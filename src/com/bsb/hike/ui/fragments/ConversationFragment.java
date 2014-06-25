@@ -249,60 +249,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getSmsContacts(), getResources().getString(R.string.ftue_sms_contact_card_header, smsContactCount), EmptyConversationItem.SMS_CONTACTS);
 			ftueListItems.add(hikeContactsItem);
 		}
-		if(ftueListView.getHeaderViewsCount()==0 && ftueListView.getFooterViewsCount() == 0)
+		if (ftueListView.getFooterViewsCount() == 0)
 		{
-			setupWelcomeToHikeCard(ftueListView, !HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOWN_WELCOME_TO_HIKE_CARD, false));
 			addBottomPadding(ftueListView);
 		}
 		ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
-	}
-
-	private void setupWelcomeToHikeCard(ListView ftueListView, boolean asHeader)
-	{
-		View welcomeCardView = LayoutInflater.from(getActivity()).inflate(
-				R.layout.ftue_welcome_card_content, null);
-		TextView startExploringBtn = (TextView) welcomeCardView.findViewById(R.id.card_btn);
-		TextView cardTextHeader = (TextView) welcomeCardView.findViewById(R.id.card_txt_header);
-		TextView cardTextMsg = (TextView) welcomeCardView.findViewById(R.id.card_txt_msg);
-		ImageView cardHeaderImage = (ImageView) welcomeCardView.findViewById(R.id.card_header_img_bg);
-		
-		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), R.drawable.bg_ct_love_tile, 1);
-		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
-		bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
-		cardHeaderImage.setImageDrawable(bd);
-		
-		View.OnClickListener onClickListner = new View.OnClickListener()
-		{
-			
-			@Override
-			public void onClick(View v)
-			{
-				
-				Intent intent = new Intent(getActivity(), FtueCardsActivity.class);
-				startActivity(intent);
-				
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_WELCOME_CARD_CLICKED);
-			}
-			
-		};
-		welcomeCardView.setOnClickListener(onClickListner);
-		startExploringBtn.setOnClickListener(onClickListner);
-		
-		if(asHeader)
-		{
-			cardTextHeader.setText(R.string.welcome_to_hike);
-			cardTextMsg.setText(R.string.ftue_welcome_card_msg);
-			startExploringBtn.setText(R.string.start_exploring);
-			ftueListView.addHeaderView(welcomeCardView);
-		}
-		else
-		{
-			cardTextHeader.setText(R.string.ftue_welcome_card_header_second);
-			cardTextMsg.setText(R.string.ftue_welcome_card_msg_second);
-			startExploringBtn.setText(R.string.explore_upper_case);
-			ftueListView.addFooterView(welcomeCardView);
-		}
-		
 	}
 	
 	/*
