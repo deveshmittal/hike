@@ -106,6 +106,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			unlinkPreference.setOnPreferenceClickListener(this);
 		}
+		
+		Preference imageQuality = getPreferenceScreen().findPreference(HikeConstants.IMAGE_QUALITY);
+		if (imageQuality != null)
+		{
+			imageQuality.setOnPreferenceClickListener(this);
+		}
 
 		Preference unlinkFacebookPreference = getPreferenceScreen().findPreference(HikeConstants.UNLINK_FB);
 		if (unlinkFacebookPreference != null)
@@ -627,8 +633,19 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 					{
 						dialog.dismiss();
 					}
+
+					@Override
+					public void onSucess(Dialog dialog)
+					{
+						// TODO Auto-generated method stub
+						
+					}
 				}, dialogStrings);
 			}
+		}
+		else if (HikeConstants.IMAGE_QUALITY.equals(preference.getKey()))
+		{
+			HikeDialog.showDialog(this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG, (Object[]) null);
 		}
 
 		return true;

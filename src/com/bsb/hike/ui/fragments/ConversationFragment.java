@@ -445,6 +445,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					
 					Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
 				}
+
+				@Override
+				public void onSucess(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
+				}
 			}, dialogStrings);
 		}
 	}

@@ -1353,7 +1353,7 @@ public class Utils
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
 				String imageOrientation = Utils.getImageOrientation(srcFilePath);
-				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX,
+				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
 						Bitmap.Config.RGB_565, true, false);
 				tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 				// Temporary fix for when a user uploads a file through Picasa
@@ -1386,6 +1386,67 @@ public class Utils
 			src.close();
 			dest.close();
 
+			return true;
+		}
+		catch (FileNotFoundException e)
+		{
+			Logger.e("Utils", "File not found while copying", e);
+			return false;
+		}
+		catch (IOException e)
+		{
+			Logger.e("Utils", "Error while reading/writing/closing file", e);
+			return false;
+		}
+		catch (Exception ex)
+		{
+			Logger.e("Utils", "WTF Error while reading/writing/closing file", ex);
+			return false;
+		}
+	}
+	
+	public static boolean copyImage(String srcFilePath, String destFilePath, Context context)
+	{
+		try
+		{
+			InputStream src;
+			String imageOrientation = Utils.getImageOrientation(srcFilePath);
+			Bitmap tempBmp = null;
+			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
+			if (quality == 2)
+			{
+				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
+						Bitmap.Config.RGB_565, true, false);
+			}
+			else if (quality != 1)
+			{
+				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX,
+						Bitmap.Config.RGB_565, true, false);
+			}
+			tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
+			if (tempBmp != null)
+			{
+				byte[] fileBytes = BitmapUtils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG, 75);
+				tempBmp.recycle();
+				src = new ByteArrayInputStream(fileBytes);
+			}
+			else
+			{
+				src = new FileInputStream(new File(srcFilePath));
+			}
+			
+			OutputStream dest = new FileOutputStream(new File(destFilePath));
+
+			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
+			int len;
+
+			while ((len = src.read(buffer)) > 0)
+			{
+				dest.write(buffer, 0, len);
+			}
+			src.close();
+			dest.close();
 			return true;
 		}
 		catch (FileNotFoundException e)
@@ -3683,6 +3744,13 @@ public class Utils
 			{
 				dialog.dismiss();
 				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
+			}
+
+			@Override
+			public void onSucess(Dialog dialog)
+			{
+				// TODO Auto-generated method stub
+				
 			}
 		}, contactInfo.getFirstName());
 	}
