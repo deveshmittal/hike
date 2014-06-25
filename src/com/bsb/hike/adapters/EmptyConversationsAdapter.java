@@ -14,6 +14,8 @@ import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.EmptyConversationFtueCardItem;
@@ -23,6 +25,7 @@ import com.bsb.hike.smartImageLoader.FTUECardImageLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.utils.Utils;
 
 public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationItem>
@@ -163,7 +166,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				status.setText(contactInfo.getMsisdn());
 
 				parentView.setTag(contactInfo);
-				parentView.setOnClickListener(ftueListItemClickListener);
+				parentView.setOnClickListener(contactCardClickListener);
 
 				if (--limit == 0)
 				{
@@ -209,6 +212,8 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			imageLoader.loadImage(FTUECardImageLoader.FTUE_CARD_IMAGE_PREFIX + item.getImgResId(), viewHolder.cardImg);
 			viewHolder.cardImg.setBackgroundColor(item.getImgBgColor());
 			viewHolder.cardImg.setScaleType(ScaleType.CENTER);
+			viewHolder.parent.setTag(item);
+			viewHolder.parent.setOnClickListener(ftueCardClickListener);
 		}
 		return v;
 	}
@@ -236,7 +241,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 		return super.isEnabled(position);
 	}
 
-	private OnClickListener ftueListItemClickListener = new OnClickListener()
+	private OnClickListener contactCardClickListener = new OnClickListener()
 	{
 		@Override
 		public void onClick(View v)
@@ -247,6 +252,24 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 
 			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_START_CHAT_CLICKED, contactInfo.getMsisdn());
 
+		}
+	};
+	
+	private OnClickListener ftueCardClickListener = new OnClickListener()
+	{
+		@Override
+		public void onClick(View v)
+		{
+			EmptyConversationFtueCardItem item = (EmptyConversationFtueCardItem) v.getTag();
+			if (item.getType() == EmptyConversationItem.LAST_SEEN)
+			{
+				Intent intent = new Intent(context, PeopleActivity.class);
+				context.startActivity(intent);
+			}
+			else if (item.getType() == EmptyConversationItem.HIDDEN_MODE)
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_UNREAD_TIP_CLICKED, null);
+			}
 		}
 	};
 
