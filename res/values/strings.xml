@@ -1587,10 +1587,10 @@
      <string name="email_body">I just downloaded the new hike messenger. What a big change from WhatsApp!\n\nIt\'s got amazing Stickers, the ability to choose who sees my Last Seen and some really cool Chat Themes. \n\nThe best part? Hike has thing called Hidden Mode that lets you hide your private chats, from the world! Awesome!\n\nDownload it like asap from http://hike.in!</string>
      <string name="email_subject">hike up your life</string>
      <string name="reciever_is_offline">%1$s is offline</string>
-     <string name="hike_to_offline_tip_msg">send bolt marked bubbles as sms</string>
+     <string name="hike_to_offline_tip_msg">Tap here to use hike offline.</string>
      <string name="send_uppercase">SEND</string>
-     <string name="hike_offline_mode_header">%1$d free sms</string>
-     <string name="hike_offline_mode_msg">selected messages will be send to %1$s</string>
+     <string name="hike_offline_mode_header">Send SMS</string>
+     <string name="hike_offline_mode_msg">Select messages to send messages as SMS.</string>
      <string name="messages_sent">Messages sent!</string>
      <string name="hike_offline_messages_sent_msg">You have %1$d free SMS left</string>
 </resources>
