@@ -819,9 +819,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	private void ShowTipIfNeeded(boolean hasNoConversation)
 	{
 		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(this.getActivity().getApplicationContext());
-		String tpe = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE, "nn");
-		Logger.i("tip", "#" + tpe + "#-currenttype");
-		Logger.i("tip", pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER, "") + " -currenttype ");
+		String tip = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
+		Logger.i("tip", "#" + tip + "#-currenttype");
 		if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.RESET_STEALTH_TIP));
@@ -839,18 +838,26 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_UNREAD_TIP));
 		}
-		else if (pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE, "").equals(HikeMessengerApp.ATOMIC_POP_UP_PROFILE_PIC))
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_PROFILE_PIC))
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_PROFILE_PIC_TIP));
 			// show atomic pop up profile pic
 		}
-		else if (pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE, "").equals(HikeMessengerApp.ATOMIC_POP_UP_FAVOURITES))
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_FAVOURITES))
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_FAVOURTITES_TIP));
 		}
-		else if (pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE, "").equals(HikeMessengerApp.ATOMIC_POP_UP_INVITE))
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_INVITE))
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_INVITE_TIP));
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_STATUS))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_STATUS_TIP));
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_INFO_TIP));
 		}
 	}
 

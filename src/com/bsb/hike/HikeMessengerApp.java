@@ -359,7 +359,9 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String FRIEND_REQ_COUNT = "frReqCount";
 
-	public static final String ATOMIC_POP_UP_TYPE = "apuType";
+	public static final String ATOMIC_POP_UP_TYPE_MAIN = "apuTypeMain";
+
+	public static final String ATOMIC_POP_UP_TYPE_CHAT = "apuTypeChat";
 
 	public static final String ATOMIC_POP_UP_STICKER = "stk";
 
@@ -375,9 +377,19 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ATOMIC_POP_UP_INVITE = "inv";
 
-	public static final String ATOMIC_POP_UP_HEADER = "apuHeader";
+	public static final String ATOMIC_POP_UP_STATUS = "stts";
 
-	public static final String ATOMIC_POP_UP_MESSAGE = "apuMessage";
+	public static final String ATOMIC_POP_UP_NOTIF_MESSAGE = "apuNotifMessage";
+
+	public static final String ATOMIC_POP_UP_NOTIF_SCREEN = "apuNotifScreen";
+
+	public static final String ATOMIC_POP_UP_HEADER_MAIN = "apuHeaderMain";
+
+	public static final String ATOMIC_POP_UP_MESSAGE_MAIN = "apuMessageMain";
+
+	public static final String ATOMIC_POP_UP_HEADER_CHAT = "apuHeaderChat";
+
+	public static final String ATOMIC_POP_UP_MESSAGE_CHAT = "apuMessageChat";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 

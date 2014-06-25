@@ -791,7 +791,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void showTipIfRequired()
 	{
 		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(this.getApplicationContext());
-		String key = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE, "");
+		String key = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
 		if (key.equals(HikeMessengerApp.ATOMIC_POP_UP_ATTACHMENT))
 		{
 			// show attachment
@@ -800,13 +800,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			setAtomicTipContent(v, pref);
 			((LinearLayout) findViewById(R.id.tipContainerTop)).addView(v, 0);
 
-		}
-		else if (key.equals(HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL))
-		{
-			View v = LayoutInflater.from(this).inflate(R.layout.tip_left_arrow, null);
-			((ImageView) (v.findViewById(R.id.arrow_pointer))).setImageResource(R.drawable.ic_information);
-			setAtomicTipContent(v, pref);
-			((LinearLayout) findViewById(R.id.tipContainerTop)).addView(v, 0);
 		}
 		else if (key.equals(HikeMessengerApp.ATOMIC_POP_UP_STICKER))
 		{
@@ -832,15 +825,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void setAtomicTipContent(View view, final HikeSharedPreferenceUtil pref)
 	{
 		currentTipView = view;
-		((TextView) view.findViewById(R.id.tip_header)).setText(pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER, ""));
-		((TextView) view.findViewById(R.id.tip_msg)).setText(pref.getData(HikeMessengerApp.ATOMIC_POP_UP_MESSAGE, ""));
+		((TextView) view.findViewById(R.id.tip_header)).setText(pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER_CHAT, ""));
+		((TextView) view.findViewById(R.id.tip_msg)).setText(pref.getData(HikeMessengerApp.ATOMIC_POP_UP_MESSAGE_CHAT, ""));
 		view.findViewById(R.id.close_tip).setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
 			{
 				currentTipView.setVisibility(View.GONE);
-				pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE, "");
+				pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
 			}
 		});
 	}
@@ -1085,10 +1078,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void resetAtomicPopUpKey(String requiredkey)
 	{
 		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(getApplicationContext());
-		String key = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE, "");
+		String key = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
 		if (key.equals(requiredkey))
 		{
-			pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE, "");
+			pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
 		}
 		if (currentTipView != null)
 		{
