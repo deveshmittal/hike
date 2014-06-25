@@ -13,8 +13,10 @@ public class EmptyConversationItem
 	public static final int HIKE_OFFLINE = 5;
 
 	public static final int STICKERS = 6;
+	
+	public static final int SEPERATOR = 7;
 
-	public static final int OTHER_FTUE_CARD = 7;
+	public static final int OTHER_FTUE_CARD = 8;
 
 	private int type;
 

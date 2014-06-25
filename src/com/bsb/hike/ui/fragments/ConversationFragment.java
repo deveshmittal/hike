@@ -261,6 +261,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void addFtueCards(List<EmptyConversationItem> ftueListItems)
 	{
+		ftueListItems.add(new EmptyConversationItem(EmptyConversationItem.SEPERATOR));
+		
 		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.LAST_SEEN, R.drawable.ftue_card_last_seen_img_small, getResources().getColor(R.color.ftue_card_last_seen),
 				R.string.ftue_card_header_last_seen, R.string.ftue_card_body_last_seen, R.string.ftue_card_click_text_last_seen, getResources().getColor(R.color.ftue_card_last_seen_click_text)));
 		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.HIDDEN_MODE, R.drawable.ftue_card_hidden_mode_img_small, getResources().getColor(R.color.ftue_card_hidden_mode),

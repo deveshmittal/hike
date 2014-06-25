@@ -41,7 +41,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 	
 	private enum ViewType
 	{
-		CONTACTS_CARD, FTUE_CARD
+		CONTACTS_CARD, FTUE_CARD, SEPERATOR
 	}
 
 	FTUECardImageLoader imageLoader;
@@ -91,7 +91,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 		{
 			return ViewType.FTUE_CARD.ordinal();
 		}
-		return ViewType.CONTACTS_CARD.ordinal();
+		return ViewType.SEPERATOR.ordinal();
 	}
 
 	@Override
@@ -136,6 +136,11 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				viewHolder.mainInfo = (TextView) v.findViewById(R.id.card_txt_msg);
 				viewHolder.seeAll = (TextView) v.findViewById(R.id.card_action_txt);
 				viewHolder.cardImg = (ImageView) v.findViewById(R.id.card_img);
+				viewHolder.parent = v.findViewById(R.id.all_content);
+			}
+			else if (viewType == ViewType.SEPERATOR)
+			{
+				v = inflater.inflate(R.layout.empty_conv_ftue_sep, parent, false);
 			}
 			v.setTag(viewHolder);
 		}
