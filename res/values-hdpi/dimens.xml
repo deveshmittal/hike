@@ -32,4 +32,5 @@
 	<dimen name="ftue_card_click_text">12dp</dimen>
 	<dimen name="ftue_card_right_padding">7dp</dimen>
 	<dimen name="ftue_card_left_margin">12dp</dimen>
+	<dimen name="ftue_contact_card_text_size">22dp</dimen>
 </resources>
