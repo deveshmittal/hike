@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:layout_marginTop="14dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingBottom="10dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="14dp" >
+
+    <View
+        android:id="@+id/text_left"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="2dp"
+        android:layout_weight="10"
+        android:background="@color/tab_pressed" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/item_seperator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:text="@string/ftue_card_sep"
+        android:textColor="@color/standerd_grey"
+        android:textSize="16dp"
+        android:textStyle="normal" />
+
+    <View
+        android:id="@+id/text_right"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="2dp"
+        android:layout_weight="10"
+        android:background="@color/tab_pressed" />
+
+</LinearLayout>
