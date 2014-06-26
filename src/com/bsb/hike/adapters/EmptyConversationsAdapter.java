@@ -270,10 +270,12 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			{
 				Intent intent = new Intent(context, PeopleActivity.class);
 				context.startActivity(intent);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_LAST_SEEN_CLICKED);
 			}
 			else if (item.getType() == EmptyConversationItem.HIDDEN_MODE)
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_UNREAD_TIP_CLICKED, null);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_HIDDEN_MODE_CLICKED);
 			}
 		}
 	};
