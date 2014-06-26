@@ -117,12 +117,11 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				viewHolder.seeAll = (TextView) v.findViewById(R.id.see_all);
 
 				viewHolder.contactsContainer.removeAllViews();
-				int limit = HikeConstants.FTUE_LIMIT;
+				int limit = HikeConstants.FTUE_CONTACT_CARD_LIMIT;
 				for (int i = 0; i < item.getContactList().size(); i++)
 				{
 					View parentView = inflater.inflate(R.layout.ftue_recommended_list_item, parent, false);
 					viewHolder.contactsContainer.addView(parentView);
-
 					if (--limit == 0)
 					{
 						break;
@@ -154,7 +153,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			EmptyConversationContactItem item = (EmptyConversationContactItem) getItem(position);
 			viewHolder.name.setText(item.getHeader());
 
-			int limit = HikeConstants.FTUE_LIMIT;
+			int limit = HikeConstants.FTUE_CONTACT_CARD_LIMIT;
 			View parentView = null;
 			for (int i = 0; i < item.getContactList().size(); i++)
 			{
