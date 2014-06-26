@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
-    
+
     <LinearLayout
         android:id="@+id/all_content"
         style="@style/CardContainerWithdoutPadding"
@@ -13,12 +13,22 @@
         android:minHeight="130dp"
         android:orientation="horizontal" >
 
-        <ImageView
-            android:id="@+id/card_img"
+        <LinearLayout
+            android:id="@+id/card_img_bg"
             android:layout_width="130dp"
             android:layout_height="match_parent"
             android:background="#dc354b"
-            android:scaleType="centerInside" />
+            android:gravity="center"
+            android:scaleType="centerInside" >
+
+            <ImageView
+                android:id="@+id/card_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#dc354b"
+                android:scaleType="center"
+                android:src="@drawable/ftue_card_sticker_img_small" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

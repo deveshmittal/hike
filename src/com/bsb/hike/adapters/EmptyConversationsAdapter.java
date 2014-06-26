@@ -58,6 +58,8 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 
 		TextView seeAll;
 
+		View cardImgBg;
+
 		ImageView cardImg;
 	}
 
@@ -134,6 +136,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				viewHolder.name = (TextView) v.findViewById(R.id.card_txt_header);
 				viewHolder.mainInfo = (TextView) v.findViewById(R.id.card_txt_msg);
 				viewHolder.seeAll = (TextView) v.findViewById(R.id.card_action_txt);
+				viewHolder.cardImgBg = (View) v.findViewById(R.id.card_img_bg);
 				viewHolder.cardImg = (ImageView) v.findViewById(R.id.card_img);
 				viewHolder.parent = v.findViewById(R.id.all_content);
 			}
@@ -209,13 +212,13 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 		else if (viewType == ViewType.FTUE_CARD)
 		{
 			EmptyConversationFtueCardItem item = (EmptyConversationFtueCardItem) getItem(position);
+			imageLoader.loadImage(FTUECardImageLoader.FTUE_CARD_IMAGE_PREFIX + item.getImgResId(), viewHolder.cardImg);
+			viewHolder.cardImg.setBackgroundColor(item.getImgBgColor());
+			viewHolder.cardImgBg.setBackgroundColor(item.getImgBgColor());
 			viewHolder.name.setText(item.getHeaderTxtResId());
 			viewHolder.mainInfo.setText(item.getSubTxtResId());
 			viewHolder.seeAll.setText(item.getClickableTxtResId());
 			viewHolder.seeAll.setTextColor(item.getClickableTxtColor());
-			imageLoader.loadImage(FTUECardImageLoader.FTUE_CARD_IMAGE_PREFIX + item.getImgResId(), viewHolder.cardImg);
-			viewHolder.cardImg.setBackgroundColor(item.getImgBgColor());
-			viewHolder.cardImg.setScaleType(ScaleType.CENTER);
 			viewHolder.parent.setTag(item);
 			viewHolder.parent.setOnClickListener(ftueCardClickListener);
 		}
