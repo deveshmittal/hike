@@ -178,7 +178,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			{
 			case EmptyConversationItem.HIKE_CONTACTS:
 				viewHolder.mainInfo.setVisibility(View.GONE);
-				if (HomeActivity.ftueContactsData.getTotalHikeContactsCount() > HikeConstants.FTUE_LIMIT)
+				if (HomeActivity.ftueContactsData.getTotalHikeContactsCount() > HikeConstants.FTUE_CONTACT_CARD_LIMIT)
 				{
 					setUpSeeAllButton(viewHolder.seeAll);
 				}
