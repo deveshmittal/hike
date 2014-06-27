@@ -22,6 +22,7 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.WhichScreen;
 
 public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationItem>
 {
@@ -122,6 +123,41 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				ImageView avatar = (ImageView) parentView.findViewById(R.id.avatar);
 				TextView name = (TextView) parentView.findViewById(R.id.contact);
 				TextView status = (TextView) parentView.findViewById(R.id.info);
+				if (item.getType() == EmptyConversationItem.SMS_CONTACTS)
+				{
+					final ImageView addFriendBtn = (ImageView) parentView.findViewById(R.id.add_friend);
+					final TextView inviteText = (TextView) parentView.findViewById(R.id.invite_Text);
+					long inviteTime = contactInfo.getInviteTime();
+					if (inviteTime == 0)
+					{
+
+						addFriendBtn.setImageResource(R.drawable.ic_invite_to_hike);
+						addFriendBtn.setVisibility(View.VISIBLE);
+						inviteText.setVisibility(View.GONE);
+						parentView.findViewById(R.id.add_friend_divider).setVisibility(View.VISIBLE);
+						addFriendBtn.setTag(contactInfo);
+						addFriendBtn.setOnClickListener(new OnClickListener()
+						{
+
+							@Override
+							public void onClick(View v)
+							{
+								ContactInfo contactInfo = (ContactInfo) v.getTag();
+								Utils.sendInviteUtil(contactInfo, context, HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED, context.getString(R.string.native_header),
+										context.getString(R.string.native_info), WhichScreen.SMS_SECTION);
+								notifyDataSetChanged();
+							}
+						});
+					}
+					else
+					{
+
+						addFriendBtn.setVisibility(View.GONE);
+						inviteText.setTextColor(context.getResources().getColor(R.color.description_lightgrey));
+						inviteText.setVisibility(View.VISIBLE);
+						parentView.findViewById(R.id.add_friend_divider).setVisibility(View.GONE);
+					}
+				}
 
 				iconLoader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
 
