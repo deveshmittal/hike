@@ -1,12 +1,20 @@
 package com.bsb.hike.utils;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -56,7 +64,7 @@ public class ToastListener implements Listener
 	String[] hikePubSubListeners = { HikePubSub.PUSH_AVATAR_DOWNLOADED, HikePubSub.PUSH_FILE_DOWNLOADED, HikePubSub.PUSH_STICKER_DOWNLOADED, HikePubSub.MESSAGE_RECEIVED,
 			HikePubSub.NEW_ACTIVITY, HikePubSub.CONNECTION_STATUS, HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED, HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED, HikePubSub.UPDATE_PUSH, HikePubSub.APPLICATIONS_PUSH,
-			HikePubSub.SHOW_FREE_INVITE_SMS, HikePubSub.STEALTH_POPUP_WITH_PUSH};
+			HikePubSub.SHOW_FREE_INVITE_SMS, HikePubSub.STEALTH_POPUP_WITH_PUSH, HikePubSub.HIKE_TO_OFFLINE_PUSH};
 
 	public ToastListener(Context context)
 	{
@@ -333,6 +341,86 @@ public class ToastListener implements Listener
 				}
 			}
 		}
+		else if (HikePubSub.HIKE_TO_OFFLINE_PUSH.equals(type))
+		{
+			if (object != null && object instanceof Bundle)
+			{
+				Bundle bundle = (Bundle) object;
+				String offlineMsisdnsString = bundle.getString(HikeConstants.Extras.OFFLINE_PUSH_KEY);
+				try
+				{
+					JSONObject offlineMsisdnsObject = new JSONObject(offlineMsisdnsString);
+					JSONArray offlineMsisdnsArray = offlineMsisdnsObject.optJSONArray(HikeConstants.Extras.OFFLINE_MSISDNS);
+
+					if (null != offlineMsisdnsArray && offlineMsisdnsArray.length() > 0)
+					{
+						int length = offlineMsisdnsArray.length();
+						ArrayList<String> msisdnList = new ArrayList<String>(length);  // original msisdn list
+						for (int i = 0; i < length; i++)
+						{
+							msisdnList.add(offlineMsisdnsArray.getString(i));
+						}
+
+						String msisdnStatement = getMsisdnStatement(msisdnList);
+
+						ArrayList<String> filteredMsisdnList = HikeConversationsDatabase.getInstance().getOfflineMsisdnsList(msisdnStatement);  // this db query will return new list which can be of different order and different length
+
+						if (filteredMsisdnList == null || filteredMsisdnList.size() == 0)
+						{
+							Logger.e("HikeToOffline", "no chats with undelivered messages");
+							return;
+						}
+
+						msisdnStatement = getMsisdnStatement(filteredMsisdnList);
+						List<ContactInfo> contactList = this.db.getContactNamesFromMsisdnList(msisdnStatement); // contact info list
+
+						HashMap<String, String> nameMap = new HashMap<String, String>();   // nameMap to map msisdn to corresponding name
+						for (ContactInfo contactInfo : contactList)
+						{
+							nameMap.put(contactInfo.getMsisdn(), contactInfo.getName());
+						}
+
+						for (String msisdn : filteredMsisdnList)
+						{
+							if (nameMap.get(msisdn) == null)
+							{
+								nameMap.put(msisdn, msisdn);
+							}
+						}
+
+						filteredMsisdnList.clear();
+						for (String msisdn : msisdnList)  // running loop to bring back original order
+						{
+							if (nameMap.containsKey(msisdn))
+							{
+								filteredMsisdnList.add(msisdn);
+							}
+						}
+
+						Activity activity = (currentActivity != null) ? currentActivity.get() : null;
+
+						if ((activity instanceof ChatThread))
+						{
+							String contactNumber = ((ChatThread) activity).getContactNumber();
+							if (filteredMsisdnList.get(0).equals(contactNumber))
+							{
+								Logger.e("HikeToOffline", "same chat thread open");
+								return;
+							}
+						}
+						toaster.notifyHikeToOfflinePush(msisdnList, nameMap);
+
+					}
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					Logger.e("HikeToOffline", "Json Exception", e);
+				}
+
+			}
+		}
 	}
 
 	private Bitmap returnBigPicture(ConvMessage convMessage, Context context)
@@ -414,6 +502,25 @@ public class ToastListener implements Listener
 			return;
 		}
 
+	}
+	
+	// added for db query
+	private String getMsisdnStatement(ArrayList<String> msisdnList)
+	{
+		
+		StringBuilder sb = new StringBuilder("(");;
+		for(String msisdn : msisdnList) 
+		{
+			
+			sb.append(DatabaseUtils.sqlEscapeString(msisdn));
+
+			sb.append(",");
+
+		}
+		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
+		
+		return sb.toString();
+		
 	}
 
 }
