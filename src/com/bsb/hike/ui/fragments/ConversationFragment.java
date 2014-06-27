@@ -61,12 +61,13 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.ConversationTip;
+import com.bsb.hike.models.EmptyConversationContactItem;
+import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
-import com.bsb.hike.ui.FtueCardsActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
@@ -235,7 +236,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if(!HomeActivity.ftueContactsData.getHikeContacts().isEmpty())
 		{
 			int hikeContactCount = HomeActivity.ftueContactsData.getTotalHikeContactsCount();
-			EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getHikeContacts(), getResources().getString(R.string.ftue_hike_contact_card_header, hikeContactCount), EmptyConversationItem.HIKE_CONTACTS);
+			EmptyConversationItem hikeContactsItem = new EmptyConversationContactItem(HomeActivity.ftueContactsData.getHikeContacts(), getResources().getString(R.string.ftue_hike_contact_card_header, hikeContactCount), EmptyConversationItem.HIKE_CONTACTS);
 			ftueListItems.add(hikeContactsItem);
 		}
 		/*
@@ -246,65 +247,31 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				&& !HomeActivity.ftueContactsData.getSmsContacts().isEmpty())
 		{
 			int smsContactCount = HomeActivity.ftueContactsData.getTotalSmsContactsCount();
-			EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getSmsContacts(), getResources().getString(R.string.ftue_sms_contact_card_header, smsContactCount), EmptyConversationItem.SMS_CONTACTS);
+			EmptyConversationItem hikeContactsItem = new EmptyConversationContactItem(HomeActivity.ftueContactsData.getSmsContacts(), getResources().getString(R.string.ftue_sms_contact_card_header, smsContactCount), EmptyConversationItem.SMS_CONTACTS);
 			ftueListItems.add(hikeContactsItem);
 		}
-		if(ftueListView.getHeaderViewsCount()==0 && ftueListView.getFooterViewsCount() == 0)
+		if (ftueListView.getFooterViewsCount() == 0)
 		{
-			setupWelcomeToHikeCard(ftueListView, !HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOWN_WELCOME_TO_HIKE_CARD, false));
 			addBottomPadding(ftueListView);
 		}
+		addFtueCards(ftueListItems);
 		ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
 	}
 
-	private void setupWelcomeToHikeCard(ListView ftueListView, boolean asHeader)
+	private void addFtueCards(List<EmptyConversationItem> ftueListItems)
 	{
-		View welcomeCardView = LayoutInflater.from(getActivity()).inflate(
-				R.layout.ftue_welcome_card_content, null);
-		TextView startExploringBtn = (TextView) welcomeCardView.findViewById(R.id.card_btn);
-		TextView cardTextHeader = (TextView) welcomeCardView.findViewById(R.id.card_txt_header);
-		TextView cardTextMsg = (TextView) welcomeCardView.findViewById(R.id.card_txt_msg);
-		ImageView cardHeaderImage = (ImageView) welcomeCardView.findViewById(R.id.card_header_img_bg);
+		ftueListItems.add(new EmptyConversationItem(EmptyConversationItem.SEPERATOR));
 		
-		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), R.drawable.bg_ct_love_tile, 1);
-		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
-		bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
-		cardHeaderImage.setImageDrawable(bd);
-		
-		View.OnClickListener onClickListner = new View.OnClickListener()
-		{
-			
-			@Override
-			public void onClick(View v)
-			{
-				
-				Intent intent = new Intent(getActivity(), FtueCardsActivity.class);
-				startActivity(intent);
-				
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_WELCOME_CARD_CLICKED);
-			}
-			
-		};
-		welcomeCardView.setOnClickListener(onClickListner);
-		startExploringBtn.setOnClickListener(onClickListner);
-		
-		if(asHeader)
-		{
-			cardTextHeader.setText(R.string.welcome_to_hike);
-			cardTextMsg.setText(R.string.ftue_welcome_card_msg);
-			startExploringBtn.setText(R.string.start_exploring);
-			ftueListView.addHeaderView(welcomeCardView);
-		}
-		else
-		{
-			cardTextHeader.setText(R.string.ftue_welcome_card_header_second);
-			cardTextMsg.setText(R.string.ftue_welcome_card_msg_second);
-			startExploringBtn.setText(R.string.explore_upper_case);
-			ftueListView.addFooterView(welcomeCardView);
-		}
-		
+		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.LAST_SEEN, R.drawable.ftue_card_last_seen_img_small, getResources().getColor(R.color.ftue_card_last_seen),
+				R.string.ftue_card_header_last_seen, R.string.ftue_card_body_last_seen, R.string.ftue_card_click_text_last_seen, getResources().getColor(R.color.ftue_card_last_seen_click_text)));
+		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.HIDDEN_MODE, R.drawable.ftue_card_hidden_mode_img_small, getResources().getColor(R.color.ftue_card_hidden_mode),
+				R.string.ftue_card_header_hidden_mode, R.string.ftue_card_body_hidden_mode, R.string.ftue_card_click_text_hidden_mode, getResources().getColor(R.color.ftue_card_hidden_mode_click_text)));
+		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.HIKE_OFFLINE, R.drawable.ftue_card_hike_offline_img_small, getResources().getColor(R.color.ftue_card_hike_offline),
+				R.string.ftue_card_header_hike_offline, R.string.ftue_card_body_hike_offline, R.string.ftue_card_click_text_hike_offline, getResources().getColor(R.color.ftue_card_hike_offline_click_text)));
+		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.STICKERS, R.drawable.ftue_card_sticker_img_small, getResources().getColor(R.color.ftue_card_sticker),
+				R.string.ftue_card_header_sticker, R.string.ftue_card_body_sticker, R.string.ftue_card_click_text_sticker, getResources().getColor(R.color.ftue_card_sticker_click_text)));
 	}
-	
+
 	/*
 	 * We are adding this footer in empty state list view
 	 * to give proper padding at the bottom of the list.
