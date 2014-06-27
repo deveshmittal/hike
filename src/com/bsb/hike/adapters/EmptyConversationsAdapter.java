@@ -21,7 +21,6 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationContactItem;
 import com.bsb.hike.models.EmptyConversationItem;
-import com.bsb.hike.smartImageLoader.FTUECardImageLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HomeActivity;
@@ -43,8 +42,6 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 	{
 		CONTACTS_CARD, FTUE_CARD, SEPERATOR
 	}
-
-	FTUECardImageLoader imageLoader;
 
 	private class ViewHolder
 	{
@@ -70,7 +67,6 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 		iconLoader = new IconLoader(context, mIconImageSize);
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		imageLoader = new FTUECardImageLoader(context);
 	}
 	
 	public int getViewTypeCount()
@@ -213,8 +209,8 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			viewHolder.mainInfo.setText(item.getSubTxtResId());
 			viewHolder.seeAll.setText(item.getClickableTxtResId());
 			viewHolder.seeAll.setTextColor(item.getClickableTxtColor());
-			imageLoader.loadImage(FTUECardImageLoader.FTUE_CARD_IMAGE_PREFIX + item.getImgResId(), viewHolder.cardImg);
 			viewHolder.cardImg.setBackgroundColor(item.getImgBgColor());
+			viewHolder.cardImg.setImageResource(item.getImgResId());
 			viewHolder.cardImg.setScaleType(ScaleType.CENTER);
 			viewHolder.parent.setTag(item);
 			viewHolder.parent.setOnClickListener(ftueCardClickListener);
