@@ -346,6 +346,8 @@ public class HikePubSub implements Runnable
 	public static final String STEALTH_UNREAD_TIP_CLICKED = "stealthUnreadTipClicked";
 
 	public static String FRIEND_REQ_COUNT_RESET = "resetFriendRequest";
+	
+	public static String HIKE_TO_OFFLINE_PUSH = "hikeToOfflinePush";
 
 	private final Thread mThread;
 
