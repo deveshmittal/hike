@@ -4458,6 +4458,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		dialog.setContentView(R.layout.sms_undelivered_popup);
 		dialog.setCancelable(true);
 
+		int selectedSmsCount = getSelectedFreeSmsCount();
+		
 		View hikeSMS = dialog.findViewById(R.id.hike_sms_container);
 		View nativeSMS = dialog.findViewById(R.id.native_sms_container);
 		View divider = dialog.findViewById(R.id.divider);
@@ -4466,34 +4468,40 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		hikeSMS.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
 		divider.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
 
-		if (conversation instanceof GroupConversation)
-		{
-			nativeSMS.setVisibility(View.GONE);
-			divider.setVisibility(View.GONE);
-		}
-
 		final CheckBox sendHike = (CheckBox) dialog.findViewById(R.id.hike_sms_checkbox);
 
 		final CheckBox sendNative = (CheckBox) dialog.findViewById(R.id.native_sms_checkbox);
 
-		final Button sendBtn = (Button) dialog.findViewById(R.id.btn_send);
-		sendBtn.setEnabled(false);
+		final Button alwaysBtn = (Button) dialog.findViewById(R.id.btn_always);
+		final Button justOnceBtn = (Button) dialog.findViewById(R.id.btn_just_once);
 
-		if (PreferenceManager.getDefaultSharedPreferences(context).contains(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_SMS_PREF))
+		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, false))
 		{
-			boolean nativeOn = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_SMS_PREF, false);
-			if (nativeOn || nativeOnly)
+			if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, false))
 			{
-				sendNative.setChecked(true);
-				sendBtn.setEnabled(true);
+				if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
+				{
+					showSMSClientDialog(false, null, false);
+					return;
+				}
+				sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages(true));
+				return;
 			}
-			else if (!nativeOnly || (conversation instanceof GroupConversation))
+			else if(!nativeOnly && chatThread.getCurrentSmsBalance() >= selectedSmsCount)
 			{
-				sendHike.setChecked(true);
-				sendBtn.setEnabled(true);
+				sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages(true));
+				return;
 			}
 		}
 
+		if(!nativeOnly && chatThread.getCurrentSmsBalance() < selectedSmsCount)
+		{
+			// disable Free Hike Sms Field and enabling the native sms one.
+			
+			sendHike.setChecked(false);
+			sendNative.setChecked(true);
+		}
+		
 		int numUnsentMessages = getAllUnsentSelectedMessages(false).size();
 		nativeHeader.setText(context.getString(R.string.x_regular_sms, numUnsentMessages));
 
@@ -4505,7 +4513,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				sendHike.setChecked(true);
 				sendNative.setChecked(false);
-				sendBtn.setEnabled(true);
 			}
 		});
 
@@ -4517,38 +4524,58 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				sendHike.setChecked(false);
 				sendNative.setChecked(true);
-				sendBtn.setEnabled(true);
 			}
 		});
 
-		sendBtn.setOnClickListener(new OnClickListener()
+		alwaysBtn.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
 			public void onClick(View v)
 			{
-				if (sendHike.isChecked())
-				{
-					Utils.setSendUndeliveredSmsSetting(context, false);
-					sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages(true));
-				}
-				else
-				{
-					if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
-					{
-						showSMSClientDialog(false, null, false);
-					}
-					else
-					{
-						sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages(true));
-						Utils.setSendUndeliveredSmsSetting(context, true);
-					}
-				}
+				smsDialogSendClick(sendHike.isChecked(), false);
+				dialog.dismiss();
+			}
+		});
+		
+		justOnceBtn.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				smsDialogSendClick(sendHike.isChecked(), true);
 				dialog.dismiss();
 			}
 		});
 
 		dialog.show();
+	}
+	
+	private void smsDialogSendClick(boolean isSendHikeChecked, boolean justOnce)
+	{
+		if(!justOnce)
+		{
+			Utils.setSendUndeliveredAlwaysAsSmsSetting(context, true, !isSendHikeChecked);
+		}
+		
+		if (isSendHikeChecked)
+		{
+			Utils.setSendUndeliveredSmsSetting(context, false);
+			sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages(true));
+		}
+		else
+		{
+			if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
+			{
+				showSMSClientDialog(false, null, false);
+			}
+			else
+			{
+				sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages(true));
+				Utils.setSendUndeliveredSmsSetting(context, true);
+			}
+		}
 	}
 
 	private void showSMSClientDialog(final boolean triggeredFromToggle, final CompoundButton checkBox, final boolean showingNativeInfoDialog)

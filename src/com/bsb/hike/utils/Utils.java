@@ -2318,7 +2318,22 @@ public class Utils
 	public static void setSendUndeliveredSmsSetting(Context context, boolean value)
 	{
 		Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_SMS_PREF, value);
+		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, value);
+		editor.commit();
+	}
+	
+	public static void setSendUndeliveredAlwaysAsSmsSetting(Context context, boolean value)
+	{
+		Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, value);
+		editor.commit();
+	}
+	
+	public static void setSendUndeliveredAlwaysAsSmsSetting(Context context, boolean value, boolean nativeSms)
+	{
+		Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, value);
+		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, nativeSms);
 		editor.commit();
 	}
 

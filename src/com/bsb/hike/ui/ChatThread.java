@@ -7326,4 +7326,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		return hikeToOfflineTipview != null && hikeToOfflineTipview.getVisibility() == View.VISIBLE;
 	}
+	
+	public int getCurrentSmsBalance()
+	{
+		return mCredits;
+	}
 }

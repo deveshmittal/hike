@@ -1593,4 +1593,6 @@
      <string name="hike_offline_mode_msg">Select messages to send messages as SMS.</string>
      <string name="messages_sent">Messages sent!</string>
      <string name="hike_offline_messages_sent_msg">You have %1$d free SMS left</string>
+     <string name="always">Always</string>
+     <string name="just_once">Just once</string>
 </resources>
