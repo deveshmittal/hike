@@ -64,7 +64,6 @@
     <string name="invite_share_message">I\'m using hike, an awesome new free messaging app! Download the app at http://get.hike.in/%1$s to start messaging me for free!</string>
     <string name="max_sms">Max 5 SMS contacts in a group.</string>
     <string name="max_contact">Max 50 contacts in a group.</string>
-    <string name="invite_sent">Invite sent.</string>
     <string name="sms_renew">Refills on the 1st of every month</string>
     <string name="invite_friend_free_sms">Earn an extra 50 free SMS per month for every friend that joins hike because of you.</string>
     <string name="free_sms_50">50 free SMS</string>
@@ -1125,7 +1124,6 @@
     <string name="invite_via_facebook">Invite Via Facebook</string>
     <string name="invite_via_twitter">Invite Via Twitter</string>
     <string name="search_hint">Search</string>
-    <string name="send_invite">Invite(%1$d)</string>
     <string name="fb_invite_success">Invite Successful</string>
     <string name="fb_invite_failed">Invite Canceled</string>
     <string name="social_invite_network_error">Unable to send invite. Check network settings.</string>
@@ -1538,7 +1536,6 @@
      <string name="sticker_tip_msg">tap to check out the stickers.</string>
      <string name="ftue_hike_contact_card_header">Hey, %1$d people you know are on hike. Start chatting!</string>
      <string name="see_all_upper_caps">SEE ALL</string>
-     <string name="ftue_sms_contact_card_header">Hey, you have %1$d contacts!</string>
      <string name="skip_upper_caps">SKIP</string>
      <string name="welcome_to_hike">Welcome to hike</string>
      <string name="ftue_welcome_card_msg">Hike is full of awesome things that we would like to show you.</string>
@@ -1554,7 +1551,6 @@
      <string name="ftue_themes_card_msg">Make your conversations colorful with our beautiful chat themes.</string>
      <string name="themes">Themes</string>
      <string name="ftue_updates_are_fun_with_favorites">Only favorites can see your status update and last seen. Choose them wisely!</string>
-     <string name="ftue_sms_contact_card_subtext">Would you like to send them free sms.</string>
      <string name="new_chat_tip_header">Start a chat</string>
      <string name="ftue_welcome_card_header_second">Explore hike</string>
      <string name="ftue_welcome_card_msg_second">Hike is full of awesome things! Tap to check them out.</string>
@@ -1586,4 +1582,12 @@
      <string name="email_body">I just downloaded the new hike messenger. What a big change from WhatsApp!\n\nIt\'s got amazing Stickers, the ability to choose who sees my Last Seen and some really cool Chat Themes. \n\nThe best part? Hike has thing called Hidden Mode that lets you hide your private chats, from the world! Awesome!\n\nDownload it like asap from http://hike.in!</string>
      <string name="email_subject">hike up your life</string>
      <string name="invited">Invited</string>
+     <string name="ftue_sms_contact_card_header">You have %1$d friends on hike</string>
+     <string name="ftue_sms_contact_card_subtext">Invite them now and earn rewards. You\'ll earn Rs20 talk-time for each friend that joins hike because of you :)</string>
+     <string name="invite_more">INVITE MORE</string>
+     <string name="invite_sent">Invite sent</string>
+     <string name="send_invite">Invite (%1$d)</string>
+    
+    
+     
 </resources>
