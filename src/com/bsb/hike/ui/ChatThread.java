@@ -417,6 +417,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private ChatThreadReceiver chatThreadReceiver;
 
 	private ScreenOffReceiver screenOffBR;
+	
+	private boolean hasLastSeenFetched = false;
 
 	@Override
 	protected void onPause()
@@ -2531,7 +2533,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		saveDraft();
 	}
 
-	private boolean shouldShowLastSeen()
+	public boolean shouldShowLastSeen()
 	{
 		if ((favoriteType == FavoriteType.FRIEND || favoriteType == FavoriteType.REQUEST_RECEIVED || favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED)
 				&& mConversation.isOnhike())
@@ -7053,6 +7055,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		public void lastSeenFetched(String msisdn, int offline, long lastSeenTime)
 		{
 			updateLastSeen(msisdn, offline, lastSeenTime);
+			hasLastSeenFetched = true;
+
+			/*
+			 * if we have fetched last seen than we need to schedule hike offline tip
+			 */
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					if (!isOnline)
+					{
+						Logger.d("tesst", "calling scheduleHikeOfflineTip");
+						mAdapter.scheduleHikeOfflineTip();
+					}
+				}
+			});
 		}
 	};
 
@@ -7330,5 +7350,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public int getCurrentSmsBalance()
 	{
 		return mCredits;
+	}
+	
+	public boolean hasLastSeenFetched()
+	{
+		return hasLastSeenFetched;
 	}
 }

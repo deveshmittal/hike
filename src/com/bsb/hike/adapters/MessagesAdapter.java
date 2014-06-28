@@ -3858,13 +3858,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	Handler handler = new Handler();
 
-	private void scheduleHikeOfflineTip()
+	public void scheduleHikeOfflineTip()
 	{
 		if (showUndeliveredMessage != null)
 		{
 			handler.removeCallbacks(showUndeliveredMessage);
 		}
 
+		/*
+		 * If user himself is online and we should show last seen for this contact;
+		 * this means we should not show hike offline tip untill we have fetched
+		 * actual value of last seen from server. 
+		 */
+		if (Utils.isUserOnline(context) && chatThread.shouldShowLastSeen() && !chatThread.hasLastSeenFetched())
+		{
+			return ;
+		}
+		
 		if(firstPendingConvMessage != null)
 		{
 			long diff = (((long) System.currentTimeMillis() / 1000) - firstPendingConvMessage.getTimestamp());
