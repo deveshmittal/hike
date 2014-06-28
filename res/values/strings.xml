@@ -1595,4 +1595,6 @@
      <string name="hike_offline_messages_sent_msg">You have %1$d free SMS left</string>
      <string name="always">Always</string>
      <string name="just_once">Just once</string>
+     <string name="undelivered_sms_setting_summary">Always ask for preference</string>
+     <string name="undelivered_sms_setting_remember">Remember my preference</string>
 </resources>
