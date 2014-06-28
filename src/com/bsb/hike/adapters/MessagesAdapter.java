@@ -5114,6 +5114,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if(undeliveredMessages.size() == 1)
 				{
 					firstPendingConvMessage = convMessage;
+				}
+				if(!chatThread.isHikeOfflineTipShowing())
+				{
 					scheduleHikeOfflineTip();
 				}
 			}

@@ -7344,7 +7344,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public boolean isHikeOfflineTipShowing()
 	{
-		return hikeToOfflineTipview != null && hikeToOfflineTipview.getVisibility() == View.VISIBLE;
+		if(hikeToOfflineTipview != null )
+		{
+			/*
+			 * if hike offline tip is in last state this means
+			 * it is going to hide;
+			 */
+			if(((Integer) hikeToOfflineTipview.getTag()) == HIKE_TO_OFFLINE_TIP_STATE_3)
+			{
+				return false;
+			}
+			return hikeToOfflineTipview.getVisibility() == View.VISIBLE;
+		}
+		return false;
 	}
 	
 	public int getCurrentSmsBalance()
