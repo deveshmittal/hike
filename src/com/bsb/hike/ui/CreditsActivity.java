@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,6 +21,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
@@ -369,8 +371,14 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onClick(View v)
 			{
-				Utils.setSendUndeliveredAlwaysAsSmsSetting(CreditsActivity.this, true, !sendHike.isChecked());
-				setupUndeliveredSmsPrefLayout();
+				if (!PreferenceManager.getDefaultSharedPreferences(CreditsActivity.this).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
+				{
+					showSMSClientDialog(sendHike.isChecked());
+				}
+				else
+				{
+					smsDialogActionClicked(true, sendHike.isChecked());
+				}
 				dialog.dismiss();
 			}
 		});
@@ -381,12 +389,62 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onClick(View v)
 			{
-				Utils.setSendUndeliveredAlwaysAsSmsSetting(CreditsActivity.this, false);
-				setupUndeliveredSmsPrefLayout();
+				smsDialogActionClicked(false, sendHike.isChecked());
 				dialog.dismiss();
 			}
 		});
 
+		dialog.show();
+	}
+	
+	private void smsDialogActionClicked(boolean alwaysBtnClicked, boolean isSendHikeChecked)
+	{
+		if(alwaysBtnClicked)
+		{
+			Utils.setSendUndeliveredAlwaysAsSmsSetting(CreditsActivity.this, true, !isSendHikeChecked);
+		}
+		else
+		{
+			Utils.setSendUndeliveredAlwaysAsSmsSetting(CreditsActivity.this, false);
+		}
+		setupUndeliveredSmsPrefLayout();
+	}
+	
+	private void showSMSClientDialog(final boolean isSendHikeChecked)
+	{
+
+		HikeDialogListener smsClientDialogListener = new HikeDialog.HikeDialogListener()
+		{
+
+			@Override
+			public void positiveClicked(Dialog dialog)
+			{
+				
+				Utils.setReceiveSmsSetting(CreditsActivity.this, true);
+				if (!settings.getBoolean(HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false))
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_SMS_SYNC_DIALOG, null);
+				}
+				smsDialogActionClicked(true, isSendHikeChecked);
+				setupPreferenceLayout(findViewById(R.id.receive_sms_item), true);
+				dialog.dismiss();
+			}
+
+			@Override
+			public void neutralClicked(Dialog dialog)
+			{
+				
+			}
+
+			@Override
+			public void negativeClicked(Dialog dialog)
+			{
+				smsDialogActionClicked(false, isSendHikeChecked);
+				dialog.dismiss();
+			}
+		};
+		
+		Dialog dialog = HikeDialog.showDialog(CreditsActivity.this, HikeDialog.SMS_CLIENT_DIALOG, smsClientDialogListener, false, null, false);  
 		dialog.show();
 	}
 }

@@ -90,6 +90,8 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.DownloadSingleStickerTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -4580,34 +4582,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void showSMSClientDialog(final boolean triggeredFromToggle, final CompoundButton checkBox, final boolean showingNativeInfoDialog)
 	{
-		final Dialog dialog = new Dialog(chatThread, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.enable_sms_client_popup);
-		dialog.setCancelable(showingNativeInfoDialog);
 
-		TextView header = (TextView) dialog.findViewById(R.id.header);
-		TextView body = (TextView) dialog.findViewById(R.id.body);
-		Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
-		Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
-
-		header.setText(showingNativeInfoDialog ? R.string.native_header : R.string.use_hike_for_sms);
-		body.setText(showingNativeInfoDialog ? R.string.native_info : R.string.use_hike_for_sms_info);
-
-		if (showingNativeInfoDialog)
-		{
-			btnCancel.setVisibility(View.GONE);
-			btnOk.setText(R.string.continue_txt);
-		}
-		else
-		{
-			btnCancel.setText(R.string.cancel);
-			btnOk.setText(R.string.allow);
-		}
-
-		btnOk.setOnClickListener(new OnClickListener()
+		HikeDialogListener smsClientDialogListener = new HikeDialog.HikeDialogListener()
 		{
 
 			@Override
-			public void onClick(View v)
+			public void positiveClicked(Dialog dialog)
 			{
 				if (showingNativeInfoDialog)
 				{
@@ -4636,26 +4616,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				dialog.dismiss();
 			}
-		});
-
-		dialog.setOnCancelListener(new OnCancelListener()
-		{
 
 			@Override
-			public void onCancel(DialogInterface dialog)
+			public void neutralClicked(Dialog dialog)
 			{
-				if (showingNativeInfoDialog)
-				{
-					checkBox.setChecked(false);
-				}
+				
 			}
-		});
-
-		btnCancel.setOnClickListener(new OnClickListener()
-		{
 
 			@Override
-			public void onClick(View v)
+			public void negativeClicked(Dialog dialog)
 			{
 				if (!showingNativeInfoDialog)
 				{
@@ -4666,9 +4635,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					checkBox.setChecked(false);
 				}
+				dialog.dismiss();
 			}
-		});
-
+		};
+		
+		Dialog dialog = HikeDialog.showDialog(chatThread, HikeDialog.SMS_CLIENT_DIALOG, smsClientDialogListener, triggeredFromToggle, checkBox, showingNativeInfoDialog);  
 		dialog.show();
 	}
 
