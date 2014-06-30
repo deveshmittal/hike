@@ -113,7 +113,7 @@ public class ContactUtils
 				contactsToDelete.addAll(contacts);
 			}
 			
-			HikeMessengerApp.getContactManager().removeFromCache(contactsToDelete);
+			HikeMessengerApp.getContactManager().removeContacts(contactsToDelete);
 			
 			/* Delete ids from hike user DB */
 			db.deleteMultipleRows(hike_contacts_by_id.keySet()); // this will
