@@ -1959,7 +1959,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					if (contactInfo.getName() == null)
 					{
 						String name = participantList.get(contactInfo.getMsisdn()).getContactInfo().getName();
-						contactInfo.setName(name);
+						HikeMessengerApp.getContactManager().setUnknownContactName(contactInfo.getMsisdn(), name);
 						participantList.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
 					}
 					else
