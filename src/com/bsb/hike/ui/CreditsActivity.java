@@ -442,6 +442,13 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 				smsDialogActionClicked(false, isSendHikeChecked);
 				dialog.dismiss();
 			}
+
+			@Override
+			public void onSucess(Dialog dialog)
+			{
+				// TODO Auto-generated method stub
+				
+			}
 		};
 		
 		Dialog dialog = HikeDialog.showDialog(CreditsActivity.this, HikeDialog.SMS_CLIENT_DIALOG, smsClientDialogListener, false, null, false);  

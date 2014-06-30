@@ -4656,6 +4656,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				dialog.dismiss();
 			}
+
+			@Override
+			public void onSucess(Dialog dialog)
+			{
+				// TODO Auto-generated method stub
+				
+			}
 		};
 		
 		Dialog dialog = HikeDialog.showDialog(chatThread, HikeDialog.SMS_CLIENT_DIALOG, smsClientDialogListener, triggeredFromToggle, checkBox, showingNativeInfoDialog);  
