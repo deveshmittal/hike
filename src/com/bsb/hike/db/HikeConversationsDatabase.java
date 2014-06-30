@@ -3221,4 +3221,48 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
+	
+	public ArrayList<String> getOfflineMsisdnsList(String msisdnStatement)
+	{
+		Cursor c = null;
+		ArrayList<String> msisdnResult = null;
+		try
+		{
+			c = mDb.query(DBConstants.MESSAGES_TABLE + "," + DBConstants.CONVERSATIONS_TABLE, new String[] {
+					" MIN (" + DBConstants.MESSAGES_TABLE + "." + DBConstants.TIMESTAMP + ") AS TIME", DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN },
+					DBConstants.MESSAGES_TABLE + "." + DBConstants.CONV_ID + " IN (SELECT " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.CONV_ID + " FROM "
+							+ DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN + " IN " + msisdnStatement + " ) " + " AND "
+							+ " ( " + DBConstants.MESSAGES_TABLE + "." + DBConstants.CONV_ID + "=" + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.CONV_ID + " ) " + " AND  "
+							+ DBConstants.MESSAGES_TABLE + "." + DBConstants.MSG_STATUS + "=" + State.SENT_CONFIRMED.ordinal(), null, DBConstants.CONVERSATIONS_TABLE + "."
+							+ DBConstants.MSISDN, null, null);
+
+			if (c != null)
+			{
+				msisdnResult = new ArrayList<String>(c.getCount());
+				while (c.moveToNext())
+				{
+					long msgTime = c.getLong(c.getColumnIndex("TIME"));
+					if ((System.currentTimeMillis() / 1000 - msgTime) > HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME)
+					{
+						msisdnResult.add(c.getString(c.getColumnIndex(DBConstants.MSISDN)));
+					}
+
+					Logger.d("HikeToOffline", "TimeStamp : " + c.getLong(c.getColumnIndex("TIME")));
+					Logger.d("HikeToOffline", "Msisdn : " + c.getString(c.getColumnIndex(DBConstants.MSISDN)));
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			Logger.e("HikeToOffline", "Exception ", e);
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		return msisdnResult;
+	}
 }

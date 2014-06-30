@@ -1168,6 +1168,9 @@ public class HikeConstants
 		
 		public static final String STEALTH_PUSH_BODY = "stleathPushBody";
 		
+		public static final String OFFLINE_PUSH_KEY = "failed";
+		
+		public static final String OFFLINE_MSISDNS = "msisdns";
 	}
 
 	public static final class LogEvent
