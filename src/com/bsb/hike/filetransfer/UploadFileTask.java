@@ -599,6 +599,10 @@ public class UploadFileTask extends FileTransferBase
 			Logger.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
 		}
 		long length = sourceFile.length();
+		if (length < 1)
+		{
+			throw new FileNotFoundException("File size less than 1 byte");
+		}
 		if (mStart >= length)
 		{
 			mStart = 0;
