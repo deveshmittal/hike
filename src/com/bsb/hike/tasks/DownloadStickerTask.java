@@ -3,8 +3,10 @@ package com.bsb.hike.tasks;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,7 +84,7 @@ public class DownloadStickerTask extends StickerTaskBase
 		boolean reachedEnd = false;
 
 		JSONArray existingStickerIds = new JSONArray();
-
+		Set<String> existingidSet = new HashSet<String>();
 		/*
 		 * If the category is the default one, we should add the default stickers as well.
 		 */
@@ -91,6 +93,7 @@ public class DownloadStickerTask extends StickerTaskBase
 			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID)
 			{
 				existingStickerIds.put(stickerId);
+				existingidSet.add(stickerId);
 			}
 		}
 		else if (category.categoryId.equals(StickerCategoryId.expressions))
@@ -98,6 +101,7 @@ public class DownloadStickerTask extends StickerTaskBase
 			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS)
 			{
 				existingStickerIds.put(stickerId);
+				existingidSet.add(stickerId);
 			}
 		}
 
@@ -107,6 +111,7 @@ public class DownloadStickerTask extends StickerTaskBase
 			for (String stickerId : stickerIds)
 			{
 				existingStickerIds.put(stickerId);
+				existingidSet.add(stickerId);
 				Logger.d(getClass().getSimpleName(), "Exising id: " + stickerId);
 			}
 		}
@@ -154,7 +159,11 @@ public class DownloadStickerTask extends StickerTaskBase
 					{
 						stickerPageAdapter.getStickerList().add(new Sticker(category, stickerId));
 					}
-					saveStickers(largeStickerDir, smallStickerDir, stickerId, stickerData);
+					// some hack : seems server was sending stickers which already exist so it was leading to duplicate issue
+					if (!existingidSet.contains(stickerId))
+					{
+						saveStickers(largeStickerDir, smallStickerDir, stickerId, stickerData);
+					}
 				}
 				catch (FileNotFoundException e)
 				{
