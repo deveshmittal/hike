@@ -2,12 +2,22 @@ package com.bsb.hike.ui;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.preference.PreferenceManager;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
 
 public class HikeDialog
 {
@@ -18,6 +28,8 @@ public class HikeDialog
 	public static final int RESET_STEALTH_DIALOG = 4;
 
 	public static final int STEALTH_FTUE_EMPTY_STATE_DIALOG = 5;
+	
+	public static final int SHARE_IMAGE_QUALITY_DIALOG = 6;
 
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
 	{
@@ -37,6 +49,8 @@ public class HikeDialog
 			return showStealthResetDialog(context, listener, data);
 		case STEALTH_FTUE_EMPTY_STATE_DIALOG:
 			return showStealthFtuePopUp(context, listener, false);
+		case SHARE_IMAGE_QUALITY_DIALOG:
+			return showImageQualityDialog(context, listener, data);
 		}
 
 		return null;
@@ -191,6 +205,80 @@ public class HikeDialog
 		dialog.show();
 		return dialog;
 	}
+	
+	private static Dialog showImageQualityDialog(final Context context, final HikeDialogListener listener, Object... data)
+	{
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.image_quality_popup);
+		dialog.setCancelable(true);
+		
+		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		final Editor editor = appPrefs.edit();
+		int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
+		
+		final RadioButton original = (RadioButton) dialog.findViewById(R.id.original);
+		final RadioButton medium = (RadioButton) dialog.findViewById(R.id.medium);
+		final RadioButton low = (RadioButton) dialog.findViewById(R.id.low);
+		final CheckBox rememberChoice = (CheckBox) dialog.findViewById(R.id.rememberChoice);
+		Button done = (Button) dialog.findViewById(R.id.done);
+		
+		switch (quality)
+		{
+		case 1:
+			original.setChecked(true);
+			break;
+		case 2:
+			medium.setChecked(true);
+			break;
+		case 3:
+			low.setChecked(true);
+			break;
+		}
+		rememberChoice.setChecked(HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false));
+		
+		done.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				// TODO Auto-generated method stub
+				
+				if (medium.isChecked())
+				{
+					editor.putInt(HikeConstants.IMAGE_QUALITY, 2);
+				}
+				else if (original.isChecked())
+				{
+					editor.putInt(HikeConstants.IMAGE_QUALITY, 1);
+				}
+				else
+				{
+					editor.putInt(HikeConstants.IMAGE_QUALITY, 3);
+				}
+				editor.commit();
+				
+				if (rememberChoice.isChecked())
+				{
+					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, true);
+				}
+				else
+				{
+					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, false);
+				}
+				if (listener != null)
+				{
+					listener.onSucess(dialog);
+				}
+				else
+				{
+					dialog.dismiss();
+				}
+			}
+		});
+		
+		dialog.show();
+		return dialog;
+	}
 
 	public static interface HikeDialogListener
 	{
@@ -199,5 +287,7 @@ public class HikeDialog
 		public void positiveClicked(Dialog dialog);
 
 		public void neutralClicked(Dialog dialog);
+		
+		public void onSucess(Dialog dialog);
 	}
 }

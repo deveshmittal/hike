@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import java.util.ArrayList;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -36,6 +37,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.GalleryImageLoader;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
 
 public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, OnScrollListener, OnPageChangeListener, HikePubSub.Listener
@@ -175,18 +177,57 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			@Override
 			public void onClick(View v)
 			{
-				ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
+				final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
 				for (GalleryItem galleryItem : galleryItems)
 				{
 					fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
 				}
-				String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
-				boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
+				final String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+				final boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
 
-				fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
-				Utils.executeAsyncTask(fileTransferTask);
+				if (!HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
+				{
+					HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
+					{
+						@Override
+						public void onSucess(Dialog dialog)
+						{
+							fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+							Utils.executeAsyncTask(fileTransferTask);
+	
+							progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+							dialog.dismiss();
+						}
+	
+						@Override
+						public void negativeClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+	
+						@Override
+						public void positiveClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+	
+						@Override
+						public void neutralClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+					}, (Object[]) null);
+				}
+				else
+				{
+					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+					Utils.executeAsyncTask(fileTransferTask);
 
-				progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+					progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+				}
 			}
 		});
 
