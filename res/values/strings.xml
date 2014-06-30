@@ -1599,6 +1599,7 @@
     <string name="ftue_card_body_sticker">When words can’t express, say it with a sticker</string>
     <string name="ftue_card_click_text_sticker">You\'ll love them!</string>
     <string name="ftue_card_sep">Amazing things you can do on hike</string>
-     <string name="hike_to_offline_push_title">Placeholder</string>
-     <string name="hike_to_offline_text">%1$s placeholder</string>
+     <string name="hike_to_offline_push_title_single">%1$s is offline</string>
+      <string name="hike_to_offline_push_title_multiple">Multiple people are offline</string>
+     <string name="hike_to_offline_text">Send messages via hike offline</string>
 </resources>

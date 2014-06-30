@@ -326,8 +326,8 @@ public class HikeNotification
 		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
 		final int smallIconId = returnSmallIcon();
 		
-		String title = context.getString(R.string.hike_to_offline_push_title);
-		String message = context.getString(R.string.hike_to_offline_text, "Placeholder");
+		String title = (msisdnList.size() > 1)  ? context.getString(R.string.hike_to_offline_push_title_multiple) : context.getString(R.string.hike_to_offline_push_title_single, nameMap.get(firstMsisdn));
+		String message = context.getString(R.string.hike_to_offline_text);
 		NotificationCompat.Builder mBuilder = getNotificationBuilder(title, message, message, avatarDrawable, smallIconId, false);
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 
