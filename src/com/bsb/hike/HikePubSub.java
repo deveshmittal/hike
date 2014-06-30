@@ -350,8 +350,6 @@ public class HikePubSub implements Runnable
 
 	public static String PROFILE_UPDATE_FINISH = "profileUpdateFinish";
 
-	public static String PROFILE_UPDATE_FINISH = "profileUpdateFinish";
-
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
