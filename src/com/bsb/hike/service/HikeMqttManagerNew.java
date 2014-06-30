@@ -357,7 +357,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		context.registerReceiver(this, filter);
 		LocalBroadcastManager.getInstance(context).registerReceiver(this, filter);
 		setServerUris();
-		// mqttThreadHandler.postDelayed(new TestOutmsgs(), 15 * 1000); // this is just for testing
+		//mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
 	}
 
 	private boolean isNetworkAvailable()
@@ -1359,44 +1359,65 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				@Override
 				public void run()
 				{
-					int count = 0;
-					for (int i = 0; i < 1000; i++)
-					{
-						count++;
-						String data = String.format("{\"t\": \"m\",\"to\": \"+918826670738\",\"d\":{\"hm\":\"%d\",\"i\":%d, \"ts\":%d}}", count + 10, count,
-								System.currentTimeMillis());
-						Logger.d(TAG, "Sending msg : " + data);
-						Message msg = Message.obtain();
-						msg.what = 12341;
-						Bundle bundle = new Bundle();
-						bundle.putString(HikeConstants.MESSAGE, data);
-						msg.setData(bundle);
-						msg.replyTo = mMessenger;
-						try
-						{
-							mMessenger.send(msg);
-							Thread.sleep(20);
-						}
-						catch (RemoteException e)
-						{
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						catch (InterruptedException e)
-						{
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						catch (Exception e)
-						{
-
-						}
-					}
-
+					testUj();
 				}
 			});
 			t.setName("Test Thread");
 			t.start();
+		}
+		
+		private void testUj()
+		{
+			String uj = String.format("{\"t\": \"uj\",\"d\":{\"msisdn\":\"%s\"},\"ts\":%d,\"st\":\"ru\"}","+919582474249",System.currentTimeMillis());
+			try
+			{
+				JSONObject o = new JSONObject(uj);
+				MqttMessagesManager.getInstance(context).saveMqttMessage(o);
+			}
+			catch (JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		private void testMsg()
+		{
+			int count = 0;
+			for (int i = 0; i < 1000; i++)
+			{
+				count++;
+				String data = String.format("{\"t\": \"m\",\"to\": \"+918826670738\",\"d\":{\"hm\":\"%d\",\"i\":%d, \"ts\":%d}}", count + 10, count,
+						System.currentTimeMillis());
+				
+				Logger.d(TAG, "Sending msg : " + data);
+				Message msg = Message.obtain();
+				msg.what = 12341;
+				Bundle bundle = new Bundle();
+				bundle.putString(HikeConstants.MESSAGE, data);
+				msg.setData(bundle);
+				msg.replyTo = mMessenger;
+				try
+				{
+					mMessenger.send(msg);
+					Thread.sleep(20);
+				}
+				catch (RemoteException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				catch (InterruptedException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				catch (Exception e)
+				{
+
+				}
+			}
+
 		}
 	}
 

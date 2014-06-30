@@ -517,7 +517,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private void startLoading()
 	{
-		loadingLayout.setVisibility(View.VISIBLE);
+		if (loadingLayout != null)
+		{
+			loadingLayout.setVisibility(View.VISIBLE);
+		}
 		infoTxt.setVisibility(View.GONE);
 		toggleActionBarElementsEnable(false);
 		if (invalidNum != null)
