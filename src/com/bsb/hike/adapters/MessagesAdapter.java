@@ -4524,8 +4524,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			sendNative.setChecked(true);
 		}
 		
-		int numUnsentMessages = getAllUnsentSelectedMessages(false).size();
-		nativeHeader.setText(context.getString(R.string.x_regular_sms, numUnsentMessages));
+		nativeHeader.setText(context.getString(R.string.regular_sms));
 
 		sendHike.setOnClickListener(new OnClickListener()
 		{
