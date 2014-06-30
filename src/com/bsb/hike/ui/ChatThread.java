@@ -2901,10 +2901,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			ConvMessage msg = findMessageById(msgId);
 			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 			{
-				if (activityVisible && Utils.isPlayTickSound(getApplicationContext()))
+				if (activityVisible && (!msg.isTickSoundPlayed()) && Utils.isPlayTickSound(getApplicationContext()))
 				{
 					Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
 				}
+				msg.setTickSoundPlayed(true);
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
 				runOnUiThread(mUpdateAdapter);
 			}
