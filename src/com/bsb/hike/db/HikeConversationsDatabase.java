@@ -1666,7 +1666,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				ContentValues contentValues = getContentValueForConversationMessage(message);
 				if (Utils.isGroupConversation(msisdn))
 				{
-					HikeMessengerApp.getContactManager().unloadPersistenceCache(c.getString(groupParticipantColumn));
+					HikeMessengerApp.getContactManager().unloadPersistenceCache(c.getString(groupParticipantColumn), false);
 				}
 				mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
 			}
