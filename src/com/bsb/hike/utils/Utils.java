@@ -59,6 +59,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
@@ -90,7 +91,6 @@ import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
-import android.provider.DocumentsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
@@ -1106,86 +1106,6 @@ public class Utils
 		}
 		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
 		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
-	}
-
-	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail)
-	{
-		Bitmap thumbnail = null;
-
-		int currentWidth = 0;
-		int currentHeight = 0;
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-
-		BitmapFactory.decodeFile(filePath, options);
-		currentHeight = options.outHeight;
-		currentWidth = options.outWidth;
-
-		if (dimensionLimit == -1)
-		{
-			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
-		}
-
-		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
-		options.inJustDecodeBounds = false;
-
-		thumbnail = BitmapFactory.decodeFile(filePath, options);
-		/*
-		 * Should only happen when the external storage does not have enough free space
-		 */
-		if (thumbnail == null)
-		{
-			return null;
-		}
-		if (makeSquareThumbnail)
-		{
-			return makeSquareThumbnail(thumbnail, dimensionLimit);
-		}
-
-		return thumbnail;
-	}
-
-	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail, boolean applyBitmapConfig)
-	{
-		Bitmap thumbnail = null;
-
-		int currentWidth = 0;
-		int currentHeight = 0;
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-
-		BitmapFactory.decodeFile(filePath, options);
-		currentHeight = options.outHeight;
-		currentWidth = options.outWidth;
-
-		if (dimensionLimit == -1)
-		{
-			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
-		}
-
-		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
-		options.inJustDecodeBounds = false;
-		if (applyBitmapConfig)
-		{
-			options.inPreferredConfig = Config.RGB_565;
-		}
-
-		thumbnail = BitmapFactory.decodeFile(filePath, options);
-		/*
-		 * Should only happen when the external storage does not have enough free space
-		 */
-		if (thumbnail == null)
-		{
-			return null;
-		}
-		if (makeSquareThumbnail)
-		{
-			return makeSquareThumbnail(thumbnail, dimensionLimit);
-		}
-
-		return thumbnail;
 	}
 
 	public static Bitmap getRotatedBitmap(String path, Bitmap bitmap)
@@ -4090,5 +4010,20 @@ public class Utils
 			editor.commit();
 		}
 
+	}
+
+	public static boolean isPackageInstalled(Context context, String packageName)
+	{
+		PackageManager pm = context.getPackageManager();
+		try
+		{
+			pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+			return true;
+		}
+		catch (NameNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		return false;
 	}
 }

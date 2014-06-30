@@ -324,5 +324,13 @@
     <color name="ftue_card_sticker_click_text">#555555</color>
     <color name="black_60">#99000000</color>
     <color name="white_16">#28FFFFFF</color>
+    <color name="jellies_bg">#663129</color>
+    <color name="jellies_btn_pressed">#391b17</color>
+    <color name="jellies_btn_normal">#4e251f</color>
+    <color name="jellies_btn_text">#ffffff</color>
+    <color name="jellies_btn_text_shadow">#45211b</color>
+    <color name="jellies_text">#ffffff</color>
+    <color name="jellies_text_shadow">#45211b</color>
+    <color name="jellies_div">#45211b</color>
 </resources>
 	

@@ -131,6 +131,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private String[] profilePubSubListeners = { HikePubSub.USER_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.STATUS_MESSAGE_RECEIVED,
 			HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
 
+	private String[] profilEditPubSubListeners = { HikePubSub.PROFILE_UPDATE_FINISH };
+
 	private GroupConversation groupConversation;
 
 	private ImageButton topBarBtn;
@@ -226,6 +228,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{
 			HikeMessengerApp.getPubSub().removeListeners(this, profilePubSubListeners);
 		}
+		else if (profileType == ProfileType.USER_PROFILE_EDIT)
+		{
+			HikeMessengerApp.getPubSub().removeListeners(this, profilEditPubSubListeners);
+		}
 	}
 
 	@Override
@@ -277,6 +283,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			if (getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false))
 			{
+				// set pubsub listeners
+				HikeMessengerApp.getPubSub().addListeners(this, profilEditPubSubListeners);
 				setContentView(R.layout.profile_edit);
 				this.profileType = ProfileType.USER_PROFILE_EDIT;
 				setupEditScreen();
@@ -1051,7 +1059,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				{
 					if (isBackPressed)
 					{
-						finishEditing();
+						HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
 					}
 				}
 
@@ -1066,7 +1074,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					editor.commit();
 					if (isBackPressed)
 					{
-						finishEditing();
+						// finishEditing();
+						HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
 					}
 				}
 			});
@@ -1895,6 +1904,18 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					}
 				});
 			}
+		}
+		else if (HikePubSub.PROFILE_UPDATE_FINISH.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					finishEditing();
+				}
+			});
 		}
 	}
 
