@@ -3990,7 +3990,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if(chatThread.isHikeOfflineTipShowing())
 				{
-					status.setImageResource(R.drawable.ic_bolt);
+					status.setImageResource(R.drawable.ic_bolt_grey);
 				}
 			}
 			else
