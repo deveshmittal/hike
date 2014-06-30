@@ -1607,6 +1607,15 @@
      <string name="invite_more">INVITE MORE</string>
      <string name="invite_sent">Invite sent</string>
      <string name="send_invite">Invite (%1$d)</string>
-    
-    
+     <string name="reciever_is_offline">%1$s is offline</string>
+     <string name="hike_to_offline_tip_msg">Tap here to use hike offline.</string>
+     <string name="send_uppercase">SEND</string>
+     <string name="hike_offline_mode_header">Send as %1$d SMS</string>
+     <string name="hike_offline_mode_msg">Select messages will be sent as SMS.</string>
+     <string name="messages_sent">Messages sent!</string>
+     <string name="hike_offline_messages_sent_msg">You have %1$d free SMS left</string>
+     <string name="always">Always</string>
+     <string name="just_once">Just once</string>
+     <string name="undelivered_sms_setting_summary">Always ask for preference</string>
+     <string name="undelivered_sms_setting_remember">Remember my preference</string>
 </resources>
