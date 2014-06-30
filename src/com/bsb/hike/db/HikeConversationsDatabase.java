@@ -1341,22 +1341,49 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return grpLastMsisdns;
 	}
 
+	public Map<String, String> getGroupNames()
+	{
+		Cursor groupInfoCursor = null;
+		try
+		{
+			groupInfoCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.GROUP_ID, DBConstants.GROUP_NAME }, null, null, null, null, null);
+
+			Map<String, String> map = new HashMap<String, String>();
+
+			final int groupIdIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ID);
+			final int groupNameIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_NAME);
+
+			while (groupInfoCursor.moveToNext())
+			{
+				String groupId = groupInfoCursor.getString(groupIdIdx);
+				String groupName = groupInfoCursor.getString(groupNameIdx);
+				map.put(groupId, groupName);
+			}
+			return map;
+		}
+		finally
+		{
+			if (null != groupInfoCursor)
+			{
+				groupInfoCursor.close();
+			}
+
+		}
+	}
+
 	public List<Conversation> getConversations()
 	{
-		long startTime = System.currentTimeMillis();
+		long t1, t2;
+		t1 = System.currentTimeMillis();
 
-		Cursor groupInfoCursor = null;
 		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.CONV_ID, DBConstants.MESSAGE, DBConstants.MSG_STATUS,
 				DBConstants.TIMESTAMP, DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.UNREAD_COUNT,
 				DBConstants.IS_STEALTH }, null, null, null, null, null);
 
-		Map<String, Conversation> conversationMap = new HashMap<String, Conversation>(c.getCount());
-
-		List<Conversation> conversations = new ArrayList<Conversation>(c.getCount());
+		List<Conversation> conversations = new ArrayList<Conversation>();
 
 		final int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
 		final int convIdx = c.getColumnIndex(DBConstants.CONV_ID);
-
 		final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
 		final int msgStatusColumn = c.getColumnIndex(DBConstants.MSG_STATUS);
 		final int tsColumn = c.getColumnIndex(DBConstants.TIMESTAMP);
@@ -1367,12 +1394,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		final int unreadCountColumn = c.getColumnIndex(DBConstants.UNREAD_COUNT);
 		final int isStealthColumn = c.getColumnIndex(DBConstants.IS_STEALTH);
 
-		HikeUserDatabase huDb = null;
-
-		List<String> msisdns = new ArrayList<String>();
 		try
 		{
-			huDb = HikeUserDatabase.getInstance();
 			while (c.moveToNext())
 			{
 				Conversation conv;
@@ -1382,18 +1405,20 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String messageString = c.getString(msgColumn);
 				String metadata = c.getString(metadataColumn);
 
-				if (!Utils.isGroupConversation(msisdn))
+				if (Utils.isGroupConversation(msisdn))
 				{
-					msisdns.add(msisdn);
+					conv = new GroupConversation(msisdn, convid, ContactManager.getInstance().getName(msisdn), null, true);
 				}
-				conv = new Conversation(msisdn, convid);
+				else
+				{
+					conv = new Conversation(msisdn, convid);
+					ContactInfo contact = ContactManager.getInstance().getContact(conv.getMsisdn());
+					conv.setContactName(contact.getName());
+					conv.setOnhike(contact.isOnhike());
+				}
+				// TODO if contact not found then make a db call
 				conv.setUnreadCount(c.getInt(unreadCountColumn));
 				conv.setIsStealth(c.getInt(isStealthColumn) == 1);
-
-				if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn))
-				{
-					conv.setContactName(HikeMessengerApp.hikeBotNamesMap.get(msisdn));
-				}
 
 				/*
 				 * If the message does not contain any text or metadata, its an empty message and the conversation is blank.
@@ -1405,14 +1430,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					try
 					{
 						message.setMetadata(metadata);
-
-						List<String> groupLastMsisdns = getGroupLastMsgMsisdn(msisdn, metadata, c.getString(groupParticipantColumn));
-
-						if (null != groupLastMsisdns && groupLastMsisdns.size() > 0)
-						{
-							msisdns.addAll(groupLastMsisdns);
-							HikeMessengerApp.getContactManager().removeOlderLastGroupMsisdns(msisdn, groupLastMsisdns);
-						}
 					}
 					catch (JSONException e)
 					{
@@ -1422,76 +1439,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 					conv.addMessage(message);
 				}
-
-				conversationMap.put(msisdn, conv);
-			}
-
-			List<ContactInfo> contactList = HikeMessengerApp.getContactManager().getContact(msisdns, false);
-
-			for (ContactInfo contactInfo : contactList)
-			{
-				Conversation conversation = conversationMap.get(contactInfo.getMsisdn());
-				if (null != conversation)
-				{
-					conversation.setContactName(contactInfo.getName());
-					conversation.setOnhike(contactInfo.isOnhike());
-				}
-			}
-
-			/*
-			 * Getting the info for group conversations
-			 */
-			groupInfoCursor = mDb.query(DBConstants.GROUP_INFO_TABLE,
-					new String[] { DBConstants.GROUP_ID, DBConstants.GROUP_NAME, DBConstants.GROUP_OWNER, DBConstants.GROUP_ALIVE }, null, null, null, null, null);
-
-			final int groupIdIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ID);
-			final int groupNameIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_NAME);
-			final int groupOwnerIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_OWNER);
-			final int groupAliveIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ALIVE);
-
-			while (groupInfoCursor.moveToNext())
-			{
-				String groupId = groupInfoCursor.getString(groupIdIdx);
-				String groupName = groupInfoCursor.getString(groupNameIdx);
-				String groupOwner = groupInfoCursor.getString(groupOwnerIdx);
-				boolean isGroupAlive = groupInfoCursor.getInt(groupAliveIdx) != 0;
-
-				Conversation conversation = conversationMap.get(groupId);
-				if (conversation == null)
-				{
-					continue;
-				}
-
-				GroupConversation groupConversation = new GroupConversation(groupId, conversation.getConvId(), groupName, groupOwner, isGroupAlive);
-				groupConversation.setMessages(conversation.getMessages());
-				groupConversation.setUnreadCount(conversation.getUnreadCount());
-				groupConversation.setIsStealth(conversation.isStealth());
-
-				/*
-				 * Setting the conversation for the message.
-				 */
-				if (!conversation.getMessages().isEmpty())
-				{
-					ConvMessage message = conversation.getMessages().get(0);
-					message.setConversation(groupConversation);
-				}
-
-				conversationMap.remove(groupId);
-				conversationMap.put(groupId, groupConversation);
+				conversations.add(conv);
 			}
 
 		}
 		finally
 		{
 			c.close();
-			if (groupInfoCursor != null)
-			{
-				groupInfoCursor.close();
-			}
 		}
-		conversations.addAll(conversationMap.values());
-		Logger.d(getClass().getSimpleName(), "Query time: " + (System.currentTimeMillis() - startTime));
 		Collections.sort(conversations, Collections.reverseOrder());
+		Logger.d("ConversationsTimeTest", "Query time: " + (System.currentTimeMillis() - t1));
 		return conversations;
 	}
 
