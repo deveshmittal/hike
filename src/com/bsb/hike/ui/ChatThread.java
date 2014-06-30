@@ -5781,7 +5781,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			categoryTextShadowColor = getResources().getColor(R.color.sports_text_shadow);
 
 			dividerBg = getResources().getColor(R.color.sports_div);
-			break;	
+			break;
+		case wicked_jellies:
+			resParentBg = getResources().getColor(R.color.jellies_bg);
+
+			stickerBtnBg = R.drawable.jellies_btn;
+			stickerBtnText = R.string.download;
+			stickerBtnTextColor = getResources().getColor(R.color.jellies_btn_text);
+			stickerBtnShadowColor = getResources().getColor(R.color.jellies_btn_text_shadow);
+
+			categoryText = getString(R.string.wicked_jellies);
+			categoryTextColor = getResources().getColor(R.color.jellies_text);
+			categoryTextShadowColor = getResources().getColor(R.color.jellies_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.jellies_div);
+			break;
 		}
 
 		parentDrawable.setColor(resParentBg);
