@@ -95,6 +95,7 @@
             android:layout_marginTop="1px"
             android:background="@color/white"
             android:fadingEdge="none"
+            android:scrollbarStyle="outsideInset"
             android:fastScrollEnabled="true" />
 
         <include layout="@layout/list_empty_view" >

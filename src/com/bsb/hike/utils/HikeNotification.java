@@ -145,7 +145,28 @@ public class HikeNotification
 
 	}
 
-	
+	public void notifyAtomicPopup(final String message, Intent notificationIntent)
+	{
+		/*
+		 * return straight away if the block notification setting is ON
+		 */
+		if (sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
+		{
+			return;
+		}
+
+		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
+
+		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		final int smallIconId = returnSmallIcon();
+
+		NotificationCompat.Builder mBuilder = getNotificationBuilder(context.getString(R.string.team_hike), message, message, avatarDrawable, smallIconId, false);
+		setNotificationIntentForBuilder(mBuilder, notificationIntent);
+
+		notificationManager.notify(FREE_SMS_POPUP_NOTIFICATION_ID, mBuilder.getNotification());
+
+	}
+
 	public void notifyMessage(final Protip proTip)
 	{
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
