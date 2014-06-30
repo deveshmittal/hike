@@ -243,7 +243,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		 * We only add this item if hike contacts are less than 
 		 * certain threashold
 		 */
-		if(HomeActivity.ftueContactsData.getHikeContacts().size() < HikeConstants.FTUE_HIKE_CONTACT_MIN_LIMIT 
+		if(HomeActivity.ftueContactsData.getHikeContacts().size() == 0
 				&& !HomeActivity.ftueContactsData.getSmsContacts().isEmpty())
 		{
 			int smsContactCount = HomeActivity.ftueContactsData.getTotalSmsContactsCount();

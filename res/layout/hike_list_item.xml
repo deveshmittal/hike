@@ -15,6 +15,38 @@
         android:button="@drawable/hike_list_item_checkbox"
         android:clickable="false"
         android:focusable="false" />
+           <com.bsb.hike.view.CustomFontTextView
+         android:id="@+id/invite_Text"
+         android:layout_width="60dp"
+         android:layout_height="30dp"
+         android:layout_alignParentRight="true"
+         android:layout_centerVertical="true"
+         android:paddingLeft="18dp"
+         android:text="@string/invited"
+         android:textColor="@color/description_lightgrey"
+         android:textSize="13sp"
+         android:textStyle="bold|italic"
+         android:visibility="gone" />
+ 
+     <ImageView
+         android:id="@+id/invite_icon"
+         android:layout_width="wrap_content"
+         android:layout_height="match_parent"
+         android:layout_alignParentRight="true"
+         android:layout_centerVertical="true"
+         android:background="@drawable/list_item"
+         android:paddingLeft="14dp"
+         android:src="@drawable/ic_invite_to_hike"
+         android:visibility="gone" />
+ 
+     <View
+         android:id="@+id/invite_divider"
+         android:layout_width="1dp"
+         android:layout_height="32dp"
+         android:layout_centerVertical="true"
+         android:layout_toLeftOf="@id/invite_icon"
+         android:background="@color/list_divider"
+         android:visibility="gone" />
 
     <FrameLayout
         android:id="@+id/avatar_container"
