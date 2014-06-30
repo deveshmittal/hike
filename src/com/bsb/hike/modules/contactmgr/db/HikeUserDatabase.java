@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -528,6 +529,38 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	}
 
+	private LinkedHashMap<String, ContactInfo> getSortedContactMap()
+	{
+
+		Cursor c = null;
+
+		LinkedHashMap<String, ContactInfo> contactMap = new LinkedHashMap<String, ContactInfo>();
+
+		try
+		{
+			c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.ID + ", " + DBConstants.MSISDN + ", " + DBConstants.PHONE
+					+ ", " + DBConstants.LAST_MESSAGED + ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + ", "
+					+ DBConstants.HIKE_JOIN_TIME + ", " + DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", " + DBConstants.INVITE_TIMESTAMP + " from "
+					+ DBConstants.USERS_TABLE + " GROUP BY " + DBConstants.MSISDN + " ORDER BY " + DBConstants.NAME + " COLLATE NOCASE ", null);
+
+			while (c.moveToNext())
+			{
+				ContactInfo contactInfo = processContact(c);
+				if (!contactMap.containsKey(contactInfo.getMsisdn()))
+					contactMap.put(contactInfo.getMsisdn(), contactInfo);
+			}
+			
+			return contactMap;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
 	private Map<String, ContactInfo> getContactMap(String msisdns)
 	{
 		Cursor c = null;
@@ -621,10 +654,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 			if (onHike != HikeConstants.BOTH_VALUE)
 			{
-				queryBuilder.append(DBConstants.ONHIKE + " = " + onHike);
+				queryBuilder.append(DBConstants.ONHIKE + " = " + onHike + " AND ");
 				if (onHike == HikeConstants.NOT_ON_HIKE_VALUE)
 				{
-					queryBuilder.append(" AND (" + DBConstants.MSISDN + " LIKE '+91%') AND ");
+					queryBuilder.append(" (" + DBConstants.MSISDN + " LIKE '+91%') AND ");
 				}
 			}
 			else if (!nativeSMSOn)
@@ -855,19 +888,20 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public Map<String, ContactInfo> getAllContactInfo()
+	public Pair<Map<String, ContactInfo>, Map<String, ContactInfo>> getAllContactInfo()
 	{
 		Cursor c = null;
 
-		Map<String, ContactInfo> contactMap = new HashMap<String, ContactInfo>();
+		Map<String, ContactInfo> savedContactMap = new LinkedHashMap<String, ContactInfo>();
+		Map<String, ContactInfo> unsavedContactMap = new LinkedHashMap<String, ContactInfo>();
 		Map<String, FavoriteType> favoriteMap = new HashMap<String, FavoriteType>();
 
 		try
 		{
-			contactMap = getContactMap();
+			savedContactMap = getSortedContactMap();
 			favoriteMap = getFavoriteMap();
 
-			for (Entry<String, ContactInfo> contactEntry : contactMap.entrySet())
+			for (Entry<String, ContactInfo> contactEntry : savedContactMap.entrySet())
 			{
 				String msisdn = contactEntry.getKey();
 				ContactInfo contact = contactEntry.getValue();
@@ -885,10 +919,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				FavoriteType favType = favTypeEntry.getValue();
 				ContactInfo contact = new ContactInfo(msisdn, msisdn, null, msisdn);
 				contact.setFavoriteType(favType);
-				contactMap.put(msisdn, contact);
+				unsavedContactMap.put(msisdn, contact);
 			}
-
-			return contactMap;
+			return new Pair<Map<String, ContactInfo>, Map<String, ContactInfo>>(savedContactMap, unsavedContactMap);
 		}
 		finally
 		{

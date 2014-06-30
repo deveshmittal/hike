@@ -5,18 +5,18 @@ package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import android.database.DatabaseUtils;
 import android.util.Pair;
 
-import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.modules.iface.ITransientCache;
+import com.bsb.hike.utils.Logger;
 
 /**
- * @author Gautam
+ * @author Gautam & Sidharth
  * 
  */
 public class ContactManager implements ITransientCache
@@ -24,12 +24,19 @@ public class ContactManager implements ITransientCache
 	// This should always be present so making it loading on class loading itself
 	private volatile static ContactManager _instance = new ContactManager();
 
-	private ContactsCache cache = new ContactsCache();
+	private PersistenceCache persistenceCache;
+
+	private TransientCache transientCache;
 
 	private ContactManager()
 	{
-		cache = new ContactsCache();
-		loadPersistenceCache();
+		persistenceCache = new PersistenceCache();
+		transientCache = new TransientCache();
+		long t1, t2;
+		t1 = System.currentTimeMillis();
+		persistenceCache.loadMemory();// loadPersistenceCache();
+		t2 = System.currentTimeMillis();
+		Logger.d("ConversationsTimeTest", " time taken by loadPersistenceCache : " + (t2 - t1));
 	}
 
 	public static ContactManager getInstance()
@@ -38,50 +45,12 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * This method loads the persistence memory
-	 */
-	private void loadPersistenceCache()
-	{
-		cache.loadPersistenceMemory();
-	}
-
-	/**
-	 * This method puts the contactInfo object list in persistence memory
-	 * 
-	 * @param contacts
-	 */
-	public List<ContactInfo> loadPersistenceCache(List<String> msisdns)
-	{
-		return cache.loadPersistenceMemory(msisdns);
-	}
-
-	/**
-	 * This method should load the transient memory at app launch event
-	 */
-	@Override
-	public void load()
-	{
-		cache.loadTransientMem();
-	}
-
-	/**
-	 * This method puts the contact info for msisdns in transient memory and Returns the list for same.
-	 * 
-	 * @param msisdns
-	 * @return
-	 */
-	public List<ContactInfo> load(List<String> msisdns)
-	{
-		return cache.loadTransientMem(msisdns);
-	}
-
-	/**
 	 * This method should unload the transient memory at app launch event
 	 */
 	@Override
 	public void unload()
 	{
-		cache.clearTransientMemory();
+		transientCache.clearMemory();
 	}
 
 	/**
@@ -89,34 +58,39 @@ public class ContactManager implements ITransientCache
 	 */
 	public void unloadPersistenceCache()
 	{
-		cache.clearPersistenceMemory();
+		persistenceCache.clearMemory();
 	}
 
 	/**
 	 * 
+	 * @param msisdn
+	 * @param ifOneToOneConversation
 	 */
-	public void unloadPersistenceCache(String msisdn)
+	public void unloadPersistenceCache(String msisdn, boolean ifOneToOneConversation)
 	{
-		List<String> msisdns = new ArrayList<String>();
-		msisdns.add(msisdn);
-		cache.clearPersistenceMemory(msisdns);
+		persistenceCache.removeContact(msisdn, ifOneToOneConversation);
 	}
 
 	/**
 	 * 
+	 * @param msisdns
 	 */
 	public void unloadPersistenceCache(List<String> msisdns)
 	{
-		cache.clearPersistenceMemory(msisdns);
+		// TODO check caller code also
+		for (String ms : msisdns)
+		{
+			// clearPersistenceMemory(ms);
+		}
 	}
 
 	/**
 	 * 
 	 * @param contacts
 	 */
-	public void removeFromCache(List<ContactInfo> contacts)
+	public void removeContacts(List<ContactInfo> contacts)
 	{
-		cache.removeFromCache(contacts);
+		// TODO remove completely from all the maps or from some maps boolean how to decide cache.removeFromCache(contacts);
 	}
 
 	/**
@@ -126,7 +100,15 @@ public class ContactManager implements ITransientCache
 	 */
 	public void updateContacts(ContactInfo contact)
 	{
-		cache.updateContact(contact.getMsisdn(), contact);
+		ContactInfo con = persistenceCache.getContact(contact.getMsisdn());
+		if (null != con)
+		{
+			persistenceCache.updateContact(contact);
+		}
+		else
+		{
+			transientCache.updateContact(contact);
+		}
 	}
 
 	/**
@@ -138,8 +120,24 @@ public class ContactManager implements ITransientCache
 	{
 		for (ContactInfo contact : updatescontacts)
 		{
-			cache.updateContact(contact.getMsisdn(), contact);
+			updateContacts(contact);
 		}
+	}
+
+	public String getName(String msisdn)
+	{
+		String name = persistenceCache.getName(msisdn);
+		if (null == name)
+		{
+			name = transientCache.getName(msisdn);
+		}
+		return name;
+	}
+
+	public void setUnknownContactName(String msisdn, String name)
+	{
+		persistenceCache.setUnknownContactName(msisdn, name);
+		transientCache.setUnknownContactName(msisdn, name);
 	}
 
 	/**
@@ -150,9 +148,12 @@ public class ContactManager implements ITransientCache
 	 */
 	public ContactInfo getContact(String msisdn)
 	{
-		ContactInfo c = null;
-		c = cache.getContact(msisdn);
-		return c;
+		ContactInfo contact = persistenceCache.getContact(msisdn);
+		if (null == contact)
+		{
+			contact = transientCache.getContact(msisdn);
+		}
+		return contact;
 	}
 
 	/**
@@ -182,16 +183,16 @@ public class ContactManager implements ITransientCache
 	 */
 	public ContactInfo getContact(String msisdn, boolean loadInTransient, boolean ifNotFoundReturnNull)
 	{
-		ContactInfo contact = cache.getContact(msisdn);
+		ContactInfo contact = getContact(msisdn);
 		if (null == contact)
 		{
 			if (loadInTransient)
 			{
-				contact = cache.loadTransientMem(msisdn, ifNotFoundReturnNull);
+				contact = transientCache.loadMemory(msisdn, ifNotFoundReturnNull);
 			}
 			else
 			{
-				contact = cache.loadPersistenceMemory(msisdn, ifNotFoundReturnNull);
+				contact = persistenceCache.loadMemory(msisdn, ifNotFoundReturnNull);
 			}
 		}
 		else
@@ -199,6 +200,11 @@ public class ContactManager implements ITransientCache
 			if (ifNotFoundReturnNull && contact.getName() == null)
 			{
 				return null;
+			}
+
+			if (!loadInTransient)
+			{
+				// TODO cache.moveToPersistence(msisdn, contact);
 			}
 		}
 		return contact;
@@ -219,7 +225,7 @@ public class ContactManager implements ITransientCache
 
 		for (String msisdn : msisdns)
 		{
-			ContactInfo c = cache.getContact(msisdn);
+			ContactInfo c = getContact(msisdn);
 			if (null != c)
 			{
 				contacts.add(c);
@@ -235,11 +241,11 @@ public class ContactManager implements ITransientCache
 			List<ContactInfo> contactsDB;
 			if (loadInTransient)
 			{
-				contactsDB = cache.loadTransientMem(msisdnsDB);
+				contactsDB = transientCache.loadMemory(msisdnsDB);
 			}
 			else
 			{
-				contactsDB = cache.loadPersistenceMemory(msisdnsDB);
+				contactsDB = persistenceCache.loadMemory(msisdnsDB);
 			}
 
 			if (null != contactsDB)
@@ -247,6 +253,12 @@ public class ContactManager implements ITransientCache
 				contacts.addAll(contactsDB);
 			}
 		}
+
+		if (!loadInTransient)
+		{
+			// TODO cache.moveToPersistence(msisdns);
+		}
+
 		return contacts;
 	}
 
@@ -257,12 +269,12 @@ public class ContactManager implements ITransientCache
 	 */
 	public List<ContactInfo> getAllContacts()
 	{
-		return cache.getAllContacts();
+		return transientCache.getAllContacts();
 	}
 
 	public void removeOlderLastGroupMsisdns(String groupId, List<String> currentGroupMsisdns)
 	{
-		cache.removeOlderLastGroupMsisdn(groupId, currentGroupMsisdns);
+		persistenceCache.removeOlderLastGroupMsisdn(groupId, currentGroupMsisdns);
 	}
 
 	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType favoriteType, int onHike, String myMsisdn)
@@ -279,7 +291,7 @@ public class ContactManager implements ITransientCache
 	{
 		if (favoriteType == FavoriteType.NOT_FRIEND)
 		{
-			return cache.getNOTFRIENDScontacts(onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+			return transientCache.getNOTFRIENDScontacts(onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
 		}
 		else
 		{
@@ -289,31 +301,38 @@ public class ContactManager implements ITransientCache
 
 	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType[] favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
 	{
-		return cache.getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+		return transientCache.getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
 	}
 
 	public List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
 	{
-		return cache.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
+		return transientCache.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
 	}
 
 	public List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts()
 	{
-		return cache.getNonHikeContacts();
+		return transientCache.getNonHikeContacts();
 	}
 
 	public List<ContactInfo> getNonHikeMostContactedContacts(int limit)
 	{
-		return cache.getNonHikeMostContactedContacts(limit);
+		return transientCache.getNonHikeMostContactedContacts(limit);
 	}
 
 	public ContactInfo getContactInfoFromPhoneNo(String number)
 	{
-		return cache.getContactInfoFromPhoneNo(number);
+		return transientCache.getContactInfoFromPhoneNo(number);
 	}
 
 	public ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number)
 	{
-		return cache.getContactInfoFromPhoneNoOrMsisdn(number);
+		return transientCache.getContactInfoFromPhoneNoOrMsisdn(number);
+	}
+
+	@Override
+	public void load()
+	{
+		// TODO Auto-generated method stub
+
 	}
 }

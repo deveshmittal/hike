@@ -1221,10 +1221,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public List<String> getConversationMsisdns()
+	public Pair<List<String>, Map<String, List<String>>> getConversationMsisdns()
 	{
 		Cursor c = null;
-		List<String> msisdns = new ArrayList<String>();
+		List<String> convsMsisdns = new ArrayList<String>();
+		Map<String, List<String>> grpLastMsisdns = new HashMap<String, List<String>>();
 
 		try
 		{
@@ -1247,15 +1248,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 					if (null != grpMsisdns && grpMsisdns.size() > 0)
 					{
-						msisdns.addAll(grpMsisdns);
+						grpLastMsisdns.put(msisdn, grpMsisdns);
 					}
 				}
 				else
 				{
-					msisdns.add(msisdn);
+					convsMsisdns.add(msisdn);
 				}
 			}
-			return msisdns;
+			Pair<List<String>, Map<String, List<String>>> allmsisdns = new Pair<List<String>, Map<String, List<String>>>(convsMsisdns, grpLastMsisdns);
+			return allmsisdns;
 		}
 		finally
 		{
@@ -1915,6 +1917,33 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			return mDb.update(DBConstants.GROUP_MEMBERS_TABLE, contentValues, selection, selectionArgs);
 
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
+	public Map<String, String> getGroupMembersName(String msisdns)
+	{
+		Cursor c = null;
+		Map<String, String> map = new HashMap<String, String>();
+		try
+		{
+			c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.NAME }, DBConstants.MSISDN + " IN " + msisdns, null, DBConstants.MSISDN,
+					null, null);
+			final int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			final int nameIdx = c.getColumnIndex(DBConstants.NAME);
+			while (c.moveToNext())
+			{
+				String msisdn = c.getString(msisdnIdx);
+				String name = c.getString(nameIdx);
+				map.put(msisdn, name);
+			}
+			return map;
 		}
 		finally
 		{
