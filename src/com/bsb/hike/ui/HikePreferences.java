@@ -819,7 +819,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		//passing true here to denote that this is coming from the password reset operation
-		data.putExtra("IsResetPassword", true);
+		data.putExtra(HikeConstants.Extras.STEALTH_PASS_RESET, true);
 		LockPattern.onLockActivityResult(this, requestCode, resultCode, data);
 		super.onActivityResult(requestCode, resultCode, data);
 	}

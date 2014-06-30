@@ -1173,6 +1173,8 @@ public class HikeConstants
 		public static final String STEALTH_PUSH_BODY = "stleathPushBody";
 		
 		public static final String STEALTH_PASS_RESET = "stealthPasswordReset";
+
+		public static final String IS_RESET_PASS = "isResetStealthPasswordFlow";
 		
 	}
 

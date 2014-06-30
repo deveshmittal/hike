@@ -1644,7 +1644,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
 				tipTypeShowing = null;
-				LockPattern.createNewPattern(HomeActivity.this);
+				LockPattern.createNewPattern(HomeActivity.this, false);
 			}
 			else
 			{
