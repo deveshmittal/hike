@@ -284,6 +284,26 @@ public class StickerManager
 				return "indianDownloadShown";
 			}
 		},
+		wicked_jellies
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.wicked_jellies;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_jelly;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "JellyDownloadShown";
+			}
+		},
 		sports
 		{
 			@Override
