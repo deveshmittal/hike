@@ -1597,4 +1597,11 @@
      <string name="just_once">Just once</string>
      <string name="undelivered_sms_setting_summary">Always ask for preference</string>
      <string name="undelivered_sms_setting_remember">Remember my preference</string>
+     <string name="send_sms_sticker_msg">send you a sticker</string>
+     <string name="send_sms_img_msg">send you an image</string>
+     <string name="send_sms_video_msg">send you a video</string>
+     <string name="send_sms_location_msg">shared his/her location </string>
+     <string name="send_sms_contact_msg">shared a contact</string>
+     <string name="send_sms_audio_msg">send you an audio</string>
+     
 </resources>
