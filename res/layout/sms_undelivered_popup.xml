@@ -121,15 +121,44 @@
         android:layout_height="2dp"
         android:background="#1f73716d" />
 
-    <com.bsb.hike.view.CustomFontButton
-        android:id="@+id/btn_send"
+    <!-- A separator view -->
+
+    <View
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@drawable/list_item"
-        android:text="@string/send"
-        android:gravity="center"
-        android:textColor="@color/sms_popup"
-        android:textSize="16dp"
-        android:textStyle="bold" />
+        android:layout_height="1dp"
+        android:background="@color/stealth_ftue_popup_divider" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="47dp"
+        android:orientation="horizontal" >
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_always"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/popup_button_bg_selector"
+            android:gravity="center"
+            android:text="@string/always"
+            android:textColor="@color/sms_popup"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/stealth_ftue_popup_divider" />
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_just_once"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/popup_button_bg_selector"
+            android:gravity="center"
+            android:text="@string/just_once"
+            android:textColor="@color/sms_popup"
+            android:textSize="16sp" />
+    </LinearLayout>
 
 </LinearLayout>

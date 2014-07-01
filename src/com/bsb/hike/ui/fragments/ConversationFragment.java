@@ -69,7 +69,9 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
@@ -243,7 +245,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		 * We only add this item if hike contacts are less than 
 		 * certain threashold
 		 */
-		if(HomeActivity.ftueContactsData.getHikeContacts().size() < HikeConstants.FTUE_HIKE_CONTACT_MIN_LIMIT 
+		if(HomeActivity.ftueContactsData.getHikeContacts().size() == 0
 				&& !HomeActivity.ftueContactsData.getSmsContacts().isEmpty())
 		{
 			int smsContactCount = HomeActivity.ftueContactsData.getTotalSmsContactsCount();
@@ -790,6 +792,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void ShowTipIfNeeded(boolean hasNoConversation)
 	{
+		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(this.getActivity().getApplicationContext());
+		String tip = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
+		Logger.i("tip", "#" + tip + "#-currenttype");
 		if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.RESET_STEALTH_TIP));
@@ -803,11 +808,31 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.START_NEW_CHAT_TIP));
 		}
-		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false) )
+		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false))
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_UNREAD_TIP));
 		}
-		
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_PROFILE_PIC))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_PROFILE_PIC_TIP));
+			// show atomic pop up profile pic
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_FAVOURITES))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_FAVOURTITES_TIP));
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_INVITE))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_INVITE_TIP));
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_STATUS))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_STATUS_TIP));
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_INFO_TIP));
+		}
 	}
 
 	private void setupConversationLists()

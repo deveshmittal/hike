@@ -48,6 +48,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.bsb.hike.BuildConfig;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.haibison.android.lockpattern.util.IEncrypter;
@@ -535,8 +536,12 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
             if (infoText != null)
                 mTextInfo.setText(infoText);
             else
-                mTextInfo
-                        .setText(R.string.alp_42447968_msg_draw_an_unlock_pattern);
+            {
+            	//checking whether this was invoked in a normal flow or stealth reset flow.
+            	//we use a different string if this was invoked from the reset flow
+                mTextInfo.setText(getIntent().getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false)
+                		?R.string.alp_42447968_msg_draw_new_pattern : R.string.alp_42447968_msg_draw_an_unlock_pattern);
+            }
 
             /*
              * BUTTON OK
@@ -566,8 +571,11 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
         }// ACTION_CREATE_PATTERN
         else if (ACTION_COMPARE_PATTERN.equals(getIntent().getAction())) {
             if (TextUtils.isEmpty(infoText))
-                mTextInfo
-                        .setText(R.string.alp_42447968_msg_draw_pattern_to_unlock);
+            {
+            	mTextInfo.setText(getIntent().getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false)
+                		?R.string.alp_42447968_msg_draw_pattern_to_unlock_in_reset : R.string.alp_42447968_msg_draw_pattern_to_unlock);
+            }
+       
             else
                 mTextInfo.setText(infoText);
             if (getIntent().hasExtra(EXTRA_PENDING_INTENT_FORGOT_PATTERN)) {
@@ -579,9 +587,8 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
             mFooter.setVisibility(View.GONE);
         }// ACTION_COMPARE_PATTERN
         else if (ACTION_VERIFY_CAPTCHA.equals(getIntent().getAction())) {
-            mTextInfo
-                    .setText(R.string.alp_42447968_msg_redraw_pattern_to_confirm);
-
+				
+        	mTextInfo.setText(getIntent().getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false)?R.string.alp_42447968_msg_redraw_new_pattern_confirm:R.string.alp_42447968_msg_redraw_pattern_to_confirm);
             /*
              * NOTE: EXTRA_PATTERN should hold a char[] array. In this case we
              * use it as a temporary variable to hold a list of Cell.

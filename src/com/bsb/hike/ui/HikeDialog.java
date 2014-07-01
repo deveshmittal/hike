@@ -6,12 +6,15 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RadioButton;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -30,6 +33,8 @@ public class HikeDialog
 	public static final int STEALTH_FTUE_EMPTY_STATE_DIALOG = 5;
 	
 	public static final int SHARE_IMAGE_QUALITY_DIALOG = 6;
+
+	public static final int SMS_CLIENT_DIALOG = 7;
 
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
 	{
@@ -51,6 +56,8 @@ public class HikeDialog
 			return showStealthFtuePopUp(context, listener, false);
 		case SHARE_IMAGE_QUALITY_DIALOG:
 			return showImageQualityDialog(context, listener, data);
+		case SMS_CLIENT_DIALOG:
+			return showSMSClientDialog(context, listener, data);
 		}
 
 		return null;
@@ -275,7 +282,74 @@ public class HikeDialog
 				}
 			}
 		});
+		dialog.show();
+		return dialog;
+	}
 		
+	private static Dialog showSMSClientDialog(Context context, final HikeDialogListener listener, Object... data)
+	{
+		return showSMSClientDialog(context, listener, (Boolean) data[0], (CompoundButton) data[1], (Boolean) data[2]);
+	}
+	
+	private static Dialog showSMSClientDialog(final Context context, final HikeDialogListener listener, final boolean triggeredFromToggle, 
+			final CompoundButton checkBox, final boolean showingNativeInfoDialog )
+	{
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.enable_sms_client_popup);
+		dialog.setCancelable(showingNativeInfoDialog);
+
+		TextView header = (TextView) dialog.findViewById(R.id.header);
+		TextView body = (TextView) dialog.findViewById(R.id.body);
+		Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
+		Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		header.setText(showingNativeInfoDialog ? R.string.native_header : R.string.use_hike_for_sms);
+		body.setText(showingNativeInfoDialog ? R.string.native_info : R.string.use_hike_for_sms_info);
+
+		if (showingNativeInfoDialog)
+		{
+			btnCancel.setVisibility(View.GONE);
+			btnOk.setText(R.string.continue_txt);
+		}
+		else
+		{
+			btnCancel.setText(R.string.cancel);
+			btnOk.setText(R.string.allow);
+		}
+
+		btnOk.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				listener.positiveClicked(dialog);
+			}
+		});
+
+		dialog.setOnCancelListener(new OnCancelListener()
+		{
+
+			@Override
+			public void onCancel(DialogInterface dialog)
+			{
+				if (showingNativeInfoDialog && checkBox != null)
+				{
+					checkBox.setChecked(false);
+				}
+			}
+		});
+
+		btnCancel.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				listener.negativeClicked(dialog);
+			}
+		});
+
 		dialog.show();
 		return dialog;
 	}

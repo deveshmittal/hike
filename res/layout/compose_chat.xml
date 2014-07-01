@@ -29,6 +29,8 @@
     </com.bsb.hike.view.TagEditText>
 
     <com.bsb.hike.view.PinnedSectionListView
+        android:fastScrollEnabled="true"
+        android:scrollbarStyle="outsideInset"
         android:id="@+id/list"
         style="@style/HomeList" >
     </com.bsb.hike.view.PinnedSectionListView>
