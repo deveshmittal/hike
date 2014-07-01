@@ -7146,6 +7146,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onClick(View v)
 			{
+				if(isActionModeOn)
+				{
+					return ;
+				}
 				initialiseHikeToOfflineMode();
 				setupHikeToOfflineTipViews();
 			}
