@@ -792,7 +792,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(this.getApplicationContext());
 		String key = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
-		if (key.equals(HikeMessengerApp.ATOMIC_POP_UP_ATTACHMENT))
+		/*
+		 * Only show these tips in a live group conversation or other conversations and is the conversation is not a hike bot conversation.
+		 */
+		if (!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber)
+				&& (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
+				&& (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false)))
+		{
+			showStickerFtueTip();
+		}
+
+		else if (key.equals(HikeMessengerApp.ATOMIC_POP_UP_ATTACHMENT))
 		{
 			// show attachment
 			View v = LayoutInflater.from(this).inflate(R.layout.tip_right_arrow, null);
@@ -1960,20 +1970,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
-		
-		/*
-		 * Only show these tips in a live group conversation or other conversations and is the conversation is not a hike bot conversation.
-		 */
-		if (!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
-		{
-			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
-			{
-				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
-				{
-					showStickerFtueTip();
-				}
-			}
-		}
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 		// add block view
@@ -2095,7 +2091,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void showStickerFtueTip()
 	{
-		tipView = findViewById(R.id.emoticon_tip);
+		tipView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.sticker_tool_tip, null);
 		tipView.setVisibility(View.VISIBLE);
 		tipView.setOnTouchListener(new OnTouchListener()
 		{
@@ -2120,6 +2116,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
 			}
 		});
+		((LinearLayout) findViewById(R.id.tipContainerBottom)).addView(tipView, 0);
 	}
 	
 	private void addtoMessageMap(int from, int to)
