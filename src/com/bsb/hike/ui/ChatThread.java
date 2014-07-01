@@ -6562,7 +6562,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					for (ConvMessage convMessage : selectedMessagesMap.values())
 					{
 						removeMessage(convMessage);
-						if(isHikeToOfflineMode && convMessage.getState() == State.SENT_CONFIRMED)
+						if(!convMessage.isSMS() && convMessage.getState() == State.SENT_CONFIRMED)
 						{
 							mAdapter.removeFromUndeliverdMessage(convMessage);
 							if(mAdapter.isSelected(convMessage))
