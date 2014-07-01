@@ -314,5 +314,13 @@
 	<color name="themes_ftue">#29264d</color>
 	<color name="attachments_ftue">#189dc9</color>
     <color name="favorite_ftue">#f59029</color>
+    <color name="ftue_card_last_seen">#f59029</color>
+    <color name="ftue_card_hidden_mode">#dc354b</color>
+    <color name="ftue_card_hike_offline">#0e7bbd</color>
+    <color name="ftue_card_sticker">#dc354b</color>
+    <color name="ftue_card_last_seen_click_text">#f59029</color>
+    <color name="ftue_card_hidden_mode_click_text">#dc354b</color>
+    <color name="ftue_card_hike_offline_click_text">#555555</color>
+    <color name="ftue_card_sticker_click_text">#555555</color>
 </resources>
 	

@@ -807,6 +807,8 @@ public class HikeConstants
 	public static final int EMPTY_CONVERSATIONS_PREFILL_LIMIT = 6;
 
 	public static final int FTUE_LIMIT = 5;
+	
+	public static final int FTUE_CONTACT_CARD_LIMIT = 4;
 
 	public static final String FTUE_MSISDN_TYPE = "ftueContact";
 
@@ -1397,6 +1399,10 @@ public class HikeConstants
 
 		public static final String FTUE_FAV_CARD_SEEL_ALL_CLICKED = "ftueFavCardSeeAllClicked";
 		
+		public static final String FTUE_CARD_LAST_SEEN_CLICKED = "ftueCardLastSeenClicked";
+
+		public static final String FTUE_CARD_HIDDEN_MODE_CLICKED = "ftueCardHiddenModeClicked";
+
 	}
 
 	public static final class MqttMessageTypes
