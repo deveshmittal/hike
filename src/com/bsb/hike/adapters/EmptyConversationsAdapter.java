@@ -22,6 +22,7 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
 
@@ -119,6 +120,15 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			for (int i=0; i< item.getContactList().size(); i++)
 			{
 				ContactInfo contactInfo = item.getContactList().get(i);
+				boolean shouldAdd = true;
+				if(item.getType() == EmptyConversationItem.SMS_CONTACTS){
+					if(!ContactUtils.isIndianMobileNumber(contactInfo.getMsisdn()))
+					{
+					   shouldAdd = false;	
+					}
+				}
+				if(shouldAdd)
+				{
 				parentView = viewHolder.contactsContainer.getChildAt(i);
 
 				ImageView avatar = (ImageView) parentView.findViewById(R.id.avatar);
@@ -171,6 +181,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				if (--limit == 0)
 				{
 					break;
+				}
 				}
 			}
 
