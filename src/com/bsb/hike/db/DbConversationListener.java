@@ -334,7 +334,7 @@ public class DbConversationListener implements Listener
 				messagesArray.put(messageJSON);
 
 				data.put(HikeConstants.BATCH_MESSAGE, messagesArray);
-				data.put(HikeConstants.COUNT, messages.size());
+				data.put(HikeConstants.COUNT, 1);
 				data.put(HikeConstants.MESSAGE_ID, messages.get(0).getMsgID());
 
 				jsonObject.put(HikeConstants.DATA, data);
