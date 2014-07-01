@@ -333,8 +333,10 @@ public class HikePubSub implements Runnable
 	public static final String APP_FOREGROUNDED = "appForegrounded";
 
 	public static final String REMOVE_WELCOME_HIKE_TIP = "removeWelcomeHikeTip";
-	
+
 	public static final String STEALTH_POPUP_WITH_PUSH = "stealthPopupShowPush";
+
+	public static final String ATOMIC_POPUP_WITH_PUSH = "atomicPopupShowPush";
 
 	public static final String REMOVE_START_NEW_CHAT_TIP = "removeStartNewChatTip";
 
@@ -343,6 +345,10 @@ public class HikePubSub implements Runnable
 	public static final String STEALTH_UNREAD_TIP_CLICKED = "stealthUnreadTipClicked";
 
 	public static String FRIEND_REQ_COUNT_RESET = "resetFriendRequest";
+	
+	public static String HIKE_TO_OFFLINE_PUSH = "hikeToOfflinePush";
+
+	public static String PROFILE_UPDATE_FINISH = "profileUpdateFinish";
 
 	private final Thread mThread;
 

@@ -1,9 +1,11 @@
 package com.bsb.hike.db;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -404,6 +406,62 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			db.execSQL(alter);
 		}
 
+		// to delete duplicate stickers
+		if (oldVersion < 26)
+		{
+			try
+			{
+				// for humanoid
+				StickerManager st = StickerManager.getInstance();
+				String humanoidDir = st.getStickerDirectoryForCategoryId(mContext, StickerManager.StickerCategoryId.humanoid.name());
+				deleteDuplicateStickers(humanoidDir, st.LOCAL_STICKER_IDS_HUMANOID);
+				// for expressions
+				String expressionDir = st.getStickerDirectoryForCategoryId(mContext, StickerManager.StickerCategoryId.expressions.name());
+				deleteDuplicateStickers(expressionDir, st.LOCAL_STICKER_IDS_EXPRESSIONS);
+			}
+			catch (Exception e)
+			{
+			}
+		}
+	}
+
+	public void deleteDuplicateStickers(String parentDir, String[] bundledFileNames)
+	{
+
+		HashSet<String> originalNames = new HashSet<String>(bundledFileNames.length);
+		for (String name : bundledFileNames)
+		{
+			originalNames.add(name);
+		}
+
+		deleteDuplicateFiles(originalNames, parentDir + File.separator + HikeConstants.SMALL_STICKER_ROOT);
+		deleteDuplicateFiles(originalNames, parentDir + File.separator + HikeConstants.LARGE_STICKER_ROOT);
+
+	}
+
+	public void deleteDuplicateFiles(HashSet<String> originalNames, String fileDir)
+	{
+		File dir = new File(fileDir);
+		String[] fileNames = null;
+		if (dir.exists() && dir.isDirectory())
+		{
+			fileNames = dir.list();
+		}
+		else
+		{
+			return;
+		}
+		for (String fileName : fileNames)
+		{
+			if (originalNames.contains(fileName))
+			{
+				File file = new File(fileDir, fileName);
+				if (file.exists())
+				{
+					file.delete();
+				}
+			}
+		}
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike)
@@ -3220,5 +3278,49 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				c.close();
 			}
 		}
+	}
+	
+	public ArrayList<String> getOfflineMsisdnsList(String msisdnStatement)
+	{
+		Cursor c = null;
+		ArrayList<String> msisdnResult = null;
+		try
+		{
+			c = mDb.query(DBConstants.MESSAGES_TABLE + "," + DBConstants.CONVERSATIONS_TABLE, new String[] {
+					" MIN (" + DBConstants.MESSAGES_TABLE + "." + DBConstants.TIMESTAMP + ") AS TIME", DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN },
+					DBConstants.MESSAGES_TABLE + "." + DBConstants.CONV_ID + " IN (SELECT " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.CONV_ID + " FROM "
+							+ DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN + " IN " + msisdnStatement + " ) " + " AND "
+							+ " ( " + DBConstants.MESSAGES_TABLE + "." + DBConstants.CONV_ID + "=" + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.CONV_ID + " ) " + " AND  "
+							+ DBConstants.MESSAGES_TABLE + "." + DBConstants.MSG_STATUS + "=" + State.SENT_CONFIRMED.ordinal(), null, DBConstants.CONVERSATIONS_TABLE + "."
+							+ DBConstants.MSISDN, null, null);
+
+			if (c != null)
+			{
+				msisdnResult = new ArrayList<String>(c.getCount());
+				while (c.moveToNext())
+				{
+					long msgTime = c.getLong(c.getColumnIndex("TIME"));
+					if ((System.currentTimeMillis() / 1000 - msgTime) > HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME)
+					{
+						msisdnResult.add(c.getString(c.getColumnIndex(DBConstants.MSISDN)));
+					}
+
+					Logger.d("HikeToOffline", "TimeStamp : " + c.getLong(c.getColumnIndex("TIME")));
+					Logger.d("HikeToOffline", "Msisdn : " + c.getString(c.getColumnIndex(DBConstants.MSISDN)));
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			Logger.e("HikeToOffline", "Exception ", e);
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		return msisdnResult;
 	}
 }

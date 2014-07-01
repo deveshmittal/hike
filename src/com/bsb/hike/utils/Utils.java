@@ -59,6 +59,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
@@ -90,7 +91,6 @@ import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
-import android.provider.DocumentsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
@@ -1108,86 +1108,6 @@ public class Utils
 		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
 	}
 
-	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail)
-	{
-		Bitmap thumbnail = null;
-
-		int currentWidth = 0;
-		int currentHeight = 0;
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-
-		BitmapFactory.decodeFile(filePath, options);
-		currentHeight = options.outHeight;
-		currentWidth = options.outWidth;
-
-		if (dimensionLimit == -1)
-		{
-			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
-		}
-
-		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
-		options.inJustDecodeBounds = false;
-
-		thumbnail = BitmapFactory.decodeFile(filePath, options);
-		/*
-		 * Should only happen when the external storage does not have enough free space
-		 */
-		if (thumbnail == null)
-		{
-			return null;
-		}
-		if (makeSquareThumbnail)
-		{
-			return makeSquareThumbnail(thumbnail, dimensionLimit);
-		}
-
-		return thumbnail;
-	}
-
-	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail, boolean applyBitmapConfig)
-	{
-		Bitmap thumbnail = null;
-
-		int currentWidth = 0;
-		int currentHeight = 0;
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-
-		BitmapFactory.decodeFile(filePath, options);
-		currentHeight = options.outHeight;
-		currentWidth = options.outWidth;
-
-		if (dimensionLimit == -1)
-		{
-			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
-		}
-
-		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
-		options.inJustDecodeBounds = false;
-		if (applyBitmapConfig)
-		{
-			options.inPreferredConfig = Config.RGB_565;
-		}
-
-		thumbnail = BitmapFactory.decodeFile(filePath, options);
-		/*
-		 * Should only happen when the external storage does not have enough free space
-		 */
-		if (thumbnail == null)
-		{
-			return null;
-		}
-		if (makeSquareThumbnail)
-		{
-			return makeSquareThumbnail(thumbnail, dimensionLimit);
-		}
-
-		return thumbnail;
-	}
-
 	public static Bitmap getRotatedBitmap(String path, Bitmap bitmap)
 	{
 		if (bitmap  == null)
@@ -1353,7 +1273,7 @@ public class Utils
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
 				String imageOrientation = Utils.getImageOrientation(srcFilePath);
-				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX,
+				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
 						Bitmap.Config.RGB_565, true, false);
 				tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 				// Temporary fix for when a user uploads a file through Picasa
@@ -1386,6 +1306,67 @@ public class Utils
 			src.close();
 			dest.close();
 
+			return true;
+		}
+		catch (FileNotFoundException e)
+		{
+			Logger.e("Utils", "File not found while copying", e);
+			return false;
+		}
+		catch (IOException e)
+		{
+			Logger.e("Utils", "Error while reading/writing/closing file", e);
+			return false;
+		}
+		catch (Exception ex)
+		{
+			Logger.e("Utils", "WTF Error while reading/writing/closing file", ex);
+			return false;
+		}
+	}
+	
+	public static boolean copyImage(String srcFilePath, String destFilePath, Context context)
+	{
+		try
+		{
+			InputStream src;
+			String imageOrientation = Utils.getImageOrientation(srcFilePath);
+			Bitmap tempBmp = null;
+			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
+			if (quality == 2)
+			{
+				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
+						Bitmap.Config.RGB_565, true, false);
+			}
+			else if (quality != 1)
+			{
+				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX,
+						Bitmap.Config.RGB_565, true, false);
+			}
+			tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
+			if (tempBmp != null)
+			{
+				byte[] fileBytes = BitmapUtils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG, 75);
+				tempBmp.recycle();
+				src = new ByteArrayInputStream(fileBytes);
+			}
+			else
+			{
+				src = new FileInputStream(new File(srcFilePath));
+			}
+			
+			OutputStream dest = new FileOutputStream(new File(destFilePath));
+
+			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
+			int len;
+
+			while ((len = src.read(buffer)) > 0)
+			{
+				dest.write(buffer, 0, len);
+			}
+			src.close();
+			dest.close();
 			return true;
 		}
 		catch (FileNotFoundException e)
@@ -2318,7 +2299,22 @@ public class Utils
 	public static void setSendUndeliveredSmsSetting(Context context, boolean value)
 	{
 		Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_SMS_PREF, value);
+		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, value);
+		editor.commit();
+	}
+	
+	public static void setSendUndeliveredAlwaysAsSmsSetting(Context context, boolean value)
+	{
+		Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, value);
+		editor.commit();
+	}
+	
+	public static void setSendUndeliveredAlwaysAsSmsSetting(Context context, boolean value, boolean nativeSms)
+	{
+		Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, value);
+		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, nativeSms);
 		editor.commit();
 	}
 
@@ -3684,6 +3680,13 @@ public class Utils
 				dialog.dismiss();
 				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
 			}
+
+			@Override
+			public void onSucess(Dialog dialog)
+			{
+				// TODO Auto-generated method stub
+				
+			}
 		}, contactInfo.getFirstName());
 	}
 
@@ -4007,5 +4010,20 @@ public class Utils
 			editor.commit();
 		}
 
+	}
+
+	public static boolean isPackageInstalled(Context context, String packageName)
+	{
+		PackageManager pm = context.getPackageManager();
+		try
+		{
+			pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+			return true;
+		}
+		catch (NameNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		return false;
 	}
 }

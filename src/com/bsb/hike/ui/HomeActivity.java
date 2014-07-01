@@ -1534,6 +1534,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			public void negativeClicked(Dialog dialog)
 			{
 			}
+
+			@Override
+			public void onSucess(Dialog dialog)
+			{
+				// TODO Auto-generated method stub
+				
+			}
 		};
 	}
 
@@ -1644,7 +1651,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
 				tipTypeShowing = null;
-				LockPattern.createNewPattern(HomeActivity.this);
+				LockPattern.createNewPattern(HomeActivity.this, false);
 			}
 			else
 			{
@@ -1674,7 +1681,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			final int stealthType = HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 			if (stealthType == HikeConstants.STEALTH_OFF)
 			{
-				LockPattern.confirmPattern(HomeActivity.this);
+				LockPattern.confirmPattern(HomeActivity.this, false);
 			}
 			else
 			{

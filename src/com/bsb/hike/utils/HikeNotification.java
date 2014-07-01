@@ -1,5 +1,8 @@
 package com.bsb.hike.utils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -55,7 +58,8 @@ public class HikeNotification
 	public static final int STEALTH_NOTIFICATION_ID = -127;
 	
 	public static final int STEALTH_POPUP_NOTIFICATION_ID = -128;
-
+	
+	public static final int HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID = -129;
 
 	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
 
@@ -141,7 +145,28 @@ public class HikeNotification
 
 	}
 
-	
+	public void notifyAtomicPopup(final String message, Intent notificationIntent)
+	{
+		/*
+		 * return straight away if the block notification setting is ON
+		 */
+		if (sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
+		{
+			return;
+		}
+
+		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
+
+		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		final int smallIconId = returnSmallIcon();
+
+		NotificationCompat.Builder mBuilder = getNotificationBuilder(context.getString(R.string.team_hike), message, message, avatarDrawable, smallIconId, false);
+		setNotificationIntentForBuilder(mBuilder, notificationIntent);
+
+		notificationManager.notify(FREE_SMS_POPUP_NOTIFICATION_ID, mBuilder.getNotification());
+
+	}
+
 	public void notifyMessage(final Protip proTip)
 	{
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
@@ -297,6 +322,38 @@ public class HikeNotification
 			// regular message
 			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, null);
 		}
+	}
+	
+	public void notifyHikeToOfflinePush(ArrayList<String> msisdnList, HashMap<String, String> nameMap)
+	{
+		/*
+		 * return straight away if the block notification setting is ON
+		 */
+		if (sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
+		{
+			return;
+		}
+
+		final int notificationId = HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID;
+		final Intent notificationIntent = new Intent(context, ChatThread.class);
+		
+		String firstMsisdn = msisdnList.get(0);
+		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, (firstMsisdn));
+		notificationIntent.putExtra(HikeConstants.Extras.NAME, (nameMap.get(firstMsisdn)));
+
+		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		final int smallIconId = returnSmallIcon();
+		
+		String title = context.getString(R.string.hike_to_offline_push_title);
+		String message = context.getString(R.string.hike_to_offline_text, "Placeholder");
+		NotificationCompat.Builder mBuilder = getNotificationBuilder(title, message, message, avatarDrawable, smallIconId, false);
+		setNotificationIntentForBuilder(mBuilder, notificationIntent);
+
+		notificationManager.notify(notificationId, mBuilder.getNotification());
+
 	}
 
 	public void notifyStealthMessage()
@@ -602,10 +659,7 @@ public class HikeNotification
 
 	public void setNotificationIntentForBuilder(NotificationCompat.Builder mBuilder, Intent notificationIntent)
 	{
-		final TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-		stackBuilder.addNextIntent(notificationIntent);
-
-		final PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-		mBuilder.setContentIntent(resultPendingIntent);
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		mBuilder.setContentIntent(contentIntent);
 	}
 }

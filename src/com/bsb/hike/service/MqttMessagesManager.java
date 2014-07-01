@@ -51,11 +51,14 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.ui.HikePreferences;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -125,6 +128,7 @@ public class MqttMessagesManager
 
 	public void saveMqttMessage(JSONObject jsonObj) throws JSONException
 	{
+		Logger.i("tip mqtt", jsonObj.toString());
 		String type = jsonObj.optString(HikeConstants.TYPE);
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{
@@ -1446,7 +1450,12 @@ public class MqttMessagesManager
 					}
 				}
 			}
-			
+			else
+			{
+				// updatePopUpData
+				updateAtomicPopUpData(jsonObj);
+			}
+
 		}
 	}
 
@@ -1736,5 +1745,92 @@ public class MqttMessagesManager
 			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, typingNotification);
 		}
 	}
-		
+
+	/**
+	 * We call it atomic pop up , as we discard old if any when new comes --gauravKhanna
+	 * 
+	 * @param jsonObject
+	 *            - jsonFromServer
+	 * @throws JSONException
+	 */
+	public void updateAtomicPopUpData(JSONObject jsonObj) throws JSONException
+	{
+		Logger.i("tip", jsonObj.toString());
+		String subType = jsonObj.getString(HikeConstants.SUB_TYPE);
+
+		JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+		if (isDuplicateOrWrongPacket("last" + subType, data))
+		{
+			return;
+		}
+		Logger.i("tip", "id passed");
+		String header = data.optString(HikeConstants.HEADER);
+		String body = data.optString(HikeConstants.BODY);
+		if (!TextUtils.isEmpty(header) && !TextUtils.isEmpty(body))
+		{
+			HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(context);
+			pref.saveData("last" + subType, data.getString(HikeConstants.MESSAGE_ID));
+			String[] keys = getPopUpTypeAndShowNotification(subType, (data.optBoolean(HikeConstants.PUSH, true) ? body : null));
+			if (keys != null)
+			{
+				pref.saveData(keys[0], header);
+				pref.saveData(keys[1], body);
+				pref.saveData(keys[2], subType);
+				Logger.i("tip", "writing to pref passed " + header + " -- " + body + " -- subtype " + subType);
+			}
+		}
+		else
+		{
+			Logger.i("tip", "header message failed " + header + " -- " + body);
+		}
+	}
+
+	/**
+	 * Since we use over write mechanism per screen for tips , say tip 1 and tip2 arrives for main screen , so we over write tip1 and save only tip2
+	 * 
+	 * 
+	 * @param subType
+	 *            -- subtype which comes from server
+	 * @return String array for header ,message and subtype keys , 0 is header , 1 is message , 2 is subtypekey
+	 * 
+	 *         in addition it shows notification whereever applicable
+	 */
+	private String[] getPopUpTypeAndShowNotification(String subType, String notificationTextIfApplicable)
+	{
+		// for chat screen
+		if (HikeMessengerApp.ATOMIC_POP_UP_ATTACHMENT.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_STICKER.equals(subType)
+				|| HikeMessengerApp.ATOMIC_POP_UP_THEME.equals(subType))
+		{
+			Logger.i("tip", "subtype for chat");
+			return new String[] { HikeMessengerApp.ATOMIC_POP_UP_HEADER_CHAT, HikeMessengerApp.ATOMIC_POP_UP_MESSAGE_CHAT, HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT };
+		}
+
+		// for main screen
+		Logger.i("tip", "subtype for main");
+		if (HikeMessengerApp.ATOMIC_POP_UP_FAVOURITES.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_INVITE.equals(subType)
+				|| HikeMessengerApp.ATOMIC_POP_UP_PROFILE_PIC.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_STATUS.equals(subType)
+				|| HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL.equals(subType))
+		{
+			// show notification
+			if (notificationTextIfApplicable != null)
+			{
+				Bundle bundle = new Bundle();
+				bundle.putString(HikeMessengerApp.ATOMIC_POP_UP_NOTIF_MESSAGE, notificationTextIfApplicable);
+				bundle.putString(HikeMessengerApp.ATOMIC_POP_UP_NOTIF_SCREEN, HomeActivity.class.getName());
+				this.pubSub.publish(HikePubSub.ATOMIC_POPUP_WITH_PUSH, bundle);
+
+			}
+			return new String[] { HikeMessengerApp.ATOMIC_POP_UP_HEADER_MAIN, HikeMessengerApp.ATOMIC_POP_UP_MESSAGE_MAIN, HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN };
+
+		}
+		Logger.i("tip", "subtype for nothing , it shud not reach here");
+		// it will not reach here
+		return null;
+	}
+
+	private boolean isDuplicateOrWrongPacket(String key, JSONObject jsonObject)
+	{
+		String id = jsonObject.optString(HikeConstants.MESSAGE_ID);
+		return TextUtils.isEmpty(id) || HikeSharedPreferenceUtil.getInstance(context).getData(key, "").equals(id);
+	}
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.view.View.OnClickListener;
 import android.content.Context;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.FetchFriendsTask;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.WhichScreen;
 import com.bsb.hike.view.PinnedSectionListView.PinnedSectionListAdapter;
 
 public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionListAdapter
@@ -202,6 +204,39 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 				holder.status.setText(contactInfo.getMsisdn());
 				holder.statusMood.setVisibility(View.GONE);
 				holder.onlineIndicator.setVisibility(View.GONE);
+				if(viewType!= ViewType.FRIEND && viewType!=ViewType.FRIEND_REQUEST){
+					 				{
+					 				if(!contactInfo.isOnhike())
+					 				{
+					 					long inviteTime = contactInfo.getInviteTime();
+					 					if (inviteTime == 0)
+					 					{
+					 						holder.inviteIcon.setVisibility(View.VISIBLE);
+					 						holder.inviteText.setVisibility(View.GONE);
+					 						holder.divider.setVisibility(View.VISIBLE);
+					 						holder.inviteIcon.setTag(contactInfo);
+					 						holder.inviteIcon.setOnClickListener(new OnClickListener()
+					 						{
+					 
+					 							public void onClick(View v)
+					 							{
+					 								ContactInfo contactInfo = (ContactInfo) v.getTag();
+					 								Utils.sendInviteUtil(contactInfo, context, HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED, context.getString(R.string.native_header),
+					 										context.getString(R.string.native_info), WhichScreen.SMS_SECTION);
+					 								notifyDataSetChanged();
+					 							}
+					 						});
+					 					}
+					 					else
+					 					{
+					 
+					 						holder.inviteIcon.setVisibility(View.GONE);
+					 						holder.inviteText.setVisibility(View.VISIBLE);
+					 						holder.divider.setVisibility(View.GONE);
+					 					}
+					 				}
+					 				}
+					 				
 			}
 
 			updateViewsRelatedToAvatar(convertView, contactInfo);
@@ -223,6 +258,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			{
 				holder.checkbox.setVisibility(View.GONE);
 			}
+		}
 		}
 		return convertView;
 	}
@@ -287,6 +323,9 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			holder.statusMood = (ImageView) convertView.findViewById(R.id.status_mood);
 			holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
 			holder.onlineIndicator = (ImageView) convertView.findViewById(R.id.online_indicator);
+			holder.inviteText = (TextView) convertView.findViewById(R.id.invite_Text);
+			holder.inviteIcon = (ImageView) convertView.findViewById(R.id.invite_icon);
+			holder.divider = (View) convertView.findViewById(R.id.invite_divider);
 			convertView.setTag(holder);
 			break;
 		}
@@ -302,12 +341,18 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		TextView status;
 
 		CheckBox checkbox;
-		
+
 		ImageView statusMood;
-		
+
 		ImageView onlineIndicator;
 
 		String msisdn;
+
+		View divider;
+
+		TextView inviteText;
+
+		ImageView inviteIcon;
 	}
 
 	@Override
