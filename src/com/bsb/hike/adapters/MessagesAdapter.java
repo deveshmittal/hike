@@ -562,7 +562,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					return;
 				}
-				scheduleHikeOfflineTip();
 				notifyDataSetChanged();
 			}
 		};
@@ -5122,7 +5121,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
 				updateFirstPendingConvMessage();
-				if(!chatThread.isHikeOfflineTipShowing())
+				// We need to schedule hike offline tip always when it is not there
+				// Coz there might be cases when user manualy removes the tip
+				if (!chatThread.isHikeOfflineTipShowing())
 				{
 					scheduleHikeOfflineTip();
 				}
@@ -5139,13 +5140,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			public void run()
 			{
 				undeliveredMessages.remove(convMessage.getMsgID());
-				if(firstPendingConvMessage == convMessage)
-				{
-					updateFirstPendingConvMessage();
-				}
 				if(undeliveredMessages.isEmpty())
 				{
 					chatThread.hideHikeToOfflineTip(false);
+				}
+				//need to update this to equals method but currently there seems to
+				//be an issue with equals. TODO update this
+				if(firstPendingConvMessage == convMessage)
+				{
+					updateFirstPendingConvMessage();
 				}
 			}
 		});
@@ -5172,6 +5175,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		if(firstPendingConvMessage == null)
 		{
 			updateFirstPendingConvMessage();
+		}
+		if (!chatThread.isHikeOfflineTipShowing())
+		{
+			scheduleHikeOfflineTip();
 		}
 	}
 	
