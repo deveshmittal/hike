@@ -5147,7 +5147,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				undeliveredMessages.remove(convMessage.getMsgID());
 				if(undeliveredMessages.isEmpty())
 				{
-					chatThread.hideHikeToOfflineTip(false);
+					/*
+					 * if all messages are delivered OR we don't 
+					 * have any undelivered messages than only we should
+					 * reset this timer not on delivery of some message
+					 */
+					chatThread.shouldRunTimerForHikeOfflineTip = true;
+					chatThread.hideHikeToOfflineTip();
 				}
 				//need to update this to equals method but currently there seems to
 				//be an issue with equals. TODO update this

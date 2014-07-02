@@ -7102,7 +7102,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				if(isOnline)
 				{
-					hideHikeToOfflineTip(true);
+					shouldRunTimerForHikeOfflineTip = true;
+					hideHikeToOfflineTip();
 				}
 
 				if (lastSeenString == null)
@@ -7138,7 +7139,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onClick(View v)
 			{
-				hideHikeToOfflineTip(false);
+				hideHikeToOfflineTip();
 			}
 		});
 		
@@ -7230,7 +7231,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		});
 	}
 
-	public void hideHikeToOfflineTip(boolean shouldRunTimerForHikeOfflineTip)
+	public void hideHikeToOfflineTip()
 	{
 		if(hikeToOfflineTipview != null)
 		{ 
@@ -7239,7 +7240,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return;
 			}
 			
-			this.shouldRunTimerForHikeOfflineTip = shouldRunTimerForHikeOfflineTip;
 			hikeToOfflineTipview.clearAnimation();
 			hikeToOfflineTipview.setVisibility(View.GONE);
 			if(isHikeToOfflineMode)
@@ -7337,7 +7337,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void onAnimationEnd(Animation animation)
 			{
 				hikeToOfflineTipview.setTag(HIKE_TO_OFFLINE_TIP_STATE_1);
-				hideHikeToOfflineTip(false);
+				hideHikeToOfflineTip();
 			}
 		});
 		
