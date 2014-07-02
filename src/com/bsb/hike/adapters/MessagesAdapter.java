@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -429,7 +430,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	 * this is set of all the currently visible messages which are 
 	 * stuck in tick and are not sms
 	 */
-	private Set<ConvMessage> undeliveredMessages = new HashSet<ConvMessage>();
+	private LinkedHashMap<Long, ConvMessage> undeliveredMessages = new LinkedHashMap<Long, ConvMessage>();
 
 	/*
 	 * this variable will point to first ConvMessage object which is stuck in tick
@@ -4662,7 +4663,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		dialog.show();
 	}
 
-	public Set<ConvMessage> getAllUnsentMessages(boolean resetTimestamp)
+	public LinkedHashMap<Long, ConvMessage> getAllUnsentMessages(boolean resetTimestamp)
 	{
 		return undeliveredMessages;
 	}
@@ -5119,7 +5120,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					return;
 				}
-				undeliveredMessages.add(convMessage);
+				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
 				if(undeliveredMessages.size() == 1)
 				{
 					firstPendingConvMessage = convMessage;
@@ -5140,7 +5141,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			@Override
 			public void run()
 			{
-				undeliveredMessages.remove(convMessage);
+				undeliveredMessages.remove(convMessage.getMsgID());
 				if(firstPendingConvMessage == convMessage)
 				{
 					firstPendingConvMessage = null;
@@ -5169,7 +5170,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			if(convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
 			{
-				undeliveredMessages.add(convMessage);
+				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
 				if(firstPendingConvMessage == null)
 				{
 					firstPendingConvMessage = convMessage;
@@ -5185,8 +5186,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void updateFirstPendingConvMessage()
 	{
-		for (ConvMessage convMessage : undeliveredMessages)
+		for (Long msgid : undeliveredMessages.keySet())
 		{
+			ConvMessage convMessage = undeliveredMessages.get(msgid);
 			if(firstPendingConvMessage == null || firstPendingConvMessage.getMsgID() > convMessage.getMsgID())
 			{
 				firstPendingConvMessage = convMessage;

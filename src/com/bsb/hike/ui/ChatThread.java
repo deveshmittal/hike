@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -7208,9 +7209,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
 		hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.GONE);
 
-		Set<ConvMessage> unsentMessages = mAdapter.getAllUnsentMessages(false);
-		for (ConvMessage convMsg : unsentMessages)
+		LinkedHashMap<Long, ConvMessage> unsentMessages = mAdapter.getAllUnsentMessages(false);
+		for (Long msgid : unsentMessages.keySet())
 		{
+			ConvMessage convMsg = unsentMessages.get(msgid);
 			if(convMsg.getState() == State.SENT_CONFIRMED)
 			{
 				mAdapter.selectView(convMsg, true);
