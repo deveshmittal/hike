@@ -5045,7 +5045,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ArrayList<Long> selectedMsgIds = new ArrayList<Long>(getSelectedMessageIds());
 		Collections.sort(selectedMsgIds);
 		
-		if (lastSentMessagePosition != -1 && !selectedMessagesMap.isEmpty() && !chatThread.isContactOnline())
+		if (firstPendingConvMessage != null && !selectedMessagesMap.isEmpty() && !chatThread.isContactOnline())
 		{
 			if (conversation.isOnhike())
 			{
