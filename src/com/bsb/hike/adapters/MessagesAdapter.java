@@ -4436,12 +4436,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		@Override
 		public void run()
 		{
-			if (lastSentMessagePosition >= convMessages.size() || lastSentMessagePosition == -1)
+			/*
+			 * if there is no firstPendingMessage we should not show the tip
+			 */
+			if (firstPendingConvMessage == null || !isMessageUndelivered(firstPendingConvMessage))
 			{
 				return;
 			}
-			ConvMessage lastSentMessage = convMessages.get(lastSentMessagePosition);
-			if (isMessageUndelivered(lastSentMessage))
+			
+			long diff = (((long) System.currentTimeMillis() / 1000) - firstPendingConvMessage.getTimestamp());
+
+			if (Utils.isUserOnline(context) && diff >= HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME )
 			{
 				chatThread.showHikeToOfflineTip();
 			}
