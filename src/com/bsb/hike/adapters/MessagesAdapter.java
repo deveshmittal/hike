@@ -5121,10 +5121,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					return;
 				}
 				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
-				if(undeliveredMessages.size() == 1)
-				{
-					firstPendingConvMessage = convMessage;
-				}
+				updateFirstPendingConvMessage();
 				if(!chatThread.isHikeOfflineTipShowing())
 				{
 					scheduleHikeOfflineTip();
@@ -5144,7 +5141,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				undeliveredMessages.remove(convMessage.getMsgID());
 				if(firstPendingConvMessage == convMessage)
 				{
-					firstPendingConvMessage = null;
 					updateFirstPendingConvMessage();
 				}
 				if(undeliveredMessages.isEmpty())
@@ -5171,28 +5167,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			if(convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
 			{
 				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
-				if(firstPendingConvMessage == null)
-				{
-					firstPendingConvMessage = convMessage;
-				}
 			}
+		}
+		if(firstPendingConvMessage == null)
+		{
+			updateFirstPendingConvMessage();
 		}
 	}
 	
-	public void setFirstPendingConvMessage(ConvMessage convMessage)
-	{
-		firstPendingConvMessage = convMessage;
-	}
-
 	private void updateFirstPendingConvMessage()
 	{
-		for (Long msgid : undeliveredMessages.keySet())
+		if(undeliveredMessages.isEmpty())
 		{
-			ConvMessage convMessage = undeliveredMessages.get(msgid);
-			if(firstPendingConvMessage == null || firstPendingConvMessage.getMsgID() > convMessage.getMsgID())
-			{
-				firstPendingConvMessage = convMessage;
-			}
+			firstPendingConvMessage = null;
+		}
+		else
+		{
+			firstPendingConvMessage = undeliveredMessages.get(undeliveredMessages.keySet().iterator().next());
 		}
 	}
 	
