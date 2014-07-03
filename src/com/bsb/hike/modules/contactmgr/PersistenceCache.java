@@ -361,34 +361,75 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
+	 * This method loads the contact info for a msisdn in persistence convs map and returns the same
+	 * 
+	 * @param msisdn
+	 * @param ifNotFoundReturnNull
+	 *            if true returns null if contact is not saved
+	 */
+	ContactInfo loadMemory(String msisdn, boolean ifNotFoundReturnNull)
+	{
+		return loadMemory(msisdn, ifNotFoundReturnNull, true);
+	}
+
+	/**
 	 * This method loads the contact info for a msisdn in persistence memory and returns the same
 	 * 
 	 * @param msisdn
 	 * @param ifNotFoundReturnNull
 	 *            if true returns null if contact is not saved
+	 * @param ifOneToOneConversation
 	 * @return Returns contact info object
 	 */
-	ContactInfo loadMemory(String msisdn, boolean ifNotFoundReturnNull)
+	ContactInfo loadMemory(String msisdn, boolean ifNotFoundReturnNull, boolean ifOneToOneConversation)
 	{
 		ContactInfo contact = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn, ifNotFoundReturnNull);
-		insertContact(contact);
-		// TODO deciding boolean to put in convs map or group map
+		if (ifOneToOneConversation)
+		{
+			insertContact(contact);
+		}
+		else
+		{
+			insertContact(contact, null);
+		}
 		return contact;
+	}
+
+	/**
+	 * This method loads the contactInfo of msisdns in persistence convs map and returns the list of same
+	 * 
+	 * @param msisdns
+	 */
+	List<ContactInfo> loadMemory(List<String> msisdns)
+	{
+		return loadMemory(msisdns, true);
 	}
 
 	/**
 	 * This method loads the contactInfo of msisdns in persistence memory and returns the list of same
 	 * 
-	 * @param msisdnsDB
+	 * @param msisdns
+	 * @param ifOneToOneConversation
 	 * @return
 	 */
-	List<ContactInfo> loadMemory(List<String> msisdns)
+	List<ContactInfo> loadMemory(List<String> msisdns, boolean ifOneToOneConversation)
 	{
 		if (msisdns.size() > 0)
 		{
 			Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
 
-			// TODO insertContactsFromMap(map); how to decide whether to put in convs map or group map
+			for (Entry<String, ContactInfo> mapEntry : map.entrySet())
+			{
+				ContactInfo contact = mapEntry.getValue();
+				if (ifOneToOneConversation)
+				{
+					insertContact(contact);
+				}
+				else
+				{
+					insertContact(contact, null);
+				}
+			}
 
 			return new ArrayList<ContactInfo>(map.values());
 		}
