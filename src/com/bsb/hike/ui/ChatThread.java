@@ -2962,10 +2962,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						mAdapter.addToUndeliverdMessage(msg);
 					}
-					else
-					{
-						mAdapter.removeFromUndeliverdMessage(msg);
-					}
 				}
 				runOnUiThread(mUpdateAdapter);
 			}
