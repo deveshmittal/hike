@@ -4533,6 +4533,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 		}
 
+		sendHike.setChecked(true);
 		if(!nativeOnly && chatThread.getCurrentSmsBalance() < selectedSmsCount)
 		{
 			// disable Free Hike Sms Field and enabling the native sms one.
