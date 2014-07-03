@@ -5204,9 +5204,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						chatThread.updateLastSeen();
 					}
 				}
-				//need to update this to equals method but currently there seems to
-				//be an issue with equals. TODO update this
-				if(firstPendingConvMessage == convMessage)
+				if (firstPendingConvMessage.equals(convMessage))
 				{
 					updateFirstPendingConvMessage();
 				}
