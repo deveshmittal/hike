@@ -5144,7 +5144,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			@Override
 			public void run()
 			{
-				undeliveredMessages.remove(convMessage.getMsgID());
+				ConvMessage msg = undeliveredMessages.remove(convMessage.getMsgID());
+				
+				// if on remove if it returns null don't do anything
+				if(msg == null)
+				{
+					return;
+				}
+				
 				if(undeliveredMessages.isEmpty())
 				{
 					/*
