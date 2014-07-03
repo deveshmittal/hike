@@ -7171,7 +7171,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			( (LinearLayout) findViewById(R.id.tipContainerBottom)).addView(hikeToOfflineTipview);
 		}
 		hikeToOfflineTipview.setVisibility(View.VISIBLE);
+		
+		scrollListViewOnShowingOfflineTip();
 		shouldRunTimerForHikeOfflineTip = false;
+	}
+
+	private void scrollListViewOnShowingOfflineTip()
+	{
+		if(mConversationsView.getLastVisiblePosition() > messages.size() -3)
+		{
+			mConversationsView.post(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					mConversationsView.smoothScrollToPosition(messages.size()-1);
+				}
+			});
+		}
 	}
 
 	public void setupHikeToOfflineTipViews()
@@ -7216,6 +7234,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void initialiseHikeToOfflineMode()
 	{
+		scrollListViewOnShowingOfflineTip();
 		hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
 		hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.GONE);
 
