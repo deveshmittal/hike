@@ -1603,5 +1603,10 @@
      <string name="send_sms_location_msg">shared his/her location </string>
      <string name="send_sms_contact_msg">shared a contact</string>
      <string name="send_sms_audio_msg">send you an audio</string>
+     <string name="free_hike_sms_subtext">%1$d left</string>
+     <string name="free_hike_sms_subtext_diabled">%1$d left. Hike more to earn free SMS</string>
+     <string name="carrier_charges_apply">carrier charges apply</string>
+     <string name="send_sms_as">Send %1$d SMS as</string>
+     <string name="choose_setting">Choose Setting</string>
      
 </resources>

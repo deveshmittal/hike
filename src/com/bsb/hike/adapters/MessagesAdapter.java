@@ -4487,13 +4487,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		int selectedSmsCount = getSelectedFreeSmsCount();
 		
+		TextView popupHeader = (TextView) dialog.findViewById(R.id.popup_header);
 		View hikeSMS = dialog.findViewById(R.id.hike_sms_container);
 		View nativeSMS = dialog.findViewById(R.id.native_sms_container);
-		View divider = dialog.findViewById(R.id.divider);
 		TextView nativeHeader = (TextView) dialog.findViewById(R.id.native_sms_header);
-
+		TextView nativeSubtext = (TextView) dialog.findViewById(R.id.native_sms_subtext);
+		TextView hikeSmsHeader = (TextView) dialog.findViewById(R.id.hike_sms_header);
+		TextView hikeSmsSubtext = (TextView) dialog.findViewById(R.id.hike_sms_subtext);
+		
+		popupHeader.setText(context.getString(R.string.send_sms_as, selectedSmsCount));
+		hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext, chatThread.getCurrentSmsBalance()));
+		
 		hikeSMS.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
-		divider.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
 
 		final CheckBox sendHike = (CheckBox) dialog.findViewById(R.id.hike_sms_checkbox);
 
@@ -4524,14 +4529,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		if(!nativeOnly && chatThread.getCurrentSmsBalance() < selectedSmsCount)
 		{
 			// disable Free Hike Sms Field and enabling the native sms one.
-			
+			hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext_diabled, chatThread.getCurrentSmsBalance()));
+			hikeSmsSubtext.setEnabled(false);
+			hikeSmsHeader.setEnabled(false);
+			hikeSMS.setEnabled(false);
+			sendHike.setEnabled(false);
 			sendHike.setChecked(false);
 			sendNative.setChecked(true);
 		}
 		
 		nativeHeader.setText(context.getString(R.string.regular_sms));
 
-		sendHike.setOnClickListener(new OnClickListener()
+		hikeSMS.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
@@ -4542,7 +4551,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 		});
 
-		sendNative.setOnClickListener(new OnClickListener()
+		nativeSMS.setOnClickListener(new OnClickListener()
 		{
 
 			@Override

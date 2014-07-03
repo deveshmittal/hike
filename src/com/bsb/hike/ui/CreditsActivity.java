@@ -321,13 +321,18 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		final Dialog dialog = new Dialog(CreditsActivity.this, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.sms_undelivered_popup);
 		dialog.setCancelable(true);
-		
+
+		TextView popupHeader = (TextView) dialog.findViewById(R.id.popup_header);
 		View hikeSMS = dialog.findViewById(R.id.hike_sms_container);
 		View nativeSMS = dialog.findViewById(R.id.native_sms_container);
-		View divider = dialog.findViewById(R.id.divider);
 		TextView nativeHeader = (TextView) dialog.findViewById(R.id.native_sms_header);
+		TextView nativeSubtext = (TextView) dialog.findViewById(R.id.native_sms_subtext);
 		TextView hikeSmsHeader = (TextView) dialog.findViewById(R.id.hike_sms_header);
-
+		TextView hikeSmsSubtext = (TextView) dialog.findViewById(R.id.hike_sms_subtext);
+		
+		popupHeader.setText(getString(R.string.choose_setting));
+		hikeSmsSubtext.setText(getString(R.string.free_hike_sms_subtext, settings.getInt(HikeMessengerApp.SMS_SETTING, 0)));
+		
 		final CheckBox sendHike = (CheckBox) dialog.findViewById(R.id.hike_sms_checkbox);
 
 		final CheckBox sendNative = (CheckBox) dialog.findViewById(R.id.native_sms_checkbox);
@@ -343,7 +348,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		nativeHeader.setText(R.string.regular_sms);
 		hikeSmsHeader.setText(R.string.free_hike_sms);
 
-		sendHike.setOnClickListener(new OnClickListener()
+		hikeSMS.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
@@ -354,7 +359,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 		});
 
-		sendNative.setOnClickListener(new OnClickListener()
+		nativeSMS.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
