@@ -60,4 +60,6 @@ abstract class ContactsCache
 	abstract void clearMemory();
 
 	abstract void setUnknownContactName(String msisdn, String name);
+	
+	abstract void contactDeleted(ContactInfo contact);
 }

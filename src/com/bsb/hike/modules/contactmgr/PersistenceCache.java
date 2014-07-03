@@ -386,6 +386,18 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
+	 * Updates the contact by setting the name to null
+	 * 
+	 * @param contact
+	 */
+	void contactDeleted(ContactInfo contact)
+	{
+		ContactInfo updatedContact = new ContactInfo(contact);
+		updatedContact.setName(null);
+		updateContact(updatedContact);
+	}
+
+	/**
 	 * 
 	 * @param groupId
 	 * @param currentGroupMsisdns

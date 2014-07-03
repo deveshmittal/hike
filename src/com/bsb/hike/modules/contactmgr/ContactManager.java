@@ -85,12 +85,17 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
+	 * This method is used when contacts are deleted from the addressbook and we set their name to null
 	 * 
 	 * @param contacts
 	 */
-	public void removeContacts(List<ContactInfo> contacts)
+	public void contactsDeleted(List<ContactInfo> contacts)
 	{
-		// TODO remove completely from all the maps or from some maps boolean how to decide cache.removeFromCache(contacts);
+		for (ContactInfo contact : contacts)
+		{
+			persistenceCache.contactDeleted(contact);
+			transientCache.contactDeleted(contact);
+		}
 	}
 
 	/**

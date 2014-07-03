@@ -112,8 +112,8 @@ public class ContactUtils
 				List<ContactInfo> contacts = mapEntry.getValue();
 				contactsToDelete.addAll(contacts);
 			}
-			
-			HikeMessengerApp.getContactManager().removeContacts(contactsToDelete);
+						
+			HikeMessengerApp.getContactManager().contactsDeleted(contactsToDelete);
 			
 			/* Delete ids from hike user DB */
 			db.deleteMultipleRows(hike_contacts_by_id.keySet()); // this will
