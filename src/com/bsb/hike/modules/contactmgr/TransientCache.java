@@ -573,18 +573,32 @@ public class TransientCache extends ContactsCache
 	 */
 	public ContactInfo getContactInfoFromPhoneNo(String number)
 	{
-		// TODO first check if all contacts are loaded
-
-		ContactInfo contact = HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(number);
-		if (null == getContact(contact.getMsisdn()))
+		ContactInfo contact = null;
+		if (allContactsLoaded)
 		{
-			if (null == contact.getName())
+			for (Entry<String, ContactTuple> mapEntry : savedContacts.entrySet())
 			{
-				insertContact(contact, null);
+				ContactTuple tuple = mapEntry.getValue();
+				if (null != tuple && tuple.getContact().getPhoneNum().equals(number))
+				{
+					contact = tuple.getContact();
+					break;
+				}
 			}
-			else
+		}
+		else
+		{
+			contact = HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(number);
+			if (null == getContact(contact.getMsisdn()))
 			{
-				insertContact(contact);
+				if (null == contact.getName())
+				{
+					insertContact(contact, null);
+				}
+				else
+				{
+					insertContact(contact);
+				}
 			}
 		}
 		return contact;
@@ -597,18 +611,38 @@ public class TransientCache extends ContactsCache
 	 */
 	public ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number)
 	{
-		// TODO first check if all contacts are loaded
+		ContactInfo contact = getContact(number);
 
-		ContactInfo contact = HikeUserDatabase.getInstance().getContactInfoFromPhoneNoOrMsisdn(number);
-		if (null == getContact(contact.getMsisdn()))
+		if (null != contact)
 		{
-			if (null == contact.getName())
+			return contact;
+		}
+
+		if (allContactsLoaded)
+		{
+			for (Entry<String, ContactTuple> mapEntry : savedContacts.entrySet())
 			{
-				insertContact(contact, null);
+				ContactTuple tuple = mapEntry.getValue();
+				if (null != tuple && tuple.getContact().getPhoneNum().equals(number))
+				{
+					contact = tuple.getContact();
+					break;
+				}
 			}
-			else
+		}
+		else
+		{
+			contact = HikeUserDatabase.getInstance().getContactInfoFromPhoneNoOrMsisdn(number);
+			if (null == getContact(contact.getMsisdn()))
 			{
-				insertContact(contact);
+				if (null == contact.getName())
+				{
+					insertContact(contact, null);
+				}
+				else
+				{
+					insertContact(contact);
+				}
 			}
 		}
 		return contact;
