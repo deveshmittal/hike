@@ -7342,12 +7342,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	private void setHikeOfflineTipAnimation(final View v)
 	{
-		slideUp = AnimationUtils.loadAnimation(ChatThread.this, R.anim.slide_up_noalpha);
-		slideUp.setDuration(400);
-
 		slideDown = AnimationUtils.loadAnimation(ChatThread.this, R.anim.slide_down_noalpha);
 		slideDown.setDuration(400);
-		slideDown.setStartOffset(3000);
+		slideDown.setStartOffset(2600);
 
 		slideDown.setAnimationListener(new AnimationListener()
 		{
@@ -7369,10 +7366,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		});
 		
-		AnimationSet anim = new AnimationSet(true);
-		anim.addAnimation(slideUp);
-		anim.addAnimation(slideDown);
-		v.setAnimation(anim);
+		v.setAnimation(slideDown);
 		
 	}
 
