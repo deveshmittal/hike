@@ -5046,36 +5046,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		
 		if (firstPendingConvMessage != null && !selectedMessagesMap.isEmpty())
 		{
-			if (conversation.isOnhike())
+			/*
+			 * Only show the H2S fallback option if user himself is Online
+			 */
+			if (!Utils.isUserOnline(context))
 			{
-				if (!Utils.isUserOnline(context))
-				{
-					if (conversation instanceof GroupConversation)
-					{
-						Toast.makeText(context, R.string.gc_fallback_offline, Toast.LENGTH_LONG).show();
-					}
-					else
-					{
-						showSMSDialog(true);
-					}
-				}
-				else
-				{
-					if (conversation instanceof GroupConversation)
-					{
-						showSMSDialog(false);
-					}
-					else
-					{
-						/*
-						 * Only show the H2S fallback option if messaging indian numbers.
-						 */
-						showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
-					}
-				}
-
-				return;
+				showSMSDialog(true);
 			}
+			else
+			{
+				/*
+				 * Only show the H2S fallback option if messaging indian numbers.
+				 */
+				showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
+			}
+
+			return;
 		}
 	}
 
