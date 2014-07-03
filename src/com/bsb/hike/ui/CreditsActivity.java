@@ -376,7 +376,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 			@Override
 			public void onClick(View v)
 			{
-				if (!PreferenceManager.getDefaultSharedPreferences(CreditsActivity.this).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
+				if (!sendHike.isChecked() && !PreferenceManager.getDefaultSharedPreferences(CreditsActivity.this).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
 				{
 					showSMSClientDialog(sendHike.isChecked());
 				}
