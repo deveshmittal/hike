@@ -4680,7 +4680,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_NATIVE_SMS_FALLBACK, unsentMessages);
 			chatThread.messagesSentCloseHikeToOfflineMode();
-			removeAllFromUndeliverdMessage(unsentMessages);
+			removeFromUndeliverdMessage(unsentMessages);
 		}
 		else
 		{
@@ -4688,7 +4688,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_HIKE_SMS_FALLBACK, unsentMessages);
 				chatThread.messagesSentCloseHikeToOfflineMode();
-				removeAllFromUndeliverdMessage(unsentMessages);
+				removeFromUndeliverdMessage(unsentMessages);
 			}
 			else
 			{
@@ -5166,12 +5166,28 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	}
 	
 
-	private void removeAllFromUndeliverdMessage(List<ConvMessage> unsentMessages)
+	private void removeFromUndeliverdMessage(List<ConvMessage> convMessages)
 	{
-		for (ConvMessage convMessage : unsentMessages)
+		for (ConvMessage convMessage : convMessages)
 		{
 			removeFromUndeliverdMessage(convMessage);
 		}
+	}
+	
+	public void removeAllFromUndeliverdMessage()
+	{
+		chatThread.runOnUiThread(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				undeliveredMessages.clear();
+				chatThread.shouldRunTimerForHikeOfflineTip = true;
+				chatThread.hideHikeToOfflineTip();
+				updateFirstPendingConvMessage();
+			}
+		});
 	}
 
 	public void addAllUndeliverdMessages(List<ConvMessage> messages)

@@ -2890,7 +2890,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
 			{
 				msg.setState(ConvMessage.State.SENT_DELIVERED);
-				if(!(mConversation instanceof GroupConversation) && !msg.isSMS())
+				if(!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
 				{
 					mAdapter.removeFromUndeliverdMessage(msg);
 				}
@@ -2920,6 +2920,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					removeFromMessageMap(msg);
 				}
+			}
+			/*
+			 * Right now our logic is to force MR for all the
+			 * unread messages that is why we need to remove all
+			 * message from undelivered set
+			 * 
+			 * if in future we move to MR less than msgId we should modify
+			 * this logic also
+			 */
+			if (!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
+			{
+				mAdapter.removeAllFromUndeliverdMessage();
 			}
 			runOnUiThread(mUpdateAdapter);
 		}
