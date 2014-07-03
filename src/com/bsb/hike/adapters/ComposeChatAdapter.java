@@ -236,38 +236,38 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 						}
 					}
 				}
+			}
 
-				/*
-				 * We don't have an avatar for new contacts. So set a hard coded one
-				 */
-				if (viewType == ViewType.NEW_CONTACT)
+			/*
+			 * We don't have an avatar for new contacts. So set a hard coded one
+			 */
+			if (viewType == ViewType.NEW_CONTACT)
+			{
+				holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
+				holder.userImage.setBackgroundResource(R.drawable.avatar_01_rounded);
+				holder.userImage.setImageResource(R.drawable.ic_default_avatar);
+			}
+			else
+			{
+				updateViewsRelatedToAvatar(convertView, contactInfo);
+			}
+
+			if (showCheckbox)
+			{
+				holder.checkbox.setVisibility(View.VISIBLE);
+				if (selectedPeople.containsKey(contactInfo.getMsisdn()))
 				{
-					holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
-					holder.userImage.setBackgroundResource(R.drawable.avatar_01_rounded);
-					holder.userImage.setImageResource(R.drawable.ic_default_avatar);
+
+					holder.checkbox.setChecked(true);
 				}
 				else
 				{
-					updateViewsRelatedToAvatar(convertView, contactInfo);
+					holder.checkbox.setChecked(false);
 				}
-
-				if (showCheckbox)
-				{
-					holder.checkbox.setVisibility(View.VISIBLE);
-					if (selectedPeople.containsKey(contactInfo.getMsisdn()))
-					{
-
-						holder.checkbox.setChecked(true);
-					}
-					else
-					{
-						holder.checkbox.setChecked(false);
-					}
-				}
-				else
-				{
-					holder.checkbox.setVisibility(View.GONE);
-				}
+			}
+			else
+			{
+				holder.checkbox.setVisibility(View.GONE);
 			}
 		}
 		return convertView;
