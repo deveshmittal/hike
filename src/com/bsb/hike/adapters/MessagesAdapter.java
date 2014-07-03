@@ -3860,6 +3860,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	public void scheduleHikeOfflineTip()
 	{
+		/*
+		 * if Kitkat OR higher we should not show tip
+		 * 1. if user has 0 free SMS left;
+		 * 2. user himself is not online;
+		 * 3. if this is an international number;
+		 */
+		if (Utils.isKitkatOrHigher())
+		{
+			int currentSmsBalance = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
+			Logger.d("tesst", ""+(currentSmsBalance == 0) +" "+ !Utils.isUserOnline(context) +" "+ !conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
+			if(currentSmsBalance == 0 || !Utils.isUserOnline(context) || !conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE))
+			{
+				return;
+			}
+		}
+		
 		if (showUndeliveredMessage != null)
 		{
 			handler.removeCallbacks(showUndeliveredMessage);
@@ -4489,6 +4505,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext, chatThread.getCurrentSmsBalance()));
 		
 		hikeSMS.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
+		nativeSMS.setVisibility(Utils.isKitkatOrHigher() ? View.GONE : View.VISIBLE);
 
 		final CheckBox sendHike = (CheckBox) dialog.findViewById(R.id.hike_sms_checkbox);
 
@@ -5051,14 +5068,35 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			 */
 			if (!Utils.isUserOnline(context))
 			{
-				showSMSDialog(true);
+				if(!Utils.isKitkatOrHigher())
+				{
+					showSMSDialog(true);
+				}
+				else
+				{
+					// We are not handling this case for now.
+				}
 			}
 			else
 			{
-				/*
-				 * Only show the H2S fallback option if messaging indian numbers.
-				 */
-				showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
+				if(!Utils.isKitkatOrHigher())
+				{
+					/*
+					 * Only show the H2S fallback option if messaging indian numbers.
+					 */
+					showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
+				}
+				else
+				{
+					if(chatThread.getCurrentSmsBalance() < getSelectedFreeSmsCount())
+					{
+						Toast.makeText(context, context.getString(R.string.kitkat_not_enough_sms, chatThread.getCurrentSmsBalance()), Toast.LENGTH_LONG);
+					}
+					else
+					{
+						smsDialogSendClick(true, true);
+					}
+				}
 			}
 
 			return;

@@ -4019,11 +4019,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (!mConversation.isOnhike() && !Utils.isContactInternational(mContactNumber))
 		{
-			/*
-			 * Add another item which translates to the SMS toggle option.
-			 */
-			setupSMSToggleButton();
-			findViewById(R.id.sms_toggle_button).setVisibility(View.VISIBLE);
+			if(!Utils.isKitkatOrHigher())
+			{
+				/*
+				 * Add another item which translates to the SMS toggle option.
+				 */
+				setupSMSToggleButton();
+				findViewById(R.id.sms_toggle_button).setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				findViewById(R.id.sms_toggle_button).setVisibility(View.GONE);
+			}
 		}
 		else
 		{

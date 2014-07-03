@@ -1608,5 +1608,6 @@
      <string name="carrier_charges_apply">carrier charges apply</string>
      <string name="send_sms_as">Send %1$d SMS as</string>
      <string name="choose_setting">Choose Setting</string>
+     <string name="kitkat_not_enough_sms">Only %1$d SMS left. Hike more to earn free SMS</string>
      
 </resources>

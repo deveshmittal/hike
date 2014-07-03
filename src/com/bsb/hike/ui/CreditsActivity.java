@@ -97,9 +97,17 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		View freeSMSParent = findViewById(R.id.free_sms_item);
 		View undeliveredSmsParent = findViewById(R.id.undelivered_sms_item);
 
-		setupPreferenceLayout(receiveSmsParent, true);
 		setupPreferenceLayout(freeSMSParent, false);
-		setupUndeliveredSmsPrefLayout();
+		if(!Utils.isKitkatOrHigher())
+		{
+			setupPreferenceLayout(receiveSmsParent, true);
+			setupUndeliveredSmsPrefLayout();
+		}
+		else
+		{
+			undeliveredSmsParent.setVisibility(View.GONE);
+			receiveSmsParent.setVisibility(View.GONE);
+		}
 
 		receiveSmsParent.setOnClickListener(new OnClickListener()
 		{
