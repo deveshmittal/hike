@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -364,32 +365,59 @@ public class TransientCache extends ContactsCache
 	 */
 	List<ContactInfo> getNOTFRIENDScontacts(int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
 	{
-		// TODO first check if all contacts are loaded if yes then scan through the maps and get the contactInfo objects
-		Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getNOTFRIENDScontactsFromDB(onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
-
 		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
 
-		if (map != null)
+		if (allContactsLoaded)
 		{
-			for (Entry<String, ContactInfo> mapEntry : map.entrySet())
+			Set<String> blockSet = HikeUserDatabase.getInstance().getBlockedMsisdnSet();
+
+			for (Entry<String, ContactTuple> savedMapEntry : savedContacts.entrySet())
 			{
-				String msisdn = mapEntry.getKey();
-				ContactInfo contact = mapEntry.getValue();
-				if (getContact(msisdn) == null)
+				String msisdn = savedMapEntry.getKey();
+				if (!blockSet.contains(msisdn) && !msisdn.equals(myMsisdn))
 				{
-					if (null == contact.getName())
+					ContactTuple tuple = savedMapEntry.getValue();
+					contacts.add(tuple.getContact());
+				}
+			}
+
+			if (!ignoreUnknownContacts)
+			{
+				for (Entry<String, ContactTuple> unsavedMapEntry : unsavedContacts.entrySet())
+				{
+					String msisdn = unsavedMapEntry.getKey();
+					if (!blockSet.contains(msisdn) && !msisdn.equals(myMsisdn))
 					{
-						insertContact(contact, null);
-					}
-					else
-					{
-						insertContact(contact);
+						ContactTuple tuple = unsavedMapEntry.getValue();
+						contacts.add(tuple.getContact());
 					}
 				}
-				contacts.add(contact);
 			}
 		}
-
+		else
+		{
+			Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getNOTFRIENDScontactsFromDB(onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+			if (map != null)
+			{
+				for (Entry<String, ContactInfo> mapEntry : map.entrySet())
+				{
+					String msisdn = mapEntry.getKey();
+					ContactInfo contact = mapEntry.getValue();
+					if (getContact(msisdn) == null)
+					{
+						if (null == contact.getName())
+						{
+							insertContact(contact, null);
+						}
+						else
+						{
+							insertContact(contact);
+						}
+					}
+					contacts.add(contact);
+				}
+			}
+		}
 		return contacts;
 	}
 
@@ -470,26 +498,45 @@ public class TransientCache extends ContactsCache
 	 */
 	List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts()
 	{
-		// TODO first check if all contacts are loaded
-
-		List<Pair<AtomicBoolean, ContactInfo>> contacts = HikeUserDatabase.getInstance().getNonHikeContacts();
-
-		for (Pair<AtomicBoolean, ContactInfo> p : contacts)
+		List<Pair<AtomicBoolean, ContactInfo>> contacts = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
+		if (allContactsLoaded)
 		{
-			ContactInfo contact = p.second;
-			if (null == getContact(contact.getMsisdn()))
+			Set<String> blockSet = HikeUserDatabase.getInstance().getBlockedMsisdnSet();
+
+			for (Entry<String, ContactTuple> savedMapEntry : savedContacts.entrySet())
 			{
-				if (null == contact.getName())
+				String msisdn = savedMapEntry.getKey();
+				if (!blockSet.contains(msisdn))
 				{
-					insertContact(contact, null);
-				}
-				else
-				{
-					insertContact(contact);
+					ContactTuple tuple = savedMapEntry.getValue();
+					ContactInfo contactInfo = tuple.getContact();
+					if (!contactInfo.isOnhike())
+					{
+						contacts.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(false), contactInfo));
+					}
 				}
 			}
 		}
+		else
+		{
+			contacts = HikeUserDatabase.getInstance().getNonHikeContacts();
 
+			for (Pair<AtomicBoolean, ContactInfo> p : contacts)
+			{
+				ContactInfo contact = p.second;
+				if (null == getContact(contact.getMsisdn()))
+				{
+					if (null == contact.getName())
+					{
+						insertContact(contact, null);
+					}
+					else
+					{
+						insertContact(contact);
+					}
+				}
+			}
+		}
 		return contacts;
 	}
 
