@@ -7166,10 +7166,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		});
 		
-		if(( (LinearLayout) findViewById(R.id.tipContainerBottom)).getChildCount() == 0 )
+		LinearLayout tipContainer = (LinearLayout) findViewById(R.id.tipContainerBottom);
+		if( tipContainer.getChildCount() > 0 )
 		{
-			( (LinearLayout) findViewById(R.id.tipContainerBottom)).addView(hikeToOfflineTipview);
+			tipContainer.removeAllViews();
 		}
+		tipContainer.addView(hikeToOfflineTipview);
 		hikeToOfflineTipview.setVisibility(View.VISIBLE);
 		
 		scrollListViewOnShowingOfflineTip();
