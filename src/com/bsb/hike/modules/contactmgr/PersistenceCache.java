@@ -160,6 +160,17 @@ class PersistenceCache extends ContactsCache
 		}
 	}
 
+	void removeGroup(String grpId)
+	{
+		Pair<String, LinkedList<String>> pp = groupPersistence.get(grpId);
+		List<String> lastMsisdns = pp.second;
+		for (String ms : lastMsisdns)
+		{
+			removeContact(ms, false);
+		}
+		groupPersistence.remove(grpId);
+	}
+
 	/**
 	 * updates the contact in memory
 	 * 

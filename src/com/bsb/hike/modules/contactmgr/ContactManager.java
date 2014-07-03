@@ -14,6 +14,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.modules.iface.ITransientCache;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 /**
  * @author Gautam & Sidharth
@@ -77,10 +78,16 @@ public class ContactManager implements ITransientCache
 	 */
 	public void unloadPersistenceCache(List<String> msisdns)
 	{
-		// TODO check caller code also
 		for (String ms : msisdns)
 		{
-			// clearPersistenceMemory(ms);
+			if (Utils.isGroupConversation(ms))
+			{
+				persistenceCache.removeGroup(ms);
+			}
+			else
+			{
+				persistenceCache.removeContact(ms);
+			}
 		}
 	}
 
