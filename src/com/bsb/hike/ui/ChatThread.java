@@ -1929,7 +1929,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
-		
+
+		shouldRunTimerForHikeOfflineTip = true;
+		if(isHikeOfflineTipShowing())
+		{
+			hideHikeToOfflineTip();
+		}
 		if(!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
 		{
 			mAdapter.addAllUndeliverdMessages(messages);
