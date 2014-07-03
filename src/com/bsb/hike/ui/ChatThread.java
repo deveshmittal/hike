@@ -1930,7 +1930,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 		
-		if(!(mConversation instanceof GroupConversation))
+		if(!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
 		{
 			mAdapter.addAllUndeliverdMessages(messages);
 		}
@@ -2956,7 +2956,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
 				}
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
-				if(!(mConversation instanceof GroupConversation))
+				if(!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
 				{
 					if(!msg.isSMS())
 					{
