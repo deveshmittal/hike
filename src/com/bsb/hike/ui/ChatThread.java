@@ -7134,7 +7134,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	public void showHikeToOfflineTip()
 	{
-		if(!mConversation.isOnhike() || mConversation instanceof GroupConversation)
+		if(!mConversation.isOnhike() || mConversation instanceof GroupConversation || isHikeOfflineTipShowing())
 		{
 			return;
 		}
