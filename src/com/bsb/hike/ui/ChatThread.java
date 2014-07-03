@@ -419,8 +419,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private ScreenOffReceiver screenOffBR;
 	
-	private boolean hasLastSeenFetched = false;
-
 	@Override
 	protected void onPause()
 	{
@@ -2897,7 +2895,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				msg.setState(ConvMessage.State.SENT_DELIVERED);
 				if(!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
 				{
-					mAdapter.removeFromUndeliverdMessage(msg);
+					mAdapter.removeFromUndeliverdMessage(msg, true);
 				}
 				runOnUiThread(mUpdateAdapter);
 			}
@@ -7069,30 +7067,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		public void lastSeenFetched(String msisdn, int offline, long lastSeenTime)
 		{
 			updateLastSeen(msisdn, offline, lastSeenTime);
-			hasLastSeenFetched = true;
-
-			/*
-			 * if we have fetched last seen than we need to schedule hike offline tip
-			 */
-			runOnUiThread(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					if (!isOnline)
-					{
-						Logger.d("tesst", "calling scheduleHikeOfflineTip");
-						mAdapter.scheduleHikeOfflineTip();
-					}
-				}
-			});
 		}
 	};
 
 	private void updateLastSeen(String msisdn, int offline, long lastSeenTime)
 	{
-		if (!mContactNumber.equals(msisdn) || (mConversation instanceof GroupConversation) || !shouldShowLastSeen())
+		if (!mContactNumber.equals(msisdn) || (mConversation instanceof GroupConversation) || !shouldShowLastSeen() || isHikeOfflineTipShowing())
 		{
 			return;
 		}
@@ -7116,7 +7096,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				if(isOnline)
 				{
 					shouldRunTimerForHikeOfflineTip = true;
-					hideHikeToOfflineTip();
 				}
 
 				if (lastSeenString == null)
@@ -7132,11 +7111,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		});
 	}
 	
+	public void updateLastSeen()
+	{
+		updateLastSeen(contactInfo.getMsisdn(), contactInfo.getOffline(), contactInfo.getLastSeenTime());
+	}
+	
 	public void showHikeToOfflineTip()
 	{
 		if(!mConversation.isOnhike() || mConversation instanceof GroupConversation || isHikeOfflineTipShowing())
 		{
 			return;
+		}
+		
+		if(isOnline && mLastSeenView != null)
+		{
+			mLastSeenView.setVisibility(View.GONE);
 		}
 		
 		if(hikeToOfflineTipview == null)
@@ -7381,10 +7370,5 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public int getCurrentSmsBalance()
 	{
 		return mCredits;
-	}
-	
-	public boolean hasLastSeenFetched()
-	{
-		return hasLastSeenFetched;
 	}
 }

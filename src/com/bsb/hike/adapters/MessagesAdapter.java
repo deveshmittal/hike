@@ -3865,16 +3865,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			handler.removeCallbacks(showUndeliveredMessage);
 		}
 
-		/*
-		 * If user himself is online and we should show last seen for this contact;
-		 * this means we should not show hike offline tip untill we have fetched
-		 * actual value of last seen from server. 
-		 */
-		if (Utils.isUserOnline(context) && chatThread.shouldShowLastSeen() && !chatThread.hasLastSeenFetched())
-		{
-			return ;
-		}
-		
 		if(firstPendingConvMessage != null)
 		{
 			long diff = (((long) System.currentTimeMillis() / 1000) - firstPendingConvMessage.getTimestamp());
@@ -5054,7 +5044,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ArrayList<Long> selectedMsgIds = new ArrayList<Long>(getSelectedMessageIds());
 		Collections.sort(selectedMsgIds);
 		
-		if (firstPendingConvMessage != null && !selectedMessagesMap.isEmpty() && !chatThread.isContactOnline())
+		if (firstPendingConvMessage != null && !selectedMessagesMap.isEmpty())
 		{
 			if (conversation.isOnhike())
 			{
@@ -5147,6 +5137,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	
 	public void removeFromUndeliverdMessage(final ConvMessage convMessage)
 	{
+		removeFromUndeliverdMessage(convMessage, false);
+	}
+	
+	/**
+	 * @param msgDelivered signifies that removeFromUndeliverdMessage is called coz
+	 * convMessage has been reached to delivered state.
+	 */
+	public void removeFromUndeliverdMessage(final ConvMessage convMessage, final boolean msgDelivered)
+	{
 		chatThread.runOnUiThread(new Runnable()
 		{
 			
@@ -5170,6 +5169,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					 */
 					chatThread.shouldRunTimerForHikeOfflineTip = true;
 					chatThread.hideHikeToOfflineTip();
+					/*
+					 * we need to update last seen value coz we might
+					 * have updated contact's last seen value in between
+					 * when hike offline tip was showing
+					 */
+					if(msgDelivered)
+					{
+						chatThread.updateLastSeen();
+					}
 				}
 				//need to update this to equals method but currently there seems to
 				//be an issue with equals. TODO update this
@@ -5202,6 +5210,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				chatThread.shouldRunTimerForHikeOfflineTip = true;
 				chatThread.hideHikeToOfflineTip();
 				updateFirstPendingConvMessage();
+				chatThread.updateLastSeen();
 			}
 		});
 	}
