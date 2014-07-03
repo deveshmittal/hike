@@ -1,23 +1,8 @@
 package com.bsb.hike.modules.contactmgr;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import android.database.DatabaseUtils;
-import android.util.Pair;
-
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
-import com.bsb.hike.utils.Logger;
 
 /**
  * @author Gautam & Sidharth

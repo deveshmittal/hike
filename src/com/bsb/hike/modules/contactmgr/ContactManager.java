@@ -5,7 +5,6 @@ package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.util.Pair;
