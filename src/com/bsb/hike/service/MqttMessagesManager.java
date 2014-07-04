@@ -959,6 +959,10 @@ public class MqttMessagesManager
 				}
 			}
 			// watsapp invite message
+			if (data.has(HikeConstants.WATSAPP_INVITE_ENABLED))
+			{
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.WATSAPP_INVITE_ENABLED, data.getBoolean(HikeConstants.WATSAPP_INVITE_ENABLED));
+			}
 			if (data.has(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY))
 			{
 				String message = data.getString(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY);
