@@ -328,8 +328,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private StickerEmoticonIconPageIndicator iconPageIndicator;
 
-	private View currentTipView;
-
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.SMS_CREDIT_CHANGED,
 			HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_FAILED, HikePubSub.ICON_CHANGED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.CONTACT_ADDED, HikePubSub.UPLOAD_FINISHED,
@@ -803,7 +801,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		registerReceiver(screenOffBR, new IntentFilter(Intent.ACTION_SCREEN_OFF));
 		/* register listeners */
 		mPubSub.addListeners(this, pubSubListeners);
+		if(!isHikeOfflineTipShowing()){
 		showTipIfRequired();
+		}
 		Logger.i("chatthread", "on create end");
 	}
 
@@ -853,7 +853,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void setAtomicTipContent(View view, final HikeSharedPreferenceUtil pref)
 	{
-		currentTipView = view;
+		tipView = view;
 		((TextView) view.findViewById(R.id.tip_header)).setText(pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER_CHAT, ""));
 		((TextView) view.findViewById(R.id.tip_msg)).setText(pref.getData(HikeMessengerApp.ATOMIC_POP_UP_MESSAGE_CHAT, ""));
 		view.findViewById(R.id.close_tip).setOnClickListener(new OnClickListener()
@@ -861,7 +861,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onClick(View v)
 			{
-				currentTipView.setVisibility(View.GONE);
+				tipView.setVisibility(View.GONE);
 				pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
 			}
 		});
@@ -1118,9 +1118,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
 		}
-		if (currentTipView != null)
+		if (tipView != null)
 		{
-			currentTipView.setVisibility(View.GONE);
+			tipView.setVisibility(View.GONE);
 		}
 	}
 
