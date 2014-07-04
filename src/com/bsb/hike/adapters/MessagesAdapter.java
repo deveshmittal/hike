@@ -1322,12 +1322,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
-					videoHolder.fileSize.setText(dataDisplay((int) hikeFile.getFile().length()));
+					videoHolder.fileSize.setText(Utils.getSizeForDisplay((int) hikeFile.getFile().length()));
 					videoHolder.fileSize.setVisibility(View.VISIBLE);
 				}
 				else if (hikeFile.getFileSize() > 0)
 				{
-					videoHolder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
+					videoHolder.fileSize.setText(Utils.getSizeForDisplay(hikeFile.getFileSize()));
 					videoHolder.fileSize.setVisibility(View.VISIBLE);
 				}
 				else
@@ -1798,11 +1798,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				fileHolder.fileName.setText(hikeFile.getFileName());
 				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
-					fileHolder.fileSize.setText(dataDisplay((int) hikeFile.getFile().length()));
+					fileHolder.fileSize.setText(Utils.getSizeForDisplay((int) hikeFile.getFile().length()));
 				}
 				else if (hikeFile.getFileSize() > 0)
 				{
-					fileHolder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
+					fileHolder.fileSize.setText(Utils.getSizeForDisplay(hikeFile.getFileSize()));
 				}
 				else
 				{
@@ -3467,33 +3467,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private void setNudgeImageResource(ChatTheme chatTheme, ImageView iv, boolean isMessageSent)
 	{
 		iv.setImageResource(isMessageSent ? chatTheme.sentNudgeResId() : chatTheme.receivedNudgeResId());
-	}
-
-	// @GM
-	// The following methods returns the user readable size when passed the bytes in size
-	private String dataDisplay(int bytes)
-	{
-		Logger.d(getClass().getSimpleName(), "DataDisplay of bytes : " + bytes);
-		if (bytes <= 0)
-			return ("");
-		if (bytes >= (1000 * 1024))
-		{
-			int mb = bytes / (1024 * 1024);
-			int mbPoint = bytes % (1024 * 1024);
-			mbPoint /= (1024 * 102);
-			return (Integer.toString(mb) + "." + Integer.toString(mbPoint) + " MB");
-		}
-		else if (bytes >= 1000)
-		{
-			int kb;
-			if (bytes < 1024) // To avoid showing "1000KB"
-				kb = bytes / 1000;
-			else
-				kb = bytes / 1024;
-			return (Integer.toString(kb) + " KB");
-		}
-		else
-			return (Integer.toString(bytes) + " B");
 	}
 
 	private void inflateNSetDay(ConvMessage convMessage, final DayHolder dayHolder)
