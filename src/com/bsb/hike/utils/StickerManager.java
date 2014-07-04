@@ -285,7 +285,7 @@ public class StickerManager
 				return "indianDownloadShown";
 			}
 		},
-		wicked_jellies
+		jelly
 		{
 			@Override
 			public int resId()
