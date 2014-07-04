@@ -1591,4 +1591,8 @@ public class HikeConstants
 	public static final long[] LONG_VIB_PATTERN = new long[] { 0, 1000 };
 
 	public static final int FTUE_HIKE_CONTACT_MIN_LIMIT = 3;
+	
+	public static final long IMAGE_SIZE_SMALL = 50 * 1024;
+	
+	public static final long IMAGE_SIZE_MEDIUM = 80 * 1024;
 }

@@ -42,7 +42,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		ArrayList<String> items = new ArrayList<String>();
 
 		items.add(getString(R.string.notifications));
-		items.add(getString(R.string.auto_download_media));
+		items.add(getString(R.string.settings_media));
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.FREE_SMS_PREF, true))
 		{
 			int credits = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getInt(HikeMessengerApp.SMS_SETTING, 0);
@@ -61,7 +61,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		final ArrayList<String> itemsSummary = new ArrayList<String>();
 
 		itemsSummary.add(getString(R.string.notifications_hintext));
-		itemsSummary.add(getString(R.string.auto_download_media_hinttext));
+		itemsSummary.add(getString(R.string.auto_download_media_hinttext_new));
 		itemsSummary.add(getString(R.string.sms_setting_hinttext));
 		itemsSummary.add(getString(R.string.account_hintttext));
 		itemsSummary.add(getString(R.string.privacy_setting_hinttext));
@@ -194,7 +194,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 		case 1:
 			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.auto_download_preferences);
+			intent.putExtra(HikeConstants.Extras.PREF, R.xml.media_download_preferences);
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.auto_download_media);
 			break;
 		case 2:
