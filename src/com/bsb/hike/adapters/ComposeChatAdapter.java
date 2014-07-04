@@ -239,7 +239,19 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 					 				
 			}
 
-			updateViewsRelatedToAvatar(convertView, contactInfo);
+			/*
+			 * We don't have an avatar for new contacts. So set a hard coded one
+			 */
+			if (viewType == ViewType.NEW_CONTACT)
+			{
+				holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
+				holder.userImage.setBackgroundResource(R.drawable.avatar_01_rounded);
+				holder.userImage.setImageResource(R.drawable.ic_default_avatar);
+			}
+			else
+			{
+				updateViewsRelatedToAvatar(convertView, contactInfo);
+			}
 
 			if (showCheckbox)
 			{
@@ -276,18 +288,9 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			return;
 		}
 
-		if (contactInfo.isUnknownContact())
-		{
-			holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
-			holder.userImage.setBackgroundResource(R.drawable.avatar_01_rounded);
-			holder.userImage.setImageResource(R.drawable.ic_default_avatar);
-		}
-		else
-		{
-			holder.userImage.setScaleType(ScaleType.FIT_CENTER);
-			String id = contactInfo.isGroupConversationContact() ? contactInfo.getId() : contactInfo.getMsisdn();
-			iconloader.loadImage(id, true, holder.userImage, false, isListFlinging, true);
-		}
+		holder.userImage.setScaleType(ScaleType.FIT_CENTER);
+		String id = contactInfo.isGroupConversationContact() ? contactInfo.getId() : contactInfo.getMsisdn();
+		iconloader.loadImage(id, true, holder.userImage, false, isListFlinging, true);
 	}
 
 	private View inflateView(ViewType viewType)
