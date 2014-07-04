@@ -1587,5 +1587,5 @@
      <string name="send_invite">Invite (%1$d)</string>
      <string name="add_as_favorite_menu">Add favorite</string>
 	<string name="remove_from_favorites">Remove favorite</string>	  
-     
+     <string name="file_attachment_info">Share Media &amp; Files up to 100 MB</string>
 </resources>
