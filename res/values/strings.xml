@@ -1631,4 +1631,6 @@
     <string name="watsapp_invitation">Hey, join me on hike, the only messaging app made in India! It lets you show your \'Last Seen\' only to select friends, send messages to friends when they\'re offline and send awesome stickers.\n
 Also share all types of files - docs, songs, movies etc, up to 100MB each ;) http://get.hike.in/</string>
     <string name="extra_invite">Extra</string>
+     <string name="profile_pic_header">Profile Picture</string>
+     <string name="profile_pic_display_info">Show only to your Favorites</string>
 </resources>
