@@ -398,22 +398,15 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			if (friendItem != null)
 			{
-				if (contactInfo.isOnhike())
-				{
-					friendItem.setVisible(false);
-				}
-				else
-				{
-					friendItem.setVisible(true);
-					if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND)
+					if (contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED_REJECTED)
 					{
-						friendItem.setTitle(R.string.add_as_favorite_menu);
+						friendItem.setVisible(true);
+						friendItem.setTitle(R.string.remove_from_favorites);
 					}
 					else
 					{
-						friendItem.setTitle(R.string.remove_from_favorites);
+						friendItem.setVisible(false);
 					}
-				}
 			}
 			return true;
 		case GROUP_INFO:
