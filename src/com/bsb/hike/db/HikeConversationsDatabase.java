@@ -411,55 +411,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			try
 			{
-				// for humanoid
+
 				StickerManager st = StickerManager.getInstance();
-				String humanoidDir = st.getStickerDirectoryForCategoryId(mContext, StickerManager.StickerCategoryId.humanoid.name());
-				deleteDuplicateStickers(humanoidDir, st.LOCAL_STICKER_IDS_HUMANOID);
-				// for expressions
-				String expressionDir = st.getStickerDirectoryForCategoryId(mContext, StickerManager.StickerCategoryId.expressions.name());
-				deleteDuplicateStickers(expressionDir, st.LOCAL_STICKER_IDS_EXPRESSIONS);
+				st.deleteDuplicateStickers();
 			}
 			catch (Exception e)
 			{
-			}
-		}
-	}
-
-	public void deleteDuplicateStickers(String parentDir, String[] bundledFileNames)
-	{
-
-		HashSet<String> originalNames = new HashSet<String>(bundledFileNames.length);
-		for (String name : bundledFileNames)
-		{
-			originalNames.add(name);
-		}
-
-		deleteDuplicateFiles(originalNames, parentDir + File.separator + HikeConstants.SMALL_STICKER_ROOT);
-		deleteDuplicateFiles(originalNames, parentDir + File.separator + HikeConstants.LARGE_STICKER_ROOT);
-
-	}
-
-	public void deleteDuplicateFiles(HashSet<String> originalNames, String fileDir)
-	{
-		File dir = new File(fileDir);
-		String[] fileNames = null;
-		if (dir.exists() && dir.isDirectory())
-		{
-			fileNames = dir.list();
-		}
-		else
-		{
-			return;
-		}
-		for (String fileName : fileNames)
-		{
-			if (originalNames.contains(fileName))
-			{
-				File file = new File(fileDir, fileName);
-				if (file.exists())
-				{
-					file.delete();
-				}
 			}
 		}
 	}

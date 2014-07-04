@@ -391,7 +391,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 				Editor accountEditor = accountPrefs.edit();
 				accountEditor.putBoolean(HikeMessengerApp.JUST_SIGNED_UP, true);
-				accountEditor.putBoolean(HikeMessengerApp.FB_SIGNUP, true);
+				if (mActivityState != null)
+				{
+					accountEditor.putBoolean(HikeMessengerApp.FB_SIGNUP, mActivityState.fbConnected);
+				}
 				accountEditor.commit();
 
 				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);

@@ -84,24 +84,24 @@ public class DownloadStickerTask extends StickerTaskBase
 		boolean reachedEnd = false;
 
 		JSONArray existingStickerIds = new JSONArray();
-		Set<String> existingidSet = new HashSet<String>();
+		String[] existingStickers = null;
 		/*
 		 * If the category is the default one, we should add the default stickers as well.
 		 */
 		if (category.categoryId.equals(StickerCategoryId.humanoid))
 		{
+			existingStickers = StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID;
 			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID)
 			{
 				existingStickerIds.put(stickerId);
-				existingidSet.add(stickerId);
 			}
 		}
 		else if (category.categoryId.equals(StickerCategoryId.expressions))
 		{
+			existingStickers = StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS;
 			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS)
 			{
 				existingStickerIds.put(stickerId);
-				existingidSet.add(stickerId);
 			}
 		}
 
@@ -111,7 +111,6 @@ public class DownloadStickerTask extends StickerTaskBase
 			for (String stickerId : stickerIds)
 			{
 				existingStickerIds.put(stickerId);
-				existingidSet.add(stickerId);
 				Logger.d(getClass().getSimpleName(), "Exising id: " + stickerId);
 			}
 		}
@@ -160,9 +159,24 @@ public class DownloadStickerTask extends StickerTaskBase
 						stickerPageAdapter.getStickerList().add(new Sticker(category, stickerId));
 					}
 					// some hack : seems server was sending stickers which already exist so it was leading to duplicate issue
-					if (!existingidSet.contains(stickerId))
+					// so we save small sticker , if not present already
+
+					File f = saveLargeStickers(largeStickerDir, stickerId, stickerData);
+					if (existingStickers != null)
 					{
-						saveStickers(largeStickerDir, smallStickerDir, stickerId, stickerData);
+						boolean saveSmall = true;
+						for (String stId : existingStickers)
+						{
+							if (stId.equals(stickerId))
+							{
+								saveSmall = false;
+								break;
+							}
+						}
+						if (saveSmall)
+						{
+							saveSmallStickers(smallStickerDir, stickerId, f);
+						}
 					}
 				}
 				catch (FileNotFoundException e)
@@ -197,11 +211,15 @@ public class DownloadStickerTask extends StickerTaskBase
 		return FTResult.SUCCESS;
 	}
 
-	private void saveStickers(File largeStickerDir, File smallStickerDir, String stickerId, String stickerData) throws IOException
+	private File saveLargeStickers(File stickerDir, String stickerId, String stickerData) throws IOException
 	{
-		File f = new File(largeStickerDir, stickerId);
+		File f = new File(stickerDir, stickerId);
 		Utils.saveBase64StringToFile(f, stickerData);
+		return f;
+	}
 
+	private void saveSmallStickers(File smallStickerDir, String stickerId, File f) throws IOException
+	{
 		Bitmap small = HikeBitmapFactory.scaleDownBitmap(f.getAbsolutePath(), SIZE_IMAGE, SIZE_IMAGE, true, false);
 
 		if (small != null)

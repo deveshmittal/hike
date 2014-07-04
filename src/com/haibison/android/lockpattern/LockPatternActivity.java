@@ -769,6 +769,7 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
      *            cases, it can be set to {@code null}.
      */
     private void finishWithResultOk(char[] pattern) {
+    	mIntentResult.putExtra(HikeConstants.Extras.STEALTH_PASS_RESET,getIntent().getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false));
         if (ACTION_CREATE_PATTERN.equals(getIntent().getAction()))
             mIntentResult.putExtra(EXTRA_PATTERN, pattern);
         else {
@@ -822,7 +823,8 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
      * {@link #RESULT_FORGOT_PATTERN}).
      */
     private void finishWithNegativeResult(int resultCode) {
-        if (ACTION_COMPARE_PATTERN.equals(getIntent().getAction()))
+    	mIntentResult.putExtra(HikeConstants.Extras.STEALTH_PASS_RESET,getIntent().getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false));
+    	if (ACTION_COMPARE_PATTERN.equals(getIntent().getAction()))
             mIntentResult.putExtra(EXTRA_RETRY_COUNT, mRetryCount);
 
         setResult(resultCode, mIntentResult);
