@@ -1617,4 +1617,6 @@ public class HikeConstants
 	public static final int FTUE_HIKE_CONTACT_MIN_LIMIT = 3;
 
 	public static final String PACKAGE_WATSAPP = "com.whatsapp";
+
+	public static final String WATSAPP_INVITE_MESSAGE_KEY = "whatsapp_invite_msg";
 }

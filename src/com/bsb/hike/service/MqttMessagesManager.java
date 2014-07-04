@@ -961,6 +961,12 @@ public class MqttMessagesManager
 					LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(HikePubSub.IPS_CHANGED).putExtra("ips", ipArray.toString()));
 				}
 			}
+			// watsapp invite message
+			if (data.has(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY))
+			{
+				String message = data.getString(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY);
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, message);
+			}
 
 			editor.commit();
 			this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
