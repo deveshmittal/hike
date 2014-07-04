@@ -358,6 +358,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String SHOWN_WELCOME_TO_HIKE_CARD = "shownWelcomeToHikeCard";
 
 	public static final String FRIEND_REQ_COUNT = "frReqCount";
+	
+	public static final String HAS_UNSET_SMS_PREFS_ON_KITKAT_UPGRAGE = "hasUnsetSmsPrefsOnKitkatUpgrade";
 
 	public static final String ATOMIC_POP_UP_TYPE_MAIN = "apuTypeMain";
 
@@ -699,6 +701,19 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		{
 			Editor editor = preferenceManager.edit();
 			editor.putBoolean(HikeConstants.STATUS_BOOLEAN_PREF, preferenceManager.getInt(HikeConstants.STATUS_PREF, 0) == 0);
+			editor.commit();
+		}
+		
+		if(Utils.isKitkatOrHigher() && !HikeSharedPreferenceUtil.getInstance(this).getData(HAS_UNSET_SMS_PREFS_ON_KITKAT_UPGRAGE, false))
+		{
+			/*
+			 * On upgrade in kitkat or higher we need to reset sms setting preferences 
+			 * as we are now removing these settings from UI.
+			 */
+			HikeSharedPreferenceUtil.getInstance(this).saveData(HAS_UNSET_SMS_PREFS_ON_KITKAT_UPGRAGE, true);
+			Editor editor = preferenceManager.edit();
+			editor.remove(HikeConstants.SEND_SMS_PREF);
+			editor.remove(HikeConstants.RECEIVE_SMS_PREF);
 			editor.commit();
 		}
 
