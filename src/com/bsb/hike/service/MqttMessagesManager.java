@@ -187,6 +187,12 @@ public class MqttMessagesManager
 			autoDownloadGroupImage(groupId);
 			saveStatusMsg(jsonObj, groupId);
 		}
+		else if (HikeConstants.MqttMessageTypes.REMOVE_PIC.equals(type))
+		{
+			String msisdn = jsonObj.getString(HikeConstants.FROM);
+			HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+        }
 		else if (HikeConstants.MqttMessageTypes.SMS_CREDITS.equals(type)) // Credits
 		// changed
 		{
@@ -788,6 +794,19 @@ public class MqttMessagesManager
 					settingEditor.putBoolean(HikeConstants.CHAT_BG_NOTIFICATION_PREF, showNotification);
 					settingEditor.commit();
 				}
+			}
+			if (data.has(HikeConstants.AVATAR))
+			{
+				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+				Editor settingEditor = settings.edit();
+				int dpSetting =  data.optInt(HikeConstants.AVATAR,1);
+				boolean defaultSetting = false;
+				if(dpSetting==2)
+				{
+				   defaultSetting = true;	
+				}
+				settingEditor.putBoolean(HikeConstants.PROFILE_PIC_PREF,defaultSetting);
+				settingEditor.commit();
 			}
 			editor.commit();
 			if (inviteTokenAdded)

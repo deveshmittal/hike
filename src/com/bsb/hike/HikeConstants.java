@@ -392,6 +392,8 @@ public class HikeConstants
 	public static final String SEND_UNDELIVERED_AS_NATIVE_SMS_PREF = "sendUndeliveredAsNativeSmsPref";
 
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
+	
+	public static final String PROFILE_PIC_PREF = "profilePicPref";
 
 	public static final String CHAT_BG_NOTIFICATION_PREF = "chatBgNotificationPref";
 
@@ -492,6 +494,8 @@ public class HikeConstants
 	public static final String IS_TYPING = "is typing...";
 
 	public static final String NEW_GROUP = "new_group";
+	
+	public static final String AVATAR = "avatar";
 
 	/* Constant used to name the preference file which saves the drafts */
 	public static final String DRAFT_SETTING = "draftSetting";
@@ -1506,6 +1510,8 @@ public class HikeConstants
 		public static final String TOGGLE_STEALTH = "ts";
 		
 		public static final String POPUP = "popup"; //this is a generic popup type
+
+		public static final String REMOVE_PIC = "icr";
 
 	}
 

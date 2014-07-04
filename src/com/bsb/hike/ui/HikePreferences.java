@@ -139,7 +139,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			lastSeenPreference.setOnPreferenceChangeListener(this);
 		}
-
+		final IconCheckBoxPreference profilePicPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.PROFILE_PIC_PREF);
+		if (profilePicPreference != null)
+		{
+			profilePicPreference.setOnPreferenceChangeListener(this);
+		}
 		final IconCheckBoxPreference freeSmsPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.FREE_SMS_PREF);
 		if (freeSmsPreference != null)
 		{
@@ -686,6 +690,28 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
 			}
+			catch (JSONException e)
+			{
+				Logger.w(getClass().getSimpleName(), "Invalid json", e);
+			}
+		}
+		else if (HikeConstants.PROFILE_PIC_PREF.equals(preference.getKey()))
+		{
+			JSONObject object = new JSONObject();
+			try
+			{
+				object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+
+				int avatarSetting =1;
+				if(isChecked){
+					avatarSetting = 2;
+				}
+				JSONObject data = new JSONObject();
+				data.put(HikeConstants.AVATAR, avatarSetting);
+				object.put(HikeConstants.DATA, data);
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+	     	}
 			catch (JSONException e)
 			{
 				Logger.w(getClass().getSimpleName(), "Invalid json", e);
