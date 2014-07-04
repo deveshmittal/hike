@@ -7079,7 +7079,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void updateLastSeen(String msisdn, int offline, long lastSeenTime)
 	{
-		if (!mContactNumber.equals(msisdn) || (mConversation instanceof GroupConversation) || !shouldShowLastSeen() || isHikeOfflineTipShowing())
+		if (!mContactNumber.equals(msisdn) || (mConversation instanceof GroupConversation) || !shouldShowLastSeen())
 		{
 			return;
 		}
@@ -7093,6 +7093,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		final String lastSeenString = Utils.getLastSeenTimeAsString(this, lastSeenTime, offline, false, true);
 
 		isOnline = contactInfo.getOffline() == 0;
+		
+		if(isHikeOfflineTipShowing() && isOnline)
+		{
+			// if hike offline tip is showing and server sends that user has
+			// come online, we donot update last seen field if all pending 
+			// messages gets delivered than we would update this field
+			return;
+		}
 		
 		runOnUiThread(new Runnable()
 		{
