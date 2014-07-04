@@ -1156,19 +1156,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.email_chat), 3));
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.add_shortcut), 4));
-		
 		if (!(mConversation instanceof GroupConversation) && contactInfo.isOnhike())
 		{
 			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND||contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED||contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED)
 			{
 				optionsList.add(new OverFlowMenuItem(getString(R.string.add_as_favorite_menu), 7));
 			}
-			else
-			{
-				optionsList.add(new OverFlowMenuItem(getString(R.string.remove_from_favorites), 7));
-			}
-			
 		}
 
 		dismissPopupWindow();
@@ -1239,10 +1232,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(ChatThread.this, null);
 					Utils.executeConvAsyncTask(emailTask, mConversation);
 					break;
-				case 4:
-					Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.ADD_SHORTCUT);
-					Utils.createShortcut(ChatThread.this, mConversation);
-					break;
 				case 5:
 					clearConversation();
 					break;
@@ -1250,23 +1239,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, mContactNumber);
 					break;
 				case 7:
-					FavoriteType favoriteType;
-					if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED
-							|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED)
-					{
-						favoriteType = FavoriteType.REQUEST_SENT;
-					}
-					else
-					{
-						favoriteType = FavoriteType.NOT_FRIEND;
-
-					}
-
+					FavoriteType favoriteType = FavoriteType.REQUEST_SENT;
 					contactInfo.setFavoriteType(favoriteType);
 					Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 					break;
-				
 				}
 
 			}

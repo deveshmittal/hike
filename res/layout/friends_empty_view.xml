@@ -4,8 +4,8 @@
     android:layout_height="wrap_content"
     android:gravity="center"
     android:orientation="vertical"
-    android:paddingTop="20dp"
-    android:paddingBottom="20dp" >
+    android:paddingTop="34dp"
+    android:paddingBottom="37dp" >
 
     <ImageView
         android:id="@+id/empty_icon"

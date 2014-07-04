@@ -1397,19 +1397,17 @@
 <![CDATA[ You are now sharing your <font color="#ef554e">Last Seen</font> and <font color="#0f8fe1">Status Updates</font> with %1$s. Would you like to request him to do the same?
 	    ]]>
     </string>
-    <string name="contacts_upper_case">CONTACTS</string>
-    <string name="favorite_request_pending">Added as a favorite</string>
-    <string name="ftue_favorite_subtext">Add as a favorite</string>
-    <string name="sent_you_favorite_request">Added you as favorite</string>
-    <string name="sent_you_favorite_request_detailed">Is sharing Last Seen and Status Updates with you. Would you like to do the same?\nAdd %1$s to your Favorites List.</string>
-    <string name="you_accepted_favorite_request_details">Great! %1$s will now be able to see your Last Seen and Status Updates.</string>
-    <string name="accepted_your_favorite_request_details">You can now see %1$s\'s Last Seen and Status Updates</string>
-    <string name="add_as_favorites_profile">Add %1$s to Favorites now.\nShare your Last Seen and Status Updates only with Favorite Contacts.</string>
-    <string name="add_as_favorite_menu">Add as a favorite</string>
-    <string name="remove_from_favorites">Remove from favorites</string>
-    <string name="favorite_request_sent">Added as a favorite</string>
-    <string name="favorite_request_sent_multiple">Added as favorites</string>
-    <string name="add_as_favorite_notification">%1$s added you as a favorite</string>
+	<string name="contacts_upper_case">CONTACTS</string>
+	<string name="favorite_request_pending">Added as a favorite</string>
+	<string name="ftue_favorite_subtext">Add as a favorite</string>
+	<string name="sent_you_favorite_request">Added you as favorite</string>
+	<string name="sent_you_favorite_request_detailed">Is sharing Last Seen and Status Updates with you. Would you like to do the same?\nAdd %1$s to your Favorites List.</string>
+	<string name="you_accepted_favorite_request_details">Great! %1$s will now be able to see your Last Seen and Status Updates.</string>
+	<string name="accepted_your_favorite_request_details">You can now see %1$s\'s Last Seen and Status Updates</string>
+	<string name="add_as_favorites_profile">Add %1$s to Favorites now.\nShare your Last Seen and Status Updates only with Favorite Contacts.</string>
+	<string name="favorite_request_sent">Added as a favorite</string>
+	<string name="favorite_request_sent_multiple">Added as favorites</string>
+	<string name="add_as_favorite_notification">%1$s added you as a favorite</string>
     <string name="add_as_favorite_notification_line">Added you as a favorite</string>
     <string name="favorite_confirmed_notification">You can now see %1$s\'s Last Seen and Status Updates</string>
     <string name="favorites_ftue_item_label">Add favorites</string>
@@ -1424,7 +1422,6 @@
     <string name="updates_are_fun_with_favorites">Updates are more fun with favorites. We\'ve found some of them that you can add to hike.</string>
     <string name="group_chats_upper_case">GROUP CHATS</string>
     <string name="max_num_files_reached">Cannot share more than %1$s files</string>
-    <string name="tap_plus_add_favorites">Only your Favorites can see your Last Seen and Status Updates.\n\nTap + to add to Favorites.</string>
     <string name="last_seen_proper_casing">Last Seen</string>
     <string name="status_updates_proper_casing">Status Updates</string>
     <string name="bigger_better_attachments">Bigger, better attachments</string>
@@ -1633,4 +1630,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="extra_invite">Extra</string>
      <string name="profile_pic_header">Profile Picture</string>
      <string name="profile_pic_display_info">Show only to your Favorites</string>
+     <string name="add_as_favorite_menu">Add favorite</string>
+	<string name="remove_from_favorites">Remove favorite</string>	  
+     <string name="file_attachment_info">Share Media &amp; Files up to 100 MB</string>
+     <string name="tap_plus_add_favorites">Only favorites can see your last seen and status update. Choose them wisely!</string>
 </resources>

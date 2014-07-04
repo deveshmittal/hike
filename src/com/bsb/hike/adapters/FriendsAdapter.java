@@ -1177,21 +1177,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			TextView emptyText = viewHolder.name;
 
 			String text = context.getString(R.string.tap_plus_add_favorites);
-
-			String lastSeen = context.getString(R.string.last_seen_proper_casing);
-			String statusUpdates = context.getString(R.string.status_updates_proper_casing);
-
-			int indexPlus = text.indexOf("+");
-			int indexLastSeen = text.indexOf(lastSeen);
-			int indexStatusUpdates = text.indexOf(statusUpdates);
-
-			SpannableStringBuilder ssb = new SpannableStringBuilder(text);
-			ssb.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.red_color_span)), indexLastSeen, indexLastSeen + lastSeen.length(),
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			ssb.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.blue_color_span)), indexStatusUpdates, indexStatusUpdates + statusUpdates.length(),
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			ssb.setSpan(new ImageSpan(context, R.drawable.ic_add_favorite_small), indexPlus, indexPlus + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			emptyText.setText(ssb);
+			emptyText.setText(text);
 			break;
 		}
 
