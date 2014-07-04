@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.CharBuffer;
 import java.security.MessageDigest;
@@ -34,6 +35,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -4025,5 +4027,60 @@ public class Utils
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	public static void clearJar(Context c)
+	{
+		HashMap<URL, JarFile> jarCache = null;
+		try
+		{
+			Class<?> jarURLConnectionImplClass;
+			if (isHoneycombOrHigher())
+			{
+				jarURLConnectionImplClass = Class.forName("libcore.net.url.JarURLConnectionImpl");
+			}
+			else
+			{
+				jarURLConnectionImplClass = Class.forName("org.apache.harmony.luni.internal.net.www.protocol.jar.JarURLConnectionImpl");
+			}
+			final Field jarCacheField = jarURLConnectionImplClass.getDeclaredField("jarCache");
+			jarCacheField.setAccessible(true);
+			jarCache = (HashMap<URL, JarFile>) jarCacheField.get(null);
+		}
+		catch (Exception e)
+		{
+			Logger.e("clearJar", "Exception while getting jarCacheField : " + e);
+		}
+
+		if (jarCache != null)
+		{
+			try
+			{
+				for (final Iterator<Map.Entry<URL, JarFile>> iterator = jarCache.entrySet().iterator(); iterator.hasNext();)
+				{
+					final Map.Entry<URL, JarFile> e = iterator.next();
+					final URL url = e.getKey();
+					if (url.toString().endsWith(".apk") && url.toString().contains(c.getPackageName()))
+					{
+						Logger.i("clearJar", "Removing static hashmap entry for " + url);
+						try
+						{
+							final JarFile jarFile = e.getValue();
+							jarFile.close();
+							iterator.remove();
+						}
+						catch (Exception f)
+						{
+							Logger.e("clearJar", "Exception in removing hashmap entry for " + url, f);
+						}
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Logger.e("clearJar", "Exception when traversing through hashmap" + e);
+			}
+		}
+
 	}
 }
