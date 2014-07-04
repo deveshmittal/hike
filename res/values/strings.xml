@@ -1599,4 +1599,9 @@
     <string name="ftue_card_body_sticker">When words can’t express, say it with a sticker</string>
     <string name="ftue_card_click_text_sticker">You\'ll love them!</string>
     <string name="ftue_card_sep">Amazing things you can do on hike</string>
+    <string name="invite_with_watsapp">WhatsApp</string>
+    <string name="watsapp_invitation">Hey, join me on hike, the only messaging app made in India! It lets you show your \'Last Seen\' only to select friends, send messages to friends when they\'re offline and send awesome stickers.\n
+Also share all types of files - docs, songs, movies etc, up to 100MB each ;) http://get.hike.in/</string>
+    <string name="extra_invite">Extra</string>
+
 </resources>

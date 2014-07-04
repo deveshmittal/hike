@@ -59,6 +59,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
@@ -4007,5 +4008,20 @@ public class Utils
 			editor.commit();
 		}
 
+	}
+
+	public static boolean isPackageInstalled(Context context, String packageName)
+	{
+		PackageManager pm = context.getPackageManager();
+		try
+		{
+			pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+			return true;
+		}
+		catch (NameNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		return false;
 	}
 }

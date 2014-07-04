@@ -56,6 +56,7 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -956,6 +957,12 @@ public class MqttMessagesManager
 				{
 					LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(HikePubSub.IPS_CHANGED).putExtra("ips", ipArray.toString()));
 				}
+			}
+			// watsapp invite message
+			if (data.has(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY))
+			{
+				String message = data.getString(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY);
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, message);
 			}
 
 			editor.commit();
