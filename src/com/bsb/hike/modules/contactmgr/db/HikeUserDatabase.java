@@ -2024,9 +2024,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public int getHikeContactCount()
+	public int getHikeContactCount(String myMsisdn)
 	{
-		String selection = DBConstants.ONHIKE + " = 1";
+		String selection = DBConstants.ONHIKE + " = 1 AND "+DBConstants.MSISDN + "!=" + DatabaseUtils.sqlEscapeString(myMsisdn);
 		Cursor c = null;
 		try
 		{
@@ -2163,9 +2163,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		int limit = HikeConstants.FTUE_LIMIT;
 
 		String myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
-
-		ftueContactsData.setTotalHikeContactsCount(getHikeContactCount());
-
+		
+		ftueContactsData.setTotalHikeContactsCount(getHikeContactCount(myMsisdn));
+		
 		/*
 		 * adding server recommended contacts to ftue contacts list;
 		 */

@@ -68,6 +68,8 @@ import com.bsb.hike.utils.Utils;
 public class MqttMessagesManager
 {
 
+	private static final String UJFile = "uj_file";
+
 	private HikeConversationsDatabase convDb;
 
 	private HikeUserDatabase userDb;
@@ -208,10 +210,31 @@ public class MqttMessagesManager
 		{
 			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.MSISDN);
 			boolean joined = HikeConstants.MqttMessageTypes.USER_JOINED.equals(type);
-
-			boolean stateChanged = false;
-
-			int rowsChanged = ContactUtils.updateHikeStatus(this.context, msisdn, joined);
+			long joinTime = 0;
+			SharedPreferences settings = context.getSharedPreferences(UJFile, Context.MODE_PRIVATE);
+			if(joined)
+			{
+				joinTime = jsonObj.optLong(HikeConstants.TIMESTAMP);
+				long ts = settings.getLong(msisdn, -1);
+				if(ts == -1) // this shows last uj was for some other msisdn or this user has left or pref file do not exist
+				{
+					Editor e = settings.edit();
+					e.clear(); // remove old values if any as we have to keep just one msisdn at a time
+					e.putLong(msisdn, joinTime);
+					e.commit();	
+				}
+				else if(ts == joinTime) // this shows UJ is duplicate so ignore
+					return;
+				else  // last join time was different from latest time
+					settings.edit().putLong(msisdn, joinTime).commit();		
+			}
+			else
+			{
+				// if user left Hike simply remove the value from pref
+				settings.edit().remove(msisdn).commit();
+			}
+			
+			ContactUtils.updateHikeStatus(this.context, msisdn, joined);
 			
 			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
 			if (null != contact)
@@ -221,24 +244,11 @@ public class MqttMessagesManager
 				HikeMessengerApp.getContactManager().updateContacts(updatedContact);
 			}
 			
-			rowsChanged += this.convDb.updateOnHikeStatus(msisdn, joined);
-
-			/*
-			 * If at least one row has been updated, that means that the user has changed his/her hike state
-			 */
-			if (rowsChanged > 0)
-			{
-				stateChanged = true;
-			}
-
-			if (!stateChanged)
-			{
-				return;
-			}
+			this.convDb.updateOnHikeStatus(msisdn, joined);
 
 			if (joined)
 			{
-				long joinTime = jsonObj.optLong(HikeConstants.TIMESTAMP);
+				
 				if (joinTime > 0)
 				{
 					joinTime = Utils.applyServerTimeOffset(context, joinTime);
