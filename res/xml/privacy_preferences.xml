@@ -36,10 +36,10 @@
         android:title="@string/reset_complete_stealth_header" />
      
      <com.bsb.hike.view.IconPreference
-        icon="ic_reset_stealth"
+        icon="ic_stealth_icon_reset_password"
         android:key="changeStealthPasscode"
         android:layout="@layout/icon_preference"
-        android:summary="@string/change_stealth_password"
-        android:title="@string/change_stealth_password_body" />
+        android:summary="@string/change_stealth_password_body"
+        android:title="@string/change_stealth_password" />
     
 </PreferenceScreen>
