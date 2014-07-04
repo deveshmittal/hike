@@ -7179,6 +7179,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			tipContainer.removeAllViews();
 		}
+		if(tipView != null && tipView.getVisibility() == View.VISIBLE)
+		{
+			tipView.setVisibility(View.GONE);
+		}
+		
 		tipContainer.addView(hikeToOfflineTipview);
 		hikeToOfflineTipview.setVisibility(View.VISIBLE);
 		
