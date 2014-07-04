@@ -951,7 +951,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		HikeUserDatabase huDb = HikeUserDatabase.getInstance();
 		ContactInfo contactInfo = Utils.isGroupConversation(msisdn) ? new ContactInfo(msisdn, msisdn, groupName, msisdn) : HikeMessengerApp.getContactManager().getContact(msisdn,
-				false);
+				false, true);
 		InsertHelper ih = null;
 		try
 		{
@@ -1109,7 +1109,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				else
 				{
-					ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, false);
+					ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, false, true);
 					name = contactInfo.getName();
 					onhike |= contactInfo.isOnhike();
 				}
@@ -1189,7 +1189,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 			else
 			{
-				ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, false);
+				ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, false, true);
 
 				onhike |= contactInfo.isOnhike();
 				conv = new Conversation(msisdn, convid, contactInfo.getName(), onhike);
@@ -1950,7 +1950,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			// at least one msisdn is required to run this in query
 			if (fetchParticipants && allMsisdns.size() > 0)
 			{
-				List<ContactInfo> list = HikeMessengerApp.getContactManager().getContact(allMsisdns, true);
+				List<ContactInfo> list = HikeMessengerApp.getContactManager().getContact(allMsisdns, true, false);
 				for (ContactInfo contactInfo : list)
 				{
 					if (contactInfo.getName() == null)
@@ -2449,7 +2449,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 			if (msisdns.size() > 0)
 			{
-				List<ContactInfo> contactList = HikeMessengerApp.getContactManager().getContact(msisdns, true);
+				List<ContactInfo> contactList = HikeMessengerApp.getContactManager().getContact(msisdns, true, true);
 
 				for (ContactInfo contactInfo : contactList)
 				{

@@ -858,7 +858,7 @@ public class MqttMessagesManager
 				return;
 			}
 
-			ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true);
+			ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
 			if (contactInfo.getFavoriteType() == FavoriteType.FRIEND)
 			{
 				return;
@@ -1045,7 +1045,7 @@ public class MqttMessagesManager
 			 */
 			statusMessage.setTimeStamp(Utils.applyServerTimeOffset(context, statusMessage.getTimeStamp()));
 
-			ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(statusMessage.getMsisdn(), true);
+			ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(statusMessage.getMsisdn(), true, true);
 			FavoriteType favoriteType = contactInfo.getFavoriteType();
 			/*
 			 * Only add updates to timeline for contacts that have a 2-way relationship with the user.
@@ -1207,7 +1207,7 @@ public class MqttMessagesManager
 				lastSeenTime = System.currentTimeMillis() / 1000;
 			}
 
-			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn, true);
+			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
 			ContactInfo updatedContact = new ContactInfo(contact);
 			updatedContact.setLastSeenTime(lastSeenTime);
 			updatedContact.setOffline((int) isOffline);
@@ -1591,7 +1591,7 @@ public class MqttMessagesManager
 
 	private void removeOrPostponeFriendType(String msisdn)
 	{
-		ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true);
+		ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
 		if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND)
 		{
 			return;

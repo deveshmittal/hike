@@ -93,8 +93,7 @@ public class GroupConversation extends Conversation
 
 	public String getGroupParticipantFirstName(String msisdn)
 	{
-		// TODO directly get name using getName
-		ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn, true);
+		ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn, true, false);
 		String name = contact.getName();
 		if (null == name)
 		{

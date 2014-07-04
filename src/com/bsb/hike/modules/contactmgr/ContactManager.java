@@ -176,9 +176,9 @@ public class ContactManager implements ITransientCache
 	 * @param loadInTransient
 	 * @return
 	 */
-	public ContactInfo getContact(String msisdn, boolean loadInTransient)
+	public ContactInfo getContact(String msisdn, boolean loadInTransient, boolean ifOneToOneConversation)
 	{
-		return getContact(msisdn, loadInTransient, false);
+		return getContact(msisdn, loadInTransient, ifOneToOneConversation, false);
 	}
 
 	/**
@@ -192,7 +192,7 @@ public class ContactManager implements ITransientCache
 	 *            if set to true returns null if not a saved contact
 	 * @return
 	 */
-	public ContactInfo getContact(String msisdn, boolean loadInTransient, boolean ifNotFoundReturnNull)
+	public ContactInfo getContact(String msisdn, boolean loadInTransient, boolean ifOneToOneConversation, boolean ifNotFoundReturnNull)
 	{
 		ContactInfo contact = getContact(msisdn);
 		if (null == contact)
@@ -203,7 +203,7 @@ public class ContactManager implements ITransientCache
 			}
 			else
 			{
-				contact = persistenceCache.loadMemory(msisdn, ifNotFoundReturnNull);
+				contact = persistenceCache.loadMemory(msisdn, ifNotFoundReturnNull, ifOneToOneConversation);
 			}
 		}
 		else
@@ -215,7 +215,20 @@ public class ContactManager implements ITransientCache
 
 			if (!loadInTransient)
 			{
-				// TODO cache.moveToPersistence(msisdn, contact);
+				// move to persistence if found in transient using getcontact used in first line of method (if loadintransient is false)
+				ContactInfo con = persistenceCache.getContact(msisdn);
+				if (null == con)
+				{
+					con = transientCache.getContact(msisdn);
+					if (ifOneToOneConversation)
+					{
+						persistenceCache.insertContact(con);
+					}
+					else
+					{
+						persistenceCache.insertContact(con, null);
+					}
+				}
 			}
 		}
 		return contact;
@@ -228,7 +241,7 @@ public class ContactManager implements ITransientCache
 	 * @param loadInTransient
 	 * @return
 	 */
-	public List<ContactInfo> getContact(List<String> msisdns, boolean loadInTransient)
+	public List<ContactInfo> getContact(List<String> msisdns, boolean loadInTransient, boolean ifOneToOneConversation)
 	{
 		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
 
@@ -256,7 +269,7 @@ public class ContactManager implements ITransientCache
 			}
 			else
 			{
-				contactsDB = persistenceCache.loadMemory(msisdnsDB);
+				contactsDB = persistenceCache.loadMemory(msisdnsDB, ifOneToOneConversation);
 			}
 
 			if (null != contactsDB)
@@ -267,7 +280,23 @@ public class ContactManager implements ITransientCache
 
 		if (!loadInTransient)
 		{
-			// TODO cache.moveToPersistence(msisdns);
+			// move to persistence if found in transient using getcontact used in first line of method (if loadintransient is false)
+			for (String msisdn : msisdns)
+			{
+				ContactInfo con = persistenceCache.getContact(msisdn);
+				if (null == con)
+				{
+					con = transientCache.getContact(msisdn);
+					if (ifOneToOneConversation)
+					{
+						persistenceCache.insertContact(con);
+					}
+					else
+					{
+						persistenceCache.insertContact(con, null);
+					}
+				}
+			}
 		}
 
 		return contacts;

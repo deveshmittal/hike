@@ -476,7 +476,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.CONTACT_INFO);
 
-		contactInfo = HikeMessengerApp.getContactManager().getContact(mLocalMSISDN, true);
+		contactInfo = HikeMessengerApp.getContactManager().getContact(mLocalMSISDN, true, true);
 
 		if (!contactInfo.isOnhike())
 		{
@@ -1683,7 +1683,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 				if (msisdns.size() > 0)
 				{
-					List<ContactInfo> contacts = HikeMessengerApp.getContactManager().getContact(msisdns, true);
+					List<ContactInfo> contacts = HikeMessengerApp.getContactManager().getContact(msisdns, true, true);
 					for (ContactInfo contactInfo : contacts)
 					{
 						participantMap.put(contactInfo.getMsisdn(), new GroupParticipant(contactInfo));
