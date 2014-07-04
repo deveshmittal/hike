@@ -34,6 +34,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
+import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.tasks.UnlinkTwitterTask;
 import com.bsb.hike.tasks.DeleteAccountTask.DeleteAccountListener;
 import com.bsb.hike.ui.utils.LockPattern;
@@ -146,7 +147,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			lastSeenPreference.setOnPreferenceChangeListener(this);
 		}
-
+		final IconCheckBoxPreference profilePicPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.PROFILE_PIC_PREF);
+		if (profilePicPreference != null)
+		{
+			profilePicPreference.setOnPreferenceChangeListener(this);
+		}
 		final IconCheckBoxPreference freeSmsPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.FREE_SMS_PREF);
 		if (freeSmsPreference != null)
 		{
@@ -664,7 +669,37 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.IMAGE_QUALITY.equals(preference.getKey()))
 		{
-			HikeDialog.showDialog(this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG, (Object[]) null);
+			HikeDialog.showDialog(HikePreferences.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
+			{
+				@Override
+				public void onSucess(Dialog dialog)
+				{
+					updateMedia();
+					dialog.dismiss();
+				}
+
+				@Override
+				public void negativeClicked(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void positiveClicked(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void neutralClicked(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+			}, (Object[]) null);
+
 		}
 		else if(HikeConstants.CHANGE_STEALTH_PASSCODE.equals(preference.getKey()))
 		{
@@ -731,6 +766,28 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				Logger.w(getClass().getSimpleName(), "Invalid json", e);
 			}
 		}
+		else if (HikeConstants.PROFILE_PIC_PREF.equals(preference.getKey()))
+		{
+			JSONObject object = new JSONObject();
+			try
+			{
+				object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+
+				int avatarSetting =1;
+				if(isChecked){
+					avatarSetting = 2;
+				}
+				JSONObject data = new JSONObject();
+				data.put(HikeConstants.AVATAR, avatarSetting);
+				object.put(HikeConstants.DATA, data);
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+	     	}
+			catch (JSONException e)
+			{
+				Logger.w(getClass().getSimpleName(), "Invalid json", e);
+			}
+		}
 		else if (HikeConstants.FREE_SMS_PREF.equals(preference.getKey()))
 		{
 			Logger.d(getClass().getSimpleName(), "Free SMS toggled");
@@ -757,9 +814,34 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		case R.xml.notification_preferences:
 			updateNotifPrefView();
 			break;
+		case R.xml.media_download_preferences:
+			updateMedia();
 		}
 	}
 
+	private void updateMedia()
+	{
+		Preference preference = getPreferenceScreen().findPreference(HikeConstants.IMAGE_QUALITY);
+		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(HikePreferences.this);
+		
+		int imageQuality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);		
+		
+		String qualityString = "";
+		switch (imageQuality)
+		{
+		case 1:
+			qualityString = "Original";
+			break;
+		case 2:
+			qualityString = "Medium";
+			break;
+		case 3:
+			qualityString = "Small";
+			break;
+		}
+		preference.setTitle(getResources().getString(R.string.image_quality_prefs) + " - " + qualityString);
+	}
+	
 	private void updateNotifPrefView()
 	{
 		ListPreference lp = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.VIBRATE_PREF_LIST);

@@ -193,6 +193,12 @@ public class MqttMessagesManager
 			autoDownloadGroupImage(groupId);
 			saveStatusMsg(jsonObj, groupId);
 		}
+		else if (HikeConstants.MqttMessageTypes.REMOVE_PIC.equals(type))
+		{
+			String msisdn = jsonObj.getString(HikeConstants.FROM);
+			HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+        }
 		else if (HikeConstants.MqttMessageTypes.SMS_CREDITS.equals(type)) // Credits
 		// changed
 		{
@@ -251,14 +257,6 @@ public class MqttMessagesManager
 				}
 
 				saveStatusMsg(jsonObj, msisdn);
-
-				List<String> groupConversations = convDb.listOfGroupConversationsWithMsisdn(msisdn);
-
-				// For group chats
-				for (String groupId : groupConversations)
-				{
-					saveStatusMsg(jsonObj, groupId);
-				}
 			}
 			else
 			{
@@ -803,6 +801,19 @@ public class MqttMessagesManager
 					settingEditor.commit();
 				}
 			}
+			if (data.has(HikeConstants.AVATAR))
+			{
+				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+				Editor settingEditor = settings.edit();
+				int dpSetting =  data.optInt(HikeConstants.AVATAR,1);
+				boolean defaultSetting = false;
+				if(dpSetting==2)
+				{
+				   defaultSetting = true;	
+				}
+				settingEditor.putBoolean(HikeConstants.PROFILE_PIC_PREF,defaultSetting);
+				settingEditor.commit();
+			}
 			editor.commit();
 			if (inviteTokenAdded)
 			{
@@ -960,6 +971,16 @@ public class MqttMessagesManager
 				{
 					LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(HikePubSub.IPS_CHANGED).putExtra("ips", ipArray.toString()));
 				}
+			}
+			// watsapp invite message
+			if (data.has(HikeConstants.WATSAPP_INVITE_ENABLED))
+			{
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.WATSAPP_INVITE_ENABLED, data.getBoolean(HikeConstants.WATSAPP_INVITE_ENABLED));
+			}
+			if (data.has(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY))
+			{
+				String message = data.getString(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY);
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, message);
 			}
 
 			editor.commit();

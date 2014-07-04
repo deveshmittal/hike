@@ -6,7 +6,7 @@
         icon="ic_auto_download_image"
         android:key="imageQuality"
         android:layout="@layout/icon_preference"
-        android:summary="Always use this quality"
+        android:summary="Always use this quality for sending images"
         android:title="Image Quality" />
 
     <PreferenceCategory

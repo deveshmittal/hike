@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -429,7 +430,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	 * this is set of all the currently visible messages which are 
 	 * stuck in tick and are not sms
 	 */
-	private Set<ConvMessage> undeliveredMessages = new HashSet<ConvMessage>();
+	private LinkedHashMap<Long, ConvMessage> undeliveredMessages = new LinkedHashMap<Long, ConvMessage>();
 
 	/*
 	 * this variable will point to first ConvMessage object which is stuck in tick
@@ -561,7 +562,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					return;
 				}
-				scheduleHikeOfflineTip();
 				notifyDataSetChanged();
 			}
 		};
@@ -1322,12 +1322,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
-					videoHolder.fileSize.setText(dataDisplay((int) hikeFile.getFile().length()));
+					videoHolder.fileSize.setText(Utils.getSizeForDisplay((int) hikeFile.getFile().length()));
 					videoHolder.fileSize.setVisibility(View.VISIBLE);
 				}
 				else if (hikeFile.getFileSize() > 0)
 				{
-					videoHolder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
+					videoHolder.fileSize.setText(Utils.getSizeForDisplay(hikeFile.getFileSize()));
 					videoHolder.fileSize.setVisibility(View.VISIBLE);
 				}
 				else
@@ -1798,11 +1798,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				fileHolder.fileName.setText(hikeFile.getFileName());
 				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
-					fileHolder.fileSize.setText(dataDisplay((int) hikeFile.getFile().length()));
+					fileHolder.fileSize.setText(Utils.getSizeForDisplay((int) hikeFile.getFile().length()));
 				}
 				else if (hikeFile.getFileSize() > 0)
 				{
-					fileHolder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
+					fileHolder.fileSize.setText(Utils.getSizeForDisplay(hikeFile.getFileSize()));
 				}
 				else
 				{
@@ -3469,33 +3469,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		iv.setImageResource(isMessageSent ? chatTheme.sentNudgeResId() : chatTheme.receivedNudgeResId());
 	}
 
-	// @GM
-	// The following methods returns the user readable size when passed the bytes in size
-	private String dataDisplay(int bytes)
-	{
-		Logger.d(getClass().getSimpleName(), "DataDisplay of bytes : " + bytes);
-		if (bytes <= 0)
-			return ("");
-		if (bytes >= (1000 * 1024))
-		{
-			int mb = bytes / (1024 * 1024);
-			int mbPoint = bytes % (1024 * 1024);
-			mbPoint /= (1024 * 102);
-			return (Integer.toString(mb) + "." + Integer.toString(mbPoint) + " MB");
-		}
-		else if (bytes >= 1000)
-		{
-			int kb;
-			if (bytes < 1024) // To avoid showing "1000KB"
-				kb = bytes / 1000;
-			else
-				kb = bytes / 1024;
-			return (Integer.toString(kb) + " KB");
-		}
-		else
-			return (Integer.toString(bytes) + " B");
-	}
-
 	private void inflateNSetDay(ConvMessage convMessage, final DayHolder dayHolder)
 	{
 		final String dateFormatted = convMessage.getMessageDate(context);
@@ -3860,21 +3833,27 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	public void scheduleHikeOfflineTip()
 	{
+		/*
+		 * if Kitkat OR higher we should not show tip
+		 * 1. if user has 0 free SMS left;
+		 * 2. user himself is not online;
+		 * 3. if this is an international number;
+		 */
+		if (Utils.isKitkatOrHigher())
+		{
+			int currentSmsBalance = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
+			Logger.d("tesst", ""+(currentSmsBalance == 0) +" "+ !Utils.isUserOnline(context) +" "+ !conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
+			if(currentSmsBalance == 0 || !Utils.isUserOnline(context) || !conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE))
+			{
+				return;
+			}
+		}
+		
 		if (showUndeliveredMessage != null)
 		{
 			handler.removeCallbacks(showUndeliveredMessage);
 		}
 
-		/*
-		 * If user himself is online and we should show last seen for this contact;
-		 * this means we should not show hike offline tip untill we have fetched
-		 * actual value of last seen from server. 
-		 */
-		if (Utils.isUserOnline(context) && chatThread.shouldShowLastSeen() && !chatThread.hasLastSeenFetched())
-		{
-			return ;
-		}
-		
 		if(firstPendingConvMessage != null)
 		{
 			long diff = (((long) System.currentTimeMillis() / 1000) - firstPendingConvMessage.getTimestamp());
@@ -3990,7 +3969,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				if(chatThread.isHikeOfflineTipShowing())
 				{
-					status.setImageResource(R.drawable.ic_bolt_grey);
+					status.setImageResource(R.drawable.ic_bolt);
 				}
 			}
 			else
@@ -4436,12 +4415,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		@Override
 		public void run()
 		{
-			if (lastSentMessagePosition >= convMessages.size() || lastSentMessagePosition == -1)
+			/*
+			 * if there is no firstPendingMessage we should not show the tip
+			 */
+			if (firstPendingConvMessage == null || !isMessageUndelivered(firstPendingConvMessage))
 			{
 				return;
 			}
-			ConvMessage lastSentMessage = convMessages.get(lastSentMessagePosition);
-			if (isMessageUndelivered(lastSentMessage))
+			
+			long diff = (((long) System.currentTimeMillis() / 1000) - firstPendingConvMessage.getTimestamp());
+
+			if (Utils.isUserOnline(context) && diff >= HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME )
 			{
 				chatThread.showHikeToOfflineTip();
 			}
@@ -4482,13 +4466,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		int selectedSmsCount = getSelectedFreeSmsCount();
 		
+		TextView popupHeader = (TextView) dialog.findViewById(R.id.popup_header);
 		View hikeSMS = dialog.findViewById(R.id.hike_sms_container);
 		View nativeSMS = dialog.findViewById(R.id.native_sms_container);
-		View divider = dialog.findViewById(R.id.divider);
 		TextView nativeHeader = (TextView) dialog.findViewById(R.id.native_sms_header);
-
+		TextView nativeSubtext = (TextView) dialog.findViewById(R.id.native_sms_subtext);
+		TextView hikeSmsHeader = (TextView) dialog.findViewById(R.id.hike_sms_header);
+		TextView hikeSmsSubtext = (TextView) dialog.findViewById(R.id.hike_sms_subtext);
+		
+		popupHeader.setText(context.getString(R.string.send_sms_as, selectedSmsCount));
+		hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext, chatThread.getCurrentSmsBalance()));
+		
 		hikeSMS.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
-		divider.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
+		nativeSMS.setVisibility(Utils.isKitkatOrHigher() ? View.GONE : View.VISIBLE);
 
 		final CheckBox sendHike = (CheckBox) dialog.findViewById(R.id.hike_sms_checkbox);
 
@@ -4516,17 +4506,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 		}
 
+		sendHike.setChecked(true);
 		if(!nativeOnly && chatThread.getCurrentSmsBalance() < selectedSmsCount)
 		{
 			// disable Free Hike Sms Field and enabling the native sms one.
-			
+			hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext_diabled, chatThread.getCurrentSmsBalance()));
+			hikeSmsSubtext.setEnabled(false);
+			hikeSmsHeader.setEnabled(false);
+			hikeSMS.setEnabled(false);
+			sendHike.setEnabled(false);
 			sendHike.setChecked(false);
 			sendNative.setChecked(true);
 		}
 		
 		nativeHeader.setText(context.getString(R.string.regular_sms));
 
-		sendHike.setOnClickListener(new OnClickListener()
+		hikeSMS.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
@@ -4537,7 +4532,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 		});
 
-		sendNative.setOnClickListener(new OnClickListener()
+		nativeSMS.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
@@ -4669,7 +4664,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		dialog.show();
 	}
 
-	public Set<ConvMessage> getAllUnsentMessages(boolean resetTimestamp)
+	public LinkedHashMap<Long, ConvMessage> getAllUnsentMessages(boolean resetTimestamp)
 	{
 		return undeliveredMessages;
 	}
@@ -4681,16 +4676,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		if (nativeSMS)
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_NATIVE_SMS_FALLBACK, unsentMessages);
-			chatThread.messagesSentCloseHikeToOfflineMode();
-			removeAllFromUndeliverdMessage(unsentMessages);
+			chatThread.messagesSentCloseHikeToOfflineMode(true);
+			removeFromUndeliverdMessage(unsentMessages);
 		}
 		else
 		{
 			if (conversation.isOnhike())
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_HIKE_SMS_FALLBACK, unsentMessages);
-				chatThread.messagesSentCloseHikeToOfflineMode();
-				removeAllFromUndeliverdMessage(unsentMessages);
+				chatThread.messagesSentCloseHikeToOfflineMode(false);
+				removeFromUndeliverdMessage(unsentMessages);
 			}
 			else
 			{
@@ -5029,14 +5024,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public int getSelectedFreeSmsCount()
 	{
 		Collection<ConvMessage> selectedMessages = getSelectedMessagesMap().values();
-		int totalMsgLength = 0;
-		for (ConvMessage convMessage : selectedMessages)
-		{
-			totalMsgLength += Utils.getMessageDisplayText(convMessage, context).length();
-			
-			// number of line enters after each msg;
-			totalMsgLength += 2;
-		}
+		int totalMsgLength = Utils.combineInOneSmsString(context, false, selectedMessages, true).length();
 		
 		return (totalMsgLength / 140) + 1;
 	}
@@ -5047,38 +5035,45 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ArrayList<Long> selectedMsgIds = new ArrayList<Long>(getSelectedMessageIds());
 		Collections.sort(selectedMsgIds);
 		
-		if (lastSentMessagePosition != -1 && !selectedMessagesMap.isEmpty() && !chatThread.isContactOnline())
+		if (firstPendingConvMessage != null && !selectedMessagesMap.isEmpty())
 		{
-			if (conversation.isOnhike())
+			/*
+			 * Only show the H2S fallback option if user himself is Online
+			 */
+			if (!Utils.isUserOnline(context))
 			{
-				if (!Utils.isUserOnline(context))
+				if(!Utils.isKitkatOrHigher())
 				{
-					if (conversation instanceof GroupConversation)
-					{
-						Toast.makeText(context, R.string.gc_fallback_offline, Toast.LENGTH_LONG).show();
-					}
-					else
-					{
-						showSMSDialog(true);
-					}
+					showSMSDialog(true);
 				}
 				else
 				{
-					if (conversation instanceof GroupConversation)
+					// We are not handling this case for now.
+				}
+			}
+			else
+			{
+				if(!Utils.isKitkatOrHigher())
+				{
+					/*
+					 * Only show the H2S fallback option if messaging indian numbers.
+					 */
+					showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
+				}
+				else
+				{
+					if(chatThread.getCurrentSmsBalance() < getSelectedFreeSmsCount())
 					{
-						showSMSDialog(false);
+						Toast.makeText(context, context.getString(R.string.kitkat_not_enough_sms, chatThread.getCurrentSmsBalance()), Toast.LENGTH_LONG);
 					}
 					else
 					{
-						/*
-						 * Only show the H2S fallback option if messaging indian numbers.
-						 */
-						showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
+						smsDialogSendClick(true, true);
 					}
 				}
-
-				return;
 			}
+
+			return;
 		}
 	}
 
@@ -5126,12 +5121,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					return;
 				}
-				undeliveredMessages.add(convMessage);
-				if(undeliveredMessages.size() == 1)
-				{
-					firstPendingConvMessage = convMessage;
-				}
-				if(!chatThread.isHikeOfflineTipShowing())
+				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
+				updateFirstPendingConvMessage();
+				// We need to schedule hike offline tip always when it is not there
+				// Coz there might be cases when user manualy removes the tip
+				if (!chatThread.isHikeOfflineTipShowing())
 				{
 					scheduleHikeOfflineTip();
 				}
@@ -5141,33 +5135,80 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	
 	public void removeFromUndeliverdMessage(final ConvMessage convMessage)
 	{
+		removeFromUndeliverdMessage(convMessage, false);
+	}
+	
+	/**
+	 * @param msgDelivered signifies that removeFromUndeliverdMessage is called coz
+	 * convMessage has been reached to delivered state.
+	 */
+	public void removeFromUndeliverdMessage(final ConvMessage convMessage, final boolean msgDelivered)
+	{
 		chatThread.runOnUiThread(new Runnable()
 		{
 			
 			@Override
 			public void run()
 			{
-				undeliveredMessages.remove(convMessage);
-				if(firstPendingConvMessage == convMessage)
+				ConvMessage msg = undeliveredMessages.remove(convMessage.getMsgID());
+				
+				// if on remove if it returns null don't do anything
+				if(msg == null)
 				{
-					firstPendingConvMessage = null;
-					updateFirstPendingConvMessage();
+					return;
 				}
+				
 				if(undeliveredMessages.isEmpty())
 				{
-					chatThread.hideHikeToOfflineTip(false);
+					/*
+					 * if all messages are delivered OR we don't 
+					 * have any undelivered messages than only we should
+					 * reset this timer not on delivery of some message
+					 */
+					chatThread.shouldRunTimerForHikeOfflineTip = true;
+					chatThread.hideHikeToOfflineTip();
+					/*
+					 * we need to update last seen value coz we might
+					 * have updated contact's last seen value in between
+					 * when hike offline tip was showing
+					 */
+					if(msgDelivered)
+					{
+						chatThread.updateLastSeen();
+					}
+				}
+				if (firstPendingConvMessage.equals(convMessage))
+				{
+					updateFirstPendingConvMessage();
 				}
 			}
 		});
 	}
 	
 
-	private void removeAllFromUndeliverdMessage(List<ConvMessage> unsentMessages)
+	private void removeFromUndeliverdMessage(List<ConvMessage> convMessages)
 	{
-		for (ConvMessage convMessage : unsentMessages)
+		for (ConvMessage convMessage : convMessages)
 		{
 			removeFromUndeliverdMessage(convMessage);
 		}
+	}
+	
+	public void removeAllFromUndeliverdMessage()
+	{
+		chatThread.runOnUiThread(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				undeliveredMessages.clear();
+				chatThread.shouldRunTimerForHikeOfflineTip = true;
+				chatThread.hideHikeToOfflineTip();
+				updateFirstPendingConvMessage();
+				chatThread.updateLastSeen();
+			}
+		});
 	}
 
 	public void addAllUndeliverdMessages(List<ConvMessage> messages)
@@ -5176,28 +5217,28 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			if(convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
 			{
-				undeliveredMessages.add(convMessage);
-				if(firstPendingConvMessage == null)
-				{
-					firstPendingConvMessage = convMessage;
-				}
+				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
 			}
+		}
+		if(firstPendingConvMessage == null)
+		{
+			updateFirstPendingConvMessage();
+		}
+		if (!chatThread.isHikeOfflineTipShowing())
+		{
+			scheduleHikeOfflineTip();
 		}
 	}
 	
-	public void setFirstPendingConvMessage(ConvMessage convMessage)
-	{
-		firstPendingConvMessage = convMessage;
-	}
-
 	private void updateFirstPendingConvMessage()
 	{
-		for (ConvMessage convMessage : undeliveredMessages)
+		if(undeliveredMessages.isEmpty())
 		{
-			if(firstPendingConvMessage == null || firstPendingConvMessage.getMsgID() > convMessage.getMsgID())
-			{
-				firstPendingConvMessage = convMessage;
-			}
+			firstPendingConvMessage = null;
+		}
+		else
+		{
+			firstPendingConvMessage = undeliveredMessages.get(undeliveredMessages.keySet().iterator().next());
 		}
 	}
 	

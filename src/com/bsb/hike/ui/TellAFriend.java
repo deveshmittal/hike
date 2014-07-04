@@ -78,7 +78,8 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 		setContentView(R.layout.settings);
 
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-		boolean watsAppPresent = Utils.isPackageInstalled(getApplicationContext(), HikeConstants.PACKAGE_WATSAPP);
+		boolean watsAppPresent = HikeSharedPreferenceUtil.getInstance(getApplicationContext()).getData(HikeConstants.WATSAPP_INVITE_ENABLED, true)
+				&& Utils.isPackageInstalled(getApplicationContext(), HikeConstants.PACKAGE_WATSAPP);
 		ArrayList<String> items = new ArrayList<String>();
 		items.add(getString(!HikeMessengerApp.isIndianUser() || settings.getBoolean(HikeMessengerApp.SEND_NATIVE_INVITE, false) ? R.string.sms : R.string.free_sms_txt));
 		if (watsAppPresent)
@@ -471,9 +472,9 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 		Intent whatsappIntent = new Intent(Intent.ACTION_SEND);
 		whatsappIntent.setType("text/plain");
 		whatsappIntent.setPackage(HikeConstants.PACKAGE_WATSAPP);
-		String inviteText = HikeSharedPreferenceUtil.getInstance(getApplicationContext()).getData("watsapp_inv", getString(R.string.watsapp_invitation));
+		String inviteText = HikeSharedPreferenceUtil.getInstance(getApplicationContext()).getData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, getString(R.string.watsapp_invitation));
 		String inviteToken = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeConstants.INVITE_TOKEN, "");
-		inviteText = inviteText + " " + (getString(R.string.default_invite_url, inviteToken));
+		inviteText = inviteText + inviteToken;
 		whatsappIntent.putExtra(Intent.EXTRA_TEXT, inviteText);
 		try
 		{
