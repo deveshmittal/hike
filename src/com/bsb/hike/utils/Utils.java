@@ -4076,4 +4076,37 @@ public class Utils
 		}
 
 	}
+	
+	// @GM
+	// The following methods returns the user readable size when passed the bytes in size
+	public static String getSizeForDisplay(int bytes)
+	{
+		if (bytes <= 0)
+			return ("");
+		if (bytes >= 1000 * 1024 *1024)
+		{
+			int gb = bytes / (1024 * 1024 * 1024);
+			int gbPoint = bytes % (1024 * 1024 * 1024);
+			gbPoint /= (1024 * 1024 * 1024);
+			return (Integer.toString(gb) + "." + Integer.toString(gbPoint) + " GB");
+		}
+		else if (bytes >= (1000 * 1024))
+		{
+			int mb = bytes / (1024 * 1024);
+			int mbPoint = bytes % (1024 * 1024);
+			mbPoint /= (1024 * 102);
+			return (Integer.toString(mb) + "." + Integer.toString(mbPoint) + " MB");
+		}
+		else if (bytes >= 1000)
+		{
+			int kb;
+			if (bytes < 1024) // To avoid showing "1000KB"
+				kb = bytes / 1000;
+			else
+				kb = bytes / 1024;
+			return (Integer.toString(kb) + " KB");
+		}
+		else
+			return (Integer.toString(bytes) + " B");
+	}
 }
