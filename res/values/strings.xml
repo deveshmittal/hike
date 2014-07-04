@@ -502,7 +502,7 @@
     <string name="exp_category">Expressions</string>
     <string name="bollywood_category">Bollywood</string>
     <string name="rf_category">Rage faces</string>
-    <string name="free_hike_sms">Free hike SMS</string>
+    <string name="free_hike_sms">Free Hike SMS</string>
     <string name="regular_sms">Regular SMS</string>
     <string name="messaging_my_number">Messaging from %1$s</string>
     <string name="messaging_hike_number">Messaging from +918451043280</string>
@@ -1397,19 +1397,17 @@
 <![CDATA[ You are now sharing your <font color="#ef554e">Last Seen</font> and <font color="#0f8fe1">Status Updates</font> with %1$s. Would you like to request him to do the same?
 	    ]]>
     </string>
-    <string name="contacts_upper_case">CONTACTS</string>
-    <string name="favorite_request_pending">Added as a favorite</string>
-    <string name="ftue_favorite_subtext">Add as a favorite</string>
-    <string name="sent_you_favorite_request">Added you as favorite</string>
-    <string name="sent_you_favorite_request_detailed">Is sharing Last Seen and Status Updates with you. Would you like to do the same?\nAdd %1$s to your Favorites List.</string>
-    <string name="you_accepted_favorite_request_details">Great! %1$s will now be able to see your Last Seen and Status Updates.</string>
-    <string name="accepted_your_favorite_request_details">You can now see %1$s\'s Last Seen and Status Updates</string>
-    <string name="add_as_favorites_profile">Add %1$s to Favorites now.\nShare your Last Seen and Status Updates only with Favorite Contacts.</string>
-    <string name="add_as_favorite_menu">Add as a favorite</string>
-    <string name="remove_from_favorites">Remove from favorites</string>
-    <string name="favorite_request_sent">Added as a favorite</string>
-    <string name="favorite_request_sent_multiple">Added as favorites</string>
-    <string name="add_as_favorite_notification">%1$s added you as a favorite</string>
+	<string name="contacts_upper_case">CONTACTS</string>
+	<string name="favorite_request_pending">Added as a favorite</string>
+	<string name="ftue_favorite_subtext">Add as a favorite</string>
+	<string name="sent_you_favorite_request">Added you as favorite</string>
+	<string name="sent_you_favorite_request_detailed">Is sharing Last Seen and Status Updates with you. Would you like to do the same?\nAdd %1$s to your Favorites List.</string>
+	<string name="you_accepted_favorite_request_details">Great! %1$s will now be able to see your Last Seen and Status Updates.</string>
+	<string name="accepted_your_favorite_request_details">You can now see %1$s\'s Last Seen and Status Updates</string>
+	<string name="add_as_favorites_profile">Add %1$s to Favorites now.\nShare your Last Seen and Status Updates only with Favorite Contacts.</string>
+	<string name="favorite_request_sent">Added as a favorite</string>
+	<string name="favorite_request_sent_multiple">Added as favorites</string>
+	<string name="add_as_favorite_notification">%1$s added you as a favorite</string>
     <string name="add_as_favorite_notification_line">Added you as a favorite</string>
     <string name="favorite_confirmed_notification">You can now see %1$s\'s Last Seen and Status Updates</string>
     <string name="favorites_ftue_item_label">Add favorites</string>
@@ -1424,7 +1422,6 @@
     <string name="updates_are_fun_with_favorites">Updates are more fun with favorites. We\'ve found some of them that you can add to hike.</string>
     <string name="group_chats_upper_case">GROUP CHATS</string>
     <string name="max_num_files_reached">Cannot share more than %1$s files</string>
-    <string name="tap_plus_add_favorites">Only your Favorites can see your Last Seen and Status Updates.\n\nTap + to add to Favorites.</string>
     <string name="last_seen_proper_casing">Last Seen</string>
     <string name="status_updates_proper_casing">Status Updates</string>
     <string name="bigger_better_attachments">Bigger, better attachments</string>
@@ -1602,8 +1599,8 @@
     <string name="ftue_card_body_sticker">When words can’t express, say it with a sticker</string>
     <string name="ftue_card_click_text_sticker">You\'ll love them!</string>
     <string name="ftue_card_sep">Amazing things you can do on hike</string>
-     <string name="hike_to_offline_push_title">Placeholder</string>
-     <string name="hike_to_offline_text">%1$s placeholder</string>
+     <string name="change_stealth_password">Change Stealth passcode</string>
+     <string name="change_stealth_password_body">Change your stealth passcode to something sneaky!</string>
      <string name="change_stealth_password">Change Password</string>
      <string name="change_stealth_password_body">Change your Hidden Mode password</string>
      <string name="invited">Invited</string>
@@ -1612,11 +1609,11 @@
      <string name="invite_more">INVITE MORE</string>
      <string name="invite_sent">Invite sent</string>
      <string name="send_invite">Invite (%1$d)</string>
-     <string name="reciever_is_offline">%1$s is offline</string>
-     <string name="hike_to_offline_tip_msg">Tap here to use hike offline.</string>
+     <string name="reciever_is_offline">%1$s is Offline</string>
+     <string name="hike_to_offline_tip_msg">Tap here to send free SMS</string>
      <string name="send_uppercase">SEND</string>
      <string name="hike_offline_mode_header">Send as %1$d SMS</string>
-     <string name="hike_offline_mode_msg">Select messages will be sent as SMS.</string>
+     <string name="hike_offline_mode_msg">Selected messages will be sent</string>
      <string name="messages_sent">Messages sent!</string>
      <string name="hike_offline_messages_sent_msg">You have %1$d free SMS left</string>
      <string name="always">Always</string>
@@ -1626,5 +1623,31 @@
     <string name="invite_with_watsapp">WhatsApp</string>
     <string name="watsapp_invitation">Hey, join me on hike messenger! It\'s the only messaging app that is made in India! Get it now and Hike up your life.</string>
     <string name="wicked_jellies">Wicked Jellies</string>
-
+     <string name="hike_to_offline_push_title_single">%1$s is offline</string>
+      <string name="hike_to_offline_push_title_multiple">Multiple people are offline</string>
+     <string name="hike_to_offline_text">Send messages via hike offline</string>
+    <string name="invite_with_watsapp">WhatsApp</string>
+    <string name="watsapp_invitation">Hey, join me on hike, the only messaging app made in India! It lets you show your \'Last Seen\' only to select friends, send messages to friends when they\'re offline and send awesome stickers.\n
+Also share all types of files - docs, songs, movies etc, up to 100MB each ;) http://get.hike.in/</string>
+    <string name="extra_invite">Extra</string>
+     <string name="profile_pic_header">Profile Picture</string>
+     <string name="profile_pic_display_info">Show only to your Favorites</string>
+     <string name="add_as_favorite_menu">Add favorite</string>
+	<string name="remove_from_favorites">Remove favorite</string>	  
+     <string name="file_attachment_info">Share Media &amp; Files up to 100 MB</string>
+     <string name="tap_plus_add_favorites">Only favorites can see your last seen and status update. Choose them wisely!</string>
+     <string name="undelivered_sms_setting_remember">My preference is saved</string>
+     <string name="send_sms_sticker_msg">sent you a sticker</string>
+     <string name="send_sms_img_msg">sent you an image</string>
+     <string name="send_sms_video_msg">sent you a video</string>
+     <string name="send_sms_location_msg">shared his/her location </string>
+     <string name="send_sms_contact_msg">shared a contact</string>
+     <string name="send_sms_audio_msg">sent you an audio</string>
+     <string name="free_hike_sms_subtext">%1$d left</string>
+     <string name="free_hike_sms_subtext_diabled">%1$d left. Hike more to earn free SMS</string>
+     <string name="carrier_charges_apply">Carrier charges apply</string>
+     <string name="send_sms_as">Send %1$d SMS as</string>
+     <string name="choose_setting">Choose Setting</string>
+     <string name="kitkat_not_enough_sms">Only %1$d SMS left. Hike more to earn free SMS</string>
+     <string name="sent_by_hike">sent via hike free sms</string>
 </resources>

@@ -614,6 +614,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		super.onStart();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
+		long t1, t2;
+		t1 = System.currentTimeMillis();
+		Utils.clearJar(this);
+		t2 = System.currentTimeMillis();
+		Logger.d("clearJar", "time : " + (t2 - t1));
 	}
 
 	@Override
