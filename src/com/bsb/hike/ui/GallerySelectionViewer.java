@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import android.app.Dialog;
@@ -38,6 +39,7 @@ import com.bsb.hike.smartImageLoader.GalleryImageLoader;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, OnScrollListener, OnPageChangeListener, HikePubSub.Listener
@@ -178,13 +180,17 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			public void onClick(View v)
 			{
 				final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
+				long sizeOriginal = 0;
 				for (GalleryItem galleryItem : galleryItems)
 				{
 					fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
+					File file = new File(galleryItem.getFilePath());
+					sizeOriginal += file.length();
 				}
+				
 				final String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
 				final boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
-
+				
 				if (!HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
 				{
 					HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
@@ -219,13 +225,12 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 							// TODO Auto-generated method stub
 							
 						}
-					}, (Object[]) null);
+					}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
 				}
 				else
 				{
 					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
 					Utils.executeAsyncTask(fileTransferTask);
-
 					progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
 				}
 			}

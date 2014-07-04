@@ -34,6 +34,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
+import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.tasks.UnlinkTwitterTask;
 import com.bsb.hike.tasks.DeleteAccountTask.DeleteAccountListener;
 import com.bsb.hike.ui.utils.LockPattern;
@@ -668,7 +669,37 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.IMAGE_QUALITY.equals(preference.getKey()))
 		{
-			HikeDialog.showDialog(this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG, (Object[]) null);
+			HikeDialog.showDialog(HikePreferences.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
+			{
+				@Override
+				public void onSucess(Dialog dialog)
+				{
+					updateMedia();
+					dialog.dismiss();
+				}
+
+				@Override
+				public void negativeClicked(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void positiveClicked(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void neutralClicked(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+			}, (Object[]) null);
+
 		}
 		else if(HikeConstants.CHANGE_STEALTH_PASSCODE.equals(preference.getKey()))
 		{
@@ -783,9 +814,34 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		case R.xml.notification_preferences:
 			updateNotifPrefView();
 			break;
+		case R.xml.media_download_preferences:
+			updateMedia();
 		}
 	}
 
+	private void updateMedia()
+	{
+		Preference preference = getPreferenceScreen().findPreference(HikeConstants.IMAGE_QUALITY);
+		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(HikePreferences.this);
+		
+		int imageQuality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);		
+		
+		String qualityString = "";
+		switch (imageQuality)
+		{
+		case 1:
+			qualityString = "Original";
+			break;
+		case 2:
+			qualityString = "Medium";
+			break;
+		case 3:
+			qualityString = "Small";
+			break;
+		}
+		preference.setTitle(getResources().getString(R.string.image_quality_prefs) + " - " + qualityString);
+	}
+	
 	private void updateNotifPrefView()
 	{
 		ListPreference lp = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.VIBRATE_PREF_LIST);

@@ -13,14 +13,19 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomFontButton;
+import com.bsb.hike.view.CustomFontTextView;
 
 public class HikeDialog
 {
@@ -218,70 +223,165 @@ public class HikeDialog
 		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.image_quality_popup);
 		dialog.setCancelable(true);
-		
 		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		final Editor editor = appPrefs.edit();
 		int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
+		final LinearLayout small_ll = (LinearLayout) dialog.findViewById(R.id.hike_small_container);
+		final LinearLayout medium_ll = (LinearLayout) dialog.findViewById(R.id.hike_medium_container);
+		final LinearLayout original_ll = (LinearLayout) dialog.findViewById(R.id.hike_original_container);
+		final CheckBox small = (CheckBox) dialog.findViewById(R.id.hike_small_checkbox);
+		final CheckBox medium = (CheckBox) dialog.findViewById(R.id.hike_medium_checkbox);
+		final CheckBox original = (CheckBox) dialog.findViewById(R.id.hike_original_checkbox);
+		CustomFontButton always = (CustomFontButton) dialog.findViewById(R.id.btn_always);
+		CustomFontButton justOnce = (CustomFontButton) dialog.findViewById(R.id.btn_just_once);
+		CustomFontTextView header = (CustomFontTextView) dialog.findViewById(R.id.image_quality_popup_header);
+		CustomFontTextView smallSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_small_cftv);
+		CustomFontTextView mediumSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_medium_cftv);
+		CustomFontTextView originalSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_original_cftv);
 		
-		final RadioButton original = (RadioButton) dialog.findViewById(R.id.original);
-		final RadioButton medium = (RadioButton) dialog.findViewById(R.id.medium);
-		final RadioButton low = (RadioButton) dialog.findViewById(R.id.low);
-		final CheckBox rememberChoice = (CheckBox) dialog.findViewById(R.id.rememberChoice);
-		Button done = (Button) dialog.findViewById(R.id.done);
+		if(data!=null)
+			{
+			Long[] dataBundle = (Long[])data;
+			int smallsz,mediumsz,originalsz;
+			if(dataBundle.length>0)
+				{
+				if(dataBundle[0]!=1)
+					header.setText(context.getString(R.string.image_quality_send) + " " + dataBundle[0] + " " + context.getString(R.string.image_quality_files_as));
+				else
+					header.setText(context.getString(R.string.image_quality_send) + " " + dataBundle[0] + " " + context.getString(R.string.image_quality_file_as));				
+				
+				originalsz = dataBundle[1].intValue();
+				smallsz = (int) (dataBundle[0] * HikeConstants.IMAGE_SIZE_SMALL);
+				mediumsz = (int) (dataBundle[0] * HikeConstants.IMAGE_SIZE_MEDIUM);
+				if (smallsz > originalsz)
+				{
+					smallsz = originalsz;
+				}
+				
+				if(mediumsz>originalsz)
+				{
+					mediumsz = originalsz;
+				}
+					smallSize.setText(" (" + Utils.getSizeForDisplay(smallsz)+ ")");
+					mediumSize.setText(" (" + Utils.getSizeForDisplay(mediumsz) + ")");
+					originalSize.setText(" (" + Utils.getSizeForDisplay(originalsz) + ")");
+					
+				
+			}
+		}
 		
 		switch (quality)
 		{
 		case 1:
+			small.setChecked(false);
+			medium.setChecked(false);
 			original.setChecked(true);
 			break;
 		case 2:
+			small.setChecked(false);
 			medium.setChecked(true);
+			original.setChecked(false);
 			break;
 		case 3:
-			low.setChecked(true);
+			small.setChecked(true);
+			medium.setChecked(false);
+			original.setChecked(false);
 			break;
 		}
-		rememberChoice.setChecked(HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false));
 		
-		done.setOnClickListener(new OnClickListener()
+		OnClickListener onClickListener = new OnClickListener()
 		{
+			
 			@Override
 			public void onClick(View v)
 			{
 				// TODO Auto-generated method stub
-				
-				if (medium.isChecked())
+				switch (v.getId())
 				{
-					editor.putInt(HikeConstants.IMAGE_QUALITY, 2);
-				}
-				else if (original.isChecked())
-				{
-					editor.putInt(HikeConstants.IMAGE_QUALITY, 1);
-				}
-				else
-				{
-					editor.putInt(HikeConstants.IMAGE_QUALITY, 3);
-				}
-				editor.commit();
-				
-				if (rememberChoice.isChecked())
-				{
+				case R.id.hike_small_container:
+					small.setChecked(true);
+					medium.setChecked(false);
+					original.setChecked(false);
+					
+					break;
+				case R.id.hike_medium_container:
+					small.setChecked(false);
+					medium.setChecked(true);
+					original.setChecked(false);
+					
+					break;
+				case R.id.hike_original_container:
+					small.setChecked(false);
+					medium.setChecked(false);
+					original.setChecked(true);
+					
+					break;
+					
+				case R.id.btn_always:
+					if (medium.isChecked())
+					{
+						editor.putInt(HikeConstants.IMAGE_QUALITY, 2);
+					}
+					else if (original.isChecked())
+					{
+						editor.putInt(HikeConstants.IMAGE_QUALITY, 1);
+					}
+					else
+					{
+						editor.putInt(HikeConstants.IMAGE_QUALITY, 3);
+					}
+					editor.commit();
+					
 					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, true);
-				}
-				else
-				{
+
+					if (listener != null)
+					{
+						listener.onSucess(dialog);
+					}
+					else
+					{
+						dialog.dismiss();
+					}
+					
+					break;
+					
+				case R.id.btn_just_once:
+					if (medium.isChecked())
+					{
+						editor.putInt(HikeConstants.IMAGE_QUALITY, 2);
+					}
+					else if (original.isChecked())
+					{
+						editor.putInt(HikeConstants.IMAGE_QUALITY, 1);
+					}
+					else
+					{
+						editor.putInt(HikeConstants.IMAGE_QUALITY, 3);
+					}
+					editor.commit();
+					
 					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, false);
-				}
-				if (listener != null)
-				{
-					listener.onSucess(dialog);
-				}
-				else
-				{
-					dialog.dismiss();
+
+					if (listener != null)
+					{
+						listener.onSucess(dialog);
+					}
+					else
+					{
+						dialog.dismiss();
+					}
+					
+					break;
 				}
 			}
-		});
+		};
+
+		small_ll.setOnClickListener(onClickListener);
+		medium_ll.setOnClickListener(onClickListener);
+		original_ll.setOnClickListener(onClickListener);
+		always.setOnClickListener(onClickListener);
+		justOnce.setOnClickListener(onClickListener);
+
 		dialog.show();
 		return dialog;
 	}
