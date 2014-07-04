@@ -1534,6 +1534,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			public void negativeClicked(Dialog dialog)
 			{
 			}
+
+			@Override
+			public void onSucess(Dialog dialog)
+			{
+				// TODO Auto-generated method stub
+				
+			}
 		};
 	}
 

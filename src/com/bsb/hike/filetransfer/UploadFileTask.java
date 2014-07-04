@@ -284,56 +284,28 @@ public class UploadFileTask extends FileTransferBase
 			else
 			{
 				mFile = new File(hikeFile.getSourceFilePath());
-				// do not copy the file if it is video or audio
-				if (!mFile.exists() || hikeFileType == HikeFileType.VIDEO || hikeFileType == HikeFileType.AUDIO || hikeFileType == HikeFileType.AUDIO_RECORDING
-						|| hikeFileType == HikeFileType.OTHER)
+				if (mFile.exists() && hikeFileType == HikeFileType.IMAGE)
 				{
-					selectedFile = mFile;
-					hikeFile.setFile(selectedFile);
-				}
-				else if (mFile.getPath().startsWith(Utils.getFileParent(hikeFileType, true)))
-				{
-					selectedFile = mFile;
-					hikeFile.setFile(selectedFile);
-				}
-				else
-				{
-					boolean makeCopy = true;
 					selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName, true);
 					if (selectedFile == null)
 						throw new Exception(FileTransferManager.READ_FAIL);
-
-					if (selectedFile.exists())
+					
+					if(selectedFile.exists())
 					{
-						String sourceFile_md5Hash = Utils.fileToMD5(mFile.getPath());
-						String selectedFile_md5Hash = Utils.fileToMD5(selectedFile.getPath());
-						if ((sourceFile_md5Hash != null) && (selectedFile_md5Hash != null))
-						{
-							if (sourceFile_md5Hash.equals(selectedFile_md5Hash))
-							{
-								Logger.d(getClass().getSimpleName(), "md5 matches: no need to copy");
-								selectedFile = mFile;
-								makeCopy = false;
-							}
-							else
-							{
-								selectedFile = Utils.getOutputMediaFile(hikeFileType, null, true);
-							}
-						}
-						else
-						{
-							selectedFile = Utils.getOutputMediaFile(hikeFileType, null, true);
-						}
+						selectedFile = Utils.getOutputMediaFile(hikeFileType, null, true);
 					}
-					// Saving the file to hike local folder
-					if (makeCopy)
+					if (!Utils.copyImage(mFile.getPath(), selectedFile.getPath(), context))
 					{
-						if (!Utils.copyFile(mFile.getPath(), selectedFile.getPath(), hikeFileType))
-						{
-							Logger.d(getClass().getSimpleName(), "throwing copy file exception");
-							throw new Exception(FileTransferManager.READ_FAIL);
-						}
+						Logger.d(getClass().getSimpleName(), "throwing copy file exception");
+						throw new Exception(FileTransferManager.READ_FAIL);
 					}
+					hikeFile.setFile(selectedFile);
+				}
+				// do not copy the file if it is video or audio or any other file
+				else
+				{
+					selectedFile = mFile;
+					hikeFile.setFile(selectedFile);
 				}
 				hikeFile.removeSourceFile();
 			}

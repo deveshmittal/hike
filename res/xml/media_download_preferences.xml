@@ -2,6 +2,13 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/auto_download_media" >
 
+    <com.bsb.hike.view.IconPreference
+        icon="ic_auto_download_image"
+        android:key="imageQuality"
+        android:layout="@layout/icon_preference"
+        android:summary="Always use this quality for sending images"
+        android:title="Image Quality" />
+
     <PreferenceCategory
         android:orderingFromXml="true"
         android:selectable="false"

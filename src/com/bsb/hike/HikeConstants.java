@@ -420,6 +420,10 @@ public class HikeConstants
 	public static final String WF_AUTO_DOWNLOAD_AUDIO_PREF = "wfAutoDownloadAudioPref";
 
 	public static final String WF_AUTO_DOWNLOAD_VIDEO_PREF = "wfAutoDownloadVideoPref";
+	
+	public static final String IMAGE_QUALITY = "imageQuality";
+	
+	public static final String REMEMBER_IMAGE_CHOICE = "rememberImageChoice";
 
 	public static final String HIKEBOT = "TD-HIKE";
 
@@ -596,7 +600,9 @@ public class HikeConstants
 
 	public static final int MAX_DIMENSION_FULL_SIZE_PROFILE_PX = 500;
 
-	public static final int MAX_DIMENSION_FULL_SIZE_PX = 800;
+	public static final int MAX_DIMENSION_MEDIUM_FULL_SIZE_PX = 800;
+	
+	public static final int MAX_DIMENSION_LOW_FULL_SIZE_PX = 600;
 
 	public static final int INITIAL_PROGRESS = 5;
 
@@ -1591,4 +1597,8 @@ public class HikeConstants
 	public static final long[] LONG_VIB_PATTERN = new long[] { 0, 1000 };
 
 	public static final int FTUE_HIKE_CONTACT_MIN_LIMIT = 3;
+	
+	public static final long IMAGE_SIZE_SMALL = 50 * 1024;
+	
+	public static final long IMAGE_SIZE_MEDIUM = 80 * 1024;
 }
