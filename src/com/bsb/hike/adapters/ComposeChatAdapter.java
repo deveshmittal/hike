@@ -104,7 +104,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 		if (convertView == null)
 		{
-			convertView = inflateView(viewType);
+			convertView = inflateView(viewType, parent);
 
 		}
 
@@ -290,7 +290,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		}
 	}
 
-	private View inflateView(ViewType viewType)
+	private View inflateView(ViewType viewType, ViewGroup parent)
 	{
 		View convertView = null;
 		ViewHolder holder = null;
@@ -315,7 +315,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			convertView.setTag(holder);
 			break;	
 		default:
-			convertView = LayoutInflater.from(context).inflate(R.layout.hike_list_item, null);
+			convertView = LayoutInflater.from(context).inflate(R.layout.hike_list_item, parent, false);
 			holder = new ViewHolder();
 			holder.userImage = (ImageView) convertView.findViewById(R.id.contact_image);
 			holder.name = (TextView) convertView.findViewById(R.id.name);
