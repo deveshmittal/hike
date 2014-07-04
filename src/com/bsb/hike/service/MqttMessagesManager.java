@@ -257,14 +257,6 @@ public class MqttMessagesManager
 				}
 
 				saveStatusMsg(jsonObj, msisdn);
-
-				List<String> groupConversations = convDb.listOfGroupConversationsWithMsisdn(msisdn);
-
-				// For group chats
-				for (String groupId : groupConversations)
-				{
-					saveStatusMsg(jsonObj, groupId);
-				}
 			}
 			else
 			{
