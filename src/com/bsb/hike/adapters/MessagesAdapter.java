@@ -5044,14 +5044,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public int getSelectedFreeSmsCount()
 	{
 		Collection<ConvMessage> selectedMessages = getSelectedMessagesMap().values();
-		int totalMsgLength = 0;
-		for (ConvMessage convMessage : selectedMessages)
-		{
-			totalMsgLength += Utils.getMessageDisplayText(convMessage, context).length();
-			
-			// number of line enters after each msg;
-			totalMsgLength += 2;
-		}
+		int totalMsgLength = Utils.combineInOneSmsString(context, false, selectedMessages, true).length();
 		
 		return (totalMsgLength / 140) + 1;
 	}

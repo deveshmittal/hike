@@ -326,7 +326,7 @@ public class DbConversationListener implements Listener
 				 */
 				ConvMessage lastMessage = messages.get(messages.size() -1);
 				
-				ConvMessage convMessage = new ConvMessage(combineInOneSmsString(true, messages), lastMessage.getMsisdn(), 
+				ConvMessage convMessage = new ConvMessage(Utils.combineInOneSmsString(context, true, messages, true), lastMessage.getMsisdn(), 
 						lastMessage.getTimestamp(), lastMessage.getState(), lastMessage.getMsgID(), lastMessage.getMappedMsgID());
 				convMessage.setConversation(lastMessage.getConversation());
 				JSONObject messageJSON = convMessage.serialize().getJSONObject(HikeConstants.DATA);
@@ -365,7 +365,7 @@ public class DbConversationListener implements Listener
 				mConversationDb.updateIsHikeMessageState(convMessage.getMsgID(), false);
 			}
 			ConvMessage lastMessage = messages.get(messages.size() - 1);
-			sendNativeSMS(new ConvMessage(combineInOneSmsString(true, messages), lastMessage.getMsisdn(), lastMessage.getTimestamp(), State.UNKNOWN, lastMessage.getMsgID(), -1));
+			sendNativeSMS(new ConvMessage(Utils.combineInOneSmsString(context, true, messages, false), lastMessage.getMsisdn(), lastMessage.getTimestamp(), State.UNKNOWN, lastMessage.getMsgID(), -1));
 
 			mPubSub.publish(HikePubSub.CHANGED_MESSAGE_TYPE, null);
 		}
@@ -556,38 +556,4 @@ public class DbConversationListener implements Listener
 		context.getContentResolver().insert(HikeConstants.SMSNative.SENTBOX_CONTENT_URI, values);
 	}
 
-	public String combineInOneSmsString(boolean resetTimestamp, List<ConvMessage> convMessages)
-	{
-		String combinedMessageString = "";
-		int count = 0;
-		for (ConvMessage convMessage : convMessages)
-		{
-			if (!convMessage.isSent())
-			{
-				break;
-			}
-			
-			if (resetTimestamp && convMessage.getState().ordinal() < State.SENT_CONFIRMED.ordinal())
-			{
-				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
-			}
-			
-			combinedMessageString += Utils.getMessageDisplayText(convMessage, context);
-			
-			if (++count >= HikeConstants.MAX_FALLBACK_NATIVE_SMS)
-			{
-				break;
-			}
-			
-			/*
-			 * Added line enters among messages
-			 */
-			if(count != convMessages.size())
-			{
-				combinedMessageString += "\n\n";
-			}
-		}
-		
-		return combinedMessageString;
-	}
 }

@@ -4033,4 +4033,44 @@ public class Utils
 		}
 
 	}
+	
+	public static String combineInOneSmsString(Context context, boolean resetTimestamp, Collection<ConvMessage> convMessages, boolean isFreeHikeSms)
+	{
+		String combinedMessageString = "";
+		int count = 0;
+		for (ConvMessage convMessage : convMessages)
+		{
+			if (!convMessage.isSent())
+			{
+				break;
+			}
+			
+			if (resetTimestamp && convMessage.getState().ordinal() < State.SENT_CONFIRMED.ordinal())
+			{
+				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
+			}
+			
+			combinedMessageString += Utils.getMessageDisplayText(convMessage, context);
+			
+			if (++count >= HikeConstants.MAX_FALLBACK_NATIVE_SMS)
+			{
+				break;
+			}
+			
+			/*
+			 * Added line enters among messages
+			 */
+			if(count != convMessages.size())
+			{
+				combinedMessageString += "\n\n";
+			}
+		}
+		
+		if(isFreeHikeSms)
+		{
+			combinedMessageString += "\n\n"+"-"+context.getString(R.string.sent_by_hike);
+		}
+		
+		return combinedMessageString;
+	}
 }
