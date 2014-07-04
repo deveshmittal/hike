@@ -206,7 +206,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 				holder.onlineIndicator.setVisibility(View.GONE);
 				if (viewType != ViewType.FRIEND && viewType != ViewType.FRIEND_REQUEST)
 				{
-					if (!contactInfo.isOnhike())
+					if (!contactInfo.isOnhike() && !showCheckbox)
 					{
 						long inviteTime = contactInfo.getInviteTime();
 						if (inviteTime == 0)
