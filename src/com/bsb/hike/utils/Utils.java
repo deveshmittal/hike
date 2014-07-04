@@ -2750,19 +2750,29 @@ public class Utils
 		{
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 
-			String message = HikeFileType.getFileTypeMessage(context, hikeFile.getHikeFileType(), false) + ". " + AccountUtils.fileTransferBaseViewUrl + hikeFile.getFileKey();
-			return message;
+			switch (hikeFile.getHikeFileType())
+			{
+			case IMAGE:
+					return context.getString(R.string.send_sms_img_msg);
+			case VIDEO:
+				return context.getString(R.string.send_sms_video_msg);
+			case AUDIO:
+				return context.getString(R.string.send_sms_audio_msg);
+			case LOCATION:
+				return context.getString(R.string.send_sms_location_msg);
+			case CONTACT:
+				return context.getString(R.string.send_sms_contact_msg);
+			case AUDIO_RECORDING:
+				return context.getString(R.string.send_sms_audio_msg);
+
+			default:
+				break;
+			}
 
 		}
 		else if (convMessage.isStickerMessage())
 		{
-			Sticker sticker = convMessage.getMetadata().getSticker();
-
-			String stickerId = sticker.getStickerId();
-			String stickerUrlId = stickerId.substring(0, stickerId.indexOf("_"));
-
-			String message = context.getString(R.string.sent_sticker_sms, String.format(AccountUtils.stickersUrl, sticker.getCategory().categoryId.name(), stickerUrlId));
-			return message;
+			return context.getString(R.string.send_sms_sticker_msg);
 		}
 		return convMessage.getMessage();
 	}
@@ -4081,6 +4091,45 @@ public class Utils
 				Logger.e("clearJar", "Exception when traversing through hashmap" + e);
 			}
 		}
-
+	}
+	
+	public static String combineInOneSmsString(Context context, boolean resetTimestamp, Collection<ConvMessage> convMessages, boolean isFreeHikeSms)
+	{
+		String combinedMessageString = "";
+		int count = 0;
+		for (ConvMessage convMessage : convMessages)
+		{
+			if (!convMessage.isSent())
+			{
+				break;
+			}
+			
+			if (resetTimestamp && convMessage.getState().ordinal() < State.SENT_CONFIRMED.ordinal())
+			{
+				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
+			}
+			
+			combinedMessageString += Utils.getMessageDisplayText(convMessage, context);
+			
+			if (++count >= HikeConstants.MAX_FALLBACK_NATIVE_SMS)
+			{
+				break;
+			}
+			
+			/*
+			 * Added line enters among messages
+			 */
+			if(count != convMessages.size())
+			{
+				combinedMessageString += "\n\n";
+			}
+		}
+		
+		if(isFreeHikeSms)
+		{
+			combinedMessageString += "\n\n"+"-"+context.getString(R.string.sent_by_hike);
+		}
+		
+		return combinedMessageString;
 	}
 }
