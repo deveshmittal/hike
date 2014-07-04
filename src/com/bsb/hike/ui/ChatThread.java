@@ -3332,6 +3332,75 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 		}
+		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
+		{
+			HashMap<String, ArrayList<ConvMessage>> messageListMap = (HashMap<String, ArrayList<ConvMessage>>) object;
+			final ArrayList<ConvMessage> messageList = messageListMap.get(mContactNumber);
+			String label = null;
+			if(messageList != null)
+			{
+				JSONArray ids = new JSONArray();
+				for (final ConvMessage message : messageList)
+				{
+					if (hasWindowFocus())
+					{
+						message.setState(ConvMessage.State.RECEIVED_READ);
+						if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+						{
+							ids.put(String.valueOf(message.getMappedMsgID()));
+						}
+						
+					}
+					
+					if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO && mConversation instanceof GroupConversation)
+					{
+						HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
+						((GroupConversation) mConversation).setGroupParticipantList(hCDB.getGroupParticipants(mConversation.getMsisdn(), false, false));
+					}
+
+					label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
+					if (activityVisible && Utils.isPlayTickSound(getApplicationContext()))
+					{
+						Utils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
+					}
+				}
+				final String convLabel = label;
+				runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						if (convLabel != null)
+						{
+							setLabel(convLabel);
+						}
+						// TODO optimize it for complete messageList
+						addBulkMessages(messageList);
+						Logger.d(getClass().getSimpleName(), "calling chatThread.addMessage() Line no. : 2219");
+					}
+				});
+				
+				
+				if (ids != null && ids.length() > 0)
+				{
+					JSONObject jsonObject = new JSONObject();
+					try
+					{
+						jsonObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
+						jsonObject.put(HikeConstants.TO, mConversation.getMsisdn());
+						jsonObject.put(HikeConstants.DATA, ids);
+					}
+					catch (JSONException e)
+					{
+						e.printStackTrace();
+					}
+					// TODO make the calls here.
+					mPubSub.publish(HikePubSub.MQTT_PUBLISH, jsonObject);
+					mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT, mConversation.getMsisdn());
+					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
+				}
+			}
+		}
 	}
 
 	public boolean isContactOnline()
@@ -3584,6 +3653,76 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			 * We add the typing notification back if the message was sent by the user or someone in the group is still typing.
 			 */
 			if (convMessage.getTypingNotification() == null && typingNotification != null)
+			{
+				if (convMessage.isSent())
+				{
+					mAdapter.addMessage(new ConvMessage(typingNotification));
+				}
+				else if (mConversation instanceof GroupConversation)
+				{
+					if (!((GroupTypingNotification) typingNotification).getGroupParticipantList().isEmpty())
+					{
+						Logger.d("TypingNotification", "Size in chat thread: " + ((GroupTypingNotification) typingNotification).getGroupParticipantList().size());
+						mAdapter.addMessage(new ConvMessage(typingNotification));
+					}
+				}
+			}
+			mAdapter.notifyDataSetChanged();
+
+			/*
+			 * Don't scroll to bottom if the user is at older messages. It's possible that the user might be reading them.
+			 */
+			if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
+			{
+				if (convMessage.getTypingNotification() == null
+						&& (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
+				{
+					showUnreadCountIndicator();
+				}
+				return;
+			}
+			else
+			{
+				mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+			}
+			/*
+			 * Resetting the transcript mode once the list has scrolled to the bottom.
+			 */
+			mHandler.post(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_DISABLED);
+				}
+			});
+		}
+	}
+	
+	private void addBulkMessages(ArrayList<ConvMessage> messageList)
+	{
+		if (messages != null && mAdapter != null)
+		{
+			TypingNotification typingNotification = null;
+			/*
+			 * If we were showing the typing bubble, we remove it from the add the new message and add the typing bubble back again
+			 */
+			if (!messages.isEmpty() && messages.get(messages.size() - 1).getTypingNotification() != null)
+			{
+				typingNotification = messages.get(messages.size() - 1).getTypingNotification();
+				messages.remove(messages.size() - 1);
+			}
+			mAdapter.addMessages(messageList, messages.size());
+
+			// Reset this boolean to load more messages when the user scrolls to
+			// the top
+			reachedEnd = false;
+
+			ConvMessage convMessage = messageList.get(messageList.size() - 1);
+			/*
+			 * We add the typing notification back if the message was sent by the user or someone in the group is still typing.
+			 */
+			if (typingNotification != null)
 			{
 				if (convMessage.isSent())
 				{
