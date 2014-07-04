@@ -503,7 +503,7 @@
     <string name="exp_category">Expressions</string>
     <string name="bollywood_category">Bollywood</string>
     <string name="rf_category">Rage faces</string>
-    <string name="free_hike_sms">Free hike SMS</string>
+    <string name="free_hike_sms">Free Hike SMS</string>
     <string name="regular_sms">Regular SMS</string>
     <string name="messaging_my_number">Messaging from %1$s</string>
     <string name="messaging_hike_number">Messaging from +918451043280</string>
@@ -1587,28 +1587,28 @@
      <string name="email_body">I just downloaded the new hike messenger. What a big change from WhatsApp!\n\nIt\'s got amazing Stickers, the ability to choose who sees my Last Seen and some really cool Chat Themes. \n\nThe best part? Hike has thing called Hidden Mode that lets you hide your private chats, from the world! Awesome!\n\nDownload it like asap from http://hike.in!</string>
      <string name="email_subject">hike up your life</string>
      <string name="reciever_is_offline">%1$s is Offline</string>
-     <string name="hike_to_offline_tip_msg">Tap here to use hike offline</string>
+     <string name="hike_to_offline_tip_msg">Tap here to send free SMS</string>
      <string name="send_uppercase">SEND</string>
      <string name="hike_offline_mode_header">Send as %1$d SMS</string>
-     <string name="hike_offline_mode_msg">Selected messages will be sent as SMS</string>
+     <string name="hike_offline_mode_msg">Selected messages will be sent</string>
      <string name="messages_sent">Messages sent!</string>
      <string name="hike_offline_messages_sent_msg">You have %1$d free SMS left</string>
      <string name="always">Always</string>
      <string name="just_once">Just once</string>
      <string name="undelivered_sms_setting_summary">Always ask for preference</string>
      <string name="undelivered_sms_setting_remember">My preference is saved</string>
-     <string name="send_sms_sticker_msg">send you a sticker</string>
-     <string name="send_sms_img_msg">send you an image</string>
-     <string name="send_sms_video_msg">send you a video</string>
+     <string name="send_sms_sticker_msg">sent you a sticker</string>
+     <string name="send_sms_img_msg">sent you an image</string>
+     <string name="send_sms_video_msg">sent you a video</string>
      <string name="send_sms_location_msg">shared his/her location </string>
      <string name="send_sms_contact_msg">shared a contact</string>
-     <string name="send_sms_audio_msg">send you an audio</string>
+     <string name="send_sms_audio_msg">sent you an audio</string>
      <string name="free_hike_sms_subtext">%1$d left</string>
      <string name="free_hike_sms_subtext_diabled">%1$d left. Hike more to earn free SMS</string>
      <string name="carrier_charges_apply">carrier charges apply</string>
      <string name="send_sms_as">Send %1$d SMS as</string>
      <string name="choose_setting">Choose Setting</string>
      <string name="kitkat_not_enough_sms">Only %1$d SMS left. Hike more to earn free SMS</string>
-     <string name="sent_by_hike">sent by hike</string>
+     <string name="sent_by_hike">sent via hike free sms</string>
      
 </resources>
