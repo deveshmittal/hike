@@ -1405,8 +1405,6 @@
 	<string name="you_accepted_favorite_request_details">Great! %1$s will now be able to see your Last Seen and Status Updates.</string>
 	<string name="accepted_your_favorite_request_details">You can now see %1$s\'s Last Seen and Status Updates</string>
 	<string name="add_as_favorites_profile">Add %1$s to Favorites now.\nShare your Last Seen and Status Updates only with Favorite Contacts.</string>
-	<string name="add_as_favorite_menu">Add as a favorite</string>
-	<string name="remove_from_favorites">Remove from favorites</string>
 	<string name="favorite_request_sent">Added as a favorite</string>
 	<string name="favorite_request_sent_multiple">Added as favorites</string>
 	<string name="add_as_favorite_notification">%1$s added you as a favorite</string>
@@ -1587,7 +1585,7 @@
      <string name="invite_more">INVITE MORE</string>
      <string name="invite_sent">Invite sent</string>
      <string name="send_invite">Invite (%1$d)</string>
-    
-    
+     <string name="add_as_favorite_menu">Add favorite</string>
+	<string name="remove_from_favorites">Remove favorite</string>	  
      
 </resources>
