@@ -318,9 +318,13 @@
     <color name="ftue_card_hidden_mode">#dc354b</color>
     <color name="ftue_card_hike_offline">#0e7bbd</color>
     <color name="ftue_card_sticker">#dc354b</color>
+    <color name="ftue_card_group">#cf5545</color>
+    <color name="ftue_card_invite">#01b085</color>
     <color name="ftue_card_last_seen_click_text">#f59029</color>
     <color name="ftue_card_hidden_mode_click_text">#dc354b</color>
     <color name="ftue_card_hike_offline_click_text">#555555</color>
     <color name="ftue_card_sticker_click_text">#555555</color>
+    <color name="ftue_card_group_click_text">#cf5545</color>
+    <color name="ftue_card_invite_click_text">#01b085</color>
 </resources>
 	
