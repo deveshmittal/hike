@@ -1584,9 +1584,9 @@
      <string name="invite_more">INVITE MORE</string>
      <string name="invite_sent">Invite sent</string>
      <string name="send_invite">Invite (%1$d)</string>
-     <string name="add_as_favorite_menu">Add favorite</string>
-	<string name="remove_from_favorites">Remove favorite</string>	  
-     <string name="file_attachment_info">Share Media &amp; Files up to 100 MB</string>
      <string name="tap_plus_add_favorites">Only favorites can see your last seen and status update. Choose them wisely!</string>
+     <string name="add_as_favorite_menu">Add Favorite</string>
+	 <string name="remove_from_favorites">Remove Favorite</string>
+	 <string name="file_attachment_info">Share media &amp; files up to 100 MB</string>
     
 </resources>
