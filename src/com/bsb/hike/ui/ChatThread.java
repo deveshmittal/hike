@@ -7325,14 +7325,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				 */
 				if (messagesSent)
 				{
+					Toast toast;
 					if(!isNativeSms)
 					{
-						Toast.makeText(ChatThread.this, getString(R.string.hike_offline_messages_sent_msg, mCredits - mAdapter.getSelectedFreeSmsCount()), Toast.LENGTH_LONG).show();
+						toast = Toast.makeText(ChatThread.this, getString(R.string.hike_offline_messages_sent_msg, mCredits - mAdapter.getSelectedFreeSmsCount()), Toast.LENGTH_SHORT);
 					}
 					else
 					{
-						Toast.makeText(ChatThread.this, getString(R.string.carrier_charges_apply), Toast.LENGTH_LONG).show();
+						toast = Toast.makeText(ChatThread.this, getString(R.string.carrier_charges_apply), Toast.LENGTH_SHORT);
 					}
+					toast.setGravity(Gravity.CENTER, 0, 0);
+					toast.show();
 				}
 			}
 		};
