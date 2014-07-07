@@ -316,5 +316,7 @@
     <color name="favorite_ftue">#f59029</color>
     <color name="black_60">#99000000</color>
     <color name="white_16">#28FFFFFF</color>
+    <color name="white_80">#CCFFFFFF</color>
+    <color name="black_16">#28000000</color>
 </resources>
 	
