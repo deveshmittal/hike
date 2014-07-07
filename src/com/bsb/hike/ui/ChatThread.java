@@ -7004,6 +7004,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						possibleKeyboardHeight = temp;
 					}
 					isKeyboardOpen = true;
+					if(isEmoticonPalleteVisible()){
+						attachmentWindow.update(-1, temp);
+					}
 				}
 				else
 				{
