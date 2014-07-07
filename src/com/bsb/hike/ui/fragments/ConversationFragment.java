@@ -69,6 +69,7 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.ui.HikeFragmentable;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
@@ -80,13 +81,14 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.HikeTip.TipType;
 
-public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener
+public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener, HikeFragmentable
 {
 
 	private class DeleteConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]>
 	{
 
 		Context context;
+
 		boolean publishStealthEvent;
 
 		public DeleteConversationsAsyncTask(Context context)
@@ -792,6 +794,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void ShowTipIfNeeded(boolean hasNoConversation)
 	{
+		// to prevent more than one tip to display at a time , it can happen at time of onnewintent
+		if(!hasNoConversation && displayedConversations.get(0) instanceof ConversationTip){
+			displayedConversations.remove(0);
+		}
 		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(this.getActivity().getApplicationContext());
 		String tip = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
 		Logger.i("tip", "#" + tip + "#-currenttype");
@@ -2171,11 +2177,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		default:
 			break;
 		}
-		
+
 		if (mAdapter.getCount() == 0)
 		{
 			setEmptyState();
 		}
+	}
+
+	@Override
+	public void onNewintent(Intent intent)
+	{
+		if (intent.getBooleanExtra(HikeConstants.Extras.HAS_TIP, false))
+		{
+			ShowTipIfNeeded(displayedConversations.isEmpty());
+			notifyDataSetChanged();
+		}
+
 	}
 
 }

@@ -310,6 +310,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			return;
 		}
+		if (mainFragment != null)
+		{
+			mainFragment.onNewintent(intent);
+		}
 	}
 
 	@Override

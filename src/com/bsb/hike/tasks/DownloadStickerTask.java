@@ -162,9 +162,9 @@ public class DownloadStickerTask extends StickerTaskBase
 					// so we save small sticker , if not present already
 
 					File f = saveLargeStickers(largeStickerDir, stickerId, stickerData);
+					boolean saveSmall = true;
 					if (existingStickers != null)
 					{
-						boolean saveSmall = true;
 						for (String stId : existingStickers)
 						{
 							if (stId.equals(stickerId))
@@ -173,10 +173,10 @@ public class DownloadStickerTask extends StickerTaskBase
 								break;
 							}
 						}
-						if (saveSmall)
-						{
-							saveSmallStickers(smallStickerDir, stickerId, f);
-						}
+					}
+					if (saveSmall)
+					{
+						saveSmallStickers(smallStickerDir, stickerId, f);
 					}
 				}
 				catch (FileNotFoundException e)
