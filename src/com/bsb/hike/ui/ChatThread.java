@@ -7210,8 +7210,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			
 			hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.GONE);
 			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.VISIBLE);
-			hikeToOfflineTipview.findViewById(R.id.tip_content).setOnClickListener(null);
-			hikeToOfflineTipview.findViewById(R.id.tip_content).setEnabled(false);
 			
 			hikeToOfflineTipview.setTag(HIKE_TO_OFFLINE_TIP_STATE_3);
 		}
@@ -7232,7 +7230,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			});
 
 			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.GONE);
-			hikeToOfflineTipview.findViewById(R.id.tip_content).setEnabled(false);
 			
 			hikeToOfflineTipview.setTag(HIKE_TO_OFFLINE_TIP_STATE_2);
 		}
@@ -7256,11 +7253,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			};
 			
-			hikeToOfflineTipview.findViewById(R.id.tip_content).setOnClickListener(onNextClickListener);
 			hikeToOfflineTipview.findViewById(R.id.send_button).setOnClickListener(onNextClickListener);
-
 			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.GONE);
-			hikeToOfflineTipview.findViewById(R.id.tip_content).setEnabled(true);
 			
 			hikeToOfflineTipview.setTag(HIKE_TO_OFFLINE_TIP_STATE_1);
 		}

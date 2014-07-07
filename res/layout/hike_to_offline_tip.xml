@@ -9,7 +9,6 @@
         android:id="@+id/tip_content"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/popup_button_bg_selector"
         android:layout_weight="1"
         android:orientation="horizontal" >
 
