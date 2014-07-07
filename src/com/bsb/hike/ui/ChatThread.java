@@ -7195,24 +7195,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	}
 	public void setupHikeToOfflineTipViews(boolean messagesSent, boolean isNativeSms)
 	{
-		if(messagesSent)
-		{
-			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_header)).setText(getResources().getString(R.string.messages_sent, mAdapter.getSelectedFreeSmsCount()));
-			TextView tipMsg = ((TextView) hikeToOfflineTipview.findViewById(R.id.tip_msg));
-			if(!isNativeSms)
-			{
-				tipMsg.setText(getResources().getString(R.string.hike_offline_messages_sent_msg, mCredits - mAdapter.getSelectedFreeSmsCount()));
-			}
-			else
-			{
-				tipMsg.setText(getResources().getString(R.string.carrier_charges_apply));
-			}
-			
-			hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.GONE);
-			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.VISIBLE);
-			
-		}
-		else if (isHikeToOfflineMode)
+		if (isHikeToOfflineMode)
 		{
 			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_header)).setText(getResources().getString(R.string.hike_offline_mode_header, mAdapter.getSelectedFreeSmsCount()));
 			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_msg)).setText(getResources().getString(R.string.hike_offline_mode_msg));
@@ -7277,12 +7260,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		sethikeToOfflineMode(true);
 	}
 
-	public void hideHikeToOfflineTip()
+	public void hideHikeToOfflineTip(final boolean messagesSent, final boolean isNativeSms)
 	{
 		if(hikeToOfflineTipview == null)
 		{ 
 			return;
 		}
+		/*
+		 * If tip is already hiding we don't need to hide it anymore
+		 */
 		else if(((Integer) hikeToOfflineTipview.getTag()) == HIKE_TO_OFFLINE_TIP_STATE_3)
 		{
 			return;
@@ -7293,6 +7279,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onAnimationStart(Animation animation)
 			{
+				hikeToOfflineTipview.setTag(HIKE_TO_OFFLINE_TIP_STATE_3);
 			}
 
 			@Override
@@ -7314,10 +7301,30 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					destroyHikeToOfflineMode();
 				}
 				( (LinearLayout) findViewById(R.id.tipContainerBottom)).removeView(hikeToOfflineTipview);
+				
+				/*
+				 * When messages are successfully sent we need to show a toast
+				 */
+				if (messagesSent)
+				{
+					if(!isNativeSms)
+					{
+						Toast.makeText(ChatThread.this, getString(R.string.hike_offline_messages_sent_msg, mCredits - mAdapter.getSelectedFreeSmsCount()), Toast.LENGTH_LONG).show();
+					}
+					else
+					{
+						Toast.makeText(ChatThread.this, getString(R.string.carrier_charges_apply), Toast.LENGTH_LONG).show();
+					}
+				}
 			}
 		};
 		
 		setHikeOfflineTipHideAnimation(hikeToOfflineTipview, animationListener);
+	}
+	
+	public void hideHikeToOfflineTip()
+	{
+		hideHikeToOfflineTip(false, false);
 	}
 	
 	public void sethikeToOfflineMode(boolean isOn)
@@ -7378,8 +7385,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public void messagesSentCloseHikeToOfflineMode(boolean isNativeSms)
 	{
 		destroyHikeToOfflineMode();
-		setupHikeToOfflineTipViews(true, isNativeSms);
-		hideHikeToOfflineTip();
+		hideHikeToOfflineTip(true, isNativeSms);
 	}
 	
 	private void setHikeOfflineTipHideAnimation(View v, AnimationListener animationListener)
