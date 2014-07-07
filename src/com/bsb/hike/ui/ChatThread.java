@@ -7198,7 +7198,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (isHikeToOfflineMode)
 		{
 			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_header)).setText(getResources().getString(R.string.hike_offline_mode_header, mAdapter.getSelectedFreeSmsCount()));
-			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_msg)).setText(getResources().getString(R.string.hike_offline_mode_msg));
+			((TextView) hikeToOfflineTipview.findViewById(R.id.tip_msg)).setText(getResources().getString(R.string.hike_offline_mode_msg, mAdapter.getSelectedCount()));
 			((TextView) hikeToOfflineTipview.findViewById(R.id.send_button_text)).setText(R.string.send_uppercase);
 			hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.VISIBLE);
 			

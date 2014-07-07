@@ -1589,7 +1589,7 @@
      <string name="reciever_is_offline">%1$s is offline</string>
      <string name="send_uppercase">SEND</string>
      <string name="hike_offline_mode_header">Send as %1$d SMS</string>
-     <string name="hike_offline_mode_msg">Selected messages will be sent</string>
+     <string name="hike_offline_mode_msg">%1$d messages selected</string>
      <string name="messages_sent">Messages sent!</string>
      <string name="hike_offline_messages_sent_msg">You have %1$d free SMS left</string>
      <string name="always">Always</string>
