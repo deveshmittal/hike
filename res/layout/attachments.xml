@@ -28,7 +28,8 @@
         android:paddingRight="10dp"
         android:paddingBottom="10dp"
         android:singleLine="true"
-        android:textColor="@color/white"
+        android:textColor="#bdbebe"
+        android:textSize="12sp"
         android:text="@string/file_attachment_info"/>
  
 </LinearLayout>

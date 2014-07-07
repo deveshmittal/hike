@@ -4266,6 +4266,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			optionsList.add(new OverFlowMenuItem(getString(R.string.location_option), 4, R.drawable.ic_attach_location));
 		}
 		dismissPopupWindow();
+		
+		Utils.hideSoftKeyboard(this, mComposeView);
 
 		attachmentWindow = new PopupWindow(this);
 
