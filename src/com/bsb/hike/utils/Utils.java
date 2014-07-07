@@ -4068,7 +4068,7 @@ public class Utils
 		
 		if(isFreeHikeSms)
 		{
-			combinedMessageString += "\n\n"+"-"+context.getString(R.string.sent_by_hike);
+			combinedMessageString += "\n\n"+"- "+context.getString(R.string.sent_by_hike);
 		}
 		
 		return combinedMessageString;
