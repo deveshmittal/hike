@@ -83,6 +83,7 @@
                 android:src="@drawable/ic_action_bar_arrow" />
 
             <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/send_button_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="8dp"
