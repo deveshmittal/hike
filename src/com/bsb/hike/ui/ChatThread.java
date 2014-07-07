@@ -826,6 +826,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			destroyHikeToOfflineMode();
 			return;
 		}
+		
+		if(isHikeOfflineTipShowing())
+		{
+			hideHikeToOfflineTip();
+			return;
+		}
 
 		if (attachmentWindow != null && attachmentWindow.isShowing())
 		{
