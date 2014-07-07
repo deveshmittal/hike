@@ -7211,7 +7211,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			hikeToOfflineTipview.findViewById(R.id.send_button).setVisibility(View.GONE);
 			hikeToOfflineTipview.findViewById(R.id.close_tip).setVisibility(View.VISIBLE);
 			
-			hikeToOfflineTipview.setTag(HIKE_TO_OFFLINE_TIP_STATE_3);
 		}
 		else if (isHikeToOfflineMode)
 		{
@@ -7280,21 +7279,45 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void hideHikeToOfflineTip()
 	{
-		if(hikeToOfflineTipview != null)
+		if(hikeToOfflineTipview == null)
 		{ 
-			if(((Integer) hikeToOfflineTipview.getTag()) == HIKE_TO_OFFLINE_TIP_STATE_3)
-			{
-				return;
-			}
-			
-			hikeToOfflineTipview.clearAnimation();
-			hikeToOfflineTipview.setVisibility(View.GONE);
-			if(isHikeToOfflineMode)
-			{
-				destroyHikeToOfflineMode();
-			}
-			( (LinearLayout) findViewById(R.id.tipContainerBottom)).removeView(hikeToOfflineTipview);
+			return;
 		}
+		else if(((Integer) hikeToOfflineTipview.getTag()) == HIKE_TO_OFFLINE_TIP_STATE_3)
+		{
+			return;
+		}
+
+		AnimationListener animationListener = new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				if(hikeToOfflineTipview == null)
+				{ 
+					return;
+				}
+				hikeToOfflineTipview.clearAnimation();
+				hikeToOfflineTipview.setVisibility(View.GONE);
+				if(isHikeToOfflineMode)
+				{
+					destroyHikeToOfflineMode();
+				}
+				( (LinearLayout) findViewById(R.id.tipContainerBottom)).removeView(hikeToOfflineTipview);
+			}
+		};
+		
+		setHikeOfflineTipHideAnimation(hikeToOfflineTipview, animationListener);
 	}
 	
 	public void sethikeToOfflineMode(boolean isOn)
@@ -7356,36 +7379,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		destroyHikeToOfflineMode();
 		setupHikeToOfflineTipViews(true, isNativeSms);
-		setHikeOfflineTipAnimation(hikeToOfflineTipview);
+		hideHikeToOfflineTip();
 	}
 	
-	private void setHikeOfflineTipAnimation(final View v)
+	private void setHikeOfflineTipHideAnimation(View v, AnimationListener animationListener)
 	{
 		slideDown = AnimationUtils.loadAnimation(ChatThread.this, R.anim.slide_down_noalpha);
 		slideDown.setDuration(400);
-		slideDown.setStartOffset(2600);
 
-		slideDown.setAnimationListener(new AnimationListener()
-		{
-			@Override
-			public void onAnimationStart(Animation animation)
-			{
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation animation)
-			{
-			}
-
-			@Override
-			public void onAnimationEnd(Animation animation)
-			{
-				hikeToOfflineTipview.setTag(HIKE_TO_OFFLINE_TIP_STATE_1);
-				hideHikeToOfflineTip();
-			}
-		});
+		slideDown.setAnimationListener(animationListener);
 		
-		v.setAnimation(slideDown);
+		v.startAnimation(slideDown);
 		
 	}
 
