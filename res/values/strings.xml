@@ -1609,6 +1609,7 @@
      <string name="kitkat_not_enough_sms">Only %1$d SMS left. Hike more to earn free SMS</string>
      <string name="sent_by_hike">sent via hike free sms</string>
      <string name="send_free_sms">Send free SMS</string>
+     <string name="send_paid_sms">Send paid SMS</string>
      <string name="next_uppercase">NEXT</string>
      
 </resources>
