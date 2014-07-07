@@ -204,26 +204,6 @@ public class StickerManager
 				return "loveDownloadShown";
 			}
 		},
-		doggy
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.doggy;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_doggy;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "doggyDownloadShown";
-			}
-		},
 		bollywood
 		{
 			@Override
@@ -242,6 +222,26 @@ public class StickerManager
 			public String downloadPref()
 			{
 				return "bollywoodDownloadShown";
+			}
+		},
+		doggy
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.doggy;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_doggy;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "doggyDownloadShown";
 			}
 		},
 		rageface
