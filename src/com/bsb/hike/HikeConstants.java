@@ -1628,7 +1628,7 @@ public class HikeConstants
 	
 	public static final long IMAGE_SIZE_MEDIUM = 80 * 1024;
 
-	public static final String WATSAPP_INVITE_MESSAGE_KEY = "i_wa";
+	public static final String WATSAPP_INVITE_MESSAGE_KEY = "wa_msg";
 
-	public static final String WATSAPP_INVITE_ENABLED = "wa_msg";
+	public static final String WATSAPP_INVITE_ENABLED = "i_wa";
 }
