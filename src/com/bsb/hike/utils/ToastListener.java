@@ -357,6 +357,7 @@ public class ToastListener implements Listener
 					{
 						notificationIntent = new Intent(context, Class.forName(className));
 						notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						notificationIntent.putExtra(HikeConstants.Extras.HAS_TIP, true);
 						toaster.notifyAtomicPopup(header, notificationIntent);
 					}
 					catch (ClassNotFoundException e)

@@ -132,6 +132,7 @@ public class HikeNotification
 		 * invoke the chat thread here. The Stealth tip popup should already be showing here ideally by now.
 		 */
 		final Intent notificationIntent = Utils.getHomeActivityIntent(context);
+		notificationIntent.putExtra(HikeConstants.Extras.HAS_TIP, true);
 		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
 
 		notificationIntent.setData((Uri.parse("custom://" + STEALTH_POPUP_NOTIFICATION_ID)));
