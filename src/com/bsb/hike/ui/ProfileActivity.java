@@ -1803,6 +1803,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				@Override
 				public void run()
 				{
+					invalidateOptionsMenu();
 					setupContactProfileList();
 					profileAdapter.notifyDataSetChanged();
 				}
