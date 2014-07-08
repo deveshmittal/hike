@@ -827,11 +827,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 		
-		if(isHikeOfflineTipShowing())
-		{
-			hideHikeToOfflineTip();
-			return;
-		}
 
 		if (attachmentWindow != null && attachmentWindow.isShowing())
 		{
@@ -840,6 +835,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 
+		if(isHikeOfflineTipShowing())
+		{
+			hideHikeToOfflineTip();
+			return;
+		}
+		
 		selectedFile = null;
 
 		Intent intent = new Intent(this, HomeActivity.class);
