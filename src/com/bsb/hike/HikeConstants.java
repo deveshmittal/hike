@@ -790,7 +790,7 @@ public class HikeConstants
 	public static final String PROTIP_STATUS_NAME = "hike team";
 
 	/* In seconds */
-	public static final int DEFAULT_UNDELIVERED_WAIT_TIME = 30;
+	public static final int DEFAULT_UNDELIVERED_WAIT_TIME = 45;
 
 	public static final int MAX_FALLBACK_NATIVE_SMS = 19;
 

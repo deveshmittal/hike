@@ -356,7 +356,7 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		nativeHeader.setText(R.string.regular_sms);
 		hikeSmsHeader.setText(R.string.free_hike_sms);
 
-		hikeSMS.setOnClickListener(new OnClickListener()
+		OnClickListener hikeSMSOnClickListener =  new OnClickListener()
 		{
 
 			@Override
@@ -365,9 +365,9 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 				sendHike.setChecked(true);
 				sendNative.setChecked(false);
 			}
-		});
-
-		nativeSMS.setOnClickListener(new OnClickListener()
+		};
+		
+		OnClickListener nativeSMSOnClickListener =  new OnClickListener()
 		{
 
 			@Override
@@ -376,7 +376,12 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 				sendHike.setChecked(false);
 				sendNative.setChecked(true);
 			}
-		});
+		};
+		
+		hikeSMS.setOnClickListener(hikeSMSOnClickListener);
+		sendHike.setOnClickListener(hikeSMSOnClickListener);
+		nativeSMS.setOnClickListener(nativeSMSOnClickListener);
+		sendNative.setOnClickListener(nativeSMSOnClickListener);
 
 		alwaysBtn.setOnClickListener(new OnClickListener()
 		{
