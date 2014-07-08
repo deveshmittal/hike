@@ -878,8 +878,7 @@ public class BulkMessageProcessor
 		{
 			Utils.vibrateNudgeReceived(context);
 		}
-		
-		
+		this.pubSub.publish(HikePubSub.BULK_MESSAGE_RECEIVED, messageListMap);
 	}
 	
 	/*
