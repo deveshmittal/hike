@@ -11,14 +11,14 @@
         android:summary="@string/blocked_list_hinttext"
         android:title="@string/blocked_list" />
     
-    <com.bsb.hike.view.IconCheckBoxPreference
+    <!-- <com.bsb.hike.view.IconCheckBoxPreference
         icon="ic_profile_picture"
         android:defaultValue="false"
         android:key="profilePicPref"
         android:layout="@layout/icon_preference"
         android:summary="@string/profile_pic_display_info"
         android:title="@string/profile_pic_header"
-        android:widgetLayout="@layout/checkbox_widget" />
+        android:widgetLayout="@layout/checkbox_widget" /> -->
     
     <com.bsb.hike.view.IconCheckBoxPreference
         icon="preference_last_seen"
