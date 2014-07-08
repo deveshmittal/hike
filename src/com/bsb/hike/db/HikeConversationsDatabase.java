@@ -49,6 +49,7 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.ui.StatusUpdate;
+import com.bsb.hike.service.BulkMessageProcessor;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
@@ -633,7 +634,35 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
-
+	
+	public void setMessageState(String msisdn, long msgId, int status)
+	{
+		int minStatusOrdinal;
+		int maxStatusOrdinal;
+		if (status <= State.SENT_DELIVERED_READ.ordinal())
+		{
+			minStatusOrdinal = State.SENT_UNCONFIRMED.ordinal();
+			maxStatusOrdinal = status;
+		}
+		else
+		{
+			minStatusOrdinal = State.RECEIVED_UNREAD.ordinal();
+			maxStatusOrdinal = status;
+		}
+		
+		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.CONV_ID + " = (SELECT " + DBConstants.CONV_ID + " FROM "
+				+ DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.MSISDN + "=? ) AND " + DBConstants.MSG_STATUS + ">=" + minStatusOrdinal + " AND " + DBConstants.MSG_STATUS + "<" + maxStatusOrdinal + " AND " +  DBConstants.MESSAGE_ID + "<" + msgId,
+				new String[] { msisdn }, null, null, null);
+		
+		long[] ids = new long[c.getCount()];
+		int i = 0;
+		while (c.moveToNext())
+		{
+			long id = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
+			ids[i++] = id;
+		}
+		updateBatch(ids, status, msisdn);
+	}
 	public int updateBatch(long[] ids, int status, String msisdn)
 	{
 		StringBuilder sb = new StringBuilder("(");
@@ -653,6 +682,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		String query = initialWhereClause;
 
 		return executeUpdateMessageStatusStatement(query, status, msisdn);
+	}
+	
+	
+	public void updateStatusBulk(Map<String, BulkMessageProcessor.Pair<Long, Long>> messageStatusMap)
+	{
+
+		String msisdn;
+		mDb.beginTransaction();
+		for (Entry<String, BulkMessageProcessor.Pair<Long, Long>> entry : messageStatusMap.entrySet())
+		{
+
+			msisdn = (String) entry.getKey();
+			BulkMessageProcessor.Pair<Long, Long> pair = entry.getValue();
+			setMessageState(msisdn, pair.getFirst(), State.SENT_DELIVERED_READ.ordinal());
+			setMessageState(msisdn, pair.getSecond(), State.SENT_DELIVERED.ordinal());
+		}
+		mDb.setTransactionSuccessful();
+		mDb.endTransaction();
 	}
 
 	public int executeUpdateMessageStatusStatement(String updateStatement, int status, String msisdn)
