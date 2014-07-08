@@ -7340,8 +7340,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		};
 		
-		hikeToOfflineTipview.clearAnimation();
-		setHikeOfflineTipHideAnimation(hikeToOfflineTipview, animationListener);
+		if(hikeToOfflineTipview.getAnimation() == null)
+		{
+			setHikeOfflineTipHideAnimation(hikeToOfflineTipview, animationListener);
+		}
 	}
 	
 	public void hideHikeToOfflineTip()
