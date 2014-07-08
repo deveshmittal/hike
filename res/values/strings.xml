@@ -1588,7 +1588,7 @@
      <string name="email_subject">hike up your life</string>
      <string name="reciever_is_offline">%1$s is offline</string>
      <string name="send_uppercase">SEND</string>
-     <string name="hike_offline_mode_msg">All will be sent as %1$d SMS</string>
+     <string name="hike_offline_mode_msg">will be sent as %1$d SMS</string>
      <string name="messages_sent">Messages sent!</string>
      <string name="hike_offline_messages_sent_msg">You have %1$d free SMS left</string>
      <string name="always">Always</string>
@@ -1611,5 +1611,6 @@
      <string name="send_free_sms">Send free SMS</string>
      <string name="send_paid_sms">Send paid SMS</string>
      <string name="next_uppercase">NEXT</string>
+     <string name="regular_sms_sent_confirmation">Sent as regular SMS</string>
      
 </resources>

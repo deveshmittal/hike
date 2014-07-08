@@ -7331,7 +7331,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					else
 					{
-						toast = Toast.makeText(ChatThread.this, getString(R.string.carrier_charges_apply), Toast.LENGTH_SHORT);
+						toast = Toast.makeText(ChatThread.this, getString(R.string.regular_sms_sent_confirmation), Toast.LENGTH_SHORT);
 					}
 					toast.setGravity(Gravity.CENTER, 0, 0);
 					toast.show();
