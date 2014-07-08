@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.FutureTask;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -49,6 +50,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
@@ -1723,6 +1725,95 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					removeTipIfExists(ConversationTip.STEALTH_UNREAD_TIP);
 				}
 			});
+		}
+		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
+		{
+			Logger.d(getClass().getSimpleName(), "New bulk msg event sent or received.");
+			HashMap<String, ArrayList<ConvMessage>> messageListMap = (HashMap<String, ArrayList<ConvMessage>>) object;
+
+			if (messageListMap != null)
+			{
+				for (Entry<String, ArrayList<ConvMessage>> entry : messageListMap.entrySet())
+				{
+					if (entry != null)
+					{
+						String msisdn = entry.getKey();
+						ArrayList<ConvMessage> messageList = entry.getValue();
+						final Conversation conv = mConversationsByMSISDN.get(msisdn);
+						if (conv != null)
+						{
+							int unreadCount = 0;
+							for (ConvMessage convMessage : messageList)
+							{
+								if (Utils.shouldIncrementCounter(convMessage))
+								{
+									unreadCount++ ;
+								}
+							}
+							if (unreadCount > 0)
+							{
+								conv.setUnreadCount(conv.getUnreadCount() + 1);
+							}
+							ConvMessage message = messageList.get(messageList.size() - 1);
+							if (message.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
+							{
+								if (!conv.getMessages().isEmpty())
+								{
+									ConvMessage prevMessage = conv.getMessages().get(conv.getMessages().size() - 1);
+									String metadata = message.getMetadata().serialize();
+									message = new ConvMessage(message.getMessage(), message.getMsisdn(), prevMessage.getTimestamp(), prevMessage.getState(), prevMessage.getMsgID(),
+											prevMessage.getMappedMsgID(), message.getGroupParticipantMsisdn());
+									try
+									{
+										message.setMetadata(metadata);
+									}
+									catch (JSONException e)
+									{
+										e.printStackTrace();
+									}
+								}
+							}
+							// For updating the group name if some participant has joined or
+							// left the group
+							else if ((conv instanceof GroupConversation) && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+							{
+								HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
+								((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn(), false, false));
+							}
+
+							final ConvMessage finalMessage = message;
+//							if (conv.getMessages().size() > 0)
+//							{
+//								if (finalMessage.getMsgID() < conv.getMessages().get(conv.getMessages().size() - 1).getMsgID())
+//								{
+//									return;
+//								}
+//							}
+							if (!isAdded())
+							{
+								return;
+							}
+							getActivity().runOnUiThread(new Runnable()
+							{
+								@Override
+								public void run()
+								{
+									addMessage(conv, finalMessage);
+								}
+							});
+						}
+						else
+						{
+							// When a message gets sent from a user we don't have a
+							// conversation for, the message gets
+							// broadcasted first then the conversation gets created. It's
+							// okay that we don't add it now, because
+							// when the conversation is broadcasted it will contain the
+							// messages
+						}
+					}
+				}
+			}
 		}
 	}
 
