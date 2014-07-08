@@ -882,11 +882,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 		
-		if(isHikeOfflineTipShowing())
-		{
-			hideHikeToOfflineTip();
-			return;
-		}
 
 		if (attachmentWindow != null && attachmentWindow.isShowing())
 		{
@@ -895,6 +890,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 
+		if(isHikeOfflineTipShowing())
+		{
+			hideHikeToOfflineTip();
+			return;
+		}
+		
 		selectedFile = null;
 
 		Intent intent = new Intent(this, HomeActivity.class);
@@ -7424,7 +7425,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{ 
 					return;
 				}
-				hikeToOfflineTipview.clearAnimation();
 				hikeToOfflineTipview.setVisibility(View.GONE);
 				if(isHikeToOfflineMode)
 				{
@@ -7444,7 +7444,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					else
 					{
-						toast = Toast.makeText(ChatThread.this, getString(R.string.carrier_charges_apply), Toast.LENGTH_SHORT);
+						toast = Toast.makeText(ChatThread.this, getString(R.string.regular_sms_sent_confirmation), Toast.LENGTH_SHORT);
 					}
 					toast.setGravity(Gravity.CENTER, 0, 0);
 					toast.show();
@@ -7452,7 +7452,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		};
 		
-		setHikeOfflineTipHideAnimation(hikeToOfflineTipview, animationListener);
+		if(hikeToOfflineTipview.getAnimation() == null)
+		{
+			setHikeOfflineTipHideAnimation(hikeToOfflineTipview, animationListener);
+		}
 	}
 	
 	public void hideHikeToOfflineTip()
