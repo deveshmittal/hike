@@ -4548,7 +4548,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		
 		nativeHeader.setText(context.getString(R.string.regular_sms));
 
-		hikeSMS.setOnClickListener(new OnClickListener()
+		OnClickListener hikeSMSOnClickListener =  new OnClickListener()
 		{
 
 			@Override
@@ -4557,9 +4557,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				sendHike.setChecked(true);
 				sendNative.setChecked(false);
 			}
-		});
-
-		nativeSMS.setOnClickListener(new OnClickListener()
+		};
+		
+		OnClickListener nativeSMSOnClickListener =  new OnClickListener()
 		{
 
 			@Override
@@ -4568,8 +4568,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				sendHike.setChecked(false);
 				sendNative.setChecked(true);
 			}
-		});
-
+		};
+		
+		hikeSMS.setOnClickListener(hikeSMSOnClickListener);
+		sendHike.setOnClickListener(hikeSMSOnClickListener);
+		nativeSMS.setOnClickListener(nativeSMSOnClickListener);
+		sendNative.setOnClickListener(nativeSMSOnClickListener);
+		
 		alwaysBtn.setOnClickListener(new OnClickListener()
 		{
 
