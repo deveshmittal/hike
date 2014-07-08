@@ -253,20 +253,19 @@ public class HikeDialog
 				originalsz = dataBundle[1].intValue();
 				smallsz = (int) (dataBundle[0] * HikeConstants.IMAGE_SIZE_SMALL);
 				mediumsz = (int) (dataBundle[0] * HikeConstants.IMAGE_SIZE_MEDIUM);
-				if (smallsz > originalsz)
+				if (smallsz >= originalsz)
 				{
 					smallsz = originalsz;
+					smallSize.setVisibility(View.GONE);
 				}
-				
-				if(mediumsz>originalsz)
+				if(mediumsz >= originalsz)
 				{
 					mediumsz = originalsz;
+					mediumSize.setVisibility(View.GONE);
 				}
-					smallSize.setText(" (" + Utils.getSizeForDisplay(smallsz)+ ")");
-					mediumSize.setText(" (" + Utils.getSizeForDisplay(mediumsz) + ")");
-					originalSize.setText(" (" + Utils.getSizeForDisplay(originalsz) + ")");
-					
-				
+				smallSize.setText(" (" + Utils.getSizeForDisplay(smallsz)+ ")");
+				mediumSize.setText(" (" + Utils.getSizeForDisplay(mediumsz) + ")");
+				originalSize.setText(" (" + Utils.getSizeForDisplay(originalsz) + ")");
 			}
 		}
 		
