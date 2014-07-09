@@ -199,6 +199,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	@Override
 	protected Boolean doInBackground(Void... unused)
 	{
+		deletePreviouslySavedProfileImages();
 		Logger.e("SignupTask", "FETCHING NUMBER? " + isAlreadyFetchingNumber);
 		isPinError = false;
 		isRunning = true;
@@ -709,4 +710,19 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		startTask(activity, userName, isFemale, birthday, profilePicSmall);
 		return signupTask;
 	}
+	
+    private void deletePreviouslySavedProfileImages()
+    {
+    	String dirPath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
+    	File dir = new File(dirPath);
+    	if (!dir.exists())
+    	{
+    		return;
+    	}
+    	for (File file : dir.listFiles())
+    	{
+    		file.delete();
+    	}
+    }
+
 }
