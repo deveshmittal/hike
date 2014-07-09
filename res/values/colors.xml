@@ -322,5 +322,6 @@
     <color name="ftue_card_hidden_mode_click_text">#dc354b</color>
     <color name="ftue_card_hike_offline_click_text">#555555</color>
     <color name="ftue_card_sticker_click_text">#555555</color>
+    <color name="image_quality_popup_text_color">#333333</color>
 </resources>
 	
