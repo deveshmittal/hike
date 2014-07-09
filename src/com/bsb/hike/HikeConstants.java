@@ -1404,6 +1404,10 @@ public class HikeConstants
 		public static final String FIRST_OFFLINE_TIP_CLICKED = "firstOfflineTipClicked";
 		
 		public static final String SECOND_OFFLINE_TIP_CLICKED = "secondOfflineTipClicked";
+
+		public static final String SMS_POPUP_ALWAYS_CLICKED = "smsPopupAlwaysClicked";
+
+		public static final String SMS_POPUP_JUST_ONCE_CLICKED = "smsPopupJustOnceClicked";
 		
 	}
 

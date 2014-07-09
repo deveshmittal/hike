@@ -4585,6 +4585,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			public void onClick(View v)
 			{
 				smsDialogSendClick(sendHike.isChecked(), false);
+				Utils.logEvent(context, HikeConstants.LogEvent.SMS_POPUP_ALWAYS_CLICKED);
 				dialog.dismiss();
 			}
 		});
@@ -4596,6 +4597,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			public void onClick(View v)
 			{
 				smsDialogSendClick(sendHike.isChecked(), true);
+				Utils.logEvent(context, HikeConstants.LogEvent.SMS_POPUP_JUST_ONCE_CLICKED);
 				dialog.dismiss();
 			}
 		});
