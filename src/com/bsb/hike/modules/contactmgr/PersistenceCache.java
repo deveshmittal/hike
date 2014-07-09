@@ -44,11 +44,11 @@ class PersistenceCache extends ContactsCache
 		convsContactsPersistence = new HashMap<String, ContactInfo>();
 		groupContactsPersistence = new HashMap<String, ContactTuple>();
 		groupPersistence = new HashMap<String, Pair<String, LinkedList<String>>>();
+		loadMemory();
 	}
 
 	/**
-	 * get contact info from memory. Returns null if not found in memory.
-	 * The implementation is thread safe
+	 * get contact info from memory. Returns null if not found in memory. The implementation is thread safe
 	 * 
 	 * @param key
 	 * @return
@@ -163,13 +163,21 @@ class PersistenceCache extends ContactsCache
 
 	void removeGroup(String grpId)
 	{
-		Pair<String, LinkedList<String>> pp = groupPersistence.get(grpId);
-		List<String> lastMsisdns = pp.second;
-		for (String ms : lastMsisdns)
+		writeLock.lock();
+		try
 		{
-			removeContact(ms, false);
+			Pair<String, LinkedList<String>> pp = groupPersistence.get(grpId);
+			List<String> lastMsisdns = pp.second;
+			for (String ms : lastMsisdns)
+			{
+				removeContact(ms, false);
+			}
+			groupPersistence.remove(grpId);
 		}
-		groupPersistence.remove(grpId);
+		finally
+		{
+			writeLock.unlock();
+		}
 	}
 
 	/**
@@ -209,38 +217,43 @@ class PersistenceCache extends ContactsCache
 	 */
 	void updateContact(ContactInfo contact, String name)
 	{
-		writeLock.lock();
+		readLock.lock();
+		ContactTuple tuple = null;
 		try
 		{
-			ContactTuple tuple = groupContactsPersistence.get(contact.getMsisdn());
-			if (null != tuple)
-			{
-				tuple.setContact(contact);
-				tuple.setName(name);
-			}
+			tuple = groupContactsPersistence.get(contact.getMsisdn());
 		}
 		finally
 		{
 			writeLock.unlock();
 		}
+		if (null != tuple)
+		{
+			tuple.setContact(contact);
+			tuple.setName(name);
+		}
+
 	}
 
 	/**
 	 * Returns name of group or contact. This implementation is threadsafe
+	 * 
 	 * @param msisdn
 	 * @return
 	 */
+
 	String getName(String msisdn)
 	{
+		/**
+		 * Always try to take locks when and where required. Here we are separating out locking into different zones so that lock acquired should be for minimum time possible.
+		 */
 		if (Utils.isGroupConversation(msisdn))
 		{
 			readLock.lock();
 			try
 			{
 				Pair<String, LinkedList<String>> grp = groupPersistence.get(msisdn);
-				if(grp != null)
-					return grp.first;
-				return null;
+				return grp.first;
 			}
 			finally
 			{
@@ -277,16 +290,24 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * 
+	 * This function sets name in group participant cache if the contact is not saved
 	 * @param msisdn
 	 * @param name
 	 */
 	void setUnknownContactName(String msisdn, String name)
 	{
-		ContactTuple tuple = groupContactsPersistence.get(msisdn);
-		if (null != tuple)
+		writeLock.lock();
+		try
 		{
-			tuple.setName(name);
+			ContactTuple tuple = groupContactsPersistence.get(msisdn);
+			if (null != tuple)
+			{
+				tuple.setName(name);
+			}
+		}
+		finally
+		{
+			writeLock.unlock();
 		}
 	}
 

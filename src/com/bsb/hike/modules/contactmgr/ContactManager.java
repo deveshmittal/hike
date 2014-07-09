@@ -30,13 +30,9 @@ public class ContactManager implements ITransientCache
 
 	private ContactManager()
 	{
+		//cache will be loaded inside the constructor itself of persistence cache
 		persistenceCache = new PersistenceCache();
 		transientCache = new TransientCache();
-		long t1, t2;
-		t1 = System.currentTimeMillis();
-		persistenceCache.loadMemory();// loadPersistenceCache();
-		t2 = System.currentTimeMillis();
-		Logger.d("ConversationsTimeTest", " time taken by loadPersistenceCache : " + (t2 - t1));
 	}
 
 	public static ContactManager getInstance()
