@@ -8,8 +8,6 @@ public class EmptyConversationItem
 
 	public static final int LAST_SEEN = 3;
 
-	public static final int HIDDEN_MODE = 4;
-
 	public static final int HIKE_OFFLINE = 5;
 
 	public static final int STICKERS = 6;
@@ -17,6 +15,10 @@ public class EmptyConversationItem
 	public static final int SEPERATOR = 7;
 
 	public static final int OTHER_FTUE_CARD = 8;
+
+	public static final int GROUP = 9;
+
+	public static final int INVITE = 10;
 
 	private int type;
 
