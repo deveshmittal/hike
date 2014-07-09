@@ -800,19 +800,19 @@ public class MqttMessagesManager
 					settingEditor.putBoolean(HikeConstants.CHAT_BG_NOTIFICATION_PREF, showNotification);
 					settingEditor.commit();
 				}
-			}
-			if (data.has(HikeConstants.AVATAR))
-			{
-				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-				Editor settingEditor = settings.edit();
-				int dpSetting =  data.optInt(HikeConstants.AVATAR,1);
-				boolean defaultSetting = false;
-				if(dpSetting==2)
+				if (account.has(HikeConstants.AVATAR))
 				{
-				   defaultSetting = true;	
+					SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+					Editor settingEditor = settings.edit();
+					int dpSetting = account.optInt(HikeConstants.AVATAR, 1);
+					boolean defaultSetting = false;
+					if (dpSetting == 2)
+					{
+						defaultSetting = true;
+					}
+					settingEditor.putBoolean(HikeConstants.PROFILE_PIC_PREF, defaultSetting);
+					settingEditor.commit();
 				}
-				settingEditor.putBoolean(HikeConstants.PROFILE_PIC_PREF,defaultSetting);
-				settingEditor.commit();
 			}
 			editor.commit();
 			if (inviteTokenAdded)

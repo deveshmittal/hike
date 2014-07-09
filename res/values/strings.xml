@@ -1526,7 +1526,7 @@
     <string name="shortcut">Add conversation shortcut</string>
     <string name="add_to_contacts">Add to contacts</string>
     <string name="delete_leave">Delete and exit group</string>
-    <string name="group_participant_info">You can add upto 50 people to a group</string>
+    <string name="group_participant_info">You can add upto 100 people to a group</string>
     <string name="photo">GALLERY</string>
     <string name="video">VIDEOS</string>
     <string name="location_option">LOCATION</string>
@@ -1590,12 +1590,6 @@
     <string name="native_sms_invite_4">Hey, check out hike messenger. It let\'s you show your \'Last Seen\' only to select friends! Download - http://hike.in and Hike up your life!</string>
     <string name="native_sms_invite_5">Hey, check out hike messenger. You can now hide your private chats from others. Download - http://hike.in and Hike up your life!</string>
     <string name="native_sms_invite_6">Hey, check out hike messenger. You can chat with even those friends who are offline. Download - http://hike.in and Hike up your life!</string>
-    <string name="new_chat_tip_msg">tap to compose</string>
-    <string name="ftue_status_update_card_header">Express yourself</string>
-    <string name="ftue_status_update_card_msg">Tap here to post a status update. Only your favorites can see them.</string>
-    <string name="earn_free_sms">Earn free SMS</string>
-    <string name="email_body">I just downloaded the new hike messenger. What a big change from WhatsApp!\n\nIt\'s got amazing Stickers, the ability to choose who sees my Last Seen and some really cool Chat Themes. \n\nThe best part? Hike has thing called Hidden Mode that lets you hide your private chats, from the world! Awesome!\n\nDownload it like asap from http://hike.in!</string>
-    <string name="email_subject">hike up your life</string>
     <string name="ftue_card_header_last_seen">Last seen</string>
     <string name="ftue_card_body_last_seen">Only favorites can see your last seen &amp; status updates</string>
     <string name="ftue_card_click_text_last_seen">Tap here to choose them!</string>
@@ -1617,11 +1611,16 @@
      <string name="invite_more">INVITE MORE</string>
      <string name="invite_sent">Invite sent</string>
      <string name="send_invite">Invite (%1$d)</string>
-     <string name="reciever_is_offline">%1$s is Offline</string>
      <string name="hike_to_offline_tip_msg">Tap here to send free SMS</string>
+     <string name="new_chat_tip_msg">tap to compose</string>
+     <string name="ftue_status_update_card_header">Express yourself</string>
+     <string name="ftue_status_update_card_msg">Tap here to post a status update. Only your favorites can see them.</string>
+     <string name="earn_free_sms">Earn free SMS</string>
+     <string name="email_body">I just downloaded the new hike messenger. What a big change from WhatsApp!\n\nIt\'s got amazing Stickers, the ability to choose who sees my Last Seen and some really cool Chat Themes. \n\nThe best part? Hike has thing called Hidden Mode that lets you hide your private chats, from the world! Awesome!\n\nDownload it like asap from http://hike.in!</string>
+     <string name="email_subject">hike up your life</string>
+     <string name="reciever_is_offline">%1$s is offline</string>
      <string name="send_uppercase">SEND</string>
-     <string name="hike_offline_mode_header">Send as %1$d SMS</string>
-     <string name="hike_offline_mode_msg">Selected messages will be sent</string>
+     <string name="hike_offline_mode_msg">will be sent as %1$d SMS</string>
      <string name="messages_sent">Messages sent!</string>
      <string name="hike_offline_messages_sent_msg">You have %1$d free SMS left</string>
      <string name="always">Always</string>
@@ -1664,4 +1663,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
 	 <string name="file_attachment_info">Share media &amp; files up to 100 MB</string>
 	 <string name="ftue_sms_contact_card_header">You have no contacts on hike</string>
 	 <string name="ftue_sms_contact_card_subtext">Invite them and earn Rs20 talk-time for each friend that joins :)</string>
+     <string name="send_free_sms">Send free SMS</string>
+     <string name="send_paid_sms">Send paid SMS</string>
+     <string name="next_uppercase">NEXT</string>
+     <string name="regular_sms_sent_confirmation">Sent as regular SMS</string>
 </resources>
