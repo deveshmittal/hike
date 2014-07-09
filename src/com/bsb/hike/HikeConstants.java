@@ -550,7 +550,7 @@ public class HikeConstants
 	// More explanation required?
 	public static final int NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP = 2;
 
-	public static final String APP_API_VERSION = "2";
+	public static final String APP_API_VERSION = "3";
 
 	public static final int NUM_SMS_PER_FRIEND = 10;
 
