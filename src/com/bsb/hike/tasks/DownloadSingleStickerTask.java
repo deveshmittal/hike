@@ -53,6 +53,9 @@ public class DownloadSingleStickerTask extends StickerTaskBase
 		this.smallStickerPath = this.dirPath + HikeConstants.SMALL_STICKER_ROOT + "/" + stId;
 
 		this.urlString = AccountUtils.base + "/stickers?catId=" + catId + "&stId=" + stId + "&resId=" + Utils.getResolutionId();
+		if(AccountUtils.ssl){
+			this.urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/stickers?catId=" + catId + "&stId=" + stId + "&resId=" + Utils.getResolutionId();
+		}
 	}
 
 	@Override
@@ -91,7 +94,7 @@ public class DownloadSingleStickerTask extends StickerTaskBase
 			connection.addRequestProperty("Cookie", "user=" + AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
 
 			Logger.d(getClass().getSimpleName(), "File size: " + connection.getContentLength());
-			if (AccountUtils.ssl)
+			if (urlString.startsWith(AccountUtils.HTTPS_STRING) && AccountUtils.ssl)
 			{
 				((HttpsURLConnection) connection).setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 			}
