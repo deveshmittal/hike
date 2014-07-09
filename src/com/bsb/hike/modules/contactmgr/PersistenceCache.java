@@ -406,9 +406,9 @@ class PersistenceCache extends ContactsCache
 	 * @param ifNotFoundReturnNull
 	 *            if true returns null if contact is not saved
 	 */
-	ContactInfo loadMemory(String msisdn, boolean ifNotFoundReturnNull)
+	ContactInfo putInCache(String msisdn, boolean ifNotFoundReturnNull)
 	{
-		return loadMemory(msisdn, ifNotFoundReturnNull, true);
+		return putInCache(msisdn, ifNotFoundReturnNull, true);
 	}
 
 	/**
@@ -420,7 +420,7 @@ class PersistenceCache extends ContactsCache
 	 * @param ifOneToOneConversation
 	 * @return Returns contact info object
 	 */
-	ContactInfo loadMemory(String msisdn, boolean ifNotFoundReturnNull, boolean ifOneToOneConversation)
+	ContactInfo putInCache(String msisdn, boolean ifNotFoundReturnNull, boolean ifOneToOneConversation)
 	{
 		ContactInfo contact = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn, ifNotFoundReturnNull);
 		if (ifOneToOneConversation)
@@ -439,9 +439,9 @@ class PersistenceCache extends ContactsCache
 	 * 
 	 * @param msisdns
 	 */
-	List<ContactInfo> loadMemory(List<String> msisdns)
+	List<ContactInfo> putInCache(List<String> msisdns)
 	{
-		return loadMemory(msisdns, true);
+		return putInCache(msisdns, true);
 	}
 
 	/**
@@ -451,7 +451,7 @@ class PersistenceCache extends ContactsCache
 	 * @param ifOneToOneConversation
 	 * @return
 	 */
-	List<ContactInfo> loadMemory(List<String> msisdns, boolean ifOneToOneConversation)
+	List<ContactInfo> putInCache(List<String> msisdns, boolean ifOneToOneConversation)
 	{
 		if (msisdns.size() > 0)
 		{

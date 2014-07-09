@@ -194,11 +194,11 @@ public class ContactManager implements ITransientCache
 		{
 			if (loadInTransient)
 			{
-				contact = transientCache.loadMemory(msisdn, ifNotFoundReturnNull);
+				contact = transientCache.putInCache(msisdn, ifNotFoundReturnNull);
 			}
 			else
 			{
-				contact = persistenceCache.loadMemory(msisdn, ifNotFoundReturnNull, ifOneToOneConversation);
+				contact = persistenceCache.putInCache(msisdn, ifNotFoundReturnNull, ifOneToOneConversation);
 			}
 		}
 		else
@@ -260,11 +260,11 @@ public class ContactManager implements ITransientCache
 			List<ContactInfo> contactsDB;
 			if (loadInTransient)
 			{
-				contactsDB = transientCache.loadMemory(msisdnsDB);
+				contactsDB = transientCache.putInCache(msisdnsDB);
 			}
 			else
 			{
-				contactsDB = persistenceCache.loadMemory(msisdnsDB, ifOneToOneConversation);
+				contactsDB = persistenceCache.putInCache(msisdnsDB, ifOneToOneConversation);
 			}
 
 			if (null != contactsDB)

@@ -310,7 +310,7 @@ public class TransientCache extends ContactsCache
 	 * @param ifNotFoundReturnNull
 	 * @return
 	 */
-	ContactInfo loadMemory(String msisdn, boolean ifNotFoundReturnNull)
+	ContactInfo putInCache(String msisdn, boolean ifNotFoundReturnNull)
 	{
 		ContactInfo c = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn, ifNotFoundReturnNull);
 		if (null != c.getName())
@@ -330,7 +330,7 @@ public class TransientCache extends ContactsCache
 	 * @param msisdns
 	 * @return
 	 */
-	List<ContactInfo> loadMemory(List<String> msisdns)
+	List<ContactInfo> putInCache(List<String> msisdns)
 	{
 		if (msisdns.size() > 0)
 		{

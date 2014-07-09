@@ -38,9 +38,9 @@ abstract class ContactsCache
 
 	abstract void loadMemory();
 
-	abstract ContactInfo loadMemory(String msisdn, boolean ifNotFoundReturnNull);
+	abstract ContactInfo putInCache(String msisdn, boolean ifNotFoundReturnNull);
 
-	abstract List<ContactInfo> loadMemory(List<String> msisdns);
+	abstract List<ContactInfo> putInCache(List<String> msisdns);
 
 	abstract void clearMemory();
 
