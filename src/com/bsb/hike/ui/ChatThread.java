@@ -6197,19 +6197,32 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			loadingMoreMessages = true;
 
+			final String msisdn = mContactNumber;
+
+			final long firstMessageId = messages.get(startIndex).getMsgID();
+
+			final Conversation conversation = mConversation;
+
 			AsyncTask<Void, Void, List<ConvMessage>> asyncTask = new AsyncTask<Void, Void, List<ConvMessage>>()
 			{
 
 				@Override
 				protected List<ConvMessage> doInBackground(Void... params)
 				{
-					return mConversationDb.getConversationThread(mContactNumber, mConversation.getConvId(), HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME, mConversation,
-							messages.get(startIndex).getMsgID());
+					return mConversationDb.getConversationThread(msisdn, conversation.getConvId(), HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME, conversation,
+							firstMessageId);
 				}
 
 				@Override
 				protected void onPostExecute(List<ConvMessage> result)
 				{
+					/*
+					 * Making sure that we are still in the same conversation.
+					 */
+					if (!msisdn.equals(mContactNumber))
+					{
+						return;
+					}
 					if (!result.isEmpty())
 					{
 						int scrollOffset = 0;
