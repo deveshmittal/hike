@@ -24,7 +24,7 @@
                 android:paddingLeft="24dp"
                 android:text="@string/image_quality_popup_header"
                 android:textColor="@color/blue_hike"
-                android:textSize="24dp"
+                android:textSize="24sp"
                 android:textStyle="italic" />
 
             <View
@@ -72,15 +72,15 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/image_quality_small"
-                            android:textColor="#333333"
-                            android:textSize="18dp" />
+                            android:textColor="@color/image_quality_popup_text_color"
+                            android:textSize="18sp" />
 
                         <com.bsb.hike.view.CustomFontTextView
                             android:id="@+id/image_quality_small_cftv"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="#333333"
-                            android:textSize="18dp"
+                            android:textColor="@color/image_quality_popup_text_color"
+                            android:textSize="18sp"
                             android:textStyle="italic" />
                     </LinearLayout>
 
@@ -89,7 +89,7 @@
                         android:layout_height="wrap_content"
                         android:text="fastest"
                         android:textColor="@color/standerd_grey"
-                        android:textSize="15dp"
+                        android:textSize="15sp"
                         android:textStyle="italic" />
                 </LinearLayout>
             </LinearLayout>
@@ -127,15 +127,15 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/image_quality_medium"
-                            android:textColor="#333333"
-                            android:textSize="18dp" />
+                            android:textColor="@color/image_quality_popup_text_color"
+                            android:textSize="18sp" />
 
                         <com.bsb.hike.view.CustomFontTextView
                             android:id="@+id/image_quality_medium_cftv"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="#333333"
-                            android:textSize="18dp"
+                            android:textColor="@color/image_quality_popup_text_color"
+                            android:textSize="18sp"
                             android:textStyle="italic" />
                     </LinearLayout>
 
@@ -144,7 +144,7 @@
                         android:layout_height="wrap_content"
                         android:text="faster"
                         android:textColor="@color/standerd_grey"
-                        android:textSize="15dp"
+                        android:textSize="15sp"
                         android:textStyle="italic" />
                 </LinearLayout>
             </LinearLayout>
@@ -182,15 +182,15 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/image_quality_original"
-                            android:textColor="#333333"
-                            android:textSize="18dp" />
+                            android:textColor="@color/image_quality_popup_text_color"
+                            android:textSize="18sp" />
 
                         <com.bsb.hike.view.CustomFontTextView
                             android:id="@+id/image_quality_original_cftv"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="#333333"
-                            android:textSize="18dp"
+                            android:textColor="@color/image_quality_popup_text_color"
+                            android:textSize="18sp"
                             android:textStyle="italic" />
                     </LinearLayout>
 
@@ -199,7 +199,7 @@
                         android:layout_height="wrap_content"
                         android:text="normal"
                         android:textColor="@color/standerd_grey"
-                        android:textSize="15dp"
+                        android:textSize="15sp"
                         android:textStyle="italic" />
                 </LinearLayout>
             </LinearLayout>
@@ -223,8 +223,8 @@
                 android:layout_weight="1"
                 android:background="@drawable/list_item"
                 android:text="Always"
-                android:textColor="@color/grey"
-                android:textSize="15dp" />
+                android:textColor="@color/image_quality_popup_text_color"
+                android:textSize="15sp" />
 
             <View
                 android:id="@+id/horizontal_divider"
@@ -239,8 +239,8 @@
                 android:layout_weight="1"
                 android:background="@drawable/list_item"
                 android:text="Just Once"
-                android:textColor="@color/grey"
-                android:textSize="15dp" />
+                android:textColor="@color/image_quality_popup_text_color"
+                android:textSize="15sp" />
         </LinearLayout>
     </LinearLayout>
 

@@ -337,5 +337,6 @@
     <color name="black_16">#28000000</color>
     <color name="ftue_card_group_click_text">#cf5545</color>
     <color name="ftue_card_invite_click_text">#01b085</color>
+    <color name="image_quality_popup_text_color">#333333</color>
 </resources>
 	
