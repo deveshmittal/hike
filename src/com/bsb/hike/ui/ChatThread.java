@@ -317,6 +317,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private int HIKE_TO_OFFLINE_TIP_STATE_2 = 2;
 	
 	private int HIKE_TO_OFFLINE_TIP_STATE_3 = 3;
+	
+	private int currentCreditsForToast = 0;
 	/*
 	 * We should run client timer before showing hikeOffline tip
 	 * only if user is entering chat thread and reciever's
@@ -7328,7 +7330,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Toast toast;
 					if(!isNativeSms)
 					{
-						toast = Toast.makeText(ChatThread.this, getString(R.string.hike_offline_messages_sent_msg, mCredits - mAdapter.getSelectedFreeSmsCount()), Toast.LENGTH_SHORT);
+						toast = Toast.makeText(ChatThread.this, getString(R.string.hike_offline_messages_sent_msg, currentCreditsForToast - mAdapter.getSelectedFreeSmsCount()), Toast.LENGTH_SHORT);
 					}
 					else
 					{
@@ -7408,6 +7410,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	public void messagesSentCloseHikeToOfflineMode(boolean isNativeSms)
 	{
+		currentCreditsForToast = mCredits;
 		destroyHikeToOfflineMode();
 		hideHikeToOfflineTip(true, isNativeSms);
 	}
