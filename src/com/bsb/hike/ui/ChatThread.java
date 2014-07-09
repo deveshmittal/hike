@@ -6538,6 +6538,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				tipView.setVisibility(View.INVISIBLE);
 			}
 		}
+		if(isHikeOfflineTipShowing())
+		{
+			setEnableHikeOfflineNextButton(false);
+		}
 		return true;
 	}
 
@@ -6559,6 +6563,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(tipView != null && tipView.getVisibility() == View.INVISIBLE)
 		{
 			tipView.setVisibility(View.VISIBLE);
+		}
+		if(isHikeOfflineTipShowing())
+		{
+			setEnableHikeOfflineNextButton(true);
 		}
 		invalidateOptionsMenu();
 	}
@@ -7446,5 +7454,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public int getCurrentSmsBalance()
 	{
 		return mCredits;
+	}
+	
+	private void setEnableHikeOfflineNextButton(boolean enabled)
+	{
+		hikeToOfflineTipview.findViewById(R.id.send_button).setEnabled(enabled);
+		hikeToOfflineTipview.findViewById(R.id.send_button_text).setEnabled(enabled);
+		hikeToOfflineTipview.findViewById(R.id.send_button_tick).setEnabled(enabled);
 	}
 }

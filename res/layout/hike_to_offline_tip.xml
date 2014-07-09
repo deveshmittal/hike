@@ -76,10 +76,11 @@
             android:visibility="visible" >
 
             <ImageView
+                android:id="@+id/send_button_tick"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:scaleType="centerInside"
-                android:src="@drawable/ic_black_arrow_tick" />
+                android:src="@drawable/offline_tip_next_tick" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/send_button_text"
@@ -87,7 +88,7 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="8dp"
                 android:text="@string/send_uppercase"
-                android:textColor="@color/black"
+                android:textColor="@drawable/offline_tip_next_txt_color"
                 android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>
