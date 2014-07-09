@@ -30,9 +30,9 @@ public class TransientCache extends ContactsCache
 
 	private final ReentrantReadWriteLock readWriteLockTrans = new ReentrantReadWriteLock(true);
 
-	private final Lock readLockTrans = readWriteLockTrans.readLock();
+	private final Lock readLock = readWriteLockTrans.readLock();
 
-	private final Lock writeLockTrans = readWriteLockTrans.writeLock();
+	private final Lock writeLock = readWriteLockTrans.writeLock();
 
 	/**
 	 * 
@@ -52,7 +52,7 @@ public class TransientCache extends ContactsCache
 	 */
 	ContactInfo getContact(String key)
 	{
-		readLockTrans.lock();
+		readLock.lock();
 		try
 		{
 			ContactTuple tuple = savedContacts.get(key);
@@ -66,7 +66,7 @@ public class TransientCache extends ContactsCache
 		}
 		finally
 		{
-			readLockTrans.unlock();
+			readLock.unlock();
 		}
 	}
 
@@ -78,7 +78,7 @@ public class TransientCache extends ContactsCache
 	 */
 	void insertContact(ContactInfo contact)
 	{
-		writeLockTrans.lock();
+		writeLock.lock();
 		try
 		{
 			ContactTuple tuple = new ContactTuple(1, null, contact);
@@ -86,7 +86,7 @@ public class TransientCache extends ContactsCache
 		}
 		finally
 		{
-			writeLockTrans.unlock();
+			writeLock.unlock();
 		}
 	}
 
@@ -100,7 +100,7 @@ public class TransientCache extends ContactsCache
 	 */
 	void insertContact(ContactInfo contact, String name)
 	{
-		writeLockTrans.lock();
+		writeLock.lock();
 		try
 		{
 			ContactTuple tuple = new ContactTuple(1, name, contact);
@@ -108,7 +108,7 @@ public class TransientCache extends ContactsCache
 		}
 		finally
 		{
-			writeLockTrans.unlock();
+			writeLock.unlock();
 		}
 	}
 
@@ -119,7 +119,7 @@ public class TransientCache extends ContactsCache
 	 */
 	void removeContact(String msisdn)
 	{
-		writeLockTrans.lock();
+		writeLock.lock();
 		try
 		{
 			ContactTuple tuple = savedContacts.get(msisdn);
@@ -146,7 +146,7 @@ public class TransientCache extends ContactsCache
 		}
 		finally
 		{
-			writeLockTrans.unlock();
+			writeLock.unlock();
 		}
 	}
 
@@ -157,7 +157,7 @@ public class TransientCache extends ContactsCache
 	 */
 	void updateContact(ContactInfo contact)
 	{
-		writeLockTrans.lock();
+		writeLock.lock();
 		try
 		{
 			if (savedContacts.containsKey(contact.getMsisdn()))
@@ -173,7 +173,7 @@ public class TransientCache extends ContactsCache
 		}
 		finally
 		{
-			writeLockTrans.unlock();
+			writeLock.unlock();
 		}
 	}
 
@@ -185,7 +185,7 @@ public class TransientCache extends ContactsCache
 	 */
 	void updateContact(ContactInfo contact, String name)
 	{
-		writeLockTrans.lock();
+		writeLock.lock();
 		try
 		{
 			if (savedContacts.containsKey(contact.getMsisdn()))
@@ -203,7 +203,7 @@ public class TransientCache extends ContactsCache
 		}
 		finally
 		{
-			writeLockTrans.unlock();
+			writeLock.unlock();
 		}
 	}
 
@@ -655,7 +655,7 @@ public class TransientCache extends ContactsCache
 	 */
 	void contactDeleted(ContactInfo contact)
 	{
-		writeLockTrans.lock();
+		writeLock.lock();
 		try
 		{
 			ContactTuple tuple = savedContacts.get(contact.getMsisdn());
@@ -668,7 +668,7 @@ public class TransientCache extends ContactsCache
 		}
 		finally
 		{
-			writeLockTrans.unlock();
+			writeLock.unlock();
 		}
 	}
 
@@ -677,7 +677,7 @@ public class TransientCache extends ContactsCache
 	 */
 	void clearMemory()
 	{
-		writeLockTrans.lock();
+		writeLock.lock();
 		try
 		{
 			if (null != savedContacts)
@@ -699,7 +699,7 @@ public class TransientCache extends ContactsCache
 		}
 		finally
 		{
-			writeLockTrans.unlock();
+			writeLock.unlock();
 		}
 	}
 }

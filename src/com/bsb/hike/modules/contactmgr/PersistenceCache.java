@@ -47,7 +47,8 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * get contact info from memory. Returns null if not found in memory
+	 * get contact info from memory. Returns null if not found in memory.
+	 * The implementation is thread safe
 	 * 
 	 * @param key
 	 * @return
@@ -59,7 +60,7 @@ class PersistenceCache extends ContactsCache
 		{
 			ContactInfo c = null;
 			c = convsContactsPersistence.get(key);
-			if (null == c)
+			if (null == c) // contact not found in persistence cache
 			{
 				ContactTuple tuple = groupContactsPersistence.get(key);
 				if (null != tuple)
@@ -225,7 +226,7 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * 
+	 * Returns name of group or contact. This implementation is threadsafe
 	 * @param msisdn
 	 * @return
 	 */
@@ -233,29 +234,46 @@ class PersistenceCache extends ContactsCache
 	{
 		if (Utils.isGroupConversation(msisdn))
 		{
-			Pair<String, LinkedList<String>> grp = groupPersistence.get(msisdn);
-			return grp.first;
-		}
-
-		ContactInfo c = null;
-		c = convsContactsPersistence.get(msisdn);
-		if (null == c)
-		{
-			ContactTuple tuple = groupContactsPersistence.get(msisdn);
-			if (null != tuple)
+			readLock.lock();
+			try
 			{
-				c = tuple.getContact();
-				if (null == c.getName())
-				{
-					return tuple.getName();
-				}
+				Pair<String, LinkedList<String>> grp = groupPersistence.get(msisdn);
+				if(grp != null)
+					return grp.first;
+				return null;
+			}
+			finally
+			{
+				readLock.unlock();
 			}
 		}
+		readLock.lock();
+		try
+		{
+			ContactInfo c = null;
+			c = convsContactsPersistence.get(msisdn);
+			if (null == c)
+			{
+				ContactTuple tuple = groupContactsPersistence.get(msisdn);
+				if (null != tuple)
+				{
+					c = tuple.getContact();
+					if (null == c.getName())
+					{
+						return tuple.getName();
+					}
+				}
+			}
 
-		if (null == c)
-			return null;
+			if (null == c)
+				return null;
 
-		return c.getName();
+			return c.getName();
+		}
+		finally
+		{
+			readLock.unlock();
+		}
 	}
 
 	/**

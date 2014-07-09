@@ -153,7 +153,7 @@ public class ContactManager implements ITransientCache
 
 	/**
 	 * This function will return name or null for a particular msisdn
-	 * 
+	 * Search in Persistence first, if not found, search in Transient
 	 * @param msisdn
 	 * @return
 	 */
@@ -183,7 +183,6 @@ public class ContactManager implements ITransientCache
 
 	/**
 	 * Returns the contactInfo for a particular msisdn.If not found in memory makes a db call
-	 * 
 	 * Inserts the object in transient memory if loadInTransient is set to true otherwise in persistence memory
 	 * 
 	 * @param msisdn
