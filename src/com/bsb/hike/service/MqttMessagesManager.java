@@ -2,7 +2,6 @@ package com.bsb.hike.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +36,6 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
@@ -149,9 +147,9 @@ public class MqttMessagesManager
 			if (!HikeConstants.SIGNUP_IC.equals(jsonObj.optString(HikeConstants.SUB_TYPE)))
 			{
 				FavoriteType favType = HikeUserDatabase.getInstance().getFriendshipStatus(msisdn);
-				if(favType==FavoriteType.FRIEND||favType==FavoriteType.REQUEST_SENT||favType==FavoriteType.REQUEST_SENT_REJECTED)
+				if (favType == FavoriteType.FRIEND || favType == FavoriteType.REQUEST_SENT || favType == FavoriteType.REQUEST_SENT_REJECTED)
 				{
-				    autoDownloadGroupImage(msisdn);
+					autoDownloadGroupImage(msisdn);
 				}
 			}
 		}
@@ -212,34 +210,35 @@ public class MqttMessagesManager
 			boolean joined = HikeConstants.MqttMessageTypes.USER_JOINED.equals(type);
 			long joinTime = 0;
 			SharedPreferences settings = context.getSharedPreferences(UJFile, Context.MODE_PRIVATE);
-			if(joined)
+			if (joined)
 			{
 				joinTime = jsonObj.optLong(HikeConstants.TIMESTAMP);
 				long ts = settings.getLong(msisdn, -1);
-				if(ts == -1) // this shows last uj was for some other msisdn or this user has left or pref file do not exist
+				if (ts == -1) // this shows last uj was for some other msisdn or this user has left or pref file do not exist
 				{
 					Editor e = settings.edit();
 					e.clear(); // remove old values if any as we have to keep just one msisdn at a time
 					e.putLong(msisdn, joinTime);
-					e.commit();	
+					e.commit();
 				}
-				else if(ts == joinTime) // this shows UJ is duplicate so ignore
+				else if (ts == joinTime) // this shows UJ is duplicate so ignore
 					return;
-				else  // last join time was different from latest time
-					settings.edit().putLong(msisdn, joinTime).commit();		
+				else
+					// last join time was different from latest time
+					settings.edit().putLong(msisdn, joinTime).commit();
 			}
 			else
 			{
 				// if user left Hike simply remove the value from pref
 				settings.edit().remove(msisdn).commit();
 			}
-			
+
 			ContactUtils.updateHikeStatus(this.context, msisdn, joined);
 			this.convDb.updateOnHikeStatus(msisdn, joined);
 
 			if (joined)
 			{
-				
+
 				if (joinTime > 0)
 				{
 					joinTime = Utils.applyServerTimeOffset(context, joinTime);
@@ -517,8 +516,8 @@ public class MqttMessagesManager
 					}
 				}
 			}
-			Logger.d(getClass().getSimpleName(), "Receiver received Message : " + convMessage.getMessage() + "		;	Receiver Msg ID : " + convMessage.getMsgID() + "	; Mapped msgID : "
-					+ convMessage.getMappedMsgID());
+			Logger.d(getClass().getSimpleName(), "Receiver received Message : " + convMessage.getMessage() + "		;	Receiver Msg ID : " + convMessage.getMsgID()
+					+ "	; Mapped msgID : " + convMessage.getMappedMsgID());
 			// We have to do publish this here since we are adding the message
 			// to the db here, and the id is set after inserting into the db.
 			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
@@ -859,11 +858,11 @@ public class MqttMessagesManager
 			FavoriteType currentType = contactInfo.getFavoriteType();
 			FavoriteType favoriteType = (currentType == FavoriteType.NOT_FRIEND || currentType == FavoriteType.REQUEST_RECEIVED_REJECTED || currentType == FavoriteType.REQUEST_RECEIVED) ? FavoriteType.REQUEST_RECEIVED
 					: FavoriteType.FRIEND;
-			if(favoriteType == FavoriteType.REQUEST_RECEIVED)
+			if (favoriteType == FavoriteType.REQUEST_RECEIVED)
 			{
 				int count = settings.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
-				if(count >= 0)
-				{	
+				if (count >= 0)
+				{
 					Utils.incrementOrDecrementHomeOverflowCount(settings, 1);
 				}
 			}
@@ -949,7 +948,7 @@ public class MqttMessagesManager
 					this.pubSub.publish(HikePubSub.SHOW_FREE_INVITE_SMS, bundle);
 				}
 			}
-			if(data.has(HikeConstants.MQTT_IP_ADDRESSES))
+			if (data.has(HikeConstants.MQTT_IP_ADDRESSES))
 			{
 				JSONArray ipArray = data.getJSONArray(HikeConstants.MQTT_IP_ADDRESSES);
 				if (null != ipArray && ipArray.length() > 0)
@@ -1383,9 +1382,8 @@ public class MqttMessagesManager
 			catch (IllegalArgumentException e)
 			{
 				/*
-				 * This exception is thrown for unknown themes. Show an unsupported message
-				 * Now in this case, we don't do anything. if user doesn't have certain theme
-				 * that chatthread will keep on current applied theme.
+				 * This exception is thrown for unknown themes. Show an unsupported message Now in this case, we don't do anything. if user doesn't have certain theme that
+				 * chatthread will keep on current applied theme.
 				 */
 			}
 		}
@@ -1405,29 +1403,29 @@ public class MqttMessagesManager
 		}
 		else if (HikeConstants.MqttMessageTypes.POPUP.equals(type))
 		{
-			if (jsonObj.getString(HikeConstants.SUB_TYPE).equals(HikeConstants.SHOW_STEALTH_POPUP)) 
+			if (jsonObj.getString(HikeConstants.SUB_TYPE).equals(HikeConstants.SHOW_STEALTH_POPUP))
 			{
 				JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
 				String id = data.optString(HikeConstants.MESSAGE_ID);
 				String lastPushPacketId = settings.getString(HikeConstants.Extras.LAST_STEALTH_POPUP_ID, "");
-				
-				if (!TextUtils.isEmpty(id)) 
+
+				if (!TextUtils.isEmpty(id))
 				{
-					if (lastPushPacketId.equals(id)) 
+					if (lastPushPacketId.equals(id))
 					{
-						Logger.d(getClass().getSimpleName(),"Duplicate popup packet ! Gotcha");
+						Logger.d(getClass().getSimpleName(), "Duplicate popup packet ! Gotcha");
 						return;
 					}
 				}
 				else
 				{
-					Logger.d(getClass().getSimpleName(),"Returning with empty packet Id");
-					return; //empty packet id : ignore this packet
+					Logger.d(getClass().getSimpleName(), "Returning with empty packet Id");
+					return; // empty packet id : ignore this packet
 				}
-				
+
 				String header = data.optString(HikeConstants.HEADER);
 				String body = data.optString(HikeConstants.BODY);
-				
+
 				if (!TextUtils.isEmpty(header) && !TextUtils.isEmpty(body))
 				{
 					Editor editor = settings.edit();
@@ -1436,17 +1434,17 @@ public class MqttMessagesManager
 					editor.putBoolean(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, true);
 					editor.putString(HikeMessengerApp.LAST_STEALTH_POPUP_ID, id);
 					editor.commit();
-					
-					if(data.optBoolean(HikeConstants.PUSH, true)) //Toast this only if the push flag is true
+
+					if (data.optBoolean(HikeConstants.PUSH, true)) // Toast this only if the push flag is true
 					{
 						Bundle bundle = new Bundle();
 						bundle.putString(HikeConstants.Extras.STEALTH_PUSH_BODY, body);
 						bundle.putString(HikeConstants.Extras.STEALTH_PUSH_HEADER, header);
-						this.pubSub.publish(HikePubSub.STEALTH_POPUP_WITH_PUSH, bundle); 
+						this.pubSub.publish(HikePubSub.STEALTH_POPUP_WITH_PUSH, bundle);
 					}
 				}
 			}
-			
+
 		}
 	}
 
@@ -1736,5 +1734,5 @@ public class MqttMessagesManager
 			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, typingNotification);
 		}
 	}
-		
+
 }
