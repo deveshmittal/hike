@@ -14,8 +14,6 @@ import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.EmptyConversationContactItem;
@@ -23,9 +21,11 @@ import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.CreateNewGroupActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
+import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
@@ -254,7 +254,14 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 		{
 			EmptyConversationFtueCardItem item = (EmptyConversationFtueCardItem) getItem(position);
 			viewHolder.name.setText(item.getHeaderTxtResId());
-			viewHolder.mainInfo.setText(item.getSubTxtResId());
+			if (item.getType() == EmptyConversationFtueCardItem.GROUP)
+			{
+				viewHolder.mainInfo.setText(context.getString(item.getSubTxtResId(), HikeConstants.MAX_CONTACTS_IN_GROUP));
+			}
+			else
+			{
+				viewHolder.mainInfo.setText(item.getSubTxtResId());
+			}
 			viewHolder.seeAll.setText(item.getClickableTxtResId());
 			viewHolder.seeAll.setTextColor(item.getClickableTxtColor());
 			viewHolder.cardImg.setBackgroundColor(item.getImgBgColor());
@@ -318,17 +325,25 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			EmptyConversationFtueCardItem item = (EmptyConversationFtueCardItem) v.getTag();
 			if (item.getType() == EmptyConversationItem.LAST_SEEN)
 			{
-				Intent intent = new Intent(context, PeopleActivity.class);
-				context.startActivity(intent);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_LAST_SEEN_CLICKED);
+				openActivityAndSendLogEvent(PeopleActivity.class, HikeConstants.LogEvent.FTUE_CARD_LAST_SEEN_CLICKED);
 			}
-			else if (item.getType() == EmptyConversationItem.HIDDEN_MODE)
+			else if (item.getType() == EmptyConversationItem.GROUP)
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_UNREAD_TIP_CLICKED, null);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_HIDDEN_MODE_CLICKED);
+				openActivityAndSendLogEvent(CreateNewGroupActivity.class, HikeConstants.LogEvent.FTUE_CARD_GROUP_CLICKED);
+			}
+			else if (item.getType() == EmptyConversationItem.INVITE)
+			{
+				openActivityAndSendLogEvent(TellAFriend.class, HikeConstants.LogEvent.FTUE_CARD_INVITE_CLICKED);
 			}
 		}
 	};
+
+	private void openActivityAndSendLogEvent(Class<?> activity, String logEventKey)
+	{
+		Intent intent = new Intent(context, activity);
+		context.startActivity(intent);
+		Utils.sendUILogEvent(logEventKey);
+	}
 
 	private OnClickListener seeAllBtnClickListener = new OnClickListener()
 	{

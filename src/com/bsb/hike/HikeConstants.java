@@ -1431,8 +1431,9 @@ public class HikeConstants
 		
 		public static final String FTUE_CARD_LAST_SEEN_CLICKED = "ftueCardLastSeenClicked";
 
-		public static final String FTUE_CARD_HIDDEN_MODE_CLICKED = "ftueCardHiddenModeClicked";
+		public static final String FTUE_CARD_GROUP_CLICKED = "ftueCardGroupClicked";
 
+		public static final String FTUE_CARD_INVITE_CLICKED = "ftueCardInviteClicked";
 	}
 
 	public static final class MqttMessageTypes
