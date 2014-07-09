@@ -3954,7 +3954,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					status.setImageResource(R.drawable.ic_clock_white);
 					break;
 				case SENT_CONFIRMED:
-					status.setImageResource(R.drawable.ic_tick_white);
+					setIconForSentMessage(message, status, R.drawable.ic_tick_white, R.drawable.ic_sms_white, R.drawable.ic_bolt_white);
 					break;
 				case SENT_DELIVERED:
 					status.setImageResource(R.drawable.ic_double_tick_white);
@@ -3974,7 +3974,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					status.setImageResource(R.drawable.ic_clock);
 					break;
 				case SENT_CONFIRMED:
-					status.setImageResource(R.drawable.ic_tick);
+					setIconForSentMessage(message, status, R.drawable.ic_tick, R.drawable.ic_sms, R.drawable.ic_bolt_grey);
 					break;
 				case SENT_DELIVERED:
 					status.setImageResource(R.drawable.ic_double_tick);
@@ -3989,21 +3989,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			status.setScaleType(ScaleType.CENTER);
 			status.setVisibility(View.VISIBLE);
 		}
-
-		if(message.getState() == State.SENT_CONFIRMED && conversation.isOnhike() && !(conversation instanceof GroupConversation))
-		{
-			if(!message.isSMS())
-			{
-				if(chatThread.isHikeOfflineTipShowing())
-				{
-					status.setImageResource(R.drawable.ic_bolt_grey);
-				}
-			}
-			else
-			{
-				status.setImageResource(R.drawable.ic_sms);
-			}
-		}
 		
 		if (timeStatus != null)
 			timeStatus.setVisibility(View.VISIBLE);
@@ -4017,6 +4002,24 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			detailHolder.messageInfoInflated.setVisibility(View.GONE);
 		}
+	}
+	
+	private void setIconForSentMessage(ConvMessage message, ImageView status, int tickResId, int smsDrawableResId, int boltDrawableResId)
+	{
+		if (conversation.isOnhike() && !(conversation instanceof GroupConversation))
+		{
+			if(message.isSMS())
+			{
+				status.setImageResource(smsDrawableResId);
+				return;
+			}
+			else if (chatThread.isHikeOfflineTipShowing())
+			{
+				status.setImageResource(boltDrawableResId);
+				return;
+			}
+		}
+		status.setImageResource(tickResId);
 	}
 
 	private void inflateNSetMessageInfo(final ConvMessage message, final DetailViewHolder detailHolder, final View clickableItem)
