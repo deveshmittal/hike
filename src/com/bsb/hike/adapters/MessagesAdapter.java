@@ -5246,5 +5246,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			firstPendingConvMessage = undeliveredMessages.get(undeliveredMessages.keySet().iterator().next());
 		}
 	}
-	
+
+	public long getFirstUnsentMessageId()
+	{
+		if (firstPendingConvMessage == null)
+		{
+			return -1;
+		}
+		return firstPendingConvMessage.getMsgID();
+	}
 }

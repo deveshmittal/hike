@@ -149,6 +149,7 @@ import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
@@ -7258,7 +7259,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return;
 		}
-		
+
+		if (!HikeMqttPersistence.getInstance().isMessageSent(mAdapter.getFirstUnsentMessageId()))
+		{
+			return;
+		}
+
 		if(isOnline && mLastSeenView != null)
 		{
 			mLastSeenView.setVisibility(View.GONE);
