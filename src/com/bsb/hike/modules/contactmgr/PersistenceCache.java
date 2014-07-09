@@ -162,13 +162,21 @@ class PersistenceCache extends ContactsCache
 
 	void removeGroup(String grpId)
 	{
-		Pair<String, LinkedList<String>> pp = groupPersistence.get(grpId);
-		List<String> lastMsisdns = pp.second;
-		for (String ms : lastMsisdns)
+		writeLock.lock();
+		try
 		{
-			removeContact(ms, false);
+			Pair<String, LinkedList<String>> pp = groupPersistence.get(grpId);
+			List<String> lastMsisdns = pp.second;
+			for (String ms : lastMsisdns)
+			{
+				removeContact(ms, false);
+			}
+			groupPersistence.remove(grpId);
 		}
-		groupPersistence.remove(grpId);
+		finally
+		{
+			writeLock.unlock();
+		}
 	}
 
 	/**
@@ -208,20 +216,22 @@ class PersistenceCache extends ContactsCache
 	 */
 	void updateContact(ContactInfo contact, String name)
 	{
-		writeLock.lock();
+		readLock.lock();
+		ContactTuple tuple = null;
 		try
 		{
-			ContactTuple tuple = groupContactsPersistence.get(contact.getMsisdn());
-			if (null != tuple)
-			{
-				tuple.setContact(contact);
-				tuple.setName(name);
-			}
+			tuple = groupContactsPersistence.get(contact.getMsisdn());
 		}
 		finally
 		{
 			writeLock.unlock();
 		}
+		if (null != tuple)
+		{
+			tuple.setContact(contact);
+			tuple.setName(name);
+		}
+
 	}
 
 	/**
