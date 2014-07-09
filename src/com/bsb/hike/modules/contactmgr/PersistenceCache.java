@@ -231,31 +231,39 @@ class PersistenceCache extends ContactsCache
 	 */
 	String getName(String msisdn)
 	{
-		if (Utils.isGroupConversation(msisdn))
+		readLock.lock();
+		try
 		{
-			Pair<String, LinkedList<String>> grp = groupPersistence.get(msisdn);
-			return grp.first;
-		}
-
-		ContactInfo c = null;
-		c = convsContactsPersistence.get(msisdn);
-		if (null == c)
-		{
-			ContactTuple tuple = groupContactsPersistence.get(msisdn);
-			if (null != tuple)
+			if (Utils.isGroupConversation(msisdn))
 			{
-				c = tuple.getContact();
-				if (null == c.getName())
+				Pair<String, LinkedList<String>> grp = groupPersistence.get(msisdn);
+				return grp.first;
+			}
+
+			ContactInfo c = null;
+			c = convsContactsPersistence.get(msisdn);
+			if (null == c)
+			{
+				ContactTuple tuple = groupContactsPersistence.get(msisdn);
+				if (null != tuple)
 				{
-					return tuple.getName();
+					c = tuple.getContact();
+					if (null == c.getName())
+					{
+						return tuple.getName();
+					}
 				}
 			}
+
+			if (null == c)
+				return null;
+
+			return c.getName();
 		}
-
-		if (null == c)
-			return null;
-
-		return c.getName();
+		finally
+		{
+			readLock.unlock();
+		}
 	}
 
 	/**
@@ -265,10 +273,18 @@ class PersistenceCache extends ContactsCache
 	 */
 	void setUnknownContactName(String msisdn, String name)
 	{
-		ContactTuple tuple = groupContactsPersistence.get(msisdn);
-		if (null != tuple)
+		writeLock.lock();
+		try
 		{
-			tuple.setName(name);
+			ContactTuple tuple = groupContactsPersistence.get(msisdn);
+			if (null != tuple)
+			{
+				tuple.setName(name);
+			}
+		}
+		finally
+		{
+			writeLock.unlock();
 		}
 	}
 
