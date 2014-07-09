@@ -172,7 +172,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, 
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_START_NEW_CHAT_TIP,
-			HikePubSub.REMOVE_STEALTH_UNREAD_TIP };
+			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED };
 
 	private ConversationsAdapter mAdapter;
 
@@ -1719,7 +1719,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 							}
 							if (unreadCount > 0)
 							{
-								conv.setUnreadCount(conv.getUnreadCount() + 1);
+								conv.setUnreadCount(conv.getUnreadCount() + unreadCount);
 							}
 							ConvMessage message = messageList.get(messageList.size() - 1);
 							if (message.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
