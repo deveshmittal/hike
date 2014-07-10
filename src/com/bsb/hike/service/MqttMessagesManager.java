@@ -1797,6 +1797,30 @@ public class MqttMessagesManager
 				pref.saveData(keys[0], header);
 				pref.saveData(keys[1], body);
 				pref.saveData(keys[2], subType);
+
+				String url = data.optString(HikeConstants.URL);
+				String urlkey = subType + HikeMessengerApp.ATOMIC_POP_UP_URL;
+				if (!TextUtils.isEmpty(url))
+				{
+					pref.saveData(urlkey, url);
+				}
+				else
+				{
+					pref.removeData(urlkey);
+				}
+				String title = data.optString(HikeConstants.TITLE);
+				String titleKey = subType + HikeMessengerApp.ATOMIC_POP_UP_TITLE;
+				if (!TextUtils.isEmpty(title))
+				{
+					pref.saveData(titleKey, title);
+					Logger.d("urltest", title);
+				}
+				else
+				{
+					Logger.d("urltest", "title empty");
+					pref.removeData(titleKey);
+					Logger.d("urltest", "Here");
+				}
 				Logger.i("tip", "writing to pref passed " + header + " -- " + body + " -- subtype " + subType);
 			}
 		}
@@ -1830,7 +1854,8 @@ public class MqttMessagesManager
 		Logger.i("tip", "subtype for main");
 		if (HikeMessengerApp.ATOMIC_POP_UP_FAVOURITES.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_INVITE.equals(subType)
 				|| HikeMessengerApp.ATOMIC_POP_UP_PROFILE_PIC.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_STATUS.equals(subType)
-				|| HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL.equals(subType))
+				|| HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_INTENT.equals(subType)
+				|| HikeMessengerApp.ATOMIC_POP_UP_HTTP.equals(subType))
 		{
 			// show notification
 			if (notificationTextIfApplicable != null)

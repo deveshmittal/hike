@@ -1,14 +1,16 @@
 package com.bsb.hike.adapters;
 
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
+import android.net.Uri;
 import android.os.CountDownTimer;
 import android.text.Html;
 import android.text.TextUtils;
@@ -24,6 +26,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -38,17 +41,15 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.ui.TellAFriend;
+import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
-import com.google.android.gms.internal.co;
-import com.google.android.gms.internal.ed;
 
 public class ConversationsAdapter extends BaseAdapter
 {
@@ -73,7 +74,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private enum ViewType
 	{
-		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP, WELCOME_HIKE_TIP, START_NEW_CHAT_TIP, STEALTH_UNREAD_TIP, ATOMIC_PROFILE_PIC_TIP, ATOMIC_FAVOURITE_TIP, ATOMIC_INVITE_TIP, ATOMIC_STATUS_TIP, ATOMIC_INFO_TIP
+		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP, WELCOME_HIKE_TIP, START_NEW_CHAT_TIP, STEALTH_UNREAD_TIP, ATOMIC_PROFILE_PIC_TIP, ATOMIC_FAVOURITE_TIP, ATOMIC_INVITE_TIP, ATOMIC_STATUS_TIP, ATOMIC_INFO_TIP, ATOMIC_HTTP_TIP, ATOMIC_INTENT_TIP
 	}
 
 	private class ViewHolder
@@ -170,7 +171,10 @@ public class ConversationsAdapter extends BaseAdapter
 				return ViewType.ATOMIC_STATUS_TIP.ordinal();
 			case ConversationTip.ATOMIC_INFO_TIP:
 				return ViewType.ATOMIC_INFO_TIP.ordinal();
-
+			case ConversationTip.ATOMIC_HTTP_TIP:
+				return ViewType.ATOMIC_HTTP_TIP.ordinal();
+			case ConversationTip.ATOMIC_INTENT_TIP:
+				return ViewType.ATOMIC_INTENT_TIP.ordinal();
 			}
 		}
 		return ViewType.CONVERSATION.ordinal();
@@ -231,6 +235,8 @@ public class ConversationsAdapter extends BaseAdapter
 			case ATOMIC_INVITE_TIP:
 			case ATOMIC_STATUS_TIP:
 			case ATOMIC_INFO_TIP:
+			case ATOMIC_HTTP_TIP:
+			case ATOMIC_INTENT_TIP:
 				v = inflater.inflate(R.layout.tip_left_arrow, parent, false);
 				viewHolder.avatar = (ImageView) v.findViewById(R.id.arrow_pointer);
 				viewHolder.headerText = (TextView) v.findViewById(R.id.tip_header);
@@ -379,8 +385,7 @@ public class ConversationsAdapter extends BaseAdapter
 			});
 			return v;
 		}
-		else if (viewType == ViewType.ATOMIC_PROFILE_PIC_TIP || viewType == ViewType.ATOMIC_FAVOURITE_TIP || viewType == ViewType.ATOMIC_INVITE_TIP
-				|| viewType == ViewType.ATOMIC_STATUS_TIP || viewType == ViewType.ATOMIC_INFO_TIP)
+		else if (isAtomicTip(viewType))
 		{
 			HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(context);
 			String headerTxt = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER_MAIN, "");
@@ -408,6 +413,14 @@ public class ConversationsAdapter extends BaseAdapter
 			else if (viewType == ViewType.ATOMIC_INFO_TIP)
 			{
 				clickParentEnabled = false;
+				viewHolder.avatar.setImageResource(R.drawable.ic_information);
+			}
+			else if (viewType == ViewType.ATOMIC_HTTP_TIP)
+			{
+				viewHolder.avatar.setImageResource(R.drawable.ic_information);
+			}
+			else if (viewType == ViewType.ATOMIC_INTENT_TIP)
+			{
 				viewHolder.avatar.setImageResource(R.drawable.ic_information);
 			}
 			viewHolder.closeTip.setOnClickListener(new OnClickListener()
@@ -484,6 +497,38 @@ public class ConversationsAdapter extends BaseAdapter
 			case ConversationTip.ATOMIC_STATUS_TIP:
 				context.startActivity(new Intent(context, StatusUpdate.class));
 				break;
+			case ConversationTip.ATOMIC_HTTP_TIP:
+				String url = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.ATOMIC_POP_UP_HTTP + HikeMessengerApp.ATOMIC_POP_UP_URL, null);
+				if (url != null && !TextUtils.isEmpty(url))
+				{
+					// Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(toLand));
+					Intent myIntent = new Intent(context, WebViewActivity.class);
+					myIntent.putExtra(HikeConstants.Extras.URL_TO_LOAD, url);
+					
+					String title = HikeSharedPreferenceUtil.getInstance(context).getData((HikeMessengerApp.ATOMIC_POP_UP_HTTP + HikeMessengerApp.ATOMIC_POP_UP_TITLE), url);
+					myIntent.putExtra(HikeConstants.Extras.TITLE, title);
+					context.startActivity(myIntent);
+				}
+				break;
+			case ConversationTip.ATOMIC_INTENT_TIP:
+				String uri = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.ATOMIC_POP_UP_INTENT + HikeMessengerApp.ATOMIC_POP_UP_URL, null);
+				if (uri != null && !TextUtils.isEmpty(uri))
+				{
+					try
+					{
+						Intent intent = Intent.parseUri(uri, 0);
+						context.startActivity(intent);
+					}
+					catch (URISyntaxException e)
+					{
+						e.printStackTrace();
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+				}
+				break;
 			}
 			conversationList.remove(position);
 			notifyDataSetChanged();
@@ -491,6 +536,13 @@ public class ConversationsAdapter extends BaseAdapter
 		}
 
 	}
+
+	private boolean isAtomicTip(ViewType viewType)
+	{
+		return viewType == ViewType.ATOMIC_PROFILE_PIC_TIP || viewType == ViewType.ATOMIC_FAVOURITE_TIP || viewType == ViewType.ATOMIC_INVITE_TIP
+				|| viewType == ViewType.ATOMIC_STATUS_TIP || viewType == ViewType.ATOMIC_INFO_TIP || viewType == ViewType.ATOMIC_HTTP_TIP || viewType == ViewType.ATOMIC_INTENT_TIP;
+	}
+
 
 	public void updateViewsRelatedToName(View parentView, Conversation conversation)
 	{
