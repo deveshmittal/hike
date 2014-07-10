@@ -1599,8 +1599,8 @@
     <string name="ftue_card_body_sticker">When words can’t express, say it with a sticker</string>
     <string name="ftue_card_click_text_sticker">You\'ll love them!</string>
     <string name="ftue_card_sep">Amazing things you can do on hike</string>
-    <string name="ftue_card_body_group">Chat with up to %1$d friends, it is bigger than ever</string>
+    <string name="ftue_card_body_group">Start bigger than ever group chats</string>
     <string name="ftue_card_click_group">Tap to create a group!</string>
-    <string name="ftue_card_body_invite">You\'ll earn Rs.20 talk-time for each friend that joins hike</string>
+    <string name="ftue_card_body_invite">Earn Rs.20 talk-time for each friend that joins hike</string>
     <string name="ftue_card_click_invite">Start inviting now!</string>
 </resources>
