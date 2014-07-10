@@ -318,6 +318,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private int HIKE_TO_OFFLINE_TIP_STATE_2 = 2;
 	
 	private int HIKE_TO_OFFLINE_TIP_STATE_3 = 3;
+	
+	private int currentCreditsForToast = 0;
 	/*
 	 * We should run client timer before showing hikeOffline tip
 	 * only if user is entering chat thread and reciever's
@@ -5794,7 +5796,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.doggy_bg);
 
 			stickerBtnBg = R.drawable.doggy_btn;
-			stickerBtnText = R.string.download;
+			stickerBtnText = R.string.free_download;
 			stickerBtnTextColor = getResources().getColor(R.color.doggy_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.doggy_btn_text_shadow);
 
@@ -5808,7 +5810,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.kitty_bg);
 
 			stickerBtnBg = R.drawable.kitty_btn;
-			stickerBtnText = R.string.download;
+			stickerBtnText = R.string.free_download;
 			stickerBtnTextColor = getResources().getColor(R.color.kitty_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.kitty_btn_text_shadow);
 
@@ -5836,7 +5838,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.bollywood_bg);
 
 			stickerBtnBg = R.drawable.bollywood_btn;
-			stickerBtnText = R.string.download;
+			stickerBtnText = R.string.free_download;
 			stickerBtnTextColor = getResources().getColor(R.color.bollywood_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.bollywood_btn_text_shadow);
 
@@ -5850,7 +5852,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.rf_bg);
 
 			stickerBtnBg = R.drawable.rf_btn;
-			stickerBtnText = R.string.download;
+			stickerBtnText = R.string.free_download;
 			stickerBtnTextColor = getResources().getColor(R.color.rf_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.rf_btn_text_shadow);
 
@@ -5864,7 +5866,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.humanoid2_bg);
 
 			stickerBtnBg = R.drawable.humanoid2_btn;
-			stickerBtnText = R.string.download;
+			stickerBtnText = R.string.free_download;
 			stickerBtnTextColor = getResources().getColor(R.color.humanoid2_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.humanoid2_btn_text_shadow);
 
@@ -5878,7 +5880,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.se_bg);
 
 			stickerBtnBg = R.drawable.se_btn;
-			stickerBtnText = R.string.download;
+			stickerBtnText = R.string.free_download;
 			stickerBtnTextColor = getResources().getColor(R.color.se_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.se_btn_text_shadow);
 
@@ -5892,7 +5894,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.avtars_bg);
 
 			stickerBtnBg = R.drawable.avtars_btn;
-			stickerBtnText = R.string.download;
+			stickerBtnText = R.string.free_download;
 			stickerBtnTextColor = getResources().getColor(R.color.avtars_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.avtars_btn_text_shadow);
 
@@ -5906,7 +5908,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.indian_bg);
 
 			stickerBtnBg = R.drawable.indian_btn;
-			stickerBtnText = R.string.download;
+			stickerBtnText = R.string.free_download;
 			stickerBtnTextColor = getResources().getColor(R.color.indian_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.indian_btn_text_shadow);
 
@@ -5920,7 +5922,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.love_bg);
 
 			stickerBtnBg = R.drawable.love_btn;
-			stickerBtnText = R.string.download;
+			stickerBtnText = R.string.free_download;
 			stickerBtnTextColor = getResources().getColor(R.color.love_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.love_btn_text_shadow);
 
@@ -5934,7 +5936,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			resParentBg = getResources().getColor(R.color.sports_bg);
 
 			stickerBtnBg = R.drawable.sports_btn;
-			stickerBtnText = R.string.download;
+			stickerBtnText = R.string.free_download;
 			stickerBtnTextColor = getResources().getColor(R.color.sports_btn_text);
 			stickerBtnShadowColor = getResources().getColor(R.color.sports_btn_text_shadow);
 
@@ -6652,6 +6654,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				tipView.setVisibility(View.INVISIBLE);
 			}
 		}
+		if(isHikeOfflineTipShowing())
+		{
+			setEnableHikeOfflineNextButton(false);
+		}
 		return true;
 	}
 
@@ -6673,6 +6679,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(tipView != null && tipView.getVisibility() == View.INVISIBLE)
 		{
 			tipView.setVisibility(View.VISIBLE);
+		}
+		if(isHikeOfflineTipShowing())
+		{
+			setEnableHikeOfflineNextButton(true);
 		}
 		invalidateOptionsMenu();
 	}
@@ -7348,6 +7358,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				public void onClick(View v)
 				{
 					mAdapter.hikeOfflineSendClick();
+					Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.SECOND_OFFLINE_TIP_CLICKED);
 				}
 			});
 
@@ -7384,6 +7395,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					initialiseHikeToOfflineMode();
 					setupHikeToOfflineTipViews();
+					Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FIRST_OFFLINE_TIP_CLICKED);
 				}
 			};
 			
@@ -7461,7 +7473,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Toast toast;
 					if(!isNativeSms)
 					{
-						toast = Toast.makeText(ChatThread.this, getString(R.string.hike_offline_messages_sent_msg, mCredits - mAdapter.getSelectedFreeSmsCount()), Toast.LENGTH_SHORT);
+						toast = Toast.makeText(ChatThread.this, getString(R.string.hike_offline_messages_sent_msg, currentCreditsForToast - mAdapter.getSelectedFreeSmsCount()), Toast.LENGTH_SHORT);
 					}
 					else
 					{
@@ -7541,6 +7553,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	public void messagesSentCloseHikeToOfflineMode(boolean isNativeSms)
 	{
+		currentCreditsForToast = mCredits;
 		destroyHikeToOfflineMode();
 		hideHikeToOfflineTip(true, isNativeSms);
 	}
@@ -7576,5 +7589,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public int getCurrentSmsBalance()
 	{
 		return mCredits;
+	}
+	
+	private void setEnableHikeOfflineNextButton(boolean enabled)
+	{
+		hikeToOfflineTipview.findViewById(R.id.send_button).setEnabled(enabled);
+		hikeToOfflineTipview.findViewById(R.id.send_button_text).setEnabled(enabled);
+		hikeToOfflineTipview.findViewById(R.id.send_button_tick).setEnabled(enabled);
 	}
 }

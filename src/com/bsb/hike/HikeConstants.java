@@ -1428,6 +1428,16 @@ public class HikeConstants
 		public static final String FTUE_CARD_SEEL_ALL_CLICKED = "ftueCardSeeAllClicked";
 
 		public static final String FTUE_FAV_CARD_SEEL_ALL_CLICKED = "ftueFavCardSeeAllClicked";
+
+		public static final String FIRST_OFFLINE_TIP_CLICKED = "firstOfflineTipClicked";
+		
+		public static final String SECOND_OFFLINE_TIP_CLICKED = "secondOfflineTipClicked";
+
+		public static final String SMS_POPUP_ALWAYS_CLICKED = "smsPopupAlwaysClicked";
+
+		public static final String SMS_POPUP_JUST_ONCE_CLICKED = "smsPopupJustOnceClicked";
+
+		public static final String SMS_POPUP_REGULAR_CHECKED = "smsPopupRegularChecked";
 		
 		public static final String FTUE_CARD_LAST_SEEN_CLICKED = "ftueCardLastSeenClicked";
 
