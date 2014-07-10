@@ -3861,6 +3861,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public void scheduleHikeOfflineTip()
 	{
 		/*
+		 * if international number don't show the tip
+		 */
+		if(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE))
+		{
+			return;
+		}
+		/*
 		 * if Kitkat OR higher we should not show tip
 		 * 1. if user has 0 free SMS left;
 		 * 2. user himself is not online;
@@ -3870,7 +3877,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			int currentSmsBalance = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
 			Logger.d("tesst", ""+(currentSmsBalance == 0) +" "+ !Utils.isUserOnline(context) +" "+ !conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
-			if(currentSmsBalance == 0 || !Utils.isUserOnline(context) || !conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE))
+			if(currentSmsBalance == 0 || !Utils.isUserOnline(context))
 			{
 				return;
 			}
