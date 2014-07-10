@@ -345,10 +345,10 @@ public class HikeNotification
 		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
-		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.offline_notification);
 		final int smallIconId = returnSmallIcon();
 		
-		String title = (msisdnList.size() > 1)  ? context.getString(R.string.hike_to_offline_push_title_multiple) : context.getString(R.string.hike_to_offline_push_title_single, nameMap.get(firstMsisdn));
+		String title = (msisdnList.size() > 1)  ? context.getString(R.string.hike_to_offline_push_title_multiple, msisdnList.size()) : context.getString(R.string.hike_to_offline_push_title_single, nameMap.get(firstMsisdn));
 		String message = context.getString(R.string.hike_to_offline_text);
 		NotificationCompat.Builder mBuilder = getNotificationBuilder(title, message, message, avatarDrawable, smallIconId, false);
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);

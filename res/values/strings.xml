@@ -1058,8 +1058,8 @@
      <string name="undelivered_sms_setting_summary">Always ask for preference</string>
     <string name="wicked_jellies">Wicked Jellies</string>
      <string name="hike_to_offline_push_title_single">%1$s is offline</string>
-      <string name="hike_to_offline_push_title_multiple">Multiple people are offline</string>
-     <string name="hike_to_offline_text">Send messages via hike offline</string>
+      <string name="hike_to_offline_push_title_multiple">%1$d people are offline</string>
+     <string name="hike_to_offline_text">Send messages as free SMS</string>
     <string name="invite_with_watsapp">WhatsApp</string>
     <string name="watsapp_invitation">Hey, join me on hike, the only messaging app made in India! It lets you show your \'Last Seen\' only to select friends, send messages to friends when they\'re offline and send awesome stickers.\n
 Also share all types of files - docs, songs, movies etc, up to 100MB each ;) http://get.hike.in/</string>
