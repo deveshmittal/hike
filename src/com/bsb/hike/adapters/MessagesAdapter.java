@@ -3834,6 +3834,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public void scheduleHikeOfflineTip()
 	{
 		/*
+		 * if international number don't show the tip
+		 */
+		if(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE))
+		{
+			return;
+		}
+		/*
 		 * if Kitkat OR higher we should not show tip
 		 * 1. if user has 0 free SMS left;
 		 * 2. user himself is not online;
@@ -3843,7 +3850,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			int currentSmsBalance = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
 			Logger.d("tesst", ""+(currentSmsBalance == 0) +" "+ !Utils.isUserOnline(context) +" "+ !conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
-			if(currentSmsBalance == 0 || !Utils.isUserOnline(context) || !conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE))
+			if(currentSmsBalance == 0 || !Utils.isUserOnline(context))
 			{
 				return;
 			}
@@ -4558,10 +4565,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			public void onClick(View v)
 			{
 				smsDialogSendClick(sendHike.isChecked(), false);
-				Utils.logEvent(context, HikeConstants.LogEvent.SMS_POPUP_ALWAYS_CLICKED);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_ALWAYS_CLICKED);
 				if(!sendHike.isChecked())
 				{
-					Utils.logEvent(context, HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
 				}
 				dialog.dismiss();
 			}
@@ -4574,10 +4581,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			public void onClick(View v)
 			{
 				smsDialogSendClick(sendHike.isChecked(), true);
-				Utils.logEvent(context, HikeConstants.LogEvent.SMS_POPUP_JUST_ONCE_CLICKED);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_JUST_ONCE_CLICKED);
 				if(!sendHike.isChecked())
 				{
-					Utils.logEvent(context, HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
 				}
 				dialog.dismiss();
 			}
@@ -4595,7 +4602,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		
 		if (isSendHikeChecked)
 		{
-			Utils.setSendUndeliveredSmsSetting(context, false);
 			sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages(true));
 		}
 		else
@@ -4607,7 +4613,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			else
 			{
 				sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages(true));
-				Utils.setSendUndeliveredSmsSetting(context, true);
 			}
 		}
 	}

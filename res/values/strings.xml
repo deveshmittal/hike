@@ -1095,4 +1095,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="ftue_card_body_invite">You\'ll earn Rs.20 talk-time for each friend that joins hike</string>
     <string name="ftue_card_click_invite">Start inviting now!</string>
     <string name="free_download">Free Download</string>
+     <string name="send_sms_file_msg">sent you a file</string>
 </resources>
