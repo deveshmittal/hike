@@ -4586,6 +4586,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				smsDialogSendClick(sendHike.isChecked(), false);
 				Utils.logEvent(context, HikeConstants.LogEvent.SMS_POPUP_ALWAYS_CLICKED);
+				if(!sendHike.isChecked())
+				{
+					Utils.logEvent(context, HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
+				}
 				dialog.dismiss();
 			}
 		});
@@ -4598,6 +4602,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				smsDialogSendClick(sendHike.isChecked(), true);
 				Utils.logEvent(context, HikeConstants.LogEvent.SMS_POPUP_JUST_ONCE_CLICKED);
+				if(!sendHike.isChecked())
+				{
+					Utils.logEvent(context, HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
+				}
 				dialog.dismiss();
 			}
 		});

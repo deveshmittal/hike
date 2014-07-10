@@ -1408,6 +1408,8 @@ public class HikeConstants
 		public static final String SMS_POPUP_ALWAYS_CLICKED = "smsPopupAlwaysClicked";
 
 		public static final String SMS_POPUP_JUST_ONCE_CLICKED = "smsPopupJustOnceClicked";
+
+		public static final String SMS_POPUP_REGULAR_CHECKED = "smsPopupRegularChecked";
 		
 	}
 
