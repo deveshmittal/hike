@@ -808,7 +808,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void showTipIfRequired()
 	{
-		if(isHikeOfflineTipShowing()){
+		if (isHikeOfflineTipShowing() || (tipView != null && tipView.getVisibility() == View.VISIBLE))
+		{
 			return;
 		}
 		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(this.getApplicationContext());
