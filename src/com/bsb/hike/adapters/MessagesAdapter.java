@@ -865,14 +865,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
 					int idx = sticker.getStickerIndex();
 					if (idx >= 0)
-						stickerHolder.image.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS[idx]);
+						setDefaultSticker(stickerHolder.image, StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS[idx]);
 				}
 				else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
 				{
 					// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
 					int idx = sticker.getStickerIndex();
 					if (idx >= 0)
-						stickerHolder.image.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
+						setDefaultSticker(stickerHolder.image, StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
 				}
 			}
 			else
@@ -3335,6 +3335,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		Logger.i("chatthread", "position " + position + " time taken : " + (System.currentTimeMillis() - startTime));
 		return v;
+	}
+
+	private void setDefaultSticker(ImageView imageView, int imageRes)
+	{
+		try
+		{
+			imageView.setImageResource(imageRes);
+		}
+		catch (OutOfMemoryError error)
+		{
+			Logger.w(getClass().getSimpleName(), "OOM while setting default sticker");
+		}
 	}
 
 	private void setBubbleColor(ConvMessage convMessage, ViewGroup messageContainer)
