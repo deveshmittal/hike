@@ -149,6 +149,7 @@ import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
@@ -6196,19 +6197,32 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			loadingMoreMessages = true;
 
+			final String msisdn = mContactNumber;
+
+			final long firstMessageId = messages.get(startIndex).getMsgID();
+
+			final Conversation conversation = mConversation;
+
 			AsyncTask<Void, Void, List<ConvMessage>> asyncTask = new AsyncTask<Void, Void, List<ConvMessage>>()
 			{
 
 				@Override
 				protected List<ConvMessage> doInBackground(Void... params)
 				{
-					return mConversationDb.getConversationThread(mContactNumber, mConversation.getConvId(), HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME, mConversation,
-							messages.get(startIndex).getMsgID());
+					return mConversationDb.getConversationThread(msisdn, conversation.getConvId(), HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME, conversation,
+							firstMessageId);
 				}
 
 				@Override
 				protected void onPostExecute(List<ConvMessage> result)
 				{
+					/*
+					 * Making sure that we are still in the same conversation.
+					 */
+					if (!msisdn.equals(mContactNumber))
+					{
+						return;
+					}
 					if (!result.isEmpty())
 					{
 						int scrollOffset = 0;
@@ -7258,7 +7272,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return;
 		}
-		
+
+		if (!HikeMqttPersistence.getInstance().isMessageSent(mAdapter.getFirstUnsentMessageId()))
+		{
+			return;
+		}
+
 		if(isOnline && mLastSeenView != null)
 		{
 			mLastSeenView.setVisibility(View.GONE);
