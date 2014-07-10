@@ -7225,7 +7225,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				public void onClick(View v)
 				{
 					mAdapter.hikeOfflineSendClick();
-					Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.SECOND_OFFLINE_TIP_CLICKED);
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SECOND_OFFLINE_TIP_CLICKED);
 				}
 			});
 
@@ -7262,7 +7262,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					initialiseHikeToOfflineMode();
 					setupHikeToOfflineTipViews();
-					Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FIRST_OFFLINE_TIP_CLICKED);
+					Utils.sendUILogEvent(HikeConstants.LogEvent.FIRST_OFFLINE_TIP_CLICKED);
 				}
 			};
 			
