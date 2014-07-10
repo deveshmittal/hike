@@ -1432,6 +1432,8 @@ public class HikeConstants
 		public static final String FTUE_CARD_LAST_SEEN_CLICKED = "ftueCardLastSeenClicked";
 
 		public static final String FTUE_CARD_HIDDEN_MODE_CLICKED = "ftueCardHiddenModeClicked";
+		
+		public static final String WATS_APP_INVITE = "inv_wa";
 
 	}
 
