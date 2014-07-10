@@ -2783,7 +2783,7 @@ public class Utils
 				return context.getString(R.string.send_sms_audio_msg);
 
 			default:
-				break;
+				return context.getString(R.string.send_sms_file_msg);
 			}
 
 		}

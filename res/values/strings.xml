@@ -1612,5 +1612,6 @@
      <string name="send_paid_sms">Send paid SMS</string>
      <string name="next_uppercase">NEXT</string>
      <string name="regular_sms_sent_confirmation">Sent as regular SMS</string>
+     <string name="send_sms_file_msg">sent you a file</string>
      
 </resources>
