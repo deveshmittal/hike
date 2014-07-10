@@ -4629,7 +4629,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		
 		if (isSendHikeChecked)
 		{
-			Utils.setSendUndeliveredSmsSetting(context, false);
 			sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages(true));
 		}
 		else
@@ -4641,7 +4640,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			else
 			{
 				sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages(true));
-				Utils.setSendUndeliveredSmsSetting(context, true);
 			}
 		}
 	}

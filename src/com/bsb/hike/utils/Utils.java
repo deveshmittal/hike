@@ -2315,13 +2315,6 @@ public class Utils
 		sendDefaultSMSClientLogEvent(value);
 	}
 
-	public static void setSendUndeliveredSmsSetting(Context context, boolean value)
-	{
-		Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, value);
-		editor.commit();
-	}
-	
 	public static void setSendUndeliveredAlwaysAsSmsSetting(Context context, boolean value)
 	{
 		Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
