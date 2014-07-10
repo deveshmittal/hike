@@ -408,14 +408,10 @@ public class HikeConstants
 	public static final String REQUEST_DP = "rdp";
 
 	public static final String C_TIME_STAMP = "cts";
-
+	
 	public static final String HEADER = "h";
-
+	
 	public static final String BODY = "b";
-
-	public static final String URL = "u";
-
-	public static final String TITLE = "t";
 
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"

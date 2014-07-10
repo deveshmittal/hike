@@ -373,14 +373,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ATOMIC_POP_UP_INFORMATIONAL = "info";
 
-	public static final String ATOMIC_POP_UP_HTTP = "http";
-
-	public static final String ATOMIC_POP_UP_INTENT = "intent";
-
-	public static final String ATOMIC_POP_UP_URL = "url";
-
-	public static final String ATOMIC_POP_UP_TITLE = "title";
-
 	public static final String ATOMIC_POP_UP_FAVOURITES = "fav";
 
 	public static final String ATOMIC_POP_UP_THEME = "theme";
