@@ -1035,6 +1035,7 @@
     <string name="ftue_card_body_sticker">When words can’t express, say it with a sticker</string>
     <string name="ftue_card_click_text_sticker">You\'ll love them!</string>
     <string name="ftue_card_sep">Amazing things you can do on hike</string>
+<<<<<<< HEAD
      <string name="change_stealth_password">Change Password</string>
      <string name="change_stealth_password_body">Change your Hidden Mode password</string>
      <string name="invited">Invited</string>
@@ -1090,9 +1091,9 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
      <string name="send_paid_sms">Send paid SMS</string>
      <string name="next_uppercase">NEXT</string>
      <string name="regular_sms_sent_confirmation">Sent as regular SMS</string>
-    <string name="ftue_card_body_group">Chat with up to %1$d friends, it is bigger than ever</string>
+    <string name="ftue_card_body_group">Start bigger than ever group chats</string>
     <string name="ftue_card_click_group">Tap to create a group!</string>
-    <string name="ftue_card_body_invite">You\'ll earn Rs.20 talk-time for each friend that joins hike</string>
+    <string name="ftue_card_body_invite">Earn Rs.20 talk-time for each friend that joins hike</string>
     <string name="ftue_card_click_invite">Start inviting now!</string>
     <string name="free_download">Free Download</string>
      <string name="send_sms_file_msg">sent you a file</string>
