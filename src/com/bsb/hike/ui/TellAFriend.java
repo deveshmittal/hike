@@ -433,6 +433,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 			startActivity(new Intent(this, HikeListActivity.class));
 			break;
 		case WATSAPP:
+			Utils.sendUILogEvent(HikeConstants.LogEvent.WATS_APP_INVITE);
 			sendInviteViaWatsApp();
 			break;
 		case FACEBOOK:
