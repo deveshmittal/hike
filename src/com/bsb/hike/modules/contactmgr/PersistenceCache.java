@@ -2,10 +2,10 @@ package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -26,9 +26,7 @@ class PersistenceCache extends ContactsCache
 	private Map<String, ContactTuple> groupContactsPersistence;
 
 	// Memory persistence for all group names and list of msisdns(last message in group) that should always be loaded
-	private Map<String, Pair<String, LinkedList<String>>> groupPersistence;
-
-	// TODO Linked List is not needed , ArrayList will also do will change later
+	private Map<String, Pair<String, ConcurrentLinkedQueue<String>>> groupPersistence;
 
 	private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
 
@@ -43,7 +41,7 @@ class PersistenceCache extends ContactsCache
 	{
 		convsContactsPersistence = new HashMap<String, ContactInfo>();
 		groupContactsPersistence = new HashMap<String, ContactTuple>();
-		groupPersistence = new HashMap<String, Pair<String, LinkedList<String>>>();
+		groupPersistence = new HashMap<String, Pair<String, ConcurrentLinkedQueue<String>>>();
 		loadMemory();
 	}
 
@@ -138,22 +136,7 @@ class PersistenceCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			if (ifOneToOneConversation)
-			{
-				convsContactsPersistence.remove(msisdn);
-			}
-			else
-			{
-				ContactTuple tuple = groupContactsPersistence.get(msisdn);
-				if (null != tuple)
-				{
-					tuple.setReferenceCount(tuple.getReferenceCount() - 1);
-					if (tuple.getReferenceCount() == 0)
-					{
-						groupContactsPersistence.remove(msisdn);
-					}
-				}
-			}
+			removeFromCache(msisdn, ifOneToOneConversation);
 		}
 		finally
 		{
@@ -161,16 +144,48 @@ class PersistenceCache extends ContactsCache
 		}
 	}
 
+	/**
+	 * This method is not Thread safe , removes the contact for a particular msisdn from the cache - if it is one to one conversation removes from convs map otherwise from group
+	 * map
+	 * 
+	 * @param msisdn
+	 * @param ifOneToOneConversation
+	 */
+	private void removeFromCache(String msisdn, boolean ifOneToOneConversation)
+	{
+		if (ifOneToOneConversation)
+		{
+			convsContactsPersistence.remove(msisdn);
+		}
+		else
+		{
+			ContactTuple tuple = groupContactsPersistence.get(msisdn);
+			if (null != tuple)
+			{
+				tuple.setReferenceCount(tuple.getReferenceCount() - 1);
+				if (tuple.getReferenceCount() == 0)
+				{
+					groupContactsPersistence.remove(msisdn);
+				}
+			}
+		}
+	}
+
+	/**
+	 * This method is thread safe and removes the mapping for particular grpId (if group is deleted) and their corresponding last msisnds are removed from the group contacts map
+	 * 
+	 * @param grpId
+	 */
 	void removeGroup(String grpId)
 	{
 		writeLock.lock();
 		try
 		{
-			Pair<String, LinkedList<String>> pp = groupPersistence.get(grpId);
-			List<String> lastMsisdns = pp.second;
+			Pair<String, ConcurrentLinkedQueue<String>> pp = groupPersistence.get(grpId);
+			ConcurrentLinkedQueue<String> lastMsisdns = pp.second;
 			for (String ms : lastMsisdns)
 			{
-				removeContact(ms, false);
+				removeFromCache(ms, false);
 			}
 			groupPersistence.remove(grpId);
 		}
@@ -252,7 +267,7 @@ class PersistenceCache extends ContactsCache
 			readLock.lock();
 			try
 			{
-				Pair<String, LinkedList<String>> grp = groupPersistence.get(msisdn);
+				Pair<String, ConcurrentLinkedQueue<String>> grp = groupPersistence.get(msisdn);
 				return grp.first;
 			}
 			finally
@@ -330,8 +345,8 @@ class PersistenceCache extends ContactsCache
 			String name = mapEntry.getValue();
 			List<String> lastMsisdns = groupLastMsisdnsMap.get(grpId);
 			grouplastMsisdns.addAll(lastMsisdns);
-			LinkedList<String> lastMsisdnsLinkedList = new LinkedList<String>(lastMsisdns);
-			Pair<String, LinkedList<String>> groupPair = new Pair<String, LinkedList<String>>(name, lastMsisdnsLinkedList);
+			ConcurrentLinkedQueue<String> lastMsisdnsConcurrentLinkedQueue = new ConcurrentLinkedQueue<String>(lastMsisdns);
+			Pair<String, ConcurrentLinkedQueue<String>> groupPair = new Pair<String, ConcurrentLinkedQueue<String>>(name, lastMsisdnsConcurrentLinkedQueue);
 			groupPersistence.put(grpId, groupPair);
 		}
 
@@ -489,6 +504,8 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
+	 * This method is used for removing msisdns from the group persistence cache and their reference count is decremented in group contacts map by which is done by removecontact
+	 * method
 	 * 
 	 * @param groupId
 	 * @param currentGroupMsisdns
@@ -497,30 +514,50 @@ class PersistenceCache extends ContactsCache
 	{
 		if (groupPersistence != null)
 		{
-			Pair<String, LinkedList<String>> nameAndLastMsisdns = groupPersistence.get(groupId);
+			Pair<String, ConcurrentLinkedQueue<String>> nameAndLastMsisdns;
+			readLock.lock();
+			try
+			{
+				nameAndLastMsisdns = groupPersistence.get(groupId);
+			}
+			finally
+			{
+				readLock.unlock();
+			}
+
 			if (null != nameAndLastMsisdns)
 			{
-				LinkedList<String> grpMsisdns = nameAndLastMsisdns.second;
-
+				ConcurrentLinkedQueue<String> grpMsisdns = nameAndLastMsisdns.second;
 				if (null != grpMsisdns)
 				{
-					Map<String, Boolean> map = new HashMap<String, Boolean>();
-					for (String s : currentGroupMsisdns)
+					boolean flag;
+					writeLock.lock();
+					try
 					{
-						map.put(s, true);
-					}
-
-					for (String msisdn : grpMsisdns)
-					{
-						if (!map.containsKey(msisdn))
+						for (String msisdn : grpMsisdns)
 						{
-							removeContact(msisdn, false);
+							flag = false;
+							for (String ms : currentGroupMsisdns)
+							{
+								if (ms.equals(msisdn))
+								{
+									flag = true;
+									break;
+								}
+							}
+							if (!flag)
+							{
+								removeFromCache(msisdn, false);
+							}
 						}
 					}
+					finally
+					{
+						writeLock.unlock();
+					}
 				}
-				Pair<String, LinkedList<String>> currentnameAndLastMsisdns = new Pair<String, LinkedList<String>>(nameAndLastMsisdns.first, new LinkedList<String>(
-						currentGroupMsisdns));
-				groupPersistence.put(groupId, currentnameAndLastMsisdns);
+				grpMsisdns.clear();
+				grpMsisdns.addAll(currentGroupMsisdns);
 			}
 		}
 	}
