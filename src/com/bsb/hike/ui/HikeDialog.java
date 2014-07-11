@@ -262,6 +262,8 @@ public class HikeDialog
 				{
 					mediumsz = originalsz;
 					mediumSize.setVisibility(View.GONE);
+					// if medium option text size is gone, so is small's
+					smallSize.setVisibility(View.GONE);
 				}
 				smallSize.setText(" (" + Utils.getSizeForDisplay(smallsz)+ ")");
 				mediumSize.setText(" (" + Utils.getSizeForDisplay(mediumsz) + ")");
