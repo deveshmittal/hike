@@ -214,6 +214,7 @@
     <string name="sound_msg">Play a sound on new message</string>
     <string name="free_sms">Free SMS to India</string>
     <string name="free_sms_msg">Turn on to send free SMS to India</string>
+    <string name="use_this_quality_for_sending_images">Use this quality for sending images</string>
     <string name="auto_download_media">Auto download media</string>
     <string name="auto_download_media_hinttext">Download settings for photos, videos, audio</string>
     <string name="md_auto_download_media">Auto Download Media : Mobile</string>
