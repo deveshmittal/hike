@@ -822,24 +822,31 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	private void updateMedia()
 	{
 		Preference preference = getPreferenceScreen().findPreference(HikeConstants.IMAGE_QUALITY);
-		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(HikePreferences.this);
-		
-		int imageQuality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);		
-		
-		String qualityString = "";
-		switch (imageQuality)
+		if (HikeSharedPreferenceUtil.getInstance(HikePreferences.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
 		{
-		case 1:
-			qualityString = "Original";
-			break;
-		case 2:
-			qualityString = "Medium";
-			break;
-		case 3:
-			qualityString = "Small";
-			break;
+			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(HikePreferences.this);
+
+			int imageQuality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
+
+			String qualityString = "";
+			switch (imageQuality)
+			{
+			case 1:
+				qualityString = "Original";
+				break;
+			case 2:
+				qualityString = "Medium";
+				break;
+			case 3:
+				qualityString = "Small";
+				break;
+			}
+			preference.setTitle(getResources().getString(R.string.image_quality_prefs) + " - " + qualityString);
 		}
-		preference.setTitle(getResources().getString(R.string.image_quality_prefs) + " - " + qualityString);
+		else
+		{
+			preference.setTitle(getResources().getString(R.string.image_quality_prefs));
+		}
 	}
 	
 	private void updateNotifPrefView()
