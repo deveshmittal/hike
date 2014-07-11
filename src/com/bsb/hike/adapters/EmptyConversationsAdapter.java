@@ -24,9 +24,9 @@ import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.CreateNewGroupActivity;
+import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
-import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.Utils;
 
 public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationItem>
@@ -280,7 +280,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			}
 			else if (item.getType() == EmptyConversationItem.INVITE)
 			{
-				openActivityAndSendLogEvent(TellAFriend.class, HikeConstants.LogEvent.FTUE_CARD_INVITE_CLICKED);
+				openActivityAndSendLogEvent(HikeListActivity.class, HikeConstants.LogEvent.FTUE_CARD_INVITE_CLICKED);
 			}
 		}
 	};
