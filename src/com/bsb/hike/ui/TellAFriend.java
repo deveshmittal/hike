@@ -245,7 +245,15 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 				@Override
 				public void run()
 				{
-					onItemClick(null, null, facebook ? 1 : 2, 0);
+					if (facebook)
+					{
+						onClickPickFriends();
+					}
+					else
+					{
+						// twitter
+						postToSocialNetwork(false);
+					}
 				}
 			});
 		}
