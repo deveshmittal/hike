@@ -113,6 +113,20 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 			c.close();
 		}
 	}
+	
+	public boolean isMessageSent(long mqttMsgId)
+	{
+		Cursor c = mDb.query(MQTT_DATABASE_TABLE, new String[] { MQTT_MESSAGE_ID }, MQTT_MESSAGE_ID + "=?", new String[] { Long.toString(mqttMsgId) }, null, null, null);
+		try
+		{
+			int count = c.getCount();
+			return (count == 0);
+		}
+		finally
+		{
+			c.close();
+		}
+	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db)

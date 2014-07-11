@@ -790,7 +790,7 @@ public class HikeConstants
 	public static final String PROTIP_STATUS_NAME = "hike team";
 
 	/* In seconds */
-	public static final int DEFAULT_UNDELIVERED_WAIT_TIME = 45;
+	public static final int DEFAULT_UNDELIVERED_WAIT_TIME = 30;
 
 	public static final int MAX_FALLBACK_NATIVE_SMS = 19;
 
@@ -1428,13 +1428,26 @@ public class HikeConstants
 		public static final String FTUE_CARD_SEEL_ALL_CLICKED = "ftueCardSeeAllClicked";
 
 		public static final String FTUE_FAV_CARD_SEEL_ALL_CLICKED = "ftueFavCardSeeAllClicked";
+
+		public static final String FIRST_OFFLINE_TIP_CLICKED = "firstOfflineTipClicked";
+		
+		public static final String SECOND_OFFLINE_TIP_CLICKED = "secondOfflineTipClicked";
+
+		public static final String SMS_POPUP_ALWAYS_CLICKED = "smsPopupAlwaysClicked";
+
+		public static final String SMS_POPUP_JUST_ONCE_CLICKED = "smsPopupJustOnceClicked";
+
+		public static final String SMS_POPUP_REGULAR_CHECKED = "smsPopupRegularChecked";
 		
 		public static final String FTUE_CARD_LAST_SEEN_CLICKED = "ftueCardLastSeenClicked";
+
+		public static final String FTUE_CARD_GROUP_CLICKED = "ftueCardGroupClicked";
 
 		public static final String FTUE_CARD_HIDDEN_MODE_CLICKED = "ftueCardHiddenModeClicked";
 		
 		public static final String WATS_APP_INVITE = "inv_wa";
 
+		public static final String FTUE_CARD_INVITE_CLICKED = "ftueCardInviteClicked";
 	}
 
 	public static final class MqttMessageTypes

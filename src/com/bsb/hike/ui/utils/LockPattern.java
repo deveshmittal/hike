@@ -34,7 +34,7 @@ public class LockPattern
 		switch (requestCode)
 		{
 		case HikeConstants.ResultCodes.CREATE_LOCK_PATTERN:
-			boolean isReset = data.getExtras().getBoolean(HikeConstants.Extras.STEALTH_PASS_RESET);
+			boolean isReset = data.getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false);
 			if (resultCode == activity.RESULT_OK)
 			{
 				String encryptedPattern = String.valueOf(data.getCharArrayExtra(LockPatternActivity.EXTRA_PATTERN));
@@ -50,7 +50,7 @@ public class LockPattern
 			else
 			{
 				//making this check so that we can find out if this is password reset flow or otherwise
-				if(!data.getExtras().getBoolean(HikeConstants.Extras.STEALTH_PASS_RESET))
+				if(!isReset)
 				{
 					HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_FTUE_STEALTH_CONV, null);
 				}
