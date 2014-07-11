@@ -3248,7 +3248,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					DBConstants.MESSAGES_TABLE + "." + DBConstants.CONV_ID + " IN (SELECT " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.CONV_ID + " FROM "
 							+ DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN + " IN " + msisdnStatement + " ) " + " AND "
 							+ " ( " + DBConstants.MESSAGES_TABLE + "." + DBConstants.CONV_ID + "=" + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.CONV_ID + " ) " + " AND  "
-							+ DBConstants.MESSAGES_TABLE + "." + DBConstants.MSG_STATUS + "=" + State.SENT_CONFIRMED.ordinal(), null, DBConstants.CONVERSATIONS_TABLE + "."
+							+ DBConstants.MESSAGES_TABLE + "." + DBConstants.MSG_STATUS + "=" + State.SENT_CONFIRMED.ordinal() + " AND  "
+									+ DBConstants.MESSAGES_TABLE + "." + DBConstants.IS_HIKE_MESSAGE + "=" + "1", null, DBConstants.CONVERSATIONS_TABLE + "."
 							+ DBConstants.MSISDN, null, null);
 
 			if (c != null)
