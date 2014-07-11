@@ -1130,6 +1130,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		setupChatThemeActionBar();
 		showingChatThemePicker = true;
 		invalidateOptionsMenu();
+		resetAtomicPopUpKey(HikeMessengerApp.ATOMIC_POP_UP_THEME);
 	}
 
 	private void dismissPopupWindow()
