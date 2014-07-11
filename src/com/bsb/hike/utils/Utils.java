@@ -1202,7 +1202,16 @@ public class Utils
 	{
 		String filePath = null;
 		String[] proj = { MediaStore.Images.Media.DATA };
-		Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
+		Cursor cursor = null;
+		// The query can throw exception if is doesn't know the specified projections. This needs to be put in a try-catch block.
+		try
+		{
+			cursor = activity.managedQuery(contentUri, proj, null, null, null);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		if (cursor == null || cursor.getCount() == 0)
 		{
 			//return null;
