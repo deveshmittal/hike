@@ -44,7 +44,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
@@ -431,12 +431,10 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 	private List<Pair<AtomicBoolean, ContactInfo>> getContactList()
 	{
-		HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
-
 		switch (type)
 		{
 		case BLOCK:
-			return hUDB.getBlockedUserList();
+			return ContactManager.getInstance().getBlockedUserList();
 		case INVITE:
 			return HikeMessengerApp.getContactManager().getNonHikeContacts();
 		}

@@ -15,10 +15,11 @@ import android.util.Pair;
 
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 
 public class TransientCache extends ContactsCache
 {
+	HikeUserDatabase hDb;
+
 	// Transient Memory for contacts that are saved in address book with their reference count
 	private Map<String, ContactTuple> savedContacts; // TODO name field not needed here
 
@@ -37,11 +38,12 @@ public class TransientCache extends ContactsCache
 	/**
 	 * 
 	 */
-	TransientCache()
+	TransientCache(HikeUserDatabase db)
 	{
 		savedContacts = new LinkedHashMap<String, ContactTuple>();
 		unsavedContacts = new HashMap<String, ContactTuple>();
 		groupParticipants = new HashMap<String, List<String>>();
+		hDb = db;
 	}
 
 	/**
@@ -269,7 +271,7 @@ public class TransientCache extends ContactsCache
 	 */
 	void loadMemory()
 	{
-		Pair<Map<String, ContactInfo>, Map<String, ContactInfo>> map = HikeUserDatabase.getInstance().getAllContactInfo();
+		Pair<Map<String, ContactInfo>, Map<String, ContactInfo>> map = hDb.getAllContactInfo();
 
 		Map<String, ContactInfo> savedcontactmap = map.first;
 
@@ -312,7 +314,7 @@ public class TransientCache extends ContactsCache
 	 */
 	ContactInfo putInCache(String msisdn, boolean ifNotFoundReturnNull)
 	{
-		ContactInfo c = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn, ifNotFoundReturnNull);
+		ContactInfo c = hDb.getContactInfoFromMSISDN(msisdn, ifNotFoundReturnNull);
 		if (null != c.getName())
 		{
 			insertContact(c);
@@ -334,7 +336,7 @@ public class TransientCache extends ContactsCache
 	{
 		if (msisdns.size() > 0)
 		{
-			Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
+			Map<String, ContactInfo> map = hDb.getContactInfoFromMsisdns(msisdns, true);
 
 			for (Entry<String, ContactInfo> mapEntry : map.entrySet())
 			{
@@ -368,7 +370,7 @@ public class TransientCache extends ContactsCache
 
 		if (allContactsLoaded)
 		{
-			Set<String> blockSet = HikeUserDatabase.getInstance().getBlockedMsisdnSet();
+			Set<String> blockSet = hDb.getBlockedMsisdnSet();
 
 			for (Entry<String, ContactTuple> savedMapEntry : savedContacts.entrySet())
 			{
@@ -395,7 +397,7 @@ public class TransientCache extends ContactsCache
 		}
 		else
 		{
-			Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getNOTFRIENDScontactsFromDB(onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+			Map<String, ContactInfo> map = hDb.getNOTFRIENDScontactsFromDB(onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
 			if (map != null)
 			{
 				for (Entry<String, ContactInfo> mapEntry : map.entrySet())
@@ -433,7 +435,7 @@ public class TransientCache extends ContactsCache
 	{
 		// TODO first check if all contacts are loaded
 
-		Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getContactsOfFavoriteTypeDB(favoriteType, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+		Map<String, ContactInfo> map = hDb.getContactsOfFavoriteTypeDB(favoriteType, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
 
 		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
 
@@ -473,7 +475,7 @@ public class TransientCache extends ContactsCache
 	{
 		// TODO first check if all contacts are loaded
 
-		List<ContactInfo> contacts = HikeUserDatabase.getInstance().getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
+		List<ContactInfo> contacts = hDb.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
 		for (ContactInfo contact : contacts)
 		{
 			if (null == getContact(contact.getMsisdn()))
@@ -500,7 +502,7 @@ public class TransientCache extends ContactsCache
 		List<Pair<AtomicBoolean, ContactInfo>> contacts = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
 		if (allContactsLoaded)
 		{
-			Set<String> blockSet = HikeUserDatabase.getInstance().getBlockedMsisdnSet();
+			Set<String> blockSet = hDb.getBlockedMsisdnSet();
 
 			for (Entry<String, ContactTuple> savedMapEntry : savedContacts.entrySet())
 			{
@@ -518,7 +520,7 @@ public class TransientCache extends ContactsCache
 		}
 		else
 		{
-			contacts = HikeUserDatabase.getInstance().getNonHikeContacts();
+			contacts = hDb.getNonHikeContacts();
 
 			for (Pair<AtomicBoolean, ContactInfo> p : contacts)
 			{
@@ -548,7 +550,7 @@ public class TransientCache extends ContactsCache
 	{
 		// TODO first check if all contacts are loaded
 
-		List<ContactInfo> contacts = HikeUserDatabase.getInstance().getNonHikeMostContactedContacts(limit);
+		List<ContactInfo> contacts = hDb.getNonHikeMostContactedContacts(limit);
 		for (ContactInfo contact : contacts)
 		{
 			if (null == getContact(contact.getMsisdn()))
@@ -588,7 +590,7 @@ public class TransientCache extends ContactsCache
 		}
 		else
 		{
-			contact = HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(number);
+			contact = hDb.getContactInfoFromPhoneNo(number);
 			if (null == getContact(contact.getMsisdn()))
 			{
 				if (null == contact.getName())
@@ -632,7 +634,7 @@ public class TransientCache extends ContactsCache
 		}
 		else
 		{
-			contact = HikeUserDatabase.getInstance().getContactInfoFromPhoneNoOrMsisdn(number);
+			contact = hDb.getContactInfoFromPhoneNoOrMsisdn(number);
 			if (null == getContact(contact.getMsisdn()))
 			{
 				if (null == contact.getName())

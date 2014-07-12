@@ -76,7 +76,7 @@ import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -486,7 +486,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		profileItems = new ArrayList<ProfileItem>();
 		setupContactProfileList();
 
-		profileAdapter = new ProfileAdapter(this, profileItems, null, contactInfo, false, HikeUserDatabase.getInstance().isBlocked(mLocalMSISDN));
+		profileAdapter = new ProfileAdapter(this, profileItems, null, contactInfo, false, ContactManager.getInstance().isBlocked(mLocalMSISDN));
 		profileContent = (ListView) findViewById(R.id.profile_content);
 		profileContent.setAdapter(profileAdapter);
 		profileContent.setOnScrollListener(this);
@@ -970,8 +970,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				public void onSuccess(JSONObject response)
 				{
 					mActivityState.destFilePath = null;
-					HikeUserDatabase db = HikeUserDatabase.getInstance();
-					db.setIcon(mLocalMSISDN, bytes, false);
+					ContactManager.getInstance().setIcon(mLocalMSISDN, bytes, false);
 
 					Utils.renameTempProfileImage(mLocalMSISDN);
 
@@ -1003,7 +1002,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						StatusMessage statusMessage = new StatusMessage(0, mappedId, msisdn, name, "", StatusMessageType.PROFILE_PIC, time, -1, 0);
 						HikeConversationsDatabase.getInstance().addStatusMessage(statusMessage, true);
 
-						HikeUserDatabase.getInstance().setIcon(statusMessage.getMappedId(), bytes, false);
+						ContactManager.getInstance().setIcon(statusMessage.getMappedId(), bytes, false);
 
 						String srcFilePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT + "/" + msisdn + ".jpg";
 

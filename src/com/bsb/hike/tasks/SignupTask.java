@@ -33,8 +33,8 @@ import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.contactmgr.ContactUtils;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
@@ -431,7 +431,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 			List<ContactInfo> contactinfos = ContactUtils.getContacts(this.context);
 			ContactUtils.setGreenBlueStatus(this.context, contactinfos);
-			HikeUserDatabase db = null;
+			
 			try
 			{
 				Map<String, List<ContactInfo>> contacts = ContactUtils.convertToMap(contactinfos);
@@ -460,8 +460,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					return Boolean.FALSE;
 				}
 				Logger.d("SignupTask", "about to insert addressbook");
-				db = HikeUserDatabase.getInstance();
-				db.setAddressBookAndBlockList(addressbook, blockList);
+				ContactManager.getInstance().setAddressBookAndBlockList(addressbook, blockList);
 
 			}
 			catch (Exception e)
@@ -569,8 +568,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		if (profilePicSmall != null)
 		{
 				byte[] bytes = BitmapUtils.bitmapToBytes(profilePicSmall, Bitmap.CompressFormat.JPEG, 100);
-				HikeUserDatabase db = HikeUserDatabase.getInstance();
-				db.setIcon(msisdn, bytes, false);
+				ContactManager.getInstance().setIcon(msisdn, bytes, false);
 		}
 		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));

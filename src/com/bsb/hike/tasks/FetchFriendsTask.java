@@ -20,7 +20,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.StatusMessage;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -143,11 +143,9 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			addToStealthList(groupTaskList, groupsStealthList, true);
 		}
 
-		HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
-
 		long queryTime = System.currentTimeMillis();
 		List<ContactInfo> allContacts = HikeMessengerApp.getContactManager().getAllContacts();
-		Set<String> blockSet = hikeUserDatabase.getBlockedMsisdnSet();
+		Set<String> blockSet = ContactManager.getInstance().getBlockedMsisdnSet();
 		Logger.d("TestQuery", "qeury time: " + (System.currentTimeMillis() - queryTime));
 
 		friendTaskList = new ArrayList<ContactInfo>();

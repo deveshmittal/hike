@@ -22,7 +22,6 @@ import android.util.Pair;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -40,7 +39,6 @@ public class ContactUtils
 			Logger.d("CONTACT UTILS", "Airplane mode is on , skipping sync update tasks.");
 			return;
 		}
-		HikeUserDatabase db = HikeUserDatabase.getInstance();
 
 		List<ContactInfo> newContacts = getContacts(ctx);
 		if (newContacts == null)
@@ -49,7 +47,7 @@ public class ContactUtils
 		}
 
 		Map<String, List<ContactInfo>> new_contacts_by_id = convertToMap(newContacts);
-		Map<String, List<ContactInfo>> hike_contacts_by_id = convertToMap(db.getContacts(false));
+		Map<String, List<ContactInfo>> hike_contacts_by_id = convertToMap(ContactManager.getInstance().getContactsFromDB(false));
 
 		/*
 		 * iterate over every item in the phone db, items that are equal remove from both maps items that are different, leave in 'new' map and remove from 'hike' map send the
@@ -113,19 +111,11 @@ public class ContactUtils
 				contactsToDelete.addAll(contacts);
 			}
 						
-			HikeMessengerApp.getContactManager().contactsDeleted(contactsToDelete);
+			HikeMessengerApp.getContactManager().deleteContacts(contactsToDelete);
 			
 			/* Delete ids from hike user DB */
-			db.deleteMultipleRows(hike_contacts_by_id.keySet()); // this will
-																	// delete
-																	// all rows
-																	// in
-																	// HikeUser
-																	// DB that
-																	// are not
-																	// in
-																	// Addressbook.
-			db.updateContacts(updatedContacts);
+			ContactManager.getInstance().deleteMultipleContactInDB(hike_contacts_by_id.keySet()); 
+			ContactManager.getInstance().updateContactsinDB(updatedContacts);
 
 		}
 		catch (Exception e)
@@ -339,8 +329,7 @@ public class ContactUtils
 
 	public static int updateHikeStatus(Context ctx, String msisdn, boolean onhike)
 	{
-		HikeUserDatabase db = HikeUserDatabase.getInstance();
-		return db.updateHikeContact(msisdn, onhike);
+		return ContactManager.getInstance().updateHikeStatus(msisdn, onhike);
 	}
 
 	/**

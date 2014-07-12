@@ -45,7 +45,6 @@ import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
@@ -611,7 +610,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		// succeeded by the
 		// onUpgrade() calls being triggered in the respective databases.
 		HikeConversationsDatabase.init(this);
-		HikeUserDatabase.init(this);
 
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
@@ -773,6 +771,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	private void initContactManager()
 	{
 		conMgr = ContactManager.getInstance();
+		conMgr.init(getApplicationContext());
 	}
 
 	public static ContactManager getContactManager()

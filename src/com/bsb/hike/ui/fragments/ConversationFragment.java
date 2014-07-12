@@ -65,7 +65,7 @@ import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.HikeDialog;
@@ -126,7 +126,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			db = HikeConversationsDatabase.getInstance();
 			db.deleteConversation(ids.toArray(new Long[] {}), msisdns);
 
-			HikeMessengerApp.getContactManager().unloadPersistenceCache(msisdns);
+			HikeMessengerApp.getContactManager().removeContacts(msisdns);
 
 			return convs;
 		}
@@ -518,7 +518,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		if (!(conv instanceof GroupConversation) && conv.getContactName() == null)
 		{
-			optionsList.add(HikeUserDatabase.getInstance().isBlocked(conv.getMsisdn())?getString(R.string.unblock_title):getString(R.string.block_title));
+			optionsList.add(ContactManager.getInstance().isBlocked(conv.getMsisdn())?getString(R.string.unblock_title):getString(R.string.block_title));
 		}
 		if (conv instanceof GroupConversation)
 		{

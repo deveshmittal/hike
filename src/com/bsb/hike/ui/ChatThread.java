@@ -169,8 +169,8 @@ import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.contactmgr.ContactUtils;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -1423,7 +1423,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			 */
 			phoneNumber = phoneNumber.replaceAll("-", "");
 			Logger.d(getClass().getSimpleName(), "SMS To: " + phoneNumber);
-			ContactInfo contactInfo = HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(phoneNumber);
+			ContactInfo contactInfo = ContactManager.getInstance().getContactInfoFromPhoneNo(phoneNumber);
 			/*
 			 * phone lookup fails for a *lot* of people. If that happens, fall back to using their msisdn
 			 */
@@ -1859,8 +1859,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 
-		HikeUserDatabase db = HikeUserDatabase.getInstance();
-		mUserIsBlocked = db.isBlocked(getMsisdnMainUser());
+		mUserIsBlocked = ContactManager.getInstance().isBlocked(getMsisdnMainUser());
 		if (mUserIsBlocked)
 		{
 			showOverlay(true);

@@ -5,12 +5,24 @@ package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
+import org.apache.http.impl.execchain.RetryExec;
+import org.json.JSONObject;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Pair;
 
+import com.bsb.hike.db.DbException;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.modules.iface.ITransientCache;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -27,19 +39,38 @@ public class ContactManager implements ITransientCache
 	private PersistenceCache persistenceCache;
 
 	private TransientCache transientCache;
+	
+	private HikeUserDatabase hDb;
+	
+	private Context context;
 
 	private ContactManager()
 	{
-		//cache will be loaded inside the constructor itself of persistence cache
-		persistenceCache = new PersistenceCache();
-		transientCache = new TransientCache();
 	}
 
 	public static ContactManager getInstance()
 	{
+		if(_instance == null)
+		{
+			synchronized (ContactManager.class)
+			{
+				if(_instance == null)
+				{
+					_instance = new ContactManager();
+				}
+			}
+		}
 		return _instance;
 	}
 
+	public void init(Context ctx)
+	{
+		context = ctx.getApplicationContext();
+		hDb = new HikeUserDatabase(ctx);
+		persistenceCache = new PersistenceCache(hDb);
+		transientCache = new TransientCache(hDb);
+	}
+	
 	/**
 	 * This method should unload the transient memory at app launch event
 	 */
@@ -52,26 +83,27 @@ public class ContactManager implements ITransientCache
 	/**
 	 * This method clears the persistence memory
 	 */
-	public void unloadPersistenceCache()
+	public void clearCache()
 	{
 		persistenceCache.clearMemory();
+		transientCache.clearMemory();
 	}
 
 	/**
-	 * 
+	 * This method should be used when a conversation gets deleted or last sender in group is changed
 	 * @param msisdn
 	 * @param ifOneToOneConversation
 	 */
-	public void unloadPersistenceCache(String msisdn, boolean ifOneToOneConversation)
+	public void removeContact(String msisdn, boolean ifOneToOneConversation)
 	{
 		persistenceCache.removeContact(msisdn, ifOneToOneConversation);
 	}
 
 	/**
-	 * 
+	 * This is used to remove the list of msisdns from either group or 1-1 conversation
 	 * @param msisdns
 	 */
-	public void unloadPersistenceCache(List<String> msisdns)
+	public void removeContacts(List<String> msisdns)
 	{
 		for (String ms : msisdns)
 		{
@@ -87,11 +119,11 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * This method is used when contacts are deleted from the addressbook and we set their name to null
+	 * This method is used when contacts are deleted from the addressbook and we set their name to null in the cache
 	 * 
 	 * @param contacts
 	 */
-	public void contactsDeleted(List<ContactInfo> contacts)
+	public void deleteContacts(List<ContactInfo> contacts)
 	{
 		for (ContactInfo contact : contacts)
 		{
@@ -369,5 +401,183 @@ public class ContactManager implements ITransientCache
 	{
 		// TODO Auto-generated method stub
 
+	}
+
+	
+	/**
+	 * return true if conversation with this id already exists
+	 * group and 1-1 conversations both will be checked
+	 * The implementation is thread safe
+	 * @param msisdn
+	 * @return
+	 */
+	public boolean isConvExists(String id)
+	{
+		return persistenceCache.convExist(id);
+	}
+
+	/**
+	 * Thread safe implementation
+	 * @param groupId
+	 * @return
+	 */
+	public boolean isGroupExist(String groupId)
+	{
+		return persistenceCache.isGroupExists(groupId);
+	}
+
+	public void insertGroup(String grpId, String groupName)
+	{
+		persistenceCache.insertGroup(grpId, groupName);
+	}
+
+	public List<ContactInfo> getContactsFromDB(boolean b)
+	{
+		return hDb.getContacts(b);
+	}
+
+	public void deleteMultipleContactInDB(Set<String> keySet)
+	{
+		hDb.deleteMultipleRows(keySet); 
+	}
+
+	public void updateContactsinDB(List<ContactInfo> updatedContacts)
+	{
+		hDb.updateContacts(updatedContacts);
+	}
+
+	public int updateHikeStatus(String msisdn, boolean onhike)
+	{
+		return hDb.updateHikeContact(msisdn, onhike);
+	}
+
+	public Set<String> getBlockedUsers()
+	{
+		return hDb.getBlockedUsers();
+	}
+
+	public boolean hasIcon(String msisdn)
+	{
+		return hDb.hasIcon(msisdn);
+	}
+
+	public void updateContactRecency(String msisdn, long timestamp)
+	{
+		hDb.updateContactRecency(msisdn, timestamp);
+	}
+
+	public void block(String msisdn)
+	{
+		hDb.block(msisdn);
+	}
+
+	public void toggleContactFavorite(String msisdn, FavoriteType ftype)
+	{
+		hDb.toggleContactFavorite(msisdn, ftype);
+	}
+
+	public void unblock(String msisdn)
+	{
+		hDb.unblock(msisdn);
+	}
+
+	public void removeIcon(String id)
+	{
+		hDb.removeIcon(id);
+	}
+
+	public void setHikeJoinTime(String msisdn, long hikeJoinTime)
+	{
+		hDb.setHikeJoinTime(msisdn, hikeJoinTime);
+	}
+
+	public void setIcon(String msisdn, byte[] data, boolean b)
+	{
+		hDb.setIcon(msisdn, data, b);
+	}
+
+	public FavoriteType getFriendshipStatus(String msisdn)
+	{
+		return hDb.getFriendshipStatus(msisdn);
+	}
+
+	public String getIconIdentifierString(String id)
+	{
+		return hDb.getIconIdentifierString(id);
+	}
+
+	public void setMultipleContactsToFavorites(JSONObject favorites)
+	{
+		hDb.setMultipleContactsToFavorites(favorites);
+	}
+
+	public boolean isBlocked(String msisdn)
+	{
+		return hDb.isBlocked(msisdn);
+	}
+
+	public void updateLastSeenTime(String msisdn, long lastSeenTime)
+	{
+		hDb.updateLastSeenTime(msisdn, lastSeenTime);
+	}
+
+	public void updateIsOffline(String msisdn, int isOffline)
+	{
+		hDb.updateIsOffline(msisdn, isOffline);
+	}
+
+	public boolean doesContactExist(String msisdn)
+	{
+		return hDb.doesContactExist(msisdn);
+	}
+
+	public void makeOlderAvatarsRounded()
+	{
+		hDb.makeOlderAvatarsRounded();
+	}
+
+	public Drawable getIcon(String msisdn, boolean rounded)
+	{
+		return hDb.getIcon(msisdn, rounded);
+	}
+
+	public byte[] getIconByteArray(String id, boolean rounded)
+	{
+		return hDb.getIconByteArray(id, rounded);
+	}
+
+	public void deleteAll()
+	{
+		hDb.deleteAll();
+	}
+
+	public Set<String> getBlockedMsisdnSet()
+	{
+		return getBlockedMsisdnSet();
+	}
+
+	public void setAddressBookAndBlockList(List<ContactInfo> contacts, List<String> blockedMsisdns) throws DbException
+	{
+		hDb.setAddressBookAndBlockList(contacts, blockedMsisdns);
+	}
+
+	public void syncContactExtraInfo()
+	{
+		hDb.syncContactExtraInfo();
+	}
+
+	public List<Pair<AtomicBoolean, ContactInfo>> getBlockedUserList()
+	{
+		return hDb.getBlockedUserList();
+	}
+
+	public FtueContactsData getFTUEContacts(SharedPreferences prefs)
+	{
+		return hDb.getFTUEContacts(prefs);
+	}
+
+	public void updateInvitedTimestamp(String msisdn, long time)
+	{
+		hDb.updateInvitedTimestamp(msisdn, time);
 	}
 }

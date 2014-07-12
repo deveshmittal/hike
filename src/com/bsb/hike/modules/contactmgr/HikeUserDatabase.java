@@ -1,4 +1,4 @@
-package com.bsb.hike.modules.contactmgr.db;
+package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,33 +43,16 @@ import com.bsb.hike.db.DbException;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
-import com.bsb.hike.modules.contactmgr.ContactUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
-public class HikeUserDatabase extends SQLiteOpenHelper
+ class HikeUserDatabase extends SQLiteOpenHelper
 {
 	private SQLiteDatabase mDb;
 
 	private SQLiteDatabase mReadDb;
 
-	private static Context mContext;
-
-	private static HikeUserDatabase hikeUserDatabase;
-
-	public static void init(Context context)
-	{
-		if (hikeUserDatabase == null)
-		{
-			mContext = context;
-			hikeUserDatabase = new HikeUserDatabase(context);
-		}
-	}
-
-	public static HikeUserDatabase getInstance()
-	{
-		return hikeUserDatabase;
-	}
+	private Context mContext;
 
 	@Override
 	public void onCreate(SQLiteDatabase db)
@@ -107,9 +90,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		db.execSQL(create);
 	}
 
-	private HikeUserDatabase(Context context)
+	HikeUserDatabase(Context context)
 	{
 		super(context, DBConstants.USERS_DATABASE_NAME, null, DBConstants.USERS_DATABASE_VERSION);
+		this.mContext = context;
 		mDb = getWritableDatabase();
 		mReadDb = getReadableDatabase();
 	}
@@ -245,12 +229,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void makeOlderAvatarsRounded()
+	 void makeOlderAvatarsRounded()
 	{
 		makeOlderAvatarsRounded(mDb);
 	}
 
-	public void addContacts(List<ContactInfo> contacts, boolean isFirstSync) throws DbException
+	 void addContacts(List<ContactInfo> contacts, boolean isFirstSync) throws DbException
 	{
 		SQLiteDatabase db = mDb;
 		db.beginTransaction();
@@ -365,7 +349,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void addBlockList(List<String> msisdns) throws DbException
+	 void addBlockList(List<String> msisdns) throws DbException
 	{
 		if (msisdns == null)
 		{
@@ -409,7 +393,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	 * @param contacts
 	 *            list of contacts to set/add
 	 */
-	public void setAddressBookAndBlockList(List<ContactInfo> contacts, List<String> blockedMsisdns) throws DbException
+	 void setAddressBookAndBlockList(List<ContactInfo> contacts, List<String> blockedMsisdns) throws DbException
 	{
 		/* delete all existing entries from database */
 		mDb.delete(DBConstants.USERS_TABLE, null, null);
@@ -420,7 +404,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		addBlockList(blockedMsisdns);
 	}
 
-	public ContactInfo getContactInfoFromMSISDN(String msisdn, boolean ifNotFoundReturnNull)
+	 ContactInfo getContactInfoFromMSISDN(String msisdn, boolean ifNotFoundReturnNull)
 	{
 		Cursor c = null;
 		List<ContactInfo> contactInfos = null;
@@ -549,7 +533,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				if (!contactMap.containsKey(contactInfo.getMsisdn()))
 					contactMap.put(contactInfo.getMsisdn(), contactInfo);
 			}
-			
+
 			return contactMap;
 		}
 		finally
@@ -845,12 +829,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return contactInfos;
 	}
 
-	public Map<String, ContactInfo> getContactInfoFromMsisdns(List<String> msisdns, boolean favoriteTypeNeeded)
+	 Map<String, ContactInfo> getContactInfoFromMsisdns(List<String> msisdns, boolean favoriteTypeNeeded)
 	{
 		return getContactInfoFromMsisdns(msisdns, favoriteTypeNeeded, false);
 	}
 
-	public Map<String, ContactInfo> getContactInfoFromMsisdns(List<String> msisdns, boolean favoriteTypeNeeded, boolean ignoreUnknownContacts)
+	 Map<String, ContactInfo> getContactInfoFromMsisdns(List<String> msisdns, boolean favoriteTypeNeeded, boolean ignoreUnknownContacts)
 	{
 		Cursor c = null;
 
@@ -888,7 +872,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public Pair<Map<String, ContactInfo>, Map<String, ContactInfo>> getAllContactInfo()
+	Pair<Map<String, ContactInfo>, Map<String, ContactInfo>> getAllContactInfo()
 	{
 		Cursor c = null;
 
@@ -933,7 +917,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	}
 
-	public List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
+	 List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
 	{
 		Cursor c = null;
 		List<ContactInfo> contactInfos = null;
@@ -1057,14 +1041,14 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	 *            contact to add
 	 * @return true if the insert was successful
 	 */
-	public void addContact(ContactInfo hikeContactInfo) throws DbException
+	 void addContact(ContactInfo hikeContactInfo) throws DbException
 	{
 		List<ContactInfo> l = new LinkedList<ContactInfo>();
 		l.add(hikeContactInfo);
 		addContacts(l, false);
 	}
 
-	public List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts()
+	 List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts()
 	{
 		Cursor c = null;
 
@@ -1086,7 +1070,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				ContactInfo contactInfo = mapEntry.getValue();
 				contactInfos.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(false), contactInfo));
 			}
-			
+
 			return contactInfos;
 		}
 		finally
@@ -1098,7 +1082,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public List<ContactInfo> getContacts()
+	 List<ContactInfo> getContacts()
 	{
 		return getContacts(true);
 	}
@@ -1186,7 +1170,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public Map<String, ContactInfo> getNOTFRIENDScontactsFromDB(int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
+	 Map<String, ContactInfo> getNOTFRIENDScontactsFromDB(int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
 	{
 		Map<String, FavoriteType> favoriteMap = getFavoriteMap();
 
@@ -1209,7 +1193,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		// remove self msisdn from favoriteMap
 		contactInfomap.remove(myMsisdn);
-		
+
 		// get block msisdns
 		Set<String> blockSet = getBlockedMsisdnSet();
 
@@ -1218,11 +1202,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		{
 			contactInfomap.remove(msisdn);
 		}
-		
+
 		return contactInfomap;
 	}
 
-	public Map<String, ContactInfo> getContactsOfFavoriteTypeDB(FavoriteType[] favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
+	 Map<String, ContactInfo> getContactsOfFavoriteTypeDB(FavoriteType[] favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
 	{
 		Map<String, FavoriteType> favoriteMap = getFavoriteMap(favoriteType);
 		if (null == favoriteMap)
@@ -1296,7 +1280,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return queryBuilder;
 	}
 
-	public List<ContactInfo> getContacts(boolean ignoreEmpty)
+	 List<ContactInfo> getContacts(boolean ignoreEmpty)
 	{
 		Cursor c = null;
 		try
@@ -1323,13 +1307,13 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return c;
 	}
 
-	public void deleteMultipleRows(Collection<String> ids)
+	 void deleteMultipleRows(Collection<String> ids)
 	{
 		String ids_joined = "(" + Utils.join(ids, ",", "\"", "\"") + ")";
 		mDb.delete(DBConstants.USERS_TABLE, DBConstants.ID + " in " + ids_joined, null);
 	}
 
-	public void updateContacts(List<ContactInfo> updatedContacts)
+	 void updateContacts(List<ContactInfo> updatedContacts)
 	{
 		if (updatedContacts == null)
 		{
@@ -1353,7 +1337,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public int updateHikeContact(String msisdn, boolean onhike)
+	 int updateHikeContact(String msisdn, boolean onhike)
 	{
 		Cursor c = null;
 		try
@@ -1391,7 +1375,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void deleteAll()
+	 void deleteAll()
 	{
 		mDb.delete(DBConstants.USERS_TABLE, null, null);
 		mDb.delete(DBConstants.BLOCK_TABLE, null, null);
@@ -1400,7 +1384,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		mDb.delete(DBConstants.ROUNDED_THUMBNAIL_TABLE, null, null);
 	}
 
-	public ContactInfo getContactInfoFromPhoneNo(String number)
+	 ContactInfo getContactInfoFromPhoneNo(String number)
 	{
 		Cursor c = null;
 		try
@@ -1423,16 +1407,16 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
-	
-	public FavoriteType getFriendshipStatus(String number)
+
+	 FavoriteType getFriendshipStatus(String number)
 	{
 		Cursor favoriteCursor = null;
 		try
 		{
-			favoriteCursor = mReadDb.query(DBConstants.FAVORITES_TABLE, new String[] { DBConstants.FAVORITE_TYPE }, DBConstants.MSISDN + " =? ", new String[] { number },
-					null, null, null);
-			
-            FavoriteType favoriteType = FavoriteType.NOT_FRIEND;
+			favoriteCursor = mReadDb.query(DBConstants.FAVORITES_TABLE, new String[] { DBConstants.FAVORITE_TYPE }, DBConstants.MSISDN + " =? ", new String[] { number }, null,
+					null, null);
+
+			FavoriteType favoriteType = FavoriteType.NOT_FRIEND;
 			if (favoriteCursor.moveToFirst())
 			{
 				favoriteType = FavoriteType.values()[favoriteCursor.getInt(favoriteCursor.getColumnIndex(DBConstants.FAVORITE_TYPE))];
@@ -1448,7 +1432,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number)
+	 ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number)
 	{
 		Cursor c = null;
 		try
@@ -1473,19 +1457,19 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void unblock(String msisdn)
+	 void unblock(String msisdn)
 	{
 		mDb.delete(DBConstants.BLOCK_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
 	}
 
-	public void block(String msisdn)
+	 void block(String msisdn)
 	{
 		ContentValues values = new ContentValues();
 		values.put(DBConstants.MSISDN, msisdn);
 		mDb.insert(DBConstants.BLOCK_TABLE, null, values);
 	}
 
-	public boolean isBlocked(String msisdn)
+	 boolean isBlocked(String msisdn)
 	{
 		Cursor c = null;
 		try
@@ -1502,7 +1486,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public Set<String> getBlockedUsers()
+	 Set<String> getBlockedUsers()
 	{
 		Set<String> blocked = new HashSet<String>();
 		Cursor c = null;
@@ -1526,7 +1510,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return blocked;
 	}
 
-	public List<Pair<AtomicBoolean, ContactInfo>> getBlockedUserList()
+	 List<Pair<AtomicBoolean, ContactInfo>> getBlockedUserList()
 	{
 		String blockedMsisdnColumnName = "blk";
 
@@ -1637,7 +1621,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void setIcon(String msisdn, byte[] data, boolean isProfileImage)
+	 void setIcon(String msisdn, byte[] data, boolean isProfileImage)
 	{
 		if (!isProfileImage)
 		{
@@ -1663,7 +1647,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		mDb.update(DBConstants.USERS_TABLE, customPhotoFlag, whereClause, new String[] { msisdn });
 	}
 
-	public Drawable getIcon(String msisdn, boolean rounded)
+	Drawable getIcon(String msisdn, boolean rounded)
 	{
 		Cursor c = null;
 		try
@@ -1689,7 +1673,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public byte[] getIconByteArray(String msisdn, boolean rounded)
+	 byte[] getIconByteArray(String msisdn, boolean rounded)
 	{
 		Cursor c = null;
 		try
@@ -1714,7 +1698,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public String getIconIdentifierString(String msisdn)
+	 String getIconIdentifierString(String msisdn)
 	{
 		Cursor c = null;
 		try
@@ -1748,7 +1732,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void removeIcon(String msisdn)
+	 void removeIcon(String msisdn)
 	{
 		/*
 		 * We delete the older file that contained the larger avatar image for this msisdn.
@@ -1765,7 +1749,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		mDb.update(DBConstants.USERS_TABLE, customPhotoFlag, whereClause, new String[] { msisdn });
 	}
 
-	public void updateContactRecency(String msisdn, long timeStamp)
+	 void updateContactRecency(String msisdn, long timeStamp)
 	{
 		ContentValues updatedTime = new ContentValues(1);
 		updatedTime.put(DBConstants.LAST_MESSAGED, timeStamp);
@@ -1775,7 +1759,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		Logger.d(getClass().getSimpleName(), "Row has been updated: " + rows);
 	}
 
-	public void syncContactExtraInfo()
+	 void syncContactExtraInfo()
 	{
 		Cursor extraInfo = null;
 
@@ -1812,7 +1796,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void toggleContactFavorite(String msisdn, FavoriteType favoriteType)
+	 void toggleContactFavorite(String msisdn, FavoriteType favoriteType)
 	{
 		/*
 		 * If we are setting the type as not favorite, we'll remove the row itself.
@@ -1851,7 +1835,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public boolean isContactFavorite(String msisdn)
+	 boolean isContactFavorite(String msisdn)
 	{
 		Cursor c = null;
 		try
@@ -1880,7 +1864,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		Map<String, ContactInfo> contactInfoMap = getContactInfoMap(msisdns, contactMap, favoriteMap, true);
 
 		List<ContactInfo> contactList = new ArrayList<ContactInfo>(contactInfoMap.values());
-		
+
 		Collections.sort(contactList, new Comparator<ContactInfo>()
 		{
 			@Override
@@ -1900,7 +1884,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return contactList;
 	}
 
-	public List<ContactInfo> getNonHikeMostContactedContacts(int limit)
+	 List<ContactInfo> getNonHikeMostContactedContacts(int limit)
 	{
 		/*
 		 * Sending twice the limit to account for the contacts that might be on hike
@@ -1909,7 +1893,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return getNonHikeMostContactedContactsFromListOfNumbers(data.first, data.second, limit);
 	}
 
-	public void setMultipleContactsToFavorites(JSONObject favorites)
+	 void setMultipleContactsToFavorites(JSONObject favorites)
 	{
 		SQLiteStatement insertStatement = null;
 		InsertHelper ih = null;
@@ -1947,7 +1931,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				}
 
 				ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn);
-				if(null != contactInfo)
+				if (null != contactInfo)
 				{
 					ContactInfo updatedContact = new ContactInfo(contactInfo);
 					updatedContact.setFavoriteType(favoriteType);
@@ -1980,7 +1964,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public boolean hasIcon(String msisdn)
+	 boolean hasIcon(String msisdn)
 	{
 		Cursor c = null;
 		try
@@ -1998,13 +1982,13 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public int getPendingFriendRequestCount()
+	 int getPendingFriendRequestCount()
 	{
 		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM " + DBConstants.FAVORITES_TABLE + " WHERE " + DBConstants.FAVORITE_TYPE + "="
 				+ FavoriteType.REQUEST_RECEIVED.ordinal(), null);
 	}
 
-	public boolean doesContactExist(String msisdn)
+	 boolean doesContactExist(String msisdn)
 	{
 		String[] columns = new String[] { DBConstants.NAME };
 		String selection = DBConstants.MSISDN + "=? ";
@@ -2024,9 +2008,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public int getHikeContactCount(String myMsisdn)
+	 int getHikeContactCount(String myMsisdn)
 	{
-		String selection = DBConstants.ONHIKE + " = 1 AND "+DBConstants.MSISDN + "!=" + DatabaseUtils.sqlEscapeString(myMsisdn);
+		String selection = DBConstants.ONHIKE + " = 1 AND " + DBConstants.MSISDN + "!=" + DatabaseUtils.sqlEscapeString(myMsisdn);
 		Cursor c = null;
 		try
 		{
@@ -2042,8 +2026,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
-	
-	public int getNonHikeContactsCount()
+
+	 int getNonHikeContactsCount()
 	{
 		String selection = DBConstants.ONHIKE + " = 0";
 		Cursor c = null;
@@ -2061,8 +2045,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
-	
-	public void setHikeJoinTime(String msisdn, long hikeJoinTime)
+
+	 void setHikeJoinTime(String msisdn, long hikeJoinTime)
 	{
 		String whereClause = DBConstants.MSISDN + "=?";
 		String[] whereArgs = new String[] { msisdn };
@@ -2073,12 +2057,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		mDb.update(DBConstants.USERS_TABLE, values, whereClause, whereArgs);
 	}
 
-	public int getFriendTableRowCount()
+	 int getFriendTableRowCount()
 	{
 		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM " + DBConstants.FAVORITES_TABLE, null);
 	}
 
-	public void updateLastSeenTime(String msisdn, long lastSeenTime)
+	 void updateLastSeenTime(String msisdn, long lastSeenTime)
 	{
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.LAST_SEEN, lastSeenTime);
@@ -2086,7 +2070,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
 	}
 
-	public void updateIsOffline(String msisdn, int offline)
+	 void updateIsOffline(String msisdn, int offline)
 	{
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.IS_OFFLINE, offline);
@@ -2156,16 +2140,16 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return sb.toString();
 	}
 
-	public FtueContactsData getFTUEContacts(SharedPreferences preferences)
+	 FtueContactsData getFTUEContacts(SharedPreferences preferences)
 	{
 		FtueContactsData ftueContactsData = new FtueContactsData();
 
 		int limit = HikeConstants.FTUE_LIMIT;
 
 		String myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
-		
+
 		ftueContactsData.setTotalHikeContactsCount(getHikeContactCount(myMsisdn));
-		
+
 		/*
 		 * adding server recommended contacts to ftue contacts list;
 		 */
@@ -2239,13 +2223,13 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			return ftueContactsData;
 		}
 		limit = HikeConstants.FTUE_LIMIT - ftueContactsData.getHikeContacts().size();
-		
+
 		// added random hike contacts
-		
+
 		/*
 		 * adding most contacted sms contacts if required;
 		 */
-		if(limit > 0)
+		if (limit > 0)
 		{
 			List<ContactInfo> nonHikeContacts = HikeMessengerApp.getContactManager().getNonHikeMostContactedContacts(limit * 4);
 			ftueContactsData.setTotalSmsContactsCount(getNonHikeContactsCount());
@@ -2263,7 +2247,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return ftueContactsData;
 	}
 
-	public void updateInvitedTimestamp(String msisdn, long timestamp)
+	 void updateInvitedTimestamp(String msisdn, long timestamp)
 	{
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.INVITE_TIMESTAMP, timestamp);
@@ -2271,7 +2255,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
 	}
 
-	public Map<String, FavoriteType> fetchFavoriteTypeMap()
+	 Map<String, FavoriteType> fetchFavoriteTypeMap()
 	{
 		Cursor c = null;
 		Map<String, FavoriteType> favoriteTypeMap = new HashMap<String, ContactInfo.FavoriteType>();
@@ -2299,7 +2283,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public Set<String> getBlockedMsisdnSet()
+	 Set<String> getBlockedMsisdnSet()
 	{
 		Cursor c = null;
 		Set<String> blockedSet = new HashSet<String>();

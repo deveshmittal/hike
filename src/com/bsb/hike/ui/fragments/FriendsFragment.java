@@ -34,7 +34,6 @@ import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.ui.CreateNewGroupActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -274,8 +273,6 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 			String myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 			boolean nativeSMSOn = Utils.getSendSmsPref(getActivity());
-
-			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 
 			final List<ContactInfo> favoriteList = HikeMessengerApp.getContactManager().getContactsOfFavoriteType(new FavoriteType[] { FavoriteType.FRIEND, FavoriteType.REQUEST_RECEIVED,
 					FavoriteType.REQUEST_SENT, FavoriteType.REQUEST_SENT_REJECTED }, HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn, false);

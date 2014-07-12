@@ -149,7 +149,7 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.utils.JSONSerializable;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
@@ -1616,7 +1616,7 @@ public class Utils
 				HikeMessengerApp.getContactManager().updateContacts(updatedContact);
 			}
 
-			HikeUserDatabase.getInstance().updateInvitedTimestamp(msisdn, time);
+			ContactManager.getInstance().updateInvitedTimestamp(msisdn, time);
 		}
 	}
 
@@ -1716,7 +1716,7 @@ public class Utils
 			HikeMessengerApp.getContactManager().updateContacts(updatedContact);
 		}
 
-		HikeUserDatabase.getInstance().updateInvitedTimestamp(contactInfo.getMsisdn(), inviteTime);
+		ContactManager.getInstance().updateInvitedTimestamp(contactInfo.getMsisdn(), inviteTime);
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.INVITE_SENT, null);
 
@@ -3652,7 +3652,6 @@ public class Utils
 	{
 		SharedPreferences settings = (SharedPreferences) context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
-		HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 		friendsList.addAll(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, msisdn, false));
 		friendsList.addAll(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE, msisdn, false));
 		friendsList.addAll(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.REQUEST_SENT_REJECTED, HikeConstants.BOTH_VALUE, msisdn, false));
@@ -3938,8 +3937,6 @@ public class Utils
 					isOffline = (int) lastSeenTime;
 					lastSeenTime = System.currentTimeMillis() / 1000;
 				}
-				HikeUserDatabase userDb = HikeUserDatabase.getInstance();
-
 				ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
 				if (null != contact)
 				{
@@ -3949,8 +3946,8 @@ public class Utils
 					HikeMessengerApp.getContactManager().updateContacts(updatedContact);
 				}
 
-				userDb.updateLastSeenTime(msisdn, lastSeenTime);
-				userDb.updateIsOffline(msisdn, (int) isOffline);
+				ContactManager.getInstance().updateLastSeenTime(msisdn, lastSeenTime);
+				ContactManager.getInstance().updateIsOffline(msisdn, (int) isOffline);
 
 				HikeMessengerApp.lastSeenFriendsMap.put(msisdn, new Pair<Integer, Long>(isOffline, lastSeenTime));
 

@@ -22,7 +22,7 @@ import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
 import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.MySoftReference;
@@ -278,7 +278,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 			int idx = key.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
 			if (idx > 0)
 				key = key.substring(0, idx);
-			BitmapDrawable bd = (BitmapDrawable) HikeUserDatabase.getInstance().getIcon(key, rounded);
+			BitmapDrawable bd = (BitmapDrawable) ContactManager.getInstance().getIcon(key, rounded);
 			if (bd != null)
 			{
 				putInCache(cacheKey, bd);
@@ -308,7 +308,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 
 	public void deleteIconForMSISDN(String msisdn)
 	{
-		HikeUserDatabase.getInstance().removeIcon(msisdn);
+		ContactManager.getInstance().removeIcon(msisdn);
 		clearIconForMSISDN(msisdn);
 	}
 

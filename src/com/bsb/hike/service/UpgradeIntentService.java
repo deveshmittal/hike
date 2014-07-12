@@ -10,7 +10,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 
 public class UpgradeIntentService extends IntentService
 {
@@ -53,7 +53,7 @@ public class UpgradeIntentService extends IntentService
 
 	private void makeRoundedThumbsForUserDb()
 	{
-		HikeUserDatabase.getInstance().makeOlderAvatarsRounded();
+		ContactManager.getInstance().makeOlderAvatarsRounded();
 	}
 
 	private void initialiseSharedMediaAndFileThumbnailTable()

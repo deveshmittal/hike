@@ -15,15 +15,11 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class SMSBroadcastReceiver extends BroadcastReceiver
 {
-
-	HikeUserDatabase mDb;
-
 	@Override
 	public void onReceive(Context context, Intent intent)
 	{
@@ -33,11 +29,6 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 		if (!Utils.isUserAuthenticated(context) || !PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
 		{
 			return;
-		}
-
-		if (mDb == null)
-		{
-			mDb = HikeUserDatabase.getInstance();
 		}
 
 		Logger.d(getClass().getSimpleName(), "Received SMS message");

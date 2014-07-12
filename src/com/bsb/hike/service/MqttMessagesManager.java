@@ -48,8 +48,8 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.contactmgr.ContactUtils;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.AccountUtils;
@@ -72,8 +72,6 @@ public class MqttMessagesManager
 
 	private HikeConversationsDatabase convDb;
 
-	private HikeUserDatabase userDb;
-
 	private SharedPreferences settings;
 
 	private SharedPreferences appPrefs;
@@ -93,7 +91,6 @@ public class MqttMessagesManager
 	private MqttMessagesManager(Context context)
 	{
 		this.convDb = HikeConversationsDatabase.getInstance();
-		this.userDb = HikeUserDatabase.getInstance();
 		this.settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.context = context;
 		this.pubSub = HikeMessengerApp.getPubSub();
@@ -137,7 +134,7 @@ public class MqttMessagesManager
 				return;
 			}
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
-			this.userDb.setIcon(msisdn, Base64.decode(iconBase64, Base64.DEFAULT), false);
+			ContactManager.getInstance().setIcon(msisdn, Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 			HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
@@ -148,7 +145,7 @@ public class MqttMessagesManager
 			 */
 			if (!HikeConstants.SIGNUP_IC.equals(jsonObj.optString(HikeConstants.SUB_TYPE)))
 			{
-				FavoriteType favType = HikeUserDatabase.getInstance().getFriendshipStatus(msisdn);
+				FavoriteType favType = ContactManager.getInstance().getFriendshipStatus(msisdn);
 				if(favType==FavoriteType.FRIEND||favType==FavoriteType.REQUEST_SENT||favType==FavoriteType.REQUEST_SENT_REJECTED)
 				{
 				    autoDownloadGroupImage(msisdn);
@@ -170,7 +167,7 @@ public class MqttMessagesManager
 				newIconIdentifier = iconBase64.substring(0, 5) + iconBase64.substring(iconBase64.length() - 6);
 			}
 
-			String oldIconIdentifier = this.userDb.getIconIdentifierString(groupId);
+			String oldIconIdentifier = ContactManager.getInstance().getIconIdentifierString(groupId);
 
 			/*
 			 * Same Icon
@@ -180,7 +177,7 @@ public class MqttMessagesManager
 				return;
 			}
 
-			this.userDb.setIcon(groupId, Base64.decode(iconBase64, Base64.DEFAULT), false);
+			ContactManager.getInstance().setIcon(groupId, Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 			HikeMessengerApp.getLruCache().clearIconForMSISDN(groupId);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, groupId);
@@ -252,7 +249,7 @@ public class MqttMessagesManager
 				if (joinTime > 0)
 				{
 					joinTime = Utils.applyServerTimeOffset(context, joinTime);
-					userDb.setHikeJoinTime(msisdn, joinTime);
+					ContactManager.getInstance().setHikeJoinTime(msisdn, joinTime);
 
 					ContactInfo con = HikeMessengerApp.getContactManager().getContact(msisdn);
 					if (null != con)
@@ -345,19 +342,16 @@ public class MqttMessagesManager
 
 			JSONObject metadata = jsonObj.optJSONObject(HikeConstants.METADATA);
 
-			if (!groupRevived && !this.convDb.doesConversationExist(groupConversation.getMsisdn()))
+			if (!groupRevived && !ContactManager.getInstance().isGroupExist(groupConversation.getMsisdn()))
 			{
 				Logger.d(getClass().getSimpleName(), "The group conversation does not exists");
-				groupConversation = (GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, "", groupConversation.getGroupOwner());
-
 				if (metadata != null)
 				{
+					/* Earlier there were 2 queries, one to make the group conv and second to set the name. I have combined the both*/
 					String groupName = metadata.optString(HikeConstants.NAME);
-					if (!TextUtils.isEmpty(groupName))
-					{
-						convDb.setGroupName(groupConversation.getMsisdn(), groupName);
-						groupConversation.setContactName(groupName);
-					}
+					groupConversation = (GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, groupName, groupConversation.getGroupOwner());
+					groupConversation.setContactName(groupName);
+					ContactManager.getInstance().insertGroup(groupConversation.getMsisdn(),groupName);
 				}
 				// Adding a key to the json signify that this was the GCJ
 				// received for group creation
@@ -763,7 +757,7 @@ public class MqttMessagesManager
 
 					if (favorites.length() > 0)
 					{
-						userDb.setMultipleContactsToFavorites(favorites);
+						ContactManager.getInstance().setMultipleContactsToFavorites(favorites);
 					}
 				}
 				editor.putString(HikeMessengerApp.REWARDS_TOKEN, account.optString(HikeConstants.REWARDS_TOKEN));
@@ -863,7 +857,7 @@ public class MqttMessagesManager
 			/*
 			 * Ignore if contact is blocked.
 			 */
-			if (userDb.isBlocked(msisdn))
+			if (ContactManager.getInstance().isBlocked(msisdn))
 			{
 				return;
 			}
@@ -1046,7 +1040,7 @@ public class MqttMessagesManager
 			 * 
 			 * Also if the user is blocked, we ignore the message.
 			 */
-			if (statusMessage.getStatusMessageType() == null || userDb.isBlocked(statusMessage.getMsisdn()))
+			if (statusMessage.getStatusMessageType() == null || ContactManager.getInstance().isBlocked(statusMessage.getMsisdn()))
 			{
 				return;
 			}
@@ -1071,7 +1065,7 @@ public class MqttMessagesManager
 			if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
 			{
 				String iconBase64 = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.THUMBNAIL);
-				this.userDb.setIcon(statusMessage.getMappedId(), Base64.decode(iconBase64, Base64.DEFAULT), false);
+				ContactManager.getInstance().setIcon(statusMessage.getMappedId(), Base64.decode(iconBase64, Base64.DEFAULT), false);
 				/*
 				 * Removing the thumbnail string from the JSON, since we've already saved it.
 				 */
@@ -1223,8 +1217,8 @@ public class MqttMessagesManager
 			updatedContact.setOffline((int) isOffline);
 			HikeMessengerApp.getContactManager().updateContacts(updatedContact);
 
-			userDb.updateLastSeenTime(msisdn, lastSeenTime);
-			userDb.updateIsOffline(msisdn, (int) isOffline);
+			ContactManager.getInstance().updateLastSeenTime(msisdn, lastSeenTime);
+			ContactManager.getInstance().updateIsOffline(msisdn, (int) isOffline);
 
 			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED, updatedContact);
 		}
@@ -1279,7 +1273,7 @@ public class MqttMessagesManager
 				String iconBase64 = jsonObj.getJSONObject(HikeConstants.DATA).optString(HikeConstants.THUMBNAIL);
 				if (!TextUtils.isEmpty(iconBase64))
 				{
-					this.userDb.setIcon(protip.getMappedId(), Base64.decode(iconBase64, Base64.DEFAULT), false);
+					ContactManager.getInstance().setIcon(protip.getMappedId(), Base64.decode(iconBase64, Base64.DEFAULT), false);
 				}
 				// increment the unseen status count straight away.
 				// we've got a new pro tip.
@@ -1662,7 +1656,7 @@ public class MqttMessagesManager
 		 */
 		if (!isChatBgMsg)
 		{
-			if ((conversation == null && (!isUJMsg || !userDb.doesContactExist(msisdn)))
+			if ((conversation == null && (!isUJMsg || !ContactManager.getInstance().doesContactExist(msisdn)))
 					|| (conversation != null && TextUtils.isEmpty(conversation.getContactName()) && isUJMsg && !isGettingCredits && !(conversation instanceof GroupConversation)))
 			{
 				return null;

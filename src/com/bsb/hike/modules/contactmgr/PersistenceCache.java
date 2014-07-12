@@ -14,11 +14,12 @@ import android.util.Pair;
 
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.modules.contactmgr.db.HikeUserDatabase;
 import com.bsb.hike.utils.Utils;
 
 class PersistenceCache extends ContactsCache
 {
+	private HikeUserDatabase hDb;
+	
 	// Memory persistence for all one to one conversation contacts that should always be loaded
 	private Map<String, ContactInfo> convsContactsPersistence;
 
@@ -37,8 +38,9 @@ class PersistenceCache extends ContactsCache
 	/**
 	 * Initializes all the maps and calls {@link loadMemory} which fills all the map when HikeService is started
 	 */
-	PersistenceCache()
+	PersistenceCache(HikeUserDatabase db)
 	{
+		hDb = db;
 		convsContactsPersistence = new HashMap<String, ContactInfo>();
 		groupContactsPersistence = new HashMap<String, ContactTuple>();
 		groupPersistence = new HashMap<String, Pair<String, ConcurrentLinkedQueue<String>>>();
@@ -363,7 +365,7 @@ class PersistenceCache extends ContactsCache
 		Map<String, ContactInfo> contactsMap = new HashMap<String, ContactInfo>();
 		if (msisdnsToGetContactInfo.size() > 0)
 		{
-			contactsMap = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdnsToGetContactInfo, true);
+			contactsMap = hDb.getContactInfoFromMsisdns(msisdnsToGetContactInfo, true);
 		}
 
 		// grouplastMsisdns list convert it to map
@@ -444,7 +446,7 @@ class PersistenceCache extends ContactsCache
 	 */
 	ContactInfo putInCache(String msisdn, boolean ifNotFoundReturnNull, boolean ifOneToOneConversation)
 	{
-		ContactInfo contact = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn, ifNotFoundReturnNull);
+		ContactInfo contact = hDb.getContactInfoFromMSISDN(msisdn, ifNotFoundReturnNull);
 		if (ifOneToOneConversation)
 		{
 			insertContact(contact);
@@ -478,7 +480,7 @@ class PersistenceCache extends ContactsCache
 	{
 		if (msisdns.size() > 0)
 		{
-			Map<String, ContactInfo> map = HikeUserDatabase.getInstance().getContactInfoFromMsisdns(msisdns, true);
+			Map<String, ContactInfo> map = hDb.getContactInfoFromMsisdns(msisdns, true);
 
 			for (Entry<String, ContactInfo> mapEntry : map.entrySet())
 			{
@@ -594,6 +596,55 @@ class PersistenceCache extends ContactsCache
 			{
 				groupPersistence.clear();
 			}
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	/**
+	 * If group conversation, check in groupPersistence else check in convPersistance
+	 * 
+	 * @param id
+	 * @return
+	 */
+	boolean convExist(String id)
+	{
+		readLock.lock();
+		try
+		{
+			if (Utils.isGroupConversation(id))
+				return groupPersistence.containsKey(id);
+			else
+				return convsContactsPersistence.containsKey(id);
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
+
+	public boolean isGroupExists(String groupId)
+	{
+		readLock.lock();
+		try
+		{
+			return groupPersistence.containsKey(groupId);
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
+
+	public void insertGroup(String grpId, String groupName)
+	{
+		writeLock.lock();try
+		{
+			ConcurrentLinkedQueue<String> clq = new ConcurrentLinkedQueue<String>();
+			Pair<String, ConcurrentLinkedQueue<String>> pair = new Pair<String, ConcurrentLinkedQueue<String>>(groupName, clq);
+			groupPersistence.put(grpId, pair);
 		}
 		finally
 		{
