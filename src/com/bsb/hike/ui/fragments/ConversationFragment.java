@@ -1041,8 +1041,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			// left the group
 			else if ((conv instanceof GroupConversation) && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 			{
-				HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-				((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn(), false, false));
+				ContactManager conMgr = ContactManager.getInstance();
+				((GroupConversation) conv).setGroupParticipantList(conMgr.getGroupParticipants(conv.getMsisdn(), false, false));
 			}
 
 			final ConvMessage finalMessage = message;

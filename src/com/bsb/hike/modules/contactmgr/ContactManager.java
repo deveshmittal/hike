@@ -5,6 +5,7 @@ package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -19,8 +20,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Pair;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.DbException;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.modules.iface.ITransientCache;
@@ -39,9 +42,9 @@ public class ContactManager implements ITransientCache
 	private PersistenceCache persistenceCache;
 
 	private TransientCache transientCache;
-	
+
 	private HikeUserDatabase hDb;
-	
+
 	private Context context;
 
 	private ContactManager()
@@ -50,11 +53,11 @@ public class ContactManager implements ITransientCache
 
 	public static ContactManager getInstance()
 	{
-		if(_instance == null)
+		if (_instance == null)
 		{
 			synchronized (ContactManager.class)
 			{
-				if(_instance == null)
+				if (_instance == null)
 				{
 					_instance = new ContactManager();
 				}
@@ -70,7 +73,7 @@ public class ContactManager implements ITransientCache
 		persistenceCache = new PersistenceCache(hDb);
 		transientCache = new TransientCache(hDb);
 	}
-	
+
 	/**
 	 * This method should unload the transient memory at app launch event
 	 */
@@ -91,6 +94,7 @@ public class ContactManager implements ITransientCache
 
 	/**
 	 * This method should be used when a conversation gets deleted or last sender in group is changed
+	 * 
 	 * @param msisdn
 	 * @param ifOneToOneConversation
 	 */
@@ -101,6 +105,7 @@ public class ContactManager implements ITransientCache
 
 	/**
 	 * This is used to remove the list of msisdns from either group or 1-1 conversation
+	 * 
 	 * @param msisdns
 	 */
 	public void removeContacts(List<String> msisdns)
@@ -181,7 +186,10 @@ public class ContactManager implements ITransientCache
 
 	/**
 	 * This function will return name or null for a particular msisdn
+	 * <p>
 	 * Search in Persistence first, if not found, search in Transient
+	 * </p>
+	 * 
 	 * @param msisdn
 	 * @return
 	 */
@@ -197,8 +205,9 @@ public class ContactManager implements ITransientCache
 
 	/**
 	 * Returns the contactInfo for a particular msisdn.If not found in memory makes a db call
-	 * 
+	 * <p>
 	 * Inserts the object in transient memory if loadInTransient is set to true otherwise in persistence memory
+	 * </p>
 	 * 
 	 * @param msisdn
 	 * @param loadInTransient
@@ -211,7 +220,9 @@ public class ContactManager implements ITransientCache
 
 	/**
 	 * Returns the contactInfo for a particular msisdn.If not found in memory makes a db call
+	 * <p>
 	 * Inserts the object in transient memory if loadInTransient is set to true otherwise in persistence memory
+	 * </p>
 	 * 
 	 * @param msisdn
 	 * @param loadInTransient
@@ -403,11 +414,9 @@ public class ContactManager implements ITransientCache
 
 	}
 
-	
 	/**
-	 * return true if conversation with this id already exists
-	 * group and 1-1 conversations both will be checked
-	 * The implementation is thread safe
+	 * return true if conversation with this id already exists group and 1-1 conversations both will be checked The implementation is thread safe
+	 * 
 	 * @param msisdn
 	 * @return
 	 */
@@ -418,6 +427,7 @@ public class ContactManager implements ITransientCache
 
 	/**
 	 * Thread safe implementation
+	 * 
 	 * @param groupId
 	 * @return
 	 */
@@ -438,7 +448,7 @@ public class ContactManager implements ITransientCache
 
 	public void deleteMultipleContactInDB(Set<String> keySet)
 	{
-		hDb.deleteMultipleRows(keySet); 
+		hDb.deleteMultipleRows(keySet);
 	}
 
 	public void updateContactsinDB(List<ContactInfo> updatedContacts)
@@ -579,5 +589,54 @@ public class ContactManager implements ITransientCache
 	public void updateInvitedTimestamp(String msisdn, long time)
 	{
 		hDb.updateInvitedTimestamp(msisdn, time);
+	}
+
+	/**
+	 * Returns a list of participants to a group
+	 * 
+	 * @param groupId
+	 * @return
+	 */
+	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
+	{
+		return getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly, true);
+	}
+
+	/**
+	 * Returns a list of participants to a group
+	 * 
+	 * @param groupId
+	 * @return
+	 */
+	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
+	{
+		Pair<Map<String, GroupParticipant>, List<String>> groupPair = transientCache.getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly, fetchParticipants);
+		Map<String, GroupParticipant> groupParticipantsMap = groupPair.first;
+		List<String> allMsisdns = groupPair.second;
+
+		if (null != allMsisdns)
+		{
+			// at least one msisdn is required to run this in query
+			if (fetchParticipants && allMsisdns.size() > 0)
+			{
+				List<ContactInfo> list = getContact(allMsisdns, true, false);
+				for (ContactInfo contactInfo : list)
+				{
+					if (contactInfo.getName() == null)
+					{
+						String name = groupParticipantsMap.get(contactInfo.getMsisdn()).getContactInfo().getName();
+						setUnknownContactName(contactInfo.getMsisdn(), name);
+						groupParticipantsMap.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
+					}
+					else
+					{
+						groupParticipantsMap.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
+					}
+				}
+			}
+		}
+
+		transientCache.insertGroupParticipants(groupId, groupParticipantsMap);
+		return groupParticipantsMap;
 	}
 }

@@ -198,7 +198,7 @@ public class DbConversationListener implements Listener
 		{
 			String groupId = (String) object;
 
-			Map<String, GroupParticipant> smsParticipants = mConversationDb.getGroupParticipants(groupId, true, true);
+			Map<String, GroupParticipant> smsParticipants = ContactManager.getInstance().getGroupParticipants(groupId, true, true);
 
 			if (smsParticipants.isEmpty())
 			{

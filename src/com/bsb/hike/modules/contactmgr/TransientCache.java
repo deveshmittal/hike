@@ -13,7 +13,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import android.util.Pair;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 
 public class TransientCache extends ContactsCache
@@ -27,7 +30,7 @@ public class TransientCache extends ContactsCache
 	private Map<String, ContactTuple> unsavedContacts;
 
 	// Transient memory for contacts of group participants
-	private Map<String, List<String>> groupParticipants;
+	private Map<String, Map<String, GroupParticipant>> groupParticipants;
 
 	private final ReentrantReadWriteLock readWriteLockTrans = new ReentrantReadWriteLock(true);
 
@@ -42,7 +45,7 @@ public class TransientCache extends ContactsCache
 	{
 		savedContacts = new LinkedHashMap<String, ContactTuple>();
 		unsavedContacts = new HashMap<String, ContactTuple>();
-		groupParticipants = new HashMap<String, List<String>>();
+		groupParticipants = new HashMap<String, Map<String, GroupParticipant>>();
 		hDb = db;
 	}
 
@@ -107,6 +110,25 @@ public class TransientCache extends ContactsCache
 		{
 			ContactTuple tuple = new ContactTuple(1, name, contact);
 			unsavedContacts.put(contact.getMsisdn(), tuple);
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	/**
+	 * Inserts the map of msisdn and <code>GroupParticipant</code> into {@link groupParticipants} with <code>grpId</code> as key.
+	 * 
+	 * @param grpId
+	 * @param groupParticipantsMap
+	 */
+	void insertGroupParticipants(String grpId, Map<String, GroupParticipant> groupParticipantsMap)
+	{
+		writeLock.lock();
+		try
+		{
+			groupParticipants.put(grpId, groupParticipantsMap);
 		}
 		finally
 		{
@@ -703,5 +725,35 @@ public class TransientCache extends ContactsCache
 		{
 			writeLock.unlock();
 		}
+	}
+
+	/**
+	 * This method is used to get group Participants of a particular group specified by <code>groupId</code>. First {@link groupParticipants} is checked if they are loaded in
+	 * memory or not , if not then database query is executed and participants are put in the cache {@link groupParticipants} map.
+	 * 
+	 * @param groupId
+	 * @param activeOnly
+	 * @param notShownStatusMsgOnly
+	 * @param fetchParticipants
+	 * @return
+	 */
+	Pair<Map<String, GroupParticipant>, List<String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
+	{
+		Map<String, GroupParticipant> groupParticipantsMap = null;
+		readLock.lock();
+		try
+		{
+			groupParticipantsMap = groupParticipants.get(groupId);
+			if (null != groupParticipantsMap)
+			{
+				return new Pair<Map<String, GroupParticipant>, List<String>>(groupParticipantsMap, null);
+			}
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+
+		return HikeConversationsDatabase.getInstance().getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly);
 	}
 }

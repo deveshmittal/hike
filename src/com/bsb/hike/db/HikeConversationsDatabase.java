@@ -984,7 +984,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						}
 					}
 
-					((GroupConversation) conv).setGroupParticipantList(getGroupParticipants(msisdn, false, false));
+					((GroupConversation) conv).setGroupParticipantList(ContactManager.getInstance().getGroupParticipants(msisdn, false, false));
 				}
 				else
 				{
@@ -1499,7 +1499,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			boolean isMuted = groupCursor.getInt(groupCursor.getColumnIndex(DBConstants.MUTE_GROUP)) != 0;
 
 			GroupConversation conv = new GroupConversation(msisdn, convid, groupName, groupOwner, isGroupAlive);
-			conv.setGroupParticipantList(getGroupParticipants(msisdn, false, false));
+			conv.setGroupParticipantList(ContactManager.getInstance().getGroupParticipants(msisdn, false, false));
 			conv.setGroupMemberAliveCount(getActiveParticipantCount(msisdn));
 			conv.setIsMuted(isMuted);
 
@@ -1737,7 +1737,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		boolean participantsAlreadyAdded = true;
 		boolean infoChangeOnly = false;
 
-		Map<String, GroupParticipant> currentParticipants = getGroupParticipants(groupId, true, false);
+		Map<String, GroupParticipant> currentParticipants = ContactManager.getInstance().getGroupParticipants(groupId, true, false);
 		if (currentParticipants.isEmpty())
 		{
 			participantsAlreadyAdded = false;
@@ -1902,18 +1902,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * @param groupId
 	 * @return
 	 */
-	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
-	{
-		return getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly, true);
-	}
-
-	/**
-	 * Returns a list of participants to a group
-	 * 
-	 * @param groupId
-	 * @return
-	 */
-	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
+	public Pair<Map<String, GroupParticipant>, List<String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
 	{
 		String selection = DBConstants.GROUP_ID + " =? " + (activeOnly ? " AND " + DBConstants.HAS_LEFT + "=0" : "")
 				+ (notShownStatusMsgOnly ? " AND " + DBConstants.SHOWN_STATUS + "=0" : "");
@@ -1933,26 +1922,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						.getColumnIndex(DBConstants.ONHIKE)) != 0), c.getInt(c.getColumnIndex(DBConstants.HAS_LEFT)) != 0, c.getInt(c.getColumnIndex(DBConstants.ON_DND)) != 0);
 				participantList.put(msisdn, groupParticipant);
 			}
-			// at least one msisdn is required to run this in query
-			if (fetchParticipants && allMsisdns.size() > 0)
-			{
-				List<ContactInfo> list = HikeMessengerApp.getContactManager().getContact(allMsisdns, true, false);
-				for (ContactInfo contactInfo : list)
-				{
-					if (contactInfo.getName() == null)
-					{
-						String name = participantList.get(contactInfo.getMsisdn()).getContactInfo().getName();
-						HikeMessengerApp.getContactManager().setUnknownContactName(contactInfo.getMsisdn(), name);
-						participantList.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
-					}
-					else
-					{
-						participantList.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
-					}
-				}
-			}
 
-			return participantList;
+			return new Pair<Map<String, GroupParticipant>, List<String>>(participantList, allMsisdns);
 		}
 		finally
 		{
@@ -2258,7 +2229,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String groupId = groupCursor.getString(groupIdIdx);
 				String groupName = groupCursor.getString(groupNameIdx);
 
-				Map<String, GroupParticipant> groupParticipantMap = getGroupParticipants(groupId, true, false, false);
+				Map<String, GroupParticipant> groupParticipantMap = ContactManager.getInstance().getGroupParticipants(groupId, true, false, false);
 				groupName = TextUtils.isEmpty(groupName) ? Utils.defaultGroupName(groupParticipantMap) : groupName;
 				int numMembers = groupParticipantMap.size();
 
