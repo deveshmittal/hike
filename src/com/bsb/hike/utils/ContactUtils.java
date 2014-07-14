@@ -21,6 +21,7 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 
@@ -507,10 +508,15 @@ public class ContactUtils
 	
 	public static boolean isIndianMobileNumber(String number)
 	{
-		Pattern pattern = Pattern.compile("^(?:(?:\\+|0{0,2})91(\\s*[\\-]\\s*)?|[0]?)?[789]\\d{9}$");
-		Matcher matcher = pattern.matcher(number);
-		if (matcher.matches())
+		if (HikeMessengerApp.isIndianUser())
+		{
+			Pattern pattern = Pattern.compile("^(?:(?:\\+|0{0,2})91(\\s*[\\-]\\s*)?|[0]?)?[789]\\d{9}$");
+			Matcher matcher = pattern.matcher(number);
+			if (matcher.matches())
+				return true;
+		}else{
 			return true;
+		}
 
 		return false;
 	}
