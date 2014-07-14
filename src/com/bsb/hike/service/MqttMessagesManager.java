@@ -516,7 +516,11 @@ public class MqttMessagesManager
 
 		if (convMessage.isGroupChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
-			this.pubSub.publish(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE, convMessage.getMsisdn());
+			convMessage = convDb.showParticipantStatusMessage(convMessage.getMsisdn());
+			if (convMessage != null)
+			{
+				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+			}
 		}
 
 		/*

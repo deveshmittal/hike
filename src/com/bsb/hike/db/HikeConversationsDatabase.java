@@ -3253,4 +3253,51 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
+	
+	public ConvMessage showParticipantStatusMessage(String groupId)
+	{
+
+		Map<String, GroupParticipant> smsParticipants = getGroupParticipants(groupId, true, true);
+
+		if (smsParticipants.isEmpty())
+		{
+			return null;
+		}
+
+		JSONObject dndJSON = new JSONObject();
+		JSONArray dndParticipants = new JSONArray();
+
+		for (Entry<String, GroupParticipant> smsParticipantEntry : smsParticipants.entrySet())
+		{
+			GroupParticipant smsParticipant = smsParticipantEntry.getValue();
+			String msisdn = smsParticipantEntry.getKey();
+			if (smsParticipant.onDnd())
+			{
+				dndParticipants.put(msisdn);
+			}
+		}
+
+		if (dndParticipants.length() == 0)
+		{
+			// No DND participants. Just return
+			return null;
+		}
+		try
+		{
+			dndJSON.put(HikeConstants.FROM, groupId);
+			dndJSON.put(HikeConstants.TYPE, HikeConstants.DND);
+			dndJSON.put(HikeConstants.DND_USERS, dndParticipants);
+
+			ConvMessage convMessage = new ConvMessage(dndJSON, null, mContext, false);
+			addConversationMessages(convMessage);
+			updateShownStatus(groupId);
+
+			return convMessage; 
+		}
+		catch (JSONException e)
+		{
+			Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
+		}
+		return null;
+	}
 }
