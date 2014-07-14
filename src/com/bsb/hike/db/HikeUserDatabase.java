@@ -694,6 +694,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				{
 					continue;
 				}
+				if(ContactUtils.isIndianMobileNumber(msisdn))
+				{
 
 				msisdnSet.add(msisdn);
 
@@ -709,6 +711,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 					contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
 				}
 				contactInfos.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(false), contactInfo));
+				}
 			}
 			return contactInfos;
 		}

@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -88,6 +91,8 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.DownloadSingleStickerTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -418,7 +423,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private boolean shownSdrIntroTip = true;
 
 	private boolean sdrTipFadeInShown = false;
+	
+	private boolean isHikeToOfflineMode = false;
+	
+	/*
+	 * this is set of all the currently visible messages which are 
+	 * stuck in tick and are not sms
+	 */
+	private LinkedHashMap<Long, ConvMessage> undeliveredMessages = new LinkedHashMap<Long, ConvMessage>();
 
+	/*
+	 * this variable will point to first ConvMessage object which is stuck in tick
+	 * and have not sent as sms till now. if there is no such message than
+	 * this should point to null.
+	 */
+	private ConvMessage firstPendingConvMessage = null;
+	
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
@@ -865,14 +885,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
 					int idx = sticker.getStickerIndex();
 					if (idx >= 0)
-						stickerHolder.image.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS[idx]);
+						setDefaultSticker(stickerHolder.image, StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS[idx]);
 				}
 				else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
 				{
 					// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
 					int idx = sticker.getStickerIndex();
 					if (idx >= 0)
-						stickerHolder.image.setImageResource(StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
+						setDefaultSticker(stickerHolder.image, StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
 				}
 			}
 			else
@@ -1302,12 +1322,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
-					videoHolder.fileSize.setText(dataDisplay((int) hikeFile.getFile().length()));
+					videoHolder.fileSize.setText(Utils.getSizeForDisplay((int) hikeFile.getFile().length()));
 					videoHolder.fileSize.setVisibility(View.VISIBLE);
 				}
 				else if (hikeFile.getFileSize() > 0)
 				{
-					videoHolder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
+					videoHolder.fileSize.setText(Utils.getSizeForDisplay(hikeFile.getFileSize()));
 					videoHolder.fileSize.setVisibility(View.VISIBLE);
 				}
 				else
@@ -1778,11 +1798,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				fileHolder.fileName.setText(hikeFile.getFileName());
 				if (convMessage.isSent() && ((int) hikeFile.getFile().length() > 0))
 				{
-					fileHolder.fileSize.setText(dataDisplay((int) hikeFile.getFile().length()));
+					fileHolder.fileSize.setText(Utils.getSizeForDisplay((int) hikeFile.getFile().length()));
 				}
 				else if (hikeFile.getFileSize() > 0)
 				{
-					fileHolder.fileSize.setText(dataDisplay(hikeFile.getFileSize()));
+					fileHolder.fileSize.setText(Utils.getSizeForDisplay(hikeFile.getFileSize()));
 				}
 				else
 				{
@@ -3337,6 +3357,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		return v;
 	}
 
+	private void setDefaultSticker(ImageView imageView, int imageRes)
+	{
+		try
+		{
+			imageView.setImageResource(imageRes);
+		}
+		catch (OutOfMemoryError error)
+		{
+			Logger.w(getClass().getSimpleName(), "OOM while setting default sticker");
+		}
+	}
+
 	private void setBubbleColor(ConvMessage convMessage, ViewGroup messageContainer)
 	{
 		if (convMessage.isSent() && messageContainer != null)
@@ -3372,7 +3404,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void setSelection(ConvMessage convMessage, View overlay)
 	{
-		if (isActionModeOn)
+		if (isActionModeOn || isHikeToOfflineMode)
 		{
 			/*
 			 * This is an transparent overlay over all the message which will listen click events while action mode is on.
@@ -3447,33 +3479,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private void setNudgeImageResource(ChatTheme chatTheme, ImageView iv, boolean isMessageSent)
 	{
 		iv.setImageResource(isMessageSent ? chatTheme.sentNudgeResId() : chatTheme.receivedNudgeResId());
-	}
-
-	// @GM
-	// The following methods returns the user readable size when passed the bytes in size
-	private String dataDisplay(int bytes)
-	{
-		Logger.d(getClass().getSimpleName(), "DataDisplay of bytes : " + bytes);
-		if (bytes <= 0)
-			return ("");
-		if (bytes >= (1000 * 1024))
-		{
-			int mb = bytes / (1024 * 1024);
-			int mbPoint = bytes % (1024 * 1024);
-			mbPoint /= (1024 * 102);
-			return (Integer.toString(mb) + "." + Integer.toString(mbPoint) + " MB");
-		}
-		else if (bytes >= 1000)
-		{
-			int kb;
-			if (bytes < 1024) // To avoid showing "1000KB"
-				kb = bytes / 1000;
-			else
-				kb = bytes / 1024;
-			return (Integer.toString(kb) + " KB");
-		}
-		else
-			return (Integer.toString(bytes) + " B");
 	}
 
 	private void inflateNSetDay(ConvMessage convMessage, final DayHolder dayHolder)
@@ -3838,23 +3843,49 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	Handler handler = new Handler();
 
-	private void scheduleUndeliveredText(TextView tv, View container, ImageView iv, ConvMessage message, View inflated)
+	public void scheduleHikeOfflineTip()
 	{
+		/*
+		 * if international number don't show the tip
+		 */
+		if(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE))
+		{
+			return;
+		}
+		/*
+		 * if Kitkat OR higher we should not show tip
+		 * 1. if user has 0 free SMS left;
+		 * 2. user himself is not online;
+		 * 3. if this is an international number;
+		 */
+		if (Utils.isKitkatOrHigher())
+		{
+			int currentSmsBalance = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
+			Logger.d("tesst", ""+(currentSmsBalance == 0) +" "+ !Utils.isUserOnline(context) +" "+ !conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
+			if(currentSmsBalance == 0 || !Utils.isUserOnline(context))
+			{
+				return;
+			}
+		}
+		
 		if (showUndeliveredMessage != null)
 		{
 			handler.removeCallbacks(showUndeliveredMessage);
 		}
 
-		long diff = (((long) System.currentTimeMillis() / 1000) - message.getTimestamp());
+		if(firstPendingConvMessage != null)
+		{
+			long diff = (((long) System.currentTimeMillis() / 1000) - firstPendingConvMessage.getTimestamp());
 
-		if (Utils.isUserOnline(context) && diff < HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME)
-		{
-			showUndeliveredMessage = new ShowUndeliveredMessage(message, tv, container, iv, inflated);
-			handler.postDelayed(showUndeliveredMessage, (HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME - diff) * 1000);
-		}
-		else
-		{
-			showUndeliveredTextAndSetClick(message, tv, container, iv, true, inflated);
+			if (Utils.isUserOnline(context) && diff < HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME && chatThread.shouldRunTimerForHikeOfflineTip)
+			{
+				showUndeliveredMessage = new ShowUndeliveredMessage();
+				handler.postDelayed(showUndeliveredMessage, (HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME - diff) * 1000);
+			}
+			else if (!undeliveredMessages.isEmpty())
+			{
+				chatThread.showHikeToOfflineTip();
+			}
 		}
 	}
 
@@ -3915,7 +3946,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					status.setImageResource(R.drawable.ic_clock_white);
 					break;
 				case SENT_CONFIRMED:
-					status.setImageResource(R.drawable.ic_tick_white);
+					setIconForSentMessage(message, status, R.drawable.ic_tick_white, R.drawable.ic_sms_white, R.drawable.ic_bolt_white);
 					break;
 				case SENT_DELIVERED:
 					status.setImageResource(R.drawable.ic_double_tick_white);
@@ -3935,7 +3966,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					status.setImageResource(R.drawable.ic_clock);
 					break;
 				case SENT_CONFIRMED:
-					status.setImageResource(R.drawable.ic_tick);
+					setIconForSentMessage(message, status, R.drawable.ic_tick, R.drawable.ic_sms, R.drawable.ic_bolt_grey);
 					break;
 				case SENT_DELIVERED:
 					status.setImageResource(R.drawable.ic_double_tick);
@@ -3950,7 +3981,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			status.setScaleType(ScaleType.CENTER);
 			status.setVisibility(View.VISIBLE);
 		}
-
+		
 		if (timeStatus != null)
 			timeStatus.setVisibility(View.VISIBLE);
 
@@ -3963,6 +3994,24 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			detailHolder.messageInfoInflated.setVisibility(View.GONE);
 		}
+	}
+	
+	private void setIconForSentMessage(ConvMessage message, ImageView status, int tickResId, int smsDrawableResId, int boltDrawableResId)
+	{
+		if (conversation.isOnhike() && !(conversation instanceof GroupConversation))
+		{
+			if(message.isSMS())
+			{
+				status.setImageResource(smsDrawableResId);
+				return;
+			}
+			else if (chatThread.isHikeOfflineTipShowing())
+			{
+				status.setImageResource(boltDrawableResId);
+				return;
+			}
+		}
+		status.setImageResource(tickResId);
 	}
 
 	private void inflateNSetMessageInfo(final ConvMessage message, final DetailViewHolder detailHolder, final View clickableItem)
@@ -4009,13 +4058,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
 			setReadByForGroup(message, messageInfo);
 			updateViewWindowForReadBy(message);
-		}
-		else if (message.getState() == State.SENT_UNCONFIRMED || message.getState() == State.SENT_CONFIRMED)
-		{
-			if (!message.isSMS())
-			{
-				scheduleUndeliveredText(messageInfo, clickableItem, sending, message, inflated);
-			}
 		}
 	}
 
@@ -4124,7 +4166,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		@Override
 		public void onClick(View v)
 		{
-			chatThread.showMessageContextMenu((ConvMessage) v.getTag());
+			if(isActionModeOn)
+			{
+				chatThread.showMessageContextMenu((ConvMessage) v.getTag());
+			}
+			else if (isHikeToOfflineMode)
+			{
+				chatThread.clickedHikeToOfflineMessage((ConvMessage) v.getTag());
+			}
 			return;
 		}
 	};
@@ -4139,52 +4188,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		Logger.d(getClass().getSimpleName(), "OnCLICK" + convMessage.getMsgID());
 
-		if (lastSentMessagePosition != -1 && convMessage.isSent() && convMessage.equals(convMessages.get(lastSentMessagePosition)) && isMessageUndelivered(convMessage)
-				&& convMessage.getState() != State.SENT_UNCONFIRMED && !chatThread.isContactOnline())
-		{
-			long diff = (((long) System.currentTimeMillis() / 1000) - convMessage.getTimestamp());
-
-			/*
-			 * Only show fallback if the message has not been sent for our max wait time.
-			 */
-			if (diff >= HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME || !Utils.isUserOnline(context))
-			{
-
-				if (conversation.isOnhike())
-				{
-					if (!Utils.isUserOnline(context))
-					{
-						if (conversation instanceof GroupConversation)
-						{
-							Toast.makeText(context, R.string.gc_fallback_offline, Toast.LENGTH_LONG).show();
-						}
-						else
-						{
-							showSMSDialog(true);
-						}
-					}
-					else
-					{
-						if (conversation instanceof GroupConversation)
-						{
-							showSMSDialog(false);
-						}
-						else
-						{
-							/*
-							 * Only show the H2S fallback option if messaging indian numbers.
-							 */
-							showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
-						}
-					}
-				}
-				else
-				{
-					sendAllUnsentMessagesAsSMS(Utils.getSendSmsPref(context));
-				}
-				return;
-			}
-		}
 		if (convMessage.isFileTransferMessage())
 		{
 			// @GM
@@ -4431,58 +4434,24 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private class ShowUndeliveredMessage implements Runnable
 	{
-		ConvMessage message;
-
-		TextView tv;
-
-		ImageView iv;
-
-		View container;
-
-		View inflated;
-
-		public ShowUndeliveredMessage(ConvMessage message, TextView tv, View container, ImageView iv, View inflated)
-		{
-			this.message = message;
-			this.tv = tv;
-			this.container = container;
-			this.iv = iv;
-			this.inflated = inflated;
-		}
-
 		@Override
 		public void run()
 		{
-			if (lastSentMessagePosition >= convMessages.size() || lastSentMessagePosition == -1)
+			/*
+			 * if there is no firstPendingMessage we should not show the tip
+			 */
+			if (firstPendingConvMessage == null || !isMessageUndelivered(firstPendingConvMessage))
 			{
 				return;
 			}
-			ConvMessage lastSentMessage = convMessages.get(lastSentMessagePosition);
-			if (isMessageUndelivered(lastSentMessage))
+			
+			long diff = (((long) System.currentTimeMillis() / 1000) - firstPendingConvMessage.getTimestamp());
+
+			if (Utils.isUserOnline(context) && diff >= HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME )
 			{
-				showUndeliveredTextAndSetClick(message, tv, container, iv, true, inflated);
+				chatThread.showHikeToOfflineTip();
 			}
 		}
-	}
-
-	private void showUndeliveredTextAndSetClick(ConvMessage message, TextView tv, View container, ImageView iv, boolean fromHandler, View inflated)
-	{
-		String undeliveredText = getUndeliveredTextRes();
-		if (!TextUtils.isEmpty(undeliveredText))
-		{
-			iv.setVisibility(View.GONE);
-			inflated.setVisibility(View.VISIBLE);
-			tv.setVisibility(View.VISIBLE);
-			tv.setText(undeliveredText);
-		}
-		tv.setTextColor(context.getResources().getColor(chatTheme.offlineMsgTextColor()));
-
-		container.setTag(convMessages.get(lastSentMessagePosition));
-		container.setOnClickListener(this);
-
-		container.setOnLongClickListener(this);
-
-		updateViewWindowForReadBy(message);
 	}
 
 	private String getUndeliveredTextRes()
@@ -4517,46 +4486,64 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		dialog.setContentView(R.layout.sms_undelivered_popup);
 		dialog.setCancelable(true);
 
+		int selectedSmsCount = getSelectedFreeSmsCount();
+		
+		TextView popupHeader = (TextView) dialog.findViewById(R.id.popup_header);
 		View hikeSMS = dialog.findViewById(R.id.hike_sms_container);
 		View nativeSMS = dialog.findViewById(R.id.native_sms_container);
-		View divider = dialog.findViewById(R.id.divider);
 		TextView nativeHeader = (TextView) dialog.findViewById(R.id.native_sms_header);
-
+		TextView nativeSubtext = (TextView) dialog.findViewById(R.id.native_sms_subtext);
+		TextView hikeSmsHeader = (TextView) dialog.findViewById(R.id.hike_sms_header);
+		TextView hikeSmsSubtext = (TextView) dialog.findViewById(R.id.hike_sms_subtext);
+		
+		popupHeader.setText(context.getString(R.string.send_sms_as, selectedSmsCount));
+		hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext, chatThread.getCurrentSmsBalance()));
+		
 		hikeSMS.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
-		divider.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
-
-		if (conversation instanceof GroupConversation)
-		{
-			nativeSMS.setVisibility(View.GONE);
-			divider.setVisibility(View.GONE);
-		}
+		nativeSMS.setVisibility(Utils.isKitkatOrHigher() ? View.GONE : View.VISIBLE);
 
 		final CheckBox sendHike = (CheckBox) dialog.findViewById(R.id.hike_sms_checkbox);
 
 		final CheckBox sendNative = (CheckBox) dialog.findViewById(R.id.native_sms_checkbox);
 
-		final Button sendBtn = (Button) dialog.findViewById(R.id.btn_send);
-		sendBtn.setEnabled(false);
+		final Button alwaysBtn = (Button) dialog.findViewById(R.id.btn_always);
+		final Button justOnceBtn = (Button) dialog.findViewById(R.id.btn_just_once);
 
-		if (PreferenceManager.getDefaultSharedPreferences(context).contains(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_SMS_PREF))
+		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, false))
 		{
-			boolean nativeOn = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_SMS_PREF, false);
-			if (nativeOn || nativeOnly)
+			if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, false))
 			{
-				sendNative.setChecked(true);
-				sendBtn.setEnabled(true);
+				if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
+				{
+					showSMSClientDialog(false, null, false);
+					return;
+				}
+				sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages(true));
+				return;
 			}
-			else if (!nativeOnly || (conversation instanceof GroupConversation))
+			else if(!nativeOnly && chatThread.getCurrentSmsBalance() >= selectedSmsCount)
 			{
-				sendHike.setChecked(true);
-				sendBtn.setEnabled(true);
+				sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages(true));
+				return;
 			}
 		}
 
-		int numUnsentMessages = getAllUnsentMessages(false).size();
-		nativeHeader.setText(context.getString(R.string.x_regular_sms, numUnsentMessages));
+		sendHike.setChecked(true);
+		if(!nativeOnly && chatThread.getCurrentSmsBalance() < selectedSmsCount)
+		{
+			// disable Free Hike Sms Field and enabling the native sms one.
+			hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext_diabled, chatThread.getCurrentSmsBalance()));
+			hikeSmsSubtext.setEnabled(false);
+			hikeSmsHeader.setEnabled(false);
+			hikeSMS.setEnabled(false);
+			sendHike.setEnabled(false);
+			sendHike.setChecked(false);
+			sendNative.setChecked(true);
+		}
+		
+		nativeHeader.setText(context.getString(R.string.regular_sms));
 
-		sendHike.setOnClickListener(new OnClickListener()
+		OnClickListener hikeSMSOnClickListener =  new OnClickListener()
 		{
 
 			@Override
@@ -4564,11 +4551,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				sendHike.setChecked(true);
 				sendNative.setChecked(false);
-				sendBtn.setEnabled(true);
 			}
-		});
-
-		sendNative.setOnClickListener(new OnClickListener()
+		};
+		
+		OnClickListener nativeSMSOnClickListener =  new OnClickListener()
 		{
 
 			@Override
@@ -4576,32 +4562,41 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				sendHike.setChecked(false);
 				sendNative.setChecked(true);
-				sendBtn.setEnabled(true);
 			}
-		});
-
-		sendBtn.setOnClickListener(new OnClickListener()
+		};
+		
+		hikeSMS.setOnClickListener(hikeSMSOnClickListener);
+		sendHike.setOnClickListener(hikeSMSOnClickListener);
+		nativeSMS.setOnClickListener(nativeSMSOnClickListener);
+		sendNative.setOnClickListener(nativeSMSOnClickListener);
+		
+		alwaysBtn.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
 			public void onClick(View v)
 			{
-				if (sendHike.isChecked())
+				smsDialogSendClick(sendHike.isChecked(), false);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_ALWAYS_CLICKED);
+				if(!sendHike.isChecked())
 				{
-					Utils.setSendUndeliveredSmsSetting(context, false);
-					sendAllUnsentMessagesAsSMS(false);
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
 				}
-				else
+				dialog.dismiss();
+			}
+		});
+		
+		justOnceBtn.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				smsDialogSendClick(sendHike.isChecked(), true);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_JUST_ONCE_CLICKED);
+				if(!sendHike.isChecked())
 				{
-					if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
-					{
-						showSMSClientDialog(false, null, false);
-					}
-					else
-					{
-						sendAllUnsentMessagesAsSMS(true);
-						Utils.setSendUndeliveredSmsSetting(context, true);
-					}
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
 				}
 				dialog.dismiss();
 			}
@@ -4609,37 +4604,39 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		dialog.show();
 	}
-
-	private void showSMSClientDialog(final boolean triggeredFromToggle, final CompoundButton checkBox, final boolean showingNativeInfoDialog)
+	
+	private void smsDialogSendClick(boolean isSendHikeChecked, boolean justOnce)
 	{
-		final Dialog dialog = new Dialog(chatThread, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.enable_sms_client_popup);
-		dialog.setCancelable(showingNativeInfoDialog);
-
-		TextView header = (TextView) dialog.findViewById(R.id.header);
-		TextView body = (TextView) dialog.findViewById(R.id.body);
-		Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
-		Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
-
-		header.setText(showingNativeInfoDialog ? R.string.native_header : R.string.use_hike_for_sms);
-		body.setText(showingNativeInfoDialog ? R.string.native_info : R.string.use_hike_for_sms_info);
-
-		if (showingNativeInfoDialog)
+		if(!justOnce)
 		{
-			btnCancel.setVisibility(View.GONE);
-			btnOk.setText(R.string.continue_txt);
+			Utils.setSendUndeliveredAlwaysAsSmsSetting(context, true, !isSendHikeChecked);
+		}
+		
+		if (isSendHikeChecked)
+		{
+			sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages(true));
 		}
 		else
 		{
-			btnCancel.setText(R.string.cancel);
-			btnOk.setText(R.string.allow);
+			if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
+			{
+				showSMSClientDialog(false, null, false);
+			}
+			else
+			{
+				sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages(true));
+			}
 		}
+	}
 
-		btnOk.setOnClickListener(new OnClickListener()
+	private void showSMSClientDialog(final boolean triggeredFromToggle, final CompoundButton checkBox, final boolean showingNativeInfoDialog)
+	{
+
+		HikeDialogListener smsClientDialogListener = new HikeDialog.HikeDialogListener()
 		{
 
 			@Override
-			public void onClick(View v)
+			public void positiveClicked(Dialog dialog)
 			{
 				if (showingNativeInfoDialog)
 				{
@@ -4653,7 +4650,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					Utils.setReceiveSmsSetting(context, true);
 					if (!triggeredFromToggle)
 					{
-						sendAllUnsentMessagesAsSMS(true);
+						sendAllMessagesAsSMS(true, getAllUnsentSelectedMessages(true));
 					}
 					if (!preferences.getBoolean(HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false))
 					{
@@ -4668,26 +4665,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 				dialog.dismiss();
 			}
-		});
-
-		dialog.setOnCancelListener(new OnCancelListener()
-		{
 
 			@Override
-			public void onCancel(DialogInterface dialog)
+			public void neutralClicked(Dialog dialog)
 			{
-				if (showingNativeInfoDialog)
-				{
-					checkBox.setChecked(false);
-				}
+				
 			}
-		});
-
-		btnCancel.setOnClickListener(new OnClickListener()
-		{
 
 			@Override
-			public void onClick(View v)
+			public void negativeClicked(Dialog dialog)
 			{
 				if (!showingNativeInfoDialog)
 				{
@@ -4698,54 +4684,43 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					checkBox.setChecked(false);
 				}
+				dialog.dismiss();
 			}
-		});
 
+			@Override
+			public void onSucess(Dialog dialog)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+		};
+		
+		Dialog dialog = HikeDialog.showDialog(chatThread, HikeDialog.SMS_CLIENT_DIALOG, smsClientDialogListener, triggeredFromToggle, checkBox, showingNativeInfoDialog);  
 		dialog.show();
 	}
 
-	private List<ConvMessage> getAllUnsentMessages(boolean resetTimestamp)
+	public LinkedHashMap<Long, ConvMessage> getAllUnsentMessages(boolean resetTimestamp)
 	{
-		List<ConvMessage> unsentMessages = new ArrayList<ConvMessage>();
-		int count = 0;
-		for (int i = lastSentMessagePosition; i >= 0; i--)
-		{
-			ConvMessage convMessage = convMessages.get(i);
-			if (!convMessage.isSent())
-			{
-				break;
-			}
-			if (!isMessageUndelivered(convMessage))
-			{
-				break;
-			}
-			if (resetTimestamp && convMessage.getState().ordinal() < State.SENT_CONFIRMED.ordinal())
-			{
-				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
-			}
-			unsentMessages.add(convMessage);
-			if (++count >= HikeConstants.MAX_FALLBACK_NATIVE_SMS)
-			{
-				break;
-			}
-		}
-		return unsentMessages;
+		return undeliveredMessages;
 	}
 
-	private void sendAllUnsentMessagesAsSMS(boolean nativeSMS)
+	private void sendAllMessagesAsSMS(boolean nativeSMS, List<ConvMessage> unsentMessages)
 	{
-		List<ConvMessage> unsentMessages = getAllUnsentMessages(true);
 		Logger.d(getClass().getSimpleName(), "Unsent messages: " + unsentMessages.size());
 
 		if (nativeSMS)
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_NATIVE_SMS_FALLBACK, unsentMessages);
+			chatThread.messagesSentCloseHikeToOfflineMode(true);
+			removeFromUndeliverdMessage(unsentMessages);
 		}
 		else
 		{
 			if (conversation.isOnhike())
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_HIKE_SMS_FALLBACK, unsentMessages);
+				chatThread.messagesSentCloseHikeToOfflineMode(false);
+				removeFromUndeliverdMessage(unsentMessages);
 			}
 			else
 			{
@@ -5074,5 +5049,240 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public boolean shownSdrToolTip()
 	{
 		return msgIdForSdrTip != -1;
+	}
+	
+	public void sethikeToOfflineMode(boolean isOn)
+	{
+		isHikeToOfflineMode = isOn;
+	}
+	
+	public int getSelectedFreeSmsCount()
+	{
+		Collection<ConvMessage> selectedMessages = getSelectedMessagesMap().values();
+		int totalMsgLength = Utils.combineInOneSmsString(context, false, selectedMessages, true).length();
+		
+		return (totalMsgLength / 140) + 1;
+	}
+	
+	public void hikeOfflineSendClick()
+	{
+		final HashMap<Long, ConvMessage> selectedMessagesMap = getSelectedMessagesMap();
+		ArrayList<Long> selectedMsgIds = new ArrayList<Long>(getSelectedMessageIds());
+		Collections.sort(selectedMsgIds);
+		
+		if (firstPendingConvMessage != null && !selectedMessagesMap.isEmpty())
+		{
+			/*
+			 * Only show the H2S fallback option if user himself is Online
+			 */
+			if (!Utils.isUserOnline(context))
+			{
+				if(!Utils.isKitkatOrHigher())
+				{
+					showSMSDialog(true);
+				}
+				else
+				{
+					// We are not handling this case for now.
+				}
+			}
+			else
+			{
+				if(!Utils.isKitkatOrHigher())
+				{
+					/*
+					 * Only show the H2S fallback option if messaging indian numbers.
+					 */
+					showSMSDialog(!conversation.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE));
+				}
+				else
+				{
+					if(chatThread.getCurrentSmsBalance() < getSelectedFreeSmsCount())
+					{
+						Toast.makeText(context, context.getString(R.string.kitkat_not_enough_sms, chatThread.getCurrentSmsBalance()), Toast.LENGTH_LONG);
+					}
+					else
+					{
+						smsDialogSendClick(true, true);
+					}
+				}
+			}
+
+			return;
+		}
+	}
+
+	public List<ConvMessage> getAllUnsentSelectedMessages(boolean resetTimestamp)
+	{
+		List<ConvMessage> unsentMessages = new ArrayList<ConvMessage>();
+		final HashMap<Long, ConvMessage> selectedMessagesMap = getSelectedMessagesMap();
+		ArrayList<Long> selectedMsgIds = new ArrayList<Long>(getSelectedMessageIds());
+		Collections.sort(selectedMsgIds);
+		for (int i = 0; i < selectedMsgIds.size(); i++)
+		{
+			ConvMessage convMessage = selectedMessagesMap.get(selectedMsgIds.get(i));
+			if(convMessage == null)
+			{
+				continue;
+			}
+			if (!convMessage.isSent())
+			{
+				break;
+			}
+			if (!isMessageUndelivered(convMessage))
+			{
+				break;
+			}
+			if (resetTimestamp && convMessage.getState().ordinal() < State.SENT_CONFIRMED.ordinal())
+			{
+				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
+			}
+			
+			unsentMessages.add(convMessage);
+		}
+		
+		return unsentMessages;
+	}
+
+	public void addToUndeliverdMessage(final ConvMessage convMessage)
+	{
+		chatThread.runOnUiThread(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				if(convMessage.isSMS())
+				{
+					return;
+				}
+				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
+				updateFirstPendingConvMessage();
+				// We need to schedule hike offline tip always when it is not there
+				// Coz there might be cases when user manualy removes the tip
+				if (!chatThread.isHikeOfflineTipShowing())
+				{
+					scheduleHikeOfflineTip();
+				}
+			}
+		});
+	}
+	
+	public void removeFromUndeliverdMessage(final ConvMessage convMessage)
+	{
+		removeFromUndeliverdMessage(convMessage, false);
+	}
+	
+	/**
+	 * @param msgDelivered signifies that removeFromUndeliverdMessage is called coz
+	 * convMessage has been reached to delivered state.
+	 */
+	public void removeFromUndeliverdMessage(final ConvMessage convMessage, final boolean msgDelivered)
+	{
+		chatThread.runOnUiThread(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				ConvMessage msg = undeliveredMessages.remove(convMessage.getMsgID());
+				
+				// if on remove if it returns null don't do anything
+				if(msg == null)
+				{
+					return;
+				}
+				
+				if(undeliveredMessages.isEmpty())
+				{
+					/*
+					 * if all messages are delivered OR we don't 
+					 * have any undelivered messages than only we should
+					 * reset this timer not on delivery of some message
+					 */
+					chatThread.shouldRunTimerForHikeOfflineTip = true;
+					chatThread.hideHikeToOfflineTip();
+					/*
+					 * we need to update last seen value coz we might
+					 * have updated contact's last seen value in between
+					 * when hike offline tip was showing
+					 */
+					if(msgDelivered)
+					{
+						chatThread.updateLastSeen();
+					}
+				}
+				if (firstPendingConvMessage.equals(convMessage))
+				{
+					updateFirstPendingConvMessage();
+				}
+			}
+		});
+	}
+	
+
+	private void removeFromUndeliverdMessage(List<ConvMessage> convMessages)
+	{
+		for (ConvMessage convMessage : convMessages)
+		{
+			removeFromUndeliverdMessage(convMessage);
+		}
+	}
+	
+	public void removeAllFromUndeliverdMessage()
+	{
+		chatThread.runOnUiThread(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				undeliveredMessages.clear();
+				chatThread.shouldRunTimerForHikeOfflineTip = true;
+				chatThread.hideHikeToOfflineTip();
+				updateFirstPendingConvMessage();
+				chatThread.updateLastSeen();
+			}
+		});
+	}
+
+	public void addAllUndeliverdMessages(List<ConvMessage> messages)
+	{
+		for (ConvMessage convMessage : messages)
+		{
+			if(convMessage.getState() == State.SENT_CONFIRMED && !convMessage.isSMS())
+			{
+				undeliveredMessages.put(convMessage.getMsgID(), convMessage);
+			}
+		}
+		if(firstPendingConvMessage == null)
+		{
+			updateFirstPendingConvMessage();
+		}
+		if (!chatThread.isHikeOfflineTipShowing())
+		{
+			scheduleHikeOfflineTip();
+		}
+	}
+	
+	private void updateFirstPendingConvMessage()
+	{
+		if(undeliveredMessages.isEmpty())
+		{
+			firstPendingConvMessage = null;
+		}
+		else
+		{
+			firstPendingConvMessage = undeliveredMessages.get(undeliveredMessages.keySet().iterator().next());
+		}
+	}
+
+	public long getFirstUnsentMessageId()
+	{
+		if (firstPendingConvMessage == null)
+		{
+			return -1;
+		}
+		return firstPendingConvMessage.getMsgID();
 	}
 }

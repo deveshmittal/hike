@@ -59,6 +59,8 @@ public class ConvMessage
 	private JSONArray readByArray;
 
 	private boolean shouldShowPush = true;
+	
+	private boolean isTickSoundPlayed = false;
 
 	private int unreadCount = -1;
 	// private boolean showResumeButton = true;
@@ -224,6 +226,10 @@ public class ConvMessage
 		this.groupParticipantMsisdn = groupParticipantMsisdn;
 		this.mIsSMS = isSMS;
 		setState(msgState);
+		if(msgState.ordinal() >= State.SENT_CONFIRMED.ordinal())
+		{
+			setTickSoundPlayed(true);
+		}
 		this.participantInfoState = participantInfoState;
 	}
 
@@ -812,5 +818,15 @@ public class ConvMessage
 	public boolean isBlockAddHeader()
 	{
 		return isBlockAddHeader;
+	}
+	
+	public boolean isTickSoundPlayed()
+	{
+		return isTickSoundPlayed;
+	}
+
+	public void setTickSoundPlayed(boolean isTickSoundPlayed)
+	{
+		this.isTickSoundPlayed = isTickSoundPlayed;
 	}
 }

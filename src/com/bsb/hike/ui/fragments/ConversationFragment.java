@@ -69,7 +69,10 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.ui.HikeFragmentable;
+import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
@@ -78,13 +81,14 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.HikeTip.TipType;
 
-public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener
+public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener, HikeFragmentable
 {
 
 	private class DeleteConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]>
 	{
 
 		Context context;
+
 		boolean publishStealthEvent;
 
 		public DeleteConversationsAsyncTask(Context context)
@@ -243,7 +247,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		 * We only add this item if hike contacts are less than 
 		 * certain threashold
 		 */
-		if(HomeActivity.ftueContactsData.getHikeContacts().size() < HikeConstants.FTUE_HIKE_CONTACT_MIN_LIMIT 
+		if(HomeActivity.ftueContactsData.getHikeContacts().size() == 0
 				&& !HomeActivity.ftueContactsData.getSmsContacts().isEmpty())
 		{
 			int smsContactCount = HomeActivity.ftueContactsData.getTotalSmsContactsCount();
@@ -264,8 +268,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		
 		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.LAST_SEEN, R.drawable.ftue_card_last_seen_img_small, getResources().getColor(R.color.ftue_card_last_seen),
 				R.string.ftue_card_header_last_seen, R.string.ftue_card_body_last_seen, R.string.ftue_card_click_text_last_seen, getResources().getColor(R.color.ftue_card_last_seen_click_text)));
-		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.HIDDEN_MODE, R.drawable.ftue_card_hidden_mode_img_small, getResources().getColor(R.color.ftue_card_hidden_mode),
-				R.string.ftue_card_header_hidden_mode, R.string.ftue_card_body_hidden_mode, R.string.ftue_card_click_text_hidden_mode, getResources().getColor(R.color.ftue_card_hidden_mode_click_text)));
+		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.GROUP, R.drawable.ftue_card_group_img_small, getResources().getColor(R.color.ftue_card_group),
+				R.string.group_chat, R.string.ftue_card_body_group, R.string.ftue_card_click_group, getResources().getColor(R.color.ftue_card_group_click_text)));
+		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.INVITE, R.drawable.ftue_card_invite_img_small, getResources().getColor(R.color.ftue_card_invite),
+				R.string.invite_friends, R.string.ftue_card_body_invite, R.string.ftue_card_click_invite, getResources().getColor(R.color.ftue_card_invite_click_text)));
 		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.HIKE_OFFLINE, R.drawable.ftue_card_hike_offline_img_small, getResources().getColor(R.color.ftue_card_hike_offline),
 				R.string.ftue_card_header_hike_offline, R.string.ftue_card_body_hike_offline, R.string.ftue_card_click_text_hike_offline, getResources().getColor(R.color.ftue_card_hike_offline_click_text)));
 		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.STICKERS, R.drawable.ftue_card_sticker_img_small, getResources().getColor(R.color.ftue_card_sticker),
@@ -411,6 +417,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					dialog.dismiss();
 					
 					Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+				}
+
+				@Override
+				public void onSucess(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
 				}
 			}, dialogStrings);
 		}
@@ -783,6 +796,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void ShowTipIfNeeded(boolean hasNoConversation)
 	{
+		// to prevent more than one tip to display at a time , it can happen at time of onnewintent
+		if(!hasNoConversation && displayedConversations.get(0) instanceof ConversationTip){
+			displayedConversations.remove(0);
+		}
+		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(this.getActivity().getApplicationContext());
+		String tip = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
+		Logger.i("tip", "#" + tip + "#-currenttype");
 		if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.RESET_STEALTH_TIP));
@@ -796,11 +816,31 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.START_NEW_CHAT_TIP));
 		}
-		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false) )
+		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false))
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_UNREAD_TIP));
 		}
-		
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_PROFILE_PIC))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_PROFILE_PIC_TIP));
+			// show atomic pop up profile pic
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_FAVOURITES))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_FAVOURTITES_TIP));
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_INVITE))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_INVITE_TIP));
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_STATUS))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_STATUS_TIP));
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_INFO_TIP));
+		}
 	}
 
 	private void setupConversationLists()
@@ -2139,11 +2179,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		default:
 			break;
 		}
-		
+
 		if (mAdapter.getCount() == 0)
 		{
 			setEmptyState();
 		}
+	}
+
+	@Override
+	public void onNewintent(Intent intent)
+	{
+		if (intent.getBooleanExtra(HikeConstants.Extras.HAS_TIP, false))
+		{
+			ShowTipIfNeeded(displayedConversations.isEmpty());
+			notifyDataSetChanged();
+		}
+
 	}
 
 }

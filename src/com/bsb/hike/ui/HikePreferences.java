@@ -34,8 +34,10 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
+import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.tasks.UnlinkTwitterTask;
 import com.bsb.hike.tasks.DeleteAccountTask.DeleteAccountListener;
+import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -106,6 +108,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			unlinkPreference.setOnPreferenceClickListener(this);
 		}
+		
+		Preference imageQuality = getPreferenceScreen().findPreference(HikeConstants.IMAGE_QUALITY);
+		if (imageQuality != null)
+		{
+			imageQuality.setOnPreferenceClickListener(this);
+		}
 
 		Preference unlinkFacebookPreference = getPreferenceScreen().findPreference(HikeConstants.UNLINK_FB);
 		if (unlinkFacebookPreference != null)
@@ -139,7 +147,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			lastSeenPreference.setOnPreferenceChangeListener(this);
 		}
-
+		final IconCheckBoxPreference profilePicPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.PROFILE_PIC_PREF);
+		if (profilePicPreference != null)
+		{
+			profilePicPreference.setOnPreferenceChangeListener(this);
+		}
 		final IconCheckBoxPreference freeSmsPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.FREE_SMS_PREF);
 		if (freeSmsPreference != null)
 		{
@@ -226,7 +238,25 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				getPreferenceScreen().removePreference(resetStealthPreference);
 			}
 		}
+		Preference resetStealthPassword = getPreferenceScreen().findPreference(HikeConstants.CHANGE_STEALTH_PASSCODE);
+		if (resetStealthPassword != null)
+		{
+			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+			{
+				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				{
+					resetStealthPassword.setTitle(R.string.change_stealth_password);
+					resetStealthPassword.setSummary(R.string.change_stealth_password_body);
+				}
 
+				resetStealthPassword.setOnPreferenceClickListener(this);
+			}
+			else
+			{
+				getPreferenceScreen().removePreference(resetStealthPassword);
+			}
+		}
+		
 		setupActionBar(titleRes);
 
 	}
@@ -627,8 +657,53 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 					{
 						dialog.dismiss();
 					}
+
+					@Override
+					public void onSucess(Dialog dialog)
+					{
+						// TODO Auto-generated method stub
+						
+					}
 				}, dialogStrings);
 			}
+		}
+		else if (HikeConstants.IMAGE_QUALITY.equals(preference.getKey()))
+		{
+			HikeDialog.showDialog(HikePreferences.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
+			{
+				@Override
+				public void onSucess(Dialog dialog)
+				{
+					updateMedia();
+					dialog.dismiss();
+				}
+
+				@Override
+				public void negativeClicked(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void positiveClicked(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void neutralClicked(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+			}, (Object[]) null);
+
+		}
+		else if(HikeConstants.CHANGE_STEALTH_PASSCODE.equals(preference.getKey()))
+		{
+			LockPattern.confirmPattern(HikePreferences.this, true);
 		}
 
 		return true;
@@ -691,6 +766,28 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				Logger.w(getClass().getSimpleName(), "Invalid json", e);
 			}
 		}
+		else if (HikeConstants.PROFILE_PIC_PREF.equals(preference.getKey()))
+		{
+			JSONObject object = new JSONObject();
+			try
+			{
+				object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+
+				int avatarSetting =1;
+				if(isChecked){
+					avatarSetting = 2;
+				}
+				JSONObject data = new JSONObject();
+				data.put(HikeConstants.AVATAR, avatarSetting);
+				object.put(HikeConstants.DATA, data);
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+	     	}
+			catch (JSONException e)
+			{
+				Logger.w(getClass().getSimpleName(), "Invalid json", e);
+			}
+		}
 		else if (HikeConstants.FREE_SMS_PREF.equals(preference.getKey()))
 		{
 			Logger.d(getClass().getSimpleName(), "Free SMS toggled");
@@ -717,9 +814,41 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		case R.xml.notification_preferences:
 			updateNotifPrefView();
 			break;
+		case R.xml.media_download_preferences:
+			updateMedia();
 		}
 	}
 
+	private void updateMedia()
+	{
+		Preference preference = getPreferenceScreen().findPreference(HikeConstants.IMAGE_QUALITY);
+		if (HikeSharedPreferenceUtil.getInstance(HikePreferences.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
+		{
+			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(HikePreferences.this);
+
+			int imageQuality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
+
+			String qualityString = "";
+			switch (imageQuality)
+			{
+			case 1:
+				qualityString = "Original";
+				break;
+			case 2:
+				qualityString = "Medium";
+				break;
+			case 3:
+				qualityString = "Small";
+				break;
+			}
+			preference.setTitle(getResources().getString(R.string.image_quality_prefs) + " - " + qualityString);
+		}
+		else
+		{
+			preference.setTitle(getResources().getString(R.string.image_quality_prefs));
+		}
+	}
+	
 	private void updateNotifPrefView()
 	{
 		ListPreference lp = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.VIBRATE_PREF_LIST);
@@ -790,4 +919,16 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 
 	}
+	/**
+	 * Adding this to handle the onactivityresult callback for reset password 
+	 */
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		//passing true here to denote that this is coming from the password reset operation
+		data.putExtra(HikeConstants.Extras.STEALTH_PASS_RESET, true);
+		LockPattern.onLockActivityResult(this, requestCode, resultCode, data);
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+	
+
 }

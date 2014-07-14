@@ -1,9 +1,11 @@
 package com.bsb.hike.db;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -404,6 +406,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			db.execSQL(alter);
 		}
 
+		// to delete duplicate stickers
+		if (oldVersion < 26)
+		{
+			try
+			{
+
+				StickerManager st = StickerManager.getInstance();
+				st.deleteDuplicateStickers();
+			}
+			catch (Exception e)
+			{
+			}
+		}
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike)
@@ -1438,7 +1453,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			Map<String, Map<String, GroupParticipant>> groupIdParticipantsMap = new HashMap<String, Map<String, GroupParticipant>>();
 			HikeUserDatabase huDB = HikeUserDatabase.getInstance();
-			Map<String, GroupParticipant> msisdnToGP = new HashMap<String, GroupParticipant>();
+			Map<String, List<GroupParticipant>> msisdnToGP = new HashMap<String, List<GroupParticipant>>();
 			StringBuilder msisdnSB = new StringBuilder("(");
 
 			while (c.moveToNext())
@@ -1456,7 +1471,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					groupIdParticipantsMap.put(groupId, participantList);
 				}
 				participantList.put(msisdn, groupParticipant);
-				msisdnToGP.put(msisdn, groupParticipant);
+
+				List<GroupParticipant> groupParticipants = msisdnToGP.get(msisdn);
+				if (groupParticipants == null)
+				{
+					groupParticipants = new ArrayList<GroupParticipant>();
+					msisdnToGP.put(msisdn, groupParticipants);
+				}
+				groupParticipants.add(groupParticipant);
 			}
 			// atleast one msisdn entered
 			if (!"(".equals(msisdnSB.toString()))
@@ -1465,7 +1487,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				List<ContactInfo> contactInfos = huDB.getContactNamesFromMsisdnList(msisdnMulti);
 				for (ContactInfo contactInfo : contactInfos)
 				{
-					msisdnToGP.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
+					List<GroupParticipant> groupParticipants = msisdnToGP.get(contactInfo.getMsisdn());
+					if (groupParticipants == null)
+					{
+						continue;
+					}
+					for (GroupParticipant groupParticipant : groupParticipants)
+					{
+						groupParticipant.setContactInfo(contactInfo);
+					}
 				}
 			}
 			return groupIdParticipantsMap;
@@ -3205,5 +3235,50 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				c.close();
 			}
 		}
+	}
+	
+	public ArrayList<String> getOfflineMsisdnsList(String msisdnStatement)
+	{
+		Cursor c = null;
+		ArrayList<String> msisdnResult = null;
+		try
+		{
+			c = mDb.query(DBConstants.MESSAGES_TABLE + "," + DBConstants.CONVERSATIONS_TABLE, new String[] {
+					" MIN (" + DBConstants.MESSAGES_TABLE + "." + DBConstants.TIMESTAMP + ") AS TIME", DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN },
+					DBConstants.MESSAGES_TABLE + "." + DBConstants.CONV_ID + " IN (SELECT " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.CONV_ID + " FROM "
+							+ DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN + " IN " + msisdnStatement + " ) " + " AND "
+							+ " ( " + DBConstants.MESSAGES_TABLE + "." + DBConstants.CONV_ID + "=" + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.CONV_ID + " ) " + " AND  "
+							+ DBConstants.MESSAGES_TABLE + "." + DBConstants.MSG_STATUS + "=" + State.SENT_CONFIRMED.ordinal() + " AND  "
+									+ DBConstants.MESSAGES_TABLE + "." + DBConstants.IS_HIKE_MESSAGE + "=" + "1", null, DBConstants.CONVERSATIONS_TABLE + "."
+							+ DBConstants.MSISDN, null, null);
+
+			if (c != null)
+			{
+				msisdnResult = new ArrayList<String>(c.getCount());
+				while (c.moveToNext())
+				{
+					long msgTime = c.getLong(c.getColumnIndex("TIME"));
+					if ((System.currentTimeMillis() / 1000 - msgTime) > HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME)
+					{
+						msisdnResult.add(c.getString(c.getColumnIndex(DBConstants.MSISDN)));
+					}
+
+					Logger.d("HikeToOffline", "TimeStamp : " + c.getLong(c.getColumnIndex("TIME")));
+					Logger.d("HikeToOffline", "Msisdn : " + c.getString(c.getColumnIndex(DBConstants.MSISDN)));
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			Logger.e("HikeToOffline", "Exception ", e);
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		return msisdnResult;
 	}
 }
