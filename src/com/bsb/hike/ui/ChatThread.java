@@ -3907,7 +3907,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				if (convMessage.getTypingNotification() == null
 						&& (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
 				{
-					showUnreadCountIndicator();
+					showUnreadCountIndicator(messageList.size());
 				}
 				return;
 			}
@@ -3932,6 +3932,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void showUnreadCountIndicator()
 	{
 		unreadMessageCount++;
+		// fast scroll indicator and unread message should not show
+		// simultaneously.
+		bottomFastScrollIndicator.setVisibility(View.GONE);
+		unreadMessageIndicator.setVisibility(View.VISIBLE);
+		TextView indicatorText = (TextView) findViewById(R.id.indicator_text);
+		indicatorText.setVisibility(View.VISIBLE);
+		if (unreadMessageCount == 1)
+		{
+			indicatorText.setText(getResources().getString(R.string.one_new_message));
+		}
+		else
+		{
+			indicatorText.setText(getResources().getString(R.string.num_new_messages, unreadMessageCount));
+		}
+	}
+	
+	private void showUnreadCountIndicator(int unreadCount)
+	{
+		unreadMessageCount += unreadCount;
 		// fast scroll indicator and unread message should not show
 		// simultaneously.
 		bottomFastScrollIndicator.setVisibility(View.GONE);
