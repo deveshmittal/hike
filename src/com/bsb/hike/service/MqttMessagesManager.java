@@ -2,8 +2,11 @@ package com.bsb.hike.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -57,6 +61,7 @@ import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.PairModified;
 
 /**
  * 
@@ -87,11 +92,25 @@ public class MqttMessagesManager
 	private static MqttMessagesManager instance;
 
 	private String userMsisdn;
+	
+	private boolean isBulkMessage = false;
+	
+	private SQLiteDatabase convWriteDb;
+	
+	private SQLiteDatabase userWriteDb;
+	
+	private ArrayList<ConvMessage> messageList;
+
+	private Map<String, ArrayList<ConvMessage>> messageListMap;
+	
+	private Map<String, Utils.PairModified<Long, Long>> messageStatusMap;
 
 	private MqttMessagesManager(Context context)
 	{
 		this.convDb = HikeConversationsDatabase.getInstance();
 		this.userDb = HikeUserDatabase.getInstance();
+		this.convWriteDb = convDb.getWritableDatabase();
+		this.userWriteDb = userDb.getWritableDatabase();
 		this.settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.context = context;
 		this.pubSub = HikeMessengerApp.getPubSub();
@@ -462,16 +481,22 @@ public class MqttMessagesManager
 		 */
 		convMessage.setTimestamp(Utils.applyServerTimeOffset(context, convMessage.getTimestamp()));
 
-		convDb.addConversationMessages(convMessage);
-
-		/*
-		 * Return if there is no conversation mapped to this message
-		 */
-		if (convMessage.getConversation() == null)
+		if(isBulkMessage)
 		{
-			return;
+			addToLists(convMessage.getMsisdn(), convMessage);
 		}
+		else
+		{
+			convDb.addConversationMessages(convMessage);
 
+			/*
+			 * Return if there is no conversation mapped to this message
+			 */
+			if (convMessage.getConversation() == null)
+			{
+				return;
+			}
+		}
 		/*
 		 * We need to add the name here in order to fix the bug where if the client receives two files of the same name, it shows the same file under both files.
 		 */
@@ -512,21 +537,33 @@ public class MqttMessagesManager
 				+ convMessage.getMappedMsgID());
 		// We have to do publish this here since we are adding the message
 		// to the db here, and the id is set after inserting into the db.
-		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
-
+		
+		if(!isBulkMessage)
+		{
+			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+		}
+		
 		if (convMessage.isGroupChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
 			convMessage = convDb.showParticipantStatusMessage(convMessage.getMsisdn());
 			if (convMessage != null)
 			{
-				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+				if(isBulkMessage)
+				{
+					addToLists(convMessage.getMsisdn(), convMessage);
+				}
+				else
+				{
+					this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+				}
 			}
 		}
+
 
 		/*
 		 * Start auto download for media files
 		 */
-		if (convMessage.isFileTransferMessage() && (!TextUtils.isEmpty(convMessage.getConversation().getContactName())))
+		if (convMessage.isFileTransferMessage() && (convMessage.getConversation() != null) && (!TextUtils.isEmpty(convMessage.getConversation().getContactName())))
 		{
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
@@ -559,7 +596,10 @@ public class MqttMessagesManager
 			}
 
 		}
-		removeTypingNotification(convMessage.getMsisdn(), convMessage.getGroupParticipantMsisdn());
+		if(!isBulkMessage)
+		{
+			removeTypingNotification(convMessage.getMsisdn(), convMessage.getGroupParticipantMsisdn());
+		}
 	}
 
 	private void saveDeliveryReport(JSONObject jsonObj) throws JSONException
@@ -577,17 +617,34 @@ public class MqttMessagesManager
 			msgID = -1;
 		}
 		Logger.d(getClass().getSimpleName(), "Delivery report received for msgid : " + msgID + "	;	REPORT : DELIVERED");
-		int rowsUpdated = updateDB(msgID, ConvMessage.State.SENT_DELIVERED, msisdn);
-
-		if (rowsUpdated == 0)
+		if(isBulkMessage)
 		{
-			Logger.d(getClass().getSimpleName(), "No rows updated");
-			return;
+			/*
+			 * update message status map with max dr msgId corresponding to its msisdn
+			 */
+			if(messageStatusMap.get(msisdn) == null)
+			{
+				messageStatusMap.put(msisdn, new Utils.PairModified<Long, Long>((long) -1, (long) -1));
+			}
+			if(msgID > messageStatusMap.get(msisdn).getSecond())
+			{
+				messageStatusMap.get(msisdn).setSecond(msgID);
+			}
 		}
+		else
+		{
+			int rowsUpdated = updateDB(msgID, ConvMessage.State.SENT_DELIVERED, msisdn);
 
-		Pair<String, Long> pair = new Pair<String, Long>(msisdn, msgID);
+			if (rowsUpdated == 0)
+			{
+				Logger.d(getClass().getSimpleName(), "No rows updated");
+				return;
+			}
 
-		this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, pair);
+			Pair<String, Long> pair = new Pair<String, Long>(msisdn, msgID);
+
+			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, pair);
+		}
 	}
 
 	private void saveMessageRead(JSONObject jsonObj) throws JSONException
@@ -603,28 +660,52 @@ public class MqttMessagesManager
 			return;
 		}
 
-		long[] ids;
-		if (!Utils.isGroupConversation(id))
+		if(isBulkMessage)
 		{
-			ids = convDb.setAllDeliveredMessagesReadForMsisdn(id, msgIds);
-			if (ids == null)
+			long msgID = -1;
+			for (int i = 0; i < msgIds.length(); i++)
 			{
-				return;
+				long tempId = msgIds.optLong(i);
+				if(tempId > msgID)
+				{
+					msgID = tempId;
+				}
+			}
+			if(messageStatusMap.get(id) == null)
+			{
+				messageStatusMap.put(id, new PairModified<Long, Long>((long) -1, (long) -1));
+			}
+			if(msgID > messageStatusMap.get(id).getFirst())
+			{
+				messageStatusMap.get(id).setFirst(msgID);
 			}
 		}
 		else
 		{
-			ids = new long[msgIds.length()];
-			for (int i = 0; i < msgIds.length(); i++)
+
+			long[] ids;
+			if (!Utils.isGroupConversation(id))
 			{
-				ids[i] = msgIds.optLong(i);
+				ids = convDb.setAllDeliveredMessagesReadForMsisdn(id, msgIds);
+				if (ids == null)
+				{
+					return;
+				}
 			}
-			convDb.setReadByForGroup(id, ids, participantMsisdn);
+			else
+			{
+				ids = new long[msgIds.length()];
+				for (int i = 0; i < msgIds.length(); i++)
+				{
+					ids[i] = msgIds.optLong(i);
+				}
+				convDb.setReadByForGroup(id, ids, participantMsisdn);
+			}
+
+			Pair<String, long[]> pair = new Pair<String, long[]>(id, ids);
+
+			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
 		}
-
-		Pair<String, long[]> pair = new Pair<String, long[]>(id, ids);
-
-		this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
 	}
 
 	private void saveTyping(JSONObject jsonObj) throws JSONException
@@ -1453,6 +1534,117 @@ public class MqttMessagesManager
 			}
 		}
 	}
+	
+	
+	public void saveBulkMessage(JSONObject bulkObj) throws JSONException 
+	{
+		boolean shouldFallBackToNormal = false;
+		JSONObject bulkMessages = bulkObj.optJSONObject(HikeConstants.DATA);
+
+		if (bulkMessages != null)
+		{
+			JSONArray msgArray = bulkMessages.optJSONArray(HikeConstants.MESSAGES);
+			if (null != msgArray && msgArray.length() > 0)
+			{
+				isBulkMessage = true;
+				int i = 0;
+				int length = msgArray.length();
+				Logger.d("bulkpacket", "length of json array : " + length);
+
+				Logger.d("BulkProcess", "started");
+				long time1 = System.currentTimeMillis();
+
+				messageList = new ArrayList<ConvMessage>(); // it will store all the convMessage object that can be added to list in one transaction
+				messageListMap = new HashMap<String, ArrayList<ConvMessage>>(); // it will store list of conversation objects based on msisdn
+				messageStatusMap = new HashMap<String, Utils.PairModified<Long, Long>>(); // it will store pair max "mr" msdId and max "dr" msgId according to msisdn
+
+				try
+				{
+					userWriteDb.beginTransaction();
+					convWriteDb.beginTransaction();
+
+					while (i < length)
+					{
+						JSONObject jsonObj = msgArray.optJSONObject(i++);
+						if (jsonObj != null)
+						{
+							saveMqttMessage(jsonObj);
+						}
+					}
+					Logger.d("BulkProcess", "going on");
+					finalProcessing();
+				}
+				catch (JSONException e)
+				{
+					throw e;
+				}
+				catch (Exception e)
+				{
+					shouldFallBackToNormal = true;
+				}
+				finally
+				{
+					convWriteDb.setTransactionSuccessful();
+					userWriteDb.setTransactionSuccessful();
+					convWriteDb.endTransaction();
+					userWriteDb.endTransaction();
+
+					Logger.d("BulkProcess", "stopped");
+					isBulkMessage = false;
+					Logger.d("bulkPacket", "total time : " + (System.currentTimeMillis() - time1));
+				}
+				
+				if(shouldFallBackToNormal)
+				{
+					i = 0;
+					while (i < length)
+					{
+						JSONObject jsonObj = msgArray.optJSONObject(i++);
+						if (jsonObj != null)
+						{
+							saveMqttMessage(jsonObj);
+						}
+					}
+				}
+
+			}
+		}
+	}
+	
+	private void finalProcessing() throws JSONException
+	{
+		if(messageList.size() > 0)
+		{
+			convDb.addConversationsNew(messageList);
+		}
+		ArrayList<ConvMessage> lastMessageList = new ArrayList<ConvMessage>(messageListMap.keySet().size());
+		for (Entry<String, ArrayList<ConvMessage>> entry : messageListMap.entrySet())
+		{
+			ArrayList<ConvMessage> list= entry.getValue();
+			lastMessageList.add(list.get(list.size() -1));
+		}
+		
+		if(lastMessageList.size() > 0)
+		{
+			convDb.addLastConversations(lastMessageList);
+		}
+		if(messageStatusMap.size() > 0)
+		{
+			convDb.updateStatusBulk(messageStatusMap);
+		}
+		this.pubSub.publish(HikePubSub.BULK_MESSAGE_RECEIVED, messageListMap);
+
+	}
+	
+	private void addToLists(String msisdn, ConvMessage convMessage)
+	{
+		messageList.add(convMessage);
+		if(messageListMap.get(msisdn) == null)
+		{
+			messageListMap.put(msisdn, new ArrayList<ConvMessage>());
+		}
+		messageListMap.get(msisdn).add(convMessage);
+	}
 
 	public void saveMqttMessage(JSONObject jsonObj) throws JSONException
 	{
@@ -1621,6 +1813,10 @@ public class MqttMessagesManager
 		else if (HikeConstants.MqttMessageTypes.POPUP.equals(type))
 		{
 			savePopup(jsonObj);
+		}
+		else if(HikeConstants.MqttMessageTypes.BULK_MESSAGE.equals(type))
+		{
+			saveBulkMessage(jsonObj);
 		}
 	}
 
@@ -1809,8 +2005,16 @@ public class MqttMessagesManager
 			}
 		}
 		ConvMessage convMessage = new ConvMessage(jsonObj, conversation, context, false);
-		convDb.addConversationMessages(convMessage);
-
+		
+		if(isBulkMessage)
+		{
+			addToLists(msisdn, convMessage);
+		}
+		else
+		{
+			convDb.addConversationMessages(convMessage);
+		}
+		
 		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED || convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT
 				|| convMessage.getParticipantInfoState() == ParticipantInfoState.GROUP_END)

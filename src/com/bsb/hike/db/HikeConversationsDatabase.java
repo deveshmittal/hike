@@ -49,7 +49,6 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.ui.StatusUpdate;
-import com.bsb.hike.service.BulkMessageProcessor;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
@@ -649,19 +648,33 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			minStatusOrdinal = State.RECEIVED_UNREAD.ordinal();
 			maxStatusOrdinal = status;
 		}
-		
-		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.CONV_ID + " = (SELECT " + DBConstants.CONV_ID + " FROM "
-				+ DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.MSISDN + "=? ) AND " + DBConstants.MSG_STATUS + ">=" + minStatusOrdinal + " AND " + DBConstants.MSG_STATUS + "<" + maxStatusOrdinal + " AND " +  DBConstants.MESSAGE_ID + "<" + msgId,
-				new String[] { msisdn }, null, null, null);
-		
-		long[] ids = new long[c.getCount()];
-		int i = 0;
-		while (c.moveToNext())
+		Cursor c = null;
+		long[] ids = null;
+		try
 		{
-			long id = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
-			ids[i++] = id;
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.CONV_ID + " = (SELECT " + DBConstants.CONV_ID + " FROM "
+					+ DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.MSISDN + "=? ) AND " + DBConstants.MSG_STATUS + ">=" + minStatusOrdinal + " AND " + DBConstants.MSG_STATUS + "<" + maxStatusOrdinal + " AND " +  DBConstants.MESSAGE_ID + "<=" + msgId,
+					new String[] { msisdn }, null, null, null);
+
+			ids = new long[c.getCount()];
+			int i = 0;
+			while (c.moveToNext())
+			{
+				long id = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
+				ids[i++] = id;
+			}
 		}
-		updateBatch(ids, status, msisdn);
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		if(ids != null)
+		{
+			updateBatch(ids, status, msisdn);
+		}
 	}
 	public int updateBatch(long[] ids, int status, String msisdn)
 	{
@@ -685,21 +698,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	}
 	
 	
-	public void updateStatusBulk(Map<String, BulkMessageProcessor.Pair<Long, Long>> messageStatusMap)
+	public void updateStatusBulk(Map<String, Utils.PairModified<Long, Long>> messageStatusMap)
 	{
 
 		String msisdn;
-		mDb.beginTransaction();
-		for (Entry<String, BulkMessageProcessor.Pair<Long, Long>> entry : messageStatusMap.entrySet())
+		for (Entry<String, Utils.PairModified<Long, Long>> entry : messageStatusMap.entrySet())
 		{
 
 			msisdn = (String) entry.getKey();
-			BulkMessageProcessor.Pair<Long, Long> pair = entry.getValue();
+			Utils.PairModified<Long, Long> pair = entry.getValue();
 			setMessageState(msisdn, pair.getFirst(), State.SENT_DELIVERED_READ.ordinal());
 			setMessageState(msisdn, pair.getSecond(), State.SENT_DELIVERED.ordinal());
 		}
-		mDb.setTransactionSuccessful();
-		mDb.endTransaction();
 	}
 
 	public int executeUpdateMessageStatusStatement(String updateStatement, int status, String msisdn)
@@ -935,6 +945,85 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.endTransaction();
 
 		incrementUnreadCounter(convMessages.get(0).getMsisdn(), unreadMessageCount);
+	}
+	
+	public void addConversationsNew(List<ConvMessage> convMessages)
+	{
+		HashMap<String, Conversation> convesationMap = new HashMap<String, Conversation>();
+		Logger.d("bulkPacket", "adding conversation started");
+		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
+				+ DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
+				+ ", " + DBConstants.IS_HIKE_MESSAGE + " ) " + " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ? FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE "
+				+ DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN + "=?");
+
+		long msgId = -1;
+
+		int unreadMessageCount = 0;
+		for (ConvMessage conv : convMessages)
+		{
+		
+			if (Utils.shouldIncrementCounter(conv))
+			{
+				unreadMessageCount++;
+			};
+			String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
+			bindConversationInsert(insertStatement, conv);
+			
+			msgId = insertStatement.executeInsert();
+			addThumbnailStringToMetadata(conv.getMetadata(), thumbnailString);
+			/*
+			 * Represents we dont have any conversation made for this msisdn. Here we are also checking whether the message is a group message, If it is and the conversation does
+			 * not exist we do not add a conversation.
+			 */
+			if (msgId <= 0 && !Utils.isGroupConversation(conv.getMsisdn()))
+			{
+				Conversation conversation = addConversation(conv.getMsisdn(), !conv.isSMS(), null, null);
+				if (conversation != null)
+				{
+					conversation.addMessage(conv);
+				}
+				
+				bindConversationInsert(insertStatement, conv);
+				msgId = insertStatement.executeInsert();
+			
+				conv.setConversation(conversation);
+				assert (msgId >= 0);
+			}
+			else if (conv.getConversation() == null)
+			{
+				// conversation not set, retrieve it from db
+				Conversation conversation = null;
+				String msisdn = conv.getMsisdn();
+				if(convesationMap.get(msisdn) == null)
+				{
+					conversation = this.getConversationNew(msisdn, 0);
+					convesationMap.put(msisdn, conversation);
+				}
+				else
+				{
+					conversation = convesationMap.get(msisdn);
+				}
+				conv.setConversation(conversation);
+			}
+			conv.setMsgID(msgId);
+			ChatThread.addtoMessageMap(conv);
+
+			if (conv.isFileTransferMessage() && conv.getConversation() != null)
+			{
+				addSharedMedia(msgId, conv.getConversation().getConvId());
+			}
+		}
+		incrementUnreadCounter(convMessages.get(0).getMsisdn(), unreadMessageCount);
+		Logger.d("bulkPacket", "adding conversation returning");
+	}
+	
+	public void addLastConversations(List<ConvMessage> convMessages)
+	{
+		for (ConvMessage conv : convMessages)
+		{
+			ContentValues contentValues = getContentValueForConversationMessage(conv);
+			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { conv.getMsisdn() });
+		}
 	}
 
 	public void updateIsHikeMessageState(long id, boolean isHikeMessage)
@@ -1175,6 +1264,64 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				messages = getConversationThread(msisdn, convid, limit, conv, -1);
 			}
 			conv.setMessages(messages);
+			conv.setUnreadCount(unreadCount);
+
+			return conv;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+	
+	public Conversation getConversationNew(String msisdn, int limit)
+	{
+		Cursor c = null;
+		HikeUserDatabase huDb = null;
+		Conversation conv = null;
+		try
+		{
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT,
+					DBConstants.IS_STEALTH }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
+			if (!c.moveToFirst())
+			{
+				Logger.d(getClass().getSimpleName(), "Could not find db entry");
+				return null;
+			}
+
+			long convid = c.getInt(c.getColumnIndex(DBConstants.CONV_ID));
+			boolean onhike = c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0;
+			int unreadCount = c.getInt(c.getColumnIndex(DBConstants.UNREAD_COUNT));
+			boolean isStealth = c.getInt(c.getColumnIndex(DBConstants.IS_STEALTH)) != 0;
+
+			if (Utils.isGroupConversation(msisdn))
+			{
+				conv = getGroupConversation(msisdn, convid);
+				conv.setIsStealth(isStealth);
+			}
+			else
+			{
+				huDb = HikeUserDatabase.getInstance();
+
+				String name;
+				if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn))
+				{
+					name = HikeMessengerApp.hikeBotNamesMap.get(msisdn);
+					onhike = true;
+				}
+				else
+				{
+					ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn, false);
+					name = contactInfo.getName();
+					onhike |= contactInfo.isOnhike();
+				}
+				conv = new Conversation(msisdn, convid, name, onhike, isStealth);
+
+			}
+			
 			conv.setUnreadCount(unreadCount);
 
 			return conv;
