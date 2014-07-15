@@ -87,7 +87,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, GENDER, SCANNING_CONTACTS, PIN_VERIFIED
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, SCANNING_CONTACTS, PIN_VERIFIED
 	};
 
 	public class StateValue
@@ -122,10 +122,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	private Bitmap profilePicSmall;
 
 	public static boolean isAlreadyFetchingNumber = false;
-
-	private Birthday birthdate;
-
-	private Boolean isFemale;
 
 	private String userName;
 
@@ -180,25 +176,15 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		this.profilePicSmall = profilePic;
 	}
 
-	public void addBirthdate(Birthday birthdate)
-	{
-		this.birthdate = birthdate;
-	}
-
 	public void addUserName(String name)
 	{
 		this.userName = name;
 	}
 
-	
-	public void addGender(Boolean isFemale)
-	{
-		this.isFemale = isFemale;
-	}
-
 	@Override
 	protected Boolean doInBackground(Void... unused)
 	{
+		deletePreviouslySavedProfileImages();
 		Logger.e("SignupTask", "FETCHING NUMBER? " + isAlreadyFetchingNumber);
 		isPinError = false;
 		isRunning = true;
@@ -418,11 +404,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		if(userName != null)
 		{
-			publishProgress(new StateValue(State.GENDER, ""));
-			if(isFemale != null)
-			{
-				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
-			}
+			publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 		}
 
 		/* scan the addressbook */
@@ -508,24 +490,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				
-				if (isFemale == null)
-				{
-					/*
-					 * publishing this will cause the the Activity to ask the user for a name and signal us
-					 */
-					publishProgress(new StateValue(State.GENDER, ""));
-					synchronized (this)
-					{
-						this.wait();
-					}
-				}
-				
 				if(getDisplayChild() != SignupActivity.SCANNING_CONTACTS)
 				{
 					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 				}
 				publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
-				AccountUtils.setProfile(userName, birthdate, isFemale.booleanValue());
+				AccountUtils.setProfile(userName);
 			}
 			catch (InterruptedException e)
 			{
@@ -548,13 +518,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			this.data = null;
 			Editor editor = settings.edit();
 			editor.putString(HikeMessengerApp.NAME_SETTING, userName);
-			editor.putInt(HikeConstants.Extras.GENDER, isFemale ? 2 : 1);
-			if (birthdate != null)
-			{
-				editor.putInt(HikeMessengerApp.BIRTHDAY_DAY, birthdate.day);
-				editor.putInt(HikeMessengerApp.BIRTHDAY_MONTH, birthdate.month);
-				editor.putInt(HikeMessengerApp.BIRTHDAY_YEAR, birthdate.year);
-			}
 			/*
 			 * Setting these values as true for now. They will be reset on upgrades.
 			 */
@@ -671,14 +634,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 
-	public static SignupTask startTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
+	public static SignupTask startTask(Activity activity, String userName, Bitmap profilePicSmall)
 	{
 		getSignupTask(activity);
 		if (!signupTask.isRunning())
 		{
-			signupTask.addGender(isFemale);
 			signupTask.addUserName(userName);
-			signupTask.addBirthdate(birthday);
 			signupTask.addProfilePicPath(null, profilePicSmall);
 			/*
 			 * if we are on signupActivity we should not anymore try to
@@ -700,13 +661,28 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 	
-	public static SignupTask restartTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
+	public static SignupTask restartTask(Activity activity, String userName, Bitmap profilePicSmall)
 	{
 		if (signupTask != null && signupTask.isRunning())
 		{
 			signupTask.cancelTask();
 		}
-		startTask(activity, userName, isFemale, birthday, profilePicSmall);
+		startTask(activity, userName, profilePicSmall);
 		return signupTask;
 	}
+	
+    private void deletePreviouslySavedProfileImages()
+    {
+    	String dirPath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
+    	File dir = new File(dirPath);
+    	if (!dir.exists())
+    	{
+    		return;
+    	}
+    	for (File file : dir.listFiles())
+    	{
+    		file.delete();
+    	}
+    }
+
 }

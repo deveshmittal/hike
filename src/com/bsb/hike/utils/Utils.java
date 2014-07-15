@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.CharBuffer;
 import java.security.MessageDigest;
@@ -34,6 +35,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,6 +61,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
@@ -90,7 +93,6 @@ import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
-import android.provider.DocumentsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
@@ -1108,86 +1110,6 @@ public class Utils
 		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
 	}
 
-	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail)
-	{
-		Bitmap thumbnail = null;
-
-		int currentWidth = 0;
-		int currentHeight = 0;
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-
-		BitmapFactory.decodeFile(filePath, options);
-		currentHeight = options.outHeight;
-		currentWidth = options.outWidth;
-
-		if (dimensionLimit == -1)
-		{
-			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
-		}
-
-		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
-		options.inJustDecodeBounds = false;
-
-		thumbnail = BitmapFactory.decodeFile(filePath, options);
-		/*
-		 * Should only happen when the external storage does not have enough free space
-		 */
-		if (thumbnail == null)
-		{
-			return null;
-		}
-		if (makeSquareThumbnail)
-		{
-			return makeSquareThumbnail(thumbnail, dimensionLimit);
-		}
-
-		return thumbnail;
-	}
-
-	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail, boolean applyBitmapConfig)
-	{
-		Bitmap thumbnail = null;
-
-		int currentWidth = 0;
-		int currentHeight = 0;
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-
-		BitmapFactory.decodeFile(filePath, options);
-		currentHeight = options.outHeight;
-		currentWidth = options.outWidth;
-
-		if (dimensionLimit == -1)
-		{
-			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight : currentWidth));
-		}
-
-		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
-		options.inJustDecodeBounds = false;
-		if (applyBitmapConfig)
-		{
-			options.inPreferredConfig = Config.RGB_565;
-		}
-
-		thumbnail = BitmapFactory.decodeFile(filePath, options);
-		/*
-		 * Should only happen when the external storage does not have enough free space
-		 */
-		if (thumbnail == null)
-		{
-			return null;
-		}
-		if (makeSquareThumbnail)
-		{
-			return makeSquareThumbnail(thumbnail, dimensionLimit);
-		}
-
-		return thumbnail;
-	}
-
 	public static Bitmap getRotatedBitmap(String path, Bitmap bitmap)
 	{
 		if (bitmap  == null)
@@ -1280,7 +1202,16 @@ public class Utils
 	{
 		String filePath = null;
 		String[] proj = { MediaStore.Images.Media.DATA };
-		Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
+		Cursor cursor = null;
+		// The query can throw exception if is doesn't know the specified projections. This needs to be put in a try-catch block.
+		try
+		{
+			cursor = activity.managedQuery(contentUri, proj, null, null, null);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		if (cursor == null || cursor.getCount() == 0)
 		{
 			//return null;
@@ -1353,7 +1284,7 @@ public class Utils
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
 				String imageOrientation = Utils.getImageOrientation(srcFilePath);
-				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX,
+				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
 						Bitmap.Config.RGB_565, true, false);
 				tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 				// Temporary fix for when a user uploads a file through Picasa
@@ -1386,6 +1317,67 @@ public class Utils
 			src.close();
 			dest.close();
 
+			return true;
+		}
+		catch (FileNotFoundException e)
+		{
+			Logger.e("Utils", "File not found while copying", e);
+			return false;
+		}
+		catch (IOException e)
+		{
+			Logger.e("Utils", "Error while reading/writing/closing file", e);
+			return false;
+		}
+		catch (Exception ex)
+		{
+			Logger.e("Utils", "WTF Error while reading/writing/closing file", ex);
+			return false;
+		}
+	}
+	
+	public static boolean copyImage(String srcFilePath, String destFilePath, Context context)
+	{
+		try
+		{
+			InputStream src;
+			String imageOrientation = Utils.getImageOrientation(srcFilePath);
+			Bitmap tempBmp = null;
+			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
+			if (quality == 2)
+			{
+				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
+						Bitmap.Config.RGB_565, true, false);
+			}
+			else if (quality != 1)
+			{
+				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX,
+						Bitmap.Config.RGB_565, true, false);
+			}
+			tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
+			if (tempBmp != null)
+			{
+				byte[] fileBytes = BitmapUtils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG, 75);
+				tempBmp.recycle();
+				src = new ByteArrayInputStream(fileBytes);
+			}
+			else
+			{
+				src = new FileInputStream(new File(srcFilePath));
+			}
+			
+			OutputStream dest = new FileOutputStream(new File(destFilePath));
+
+			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
+			int len;
+
+			while ((len = src.read(buffer)) > 0)
+			{
+				dest.write(buffer, 0, len);
+			}
+			src.close();
+			dest.close();
 			return true;
 		}
 		catch (FileNotFoundException e)
@@ -2315,10 +2307,18 @@ public class Utils
 		sendDefaultSMSClientLogEvent(value);
 	}
 
-	public static void setSendUndeliveredSmsSetting(Context context, boolean value)
+	public static void setSendUndeliveredAlwaysAsSmsSetting(Context context, boolean value)
 	{
 		Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_SMS_PREF, value);
+		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, value);
+		editor.commit();
+	}
+	
+	public static void setSendUndeliveredAlwaysAsSmsSetting(Context context, boolean value, boolean nativeSms)
+	{
+		Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, value);
+		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, nativeSms);
 		editor.commit();
 	}
 
@@ -2752,19 +2752,29 @@ public class Utils
 		{
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 
-			String message = HikeFileType.getFileTypeMessage(context, hikeFile.getHikeFileType(), false) + ". " + AccountUtils.fileTransferBaseViewUrl + hikeFile.getFileKey();
-			return message;
+			switch (hikeFile.getHikeFileType())
+			{
+			case IMAGE:
+					return context.getString(R.string.send_sms_img_msg);
+			case VIDEO:
+				return context.getString(R.string.send_sms_video_msg);
+			case AUDIO:
+				return context.getString(R.string.send_sms_audio_msg);
+			case LOCATION:
+				return context.getString(R.string.send_sms_location_msg);
+			case CONTACT:
+				return context.getString(R.string.send_sms_contact_msg);
+			case AUDIO_RECORDING:
+				return context.getString(R.string.send_sms_audio_msg);
+
+			default:
+				return context.getString(R.string.send_sms_file_msg);
+			}
 
 		}
 		else if (convMessage.isStickerMessage())
 		{
-			Sticker sticker = convMessage.getMetadata().getSticker();
-
-			String stickerId = sticker.getStickerId();
-			String stickerUrlId = stickerId.substring(0, stickerId.indexOf("_"));
-
-			String message = context.getString(R.string.sent_sticker_sms, String.format(AccountUtils.stickersUrl, sticker.getCategory().categoryId.name(), stickerUrlId));
-			return message;
+			return context.getString(R.string.send_sms_sticker_msg);
 		}
 		return convMessage.getMessage();
 	}
@@ -3684,6 +3694,13 @@ public class Utils
 				dialog.dismiss();
 				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.SHOWN_ADD_FAVORITE_TIP, true);
 			}
+
+			@Override
+			public void onSucess(Dialog dialog)
+			{
+				// TODO Auto-generated method stub
+				
+			}
 		}, contactInfo.getFirstName());
 	}
 
@@ -4044,5 +4061,147 @@ public class Utils
 		{
 			this.r = r;
 		}
+	}
+
+	public static boolean isPackageInstalled(Context context, String packageName)
+	{
+		PackageManager pm = context.getPackageManager();
+		try
+		{
+			pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+			return true;
+		}
+		catch (NameNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public static void clearJar(Context c)
+	{
+		HashMap<URL, JarFile> jarCache = null;
+		try
+		{
+			Class<?> jarURLConnectionImplClass;
+			if (isHoneycombOrHigher())
+			{
+				jarURLConnectionImplClass = Class.forName("libcore.net.url.JarURLConnectionImpl");
+			}
+			else
+			{
+				jarURLConnectionImplClass = Class.forName("org.apache.harmony.luni.internal.net.www.protocol.jar.JarURLConnectionImpl");
+			}
+			final Field jarCacheField = jarURLConnectionImplClass.getDeclaredField("jarCache");
+			jarCacheField.setAccessible(true);
+			jarCache = (HashMap<URL, JarFile>) jarCacheField.get(null);
+		}
+		catch (Exception e)
+		{
+			Logger.e("clearJar", "Exception while getting jarCacheField : " + e);
+		}
+
+		if (jarCache != null)
+		{
+			try
+			{
+				for (final Iterator<Map.Entry<URL, JarFile>> iterator = jarCache.entrySet().iterator(); iterator.hasNext();)
+				{
+					final Map.Entry<URL, JarFile> e = iterator.next();
+					final URL url = e.getKey();
+					if (url.toString().endsWith(".apk") && url.toString().contains(c.getPackageName()))
+					{
+						Logger.i("clearJar", "Removing static hashmap entry for " + url);
+						try
+						{
+							final JarFile jarFile = e.getValue();
+							jarFile.close();
+							iterator.remove();
+						}
+						catch (Exception f)
+						{
+							Logger.e("clearJar", "Exception in removing hashmap entry for " + url, f);
+						}
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Logger.e("clearJar", "Exception when traversing through hashmap" + e);
+			}
+		}
+	}
+	
+	public static String combineInOneSmsString(Context context, boolean resetTimestamp, Collection<ConvMessage> convMessages, boolean isFreeHikeSms)
+	{
+		String combinedMessageString = "";
+		int count = 0;
+		for (ConvMessage convMessage : convMessages)
+		{
+			if (!convMessage.isSent())
+			{
+				break;
+			}
+			
+			if (resetTimestamp && convMessage.getState().ordinal() < State.SENT_CONFIRMED.ordinal())
+			{
+				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
+			}
+			
+			combinedMessageString += Utils.getMessageDisplayText(convMessage, context);
+			
+			if (++count >= HikeConstants.MAX_FALLBACK_NATIVE_SMS)
+			{
+				break;
+			}
+			
+			/*
+			 * Added line enters among messages
+			 */
+			if(count != convMessages.size())
+			{
+				combinedMessageString += "\n\n";
+			}
+		}
+		
+		if(isFreeHikeSms)
+		{
+			combinedMessageString += "\n\n"+"- "+context.getString(R.string.sent_by_hike);
+		}
+		
+		return combinedMessageString;
+	}
+	
+	// @GM
+	// The following methods returns the user readable size when passed the bytes in size
+	public static String getSizeForDisplay(int bytes)
+	{
+		if (bytes <= 0)
+			return ("");
+		if (bytes >= 1000 * 1024 *1024)
+		{
+			int gb = bytes / (1024 * 1024 * 1024);
+			int gbPoint = bytes % (1024 * 1024 * 1024);
+			gbPoint /= (1024 * 1024 * 1024);
+			return (Integer.toString(gb) + "." + Integer.toString(gbPoint) + " GB");
+		}
+		else if (bytes >= (1000 * 1024))
+		{
+			int mb = bytes / (1024 * 1024);
+			int mbPoint = bytes % (1024 * 1024);
+			mbPoint /= (1024 * 102);
+			return (Integer.toString(mb) + "." + Integer.toString(mbPoint) + " MB");
+		}
+		else if (bytes >= 1000)
+		{
+			int kb;
+			if (bytes < 1024) // To avoid showing "1000KB"
+				kb = bytes / 1000;
+			else
+				kb = bytes / 1024;
+			return (Integer.toString(kb) + " KB");
+		}
+		else
+			return (Integer.toString(bytes) + " B");
 	}
 }

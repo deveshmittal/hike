@@ -3,7 +3,7 @@
     android:id="@+id/time_status"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:gravity="center"
+    android:gravity="bottom"
     android:orientation="horizontal" >
 
     <com.bsb.hike.view.CustomFontTextView
@@ -19,6 +19,8 @@
         android:id="@+id/status"
         android:layout_width="21dp"
         android:layout_height="wrap_content"
+        android:src="@drawable/ic_tick"
+        android:layout_marginBottom="3dp"
         android:layout_marginLeft="3dp"
         android:visibility="gone" />
 

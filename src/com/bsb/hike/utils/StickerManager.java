@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -204,26 +205,6 @@ public class StickerManager
 				return "loveDownloadShown";
 			}
 		},
-		doggy
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.doggy;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_doggy;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "doggyDownloadShown";
-			}
-		},
 		bollywood
 		{
 			@Override
@@ -242,6 +223,26 @@ public class StickerManager
 			public String downloadPref()
 			{
 				return "bollywoodDownloadShown";
+			}
+		},
+		doggy
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.doggy;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_doggy;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "doggyDownloadShown";
 			}
 		},
 		rageface
@@ -282,6 +283,26 @@ public class StickerManager
 			public String downloadPref()
 			{
 				return "indianDownloadShown";
+			}
+		},
+		jelly
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.wicked_jellies;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_jelly;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "JellyDownloadShown";
 			}
 		},
 		sports
@@ -1085,6 +1106,55 @@ public class StickerManager
 		catch (Exception e)
 		{
 			e.printStackTrace();
+		}
+	}
+
+	public void deleteDuplicateStickers()
+	{
+		// for humanoid
+		String humanoidDir = getStickerDirectoryForCategoryId(context, StickerManager.StickerCategoryId.humanoid.name());
+		deleteDuplicateStickers(humanoidDir, LOCAL_STICKER_IDS_HUMANOID);
+		// for expressions
+		String expressionDir = getStickerDirectoryForCategoryId(context, StickerManager.StickerCategoryId.expressions.name());
+		deleteDuplicateStickers(expressionDir, LOCAL_STICKER_IDS_EXPRESSIONS);
+	}
+
+	public void deleteDuplicateStickers(String parentDir, String[] bundledFileNames)
+	{
+
+		HashSet<String> originalNames = new HashSet<String>(bundledFileNames.length);
+		for (String name : bundledFileNames)
+		{
+			originalNames.add(name);
+		}
+
+		deleteDuplicateFiles(originalNames, parentDir + File.separator + HikeConstants.SMALL_STICKER_ROOT);
+		deleteDuplicateFiles(originalNames, parentDir + File.separator + HikeConstants.LARGE_STICKER_ROOT);
+
+	}
+
+	public void deleteDuplicateFiles(HashSet<String> originalNames, String fileDir)
+	{
+		File dir = new File(fileDir);
+		String[] fileNames = null;
+		if (dir.exists() && dir.isDirectory())
+		{
+			fileNames = dir.list();
+		}
+		else
+		{
+			return;
+		}
+		for (String fileName : fileNames)
+		{
+			if (originalNames.contains(fileName))
+			{
+				File file = new File(fileDir, fileName);
+				if (file.exists())
+				{
+					file.delete();
+				}
+			}
 		}
 	}
 }

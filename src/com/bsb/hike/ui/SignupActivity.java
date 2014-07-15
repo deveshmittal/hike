@@ -13,7 +13,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Random;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -106,8 +105,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private ViewGroup nameLayout;
 
-	private ViewGroup genderLayout;
-
 	private ViewGroup scanningContactsLayout;
 
 	private TextView infoTxt;
@@ -128,15 +125,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private ImageView mIconView;
 
-	private TextView birthdayText;
-
-	private TextView maleText;
-
-	private TextView femaleText;
-
 	private ImageView profilePicCamIcon;
-
-	private TextView genderDesctribeText;
 
 	private Handler mHandler;
 
@@ -144,9 +133,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private boolean msisdnErrorDuringSignup = false;
 
-	public static final int SCANNING_CONTACTS = 4;
-
-	public static final int GENDER = 3;
+	public static final int SCANNING_CONTACTS = 3;
 
 	public static final int NAME = 2;
 
@@ -217,10 +204,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		public long timeLeft = 0;
 
 		public boolean fbConnected = false;
-
-		public Boolean isFemale = null;
-
-		public Birthday birthday = null;
 	}
 
 	@Override
@@ -238,7 +221,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		numLayout = (ViewGroup) findViewById(R.id.num_layout);
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
 		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
-		genderLayout = (ViewGroup) findViewById(R.id.gender_layout);
 		scanningContactsLayout = (ViewGroup) findViewById(R.id.scanning_contacts_layout);
 
 		Object o = getLastCustomNonConfigurationInstance();
@@ -293,9 +275,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				prepareLayoutForGettingName(savedInstanceState, false);
 				enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
 				break;
-			case GENDER:
-				prepareLayoutForGender(savedInstanceState);
-				break;
 			case SCANNING_CONTACTS:
 				prepareLayoutForScanning(savedInstanceState);
 				break;
@@ -308,7 +287,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				showErrorMsg();
 			}
-			mTask = SignupTask.startTask(this, mActivityState.userName, mActivityState.isFemale, mActivityState.birthday, mActivityState.profileBitmap);
+			mTask = SignupTask.startTask(this, mActivityState.userName, mActivityState.profileBitmap);
 		}
 		else
 		{
@@ -336,7 +315,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		int displayedChild = viewFlipper.getDisplayedChild();
 		switch (displayedChild)
 		{
-		case GENDER:
 		case SCANNING_CONTACTS:
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 			break;
@@ -387,10 +365,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			mActionBarTitle.setText(R.string.about_you);
 		}
-		else if (displayedChild == GENDER)
-		{
-			mActionBarTitle.setText(R.string.tell_us_more);
-		}
 		else if (displayedChild == SCANNING_CONTACTS)
 		{
 			mActionBarTitle.setText("");
@@ -417,7 +391,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 				Editor accountEditor = accountPrefs.edit();
 				accountEditor.putBoolean(HikeMessengerApp.JUST_SIGNED_UP, true);
-				accountEditor.putBoolean(HikeMessengerApp.FB_SIGNUP, true);
+				if (mActivityState != null)
+				{
+					accountEditor.putBoolean(HikeMessengerApp.FB_SIGNUP, mActivityState.fbConnected);
+				}
 				accountEditor.commit();
 
 				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -521,7 +498,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			loadingLayout.setVisibility(View.VISIBLE);
 		}
-		infoTxt.setVisibility(View.GONE);
+		if(infoTxt != null)
+		{
+			infoTxt.setVisibility(View.GONE);
+		}
 		toggleActionBarElementsEnable(false);
 		if (invalidNum != null)
 		{
@@ -615,22 +595,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				toggleActionBarElementsEnable(true);
 				invalidNum.setVisibility(View.VISIBLE);
 			}
-			else if (viewFlipper.getDisplayedChild() == GENDER)
-			{
-				if (mActivityState.isFemale != null)
-				{
-					mTask.addGender(mActivityState.isFemale);
-					mTask.addUserInput(mActivityState.isFemale.toString());
-					viewFlipper.setDisplayedChild(SCANNING_CONTACTS);
-					prepareLayoutForScanning(null);
-				}
-				else
-				{
-					Toast toast = Toast.makeText(this, "please select your gender", Toast.LENGTH_SHORT);
-					toast.setGravity(Gravity.CENTER, 0, 0);
-					toast.show();
-				}
-			}
 			else
 			{
 				final String input = enterEditText.getText().toString();
@@ -703,17 +667,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						Utils.hideSoftKeyboard(this, enterEditText);
 						mActivityState.userName = input;
 						mTask.addUserName(mActivityState.userName);
-						viewFlipper.setDisplayedChild(GENDER);
-						prepareLayoutForGender(null);
+						viewFlipper.setDisplayedChild(SCANNING_CONTACTS);
+						prepareLayoutForScanning(null);
 					}
 					mTask.addUserInput(input);
-					if (birthdayText != null && !TextUtils.isEmpty(birthdayText.getText().toString()))
-					{
-						Calendar calendar = Calendar.getInstance();
-						int currentYear = calendar.get(Calendar.YEAR);
-						mActivityState.birthday = new Birthday(0, 0, currentYear - Integer.valueOf(birthdayText.getText().toString()));
-						mTask.addBirthdate(mActivityState.birthday);
-					}
 				}
 			}
 		}
@@ -730,7 +687,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 		case R.id.name_layout:
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_name);
-			birthdayText = (TextView) layout.findViewById(R.id.birthday);
 			profilePicCamIcon = (ImageView) layout.findViewById(R.id.profile_cam);
 			break;
 		case R.id.num_layout:
@@ -746,8 +702,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			verifiedPin = layout.findViewById(R.id.verified_pin);
 			infoTxt.setVisibility(View.VISIBLE);
 			invalidPin.setVisibility(View.INVISIBLE);
-			break;
-		case R.id.gender_layout:
 			break;
 		}
 		infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
@@ -944,24 +898,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		nextBtnContainer.setVisibility(View.VISIBLE);
 	}
 
-	private void prepareLayoutForGender(Bundle savedInstanceState)
-	{
-		femaleText = (TextView) genderLayout.findViewById(R.id.female);
-		maleText = (TextView) genderLayout.findViewById(R.id.male);
-		genderDesctribeText = (TextView) genderLayout.findViewById(R.id.describe_txt);
-		if (savedInstanceState != null && savedInstanceState.containsKey(HikeConstants.Extras.GENDER))
-		{
-			mActivityState.isFemale = savedInstanceState.getBoolean(HikeConstants.Extras.GENDER);
-			selectGender(mActivityState.isFemale);
-		}
-		if (mActivityState.isFemale == null)
-		{
-			genderDesctribeText.setText("");
-		}
-		nextBtnContainer.setVisibility(View.VISIBLE);
-		setupActionBarTitle();
-	}
-
 	private void prepareLayoutForScanning(Bundle savedInstanceState)
 	{
 		infoTxt = (TextView) scanningContactsLayout.findViewById(R.id.txt_img1);
@@ -969,54 +905,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		loadingLayout = (ViewGroup) scanningContactsLayout.findViewById(R.id.loading_layout);
 		nextBtnContainer.setVisibility(View.GONE);
 		setupActionBarTitle();
-	}
-
-	public void onGenderClick(View v)
-	{
-		if (v.getId() == R.id.female)
-		{
-			if (mActivityState.isFemale != null && mActivityState.isFemale)
-			{
-				return;
-			}
-			mActivityState.isFemale = true;
-		}
-		else
-		{
-			if (mActivityState.isFemale != null && !mActivityState.isFemale)
-			{
-				return;
-			}
-			mActivityState.isFemale = false;
-		}
-
-		selectGender(mActivityState.isFemale);
-	}
-
-	private void selectGender(Boolean isFemale)
-	{
-		femaleText.setSelected(mActivityState.isFemale);
-		maleText.setSelected(!mActivityState.isFemale);
-
-		setGenderDescribeRandomText(mActivityState.isFemale);
-	}
-
-	private void setGenderDescribeRandomText(boolean isFemale)
-	{
-		int size = 0;
-		int describeStringRes;
-		Random random = new Random();
-		if (isFemale)
-		{
-			size = HikeConstants.FEMALE_SELECTED_STRINGS.length;
-			describeStringRes = HikeConstants.FEMALE_SELECTED_STRINGS[random.nextInt(size)];
-		}
-		else
-		{
-			size = HikeConstants.MALE_SELECTED_STRINGS.length;
-			describeStringRes = HikeConstants.MALE_SELECTED_STRINGS[random.nextInt(size)];
-		}
-		genderDesctribeText.setText(describeStringRes);
 	}
 
 	private void resetViewFlipper()
@@ -1036,10 +924,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		mTask = SignupTask.restartTask(this);
 	}
 
-	private void restartTask(String userName, Boolean isFemale, Birthday birthday)
+	private void restartTask(String userName)
 	{
 		resetViewFlipper();
-		mTask = SignupTask.restartTask(this, userName, isFemale, birthday, mActivityState.profileBitmap);
+		mTask = SignupTask.restartTask(this, userName, mActivityState.profileBitmap);
 	}
 
 	private void showErrorMsg()
@@ -1091,7 +979,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 							}
 						}, 100);
 					}
-					restartTask(mActivityState.userName, mActivityState.isFemale, mActivityState.birthday);
+					restartTask(mActivityState.userName);
 
 				}
 			}
@@ -1148,10 +1036,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		if (viewFlipper.getDisplayedChild() == NUMBER)
 		{
 			outState.putString(HikeConstants.Extras.COUNTRY_CODE, countryPicker.getText().toString());
-		}
-		if (viewFlipper.getDisplayedChild() == GENDER && mActivityState.isFemale != null)
-		{
-			outState.putBoolean(HikeConstants.Extras.GENDER, mActivityState.isFemale);
 		}
 		super.onSaveInstanceState(outState);
 	}
@@ -1293,13 +1177,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				prepareLayoutForGettingName(null, true);
 			}
 			break;
-		case GENDER:
-			if (TextUtils.isEmpty(value))
-			{
-				prepareLayoutForGender(null);
-				viewFlipper.setDisplayedChild(GENDER);
-			}
-			break;
 		case SCANNING_CONTACTS:
 			if (TextUtils.isEmpty(value) && viewFlipper.getDisplayedChild() != SCANNING_CONTACTS)
 			{
@@ -1363,22 +1240,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		if ((actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
 				&& !TextUtils.isEmpty(enterEditText.getText().toString().trim()) && (loadingLayout == null || loadingLayout.getVisibility() != View.VISIBLE))
 		{
-			if (viewFlipper.getDisplayedChild() == NAME)
-			{
-				if (enterEditText.isFocused())
-				{
-					birthdayText.requestFocus();
-				}
-				else
-				{
-					Utils.hideSoftKeyboard(this, enterEditText);
-				}
-			}
-			else
-			{
 				submitClicked();
 				Utils.hideSoftKeyboard(this, enterEditText);
-			}
 		}
 		return true;
 	}
@@ -1489,38 +1352,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 						String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
 						String fileName = Utils.getTempProfileImageFileName(accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, ""));
-
-						try
-						{
-							String gender = (String) user.getProperty("gender");
-
-							mActivityState.isFemale = "female".equalsIgnoreCase(gender);
-						}
-						catch (Exception e)
-						{
-							Logger.w(getClass().getSimpleName(), "Exception while fetching gender", e);
-						}
-						try
-						{
-							String birthdayString = user.getBirthday();
-							if (!TextUtils.isEmpty(birthdayString))
-							{
-								Date date = new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH).parse(user.getBirthday());
-								if (date.compareTo(Calendar.getInstance().getTime()) <= 0)
-								{
-									Calendar calendar = Calendar.getInstance();
-									calendar.setTime(date);
-									mActivityState.birthday = new Birthday(calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR));
-									mTask.addBirthdate(mActivityState.birthday);
-									birthdayText.setText(String.valueOf(Calendar.getInstance().get(Calendar.YEAR) - mActivityState.birthday.year));
-								}
-							}
-
-						}
-						catch (Exception e)
-						{
-							Logger.w(getClass().getSimpleName(), "Exception while fetching birthday", e);
-						}
 
 						final File destFile = new File(directory, fileName);
 						downloadImage(destFile, Uri.parse(fbProfileUrl), new ImageDownloadResult()

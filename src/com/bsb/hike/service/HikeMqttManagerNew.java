@@ -15,6 +15,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
+import org.eclipse.paho.client.mqttv3.IMqttActionListenerNew;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -356,7 +357,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		context.registerReceiver(this, filter);
 		LocalBroadcastManager.getInstance(context).registerReceiver(this, filter);
 		setServerUris();
-		mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
+		//mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
 	}
 
 	private boolean isNetworkAvailable()
@@ -1025,7 +1026,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			 * String.format("Inflight msgs : %d , MaxInflight count : %d .... Waiting for sometime", mqtt.getInflightMessages(), mqtt.getMaxflightMessages())); Thread.sleep(30); }
 			 * catch (InterruptedException e) { // TODO Auto-generated catch block e.printStackTrace(); } }
 			 */
-			mqtt.publish(this.topic + HikeConstants.PUBLISH_TOPIC, packet.getMessage(), qos, false, packet, new IMqttActionListener()
+			mqtt.publish(this.topic + HikeConstants.PUBLISH_TOPIC, packet.getMessage(), qos, false, packet, new IMqttActionListenerNew()
 			{
 				@Override
 				public void onSuccess(IMqttToken arg0)
@@ -1041,7 +1042,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 							{
 								Long msgId = packet.getMsgId();
 								Logger.d(TAG, "Recieved S status for msg with id : " + msgId);
-								HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
+								//HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
 							}
 						}
 						if (haveUnsentMessages.get())
@@ -1062,6 +1063,18 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					Logger.e(TAG, "Message delivery failed for : " + arg0.getMessageId() + ", exception : " + arg1.getMessage());
 					haveUnsentMessages.set(true);
 					connectOnMqttThread();
+				}
+
+				@Override
+				public void notifyWrittenOnSocket(IMqttToken asyncActionToken)
+				{
+					HikePacket packet = (HikePacket) asyncActionToken.getUserContext();
+					if (packet.getMsgId() > 0)
+					{
+						Long msgId = packet.getMsgId();
+						Logger.d(TAG, "Socket written success for msg with id : " + msgId);
+						HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
+					}
 				}
 			});
 		}

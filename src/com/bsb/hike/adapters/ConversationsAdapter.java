@@ -6,6 +6,9 @@ import java.util.Set;
 import org.json.JSONArray;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.CountDownTimer;
 import android.text.Html;
 import android.text.TextUtils;
@@ -35,10 +38,17 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.ui.HikeListActivity;
+import com.bsb.hike.ui.PeopleActivity;
+import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.StatusUpdate;
+import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
+import com.google.android.gms.internal.co;
+import com.google.android.gms.internal.ed;
 
 public class ConversationsAdapter extends BaseAdapter
 {
@@ -63,7 +73,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private enum ViewType
 	{
-		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP, WELCOME_HIKE_TIP, START_NEW_CHAT_TIP, STEALTH_UNREAD_TIP
+		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP, WELCOME_HIKE_TIP, START_NEW_CHAT_TIP, STEALTH_UNREAD_TIP, ATOMIC_PROFILE_PIC_TIP, ATOMIC_FAVOURITE_TIP, ATOMIC_INVITE_TIP, ATOMIC_STATUS_TIP, ATOMIC_INFO_TIP
 	}
 
 	private class ViewHolder
@@ -149,7 +159,18 @@ public class ConversationsAdapter extends BaseAdapter
 			case ConversationTip.START_NEW_CHAT_TIP:
 				return ViewType.START_NEW_CHAT_TIP.ordinal();
 			case ConversationTip.STEALTH_UNREAD_TIP:
-				return ViewType.STEALTH_UNREAD_TIP.ordinal();	
+				return ViewType.STEALTH_UNREAD_TIP.ordinal();
+			case ConversationTip.ATOMIC_PROFILE_PIC_TIP:
+				return ViewType.ATOMIC_PROFILE_PIC_TIP.ordinal();
+			case ConversationTip.ATOMIC_FAVOURTITES_TIP:
+				return ViewType.ATOMIC_FAVOURITE_TIP.ordinal();
+			case ConversationTip.ATOMIC_INVITE_TIP:
+				return ViewType.ATOMIC_INVITE_TIP.ordinal();
+			case ConversationTip.ATOMIC_STATUS_TIP:
+				return ViewType.ATOMIC_STATUS_TIP.ordinal();
+			case ConversationTip.ATOMIC_INFO_TIP:
+				return ViewType.ATOMIC_INFO_TIP.ordinal();
+
 			}
 		}
 		return ViewType.CONVERSATION.ordinal();
@@ -193,7 +214,7 @@ public class ConversationsAdapter extends BaseAdapter
 				viewHolder.closeTip = v.findViewById(R.id.close_tip);
 				break;	
 			case START_NEW_CHAT_TIP:
-				v = inflater.inflate(R.layout.start_new_chat_tip, parent, false);
+				v = inflater.inflate(R.layout.tip_middle_arrow, parent, false);
 				viewHolder.headerText = (TextView) v.findViewById(R.id.tip_header);
 				viewHolder.subText = (TextView) v.findViewById(R.id.tip_msg);
 				viewHolder.closeTip = v.findViewById(R.id.close_tip);
@@ -204,7 +225,19 @@ public class ConversationsAdapter extends BaseAdapter
 				viewHolder.subText = (TextView) v.findViewById(R.id.tip_msg);
 				viewHolder.closeTip = v.findViewById(R.id.close_tip);
 				viewHolder.parent = v.findViewById(R.id.all_content);
-				break;	
+				break;
+			case ATOMIC_PROFILE_PIC_TIP:
+			case ATOMIC_FAVOURITE_TIP:
+			case ATOMIC_INVITE_TIP:
+			case ATOMIC_STATUS_TIP:
+			case ATOMIC_INFO_TIP:
+				v = inflater.inflate(R.layout.tip_left_arrow, parent, false);
+				viewHolder.avatar = (ImageView) v.findViewById(R.id.arrow_pointer);
+				viewHolder.headerText = (TextView) v.findViewById(R.id.tip_header);
+				viewHolder.subText = (TextView) v.findViewById(R.id.tip_msg);
+				viewHolder.closeTip = v.findViewById(R.id.close_tip);
+				viewHolder.parent = v.findViewById(R.id.all_content);
+				break;
 			default:
 				break;
 			}
@@ -346,6 +379,66 @@ public class ConversationsAdapter extends BaseAdapter
 			});
 			return v;
 		}
+		else if (viewType == ViewType.ATOMIC_PROFILE_PIC_TIP || viewType == ViewType.ATOMIC_FAVOURITE_TIP || viewType == ViewType.ATOMIC_INVITE_TIP
+				|| viewType == ViewType.ATOMIC_STATUS_TIP || viewType == ViewType.ATOMIC_INFO_TIP)
+		{
+			HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(context);
+			String headerTxt = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER_MAIN, "");
+			String message = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_MESSAGE_MAIN, "");
+			viewHolder.headerText.setText(headerTxt);
+			viewHolder.subText.setText(message);
+			viewHolder.closeTip.setTag(position);
+			boolean clickParentEnabled = true;
+			if (viewType == ViewType.ATOMIC_PROFILE_PIC_TIP)
+			{
+				viewHolder.avatar.setImageResource(R.drawable.ic_profile);
+			}
+			else if (viewType == ViewType.ATOMIC_FAVOURITE_TIP)
+			{
+				viewHolder.avatar.setImageResource(R.drawable.ic_favorites);
+			}
+			else if (viewType == ViewType.ATOMIC_INVITE_TIP)
+			{
+				viewHolder.avatar.setImageResource(R.drawable.ic_rewards);
+			}
+			else if (viewType == ViewType.ATOMIC_STATUS_TIP)
+			{
+				viewHolder.avatar.setImageResource(R.drawable.ic_status_tip);
+			}
+			else if (viewType == ViewType.ATOMIC_INFO_TIP)
+			{
+				clickParentEnabled = false;
+				viewHolder.avatar.setImageResource(R.drawable.ic_information);
+			}
+			viewHolder.closeTip.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					Logger.i("tip", "on cross click ");
+					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
+					// make sure it is on 0 position
+					conversationList.remove((int) ((Integer) v.getTag()));
+					notifyDataSetChanged();
+				}
+			});
+			if (clickParentEnabled)
+			{
+				viewHolder.parent.setTag(position);
+				viewHolder.parent.setOnClickListener(new OnClickListener()
+				{
+
+					@Override
+					public void onClick(View v)
+					{
+						Integer position = (Integer) v.getTag();
+						resetAtomicPopUpKey(position);
+					}
+				});
+			}
+			return v;
+		}
 
 		viewHolder.msisdn = conversation.getMsisdn();
 
@@ -369,6 +462,34 @@ public class ConversationsAdapter extends BaseAdapter
 		updateViewsRelatedToAvatar(v, conversation);
 
 		return v;
+	}
+
+	private void resetAtomicPopUpKey(int position)
+	{
+		Conversation con = conversationList.get(position);
+		if (con instanceof ConversationTip)
+		{
+			ConversationTip tip = (ConversationTip) con;
+			switch (tip.getTipType())
+			{
+			case ConversationTip.ATOMIC_FAVOURTITES_TIP:
+				context.startActivity(new Intent(context, PeopleActivity.class));
+				break;
+			case ConversationTip.ATOMIC_INVITE_TIP:
+				context.startActivity(new Intent(context, TellAFriend.class));
+				break;
+			case ConversationTip.ATOMIC_PROFILE_PIC_TIP:
+				context.startActivity(new Intent(context, ProfileActivity.class));
+				break;
+			case ConversationTip.ATOMIC_STATUS_TIP:
+				context.startActivity(new Intent(context, StatusUpdate.class));
+				break;
+			}
+			conversationList.remove(position);
+			notifyDataSetChanged();
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
+		}
+
 	}
 
 	public void updateViewsRelatedToName(View parentView, Conversation conversation)
@@ -433,7 +554,7 @@ public class ConversationsAdapter extends BaseAdapter
 		TextView messageView = viewHolder.subText;
 
 		CharSequence markedUp = getConversationText(conversation, message);
-		
+
 		messageView.setVisibility(View.VISIBLE);
 		messageView.setText(markedUp);
 		TextView tsView = viewHolder.timeStamp;

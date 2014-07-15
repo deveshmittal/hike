@@ -392,10 +392,18 @@ public class HikeConstants
 	public static final String SEND_UNDELIVERED_AS_NATIVE_SMS_PREF = "sendUndeliveredAsNativeSmsPref";
 
 	public static final String LAST_SEEN_PREF = "lastSeenPref";
+	
+	public static final String PROFILE_PIC_PREF = "profilePicPref";
 
 	public static final String CHAT_BG_NOTIFICATION_PREF = "chatBgNotificationPref";
 
 	public static final String RESET_STEALTH_PREF = "resetStealthPref";
+	
+	public static final String CHANGE_STEALTH_PASSCODE = "changeStealthPasscode";
+
+	public static final String SEND_UNDELIVERED_AS_NATIVE_PREF = "sendUndeliveredAsNativePref";
+
+	public static final String SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF = "sendUndeliveredAlwaysAsSmsPref";
 
 	public static final String REQUEST_DP = "rdp";
 
@@ -422,6 +430,10 @@ public class HikeConstants
 	public static final String WF_AUTO_DOWNLOAD_AUDIO_PREF = "wfAutoDownloadAudioPref";
 
 	public static final String WF_AUTO_DOWNLOAD_VIDEO_PREF = "wfAutoDownloadVideoPref";
+	
+	public static final String IMAGE_QUALITY = "imageQuality";
+	
+	public static final String REMEMBER_IMAGE_CHOICE = "rememberImageChoice";
 
 	public static final String HIKEBOT = "TD-HIKE";
 
@@ -434,6 +446,8 @@ public class HikeConstants
 	public static final String FTUE_GAMING_MSISDN = "+hike2+";
 
 	public static final String FTUE_HIKE_DAILY = "+hike3+";
+	
+	public static final String FTUE_HIKE_SUPPORT = "+hike4+";
 
 	public static final String UNLINK_PREF = "unlinkAccount";
 
@@ -494,6 +508,8 @@ public class HikeConstants
 	public static final String IS_TYPING = "is typing...";
 
 	public static final String NEW_GROUP = "new_group";
+	
+	public static final String AVATAR = "avatar";
 
 	/* Constant used to name the preference file which saves the drafts */
 	public static final String DRAFT_SETTING = "draftSetting";
@@ -560,7 +576,7 @@ public class HikeConstants
 
 	public static final int MAX_CHAR_IN_NAME = 20;
 
-	public static final int MAX_CONTACTS_IN_GROUP = 50;
+	public static final int MAX_CONTACTS_IN_GROUP = 100;
 
 	public static final int MAX_SMS_CONTACTS_IN_GROUP = MAX_CONTACTS_IN_GROUP;
 
@@ -598,7 +614,9 @@ public class HikeConstants
 
 	public static final int MAX_DIMENSION_FULL_SIZE_PROFILE_PX = 500;
 
-	public static final int MAX_DIMENSION_FULL_SIZE_PX = 800;
+	public static final int MAX_DIMENSION_MEDIUM_FULL_SIZE_PX = 800;
+	
+	public static final int MAX_DIMENSION_LOW_FULL_SIZE_PX = 600;
 
 	public static final int INITIAL_PROGRESS = 5;
 
@@ -874,6 +892,8 @@ public class HikeConstants
 		public static final int CREATE_LOCK_PATTERN = 4002;
 
 		public static final int CONFIRM_LOCK_PATTERN = 4003;
+		
+		public static final int CONFIRM_AND_ENTER_NEW_PASSWORD = 4004;
 	}
 
 	public static final class Extras
@@ -1170,6 +1190,16 @@ public class HikeConstants
 		
 		public static final String STEALTH_PUSH_BODY = "stleathPushBody";
 		
+		public static final String OFFLINE_PUSH_KEY = "failed";
+		
+		public static final String OFFLINE_MSISDNS = "msisdns";
+
+		public static final String STEALTH_PASS_RESET = "stealthPasswordReset";
+
+		public static final String IS_RESET_PASS = "isResetStealthPasswordFlow";
+		
+		public static final String HAS_TIP = "hasTip";
+		
 	}
 
 	public static final class LogEvent
@@ -1400,11 +1430,26 @@ public class HikeConstants
 		public static final String FTUE_CARD_SEEL_ALL_CLICKED = "ftueCardSeeAllClicked";
 
 		public static final String FTUE_FAV_CARD_SEEL_ALL_CLICKED = "ftueFavCardSeeAllClicked";
+
+		public static final String FIRST_OFFLINE_TIP_CLICKED = "firstOfflineTipClicked";
+		
+		public static final String SECOND_OFFLINE_TIP_CLICKED = "secondOfflineTipClicked";
+
+		public static final String SMS_POPUP_ALWAYS_CLICKED = "smsPopupAlwaysClicked";
+
+		public static final String SMS_POPUP_JUST_ONCE_CLICKED = "smsPopupJustOnceClicked";
+
+		public static final String SMS_POPUP_REGULAR_CHECKED = "smsPopupRegularChecked";
 		
 		public static final String FTUE_CARD_LAST_SEEN_CLICKED = "ftueCardLastSeenClicked";
 
-		public static final String FTUE_CARD_HIDDEN_MODE_CLICKED = "ftueCardHiddenModeClicked";
+		public static final String FTUE_CARD_GROUP_CLICKED = "ftueCardGroupClicked";
 
+		public static final String FTUE_CARD_HIDDEN_MODE_CLICKED = "ftueCardHiddenModeClicked";
+		
+		public static final String WATS_APP_INVITE = "inv_wa";
+
+		public static final String FTUE_CARD_INVITE_CLICKED = "ftueCardInviteClicked";
 	}
 
 	public static final class MqttMessageTypes
@@ -1517,6 +1562,8 @@ public class HikeConstants
 		
 		public static final String BULK_MESSAGE = "bm";
 
+		public static final String REMOVE_PIC = "icr";
+
 	}
 
 	public static final class SMSNative
@@ -1595,4 +1642,14 @@ public class HikeConstants
 	public static final long[] LONG_VIB_PATTERN = new long[] { 0, 1000 };
 
 	public static final int FTUE_HIKE_CONTACT_MIN_LIMIT = 3;
+
+	public static final String PACKAGE_WATSAPP = "com.whatsapp";
+
+	public static final long IMAGE_SIZE_SMALL = 50 * 1024;
+	
+	public static final long IMAGE_SIZE_MEDIUM = 80 * 1024;
+
+	public static final String WATSAPP_INVITE_MESSAGE_KEY = "wa_msg";
+
+	public static final String WATSAPP_INVITE_ENABLED = "i_wa";
 }
