@@ -39,7 +39,7 @@ public class TransientCache extends ContactsCache
 	private final Lock writeLock = readWriteLockTrans.writeLock();
 
 	/**
-	 * 
+	 * Initializes all the transient maps
 	 */
 	TransientCache(HikeUserDatabase db)
 	{
@@ -50,7 +50,7 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * get contact info from memory. Returns null if not found in memory
+	 * get contact info from memory. Returns null if not found in memory. This implementation is thread safe.
 	 * 
 	 * @param key
 	 * @return
@@ -76,7 +76,10 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * inserts contact in saved contacts map. Make sure that it is not already in memory , we are setting reference count to 1 here
+	 * inserts contact in {@link #savedContacts}.
+	 * <p>
+	 * Make sure that it is not already in memory , we are setting reference count to one here
+	 * </p>
 	 * 
 	 * @param contact
 	 *            contactinfo to put in map
@@ -96,7 +99,10 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * inserts contact in unsaved contacts map. Make sure that it is not already in memory , we are setting reference count to 1 here
+	 * inserts contact in {@link #unsavedContacts}.
+	 * <p>
+	 * Make sure that it is not already in memory , we are setting reference count to one here
+	 * </p>
 	 * 
 	 * @param contact
 	 *            contactinfo to put in map
@@ -118,7 +124,7 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * Inserts the map of msisdn and <code>GroupParticipant</code> into {@link groupParticipants} with <code>grpId</code> as key.
+	 * Inserts the map of msisdn and <code>GroupParticipant</code> into {@link #groupParticipants} with <code>grpId</code> as key.
 	 * 
 	 * @param grpId
 	 * @param groupParticipantsMap
@@ -231,6 +237,12 @@ public class TransientCache extends ContactsCache
 		}
 	}
 
+	/**
+	 * Returns the list of all the contacts sorted by their names. If boolean {@link #allContactsLoaded} is true then all the contacts are retrieved from {@link #savedContacts} and
+	 * {@link #unsavedContacts}.
+	 * 
+	 * @return
+	 */
 	List<ContactInfo> getAllContacts()
 	{
 		if (!allContactsLoaded)
@@ -262,6 +274,7 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
+	 * This method returns the name of contact using <code>msisdn</code> parameter.
 	 * 
 	 * @param msisdn
 	 * @return
@@ -275,6 +288,7 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
+	 * Sets the name for a unsaved contact in {@link #unsavedContacts} contact tuple field.
 	 * 
 	 * @param msisdn
 	 * @param name
@@ -289,7 +303,7 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * This function will load all the contacts from DB into transient storage. Contacts which are in persistence map will not be loaded into it
+	 * This function will load all the contacts from DB into transient storage. Contacts which are in persistence map will not be loaded into it.
 	 */
 	void loadMemory()
 	{
@@ -728,8 +742,8 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * This method is used to get group Participants of a particular group specified by <code>groupId</code>. First {@link groupParticipants} is checked if they are loaded in
-	 * memory or not , if not then database query is executed and participants are put in the cache {@link groupParticipants} map.
+	 * This method is used to get group Participants of a particular group specified by <code>groupId</code>. First {@link #groupParticipants} is checked if they are loaded in
+	 * memory or not , if not then database query is executed and participants are put in the cache {@link #groupParticipants} map.
 	 * 
 	 * @param groupId
 	 * @param activeOnly
