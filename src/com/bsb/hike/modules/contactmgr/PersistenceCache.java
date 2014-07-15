@@ -536,6 +536,7 @@ class PersistenceCache extends ContactsCache
 				readLock.unlock();
 			}
 
+			List<String> msisdns = new ArrayList<String>();
 			if (null != nameAndLastMsisdns)
 			{
 				ConcurrentLinkedQueue<String> grpMsisdns = nameAndLastMsisdns.second;
@@ -560,6 +561,30 @@ class PersistenceCache extends ContactsCache
 							{
 								removeFromCache(msisdn, false);
 							}
+							else
+							{
+								// if contact is in group map then increase ref count by 1
+								ContactTuple tuple = groupContactsPersistence.get(msisdn);
+								if (null != tuple)
+								{
+									tuple.setReferenceCount(tuple.getReferenceCount() + 1);
+								}
+								else
+								{
+									// if contact is in convsMap then insert in groupMap with ref count 1
+									ContactInfo contact = convsContactsPersistence.get(msisdn);
+									if (null == contact)
+									{
+										// get contact from db
+										// add to a list
+										msisdns.add(msisdn);
+									}
+									else
+									{
+										insertContact(contact, null);
+									}
+								}
+							}
 						}
 					}
 					finally
@@ -567,6 +592,10 @@ class PersistenceCache extends ContactsCache
 						writeLock.unlock();
 					}
 				}
+
+				// contacts loaded from databse query , insert in group map with ref count 1 (done by putInCache method)
+				putInCache(msisdns, false);
+
 				// lock is not needed here because grpMsisdns is concurrentLinkedQueue
 				grpMsisdns.clear();
 				grpMsisdns.addAll(currentGroupMsisdns);
