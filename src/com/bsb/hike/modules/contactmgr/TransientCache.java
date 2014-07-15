@@ -756,4 +756,35 @@ public class TransientCache extends ContactsCache
 
 		return HikeConversationsDatabase.getInstance().getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly);
 	}
+
+	/**
+	 * This is used for cases when we getGroupParticipants and if found in transient cache we have to increase the reference count by one.
+	 * <p>
+	 * Since for getting contact info for group participants , we have to check in both persistence and transient cache .These things are done in
+	 * {@link ContactManager#getGroupParticipants(String, boolean, boolean, boolean)} where if contact is found in transient cache then it's reference count should be incremented.
+	 * </p>
+	 * 
+	 * @param msisdn
+	 */
+	void incrementRefCount(String msisdn)
+	{
+		writeLock.lock();
+		try
+		{
+			ContactTuple tuple = savedContacts.get(msisdn);
+			if (null == tuple)
+			{
+				tuple = unsavedContacts.get(msisdn);
+			}
+
+			if (null != tuple)
+			{
+				tuple.setReferenceCount(tuple.getReferenceCount() + 1);
+			}
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
 }

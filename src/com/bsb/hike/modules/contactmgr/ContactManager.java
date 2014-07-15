@@ -619,7 +619,39 @@ public class ContactManager implements ITransientCache
 			// at least one msisdn is required to run this in query
 			if (fetchParticipants && allMsisdns.size() > 0)
 			{
-				List<ContactInfo> list = getContact(allMsisdns, true, false);
+				List<ContactInfo> list = new ArrayList<ContactInfo>();
+				List<String> msisdnsDB = new ArrayList<String>();
+				
+				// traverse all msisdns if found in transient memory increment ref count by one
+				for (String ms : allMsisdns)
+				{
+					ContactInfo contact = transientCache.getContact(ms);
+					if (null != contact)
+					{
+						// increment ref count
+						transientCache.incrementRefCount(ms);
+						list.add(contact);
+					}
+					else
+					{
+						contact = persistenceCache.getContact(ms);
+						if (null != contact)
+						{
+							if (null == contact.getName())
+								transientCache.insertContact(contact, null);
+							else
+								transientCache.insertContact(contact);
+							list.add(contact);
+						}
+						else
+						{
+							msisdnsDB.add(ms);
+						}
+					}
+				}
+
+				list.addAll(transientCache.putInCache(msisdnsDB));
+				
 				for (ContactInfo contactInfo : list)
 				{
 					if (contactInfo.getName() == null)
