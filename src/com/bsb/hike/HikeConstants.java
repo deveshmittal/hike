@@ -404,6 +404,8 @@ public class HikeConstants
 	public static final String HEADER = "h";
 	
 	public static final String BODY = "b";
+	
+	public static final String MESSAGES = "msgs";
 
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
@@ -1512,6 +1514,8 @@ public class HikeConstants
 		public static final String TOGGLE_STEALTH = "ts";
 		
 		public static final String POPUP = "popup"; //this is a generic popup type
+		
+		public static final String BULK_MESSAGE = "bm";
 
 	}
 
