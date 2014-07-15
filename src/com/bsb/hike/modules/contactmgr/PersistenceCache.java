@@ -19,7 +19,7 @@ import com.bsb.hike.utils.Utils;
 class PersistenceCache extends ContactsCache
 {
 	private HikeUserDatabase hDb;
-	
+
 	// Memory persistence for all one to one conversation contacts that should always be loaded
 	private Map<String, ContactInfo> convsContactsPersistence;
 
@@ -36,7 +36,7 @@ class PersistenceCache extends ContactsCache
 	private final Lock writeLock = readWriteLock.writeLock();
 
 	/**
-	 * Initializes all the maps and calls {@link loadMemory} which fills all the map when HikeService is started
+	 * Initializes all the maps and calls {@link #loadMemory} which fills all the map when HikeService is started
 	 */
 	PersistenceCache(HikeUserDatabase db)
 	{
@@ -77,7 +77,7 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * Thread safe method that inserts contact in {@link convsContactsPersistence}.
+	 * Thread safe method that inserts contact in {@link #convsContactsPersistence}.
 	 * 
 	 * @param contact
 	 */
@@ -95,8 +95,10 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * inserts contact in {@link groupContactsPersistence}. Make sure that it is not already in memory , we are setting reference count to one here.This implementation is thread
-	 * safe.
+	 * Inserts contact in {@link #groupContactsPersistence}.
+	 * <p>
+	 * Make sure that it is not already in memory , we are setting reference count to one here.This implementation is thread safe.
+	 * </p>
 	 * 
 	 * @param contact
 	 * @param name
@@ -117,7 +119,7 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * Removes the contact from {@link convsContactsPersistence}.
+	 * Removes the contact from {@link #convsContactsPersistence}.
 	 * 
 	 * @param contact
 	 */
@@ -127,7 +129,7 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * Removes the contact the {@link convsContactsPersistence} OR decrements the reference count in {@link groupContactsPersistence} , if reference count becomes 0 then removes
+	 * Removes the contact the {@link #convsContactsPersistence} OR decrements the reference count in {@link #groupContactsPersistence} , if reference count becomes 0 then removes
 	 * from this map Depending on whether it is one to one conversation or group conversation . This method is thread safe.
 	 * 
 	 * @param contact
@@ -148,8 +150,8 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * This method is not Thread safe , removes the contact for a particular msisdn from the cache - if it is one to one conversation removes from convs map otherwise decrements
-	 * the reference count by one , if reference count becomes zero then remove it completely from group map
+	 * This method is not Thread safe , removes the contact for a particular msisdn from the cache - if it is one to one conversation removes from {@link #convsContactsPersistence}
+	 * otherwise decrements the reference count by one , if reference count becomes zero then remove it completely from {@link #groupContactsPersistence}
 	 * 
 	 * @param msisdn
 	 * @param ifOneToOneConversation
@@ -229,9 +231,12 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * Updates the contact tuple in {@link groupContactsPersistence} if unknown contact is saved or saved contact is deleted because we have to update the name field also in
-	 * contact tuple. In case of saved contact is deleted from addressbook then it's name should be changed to null and if unsaved contact is added in address book then it's name
-	 * from group info table should be passed as parameter
+	 * Updates the contact tuple in {@link #groupContactsPersistence} if unknown contact is saved or saved contact is deleted because we have to update the name field also in
+	 * contact tuple.
+	 * <p>
+	 * In case of saved contact is deleted from addressbook then it's name should be changed to null and if unsaved contact is added in address book then it's name from group info
+	 * table should be passed as parameter
+	 * </p>
 	 * 
 	 * @param contact
 	 * @param name
@@ -310,8 +315,10 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * This function sets name in {@link groupContactsPersistence} cache if the contact is not saved . Suppose some unsaved contact is already in memory and it is added in a group
-	 * then we set the name of contact using group table.
+	 * This function sets name in {@link #groupContactsPersistence} cache if the contact is not saved .
+	 * <p>
+	 * Suppose some unsaved contact is already in memory and it is added in a group then we set the name of contact using group table.
+	 * </p>
 	 * 
 	 * @param msisdn
 	 * @param name
@@ -441,7 +448,7 @@ class PersistenceCache extends ContactsCache
 	 * @param ifNotFoundReturnNull
 	 *            if true returns null if contact is not saved
 	 * @param ifOneToOneConversation
-	 *            used to determine whether to put in {@link convsContactsPersistence} or {@link groupContactsPersistence}.
+	 *            used to determine whether to put in {@link #convsContactsPersistence} or {@link #groupContactsPersistence}.
 	 * @return Returns contact info object
 	 */
 	ContactInfo putInCache(String msisdn, boolean ifNotFoundReturnNull, boolean ifOneToOneConversation)
@@ -459,7 +466,7 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * This method makes a database query to load the contactInfo of msisdns in {@link convsContactsPersistence} and returns the list of same
+	 * This method makes a database query to load the contactInfo of msisdns in {@link #convsContactsPersistence} and returns the list of same
 	 * 
 	 * @param msisdns
 	 */
@@ -473,7 +480,7 @@ class PersistenceCache extends ContactsCache
 	 * 
 	 * @param msisdns
 	 * @param ifOneToOneConversation
-	 *            used to determine whether to put in {@link convsContactsPersistence} or {@link groupContactsPersistence}.
+	 *            used to determine whether to put in {@link #convsContactsPersistence} or {@link #groupContactsPersistence}.
 	 * @return
 	 */
 	List<ContactInfo> putInCache(List<String> msisdns, boolean ifOneToOneConversation)
@@ -502,8 +509,7 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * when contacts are deleted from address book , contacts name should be changed to null in contactInfo object .This method Updates the contact by setting the name to null for
-	 * the contact that is deleted from address book
+	 * This method Updates the contact by setting the name to null for the contact that is deleted from address book
 	 * 
 	 * @param contact
 	 */
@@ -516,7 +522,7 @@ class PersistenceCache extends ContactsCache
 
 	/**
 	 * This method is used for removing msisdns from the group persistence cache when last message in group is changed and their reference count is decremented in group contacts
-	 * map by one which is done by {@link removeFromCache} method
+	 * map by one which is done by {@link #removeFromCache} method
 	 * 
 	 * @param groupId
 	 * @param currentGroupMsisdns
@@ -669,7 +675,8 @@ class PersistenceCache extends ContactsCache
 
 	public void insertGroup(String grpId, String groupName)
 	{
-		writeLock.lock();try
+		writeLock.lock();
+		try
 		{
 			ConcurrentLinkedQueue<String> clq = new ConcurrentLinkedQueue<String>();
 			Pair<String, ConcurrentLinkedQueue<String>> pair = new Pair<String, ConcurrentLinkedQueue<String>>(groupName, clq);
