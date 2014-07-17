@@ -185,13 +185,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			db = mDb;
 		}
-		onCreate(db);
 
 		if (oldVersion < 2)
 		{
 			String alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.ONHIKE + " INTEGER";
 			db.execSQL(alter);
 		}
+
 		if (oldVersion < 3)
 		{
 			String alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.ON_DND + " INTEGER";
@@ -199,6 +199,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.SHOWN_STATUS + " INTEGER";
 			db.execSQL(alter);
 		}
+
 		// This is being done to change the column type of column "name" in the
 		// group members table
 		if (oldVersion < 4)
@@ -225,12 +226,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			db.execSQL(insert);
 			db.execSQL(drop);
 		}
+
+		// Creating Emotions Table and adding index
+		if (oldVersion < 5)
+		{
+			String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.EMOTICON_TABLE + " ( " + DBConstants.EMOTICON_NUM + " INTEGER PRIMARY KEY, " + DBConstants.LAST_USED
+					+ " INTEGER" + " )";
+			db.execSQL(create);
+			create = "CREATE UNIQUE INDEX IF NOT EXISTS " + DBConstants.EMOTICON_INDEX + " ON " + DBConstants.EMOTICON_TABLE + " ( " + DBConstants.EMOTICON_NUM + " ) ";
+			db.execSQL(create);
+		}
+
 		// Add muteGroup column
 		if (oldVersion < 6)
 		{
 			String alter = "ALTER TABLE " + DBConstants.GROUP_INFO_TABLE + " ADD COLUMN " + DBConstants.MUTE_GROUP + " INTEGER DEFAULT 0";
 			db.execSQL(alter);
 		}
+
 		/*
 		 * We won't use the DB to manage the file name and key anymore. Instead we write this data to a file. So we write all the current data in the db to the file.
 		 */
@@ -290,17 +303,37 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 			}
 		}
+
+		// No need to make status table here. We are making a new one in version 12
+		// if (oldVersion < 8)
+		// {
+		// }
+
+		// No need to make status table here. We are making a new one in version 12
+		// if (oldVersion < 9)
+		// {
+		// }
+
+		// No need to make status table here. We are making a new one in version 12
+		// if (oldVersion < 9)
+		// {
+		// }
+
+		// No need to make status table here. We are making a new one in version 12
+		// if (oldVersion < 10)
+		// {
+		// }
+
 		/*
 		 * Dropping the earlier status table to ensure the previous statuses (if any) are deleted.
 		 */
 		if (oldVersion < 12)
 		{
-			String drop = "DROP TABLE " + DBConstants.STATUS_TABLE;
-
-			String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STATUS_TABLE + " (" + DBConstants.STATUS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+			String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.STATUS_TABLE + " (" + DBConstants.STATUS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
 					+ DBConstants.STATUS_MAPPED_ID + " TEXT UNIQUE, " + DBConstants.MSISDN + " TEXT, " + DBConstants.STATUS_TEXT + " TEXT, " + DBConstants.STATUS_TYPE
 					+ " INTEGER, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0, " + DBConstants.SHOW_IN_TIMELINE + " INTEGER, "
 					+ DBConstants.MOOD_ID + " INTEGER, " + DBConstants.TIME_OF_DAY + " INTEGER" + " )";
+			db.execSQL(create);
 
 			String alter1 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.MESSAGE + " STRING";
 			String alter2 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.MSG_STATUS + " INTEGER";
@@ -311,8 +344,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			String alter7 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.GROUP_PARTICIPANT + " TEXT";
 			String alter8 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.IS_STATUS_MSG + " INTEGER DEFAULT 0";
 
-			db.execSQL(drop);
-			db.execSQL(sql);
+			db.execSQL(create);
 			db.execSQL(alter1);
 			db.execSQL(alter2);
 			db.execSQL(alter3);
@@ -324,9 +356,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			denormaliseConversations(db);
 		}
+
 		/*
-		 * Version 13 for creating status index. Will be done by the onCreate method.
+		 * Adding index on MSISDN in status table.
 		 */
+		if (oldVersion < 13)
+		{
+			String createIndex = "CREATE INDEX IF NOT EXISTS " + DBConstants.STATUS_INDEX + " ON " + DBConstants.STATUS_TABLE + " ( " + DBConstants.MSISDN + " ) ";
+			db.execSQL(createIndex);
+		}
 
 		/*
 		 * Adding a column to keep a track of the message type i.e hike or sms.
@@ -336,14 +374,28 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.IS_HIKE_MESSAGE + " INTEGER DEFAULT -1";
 			db.execSQL(alter);
 		}
+
 		/*
-		 * Version 15 adds the sticker table. Version 16 adds the protips table.
+		 * Version 15 adds the sticker table.
 		 */
-		boolean protipGameUrlAdded = false;
+		if (oldVersion < 15)
+		{
+			String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.STICKERS_TABLE + " (" + DBConstants.CATEGORY_ID + " TEXT PRIMARY KEY, " + DBConstants.TOTAL_NUMBER
+					+ " INTEGER, " + DBConstants.REACHED_END + " INTEGER," + DBConstants.UPDATE_AVAILABLE + " INTEGER" + " )";
+			db.execSQL(create);
+		}
+
+		/*
+		 * Version 16 adds the protips table.
+		 */
 		if (oldVersion < 16)
 		{
-			protipGameUrlAdded = true;
+			String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.PROTIP_TABLE + " (" + DBConstants.ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+					+ DBConstants.PROTIP_MAPPED_ID + " TEXT UNIQUE, " + DBConstants.HEADER + " TEXT, " + DBConstants.PROTIP_TEXT + " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, "
+					+ DBConstants.IMAGE_URL + " TEXT, " + DBConstants.WAIT_TIME + " INTEGER" + " )";
+			db.execSQL(create);
 		}
+
 		/*
 		 * Version 17 add the unread column.
 		 */
@@ -352,11 +404,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			String alter = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.UNREAD_COUNT + " INTEGER DEFAULT 0";
 			db.execSQL(alter);
 		}
+
 		/*
 		 * Version 18 adds the shared media and file thumbnail table. We also parse through all the messages to populate these tables.
 		 */
 		if (oldVersion < 18)
 		{
+			String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.SHARED_MEDIA_TABLE + " (" + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY, " + DBConstants.CONV_ID
+					+ " INTEGER" + " )";
+			db.execSQL(create);
+			create = "CREATE TABLE IF NOT EXISTS " + DBConstants.FILE_THUMBNAIL_TABLE + " (" + DBConstants.FILE_KEY + " TEXT PRIMARY KEY, " + DBConstants.IMAGE + " BLOB" + " )";
+			db.execSQL(create);
 			// Edit the preference to ensure that HikeMessenger app knows we've
 			// reached the
 			// upgrade flow for version 18
@@ -364,6 +422,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			editor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 1);
 			editor.commit();
 		}
+
 		/*
 		 * Version 19 adds the 'read by' column in the messages table.
 		 */
@@ -372,26 +431,40 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.READ_BY + " TEXT";
 			db.execSQL(alter);
 		}
+
 		/*
 		 * Version 20 adds an index for the file thumbnails table.
 		 */
-		if (!protipGameUrlAdded && oldVersion < 21)
+		if (oldVersion < 20)
+		{
+			String createIndex = "CREATE INDEX IF NOT EXISTS " + DBConstants.FILE_THUMBNAIL_INDEX + " ON " + DBConstants.FILE_THUMBNAIL_TABLE + " (" + DBConstants.FILE_KEY + " )";
+			db.execSQL(createIndex);
+		}
+
+		/*
+		 * Version 21 adds PROTIP_GAMING_DOWNLOAD_URL to the protip table
+		 */
+		if (oldVersion < 21)
 		{
 			String alter = "ALTER TABLE " + DBConstants.PROTIP_TABLE + " ADD COLUMN " + DBConstants.PROTIP_GAMING_DOWNLOAD_URL + " TEXT";
 			db.execSQL(alter);
 		}
+
 		/*
 		 * Version 22 adds the Chat BG table.
 		 */
-		boolean chatBgTableAdded = false;
 		if (oldVersion < 22)
 		{
-			chatBgTableAdded = true;
+			String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.CHAT_BG_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.BG_ID + " TEXT)";
+			db.execSQL(sql);
+			sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CHAT_BG_INDEX + " ON " + DBConstants.CHAT_BG_TABLE + " (" + DBConstants.MSISDN + ")";
+			db.execSQL(sql);
 		}
+
 		/*
 		 * Version 23 adds the timestamp column to the chat bg table
 		 */
-		if (!chatBgTableAdded && oldVersion < 23)
+		if (oldVersion < 23)
 		{
 			String alter = "ALTER TABLE " + DBConstants.CHAT_BG_TABLE + " ADD COLUMN " + DBConstants.TIMESTAMP + " INTEGER";
 			db.execSQL(alter);
@@ -411,7 +484,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			try
 			{
-
 				StickerManager st = StickerManager.getInstance();
 				st.deleteDuplicateStickers();
 			}
