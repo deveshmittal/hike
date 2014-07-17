@@ -94,6 +94,11 @@ public class GroupConversation extends Conversation
 	{
 		return getGroupParticipant(msisdn).getContactInfo().getFirstName();
 	}
+	
+	public String getGroupParticipantFirstNameAndSurname(String msisdn)
+	{
+		return getGroupParticipant(msisdn).getContactInfo().getFirstNameAndSurname();
+	}
 
 	public String getLabel()
 	{
