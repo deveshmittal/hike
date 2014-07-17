@@ -1461,8 +1461,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String groupId = c.getString(groupIdIdx);
 				String msisdn = c.getString(msisdnIdx);
 				msisdnSB.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
-				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, c.getString(nameIdx), msisdn, c.getInt(onHikeIdx) != 0), c.getInt(hasLeftIdx) != 0,
-						c.getInt(onDndIdx) != 0);
+				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, c.getString(nameIdx), msisdn, c.getInt(onHikeIdx) != 0),
+						c.getInt(hasLeftIdx) != 0, c.getInt(onDndIdx) != 0);
 
 				Map<String, GroupParticipant> participantList = groupIdParticipantsMap.get(groupId);
 				if (participantList == null)
@@ -1566,7 +1566,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				long msgId = c.getLong(msgIdIdx);
 				long mappedMsgId = c.getLong(mappedMsgIdIdx);
-				if(mappedMsgId > 0){
+				if (mappedMsgId > 0)
+				{
 					ids.put(String.valueOf(mappedMsgId));
 				}
 				sb.append(msgId);
@@ -1585,7 +1586,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MESSAGE_ID + " in " + sb.toString(), null);
 
 			Logger.d("HIKE CONVERSATION DB ", "Rows Updated : " + rowsAffected);
-			if(ids.length() == 0)
+			if (ids.length() == 0)
 			{
 				return null;
 			}
@@ -1927,8 +1928,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String msisdn = c.getString(c.getColumnIndex(DBConstants.MSISDN));
 				allMsisdns.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, c.getString(c.getColumnIndex(DBConstants.NAME)), msisdn, c.getInt(c
-						.getColumnIndex(DBConstants.ONHIKE)) != 0), c.getInt(c
-						.getColumnIndex(DBConstants.HAS_LEFT)) != 0, c.getInt(c.getColumnIndex(DBConstants.ON_DND)) != 0);
+						.getColumnIndex(DBConstants.ONHIKE)) != 0), c.getInt(c.getColumnIndex(DBConstants.HAS_LEFT)) != 0, c.getInt(c.getColumnIndex(DBConstants.ON_DND)) != 0);
 				participantList.put(msisdn, groupParticipant);
 			}
 			String msisdns = allMsisdns.toString();
@@ -2416,7 +2416,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
-	
+
 	public Map<String, StatusMessage> getLastStatusMessages(boolean timelineUpdatesOnly, StatusMessage.StatusMessageType[] smTypes, List<ContactInfo> contactList)
 	{
 		Map<String, StatusMessage> statusMessagesMap = new HashMap<String, StatusMessage>();
@@ -2457,14 +2457,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 			smTypeSelection.replace(smTypeSelection.lastIndexOf(","), smTypeSelection.length(), ")");
 		}
-		
+
 		if (!TextUtils.isEmpty(smTypeSelection))
 		{
-			selection.append(" AND "+DBConstants.STATUS_TYPE + " IN " + smTypeSelection.toString());
+			selection.append(" AND " + DBConstants.STATUS_TYPE + " IN " + smTypeSelection.toString());
 		}
 		String orderBy = DBConstants.STATUS_ID + " DESC ";
-		
-		String havingSelection = "MAX(" + DBConstants.STATUS_ID +")="+ DBConstants.STATUS_ID;;
+
+		String havingSelection = "MAX(" + DBConstants.STATUS_ID + ")=" + DBConstants.STATUS_ID;
+		;
 
 		String groupby = DBConstants.MSISDN;
 		Cursor c = null;
@@ -2706,7 +2707,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
-	
+
 	public void removeStickerCategory(String categoryId)
 	{
 		mDb.delete(DBConstants.STICKERS_TABLE, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
@@ -3236,7 +3237,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
-	
+
 	public ArrayList<String> getOfflineMsisdnsList(String msisdnStatement)
 	{
 		Cursor c = null;
@@ -3248,9 +3249,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					DBConstants.MESSAGES_TABLE + "." + DBConstants.CONV_ID + " IN (SELECT " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.CONV_ID + " FROM "
 							+ DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN + " IN " + msisdnStatement + " ) " + " AND "
 							+ " ( " + DBConstants.MESSAGES_TABLE + "." + DBConstants.CONV_ID + "=" + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.CONV_ID + " ) " + " AND  "
-							+ DBConstants.MESSAGES_TABLE + "." + DBConstants.MSG_STATUS + "=" + State.SENT_CONFIRMED.ordinal() + " AND  "
-									+ DBConstants.MESSAGES_TABLE + "." + DBConstants.IS_HIKE_MESSAGE + "=" + "1", null, DBConstants.CONVERSATIONS_TABLE + "."
-							+ DBConstants.MSISDN, null, null);
+							+ DBConstants.MESSAGES_TABLE + "." + DBConstants.MSG_STATUS + "=" + State.SENT_CONFIRMED.ordinal() + " AND  " + DBConstants.MESSAGES_TABLE + "."
+							+ DBConstants.IS_HIKE_MESSAGE + "=" + "1", null, DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN, null, null);
 
 			if (c != null)
 			{
