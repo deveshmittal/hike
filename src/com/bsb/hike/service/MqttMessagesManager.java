@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -107,6 +109,8 @@ public class MqttMessagesManager
 	private Map<String, ArrayList<ConvMessage>> messageListMap;
 	
 	private Map<String, Utils.PairModified<Long, Long>> messageStatusMap;
+	
+	private Map<String, Utils.PairModified<Long, Set<String>>> messageReadMapForGroup;
 
 	private MqttMessagesManager(Context context)
 	{
@@ -666,6 +670,7 @@ public class MqttMessagesManager
 					msgID = tempId;
 				}
 			}
+			
 			if(messageStatusMap.get(id) == null)
 			{
 				messageStatusMap.put(id, new PairModified<Long, Long>((long) -1, (long) -1));
@@ -673,6 +678,26 @@ public class MqttMessagesManager
 			if(msgID > messageStatusMap.get(id).getFirst())
 			{
 				messageStatusMap.get(id).setFirst(msgID);
+			}
+			
+			if (Utils.isGroupConversation(id))
+			{
+				if(null == messageReadMapForGroup.get(id))
+				{
+					Set<String> msisdnSet = new HashSet<String>();
+					Utils.PairModified<Long, Set<String>> pair = new PairModified<Long, Set<String>>((long) -1, msisdnSet);
+					messageReadMapForGroup.put(id, pair);
+				}
+				long messageId = messageStatusMap.get(id).getFirst();
+				Utils.PairModified<Long, Set<String>> pair = messageReadMapForGroup.get(id);
+				if(pair.getFirst() != messageId)
+				{
+					pair.setSecond(new HashSet<String>());
+				}
+					
+				pair.setFirst(msgID);
+				pair.getSecond().add(participantMsisdn);
+	
 			}
 		}
 		else
@@ -1574,7 +1599,7 @@ public class MqttMessagesManager
 				messageList = new ArrayList<ConvMessage>(); // it will store all the convMessage object that can be added to list in one transaction
 				messageListMap = new HashMap<String, ArrayList<ConvMessage>>(); // it will store list of conversation objects based on msisdn
 				messageStatusMap = new HashMap<String, Utils.PairModified<Long, Long>>(); // it will store pair max "mr" msdId and max "dr" msgId according to msisdn
-
+				messageReadMapForGroup = new HashMap<String, Utils.PairModified<Long, Set<String>>>();
 				try
 				{
 					userWriteDb.beginTransaction();
@@ -1648,6 +1673,10 @@ public class MqttMessagesManager
 		if(messageStatusMap.size() > 0)
 		{
 			convDb.updateStatusBulk(messageStatusMap);
+		}
+		if(messageReadMapForGroup.size() > 0)
+		{
+			convDb.setReadByForGroupBulk(messageReadMapForGroup);
 		}
 		this.pubSub.publish(HikePubSub.BULK_MESSAGE_RECEIVED, messageListMap);
 		this.pubSub.publish(HikePubSub.BULK_MESSAGE_DELIVERED_READ, messageStatusMap);

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.json.JSONArray;
@@ -59,6 +60,7 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.PairModified;
 
 public class HikeConversationsDatabase extends SQLiteOpenHelper
 {
@@ -741,6 +743,86 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 			mDb.setTransactionSuccessful();
 			mDb.endTransaction();
+		}
+	}
+	
+	public void setReadByForGroupBulk(Map<String, Utils.PairModified<Long, Set<String>>> messageReadMapForGroup)
+	{
+
+		long maxMsgId = -1;
+		Cursor c = null;
+		for (Entry<String, PairModified<Long, Set<String>>> entry : messageReadMapForGroup.entrySet())
+		{
+
+			String groupId = entry.getKey();
+			PairModified<Long, Set<String>> pair = entry.getValue();
+			
+			try
+			{
+				c = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.READ_BY, DBConstants.MESSAGE_ID }, DBConstants.GROUP_ID + " =? ", new String[] { groupId },
+						null, null, null);
+
+				if (c.moveToFirst())
+				{
+					String readByString = null;
+					long msgId = c.getInt(c.getColumnIndex(DBConstants.MESSAGE_ID));
+
+					if (msgId == maxMsgId)
+						readByString = c.getString(c.getColumnIndex(DBConstants.READ_BY));
+					try
+					{
+						JSONArray readByArray;
+						if (TextUtils.isEmpty(readByString))
+						{
+							readByArray = new JSONArray();
+						}
+						else
+						{
+							readByArray = new JSONArray(readByString);
+						}
+						/*
+						 * Checking if this number has already been added.
+						 */
+						boolean alreadyAdded = false;
+						for(String msisdn : pair.getSecond())
+						{
+							for (int i = 0; i < readByArray.length(); i++)
+							{
+								if (readByArray.optString(i).equals(msisdn))
+								{
+									alreadyAdded = true;
+									break;
+								}
+							}
+							if (!alreadyAdded)
+							{
+								readByArray.put(msisdn);
+							}
+						}
+
+						ContentValues contentValues = new ContentValues();
+						contentValues.put(DBConstants.MSG_STATUS, State.SENT_DELIVERED_READ.ordinal());
+						mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { groupId });
+						contentValues.clear();
+						contentValues.put(DBConstants.READ_BY, readByArray.toString());
+						contentValues.put(DBConstants.MESSAGE_ID, maxMsgId);
+						mDb.update(DBConstants.GROUP_INFO_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[] { groupId });
+
+					}
+					catch (JSONException e)
+					{
+						Logger.w(getClass().getSimpleName(), "Invalid JSON", e);
+					}
+
+				}
+			}
+			finally
+			{
+				if (c != null)
+				{
+					c.close();
+				}
+			}
 		}
 	}
 
