@@ -177,7 +177,7 @@ public class HikePubSub implements Runnable
 
 	public static final String REFRESH_RECENTS = "refreshRecents";
 
-	public static final String SWITCHED_DATA_CONNECTION = "switchedDataConnection";
+	public static final String SSL_PREFERENCE_CHANGED = "sslPrefChanged";
 
 	public static final String GROUP_REVIVED = "groupRevived";
 
@@ -303,9 +303,49 @@ public class HikePubSub implements Runnable
 
 	public static final String CONTACT_SYNCED = "contactSynced";
 
-	public static final String MQTT_CONNECTED = "mqttConnected";
-
 	public static final String DISMISS_GROUP_CHAT_TIP = "dismissGroupChatTip";
+	
+	public static final String IPS_CHANGED = "ipsChanged";
+
+	public static final String DISMISS_STEALTH_FTUE_CONV_TIP = "dismissStealthFtueConvTip";
+
+	public static final String SHOW_STEALTH_FTUE_CONV_TIP = "showStealthFtueConvTip";
+
+	public static final String SHOW_STEALTH_FTUE_SET_PASS_TIP = "showStealthFtueSetPassTip";
+
+	public static final String SHOW_STEALTH_FTUE_ENTER_PASS_TIP = "showStealthFtueEnterPassTip";
+
+	public static final String STEALTH_MODE_TOGGLED = "stealthModeToggled";
+
+	public static final String CLEAR_FTUE_STEALTH_CONV = "clearFtueStealthConv";
+
+	public static final String STEALTH_CONVERSATION_MARKED = "stealthConverstaionMarked";
+
+	public static final String STEALTH_CONVERSATION_UNMARKED = "stealthConversationUnmarked";
+
+	public static final String RESET_STEALTH_INITIATED = "resetStealthInitiated";
+
+	public static final String RESET_STEALTH_CANCELLED = "resetStealthCancelled";
+
+	public static final String STEALTH_MODE_RESET_COMPLETE = "stealthModeResetComplete";
+
+	public static final String CONNECTED_TO_MQTT = "connectedToMqtt";
+
+	public static final String CLOSE_CURRENT_STEALTH_CHAT = "closeCurrentStealthChat";
+
+	public static final String APP_FOREGROUNDED = "appForegrounded";
+
+	public static final String REMOVE_WELCOME_HIKE_TIP = "removeWelcomeHikeTip";
+	
+	public static final String STEALTH_POPUP_WITH_PUSH = "stealthPopupShowPush";
+
+	public static final String REMOVE_START_NEW_CHAT_TIP = "removeStartNewChatTip";
+
+	public static final String REMOVE_STEALTH_UNREAD_TIP = "removeStealthUnreadTip";
+
+	public static final String STEALTH_UNREAD_TIP_CLICKED = "stealthUnreadTipClicked";
+
+	public static String FRIEND_REQ_COUNT_RESET = "resetFriendRequest";
 
 	private final Thread mThread;
 

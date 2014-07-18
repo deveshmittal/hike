@@ -28,6 +28,8 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.Birthday;
@@ -147,7 +149,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public static SignupTask getSignupTask(Activity activity)
 	{
-		if (signupTask == null)
+		if (signupTask == null || signupTask.isCancelled())
 		{
 			signupTask = new SignupTask(activity);
 		}
@@ -566,7 +568,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 		if (profilePicSmall != null)
 		{
-				byte[] bytes = Utils.bitmapToBytes(profilePicSmall, Bitmap.CompressFormat.JPEG, 100);
+				byte[] bytes = BitmapUtils.bitmapToBytes(profilePicSmall, Bitmap.CompressFormat.JPEG, 100);
 				HikeUserDatabase db = HikeUserDatabase.getInstance();
 				db.setIcon(msisdn, bytes, false);
 		}
@@ -579,6 +581,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
 		isAlreadyFetchingNumber = false;
 
+		/*
+		 * We show these tips only to upgrading users
+		 */
+		settings.edit().putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true).commit();
+		/*
+		 * We show this tip only to new signup users
+		 */
+		settings.edit().putBoolean(HikeMessengerApp.SHOW_START_NEW_CHAT_TIP, true).commit();
 		return Boolean.TRUE;
 	}
 

@@ -3,8 +3,10 @@ package com.bsb.hike.ui;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -12,10 +14,13 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -30,14 +35,17 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.tasks.UnlinkTwitterTask;
+import com.bsb.hike.tasks.DeleteAccountTask.DeleteAccountListener;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
 import com.facebook.Session;
 
-public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, OnPreferenceChangeListener
+public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, OnPreferenceChangeListener, DeleteAccountListener
 {
 
 	private enum BlockingTaskType
@@ -50,7 +58,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	ProgressDialog mDialog;
 
 	private boolean isDeleting;
-	
+
 	private BlockingTaskType blockingTaskType = BlockingTaskType.NONE;
 
 	@Override
@@ -75,7 +83,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof ActivityCallableTask)
 		{
-			if(savedInstanceState != null){
+			if (savedInstanceState != null)
+			{
 				blockingTaskType = BlockingTaskType.values()[savedInstanceState.getInt(HikeConstants.Extras.BLOKING_TASK_TYPE)];
 			}
 			setBlockingTask((ActivityCallableTask) retained);
@@ -102,7 +111,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (unlinkFacebookPreference != null)
 		{
 			Session session = Session.getActiveSession();
-			if (session != null )
+			if (session != null)
 			{
 				unlinkFacebookPreference.setOnPreferenceClickListener(this);
 			}
@@ -199,6 +208,25 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			muteChatBgPreference.setOnPreferenceClickListener(this);
 		}
 
+		Preference resetStealthPreference = getPreferenceScreen().findPreference(HikeConstants.RESET_STEALTH_PREF);
+		if (resetStealthPreference != null)
+		{
+			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+			{
+				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				{
+					resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
+					resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
+				}
+
+				resetStealthPreference.setOnPreferenceClickListener(this);
+			}
+			else
+			{
+				getPreferenceScreen().removePreference(resetStealthPreference);
+			}
+		}
+
 		setupActionBar(titleRes);
 
 	}
@@ -254,7 +282,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (!task.isFinished())
 		{
 			mTask = task;
-			String message="";
+			String message = "";
 			switch (blockingTaskType)
 			{
 			case DELETING_ACCOUNT:
@@ -289,6 +317,9 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		Logger.d("HikePreferences", "Preference clicked: " + preference.getKey());
 		if (preference.getKey().equals(HikeConstants.DELETE_PREF))
 		{
+			// Intent i = new Intent(getApplicationContext(), DeleteAccount.class);
+			// startActivity(i);
+
 			final CustomAlertDialog secondConfirmDialog = new CustomAlertDialog(HikePreferences.this);
 			final CustomAlertDialog firstConfirmDialog = new CustomAlertDialog(HikePreferences.this);
 			firstConfirmDialog.setHeader(R.string.are_you_sure);
@@ -510,6 +541,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				JSONObject jsonObject = new JSONObject();
 				JSONObject data = new JSONObject();
 				data.put(HikeConstants.PUSH_SU, newValue);
+				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
 				jsonObject.put(HikeConstants.DATA, data);
 				jsonObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, jsonObject);
@@ -531,6 +563,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				JSONObject jsonObject = new JSONObject();
 				JSONObject data = new JSONObject();
 				data.put(HikeConstants.CHAT_BACKGROUD_NOTIFICATION, settingPref.getBoolean(HikeConstants.CHAT_BG_NOTIFICATION_PREF, true) ? 0 : -1);
+				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
 				jsonObject.put(HikeConstants.DATA, data);
 				jsonObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, jsonObject);
@@ -539,6 +572,62 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			catch (JSONException e)
 			{
 				Logger.w(getClass().getSimpleName(), e);
+			}
+		}
+		else if (HikeConstants.RESET_STEALTH_PREF.equals(preference.getKey()))
+		{
+			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+			{
+				Utils.cancelScheduledStealthReset(this);
+
+				preference.setTitle(R.string.reset_complete_stealth_header);
+				preference.setSummary(R.string.reset_complete_stealth_info);
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.RESET_STEALTH_CANCELLED, null);
+
+				Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+			}
+			else
+			{
+				Object[] dialogStrings = new Object[4];
+				dialogStrings[0] = getString(R.string.initiate_reset_stealth_header);
+				dialogStrings[1] = getString(R.string.initiate_reset_stealth_body);
+				dialogStrings[2] = getString(R.string.confirm);
+				dialogStrings[3] = getString(R.string.cancel);
+
+				HikeDialog.showDialog(this, HikeDialog.RESET_STEALTH_DIALOG, new HikeDialog.HikeDialogListener()
+				{
+
+					@Override
+					public void positiveClicked(Dialog dialog)
+					{
+						HikeSharedPreferenceUtil.getInstance(getApplicationContext()).saveData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, System.currentTimeMillis());
+
+						HikeMessengerApp.getPubSub().publish(HikePubSub.RESET_STEALTH_INITIATED, null);
+
+						preference.setTitle(R.string.resetting_complete_stealth_header);
+						preference.setSummary(R.string.resetting_complete_stealth_info);
+
+						Intent intent = new Intent(HikePreferences.this, HomeActivity.class);
+						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						startActivity(intent);
+
+						dialog.dismiss();
+						Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_INIT);
+					}
+
+					@Override
+					public void neutralClicked(Dialog dialog)
+					{
+
+					}
+
+					@Override
+					public void negativeClicked(Dialog dialog)
+					{
+						dialog.dismiss();
+					}
+				}, dialogStrings);
 			}
 		}
 
@@ -592,12 +681,10 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 
 				JSONObject data = new JSONObject();
 				data.put(HikeConstants.LAST_SEEN_SETTING, isChecked);
-
+				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
 				object.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
-
-				ContactInfo.lastSeenTimeComparator.lastSeenPref = isChecked;
 			}
 			catch (JSONException e)
 			{
@@ -613,9 +700,94 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.SSL_PREF.equals(preference.getKey()))
 		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCHED_DATA_CONNECTION, null);
+			Utils.setupUri(this.getApplicationContext());
+			LocalBroadcastManager.getInstance(this.getApplicationContext()).sendBroadcast(new Intent(HikePubSub.SSL_PREFERENCE_CHANGED));
 		}
 		return false;
 	}
 
+	@Override
+	@Deprecated
+	public void addPreferencesFromResource(int preferencesResId)
+	{
+		// TODO Auto-generated method stub
+		super.addPreferencesFromResource(preferencesResId);
+		switch (preferencesResId)
+		{
+		case R.xml.notification_preferences:
+			updateNotifPrefView();
+			break;
+		}
+	}
+
+	private void updateNotifPrefView()
+	{
+		ListPreference lp = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.VIBRATE_PREF_LIST);
+		lp.setOnPreferenceChangeListener(new OnPreferenceChangeListener()
+		{
+
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue)
+			{
+				preference.setTitle(getString(R.string.vibrate) + " - " + (newValue.toString()));
+				try
+				{
+					Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
+					if (vibrator != null)
+					{
+						if (getString(R.string.vib_long).equals(newValue.toString()))
+						{
+							// play long
+							vibrator.vibrate(HikeConstants.LONG_VIB_PATTERN, -1);
+						}
+						else if (getString(R.string.vib_short).equals(newValue.toString()))
+						{
+							// play short
+							vibrator.vibrate(HikeConstants.SHORT_VIB_PATTERN, -1);
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+				return true;
+			}
+		});
+		lp.setTitle(lp.getTitle() + " - " + lp.getValue());
+		ListPreference soundPref = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.NOTIF_SOUND_PREF);
+		soundPref.setOnPreferenceChangeListener(new OnPreferenceChangeListener()
+		{
+
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue)
+			{
+				preference.setTitle(getString(R.string.notificationSoundTitle) + " - " + (newValue.toString()));
+				if (getString(R.string.notif_sound_Hike).equals(newValue.toString()))
+				{
+					Utils.playSoundFromRaw(getApplicationContext(), R.raw.hike_jingle_15);
+				}
+				else if (getString(R.string.notif_sound_default).equals(newValue.toString()))
+				{
+					Utils.playDefaultNotificationSound(getApplicationContext());
+				}
+				return true;
+			}
+		});
+		soundPref.setTitle(getString(R.string.notificationSoundTitle) + " - " + (soundPref.getValue()));
+	}
+
+	@Override
+	public void accountDeleted(boolean isSuccess)
+	{
+		if (isSuccess)
+		{
+			accountDeleted();
+		}
+		else
+		{
+			dismissProgressDialog();
+		}
+
+	}
 }

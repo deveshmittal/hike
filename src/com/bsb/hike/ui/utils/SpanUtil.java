@@ -1,5 +1,7 @@
 package com.bsb.hike.ui.utils;
 
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -22,29 +24,16 @@ public class SpanUtil
 		return getImageSpan(context, view);
 	}
 
-	public static ImageSpan getImageSpan(Context context, View view)
+	private static ImageSpan getImageSpan(Context context, View view)
 	{
 		// create bitmap drawable for imagespan
-		BitmapDrawable bmpDrawable = new BitmapDrawable(context.getResources(), getBitMapFromTV(view));
+		BitmapDrawable bmpDrawable = HikeBitmapFactory.getBitmapDrawable(context.getResources(), HikeBitmapFactory.getBitMapFromTV(view));
+		if (bmpDrawable == null)
+		{
+			return null;
+		}
 		bmpDrawable.setBounds(0, 0, bmpDrawable.getIntrinsicWidth(), bmpDrawable.getIntrinsicHeight());
 		return new ImageSpan(bmpDrawable);
-	}
-
-	public static Bitmap getBitMapFromTV(View textView)
-	{
-		// capture bitmapt of genreated textview
-		int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-		textView.measure(spec, spec);
-		textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-		Bitmap b = Bitmap.createBitmap(textView.getWidth(), textView.getHeight(), Bitmap.Config.ARGB_8888);
-		Canvas canvas = new Canvas(b);
-		canvas.translate(-textView.getScrollX(), -textView.getScrollY());
-		textView.draw(canvas);
-		textView.setDrawingCacheEnabled(true);
-		Bitmap cacheBmp = textView.getDrawingCache();
-		Bitmap viewBmp = cacheBmp.copy(Bitmap.Config.ARGB_8888, true);
-		textView.destroyDrawingCache(); // destory drawable
-		return viewBmp;
 	}
 
 }

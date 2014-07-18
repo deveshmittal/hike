@@ -21,10 +21,6 @@
                 android:id="@+id/avatar"
                 style="@style/AvatarStyle.MorePadding" />
 
-            <ImageView
-                android:id="@+id/avatar_frame"
-                style="@style/AvatarStyle"
-                android:src="@drawable/frame_avatar_highlight" />
         </FrameLayout>
 
         <LinearLayout
@@ -123,8 +119,7 @@
     </LinearLayout>
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@drawable/home_list_divider"
+        style="@style/Divider"
         android:layout_alignParentBottom="true" />
+
 </RelativeLayout>

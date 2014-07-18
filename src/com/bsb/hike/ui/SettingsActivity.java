@@ -40,7 +40,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		setContentView(R.layout.settings);
 
 		ArrayList<String> items = new ArrayList<String>();
-		items.add(getString(R.string.manage_account));
+
 		items.add(getString(R.string.notifications));
 		items.add(getString(R.string.auto_download_media));
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.FREE_SMS_PREF, true))
@@ -52,25 +52,28 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		{
 			items.add(getString(R.string.sms));
 		}
+		items.add(getString(R.string.manage_account));
 		items.add(getString(R.string.privacy));
 		items.add(getString(R.string.sync_contacts));
 		items.add(getString(R.string.help));
 		items.add(null);
 
 		final ArrayList<String> itemsSummary = new ArrayList<String>();
-		itemsSummary.add(getString(R.string.account_hintttext));
+
 		itemsSummary.add(getString(R.string.notifications_hintext));
 		itemsSummary.add(getString(R.string.auto_download_media_hinttext));
 		itemsSummary.add(getString(R.string.sms_setting_hinttext));
+		itemsSummary.add(getString(R.string.account_hintttext));
 		itemsSummary.add(getString(R.string.privacy_setting_hinttext));
 		itemsSummary.add(getString(R.string.sync_contacts_hinttext));
 		itemsSummary.add(getString(R.string.help_hinttext));
 
 		final ArrayList<Integer> itemIcons = new ArrayList<Integer>();
-		itemIcons.add(R.drawable.ic_account_settings);
+
 		itemIcons.add(R.drawable.ic_notifications_settings);
 		itemIcons.add(R.drawable.ic_auto_download_media_settings);
 		itemIcons.add(R.drawable.ic_sms_settings);
+		itemIcons.add(R.drawable.ic_account_settings);
 		itemIcons.add(R.drawable.ic_privacy_settings);
 		itemIcons.add(R.drawable.ic_sync_contacts);
 		itemIcons.add(R.drawable.ic_help_settings);
@@ -185,22 +188,22 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		{
 		case 0:
 			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.account_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.account);
+			intent.putExtra(HikeConstants.Extras.PREF, R.xml.notification_preferences);
+			intent.putExtra(HikeConstants.Extras.TITLE, R.string.notifications);
 			break;
 
 		case 1:
 			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.notification_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.notifications);
-			break;
-		case 2:
-			intent = new Intent(this, HikePreferences.class);
 			intent.putExtra(HikeConstants.Extras.PREF, R.xml.auto_download_preferences);
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.auto_download_media);
 			break;
-		case 3:
+		case 2:
 			intent = new Intent(this, CreditsActivity.class);
+			break;
+		case 3:
+			intent = new Intent(this, HikePreferences.class);
+			intent.putExtra(HikeConstants.Extras.PREF, R.xml.account_preferences);
+			intent.putExtra(HikeConstants.Extras.TITLE, R.string.account);
 			break;
 		case 4:
 			intent = new Intent(this, HikePreferences.class);

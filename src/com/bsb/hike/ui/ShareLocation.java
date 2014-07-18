@@ -41,6 +41,8 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
@@ -130,6 +132,8 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 	private TextView title;
 
 	private ImageView backIcon;
+	
+	public boolean isActivityDestroyed = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -323,6 +327,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 	protected void onDestroy()
 	{
 		super.onDestroy();
+		isActivityDestroyed = true;
 		if (mLocationClient != null)
 		{
 			mLocationClient.disconnect();
@@ -609,7 +614,12 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 		{
 			for (int p = 0; p < totalPlaces; p++)
 			{
-				if (places[p] != null)
+				/*
+				 * We should not run this if activity is destroyed already
+				 * We added this because sometime add marker was getting
+				 * called even if activity is destroyed
+				 */
+				if (places[p] != null && !isActivityDestroyed)
 				{
 					placeMarkers[p] = map.addMarker(places[p]);
 					addItemToAdapter(places[p].getTitle(), places[p].getSnippet(), placeMarkers[p], false);
@@ -794,8 +804,11 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 				Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
 				// Scale it to required size
 				int width = (int) getResources().getDimension(R.dimen.share_my_location_drawable_width);
-				Drawable scaled_dr = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, width, width, true));
 
+				Bitmap b = HikeBitmapFactory.createScaledBitmap(bitmap, width, width, Bitmap.Config.RGB_565, true, true, false);
+				Drawable scaled_dr = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
+
+				Logger.d("BitmapLocation","size : "+BitmapUtils.getBitmapSize(b));
 				holder.txt_itemName.setCompoundDrawablesWithIntrinsicBounds(scaled_dr, null, null, null);
 				holder.txt_itemName.setCompoundDrawablePadding((int) getResources().getDimension(R.dimen.share_my_location_drawable_padding));
 			}
