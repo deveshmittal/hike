@@ -346,6 +346,8 @@ public class HikePubSub implements Runnable
 	
 	public static final String BULK_MESSAGE_RECEIVED = "bulkMessagesReceived";
 
+	public static final String BULK_MESSAGE_DELIVERED_READ = "bulkMessageDeliveredRead";
+
 	public static String FRIEND_REQ_COUNT_RESET = "resetFriendRequest";
 	
 	public static String HIKE_TO_OFFLINE_PUSH = "hikeToOfflinePush";

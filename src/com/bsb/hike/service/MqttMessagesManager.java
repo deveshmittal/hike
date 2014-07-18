@@ -1650,7 +1650,7 @@ public class MqttMessagesManager
 			convDb.updateStatusBulk(messageStatusMap);
 		}
 		this.pubSub.publish(HikePubSub.BULK_MESSAGE_RECEIVED, messageListMap);
-
+		this.pubSub.publish(HikePubSub.BULK_MESSAGE_DELIVERED_READ, messageStatusMap);
 	}
 	
 	private void addToLists(String msisdn, ConvMessage convMessage)

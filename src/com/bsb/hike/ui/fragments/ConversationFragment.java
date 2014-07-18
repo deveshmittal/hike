@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.FutureTask;
 import java.util.Set;
@@ -82,6 +83,7 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.HikeTip.TipType;
+import com.bsb.hike.utils.Utils.PairModified;
 
 public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener, HikeFragmentable
 {
@@ -1817,6 +1819,86 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 							// okay that we don't add it now, because
 							// when the conversation is broadcasted it will contain the
 							// messages
+						}
+					}
+				}
+			}
+		}
+		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
+		{
+			Map<String, Utils.PairModified<Long, Long>> messageStatusMap = (Map<String, Utils.PairModified<Long, Long>>) object;
+
+			if (messageStatusMap != null)
+			{
+				for (Entry<String, PairModified<Long, Long>> entry : messageStatusMap.entrySet())
+				{
+					if (entry != null)
+					{
+						final String msisdn = entry.getKey();
+						PairModified<Long, Long> pair = entry.getValue();
+						if (pair != null)
+						{
+							long mrMsgId = (long) pair.getFirst();
+							long drMsgId = (long) pair.getSecond();
+
+							if (mrMsgId > 0)
+							{
+								ConvMessage msg = findMessageById(mrMsgId);
+								if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+								{
+									// If the msisdn don't match we simply return
+									if (!msg.getMsisdn().equals(msisdn))
+									{
+										return;
+									}
+
+									msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+
+									if (!isAdded())
+									{
+										return;
+									}
+
+									final ConvMessage message = msg;
+									getActivity().runOnUiThread(new Runnable()
+									{
+										@Override
+										public void run()
+										{
+											Conversation conversation = mConversationsByMSISDN.get(msisdn);
+											updateViewForMessageStateChange(conversation, message);
+										}
+									});
+								}
+							}
+							if (drMsgId > 0)
+							{
+								final ConvMessage msg = findMessageById(drMsgId);
+								if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
+								{
+									// If the msisdn don't match we simply return
+									if (!msg.getMsisdn().equals(msisdn))
+									{
+										return;
+									}
+
+									msg.setState(ConvMessage.State.SENT_DELIVERED);
+
+									if (!isAdded())
+									{
+										return;
+									}
+									getActivity().runOnUiThread(new Runnable()
+									{
+										@Override
+										public void run()
+										{
+											Conversation conversation = mConversationsByMSISDN.get(msisdn);
+											updateViewForMessageStateChange(conversation, msg);
+										}
+									});
+								}
+							}
 						}
 					}
 				}
