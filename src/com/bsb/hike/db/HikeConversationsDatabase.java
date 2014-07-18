@@ -105,7 +105,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 																																									 */
 				+ DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + DBConstants.MAPPED_MSG_ID + " INTEGER, "
 				+ DBConstants.CONV_ID + " INTEGER," + DBConstants.MESSAGE_METADATA + " TEXT, " + DBConstants.GROUP_PARTICIPANT + " TEXT, " + DBConstants.IS_HIKE_MESSAGE
-				+ " INTEGER DEFAULT -1, " + DBConstants.READ_BY + " TEXT, " + DBConstants.MESSAGE_HASH + " TEXT UNIQUE DEFAULT NULL" + " ) ";
+				+ " INTEGER DEFAULT -1, " + DBConstants.READ_BY + " TEXT, " + DBConstants.MSISDN + " TEXT, " + DBConstants.MESSAGE_HASH + " TEXT UNIQUE DEFAULT NULL" + " ) ";
 
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CONVERSATION_INDEX + " ON " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.CONV_ID + " , " + DBConstants.TIMESTAMP
@@ -502,13 +502,21 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		 */
 		if (oldVersion < 27)
 		{
-			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.MESSAGE_HASH + " TEXT UNIQUE DEFAULT NULL";
+			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.MSISDN + " TEXT";
+			String alter1 = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.MESSAGE_HASH + " TEXT UNIQUE DEFAULT NULL";
 			String createIndex = "CREATE UNIQUE INDEX IF NOT EXISTS " + DBConstants.MESSAGE_HASH_INDEX + " ON " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE_HASH
 					+ " DESC" + " )";
-			String alter1 = "ALTER TABLE " + DBConstants.GROUP_INFO_TABLE + " ADD COLUMN " + DBConstants.READ_BY + " TEXT, " + DBConstants.MESSAGE_ID + " INTEGER";
+			String alter2 = "ALTER TABLE " + DBConstants.GROUP_INFO_TABLE + " ADD COLUMN " + DBConstants.READ_BY + " TEXT, " + DBConstants.MESSAGE_ID + " INTEGER";
 			db.execSQL(alter);
-			db.execSQL(createIndex);
 			db.execSQL(alter1);
+			db.execSQL(createIndex);
+			db.execSQL(alter2);
+			// Edit the preference to ensure that HikeMessenger app knows we've
+			// reached the
+			// upgrade flow for version 27
+			Editor editor = mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+			editor.putInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, 1);
+			editor.commit();
 		}
 	}
 
@@ -997,9 +1005,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		String msgHash = null;
 		if (!msg.isSent())
 		{
-			msgHash = msg.getMsisdn() + msg.getMappedMsgID() + msg.getMessage().charAt(0) + msg.getMessage().charAt(msg.getMessage().length() - 1) + msg.getTimestamp();
+			if (TextUtils.isEmpty(msg.getMessage()))
+			{
+				msgHash = msg.getMsisdn() + msg.getMappedMsgID() + msg.getTimestamp();
+			}
+			else
+			{
+				msgHash = msg.getMsisdn() + msg.getMappedMsgID() + msg.getMessage().charAt(0) + msg.getMessage().charAt(msg.getMessage().length() - 1) + msg.getTimestamp();
+			}
 			Logger.d(getClass().getSimpleName(), "Message hash: " + msgHash);
 		}
+		return msgHash;
+	}
+	
+	private String createMessageHash(String msisdn, long mappedMsgId, String message, long ts)
+	{
+		String msgHash = null;
+		if (TextUtils.isEmpty(message))
+		{
+			msgHash = msisdn + mappedMsgId + ts;
+		}
+		else
+		{
+			msgHash = msisdn + mappedMsgId + message.charAt(0) + message.charAt(message.length() - 1) + ts;
+		}
+		Logger.d(getClass().getSimpleName(), "Message hash: " + msgHash);
 		return msgHash;
 	}
 
@@ -3653,10 +3683,95 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return msisdnResult;
 	}
 
-	public void updateReadByArrayForGroups()
+	public void addMessageHashNMsisdnNReadByForGroup()
+	{
+		mDb.beginTransaction();
+		addMessageHashAndMsisdn();
+		updateReadByArrayForGroups();
+		mDb.setTransactionSuccessful();
+		mDb.endTransaction();
+	}
+
+	private void addMessageHashAndMsisdn()
 	{
 		Cursor c = null;
-		mDb.beginTransaction();
+		try
+		{
+			ArrayList<Pair<String, String>> convIdtoMsisdn = new ArrayList<Pair<String, String>>();
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.MSISDN }, null, null, null, null, null);
+			
+			final int convIdIndex = c.getColumnIndex(DBConstants.CONV_ID);
+			final int msisdnIndex = c.getColumnIndex(DBConstants.MSISDN);
+			
+			while (c.moveToNext())
+			{
+				Integer convId = c.getInt(convIdIndex);
+				String msisdn = c.getString(msisdnIndex);
+				convIdtoMsisdn.add(new Pair<String, String>(convId.toString(),msisdn));
+			}
+			
+			for (Pair<String, String> pair : convIdtoMsisdn)
+			{
+				ContentValues contentValues = new ContentValues();
+				contentValues.put(DBConstants.MSISDN, pair.second);
+				mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.CONV_ID + "=?", new String[] { pair.first });
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "Exception in updateReadByArrayForGroups",e);
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		
+		try
+		{
+			ArrayList<Pair<String, String>> convIdtoMsisdn = new ArrayList<Pair<String, String>>();
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE, DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID, DBConstants.MAPPED_MSG_ID, DBConstants.MSISDN }, null, null, null, null, null);
+			
+			final int messageIndex = c.getColumnIndex(DBConstants.MESSAGE);
+			final int tsIndex = c.getColumnIndex(DBConstants.TIMESTAMP);
+			final int msgIdIndex = c.getColumnIndex(DBConstants.MESSAGE_ID);
+			final int mappedMsgIdIndex = c.getColumnIndex(DBConstants.MAPPED_MSG_ID);
+			final int msisdnIndex = c.getColumnIndex(DBConstants.MSISDN);
+			
+			while (c.moveToNext())
+			{
+				String message = c.getString(messageIndex);
+				int ts = c.getInt(tsIndex);
+				int mappedId = c.getInt(mappedMsgIdIndex);
+				String msisdn = c.getString(msisdnIndex);
+				String messageHash = createMessageHash(msisdn, (long)mappedId, message, (long)ts);
+				Integer msgId = c.getInt(msgIdIndex);
+				
+				ContentValues contentValues = new ContentValues();
+				contentValues.put(DBConstants.MESSAGE_HASH, messageHash);
+				mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { msgId.toString() });
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "Exception in updateReadByArrayForGroups",e);
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
+	private void updateReadByArrayForGroups()
+	{
+		Cursor c = null;
 		try
 		{
 			HashMap<String, String> groupIdMap = getAllGroupConversations();
@@ -3687,6 +3802,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "Exception in updateReadByArrayForGroups",e);
 		}
 		finally
 		{
@@ -3694,8 +3810,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				c.close();
 			}
-			mDb.setTransactionSuccessful();
-			mDb.endTransaction();
 		}
 	}
 
