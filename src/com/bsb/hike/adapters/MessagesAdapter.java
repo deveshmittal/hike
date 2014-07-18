@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -70,6 +71,7 @@ import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -4073,7 +4075,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private void setReadByForGroup(ConvMessage convMessage, TextView tv)
 	{
 		GroupConversation groupConversation = (GroupConversation) conversation;
-		JSONArray readByArray = convMessage.getReadByArray();
+		
+		String readBy = HikeConversationsDatabase.getInstance().getReadByValueForGroup(convMessage.getMsisdn());
+		JSONArray readByArray = null;
+		try
+		{
+			readByArray = new JSONArray(readBy);
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		if (readByArray == null || groupConversation.getGroupMemberAliveCount() == readByArray.length())
 		{

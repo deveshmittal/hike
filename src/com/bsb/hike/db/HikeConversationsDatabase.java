@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.R.integer;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
@@ -552,43 +553,47 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		return ids;
 	}
-
+	
+	/*
+	 * 1. Get max message id from list of ids
+	 * 2. Get convid from conversation table
+	 * 3. Get message id stored in groupInfo table
+	 * 4. If maxMsgid is equal to message id in group info table then we have to update readbyString else we have to add new string
+	 * 5. Mark all the message that have message id less than maxMsgId and state less than R to R.
+	 * 6. Update read by String and message id in groupInfo table
+	 */
 	public void setReadByForGroup(String groupId, long[] ids, String msisdn)
 	{
-		StringBuilder sb = new StringBuilder("(");
-		/* TODO make utils.join work for arrays */
+
+		long maxMsgId = -1;
 		for (int i = 0; i < ids.length; i++)
 		{
-			sb.append(ids[i]);
-			if (i != ids.length - 1)
-			{
-				sb.append(",");
-			}
+			if(ids[i] > maxMsgId)
+				maxMsgId = ids[i];
+			
 		}
-		sb.append(")");
-
 		Cursor c = null;
 		Cursor conversationCursor = null;
+		mDb.beginTransaction();
 		try
-		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.READ_BY, DBConstants.MESSAGE_ID }, DBConstants.CONV_ID + " = (SELECT " + DBConstants.CONV_ID
-					+ " FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.MSISDN + "=? ) AND " + DBConstants.MESSAGE_ID + " IN " + sb.toString(),
-					new String[] { groupId }, null, null, null);
-
-			conversationCursor = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + " = ?", new String[] { groupId }, null,
-					null, null);
-
-			long conversationMsgId = -1;
-			if (conversationCursor.moveToFirst())
+		{	
+			conversationCursor = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] {DBConstants.CONV_ID}, DBConstants.MSISDN + "=?", new String[] {groupId}, null, null, null);
+			c = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] {DBConstants.READ_BY, DBConstants.MESSAGE_ID}, DBConstants.GROUP_ID + " =? ", new String[] {groupId}, null, null, null);
+			
+			if(!conversationCursor.moveToFirst())
 			{
-				conversationMsgId = conversationCursor.getLong(conversationCursor.getColumnIndex(DBConstants.MESSAGE_ID));
+				return ;
+				
 			}
-
-			while (c.moveToNext())
+			long convId = conversationCursor.getInt(conversationCursor.getColumnIndex(DBConstants.CONV_ID));
+			
+			if (c.moveToFirst())
 			{
-				String readByString = c.getString(c.getColumnIndex(DBConstants.READ_BY));
-				long msgId = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
-
+				String readByString = null;
+				long msgId = c.getInt(c.getColumnIndex(DBConstants.MESSAGE_ID));
+				
+				if(msgId == maxMsgId)
+					readByString = c.getString(c.getColumnIndex(DBConstants.READ_BY));
 				try
 				{
 					JSONArray readByArray;
@@ -612,32 +617,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 							break;
 						}
 					}
-					if (alreadyAdded)
+					if (!alreadyAdded)
 					{
-						continue;
+						readByArray.put(msisdn);
 					}
-					readByArray.put(msisdn);
-
+					
 					int minStatusOrdinal = State.SENT_UNCONFIRMED.ordinal();
 					int maxStatusOrdinal = State.SENT_DELIVERED_READ.ordinal();
 
 					/*
 					 * Making sure we only set the status of sent messages.
 					 */
-					String whereClause = DBConstants.MESSAGE_ID + "=?" + " AND " + DBConstants.MSG_STATUS + " >= " + minStatusOrdinal + " AND " + DBConstants.MSG_STATUS + " <= "
-							+ maxStatusOrdinal;
+					String whereClause = DBConstants.MESSAGE_ID + " <= " + maxMsgId +  " AND " + DBConstants.MSG_STATUS + " > " + minStatusOrdinal + " AND " + DBConstants.MSG_STATUS + " < "
+							+ maxStatusOrdinal + " AND " + DBConstants.CONV_ID + "=?";
 
+					
 					// TODO find a better way to perform this update.
 					ContentValues contentValues = new ContentValues();
 					contentValues.put(DBConstants.MSG_STATUS, State.SENT_DELIVERED_READ.ordinal());
-
-					if (conversationMsgId == msgId)
-					{
-						mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { groupId });
-					}
-
+					mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { groupId });
+					mDb.update(DBConstants.MESSAGES_TABLE, contentValues, whereClause, new String[] {Long.toString(convId)});
+					
+					contentValues.clear();
 					contentValues.put(DBConstants.READ_BY, readByArray.toString());
-					mDb.update(DBConstants.MESSAGES_TABLE, contentValues, whereClause, new String[] { Long.toString(msgId) });
+					contentValues.put(DBConstants.MESSAGE_ID, maxMsgId);
+					mDb.update(DBConstants.GROUP_INFO_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[] { groupId });
 
 				}
 				catch (JSONException e)
@@ -653,10 +657,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				c.close();
 			}
+			
 			if (conversationCursor != null)
 			{
 				conversationCursor.close();
 			}
+			mDb.setTransactionSuccessful();
+			mDb.endTransaction();
 		}
 	}
 
@@ -1051,7 +1058,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			/* TODO this should be ORDER BY timestamp */
 			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID,
-					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.IS_HIKE_MESSAGE, DBConstants.READ_BY }, selection,
+					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.IS_HIKE_MESSAGE}, selection,
 					new String[] { Long.toString(convid) }, null, null, DBConstants.MESSAGE_ID + " DESC", limitStr);
 
 			final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
@@ -1062,10 +1069,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
 			final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
 			final int isHikeMessageColumn = c.getColumnIndex(DBConstants.IS_HIKE_MESSAGE);
-			final int readByColumn = c.getColumnIndex(DBConstants.READ_BY);
 
 			List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
-
 			while (c.moveToNext())
 			{
 				int hikeMessage = c.getInt(isHikeMessageColumn);
@@ -1082,7 +1087,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				{
 					Logger.w(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
 				}
-				message.setReadByArray(c.getString(readByColumn));
 				elements.add(elements.size(), message);
 				message.setConversation(conversation);
 			}
@@ -3043,6 +3047,28 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		try
 		{
 			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.READ_BY }, DBConstants.MESSAGE_ID + "=?", new String[] { Long.toString(msgId) }, null, null, null);
+			if (!c.moveToFirst())
+			{
+				return null;
+			}
+			String readByString = c.getString(c.getColumnIndex(DBConstants.READ_BY));
+			return readByString;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+	
+	public String getReadByValueForGroup(String groupId)
+	{
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.READ_BY }, DBConstants.GROUP_ID + "=?", new String[] {groupId}, null, null, null);
 			if (!c.moveToFirst())
 			{
 				return null;
