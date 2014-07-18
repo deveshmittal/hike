@@ -540,16 +540,16 @@ public class MqttMessagesManager
 		
 		if (convMessage.isGroupChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
-			convMessage = convDb.showParticipantStatusMessage(convMessage.getMsisdn());
-			if (convMessage != null)
+			ConvMessage convMessageNew = convDb.showParticipantStatusMessage(convMessage.getMsisdn());
+			if (convMessageNew != null)
 			{
 				if(isBulkMessage)
 				{
-					addToLists(convMessage.getMsisdn(), convMessage);
+					addToLists(convMessageNew.getMsisdn(), convMessageNew);
 				}
 				else
 				{
-					this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+					this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessageNew);
 				}
 			}
 		}
@@ -1706,7 +1706,7 @@ public class MqttMessagesManager
 		// name
 		// change
 		{
-			saveGCEnd(jsonObj);
+			saveGCName(jsonObj);
 		}
 		else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_END.equals(type)) // Group
 		// chat
