@@ -7,25 +7,17 @@ public class ContactTuple
 
 	private int referenceCount;
 
-	private String name;
-
 	private ContactInfo contact;
 
-	public ContactTuple(int refCount, String n, ContactInfo con)
+	public ContactTuple(int refCount, ContactInfo con)
 	{
 		this.referenceCount = refCount;
-		this.name = n;
 		this.contact = con;
 	}
 
 	public int getReferenceCount()
 	{
 		return referenceCount;
-	}
-
-	public String getName()
-	{
-		return name;
 	}
 
 	public ContactInfo getContact()
@@ -36,11 +28,6 @@ public class ContactTuple
 	public void setReferenceCount(int refCount)
 	{
 		referenceCount = refCount;
-	}
-
-	public void setName(String n)
-	{
-		name = n;
 	}
 
 	public void setContact(ContactInfo con)

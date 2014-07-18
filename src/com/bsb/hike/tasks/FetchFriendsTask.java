@@ -5,12 +5,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -162,7 +162,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			}
 
 			FavoriteType favoriteType = contactInfo.getFavoriteType();
-			
+
 			if (shouldAddToFavorites(favoriteType))
 			{
 				friendTaskList.add(contactInfo);
@@ -188,7 +188,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 		if (removeExistingParticipants)
 		{
-			Map<String, GroupParticipant> groupParticipants = ContactManager.getInstance().getGroupParticipants(existingGroupId, true, false);
+			Map<String, Pair<GroupParticipant, String>> groupParticipants = ContactManager.getInstance().getGroupParticipants(existingGroupId, true, false);
 
 			removeContactsFromList(friendTaskList, groupParticipants);
 			removeContactsFromList(hikeTaskList, groupParticipants);
@@ -197,9 +197,9 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 				removeContactsFromList(smsTaskList, groupParticipants);
 			}
 
-			for (GroupParticipant groupParticipant : groupParticipants.values())
+			for (Pair<GroupParticipant,String> groupParticipant : groupParticipants.values())
 			{
-				ContactInfo contactInfo = groupParticipant.getContactInfo();
+				ContactInfo contactInfo = groupParticipant.first.getContactInfo();
 
 				selectedPeople.put(contactInfo.getMsisdn(), contactInfo);
 			}
@@ -268,7 +268,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		}
 	}
 
-	private void removeContactsFromList(List<ContactInfo> contactList, Map<String, GroupParticipant> groupParticipants)
+	private void removeContactsFromList(List<ContactInfo> contactList, Map<String, Pair<GroupParticipant, String>> groupParticipants)
 	{
 		for (Iterator<ContactInfo> iter = contactList.iterator(); iter.hasNext();)
 		{

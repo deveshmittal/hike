@@ -100,7 +100,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private LastSeenScheduler lastSeenScheduler;
 
-	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LAST_SEEN_TIME_BULK_UPDATED };
+	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED, HikePubSub.LAST_SEEN_TIME_UPDATED,
+			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED };
 
 	private int previousFirstVisibleItem;
 
@@ -460,12 +461,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			// Group alredy exists. Fetch existing participants.
 			newGroup = false;
 		}
-		Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();
+		Map<String, Pair<GroupParticipant, String>> participantList = new HashMap<String, Pair<GroupParticipant, String>>();
 
 		for (ContactInfo particpant : selectedContactList)
 		{
 			GroupParticipant groupParticipant = new GroupParticipant(particpant);
-			participantList.put(particpant.getMsisdn(), groupParticipant);
+			participantList.put(particpant.getMsisdn(), new Pair<GroupParticipant, String>(groupParticipant, null));
 		}
 		ContactInfo userContactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 
@@ -714,9 +715,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else if (type != null && presentIntent.hasExtra(Intent.EXTRA_STREAM))
 		{
-			if(type.startsWith(HikeConstants.SHARE_CONTACT_CONTENT_TYPE))
+			if (type.startsWith(HikeConstants.SHARE_CONTACT_CONTENT_TYPE))
 			{
-				//TODO need to handle this case of contact sharing
+				// TODO need to handle this case of contact sharing
 				Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
 				return;
 			}
@@ -814,7 +815,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 			runOnUiThread(new Runnable()
 			{
-				
+
 				@Override
 				public void run()
 				{
@@ -891,7 +892,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	FriendsListFetchedCallback friendsListFetchedCallback = new FriendsListFetchedCallback()
 	{
-		
+
 		@Override
 		public void listFetched()
 		{

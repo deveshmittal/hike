@@ -23,8 +23,6 @@ abstract class ContactsCache
 
 	abstract void insertContact(ContactInfo contact);
 
-	abstract void insertContact(ContactInfo contact, String name);
-
 	abstract void removeContact(String msisdn);
 
 	/**
@@ -34,9 +32,11 @@ abstract class ContactsCache
 	 */
 	abstract void updateContact(ContactInfo contact);
 
-	abstract void updateContact(ContactInfo contact, String name);
-
 	abstract void loadMemory();
+
+	abstract String getName(String msisdn);
+
+	abstract String getName(String groupId, String msisdn);
 
 	abstract ContactInfo putInCache(String msisdn, boolean ifNotFoundReturnNull);
 
@@ -44,7 +44,7 @@ abstract class ContactsCache
 
 	abstract void clearMemory();
 
-	abstract void setUnknownContactName(String msisdn, String name);
-	
+	abstract void setUnknownContactName(String groupId, String msisdn, String name);
+
 	abstract void contactDeleted(ContactInfo contact);
 }

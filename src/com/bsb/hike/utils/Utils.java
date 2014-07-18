@@ -628,14 +628,14 @@ public class Utils
 		return !msisdn.startsWith("+");
 	}
 
-	public static String defaultGroupName(Map<String, GroupParticipant> participantList)
+	public static String defaultGroupName(Map<String, Pair<GroupParticipant, String>> participantList)
 	{
 		List<GroupParticipant> groupParticipants = new ArrayList<GroupParticipant>();
-		for (Entry<String, GroupParticipant> participant : participantList.entrySet())
+		for (Entry<String, Pair<GroupParticipant,String>> participant : participantList.entrySet())
 		{
-			if (!participant.getValue().hasLeft())
+			if (!participant.getValue().first.hasLeft())
 			{
-				groupParticipants.add(participant.getValue());
+				groupParticipants.add(participant.getValue().first);
 			}
 		}
 		Collections.sort(groupParticipants);

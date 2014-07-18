@@ -109,7 +109,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private String emailTxt;
 
-	private Map<String, GroupParticipant> participantMap;
+	private Map<String, Pair<GroupParticipant, String>> participantMap;
 
 	private ProfileType profileType;
 
@@ -572,9 +572,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		/*
 		 * Removing inactive participants
 		 */
-		for (Entry<String, GroupParticipant> participantEntry : participantMap.entrySet())
+		for (Entry<String, Pair<GroupParticipant, String>> participantEntry : participantMap.entrySet())
 		{
-			GroupParticipant groupParticipant = participantEntry.getValue();
+			GroupParticipant groupParticipant = participantEntry.getValue().first;
 			if (groupParticipant.hasLeft())
 			{
 				inactiveMsisdns.add(participantEntry.getKey());
@@ -607,7 +607,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		// Adding an item for the header
 		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.HEADER_ID));
 
-		List<GroupParticipant> participants = new ArrayList<GroupParticipant>(participantMap.values());
+		List<GroupParticipant> participants = new ArrayList<GroupParticipant>();
+
+		for(Entry<String,Pair<GroupParticipant,String>> mapEntry : participantMap.entrySet())
+		{
+			participants.add(mapEntry.getValue().first);
+		}
 
 		if (!participantMap.containsKey(userInfo.getContactInfo().getMsisdn()))
 		{
@@ -1344,7 +1349,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(contactInfo, favoriteType);
 		HikeMessengerApp.getPubSub().publish(accepted ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.REJECT_FRIEND_REQUEST, favoriteToggle);
 		int count = preferences.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
-		if(count > 0)
+		if (count > 0)
 		{
 			Utils.incrementOrDecrementHomeOverflowCount(preferences, -1);
 		}
@@ -1685,7 +1690,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					List<ContactInfo> contacts = HikeMessengerApp.getContactManager().getContact(msisdns, true, true);
 					for (ContactInfo contactInfo : contacts)
 					{
-						participantMap.put(contactInfo.getMsisdn(), new GroupParticipant(contactInfo));
+						participantMap.put(contactInfo.getMsisdn(), new Pair<GroupParticipant, String>(new GroupParticipant(contactInfo), null));
 						if (contactInfo.getName() == null)
 						{
 							msisdnsGroupTable.add(contactInfo.getMsisdn());
@@ -1700,7 +1705,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					{
 						String msisdn = mapEntry.getKey();
 						String name = mapEntry.getValue();
-						participantMap.get(msisdn).getContactInfo().setName(name);
+						participantMap.get(msisdn).first.getContactInfo().setName(name);
 					}
 				}
 

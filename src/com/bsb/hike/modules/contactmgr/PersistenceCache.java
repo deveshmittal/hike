@@ -27,7 +27,7 @@ class PersistenceCache extends ContactsCache
 	private Map<String, ContactTuple> groupContactsPersistence;
 
 	// Memory persistence for all group names and list of msisdns(last message in group) that should always be loaded
-	private Map<String, Pair<String, ConcurrentLinkedQueue<String>>> groupPersistence;
+	private Map<String, GroupDetails> groupPersistence;
 
 	private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
 
@@ -43,7 +43,7 @@ class PersistenceCache extends ContactsCache
 		hDb = db;
 		convsContactsPersistence = new HashMap<String, ContactInfo>();
 		groupContactsPersistence = new HashMap<String, ContactTuple>();
-		groupPersistence = new HashMap<String, Pair<String, ConcurrentLinkedQueue<String>>>();
+		groupPersistence = new HashMap<String, GroupDetails>();
 		loadMemory();
 	}
 
@@ -83,15 +83,7 @@ class PersistenceCache extends ContactsCache
 	 */
 	void insertContact(ContactInfo contact)
 	{
-		writeLock.lock();
-		try
-		{
-			convsContactsPersistence.put(contact.getMsisdn(), contact);
-		}
-		finally
-		{
-			writeLock.unlock();
-		}
+		insertContact(contact, true);
 	}
 
 	/**
@@ -104,13 +96,20 @@ class PersistenceCache extends ContactsCache
 	 * @param name
 	 *            name if contact is not saved in address book otherwise null
 	 */
-	void insertContact(ContactInfo contact, String name)
+	void insertContact(ContactInfo contact, boolean ifOneToOneConversation)
 	{
 		writeLock.lock();
 		try
 		{
-			ContactTuple tuple = new ContactTuple(1, name, contact);
-			groupContactsPersistence.put(contact.getMsisdn(), tuple);
+			if (ifOneToOneConversation)
+			{
+				convsContactsPersistence.put(contact.getMsisdn(), contact);
+			}
+			else
+			{
+				ContactTuple tuple = new ContactTuple(1, contact);
+				groupContactsPersistence.put(contact.getMsisdn(), tuple);
+			}
 		}
 		finally
 		{
@@ -187,11 +186,11 @@ class PersistenceCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			Pair<String, ConcurrentLinkedQueue<String>> pp = groupPersistence.get(grpId);
-			ConcurrentLinkedQueue<String> lastMsisdns = pp.second;
-			for (String ms : lastMsisdns)
+			GroupDetails pp = groupPersistence.get(grpId);
+			ConcurrentLinkedQueue<pair> lastMsisdns = pp.getLastMsisdns();
+			for (pair msPair : lastMsisdns)
 			{
-				removeFromCache(ms, false);
+				removeFromCache(msPair.first, false);
 			}
 			groupPersistence.remove(grpId);
 		}
@@ -231,37 +230,7 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * Updates the contact tuple in {@link #groupContactsPersistence} if unknown contact is saved or saved contact is deleted because we have to update the name field also in
-	 * contact tuple.
-	 * <p>
-	 * In case of saved contact is deleted from addressbook then it's name should be changed to null and if unsaved contact is added in address book then it's name from group info
-	 * table should be passed as parameter
-	 * </p>
-	 * 
-	 * @param contact
-	 * @param name
-	 */
-	void updateContact(ContactInfo contact, String name)
-	{
-		readLock.lock();
-		ContactTuple tuple = null;
-		try
-		{
-			tuple = groupContactsPersistence.get(contact.getMsisdn());
-		}
-		finally
-		{
-			writeLock.unlock();
-		}
-		if (null != tuple)
-		{
-			tuple.setContact(contact);
-			tuple.setName(name);
-		}
-	}
-
-	/**
-	 * Returns name of group if msisdn is group ID else contact name - in this case also if contact is not saved then contact's name from contact tuple is obtained . This
+	 * Returns name of group if msisdn is group ID else contact name - if contact is unsaved then this method returns null as for unsaved contact we need groupId to get name. This
 	 * implementation is thread safe.
 	 * 
 	 * @param msisdn
@@ -277,8 +246,8 @@ class PersistenceCache extends ContactsCache
 			readLock.lock();
 			try
 			{
-				Pair<String, ConcurrentLinkedQueue<String>> grp = groupPersistence.get(msisdn);
-				return grp.first;
+				GroupDetails grpDetails = groupPersistence.get(msisdn);
+				return grpDetails.getGroupName();
 			}
 			finally
 			{
@@ -296,10 +265,6 @@ class PersistenceCache extends ContactsCache
 				if (null != tuple)
 				{
 					c = tuple.getContact();
-					if (null == c.getName())
-					{
-						return tuple.getName();
-					}
 				}
 			}
 
@@ -315,7 +280,20 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * This function sets name in {@link #groupContactsPersistence} cache if the contact is not saved .
+	 * Returns name of an unsaved contact using groupId as unsaved contacts name is different in different groups
+	 * 
+	 * @param groupId
+	 * @param msisdn
+	 * @return
+	 */
+	String getName(String groupId, String msisdn)
+	{
+		GroupDetails grpDetails = groupPersistence.get(groupId);
+		return grpDetails.getName(msisdn);
+	}
+
+	/**
+	 * This function sets name in {@link #groupContactsPersistence} cache if the contact is not saved.
 	 * <p>
 	 * Suppose some unsaved contact is already in memory and it is added in a group then we set the name of contact using group table.
 	 * </p>
@@ -323,16 +301,13 @@ class PersistenceCache extends ContactsCache
 	 * @param msisdn
 	 * @param name
 	 */
-	void setUnknownContactName(String msisdn, String name)
+	void setUnknownContactName(String grpId, String msisdn, String name)
 	{
 		writeLock.lock();
 		try
 		{
-			ContactTuple tuple = groupContactsPersistence.get(msisdn);
-			if (null != tuple)
-			{
-				tuple.setName(name);
-			}
+			GroupDetails grpDet = groupPersistence.get(grpId);
+			grpDet.setName(msisdn, name);
 		}
 		finally
 		{
@@ -360,9 +335,14 @@ class PersistenceCache extends ContactsCache
 			String name = mapEntry.getValue();
 			List<String> lastMsisdns = groupLastMsisdnsMap.get(grpId);
 			grouplastMsisdns.addAll(lastMsisdns);
-			ConcurrentLinkedQueue<String> lastMsisdnsConcurrentLinkedQueue = new ConcurrentLinkedQueue<String>(lastMsisdns);
-			Pair<String, ConcurrentLinkedQueue<String>> groupPair = new Pair<String, ConcurrentLinkedQueue<String>>(name, lastMsisdnsConcurrentLinkedQueue);
-			groupPersistence.put(grpId, groupPair);
+			ConcurrentLinkedQueue<pair> lastMsisdnsConcurrentLinkedQueue = new ConcurrentLinkedQueue<pair>();
+			for (String ms : lastMsisdns)
+			{
+				lastMsisdnsConcurrentLinkedQueue.add(new pair(ms, null));
+			}
+
+			GroupDetails grpDetails = new GroupDetails(name, lastMsisdnsConcurrentLinkedQueue);
+			groupPersistence.put(grpId, grpDetails);
 		}
 
 		List<String> msisdnsToGetContactInfo = new ArrayList<String>();
@@ -399,7 +379,7 @@ class PersistenceCache extends ContactsCache
 		{
 			String msisdn = mapEntry.getKey();
 			ContactInfo contact = mapEntry.getValue();
-			ContactTuple tuple = new ContactTuple(1, null, contact);
+			ContactTuple tuple = new ContactTuple(1, contact);
 			groupContactsPersistence.put(msisdn, tuple);
 
 			if (null == contact.getName())
@@ -409,7 +389,7 @@ class PersistenceCache extends ContactsCache
 		}
 
 		// get names of unknown group contacts from group members table
-		Map<String, String> unknownGroupMsisdnsName = new HashMap<String, String>();
+		Map<String, Map<String, String>> unknownGroupMsisdnsName = new HashMap<String, Map<String, String>>();
 
 		int idx = unknownGroupMsisdns.lastIndexOf(",");
 		if (idx >= 0)
@@ -419,13 +399,19 @@ class PersistenceCache extends ContactsCache
 		}
 
 		// set names for unknown group contacts
-		for (Entry<String, String> mapEntry : unknownGroupMsisdnsName.entrySet())
+		for (Entry<String, GroupDetails> mapEntry : groupPersistence.entrySet())
 		{
-			String msisdn = mapEntry.getKey();
-			String name = mapEntry.getValue();
-
-			ContactTuple tuple = groupContactsPersistence.get(msisdn);
-			tuple.setName(name);
+			String groupId = mapEntry.getKey();
+			GroupDetails grpDetails = mapEntry.getValue();
+			ConcurrentLinkedQueue<pair> list = grpDetails.getLastMsisdns();
+			Map<String, String> map = unknownGroupMsisdnsName.get(groupId);
+			if (null != map)
+			{
+				for (pair msPair : list)
+				{
+					msPair.second = map.get(msPair.first);
+				}
+			}
 		}
 	}
 
@@ -454,14 +440,9 @@ class PersistenceCache extends ContactsCache
 	ContactInfo putInCache(String msisdn, boolean ifNotFoundReturnNull, boolean ifOneToOneConversation)
 	{
 		ContactInfo contact = hDb.getContactInfoFromMSISDN(msisdn, ifNotFoundReturnNull);
-		if (ifOneToOneConversation)
-		{
-			insertContact(contact);
-		}
-		else
-		{
-			insertContact(contact, null);
-		}
+
+		insertContact(contact, ifOneToOneConversation);
+
 		return contact;
 	}
 
@@ -492,14 +473,9 @@ class PersistenceCache extends ContactsCache
 			for (Entry<String, ContactInfo> mapEntry : map.entrySet())
 			{
 				ContactInfo contact = mapEntry.getValue();
-				if (ifOneToOneConversation)
-				{
-					insertContact(contact);
-				}
-				else
-				{
-					insertContact(contact, null);
-				}
+
+				insertContact(contact, ifOneToOneConversation);
+
 			}
 
 			return new ArrayList<ContactInfo>(map.values());
@@ -531,7 +507,7 @@ class PersistenceCache extends ContactsCache
 	{
 		if (groupPersistence != null)
 		{
-			Pair<String, ConcurrentLinkedQueue<String>> nameAndLastMsisdns;
+			GroupDetails nameAndLastMsisdns;
 			readLock.lock();
 			try
 			{
@@ -545,19 +521,19 @@ class PersistenceCache extends ContactsCache
 			List<String> msisdns = new ArrayList<String>();
 			if (null != nameAndLastMsisdns)
 			{
-				ConcurrentLinkedQueue<String> grpMsisdns = nameAndLastMsisdns.second;
+				ConcurrentLinkedQueue<pair> grpMsisdns = nameAndLastMsisdns.getLastMsisdns();
 				if (null != grpMsisdns)
 				{
 					boolean flag;
 					writeLock.lock();
 					try
 					{
-						for (String msisdn : grpMsisdns)
+						for (pair msisdnPair : grpMsisdns)
 						{
 							flag = false;
 							for (String ms : currentGroupMsisdns)
 							{
-								if (ms.equals(msisdn))
+								if (ms.equals(msisdnPair.first))
 								{
 									flag = true;
 									break;
@@ -565,12 +541,12 @@ class PersistenceCache extends ContactsCache
 							}
 							if (!flag)
 							{
-								removeFromCache(msisdn, false);
+								removeFromCache(msisdnPair.first, false);
 							}
 							else
 							{
 								// if contact is in group map then increase ref count by 1
-								ContactTuple tuple = groupContactsPersistence.get(msisdn);
+								ContactTuple tuple = groupContactsPersistence.get(msisdnPair.first);
 								if (null != tuple)
 								{
 									tuple.setReferenceCount(tuple.getReferenceCount() + 1);
@@ -578,16 +554,16 @@ class PersistenceCache extends ContactsCache
 								else
 								{
 									// if contact is in convsMap then insert in groupMap with ref count 1
-									ContactInfo contact = convsContactsPersistence.get(msisdn);
+									ContactInfo contact = convsContactsPersistence.get(msisdnPair.first);
 									if (null == contact)
 									{
 										// get contact from db
 										// add to a list
-										msisdns.add(msisdn);
+										msisdns.add(msisdnPair.first);
 									}
 									else
 									{
-										insertContact(contact, null);
+										insertContact(contact, false);
 									}
 								}
 							}
@@ -604,7 +580,12 @@ class PersistenceCache extends ContactsCache
 
 				// lock is not needed here because grpMsisdns is concurrentLinkedQueue
 				grpMsisdns.clear();
-				grpMsisdns.addAll(currentGroupMsisdns);
+
+				for (String ms : currentGroupMsisdns)
+				{
+					pair msisdnNamePair = new pair(ms, null); // TODO name for unsaved contact
+					grpMsisdns.add(msisdnNamePair);
+				}
 			}
 		}
 	}
@@ -678,9 +659,9 @@ class PersistenceCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			ConcurrentLinkedQueue<String> clq = new ConcurrentLinkedQueue<String>();
-			Pair<String, ConcurrentLinkedQueue<String>> pair = new Pair<String, ConcurrentLinkedQueue<String>>(groupName, clq);
-			groupPersistence.put(grpId, pair);
+			ConcurrentLinkedQueue<pair> clq = new ConcurrentLinkedQueue<pair>();
+			GroupDetails grpDetails = new GroupDetails(groupName, clq);
+			groupPersistence.put(grpId, grpDetails);
 		}
 		finally
 		{

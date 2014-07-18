@@ -198,7 +198,7 @@ public class DbConversationListener implements Listener
 		{
 			String groupId = (String) object;
 
-			Map<String, GroupParticipant> smsParticipants = ContactManager.getInstance().getGroupParticipants(groupId, true, true);
+			Map<String, Pair<GroupParticipant,String>> smsParticipants = ContactManager.getInstance().getGroupParticipants(groupId, true, true);
 
 			if (smsParticipants.isEmpty())
 			{
@@ -208,9 +208,9 @@ public class DbConversationListener implements Listener
 			JSONObject dndJSON = new JSONObject();
 			JSONArray dndParticipants = new JSONArray();
 
-			for (Entry<String, GroupParticipant> smsParticipantEntry : smsParticipants.entrySet())
+			for (Entry<String, Pair<GroupParticipant,String>> smsParticipantEntry : smsParticipants.entrySet())
 			{
-				GroupParticipant smsParticipant = smsParticipantEntry.getValue();
+				GroupParticipant smsParticipant = smsParticipantEntry.getValue().first;
 				String msisdn = smsParticipantEntry.getKey();
 				if (smsParticipant.onDnd())
 				{

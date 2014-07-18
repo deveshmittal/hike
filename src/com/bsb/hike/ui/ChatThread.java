@@ -1748,9 +1748,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (mConversation instanceof GroupConversation)
 		{
 			boolean hasSmsUser = false;
-			for (Entry<String, GroupParticipant> entry : ((GroupConversation) mConversation).getGroupParticipantList().entrySet())
+			for (Entry<String, Pair<GroupParticipant,String>> entry : ((GroupConversation) mConversation).getGroupParticipantList().entrySet())
 			{
-				GroupParticipant groupParticipant = entry.getValue();
+				GroupParticipant groupParticipant = entry.getValue().first;
 				if (!groupParticipant.getContactInfo().isOnhike())
 				{
 					hasSmsUser = true;

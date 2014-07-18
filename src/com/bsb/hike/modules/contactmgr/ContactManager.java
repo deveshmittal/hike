@@ -8,26 +8,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-import org.apache.http.impl.execchain.RetryExec;
 import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Pair;
 
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.DbException;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.modules.iface.ITransientCache;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -178,10 +172,20 @@ public class ContactManager implements ITransientCache
 		return name;
 	}
 
-	public void setUnknownContactName(String msisdn, String name)
+	public String getName(String groupId, String msisdn)
 	{
-		persistenceCache.setUnknownContactName(msisdn, name);
-		transientCache.setUnknownContactName(msisdn, name);
+		String name = persistenceCache.getName(groupId, msisdn);
+		if (null == name)
+		{
+			name = transientCache.getName(groupId, msisdn);
+		}
+		return name;
+	}
+
+	public void setUnknownContactName(String grpId, String msisdn, String name)
+	{
+		persistenceCache.setUnknownContactName(grpId, msisdn, name);
+		transientCache.setUnknownContactName(grpId, msisdn, name);
 	}
 
 	/**
@@ -258,14 +262,8 @@ public class ContactManager implements ITransientCache
 				if (null == con)
 				{
 					con = transientCache.getContact(msisdn);
-					if (ifOneToOneConversation)
-					{
-						persistenceCache.insertContact(con);
-					}
-					else
-					{
-						persistenceCache.insertContact(con, null);
-					}
+					persistenceCache.insertContact(con, ifOneToOneConversation);
+
 				}
 			}
 		}
@@ -325,14 +323,7 @@ public class ContactManager implements ITransientCache
 				if (null == con)
 				{
 					con = transientCache.getContact(msisdn);
-					if (ifOneToOneConversation)
-					{
-						persistenceCache.insertContact(con);
-					}
-					else
-					{
-						persistenceCache.insertContact(con, null);
-					}
+					persistenceCache.insertContact(con, ifOneToOneConversation);
 				}
 			}
 		}
@@ -563,7 +554,7 @@ public class ContactManager implements ITransientCache
 
 	public Set<String> getBlockedMsisdnSet()
 	{
-		return getBlockedMsisdnSet();
+		return hDb.getBlockedMsisdnSet();
 	}
 
 	public void setAddressBookAndBlockList(List<ContactInfo> contacts, List<String> blockedMsisdns) throws DbException
@@ -597,7 +588,7 @@ public class ContactManager implements ITransientCache
 	 * @param groupId
 	 * @return
 	 */
-	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
+	public Map<String, Pair<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
 	{
 		return getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly, true);
 	}
@@ -608,10 +599,11 @@ public class ContactManager implements ITransientCache
 	 * @param groupId
 	 * @return
 	 */
-	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
+	public Map<String, Pair<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
 	{
-		Pair<Map<String, GroupParticipant>, List<String>> groupPair = transientCache.getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly, fetchParticipants);
-		Map<String, GroupParticipant> groupParticipantsMap = groupPair.first;
+		Pair<Map<String, Pair<GroupParticipant, String>>, List<String>> groupPair = transientCache.getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly,
+				fetchParticipants);
+		Map<String, Pair<GroupParticipant, String>> groupParticipantsMap = groupPair.first;
 		List<String> allMsisdns = groupPair.second;
 
 		if (null != allMsisdns)
@@ -621,7 +613,7 @@ public class ContactManager implements ITransientCache
 			{
 				List<ContactInfo> list = new ArrayList<ContactInfo>();
 				List<String> msisdnsDB = new ArrayList<String>();
-				
+
 				// traverse all msisdns if found in transient memory increment ref count by one
 				for (String ms : allMsisdns)
 				{
@@ -637,10 +629,7 @@ public class ContactManager implements ITransientCache
 						contact = persistenceCache.getContact(ms);
 						if (null != contact)
 						{
-							if (null == contact.getName())
-								transientCache.insertContact(contact, null);
-							else
-								transientCache.insertContact(contact);
+							transientCache.insertContact(contact);
 							list.add(contact);
 						}
 						else
@@ -651,18 +640,19 @@ public class ContactManager implements ITransientCache
 				}
 
 				list.addAll(transientCache.putInCache(msisdnsDB));
-				
+
 				for (ContactInfo contactInfo : list)
 				{
+					Pair<GroupParticipant, String> groupParticipantPair = groupParticipantsMap.get(contactInfo.getMsisdn());
 					if (contactInfo.getName() == null)
 					{
-						String name = groupParticipantsMap.get(contactInfo.getMsisdn()).getContactInfo().getName();
-						setUnknownContactName(contactInfo.getMsisdn(), name);
-						groupParticipantsMap.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
+						String name = groupParticipantPair.first.getContactInfo().getName();
+						setUnknownContactName(groupId, contactInfo.getMsisdn(), name);
+						groupParticipantPair.first.setContactInfo(contactInfo);
 					}
 					else
 					{
-						groupParticipantsMap.get(contactInfo.getMsisdn()).setContactInfo(contactInfo);
+						groupParticipantPair.first.setContactInfo(contactInfo);
 					}
 				}
 			}
