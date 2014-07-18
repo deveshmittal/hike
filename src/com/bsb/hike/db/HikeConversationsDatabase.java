@@ -107,7 +107,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 																																									 */
 				+ DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + DBConstants.MAPPED_MSG_ID + " INTEGER, "
 				+ DBConstants.CONV_ID + " INTEGER," + DBConstants.MESSAGE_METADATA + " TEXT, " + DBConstants.GROUP_PARTICIPANT + " TEXT, " + DBConstants.IS_HIKE_MESSAGE
-				+ " INTEGER DEFAULT -1, " + DBConstants.READ_BY + " TEXT, " + DBConstants.MSISDN + " TEXT, " + DBConstants.MESSAGE_HASH + " TEXT UNIQUE DEFAULT NULL" + " ) ";
+				+ " INTEGER DEFAULT -1, " + DBConstants.READ_BY + " TEXT, " + DBConstants.MSISDN + " TEXT, " + DBConstants.MESSAGE_HASH + " TEXT DEFAULT NULL" + " ) ";
 
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CONVERSATION_INDEX + " ON " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.CONV_ID + " , " + DBConstants.TIMESTAMP
@@ -505,7 +505,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		if (oldVersion < 27)
 		{
 			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.MSISDN + " TEXT";
-			String alter1 = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.MESSAGE_HASH + " TEXT UNIQUE DEFAULT NULL";
+			String alter1 = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.MESSAGE_HASH + " TEXT DEFAULT NULL";
 			String createIndex = "CREATE UNIQUE INDEX IF NOT EXISTS " + DBConstants.MESSAGE_HASH_INDEX + " ON " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE_HASH
 					+ " DESC" + " )";
 			String alter2 = "ALTER TABLE " + DBConstants.GROUP_INFO_TABLE + " ADD COLUMN " + DBConstants.READ_BY + " TEXT, " + DBConstants.MESSAGE_ID + " INTEGER";
