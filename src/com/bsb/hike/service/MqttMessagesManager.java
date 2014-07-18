@@ -1706,7 +1706,7 @@ public class MqttMessagesManager
 		// name
 		// change
 		{
-			saveGCEnd(jsonObj);
+			saveGCName(jsonObj);
 		}
 		else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_END.equals(type)) // Group
 		// chat
