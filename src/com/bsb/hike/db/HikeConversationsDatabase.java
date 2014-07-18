@@ -508,11 +508,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			String alter1 = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.MESSAGE_HASH + " TEXT DEFAULT NULL";
 			String createIndex = "CREATE UNIQUE INDEX IF NOT EXISTS " + DBConstants.MESSAGE_HASH_INDEX + " ON " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE_HASH
 					+ " DESC" + " )";
-			String alter2 = "ALTER TABLE " + DBConstants.GROUP_INFO_TABLE + " ADD COLUMN " + DBConstants.READ_BY + " TEXT, " + DBConstants.MESSAGE_ID + " INTEGER";
+			String alter2 = "ALTER TABLE " + DBConstants.GROUP_INFO_TABLE + " ADD COLUMN " + DBConstants.READ_BY + " TEXT";
+			String alter3 = "ALTER TABLE " + DBConstants.GROUP_INFO_TABLE + " ADD COLUMN " + DBConstants.MESSAGE_ID + " INTEGER";
 			db.execSQL(alter);
 			db.execSQL(alter1);
 			db.execSQL(createIndex);
 			db.execSQL(alter2);
+			db.execSQL(alter3);
 			// Edit the preference to ensure that HikeMessenger app knows we've
 			// reached the
 			// upgrade flow for version 27
