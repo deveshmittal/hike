@@ -3770,10 +3770,21 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	public void addMessageHashNMsisdnNReadByForGroup()
 	{
 		mDb.beginTransaction();
-		addMessageHashAndMsisdn();
-		updateReadByArrayForGroups();
-		mDb.setTransactionSuccessful();
-		mDb.endTransaction();
+		try
+		{
+			addMessageHashAndMsisdn();
+			updateReadByArrayForGroups();
+		}
+		catch (Exception e)
+		{
+			Logger.e(getClass().getSimpleName(), "Exception : ", e);
+			e.printStackTrace();
+		}
+		finally
+		{
+			mDb.setTransactionSuccessful();
+			mDb.endTransaction();
+		}
 	}
 
 	private void addMessageHashAndMsisdn()
