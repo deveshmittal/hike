@@ -2934,11 +2934,11 @@ public class Utils
 	}
 
 
-	//removed kitkat specific code for nokia
-	//public static boolean isKitkatOrHigher()
-	//{
-	//	return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-	//}
+	//this method will return hardcoded false for nokia
+	public static boolean isKitkatOrHigher()
+	{
+		return false;// Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+	}
 
 	public static void executeAsyncTask(AsyncTask<Void, Void, Void> asyncTask)
 	{
