@@ -2,6 +2,7 @@ package com.bsb.hike.db;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -123,7 +124,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ " ) ";
 		db.execSQL(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.GROUP_INFO_TABLE + " ( " + DBConstants.GROUP_ID + " STRING PRIMARY KEY, " + DBConstants.GROUP_NAME + " TEXT, "
-				+ DBConstants.GROUP_OWNER + " TEXT, " + DBConstants.GROUP_ALIVE + " INTEGER, " + DBConstants.MUTE_GROUP + " INTEGER DEFAULT 0 " + " )";
+				+ DBConstants.GROUP_OWNER + " TEXT, " + DBConstants.GROUP_ALIVE + " INTEGER, " + DBConstants.MUTE_GROUP + " INTEGER DEFAULT 0, " + DBConstants.READ_BY + " TEXT, " + DBConstants.MESSAGE_ID + " INTEGER" + " )";
 		db.execSQL(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.EMOTICON_TABLE + " ( " + DBConstants.EMOTICON_NUM + " INTEGER PRIMARY KEY, " + DBConstants.LAST_USED + " INTEGER" + " )";
 		db.execSQL(sql);
@@ -418,6 +419,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			catch (Exception e)
 			{
 			}
+		}
+		
+		
+		/*
+		 * Version 27 adds READ_BY and MESSAGE_ID column in groupInfo table
+		 */
+		if (oldVersion < 27)
+		{
+			String alter1 = "ALTER TABLE " + DBConstants.GROUP_INFO_TABLE + " ADD COLUMN " + DBConstants.READ_BY + " TEXT, " + DBConstants.MESSAGE_ID + " INTEGER";
+			db.execSQL(alter1);
 		}
 	}
 
@@ -3280,5 +3291,96 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 		return msisdnResult;
+	}
+	
+	public void updateReadByArrayForGroups()
+	{
+		Cursor c = null;
+		mDb.beginTransaction();
+		try
+		{
+			HashMap<String, String> groupIdMap = getAllGroupConversations();
+			String convIdStatement = getConvIdStatement(groupIdMap.keySet());
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] {" MAX (" + DBConstants.MESSAGE_ID + ") AS msgid", DBConstants.READ_BY, DBConstants.CONV_ID}, DBConstants.CONV_ID + " IN " + convIdStatement + " AND " + DBConstants.MSG_STATUS + " = " + State.SENT_DELIVERED_READ.ordinal(), null, DBConstants.CONV_ID, null, null);
+			
+			final int convIdIdx = c.getColumnIndex(DBConstants.CONV_ID);
+			final int msgIdIdx = c.getColumnIndex(DBConstants.MESSAGE_ID);
+			final int readByIdx = c.getColumnIndex(DBConstants.READ_BY);
+			
+			while(c.moveToNext())
+			{
+				long messageId = c.getLong(msgIdIdx);
+				long convId = c.getLong(convIdIdx);
+				String readByString = c.getString(readByIdx);
+				String groupId = groupIdMap.get(Long.toString(convId));
+				
+				Logger.d("readByValues", "conVid : " + convId + " messageId : " + messageId + " groupId : " + groupId + " readby : " + readByString);
+				
+				ContentValues contentValues = new ContentValues();
+				contentValues.put(DBConstants.MESSAGE_ID, messageId);
+				contentValues.put(DBConstants.READ_BY, readByString);
+				mDb.update(DBConstants.GROUP_INFO_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[]{groupId});
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			if(c != null)
+			{
+				c.close();
+			}
+			mDb.setTransactionSuccessful();
+			mDb.endTransaction();
+		}
+	}
+	
+	public HashMap<String, String> getAllGroupConversations()
+	{
+		Cursor c = null;
+		String msisdn;
+		HashMap<String, String> groupIdMap = new HashMap<String, String>();
+		
+		try
+		{
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] {DBConstants.CONV_ID, DBConstants.MSISDN}, null, null, null, null, null);
+			while(c.moveToNext())
+			{
+				msisdn = c.getString(c.getColumnIndex(DBConstants.MSISDN));
+				if(Utils.isGroupConversation(msisdn))
+				{
+					groupIdMap.put(Integer.toString(c.getInt(c.getColumnIndex(DBConstants.CONV_ID))), msisdn);
+				}
+			}
+		}
+		finally
+		{
+			if(c != null)
+			{
+				c.close();
+			}
+		}
+		return groupIdMap;
+	}
+	
+	private String getConvIdStatement(Collection<String> collection)
+	{
+
+		StringBuilder sb = new StringBuilder("(");
+		;
+		for (String convId : collection)
+		{
+
+			sb.append(DatabaseUtils.sqlEscapeString(convId));
+
+			sb.append(",");
+
+		}
+		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
+
+		return sb.toString();
+
 	}
 }
