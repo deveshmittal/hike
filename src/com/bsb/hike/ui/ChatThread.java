@@ -207,6 +207,7 @@ import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
 		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener
 {
+	private static final String HASH_PIN = "#pin ";
 
 	private boolean screenOffEvent;
 
@@ -1499,6 +1500,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (mComposeViewWatcher != null)
 		{
 			mComposeViewWatcher.onMessageSent();
+		}
+	}
+
+	private void checkMessageTypeFromHash(ConvMessage convMessage)
+	{
+		if (convMessage.getMessage().startsWith(HASH_PIN))
+		{
+			convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 		}
 	}
 

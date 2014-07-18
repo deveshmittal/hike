@@ -1642,10 +1642,17 @@ public class HikeConstants
 	public static final String PACKAGE_WATSAPP = "com.whatsapp";
 
 	public static final long IMAGE_SIZE_SMALL = 50 * 1024;
-	
+
 	public static final long IMAGE_SIZE_MEDIUM = 80 * 1024;
 
 	public static final String WATSAPP_INVITE_MESSAGE_KEY = "wa_msg";
 
 	public static final String WATSAPP_INVITE_ENABLED = "i_wa";
+
+	public static class MESSAGE_TYPE
+	{
+		public static final int PLAIN_TEXT = 1;
+
+		public static final int TEXT_PIN = 2;
+	}
 }

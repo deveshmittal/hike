@@ -59,11 +59,13 @@ public class ConvMessage
 	private JSONArray readByArray;
 
 	private boolean shouldShowPush = true;
-	
+
 	private boolean isTickSoundPlayed = false;
 
 	private int unreadCount = -1;
+
 	// private boolean showResumeButton = true;
+	private int messageType = HikeConstants.MESSAGE_TYPE.PLAIN_TEXT;
 
 	public boolean isInvite()
 	{
@@ -828,5 +830,15 @@ public class ConvMessage
 	public void setTickSoundPlayed(boolean isTickSoundPlayed)
 	{
 		this.isTickSoundPlayed = isTickSoundPlayed;
+	}
+
+	public void setMessageType(int messageType)
+	{
+		this.messageType = messageType;
+	}
+
+	public int getMessageType()
+	{
+		return messageType;
 	}
 }
