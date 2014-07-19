@@ -349,6 +349,7 @@ public class TransientCache extends ContactsCache
 	 */
 	List<ContactInfo> putInCache(List<String> msisdns)
 	{
+		List<ContactInfo> contactsList = new ArrayList<ContactInfo>();
 		if (msisdns.size() > 0)
 		{
 			Map<String, ContactInfo> map = hDb.getContactInfoFromMsisdns(msisdns, true);
@@ -365,10 +366,9 @@ public class TransientCache extends ContactsCache
 					insertContact(contact);
 				}
 			}
-
-			return new ArrayList<ContactInfo>(map.values());
+			contactsList.addAll(map.values());
 		}
-		return null;
+		return contactsList;
 	}
 
 	/**

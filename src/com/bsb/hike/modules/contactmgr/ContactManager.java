@@ -6,6 +6,7 @@ package com.bsb.hike.modules.contactmgr;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -174,7 +175,11 @@ public class ContactManager implements ITransientCache
 
 	public String getName(String groupId, String msisdn)
 	{
-		String name = persistenceCache.getName(groupId, msisdn);
+		String name = getName(msisdn); // maybe a saved contact in a group
+		if (null != name)
+			return name;
+
+		name = persistenceCache.getName(groupId, msisdn);
 		if (null == name)
 		{
 			name = transientCache.getName(groupId, msisdn);

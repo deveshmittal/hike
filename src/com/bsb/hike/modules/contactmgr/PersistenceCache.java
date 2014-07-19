@@ -247,6 +247,8 @@ class PersistenceCache extends ContactsCache
 			try
 			{
 				GroupDetails grpDetails = groupPersistence.get(msisdn);
+				if (null == grpDetails)
+					return null;
 				return grpDetails.getGroupName();
 			}
 			finally
@@ -289,7 +291,9 @@ class PersistenceCache extends ContactsCache
 	String getName(String groupId, String msisdn)
 	{
 		GroupDetails grpDetails = groupPersistence.get(groupId);
-		return grpDetails.getName(msisdn);
+		if (null != grpDetails)
+			return grpDetails.getName(msisdn);
+		return null;
 	}
 
 	/**
@@ -334,13 +338,15 @@ class PersistenceCache extends ContactsCache
 			String grpId = mapEntry.getKey();
 			String name = mapEntry.getValue();
 			List<String> lastMsisdns = groupLastMsisdnsMap.get(grpId);
-			grouplastMsisdns.addAll(lastMsisdns);
 			ConcurrentLinkedQueue<pair> lastMsisdnsConcurrentLinkedQueue = new ConcurrentLinkedQueue<pair>();
-			for (String ms : lastMsisdns)
+			if (null != lastMsisdns)
 			{
-				lastMsisdnsConcurrentLinkedQueue.add(new pair(ms, null));
+				grouplastMsisdns.addAll(lastMsisdns);
+				for (String ms : lastMsisdns)
+				{
+					lastMsisdnsConcurrentLinkedQueue.add(new pair(ms, null));
+				}
 			}
-
 			GroupDetails grpDetails = new GroupDetails(name, lastMsisdnsConcurrentLinkedQueue);
 			groupPersistence.put(grpId, grpDetails);
 		}
