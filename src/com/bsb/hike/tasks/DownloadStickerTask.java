@@ -107,11 +107,11 @@ public class DownloadStickerTask extends StickerTaskBase
 
 		if (smallStickerDir.exists())
 		{
-			String[] stickerIds = smallStickerDir.list();
+			String[] stickerIds = smallStickerDir.list(StickerManager.getInstance().stickerFileFilter);
 			for (String stickerId : stickerIds)
 			{
 				existingStickerIds.put(stickerId);
-				Logger.d(getClass().getSimpleName(), "Exising id: " + stickerId);
+				Logger.d(getClass().getSimpleName(), "Existing id: " + stickerId);
 			}
 		}
 		else
@@ -156,7 +156,11 @@ public class DownloadStickerTask extends StickerTaskBase
 				{
 					if (downloadType.equals(DownloadType.MORE_STICKERS) || downloadType.equals(DownloadType.UPDATE) && stickerPageAdapter != null)
 					{
-						stickerPageAdapter.getStickerList().add(new Sticker(category, stickerId));
+						Sticker s = new Sticker(category, stickerId);
+						// if this sticker is in app sticker, ignore it
+						if(s.isInAppSticker())
+							continue;
+						stickerPageAdapter.getStickerList().add(s);
 					}
 					// some hack : seems server was sending stickers which already exist so it was leading to duplicate issue
 					// so we save small sticker , if not present already
