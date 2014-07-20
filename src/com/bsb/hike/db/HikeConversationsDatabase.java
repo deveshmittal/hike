@@ -580,11 +580,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void addConversationMessages(ConvMessage message)
+	/*
+	 * It will add message in db and return true in case message was successfully added 
+	 * and will return false if message was duplicate and cannot be inserted in database
+	 */
+	public boolean addConversationMessages(ConvMessage message)
 	{
 		List<ConvMessage> l = new ArrayList<ConvMessage>(1);
 		l.add(message);
-		addConversations(l);
+		return addConversations(l);
 	}
 
 	public int updateMsgStatus(long msgID, int val, String msisdn)
@@ -1117,7 +1121,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return msgHash;
 	}
 
-	public void addConversations(List<ConvMessage> convMessages)
+	public boolean addConversations(List<ConvMessage> convMessages)
 	{
 		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
 				+ DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
@@ -1139,7 +1143,22 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
 
 			bindConversationInsert(insertStatement, conv);
-			msgId = insertStatement.executeInsert();
+			
+			/*
+			 * In case message is duplicate insert statement will throw exception . 
+			 * It will catch that exception and will return false denoting duplicate message case
+			 */
+			try
+			{
+				msgId = insertStatement.executeInsert();
+			}
+			catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				Logger.e(getClass().getSimpleName(), "Duplicate value ", e);
+				return false;
+			}
+			
 
 			addThumbnailStringToMetadata(conv.getMetadata(), thumbnailString);
 			/*
@@ -1153,8 +1172,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				{
 					conversation.addMessage(conv);
 				}
+				
 				bindConversationInsert(insertStatement, conv);
-				msgId = insertStatement.executeInsert();
+				try
+				{
+					msgId = insertStatement.executeInsert();
+				}
+				catch (Exception e)
+				{
+					// TODO Auto-generated catch block
+					Logger.e(getClass().getSimpleName(), "Duplicate value ", e);
+					return false;
+				}
+				
 				conv.setConversation(conversation);
 				assert (msgId >= 0);
 			}
@@ -1184,6 +1214,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.endTransaction();
 
 		incrementUnreadCounter(convMessages.get(0).getMsisdn(), unreadMessageCount);
+		return true;
 	}
 
 	public void addConversationsNew(List<ConvMessage> convMessages)

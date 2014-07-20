@@ -443,14 +443,6 @@ public class MqttMessagesManager
 		{
 			convMessage.setMessage(context.getString(R.string.sent_sticker));
 		}
-		if (this.convDb.wasMessageReceived(convMessage)) // Check if message
-		// was already
-		// received by
-		// the receiver
-		{
-			Logger.d(getClass().getSimpleName(), "Message already exists");
-			return;
-		}
 		/*
 		 * Need to rename every audio recording to a unique name since the ios client is sending every file with the same name.
 		 */
@@ -486,7 +478,14 @@ public class MqttMessagesManager
 		}
 		else
 		{
-			convDb.addConversationMessages(convMessage);
+			/*
+			 * adding message in db if not duplicate. In case of duplicate message we don't do further processing and return
+			 */
+			if(!convDb.addConversationMessages(convMessage))
+			{
+				return ;
+			}
+			
 
 			/*
 			 * Return if there is no conversation mapped to this message
