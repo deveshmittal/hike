@@ -14,28 +14,39 @@ public class ConversationTip extends Conversation
 	
 	public static final int STEALTH_UNREAD_TIP = 6;
 
+	public static final int ATOMIC_PROFILE_PIC_TIP = 7;
+
+	public static final int ATOMIC_FAVOURTITES_TIP = 8;
+
+	public static final int ATOMIC_INVITE_TIP = 9;
+
+	public static final int ATOMIC_STATUS_TIP = 10;
+
+	public static final int ATOMIC_INFO_TIP = 11;
+
 	private int tipType;
+
 	public ConversationTip(int tipType)
 	{
 		super(null, -1);
 		this.tipType = tipType;
 	}
-	
+
 	public int getTipType()
 	{
 		return tipType;
 	}
-	
+
 	public void setTipType(int tipType)
 	{
 		this.tipType = tipType;
 	}
-	
+
 	public boolean isGroupChatTip()
 	{
 		return tipType == GROUP_CHAT_TIP;
 	}
-	
+
 	public boolean isStealthFtueTip()
 	{
 		return tipType == STEALTH_FTUE_TIP;

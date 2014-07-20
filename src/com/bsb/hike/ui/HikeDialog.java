@@ -2,12 +2,30 @@ package com.bsb.hike.ui;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.preference.PreferenceManager;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomFontButton;
+import com.bsb.hike.view.CustomFontTextView;
 
 public class HikeDialog
 {
@@ -18,6 +36,10 @@ public class HikeDialog
 	public static final int RESET_STEALTH_DIALOG = 4;
 
 	public static final int STEALTH_FTUE_EMPTY_STATE_DIALOG = 5;
+	
+	public static final int SHARE_IMAGE_QUALITY_DIALOG = 6;
+
+	public static final int SMS_CLIENT_DIALOG = 7;
 
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
 	{
@@ -37,6 +59,10 @@ public class HikeDialog
 			return showStealthResetDialog(context, listener, data);
 		case STEALTH_FTUE_EMPTY_STATE_DIALOG:
 			return showStealthFtuePopUp(context, listener, false);
+		case SHARE_IMAGE_QUALITY_DIALOG:
+			return showImageQualityDialog(context, listener, data);
+		case SMS_CLIENT_DIALOG:
+			return showSMSClientDialog(context, listener, data);
 		}
 
 		return null;
@@ -191,6 +217,243 @@ public class HikeDialog
 		dialog.show();
 		return dialog;
 	}
+	
+	private static Dialog showImageQualityDialog(final Context context, final HikeDialogListener listener, Object... data)
+	{
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.image_quality_popup);
+		dialog.setCancelable(true);
+		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		final Editor editor = appPrefs.edit();
+		int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
+		final LinearLayout small_ll = (LinearLayout) dialog.findViewById(R.id.hike_small_container);
+		final LinearLayout medium_ll = (LinearLayout) dialog.findViewById(R.id.hike_medium_container);
+		final LinearLayout original_ll = (LinearLayout) dialog.findViewById(R.id.hike_original_container);
+		final CheckBox small = (CheckBox) dialog.findViewById(R.id.hike_small_checkbox);
+		final CheckBox medium = (CheckBox) dialog.findViewById(R.id.hike_medium_checkbox);
+		final CheckBox original = (CheckBox) dialog.findViewById(R.id.hike_original_checkbox);
+		CustomFontButton always = (CustomFontButton) dialog.findViewById(R.id.btn_always);
+		CustomFontButton justOnce = (CustomFontButton) dialog.findViewById(R.id.btn_just_once);
+		CustomFontTextView header = (CustomFontTextView) dialog.findViewById(R.id.image_quality_popup_header);
+		CustomFontTextView smallSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_small_cftv);
+		CustomFontTextView mediumSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_medium_cftv);
+		CustomFontTextView originalSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_original_cftv);
+		
+		if(data!=null)
+			{
+			Long[] dataBundle = (Long[])data;
+			int smallsz,mediumsz,originalsz;
+			if(dataBundle.length>0)
+				{
+				if(dataBundle[0]!=1)
+					header.setText(context.getString(R.string.image_quality_send) + " " + dataBundle[0] + " " + context.getString(R.string.image_quality_files_as));
+				else
+					header.setText(context.getString(R.string.image_quality_send) + " " + dataBundle[0] + " " + context.getString(R.string.image_quality_file_as));				
+				
+				originalsz = dataBundle[1].intValue();
+				smallsz = (int) (dataBundle[0] * HikeConstants.IMAGE_SIZE_SMALL);
+				mediumsz = (int) (dataBundle[0] * HikeConstants.IMAGE_SIZE_MEDIUM);
+				if (smallsz >= originalsz)
+				{
+					smallsz = originalsz;
+					smallSize.setVisibility(View.GONE);
+				}
+				if(mediumsz >= originalsz)
+				{
+					mediumsz = originalsz;
+					mediumSize.setVisibility(View.GONE);
+					// if medium option text size is gone, so is small's
+					smallSize.setVisibility(View.GONE);
+				}
+				smallSize.setText(" (" + Utils.getSizeForDisplay(smallsz)+ ")");
+				mediumSize.setText(" (" + Utils.getSizeForDisplay(mediumsz) + ")");
+				originalSize.setText(" (" + Utils.getSizeForDisplay(originalsz) + ")");
+			}
+		}
+		
+		switch (quality)
+		{
+		case 1:
+			small.setChecked(false);
+			medium.setChecked(false);
+			original.setChecked(true);
+			break;
+		case 2:
+			small.setChecked(false);
+			medium.setChecked(true);
+			original.setChecked(false);
+			break;
+		case 3:
+			small.setChecked(true);
+			medium.setChecked(false);
+			original.setChecked(false);
+			break;
+		}
+		
+		OnClickListener onClickListener = new OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				// TODO Auto-generated method stub
+				switch (v.getId())
+				{
+				case R.id.hike_small_container:
+					small.setChecked(true);
+					medium.setChecked(false);
+					original.setChecked(false);
+					
+					break;
+				case R.id.hike_medium_container:
+					small.setChecked(false);
+					medium.setChecked(true);
+					original.setChecked(false);
+					
+					break;
+				case R.id.hike_original_container:
+					small.setChecked(false);
+					medium.setChecked(false);
+					original.setChecked(true);
+					
+					break;
+					
+				case R.id.btn_always:
+					if (medium.isChecked())
+					{
+						editor.putInt(HikeConstants.IMAGE_QUALITY, 2);
+					}
+					else if (original.isChecked())
+					{
+						editor.putInt(HikeConstants.IMAGE_QUALITY, 1);
+					}
+					else
+					{
+						editor.putInt(HikeConstants.IMAGE_QUALITY, 3);
+					}
+					editor.commit();
+					
+					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, true);
+
+					if (listener != null)
+					{
+						listener.onSucess(dialog);
+					}
+					else
+					{
+						dialog.dismiss();
+					}
+					
+					break;
+					
+				case R.id.btn_just_once:
+					if (medium.isChecked())
+					{
+						editor.putInt(HikeConstants.IMAGE_QUALITY, 2);
+					}
+					else if (original.isChecked())
+					{
+						editor.putInt(HikeConstants.IMAGE_QUALITY, 1);
+					}
+					else
+					{
+						editor.putInt(HikeConstants.IMAGE_QUALITY, 3);
+					}
+					editor.commit();
+					
+					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, false);
+
+					if (listener != null)
+					{
+						listener.onSucess(dialog);
+					}
+					else
+					{
+						dialog.dismiss();
+					}
+					
+					break;
+				}
+			}
+		};
+
+		small_ll.setOnClickListener(onClickListener);
+		medium_ll.setOnClickListener(onClickListener);
+		original_ll.setOnClickListener(onClickListener);
+		always.setOnClickListener(onClickListener);
+		justOnce.setOnClickListener(onClickListener);
+
+		dialog.show();
+		return dialog;
+	}
+		
+	private static Dialog showSMSClientDialog(Context context, final HikeDialogListener listener, Object... data)
+	{
+		return showSMSClientDialog(context, listener, (Boolean) data[0], (CompoundButton) data[1], (Boolean) data[2]);
+	}
+	
+	private static Dialog showSMSClientDialog(final Context context, final HikeDialogListener listener, final boolean triggeredFromToggle, 
+			final CompoundButton checkBox, final boolean showingNativeInfoDialog )
+	{
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.enable_sms_client_popup);
+		dialog.setCancelable(showingNativeInfoDialog);
+
+		TextView header = (TextView) dialog.findViewById(R.id.header);
+		TextView body = (TextView) dialog.findViewById(R.id.body);
+		Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
+		Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		header.setText(showingNativeInfoDialog ? R.string.native_header : R.string.use_hike_for_sms);
+		body.setText(showingNativeInfoDialog ? R.string.native_info : R.string.use_hike_for_sms_info);
+
+		if (showingNativeInfoDialog)
+		{
+			btnCancel.setVisibility(View.GONE);
+			btnOk.setText(R.string.continue_txt);
+		}
+		else
+		{
+			btnCancel.setText(R.string.cancel);
+			btnOk.setText(R.string.allow);
+		}
+
+		btnOk.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				listener.positiveClicked(dialog);
+			}
+		});
+
+		dialog.setOnCancelListener(new OnCancelListener()
+		{
+
+			@Override
+			public void onCancel(DialogInterface dialog)
+			{
+				if (showingNativeInfoDialog && checkBox != null)
+				{
+					checkBox.setChecked(false);
+				}
+			}
+		});
+
+		btnCancel.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				listener.negativeClicked(dialog);
+			}
+		});
+
+		dialog.show();
+		return dialog;
+	}
 
 	public static interface HikeDialogListener
 	{
@@ -199,5 +462,7 @@ public class HikeDialog
 		public void positiveClicked(Dialog dialog);
 
 		public void neutralClicked(Dialog dialog);
+		
+		public void onSucess(Dialog dialog);
 	}
 }

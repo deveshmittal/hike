@@ -1,46 +1,30 @@
 package com.bsb.hike.models;
 
-import java.util.List;
-
 public class EmptyConversationItem
 {
 	public static final int HIKE_CONTACTS = 1;
 
 	public static final int SMS_CONTACTS = 2;
 
-	private List<ContactInfo> contactList;
+	public static final int LAST_SEEN = 3;
 
-	private String header;
+	public static final int HIKE_OFFLINE = 5;
+
+	public static final int STICKERS = 6;
+	
+	public static final int SEPERATOR = 7;
+
+	public static final int OTHER_FTUE_CARD = 8;
+
+	public static final int GROUP = 9;
+
+	public static final int INVITE = 10;
 
 	private int type;
 
-	public EmptyConversationItem(List<ContactInfo> contactList, String header, int type)
+	public EmptyConversationItem(int type)
 	{
-		this.setContactList(contactList);
-
-		this.setHeader(header);
-
 		this.setType(type);
-	}
-
-	public List<ContactInfo> getContactList()
-	{
-		return contactList;
-	}
-
-	public void setContactList(List<ContactInfo> contactList)
-	{
-		this.contactList = contactList;
-	}
-
-	public String getHeader()
-	{
-		return header;
-	}
-
-	public void setHeader(String header)
-	{
-		this.header = header;
 	}
 
 	public int getType()

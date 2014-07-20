@@ -694,6 +694,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				{
 					continue;
 				}
+				if(ContactUtils.isIndianMobileNumber(msisdn))
+				{
 
 				msisdnSet.add(msisdn);
 
@@ -709,6 +711,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 					contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
 				}
 				contactInfos.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(false), contactInfo));
+				}
 			}
 			return contactInfos;
 		}
@@ -1933,9 +1936,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public int getHikeContactCount()
+	public int getHikeContactCount(String myMsisdn)
 	{
-		String selection = DBConstants.ONHIKE + " = 1";
+		String selection = DBConstants.ONHIKE + " = 1 AND "+DBConstants.MSISDN + "!=" + DatabaseUtils.sqlEscapeString(myMsisdn);
 		Cursor c = null;
 		try
 		{
@@ -2075,7 +2078,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		String myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 		
-		ftueContactsData.setTotalHikeContactsCount(getHikeContactCount());
+		ftueContactsData.setTotalHikeContactsCount(getHikeContactCount(myMsisdn));
 		
 		/*
 		 * adding server recommended contacts to ftue contacts list;
