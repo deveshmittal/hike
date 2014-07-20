@@ -1656,7 +1656,7 @@ public class MqttMessagesManager
 	{
 		if(messageList.size() > 0)
 		{
-			convDb.addConversationsNew(messageList);
+			convDb.addConversationsBulk(messageList);
 		}
 		ArrayList<ConvMessage> lastMessageList = new ArrayList<ConvMessage>(messageListMap.keySet().size());
 		for (Entry<String, ArrayList<ConvMessage>> entry : messageListMap.entrySet())

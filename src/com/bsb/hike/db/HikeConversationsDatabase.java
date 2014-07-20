@@ -1217,7 +1217,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return true;
 	}
 
-	public void addConversationsNew(List<ConvMessage> convMessages)
+	public void addConversationsBulk(List<ConvMessage> convMessages)
 	{
 		HashMap<String, Conversation> convesationMap = new HashMap<String, Conversation>();
 		Logger.d("bulkPacket", "adding conversation started");
@@ -1267,7 +1267,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String msisdn = conv.getMsisdn();
 				if (convesationMap.get(msisdn) == null)
 				{
-					conversation = this.getConversationNew(msisdn, 0);
+					conversation = this.getConversationBulk(msisdn, 0);
 					convesationMap.put(msisdn, conversation);
 				}
 				else
@@ -1545,7 +1545,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public Conversation getConversationNew(String msisdn, int limit)
+	public Conversation getConversationBulk(String msisdn, int limit)
 	{
 		Cursor c = null;
 		HikeUserDatabase huDb = null;
