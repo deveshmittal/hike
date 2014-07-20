@@ -2066,9 +2066,8 @@ public class MqttMessagesManager
 		else
 		{
 			convDb.addConversationMessages(convMessage);
+			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		}
-		
-		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED || convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT
 				|| convMessage.getParticipantInfoState() == ParticipantInfoState.GROUP_END)
 		{
