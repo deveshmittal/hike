@@ -1661,4 +1661,6 @@ public class HikeConstants
 
 		public static final int TEXT_PIN = 1;
 	}
+	
+	public static final String TEXT_PINS = "text_pins";
 }

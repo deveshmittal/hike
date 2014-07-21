@@ -684,9 +684,9 @@
 	</style>
 	
 	<style name="PinsReadContainer">
-	    <item name="android:layout_marginLeft">12dp</item>
-	    <item name="android:layout_marginRight">6dp</item>
-	    <item name="android:layout_marginTop">12dp</item>
+	    <item name="android:layout_marginLeft">8dp</item>
+	    <item name="android:layout_marginRight">8dp</item>
+	    <item name="android:layout_marginTop">8dp</item>
         <item name="android:background">@drawable/pins_bg_read_selector</item>
 	</style>
 	

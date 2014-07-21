@@ -1,39 +1,64 @@
 package com.bsb.hike.ui.fragments;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Shader.TileMode;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
-
 import com.actionbarsherlock.app.SherlockListFragment;
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.PinHistoryAdapter;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 public class PinHistoryFragment extends SherlockListFragment implements OnScrollListener
 {
 	private PinHistoryAdapter PHadapter;
+			
+	private List<ConvMessage> textPins;
 	
-	private List<Pair<String, String>>pins = null;
+	private String msisdn;
 	
-	private String userMSISDN;
+	private ChatTheme chatTheme;
+		
+	private HikeConversationsDatabase mDb;
 	
-	private SharedPreferences prefs;
-	
+	public PinHistoryFragment(String userMSISDN)
+	{
+		this.msisdn = userMSISDN;
+	}
+		
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View parent = inflater.inflate(R.layout.sticky_pins, null);
 		ListView pinsList = (ListView) parent.findViewById(android.R.id.list);
+		
+		mDb = HikeConversationsDatabase.getInstance();
+		
+		chatTheme = mDb.getChatThemeForMsisdn(msisdn);
+		
 		pinsList.setEmptyView(parent.findViewById(android.R.id.empty));
 		return parent;
+	}
+	
+	@Override
+	public void onViewCreated(View view, Bundle savedInstanceState) 
+	{
+		super.onViewCreated(view, savedInstanceState);
+						
+		view.findViewById(R.id.sticky_parent).setBackground(getChatTheme(chatTheme));		
 	}
 
 	@Override
@@ -56,14 +81,8 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 	public void onActivityCreated(Bundle savedInstanceState)
 	{
 		super.onActivityCreated(savedInstanceState);
-
-		prefs = getActivity().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-
-		userMSISDN = prefs.getString(HikeMessengerApp.MSISDN_SETTING, "");
-
-		pins = new ArrayList<Pair<String, String>>();
-
-		PHadapter = new PinHistoryAdapter(getActivity(), pins, userMSISDN);
+		
+		PHadapter = new PinHistoryAdapter(getActivity(), textPins, msisdn);
 		
 		setListAdapter(PHadapter);
 		getListView().setOnScrollListener(this);
@@ -91,4 +110,29 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 	{
 		
 	}	
+		
+	public Drawable getChatTheme(ChatTheme chatTheme)
+	{
+		/*
+		 * for xhdpi and above we should not scale down the chat theme nodpi asset for hdpi and below to save memory we should scale it down
+		 */
+		int inSampleSize = 1;
+		if(!chatTheme.isTiled() && Utils.densityMultiplier < 2)
+		{
+			inSampleSize = 2;
+		}
+		
+		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), inSampleSize);
+
+		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
+
+		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= " + BitmapUtils.getBitmapSize(b));
+
+		if (bd != null && chatTheme.isTiled())
+		{
+			bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+		}
+
+		return bd;
+	}
 }
