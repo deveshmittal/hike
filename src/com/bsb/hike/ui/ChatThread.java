@@ -1250,6 +1250,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 
+		optionsList.add(new OverFlowMenuItem(getString(R.string.chat_theme_small), 8));
+
 		dismissPopupWindow();
 
 		attachmentWindow = new PopupWindow(this);
@@ -1336,6 +1338,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					contactInfo.setFavoriteType(favoriteType);
 					Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+					break;
+				case 8:
+					setupThemePicker(null);
 					break;
 				}
 
