@@ -67,6 +67,14 @@
             </ListView>
 
             <LinearLayout
+                android:id="@+id/impMessageContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tipContainerTop"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/tipContainerBottom"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
