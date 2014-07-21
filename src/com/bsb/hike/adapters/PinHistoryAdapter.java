@@ -1,35 +1,47 @@
 package com.bsb.hike.adapters;
 
-import java.util.ArrayList;
 import java.util.List;
-import com.bsb.hike.R;
 import android.app.Activity;
 import android.content.Context;
 import android.text.util.Linkify;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 
 public class PinHistoryAdapter extends BaseAdapter
 {
 	private Activity context;
 	
-	private List<Pair<String, String>> pinMessages;
+	private List<ConvMessage> textPins;
 	
 	private String userMSISDN;
 	
 	private LayoutInflater inflater;
-
 	
-	public PinHistoryAdapter(Activity context, List<Pair<String, String>> PinMessages, String userMsisdn)
+	private HikeConversationsDatabase mDb;
+	
+	private Conversation conv;
+		
+	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn)
 	{
 		this.context = context;
-		this.pinMessages = getPins();
+		
 		this.userMSISDN = userMsisdn;
+		
+		mDb = HikeConversationsDatabase.getInstance();
+		
+		conv = mDb.getConversation(userMSISDN, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY);
+		
+		this.textPins = conv.getMessages();
+		
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 	
@@ -50,13 +62,13 @@ public class PinHistoryAdapter extends BaseAdapter
 	@Override
 	public int getCount() 
 	{
-		return pinMessages.size();
+		return textPins.size();
 	}
 
 	@Override
-	public Pair<String, String> getItem(int position) 
+	public ConvMessage getItem(int position) 
 	{
-		return pinMessages.get(position);
+		return textPins.get(position);
 	}
 
 	@Override
@@ -94,7 +106,7 @@ public class PinHistoryAdapter extends BaseAdapter
 	{
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
-		final Pair<String, String> pin = getItem(position);
+		final ConvMessage textPin = getItem(position);
 
 		final ViewHolder viewHolder;
 		
@@ -124,8 +136,8 @@ public class PinHistoryAdapter extends BaseAdapter
 		{
 			case TEXT:
 			{
-	 			viewHolder.sender.setText(pin.first);
-	 			viewHolder.detail.setText(pin.second);
+	 			viewHolder.sender.setText(textPin.getMsisdn());
+	 			viewHolder.detail.setText(textPin.getMessage());
 	 			viewHolder.parent.setOnClickListener(pinOnClickListener);
 				Linkify.addLinks(viewHolder.detail, Linkify.ALL);
 			}
@@ -157,17 +169,4 @@ public class PinHistoryAdapter extends BaseAdapter
 		{
 		}
 	};
-	
-	private List<Pair<String, String>> getPins()
-	{
-		Pair<String, String> pin = null;
-		List<Pair<String, String>> pins = new ArrayList<Pair<String,String>>();
-		
-		for(int i=0; i<10; i++)
-		{
-			pin = Pair.create("Pathik " + i, "Let's go on a mass bunk tomorrow and watch movie! " + i);
-			pins.add(pin);
-		}
-		return pins;
-	}
 }
