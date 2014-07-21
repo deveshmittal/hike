@@ -390,6 +390,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean showingChatThemePicker;
 
+	private boolean showingImpMessagePin;
+
 	private ImageView backgroundImage;
 
 	private int selectedNonTextMsgs = 0;
@@ -806,8 +808,70 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		screenOffBR = new ScreenOffReceiver();
 		registerReceiver(screenOffBR, new IntentFilter(Intent.ACTION_SCREEN_OFF));
-		showTipIfRequired();
+		// give priority to imp message , say pin message
+		if (!showImpMessageIfRequired())
+		{
+			showTipIfRequired();
+		}
 		Logger.i("chatthread", "on create end");
+	}
+
+	private boolean showImpMessageIfRequired()
+	{
+		ConvMessage impMessage = new ConvMessage("Sample", "999", System.currentTimeMillis(), State.SENT_CONFIRMED);
+		impMessage.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+		if (impMessage != null)
+		{
+			showImpMessage(impMessage, -1);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 * @param impMessage
+	 *            -- ConvMessage to stick to top
+	 * @param animationId
+	 *            -- play animation on message , id must be anim resource id, -1 of no
+	 */
+	private void showImpMessage(ConvMessage impMessage, int animationId)
+	{
+		if (tipView != null)
+		{
+			tipView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_out_animation));
+			tipView.setVisibility(View.GONE);
+		}
+		if (impMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+		{
+			tipView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_text_pin, null);
+		}
+		TextView sender = (TextView) tipView.findViewById(R.id.senderName);
+		TextView text = (TextView) tipView.findViewById(R.id.text);
+		TextView date = (TextView) tipView.findViewById(R.id.date);
+		sender.setText(impMessage.getMsisdn());
+		text.setText(impMessage.getMessage());
+		date.setText(impMessage.getTimestampFormatted(false, getApplicationContext()));
+		tipView.findViewById(R.id.cross).setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				tipView.setVisibility(View.GONE);
+				// mark it seen in DB
+			}
+		});
+		LinearLayout ll = ((LinearLayout) findViewById(R.id.impMessageContainer));
+		if (ll.getChildCount() > 0)
+		{
+			ll.removeAllViews();
+		}
+		ll.addView(tipView, 0);
+		if (animationId != -1)
+		{
+			tipView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), animationId));
+		}
 	}
 
 	private void showTipIfRequired()
@@ -1029,7 +1093,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if (showingChatThemePicker)
+		if (showingChatThemePicker || showingImpMessagePin)
 		{
 			return false;
 		}
@@ -1041,7 +1105,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
-		if (mConversation == null || showingChatThemePicker)
+		if (mConversation == null || showingChatThemePicker || showingImpMessagePin)
 		{
 			return super.onPrepareOptionsMenu(menu);
 		}
@@ -1088,14 +1152,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		switch (item.getItemId())
 		{
-		case R.id.chat_bg:
-			setupThemePicker(null);
-			break;
+		// case R.id.chat_bg:
+		// setupThemePicker(null);
+		// break;
 		case R.id.attachment:
 			// hide pop up if any
 			return attachmentClicked();
 		case R.id.overflow_menu:
 			showOverFlowMenu();
+			break;
+		case R.id.pin_imp:
+			setupPinImpMessage(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 			break;
 		}
 
@@ -1474,18 +1541,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if (TextUtils.isEmpty(mComposeView.getText()))
 		{
-			if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
+			if (mComposeView.getId() == R.id.msg_compose)
 			{
-				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-				return;
+				recordingDialogClicked();
 			}
-			if (FileTransferManager.getInstance(this).remainingTransfers() == 0)
-			{
-				Toast.makeText(this, getString(R.string.max_num_files_reached, FileTransferManager.getInstance(this).getTaskLimit()), Toast.LENGTH_SHORT).show();
-				return;
-			}
-
-			showRecordingDialog();
 			return;
 		}
 
@@ -1494,7 +1553,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mComposeView.setText("");
 
 		ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, message, isConversationOnHike());
-
+		if (showingImpMessagePin)
+		{
+			convMessage.setMessageType((Integer) v.getTag());
+		}
+		else
+		{
+			checkMessageTypeFromHash(convMessage);
+		}
 		sendMessage(convMessage);
 
 		if (mComposeViewWatcher != null)
@@ -1503,10 +1569,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
+	private void recordingDialogClicked()
+	{
+		if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
+		{
+			Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (FileTransferManager.getInstance(this).remainingTransfers() == 0)
+		{
+			Toast.makeText(this, getString(R.string.max_num_files_reached, FileTransferManager.getInstance(this).getTaskLimit()), Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		showRecordingDialog();
+	}
+
 	private void checkMessageTypeFromHash(ConvMessage convMessage)
 	{
 		if (convMessage.getMessage().startsWith(HASH_PIN))
 		{
+			convMessage.setMessage(convMessage.getMessage().substring(HASH_PIN.length()));
 			convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 		}
 	}
@@ -3767,6 +3850,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 				}
 			}
+			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			{
+				showImpMessage(convMessage, R.anim.scale_from_mid_bounce);
+			}
 			mAdapter.notifyDataSetChanged();
 
 			/*
@@ -4268,6 +4355,128 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		slideIn.setDuration(200);
 		closeBtn.startAnimation(slideIn);
 		saveThemeBtn.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_in));
+	}
+
+	private void setupPinImpMessage(int pinType)
+	{
+		switch (pinType)
+		{
+		case HikeConstants.MESSAGE_TYPE.TEXT_PIN:
+			setupPinImpMessageTextBased();
+			break;
+		}
+	}
+
+	private void setupPinImpMessageTextBased()
+	{
+		setupPinImpMessageActionBar();
+		showingImpMessagePin = true;
+		invalidateOptionsMenu();
+		dismissPopupWindow();
+		View content = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_pin_pop_up, null);
+		attachmentWindow = new PopupWindow(content);
+		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
+		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
+		attachmentWindow.setOutsideTouchable(false);
+		attachmentWindow.setFocusable(true);
+		attachmentWindow.setWidth(LayoutParams.MATCH_PARENT);
+		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
+
+		try
+		{
+			attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+			Utils.showSoftKeyboard(getApplicationContext(), mComposeView);
+			mComposeView.requestFocus();
+		}
+		catch (BadTokenException e)
+		{
+			Logger.e(getClass().getSimpleName(), "Excepetion in ChatThread ChatTheme picker", e);
+		}
+
+		FrameLayout viewParent = (FrameLayout) content.getParent();
+		WindowManager.LayoutParams lp = (WindowManager.LayoutParams) viewParent.getLayoutParams();
+		lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+
+		WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+		windowManager.updateViewLayout(viewParent, lp);
+
+		attachmentWindow.setTouchInterceptor(new OnTouchListener()
+		{
+
+			@Override
+			public boolean onTouch(View view, MotionEvent event)
+			{
+				if (event.getAction() == MotionEvent.ACTION_OUTSIDE)
+				{
+					return true;
+				}
+				return false;
+			}
+		});
+
+		attachmentWindow.setOnDismissListener(new OnDismissListener()
+		{
+
+			@Override
+			public void onDismiss()
+			{
+				showingImpMessagePin = false;
+				setupActionBar(false);
+				invalidateOptionsMenu();
+				mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
+				Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
+				getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+			}
+		});
+	}
+
+	private void setupPinImpMessageActionBar()
+	{
+
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.chat_theme_action_bar, null);
+
+		View saveBtn = actionBarView.findViewById(R.id.done_container);
+		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
+		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		ViewGroup closeContainer = (ViewGroup) actionBarView.findViewById(R.id.close_container);
+
+		title.setText(R.string.create_pin);
+
+		closeContainer.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				dismissPopupWindow();
+			}
+		});
+
+		saveBtn.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				v.setTag(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+				onSendClick(v);
+				dismissPopupWindow();
+
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
+
+		Animation slideIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_left_noalpha);
+		slideIn.setInterpolator(new AccelerateDecelerateInterpolator());
+		slideIn.setDuration(200);
+		closeBtn.startAnimation(slideIn);
+		saveBtn.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_in));
+
 	}
 
 	private void showFilePicker(final ExternalStorageState externalStorageState)
