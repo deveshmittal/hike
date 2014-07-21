@@ -17,19 +17,17 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.utils.Logger;
 
 public class TransientCache extends ContactsCache
 {
 	HikeUserDatabase hDb;
 
-	// Transient Memory for contacts that are saved in address book with their reference count
-	private Map<String, ContactTuple> savedContacts;
-
-	// Transient Memory for contacts that are not saved in address book with their reference count
-	private Map<String, ContactTuple> unsavedContacts;
+	// Transient Memory for contacts with their reference count
+	private Map<String, ContactTuple> transientContacts;
 
 	// Transient memory for contacts of group participants
-	private Map<String, Map<String, Pair<GroupParticipant, String>>> groupParticipants; // for name we can keep a pair of name and groupParticipant
+	private Map<String, Map<String, Pair<GroupParticipant, String>>> groupParticipants;
 
 	private final ReentrantReadWriteLock readWriteLockTrans = new ReentrantReadWriteLock(true);
 
@@ -42,8 +40,7 @@ public class TransientCache extends ContactsCache
 	 */
 	TransientCache(HikeUserDatabase db)
 	{
-		savedContacts = new LinkedHashMap<String, ContactTuple>();
-		unsavedContacts = new HashMap<String, ContactTuple>();
+		transientContacts = new LinkedHashMap<String, ContactTuple>();
 		groupParticipants = new HashMap<String, Map<String, Pair<GroupParticipant, String>>>();
 		hDb = db;
 	}
@@ -59,12 +56,10 @@ public class TransientCache extends ContactsCache
 		readLock.lock();
 		try
 		{
-			ContactTuple tuple = savedContacts.get(key);
+			ContactTuple tuple = transientContacts.get(key);
 			if (null == tuple)
 			{
-				tuple = unsavedContacts.get(key);
-				if (null == tuple)
-					return null;
+				return null;
 			}
 			return tuple.getContact();
 		}
@@ -75,7 +70,7 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * inserts contact in {@link #savedContacts} if name field in contactInfo is not null otherwise in {@link #unsavedContacts}
+	 * inserts contact in {@link #transientContacts} if name field in contactInfo is not null otherwise in {@link #unsavedContacts}
 	 * <p>
 	 * Make sure that it is not already in memory , we are setting reference count to one here
 	 * </p>
@@ -89,14 +84,7 @@ public class TransientCache extends ContactsCache
 		try
 		{
 			ContactTuple tuple = new ContactTuple(1, contact);
-			if (null == contact.getName())
-			{
-				unsavedContacts.put(contact.getMsisdn(), tuple);
-			}
-			else
-			{
-				savedContacts.put(contact.getMsisdn(), tuple);
-			}
+			transientContacts.put(contact.getMsisdn(), tuple);
 		}
 		finally
 		{
@@ -133,25 +121,13 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			ContactTuple tuple = savedContacts.get(msisdn);
+			ContactTuple tuple = transientContacts.get(msisdn);
 			if (null != tuple)
 			{
 				tuple.setReferenceCount(tuple.getReferenceCount() - 1);
 				if (tuple.getReferenceCount() == 0)
 				{
-					savedContacts.remove(msisdn);
-				}
-			}
-			else
-			{
-				tuple = unsavedContacts.get(msisdn);
-				if (null != tuple)
-				{
-					tuple.setReferenceCount(tuple.getReferenceCount() - 1);
-					if (tuple.getReferenceCount() == 0)
-					{
-						unsavedContacts.remove(msisdn);
-					}
+					transientContacts.remove(msisdn);
 				}
 			}
 		}
@@ -171,14 +147,9 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			if (savedContacts.containsKey(contact.getMsisdn()))
+			if (transientContacts.containsKey(contact.getMsisdn()))
 			{
-				ContactTuple tuple = savedContacts.get(contact.getMsisdn());
-				tuple.setContact(contact);
-			}
-			else if (unsavedContacts.containsKey(contact.getMsisdn()))
-			{
-				ContactTuple tuple = unsavedContacts.get(contact.getMsisdn());
+				ContactTuple tuple = transientContacts.get(contact.getMsisdn());
 				tuple.setContact(contact);
 			}
 		}
@@ -189,7 +160,7 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * Returns the list of all the contacts sorted by their names. If boolean {@link #allContactsLoaded} is true then all the contacts are retrieved from {@link #savedContacts} and
+	 * Returns the list of all the contacts sorted by their names. If boolean {@link #allContactsLoaded} is true then all the contacts are retrieved from {@link #transientContacts} and
 	 * {@link #unsavedContacts}.
 	 * 
 	 * @return
@@ -204,23 +175,11 @@ public class TransientCache extends ContactsCache
 
 		List<ContactInfo> allContacts = new ArrayList<ContactInfo>();
 		// Traverse through savedContacts and add in allCOntacts list
-		for (Entry<String, ContactTuple> mapEntry : savedContacts.entrySet())
+		for (Entry<String, ContactTuple> mapEntry : transientContacts.entrySet())
 		{
 			ContactTuple tuple = mapEntry.getValue();
 			allContacts.add(tuple.getContact());
 		}
-
-		// then traverse through unsaved and add only whose favorite type is not null
-		for (Entry<String, ContactTuple> mapEntry : unsavedContacts.entrySet())
-		{
-			ContactTuple tuple = mapEntry.getValue();
-			FavoriteType favType = tuple.getContact().getFavoriteType();
-			if (null != favType)
-			{
-				allContacts.add(tuple.getContact());
-			}
-		}
-
 		return allContacts;
 	}
 
@@ -286,19 +245,15 @@ public class TransientCache extends ContactsCache
 	 */
 	void loadMemory()
 	{
-		Pair<Map<String, ContactInfo>, Map<String, ContactInfo>> map = hDb.getAllContactInfo();
-
-		Map<String, ContactInfo> savedcontactmap = map.first;
-
-		Map<String, ContactInfo> unsavedcontactmap = map.second;
+		Map<String, ContactInfo> contactMap = hDb.getAllContactInfo();
 
 		LinkedHashMap<String, ContactTuple> temp = new LinkedHashMap<String, ContactTuple>();
 
-		for (Entry<String, ContactInfo> mapEntry : savedcontactmap.entrySet())
+		for (Entry<String, ContactInfo> mapEntry : contactMap.entrySet())
 		{
 			String msisdn = mapEntry.getKey();
 			ContactInfo contact = mapEntry.getValue();
-			ContactTuple tuple = savedContacts.get(msisdn);
+			ContactTuple tuple = transientContacts.get(msisdn);
 			if (null != tuple)
 			{
 				tuple.setContact(contact);
@@ -309,15 +264,12 @@ public class TransientCache extends ContactsCache
 				tuple = new ContactTuple(1, contact);
 				temp.put(msisdn, tuple);
 			}
+			transientContacts.remove(msisdn);
 		}
 
-		savedContacts = temp;
+		temp.putAll(transientContacts);
 
-		for (Entry<String, ContactInfo> mapEntry : unsavedcontactmap.entrySet())
-		{
-			ContactInfo contact = mapEntry.getValue();
-			insertContact(contact);
-		}
+		transientContacts = temp;
 	}
 
 	/**
@@ -387,25 +339,16 @@ public class TransientCache extends ContactsCache
 		{
 			Set<String> blockSet = hDb.getBlockedMsisdnSet();
 
-			for (Entry<String, ContactTuple> savedMapEntry : savedContacts.entrySet())
+			for (Entry<String, ContactTuple> savedMapEntry : transientContacts.entrySet())
 			{
 				String msisdn = savedMapEntry.getKey();
 				if (!blockSet.contains(msisdn) && !msisdn.equals(myMsisdn))
 				{
 					ContactTuple tuple = savedMapEntry.getValue();
-					contacts.add(tuple.getContact());
-				}
-			}
-
-			if (!ignoreUnknownContacts)
-			{
-				for (Entry<String, ContactTuple> unsavedMapEntry : unsavedContacts.entrySet())
-				{
-					String msisdn = unsavedMapEntry.getKey();
-					if (!blockSet.contains(msisdn) && !msisdn.equals(myMsisdn))
+					ContactInfo contact = tuple.getContact();
+					if (!(ignoreUnknownContacts && (null == contact.getName())))
 					{
-						ContactTuple tuple = unsavedMapEntry.getValue();
-						contacts.add(tuple.getContact());
+						contacts.add(contact);
 					}
 				}
 			}
@@ -519,7 +462,7 @@ public class TransientCache extends ContactsCache
 		{
 			Set<String> blockSet = hDb.getBlockedMsisdnSet();
 
-			for (Entry<String, ContactTuple> savedMapEntry : savedContacts.entrySet())
+			for (Entry<String, ContactTuple> savedMapEntry : transientContacts.entrySet())
 			{
 				String msisdn = savedMapEntry.getKey();
 				if (!blockSet.contains(msisdn))
@@ -593,7 +536,7 @@ public class TransientCache extends ContactsCache
 		ContactInfo contact = null;
 		if (allContactsLoaded)
 		{
-			for (Entry<String, ContactTuple> mapEntry : savedContacts.entrySet())
+			for (Entry<String, ContactTuple> mapEntry : transientContacts.entrySet())
 			{
 				ContactTuple tuple = mapEntry.getValue();
 				if (null != tuple && tuple.getContact().getPhoneNum().equals(number))
@@ -637,7 +580,7 @@ public class TransientCache extends ContactsCache
 
 		if (allContactsLoaded)
 		{
-			for (Entry<String, ContactTuple> mapEntry : savedContacts.entrySet())
+			for (Entry<String, ContactTuple> mapEntry : transientContacts.entrySet())
 			{
 				ContactTuple tuple = mapEntry.getValue();
 				if (null != tuple && tuple.getContact().getPhoneNum().equals(number))
@@ -675,11 +618,10 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			ContactTuple tuple = savedContacts.get(contact.getMsisdn());
+			ContactTuple tuple = transientContacts.get(contact.getMsisdn());
 			if (null != tuple)
 			{
-				savedContacts.remove(contact.getMsisdn());
-				unsavedContacts.put(contact.getMsisdn(), tuple);
+				tuple.getContact().setName(null);
 			}
 		}
 		finally
@@ -696,14 +638,9 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			if (null != savedContacts)
+			if (null != transientContacts)
 			{
-				savedContacts.clear();
-			}
-
-			if (null != unsavedContacts)
-			{
-				unsavedContacts.clear();
+				transientContacts.clear();
 			}
 
 			if (null != groupParticipants)
@@ -764,11 +701,7 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			ContactTuple tuple = savedContacts.get(msisdn);
-			if (null == tuple)
-			{
-				tuple = unsavedContacts.get(msisdn);
-			}
+			ContactTuple tuple = transientContacts.get(msisdn);
 
 			if (null != tuple)
 			{

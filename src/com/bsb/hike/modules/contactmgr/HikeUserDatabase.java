@@ -872,20 +872,19 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	Pair<Map<String, ContactInfo>, Map<String, ContactInfo>> getAllContactInfo()
+	Map<String, ContactInfo> getAllContactInfo()
 	{
 		Cursor c = null;
 
-		Map<String, ContactInfo> savedContactMap = new LinkedHashMap<String, ContactInfo>();
-		Map<String, ContactInfo> unsavedContactMap = new LinkedHashMap<String, ContactInfo>();
+		Map<String, ContactInfo> contactMap = new LinkedHashMap<String, ContactInfo>();
 		Map<String, FavoriteType> favoriteMap = new HashMap<String, FavoriteType>();
 
 		try
 		{
-			savedContactMap = getSortedContactMap();
+			contactMap = getSortedContactMap();
 			favoriteMap = getFavoriteMap();
 
-			for (Entry<String, ContactInfo> contactEntry : savedContactMap.entrySet())
+			for (Entry<String, ContactInfo> contactEntry : contactMap.entrySet())
 			{
 				String msisdn = contactEntry.getKey();
 				ContactInfo contact = contactEntry.getValue();
@@ -903,9 +902,9 @@ import com.bsb.hike.utils.Utils;
 				FavoriteType favType = favTypeEntry.getValue();
 				ContactInfo contact = new ContactInfo(msisdn, msisdn, null, msisdn);
 				contact.setFavoriteType(favType);
-				unsavedContactMap.put(msisdn, contact);
+				contactMap.put(msisdn, contact);
 			}
-			return new Pair<Map<String, ContactInfo>, Map<String, ContactInfo>>(savedContactMap, unsavedContactMap);
+			return contactMap;
 		}
 		finally
 		{
