@@ -282,14 +282,7 @@ public class TransientCache extends ContactsCache
 	ContactInfo putInCache(String msisdn, boolean ifNotFoundReturnNull)
 	{
 		ContactInfo c = hDb.getContactInfoFromMSISDN(msisdn, ifNotFoundReturnNull);
-		if (null != c.getName())
-		{
-			insertContact(c);
-		}
-		else
-		{
-			insertContact(c);
-		}
+		insertContact(c);
 		return c;
 	}
 
@@ -309,14 +302,7 @@ public class TransientCache extends ContactsCache
 			for (Entry<String, ContactInfo> mapEntry : map.entrySet())
 			{
 				ContactInfo contact = mapEntry.getValue();
-				if (null == contact.getName())
-				{
-					insertContact(contact);
-				}
-				else
-				{
-					insertContact(contact);
-				}
+				insertContact(contact);
 			}
 			contactsList.addAll(map.values());
 		}
@@ -364,14 +350,7 @@ public class TransientCache extends ContactsCache
 					ContactInfo contact = mapEntry.getValue();
 					if (getContact(msisdn) == null)
 					{
-						if (null == contact.getName())
-						{
-							insertContact(contact);
-						}
-						else
-						{
-							insertContact(contact);
-						}
+						insertContact(contact);
 					}
 					contacts.add(contact);
 				}
@@ -405,14 +384,7 @@ public class TransientCache extends ContactsCache
 				ContactInfo contact = mapEntry.getValue();
 				if (getContact(msisdn) == null)
 				{
-					if (null == contact.getName())
-					{
-						insertContact(contact);
-					}
-					else
-					{
-						insertContact(contact);
-					}
+					insertContact(contact);
 				}
 				contacts.add(contact);
 			}
@@ -438,14 +410,7 @@ public class TransientCache extends ContactsCache
 		{
 			if (null == getContact(contact.getMsisdn()))
 			{
-				if (null == contact.getName())
-				{
-					insertContact(contact);
-				}
-				else
-				{
-					insertContact(contact);
-				}
+				insertContact(contact);
 			}
 		}
 		return contacts;
@@ -485,14 +450,7 @@ public class TransientCache extends ContactsCache
 				ContactInfo contact = p.second;
 				if (null == getContact(contact.getMsisdn()))
 				{
-					if (null == contact.getName())
-					{
-						insertContact(contact);
-					}
-					else
-					{
-						insertContact(contact);
-					}
+					insertContact(contact);
 				}
 			}
 		}
@@ -513,14 +471,7 @@ public class TransientCache extends ContactsCache
 		{
 			if (null == getContact(contact.getMsisdn()))
 			{
-				if (null == contact.getName())
-				{
-					insertContact(contact);
-				}
-				else
-				{
-					insertContact(contact);
-				}
+				insertContact(contact);
 			}
 		}
 		return contacts;
@@ -551,14 +502,7 @@ public class TransientCache extends ContactsCache
 			contact = hDb.getContactInfoFromPhoneNo(number);
 			if (null == getContact(contact.getMsisdn()))
 			{
-				if (null == contact.getName())
-				{
-					insertContact(contact);
-				}
-				else
-				{
-					insertContact(contact);
-				}
+				insertContact(contact);
 			}
 		}
 		return contact;
@@ -595,14 +539,7 @@ public class TransientCache extends ContactsCache
 			contact = hDb.getContactInfoFromPhoneNoOrMsisdn(number);
 			if (null == getContact(contact.getMsisdn()))
 			{
-				if (null == contact.getName())
-				{
-					insertContact(contact);
-				}
-				else
-				{
-					insertContact(contact);
-				}
+				insertContact(contact);
 			}
 		}
 		return contact;
