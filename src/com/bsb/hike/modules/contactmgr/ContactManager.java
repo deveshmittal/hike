@@ -6,7 +6,6 @@ package com.bsb.hike.modules.contactmgr;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -348,7 +347,21 @@ public class ContactManager implements ITransientCache
 
 	public void removeOlderLastGroupMsisdns(String groupId, List<String> currentGroupMsisdns)
 	{
-		persistenceCache.removeOlderLastGroupMsisdn(groupId, currentGroupMsisdns);
+		List<String> msisdns = persistenceCache.removeOlderLastGroupMsisdn(groupId, currentGroupMsisdns);
+		List<String> msisdnsDB = new ArrayList<String>();
+		for(String ms : msisdns)
+		{
+			ContactInfo contact = transientCache.getContact(ms);
+			if(null == contact)
+			{
+				msisdnsDB.add(ms);
+			}
+			else
+			{
+				persistenceCache.insertContact(contact, false);
+			}
+		}
+		persistenceCache.putInCache(msisdnsDB, false);
 	}
 
 	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType favoriteType, int onHike, String myMsisdn)

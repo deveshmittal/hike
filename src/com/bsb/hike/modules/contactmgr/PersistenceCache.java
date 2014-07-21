@@ -14,6 +14,7 @@ import android.util.Pair;
 
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 class PersistenceCache extends ContactsCache
@@ -509,7 +510,7 @@ class PersistenceCache extends ContactsCache
 	 * @param groupId
 	 * @param currentGroupMsisdns
 	 */
-	void removeOlderLastGroupMsisdn(String groupId, List<String> currentGroupMsisdns)
+	List<String> removeOlderLastGroupMsisdn(String groupId, List<String> currentGroupMsisdns)
 	{
 		if (groupPersistence != null)
 		{
@@ -581,9 +582,6 @@ class PersistenceCache extends ContactsCache
 					}
 				}
 
-				// contacts loaded from databse query , insert in group map with ref count 1 (done by putInCache method)
-				putInCache(msisdns, false);
-
 				// lock is not needed here because grpMsisdns is concurrentLinkedQueue
 				grpMsisdns.clear();
 
@@ -593,7 +591,10 @@ class PersistenceCache extends ContactsCache
 					grpMsisdns.add(msisdnNamePair);
 				}
 			}
+			// returning msisdns which are not found in persistence cache because before making new objects we should also check transient cache
+			return msisdns;
 		}
+		return null;
 	}
 
 	/**
