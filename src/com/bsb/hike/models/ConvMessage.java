@@ -63,15 +63,15 @@ public class ConvMessage
 	private boolean isTickSoundPlayed = false;
 
 	private int unreadCount = -1;
-	private Type messageType;
+	private int messageType = HikeConstants.MESSAGE_TYPE.PLAIN_TEXT;
 	// private boolean showResumeButton = true;
 	
-	public Type getMessageType()
+	public int getMessageType()
 	{
 		return messageType;
 	}
 
-	public void setMessageType(Type messageType)
+	public void setMessageType(int messageType)
 	{
 		this.messageType = messageType;
 	}
@@ -129,11 +129,6 @@ public class ConvMessage
 		UNKNOWN
 	};
 	
-	public static enum Type
-	{
-		TEXT,
-		PIN_TEXT
-	};
 
 	public static enum ParticipantInfoState
 	{
@@ -222,19 +217,19 @@ public class ConvMessage
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn)
 	{
-		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, false,Type.TEXT);
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, false,HikeConstants.MESSAGE_TYPE.PLAIN_TEXT);
 	}
-	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, Type type)
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, int type)
 	{
 		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, false, type);
 	}
-	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS, Type type)
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS, int type)
 	{
 		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO, type);
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS,
-			ParticipantInfoState participantInfoState, Type type)
+			ParticipantInfoState participantInfoState, int type)
 	{
 		assert (msisdn != null);
 		this.mMsisdn = msisdn;
@@ -273,7 +268,7 @@ public class ConvMessage
 		}
 		if (data.has(HikeConstants.PIN_MESSAGE))
 		{
-			this.messageType = typeValue(data.getInt(HikeConstants.PIN_MESSAGE));
+			this.messageType = data.getInt(HikeConstants.PIN_MESSAGE);
 		}
 		this.mTimestamp = data.getLong(HikeConstants.TIMESTAMP);
 		/* prevent us from receiving a message from the future */
@@ -590,7 +585,7 @@ public class ConvMessage
 					}
 				}
 				data.put(!mIsSMS ? HikeConstants.HIKE_MESSAGE : HikeConstants.SMS_MESSAGE, mMessage);
-				if(messageType!=Type.TEXT)
+				if(messageType!=HikeConstants.MESSAGE_TYPE.PLAIN_TEXT)
 				{
 				data.put(HikeConstants.PIN_MESSAGE, messageType);
 				}
@@ -712,10 +707,6 @@ public class ConvMessage
 	public static State stateValue(int val)
 	{
 		return State.values()[val];
-	}
-	public static Type typeValue(int val)
-	{
-		return Type.values()[val];
 	}
 
 	public void setState(State state)

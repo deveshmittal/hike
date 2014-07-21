@@ -1849,7 +1849,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					textHolder = new TextViewHolder();
 					long time = System.currentTimeMillis();
-					if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.PLAIN_TEXT)
+					if (convMessage.getMessageType() ==HikeConstants.MESSAGE_TYPE.PLAIN_TEXT)
 					{
 						v = inflateView(R.layout.message_sent_text, parent, false);
 					}
@@ -1857,6 +1857,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						v = inflateView(R.layout.message_sent_text_pin, parent, false);
 					}
+					
 					textHolder.text = (TextView) v.findViewById(R.id.text);
 					textHolder.time = (TextView) v.findViewById(R.id.time);
 					textHolder.status = (ImageView) v.findViewById(R.id.status);

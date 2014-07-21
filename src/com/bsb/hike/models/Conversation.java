@@ -70,6 +70,31 @@ public class Conversation implements Comparable<Conversation>
 	private boolean onhike;
 
 	private int unreadCount;
+	
+	private int unreadPinCount;
+	
+	private String lastPin;
+	 
+
+	public String getLastPin()
+	{
+		return lastPin;
+	}
+
+	public void setLastPin(String string)
+	{
+		this.lastPin = string;
+	}
+
+	public int getUnreadPinCount()
+	{
+		return unreadPinCount;
+	}
+
+	public void setUnreadPinCount(int unreadPinCount)
+	{
+		this.unreadPinCount = unreadPinCount;
+	}
 
 	private boolean isStealth;
 

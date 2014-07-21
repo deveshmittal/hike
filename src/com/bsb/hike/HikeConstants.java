@@ -1657,8 +1657,8 @@ public class HikeConstants
 
 	public static class MESSAGE_TYPE
 	{
-		public static final int PLAIN_TEXT = 1;
+		public static final int PLAIN_TEXT = 0;
 
-		public static final int TEXT_PIN = 2;
+		public static final int TEXT_PIN = 1;
 	}
 }

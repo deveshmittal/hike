@@ -811,8 +811,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		final int messageMetadataColumn = 5;
 		final int groupParticipant = 6;
 		final int isHikeMessageColumn = 7;
-		final int msisdnColumn = 8;
-		final int typeColumn = 9 ;
+		final int typeColumn = 8 ;
+		final int msisdnColumn = 9;
 		insertStatement.clearBindings();
 		insertStatement.bindString(messageColumn, conv.getMessage());
 		// 0 -> SENT_UNCONFIRMED ; 1 -> SENT_CONFIRMED ; 2 -> RECEIVED_UNREAD ;
@@ -824,7 +824,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		insertStatement.bindString(messageMetadataColumn, conv.getMetadata() != null ? conv.getMetadata().serialize() : "");
 		insertStatement.bindLong(isHikeMessageColumn, conv.isSMS() ? 0 : 1);
 		insertStatement.bindString(groupParticipant, conv.getGroupParticipantMsisdn() != null ? conv.getGroupParticipantMsisdn() : "");
-		insertStatement.bindLong(typeColumn, conv.getMessageType().ordinal());
+		insertStatement.bindLong(typeColumn, conv.getMessageType());
 	}
 
 	public boolean wasMessageReceived(ConvMessage conv)
@@ -856,16 +856,20 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ ", " + DBConstants.IS_HIKE_MESSAGE + ", " + DBConstants.MESSAGE_TYPE + " ) " + " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ? FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE "
 				+ DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN + "=?");
 		mDb.beginTransaction();
-
+		
 		long msgId = -1;
 
 		int unreadMessageCount = 0;
+		int unreadPinMessageCount = 0;
 
 		for (ConvMessage conv : convMessages)
 		{
 			if (Utils.shouldIncrementCounter(conv))
 			{
 				unreadMessageCount++;
+				if(conv.getMessageType()==HikeConstants.MESSAGE_TYPE.TEXT_PIN){
+					unreadPinMessageCount++;
+				}
 			}
 
 			String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
@@ -916,6 +920,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.endTransaction();
 
 		incrementUnreadCounter(convMessages.get(0).getMsisdn(), unreadMessageCount);
+		incrementUnreadPINCounter(convMessages.get(0).getMsisdn(), unreadPinMessageCount);
 	}
 
 	public void updateIsHikeMessageState(long id, boolean isHikeMessage)
@@ -1088,7 +1093,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				boolean isHikeMessage = hikeMessage == -1 ? conversation.isOnhike() : (hikeMessage == 0 ? false : true);
 
 				ConvMessage message = new ConvMessage(c.getString(msgColumn), msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)),
-						c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn), !isHikeMessage,ConvMessage.typeValue(c.getInt(typeColumn)));
+						c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn), !isHikeMessage,c.getInt(typeColumn));
 				String metadata = c.getString(metadataColumn);
 				try
 				{
@@ -1269,7 +1274,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor groupInfoCursor = null;
 		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.CONV_ID, DBConstants.MESSAGE, DBConstants.MSG_STATUS,
 				DBConstants.TIMESTAMP, DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.UNREAD_COUNT,
-				DBConstants.IS_STEALTH }, null, null, null, null, null);
+				DBConstants.IS_STEALTH,DBConstants.LAST_PIN,DBConstants.UNREAD_PIN_COUNT }, null, null, null, null, null);
 
 		Map<String, Conversation> conversationMap = new HashMap<String, Conversation>(c.getCount());
 
@@ -1287,6 +1292,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
 		final int unreadCountColumn = c.getColumnIndex(DBConstants.UNREAD_COUNT);
 		final int isStealthColumn = c.getColumnIndex(DBConstants.IS_STEALTH);
+		final int lastPinColumn = c.getColumnIndex(DBConstants.LAST_PIN);
+		final int unraedPinCountColumn = c.getColumnIndex(DBConstants.UNREAD_PIN_COUNT);
 
 		HikeUserDatabase huDb = null;
 
@@ -1314,6 +1321,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				conv = new Conversation(msisdn, convid);
 				conv.setUnreadCount(c.getInt(unreadCountColumn));
 				conv.setIsStealth(c.getInt(isStealthColumn) == 1);
+				conv.setLastPin(c.getString(lastPinColumn));
+				conv.setUnreadPinCount(c.getInt(unraedPinCountColumn));
+				
 
 				if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn))
 				{
@@ -1464,7 +1474,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 	
-	private ConvMessage getLastUnreadPinForConversation(String msisdn)
+	public ConvMessage getLastUnreadPinForConversation(String msisdn)
 	{
 		Cursor c = null;
 
@@ -1707,9 +1717,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		contentValues.put(DBConstants.MAPPED_MSG_ID, 0);
 		contentValues.put(DBConstants.UNREAD_COUNT, 0);
 		contentValues.put(DBConstants.MSG_STATUS, State.RECEIVED_READ.ordinal());
-		contentValues.put(DBConstants.LAST_PIN, "");
-		contentValues.put(DBConstants.UNREAD_PIN_COUNT,0);
-
+	
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.CONV_ID + "=?", new String[] { Long.toString(convId) });
 	}
 
@@ -2964,6 +2972,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ DBConstants.MSISDN + "=" + DatabaseUtils.sqlEscapeString(msisdn);
 		mDb.execSQL(sqlString);
 	}
+	public void incrementUnreadPINCounter(String msisdn, int incrementValue)
+	{
+		String sqlString = "UPDATE " + DBConstants.CONVERSATIONS_TABLE + " SET " + DBConstants.UNREAD_PIN_COUNT + "=" + DBConstants.UNREAD_PIN_COUNT + " + " + incrementValue + " WHERE "
+				+ DBConstants.MSISDN + "=" + DatabaseUtils.sqlEscapeString(msisdn);
+		mDb.execSQL(sqlString);
+	}
 
 	public void initialiseSharedMediaAndFileThumbnailTable(SQLiteDatabase mDb)
 	{
@@ -3316,7 +3330,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		return 0;
 	}
-	
+
 	public List<ConvMessage> getAllPinMessage(int type)
 	{
 		return null;
