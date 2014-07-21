@@ -408,15 +408,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		/*
 		 * Version 25 adds the type column to the message table
 		 */
-		if (oldVersion < 25)
-		{
-			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.MESSAGE_TYPE + " INTEGER";
-			String alter1 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.LAST_PIN + " TEXT";
-			String alter2 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.UNREAD_PIN_COUNT + " INTEGER";
-			db.execSQL(alter);
-			db.execSQL(alter1);
-			db.execSQL(alter2);
-		}
+	
 
 		// to delete duplicate stickers
 		if (oldVersion < 26)
@@ -430,6 +422,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			catch (Exception e)
 			{
 			}
+		}
+		if (oldVersion < 27)
+		{
+			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.MESSAGE_TYPE + " INTEGER";
+			String alter1 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.LAST_PIN + " TEXT";
+			String alter2 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.UNREAD_PIN_COUNT + " INTEGER";
+			db.execSQL(alter);
+			db.execSQL(alter1);
+			db.execSQL(alter2);
 		}
 	}
 
