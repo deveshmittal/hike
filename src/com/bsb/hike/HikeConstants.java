@@ -54,6 +54,8 @@ public class HikeConstants
 	public static final String HIKE_MESSAGE = "hm";
 
 	public static final String SMS_MESSAGE = "sm";
+	
+	public static final String PIN_MESSAGE = "pm";
 
 	public static final String TIMESTAMP = "ts";
 
@@ -126,6 +128,10 @@ public class HikeConstants
 	public static final String ADDRESS = "add";
 
 	public static final String POKE = "poke";
+	
+	public static final String IS_GHOST = "is_ghost";
+	
+	public static final String UNREAD_PIN = "unreadpin";
 
 	public static final String ID = "id";
 

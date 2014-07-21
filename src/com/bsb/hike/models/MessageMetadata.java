@@ -61,8 +61,15 @@ public class MessageMetadata
 	private StatusMessage statusMessage;
 
 	private Sticker sticker;
-
+	
 	private boolean oldUser;
+	
+	private boolean isGhostMessage;
+
+	public boolean isGhostMessage()
+	{
+		return isGhostMessage;
+	}
 
 	private NudgeAnimationType nudgeAnimationType = NudgeAnimationType.NONE;
 
@@ -116,6 +123,7 @@ public class MessageMetadata
 			this.hikeFileList.add(new HikeFile(metadata, isSent));
 		}
 		this.isPokeMessage = metadata.optBoolean(HikeConstants.POKE);
+		this.isGhostMessage = metadata.optBoolean(HikeConstants.IS_GHOST);
 		this.json = metadata;
 		if (metadata.has(StickerManager.STICKER_ID))
 		{
@@ -231,7 +239,7 @@ public class MessageMetadata
 	{
 		return sticker;
 	}
-
+	
 	public boolean isOldUser()
 	{
 		return oldUser;

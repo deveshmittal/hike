@@ -1101,4 +1101,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="pin_detail">Mass bunk tomorrow! Let\'s all go for a movie at DT Mall</string>
     <string name="postAnonymously">Post Anonymously</string>
     <string name="create_pin">Create Pin</string>
+    <string name="pin_history">Pin history</string>
 </resources>
