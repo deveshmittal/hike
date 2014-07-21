@@ -1,6 +1,7 @@
 package com.bsb.hike.adapters;
 
 import java.util.List;
+
 import android.app.Activity;
 import android.content.Context;
 import android.text.util.Linkify;
@@ -10,6 +11,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -27,10 +29,8 @@ public class PinHistoryAdapter extends BaseAdapter
 	private LayoutInflater inflater;
 	
 	private HikeConversationsDatabase mDb;
-	
-	private Conversation conv;
 		
-	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn)
+	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn, long convId)
 	{
 		this.context = context;
 		
@@ -38,9 +38,9 @@ public class PinHistoryAdapter extends BaseAdapter
 		
 		mDb = HikeConversationsDatabase.getInstance();
 		
-		conv = mDb.getConversation(userMSISDN, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY);
+	//	conv = mDb.getConversation(userMSISDN, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY);
 		
-		this.textPins = conv.getMessages();
+		this.textPins = mDb.getAllPinMessage(HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, userMSISDN,convId);
 		
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}

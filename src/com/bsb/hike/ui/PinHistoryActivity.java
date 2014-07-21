@@ -18,6 +18,8 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity
 	private PinHistoryFragment mainFragment;
 		
 	private String msisdn;
+
+	private long convId;
 	
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -66,8 +68,8 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity
         }
 		
 		msisdn = getIntent().getExtras().getString(HikeConstants.TEXT_PINS);
-
-        mainFragment = new PinHistoryFragment(msisdn);
+		convId = getIntent().getExtras().getLong(HikeConstants.EXTRA_CONV_ID);
+        mainFragment = new PinHistoryFragment(msisdn,convId);
         
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.parent_layout, mainFragment).commit();		
