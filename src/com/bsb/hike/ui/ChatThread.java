@@ -846,6 +846,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			tipView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_text_pin, null);
 		}
+		if (impMessage.getMetadata() != null && impMessage.getMetadata().isGhostMessage())
+		{
+			tipView.findViewById(R.id.main_content).setBackgroundResource(R.drawable.pin_bg_black);
+		}
 		TextView sender = (TextView) tipView.findViewById(R.id.senderName);
 		TextView text = (TextView) tipView.findViewById(R.id.text);
 		TextView date = (TextView) tipView.findViewById(R.id.date);
@@ -1556,6 +1560,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (showingImpMessagePin)
 		{
 			convMessage.setMessageType((Integer) v.getTag());
+			Object metaData = v.getTag(R.id.message_info);
+			if (metaData != null && metaData instanceof JSONObject)
+			{
+				try
+				{
+					convMessage.setMetadata((JSONObject) metaData);
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 		else
 		{
@@ -4463,6 +4480,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void onClick(View v)
 			{
 				v.setTag(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+				CheckBox isGhost = (CheckBox) attachmentWindow.getContentView().findViewById(R.id.ghostCheckbox);
+
+				JSONObject jsonObject = new JSONObject();
+				try
+				{
+					jsonObject.put(HikeConstants.IS_GHOST, isGhost.isChecked());
+					v.setTag(R.id.message_info, jsonObject);
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				onSendClick(v);
 				dismissPopupWindow();
 
