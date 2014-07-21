@@ -1237,6 +1237,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.email_chat), 3));
 
+		if(mConversation instanceof GroupConversation)
+		{
+			optionsList.add(new OverFlowMenuItem(getString(R.string.pin_history), 4));
+		}
+			
 		if (!(mConversation instanceof GroupConversation) && contactInfo.isOnhike())
 		{
 			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND||contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED||contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED)
@@ -1312,6 +1317,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 3:
 					EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(ChatThread.this, null);
 					Utils.executeConvAsyncTask(emailTask, mConversation);
+					break;
+				case 4:					
+					Intent intent = new Intent();
+					intent.setClass(ChatThread.this, PinHistoryActivity.class);
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					intent.putExtra(HikeConstants.TEXT_PINS, mContactNumber);
+					startActivity(intent);
 					break;
 				case 5:
 					clearConversation();
