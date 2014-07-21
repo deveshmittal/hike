@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/yellow_sticky_note" >
+
+    <TextView
+        android:id="@+id/senderName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:text="xyz"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:padding="5dp"
+        android:id="@+id/cross"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/ic_cross" />
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/senderName"
+        android:maxLines="2"
+        android:text="Lorum Ipsum"
+        android:textSize="16sp"
+        android:textStyle="normal" />
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/text"
+        android:text="just now"
+        android:textColor="@color/light_gray"
+        android:textSize="11sp" />
+
+</RelativeLayout>

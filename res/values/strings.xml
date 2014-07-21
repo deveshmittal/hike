@@ -1099,4 +1099,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="use_this_quality_for_sending_images">Use this quality for sending images</string>
     <string name="pin_header">Pathik</string>
     <string name="pin_detail">Mass bunk tomorrow! Let\'s all go for a movie at DT Mall</string>
+    <string name="postAnonymously">Post Anonymously</string>
+    <string name="create_pin">Create Pin</string>
 </resources>

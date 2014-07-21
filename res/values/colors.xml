@@ -339,5 +339,7 @@
     <color name="ftue_card_invite_click_text">#01b085</color>
     <color name="image_quality_popup_text_color">#333333</color>
     <color name="black_30">#4D000000</color>
+    <color name="yellow_sticky_note">#fff38f</color>
+    <color name="light_gray">#404040</color>
 </resources>
 	
