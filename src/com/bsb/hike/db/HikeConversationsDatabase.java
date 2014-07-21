@@ -770,6 +770,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			String groupId = entry.getKey();
 			PairModified<Long, Set<String>> pair = entry.getValue();
+			maxMsgId = pair.getFirst();
 			
 			try
 			{
