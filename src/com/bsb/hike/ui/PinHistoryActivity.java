@@ -1,6 +1,5 @@
 package com.bsb.hike.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,13 +8,16 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.fragments.PinHistoryFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
 public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity 
 {	
-	PinHistoryFragment mainFragment;
+	private PinHistoryFragment mainFragment;
+		
+	private String msisdn;
 	
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -63,7 +65,9 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity
             return;
         }
 		
-        mainFragment = new PinHistoryFragment();
+		msisdn = getIntent().getExtras().getString(HikeConstants.TEXT_PINS);
+
+        mainFragment = new PinHistoryFragment(msisdn);
         
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.parent_layout, mainFragment).commit();		
@@ -91,11 +95,7 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity
 	@Override
 	public void onBackPressed()
 	{
-		Intent intent = new Intent(PinHistoryActivity.this, ChatThread.class);
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		startActivity(intent);
-
-//		super.onBackPressed();
+		super.onBackPressed();
 	}
 	
 	
