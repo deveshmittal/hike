@@ -114,6 +114,8 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -818,10 +820,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean showImpMessageIfRequired()
 	{
-	//	ConvMessage impMessage = new ConvMessage("Sample", "999", System.currentTimeMillis(), State.SENT_CONFIRMED);
-		//impMessage.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+		// ConvMessage impMessage = new ConvMessage("Sample", "999", System.currentTimeMillis(), State.SENT_CONFIRMED);
+		// impMessage.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 		ConvMessage impMessage = mConversationDb.getLastUnreadPinForConversation(mConversation.getMsisdn());
-		
+
 		if (impMessage != null)
 		{
 			showImpMessage(impMessage, -1);
@@ -841,20 +843,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (tipView != null)
 		{
-			tipView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_out_animation));
 			tipView.setVisibility(View.GONE);
 		}
 		if (impMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
 			tipView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_text_pin, null);
 		}
-		if (impMessage.getMetadata() != null && impMessage.getMetadata().isGhostMessage())
-		{
-			tipView.findViewById(R.id.main_content).setBackgroundResource(R.drawable.pin_bg_black);
-		}
+
 		TextView sender = (TextView) tipView.findViewById(R.id.senderName);
 		TextView text = (TextView) tipView.findViewById(R.id.text);
 		TextView date = (TextView) tipView.findViewById(R.id.date);
+		if (impMessage.getMetadata() != null && impMessage.getMetadata().isGhostMessage())
+		{
+			tipView.findViewById(R.id.main_content).setBackgroundResource(R.drawable.pin_bg_black);
+			sender.setTextColor(getResources().getColor(R.color.gray));
+			text.setTextColor(getResources().getColor(R.color.gray));
+		}
 		sender.setText(impMessage.getMsisdn());
 		text.setText(impMessage.getMessage());
 		date.setText(impMessage.getTimestampFormatted(false, getApplicationContext()));
@@ -1214,6 +1218,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (attachmentWindow != null)
 		{
+			if (showingImpMessagePin)
+			{
+				View v = attachmentWindow.getContentView();
+				v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_out_animation));
+			}
 			attachmentWindow.dismiss();
 		}
 	}
@@ -3861,8 +3870,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				typingNotification = messages.get(messages.size() - 1).getTypingNotification();
 				messages.remove(messages.size() - 1);
 			}
+			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			{
+				showImpMessage(convMessage, -1);
+			}
 			mAdapter.addMessage(convMessage);
-			addtoMessageMap(messages.size() - 1 ,messages.size());
+			addtoMessageMap(messages.size() - 1, messages.size());
 
 			// Reset this boolean to load more messages when the user scrolls to
 			// the top
@@ -3886,10 +3899,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 				}
 			}
-			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-			{
-				showImpMessage(convMessage, R.anim.scale_from_mid_bounce);
-			}
+
 			mAdapter.notifyDataSetChanged();
 
 			/*
@@ -4409,9 +4419,40 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		showingImpMessagePin = true;
 		invalidateOptionsMenu();
 		dismissPopupWindow();
-		View content = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_pin_pop_up, null);
+		final View content = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_pin_pop_up, null);
 		attachmentWindow = new PopupWindow(content);
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+		Utils.showSoftKeyboard(getApplicationContext(), mComposeView);
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
+		CheckBox isGhost = (CheckBox) content.findViewById(R.id.ghostCheckbox);
+		isGhost.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+		{
+
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+			{
+
+				if (isChecked)
+				{
+					int gray = getResources().getColor(R.color.gray);
+					content.findViewById(R.id.main_content).setBackgroundResource(R.drawable.pin_bg_black);
+					EditText et = (EditText) content.findViewById(R.id.messageedittext);
+					et.setTextColor(gray);
+					et.setBackgroundResource(R.drawable.textbox_black);
+					buttonView.setTextColor(gray);
+				}
+				else
+				{
+					int black = getResources().getColor(R.color.black);
+					content.findViewById(R.id.main_content).setBackgroundResource(R.drawable.pin_bg_yellow);
+					EditText et = (EditText) content.findViewById(R.id.messageedittext);
+					et.setTextColor(black);
+					et.setBackgroundResource(R.drawable.textbox);
+					buttonView.setTextColor(black);
+				}
+
+			}
+		});
 		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
 		attachmentWindow.setOutsideTouchable(false);
 		attachmentWindow.setFocusable(true);
@@ -4421,8 +4462,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		try
 		{
 			attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
-			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
-			Utils.showSoftKeyboard(getApplicationContext(), mComposeView);
+
 			mComposeView.requestFocus();
 		}
 		catch (BadTokenException e)
@@ -4457,11 +4497,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onDismiss()
 			{
+				Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
 				showingImpMessagePin = false;
 				setupActionBar(false);
 				invalidateOptionsMenu();
 				mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
-				Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
+				ChatThread.this.chatLayout.requestFocus();
 				getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 			}
 		});

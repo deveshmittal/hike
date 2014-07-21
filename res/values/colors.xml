@@ -341,5 +341,6 @@
     <color name="black_30">#4D000000</color>
     <color name="yellow_sticky_note">#fff38f</color>
     <color name="light_gray">#404040</color>
+    <color name="gray">#cccccc</color>
 </resources>
 	
