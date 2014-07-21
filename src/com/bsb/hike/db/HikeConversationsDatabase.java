@@ -1217,10 +1217,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return true;
 	}
 
-	public void addConversationsBulk(List<ConvMessage> convMessages)
+	public ArrayList<ConvMessage> addConversationsBulk(List<ConvMessage> convMessages)
 	{
 		HashMap<String, Conversation> convesationMap = new HashMap<String, Conversation>();
 		Logger.d("bulkPacket", "adding conversation started");
+		ArrayList<ConvMessage> resultList = new ArrayList<ConvMessage>();
 		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
 				+ DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
 				+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + " ) " + " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ? FROM "
@@ -1240,7 +1241,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
 			bindConversationInsert(insertStatement, conv);
 
-			msgId = insertStatement.executeInsert();
+			try
+			{
+				msgId = insertStatement.executeInsert();
+			}
+			catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				Logger.e(getClass().getSimpleName(), "Duplicate value ", e);
+				continue;
+			}
 			addThumbnailStringToMetadata(conv.getMetadata(), thumbnailString);
 			/*
 			 * Represents we dont have any conversation made for this msisdn. Here we are also checking whether the message is a group message, If it is and the conversation does
@@ -1255,7 +1265,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 
 				bindConversationInsert(insertStatement, conv);
-				msgId = insertStatement.executeInsert();
+				try
+				{
+					msgId = insertStatement.executeInsert();
+				}
+				catch (Exception e)
+				{
+					// TODO Auto-generated catch block
+					Logger.e(getClass().getSimpleName(), "Duplicate value ", e);
+					continue;
+				}
 
 				conv.setConversation(conversation);
 				assert (msgId >= 0);
@@ -1283,9 +1302,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				addSharedMedia(msgId, conv.getConversation().getConvId());
 			}
+			resultList.add(conv);
 		}
 		incrementUnreadCounter(convMessages.get(0).getMsisdn(), unreadMessageCount);
-		Logger.d("bulkPacket", "adding conversation returning");
+		Logger.d("BulkProcess", "adding conversation returning");
+		return resultList;
 	}
 
 	public void addLastConversations(List<ConvMessage> convMessages)

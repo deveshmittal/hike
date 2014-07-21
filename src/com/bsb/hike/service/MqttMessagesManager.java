@@ -1656,7 +1656,21 @@ public class MqttMessagesManager
 	{
 		if(messageList.size() > 0)
 		{
-			convDb.addConversationsBulk(messageList);
+			messageList = convDb.addConversationsBulk(messageList);
+		}
+		
+		/*
+		 * The list returned by {@link com.bsb.hike.db.HikeConversationsDatabase#addConversationsBulk(List<ConvMessages>)} contains non duplicate messages
+		 * This list is used for further processing
+		 */
+		for (ConvMessage convMessage : messageList)
+		{
+			String msisdn = convMessage.getMsisdn();
+			if(messageListMap.get(msisdn) == null)
+			{
+				messageListMap.put(msisdn, new ArrayList<ConvMessage>());
+			}
+			messageListMap.get(msisdn).add(convMessage);
 		}
 		ArrayList<ConvMessage> lastMessageList = new ArrayList<ConvMessage>(messageListMap.keySet().size());
 		for (Entry<String, ArrayList<ConvMessage>> entry : messageListMap.entrySet())
@@ -1685,11 +1699,6 @@ public class MqttMessagesManager
 	private void addToLists(String msisdn, ConvMessage convMessage)
 	{
 		messageList.add(convMessage);
-		if(messageListMap.get(msisdn) == null)
-		{
-			messageListMap.put(msisdn, new ArrayList<ConvMessage>());
-		}
-		messageListMap.get(msisdn).add(convMessage);
 	}
 
 	public void saveMqttMessage(JSONObject jsonObj) throws JSONException
