@@ -1340,6 +1340,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					intent.setClass(ChatThread.this, PinHistoryActivity.class);
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					intent.putExtra(HikeConstants.TEXT_PINS, mContactNumber);
+					intent.putExtra(HikeConstants.EXTRA_CONV_ID, mConversation.getConvId());
 					startActivity(intent);
 					break;
 				case 5:

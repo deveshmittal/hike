@@ -1,6 +1,7 @@
 package com.bsb.hike.ui.fragments;
 
 import java.util.List;
+
 import android.graphics.Bitmap;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
+
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
@@ -34,10 +36,13 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 	private ChatTheme chatTheme;
 		
 	private HikeConversationsDatabase mDb;
+
+	private long convId;
 	
-	public PinHistoryFragment(String userMSISDN)
+	public PinHistoryFragment(String userMSISDN, long convId2)
 	{
 		this.msisdn = userMSISDN;
+		this.convId= convId2;
 	}
 		
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -82,7 +87,7 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 	{
 		super.onActivityCreated(savedInstanceState);
 		
-		PHadapter = new PinHistoryAdapter(getActivity(), textPins, msisdn);
+		PHadapter = new PinHistoryAdapter(getActivity(), textPins, msisdn,convId);
 		
 		setListAdapter(PHadapter);
 		getListView().setOnScrollListener(this);

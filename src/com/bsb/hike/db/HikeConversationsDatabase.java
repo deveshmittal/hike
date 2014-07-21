@@ -3353,17 +3353,72 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return 0;
 	}
 
-	public List<ConvMessage> getAllPinMessage(int type)
+	public List<ConvMessage> getAllPinMessage(int limit, String msisdn,  long convId)
 	{
-		return null;
+		String limitStr = (limit == -1) ? null : new Integer(limit).toString();
+		String selection = DBConstants.CONV_ID + " = ?" + " AND " + DBConstants.MESSAGE_TYPE + "==" + HikeConstants.MESSAGE_TYPE.TEXT_PIN;
+		Cursor c = null;
+		try
+		{
+			/* TODO this should be ORDER BY timestamp */
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID,
+					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.IS_HIKE_MESSAGE, DBConstants.READ_BY , DBConstants.MESSAGE_TYPE }, selection,
+					new String[] {Long.toString(convId)}, null, null, DBConstants.MESSAGE_ID + " DESC", limitStr);
+
+			final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
+			final int msgStatusColumn = c.getColumnIndex(DBConstants.MSG_STATUS);
+			final int tsColumn = c.getColumnIndex(DBConstants.TIMESTAMP);
+			final int mappedMsgIdColumn = c.getColumnIndex(DBConstants.MAPPED_MSG_ID);
+			final int msgIdColumn = c.getColumnIndex(DBConstants.MESSAGE_ID);
+			final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
+			final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
+			final int isHikeMessageColumn = c.getColumnIndex(DBConstants.IS_HIKE_MESSAGE);
+			final int readByColumn = c.getColumnIndex(DBConstants.READ_BY);
+			final int typeColumn = c.getColumnIndex(DBConstants.MESSAGE_TYPE);
+
+			List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
+
+			while (c.moveToNext())
+			{
+				int hikeMessage = c.getInt(isHikeMessageColumn);
+				boolean isHikeMessage =  (hikeMessage == 0 ? false : true);
+
+				ConvMessage message = new ConvMessage(c.getString(msgColumn), msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)),
+						c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn), !isHikeMessage,c.getInt(typeColumn));
+				String metadata = c.getString(metadataColumn);
+				try
+				{
+					message.setMetadata(metadata);
+				}
+				catch (JSONException e)
+				{
+					Logger.w(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
+				}
+				message.setReadByArray(c.getString(readByColumn));
+				elements.add(elements.size(), message);
+				//message.setConversation(conversation);
+			}
+			Collections.reverse(elements);
+
+			return elements;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
 	}
+
 	public void markPinMessagesRead(List<ConvMessage> msgs)
 	{
-		
+
 	}
+
 	public void markPinMessageRead(ConvMessage convMessage)
 	{
-		
+
 	}
 	public void removeLastPinMessageForConv(String convId)
 	{
