@@ -3467,8 +3467,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	}
 
-	public void markPinMessageRead(ConvMessage convMessage)
+	public void markPinMessageRead(String msisdn)
 	{
+		String sqlString = "UPDATE " + DBConstants.CONVERSATIONS_TABLE + " SET " + DBConstants.LAST_PIN + "=" +  null + " WHERE "
+				+ DBConstants.MSISDN + "=" + DatabaseUtils.sqlEscapeString(msisdn);
+		mDb.execSQL(sqlString);
 
 	}
 	public void removeLastPinMessageForConv(String convId)
