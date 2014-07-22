@@ -861,18 +861,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			sender.setTextColor(getResources().getColor(R.color.gray));
 			text.setTextColor(getResources().getColor(R.color.gray));
 		}
-		if (Utils.isGroupConversation(ChatThread.this.mConversation.getMsisdn()))
+		if (impMessage.isSent())
 		{
-			GroupConversation gConv = (GroupConversation) mConversation;
-			sender.setText(gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
+			sender.setText("You");
 		}
 		else
 		{
-			sender.setText(impMessage.getMsisdn());
+			if (Utils.isGroupConversation(ChatThread.this.mConversation.getMsisdn()))
+			{
+				GroupConversation gConv = (GroupConversation) mConversation;
+				sender.setText(gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
+			}
 		}
+
 		text.setText(impMessage.getMessage());
 		date.setText(impMessage.getTimestampFormatted(false, getApplicationContext()));
-		View cross  =tipView.findViewById(R.id.cross);
+		View cross = tipView.findViewById(R.id.cross);
 		cross.setTag(impMessage);
 		cross.setOnClickListener(new OnClickListener()
 		{
