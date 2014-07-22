@@ -4472,6 +4472,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		try
 		{
+			if(tipView!=null){
+				tipView.setVisibility(View.GONE);
+			}
 			attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
 
 			mComposeView.requestFocus();
@@ -4508,6 +4511,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onDismiss()
 			{
+				if(tipView!=null){
+					tipView.setVisibility(View.VISIBLE);
+				}
 				Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
 				showingImpMessagePin = false;
 				setupActionBar(false);
