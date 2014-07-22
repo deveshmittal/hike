@@ -1122,6 +1122,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return false;
 		}
 		getSupportMenuInflater().inflate(isActionModeOn ? R.menu.multi_select_chat_menu : R.menu.chat_thread_menu, menu);
+		// for group chat we show pin and one:one, we show theme
+		if (mConversation instanceof GroupConversation)
+		{
+			menu.getItem(0).setVisible(false);
+			menu.getItem(1).setVisible(true);
+		}
+		else
+		{
+			menu.getItem(0).setVisible(true);
+			menu.getItem(1).setVisible(false);
+		}
 		mMenu = menu;
 		return true;
 	}
@@ -1176,9 +1187,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		switch (item.getItemId())
 		{
-		// case R.id.chat_bg:
-		// setupThemePicker(null);
-		// break;
+		case R.id.chat_bg:
+			setupThemePicker(null);
+			break;
 		case R.id.attachment:
 			// hide pop up if any
 			return attachmentClicked();
@@ -1619,7 +1630,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else
 		{
-			checkMessageTypeFromHash(convMessage);
+			if (mConversation instanceof GroupConversation)
+			{
+				checkMessageTypeFromHash(convMessage);
+			}
 		}
 		sendMessage(convMessage);
 
