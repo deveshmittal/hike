@@ -1894,23 +1894,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder = (TextViewHolder) v.getTag();
 				}
 			}
-			Logger.i("messageadapter", "message type "+convMessage.getMessageType());
-			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.PLAIN_TEXT)
-			{
-				setBubbleColor(convMessage, textHolder.messageContainer);
-			}
-			else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-			{
-				// for text based pins, we need yellow bubble irrespective of themes 
-				if (viewType == ViewType.SEND_HIKE)
-				{
-					textHolder.messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_sent_yellow);
-				}
-				else
-				{
-					textHolder.messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_received_yellow);
-				}
-			}
+			Logger.i("messageadapter", "message type " + convMessage.getMessageType());
+
+			setBubbleColor(convMessage, textHolder.messageContainer);
+
 			dayHolder = textHolder;
 			setSenderDetails(convMessage, position, textHolder, false);
 
@@ -3395,13 +3382,28 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			int rightPad = messageContainer.getPaddingRight();
 			int bottomPad = messageContainer.getPaddingBottom();
 			/* label outgoing hike conversations in green */
-			if (chatTheme == ChatTheme.DEFAULT)
+			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			{
-				messageContainer.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector : R.drawable.ic_bubble_green_selector);
+				// for text based pins, we need yellow bubble irrespective of themes
+				if (convMessage.isSent())
+				{
+					messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_sent_yellow);
+				}
+				else
+				{
+					messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_received_yellow);
+				}
 			}
 			else
 			{
-				messageContainer.setBackgroundResource(chatTheme.bubbleResId());
+				if (chatTheme == ChatTheme.DEFAULT)
+				{
+					messageContainer.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector : R.drawable.ic_bubble_green_selector);
+				}
+				else
+				{
+					messageContainer.setBackgroundResource(chatTheme.bubbleResId());
+				}
 			}
 			messageContainer.setPadding(leftPad, topPad, rightPad, bottomPad);
 		}
