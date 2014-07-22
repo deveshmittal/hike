@@ -64,6 +64,12 @@ public class MessageMetadata
 	
 	private boolean oldUser;
 	
+	private boolean isGhostMessage;
+
+	public boolean isGhostMessage()
+	{
+		return isGhostMessage;
+	}
 
 	private NudgeAnimationType nudgeAnimationType = NudgeAnimationType.NONE;
 
