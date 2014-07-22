@@ -114,6 +114,8 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -207,6 +209,7 @@ import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
 		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener
 {
+	private static final String HASH_PIN = "#pin ";
 
 	private boolean screenOffEvent;
 
@@ -388,6 +391,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private ChatTheme temporaryTheme;
 
 	private boolean showingChatThemePicker;
+
+	private boolean showingImpMessagePin;
 
 	private ImageView backgroundImage;
 
@@ -805,8 +810,95 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		screenOffBR = new ScreenOffReceiver();
 		registerReceiver(screenOffBR, new IntentFilter(Intent.ACTION_SCREEN_OFF));
-		showTipIfRequired();
+		// give priority to imp message , say pin message
+		if (!showImpMessageIfRequired())
+		{
+			showTipIfRequired();
+		}
 		Logger.i("chatthread", "on create end");
+	}
+
+	private boolean showImpMessageIfRequired()
+	{
+		ConvMessage impMessage = mConversationDb.getLastUnreadPinForConversation(mConversation.getMsisdn());
+		if (impMessage != null)
+		{
+			showImpMessage(impMessage, -1);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 * @param impMessage
+	 *            -- ConvMessage to stick to top
+	 * @param animationId
+	 *            -- play animation on message , id must be anim resource id, -1 of no
+	 */
+	private void showImpMessage(ConvMessage impMessage, int animationId)
+	{
+		if (tipView != null)
+		{
+			tipView.setVisibility(View.GONE);
+		}
+		if (impMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+		{
+			tipView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_text_pin, null);
+		}
+
+		if (tipView == null)
+		{
+			Logger.e("chatthread", "got imp message but type is unnknown , type " + impMessage.getMessageType());
+			return;
+		}
+		TextView sender = (TextView) tipView.findViewById(R.id.senderName);
+		TextView text = (TextView) tipView.findViewById(R.id.text);
+		TextView date = (TextView) tipView.findViewById(R.id.date);
+		if (impMessage.getMetadata() != null && impMessage.getMetadata().isGhostMessage())
+		{
+			tipView.findViewById(R.id.main_content).setBackgroundResource(R.drawable.pin_bg_black);
+			sender.setTextColor(getResources().getColor(R.color.gray));
+			text.setTextColor(getResources().getColor(R.color.gray));
+		}
+		if (impMessage.isSent())
+		{
+			sender.setText("You");
+		}
+		else
+		{
+			if (Utils.isGroupConversation(ChatThread.this.mConversation.getMsisdn()))
+			{
+				GroupConversation gConv = (GroupConversation) mConversation;
+				sender.setText(gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
+			}
+		}
+
+		text.setText(impMessage.getMessage());
+		date.setText(impMessage.getTimestampFormatted(false, getApplicationContext()));
+		View cross = tipView.findViewById(R.id.cross);
+		cross.setTag(impMessage);
+		cross.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				tipView.setVisibility(View.GONE);
+				HikeConversationsDatabase.getInstance().markPinMessageRead(mConversation.getMsisdn());
+
+			}
+		});
+		LinearLayout ll = ((LinearLayout) findViewById(R.id.impMessageContainer));
+		if (ll.getChildCount() > 0)
+		{
+			ll.removeAllViews();
+		}
+		ll.addView(tipView, 0);
+		if (animationId != -1)
+		{
+			tipView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), animationId));
+		}
 	}
 
 	private void showTipIfRequired()
@@ -1028,11 +1120,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if (showingChatThemePicker)
+		if (showingChatThemePicker || showingImpMessagePin)
 		{
 			return false;
 		}
 		getSupportMenuInflater().inflate(isActionModeOn ? R.menu.multi_select_chat_menu : R.menu.chat_thread_menu, menu);
+		// for group chat we show pin and one:one, we show theme
+		if (mConversation instanceof GroupConversation)
+		{
+			menu.getItem(0).setVisible(false);
+			menu.getItem(1).setVisible(true);
+		}
+		else
+		{
+			menu.getItem(0).setVisible(true);
+			menu.getItem(1).setVisible(false);
+		}
 		mMenu = menu;
 		return true;
 	}
@@ -1040,7 +1143,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
-		if (mConversation == null || showingChatThemePicker)
+		if (mConversation == null || showingChatThemePicker || showingImpMessagePin)
 		{
 			return super.onPrepareOptionsMenu(menu);
 		}
@@ -1096,6 +1199,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		case R.id.overflow_menu:
 			showOverFlowMenu();
 			break;
+		case R.id.pin_imp:
+			setupPinImpMessage(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+			break;
 		}
 
 		return true;
@@ -1140,6 +1246,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (attachmentWindow != null)
 		{
+			if (showingImpMessagePin)
+			{
+				View v = attachmentWindow.getContentView();
+				v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_out_animation));
+			}
 			attachmentWindow.dismiss();
 		}
 	}
@@ -1169,6 +1280,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.email_chat), 3));
 
+		if(mConversation instanceof GroupConversation)
+		{
+			optionsList.add(new OverFlowMenuItem(getString(R.string.pin_history), 4));
+		}
+			
 		if (!(mConversation instanceof GroupConversation) && contactInfo.isOnhike())
 		{
 			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND||contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED||contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED)
@@ -1176,6 +1292,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				optionsList.add(new OverFlowMenuItem(getString(R.string.add_as_favorite_menu), 7));
 			}
 		}
+
+		optionsList.add(new OverFlowMenuItem(getString(R.string.chat_theme_small), 8));
 
 		dismissPopupWindow();
 
@@ -1245,6 +1363,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(ChatThread.this, null);
 					Utils.executeConvAsyncTask(emailTask, mConversation);
 					break;
+				case 4:					
+					Intent intent = new Intent();
+					intent.setClass(ChatThread.this, PinHistoryActivity.class);
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					intent.putExtra(HikeConstants.TEXT_PINS, mContactNumber);
+					intent.putExtra(HikeConstants.EXTRA_CONV_ID, mConversation.getConvId());
+					startActivity(intent);
+					break;
 				case 5:
 					clearConversation();
 					break;
@@ -1256,6 +1382,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					contactInfo.setFavoriteType(favoriteType);
 					Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+					break;
+				case 8:
+					setupThemePicker(null);
 					break;
 				}
 
@@ -1473,18 +1602,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if (TextUtils.isEmpty(mComposeView.getText()))
 		{
-			if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
+			if (mComposeView.getId() == R.id.msg_compose)
 			{
-				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-				return;
+				recordingDialogClicked();
 			}
-			if (FileTransferManager.getInstance(this).remainingTransfers() == 0)
-			{
-				Toast.makeText(this, getString(R.string.max_num_files_reached, FileTransferManager.getInstance(this).getTaskLimit()), Toast.LENGTH_SHORT).show();
-				return;
-			}
-
-			showRecordingDialog();
 			return;
 		}
 
@@ -1493,12 +1614,68 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mComposeView.setText("");
 
 		ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, message, isConversationOnHike());
-
+		if (showingImpMessagePin)
+		{
+			convMessage.setMessageType((Integer) v.getTag());
+			Object metaData = v.getTag(R.id.message_info);
+			if (metaData != null && metaData instanceof JSONObject)
+			{
+				try
+				{
+					convMessage.setMetadata((JSONObject) metaData);
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		else
+		{
+			if (mConversation instanceof GroupConversation)
+			{
+				checkMessageTypeFromHash(convMessage);
+			}
+		}
 		sendMessage(convMessage);
 
 		if (mComposeViewWatcher != null)
 		{
 			mComposeViewWatcher.onMessageSent();
+		}
+	}
+
+	private void recordingDialogClicked()
+	{
+		if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
+		{
+			Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (FileTransferManager.getInstance(this).remainingTransfers() == 0)
+		{
+			Toast.makeText(this, getString(R.string.max_num_files_reached, FileTransferManager.getInstance(this).getTaskLimit()), Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		showRecordingDialog();
+	}
+
+	private void checkMessageTypeFromHash(ConvMessage convMessage)
+	{
+		if (convMessage.getMessage().startsWith(HASH_PIN))
+		{
+			convMessage.setMessage(convMessage.getMessage().substring(HASH_PIN.length()));
+			convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+			JSONObject jsonObject = new JSONObject();
+			try
+			{
+				jsonObject.put(HikeConstants.PIN_MESSAGE, 1);
+				convMessage.setMetadata(jsonObject);
+			}catch(JSONException je){
+				je.printStackTrace();
+			}
 		}
 	}
 
@@ -3733,8 +3910,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				typingNotification = messages.get(messages.size() - 1).getTypingNotification();
 				messages.remove(messages.size() - 1);
 			}
+			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			{
+				showImpMessage(convMessage, -1);
+			}
 			mAdapter.addMessage(convMessage);
-			addtoMessageMap(messages.size() - 1 ,messages.size());
+			addtoMessageMap(messages.size() - 1, messages.size());
 
 			// Reset this boolean to load more messages when the user scrolls to
 			// the top
@@ -3758,6 +3939,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 				}
 			}
+
 			mAdapter.notifyDataSetChanged();
 
 			/*
@@ -4259,6 +4441,141 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		slideIn.setDuration(200);
 		closeBtn.startAnimation(slideIn);
 		saveThemeBtn.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_in));
+	}
+
+	private void setupPinImpMessage(int pinType)
+	{
+		switch (pinType)
+		{
+		case HikeConstants.MESSAGE_TYPE.TEXT_PIN:
+			setupPinImpMessageTextBased();
+			break;
+		}
+	}
+
+	private void setupPinImpMessageTextBased()
+	{
+		setupPinImpMessageActionBar();
+		showingImpMessagePin = true;
+		invalidateOptionsMenu();
+		dismissPopupWindow();
+		final View content = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_pin_pop_up, null);
+		attachmentWindow = new PopupWindow(content);
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+		Utils.showSoftKeyboard(getApplicationContext(), mComposeView);
+		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
+		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
+		attachmentWindow.setOutsideTouchable(false);
+		attachmentWindow.setFocusable(true);
+		attachmentWindow.setWidth(LayoutParams.MATCH_PARENT);
+		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
+
+		try
+		{
+			attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
+
+			mComposeView.requestFocus();
+		}
+		catch (BadTokenException e)
+		{
+			Logger.e(getClass().getSimpleName(), "Excepetion in ChatThread ChatTheme picker", e);
+		}
+
+		FrameLayout viewParent = (FrameLayout) content.getParent();
+		WindowManager.LayoutParams lp = (WindowManager.LayoutParams) viewParent.getLayoutParams();
+		lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+
+		WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+		windowManager.updateViewLayout(viewParent, lp);
+
+		attachmentWindow.setTouchInterceptor(new OnTouchListener()
+		{
+
+			@Override
+			public boolean onTouch(View view, MotionEvent event)
+			{
+				if (event.getAction() == MotionEvent.ACTION_OUTSIDE)
+				{
+					return true;
+				}
+				return false;
+			}
+		});
+
+		attachmentWindow.setOnDismissListener(new OnDismissListener()
+		{
+
+			@Override
+			public void onDismiss()
+			{
+				Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
+				showingImpMessagePin = false;
+				setupActionBar(false);
+				invalidateOptionsMenu();
+				mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
+				ChatThread.this.chatLayout.requestFocus();
+				getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+			}
+		});
+	}
+
+	private void setupPinImpMessageActionBar()
+	{
+
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.chat_theme_action_bar, null);
+
+		View saveBtn = actionBarView.findViewById(R.id.done_container);
+		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
+		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		ViewGroup closeContainer = (ViewGroup) actionBarView.findViewById(R.id.close_container);
+
+		title.setText(R.string.create_pin);
+
+		closeContainer.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				dismissPopupWindow();
+			}
+		});
+
+		saveBtn.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				v.setTag(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+				JSONObject jsonObject = new JSONObject();
+				try
+				{
+					jsonObject.put(HikeConstants.PIN_MESSAGE, 1);
+					v.setTag(R.id.message_info, jsonObject);
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				onSendClick(v);
+				dismissPopupWindow();
+
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
+
+		Animation slideIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_left_noalpha);
+		slideIn.setInterpolator(new AccelerateDecelerateInterpolator());
+		slideIn.setDuration(200);
+		closeBtn.startAnimation(slideIn);
+		saveBtn.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_in));
+
 	}
 
 	private void showFilePicker(final ExternalStorageState externalStorageState)

@@ -1734,6 +1734,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder = (TextViewHolder) v.getTag();
 				}
 			}
+			Logger.i("messageadapter", "message type " + convMessage.getMessageType());
+
+			setBubbleColor(convMessage, textHolder.messageContainer);
+
 			dayHolder = textHolder;
 			setSenderDetails(convMessage, position, textHolder, false);
 
@@ -1744,7 +1748,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			Linkify.addLinks(textHolder.text, Linkify.ALL);
 			Linkify.addLinks(textHolder.text, Utils.shortCodeRegex, "tel:");
 
-			setBubbleColor(convMessage, textHolder.messageContainer);
+			
 			setTimeNStatus(position, textHolder, false, textHolder.messageContainer);
 			setSelection(convMessage, textHolder.selectedStateOverlay);
 
@@ -2237,23 +2241,46 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void setBubbleColor(ConvMessage convMessage, ViewGroup messageContainer)
 	{
+		int leftPad = messageContainer.getPaddingLeft();
+		int topPad = messageContainer.getPaddingTop();
+		int rightPad = messageContainer.getPaddingRight();
+		int bottomPad = messageContainer.getPaddingBottom();
 		if (convMessage.isSent() && messageContainer != null)
 		{
-			int leftPad = messageContainer.getPaddingLeft();
-			int topPad = messageContainer.getPaddingTop();
-			int rightPad = messageContainer.getPaddingRight();
-			int bottomPad = messageContainer.getPaddingBottom();
+
 			/* label outgoing hike conversations in green */
-			if (chatTheme == ChatTheme.DEFAULT)
+			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			{
-				messageContainer.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector : R.drawable.ic_bubble_green_selector);
+				// for text based pins, we need yellow bubble irrespective of themes
+
+				messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_sent_yellow);
+
 			}
 			else
 			{
-				messageContainer.setBackgroundResource(chatTheme.bubbleResId());
+				if (chatTheme == ChatTheme.DEFAULT)
+				{
+					messageContainer.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector : R.drawable.ic_bubble_green_selector);
+				}
+				else
+				{
+					messageContainer.setBackgroundResource(chatTheme.bubbleResId());
+				}
 			}
-			messageContainer.setPadding(leftPad, topPad, rightPad, bottomPad);
+
 		}
+		else
+		{
+			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			{
+				messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_received_yellow);
+			}
+			else
+			{
+				messageContainer.setBackgroundResource(R.drawable.ic_bubble_white_selector);
+			}
+		}
+		messageContainer.setPadding(leftPad, topPad, rightPad, bottomPad);
 	}
 
 	private View inflateView(int resource, ViewGroup root)

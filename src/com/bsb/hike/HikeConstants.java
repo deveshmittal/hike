@@ -54,6 +54,8 @@ public class HikeConstants
 	public static final String HIKE_MESSAGE = "hm";
 
 	public static final String SMS_MESSAGE = "sm";
+	
+	public static final String PIN_MESSAGE = "pin";
 
 	public static final String TIMESTAMP = "ts";
 
@@ -126,6 +128,10 @@ public class HikeConstants
 	public static final String ADDRESS = "add";
 
 	public static final String POKE = "poke";
+	
+	public static final String IS_GHOST = "is_ghost";
+	
+	public static final String UNREAD_PIN = "unreadpin";
 
 	public static final String ID = "id";
 
@@ -1642,10 +1648,21 @@ public class HikeConstants
 	public static final String PACKAGE_WATSAPP = "com.whatsapp";
 
 	public static final long IMAGE_SIZE_SMALL = 50 * 1024;
-	
+
 	public static final long IMAGE_SIZE_MEDIUM = 80 * 1024;
 
 	public static final String WATSAPP_INVITE_MESSAGE_KEY = "wa_msg";
 
 	public static final String WATSAPP_INVITE_ENABLED = "i_wa";
+
+	public static class MESSAGE_TYPE
+	{
+		public static final int PLAIN_TEXT = 0;
+
+		public static final int TEXT_PIN = 1;
+	}
+	
+	public static final String TEXT_PINS = "text_pins";
+
+	public static final String EXTRA_CONV_ID = "conv_id";
 }
