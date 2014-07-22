@@ -266,10 +266,7 @@ public class ConvMessage
 			this.mMessage = data.getString(HikeConstants.HIKE_MESSAGE);
 			mIsSMS = false;
 		}
-		if (data.has(HikeConstants.PIN_MESSAGE))
-		{
-			this.messageType = data.getInt(HikeConstants.PIN_MESSAGE);
-		}
+		
 		this.mTimestamp = data.getLong(HikeConstants.TIMESTAMP);
 		/* prevent us from receiving a message from the future */
 		long now = System.currentTimeMillis() / 1000;
@@ -297,6 +294,11 @@ public class ConvMessage
 		}
 		if (data.has(HikeConstants.METADATA))
 		{
+			JSONObject mdata = data.getJSONObject(HikeConstants.METADATA);
+			if (mdata.has(HikeConstants.PIN_MESSAGE))
+			{
+				this.messageType = mdata.getInt(HikeConstants.PIN_MESSAGE);
+			}
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
 		}
 		this.isStickerMessage = HikeConstants.STICKER.equals(obj.optString(HikeConstants.SUB_TYPE));
@@ -427,6 +429,8 @@ public class ConvMessage
 			participantInfoState = this.metadata.getParticipantInfoState();
 
 			isStickerMessage = this.metadata.getSticker() != null;
+			
+			
 		}
 	}
 
@@ -578,17 +582,18 @@ public class ConvMessage
 					{
 						md = metadata.getJSON();
 						data.put(HikeConstants.METADATA, md);
-					}
+					}else if(messageType!=HikeConstants.MESSAGE_TYPE.PLAIN_TEXT)
+					{
+						md = metadata.getJSON();
+						data.put(HikeConstants.METADATA, md);
+				    }
 					else if (metadata.isPokeMessage())
 					{
 						data.put(HikeConstants.POKE, true);
 					}
 				}
 				data.put(!mIsSMS ? HikeConstants.HIKE_MESSAGE : HikeConstants.SMS_MESSAGE, mMessage);
-				if(messageType!=HikeConstants.MESSAGE_TYPE.PLAIN_TEXT)
-				{
-				data.put(HikeConstants.PIN_MESSAGE, messageType);
-				}
+				
 				data.put(HikeConstants.TIMESTAMP, mTimestamp);
 
 				if (mInvite)

@@ -883,7 +883,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				tipView.setVisibility(View.GONE);
 				mConversationDb.markPinMessageRead(mConversation.getMsisdn());
 				// mark it seen in DB
-				HikeConversationsDatabase.getInstance().markPinMessageRead((ConvMessage) v.getTag());
+				//HikeConversationsDatabase.getInstance().markPinMessageRead((ConvMessage) v.getTag());
 			}
 		});
 		LinearLayout ll = ((LinearLayout) findViewById(R.id.impMessageContainer));
