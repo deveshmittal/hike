@@ -1614,6 +1614,8 @@ public class MqttMessagesManager
 					}
 					Logger.d("BulkProcess", "going on");
 					finalProcessing();
+					convWriteDb.setTransactionSuccessful();
+					userWriteDb.setTransactionSuccessful();
 				}
 				catch (JSONException e)
 				{
@@ -1625,8 +1627,6 @@ public class MqttMessagesManager
 				}
 				finally
 				{
-					convWriteDb.setTransactionSuccessful();
-					userWriteDb.setTransactionSuccessful();
 					convWriteDb.endTransaction();
 					userWriteDb.endTransaction();
 
