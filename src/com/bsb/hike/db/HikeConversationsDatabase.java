@@ -113,7 +113,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ " INTEGER, " + DBConstants.CONTACT_ID + " STRING, " + DBConstants.MSISDN + " UNIQUE, " + DBConstants.OVERLAY_DISMISSED + " INTEGER, " + DBConstants.MESSAGE
 				+ " STRING, " + DBConstants.MSG_STATUS + " INTEGER, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID + " INTEGER, " + DBConstants.MAPPED_MSG_ID
 				+ " INTEGER, " + DBConstants.MESSAGE_METADATA + " TEXT, " + DBConstants.GROUP_PARTICIPANT + " TEXT, " + DBConstants.IS_STATUS_MSG + " INTEGER DEFAULT 0, "
-				+ DBConstants.UNREAD_COUNT + " INTEGER DEFAULT 0, " + DBConstants.IS_STEALTH + " INTEGER DEFAULT 0, " + DBConstants.LAST_PIN + " TEXT, " + DBConstants.UNREAD_PIN_COUNT + " INTEGER"  +" )";
+				+ DBConstants.UNREAD_COUNT + " INTEGER DEFAULT 0, " + DBConstants.IS_STEALTH + " INTEGER DEFAULT 0, " + DBConstants.LAST_PIN + " TEXT, " + DBConstants.UNREAD_PIN_COUNT + " INTEGER DEFAULT 0"  +" )";
 		db.execSQL(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.GROUP_MEMBERS_TABLE + " ( " + DBConstants.GROUP_ID + " STRING, " + DBConstants.MSISDN + " TEXT, " + DBConstants.NAME
 				+ " TEXT, " + DBConstants.ONHIKE + " INTEGER, " + DBConstants.HAS_LEFT + " INTEGER, " + DBConstants.ON_DND + " INTEGER, " + DBConstants.SHOWN_STATUS + " INTEGER "
@@ -427,7 +427,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.MESSAGE_TYPE + " INTEGER";
 			String alter1 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.LAST_PIN + " TEXT";
-			String alter2 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.UNREAD_PIN_COUNT + " INTEGER";
+			String alter2 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.UNREAD_PIN_COUNT + " INTEGER DEFAULT 0";
 			db.execSQL(alter);
 			db.execSQL(alter1);
 			db.execSQL(alter2);
@@ -876,11 +876,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			if (Utils.shouldIncrementCounter(conv))
 			{
 				unreadMessageCount++;
-				if(conv.getMessageType()==HikeConstants.MESSAGE_TYPE.TEXT_PIN){
-					unreadPinMessageCount++;
-				}
+				
 			}
-
+			if(conv.getMessageType()==HikeConstants.MESSAGE_TYPE.TEXT_PIN){
+				unreadPinMessageCount++;
+			}
 			String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
 
 			bindConversationInsert(insertStatement, conv);
@@ -932,7 +932,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.endTransaction();
 
 		incrementUnreadCounter(convMessages.get(0).getMsisdn(), unreadMessageCount);
-		incrementUnreadPINCounter(convMessages.get(0).getMsisdn(), unreadPinMessageCount);
+		if(unreadPinMessageCount>0)
+		{
+		    incrementUnreadPINCounter(convMessages.get(0).getMsisdn(), unreadPinMessageCount);
+		}
 	}
 
 	public void updateIsHikeMessageState(long id, boolean isHikeMessage)
@@ -1538,6 +1541,41 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	}
 		
 	}
+
+	public int getUnreadPinCountForConversation(String msisdn)
+	{
+		Cursor c = null;
+
+		try
+		{
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.UNREAD_PIN_COUNT }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
+
+			final int msgCount = c.getColumnIndex(DBConstants.UNREAD_PIN_COUNT);
+
+			if (c.moveToFirst())
+			{
+
+				int pinCount = c.getInt(msgCount);
+				return pinCount;
+
+			}
+			return 0;
+		}
+		catch(Exception e)
+		{
+			System.out.print(e.getMessage());
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		return 0;
+
+	}
+	
 
 	private Map<String, Map<String, GroupParticipant>> getAllGroupParticipants()
 	{
@@ -2997,6 +3035,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	public void incrementUnreadPINCounter(String msisdn, int incrementValue)
 	{
 		String sqlString = "UPDATE " + DBConstants.CONVERSATIONS_TABLE + " SET " + DBConstants.UNREAD_PIN_COUNT + "=" + DBConstants.UNREAD_PIN_COUNT + " + " + incrementValue + " WHERE "
+				+ DBConstants.MSISDN + "=" + DatabaseUtils.sqlEscapeString(msisdn);
+		mDb.execSQL(sqlString);
+	}
+	public void decrementUnreadPINCounter(String msisdn, int decrementValue)
+	{
+		String sqlString = "UPDATE " + DBConstants.CONVERSATIONS_TABLE + " SET " + DBConstants.UNREAD_PIN_COUNT + "=" + DBConstants.UNREAD_PIN_COUNT + " - " + decrementValue + " WHERE "
+				+ DBConstants.MSISDN + "=" + DatabaseUtils.sqlEscapeString(msisdn);
+		mDb.execSQL(sqlString);
+	}
+	
+	public void resetUnreadPINCounter(String msisdn)
+	{
+		String sqlString = "UPDATE " + DBConstants.CONVERSATIONS_TABLE + " SET " + DBConstants.UNREAD_PIN_COUNT + "="+ 0 + " WHERE "
 				+ DBConstants.MSISDN + "=" + DatabaseUtils.sqlEscapeString(msisdn);
 		mDb.execSQL(sqlString);
 	}
