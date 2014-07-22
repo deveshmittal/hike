@@ -136,6 +136,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	private static final int STAGING_BROKER_PORT_NUMBER_SSL = 8883;
 
+	private static final int FALLBACK_BROKER_PORT_NUMBER = 5222;
+	
 	// this represents number of msgs published whose callback is not yet arrived
 	private short MAX_INFLIGHT_MESSAGES_ALLOWED = 100;
 
@@ -766,7 +768,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 		if(connectUsingIp)
 		{
-			return getIp() + ":" + brokerPortNumber;
+			return getIp() + ":" + FALLBACK_BROKER_PORT_NUMBER;
 		}
 		else
 		{
