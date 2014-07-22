@@ -3375,24 +3375,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void setBubbleColor(ConvMessage convMessage, ViewGroup messageContainer)
 	{
+		int leftPad = messageContainer.getPaddingLeft();
+		int topPad = messageContainer.getPaddingTop();
+		int rightPad = messageContainer.getPaddingRight();
+		int bottomPad = messageContainer.getPaddingBottom();
 		if (convMessage.isSent() && messageContainer != null)
 		{
-			int leftPad = messageContainer.getPaddingLeft();
-			int topPad = messageContainer.getPaddingTop();
-			int rightPad = messageContainer.getPaddingRight();
-			int bottomPad = messageContainer.getPaddingBottom();
+
 			/* label outgoing hike conversations in green */
 			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			{
 				// for text based pins, we need yellow bubble irrespective of themes
-				if (convMessage.isSent())
-				{
-					messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_sent_yellow);
-				}
-				else
-				{
-					messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_received_yellow);
-				}
+
+				messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_sent_yellow);
+
 			}
 			else
 			{
@@ -3405,8 +3401,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					messageContainer.setBackgroundResource(chatTheme.bubbleResId());
 				}
 			}
-			messageContainer.setPadding(leftPad, topPad, rightPad, bottomPad);
+
 		}
+		else
+		{
+			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			{
+				messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_received_yellow);
+			}
+			else
+			{
+				messageContainer.setBackgroundResource(R.drawable.ic_bubble_white_selector);
+			}
+		}
+		messageContainer.setPadding(leftPad, topPad, rightPad, bottomPad);
 	}
 
 	private View inflateView(int resource, ViewGroup root)
