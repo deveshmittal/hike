@@ -1849,15 +1849,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					textHolder = new TextViewHolder();
 					long time = System.currentTimeMillis();
-					if (convMessage.getMessageType() ==HikeConstants.MESSAGE_TYPE.PLAIN_TEXT)
-					{
-						v = inflateView(R.layout.message_sent_text, parent, false);
-					}
-					else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-					{
-						v = inflateView(R.layout.message_sent_text_pin, parent, false);
-					}
-					
+					v = inflateView(R.layout.message_sent_text, parent, false);
 					textHolder.text = (TextView) v.findViewById(R.id.text);
 					textHolder.time = (TextView) v.findViewById(R.id.time);
 					textHolder.status = (ImageView) v.findViewById(R.id.status);
@@ -1880,14 +1872,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					textHolder = new TextViewHolder();
 					long time = System.currentTimeMillis();
-					if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-					{
-						v = inflateView(R.layout.message_receive_text_pin, parent, false);
-					}
-					else
-					{
-						v = inflateView(R.layout.message_receive_text, parent, false);
-					}
+					v = inflateView(R.layout.message_receive_text, parent, false);
 					Logger.d("MSG_GET_VIEW", "" + (System.currentTimeMillis() - time));
 
 					textHolder.text = (TextView) v.findViewById(R.id.text);
@@ -1909,6 +1894,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					textHolder = (TextViewHolder) v.getTag();
 				}
 			}
+			Logger.i("messageadapter", "message type "+convMessage.getMessageType());
+			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.PLAIN_TEXT)
+			{
+				setBubbleColor(convMessage, textHolder.messageContainer);
+			}
+			else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			{
+				// for text based pins, we need yellow bubble irrespective of themes 
+				if (viewType == ViewType.SEND_HIKE)
+				{
+					textHolder.messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_sent_yellow);
+				}
+				else
+				{
+					textHolder.messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_received_yellow);
+				}
+			}
 			dayHolder = textHolder;
 			setSenderDetails(convMessage, position, textHolder, false);
 
@@ -1919,7 +1921,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			Linkify.addLinks(textHolder.text, Linkify.ALL);
 			Linkify.addLinks(textHolder.text, Utils.shortCodeRegex, "tel:");
 
-			setBubbleColor(convMessage, textHolder.messageContainer);
+			
 			setTimeNStatus(position, textHolder, false, textHolder.messageContainer);
 			setSelection(convMessage, textHolder.selectedStateOverlay);
 

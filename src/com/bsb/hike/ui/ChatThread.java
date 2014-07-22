@@ -850,6 +850,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			tipView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_text_pin, null);
 		}
 
+		if (tipView == null)
+		{
+			Logger.e("chatthread", "got imp message but type is unnknown , type " + impMessage.getMessageType());
+			return;
+		}
 		TextView sender = (TextView) tipView.findViewById(R.id.senderName);
 		TextView text = (TextView) tipView.findViewById(R.id.text);
 		TextView date = (TextView) tipView.findViewById(R.id.date);
@@ -859,10 +864,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			sender.setTextColor(getResources().getColor(R.color.gray));
 			text.setTextColor(getResources().getColor(R.color.gray));
 		}
-		sender.setText(impMessage.getMsisdn());
+		if (Utils.isGroupConversation(ChatThread.this.mConversation.getMsisdn()))
+		{
+			GroupConversation gConv = (GroupConversation) mConversation;
+			sender.setText(gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
+		}
+		else
+		{
+			sender.setText(impMessage.getMsisdn());
+		}
 		text.setText(impMessage.getMessage());
 		date.setText(impMessage.getTimestampFormatted(false, getApplicationContext()));
-		tipView.findViewById(R.id.cross).setOnClickListener(new OnClickListener()
+		View cross  =tipView.findViewById(R.id.cross);
+		cross.setTag(impMessage);
+		cross.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
@@ -870,6 +885,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				tipView.setVisibility(View.GONE);
 				// mark it seen in DB
+				HikeConversationsDatabase.getInstance().markPinMessageRead((ConvMessage) v.getTag());
 			}
 		});
 		LinearLayout ll = ((LinearLayout) findViewById(R.id.impMessageContainer));

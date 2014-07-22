@@ -55,7 +55,7 @@ public class HikeConstants
 
 	public static final String SMS_MESSAGE = "sm";
 	
-	public static final String PIN_MESSAGE = "pm";
+	public static final String PIN_MESSAGE = "pin";
 
 	public static final String TIMESTAMP = "ts";
 
