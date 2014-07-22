@@ -883,7 +883,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				tipView.setVisibility(View.GONE);
 				mConversationDb.markPinMessageRead(mConversation.getMsisdn());
 				// mark it seen in DB
-				HikeConversationsDatabase.getInstance().markPinMessageRead((ConvMessage) v.getTag());
+				HikeConversationsDatabase.getInstance().markPinMessageRead(mConversation.getMsisdn());
 			}
 		});
 		LinearLayout ll = ((LinearLayout) findViewById(R.id.impMessageContainer));
@@ -1665,6 +1665,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			convMessage.setMessage(convMessage.getMessage().substring(HASH_PIN.length()));
 			convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+			JSONObject jsonObject = new JSONObject();
+			try
+			{
+				jsonObject.put(HikeConstants.PIN_MESSAGE, 1);
+				convMessage.setMetadata(jsonObject);
+			}catch(JSONException je){
+				je.printStackTrace();
+			}
 		}
 	}
 
