@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     android:background="@drawable/pin_bg_yellow"
     android:id="@+id/main_content"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:minHeight="100dp" >
 
     <com.bsb.hike.view.CustomFontEditText
         android:id="@+id/messageedittext"
