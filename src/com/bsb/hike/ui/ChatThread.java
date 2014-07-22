@@ -4425,35 +4425,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
 		Utils.showSoftKeyboard(getApplicationContext(), mComposeView);
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
-		CheckBox isGhost = (CheckBox) content.findViewById(R.id.ghostCheckbox);
-		isGhost.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-		{
-
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-			{
-
-				if (isChecked)
-				{
-					int gray = getResources().getColor(R.color.gray);
-					content.findViewById(R.id.main_content).setBackgroundResource(R.drawable.pin_bg_black);
-					EditText et = (EditText) content.findViewById(R.id.messageedittext);
-					et.setTextColor(gray);
-					et.setBackgroundResource(R.drawable.textbox_black);
-					buttonView.setTextColor(gray);
-				}
-				else
-				{
-					int black = getResources().getColor(R.color.black);
-					content.findViewById(R.id.main_content).setBackgroundResource(R.drawable.pin_bg_yellow);
-					EditText et = (EditText) content.findViewById(R.id.messageedittext);
-					et.setTextColor(black);
-					et.setBackgroundResource(R.drawable.textbox);
-					buttonView.setTextColor(black);
-				}
-
-			}
-		});
 		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
 		attachmentWindow.setOutsideTouchable(false);
 		attachmentWindow.setFocusable(true);
@@ -4541,12 +4512,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void onClick(View v)
 			{
 				v.setTag(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
-				CheckBox isGhost = (CheckBox) attachmentWindow.getContentView().findViewById(R.id.ghostCheckbox);
-
 				JSONObject jsonObject = new JSONObject();
 				try
 				{
-					jsonObject.put(HikeConstants.IS_GHOST, isGhost.isChecked());
+					jsonObject.put(HikeConstants.PIN_MESSAGE, 1);
 					v.setTag(R.id.message_info, jsonObject);
 				}
 				catch (JSONException e)
