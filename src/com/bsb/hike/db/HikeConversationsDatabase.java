@@ -3397,25 +3397,26 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
-	
 
 	public int getUnreadPinCounter()
 	{
 		return 0;
 	}
 
-	public List<ConvMessage> getAllPinMessage(int limit, String msisdn,  long convId)
+	public List<ConvMessage> getAllPinMessage(int startFrom, int limit, String msisdn, long convId)
 	{
 		String limitStr = (limit == -1) ? null : new Integer(limit).toString();
+		String startFromStr = (startFrom < 0) ? "0" : String.valueOf(startFrom);
 		String selection = DBConstants.CONV_ID + " = ?" + " AND " + DBConstants.MESSAGE_TYPE + "==" + HikeConstants.MESSAGE_TYPE.TEXT_PIN;
 		Cursor c = null;
 		try
 		{
 			/* TODO this should be ORDER BY timestamp */
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID,
-					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.IS_HIKE_MESSAGE, DBConstants.READ_BY , DBConstants.MESSAGE_TYPE }, selection,
-					new String[] {Long.toString(convId)}, null, null, DBConstants.MESSAGE_ID + " DESC", limitStr);
-
+			String query = "SELECT " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + "," + DBConstants.TIMESTAMP + "," + DBConstants.MESSAGE_ID + ","
+					+ DBConstants.MAPPED_MSG_ID + "," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.IS_HIKE_MESSAGE + ","
+					+ DBConstants.READ_BY + "," + DBConstants.MESSAGE_TYPE + " FROM " + DBConstants.MESSAGES_TABLE + " where " + selection + " LIMIT " + limitStr + " OFFSET "
+					+ startFrom;
+			c = mDb.rawQuery(query, new String[] { Long.toString(convId) });
 			final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
 			final int msgStatusColumn = c.getColumnIndex(DBConstants.MSG_STATUS);
 			final int tsColumn = c.getColumnIndex(DBConstants.TIMESTAMP);
