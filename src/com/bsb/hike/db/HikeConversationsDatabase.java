@@ -1139,10 +1139,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			for (ConvMessage conv : convMessages)
 			{
-				if (Utils.shouldIncrementCounter(conv))
-				{
-					unreadMessageCount++;
-				}
 
 				String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
 
@@ -1205,7 +1201,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				{
 					addSharedMedia(msgId, conv.getConversation().getConvId());
 				}
-
+				if (Utils.shouldIncrementCounter(conv))
+				{
+					unreadMessageCount++;
+				}
 				/*
 				 * Updating the conversations table
 				 */
@@ -1241,11 +1240,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			for (ConvMessage conv : convMessages)
 			{
 
-				if (Utils.shouldIncrementCounter(conv))
-				{
-					unreadMessageCount++;
-				}
-				;
 				String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
 				bindConversationInsert(insertStatement, conv);
 
@@ -1309,6 +1303,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				if (conv.isFileTransferMessage() && conv.getConversation() != null)
 				{
 					addSharedMedia(msgId, conv.getConversation().getConvId());
+				}
+				if (Utils.shouldIncrementCounter(conv))
+				{
+					unreadMessageCount++;
 				}
 				resultList.add(conv);
 			}
