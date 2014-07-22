@@ -803,12 +803,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		addThumbnailStringToMetadata(metadata, thumbnailString);
 	}
 	
-	public void updateLastPinMessage(ConvMessage msg)
+	public void updateLastPinMessage(ConvMessage msg,long msgID)
 	{
 	
 		ContentValues contentValues = new ContentValues(1);
 		contentValues.put(DBConstants.LAST_PIN,msg.serialize().toString());
-		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues,null,null);
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues,DBConstants.MESSAGE_ID + "=?",new String[] { String.valueOf(msgID) });
 	}
 
 	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv)
@@ -923,7 +923,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			ContentValues contentValues = getContentValueForConversationMessage(conv);
 			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { conv.getMsisdn() });
 			if(conv.getMessageType()==HikeConstants.MESSAGE_TYPE.TEXT_PIN){
-				updateLastPinMessage(conv);
+				updateLastPinMessage(conv,msgId);
 			}
 		}
 
