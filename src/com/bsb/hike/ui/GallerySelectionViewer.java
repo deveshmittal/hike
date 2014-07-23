@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -41,6 +43,7 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomFontButton;
 
 public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, OnScrollListener, OnPageChangeListener, HikePubSub.Listener
 {
@@ -59,13 +62,75 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	private volatile InitiateMultiFileTransferTask fileTransferTask;
 
 	private ProgressDialog progressDialog;
+	
+	private CustomFontButton imageQualityBtn;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gallery_selection_viewer);
+		imageQualityBtn = (CustomFontButton) findViewById(R.id.btn_image_quality);
+		imageQualityBtn.setOnClickListener(new OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				// TODO Auto-generated method stub
+				final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
+				long sizeOriginal = 0;
+				for (GalleryItem galleryItem : galleryItems)
+				{
+					fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
+					File file = new File(galleryItem.getFilePath());
+					sizeOriginal += file.length();
+				}
+				HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
+				{
+					@Override
+					public void onSucess(Dialog dialog)
+					{
+						dialog.dismiss();
+						SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+						int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 3);
+						switch(quality)
+						{
+						case 3:
+							imageQualityBtn.setText("Small");
+							break;
+						case 2:
+							imageQualityBtn.setText("Medium");
+							break;
+						case 1:
+							imageQualityBtn.setText("Original");
+							break;
+						}
+					}
 
+					@Override
+					public void negativeClicked(Dialog dialog)
+					{
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void positiveClicked(Dialog dialog)
+					{
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void neutralClicked(Dialog dialog)
+					{
+						// TODO Auto-generated method stub
+						
+					}
+				}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
+			}
+		});
 		Object object = getLastCustomNonConfigurationInstance();
 
 		if (object instanceof InitiateMultiFileTransferTask)
@@ -180,20 +245,22 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			public void onClick(View v)
 			{
 				final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
-				long sizeOriginal = 0;
 				for (GalleryItem galleryItem : galleryItems)
 				{
 					fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
-					File file = new File(galleryItem.getFilePath());
-					sizeOriginal += file.length();
 				}
 				
 				final String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
 				final boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
 				
-				if (!HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
-				{
-					HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
+				fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+				Utils.executeAsyncTask(fileTransferTask);
+
+				progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+				
+				//if (!HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
+				
+					/*HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
 					{
 						@Override
 						public void onSucess(Dialog dialog)
@@ -202,6 +269,9 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 							Utils.executeAsyncTask(fileTransferTask);
 	
 							progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+							dialog.dismiss();
+							SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+							Logger.d("piyush", "" + appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 3));
 							dialog.dismiss();
 						}
 	
@@ -226,13 +296,13 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 							
 						}
 					}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
-				}
+				
 				else
 				{
 					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
 					Utils.executeAsyncTask(fileTransferTask);
 					progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
-				}
+				}*/
 			}
 		});
 
