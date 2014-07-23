@@ -2,6 +2,8 @@ package com.bsb.hike.ui.fragments;
 
 import java.util.List;
 
+import org.json.JSONException;
+
 import android.graphics.Bitmap;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
@@ -100,6 +102,7 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 		try 
 		{
 			mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
+			mDb.updateConversationMetadata(convId, mConversation.getMetaData());
 		}
 		catch (JSONException e) 
 		{
