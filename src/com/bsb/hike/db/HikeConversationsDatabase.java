@@ -2088,29 +2088,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public String getParticipantName(String groupId, String msisdn)
-	{
-		Cursor c = null;
-		try
-		{
-			c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] { DBConstants.NAME }, DBConstants.GROUP_ID + " = ? AND " + DBConstants.MSISDN + " = ? ", new String[] {
-					groupId, msisdn }, null, null, null);
-			String name = "";
-			if (c.moveToFirst())
-			{
-				name = c.getString(c.getColumnIndex(DBConstants.NAME));
-			}
-			return name;
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
-	}
-
 	public Map<String, String> getGroupParticipantNameMap(String groupId, List<String> msisdns)
 	{
 		Map<String, String> map = new HashMap<String, String>();
