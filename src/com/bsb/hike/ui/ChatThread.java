@@ -2962,8 +2962,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			String groupId = (String) object;
 			if (mContactNumber.equals(groupId))
 			{
-				HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
-				final String groupName = db.getGroupName(groupId);
+				final String groupName = ContactManager.getInstance().getName(mContactNumber);
 				mConversation.setContactName(groupName);
 
 				runOnUiThread(new Runnable()

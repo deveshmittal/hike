@@ -1621,8 +1621,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{
 			if (mLocalMSISDN.equals((String) object))
 			{
-				HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
-				nameTxt = db.getGroupName(mLocalMSISDN);
+				nameTxt = ContactManager.getInstance().getName(mLocalMSISDN);
 				groupConversation.setContactName(nameTxt);
 
 				runOnUiThread(new Runnable()

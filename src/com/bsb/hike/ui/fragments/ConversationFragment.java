@@ -1357,8 +1357,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type))
 		{
 			String groupId = (String) object;
-			HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
-			final String groupName = db.getGroupName(groupId);
+			final String groupName = ContactManager.getInstance().getName(groupId);
 
 			final Conversation conv = mConversationsByMSISDN.get(groupId);
 			if (conv == null)

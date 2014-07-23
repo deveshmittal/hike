@@ -60,8 +60,8 @@ public class GroupConversation extends Conversation
 			ContactManager.getInstance().addGroupParticipants(getMsisdn(), groupParticipantList);
 		}
 
-		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
-		setContactName(db.getGroupName(getMsisdn()));
+		String groupName = ContactManager.getInstance().getName(getMsisdn());
+		setContactName(groupName);
 	}
 
 	public String getGroupOwner()

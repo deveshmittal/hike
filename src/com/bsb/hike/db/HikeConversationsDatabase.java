@@ -1961,34 +1961,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	/**
-	 * Reutrn the group name corresponding to a group ID.
-	 * 
-	 * @param groupId
-	 * @return
-	 */
-	public String getGroupName(String groupId)
-	{
-		Cursor c = null;
-		try
-		{
-			c = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.GROUP_NAME }, DBConstants.GROUP_ID + " = ? ", new String[] { groupId }, null, null, null);
-			String groupName = "";
-			if (c.moveToFirst())
-			{
-				groupName = c.getString(c.getColumnIndex(DBConstants.GROUP_NAME));
-			}
-			return groupName;
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
-	}
-
 	public boolean doesConversationExist(String msisdn)
 	{
 		Cursor c = null;
