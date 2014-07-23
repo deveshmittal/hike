@@ -19,5 +19,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/selection_grid" />
+    
+    <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/btn_image_quality"
+                android:layout_height="35dp"
+                android:layout_width="match_parent"
+                android:layout_alignParentBottom="true"
+                android:background="@color/white"
+                android:text="Choose Image Quality"
+                android:textColor="@color/image_quality_popup_text_color"
+                android:textSize="15sp" />
 
 </RelativeLayout>
