@@ -135,6 +135,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.cropimage.CropImage;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
@@ -164,6 +165,7 @@ import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
+import com.google.android.gms.internal.co;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
@@ -4166,5 +4168,16 @@ public class Utils
 		}
 		else
 			return (Integer.toString(bytes) + " B");
+	}
+	
+	public static void emoticonClicked(Context context,int emoticonIndex,EditText composeBox){
+		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(emoticonIndex, System.currentTimeMillis());
+		// We don't add an emoticon if the compose box is near its maximum
+		// length of characters
+		if (composeBox.length() >= context.getResources().getInteger(R.integer.max_length_message) - 20)
+		{
+			return;
+		}
+		SmileyParser.getInstance().addSmiley(composeBox, emoticonIndex);
 	}
 }

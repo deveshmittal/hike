@@ -4,14 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,6 +80,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.util.Pair;
 import android.view.GestureDetector;
@@ -114,8 +113,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -150,6 +147,7 @@ import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
+import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -188,6 +186,7 @@ import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.HikeTip;
@@ -207,7 +206,7 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
-		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener
+		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener,EmoticonClickListener
 {
 	private static final String HASH_PIN = "#pin ";
 
@@ -873,8 +872,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				sender.setText(gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
 			}
 		}
-
-		text.setText(impMessage.getMessage());
+		CharSequence markedUp= impMessage.getMessage();
+		SmileyParser smileyParser = SmileyParser.getInstance();
+		markedUp = smileyParser.addSmileySpans(markedUp, false);
+//		Linkify.addLinks(markedUp, Linkify.ALL);
+//		Linkify.addLinks(textHolder.text, Utils.shortCodeRegex, "tel:");
+		text.setText(markedUp);
 		date.setText(impMessage.getTimestampFormatted(false, getApplicationContext()));
 		View cross = tipView.findViewById(R.id.cross);
 		cross.setTag(impMessage);
@@ -4461,9 +4464,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		dismissPopupWindow();
 		final View content = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_pin_pop_up, null);
 		attachmentWindow = new PopupWindow(content);
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+		
 		Utils.showSoftKeyboard(getApplicationContext(), mComposeView);
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
+		mComposeView.addTextChangedListener(new EmoticonTextWatcher());
+		content.findViewById(R.id.emo_btn).setOnClickListener(new OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				onEmoticonBtnClicked(v);
+				
+			}
+		});
+		mBottomView.setVisibility(View.GONE);
 		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
 		attachmentWindow.setOutsideTouchable(false);
 		attachmentWindow.setFocusable(true);
@@ -4520,7 +4535,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				invalidateOptionsMenu();
 				mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
 				ChatThread.this.chatLayout.requestFocus();
-				getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+				mBottomView.setVisibility(View.VISIBLE);
 			}
 		});
 	}
@@ -6344,7 +6359,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if(emoticonsAdapter == null)
 			{
-				emoticonsAdapter = new EmoticonAdapter(this, mComposeView, isPortrait, categoryResIds);
+				emoticonsAdapter = new EmoticonAdapter(this, this, isPortrait, categoryResIds);
 			}
 			emoticonViewPager.setAdapter(emoticonsAdapter);
 		}
@@ -7929,5 +7944,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		hikeToOfflineTipview.findViewById(R.id.send_button).setEnabled(enabled);
 		hikeToOfflineTipview.findViewById(R.id.send_button_text).setEnabled(enabled);
 		hikeToOfflineTipview.findViewById(R.id.send_button_tick).setEnabled(enabled);
+	}
+
+	@Override
+	public void onEmoticonClicked(int emoticonIndex)
+	{
+		Utils.emoticonClicked(getApplicationContext(), emoticonIndex, mComposeView);
+		
 	}
 }

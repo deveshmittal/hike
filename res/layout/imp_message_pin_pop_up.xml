@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/pin_bg_yellow"
-    android:id="@+id/main_content"
-    android:orientation="vertical"
-     >
+    android:orientation="vertical" 
+    >
 
     <com.bsb.hike.view.CustomFontEditText
+        android:layout_marginTop="10dp"
         android:id="@+id/messageedittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,4 +19,16 @@
         android:textSize="16sp"
         android:visibility="visible" />
 
-</LinearLayout>
+    <ImageButton
+        android:id="@+id/emo_btn"
+        android:layout_width="33dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/messageedittext"
+        android:background="@null"
+        android:onClick="onEmoticonBtnClicked"
+        android:paddingBottom="3dp"
+        android:paddingTop="11dp"
+        android:src="@drawable/smiley_selector" />
+
+</RelativeLayout>
