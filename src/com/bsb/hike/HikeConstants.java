@@ -469,6 +469,8 @@ public class HikeConstants
 
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
 
+	public static final String UPGRADE_MSG_HASH_GROUP_READBY = "upgradeMsgHashGroupReadby";
+
 	public static final String UPGRADE_AVATAR_CONV_DB = "upgradeAvtarProgressConv";
 
 	public static final String NO_CALL_ALERT_CHECKED = "noCallAlertChecked";

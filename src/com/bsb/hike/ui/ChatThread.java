@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
@@ -340,7 +341,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED,
 			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED, HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
-			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED };
+			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
+			HikePubSub.BULK_MESSAGE_DELIVERED_READ };
 
 	private EmoticonType emoticonType;
 
@@ -3016,10 +3018,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
 				{
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
-					if(msg.isGroupChat())
-					{
-						msg.setReadByArray(HikeConversationsDatabase.getInstance().getReadByValueForMessageID(msg.getMsgID()));
-					}
 					removeFromMessageMap(msg);
 				}
 			}
@@ -3559,6 +3557,45 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT, mConversation.getMsisdn());
 					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 				}
+			}
+		}
+		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
+		{
+			Map<String, Utils.PairModified<Long, Long>> messageStatusMap = (Map<String, Utils.PairModified<Long, Long>>) object;
+			Utils.PairModified<Long, Long> pair = messageStatusMap.get(mConversation.getMsisdn());
+			if (pair != null)
+			{
+				long mrMsgId = (long) pair.getFirst();
+				long drMsgId = (long) pair.getSecond();
+
+				while (mrMsgId > 0)
+				{
+					ConvMessage msg = findMessageById(mrMsgId);
+					if (msg != null)
+					{
+						msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+						removeFromMessageMap(msg);
+						mrMsgId -= 1;
+					}
+					else
+					{
+						mrMsgId = 0;
+					}
+				}
+				while (drMsgId > 0)
+				{
+					ConvMessage msg = findMessageById(drMsgId);
+					if (msg != null)
+					{
+						msg.setState(ConvMessage.State.SENT_DELIVERED);
+						drMsgId -= 1;
+					}
+					else
+					{
+						drMsgId = 0;
+					}
+				}
+				runOnUiThread(mUpdateAdapter);
 			}
 		}
 	}
