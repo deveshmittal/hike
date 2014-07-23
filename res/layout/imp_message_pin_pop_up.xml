@@ -4,17 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/pin_bg_yellow"
-    android:orientation="vertical" 
-    >
+    android:minHeight="75dp"
+    android:orientation="vertical" >
 
     <com.bsb.hike.view.CustomFontEditText
-        android:layout_marginTop="10dp"
         android:id="@+id/messageedittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_toLeftOf="@+id/emo_btn"
         android:background="@drawable/textbox"
         android:maxLines="2"
-        android:text="sample"
         android:textColor="@color/black"
         android:textSize="16sp"
         android:visibility="visible" />
@@ -23,12 +23,24 @@
         android:id="@+id/emo_btn"
         android:layout_width="33dp"
         android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/messageedittext"
         android:background="@null"
         android:onClick="onEmoticonBtnClicked"
         android:paddingBottom="3dp"
         android:paddingTop="11dp"
         android:src="@drawable/smiley_selector" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:visibility="gone"
+        android:textColor="@color/gray"
+        android:layout_marginRight="5dp"
+        android:id="@+id/counter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/messageedittext"
+        android:layout_alignBottom="@+id/messageedittext"
+        android:layout_alignRight="@+id/messageedittext"
+        android:text="140" />
 
 </RelativeLayout>
