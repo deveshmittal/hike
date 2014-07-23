@@ -131,8 +131,6 @@ public class HikeConstants
 	
 	public static final String IS_GHOST = "is_ghost";
 	
-	public static final String UNREAD_PIN = "unreadpin";
-
 	public static final String ID = "id";
 
 	public static final String TOKEN = "token";
@@ -892,6 +890,12 @@ public class HikeConstants
 	public static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
 	
 	public static final String SHOW_STEALTH_POPUP = "stlthrmd";
+
+	public static final String PIN = "pin";
+
+	public static final String UNREAD_COUNT = "unreadCount";
+
+	public static final String TO_SHOW = "toShow";
 
 	public static final class ResultCodes
 	{
