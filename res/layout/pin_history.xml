@@ -23,11 +23,11 @@
                 android:singleLine="true"
                 android:text="@string/pin_header"
                 android:textColor="@color/updates_text"
-                android:textSize="12sp" 
+                android:textSize="12sp"
                 android:textStyle="bold"/>
         </LinearLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/pin_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,7 +41,18 @@
                 android:text="@string/pin_detail"
                 android:textColor="@color/updates_text"
                 android:textSize="16sp" />
-        </LinearLayout>
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/last_pin_timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="false"
+                android:layout_alignBottom="@id/pin_detail"
+                android:text="9:35AM"
+                android:textColor="@color/timestamp"
+                android:textSize="12sp" />
+        </RelativeLayout>
     </RelativeLayout>
 
 </RelativeLayout>
