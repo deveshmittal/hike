@@ -223,6 +223,7 @@ public class HikeDialog
 		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.image_quality_popup);
 		dialog.setCancelable(true);
+		dialog.setCanceledOnTouchOutside(true);
 		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		final Editor editor = appPrefs.edit();
 		//int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
