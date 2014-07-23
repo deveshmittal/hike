@@ -801,7 +801,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		addThumbnailStringToMetadata(metadata, thumbnailString);
 	}
 	
-	public void updateConversationMetadata(int convId, JSONObject metadata)
+	public void updateConversationMetadata(long convId, Conversation.MetaData metadata)
 	{
 		ContentValues contentValues = new ContentValues(1);
 		contentValues.put(DBConstants.CONVERSATION_METADATA,metadata.toString());
