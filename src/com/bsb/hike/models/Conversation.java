@@ -70,11 +70,12 @@ public class Conversation implements Comparable<Conversation>
 	private boolean onhike;
 
 	private int unreadCount;
-	
+
 	private int unreadPinCount;
-	
+
 	private String lastPin;
-	 
+
+	private MetaData metaData;
 
 	public String getLastPin()
 	{
@@ -274,5 +275,102 @@ public class Conversation implements Comparable<Conversation>
 	public void setContactName(String contactName)
 	{
 		this.contactName = contactName;
+	}
+
+	public MetaData getMetaData()
+	{
+		return metaData;
+	}
+
+	public void setMetaData(MetaData metaData)
+	{
+		this.metaData = metaData;
+	}
+
+	public class MetaData
+	{
+		/**
+		 * sample json : {'pin':{'id':'1','unreadCount':'1','toShow':'true'} }
+		 */
+		JSONObject jsonObject;
+
+		public MetaData(String jsonString) throws JSONException
+		{
+			if (jsonString != null)
+			{
+				jsonObject = new JSONObject(jsonString);
+			}
+			else
+			{
+				jsonObject = new JSONObject();
+			}
+		}
+
+		public long getLastPinId(int pinType) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			return pinJSON.getLong(HikeConstants.ID);
+		}
+
+		public int getUnreadCount(int pinType) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			return pinJSON.getInt(HikeConstants.UNREAD_COUNT);
+		}
+
+		public boolean isShowLastPin(int pinType)
+		{
+			try
+			{
+				JSONObject pinJson = getPinJson(pinType);
+				return pinJson.getBoolean(HikeConstants.TO_SHOW);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+				return false;
+			}
+		}
+
+		private JSONObject getPinJson(int pinType) throws JSONException
+		{
+			JSONObject json = jsonObject.optJSONObject(HikeConstants.PIN);
+			if (json == null)
+			{
+				jsonObject.put(HikeConstants.PIN, json = new JSONObject());
+			}
+			return json;
+		}
+
+		public void setLastPinId(int pinType, long id) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			pinJSON.put(HikeConstants.ID, id);
+		}
+
+		public void setUnreadCount(int pinType, int count) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			pinJSON.put(HikeConstants.UNREAD_COUNT, count);
+		}
+
+		public void incrementUnreadCount(int pinType) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			pinJSON.put(HikeConstants.UNREAD_COUNT, pinJSON.getInt(HikeConstants.UNREAD_COUNT) + 1);
+		}
+
+		public void setShowLastPin(int pinType, boolean isShow) throws JSONException
+		{
+			JSONObject pinJson = getPinJson(pinType);
+			pinJson.put(HikeConstants.TO_SHOW, isShow);
+		}
+
+		@Override
+		public String toString()
+		{
+			return jsonObject.toString();
+		}
+
 	}
 }
