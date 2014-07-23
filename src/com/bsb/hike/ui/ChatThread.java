@@ -969,18 +969,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void onBackPressed()
 	{
+		if(findViewById(R.id.impMessageCreateView).getVisibility() == View.VISIBLE){
+			dismissPinCreateView();
+			return;
+		}
 		if (isActionModeOn)
 		{
 			destroyActionMode();
 			return;
 		}
-		
+
 		if (isHikeToOfflineMode)
 		{
 			destroyHikeToOfflineMode();
 			return;
 		}
-		
 
 		if (attachmentWindow != null && attachmentWindow.isShowing())
 		{
@@ -4462,82 +4465,43 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		showingImpMessagePin = true;
 		invalidateOptionsMenu();
 		dismissPopupWindow();
-		final View content = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_pin_pop_up, null);
-		attachmentWindow = new PopupWindow(content);
-		
+		final View content = findViewById(R.id.impMessageCreateView);
+		content.setVisibility(View.VISIBLE);
 		Utils.showSoftKeyboard(getApplicationContext(), mComposeView);
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
 		mComposeView.addTextChangedListener(new EmoticonTextWatcher());
 		content.findViewById(R.id.emo_btn).setOnClickListener(new OnClickListener()
 		{
-			
+
 			@Override
 			public void onClick(View v)
 			{
 				onEmoticonBtnClicked(v);
-				
+
 			}
 		});
 		mBottomView.setVisibility(View.GONE);
-		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
-		attachmentWindow.setOutsideTouchable(false);
-		attachmentWindow.setFocusable(true);
-		attachmentWindow.setWidth(LayoutParams.MATCH_PARENT);
-		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
-
-		try
+		if (tipView != null)
 		{
-			if(tipView!=null){
-				tipView.setVisibility(View.GONE);
-			}
-			attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
-
-			mComposeView.requestFocus();
+			tipView.setVisibility(View.GONE);
 		}
-		catch (BadTokenException e)
+	}
+
+	private void dismissPinCreateView()
+	{
+		if (tipView != null)
 		{
-			Logger.e(getClass().getSimpleName(), "Excepetion in ChatThread ChatTheme picker", e);
+			tipView.setVisibility(View.VISIBLE);
 		}
-
-		FrameLayout viewParent = (FrameLayout) content.getParent();
-		WindowManager.LayoutParams lp = (WindowManager.LayoutParams) viewParent.getLayoutParams();
-		lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-
-		WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-		windowManager.updateViewLayout(viewParent, lp);
-
-		attachmentWindow.setTouchInterceptor(new OnTouchListener()
-		{
-
-			@Override
-			public boolean onTouch(View view, MotionEvent event)
-			{
-				if (event.getAction() == MotionEvent.ACTION_OUTSIDE)
-				{
-					return true;
-				}
-				return false;
-			}
-		});
-
-		attachmentWindow.setOnDismissListener(new OnDismissListener()
-		{
-
-			@Override
-			public void onDismiss()
-			{
-				if(tipView!=null){
-					tipView.setVisibility(View.VISIBLE);
-				}
-				Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
-				showingImpMessagePin = false;
-				setupActionBar(false);
-				invalidateOptionsMenu();
-				mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
-				ChatThread.this.chatLayout.requestFocus();
-				mBottomView.setVisibility(View.VISIBLE);
-			}
-		});
+		Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
+		showingImpMessagePin = false;
+		setupActionBar(false);
+		invalidateOptionsMenu();
+		mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
+		ChatThread.this.chatLayout.requestFocus();
+		dismissPopupWindow();
+		mBottomView.setVisibility(View.VISIBLE);
+		findViewById(R.id.impMessageCreateView).setVisibility(View.GONE);
 	}
 
 	private void setupPinImpMessageActionBar()
@@ -4561,7 +4525,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onClick(View v)
 			{
-				dismissPopupWindow();
+				dismissPinCreateView();
 			}
 		});
 
@@ -4584,8 +4548,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					e.printStackTrace();
 				}
 				onSendClick(v);
-				dismissPopupWindow();
-
+				dismissPinCreateView();
 			}
 		});
 

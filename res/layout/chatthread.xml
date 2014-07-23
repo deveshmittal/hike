@@ -51,6 +51,19 @@
                 <include
                     android:id="@+id/sms_toggle_button"
                     layout="@layout/sms_toggle_item" />
+
+                <LinearLayout
+                    android:id="@+id/impMessageContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tipContainerTop"
+                    android:orientation="vertical" >
+                </LinearLayout>
+
+                <include
+                    android:id="@+id/impMessageCreateView"
+                    layout="@layout/imp_message_pin_pop_up"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <ListView
@@ -65,14 +78,6 @@
                 android:fadingEdge="none"
                 android:listSelector="@android:color/transparent" >
             </ListView>
-
-            <LinearLayout
-                android:id="@+id/impMessageContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/tipContainerTop"
-                android:orientation="vertical" >
-            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/tipContainerBottom"
