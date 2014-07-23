@@ -51,6 +51,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -479,6 +480,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		if (newGroup)
 		{
 			mConversationDb.addConversation(groupConversation.getMsisdn(), false, groupName, groupConversation.getGroupOwner());
+			ContactManager.getInstance().insertGroup(groupConversation.getMsisdn(),groupName);
 		}
 
 		try
