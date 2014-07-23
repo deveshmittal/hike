@@ -12,37 +12,41 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.utils.Utils;
 
 public class PinHistoryAdapter extends BaseAdapter
 {
 	private Activity context;
 	
 	private List<ConvMessage> textPins;
-	
-	private String userMSISDN;
-	
+		
 	private LayoutInflater inflater;
 	
-	private HikeConversationsDatabase mDb;
-		
-	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn, long convId)
+	private Conversation mConversation;
+	
+	private PinHistoryItemsListener mListener;
+
+	public static interface PinHistoryItemsListener
+	{
+		public void onLastItemRequested();		
+	}
+	
+	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn, 
+			long convId, Conversation conversation, PinHistoryItemsListener listener)
 	{
 		this.context = context;
 		
-		this.userMSISDN = userMsisdn;
+		this.mListener = listener;
+						
+		this.mConversation = conversation;
 		
-		mDb = HikeConversationsDatabase.getInstance();
+		this.textPins = textPins;
 		
-	//	conv = mDb.getConversation(userMSISDN, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY);
-		
-		this.textPins = mDb.getAllPinMessage(HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, userMSISDN,convId);
-		
-		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);	
 	}
 	
 	private enum ViewType
@@ -50,11 +54,20 @@ public class PinHistoryAdapter extends BaseAdapter
 		TEXT
 	}
 	
+	public void appendPinstoView(List<ConvMessage> list)
+	{
+		textPins.addAll(list);
+		
+		notifyDataSetChanged();
+	}
+		
 	private class ViewHolder
 	{
 		TextView sender;
 		
 		TextView detail;
+		
+		TextView timestamp;
 		
 		View parent;
 	}
@@ -104,6 +117,10 @@ public class PinHistoryAdapter extends BaseAdapter
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) 
 	{
+		if(position == getCount() - 1)
+		{
+			mListener.onLastItemRequested();
+		}
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
 		final ConvMessage textPin = getItem(position);
@@ -121,6 +138,7 @@ public class PinHistoryAdapter extends BaseAdapter
 					convertView = inflater.inflate(R.layout.pin_history, null);
 					viewHolder.sender = (TextView)convertView.findViewById(R.id.pin_header);
 					viewHolder.detail = (TextView)convertView.findViewById(R.id.pin_detail);
+					viewHolder.timestamp = (TextView)convertView.findViewById(R.id.last_pin_timestamp);
 					viewHolder.parent = convertView.findViewById(R.id.main_content);					
 				}		
 				break;
@@ -136,8 +154,20 @@ public class PinHistoryAdapter extends BaseAdapter
 		{
 			case TEXT:
 			{
-	 			viewHolder.sender.setText(textPin.getMsisdn());
+				if(textPin.isSent())
+				{
+					viewHolder.sender.setText("You");
+				}
+				else
+				{
+					if (Utils.isGroupConversation(textPin.getMsisdn()))
+					{
+					GroupConversation gConv = (GroupConversation) mConversation;
+					viewHolder.sender.setText(gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn()));
+					}
+				}
 	 			viewHolder.detail.setText(textPin.getMessage());
+	 			viewHolder.timestamp.setText(textPin.getTimestampFormatted(true, context));
 	 			viewHolder.parent.setOnClickListener(pinOnClickListener);
 				Linkify.addLinks(viewHolder.detail, Linkify.ALL);
 			}

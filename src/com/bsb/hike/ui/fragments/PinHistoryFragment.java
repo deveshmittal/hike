@@ -10,22 +10,23 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.PinHistoryAdapter;
+import com.bsb.hike.adapters.PinHistoryAdapter.PinHistoryItemsListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
-public class PinHistoryFragment extends SherlockListFragment implements OnScrollListener
+public class PinHistoryFragment extends SherlockListFragment implements PinHistoryItemsListener
 {
 	private PinHistoryAdapter PHadapter;
 			
@@ -37,24 +38,32 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 		
 	private HikeConversationsDatabase mDb;
 
+	private Conversation mConversation;
+
 	private long convId;
 	
 	public PinHistoryFragment(String userMSISDN, long convId2)
 	{
 		this.msisdn = userMSISDN;
-		this.convId= convId2;
+		this.convId = convId2;
 	}
 		
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View parent = inflater.inflate(R.layout.sticky_pins, null);
+		
 		ListView pinsList = (ListView) parent.findViewById(android.R.id.list);
 		
 		mDb = HikeConversationsDatabase.getInstance();
 		
+		this.mConversation = mDb.getConversation(msisdn, HikeConstants.MAX_PINS_TO_LOAD_INITIALLY);
+		
+		this.textPins = mDb.getAllPinMessage(0, HikeConstants.MAX_PINS_TO_LOAD_INITIALLY, msisdn,convId);
+
 		chatTheme = mDb.getChatThemeForMsisdn(msisdn);
 		
 		pinsList.setEmptyView(parent.findViewById(android.R.id.empty));
+		
 		return parent;
 	}
 	
@@ -87,10 +96,9 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 	{
 		super.onActivityCreated(savedInstanceState);
 		
-		PHadapter = new PinHistoryAdapter(getActivity(), textPins, msisdn,convId);
+		PHadapter = new PinHistoryAdapter(getActivity(), textPins, msisdn, convId, mConversation, this);
 		
-		setListAdapter(PHadapter);
-		getListView().setOnScrollListener(this);
+		setListAdapter(PHadapter);		
 	}
 
 	@Override
@@ -104,18 +112,6 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 	{
 	}
 
-	@Override
-	public void onScroll(AbsListView view, final int firstVisibleItem, int visibleItemCount, int totalItemCount)
-	{
-		
-	}
-
-	@Override
-	public void onScrollStateChanged(AbsListView view, int scrollState) 
-	{
-		
-	}	
-		
 	public Drawable getChatTheme(ChatTheme chatTheme)
 	{
 		/*
@@ -139,5 +135,13 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 		}
 
 		return bd;
+	}
+
+	@Override
+	public void onLastItemRequested() 
+	{		
+		this.textPins = mDb.getAllPinMessage(PHadapter.getCount(), HikeConstants.MAX_OLDER_PINS_TO_LOAD_EACH_TIME, msisdn, convId);
+		
+		this.PHadapter.appendPinstoView(textPins);
 	}
 }

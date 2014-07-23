@@ -3450,7 +3450,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				elements.add(elements.size(), message);
 				//message.setConversation(conversation);
 			}
-			Collections.reverse(elements);
+//			Collections.reverse(elements);
 
 			return elements;
 		}

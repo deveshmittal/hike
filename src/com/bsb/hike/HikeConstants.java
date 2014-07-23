@@ -706,6 +706,10 @@ public class HikeConstants
 
 	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 40;
 
+	public static final int MAX_PINS_TO_LOAD_INITIALLY = 20;
+
+	public static final int MAX_OLDER_PINS_TO_LOAD_EACH_TIME = 20;
+
 	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 20;
 
 	public static final int MIN_INDEX_TO_LOAD_MORE_MESSAGES = 10;
