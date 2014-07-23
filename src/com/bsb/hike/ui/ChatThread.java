@@ -428,6 +428,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private ScreenOffReceiver screenOffBR;
 	
+	private int pin_unread_count = 0;
+	
 	@Override
 	protected void onPause()
 	{
@@ -816,6 +818,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			showTipIfRequired();
 		}
 		Logger.i("chatthread", "on create end");
+		try 
+		{
+			pin_unread_count = mConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+		}
+		catch (JSONException e) 
+		{
+			e.printStackTrace();
+		}
 	}
 
 	private boolean showImpMessageIfRequired()
@@ -7231,9 +7241,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
 				freeSmsCount.setVisibility(View.GONE);
-
-				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
-				newGamesIndicator.setVisibility(View.GONE);
+				
+				TextView pin_unread = (TextView) convertView.findViewById(R.id.new_games_indicator);
+				
+				if(item.getKey() == 4)
+				{
+					pin_unread.setVisibility(View.VISIBLE);
+					
+					if(pin_unread_count > 0)
+						pin_unread.setText(Integer.toString(pin_unread_count));
+					else
+						pin_unread.setVisibility(View.GONE);					
+				}
+				else
+				{
+					pin_unread.setVisibility(View.GONE);					
+				}
 
 				return convertView;
 			}

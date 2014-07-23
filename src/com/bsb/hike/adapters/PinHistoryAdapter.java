@@ -16,6 +16,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
 public class PinHistoryAdapter extends BaseAdapter
@@ -29,7 +30,7 @@ public class PinHistoryAdapter extends BaseAdapter
 	private Conversation mConversation;
 	
 	private PinHistoryItemsListener mListener;
-
+	
 	public static interface PinHistoryItemsListener
 	{
 		public void onLastItemRequested();		
@@ -53,7 +54,7 @@ public class PinHistoryAdapter extends BaseAdapter
 	{
 		TEXT
 	}
-	
+		
 	public void appendPinstoView(List<ConvMessage> list)
 	{
 		textPins.addAll(list);
@@ -166,8 +167,12 @@ public class PinHistoryAdapter extends BaseAdapter
 					viewHolder.sender.setText(gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn()));
 					}
 				}
-	 			viewHolder.detail.setText(textPin.getMessage());
-	 			viewHolder.timestamp.setText(textPin.getTimestampFormatted(true, context));
+				CharSequence markedUp= textPin.getMessage();
+				SmileyParser smileyParser = SmileyParser.getInstance();
+				markedUp = smileyParser.addSmileySpans(markedUp, false);
+				
+	 			viewHolder.detail.setText(markedUp);
+	 			viewHolder.timestamp.setText(textPin.getTimestampFormatted(false, context));
 	 			viewHolder.parent.setOnClickListener(pinOnClickListener);
 				Linkify.addLinks(viewHolder.detail, Linkify.ALL);
 			}
