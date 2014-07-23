@@ -4,14 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,6 +80,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.util.Pair;
 import android.view.GestureDetector;
@@ -114,8 +113,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -150,6 +147,7 @@ import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
+import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -188,6 +186,7 @@ import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.HikeTip;
@@ -207,7 +206,7 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
-		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener
+		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener,EmoticonClickListener
 {
 	private static final String HASH_PIN = "#pin ";
 
@@ -873,8 +872,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				sender.setText(gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
 			}
 		}
-
-		text.setText(impMessage.getMessage());
+		CharSequence markedUp= impMessage.getMessage();
+		SmileyParser smileyParser = SmileyParser.getInstance();
+		markedUp = smileyParser.addSmileySpans(markedUp, false);
+		text.setText(markedUp);
+		Linkify.addLinks(text, Linkify.ALL);
+		Linkify.addLinks(text, Utils.shortCodeRegex, "tel:");
+		
 		date.setText(impMessage.getTimestampFormatted(false, getApplicationContext()));
 		View cross = tipView.findViewById(R.id.cross);
 		cross.setTag(impMessage);
@@ -966,18 +970,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void onBackPressed()
 	{
+		if(findViewById(R.id.impMessageCreateView).getVisibility() == View.VISIBLE){
+			dismissPinCreateView();
+			return;
+		}
 		if (isActionModeOn)
 		{
 			destroyActionMode();
 			return;
 		}
-		
+
 		if (isHikeToOfflineMode)
 		{
 			destroyHikeToOfflineMode();
 			return;
 		}
-		
 
 		if (attachmentWindow != null && attachmentWindow.isShowing())
 		{
@@ -4459,64 +4466,43 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		showingImpMessagePin = true;
 		invalidateOptionsMenu();
 		dismissPopupWindow();
-		final View content = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_pin_pop_up, null);
-		attachmentWindow = new PopupWindow(content);
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+		final View content = findViewById(R.id.impMessageCreateView);
+		content.setVisibility(View.VISIBLE);
 		Utils.showSoftKeyboard(getApplicationContext(), mComposeView);
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
-		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(android.R.color.transparent));
-		attachmentWindow.setOutsideTouchable(false);
-		attachmentWindow.setFocusable(true);
-		attachmentWindow.setWidth(LayoutParams.MATCH_PARENT);
-		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
-
-		try
-		{
-			attachmentWindow.showAsDropDown(findViewById(R.id.cb_anchor));
-
-			mComposeView.requestFocus();
-		}
-		catch (BadTokenException e)
-		{
-			Logger.e(getClass().getSimpleName(), "Excepetion in ChatThread ChatTheme picker", e);
-		}
-
-		FrameLayout viewParent = (FrameLayout) content.getParent();
-		WindowManager.LayoutParams lp = (WindowManager.LayoutParams) viewParent.getLayoutParams();
-		lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-
-		WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-		windowManager.updateViewLayout(viewParent, lp);
-
-		attachmentWindow.setTouchInterceptor(new OnTouchListener()
+		mComposeView.addTextChangedListener(new EmoticonTextWatcher());
+		content.findViewById(R.id.emo_btn).setOnClickListener(new OnClickListener()
 		{
 
 			@Override
-			public boolean onTouch(View view, MotionEvent event)
+			public void onClick(View v)
 			{
-				if (event.getAction() == MotionEvent.ACTION_OUTSIDE)
-				{
-					return true;
-				}
-				return false;
+				onEmoticonBtnClicked(v);
+
 			}
 		});
-
-		attachmentWindow.setOnDismissListener(new OnDismissListener()
+		mBottomView.setVisibility(View.GONE);
+		if (tipView != null)
 		{
+			tipView.setVisibility(View.GONE);
+		}
+	}
 
-			@Override
-			public void onDismiss()
-			{
-				Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
-				showingImpMessagePin = false;
-				setupActionBar(false);
-				invalidateOptionsMenu();
-				mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
-				ChatThread.this.chatLayout.requestFocus();
-				getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-			}
-		});
+	private void dismissPinCreateView()
+	{
+		if (tipView != null)
+		{
+			tipView.setVisibility(View.VISIBLE);
+		}
+		Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
+		showingImpMessagePin = false;
+		setupActionBar(false);
+		invalidateOptionsMenu();
+		mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
+		ChatThread.this.chatLayout.requestFocus();
+		dismissPopupWindow();
+		mBottomView.setVisibility(View.VISIBLE);
+		findViewById(R.id.impMessageCreateView).setVisibility(View.GONE);
 	}
 
 	private void setupPinImpMessageActionBar()
@@ -4540,7 +4526,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onClick(View v)
 			{
-				dismissPopupWindow();
+				dismissPinCreateView();
 			}
 		});
 
@@ -4563,8 +4549,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					e.printStackTrace();
 				}
 				onSendClick(v);
-				dismissPopupWindow();
-
+				dismissPinCreateView();
 			}
 		});
 
@@ -6338,7 +6323,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if(emoticonsAdapter == null)
 			{
-				emoticonsAdapter = new EmoticonAdapter(this, mComposeView, isPortrait, categoryResIds);
+				emoticonsAdapter = new EmoticonAdapter(this, this, isPortrait, categoryResIds);
 			}
 			emoticonViewPager.setAdapter(emoticonsAdapter);
 		}
@@ -7923,5 +7908,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		hikeToOfflineTipview.findViewById(R.id.send_button).setEnabled(enabled);
 		hikeToOfflineTipview.findViewById(R.id.send_button_text).setEnabled(enabled);
 		hikeToOfflineTipview.findViewById(R.id.send_button_tick).setEnabled(enabled);
+	}
+
+	@Override
+	public void onEmoticonClicked(int emoticonIndex)
+	{
+		Utils.emoticonClicked(getApplicationContext(), emoticonIndex, mComposeView);
+		
 	}
 }
