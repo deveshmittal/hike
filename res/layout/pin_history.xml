@@ -46,9 +46,10 @@
                 android:id="@+id/last_pin_timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/pin_detail"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="false"
-                android:layout_alignBottom="@id/pin_detail"
+                android:layout_marginRight="8dp"
                 android:text="9:35AM"
                 android:textColor="@color/timestamp"
                 android:textSize="12sp" />
