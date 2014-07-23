@@ -819,7 +819,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean showImpMessageIfRequired()
 	{
-		ConvMessage impMessage = mConversationDb.getLastUnreadPinForConversation(mConversation.getMsisdn());
+		ConvMessage impMessage = mConversationDb.getLastPinForConversation(mConversation);
 		if (impMessage != null)
 		{
 			showImpMessage(impMessage, -1);
