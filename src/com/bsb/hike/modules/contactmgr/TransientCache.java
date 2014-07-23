@@ -144,6 +144,27 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
+	 * Removes the group participant from {@link #groupParticipants} , should be called when user leaves a group chat.
+	 * @param groupId
+	 * @param msisdn
+	 */
+	void removeGroupParticipants(String groupId, String msisdn)
+	{
+		writeLock.lock();
+		try
+		{
+			Map<String, Pair<GroupParticipant, String>> groupParticipantsList = groupParticipants.get(groupId);
+			if(null != groupParticipantsList)
+			{
+				groupParticipantsList.remove(msisdn);
+			}
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+	/**
 	 * updates the contact in memory
 	 * 
 	 * @param contact

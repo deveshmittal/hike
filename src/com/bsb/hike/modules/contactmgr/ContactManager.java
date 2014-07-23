@@ -689,5 +689,15 @@ public class ContactManager implements ITransientCache
 	{
 		transientCache.insertGroupParticipants(groupId, participantList);
 	}
-		
+
+	/**
+	 * This method removes group participant of a particular group from transient cache
+	 * @param groupId
+	 * @param msisdn
+	 */
+	public void removeGroupParticipant(String groupId, String msisdn)
+	{
+		transientCache.removeGroupParticipants(groupId, msisdn);
+	}
+	
 }
