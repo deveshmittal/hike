@@ -553,7 +553,7 @@ public class FileTransferManager extends BroadcastReceiver
 				e.printStackTrace();
 			}
 		}
-		return fss;
+		return fss != null ? fss : new FileSavedState();
 	}
 
 	// this function gives the state of uploading for a file
