@@ -8,9 +8,12 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.ui.fragments.PinHistoryFragment;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
 public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity 
@@ -21,8 +24,15 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity
 
 	private long convId;
 	
+	private ChatTheme chatTheme;
+		
 	protected void onCreate(Bundle savedInstanceState)
 	{
+		/*
+		* Making the action bar transparent for custom theming.
+		*/
+		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+		
 		super.onCreate(savedInstanceState);
 		initialisePinHistory(savedInstanceState);
 	}	
@@ -37,6 +47,13 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity
 	private void setupActionBar()
 	{
 		ActionBar actionBar = getSupportActionBar();
+		
+		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
+		chatTheme = db.getChatThemeForMsisdn(msisdn);
+
+		actionBar.setBackgroundDrawable(getResources().getDrawable(chatTheme.headerBgResId()));
+		actionBar.setDisplayShowTitleEnabled(true);
+
 		actionBar.setIcon(R.drawable.hike_logo_top_bar);
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
