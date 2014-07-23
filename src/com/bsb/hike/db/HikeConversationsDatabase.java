@@ -1961,24 +1961,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public boolean doesConversationExist(String msisdn)
-	{
-		Cursor c = null;
-		try
-		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN }, DBConstants.MSISDN + " = ? ", new String[] { msisdn }, null, null, null);
-
-			return c.moveToFirst();
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
-	}
-
 	public boolean isGroupAlive(String groupId)
 	{
 		Cursor c = null;
