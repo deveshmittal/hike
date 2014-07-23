@@ -1344,7 +1344,10 @@ public class Utils
 			String imageOrientation = Utils.getImageOrientation(srcFilePath);
 			Bitmap tempBmp = null;
 			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
+			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 3);  //Defaults to small
+			if(quality!=3)
+				resetImageQuality(appPrefs);  //Reset the image quality to small option
+			
 			if (quality == 2)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
@@ -1353,7 +1356,7 @@ public class Utils
 			else if (quality != 1)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX,
-						Bitmap.Config.RGB_565, true, false);
+						Bitmap.Config.RGB_565, false, false);  //Reducing further for small 
 			}
 			tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 			if (tempBmp != null)
@@ -1395,6 +1398,14 @@ public class Utils
 			Logger.e("Utils", "WTF Error while reading/writing/closing file", ex);
 			return false;
 		}
+	}
+
+	public static void resetImageQuality(SharedPreferences appPrefs)
+	{
+		// TODO Auto-generated method stub
+		final Editor editor = appPrefs.edit();
+		editor.putInt(HikeConstants.IMAGE_QUALITY, 3);
+		editor.commit();
 	}
 
 	public static String getImageOrientation(String filePath)
