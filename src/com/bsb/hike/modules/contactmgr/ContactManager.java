@@ -709,6 +709,17 @@ public class ContactManager implements ITransientCache
 	{
 		persistenceCache.setGroupName(groupId, name);
 	}
-		
+	
+	/**
+	 * Returns the number of participants in a particular group.
+	 * @param groupId
+	 * @return
+	 */
+	public int getActiveParticipantCount(String groupId)
+	{
+		return transientCache.getGroupParticipantsCount(groupId);
+	}
+	
+	
 	
 }

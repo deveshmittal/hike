@@ -732,4 +732,19 @@ public class TransientCache extends ContactsCache
 			writeLock.unlock();
 		}
 	}
+	
+	/**
+	 * Returns the count of number of participants in a particular group.
+	 * @param groupId
+	 * @return
+	 */
+	int getGroupParticipantsCount(String groupId)
+	{
+		Map<String,Pair<GroupParticipant,String>> g = groupParticipants.get(groupId);
+		if(null != g)
+		{
+			return g.size();
+		}
+		return HikeConversationsDatabase.getInstance().getActiveParticipantCount(groupId);
+	}
 }
