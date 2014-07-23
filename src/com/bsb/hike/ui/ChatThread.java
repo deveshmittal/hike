@@ -166,6 +166,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
@@ -819,11 +820,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean showImpMessageIfRequired()
 	{
-		ConvMessage impMessage = mConversationDb.getLastPinForConversation(mConversation);
-		if (impMessage != null)
+		if (mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
 		{
-			showImpMessage(impMessage, -1);
-			return true;
+			ConvMessage impMessage = mConversationDb.getLastPinForConversation(mConversation);
+			if (impMessage != null)
+			{
+				showImpMessage(impMessage, -1);
+				return true;
+			}
 		}
 		return false;
 	}
@@ -889,8 +893,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void onClick(View v)
 			{
 				tipView.setVisibility(View.GONE);
-				HikeConversationsDatabase.getInstance().markPinMessageRead(mConversation.getMsisdn());
-
+				MetaData metadata = mConversation.getMetaData();
+				try
+				{
+					metadata.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, false);
+					HikeConversationsDatabase.getInstance().updateConversationMetadata(mConversation.getConvId(), mConversation.getMetaData());
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		});
 		LinearLayout ll = ((LinearLayout) findViewById(R.id.impMessageContainer));
@@ -2033,7 +2046,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
 		 */
-		mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY);
+		mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
 		if (mConversation == null)
 		{
 			if (Utils.isGroupConversation(mContactNumber))
