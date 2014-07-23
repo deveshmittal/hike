@@ -231,6 +231,29 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
+	 * Should be called when group name is changed, name is stored in persistence cache {@link #groupPersistence}.
+	 * 
+	 * @param groupId
+	 * @param name
+	 */
+	void setGroupName(String groupId, String name)
+	{
+		writeLock.lock();
+		try
+		{
+			GroupDetails grpDetails = groupPersistence.get(groupId);
+			if (null != grpDetails)
+			{
+				grpDetails.setGroupName(name);
+			}
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	/**
 	 * Returns name of group if msisdn is group ID else contact name - if contact is unsaved then this method returns null as for unsaved contact we need groupId to get name. This
 	 * implementation is thread safe.
 	 * 

@@ -699,5 +699,16 @@ public class ContactManager implements ITransientCache
 	{
 		transientCache.removeGroupParticipants(groupId, msisdn);
 	}
+
+	/**
+	 * Sets the group name in persistence cache , should be called when group name is changed
+	 * @param groupId
+	 * @param name
+	 */
+	public void setGroupName(String groupId,String name)
+	{
+		persistenceCache.setGroupName(groupId, name);
+	}
+		
 	
 }

@@ -408,9 +408,10 @@ public class MqttMessagesManager
 		{
 			String groupname = jsonObj.optString(HikeConstants.DATA);
 			String groupId = jsonObj.optString(HikeConstants.TO);
-
+			
 			if (this.convDb.setGroupName(groupId, groupname) > 0)
 			{
+				ContactManager.getInstance().setGroupName(groupId, groupname);
 				this.pubSub.publish(HikePubSub.GROUP_NAME_CHANGED, groupId);
 
 				boolean showPush = true;
