@@ -37,31 +37,43 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 	private String msisdn;
 	
 	private ChatTheme chatTheme;
+	
+	private ImageView backgroundImage;
 		
 	private HikeConversationsDatabase mDb;
 
 	private Conversation mConversation;
 
 	private long convId;
-	
-	public PinHistoryFragment(String userMSISDN, long convId2)
-	{
-		this.msisdn = userMSISDN;
-		this.convId = convId2;
-	}
 		
+	public PinHistoryFragment()
+	{
+	}
+
+	@Override
+	public void setArguments(Bundle args) 
+	{
+		super.setArguments(args);
+		
+		msisdn = args.getString(HikeConstants.TEXT_PINS);
+		
+		convId = args.getLong(HikeConstants.EXTRA_CONV_ID);
+	}
+	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View parent = inflater.inflate(R.layout.sticky_pins, null);
 		
 		ListView pinsList = (ListView) parent.findViewById(android.R.id.list);
 		
+		backgroundImage = (ImageView) parent.findViewById(R.id.pin_history_background);
+
 		mDb = HikeConversationsDatabase.getInstance();
 		
-		this.mConversation = mDb.getConversation(msisdn, HikeConstants.MAX_PINS_TO_LOAD_INITIALLY);
+		this.mConversation = mDb.getConversation(msisdn, HikeConstants.MAX_PINS_TO_LOAD_INITIALLY, true);
 		
-		this.textPins = mDb.getAllPinMessage(0, HikeConstants.MAX_PINS_TO_LOAD_INITIALLY, msisdn,convId);
-
+		this.textPins = mDb.getAllPinMessage(0, HikeConstants.MAX_PINS_TO_LOAD_INITIALLY, msisdn, mConversation);
+		
 		chatTheme = mDb.getChatThemeForMsisdn(msisdn);
 		
 		pinsList.setEmptyView(parent.findViewById(android.R.id.empty));
@@ -160,7 +172,7 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 	@Override
 	public void onLastItemRequested() 
 	{		
-		this.textPins = mDb.getAllPinMessage(PHadapter.getCount(), HikeConstants.MAX_OLDER_PINS_TO_LOAD_EACH_TIME, msisdn, convId);
+		this.textPins = mDb.getAllPinMessage(PHadapter.getCount(), HikeConstants.MAX_OLDER_PINS_TO_LOAD_EACH_TIME, msisdn, mConversation);
 		
 		this.PHadapter.appendPinstoView(textPins);
 	}
