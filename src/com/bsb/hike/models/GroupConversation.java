@@ -15,6 +15,7 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -56,6 +57,7 @@ public class GroupConversation extends Conversation
 			GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(contactNum, contactNum, contactName, contactNum, onHike), false, onDnd);
 			Logger.d(getClass().getSimpleName(), "Parsing JSON and adding contact to conversation: " + contactNum);
 			this.groupParticipantList.put(contactNum, new Pair<GroupParticipant, String>(groupParticipant, contactName));
+			ContactManager.getInstance().addGroupParticipants(getMsisdn(), groupParticipantList);
 		}
 
 		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();

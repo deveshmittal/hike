@@ -103,7 +103,13 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			groupParticipants.put(grpId, groupParticipantsMap);
+			Map<String, Pair<GroupParticipant, String>> groupParticipantsList = groupParticipants.get(grpId);
+			if (null == groupParticipantsList)
+			{
+				groupParticipantsList = new HashMap<String, Pair<GroupParticipant, String>>();
+				groupParticipants.put(grpId, groupParticipantsList);
+			}
+			groupParticipantsList.putAll(groupParticipantsMap);
 		}
 		finally
 		{

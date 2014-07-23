@@ -679,4 +679,15 @@ public class ContactManager implements ITransientCache
 		transientCache.insertGroupParticipants(groupId, groupParticipantsMap);
 		return groupParticipantsMap;
 	}
+
+	/**
+	 * This method adds group participants for a particular <code>groupId</code> into {@link TransientCache}.
+	 * @param groupId
+	 * @param participantList
+	 */
+	public void addGroupParticipants(String groupId, Map<String, Pair<GroupParticipant, String>> participantList)
+	{
+		transientCache.insertGroupParticipants(groupId, participantList);
+	}
+		
 }
