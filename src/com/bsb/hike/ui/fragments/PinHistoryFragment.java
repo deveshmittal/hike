@@ -10,7 +10,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ImageView.ScaleType;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.bsb.hike.HikeConstants;
@@ -72,7 +74,25 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 	{
 		super.onViewCreated(view, savedInstanceState);
 						
-		view.findViewById(R.id.sticky_parent).setBackground(getChatTheme(chatTheme));		
+		if (chatTheme != ChatTheme.DEFAULT)
+		{
+			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
+			backgroundImage.setImageDrawable(getChatTheme(chatTheme));
+		}
+		else
+		{
+			backgroundImage.setImageResource(chatTheme.bgResId());
+		}
+		
+		// reset unread pin count to 0
+		try 
+		{
+			mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
+		}
+		catch (JSONException e) 
+		{
+			e.printStackTrace();
+		}
 	}
 
 	@Override
