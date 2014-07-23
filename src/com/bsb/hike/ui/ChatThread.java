@@ -875,9 +875,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		CharSequence markedUp= impMessage.getMessage();
 		SmileyParser smileyParser = SmileyParser.getInstance();
 		markedUp = smileyParser.addSmileySpans(markedUp, false);
-//		Linkify.addLinks(markedUp, Linkify.ALL);
-//		Linkify.addLinks(textHolder.text, Utils.shortCodeRegex, "tel:");
 		text.setText(markedUp);
+		Linkify.addLinks(text, Linkify.ALL);
+		Linkify.addLinks(text, Utils.shortCodeRegex, "tel:");
+		
 		date.setText(impMessage.getTimestampFormatted(false, getApplicationContext()));
 		View cross = tipView.findViewById(R.id.cross);
 		cross.setTag(impMessage);
