@@ -359,6 +359,12 @@ public class Conversation implements Comparable<Conversation>
 			JSONObject pinJSON = getPinJson(pinType);
 			pinJSON.put(HikeConstants.UNREAD_COUNT, pinJSON.getInt(HikeConstants.UNREAD_COUNT) + 1);
 		}
+		
+		public void decrementUnreadCount(int pinType) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			pinJSON.put(HikeConstants.UNREAD_COUNT, pinJSON.getInt(HikeConstants.UNREAD_COUNT) - 1);
+		}
 
 		public void setShowLastPin(int pinType, boolean isShow) throws JSONException
 		{
