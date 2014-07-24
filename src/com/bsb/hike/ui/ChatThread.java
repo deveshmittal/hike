@@ -823,7 +823,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	private boolean showImpMessageIfRequired()
 	{
-		if (mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
+		if (mConversation.getMetaData() != null && mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
 		{
 			ConvMessage impMessage = mConversationDb.getLastPinForConversation(mConversation);
 			if (impMessage != null)
