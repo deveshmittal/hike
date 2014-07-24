@@ -1448,6 +1448,12 @@ public class HikeConstants
 		public static final String WATS_APP_INVITE = "inv_wa";
 
 		public static final String FTUE_CARD_INVITE_CLICKED = "ftueCardInviteClicked";
+
+		public static final String SHOW_TIMELINE_TOP_BAR = "showTimelineTopBar";
+
+		public static final String FAVOURITE_FROM_OVERFLOW = "favoriteFromOverflow";
+		
+		public static final String STATUS_UPDATE_FROM_OVERFLOW = "statusUpdateFromOverflow";
 	}
 
 	public static final class MqttMessageTypes
