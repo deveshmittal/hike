@@ -4,13 +4,13 @@
     android:layout_height="match_parent" >
 
     <RelativeLayout
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
         android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/pin_chat_bg_yellow" >
-
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:background="@drawable/pin_chat_bg_yellow"
+        android:minHeight="70dp" >
 
         <ImageView
             android:id="@+id/cross"
@@ -24,11 +24,11 @@
             android:src="@drawable/ic_cross" />
 
         <com.bsb.hike.view.CustomFontTextView
+            android:layout_marginTop="13dp"
             android:id="@+id/text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/senderName"
             android:layout_marginLeft="4dp"
             android:maxLines="2"
             android:text="sample"
@@ -38,12 +38,14 @@
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/date"
-            android:textColor="@color/dark_yellow_sticky_note"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/text"
+            android:layout_marginRight="-1dp"
+            android:layout_marginTop="3dp"
             android:text="just now"
+            android:textColor="@color/dark_yellow_sticky_note"
             android:textSize="12sp"
             android:textStyle="italic" />
     </RelativeLayout>
