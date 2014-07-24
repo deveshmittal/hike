@@ -896,6 +896,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void onClick(View v)
 			{
 				tipView.setVisibility(View.GONE);
+				tipView =null;
 				MetaData metadata = mConversation.getMetaData();
 				try
 				{
