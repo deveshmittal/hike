@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -1738,16 +1739,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
 		{
 			Logger.d(getClass().getSimpleName(), "New bulk msg event sent or received.");
-			HashMap<String, ArrayList<ConvMessage>> messageListMap = (HashMap<String, ArrayList<ConvMessage>>) object;
+			HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
 
 			if (messageListMap != null)
 			{
-				for (Entry<String, ArrayList<ConvMessage>> entry : messageListMap.entrySet())
+				for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
 				{
 					if (entry != null)
 					{
 						String msisdn = entry.getKey();
-						ArrayList<ConvMessage> messageList = entry.getValue();
+						LinkedList<ConvMessage> messageList = entry.getValue();
 						final Conversation conv = mConversationsByMSISDN.get(msisdn);
 						if (conv != null)
 						{

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1223,11 +1224,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public ArrayList<ConvMessage> addConversationsBulk(List<ConvMessage> convMessages)
+	public LinkedList<ConvMessage> addConversationsBulk(List<ConvMessage> convMessages)
 	{
 		HashMap<String, Conversation> convesationMap = new HashMap<String, Conversation>();
 		Logger.d("bulkPacket", "adding conversation started");
-		ArrayList<ConvMessage> resultList = new ArrayList<ConvMessage>();
+		LinkedList<ConvMessage> resultList = new LinkedList<ConvMessage>();
 		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
 				+ DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
 				+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + " ) " + " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ? FROM "

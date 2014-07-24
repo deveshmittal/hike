@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -3493,8 +3494,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
 		{
-			HashMap<String, ArrayList<ConvMessage>> messageListMap = (HashMap<String, ArrayList<ConvMessage>>) object;
-			final ArrayList<ConvMessage> messageList = messageListMap.get(mContactNumber);
+			HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
+			final LinkedList<ConvMessage> messageList = messageListMap.get(mContactNumber);
 			String label = null;
 			if(messageList != null)
 			{
@@ -3897,7 +3898,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 	
-	private void addBulkMessages(ArrayList<ConvMessage> messageList)
+	private void addBulkMessages(LinkedList<ConvMessage> messageList)
 	{
 		if (messages != null && mAdapter != null)
 		{

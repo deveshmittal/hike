@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -104,9 +105,9 @@ public class MqttMessagesManager
 	
 	private SQLiteDatabase userWriteDb;
 	
-	private ArrayList<ConvMessage> messageList;
+	private LinkedList<ConvMessage> messageList;
 
-	private Map<String, ArrayList<ConvMessage>> messageListMap;
+	private Map<String, LinkedList<ConvMessage>> messageListMap;
 	
 	private Map<String, PairModified<Long, Long>> messageStatusMap;
 	
@@ -1673,8 +1674,8 @@ public class MqttMessagesManager
 				Logger.d("BulkProcess", "started");
 				long time1 = System.currentTimeMillis();
 
-				messageList = new ArrayList<ConvMessage>(); // it will store all the convMessage object that can be added to list in one transaction
-				messageListMap = new HashMap<String, ArrayList<ConvMessage>>(); // it will store list of conversation objects based on msisdn
+				messageList = new LinkedList<ConvMessage>(); // it will store all the convMessage object that can be added to list in one transaction
+				messageListMap = new HashMap<String, LinkedList<ConvMessage>>(); // it will store list of conversation objects based on msisdn
 				messageStatusMap = new HashMap<String, PairModified<Long, Long>>(); // it will store pair max "mr" msdId and max "dr" msgId according to msisdn
 				messageReadMapForGroup = new HashMap<String, PairModified<Long, Set<String>>>(); // It will store a mapping of group id to a pair containing max "mr" and list of participant msisdns
 				try
@@ -1746,14 +1747,14 @@ public class MqttMessagesManager
 			String msisdn = convMessage.getMsisdn();
 			if(messageListMap.get(msisdn) == null)
 			{
-				messageListMap.put(msisdn, new ArrayList<ConvMessage>());
+				messageListMap.put(msisdn, new LinkedList<ConvMessage>());
 			}
 			messageListMap.get(msisdn).add(convMessage);
 		}
 		ArrayList<ConvMessage> lastMessageList = new ArrayList<ConvMessage>(messageListMap.keySet().size());
-		for (Entry<String, ArrayList<ConvMessage>> entry : messageListMap.entrySet())
+		for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
 		{
-			ArrayList<ConvMessage> list= entry.getValue();
+			LinkedList<ConvMessage> list= entry.getValue();
 			lastMessageList.add(list.get(list.size() -1));
 		}
 		
