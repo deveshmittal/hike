@@ -1703,7 +1703,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void checkMessageTypeFromHash(ConvMessage convMessage)
 	{
-		if (convMessage.getMessage().startsWith(HASH_PIN))
+		if (convMessage.getMessage().matches("(?i)" + HASH_PIN + ".*"))
 		{
 			convMessage.setMessage(convMessage.getMessage().substring(HASH_PIN.length()));
 			convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
