@@ -4579,8 +4579,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				if(!TextUtils.isEmpty(mComposeView.getText().toString().trim())){
 				onSendClick(v);
 				dismissPinCreateView();
+				}else{
+					Toast.makeText(getApplicationContext(), "Text Can't be empty!", Toast.LENGTH_SHORT).show();
+				}
 			}
 		});
 
