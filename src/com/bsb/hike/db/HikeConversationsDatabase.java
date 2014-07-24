@@ -3781,7 +3781,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			dndJSON.put(HikeConstants.DND_USERS, dndParticipants);
 
 			ConvMessage convMessage = new ConvMessage(dndJSON, null, mContext, false);
-			addConversationMessages(convMessage);
 			updateShownStatus(groupId);
 
 			return convMessage;
