@@ -1397,6 +1397,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					intent.putExtra(HikeConstants.TEXT_PINS, mContactNumber);
 					intent.putExtra(HikeConstants.EXTRA_CONV_ID, mConversation.getConvId());
 					startActivity(intent);
+					pin_unread_count =0;  
 					break;
 				case 5:
 					clearConversation();
