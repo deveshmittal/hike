@@ -34,7 +34,7 @@
         <item name="alp_42447968_color_pattern_path">@color/alp_42447968_pattern_path_dark</item>
         <item name="alp_42447968_ic_action_lockpattern">@drawable/alp_42447968_ic_action_lockpattern_dark</item>
         <item name="aosp_drawable_indicator_code_lock_point_area_normal">@drawable/aosp_indicator_code_lock_point_area_green_holo</item>
-        <item name="android:windowBackground">@color/alp_42447968_pattern_red_background</item>
+        <item name="android:windowBackground">@color/transparent</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowCloseOnTouchOutside">false</item>
     </style>

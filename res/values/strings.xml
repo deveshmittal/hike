@@ -1099,4 +1099,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="use_this_quality_for_sending_images">Use this quality for sending images</string>
     <string name="select_all_confirmation_header">Invite All</string>
     <string name="select_all_confirmation_msg">Send invite to %1$d contacts to download hike?</string>
+    <string name="change_password_from_privacy">
+        <![CDATA[ <font color="#929391">To change password</font>  <font color="#fdf0e1">Settings > Privacy</font>
+	    ]]>
+    </string>
 </resources>

@@ -158,6 +158,7 @@ import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.SignupActivity;
@@ -4166,5 +4167,13 @@ public class Utils
 		}
 		else
 			return (Integer.toString(bytes) + " B");
+	}
+	
+	public static Intent getIntentForPrivacyScreen(Context context)
+	{
+		Intent intent = new Intent(context, HikePreferences.class);
+		intent.putExtra(HikeConstants.Extras.PREF, R.xml.privacy_preferences);
+		intent.putExtra(HikeConstants.Extras.TITLE, R.string.privacy);
+		return intent;
 	}
 }
