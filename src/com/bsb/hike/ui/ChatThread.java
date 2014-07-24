@@ -427,9 +427,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private ChatThreadReceiver chatThreadReceiver;
 
 	private ScreenOffReceiver screenOffBR;
-	
-	private int pin_unread_count = 0;
-	
+
+
 	@Override
 	protected void onPause()
 	{
@@ -818,16 +817,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			showTipIfRequired();
 		}
 		Logger.i("chatthread", "on create end");
-		try 
-		{
-			pin_unread_count = mConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
-		}
-		catch (JSONException e) 
-		{
-			e.printStackTrace();
-		}
+		
 	}
-
+	
 	private boolean showImpMessageIfRequired()
 	{
 		if (mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
@@ -922,6 +914,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			ll.removeAllViews();
 		}
 		ll.addView(tipView, 0);
+		// to hide pin , if pin create view is visible
+		if (findViewById(R.id.impMessageCreateView).getVisibility() == View.VISIBLE)
+		{
+			tipView.setVisibility(View.GONE);
+		}
 		if (animationId != -1)
 		{
 			tipView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), animationId));
@@ -4494,6 +4491,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		Utils.showSoftKeyboard(getApplicationContext(), mComposeView);
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
 		mComposeView.addTextChangedListener(new EmoticonTextWatcher());
+		mComposeView.requestFocus();
 		content.findViewById(R.id.emo_btn).setOnClickListener(new OnClickListener()
 		{
 
@@ -7241,21 +7239,30 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
 				freeSmsCount.setVisibility(View.GONE);
-				
+
 				TextView pin_unread = (TextView) convertView.findViewById(R.id.new_games_indicator);
-				
-				if(item.getKey() == 4)
+
+				if (item.getKey() == 4)
 				{
 					pin_unread.setVisibility(View.VISIBLE);
-					
-					if(pin_unread_count > 0)
+					int pin_unread_count = 0;
+					try
+					{
+						// -1 because most recent pin will be at stick at top
+						pin_unread_count = mConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN) -1;
+					}
+					catch (JSONException e)
+					{
+						e.printStackTrace();
+					}
+					if (pin_unread_count > 0)
 						pin_unread.setText(Integer.toString(pin_unread_count));
 					else
-						pin_unread.setVisibility(View.GONE);					
+						pin_unread.setVisibility(View.GONE);
 				}
 				else
 				{
-					pin_unread.setVisibility(View.GONE);					
+					pin_unread.setVisibility(View.GONE);
 				}
 
 				return convertView;
