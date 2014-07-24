@@ -1264,10 +1264,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (key.equals(requiredkey))
 		{
 			pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_CHAT, "");
-		}
-		if (tipView != null)
-		{
-			tipView.setVisibility(View.GONE);
+			if (tipView != null)
+			{
+				tipView.setVisibility(View.GONE);
+				tipView =null;
+			}
 		}
 	}
 
