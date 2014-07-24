@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <RelativeLayout
+        style="@style/PinsReadContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/sender_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/pin_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/pin_header"
+                android:textColor="@color/updates_text"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/pin_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/sender_content"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/pin_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pin_detail"
+                android:textColor="@color/updates_text"
+                android:textSize="16sp" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/last_pin_timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/pin_detail"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="false"
+                android:layout_marginRight="8dp"
+                android:text="9:35AM"
+                android:textColor="@color/timestamp"
+                android:textSize="12sp" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

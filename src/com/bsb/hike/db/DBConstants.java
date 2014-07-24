@@ -40,6 +40,10 @@ public class DBConstants
 	public static final String MESSAGE_HASH = "msgHash";
 
 	public static final String CONV_ID = "convid";
+	
+	public static final String MESSAGE_TYPE = "type";
+
+	public static final String CONVERSATION_METADATA = "convMetadata";
 
 	public static final String ONHIKE = "onhike";
 
