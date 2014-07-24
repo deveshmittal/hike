@@ -762,17 +762,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 	
-	public void setReadByForGroupBulk(Map<String, PairModified<Long, Set<String>>> messageReadMapForGroup)
+	public void setReadByForGroupBulk(Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap)
 	{
 
 		long maxMsgId = -1;
 		Cursor c = null;
-		for (Entry<String, PairModified<Long, Set<String>>> entry : messageReadMapForGroup.entrySet())
+		for (Entry<String, PairModified<PairModified<Long, Set<String>>, Long>> entry : messageStatusMap.entrySet())
 		{
 
 			String groupId = entry.getKey();
-			PairModified<Long, Set<String>> pair = entry.getValue();
-			maxMsgId = pair.getFirst();
+			PairModified<PairModified<Long, Set<String>>, Long> pair = entry.getValue();
+			maxMsgId = pair.getFirst().getFirst();
 			
 			try
 			{
@@ -801,7 +801,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						 * Checking if this number has already been added.
 						 */
 						boolean alreadyAdded = false;
-						for(String msisdn : pair.getSecond())
+						for(String msisdn : pair.getFirst().getSecond())
 						{
 							for (int i = 0; i < readByArray.length(); i++)
 							{
@@ -907,16 +907,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return executeUpdateMessageStatusStatement(query, status, msisdn);
 	}
 
-	public void updateStatusBulk(Map<String, PairModified<Long, Long>> messageStatusMap)
+	public void updateStatusBulk(Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap)
 	{
 
 		String msisdn;
-		for (Entry<String, PairModified<Long, Long>> entry : messageStatusMap.entrySet())
+		for (Entry<String, PairModified<PairModified<Long, Set<String>>, Long>> entry : messageStatusMap.entrySet())
 		{
 
 			msisdn = (String) entry.getKey();
-			PairModified<Long, Long> pair = entry.getValue();
-			setMessageState(msisdn, pair.getFirst(), State.SENT_DELIVERED_READ.ordinal());
+			PairModified<PairModified<Long, Set<String>>, Long> pair = entry.getValue();
+			setMessageState(msisdn, pair.getFirst().getFirst(), State.SENT_DELIVERED_READ.ordinal());
 			setMessageState(msisdn, pair.getSecond(), State.SENT_DELIVERED.ordinal());
 		}
 	}

@@ -109,9 +109,7 @@ public class MqttMessagesManager
 
 	private Map<String, LinkedList<ConvMessage>> messageListMap;
 	
-	private Map<String, PairModified<Long, Long>> messageStatusMap;
-	
-	private Map<String, PairModified<Long, Set<String>>> messageReadMapForGroup;
+	private Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap;
 
 	private MqttMessagesManager(Context context)
 	{
@@ -694,9 +692,10 @@ public class MqttMessagesManager
 		/*
 		 * update message status map with max dr msgId corresponding to its msisdn
 		 */
+		
 		if(messageStatusMap.get(msisdn) == null)
 		{
-			messageStatusMap.put(msisdn, new PairModified<Long, Long>((long) -1, (long) -1));
+			messageStatusMap.put(msisdn, new PairModified<PairModified<Long, Set<String>>, Long>(null, (long) -1));
 		}
 		if(msgID > messageStatusMap.get(msisdn).getSecond())
 		{
@@ -774,33 +773,30 @@ public class MqttMessagesManager
 
 		if(messageStatusMap.get(id) == null)
 		{
-			messageStatusMap.put(id, new PairModified<Long, Long>((long) -1, (long) -1));
+			messageStatusMap.put(id, new PairModified<PairModified<Long, Set<String>>, Long>(null, (long) -1));
 		}
-		if(msgID > messageStatusMap.get(id).getFirst())
+		
+		if(null == messageStatusMap.get(id).getFirst())
 		{
-			messageStatusMap.get(id).setFirst(msgID);
+			Set<String> msisdnSet = new HashSet<String>();
+			PairModified<Long, Set<String>> pair = new PairModified<Long, Set<String>>((long) -1, msisdnSet);
+			messageStatusMap.get(id).setFirst(pair);
 		}
-
+		
+		PairModified<Long, Set<String>> pair = messageStatusMap.get(id).getFirst();
+		
 		if (Utils.isGroupConversation(id))
 		{
-			if(null == messageReadMapForGroup.get(id))
-			{
-				Set<String> msisdnSet = new HashSet<String>();
-				PairModified<Long, Set<String>> pair = new PairModified<Long, Set<String>>((long) -1, msisdnSet);
-				messageReadMapForGroup.put(id, pair);
-			}
-			long messageId = messageStatusMap.get(id).getFirst();
-			PairModified<Long, Set<String>> pair = messageReadMapForGroup.get(id);
-			if(pair.getFirst() != messageId)
+			if(pair.getFirst() != msgID)
 			{
 				pair.setSecond(new HashSet<String>());
 			}
-
-			pair.setFirst(msgID);
 			pair.getSecond().add(participantMsisdn);
-
 		}
-		
+		if(msgID > pair.getFirst())
+		{
+			pair.setFirst(msgID);
+		}
 	}
 
 	private void saveTyping(JSONObject jsonObj) throws JSONException
@@ -1676,8 +1672,7 @@ public class MqttMessagesManager
 
 				messageList = new LinkedList<ConvMessage>(); // it will store all the convMessage object that can be added to list in one transaction
 				messageListMap = new HashMap<String, LinkedList<ConvMessage>>(); // it will store list of conversation objects based on msisdn
-				messageStatusMap = new HashMap<String, PairModified<Long, Long>>(); // it will store pair max "mr" msdId and max "dr" msgId according to msisdn
-				messageReadMapForGroup = new HashMap<String, PairModified<Long, Set<String>>>(); // It will store a mapping of group id to a pair containing max "mr" and list of participant msisdns
+				messageStatusMap = new HashMap<String, PairModified<PairModified<Long, Set<String>>, Long>>(); // it will store pair mapping to msisdn. pair first value is a pair which contains max "mr" msgid and msisdns of participants that read it.																									   // pair second value is max "dr" message id
 				try
 				{
 					userWriteDb.beginTransaction();
@@ -1765,10 +1760,7 @@ public class MqttMessagesManager
 		if(messageStatusMap.size() > 0)
 		{
 			convDb.updateStatusBulk(messageStatusMap);
-		}
-		if(messageReadMapForGroup.size() > 0)
-		{
-			convDb.setReadByForGroupBulk(messageReadMapForGroup);
+			convDb.setReadByForGroupBulk(messageStatusMap);
 		}
 		
 		/*

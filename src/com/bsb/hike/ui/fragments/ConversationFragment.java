@@ -1827,19 +1827,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
 		{
-			Map<String, PairModified<Long, Long>> messageStatusMap = (Map<String, PairModified<Long, Long>>) object;
+			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
 
 			if (messageStatusMap != null)
 			{
-				for (Entry<String, PairModified<Long, Long>> entry : messageStatusMap.entrySet())
+				for (Entry<String, PairModified<PairModified<Long, Set<String>>, Long>> entry : messageStatusMap.entrySet())
 				{
 					if (entry != null)
 					{
 						final String msisdn = entry.getKey();
-						PairModified<Long, Long> pair = entry.getValue();
+						PairModified<PairModified<Long, Set<String>>, Long> pair = entry.getValue();
 						if (pair != null)
 						{
-							long mrMsgId = (long) pair.getFirst();
+							long mrMsgId = (long) pair.getFirst().getFirst();
 							long drMsgId = (long) pair.getSecond();
 
 							if (mrMsgId > 0)

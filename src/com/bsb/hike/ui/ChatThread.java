@@ -3563,11 +3563,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
 		{
-			Map<String, PairModified<Long, Long>> messageStatusMap = (Map<String, PairModified<Long, Long>>) object;
-			PairModified<Long, Long> pair = messageStatusMap.get(mConversation.getMsisdn());
+			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
+			PairModified<PairModified<Long, Set<String>>, Long> pair = messageStatusMap.get(mConversation.getMsisdn());
 			if (pair != null)
 			{
-				long mrMsgId = (long) pair.getFirst();
+				long mrMsgId = (long) pair.getFirst().getFirst();
 				long drMsgId = (long) pair.getSecond();
 
 				while (mrMsgId > 0)
