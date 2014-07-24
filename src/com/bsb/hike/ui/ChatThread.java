@@ -4498,6 +4498,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		dismissPopupWindow();
 		final View content = findViewById(R.id.impMessageCreateView);
 		content.setVisibility(View.VISIBLE);
+		mComposeView.requestFocus();
 		Utils.showSoftKeyboard(getApplicationContext(), mComposeView);
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
 		mComposeView.addTextChangedListener(new EmoticonTextWatcher());
