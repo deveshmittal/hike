@@ -910,6 +910,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		});
+		
+		tipView.setOnClickListener(new OnClickListener() 
+		{			
+			@Override
+			public void onClick(View v) 
+			{
+				showPinHistory();
+			}
+		});
 		LinearLayout ll = ((LinearLayout) findViewById(R.id.impMessageContainer));
 		if (ll.getChildCount() > 0)
 		{
@@ -1311,7 +1320,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if(mConversation instanceof GroupConversation)
 		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.pin_history), 4));
+			optionsList.add(new OverFlowMenuItem(getString(R.string.chat_theme_small), 4));
 		}
 			
 		if (!(mConversation instanceof GroupConversation) && contactInfo.isOnhike())
@@ -1322,7 +1331,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.chat_theme_small), 8));
+		if(mConversation instanceof GroupConversation)
+		{
+			optionsList.add(new OverFlowMenuItem(getString(R.string.pin_history), 8));
+		}
 
 		dismissPopupWindow();
 
@@ -1392,23 +1404,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(ChatThread.this, null);
 					Utils.executeConvAsyncTask(emailTask, mConversation);
 					break;
-				case 4:					
-					Intent intent = new Intent();
-					intent.setClass(ChatThread.this, PinHistoryActivity.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					intent.putExtra(HikeConstants.TEXT_PINS, mContactNumber);
-					intent.putExtra(HikeConstants.EXTRA_CONV_ID, mConversation.getConvId());
-					startActivity(intent);
-					overridePendingTransition(R.anim.slide_in_left_pins, R.anim.slide_out_left_pins);
-					try
-					{
-						mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN,0);
-					}
-					catch (JSONException e)
-					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+				case 8:
+					showPinHistory();
 					break;
 				case 5:
 					clearConversation();
@@ -1422,7 +1419,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 					break;
-				case 8:
+				case 4:
 					setupThemePicker(null);
 					break;
 				}
@@ -7258,7 +7255,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				TextView pin_unread = (TextView) convertView.findViewById(R.id.new_games_indicator);
 
-				if (item.getKey() == 4)
+				if (item.getKey() == 8)
 				{
 					pin_unread.setVisibility(View.VISIBLE);
 					int pin_unread_count = 0;
@@ -7272,7 +7269,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						e.printStackTrace();
 					}
 					if (pin_unread_count > 0)
-						pin_unread.setText(Integer.toString(pin_unread_count));
+					{
+						if(pin_unread_count >= 10)
+							pin_unread.setText(R.string.max_pin_unread_counter);							
+						else
+							pin_unread.setText(Integer.toString(pin_unread_count));
+					}
 					else
 						pin_unread.setVisibility(View.GONE);
 				}
@@ -7974,5 +7976,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		Utils.emoticonClicked(getApplicationContext(), emoticonIndex, mComposeView);
 		
+	}
+	
+	private void showPinHistory()
+	{
+		Intent intent = new Intent();
+		intent.setClass(ChatThread.this, PinHistoryActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(HikeConstants.TEXT_PINS, mContactNumber);
+		intent.putExtra(HikeConstants.EXTRA_CONV_ID, mConversation.getConvId());
+		startActivity(intent);
+		overridePendingTransition(R.anim.slide_in_left_pins, R.anim.slide_out_left_pins);
+		try
+		{
+			mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN,0);
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
