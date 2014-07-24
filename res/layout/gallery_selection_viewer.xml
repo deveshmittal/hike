@@ -25,9 +25,9 @@
                 android:layout_height="35dp"
                 android:layout_width="match_parent"
                 android:layout_alignParentBottom="true"
-                android:background="@color/white"
+                android:background="@color/black"
                 android:text="Choose Image Quality"
-                android:textColor="@color/image_quality_popup_text_color"
+                android:textColor="@color/white"
                 android:textSize="15sp" />
 
 </RelativeLayout>
