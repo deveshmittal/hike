@@ -859,35 +859,33 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Logger.e("chatthread", "got imp message but type is unnknown , type " + impMessage.getMessageType());
 			return;
 		}
-		TextView sender = (TextView) tipView.findViewById(R.id.senderName);
 		TextView text = (TextView) tipView.findViewById(R.id.text);
-		TextView date = (TextView) tipView.findViewById(R.id.date);
+		TextView dateSender = (TextView) tipView.findViewById(R.id.date);
 		if (impMessage.getMetadata() != null && impMessage.getMetadata().isGhostMessage())
 		{
 			tipView.findViewById(R.id.main_content).setBackgroundResource(R.drawable.pin_bg_black);
-			sender.setTextColor(getResources().getColor(R.color.gray));
 			text.setTextColor(getResources().getColor(R.color.gray));
 		}
 		if (impMessage.isSent())
 		{
-			sender.setText("You");
+			dateSender.setText("You");
 		}
 		else
 		{
 			if (Utils.isGroupConversation(ChatThread.this.mConversation.getMsisdn()))
 			{
 				GroupConversation gConv = (GroupConversation) mConversation;
-				sender.setText(gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
+				dateSender.setText(gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
 			}
 		}
-		CharSequence markedUp= impMessage.getMessage();
+		CharSequence markedUp = impMessage.getMessage();
 		SmileyParser smileyParser = SmileyParser.getInstance();
 		markedUp = smileyParser.addSmileySpans(markedUp, false);
 		text.setText(markedUp);
 		Linkify.addLinks(text, Linkify.ALL);
 		Linkify.addLinks(text, Utils.shortCodeRegex, "tel:");
-		
-		date.setText(impMessage.getTimestampFormatted(false, getApplicationContext()));
+
+		dateSender.setText(dateSender.getText() + ", " + impMessage.getTimestampFormatted(false, getApplicationContext()));
 		View cross = tipView.findViewById(R.id.cross);
 		cross.setTag(impMessage);
 		cross.setOnClickListener(new OnClickListener()

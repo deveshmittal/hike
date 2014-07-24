@@ -9,18 +9,8 @@
         android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/pin_bg_yellow" >
+        android:background="@drawable/pin_chat_bg_yellow" >
 
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/senderName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="4dp"
-            android:text="xyz"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/cross"
@@ -43,18 +33,18 @@
             android:maxLines="2"
             android:text="sample"
             android:textColor="@color/black"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textStyle="normal" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/date"
+            android:textColor="@color/dark_yellow_sticky_note"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/text"
             android:text="just now"
-            android:textColor="#aea559"
-            android:textSize="11sp"
+            android:textSize="12sp"
             android:textStyle="italic" />
     </RelativeLayout>
 
