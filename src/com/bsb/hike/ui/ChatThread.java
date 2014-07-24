@@ -181,6 +181,7 @@ import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.ui.utils.HashSpanWatcher;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ContactDialog;
@@ -209,7 +210,7 @@ import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
 		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener,EmoticonClickListener
 {
-	private static final String HASH_PIN = "#pin ";
+	private static final String HASH_PIN = "#pin";
 
 	private boolean screenOffEvent;
 
@@ -427,7 +428,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private ChatThreadReceiver chatThreadReceiver;
 
 	private ScreenOffReceiver screenOffBR;
-	
+	private HashSpanWatcher hashWatcher;
 	
 	@Override
 	protected void onPause()
@@ -823,7 +824,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	
 	private boolean showImpMessageIfRequired()
 	{
-		if (mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
+		if (mConversation.getMetaData()!=null && mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
 		{
 			ConvMessage impMessage = mConversationDb.getLastPinForConversation(mConversation);
 			if (impMessage != null)
@@ -2083,6 +2084,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		if (mConversation instanceof GroupConversation)
 		{
+			hashWatcher = new HashSpanWatcher(mComposeView, HASH_PIN,getResources().getColor(R.color.sticky_yellow));
 			boolean hasSmsUser = false;
 			for (Entry<String, GroupParticipant> entry : ((GroupConversation) mConversation).getGroupParticipantList().entrySet())
 			{
@@ -3751,6 +3753,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (!mConversation.isOnhike())
 		{
 			updateChatMetadata();
+		}
+		if(hashWatcher!=null){
+			hashWatcher.afterTextChanged(editable);
 		}
 	}
 
