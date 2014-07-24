@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -226,7 +227,7 @@ public class HikeDialog
 		dialog.setCanceledOnTouchOutside(true);
 		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		final Editor editor = appPrefs.edit();
-		//int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
+		int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
 		final LinearLayout small_ll = (LinearLayout) dialog.findViewById(R.id.hike_small_container);
 		final LinearLayout medium_ll = (LinearLayout) dialog.findViewById(R.id.hike_medium_container);
 		final LinearLayout original_ll = (LinearLayout) dialog.findViewById(R.id.hike_original_container);
@@ -275,17 +276,17 @@ public class HikeDialog
 		
 		/*switch (quality)
 		{
-		case 1:
+		case ImageQuality.QUALITY_ORIGINAL:
 			small.setChecked(false);
 			medium.setChecked(false);
 			original.setChecked(true);
 			break;
-		case 2:
+		case ImageQuality.QUALITY_MEDIUM:
 			small.setChecked(false);
 			medium.setChecked(true);
 			original.setChecked(false);
 			break;
-		case 3:
+		case ImageQuality.QUALITY_SMALL:
 			small.setChecked(true);
 			medium.setChecked(false);
 			original.setChecked(false);
@@ -305,7 +306,7 @@ public class HikeDialog
 					small.setChecked(true);
 					medium.setChecked(false);
 					original.setChecked(false);
-					saveImageQualitySettings(editor,3);
+					saveImageQualitySettings(editor,ImageQuality.QUALITY_SMALL);
 					callOnSucess(listener, dialog);
 					
 					break;
@@ -313,7 +314,7 @@ public class HikeDialog
 					small.setChecked(false);
 					medium.setChecked(true);
 					original.setChecked(false);
-					saveImageQualitySettings(editor,2);
+					saveImageQualitySettings(editor,ImageQuality.QUALITY_MEDIUM);
 					callOnSucess(listener, dialog);
 					
 					break;
@@ -321,7 +322,7 @@ public class HikeDialog
 					small.setChecked(false);
 					medium.setChecked(false);
 					original.setChecked(true);
-					saveImageQualitySettings(editor,1);
+					saveImageQualitySettings(editor,ImageQuality.QUALITY_ORIGINAL);
 					callOnSucess(listener, dialog);
 					
 					break;
@@ -329,15 +330,15 @@ public class HikeDialog
 				/*case R.id.btn_always:
 					if (medium.isChecked())
 					{
-						editor.putInt(HikeConstants.IMAGE_QUALITY, 2);
+						editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_MEDIUM);
 					}
 					else if (original.isChecked())
 					{
-						editor.putInt(HikeConstants.IMAGE_QUALITY, 1);
+						editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_ORIGINAL);
 					}
 					else
 					{
-						editor.putInt(HikeConstants.IMAGE_QUALITY, 3);
+						editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_SMALL);
 					}
 					editor.commit();
 					
@@ -357,15 +358,15 @@ public class HikeDialog
 				case R.id.btn_just_once:
 					if (medium.isChecked())
 					{
-						editor.putInt(HikeConstants.IMAGE_QUALITY, 2);
+						editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_MEDIUM);
 					}
 					else if (original.isChecked())
 					{
-						editor.putInt(HikeConstants.IMAGE_QUALITY, 1);
+						editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_ORIGINAL);
 					}
 					else
 					{
-						editor.putInt(HikeConstants.IMAGE_QUALITY, 3);
+						editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_SMALL);
 					}
 					editor.commit();
 					

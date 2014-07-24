@@ -31,6 +31,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
@@ -826,18 +827,18 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(HikePreferences.this);
 
-			int imageQuality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
+			int imageQuality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
 
 			String qualityString = "";
 			switch (imageQuality)
 			{
-			case 1:
+			case ImageQuality.QUALITY_ORIGINAL:
 				qualityString = "Original";
 				break;
-			case 2:
+			case ImageQuality.QUALITY_MEDIUM:
 				qualityString = "Medium";
 				break;
-			case 3:
+			case ImageQuality.QUALITY_SMALL:
 				qualityString = "Small";
 				break;
 			}

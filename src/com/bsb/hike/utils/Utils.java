@@ -127,6 +127,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.HikeConstants.SMSSyncState;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
@@ -1344,10 +1345,7 @@ public class Utils
 			String imageOrientation = Utils.getImageOrientation(srcFilePath);
 			Bitmap tempBmp = null;
 			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 3);  //Defaults to small
-			if(quality!=3)
-				resetImageQuality(appPrefs);  //Reset the image quality to small option
-			
+			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
 			if (quality == 2)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
@@ -1404,7 +1402,7 @@ public class Utils
 	{
 		// TODO Auto-generated method stub
 		final Editor editor = appPrefs.edit();
-		editor.putInt(HikeConstants.IMAGE_QUALITY, 3);
+		editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
 		editor.commit();
 	}
 
