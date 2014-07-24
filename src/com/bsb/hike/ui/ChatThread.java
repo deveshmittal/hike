@@ -4526,12 +4526,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			tipView.setVisibility(View.VISIBLE);
 		}
-		Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
+		//Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
 		showingImpMessagePin = false;
 		setupActionBar(false);
 		invalidateOptionsMenu();
 		mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
-		ChatThread.this.chatLayout.requestFocus();
+//		ChatThread.this.chatLayout.requestFocus();
+		mComposeView.requestFocus();
 		dismissPopupWindow();
 		mBottomView.setVisibility(View.VISIBLE);
 		findViewById(R.id.impMessageCreateView).setVisibility(View.GONE);
