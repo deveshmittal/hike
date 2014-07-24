@@ -701,7 +701,6 @@ public class MqttMessagesManager
 		}
 		else
 		{
-
 			long[] ids;
 			if (!Utils.isGroupConversation(id))
 			{
@@ -710,6 +709,8 @@ public class MqttMessagesManager
 				{
 					return;
 				}
+				Pair<String, long[]> pair = new Pair<String, long[]>(id, ids);
+				this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
 			}
 			else
 			{
@@ -719,11 +720,10 @@ public class MqttMessagesManager
 					ids[i] = msgIds.optLong(i);
 				}
 				convDb.setReadByForGroup(id, ids, participantMsisdn);
+				Pair<long[],String> pair = new Pair<long[],String>(ids,participantMsisdn);
+				Pair<String, Pair<long[],String>> groupPair = new Pair<String, Pair<long[],String>>(id, pair);
+				this.pubSub.publish(HikePubSub.GROUP_MESSAGE_DELIVERED_READ, groupPair);
 			}
-
-			Pair<String, long[]> pair = new Pair<String, long[]>(id, ids);
-
-			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
 		}
 	}
 

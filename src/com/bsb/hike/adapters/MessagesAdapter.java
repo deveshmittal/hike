@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -4076,19 +4077,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		GroupConversation groupConversation = (GroupConversation) conversation;
 		
-		String readBy = HikeConversationsDatabase.getInstance().getReadByValueForGroup(convMessage.getMsisdn());
-		JSONArray readByArray = null;
-		try
-		{
-			readByArray = new JSONArray(readBy);
-		}
-		catch (JSONException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		LinkedList<String>readByList = groupConversation.getReadByList();
 
-		if (readByArray == null || groupConversation.getGroupMemberAliveCount() == readByArray.length())
+		if (readByList == null)
+		{
+			tv.setText("");
+		}
+		else if (groupConversation.getGroupMemberAliveCount() == readByList.size())
 		{
 			tv.setText(R.string.read_by_everyone);
 		}
@@ -4096,7 +4091,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			StringBuilder sb = new StringBuilder();
 
-			int lastIndex = readByArray.length() - HikeConstants.MAX_READ_BY_NAMES;
+			int lastIndex = readByList.size() - HikeConstants.MAX_READ_BY_NAMES;
 
 			boolean moreNamesThanMaxCount = false;
 			if (lastIndex < 0)
@@ -4116,9 +4111,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				moreNamesThanMaxCount = true;
 			}
 
-			for (int i = readByArray.length() - 1; i >= lastIndex; i--)
+			for (int i = readByList.size() - 1; i >= lastIndex; i--)
 			{
-				sb.append(groupConversation.getGroupParticipantFirstName(readByArray.optString(i)));
+				sb.append(groupConversation.getGroupParticipantFirstName(readByList.get(i)));
 				if (i > lastIndex + 1)
 				{
 					sb.append(", ");

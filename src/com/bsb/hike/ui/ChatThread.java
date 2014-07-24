@@ -342,7 +342,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED, HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
-			HikePubSub.BULK_MESSAGE_DELIVERED_READ };
+			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ };
 
 	private EmoticonType emoticonType;
 
@@ -1865,9 +1865,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			mConversation = mConversationDb.addConversation(mContactNumber, false, "", null);
 		}
-
 		/*
 		 * Setting a flag which tells us whether the group contains sms users or not.
+		 * Set participant ready by list
 		 */
 		if (mConversation instanceof GroupConversation)
 		{
@@ -1882,6 +1882,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 			((GroupConversation) mConversation).setHasSmsUser(hasSmsUser);
+			
+			Pair<String,Long> pair = HikeConversationsDatabase.getInstance().getReadByValueForGroup(mConversation.getMsisdn());
+			if (pair != null)
+			{
+				String readBy = pair.first;
+				long msgId = pair.second;
+				((GroupConversation)mConversation).setupReadByList(readBy, msgId);
+			}
+			
 		}
 
 		mLabel = mConversation.getLabel();
@@ -3490,6 +3499,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 		}
+		else if (HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
+		{
+			Pair<String, Pair<long[],String>> pair = (Pair<String, Pair<long[], String>>) object;
+			// If the msisdn don't match we simply return
+			if (!mConversation.getMsisdn().equals(pair.first))
+			{
+				return;
+			}
+			long[] ids = pair.second.first;
+			String participant = pair.second.second;
+			// TODO we could keep a map of msgId -> conversation objects
+			// somewhere to make this faster
+			((GroupConversation)mConversation).updateReadByList(participant,ids[ids.length - 1]);
+			runOnUiThread(mUpdateAdapter);
+		}
 		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
 		{
 			HashMap<String, ArrayList<ConvMessage>> messageListMap = (HashMap<String, ArrayList<ConvMessage>>) object;
@@ -3840,6 +3864,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				messages.remove(messages.size() - 1);
 			}
 			mAdapter.addMessage(convMessage);
+			if (mConversation instanceof GroupConversation)
+			{
+				if (convMessage.isSent())
+				{
+					((GroupConversation) mConversation).setupReadByList(null, convMessage.getMsgID());
+				}
+			}
 			addtoMessageMap(messages.size() - 1 ,messages.size());
 
 			// Reset this boolean to load more messages when the user scrolls to

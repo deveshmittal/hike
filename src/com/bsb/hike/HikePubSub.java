@@ -61,6 +61,8 @@ public class HikePubSub implements Runnable
 																				// by
 																				// the
 																				// same.
+	
+	public static final String GROUP_MESSAGE_DELIVERED_READ = "groupMessageDeliveredRead";
 
 	public static final String WS_CLOSE = "ws_close";
 
