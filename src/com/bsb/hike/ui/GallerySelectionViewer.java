@@ -34,6 +34,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.adapters.GalleryAdapter;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -64,6 +65,8 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	private ProgressDialog progressDialog;
 	
 	private CustomFontButton imageQualityBtn;
+	
+	private static final String IMAGE_QUALITY_STRING = "Image quality : ";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -71,6 +74,8 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gallery_selection_viewer);
 		imageQualityBtn = (CustomFontButton) findViewById(R.id.btn_image_quality);
+		imageQualityBtn.setText(IMAGE_QUALITY_STRING + ImageQuality.IMAGE_QUALITY_DEFAULT);
+		Utils.resetImageQuality(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));  //Reset the image quality to Default
 		imageQualityBtn.setOnClickListener(new OnClickListener()
 		{
 			
@@ -93,17 +98,17 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 					{
 						dialog.dismiss();
 						SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-						int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 3);
+						int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
 						switch(quality)
 						{
-						case 3:
-							imageQualityBtn.setText("Small");
+						case ImageQuality.QUALITY_SMALL:
+							imageQualityBtn.setText(IMAGE_QUALITY_STRING + ImageQuality.IMAGE_QUALITY_SMALL);
 							break;
-						case 2:
-							imageQualityBtn.setText("Medium");
+						case ImageQuality.QUALITY_MEDIUM:
+							imageQualityBtn.setText(IMAGE_QUALITY_STRING + ImageQuality.IMAGE_QUALITY_MEDIUM);
 							break;
-						case 1:
-							imageQualityBtn.setText("Original");
+						case ImageQuality.QUALITY_ORIGINAL:
+							imageQualityBtn.setText(IMAGE_QUALITY_STRING + ImageQuality.IMAGE_QUALITY_ORIGINAL);
 							break;
 						}
 					}
