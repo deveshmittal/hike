@@ -1097,4 +1097,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="free_download">Free Download</string>
      <string name="send_sms_file_msg">sent you a file</string>
     <string name="use_this_quality_for_sending_images">Use this quality for sending images</string>
+    <string name="select_all_confirmation_header">Invite All</string>
+    <string name="select_all_confirmation_msg">Send invite to %1$d contacts to download hike?</string>
 </resources>
