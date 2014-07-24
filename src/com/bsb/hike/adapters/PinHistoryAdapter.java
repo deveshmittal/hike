@@ -152,7 +152,6 @@ public class PinHistoryAdapter extends BaseAdapter
 					viewHolder.detail = (TextView)convertView.findViewById(R.id.text);
 					viewHolder.timestamp = (TextView)convertView.findViewById(R.id.date);
 					convertView.findViewById(R.id.cross).setVisibility(View.GONE);
-//					viewHolder.parent = convertView.findViewById(R.id.main_content);					
 				}		
 				break;
 			}
@@ -175,8 +174,17 @@ public class PinHistoryAdapter extends BaseAdapter
 				{
 					if (Utils.isGroupConversation(textPin.getMsisdn()))
 					{
-					GroupConversation gConv = (GroupConversation) mConversation;
-					viewHolder.sender.setText(gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn()));
+						GroupConversation gConv = (GroupConversation) mConversation;
+						String number = textPin.getGroupParticipantMsisdn();
+						
+						if(number != null)
+						{
+							viewHolder.sender.setText(number + " ~ " + gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn()));						
+						}
+						else
+						{
+							viewHolder.sender.setText(gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn()));
+						}
 					}
 				}
 				CharSequence markedUp= textPin.getMessage();
