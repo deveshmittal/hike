@@ -443,14 +443,6 @@ public class MqttMessagesManager
 		{
 			convMessage.setMessage(context.getString(R.string.sent_sticker));
 		}
-		if (this.convDb.wasMessageReceived(convMessage)) // Check if message
-		// was already
-		// received by
-		// the receiver
-		{
-			Logger.d(getClass().getSimpleName(), "Message already exists");
-			return;
-		}
 		/*
 		 * Need to rename every audio recording to a unique name since the ios client is sending every file with the same name.
 		 */
@@ -486,7 +478,14 @@ public class MqttMessagesManager
 		}
 		else
 		{
-			convDb.addConversationMessages(convMessage);
+			/*
+			 * adding message in db if not duplicate. In case of duplicate message we don't do further processing and return
+			 */
+			if(!convDb.addConversationMessages(convMessage))
+			{
+				return ;
+			}
+			
 
 			/*
 			 * Return if there is no conversation mapped to this message
@@ -1615,6 +1614,8 @@ public class MqttMessagesManager
 					}
 					Logger.d("BulkProcess", "going on");
 					finalProcessing();
+					convWriteDb.setTransactionSuccessful();
+					userWriteDb.setTransactionSuccessful();
 				}
 				catch (JSONException e)
 				{
@@ -1626,8 +1627,6 @@ public class MqttMessagesManager
 				}
 				finally
 				{
-					convWriteDb.setTransactionSuccessful();
-					userWriteDb.setTransactionSuccessful();
 					convWriteDb.endTransaction();
 					userWriteDb.endTransaction();
 
@@ -1657,7 +1656,21 @@ public class MqttMessagesManager
 	{
 		if(messageList.size() > 0)
 		{
-			convDb.addConversationsNew(messageList);
+			messageList = convDb.addConversationsBulk(messageList);
+		}
+		
+		/*
+		 * The list returned by {@link com.bsb.hike.db.HikeConversationsDatabase#addConversationsBulk(List<ConvMessages>)} contains non duplicate messages
+		 * This list is used for further processing
+		 */
+		for (ConvMessage convMessage : messageList)
+		{
+			String msisdn = convMessage.getMsisdn();
+			if(messageListMap.get(msisdn) == null)
+			{
+				messageListMap.put(msisdn, new ArrayList<ConvMessage>());
+			}
+			messageListMap.get(msisdn).add(convMessage);
 		}
 		ArrayList<ConvMessage> lastMessageList = new ArrayList<ConvMessage>(messageListMap.keySet().size());
 		for (Entry<String, ArrayList<ConvMessage>> entry : messageListMap.entrySet())
@@ -1686,11 +1699,6 @@ public class MqttMessagesManager
 	private void addToLists(String msisdn, ConvMessage convMessage)
 	{
 		messageList.add(convMessage);
-		if(messageListMap.get(msisdn) == null)
-		{
-			messageListMap.put(msisdn, new ArrayList<ConvMessage>());
-		}
-		messageListMap.get(msisdn).add(convMessage);
 	}
 
 	public void saveMqttMessage(JSONObject jsonObj) throws JSONException
@@ -2066,9 +2074,8 @@ public class MqttMessagesManager
 		else
 		{
 			convDb.addConversationMessages(convMessage);
+			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		}
-		
-		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED || convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT
 				|| convMessage.getParticipantInfoState() == ParticipantInfoState.GROUP_END)
 		{

@@ -944,7 +944,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					try
 					{
 						cancelNetworkErrorTimer();
-						String messageBody = new String(arg1.getPayload(), "UTF-8");
+						byte[] bytes = arg1.getPayload();
+						bytes = Utils.uncompressByteArray(bytes);
+						String messageBody = new String(bytes, "UTF-8");
 						Logger.i(TAG, "messageArrived called " + messageBody);
 						JSONObject jsonObj = new JSONObject(messageBody);
 						mqttMessageManager.saveMqttMessage(jsonObj);
