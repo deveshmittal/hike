@@ -3954,7 +3954,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			{
-				showImpMessage(convMessage, -1);
+				showImpMessage(convMessage, R.anim.up_down_fade_in);
 			}
 			mAdapter.addMessage(convMessage);
 			addtoMessageMap(messages.size() - 1, messages.size());
