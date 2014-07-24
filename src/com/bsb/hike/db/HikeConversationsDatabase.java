@@ -3689,18 +3689,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public String getReadByValueForGroup(String groupId)
+	public Pair<String,Long> getReadByValueForGroup(String groupId)
 	{
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.READ_BY }, DBConstants.GROUP_ID + "=?", new String[] { groupId }, null, null, null);
+			c = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.READ_BY,DBConstants.MESSAGE_ID }, DBConstants.GROUP_ID + "=?", new String[] { groupId }, null, null, null);
 			if (!c.moveToFirst())
 			{
 				return null;
 			}
 			String readByString = c.getString(c.getColumnIndex(DBConstants.READ_BY));
-			return readByString;
+			Long msgId = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
+			return new Pair<String,Long>(readByString,msgId);
 		}
 		finally
 		{
