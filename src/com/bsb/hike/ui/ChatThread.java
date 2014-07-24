@@ -427,8 +427,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private ChatThreadReceiver chatThreadReceiver;
 
 	private ScreenOffReceiver screenOffBR;
-
-
+	
+	
 	@Override
 	protected void onPause()
 	{
@@ -817,6 +817,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			showTipIfRequired();
 		}
 		Logger.i("chatthread", "on create end");
+		
 		
 	}
 	
@@ -1397,7 +1398,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					intent.putExtra(HikeConstants.TEXT_PINS, mContactNumber);
 					intent.putExtra(HikeConstants.EXTRA_CONV_ID, mConversation.getConvId());
 					startActivity(intent);
-					pin_unread_count =0;  
+					try
+					{
+						mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN,0);
+					}
+					catch (JSONException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					break;
 				case 5:
 					clearConversation();
