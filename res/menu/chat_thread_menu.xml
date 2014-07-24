@@ -8,7 +8,7 @@
         android:title="@string/chat_theme"/>
     <item
         android:id="@+id/pin_imp"
-        android:icon="@drawable/ic_pin_imp"
+        android:icon="@drawable/ic_pin_it"
         android:showAsAction="always"
         android:title="@string/create_pin"/>
     <item
