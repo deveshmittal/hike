@@ -147,7 +147,7 @@ public class PinHistoryAdapter extends BaseAdapter
 			{
 				case TEXT:
 				{
-					convertView = inflater.inflate(R.layout.imp_message_text_pin, null);
+					convertView = inflater.inflate(R.layout.pin_history, null);
 					viewHolder.sender = (TextView)convertView.findViewById(R.id.senderName);
 					viewHolder.detail = (TextView)convertView.findViewById(R.id.text);
 					viewHolder.timestamp = (TextView)convertView.findViewById(R.id.date);
@@ -191,7 +191,6 @@ public class PinHistoryAdapter extends BaseAdapter
 				SmileyParser smileyParser = SmileyParser.getInstance();
 				markedUp = smileyParser.addSmileySpans(markedUp, false);
 				
-				viewHolder.detail.setMaxLines(HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY);
 	 			viewHolder.detail.setText(markedUp);
 	 			viewHolder.timestamp.setText(textPin.getTimestampFormatted(false, context));
 				Linkify.addLinks(viewHolder.detail, Linkify.ALL);

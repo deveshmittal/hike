@@ -1,59 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main_content"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="match_parent" >
 
     <RelativeLayout
-        style="@style/PinsReadContainer"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:id="@+id/main_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@drawable/pin_bg_yellow" >
 
-        <LinearLayout
-            android:id="@+id/sender_content"
-            android:layout_width="match_parent"
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/senderName"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="4dp"
+            android:text="xyz"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/pin_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:text="@string/pin_header"
-                android:textColor="@color/updates_text"
-                android:textSize="12sp"
-                android:textStyle="bold"/>
-        </LinearLayout>
-
-        <RelativeLayout
-            android:id="@+id/pin_content"
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/cross"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/sender_content"
-            android:orientation="vertical" >
+            android:layout_alignParentRight="true"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="4dp"
+            android:paddingTop="4dp"
+            android:src="@drawable/ic_cross" />
 
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/pin_detail"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/pin_detail"
-                android:textColor="@color/updates_text"
-                android:textSize="16sp" />
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/senderName"
+            android:layout_marginLeft="4dp"
+            android:text="sample"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="normal" />
 
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/last_pin_timestamp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/pin_detail"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="false"
-                android:layout_marginRight="8dp"
-                android:text="9:35AM"
-                android:textColor="@color/timestamp"
-                android:textSize="12sp" />
-        </RelativeLayout>
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/text"
+            android:text="just now"
+            android:textColor="#aea559"
+            android:textSize="11sp"
+            android:textStyle="italic" />
     </RelativeLayout>
 
 </RelativeLayout>
