@@ -147,12 +147,11 @@ public class PinHistoryAdapter extends BaseAdapter
 			{
 				case TEXT:
 				{
-					convertView = inflater.inflate(R.layout.imp_message_text_pin, null);
+					convertView = inflater.inflate(R.layout.pin_history, null);
 					viewHolder.sender = (TextView)convertView.findViewById(R.id.senderName);
 					viewHolder.detail = (TextView)convertView.findViewById(R.id.text);
 					viewHolder.timestamp = (TextView)convertView.findViewById(R.id.date);
 					convertView.findViewById(R.id.cross).setVisibility(View.GONE);
-//					viewHolder.parent = convertView.findViewById(R.id.main_content);					
 				}		
 				break;
 			}
@@ -175,15 +174,23 @@ public class PinHistoryAdapter extends BaseAdapter
 				{
 					if (Utils.isGroupConversation(textPin.getMsisdn()))
 					{
-					GroupConversation gConv = (GroupConversation) mConversation;
-					viewHolder.sender.setText(gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn()));
+						GroupConversation gConv = (GroupConversation) mConversation;
+						String number = textPin.getGroupParticipantMsisdn();
+						
+						if(number != null)
+						{
+							viewHolder.sender.setText(number + " ~ " + gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn()));						
+						}
+						else
+						{
+							viewHolder.sender.setText(gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn()));
+						}
 					}
 				}
 				CharSequence markedUp= textPin.getMessage();
 				SmileyParser smileyParser = SmileyParser.getInstance();
 				markedUp = smileyParser.addSmileySpans(markedUp, false);
 				
-				viewHolder.detail.setMaxLines(HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY);
 	 			viewHolder.detail.setText(markedUp);
 	 			viewHolder.timestamp.setText(textPin.getTimestampFormatted(false, context));
 				Linkify.addLinks(viewHolder.detail, Linkify.ALL);
