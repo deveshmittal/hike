@@ -39,15 +39,15 @@ public class PinHistoryAdapter extends BaseAdapter
 	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn, 
 			long convId, Conversation conversation, PinHistoryItemsListener listener)
 	{
-		this.context = context;
-		
-		this.mListener = listener;
+		this.context = context;		
 						
 		this.mConversation = conversation;
 		
 		this.textPins = textPins;
 		
-		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);	
+		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		
+		setItemViewListener(listener);
 	}
 	
 	private enum ViewType
@@ -61,7 +61,17 @@ public class PinHistoryAdapter extends BaseAdapter
 		
 		notifyDataSetChanged();
 	}
-		
+			
+	private void setItemViewListener(PinHistoryItemsListener listener)
+	{
+		this.mListener = listener;
+	}
+	
+	public void removeItemViewListener()
+	{
+		this.mListener = null;
+	}
+	
 	private class ViewHolder
 	{
 		TextView sender;
@@ -118,8 +128,8 @@ public class PinHistoryAdapter extends BaseAdapter
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) 
 	{
-		if(position == getCount() - 1)
-		{
+		if(position == getCount() - 1 && mListener != null)
+		{			
 			mListener.onLastItemRequested();
 		}
 		ViewType viewType = ViewType.values()[getItemViewType(position)];

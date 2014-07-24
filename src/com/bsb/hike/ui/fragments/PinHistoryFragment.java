@@ -177,6 +177,13 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 	{		
 		this.textPins = mDb.getAllPinMessage(PHadapter.getCount(), HikeConstants.MAX_OLDER_PINS_TO_LOAD_EACH_TIME, msisdn, mConversation);
 		
-		this.PHadapter.appendPinstoView(textPins);
+		if(textPins != null && textPins.size() <= 0)
+		{
+			PHadapter.removeItemViewListener();
+		}
+		else
+		{
+			this.PHadapter.appendPinstoView(textPins);
+		}
 	}
 }
