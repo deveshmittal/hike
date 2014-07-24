@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
@@ -146,11 +147,12 @@ public class PinHistoryAdapter extends BaseAdapter
 			{
 				case TEXT:
 				{
-					convertView = inflater.inflate(R.layout.pin_history, null);
-					viewHolder.sender = (TextView)convertView.findViewById(R.id.pin_header);
-					viewHolder.detail = (TextView)convertView.findViewById(R.id.pin_detail);
-					viewHolder.timestamp = (TextView)convertView.findViewById(R.id.last_pin_timestamp);
-					viewHolder.parent = convertView.findViewById(R.id.main_content);					
+					convertView = inflater.inflate(R.layout.imp_message_text_pin, null);
+					viewHolder.sender = (TextView)convertView.findViewById(R.id.senderName);
+					viewHolder.detail = (TextView)convertView.findViewById(R.id.text);
+					viewHolder.timestamp = (TextView)convertView.findViewById(R.id.date);
+					convertView.findViewById(R.id.cross).setVisibility(View.GONE);
+//					viewHolder.parent = convertView.findViewById(R.id.main_content);					
 				}		
 				break;
 			}
@@ -181,11 +183,12 @@ public class PinHistoryAdapter extends BaseAdapter
 				SmileyParser smileyParser = SmileyParser.getInstance();
 				markedUp = smileyParser.addSmileySpans(markedUp, false);
 				
+				viewHolder.detail.setMaxLines(HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY);
 	 			viewHolder.detail.setText(markedUp);
 	 			viewHolder.timestamp.setText(textPin.getTimestampFormatted(false, context));
-	 			viewHolder.parent.setOnClickListener(pinOnClickListener);
 				Linkify.addLinks(viewHolder.detail, Linkify.ALL);
-			}
+				Linkify.addLinks(viewHolder.detail, Utils.shortCodeRegex, "tel:");
+				}
 			break;
 		}
 		if (viewHolder.parent != null)
@@ -206,12 +209,4 @@ public class PinHistoryAdapter extends BaseAdapter
 
 		return convertView;
 	}
-
-	private OnClickListener pinOnClickListener = new OnClickListener() 
-	{		
-		@Override
-		public void onClick(View v) 
-		{
-		}
-	};
 }
