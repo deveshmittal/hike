@@ -2249,15 +2249,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 
 			/* label outgoing hike conversations in green */
-			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-			{
-				// for text based pins, we need yellow bubble irrespective of themes
-
-				messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_sent_yellow);
-
-			}
-			else
-			{
+//			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+//			{
+//				// for text based pins, we need yellow bubble irrespective of themes
+//
+//				messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_sent_yellow);
+//
+//			}
+//			else
+//			{
 				if (chatTheme == ChatTheme.DEFAULT)
 				{
 					messageContainer.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector : R.drawable.ic_bubble_green_selector);
@@ -2266,20 +2266,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					messageContainer.setBackgroundResource(chatTheme.bubbleResId());
 				}
-			}
+//			}
 
 		}
-		else
-		{
-			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-			{
-				messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_received_yellow);
-			}
-			else
-			{
-				messageContainer.setBackgroundResource(R.drawable.ic_bubble_white_selector);
-			}
-		}
+		// else
+		// {
+		// if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+		// {
+		// messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_received_yellow);
+		// }
+		// else
+		// {
+		// messageContainer.setBackgroundResource(R.drawable.ic_bubble_white_selector);
+		// }
+		// }
 		messageContainer.setPadding(leftPad, topPad, rightPad, bottomPad);
 	}
 
