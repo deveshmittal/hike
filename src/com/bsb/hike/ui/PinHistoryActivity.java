@@ -125,6 +125,7 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity
 	public void onBackPressed()
 	{
 		super.onBackPressed();
+		overridePendingTransition(R.anim.slide_in_right_pins, R.anim.slide_out_right_pins);
 	}
 	
 	
