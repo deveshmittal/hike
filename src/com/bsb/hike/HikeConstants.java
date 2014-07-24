@@ -1657,7 +1657,7 @@ public class HikeConstants
 
 		public static final int QUALITY_SMALL = 3;
 
-		public static final int QUALITY_DEFAULT = QUALITY_MEDIUM;
+		public static final int QUALITY_DEFAULT = QUALITY_SMALL;
 
 		public static final String IMAGE_QUALITY_ORIGINAL = "Original";
 
@@ -1665,6 +1665,6 @@ public class HikeConstants
 
 		public static final String IMAGE_QUALITY_SMALL = "Small";
 		
-		public static final String IMAGE_QUALITY_DEFAULT = IMAGE_QUALITY_MEDIUM;
+		public static final String IMAGE_QUALITY_DEFAULT = IMAGE_QUALITY_SMALL;
 	}
 }
