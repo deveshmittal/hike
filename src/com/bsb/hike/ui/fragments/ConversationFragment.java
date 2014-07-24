@@ -81,9 +81,9 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.HikeTip.TipType;
-import com.bsb.hike.utils.Utils.PairModified;
 
 public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener, HikeFragmentable
 {
@@ -1826,7 +1826,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
 		{
-			Map<String, Utils.PairModified<Long, Long>> messageStatusMap = (Map<String, Utils.PairModified<Long, Long>>) object;
+			Map<String, PairModified<Long, Long>> messageStatusMap = (Map<String, PairModified<Long, Long>>) object;
 
 			if (messageStatusMap != null)
 			{

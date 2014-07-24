@@ -64,9 +64,9 @@ import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.Utils.PairModified;
 
 /**
  * 
@@ -108,9 +108,9 @@ public class MqttMessagesManager
 
 	private Map<String, ArrayList<ConvMessage>> messageListMap;
 	
-	private Map<String, Utils.PairModified<Long, Long>> messageStatusMap;
+	private Map<String, PairModified<Long, Long>> messageStatusMap;
 	
-	private Map<String, Utils.PairModified<Long, Set<String>>> messageReadMapForGroup;
+	private Map<String, PairModified<Long, Set<String>>> messageReadMapForGroup;
 
 	private MqttMessagesManager(Context context)
 	{
@@ -1597,8 +1597,8 @@ public class MqttMessagesManager
 
 				messageList = new ArrayList<ConvMessage>(); // it will store all the convMessage object that can be added to list in one transaction
 				messageListMap = new HashMap<String, ArrayList<ConvMessage>>(); // it will store list of conversation objects based on msisdn
-				messageStatusMap = new HashMap<String, Utils.PairModified<Long, Long>>(); // it will store pair max "mr" msdId and max "dr" msgId according to msisdn
-				messageReadMapForGroup = new HashMap<String, Utils.PairModified<Long, Set<String>>>();
+				messageStatusMap = new HashMap<String, PairModified<Long, Long>>(); // it will store pair max "mr" msdId and max "dr" msgId according to msisdn
+				messageReadMapForGroup = new HashMap<String, PairModified<Long, Set<String>>>(); // It will store a mapping of group id to a pair containing max "mr" and list of participant msisdns
 				try
 				{
 					userWriteDb.beginTransaction();

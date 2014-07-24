@@ -194,6 +194,7 @@ import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
@@ -3561,8 +3562,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
 		{
-			Map<String, Utils.PairModified<Long, Long>> messageStatusMap = (Map<String, Utils.PairModified<Long, Long>>) object;
-			Utils.PairModified<Long, Long> pair = messageStatusMap.get(mConversation.getMsisdn());
+			Map<String, PairModified<Long, Long>> messageStatusMap = (Map<String, PairModified<Long, Long>>) object;
+			PairModified<Long, Long> pair = messageStatusMap.get(mConversation.getMsisdn());
 			if (pair != null)
 			{
 				long mrMsgId = (long) pair.getFirst();

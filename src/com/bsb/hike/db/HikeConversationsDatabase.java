@@ -57,10 +57,10 @@ import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.Utils.PairModified;
 
 public class HikeConversationsDatabase extends SQLiteOpenHelper
 {
@@ -761,7 +761,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 	
-	public void setReadByForGroupBulk(Map<String, Utils.PairModified<Long, Set<String>>> messageReadMapForGroup)
+	public void setReadByForGroupBulk(Map<String, PairModified<Long, Set<String>>> messageReadMapForGroup)
 	{
 
 		long maxMsgId = -1;
@@ -906,15 +906,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return executeUpdateMessageStatusStatement(query, status, msisdn);
 	}
 
-	public void updateStatusBulk(Map<String, Utils.PairModified<Long, Long>> messageStatusMap)
+	public void updateStatusBulk(Map<String, PairModified<Long, Long>> messageStatusMap)
 	{
 
 		String msisdn;
-		for (Entry<String, Utils.PairModified<Long, Long>> entry : messageStatusMap.entrySet())
+		for (Entry<String, PairModified<Long, Long>> entry : messageStatusMap.entrySet())
 		{
 
 			msisdn = (String) entry.getKey();
-			Utils.PairModified<Long, Long> pair = entry.getValue();
+			PairModified<Long, Long> pair = entry.getValue();
 			setMessageState(msisdn, pair.getFirst(), State.SENT_DELIVERED_READ.ordinal());
 			setMessageState(msisdn, pair.getSecond(), State.SENT_DELIVERED.ordinal());
 		}
