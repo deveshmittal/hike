@@ -3724,6 +3724,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return;
 			}
 			long[] ids = pair.second.first;
+			for (int i = 0; i < ids.length; i++)
+			{
+				ConvMessage msg = findMessageById(ids[i]);
+				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+				{
+					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+					removeFromMessageMap(msg);
+				}
+			}
 			String participant = pair.second.second;
 			// TODO we could keep a map of msgId -> conversation objects
 			// somewhere to make this faster
