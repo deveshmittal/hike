@@ -1,5 +1,8 @@
 package com.bsb.hike.adapters;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
@@ -19,140 +22,152 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
+import com.google.android.gms.internal.co;
 
 public class PinHistoryAdapter extends BaseAdapter
 {
 	private Activity context;
-	
+
 	private List<ConvMessage> textPins;
-		
+
+	private List<Object> listData;
+
 	private LayoutInflater inflater;
-	
+
 	private Conversation mConversation;
-	
+
 	private PinHistoryItemsListener mListener;
-	
+
+	private boolean addDateInBetween;
+
 	public static interface PinHistoryItemsListener
 	{
-		public void onLastItemRequested();		
+		public void onLastItemRequested();
 	}
-	
-	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn, 
-			long convId, Conversation conversation, PinHistoryItemsListener listener)
+
+	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn, long convId, Conversation conversation, PinHistoryItemsListener listener,
+			boolean addDateInbetween)
 	{
-		this.context = context;		
-						
+		this.context = context;
+		this.addDateInBetween = addDateInbetween;
 		this.mConversation = conversation;
-		
+
 		this.textPins = textPins;
-		
+		addDateInBetween();
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		
+
 		setItemViewListener(listener);
 	}
-	
+
 	private enum ViewType
 	{
-		TEXT
+		TEXT, DATE_SEP
 	}
-		
+
 	public void appendPinstoView(List<ConvMessage> list)
 	{
 		textPins.addAll(list);
-		
-		notifyDataSetChanged();
+		addDateInBetween();
 	}
-			
+
 	private void setItemViewListener(PinHistoryItemsListener listener)
 	{
 		this.mListener = listener;
 	}
-	
+
 	public void removeItemViewListener()
 	{
 		this.mListener = null;
 	}
-	
+
 	private class ViewHolder
 	{
 		TextView sender;
-		
+
 		TextView detail;
-		
+
 		TextView timestamp;
-		
+
 		View parent;
 	}
-	
+
 	@Override
-	public int getCount() 
+	public int getCount()
 	{
-		return textPins.size();
+		return listData.size();
 	}
 
 	@Override
-	public ConvMessage getItem(int position) 
+	public Object getItem(int position)
 	{
-		return textPins.get(position);
+		return listData.get(position);
 	}
 
 	@Override
-	public long getItemId(int position) 
+	public long getItemId(int position)
 	{
 		return 0;
 	}
 
 	@Override
-	public int getViewTypeCount() 
+	public int getViewTypeCount()
 	{
 		return ViewType.values().length;
 	}
-	
+
 	@Override
-	public boolean areAllItemsEnabled() 
+	public boolean areAllItemsEnabled()
 	{
 		return false;
 	}
-	
+
 	@Override
-	public boolean isEnabled(int position) 
+	public boolean isEnabled(int position)
 	{
 		return true;
 	}
-	
+
 	@Override
-	public int getItemViewType(int position) 
+	public int getItemViewType(int position)
 	{
-		return ViewType.TEXT.ordinal();
+		Object obj = getItem(position);
+		if (obj instanceof ConvMessage)
+		{
+			return ViewType.TEXT.ordinal();
+		}
+		return ViewType.DATE_SEP.ordinal();
 	}
-	
+
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) 
+	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		if(position == getCount() - 1 && mListener != null)
-		{			
+		if (position == getCount() - 1 && mListener != null)
+		{
 			mListener.onLastItemRequested();
 		}
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
-		final ConvMessage textPin = getItem(position);
+		final Object data = getItem(position);
 
 		final ViewHolder viewHolder;
-		
+
 		if (convertView == null)
 		{
 			viewHolder = new ViewHolder();
 
 			switch (viewType)
 			{
-				case TEXT:
-				{
-					convertView = inflater.inflate(R.layout.pin_history, null);
-					viewHolder.sender = (TextView)convertView.findViewById(R.id.senderName);
-					viewHolder.detail = (TextView)convertView.findViewById(R.id.text);
-					viewHolder.timestamp = (TextView)convertView.findViewById(R.id.date);
-					convertView.findViewById(R.id.cross).setVisibility(View.GONE);
-				}		
+			case TEXT:
+			{
+				convertView = inflater.inflate(R.layout.pin_history, null);
+				viewHolder.sender = (TextView) convertView.findViewById(R.id.senderName);
+				viewHolder.detail = (TextView) convertView.findViewById(R.id.text);
+				viewHolder.timestamp = (TextView) convertView.findViewById(R.id.date);
+				convertView.findViewById(R.id.cross).setVisibility(View.GONE);
+			}
+				break;
+			case DATE_SEP:
+				convertView = inflater.inflate(R.layout.message_day_container, null);
 				break;
 			}
 			convertView.setTag(viewHolder);
@@ -161,59 +176,86 @@ public class PinHistoryAdapter extends BaseAdapter
 		{
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
-		
-		switch (viewType) 
-		{
-			case TEXT:
-			{
-				if(textPin.isSent())
-				{
-					viewHolder.sender.setText("You");
-				}
-				else
-				{
-					if (Utils.isGroupConversation(textPin.getMsisdn()))
-					{
-						GroupConversation gConv = (GroupConversation) mConversation;
-						String number = textPin.getGroupParticipantMsisdn();
-						
-						if(number != null)
-						{
-							viewHolder.sender.setText(number + " ~ " + gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn()));						
-						}
-						else
-						{
-							viewHolder.sender.setText(gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn()));
-						}
-					}
-				}
-				CharSequence markedUp= textPin.getMessage();
-				SmileyParser smileyParser = SmileyParser.getInstance();
-				markedUp = smileyParser.addSmileySpans(markedUp, false);
-				
-	 			viewHolder.detail.setText(markedUp);
-	 			viewHolder.timestamp.setText(textPin.getTimestampFormatted(false, context));
-				Linkify.addLinks(viewHolder.detail, Linkify.ALL);
-				Linkify.addLinks(viewHolder.detail, Utils.shortCodeRegex, "tel:");
-				}
-			break;
-		}
-		if (viewHolder.parent != null)
-		{
-			int bottomPadding;
 
-			if (position == getCount() - 1)
+		switch (viewType)
+		{
+		case TEXT:
+		{
+			ConvMessage textPin = (ConvMessage) data;
+			if (textPin.isSent())
 			{
-				bottomPadding = context.getResources().getDimensionPixelSize(R.dimen.updates_margin);
+				viewHolder.sender.setText("You");
 			}
 			else
 			{
-				bottomPadding = 0;
-			}
+				if (Utils.isGroupConversation(textPin.getMsisdn()))
+				{
+					GroupConversation gConv = (GroupConversation) mConversation;
+					String number = textPin.getGroupParticipantMsisdn();
 
-			viewHolder.parent.setPadding(0, 0, 0, bottomPadding);
+					if (number != null)
+					{
+						viewHolder.sender.setText(number + " ~ " + gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn()));
+					}
+					else
+					{
+						viewHolder.sender.setText(gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn()));
+					}
+				}
+			}
+			CharSequence markedUp = textPin.getMessage();
+			SmileyParser smileyParser = SmileyParser.getInstance();
+			markedUp = smileyParser.addSmileySpans(markedUp, false);
+
+			viewHolder.detail.setText(markedUp);
+			viewHolder.timestamp.setText(textPin.getTimestampFormatted(false, context));
+			Linkify.addLinks(viewHolder.detail, Linkify.ALL);
+			Linkify.addLinks(viewHolder.detail, Utils.shortCodeRegex, "tel:");
+		}
+			break;
+		case DATE_SEP:
+			TextView tv = (TextView) convertView.findViewById(R.id.day);
+			tv.setText((String) data);
+			break;
 		}
 
 		return convertView;
+	}
+
+	private void addDateInBetween()
+	{
+		List<Object> newData = new ArrayList<Object>();
+		if (textPins.size() > 0)
+		{
+			if (addDateInBetween)
+			{
+				long timeStamp = textPins.get(0).getTimestamp();
+				Calendar c = Calendar.getInstance();
+				c.setTimeInMillis(timeStamp);
+				String timeToShow = textPins.get(0).getMessageDate(context);
+				newData.add(timeToShow);
+				newData.add(textPins.get(0));
+				for (int i = 1; i < textPins.size(); i++)
+				{
+					Calendar newC = Calendar.getInstance();
+					newC.setTimeInMillis(textPins.get(i).getTimestamp());
+					if (c.get(Calendar.DAY_OF_MONTH) != newC.get(Calendar.DAY_OF_MONTH))
+					{
+						newData.add(textPins.get(i).getMessageDate(context));
+						c = newC;
+					}
+					newData.add(textPins.get(i));
+				}
+			}
+			else
+			{
+				for (ConvMessage con : textPins)
+				{
+					newData.add(con);
+				}
+			}
+		}
+		listData = newData;
+		notifyDataSetChanged();
 	}
 }
