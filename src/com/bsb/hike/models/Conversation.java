@@ -287,7 +287,7 @@ public class Conversation implements Comparable<Conversation>
 		this.metaData = metaData;
 	}
 
-	public class MetaData
+	public static class MetaData
 	{
 		/**
 		 * sample json : {'pin':{'id':'1','unreadCount':'1','toShow':'true'} }

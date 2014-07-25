@@ -965,11 +965,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					Conversation.MetaData convMetaData = null;
 					if (metadata != null)
 					{
-						convMetaData = new Conversation("", 0).new MetaData(metadata);
+						convMetaData = new Conversation.MetaData(metadata);
 					}
 					else
 					{
-						convMetaData = new Conversation("", 0).new MetaData(null);
+						convMetaData = new Conversation.MetaData(null);
 						convMetaData.setLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN, conv.getMsgID());
 						convMetaData.setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, conv.isSent() ? 0 : 1);
 						convMetaData.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
@@ -1209,7 +1209,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				metadata = c.getString(c.getColumnIndex(DBConstants.CONVERSATION_METADATA));
 				try
 				{
-					conv.setMetaData(conv.new MetaData(metadata));
+					conv.setMetaData(new Conversation.MetaData(metadata));
 				}
 				catch (JSONException e)
 				{
