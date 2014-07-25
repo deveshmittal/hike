@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:background="#f1f2f3" >
+
+ <RelativeLayout
+        android:id="@+id/super_container"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical" >
+
+        <ImageView
+            android:id="@+id/group_profile_image"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/ic_default_avatar_group" />
+
+        <ImageView
+            android:id="@+id/change_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@id/group_profile_image"
+            android:layout_alignTop="@id/group_profile_image"
+            android:background="@null"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:src="@drawable/ic_new_group_image" />
+    </RelativeLayout>
+    
+ 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="19dp"
+            android:layout_marginTop="38dp"
+            android:layout_toRightOf="@+id/super_container"
+            android:orientation="vertical" 
+            android:gravity="center"
+            >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="The Coffee Club"
+                android:textSize="18dp"
+                android:layout_marginBottom="10dp" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Created over a year ago"
+                android:textSize="12dp" />
+        </LinearLayout>
+        
+         <View
+            android:id="@+id/divider"
+            android:layout_width="1.5dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/button_container"
+            android:background="@color/white" />
+        
+        <LinearLayout
+            android:id="@+id/button_container"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true" >
+
+            <ImageView
+                android:id="@+id/change_profile"
+                android:layout_width="62dp"
+                android:layout_height="match_parent"
+                android:onClick="onHeaderButtonClicked"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_change_profile_pic"
+                android:background="@drawable/bg_overflow_menu_selector" />
+        </LinearLayout>
+
+   
+</RelativeLayout>
