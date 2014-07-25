@@ -38,6 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -135,6 +136,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.cropimage.CropImage;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
@@ -164,6 +166,7 @@ import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
+import com.google.android.gms.internal.co;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
@@ -4025,7 +4028,7 @@ public class Utils
 		}
 
 	}
-
+	
 	public static boolean isPackageInstalled(Context context, String packageName)
 	{
 		PackageManager pm = context.getPackageManager();
@@ -4167,4 +4170,90 @@ public class Utils
 		else
 			return (Integer.toString(bytes) + " B");
 	}
+	
+	public static boolean isCompressed(byte[] bytes)
+    {
+        try
+		{
+			if ((bytes == null) || (bytes.length < 2))
+			{
+			    return false;
+			}
+			else
+			{
+			    return ((bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC)) && (bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8)));
+			}
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+    }
+	
+	public static byte[] uncompressByteArray(byte[] bytes) throws IOException
+    {
+       
+		int DEFAULT_BUFFER_SIZE = 1024 *4;
+		
+		if (!isCompressed(bytes))
+        {
+            return bytes;
+        }
+
+        ByteArrayInputStream bais = null;
+        GZIPInputStream gzis = null;
+        ByteArrayOutputStream baos = null;
+
+        try
+        {
+            bais = new ByteArrayInputStream(bytes);
+            gzis = new GZIPInputStream(bais);
+            baos = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+
+            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+            int n = 0;
+            while (-1 != (n = gzis.read(buffer))) {
+            	baos.write(buffer, 0, n);
+            }
+            gzis.close();
+            bais.close();
+
+            byte[] uncompressedByteArray = baos.toByteArray();
+            baos.close();
+
+
+            return uncompressedByteArray;
+        }
+        catch (IOException ioex)
+        {
+            throw ioex;
+        }
+        finally
+        {
+            if(gzis != null)
+            {
+            	gzis.close();
+            }
+            if(bais != null)
+            {
+            	bais.close();
+            }
+            if(baos != null)
+            {
+            	baos.close();
+            }
+        }
+    }
+
+	public static void emoticonClicked(Context context,int emoticonIndex,EditText composeBox){
+		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(emoticonIndex, System.currentTimeMillis());
+		// We don't add an emoticon if the compose box is near its maximum
+		// length of characters
+		if (composeBox.length() >= context.getResources().getInteger(R.integer.max_length_message) - 20)
+		{
+			return;
+		}
+		SmileyParser.getInstance().addSmiley(composeBox, emoticonIndex);
+	}
+
 }

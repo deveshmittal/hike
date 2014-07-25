@@ -1552,6 +1552,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			insertStatement.bindLong(ih.getColumnIndex(DBConstants.FAVORITE_TYPE), favoriteType.ordinal());
 
 			insertStatement.executeInsert();
+			mDb.setTransactionSuccessful();
 		}
 		finally
 		{
@@ -1563,7 +1564,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			{
 				ih.close();
 			}
-			mDb.setTransactionSuccessful();
 			mDb.endTransaction();
 		}
 	}
@@ -1870,6 +1870,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.FAVORITE_TYPE), favoriteType.ordinal());
 
 				insertStatement.executeInsert();
+				mDb.setTransactionSuccessful();
 			}
 		}
 		finally
@@ -1882,7 +1883,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			{
 				ih.close();
 			}
-			mDb.setTransactionSuccessful();
 			mDb.endTransaction();
 
 			if (favorites.length() > 0)

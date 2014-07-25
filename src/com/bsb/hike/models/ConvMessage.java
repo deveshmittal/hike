@@ -59,11 +59,22 @@ public class ConvMessage
 	private JSONArray readByArray;
 
 	private boolean shouldShowPush = true;
-	
+
 	private boolean isTickSoundPlayed = false;
 
 	private int unreadCount = -1;
+	private int messageType = HikeConstants.MESSAGE_TYPE.PLAIN_TEXT;
 	// private boolean showResumeButton = true;
+	
+	public int getMessageType()
+	{
+		return messageType;
+	}
+
+	public void setMessageType(int messageType)
+	{
+		this.messageType = messageType;
+	}
 
 	public boolean isInvite()
 	{
@@ -117,6 +128,7 @@ public class ConvMessage
 		RECEIVED_READ, /* message received and read */
 		UNKNOWN
 	};
+	
 
 	public static enum ParticipantInfoState
 	{
@@ -205,16 +217,19 @@ public class ConvMessage
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn)
 	{
-		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, false);
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, false,HikeConstants.MESSAGE_TYPE.PLAIN_TEXT);
 	}
-
-	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS)
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, int type)
 	{
-		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO);
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, false, type);
+	}
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS, int type)
+	{
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO, type);
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS,
-			ParticipantInfoState participantInfoState)
+			ParticipantInfoState participantInfoState, int type)
 	{
 		assert (msisdn != null);
 		this.mMsisdn = msisdn;
@@ -225,6 +240,7 @@ public class ConvMessage
 		mIsSent = (msgState == State.SENT_UNCONFIRMED || msgState == State.SENT_CONFIRMED || msgState == State.SENT_DELIVERED || msgState == State.SENT_DELIVERED_READ || msgState == State.SENT_FAILED);
 		this.groupParticipantMsisdn = groupParticipantMsisdn;
 		this.mIsSMS = isSMS;
+		this.messageType= type;
 		setState(msgState);
 		if(msgState.ordinal() >= State.SENT_CONFIRMED.ordinal())
 		{
@@ -250,6 +266,7 @@ public class ConvMessage
 			this.mMessage = data.getString(HikeConstants.HIKE_MESSAGE);
 			mIsSMS = false;
 		}
+		
 		this.mTimestamp = data.getLong(HikeConstants.TIMESTAMP);
 		/* prevent us from receiving a message from the future */
 		long now = System.currentTimeMillis() / 1000;
@@ -277,6 +294,11 @@ public class ConvMessage
 		}
 		if (data.has(HikeConstants.METADATA))
 		{
+			JSONObject mdata = data.getJSONObject(HikeConstants.METADATA);
+			if (mdata.has(HikeConstants.PIN_MESSAGE))
+			{
+				this.messageType = mdata.getInt(HikeConstants.PIN_MESSAGE);
+			}
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
 		}
 		this.isStickerMessage = HikeConstants.STICKER.equals(obj.optString(HikeConstants.SUB_TYPE));
@@ -407,6 +429,8 @@ public class ConvMessage
 			participantInfoState = this.metadata.getParticipantInfoState();
 
 			isStickerMessage = this.metadata.getSticker() != null;
+			
+			
 		}
 	}
 
@@ -558,13 +582,18 @@ public class ConvMessage
 					{
 						md = metadata.getJSON();
 						data.put(HikeConstants.METADATA, md);
-					}
+					}else if(messageType!=HikeConstants.MESSAGE_TYPE.PLAIN_TEXT)
+					{
+						md = metadata.getJSON();
+						data.put(HikeConstants.METADATA, md);
+				    }
 					else if (metadata.isPokeMessage())
 					{
 						data.put(HikeConstants.POKE, true);
 					}
 				}
 				data.put(!mIsSMS ? HikeConstants.HIKE_MESSAGE : HikeConstants.SMS_MESSAGE, mMessage);
+				
 				data.put(HikeConstants.TIMESTAMP, mTimestamp);
 
 				if (mInvite)
@@ -829,4 +858,5 @@ public class ConvMessage
 	{
 		this.isTickSoundPlayed = isTickSoundPlayed;
 	}
+
 }

@@ -217,7 +217,10 @@
             android:launchMode="singleTop"
             android:theme="@style/NoTitleBar" >
         </activity>
-        
+        <activity
+            android:name="com.bsb.hike.ui.PinHistoryActivity"
+       		android:configChanges="orientation|screenSize|keyboard|keyboardHidden">            
+        </activity>         
         <activity
     		android:name="com.haibison.android.lockpattern.LockPatternActivity"
     		android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
