@@ -49,7 +49,6 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.modules.contactmgr.ContactUtils;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.AccountUtils;
@@ -231,7 +230,7 @@ public class MqttMessagesManager
 				settings.edit().remove(msisdn).commit();
 			}
 			
-			ContactUtils.updateHikeStatus(this.context, msisdn, joined);
+			ContactManager.getInstance().updateHikeStatus(this.context, msisdn, joined);
 			
 			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
 			if (null != contact)
@@ -1000,8 +999,8 @@ public class MqttMessagesManager
 			if (data.optBoolean(HikeConstants.POST_AB))
 			{
 				String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
-				List<ContactInfo> contactinfos = ContactUtils.getContacts(this.context);
-				Map<String, List<ContactInfo>> contacts = ContactUtils.convertToMap(contactinfos);
+				List<ContactInfo> contactinfos = ContactManager.getInstance().getContacts(this.context);
+				Map<String, List<ContactInfo>> contacts = ContactManager.getInstance().convertToMap(contactinfos);
 				try
 				{
 					AccountUtils.postAddressBook(token, contacts);

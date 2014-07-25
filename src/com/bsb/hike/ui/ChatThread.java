@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -170,7 +171,6 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.modules.contactmgr.ContactUtils;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -1815,7 +1815,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 								hikeJoinTime = Utils.applyServerTimeOffset(ChatThread.this, hikeJoinTime);
 
 								HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_JOIN_TIME_OBTAINED, new Pair<String, Long>(mContactNumber, hikeJoinTime));
-								ContactUtils.updateHikeStatus(ChatThread.this, mContactNumber, true);
+								ContactManager.getInstance().updateHikeStatus(ChatThread.this, mContactNumber, true);
 								
 								ContactInfo contact = HikeMessengerApp.getContactManager().getContact(mContactNumber);
 								if (null != contact)

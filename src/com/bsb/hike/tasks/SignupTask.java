@@ -1,6 +1,7 @@
 package com.bsb.hike.tasks;
 
 import java.io.File;
+
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +35,6 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.modules.contactmgr.ContactUtils;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
@@ -429,12 +429,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		if (!ab_scanned)
 		{
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
-			List<ContactInfo> contactinfos = ContactUtils.getContacts(this.context);
-			ContactUtils.setGreenBlueStatus(this.context, contactinfos);
+			ContactManager conMgr = ContactManager.getInstance();
+			List<ContactInfo> contactinfos = conMgr.getContacts(this.context);
+			conMgr.setGreenBlueStatus(this.context, contactinfos);
 			
 			try
 			{
-				Map<String, List<ContactInfo>> contacts = ContactUtils.convertToMap(contactinfos);
+				Map<String, List<ContactInfo>> contacts = conMgr.convertToMap(contactinfos);
 				JSONObject jsonForAddressBookAndBlockList = AccountUtils.postAddressBook(token, contacts);
 
 				List<ContactInfo> addressbook = AccountUtils.getContactList(jsonForAddressBookAndBlockList, contacts);

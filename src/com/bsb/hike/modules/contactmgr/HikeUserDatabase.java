@@ -1888,7 +1888,7 @@ import com.bsb.hike.utils.Utils;
 		/*
 		 * Sending twice the limit to account for the contacts that might be on hike
 		 */
-		Pair<String, Map<String, Integer>> data = ContactUtils.getMostContactedContacts(mContext, limit * 2);
+		Pair<String, Map<String, Integer>> data = ContactManager.getInstance().getMostContactedContacts(mContext, limit * 2);
 		return getNonHikeMostContactedContactsFromListOfNumbers(data.first, data.second, limit);
 	}
 
