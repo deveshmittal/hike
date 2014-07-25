@@ -955,7 +955,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			if (c.moveToNext())
 			{
 				String metadata = c.getString(metadataIndex);
-
 				try
 				{
 					Conversation.MetaData convMetaData = null;
@@ -966,12 +965,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					else
 					{
 						convMetaData = new Conversation("", 0).new MetaData(null);
-						convMetaData.setLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN, conv.getMsgID());
 						convMetaData.setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, conv.isSent() ? 0 : 1);
-						convMetaData.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
 					}
-
-					convMetaData = updatePinMetadata(conv, convMetaData);
+					long preTimeStamp = convMetaData.getLastPinTimeStamp(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+					long currentTimeStamp = conv.getTimestamp();
+					if(preTimeStamp<currentTimeStamp)
+					{
+					    convMetaData = updatePinMetadata(conv, convMetaData);
+					  
+					}
 					contentValues.put(DBConstants.CONVERSATION_METADATA, convMetaData.toString());
 				}
 				catch (JSONException e)
@@ -999,6 +1001,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				metadata.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
 				metadata.setLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN, msg.getMsgID());
+				metadata.setLastPinTimeStamp(HikeConstants.MESSAGE_TYPE.TEXT_PIN, msg.getTimestamp());
 			}
 		}
 		catch (JSONException e)
