@@ -211,7 +211,6 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 							progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
 							dialog.dismiss();
 							SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-							Logger.d("piyush", "" + appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 3));
 							dialog.dismiss();
 						}
 	
