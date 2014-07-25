@@ -25,6 +25,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
@@ -64,78 +65,12 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 	private ProgressDialog progressDialog;
 	
-	private CustomFontButton imageQualityBtn;
-	
-	private static final String IMAGE_QUALITY_STRING = "Image quality : ";
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gallery_selection_viewer);
-		imageQualityBtn = (CustomFontButton) findViewById(R.id.btn_image_quality);
-		imageQualityBtn.setText(IMAGE_QUALITY_STRING + ImageQuality.IMAGE_QUALITY_DEFAULT);
 		Utils.resetImageQuality(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));  //Reset the image quality to Default
-		imageQualityBtn.setOnClickListener(new OnClickListener()
-		{
-			
-			@Override
-			public void onClick(View v)
-			{
-				// TODO Auto-generated method stub
-				final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
-				long sizeOriginal = 0;
-				for (GalleryItem galleryItem : galleryItems)
-				{
-					fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
-					File file = new File(galleryItem.getFilePath());
-					sizeOriginal += file.length();
-				}
-				HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
-				{
-					@Override
-					public void onSucess(Dialog dialog)
-					{
-						dialog.dismiss();
-						SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-						int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
-						switch(quality)
-						{
-						case ImageQuality.QUALITY_SMALL:
-							imageQualityBtn.setText(IMAGE_QUALITY_STRING + ImageQuality.IMAGE_QUALITY_SMALL);
-							break;
-						case ImageQuality.QUALITY_MEDIUM:
-							imageQualityBtn.setText(IMAGE_QUALITY_STRING + ImageQuality.IMAGE_QUALITY_MEDIUM);
-							break;
-						case ImageQuality.QUALITY_ORIGINAL:
-							imageQualityBtn.setText(IMAGE_QUALITY_STRING + ImageQuality.IMAGE_QUALITY_ORIGINAL);
-							break;
-						}
-					}
-
-					@Override
-					public void negativeClicked(Dialog dialog)
-					{
-						// TODO Auto-generated method stub
-						
-					}
-
-					@Override
-					public void positiveClicked(Dialog dialog)
-					{
-						// TODO Auto-generated method stub
-						
-					}
-
-					@Override
-					public void neutralClicked(Dialog dialog)
-					{
-						// TODO Auto-generated method stub
-						
-					}
-				}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
-			}
-		});
 		Object object = getLastCustomNonConfigurationInstance();
 
 		if (object instanceof InitiateMultiFileTransferTask)
@@ -222,18 +157,18 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
 		View actionBarView = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
-
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
 		View doneBtn = actionBarView.findViewById(R.id.done_container);
 		TextView postText = (TextView) actionBarView.findViewById(R.id.post_btn);
-
+		View imageSettingsBtn = actionBarView.findViewById(R.id.image_quality_settings_view);
+		
 		doneBtn.setVisibility(View.VISIBLE);
 		postText.setText(R.string.send);
-
+		
 		title.setText(R.string.preview);
-
+		imageSettingsBtn.setVisibility(View.VISIBLE);
 		backContainer.setOnClickListener(new OnClickListener()
 		{
 			@Override
@@ -309,6 +244,52 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 					progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
 				}*/
 			}
+		});
+		
+		imageSettingsBtn.setOnClickListener(new OnClickListener()
+		{
+				@Override
+				public void onClick(View v)
+				{
+					// TODO Auto-generated method stub
+					final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
+					long sizeOriginal = 0;
+					for (GalleryItem galleryItem : galleryItems)
+					{
+						fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
+						File file = new File(galleryItem.getFilePath());
+						sizeOriginal += file.length();
+					}
+					HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
+					{
+						@Override
+						public void onSucess(Dialog dialog)
+						{
+							dialog.dismiss();
+						}
+
+						@Override
+						public void negativeClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void positiveClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void neutralClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+					}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
+				}
 		});
 
 		actionBar.setCustomView(actionBarView);
