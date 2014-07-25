@@ -1325,6 +1325,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return grpLastMsisdns;
 	}
 
+	/**
+	 * Returns a hash map between group id and group name
+	 * @return
+	 */
 	public Map<String, String> getGroupNames()
 	{
 		Cursor groupInfoCursor = null;

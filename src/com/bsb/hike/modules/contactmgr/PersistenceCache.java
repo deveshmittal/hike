@@ -2,6 +2,7 @@ package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -350,13 +351,19 @@ class PersistenceCache extends ContactsCache
 	void loadMemory()
 	{
 		Pair<List<String>, Map<String, List<String>>> allmsisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
+		// oneToOneMsisdns contains list of msisdns with whom one to one conversation currently exists
+		// groupLastMsisdnsMap is map between group Id and list of last msisdns (msisdns of last message) in a group
 		List<String> oneToOneMsisdns = allmsisdns.first;
 		Map<String, List<String>> groupLastMsisdnsMap = allmsisdns.second;
 
 		Map<String, String> groupNamesMap = HikeConversationsDatabase.getInstance().getGroupNames();
 
-		List<String> grouplastMsisdns = new ArrayList<String>();
+		HashSet<String> grouplastMsisdns = new HashSet<String>();
 
+		/**
+		 * groupPersistence is now populated using groupNamesMap(for group name) and groupLastMsisdnsMap(msisdns in last message of a group) , these are needed so that if last
+		 * message in a group changes then previous contact Info objects can be removed from persistence cache otherwise after some time all contacts will be loaded in cache
+		 */
 		for (Entry<String, String> mapEntry : groupNamesMap.entrySet())
 		{
 			String grpId = mapEntry.getKey();
@@ -369,12 +376,14 @@ class PersistenceCache extends ContactsCache
 				for (String ms : lastMsisdns)
 				{
 					lastMsisdnsConcurrentLinkedQueue.add(new pair(ms, null));
+					// name for unsaved contact will be set later because at this point we don't know which msisdns are saved and which are not.
 				}
 			}
 			GroupDetails grpDetails = new GroupDetails(name, lastMsisdnsConcurrentLinkedQueue);
 			groupPersistence.put(grpId, grpDetails);
 		}
 
+		// msisdnsToGetContactInfo is combination of one to one msisdns and group last msisdns to get contact info from users db
 		List<String> msisdnsToGetContactInfo = new ArrayList<String>();
 		msisdnsToGetContactInfo.addAll(oneToOneMsisdns);
 		msisdnsToGetContactInfo.addAll(grouplastMsisdns);
@@ -385,25 +394,19 @@ class PersistenceCache extends ContactsCache
 			contactsMap = hDb.getContactInfoFromMsisdns(msisdnsToGetContactInfo, true);
 		}
 
-		// grouplastMsisdns list convert it to map
-		Map<String, Boolean> temp = new HashMap<String, Boolean>();
-		for (String ms : grouplastMsisdns)
-		{
-			temp.put(ms, true);
-		}
-
-		// traverse through oneToOneMsisdns and get from contactsMap and put in convsContactsPersistence , remove from contactsMap if not present in grouplastMsisdns map
+		// traverse through oneToOneMsisdns and get from contactsMap and put in convsContactsPersistence cache , remove from contactsMap if not present in grouplastMsisdns(because
+		// some msisdns will be common between one to one msisdns and group last msisdns)
 		for (String ms : oneToOneMsisdns)
 		{
 			ContactInfo contact = contactsMap.get(ms);
 			convsContactsPersistence.put(ms, contact);
-			if (!temp.containsKey(ms))
+			if (!grouplastMsisdns.contains(ms))
 			{
 				contactsMap.remove(ms);
 			}
 		}
 
-		// traverse through contactsMap which is left put in groupContactsPersistence if contactInfo name is null we have to get names for that
+		// traverse through contactsMap which is left and put in groupContactsPersistence if contactInfo name is null we have to get names for that
 		StringBuilder unknownGroupMsisdns = new StringBuilder("(");
 		for (Entry<String, ContactInfo> mapEntry : contactsMap.entrySet())
 		{
@@ -428,15 +431,15 @@ class PersistenceCache extends ContactsCache
 			unknownGroupMsisdnsName = HikeConversationsDatabase.getInstance().getGroupMembersName(unknownGroupMsisdns.toString());
 		}
 
-		// set names for unknown group contacts
-		for (Entry<String, GroupDetails> mapEntry : groupPersistence.entrySet())
+		// set names for unknown group contacts in groupPersistence cache
+		for (Entry<String, Map<String, String>> mapEntry : unknownGroupMsisdnsName.entrySet())
 		{
 			String groupId = mapEntry.getKey();
-			GroupDetails grpDetails = mapEntry.getValue();
-			ConcurrentLinkedQueue<pair> list = grpDetails.getLastMsisdns();
-			Map<String, String> map = unknownGroupMsisdnsName.get(groupId);
-			if (null != map)
+			Map<String, String> map = mapEntry.getValue();
+			GroupDetails grpDetails = groupPersistence.get(groupId);
+			if (null != grpDetails)
 			{
+				ConcurrentLinkedQueue<pair> list = grpDetails.getLastMsisdns();
 				for (pair msPair : list)
 				{
 					msPair.second = map.get(msPair.first);
