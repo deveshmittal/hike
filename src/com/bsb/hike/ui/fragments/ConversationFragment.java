@@ -179,7 +179,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, 
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_START_NEW_CHAT_TIP,
-			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.BULK_MESSAGE_DELIVERED_READ };
+			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ };
 
 	private ConversationsAdapter mAdapter;
 
@@ -1278,13 +1278,24 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				});
 			}
 		}
-		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))
+		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type) || HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
 		{
-			Pair<String, long[]> pair = (Pair<String, long[]>) object;
+			String sender = null;
+			long[] ids;
+			if (HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
+			{
+				Pair<String, Pair<long[],String>> pair = (Pair<String, Pair<long[], String>>) object;
+				sender = pair.first;
+				ids = pair.second.first;
+			}
+			else
+			{
+				Pair<String, long[]> pair = (Pair<String, long[]>) object;
+				sender = pair.first;
+				ids = (long[]) pair.second;
+			}
 
-			final String msisdn = pair.first;
-
-			long[] ids = (long[]) pair.second;
+			final String msisdn = sender;
 
 			ConvMessage lastConvMessage = null;
 
