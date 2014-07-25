@@ -303,7 +303,11 @@ public class Conversation implements Comparable<Conversation>
 			else
 			{
 				jsonObject = new JSONObject();
+				setLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN, -1);
+				setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
+				setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
 			}
+			
 		}
 
 		public long getLastPinId(int pinType) throws JSONException

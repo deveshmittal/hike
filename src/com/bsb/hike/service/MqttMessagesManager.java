@@ -1650,7 +1650,12 @@ public class MqttMessagesManager
 			updateAtomicPopUpData(jsonObj);
 		}
 	}
-	
+	/**
+	 * 
+	 * @param bulkObj
+	 * 			- bulk json object from server
+	 * @throws JSONException
+	 */
 	
 	public void saveBulkMessage(JSONObject bulkObj) throws JSONException 
 	{
@@ -1737,6 +1742,9 @@ public class MqttMessagesManager
 		 * The list returned by {@link com.bsb.hike.db.HikeConversationsDatabase#addConversationsBulk(List<ConvMessages>)} contains non duplicate messages
 		 * This list is used for further processing
 		 */
+		
+		HashMap<String, PairModified<ConvMessage, Integer>> lastPinMap = new HashMap<String, PairModified<ConvMessage,Integer>>();
+		
 		for (ConvMessage convMessage : messageList)
 		{
 			String msisdn = convMessage.getMsisdn();
@@ -1745,7 +1753,19 @@ public class MqttMessagesManager
 				messageListMap.put(msisdn, new LinkedList<ConvMessage>());
 			}
 			messageListMap.get(msisdn).add(convMessage);
+			
+			if(convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			{
+				if(lastPinMap.get(msisdn) == null)
+				{
+					lastPinMap.put(msisdn, new PairModified<ConvMessage, Integer>(null, 0));
+				}
+				lastPinMap.get(msisdn).setFirst(convMessage);
+				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() + 1);
+			}
 		}
+		
+		
 		ArrayList<ConvMessage> lastMessageList = new ArrayList<ConvMessage>(messageListMap.keySet().size());
 		for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
 		{
@@ -1755,7 +1775,7 @@ public class MqttMessagesManager
 		
 		if(lastMessageList.size() > 0)
 		{
-			convDb.addLastConversations(lastMessageList);
+			convDb.addLastConversations(lastMessageList, lastPinMap);
 		}
 		if(messageStatusMap.size() > 0)
 		{
