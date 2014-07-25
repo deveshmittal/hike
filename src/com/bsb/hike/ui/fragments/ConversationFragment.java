@@ -1106,7 +1106,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void run()
 				{
-					addMessage(conv, finalMessage);
+					addMessage(conv, finalMessage, true);
 				}
 			});
 
@@ -1819,7 +1819,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 								@Override
 								public void run()
 								{
-									addMessage(conv, finalMessage);
+									addMessage(conv,finalMessage,false);
 								}
 							});
 						}
@@ -1834,6 +1834,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						}
 					}
 				}
+				getActivity().runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						Collections.sort(displayedConversations, mConversationsComparator);
+						notifyDataSetChanged();
+					}
+				});
 			}
 		}
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
@@ -1872,15 +1881,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 									}
 
 									final ConvMessage message = msg;
-									getActivity().runOnUiThread(new Runnable()
-									{
-										@Override
-										public void run()
-										{
-											Conversation conversation = mConversationsByMSISDN.get(msisdn);
-											updateViewForMessageStateChange(conversation, message);
-										}
-									});
 								}
 							}
 							if (drMsgId > 0)
@@ -1900,20 +1900,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 									{
 										return;
 									}
-									getActivity().runOnUiThread(new Runnable()
-									{
-										@Override
-										public void run()
-										{
-											Conversation conversation = mConversationsByMSISDN.get(msisdn);
-											updateViewForMessageStateChange(conversation, msg);
-										}
-									});
 								}
 							}
 						}
 					}
 				}
+				getActivity().runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						notifyDataSetChanged();
+					}
+				});
 			}
 		}
 	}
@@ -2077,7 +2076,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		mAdapter.updateViewsRelatedToMessageState(parentView, convMessage, conversation);
 	}
 
-	private void addMessage(Conversation conv, ConvMessage convMessage)
+	private void addMessage(Conversation conv, ConvMessage convMessage, boolean sortAndUpdateView)
 	{
 		boolean newConversationAdded = false;
 
@@ -2096,7 +2095,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		conv.addMessage(convMessage);
 		Logger.d(getClass().getSimpleName(), "new message is " + convMessage);
 
-		sortAndUpdateTheView(conv, convMessage, newConversationAdded);
+		if (sortAndUpdateView)
+		{
+			sortAndUpdateTheView(conv, convMessage, newConversationAdded);
+		}
 	}
 
 	public void movedFromEmptyToNonEmpty()
