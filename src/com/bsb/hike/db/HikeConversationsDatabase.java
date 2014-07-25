@@ -103,7 +103,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 																																									 */
 				+ DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + DBConstants.MAPPED_MSG_ID + " INTEGER, "
 				+ DBConstants.CONV_ID + " INTEGER," + DBConstants.MESSAGE_METADATA + " TEXT, " + DBConstants.GROUP_PARTICIPANT + " TEXT, " + DBConstants.IS_HIKE_MESSAGE
-				+ " INTEGER DEFAULT -1, " + DBConstants.READ_BY + " TEXT, "+ DBConstants.MESSAGE_TYPE + " INTEGER" + " ) ";
+				+ " INTEGER DEFAULT -1, " + DBConstants.READ_BY + " TEXT, "+ DBConstants.MESSAGE_TYPE + " INTEGER DEFAULT -1" + " ) ";
 
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CONVERSATION_INDEX + " ON " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.CONV_ID + " , " + DBConstants.TIMESTAMP
@@ -405,11 +405,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			String alter = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.IS_STEALTH + " INTEGER DEFAULT 0";
 			db.execSQL(alter);
 		}
-		/*
-		 * Version 25 adds the type column to the message table
-		 */
 	
-
 		// to delete duplicate stickers
 		if (oldVersion < 26)
 		{
@@ -425,7 +421,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 		if (oldVersion < 27)
 		{
-			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.MESSAGE_TYPE + " INTEGER";
+			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.MESSAGE_TYPE + " INTEGER DEFAULT -1";
 			String alter1 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.CONVERSATION_METADATA + " TEXT";
 			db.execSQL(alter);
 			db.execSQL(alter1);
