@@ -253,9 +253,9 @@
     <color name="bubble_blue">#d4feff</color>
     <color name="bubble_celebration_space">#e4cdfe</color>
     <color name="bubble_chatty_bechy_techy">#b9fffb</color>
-    <color name="bubble_forest_study_sporty_fifa">#dcffa0</color>
+    <color name="bubble_forest_study_sporty_fifa_nature">#dcffa0</color>
     <color name="bubble_green">#ecffcf</color>
-    <color name="bubble_love_floral_kisses_valentines_girly_ipl_blurredlight">#feebdd</color>
+    <color name="bubble_love_floral_kisses_valentines_girly_ipl_blurredlight_love2">#feebdd</color>
     <color name="bubble_night">#91d8fa</color>
     <color name="bubble_owl">#7acdc8</color>
     <color name="bubble_smiley_geometric1">#ffffcd</color>
@@ -264,7 +264,7 @@
     <color name="bubble_hikin_couple_mountain">#fce3c5</color>
     <color name="bubble_mr_right_exam">#ffd7ac</color>
     <color name="bubble_music">#d2f0ff</color>
-    <color name="bubble_rains_beach_2">#b2e5ff</color>
+    <color name="bubble_rains_beach_2_independence">#b2e5ff</color>
     <color name="bubble_white">#ffffff</color>
 	<color name="green_connected">#87d156</color>
     <color name="action_bar_btn_disable">#38b1fe</color>
