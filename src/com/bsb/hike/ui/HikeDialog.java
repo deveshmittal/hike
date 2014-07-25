@@ -240,7 +240,6 @@ public class HikeDialog
 		CustomFontTextView smallSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_small_cftv);
 		CustomFontTextView mediumSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_medium_cftv);
 		CustomFontTextView originalSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_original_cftv);
-		small.setChecked(true);
 		
 		if(data!=null)
 			{
@@ -274,7 +273,7 @@ public class HikeDialog
 			}
 		}
 		
-		/*switch (quality)
+		switch (quality)
 		{
 		case ImageQuality.QUALITY_ORIGINAL:
 			small.setChecked(false);
@@ -292,7 +291,7 @@ public class HikeDialog
 			original.setChecked(false);
 			break;
 		}
-		*/
+		
 		OnClickListener onClickListener = new OnClickListener()
 		{
 			
