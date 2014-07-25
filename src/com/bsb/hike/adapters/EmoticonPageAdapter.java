@@ -17,6 +17,10 @@ import com.bsb.hike.utils.SmileyParser;
 
 public class EmoticonPageAdapter extends BaseAdapter implements OnClickListener
 {
+	
+	public static interface EmoticonClickListener{
+		public void onEmoticonClicked(int emoticonIndex);
+	}
 
 	LayoutInflater inflater;
 
@@ -33,12 +37,12 @@ public class EmoticonPageAdapter extends BaseAdapter implements OnClickListener
 	private int idOffset;
 
 	Activity activity;
+	EmoticonClickListener listener;
+	
 
-	EditText composeBox;
-
-	public EmoticonPageAdapter(Activity context, int[] emoticonSubCategories, int[] emoticonResIds, int currentPage, int idOffset, EditText composeBox)
+	public EmoticonPageAdapter(Activity context, int[] emoticonSubCategories, int[] emoticonResIds, int currentPage, int idOffset, EmoticonClickListener listener)
 	{
-		this.composeBox = composeBox;
+		this.listener = listener;
 		this.activity = context;
 		this.currentPage = currentPage;
 		this.inflater = LayoutInflater.from(context);
@@ -117,14 +121,7 @@ public class EmoticonPageAdapter extends BaseAdapter implements OnClickListener
 	{
 		Logger.i("emoticon", "item clicked");
 		int emoticonIndex = (Integer) v.getTag();
-		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(emoticonIndex, System.currentTimeMillis());
-		// We don't add an emoticon if the compose box is near its maximum
-		// length of characters
-		if (composeBox.length() >= activity.getResources().getInteger(R.integer.max_length_message) - 20)
-		{
-			return;
-		}
-		SmileyParser.getInstance().addSmiley(composeBox, emoticonIndex);
+		listener.onEmoticonClicked(emoticonIndex);
 
 	}
 }

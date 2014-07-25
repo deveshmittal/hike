@@ -944,7 +944,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					try
 					{
 						cancelNetworkErrorTimer();
-						String messageBody = new String(arg1.getPayload(), "UTF-8");
+						byte[] bytes = arg1.getPayload();
+						bytes = Utils.uncompressByteArray(bytes);
+						String messageBody = new String(bytes, "UTF-8");
 						Logger.i(TAG, "messageArrived called " + messageBody);
 						JSONObject jsonObj = new JSONObject(messageBody);
 						mqttMessageManager.saveMqttMessage(jsonObj);
@@ -1368,26 +1370,77 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		
 		private void testUj()
 		{
-			String uj = String.format("{\"t\": \"uj\",\"d\":{\"msisdn\":\"%s\"},\"ts\":%d,\"st\":\"ru\"}","+919582474249",System.currentTimeMillis());
+			int count = 0;
+			String myMsisdn  = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+			String msisdn  = "+919999238132";
+			String msisdn1  = "+919868185209";
+			if(myMsisdn != null)
+			{
+				if(msisdn.equalsIgnoreCase(myMsisdn))
+				{
+					return ;
+				}
+			}
+			Random rand = new Random();
+			
+			JSONObject bulkPacket = new JSONObject();
+			JSONObject data = new JSONObject();
+			JSONObject msgs = new JSONObject();
+			JSONArray bulkMsgArray = new JSONArray();
+			for (int i = 0; i < 25; i++)
+			{
+				String ujString = String.format("{\"t\": \"uj\",\"d\":{\"msisdn\":\"%s\"},\"ts\":%d,\"st\":\"ru\"}",msisdn,Math.abs(System.currentTimeMillis() + rand.nextLong()));
+				String ujString1 = String.format("{\"t\": \"uj\",\"d\":{\"msisdn\":\"%s\"},\"ts\":%d,\"st\":\"ru\"}",msisdn1,Math.abs(System.currentTimeMillis() + rand.nextLong()));
+				try
+				{
+					
+					JSONObject o = new JSONObject(ujString);
+					JSONObject o1 = new JSONObject(ujString1);
+					bulkMsgArray.put(o);
+					bulkMsgArray.put(o1);
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
 			try
 			{
-				JSONObject o = new JSONObject(uj);
-				MqttMessagesManager.getInstance(context).saveMqttMessage(o);
+				bulkPacket.put(HikeConstants.TYPE, "bm");
+				data.put("msgs", bulkMsgArray);
+				bulkPacket.put(HikeConstants.DATA, data);
+				bulkPacket.put(HikeConstants.TIMESTAMP, System.currentTimeMillis());
+				mqttMessageManager.saveMqttMessage(bulkPacket);
+				
 			}
 			catch (JSONException e)
 			{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
 		}
 		
 		private void testMsg()
 		{
 			int count = 0;
-			for (int i = 0; i < 1000; i++)
+			String myMsisdn  = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+			String msisdn  = "+919582974797";
+			
+			if(myMsisdn != null)
+			{
+				if(msisdn.equalsIgnoreCase(myMsisdn))
+				{
+					return ;
+				}
+			}
+			for (int i = 0; i < 50; i++)
 			{
 				count++;
-				String data = String.format("{\"t\": \"m\",\"to\": \"+918826670738\",\"d\":{\"hm\":\"%d\",\"i\":%d, \"ts\":%d}}", count + 10, count,
+				Random rand = new Random();
+				String data = String.format("{\"t\": \"m\",\"to\": \"" + msisdn + "\",\"d\":{\"hm\":\"%d\",\"i\":%d, \"ts\":%d}}", rand.nextLong(), rand.nextLong(),
 						System.currentTimeMillis());
 				
 				Logger.d(TAG, "Sending msg : " + data);
