@@ -3155,7 +3155,7 @@ public class Utils
 		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
 		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
 
-		Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(activity, conv.getMsisdn());
+		Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(activity, conv.getMsisdn(), false);
 
 		Bitmap bitmap = HikeBitmapFactory.drawableToBitmap(avatarDrawable, Bitmap.Config.RGB_565);
 
@@ -3631,16 +3631,28 @@ public class Utils
 		postText.setEnabled(enabled);
 	}
 
-	public static Drawable getAvatarDrawableForNotificationOrShortcut(Context context, String msisdn)
+	public static Drawable getAvatarDrawableForNotificationOrShortcut(Context context, String msisdn, boolean isPin)
 	{
 		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
+		
 		if (drawable == null)
 		{
 			Drawable background = context.getResources().getDrawable(BitmapUtils.getDefaultAvatarResourceId(msisdn, false));
-			Drawable iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+			
+			Drawable iconDrawable = null;
+			
+			if(!isPin)
+			{
+				iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+			}
+			else
+			{
+				iconDrawable = context.getResources().getDrawable(R.drawable.ic_pin_notification);
+			}
+			
 			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });
 		}
-		return drawable;
+		return drawable;		
 	}
 
 	public static void getRecommendedAndHikeContacts(Context context, List<ContactInfo> recommendedContacts, List<ContactInfo> hikeContacts, List<ContactInfo> friendsList)
