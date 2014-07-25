@@ -1102,6 +1102,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="postAnonymously">Post Anonymously</string>
     <string name="create_pin">Create Pin</string>
     <string name="pin_history">Pin History</string>
-    <string name="chat_theme_small">Chat theme</string>
     <string name="max_pin_unread_counter">9+</string>
+    <string name="pin_text_hint">Share something important</string>
+    <string name="chat_theme_small">Chat Theme</string>
+    
 </resources>

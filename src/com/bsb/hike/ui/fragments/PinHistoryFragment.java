@@ -18,6 +18,8 @@ import android.widget.ImageView.ScaleType;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
@@ -26,6 +28,7 @@ import com.bsb.hike.adapters.PinHistoryAdapter.PinHistoryItemsListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -47,6 +50,8 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 	private Conversation mConversation;
 
 	private long convId;
+
+	private HikePubSub mPubSub;
 		
 	public PinHistoryFragment()
 	{
@@ -97,17 +102,18 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 		{
 			backgroundImage.setImageResource(chatTheme.bgResId());
 		}
-		
-		// reset unread pin count to 0
-		try 
+		MetaData metadata = mConversation.getMetaData();
+		try
 		{
-			mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
-			mDb.updateConversationMetadata(convId, mConversation.getMetaData());
+			metadata.setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
 		}
-		catch (JSONException e) 
+		catch (JSONException e)
 		{
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA,mConversation);
+		
 	}
 
 	@Override
@@ -130,10 +136,19 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 	public void onActivityCreated(Bundle savedInstanceState)
 	{
 		super.onActivityCreated(savedInstanceState);
+
+		PHadapter = new PinHistoryAdapter(getActivity(), textPins, msisdn, convId, mConversation, this, true);
+
+		setListAdapter(PHadapter);
 		
-		PHadapter = new PinHistoryAdapter(getActivity(), textPins, msisdn, convId, mConversation, this);
-		
-		setListAdapter(PHadapter);		
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		mPubSub = HikeMessengerApp.getPubSub();
 	}
 
 	@Override

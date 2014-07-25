@@ -68,7 +68,6 @@
             </ListView>
 
             <LinearLayout
-                android:layout_marginTop="3dp"
                 android:layout_below="@+id/tipContainerTop"
                 android:id="@+id/upperContainer"
                 android:orientation="vertical"

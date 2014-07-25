@@ -11,11 +11,12 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
-        android:background="@drawable/pin_bg_yellow"
+        android:background="@drawable/pin_chat_bg_yellow"
         android:paddingBottom="22dp"
         android:paddingTop="26dp" >
 
         <com.bsb.hike.view.CustomFontEditText
+            android:hint="@string/pin_text_hint"
             android:id="@+id/messageedittext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
