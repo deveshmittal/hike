@@ -557,7 +557,20 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 		return mqtt.isConnected();
 	}
-
+	
+	private boolean isConnecting()
+	{
+		if (mqtt == null)
+			return false;
+		return mqtt.isConnecting();
+	}
+	
+	private boolean isDisconnecting()
+	{
+		if (mqtt == null)
+			return false;
+		return mqtt.isDisconnecting();
+	}
 	// This function should be called always from external classes inorder to run connect on MQTT thread
 	public void connectOnMqttThread()
 	{
@@ -654,7 +667,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				mqtt.setCallback(getMqttCallback());
 				Logger.d(TAG, "Number of max inflight msgs allowed : " + mqtt.getMaxflightMessages());
 			}
-			if (isConnected())
+			if (isConnected() || isConnecting() || isDisconnecting())
 				return;
 
 			mqttConnStatus = MQTTConnectionStatus.CONNECTING;
