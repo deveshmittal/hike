@@ -1339,11 +1339,34 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void addLastConversations(List<ConvMessage> convMessages)
+	public void addLastConversations(List<ConvMessage> convMessages, HashMap<String, PairModified<ConvMessage, Integer>> lastPinMap)
 	{
 		for (ConvMessage conv : convMessages)
 		{
+			String msisdn = conv.getMsisdn();
 			ContentValues contentValues = getContentValueForConversationMessage(conv);
+			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
+			
+			if(lastPinMap.get(conv.getMsisdn()) != null)
+			{
+				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() - 1);
+			}
+		}
+		
+		for (Entry<String, PairModified<ConvMessage, Integer>> entry : lastPinMap.entrySet())
+		{
+			PairModified<ConvMessage, Integer> pair= entry.getValue();
+			String msisdn = entry.getKey();
+			ContentValues contentValues = getContentValueForPinConversationMessage(pair.getFirst(), new ContentValues(), pair.getSecond());
+			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
+		}
+	}
+	
+	public void addLastPinConversations(List<ConvMessage> convMessages)
+	{
+		for (ConvMessage conv : convMessages)
+		{
+			ContentValues contentValues = getContentValueForPinConversationMessage(conv, new ContentValues());
 			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { conv.getMsisdn() });
 		}
 	}
@@ -1375,7 +1398,20 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 		if (conv.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
-			Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONVERSATION_METADATA }, DBConstants.MSISDN + "=?", new String[] { conv.getMsisdn() },
+			contentValues =  getContentValueForPinConversationMessage(conv, contentValues);
+		}
+		return contentValues;
+	}
+	
+	/*
+	 * add pin related content values to the content values that comes in argument and return modified content values
+	 */
+	private ContentValues getContentValueForPinConversationMessage(ConvMessage conv, ContentValues contentValues)
+	{
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONVERSATION_METADATA }, DBConstants.MSISDN + "=?", new String[] { conv.getMsisdn() },
 					null, null, null);
 			int metadataIndex = c.getColumnIndex(DBConstants.CONVERSATION_METADATA);
 			if (c.moveToNext())
@@ -1385,19 +1421,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				try
 				{
 					Conversation.MetaData convMetaData = null;
-					if (metadata != null)
-					{
-						convMetaData = new Conversation("", 0).new MetaData(metadata);
-					}
-					else
-					{
-						convMetaData = new Conversation("", 0).new MetaData(null);
-						convMetaData.setLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN, conv.getMsgID());
-						convMetaData.setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, conv.isSent() ? 0 : 1);
-						convMetaData.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
-					}
+					convMetaData = new Conversation("", 0).new MetaData(metadata);
 
-					convMetaData = updatePinMetadata(conv, convMetaData);
+					convMetaData = updatePinMetadata(conv, convMetaData, 0);
 					contentValues.put(DBConstants.CONVERSATION_METADATA, convMetaData.toString());
 				}
 				catch (JSONException e)
@@ -1407,11 +1433,60 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 
 			}
+			return contentValues;
 		}
-		return contentValues;
+		finally 
+		{
+			if(c != null)
+			{
+				c.close();
+			}
+		}
 	}
+	
+	/*
+	 * add pin related content values to the content values that comes in argument and return modified content values
+	 * This function is specific for bulk. We also give unread count in this function.
+	 */
+	private ContentValues getContentValueForPinConversationMessage(ConvMessage conv, ContentValues contentValues, int unreadCount)
+	{
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONVERSATION_METADATA }, DBConstants.MSISDN + "=?", new String[] { conv.getMsisdn() },
+					null, null, null);
+			int metadataIndex = c.getColumnIndex(DBConstants.CONVERSATION_METADATA);
+			if (c.moveToNext())
+			{
+				String metadata = c.getString(metadataIndex);
 
-	public Conversation.MetaData updatePinMetadata(ConvMessage msg, Conversation.MetaData metadata)
+				try
+				{
+					Conversation.MetaData convMetaData = null;
+					convMetaData = new Conversation("", 0).new MetaData(metadata);
+
+					convMetaData = updatePinMetadata(conv, convMetaData, unreadCount);
+					contentValues.put(DBConstants.CONVERSATION_METADATA, convMetaData.toString());
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+			return contentValues;
+		}
+		finally 
+		{
+			if(c != null)
+			{
+				c.close();
+			}
+		}
+	}
+	
+	public Conversation.MetaData updatePinMetadata(ConvMessage msg, Conversation.MetaData metadata, int unreadCount)
 	{
 		try
 		{
@@ -1421,7 +1496,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				// update only for received
 				if (!msg.isSent())
 				{
-					metadata.incrementUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+					if(unreadCount != 0)
+					{
+						metadata.setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, (metadata.getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN) + unreadCount));
+					}
+					else
+					{
+						metadata.incrementUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+					}
 				}
 				metadata.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
 				metadata.setLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN, msg.getMsgID());
