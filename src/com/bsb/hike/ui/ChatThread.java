@@ -1816,15 +1816,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 								HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_JOIN_TIME_OBTAINED, new Pair<String, Long>(mContactNumber, hikeJoinTime));
 								ContactManager.getInstance().updateHikeStatus(ChatThread.this, mContactNumber, true);
-								
-								ContactInfo contact = HikeMessengerApp.getContactManager().getContact(mContactNumber);
-								if (null != contact)
-								{
-									ContactInfo updatedContact = new ContactInfo(contact);
-									updatedContact.setOnhike(true);
-									HikeMessengerApp.getContactManager().updateContacts(updatedContact);
-								}
-								
 								mConversationDb.updateOnHikeStatus(mContactNumber, true);
 								HikeMessengerApp.getPubSub().publish(HikePubSub.USER_JOINED, mContactNumber);
 							}

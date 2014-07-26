@@ -1929,12 +1929,12 @@ import com.bsb.hike.utils.Utils;
 					favoriteType = FavoriteType.FRIEND;
 				}
 
-				ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn);
+				ContactInfo contactInfo = ContactManager.getInstance().getContact(msisdn);
 				if (null != contactInfo)
 				{
 					ContactInfo updatedContact = new ContactInfo(contactInfo);
 					updatedContact.setFavoriteType(favoriteType);
-					HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+					ContactManager.getInstance().updateContacts(updatedContact);
 				}
 
 				insertStatement.bindString(ih.getColumnIndex(DBConstants.MSISDN), msisdn);

@@ -482,6 +482,13 @@ public class ContactManager implements ITransientCache
 
 	public int updateHikeStatus(String msisdn, boolean onhike)
 	{
+		ContactInfo contact = getContact(msisdn);
+		if (null != contact)
+		{
+			ContactInfo updatedContact = new ContactInfo(contact);
+			updatedContact.setOnhike(onhike);
+			updateContacts(updatedContact);
+		}
 		return hDb.updateHikeContact(msisdn, onhike);
 	}
 
@@ -497,6 +504,13 @@ public class ContactManager implements ITransientCache
 
 	public void updateContactRecency(String msisdn, long timestamp)
 	{
+		ContactInfo contact = getContact(msisdn);
+		if (null != contact)
+		{
+			ContactInfo updatedContact = new ContactInfo(contact);
+			updatedContact.setLastMessaged(timestamp);
+			updateContacts(updatedContact);
+		}
 		hDb.updateContactRecency(msisdn, timestamp);
 	}
 
@@ -507,6 +521,13 @@ public class ContactManager implements ITransientCache
 
 	public void toggleContactFavorite(String msisdn, FavoriteType ftype)
 	{
+		ContactInfo contact = getContact(msisdn);
+		if (null != contact)
+		{
+			ContactInfo updatedContact = new ContactInfo(contact);
+			updatedContact.setFavoriteType(ftype);
+			updateContacts(updatedContact);
+		}
 		hDb.toggleContactFavorite(msisdn, ftype);
 	}
 
@@ -522,6 +543,13 @@ public class ContactManager implements ITransientCache
 
 	public void setHikeJoinTime(String msisdn, long hikeJoinTime)
 	{
+		ContactInfo contact = getContact(msisdn);
+		if (null != contact)
+		{
+			ContactInfo updatedContact = new ContactInfo(contact);
+			updatedContact.setHikeJoinTime(hikeJoinTime);
+			updateContacts(updatedContact);
+		}
 		hDb.setHikeJoinTime(msisdn, hikeJoinTime);
 	}
 
@@ -552,11 +580,25 @@ public class ContactManager implements ITransientCache
 
 	public void updateLastSeenTime(String msisdn, long lastSeenTime)
 	{
+		ContactInfo contact = getContact(msisdn);
+		if (null != contact)
+		{
+			ContactInfo updatedContact = new ContactInfo(contact);
+			updatedContact.setLastSeenTime(lastSeenTime);
+			updateContacts(updatedContact);
+		}
 		hDb.updateLastSeenTime(msisdn, lastSeenTime);
 	}
 
 	public void updateIsOffline(String msisdn, int isOffline)
 	{
+		ContactInfo contact = getContact(msisdn);
+		if (null != contact)
+		{
+			ContactInfo updatedContact = new ContactInfo(contact);
+			updatedContact.setOffline(isOffline);
+			updateContacts(updatedContact);
+		}
 		hDb.updateIsOffline(msisdn, isOffline);
 	}
 
@@ -612,6 +654,13 @@ public class ContactManager implements ITransientCache
 
 	public void updateInvitedTimestamp(String msisdn, long time)
 	{
+		ContactInfo contact = getContact(msisdn);
+		if (null != contact)
+		{
+			ContactInfo updatedContact = new ContactInfo(contact);
+			updatedContact.setInviteTime(time);
+			updateContacts(updatedContact);
+		}
 		hDb.updateInvitedTimestamp(msisdn, time);
 	}
 
@@ -808,7 +857,7 @@ public class ContactManager implements ITransientCache
 			Logger.d("ContactUtils", "New contacts:" + new_contacts_by_id.size() + " DELETED contacts: " + ids_json.length());
 			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
 
-			HikeMessengerApp.getContactManager().updateContacts(updatedContacts);
+			updateContacts(updatedContacts);
 			
 			List<ContactInfo> contactsToDelete = new ArrayList<ContactInfo>();
 			
@@ -818,11 +867,11 @@ public class ContactManager implements ITransientCache
 				contactsToDelete.addAll(contacts);
 			}
 						
-			HikeMessengerApp.getContactManager().deleteContacts(contactsToDelete);
+			deleteContacts(contactsToDelete);
 			
 			/* Delete ids from hike user DB */
-			ContactManager.getInstance().deleteMultipleContactInDB(hike_contacts_by_id.keySet()); 
-			ContactManager.getInstance().updateContactsinDB(updatedContacts);
+			deleteMultipleContactInDB(hike_contacts_by_id.keySet()); 
+			updateContactsinDB(updatedContacts);
 
 		}
 		catch (Exception e)
@@ -1036,6 +1085,13 @@ public class ContactManager implements ITransientCache
 
 	public int updateHikeStatus(Context ctx, String msisdn, boolean onhike)
 	{
+		ContactInfo contact = getContact(msisdn);
+		if (null != contact)
+		{
+			ContactInfo updatedContact = new ContactInfo(contact);
+			updatedContact.setOnhike(onhike);
+			updateContacts(updatedContact);
+		}
 		return updateHikeStatus(msisdn, onhike);
 	}
 

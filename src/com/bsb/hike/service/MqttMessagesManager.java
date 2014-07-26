@@ -232,14 +232,6 @@ public class MqttMessagesManager
 			
 			ContactManager.getInstance().updateHikeStatus(this.context, msisdn, joined);
 			
-			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
-			if (null != contact)
-			{
-				ContactInfo updatedContact = new ContactInfo(contact);
-				updatedContact.setOnhike(joined);
-				HikeMessengerApp.getContactManager().updateContacts(updatedContact);
-			}
-			
 			this.convDb.updateOnHikeStatus(msisdn, joined);
 
 			if (joined)
@@ -249,14 +241,6 @@ public class MqttMessagesManager
 				{
 					joinTime = Utils.applyServerTimeOffset(context, joinTime);
 					ContactManager.getInstance().setHikeJoinTime(msisdn, joinTime);
-
-					ContactInfo con = HikeMessengerApp.getContactManager().getContact(msisdn);
-					if (null != con)
-					{
-						ContactInfo updatedContact = new ContactInfo(con);
-						updatedContact.setHikeJoinTime(joinTime);
-						HikeMessengerApp.getContactManager().updateContacts(updatedContact);
-					}
 				}
 
 				saveStatusMsg(jsonObj, msisdn);
@@ -885,7 +869,7 @@ public class MqttMessagesManager
 			
 			ContactInfo updatedContact = new ContactInfo(contactInfo);
 			updatedContact.setFavoriteType(favoriteType);
-			HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+			ContactManager.getInstance().updateContacts(updatedContact);
 			
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contact, favoriteType);
 			this.pubSub.publish(favoriteType == FavoriteType.REQUEST_RECEIVED ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.FRIEND_REQUEST_ACCEPTED, favoriteToggle);
@@ -1211,17 +1195,10 @@ public class MqttMessagesManager
 				isOffline = (int) lastSeenTime;
 				lastSeenTime = System.currentTimeMillis() / 1000;
 			}
-
-			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
-			ContactInfo updatedContact = new ContactInfo(contact);
-			updatedContact.setLastSeenTime(lastSeenTime);
-			updatedContact.setOffline((int) isOffline);
-			HikeMessengerApp.getContactManager().updateContacts(updatedContact);
-
 			ContactManager.getInstance().updateLastSeenTime(msisdn, lastSeenTime);
 			ContactManager.getInstance().updateIsOffline(msisdn, (int) isOffline);
-
-			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED, updatedContact);
+			ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, true);
+			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED, contact);
 		}
 		else if (HikeConstants.MqttMessageTypes.SERVER_TIMESTAMP.equals(type))
 		{
@@ -1609,7 +1586,7 @@ public class MqttMessagesManager
 		
 		ContactInfo updatedContact = new ContactInfo(contactInfo);
 		updatedContact.setFavoriteType(favoriteType);
-		HikeMessengerApp.getContactManager().updateContacts(updatedContact);
+		ContactManager.getInstance().updateContacts(updatedContact);
 
 		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(contact, favoriteType);
 		this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);

@@ -106,14 +106,6 @@ public class DbConversationListener implements Listener
 				// Recency was already updated when the ft message was added.
 				ContactManager.getInstance().updateContactRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
 
-				ContactInfo contact = HikeMessengerApp.getContactManager().getContact(convMessage.getMsisdn());
-				if (null != contact)
-				{
-					ContactInfo updatedContact = new ContactInfo(contact);
-					updatedContact.setLastMessaged(convMessage.getTimestamp());
-					HikeMessengerApp.getContactManager().updateContacts(updatedContact);
-				}
-
 				mPubSub.publish(HikePubSub.RECENT_CONTACTS_UPDATED, convMessage.getMsisdn());
 			}
 
@@ -159,14 +151,6 @@ public class DbConversationListener implements Listener
 			 * When a user blocks someone, we reset the contact's friend type.
 			 */
 			ContactManager.getInstance().toggleContactFavorite(msisdn, FavoriteType.NOT_FRIEND);
-
-			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
-			if (null != contact)
-			{
-				ContactInfo updatedContact = new ContactInfo(contact);
-				updatedContact.setFavoriteType(FavoriteType.NOT_FRIEND);
-				HikeMessengerApp.getContactManager().updateContacts(updatedContact);
-			}
 
 			JSONObject blockObj = blockUnblockSerialize("b", msisdn);
 			/*
@@ -249,14 +233,6 @@ public class DbConversationListener implements Listener
 
 			ContactManager.getInstance().toggleContactFavorite(contactInfo.getMsisdn(), favoriteType);
 
-			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(contactInfo.getMsisdn());
-			if (null != contact)
-			{
-				ContactInfo updatedContact = new ContactInfo(contact);
-				updatedContact.setFavoriteType(favoriteType);
-				HikeMessengerApp.getContactManager().updateContacts(updatedContact);
-			}
-
 			if (favoriteType != FavoriteType.REQUEST_RECEIVED && favoriteType != FavoriteType.REQUEST_SENT_REJECTED && !HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type))
 			{
 				String requestType;
@@ -317,13 +293,6 @@ public class DbConversationListener implements Listener
 
 			ContactManager.getInstance().setHikeJoinTime(msisdn, hikeJoinTime);
 			
-			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
-			if (null != contact)
-			{
-				ContactInfo updatedContact = new ContactInfo(contact);
-				updatedContact.setHikeJoinTime(hikeJoinTime);
-				HikeMessengerApp.getContactManager().updateContacts(updatedContact);
-			}
 		}
 		else if (HikePubSub.SEND_HIKE_SMS_FALLBACK.equals(type))
 		{

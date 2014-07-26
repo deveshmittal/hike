@@ -1608,14 +1608,6 @@ public class Utils
 		if (!dbUpdated)
 		{
 			long time = System.currentTimeMillis() / 1000;
-			ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
-			if (null != contact)
-			{
-				ContactInfo updatedContact = new ContactInfo(contact);
-				updatedContact.setInviteTime(time);
-				HikeMessengerApp.getContactManager().updateContacts(updatedContact);
-			}
-
 			ContactManager.getInstance().updateInvitedTimestamp(msisdn, time);
 		}
 	}
@@ -1707,14 +1699,6 @@ public class Utils
 
 		long inviteTime = System.currentTimeMillis() / 1000;
 		contactInfo.setInviteTime(inviteTime);
-
-		ContactInfo contact = HikeMessengerApp.getContactManager().getContact(contactInfo.getMsisdn());
-		if (null != contact)
-		{
-			ContactInfo updatedContact = new ContactInfo(contact);
-			updatedContact.setInviteTime(inviteTime);
-			HikeMessengerApp.getContactManager().updateContacts(updatedContact);
-		}
 
 		ContactManager.getInstance().updateInvitedTimestamp(contactInfo.getMsisdn(), inviteTime);
 
@@ -3937,20 +3921,10 @@ public class Utils
 					isOffline = (int) lastSeenTime;
 					lastSeenTime = System.currentTimeMillis() / 1000;
 				}
-				ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
-				if (null != contact)
-				{
-					ContactInfo updatedContact = new ContactInfo(contact);
-					updatedContact.setLastSeenTime(lastSeenTime);
-					updatedContact.setOffline((int) isOffline);
-					HikeMessengerApp.getContactManager().updateContacts(updatedContact);
-				}
-
 				ContactManager.getInstance().updateLastSeenTime(msisdn, lastSeenTime);
 				ContactManager.getInstance().updateIsOffline(msisdn, (int) isOffline);
 
 				HikeMessengerApp.lastSeenFriendsMap.put(msisdn, new Pair<Integer, Long>(isOffline, lastSeenTime));
-
 			}
 			HikeMessengerApp.getPubSub().publish(HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, null);
 		}

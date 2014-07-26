@@ -106,15 +106,6 @@ public class FetchLastSeenTask extends FetchLastSeenBase
 			lastSeenValue = System.currentTimeMillis() / 1000;
 		}
 
-		ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn);
-		if (null != contact)
-		{
-			ContactInfo updatedContact = new ContactInfo(contact);
-			updatedContact.setLastSeenTime(lastSeenValue);
-			updatedContact.setOffline(offline);
-			HikeMessengerApp.getContactManager().updateContacts(updatedContact);
-		}
-		
 		ContactManager.getInstance().updateLastSeenTime(msisdn, lastSeenValue);
 		ContactManager.getInstance().updateIsOffline(msisdn, offline);
 
