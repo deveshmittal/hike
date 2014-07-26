@@ -701,4 +701,97 @@ class PersistenceCache extends ContactsCache
 			writeLock.unlock();
 		}
 	}
+
+	/**
+	 * This method is used when <code>number</code> can be msisdn or phone number . First we check in cache assuming number is msisdn , if not found then traverse through all the
+	 * contacts in persistence cache to find if any contactInfo object contains given number as phoneNumber. This method returns null if not found in memory and not makes a DB
+	 * call.
+	 * 
+	 * @param number
+	 * @return
+	 */
+	public ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number)
+	{
+		ContactInfo contact = getContact(number);
+		if (null != contact)
+		{
+			return contact;
+		}
+		readLock.lock();
+		try
+		{
+			for (Entry<String, ContactInfo> mapEntry : convsContactsPersistence.entrySet())
+			{
+				ContactInfo con = mapEntry.getValue();
+				if (null != con && con.getPhoneNum().equals(number))
+				{
+					contact = con;
+					break;
+				}
+			}
+
+			if (null == contact)
+			{
+				for (Entry<String, ContactTuple> mapEntry : groupContactsPersistence.entrySet())
+				{
+					ContactTuple tuple = mapEntry.getValue();
+					if (null != tuple && tuple.getContact().getPhoneNum().equals(number))
+					{
+						contact = tuple.getContact();
+						break;
+					}
+				}
+			}
+
+			return contact;
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
+
+	/**
+	 * Traverse through all the contacts in persistence cache to find if any contactInfo object contains given number as phoneNumber. This method returns null if not found in
+	 * memory and not makes a DB call.
+	 * 
+	 * @param number
+	 * @return
+	 */
+	public ContactInfo getContactInfoFromPhoneNo(String number)
+	{
+		ContactInfo contact = null;
+		readLock.lock();
+		try
+		{
+			for (Entry<String, ContactInfo> mapEntry : convsContactsPersistence.entrySet())
+			{
+				ContactInfo con = mapEntry.getValue();
+				if (null != con && con.getPhoneNum().equals(number))
+				{
+					contact = con;
+					break;
+				}
+			}
+
+			if (null == contact)
+			{
+				for (Entry<String, ContactTuple> mapEntry : groupContactsPersistence.entrySet())
+				{
+					ContactTuple tuple = mapEntry.getValue();
+					if (null != tuple && tuple.getContact().getPhoneNum().equals(number))
+					{
+						contact = tuple.getContact();
+						break;
+					}
+				}
+			}
+
+			return contact;
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
 }

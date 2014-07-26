@@ -545,6 +545,8 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
+	 * Traverse through all the contacts in transient cache to find if any contactInfo object contains given number as phoneNumber. This method returns null if not found in memory
+	 * and not makes a DB call.
 	 * 
 	 * @param number
 	 * @return
@@ -584,6 +586,8 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
+	 * This method is used when <code>number</code> can be msisdn or phone number . First we check in cache assuming number is msisdn , if not found then traverse through all the
+	 * contacts in transient cache to find if any contactInfo object contains given number as phoneNumber And if not found in transient cache we make a DB call.
 	 * 
 	 * @param number
 	 * @return
@@ -732,19 +736,38 @@ public class TransientCache extends ContactsCache
 			writeLock.unlock();
 		}
 	}
-	
+
 	/**
 	 * Returns the count of number of participants in a particular group.
+	 * 
 	 * @param groupId
 	 * @return
 	 */
 	int getGroupParticipantsCount(String groupId)
 	{
-		Map<String,Pair<GroupParticipant,String>> g = groupParticipants.get(groupId);
-		if(null != g)
+		Map<String, Pair<GroupParticipant, String>> g = groupParticipants.get(groupId);
+		if (null != g)
 		{
 			return g.size();
 		}
 		return HikeConversationsDatabase.getInstance().getActiveParticipantCount(groupId);
+	}
+
+	boolean doesContactExist(String msisdn)
+	{
+		ContactInfo contact = getContact(msisdn);
+		if (allContactsLoaded)
+		{
+			return (null != contact);
+		}
+		else
+		{
+			if (null != contact)
+				return true;
+			else
+			{
+				return hDb.doesContactExist(msisdn);
+			}
+		}
 	}
 }

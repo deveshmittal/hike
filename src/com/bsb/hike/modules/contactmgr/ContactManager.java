@@ -423,11 +423,21 @@ public class ContactManager implements ITransientCache
 
 	public ContactInfo getContactInfoFromPhoneNo(String number)
 	{
+		ContactInfo contact = persistenceCache.getContactInfoFromPhoneNo(number);
+		if (null != contact)
+		{
+			return contact;
+		}
 		return transientCache.getContactInfoFromPhoneNo(number);
 	}
 
 	public ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number)
 	{
+		ContactInfo contact = persistenceCache.getContactInfoFromPhoneNoOrMsisdn(number);
+		if (null != contact)
+		{
+			return contact;
+		}
 		return transientCache.getContactInfoFromPhoneNoOrMsisdn(number);
 	}
 
@@ -560,6 +570,11 @@ public class ContactManager implements ITransientCache
 
 	public FavoriteType getFriendshipStatus(String msisdn)
 	{
+		ContactInfo contact = getContact(msisdn);
+		if (null != contact)
+		{
+			return contact.getFavoriteType();
+		}
 		return hDb.getFriendshipStatus(msisdn);
 	}
 
@@ -604,7 +619,7 @@ public class ContactManager implements ITransientCache
 
 	public boolean doesContactExist(String msisdn)
 	{
-		return hDb.doesContactExist(msisdn);
+		return transientCache.doesContactExist(msisdn);
 	}
 
 	public void makeOlderAvatarsRounded()
