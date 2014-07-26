@@ -839,6 +839,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			boolean convAlreadyExist = ContactManager.getInstance().isConvExists(conv.getMsisdn());
 			String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
+			
+			bindConversationInsert(insertStatement, conv);
+			msgId = insertStatement.executeInsert();
+			
 			addThumbnailStringToMetadata(conv.getMetadata(), thumbnailString);
 
 			// if conversation does not exist and is not a group message, create new conversation
