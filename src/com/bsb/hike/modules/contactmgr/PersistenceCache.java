@@ -188,13 +188,16 @@ class PersistenceCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			GroupDetails pp = groupPersistence.get(grpId);
-			ConcurrentLinkedQueue<pair> lastMsisdns = pp.getLastMsisdns();
-			for (pair msPair : lastMsisdns)
+			GroupDetails grpDetails = groupPersistence.get(grpId);
+			if (null != grpDetails)
 			{
-				removeFromCache(msPair.first, false);
+				ConcurrentLinkedQueue<pair> lastMsisdns = grpDetails.getLastMsisdns();
+				for (pair msPair : lastMsisdns)
+				{
+					removeFromCache(msPair.first, false);
+				}
+				groupPersistence.remove(grpId);
 			}
-			groupPersistence.remove(grpId);
 		}
 		finally
 		{
