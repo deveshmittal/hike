@@ -131,6 +131,12 @@ public class AccountUtils
 	public static final String STICKERS_STAGING_BASE = "staging.im.hike.in/s/%1$s/%2$s";
 
 	public static String stickersUrl = HTTP_STRING + STICKERS_PRODUCTION_BASE;
+	
+	public static final String H2O_TUTORIAL_PRODUCTION_BASE = "hike.in/offlinedemo/";
+
+	public static final String H2O_TUTORIAL_STAGING_BASE = "staging.im.hike.in/offlinedemo/";
+
+	public static String h2oTutorialUrl = HTTP_STRING + H2O_TUTORIAL_PRODUCTION_BASE;
 
 	public static boolean ssl = false;
 

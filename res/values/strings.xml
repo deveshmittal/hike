@@ -1103,4 +1103,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
         <![CDATA[ <font color="#929391">To change password</font>  <font color="#fdf0e1">Settings > Privacy</font>
 	    ]]>
     </string>
+    <string name="hike_offline_caps">Hike Offline</string>
 </resources>

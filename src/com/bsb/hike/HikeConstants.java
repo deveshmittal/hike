@@ -1454,6 +1454,8 @@ public class HikeConstants
 		public static final String FAVOURITE_FROM_OVERFLOW = "favoriteFromOverflow";
 		
 		public static final String STATUS_UPDATE_FROM_OVERFLOW = "statusUpdateFromOverflow";
+
+		public static final String FTUE_CARD_HIKE_OFFLINE_CLICKED = "ftueCardHikeOfflineClicked";
 	}
 
 	public static final class MqttMessageTypes
