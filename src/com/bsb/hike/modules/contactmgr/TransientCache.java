@@ -403,16 +403,7 @@ public class TransientCache extends ContactsCache
 			Map<String, ContactInfo> map = hDb.getNOTFRIENDScontactsFromDB(onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
 			if (map != null)
 			{
-				for (Entry<String, ContactInfo> mapEntry : map.entrySet())
-				{
-					String msisdn = mapEntry.getKey();
-					ContactInfo contact = mapEntry.getValue();
-					if (getContact(msisdn) == null)
-					{
-						insertContact(contact);
-					}
-					contacts.add(contact);
-				}
+				contacts.addAll(map.values());
 			}
 		}
 		return contacts;

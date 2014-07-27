@@ -393,7 +393,21 @@ public class ContactManager implements ITransientCache
 	{
 		if (favoriteType == FavoriteType.NOT_FRIEND)
 		{
-			return transientCache.getNOTFRIENDScontacts(onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+			List<ContactInfo> contacts = transientCache.getNOTFRIENDScontacts(onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+
+			if (!transientCache.isAllContactsLoaded())
+			{
+				// if all contacts are not loaded then we get contacts from DB (using method getNOTFRIENDScontacts) , some contacts can be already in memory either in persistence
+				// cache or transient cache . To avoid duplicates we first check in both cache if not found then only insert in transient cache.
+				for (ContactInfo con : contacts)
+				{
+					if (null == getContact(con.getMsisdn()))
+					{
+						transientCache.insertContact(con);
+					}
+				}
+			}
+			return contacts;
 		}
 		else
 		{

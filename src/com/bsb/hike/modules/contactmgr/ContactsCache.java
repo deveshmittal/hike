@@ -15,6 +15,11 @@ abstract class ContactsCache
 {
 	protected boolean allContactsLoaded = false;
 
+	protected boolean isAllContactsLoaded()
+	{
+		return allContactsLoaded;
+	}
+	
 	/**
 	 * @param key
 	 * @return contact object if present and null if not present
