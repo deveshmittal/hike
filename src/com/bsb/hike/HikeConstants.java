@@ -1212,6 +1212,7 @@ public class HikeConstants
 		
 		public static final String HAS_TIP = "hasTip";
 		
+		public static final String PIN_TYPE_SHOWING="pinTypeShowing";
 	}
 
 	public static final class LogEvent
