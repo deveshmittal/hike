@@ -816,6 +816,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			showTipIfRequired();
 		}
+		final int whichPinEditShowing = savedInstanceState!=null ? savedInstanceState.getInt(HikeConstants.Extras.PIN_TYPE_SHOWING) : 0;
+		if(whichPinEditShowing!=0){
+			mHandler.post(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					setupPinImpMessage(whichPinEditShowing);
+				}
+			});
+			
+		}
 		Logger.i("chatthread", "on create end");
 
 	}
@@ -5796,6 +5809,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			outState.putBoolean(HikeConstants.Extras.CHAT_THEME_WINDOW_OPEN, true);
 			outState.putInt(HikeConstants.Extras.SELECTED_THEME, temporaryTheme.ordinal());
+		}
+		if (showingImpMessagePin)
+		{
+			outState.putInt(HikeConstants.Extras.PIN_TYPE_SHOWING, HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 		}
 		super.onSaveInstanceState(outState);
 	}
