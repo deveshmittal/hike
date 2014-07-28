@@ -28,7 +28,6 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.DbException;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -563,6 +562,11 @@ public class ContactManager implements ITransientCache
 
 	public boolean hasIcon(String msisdn)
 	{
+		ContactInfo contact = getContact(msisdn);
+		if (null != contact)
+		{
+			return contact.hasCustomPhoto();
+		}
 		return hDb.hasIcon(msisdn);
 	}
 
@@ -600,9 +604,16 @@ public class ContactManager implements ITransientCache
 		hDb.unblock(msisdn);
 	}
 
-	public void removeIcon(String id)
+	public void removeIcon(String msisdn)
 	{
-		hDb.removeIcon(id);
+		ContactInfo contact = getContact(msisdn);
+		if (null != contact)
+		{
+			ContactInfo updatedContact = new ContactInfo(contact);
+			updatedContact.setHasCustomPhoto(false);
+			updateContacts(updatedContact);
+		}
+		hDb.removeIcon(msisdn);
 	}
 
 	public void setHikeJoinTime(String msisdn, long hikeJoinTime)
@@ -619,6 +630,13 @@ public class ContactManager implements ITransientCache
 
 	public void setIcon(String msisdn, byte[] data, boolean b)
 	{
+		ContactInfo contact = getContact(msisdn);
+		if (null != contact)
+		{
+			ContactInfo updatedContact = new ContactInfo(contact);
+			updatedContact.setHasCustomPhoto(true);
+			updateContacts(updatedContact);
+		}
 		hDb.setIcon(msisdn, data, b);
 	}
 
