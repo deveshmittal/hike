@@ -319,7 +319,11 @@ public class Conversation implements Comparable<Conversation>
 		public long getLastPinTimeStamp(int pinType) throws JSONException
 		{
 			JSONObject pinJSON = getPinJson(pinType);
-			return pinJSON.getLong(HikeConstants.TIMESTAMP);
+			if(pinJSON.has(HikeConstants.TIMESTAMP))
+			{
+				return pinJSON.getLong(HikeConstants.TIMESTAMP);
+			}
+			return -1;
 		}
 		public void setLastPinTimeStamp(int pinType, long timeStamp) throws JSONException
 		{
