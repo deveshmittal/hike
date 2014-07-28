@@ -3455,9 +3455,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
-					Intent intent = new Intent(ChatThread.this, HomeActivity.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
+					finish();
 				}
 			});
 		}
