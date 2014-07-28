@@ -3405,13 +3405,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			/* TODO this should be ORDER BY timestamp */
 			String query = "SELECT " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + "," + DBConstants.TIMESTAMP + "," + DBConstants.MESSAGE_ID + ","
 					+ DBConstants.MAPPED_MSG_ID + "," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.IS_HIKE_MESSAGE + ","
-					+ DBConstants.READ_BY + "," + DBConstants.MESSAGE_TYPE + " FROM " + DBConstants.MESSAGES_TABLE + " where " + selection + " LIMIT " + limitStr + " OFFSET "
+					+ DBConstants.READ_BY + "," + DBConstants.MESSAGE_TYPE + " FROM " + DBConstants.MESSAGES_TABLE + " where " + selection + " order by " + DBConstants.MESSAGE_ID + " LIMIT " + limitStr + " OFFSET "
 					+ startFrom;
 			c = mDb.rawQuery(query, new String[] { Long.toString(conv.getConvId()) });
 
 			List<ConvMessage> elements = getMessagesFromDB(c, conv);
-
-			// Collections.reverse(elements);
+			
+			
+			 Collections.reverse(elements);
 
 			return elements;
 		}
