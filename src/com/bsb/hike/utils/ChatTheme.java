@@ -129,7 +129,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_beach_2_independence_rain2;
+			return R.drawable.ic_bubble_smiley_geometric1_independence;
 		}
 
 		@Override
@@ -141,7 +141,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_beach_2_independence_rain2;
+			return R.drawable.ic_nudge_sent_custom_smiley_geometric1_independence;
 		}
 
 		@Override
@@ -171,7 +171,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_beach_2_independence_rain2;
+			return R.color.bubble_smiley_geometric1_independence;
 		}
 
 		@Override
@@ -414,7 +414,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_beach_2_independence_rain2;
+			return R.drawable.ic_bubble_beach_2_rain2;
 		}
 
 		@Override
@@ -426,7 +426,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_beach_2_independence_rain2;
+			return R.drawable.ic_nudge_sent_custom_beach_2_rain2;
 		}
 
 		@Override
@@ -456,7 +456,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_beach_2_independence_rain2;
+			return R.color.bubble_beach_2_rain2;
 		}
 
 		@Override
@@ -699,7 +699,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_smiley_geometric1;
+			return R.drawable.ic_bubble_smiley_geometric1_independence;
 		}
 
 		@Override
@@ -711,7 +711,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_smiley_geometric1;
+			return R.drawable.ic_nudge_sent_custom_smiley_geometric1_independence;
 		}
 
 		@Override
@@ -741,7 +741,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_smiley_geometric1;
+			return R.color.bubble_smiley_geometric1_independence;
 		}
 
 		@Override
@@ -889,7 +889,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_smiley_geometric1;
+			return R.drawable.ic_bubble_smiley_geometric1_independence;
 		}
 
 		@Override
@@ -930,7 +930,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_smiley_geometric1;
+			return R.color.bubble_smiley_geometric1_independence;
 		}
 
 		@Override
@@ -1078,7 +1078,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_beach_2_independence_rain2;
+			return R.drawable.ic_bubble_beach_2_rain2;
 		}
 
 		@Override
@@ -1090,7 +1090,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_beach_2_independence_rain2;
+			return R.drawable.ic_nudge_sent_custom_beach_2_rain2;
 		}
 
 		@Override
@@ -1120,7 +1120,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_beach_2_independence_rain2;
+			return R.color.bubble_beach_2_rain2;
 		}
 
 		@Override
@@ -2408,7 +2408,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleResId()
 		{
-			return R.drawable.ic_bubble_smiley_geometric1;
+			return R.drawable.ic_bubble_smiley_geometric1_independence;
 		}
 
 		@Override
@@ -2420,7 +2420,7 @@ public enum ChatTheme
 		@Override
 		public int sentNudgeResId()
 		{
-			return R.drawable.ic_nudge_sent_custom_smiley_geometric1;
+			return R.drawable.ic_nudge_sent_custom_smiley_geometric1_independence;
 		}
 
 		@Override
@@ -2450,7 +2450,7 @@ public enum ChatTheme
 		@Override
 		public int bubbleColor()
 		{
-			return R.color.bubble_smiley_geometric1;
+			return R.color.bubble_smiley_geometric1_independence;
 		}
 
 		@Override
