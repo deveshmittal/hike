@@ -734,17 +734,32 @@ public class MqttMessagesManager
 			{
 				ids[i] = msgIds.optLong(i);
 			}
-			convDb.setReadByForGroup(id, ids, participantMsisdn);
-			Pair<long[],String> pair = new Pair<long[],String>(ids,participantMsisdn);
-			Pair<String, Pair<long[],String>> groupPair = new Pair<String, Pair<long[],String>>(id, pair);
-			this.pubSub.publish(HikePubSub.GROUP_MESSAGE_DELIVERED_READ, groupPair);
+			long maxMsgId = convDb.setReadByForGroup(id, ids, participantMsisdn);
+			
+			if(maxMsgId > 0)
+			{
+				Pair<Long,String> pair = new Pair<Long,String>(maxMsgId,participantMsisdn);
+				Pair<String , Pair<Long,String>> groupPair = new Pair<String, Pair<Long,String>>(id, pair);
+				this.pubSub.publish(HikePubSub.GROUP_MESSAGE_DELIVERED_READ, groupPair);
+			}
 		}
 	}
 	
 	/**
 	 * <li>This function does specific "mr" processing for bulk.</li>
-	 * <li> adds max message id form msgids list to {@link #messageStatusMap} first field if this id is grater than that present in second field
+	 * <p> In 1-1 conversation it adds max message id from ids list to {@link #messageStatusMap} first field if 
+	 * this id is greater than that present in first field</p>
+	 * 
+	 * <p> In group conversation since we receive mr for messages sent by others also
+	 * we have to first check whether the list of ids present in mr belongs to our conversation or not.
+	 * <br>We call {@link HikeConversationsDatabase#getMrIdForGroup(String, long[])} passing groupId and ids as arguments.</br> It will return max id from list
+	 * if it belongs to this conversation else it will return -1. 
+	 * <li>if id returned is less than that already present in first field we simply return</li>
+	 * <li>if equals we have to participant msisdn to set</li>
+	 * <li>if greater than we have clear set and update update both set and msgid fields in pair</li>
+	 * 
 	 * @param jsonObj
+	 * 			-- mr json containing list of ids 
 	 * @throws JSONException
 	 */
 	private void saveMessageReadBulk(JSONObject jsonObj) throws JSONException
@@ -761,15 +776,6 @@ public class MqttMessagesManager
 			return;
 		}
 		
-		long msgID = -1;
-		for (int i = 0; i < msgIds.length(); i++)
-		{
-			long tempId = msgIds.optLong(i);
-			if(tempId > msgID)
-			{
-				msgID = tempId;
-			}
-		}
 
 		if(messageStatusMap.get(id) == null)
 		{
@@ -784,18 +790,45 @@ public class MqttMessagesManager
 		}
 		
 		PairModified<Long, Set<String>> pair = messageStatusMap.get(id).getFirst();
+		long msgID = -1;
 		
 		if (Utils.isGroupConversation(id))
 		{
-			if(pair.getFirst() != msgID)
+			long[] ids = new long[msgIds.length()];
+			for (int i = 0; i < msgIds.length(); i++)
 			{
-				pair.setSecond(new HashSet<String>());
+				ids[i] = msgIds.optLong(i);
+			}
+			
+			msgID = convDb.getMrIdForGroup(id, ids);
+			if(pair.getFirst() > msgID)
+			{
+				return ;
+			}
+			
+			if(pair.getFirst() < msgID)
+			{
+				pair.setFirst(msgID);
+				pair.getSecond().clear();
 			}
 			pair.getSecond().add(participantMsisdn);
 		}
-		if(msgID > pair.getFirst())
+		else
 		{
-			pair.setFirst(msgID);
+			
+			for (int i = 0; i < msgIds.length(); i++)
+			{
+				long tempId = msgIds.optLong(i);
+				if(tempId > msgID)
+				{
+					msgID = tempId;
+				}
+				if(msgID > pair.getFirst())
+				{
+					pair.setFirst(msgID);
+				}
+			}
+
 		}
 	}
 
