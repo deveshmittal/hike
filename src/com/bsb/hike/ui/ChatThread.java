@@ -1751,7 +1751,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				je.printStackTrace();
 			}
 		}
-		return false;
+		return true;
 	}
 
 	/*
