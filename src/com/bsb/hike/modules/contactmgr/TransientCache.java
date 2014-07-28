@@ -509,15 +509,33 @@ public class TransientCache extends ContactsCache
 	 */
 	List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
 	{
-		// TODO first check if all contacts are loaded
-
-		List<ContactInfo> contacts = hDb.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
-		for (ContactInfo contact : contacts)
+		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
+		if (allContactsLoaded)
 		{
-			if (null == getContact(contact.getMsisdn()))
+			readLock.lock();
+			try
 			{
-				insertContact(contact);
+				for (Entry<String, ContactTuple> mapEntry : transientContacts.entrySet())
+				{
+					String msisdn = mapEntry.getKey();
+					ContactInfo contactInfo = mapEntry.getValue().getContact();
+					if (msisdnsIn.contains(msisdn) && (!msisdnsNotIn.contains(msisdn)) && !msisdn.equals(myMsisdn) && contactInfo.isOnhike())
+					{
+						contacts.add(contactInfo);
+						limit--;
+						if (limit == 0)
+							break;
+					}
+				}
 			}
+			finally
+			{
+				readLock.unlock();
+			}
+		}
+		else
+		{
+			contacts = hDb.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
 		}
 		return contacts;
 	}

@@ -433,7 +433,19 @@ public class ContactManager implements ITransientCache
 
 	public List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
 	{
-		return transientCache.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
+		List<ContactInfo> contacts = transientCache.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
+		
+		if (!transientCache.allContactsLoaded)
+		{
+			for (ContactInfo con : contacts)
+			{
+				if (null == getContact(con.getMsisdn()))
+				{
+					transientCache.insertContact(con);
+				}
+			}
+		}
+		return contacts;
 	}
 
 	public List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts()
