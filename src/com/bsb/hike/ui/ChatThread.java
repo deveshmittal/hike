@@ -3929,6 +3929,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int before, int count)
 	{
+		if(hashWatcher!=null){
+			hashWatcher.onTextChanged(s, start, before, count);
+		}
 	}
 
 	@Override
