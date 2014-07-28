@@ -502,15 +502,6 @@ public class TransientCache extends ContactsCache
 		else
 		{
 			contacts = hDb.getNonHikeContacts();
-
-			for (Pair<AtomicBoolean, ContactInfo> p : contacts)
-			{
-				ContactInfo contact = p.second;
-				if (null == getContact(contact.getMsisdn()))
-				{
-					insertContact(contact);
-				}
-			}
 		}
 		return contacts;
 	}

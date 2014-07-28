@@ -427,7 +427,19 @@ public class ContactManager implements ITransientCache
 
 	public List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts()
 	{
-		return transientCache.getNonHikeContacts();
+		List<Pair<AtomicBoolean, ContactInfo>> nonHikeContacts = transientCache.getNonHikeContacts();
+		if (!transientCache.isAllContactsLoaded())
+		{
+			for (Pair<AtomicBoolean, ContactInfo> pair : nonHikeContacts)
+			{
+				ContactInfo contact = pair.second;
+				if (null == getContact(contact.getMsisdn()))
+				{
+					transientCache.insertContact(contact);
+				}
+			}
+		}
+		return nonHikeContacts;
 	}
 
 	public List<ContactInfo> getNonHikeMostContactedContacts(int limit)
