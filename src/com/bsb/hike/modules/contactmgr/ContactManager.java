@@ -456,7 +456,23 @@ public class ContactManager implements ITransientCache
 
 	public List<ContactInfo> getNonHikeMostContactedContacts(int limit)
 	{
-		return transientCache.getNonHikeMostContactedContacts(limit);
+		/*
+		 * Sending twice the limit to account for the contacts that might be on hike
+		 */
+		Pair<String, Map<String, Integer>> data = getMostContactedContacts(context, limit * 2);
+		List<ContactInfo> contacts = transientCache.getNonHikeMostContactedContacts(data.first, data.second, limit);
+		
+		if (!transientCache.isAllContactsLoaded())
+		{
+			for (ContactInfo con : contacts)
+			{
+				if (null == getContact(con.getMsisdn()))
+				{
+					transientCache.insertContact(con);
+				}
+			}
+		}
+		return contacts;
 	}
 
 	public ContactInfo getContactInfoFromPhoneNo(String number)

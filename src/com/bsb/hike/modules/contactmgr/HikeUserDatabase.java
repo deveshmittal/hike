@@ -1852,7 +1852,7 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	private List<ContactInfo> getNonHikeMostContactedContactsFromListOfNumbers(String selectionNumbers, final Map<String, Integer> mostContactedValues, int limit)
+	public List<ContactInfo> getNonHikeMostContactedContactsFromListOfNumbers(String selectionNumbers, final Map<String, Integer> mostContactedValues, int limit)
 	{
 		Map<String, FavoriteType> favoriteMap = getFavoriteMap();
 
@@ -1881,15 +1881,6 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		});
 
 		return contactList;
-	}
-
-	List<ContactInfo> getNonHikeMostContactedContacts(int limit)
-	{
-		/*
-		 * Sending twice the limit to account for the contacts that might be on hike
-		 */
-		Pair<String, Map<String, Integer>> data = ContactManager.getInstance().getMostContactedContacts(mContext, limit * 2);
-		return getNonHikeMostContactedContactsFromListOfNumbers(data.first, data.second, limit);
 	}
 
 	void setMultipleContactsToFavorites(JSONObject favorites)

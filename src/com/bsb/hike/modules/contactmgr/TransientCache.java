@@ -1,6 +1,8 @@
 package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -565,17 +567,51 @@ public class TransientCache extends ContactsCache
 	 * @param limit
 	 * @return
 	 */
-	List<ContactInfo> getNonHikeMostContactedContacts(int limit)
+	List<ContactInfo> getNonHikeMostContactedContacts(String phoneNumbers, final Map<String, Integer> mostContactedValues, int limit)
 	{
-		// TODO first check if all contacts are loaded
-
-		List<ContactInfo> contacts = hDb.getNonHikeMostContactedContacts(limit);
-		for (ContactInfo contact : contacts)
+		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
+		if (allContactsLoaded)
 		{
-			if (null == getContact(contact.getMsisdn()))
+			readLock.lock();
+			try
 			{
-				insertContact(contact);
+				for (Entry<String, ContactTuple> savedMapEntry : transientContacts.entrySet())
+				{
+					String msisdn = savedMapEntry.getKey();
+					ContactInfo contactInfo = savedMapEntry.getValue().getContact();
+					if (phoneNumbers.contains(msisdn) && !contactInfo.isOnhike())
+					{
+						contacts.add(contactInfo);
+						limit = limit - 1;
+						if (limit == 0)
+							break;
+					}
+				}
 			}
+			finally
+			{
+				readLock.unlock();
+			}
+
+			Collections.sort(contacts, new Comparator<ContactInfo>()
+			{
+				@Override
+				public int compare(ContactInfo lhs, ContactInfo rhs)
+				{
+					int lhsContactNum = mostContactedValues.get(lhs.getPhoneNum());
+					int rhsContactNum = mostContactedValues.get(rhs.getPhoneNum());
+
+					if (lhsContactNum != rhsContactNum)
+					{
+						return -((Integer) lhsContactNum).compareTo(rhsContactNum);
+					}
+					return lhs.getName().toLowerCase().compareTo(rhs.getName().toLowerCase());
+				}
+			});
+		}
+		else
+		{
+			contacts = hDb.getNonHikeMostContactedContactsFromListOfNumbers(phoneNumbers, mostContactedValues, limit);
 		}
 		return contacts;
 	}
