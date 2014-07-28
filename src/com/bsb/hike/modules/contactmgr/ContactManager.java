@@ -417,7 +417,19 @@ public class ContactManager implements ITransientCache
 
 	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType[] favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
 	{
-		return transientCache.getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+		List<ContactInfo> contacts = transientCache.getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+		
+		if (!transientCache.allContactsLoaded)
+		{
+			for (ContactInfo con : contacts)
+			{
+				if (null == getContact(con.getMsisdn()))
+				{
+					transientCache.insertContact(con);
+				}
+			}
+		}
+		return contacts;
 	}
 
 	public List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)

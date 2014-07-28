@@ -13,6 +13,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import android.util.Pair;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -420,26 +421,79 @@ public class TransientCache extends ContactsCache
 	 */
 	List<ContactInfo> getContactsOfFavoriteType(FavoriteType[] favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
 	{
-		// TODO first check if all contacts are loaded
-
-		Map<String, ContactInfo> map = hDb.getContactsOfFavoriteTypeDB(favoriteType, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
-
 		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
-
-		if (map != null)
+		if (allContactsLoaded)
 		{
-			for (Entry<String, ContactInfo> mapEntry : map.entrySet())
+			Set<String> blockSet = hDb.getBlockedMsisdnSet();
+			boolean flag;
+
+			readLock.lock();
+			try
 			{
-				String msisdn = mapEntry.getKey();
-				ContactInfo contact = mapEntry.getValue();
-				if (getContact(msisdn) == null)
+				for (Entry<String, ContactTuple> savedMapEntry : transientContacts.entrySet())
 				{
-					insertContact(contact);
+					String msisdn = savedMapEntry.getKey();
+					ContactTuple tuple = savedMapEntry.getValue();
+					ContactInfo contactInfo = tuple.getContact();
+
+					if (ignoreUnknownContacts && (null == contactInfo.getName()))
+					{
+						continue;
+					}
+
+					if (onHike != HikeConstants.BOTH_VALUE)
+					{
+						if (!(contactInfo.isOnhike() == (onHike == 1 ? true : false)))
+						{
+							continue;
+						}
+
+						if (onHike == HikeConstants.NOT_ON_HIKE_VALUE)
+						{
+							if (!msisdn.contains("+91"))
+							{
+								continue;
+							}
+						}
+					}
+
+					if (!nativeSMSOn)
+					{
+						if (!(contactInfo.isOnhike() || msisdn.contains("+91")))
+						{
+							continue;
+						}
+					}
+
+					flag = false;
+					for (FavoriteType favType : favoriteType)
+					{
+						if (contactInfo.getFavoriteType() == favType)
+						{
+							flag = true;
+							break;
+						}
+					}
+
+					if (flag && !blockSet.contains(msisdn) && !msisdn.equals(myMsisdn))
+					{
+						contacts.add(contactInfo);
+					}
 				}
-				contacts.add(contact);
+			}
+			finally
+			{
+				readLock.unlock();
 			}
 		}
-
+		else
+		{
+			Map<String, ContactInfo> map = hDb.getContactsOfFavoriteTypeDB(favoriteType, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
+			if (map != null)
+			{
+				contacts.addAll(map.values());
+			}
+		}
 		return contacts;
 	}
 
