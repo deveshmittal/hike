@@ -1355,7 +1355,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					String msisdn = conv.getMsisdn();
 					if (convesationMap.get(msisdn) == null)
 					{
-						conversation = this.getConversationBulk(msisdn, 0);
+						conversation = this.getConversation(msisdn, 0);
 						convesationMap.put(msisdn, conversation);
 					}
 					else
@@ -1789,15 +1789,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 			}
 			List<ConvMessage> messages;
-			if (limit != -1 && unreadCount > limit)
+			if (limit != 0)
 			{
-				messages = getConversationThread(msisdn, convid, unreadCount, conv, -1);
+				if (limit != -1 && unreadCount > limit)
+				{
+					messages = getConversationThread(msisdn, convid, unreadCount, conv, -1);
+				}
+				else
+				{
+					messages = getConversationThread(msisdn, convid, limit, conv, -1);
+				}
+				conv.setMessages(messages);
 			}
-			else
-			{
-				messages = getConversationThread(msisdn, convid, limit, conv, -1);
-			}
-			conv.setMessages(messages);
 			conv.setUnreadCount(unreadCount);
 
 			return conv;
