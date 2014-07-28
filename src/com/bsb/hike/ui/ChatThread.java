@@ -1824,6 +1824,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void createConversation()
 	{
 		/*
+		 * Fix for forward crash : Happens due to the action mode is remain enabled on switching the orientation before forwarding.
+		 */
+		invalidateOptionsMenu();
+		/*
 		 * If we are in a stealth conversation when the stealth mode is off, we should exit the conversation.
 		 */
 		if (HikeMessengerApp.isStealthMsisdn(mContactNumber))
