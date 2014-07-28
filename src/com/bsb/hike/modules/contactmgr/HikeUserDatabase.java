@@ -46,7 +46,7 @@ import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
- class HikeUserDatabase extends SQLiteOpenHelper
+class HikeUserDatabase extends SQLiteOpenHelper
 {
 	private SQLiteDatabase mDb;
 
@@ -229,12 +229,12 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 void makeOlderAvatarsRounded()
+	void makeOlderAvatarsRounded()
 	{
 		makeOlderAvatarsRounded(mDb);
 	}
 
-	 void addContacts(List<ContactInfo> contacts, boolean isFirstSync) throws DbException
+	void addContacts(List<ContactInfo> contacts, boolean isFirstSync) throws DbException
 	{
 		SQLiteDatabase db = mDb;
 		db.beginTransaction();
@@ -349,7 +349,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 void addBlockList(List<String> msisdns) throws DbException
+	void addBlockList(List<String> msisdns) throws DbException
 	{
 		if (msisdns == null)
 		{
@@ -393,7 +393,7 @@ import com.bsb.hike.utils.Utils;
 	 * @param contacts
 	 *            list of contacts to set/add
 	 */
-	 void setAddressBookAndBlockList(List<ContactInfo> contacts, List<String> blockedMsisdns) throws DbException
+	void setAddressBookAndBlockList(List<ContactInfo> contacts, List<String> blockedMsisdns) throws DbException
 	{
 		/* delete all existing entries from database */
 		mDb.delete(DBConstants.USERS_TABLE, null, null);
@@ -404,7 +404,7 @@ import com.bsb.hike.utils.Utils;
 		addBlockList(blockedMsisdns);
 	}
 
-	 ContactInfo getContactInfoFromMSISDN(String msisdn, boolean ifNotFoundReturnNull)
+	ContactInfo getContactInfoFromMSISDN(String msisdn, boolean ifNotFoundReturnNull)
 	{
 		Cursor c = null;
 		List<ContactInfo> contactInfos = null;
@@ -829,12 +829,12 @@ import com.bsb.hike.utils.Utils;
 		return contactInfos;
 	}
 
-	 Map<String, ContactInfo> getContactInfoFromMsisdns(List<String> msisdns, boolean favoriteTypeNeeded)
+	Map<String, ContactInfo> getContactInfoFromMsisdns(List<String> msisdns, boolean favoriteTypeNeeded)
 	{
 		return getContactInfoFromMsisdns(msisdns, favoriteTypeNeeded, false);
 	}
 
-	 Map<String, ContactInfo> getContactInfoFromMsisdns(List<String> msisdns, boolean favoriteTypeNeeded, boolean ignoreUnknownContacts)
+	Map<String, ContactInfo> getContactInfoFromMsisdns(List<String> msisdns, boolean favoriteTypeNeeded, boolean ignoreUnknownContacts)
 	{
 		Cursor c = null;
 
@@ -916,7 +916,7 @@ import com.bsb.hike.utils.Utils;
 
 	}
 
-	 List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
+	List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
 	{
 		Cursor c = null;
 		List<ContactInfo> contactInfos = null;
@@ -1040,14 +1040,14 @@ import com.bsb.hike.utils.Utils;
 	 *            contact to add
 	 * @return true if the insert was successful
 	 */
-	 void addContact(ContactInfo hikeContactInfo) throws DbException
+	void addContact(ContactInfo hikeContactInfo) throws DbException
 	{
 		List<ContactInfo> l = new LinkedList<ContactInfo>();
 		l.add(hikeContactInfo);
 		addContacts(l, false);
 	}
 
-	 List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts()
+	List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts()
 	{
 		Cursor c = null;
 
@@ -1081,7 +1081,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 List<ContactInfo> getContacts()
+	List<ContactInfo> getContacts()
 	{
 		return getContacts(true);
 	}
@@ -1169,7 +1169,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 Map<String, ContactInfo> getNOTFRIENDScontactsFromDB(int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
+	Map<String, ContactInfo> getNOTFRIENDScontactsFromDB(int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
 	{
 		Map<String, FavoriteType> favoriteMap = getFavoriteMap();
 
@@ -1205,7 +1205,7 @@ import com.bsb.hike.utils.Utils;
 		return contactInfomap;
 	}
 
-	 Map<String, ContactInfo> getContactsOfFavoriteTypeDB(FavoriteType[] favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
+	Map<String, ContactInfo> getContactsOfFavoriteTypeDB(FavoriteType[] favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
 	{
 		Map<String, FavoriteType> favoriteMap = getFavoriteMap(favoriteType);
 		if (null == favoriteMap)
@@ -1279,7 +1279,7 @@ import com.bsb.hike.utils.Utils;
 		return queryBuilder;
 	}
 
-	 List<ContactInfo> getContacts(boolean ignoreEmpty)
+	List<ContactInfo> getContacts(boolean ignoreEmpty)
 	{
 		Cursor c = null;
 		try
@@ -1306,13 +1306,13 @@ import com.bsb.hike.utils.Utils;
 		return c;
 	}
 
-	 void deleteMultipleRows(Collection<String> ids)
+	void deleteMultipleRows(Collection<String> ids)
 	{
 		String ids_joined = "(" + Utils.join(ids, ",", "\"", "\"") + ")";
 		mDb.delete(DBConstants.USERS_TABLE, DBConstants.ID + " in " + ids_joined, null);
 	}
 
-	 void updateContacts(List<ContactInfo> updatedContacts)
+	void updateContacts(List<ContactInfo> updatedContacts)
 	{
 		if (updatedContacts == null)
 		{
@@ -1336,7 +1336,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 int updateHikeContact(String msisdn, boolean onhike)
+	int updateHikeContact(String msisdn, boolean onhike)
 	{
 		Cursor c = null;
 		try
@@ -1374,7 +1374,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 void deleteAll()
+	void deleteAll()
 	{
 		mDb.delete(DBConstants.USERS_TABLE, null, null);
 		mDb.delete(DBConstants.BLOCK_TABLE, null, null);
@@ -1383,7 +1383,7 @@ import com.bsb.hike.utils.Utils;
 		mDb.delete(DBConstants.ROUNDED_THUMBNAIL_TABLE, null, null);
 	}
 
-	 ContactInfo getContactInfoFromPhoneNo(String number)
+	ContactInfo getContactInfoFromPhoneNo(String number)
 	{
 		Cursor c = null;
 		try
@@ -1407,7 +1407,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 FavoriteType getFriendshipStatus(String number)
+	FavoriteType getFriendshipStatus(String number)
 	{
 		Cursor favoriteCursor = null;
 		try
@@ -1431,7 +1431,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number)
+	ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number)
 	{
 		Cursor c = null;
 		try
@@ -1456,19 +1456,19 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 void unblock(String msisdn)
+	void unblock(String msisdn)
 	{
 		mDb.delete(DBConstants.BLOCK_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
 	}
 
-	 void block(String msisdn)
+	void block(String msisdn)
 	{
 		ContentValues values = new ContentValues();
 		values.put(DBConstants.MSISDN, msisdn);
 		mDb.insert(DBConstants.BLOCK_TABLE, null, values);
 	}
 
-	 boolean isBlocked(String msisdn)
+	boolean isBlocked(String msisdn)
 	{
 		Cursor c = null;
 		try
@@ -1485,7 +1485,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 Set<String> getBlockedUsers()
+	Set<String> getBlockedUsers()
 	{
 		Set<String> blocked = new HashSet<String>();
 		Cursor c = null;
@@ -1509,7 +1509,7 @@ import com.bsb.hike.utils.Utils;
 		return blocked;
 	}
 
-	 List<Pair<AtomicBoolean, ContactInfo>> getBlockedUserList()
+	List<Pair<AtomicBoolean, ContactInfo>> getBlockedUserList()
 	{
 		String blockedMsisdnColumnName = "blk";
 
@@ -1620,7 +1620,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 void setIcon(String msisdn, byte[] data, boolean isProfileImage)
+	void setIcon(String msisdn, byte[] data, boolean isProfileImage)
 	{
 		if (!isProfileImage)
 		{
@@ -1672,7 +1672,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 byte[] getIconByteArray(String msisdn, boolean rounded)
+	byte[] getIconByteArray(String msisdn, boolean rounded)
 	{
 		Cursor c = null;
 		try
@@ -1697,7 +1697,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 String getIconIdentifierString(String msisdn)
+	String getIconIdentifierString(String msisdn)
 	{
 		Cursor c = null;
 		try
@@ -1731,7 +1731,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 void removeIcon(String msisdn)
+	void removeIcon(String msisdn)
 	{
 		/*
 		 * We delete the older file that contained the larger avatar image for this msisdn.
@@ -1748,7 +1748,7 @@ import com.bsb.hike.utils.Utils;
 		mDb.update(DBConstants.USERS_TABLE, customPhotoFlag, whereClause, new String[] { msisdn });
 	}
 
-	 void updateContactRecency(String msisdn, long timeStamp)
+	void updateContactRecency(String msisdn, long timeStamp)
 	{
 		ContentValues updatedTime = new ContentValues(1);
 		updatedTime.put(DBConstants.LAST_MESSAGED, timeStamp);
@@ -1758,7 +1758,7 @@ import com.bsb.hike.utils.Utils;
 		Logger.d(getClass().getSimpleName(), "Row has been updated: " + rows);
 	}
 
-	 void syncContactExtraInfo()
+	void syncContactExtraInfo()
 	{
 		Cursor extraInfo = null;
 
@@ -1795,7 +1795,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 void toggleContactFavorite(String msisdn, FavoriteType favoriteType)
+	void toggleContactFavorite(String msisdn, FavoriteType favoriteType)
 	{
 		/*
 		 * If we are setting the type as not favorite, we'll remove the row itself.
@@ -1834,7 +1834,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 boolean isContactFavorite(String msisdn)
+	boolean isContactFavorite(String msisdn)
 	{
 		Cursor c = null;
 		try
@@ -1883,7 +1883,7 @@ import com.bsb.hike.utils.Utils;
 		return contactList;
 	}
 
-	 List<ContactInfo> getNonHikeMostContactedContacts(int limit)
+	List<ContactInfo> getNonHikeMostContactedContacts(int limit)
 	{
 		/*
 		 * Sending twice the limit to account for the contacts that might be on hike
@@ -1892,7 +1892,7 @@ import com.bsb.hike.utils.Utils;
 		return getNonHikeMostContactedContactsFromListOfNumbers(data.first, data.second, limit);
 	}
 
-	 void setMultipleContactsToFavorites(JSONObject favorites)
+	void setMultipleContactsToFavorites(JSONObject favorites)
 	{
 		SQLiteStatement insertStatement = null;
 		InsertHelper ih = null;
@@ -1963,7 +1963,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 boolean hasIcon(String msisdn)
+	boolean hasIcon(String msisdn)
 	{
 		Cursor c = null;
 		try
@@ -1981,13 +1981,13 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 int getPendingFriendRequestCount()
+	int getPendingFriendRequestCount()
 	{
 		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM " + DBConstants.FAVORITES_TABLE + " WHERE " + DBConstants.FAVORITE_TYPE + "="
 				+ FavoriteType.REQUEST_RECEIVED.ordinal(), null);
 	}
 
-	 boolean doesContactExist(String msisdn)
+	boolean doesContactExist(String msisdn)
 	{
 		String[] columns = new String[] { DBConstants.NAME };
 		String selection = DBConstants.MSISDN + "=? ";
@@ -2007,7 +2007,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 int getHikeContactCount(String myMsisdn)
+	int getHikeContactCount(String myMsisdn)
 	{
 		String selection = DBConstants.ONHIKE + " = 1 AND " + DBConstants.MSISDN + "!=" + DatabaseUtils.sqlEscapeString(myMsisdn);
 		Cursor c = null;
@@ -2026,7 +2026,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 int getNonHikeContactsCount()
+	int getNonHikeContactsCount()
 	{
 		String selection = DBConstants.ONHIKE + " = 0";
 		Cursor c = null;
@@ -2045,7 +2045,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 void setHikeJoinTime(String msisdn, long hikeJoinTime)
+	void setHikeJoinTime(String msisdn, long hikeJoinTime)
 	{
 		String whereClause = DBConstants.MSISDN + "=?";
 		String[] whereArgs = new String[] { msisdn };
@@ -2056,12 +2056,12 @@ import com.bsb.hike.utils.Utils;
 		mDb.update(DBConstants.USERS_TABLE, values, whereClause, whereArgs);
 	}
 
-	 int getFriendTableRowCount()
+	int getFriendTableRowCount()
 	{
 		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM " + DBConstants.FAVORITES_TABLE, null);
 	}
 
-	 void updateLastSeenTime(String msisdn, long lastSeenTime)
+	void updateLastSeenTime(String msisdn, long lastSeenTime)
 	{
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.LAST_SEEN, lastSeenTime);
@@ -2069,7 +2069,7 @@ import com.bsb.hike.utils.Utils;
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
 	}
 
-	 void updateIsOffline(String msisdn, int offline)
+	void updateIsOffline(String msisdn, int offline)
 	{
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.IS_OFFLINE, offline);
@@ -2139,7 +2139,7 @@ import com.bsb.hike.utils.Utils;
 		return sb.toString();
 	}
 
-	 FtueContactsData getFTUEContacts(SharedPreferences preferences)
+	FtueContactsData getFTUEContacts(SharedPreferences preferences)
 	{
 		FtueContactsData ftueContactsData = new FtueContactsData();
 
@@ -2246,7 +2246,7 @@ import com.bsb.hike.utils.Utils;
 		return ftueContactsData;
 	}
 
-	 void updateInvitedTimestamp(String msisdn, long timestamp)
+	void updateInvitedTimestamp(String msisdn, long timestamp)
 	{
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.INVITE_TIMESTAMP, timestamp);
@@ -2254,7 +2254,7 @@ import com.bsb.hike.utils.Utils;
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
 	}
 
-	 Map<String, FavoriteType> fetchFavoriteTypeMap()
+	Map<String, FavoriteType> fetchFavoriteTypeMap()
 	{
 		Cursor c = null;
 		Map<String, FavoriteType> favoriteTypeMap = new HashMap<String, ContactInfo.FavoriteType>();
@@ -2282,7 +2282,7 @@ import com.bsb.hike.utils.Utils;
 		}
 	}
 
-	 Set<String> getBlockedMsisdnSet()
+	Set<String> getBlockedMsisdnSet()
 	{
 		Cursor c = null;
 		Set<String> blockedSet = new HashSet<String>();
