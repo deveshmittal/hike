@@ -1658,7 +1658,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		String message = mComposeView.getText().toString();
 
-		mComposeView.setText("");
 
 		ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, message, isConversationOnHike());
 		if (showingImpMessagePin)
@@ -1682,9 +1681,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if (mConversation instanceof GroupConversation)
 			{
-				checkMessageTypeFromHash(convMessage);
+				if (!checkMessageTypeFromHash(convMessage)){
+					return;
+				}
 			}
 		}
+		mComposeView.setText("");
 		sendMessage(convMessage);
 
 		if (mComposeViewWatcher != null)
@@ -1709,23 +1711,34 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		showRecordingDialog();
 	}
 
-	private void checkMessageTypeFromHash(ConvMessage convMessage)
+	/*
+	 * return true if all validation passes and it modifies message properly
+	 */
+	private boolean checkMessageTypeFromHash(ConvMessage convMessage)
 	{
 		if (convMessage.getMessage().matches("(?i)" + HASH_PIN + ".*"))
 		{
-			convMessage.setMessage(convMessage.getMessage().substring(HASH_PIN.length()));
+			convMessage.setMessage(convMessage.getMessage().substring(HASH_PIN.length()).trim());
+			if (TextUtils.isEmpty(convMessage.getMessage()))
+			{
+				Toast.makeText(getApplicationContext(), "Text Can't be empty!", Toast.LENGTH_SHORT).show();
+				return false;
+			}
 			convMessage.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 			JSONObject jsonObject = new JSONObject();
 			try
 			{
 				jsonObject.put(HikeConstants.PIN_MESSAGE, 1);
 				convMessage.setMetadata(jsonObject);
+				return true;
 			}
 			catch (JSONException je)
 			{
+				Toast.makeText(getApplicationContext(), "Some Error", Toast.LENGTH_SHORT).show();
 				je.printStackTrace();
 			}
 		}
+		return false;
 	}
 
 	/*
