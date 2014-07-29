@@ -190,12 +190,17 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * Returns the list of all the contacts sorted by their names. If boolean {@link #allContactsLoaded} is true then all the contacts are retrieved from {@link #transientContacts} and
-	 * {@link #unsavedContacts}.
+	 * Returns the list of all the contacts sorted by their names. If boolean {@link #allContactsLoaded} is true then all the contacts are retrieved from {@link #transientContacts}
+	 * and {@link #unsavedContacts}.
 	 * 
 	 * @return
 	 */
 	List<ContactInfo> getAllContacts()
+	{
+		return getAllContacts(false);
+	}
+
+	List<ContactInfo> getAllContacts(boolean ignoreUnknownContacts)
 	{
 		if (!allContactsLoaded)
 		{
@@ -211,6 +216,9 @@ public class TransientCache extends ContactsCache
 			for (Entry<String, ContactTuple> mapEntry : transientContacts.entrySet())
 			{
 				ContactTuple tuple = mapEntry.getValue();
+				ContactInfo contact = tuple.getContact();
+				if (ignoreUnknownContacts && null == contact.getName())
+					continue;
 				allContacts.add(tuple.getContact());
 			}
 		}

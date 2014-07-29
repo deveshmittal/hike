@@ -1081,11 +1081,6 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	List<ContactInfo> getContacts()
-	{
-		return getContacts(true);
-	}
-
 	private List<ContactInfo> getContactInfo(String query, FavoriteType favoriteType, boolean ignoreUnknownContacts)
 	{
 		String favoriteMsisdnColumnName = "tempMsisdn";
@@ -1277,33 +1272,6 @@ class HikeUserDatabase extends SQLiteOpenHelper
 			queryBuilder.append(")");
 		}
 		return queryBuilder;
-	}
-
-	List<ContactInfo> getContacts(boolean ignoreEmpty)
-	{
-		Cursor c = null;
-		try
-		{
-			c = getContactsCursor(ignoreEmpty);
-			List<ContactInfo> contactInfos = extractContactInfo(c);
-			return contactInfos;
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
-	}
-
-	private Cursor getContactsCursor(boolean ignoreEmpty)
-	{
-		String selection = ignoreEmpty ? DBConstants.MSISDN + " != 'null'" : null;
-		Cursor c = null;
-		c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
-				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO }, selection, null, null, null, null);
-		return c;
 	}
 
 	void deleteMultipleRows(Collection<String> ids)
