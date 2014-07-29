@@ -3733,30 +3733,49 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 		}
+		/*
+		 * Receives conversation group-id, the message id for the message read packet, and the participant msisdn.
+		 */
 		else if (HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
 		{
-			Pair<String, Pair<long[],String>> pair = (Pair<String, Pair<long[], String>>) object;
+			Pair<String, Pair<Long,String>> pair = (Pair<String, Pair<Long, String>>) object;
 			// If the msisdn don't match we simply return
 			if (!mConversation.getMsisdn().equals(pair.first))
 			{
 				return;
 			}
-			long[] ids = pair.second.first;
-			for (int i = 0; i < ids.length; i++)
+			Long mrMsgId = pair.second.first;
+			for (int i = messages.size() - 1 ; i>=0; i--)
 			{
-				ConvMessage msg = findMessageById(ids[i]);
-				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+				ConvMessage msg = messages.get(i);
+				if (msg != null && msg.isSent())
 				{
-					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
-					removeFromMessageMap(msg);
+					long id = msg.getMsgID();
+					if (id > mrMsgId)
+					{
+						continue;
+					}
+					if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+					{
+						msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+						removeFromMessageMap(msg);
+					}
+					else
+					{
+						break;
+					}
 				}
 			}
 			String participant = pair.second.second;
 			// TODO we could keep a map of msgId -> conversation objects
 			// somewhere to make this faster
-			((GroupConversation)mConversation).updateReadByList(participant,ids[ids.length - 1]);
+			((GroupConversation)mConversation).updateReadByList(participant,mrMsgId);
 			runOnUiThread(mUpdateAdapter);
 		}
+		/*
+		 * The list of messages is processed.
+		 * The messages are added and the UI is updated at once.
+		 */
 		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
 		{
 			HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
@@ -3799,7 +3818,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						{
 							setLabel(convLabel);
 						}
-						// TODO optimize it for complete messageList
 						addBulkMessages(messageList);
 						Logger.d(getClass().getSimpleName(), "calling chatThread.addMessage() Line no. : 2219");
 					}
@@ -3826,6 +3844,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
+		/*
+		 * The list of msisdns and their maximum ids for DR and MR packets is received.
+		 * The messages are updated in the chat thread.
+		 */
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
 		{
 			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
@@ -3834,6 +3856,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				long mrMsgId = (long) pair.getFirst().getFirst();
 				long drMsgId = (long) pair.getSecond();
+				if (mrMsgId > drMsgId)
+				{
+					drMsgId = mrMsgId;
+				}
 
 				if (mConversation instanceof GroupConversation)
 				{
@@ -3842,31 +3868,31 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						((GroupConversation)mConversation).updateReadByList(msisdn, mrMsgId);
 					}
 				}
-				while (mrMsgId > 0)
+				for (int i = messages.size() - 1 ; i>=0; i--)
 				{
-					ConvMessage msg = findMessageById(mrMsgId);
-					if (msg != null)
+					ConvMessage msg = messages.get(i);
+					if (msg != null && msg.isSent())
 					{
-						msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
-						removeFromMessageMap(msg);
-						mrMsgId -= 1;
-					}
-					else
-					{
-						mrMsgId = 0;
-					}
-				}
-				while (drMsgId > 0)
-				{
-					ConvMessage msg = findMessageById(drMsgId);
-					if (msg != null)
-					{
-						msg.setState(ConvMessage.State.SENT_DELIVERED);
-						drMsgId -= 1;
-					}
-					else
-					{
-						drMsgId = 0;
+						long id = msg.getMsgID();
+						if (id <= mrMsgId)
+						{
+							if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+							{
+								msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+								removeFromMessageMap(msg);
+							}
+							else
+							{
+								break;
+							}
+						}
+						else if (id <= drMsgId)
+						{
+							if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
+							{
+								msg.setState(ConvMessage.State.SENT_DELIVERED);
+							}
+						}
 					}
 				}
 				runOnUiThread(mUpdateAdapter);
@@ -4187,6 +4213,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 	
+	/**
+	 * Adds a complete list of messages at the end of the messages list and updates the UI at once
+	 * 
+	 * @param messageList
+	 * 			The list of messages to be added.
+	 */
 	private void addBulkMessages(LinkedList<ConvMessage> messageList)
 	{
 		if (messages != null && mAdapter != null)

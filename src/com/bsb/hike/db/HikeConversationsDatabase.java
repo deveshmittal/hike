@@ -1155,6 +1155,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	/**
+	 * Creates the messages hash for the message object.
+	 * @param msg
+	 * 			The message for which hash is to be created.
+	 * @return The message hash string .
+	 */
 	private String createMessageHash(ConvMessage msg)
 	{
 		String msgHash = null;
@@ -1162,11 +1168,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			if (TextUtils.isEmpty(msg.getMessage()))
 			{
-				msgHash = msg.getMsisdn() + msg.getMappedMsgID() + msg.getTimestamp();
+				msgHash = msg.getMsisdn() + msg.getMappedMsgID();
 			}
 			else
 			{
-				msgHash = msg.getMsisdn() + msg.getMappedMsgID() + msg.getMessage().charAt(0) + msg.getMessage().charAt(msg.getMessage().length() - 1) + msg.getTimestamp();
+				msgHash = msg.getMsisdn() + msg.getMappedMsgID() + msg.getMessage().charAt(0) + msg.getMessage().charAt(msg.getMessage().length() - 1);
+			}
+			if(msg.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+			{
+				msgHash = msgHash + msg.getTimestamp();
 			}
 			Logger.d(getClass().getSimpleName(), "Message hash: " + msgHash);
 		}
@@ -4393,6 +4403,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	}
 	
+	/**
+	 * Generates a list of messages based on the query passed to it.
+	 * @param c
+	 * 			The query on the message table.
+	 * @param conversation
+	 * 			Conversation for which the messages are to be fetched.
+	 * @return The list on ConvMessage objects.
+	 */
 	private List<ConvMessage> getMessagesFromDB(Cursor c, Conversation conversation)
 	{
 		final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
