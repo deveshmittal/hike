@@ -1802,24 +1802,6 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	boolean isContactFavorite(String msisdn)
-	{
-		Cursor c = null;
-		try
-		{
-			c = mDb.query(DBConstants.FAVORITES_TABLE, new String[] { DBConstants.MSISDN },
-					DBConstants.MSISDN + "=? AND " + DBConstants.FAVORITE_TYPE + "=" + FavoriteType.FRIEND.ordinal(), new String[] { msisdn }, null, null, null);
-			return c.moveToFirst();
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
-	}
-
 	public List<ContactInfo> getNonHikeMostContactedContactsFromListOfNumbers(String selectionNumbers, final Map<String, Integer> mostContactedValues, int limit)
 	{
 		Map<String, FavoriteType> favoriteMap = getFavoriteMap();
@@ -1938,12 +1920,6 @@ class HikeUserDatabase extends SQLiteOpenHelper
 				c.close();
 			}
 		}
-	}
-
-	int getPendingFriendRequestCount()
-	{
-		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM " + DBConstants.FAVORITES_TABLE + " WHERE " + DBConstants.FAVORITE_TYPE + "="
-				+ FavoriteType.REQUEST_RECEIVED.ordinal(), null);
 	}
 
 	boolean doesContactExist(String msisdn)
@@ -2211,34 +2187,6 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		contentValues.put(DBConstants.INVITE_TIMESTAMP, timestamp);
 
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
-	}
-
-	Map<String, FavoriteType> fetchFavoriteTypeMap()
-	{
-		Cursor c = null;
-		Map<String, FavoriteType> favoriteTypeMap = new HashMap<String, ContactInfo.FavoriteType>();
-
-		try
-		{
-			c = mReadDb.query(DBConstants.FAVORITES_TABLE, new String[] { DBConstants.MSISDN, DBConstants.FAVORITE_TYPE }, null, null, null, null, null);
-
-			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
-			int favTypeIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
-
-			while (c.moveToNext())
-			{
-				favoriteTypeMap.put(c.getString(msisdnIdx), FavoriteType.values()[c.getInt(favTypeIdx)]);
-			}
-
-			return favoriteTypeMap;
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
 	}
 
 	Set<String> getBlockedMsisdnSet()
