@@ -1278,6 +1278,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				});
 			}
 		}
+		/*
+		 * Receives conversation group-id, the message id for the message read packet, and the participant msisdn.
+		 */
 		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type) || HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
 		{
 			String sender = null;
@@ -1747,6 +1750,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 			});
 		}
+		/*
+		 * The list of messages is processed.
+		 * The messages are added and the UI is updated at once.
+		 */
 		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
 		{
 			Logger.d(getClass().getSimpleName(), "New bulk msg event sent or received.");
@@ -1845,6 +1852,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				});
 			}
 		}
+		/*
+		 * The list of msisdns and their maximum ids for DR and MR packets is received.
+		 * The messages are updated in the chat thread.
+		 */
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
 		{
 			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
