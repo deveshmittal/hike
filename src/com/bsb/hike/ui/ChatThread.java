@@ -861,6 +861,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	 */
 	private void showImpMessage(ConvMessage impMessage, int animationId)
 	{
+		if (!prefs.getBoolean(HikeMessengerApp.SHOWN_PIN_TIP, false))
+		{
+		
+		Editor editor = prefs.edit();
+		editor.putBoolean(HikeMessengerApp.SHOWN_PIN_TIP, true);
+		editor.commit();
+		}
 		if (tipView != null)
 		{
 			tipView.setVisibility(View.GONE);
@@ -1756,7 +1763,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				je.printStackTrace();
 			}
 		}
-		return false;
+		return true;
 	}
 
 	/*
@@ -2283,14 +2290,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		if (!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
 		{
+			boolean shownSticker = true;
 			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
 			{
 				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
 				{
+					shownSticker = false;
 					showStickerFtueTip();
 				}
 			}
+            if (shownSticker && (mConversation instanceof GroupConversation) && ((GroupConversation) mConversation).getIsGroupAlive())
+			{
+				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_PIN_TIP, false))
+				{
+					showPinFtueTip();
+				}
+			}
 		}
+		
+		
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 
@@ -2449,6 +2467,35 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void onClick(View v)
 			{
 				HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
+			}
+		});
+	}
+	
+	private void showPinFtueTip()
+	{
+		tipView = findViewById(R.id.pin_tip);
+		tipView.setVisibility(View.VISIBLE);
+		tipView.setOnTouchListener(new OnTouchListener()
+		{
+			@Override
+			public boolean onTouch(View arg0, MotionEvent arg1)
+			{
+				// disabling on touch gesture for sticker ftue tip
+				// so that we do not send an unnecessary nudge on a
+				// double tap on tipview.
+				return true;
+			}
+		});
+		tipView.setTag(TipType.PIN);
+
+		ImageView closeIcon = (ImageView) tipView.findViewById(R.id.close_tip);
+		closeIcon.setOnClickListener(new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				HikeTip.closeTip(TipType.PIN, tipView, prefs);
 			}
 		});
 	}
