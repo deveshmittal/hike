@@ -1870,8 +1870,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.FAVORITE_TYPE), favoriteType.ordinal());
 
 				insertStatement.executeInsert();
-				mDb.setTransactionSuccessful();
 			}
+			mDb.setTransactionSuccessful();
 		}
 		finally
 		{

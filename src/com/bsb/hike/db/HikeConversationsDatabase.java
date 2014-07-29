@@ -4014,8 +4014,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				insertStatement.executeInsert();
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.CHAT_BACKGROUND_CHANGED, new Pair<String, ChatTheme>(msisdn, chatTheme));
-				mDb.setTransactionSuccessful();
 			}
+			mDb.setTransactionSuccessful();
 		}
 		finally
 		{
