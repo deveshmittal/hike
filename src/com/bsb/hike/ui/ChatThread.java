@@ -2008,6 +2008,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Logger.w("ChatThread", "DIFFERENT MSISDN CLOSING CONTEXT MENU!!");
 			closeContextMenu();
 		}
+		if(showingImpMessagePin){
+			dismissPinCreateView();
+		}
 	}
 
 	private void initiateFileTransferFromIntentData(String fileType, String filePath)
