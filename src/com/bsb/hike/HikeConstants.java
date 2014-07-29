@@ -882,6 +882,9 @@ public class HikeConstants
 	public static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
 	
 	public static final String SHOW_STEALTH_POPUP = "stlthrmd";
+	
+	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
+
 
 	public static final class ResultCodes
 	{

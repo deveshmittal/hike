@@ -1122,4 +1122,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
         <item>In many cultures, silence is considered rude.</item>
         <item>If only there was a way to start a chat. Oh wait...</item>
     </string-array>
+    <string name="hike_offline_notifications">Hike offline notifications</string>
+    <string name="h2o_notifications_setting_summary">Enable hike offline notifications for contacts </string>
 </resources>
