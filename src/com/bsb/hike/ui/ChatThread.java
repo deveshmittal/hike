@@ -3733,6 +3733,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 		}
+		/*
+		 * Receives conversation group-id, the message id for the message read packet, and the participant msisdn.
+		 */
 		else if (HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
 		{
 			Pair<String, Pair<Long,String>> pair = (Pair<String, Pair<Long, String>>) object;
@@ -3769,6 +3772,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			((GroupConversation)mConversation).updateReadByList(participant,mrMsgId);
 			runOnUiThread(mUpdateAdapter);
 		}
+		/*
+		 * The list of messages is processed.
+		 * The messages are added and the UI is updated at once.
+		 */
 		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
 		{
 			HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
@@ -3811,7 +3818,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						{
 							setLabel(convLabel);
 						}
-						// TODO optimize it for complete messageList
 						addBulkMessages(messageList);
 						Logger.d(getClass().getSimpleName(), "calling chatThread.addMessage() Line no. : 2219");
 					}
@@ -3838,6 +3844,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
+		/*
+		 * The list of msisdns and their maximum ids for DR and MR packets is received.
+		 * The messages are updated in the chat thread.
+		 */
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
 		{
 			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
@@ -4203,6 +4213,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 	
+	/**
+	 * Adds a complete list of messages at the end of the messages list and updates the UI at once
+	 * 
+	 * @param messageList
+	 * 			The list of messages to be added.
+	 */
 	private void addBulkMessages(LinkedList<ConvMessage> messageList)
 	{
 		if (messages != null && mAdapter != null)

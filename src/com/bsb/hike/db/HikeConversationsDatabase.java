@@ -1153,6 +1153,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	/**
+	 * Creates the messages hash for the message object.
+	 * @param msg
+	 * 			The message for which hash is to be created.
+	 * @return The message hash string .
+	 */
 	private String createMessageHash(ConvMessage msg)
 	{
 		String msgHash = null;
@@ -4370,6 +4376,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	}
 	
+	/**
+	 * Generates a list of messages based on the query passed to it.
+	 * @param c
+	 * 			The query on the message table.
+	 * @param conversation
+	 * 			Conversation for which the messages are to be fetched.
+	 * @return The list on ConvMessage objects.
+	 */
 	private List<ConvMessage> getMessagesFromDB(Cursor c, Conversation conversation)
 	{
 		final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
