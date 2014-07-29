@@ -579,10 +579,10 @@ public class MqttMessagesManager
 	}
 	
 	/**
-	 * This function does processing on filetransfer message
+	 * This function does processing on file transfer message
 	 * 
 	 * @param convMessage
-	 * 			the ConvMessage object with message id and conversation set
+	 * 			the ConvMessage object with message id and conversation object initialized
 	 */
 	private void messageProcessFT(ConvMessage convMessage)
 	{
@@ -1684,9 +1684,10 @@ public class MqttMessagesManager
 		}
 	}
 	/**
+	 * <br>This function handles bulk packet</br>
 	 * 
 	 * @param bulkObj
-	 * 			- bulk json object from server
+	 * 			- bulk json object of type "bm"
 	 * @throws JSONException
 	 */
 	
@@ -1707,10 +1708,14 @@ public class MqttMessagesManager
 
 				Logger.d("BulkProcess", "started");
 				long time1 = System.currentTimeMillis();
-
+				
+				/*
+				 * Initialize all the datastructures used for bulk packet processing
+				 */
 				messageList = new LinkedList<ConvMessage>(); // it will store all the convMessage object that can be added to list in one transaction
 				messageListMap = new HashMap<String, LinkedList<ConvMessage>>(); // it will store list of conversation objects based on msisdn
 				messageStatusMap = new HashMap<String, PairModified<PairModified<Long, Set<String>>, Long>>(); // it will store pair mapping to msisdn. pair first value is a pair which contains max "mr" msgid and msisdns of participants that read it.																									   // pair second value is max "dr" message id
+				
 				try
 				{
 					userWriteDb.beginTransaction();
@@ -1735,7 +1740,8 @@ public class MqttMessagesManager
 				}
 				catch (Exception e)
 				{
-					shouldFallBackToNormal = true;
+					Logger.e("BulkProcessor", "Exception during processing ", e);
+					shouldFallBackToNormal = true;   // fallback to one message processing
 				}
 				finally
 				{
@@ -1747,6 +1753,9 @@ public class MqttMessagesManager
 					Logger.d("bulkPacket", "total time : " + (System.currentTimeMillis() - time1));
 				}
 				
+				/*
+				 * If there is some exception processing bulk packet we fallback to normal single message processing of bulk packet messages
+				 */
 				if(shouldFallBackToNormal)
 				{
 					i = 0;
@@ -1766,16 +1775,21 @@ public class MqttMessagesManager
 	
 	private void finalProcessing() throws JSONException
 	{
+		
+		/*
+		 * The list returned by {@link HikeConversationsDatabase#addConversationsBulk(List<ConvMessages>)} contains non duplicate messages
+		 * This list is used for further processing
+		 */
+		
 		if(messageList.size() > 0)
 		{
 			messageList = convDb.addConversationsBulk(messageList);
 		}
 		
 		/*
-		 * The list returned by {@link com.bsb.hike.db.HikeConversationsDatabase#addConversationsBulk(List<ConvMessages>)} contains non duplicate messages
-		 * This list is used for further processing
+		 * lastPinMap is map of msisdn to a pair containing last pin message for a conversation 
+		 * and count of total number of pin messages in bulk packet for that conversation
 		 */
-		
 		HashMap<String, PairModified<ConvMessage, Integer>> lastPinMap = new HashMap<String, PairModified<ConvMessage,Integer>>();
 		
 		for (ConvMessage convMessage : messageList)
@@ -1785,7 +1799,7 @@ public class MqttMessagesManager
 			{
 				messageListMap.put(msisdn, new LinkedList<ConvMessage>());
 			}
-			messageListMap.get(msisdn).add(convMessage);
+			messageListMap.get(msisdn).add(convMessage);  // adds each message into messageListMap according to msisdn
 			
 			if(convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			{
@@ -1793,12 +1807,14 @@ public class MqttMessagesManager
 				{
 					lastPinMap.put(msisdn, new PairModified<ConvMessage, Integer>(null, 0));
 				}
-				lastPinMap.get(msisdn).setFirst(convMessage);
-				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() + 1);
+				lastPinMap.get(msisdn).setFirst(convMessage);						      // update last pin message for a msisdn
+				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() + 1); // increment pin unread count for a msisdn
 			}
 		}
 		
-		
+		/*
+		 * contains last message for each conversation to be added to conversation table
+		 */
 		ArrayList<ConvMessage> lastMessageList = new ArrayList<ConvMessage>(messageListMap.keySet().size());
 		for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
 		{
@@ -1806,10 +1822,17 @@ public class MqttMessagesManager
 			lastMessageList.add(list.get(list.size() -1));
 		}
 		
+		/*
+		 * add last message and last pin and unread pin count to conversation table
+		 */
 		if(lastMessageList.size() > 0)
 		{
 			convDb.addLastConversations(lastMessageList, lastPinMap);
 		}
+		
+		/*
+		 * update status of messages and also update readByString in group info table for each group
+		 */
 		if(messageStatusMap.size() > 0)
 		{
 			convDb.updateStatusBulk(messageStatusMap);
@@ -1817,12 +1840,16 @@ public class MqttMessagesManager
 		}
 		
 		/*
-		 * Process for ft messages
+		 * Since now messages contains message id and conversation object we can process ft messages
 		 */
 		for(ConvMessage convMessage : messageList)
 		{
 			messageProcessFT(convMessage);
 		}
+		
+		/*
+		 * publish the events for updating chat thread and conversation table
+		 */
 		this.pubSub.publish(HikePubSub.BULK_MESSAGE_RECEIVED, messageListMap);
 		this.pubSub.publish(HikePubSub.BULK_MESSAGE_DELIVERED_READ, messageStatusMap);
 		this.pubSub.publish(HikePubSub.BULK_MESSAGE_NOTIFICATION, messageList.get(messageList.size() - 1));
