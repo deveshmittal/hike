@@ -374,9 +374,21 @@ public class UploadFileTask extends FileTransferBase
 	public FTResult call()
 	{
 		mThread = Thread.currentThread();
+		boolean isValidKey = false;
+		try{
+			isValidKey = isFileKeyValid();
+		}catch(Exception e){
+			Logger.e(getClass().getSimpleName(), "Exception", e);
+			_state = FTState.ERROR;
+			HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
+			stateFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), hikeFile.getFileName() + ".bin." + ((ConvMessage) userContext).getMsgID());
+			saveFileKeyState(fileKey);
+			fileKey = null;
+			return FTResult.UPLOAD_FAILED;
+		}
 		try
 		{
-			if (isFileKeyValid())
+			if (isValidKey)
 			{
 				try
 				{
@@ -486,6 +498,8 @@ public class UploadFileTask extends FileTransferBase
 
 			Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, ((ConvMessage) userContext));
+			_state = FTState.COMPLETED;
+			deleteStateFile();
 
 		}
 		catch (MalformedURLException e)
@@ -565,7 +579,10 @@ public class UploadFileTask extends FileTransferBase
 				return responseJson;
 			}
 			X_SESSION_ID = fst.getSessionId();
-			mStart = AccountUtils.getBytesUploaded(String.valueOf(X_SESSION_ID));
+			if(X_SESSION_ID != null)
+				mStart = AccountUtils.getBytesUploaded(String.valueOf(X_SESSION_ID));
+			else
+				mStart = 0;
 			if (mStart <= 0)
 			{
 				X_SESSION_ID = UUID.randomUUID().toString();
@@ -772,52 +789,67 @@ public class UploadFileTask extends FileTransferBase
 		return res.toString();
 	}
 
-	private boolean isFileKeyValid()
+	private boolean isFileKeyValid() throws Exception
 	{
-		if (TextUtils.isEmpty(fileKey))
-			return false;
-
-		// If we are not able to verify the filekey validity from the server, fall back to uploading the file
-		try
-		{
-			mUrl = new URL(AccountUtils.fileTransferBaseDownloadUrl + fileKey);
-			HttpClient client = new DefaultHttpClient();
-			client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
-			HttpHead head = new HttpHead(mUrl.toString());
-			head.addHeader("Cookie", "user=" + token + ";UID=" + uId);
-
-			HttpResponse resp = client.execute(head);
-			int resCode = resp.getStatusLine().getStatusCode();
-			// Make sure the response code is 200.
-			if (resCode == RESPONSE_OK)
-			{
-				// This is to get the file size from server
-				// continue anyway if not able to obtain the size
-				try
-				{
-					String range = resp.getFirstHeader("Content-Range").getValue();
-					fileSize = Integer.valueOf(range.substring(range.lastIndexOf("/") + 1, range.length()));
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-					fileSize = 0;
-				}
-				return true;
-			}
-			else
-			{
-				fileKey = null;
+		if (TextUtils.isEmpty(fileKey)){
+			msgId = ((ConvMessage) userContext).getMsgID();
+			HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
+			selectedFile = new File(hikeFile.getFilePath());
+			FileSavedState fst = FileTransferManager.getInstance(context).getUploadFileState(selectedFile, msgId);
+			deleteStateFile();
+			if(fst != null && !TextUtils.isEmpty(fst.getFileKey())){
+				fileKey = fst.getFileKey();
+			}else
 				return false;
+		}
+		// If we are not able to verify the filekey validity from the server, fall back to uploading the file		
+		final int MAX_RETRY = 3;
+		int retry =0;
+		while(retry < MAX_RETRY)
+		{
+			try
+			{
+				mUrl = new URL(AccountUtils.fileTransferBaseDownloadUrl + fileKey);
+				HttpClient client = new DefaultHttpClient();
+				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
+				HttpHead head = new HttpHead(mUrl.toString());
+				head.addHeader("Cookie", "user=" + token + ";uid=" + uId);
+	
+				HttpResponse resp = client.execute(head);
+				int resCode = resp.getStatusLine().getStatusCode();
+				// Make sure the response code is 200.
+				if (resCode == RESPONSE_OK)
+				{
+					// This is to get the file size from server
+					// continue anyway if not able to obtain the size
+					try
+					{
+						String range = resp.getFirstHeader("Content-Range").getValue();
+						fileSize = Integer.valueOf(range.substring(range.lastIndexOf("/") + 1, range.length()));
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+						fileSize = 0;
+					}
+					return true;
+				}
+				else
+				{
+					fileKey = null;
+					return false;
+				}
+			}
+			catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				retry++;
+				if(retry == (MAX_RETRY-1))
+					throw e;
 			}
 		}
-		catch (Exception e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			fileKey = null;
-			return false;
-		}
+		throw new Exception("Network error.");
 	}
 
 	/*
