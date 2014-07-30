@@ -935,7 +935,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			tipView.setVisibility(View.GONE);
 		}
-		if (animationId != -1)
+		if (animationId != -1 && !showingPIN)
 		{
 			tipView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), animationId));
 		}
@@ -1026,7 +1026,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (findViewById(R.id.impMessageCreateView).getVisibility() == View.VISIBLE)
 		{
-			dismissPinCreateView();
+			dismissPinCreateView(R.anim.down_up_up_part);
 			return;
 		}
 		if (isActionModeOn)
@@ -1647,7 +1647,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void sendMessage(ConvMessage convMessage)
 	{
-		addMessage(convMessage);
+		sendMessage(convMessage,false);
+	}
+	
+	private void sendMessage(ConvMessage convMessage,boolean playPinAnim)
+	{
+		addMessage(convMessage,playPinAnim);
 
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 	}
@@ -1702,7 +1707,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 		mComposeView.setText("");
-		sendMessage(convMessage);
+		sendMessage(convMessage,!showingImpMessagePinCreate);
 
 		if (mComposeViewWatcher != null)
 		{
@@ -2006,7 +2011,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			closeContextMenu();
 		}
 		if(showingImpMessagePinCreate){
-			dismissPinCreateView();
+			dismissPinCreateView(-1);
 		}
 		if(showingPIN){
 			hidePin();
@@ -4034,6 +4039,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void addMessage(ConvMessage convMessage)
 	{
+		addMessage(convMessage, false);
+	}
+	
+	private void addMessage(ConvMessage convMessage, boolean playPinAnim)
+	{
 		if (messages != null && mAdapter != null)
 		{
 			TypingNotification typingNotification = null;
@@ -4047,7 +4057,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			{
-				showImpMessage(convMessage, R.anim.up_down_fade_in);
+				showImpMessage(convMessage, playPinAnim ? R.anim.up_down_fade_in : -1);
 			}
 			mAdapter.addMessage(convMessage);
 			addtoMessageMap(messages.size() - 1, messages.size());
@@ -4596,6 +4606,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		dismissPopupWindow();
 		final View content = findViewById(R.id.impMessageCreateView);
 		content.setVisibility(View.VISIBLE);
+		if(isKeyboardOpen){
+			mBottomView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.up_down_lower_part));
+		}
+		mBottomView.setVisibility(View.GONE);
+		content.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.up_down_fade_in));
 		mComposeView.requestFocus();
 		Utils.showSoftKeyboard(getApplicationContext(), mComposeView);
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
@@ -4611,14 +4626,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			}
 		});
-		mBottomView.setVisibility(View.GONE);
+		
 		if (tipView != null)
 		{
 			tipView.setVisibility(View.GONE);
 		}
 	}
 
-	private void dismissPinCreateView()
+	private void dismissPinCreateView(int animId)
 	{
 		if (tipView != null)
 		{
@@ -4632,8 +4647,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		// ChatThread.this.chatLayout.requestFocus();
 		mComposeView.requestFocus();
 		dismissPopupWindow();
+		mBottomView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.down_up_lower_part));
 		mBottomView.setVisibility(View.VISIBLE);
-		findViewById(R.id.impMessageCreateView).setVisibility(View.GONE);
+		final View v = findViewById(R.id.impMessageCreateView);
+		if(animId!=-1){
+			Animation an = AnimationUtils.loadAnimation(getApplicationContext(), animId);
+		}
+		v.setVisibility(View.GONE);
 	}
 
 	private void setupPinImpMessageActionBar()
@@ -4657,7 +4677,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onClick(View v)
 			{
-				dismissPinCreateView();
+				dismissPinCreateView(R.anim.down_up_up_part);
 			}
 		});
 
@@ -4682,7 +4702,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				if (!TextUtils.isEmpty(mComposeView.getText().toString().trim()))
 				{
 					onSendClick(v);
-					dismissPinCreateView();
+					dismissPinCreateView(-1);
 				}
 				else
 				{
