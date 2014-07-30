@@ -24,8 +24,61 @@
                 android:id="@+id/avatar_frame"
                 style="@style/AvatarStyle" />
         </RelativeLayout>
+        <RelativeLayout
+                android:id="@+id/content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/avatar_container"
+                android:layout_toRightOf="@id/avatar_container">
 
-        <LinearLayout
+          	    <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2 mins ago"
+                android:textColor="@color/timestampcolor"
+                android:layout_alignParentRight="true"
+                android:textSize="12sp"
+                android:layout_alignBottom="@+id/name"
+                android:textStyle="bold|italic" />
+                 
+               <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Rishabh Sharma"
+                android:textColor="@color/updates_text"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@id/timestamp"
+                android:textSize="14sp"
+                android:textStyle="bold|italic" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/details_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="5dp"
+                android:orientation="vertical"
+                android:layout_toRightOf="@id/avatar_container" >
+
+               <com.bsb.hike.view.LinkedTextView
+                android:id="@+id/main_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Added you as a friend"
+                android:textColor="@color/updates_text"
+                android:textSize="16sp"
+                android:textStyle="italic" />
+            </LinearLayout>
+
+       <!--  <LinearLayout
             android:id="@+id/side_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -74,6 +127,7 @@
                 android:textSize="16sp"
                 android:textStyle="italic" />
         </LinearLayout>
+        -->
     </RelativeLayout>
 
 </RelativeLayout>

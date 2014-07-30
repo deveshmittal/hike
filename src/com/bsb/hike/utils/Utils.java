@@ -1264,6 +1264,17 @@ public class Utils
 	{
 		return name.trim().split(" ", 2)[0];
 	}
+	
+	public static String getFirstNameAndSurname(String name)
+	{
+		/*String fullname = name.trim().split(" ", 2)[0];
+		if(name.contains(" "))
+		{
+		  int spaceIndex = name.indexOf(" ");
+		  fullname.concat(" " + name.charAt(spaceIndex + 1)); 
+		}*/
+		return name;
+	}
 
 	public static double getFreeSpace()
 	{
