@@ -1287,9 +1287,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			long[] ids;
 			if (HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
 			{
-				Pair<String, Pair<long[],String>> pair = (Pair<String, Pair<long[], String>>) object;
+				Pair<String, Pair<Long,String>> pair = (Pair<String, Pair<Long, String>>) object;
 				sender = pair.first;
-				ids = pair.second.first;
+				ids = new long[] { pair.second.first} ;
 			}
 			else
 			{
