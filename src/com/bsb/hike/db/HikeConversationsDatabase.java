@@ -966,7 +966,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					{
 						convMetaData = new Conversation.MetaData(null);
 						convMetaData.setLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN, conv.getMsgID());
-						convMetaData.setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, conv.isSent() ? 0 : 1);
 					}
 					long preTimeStamp = convMetaData.getLastPinTimeStamp(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 					long currentTimeStamp = conv.getTimestamp();
