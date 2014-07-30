@@ -1819,7 +1819,10 @@ public class MqttMessagesManager
 		for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
 		{
 			LinkedList<ConvMessage> list= entry.getValue();
-			lastMessageList.add(list.get(list.size() -1));
+			if (list.size() > 0)
+			{
+				lastMessageList.add(list.get(list.size() -1));
+			}
 		}
 		
 		/*
