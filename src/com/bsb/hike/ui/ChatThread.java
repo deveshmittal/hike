@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -194,6 +195,7 @@ import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
@@ -3492,8 +3494,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
 		{
-			HashMap<String, ArrayList<ConvMessage>> messageListMap = (HashMap<String, ArrayList<ConvMessage>>) object;
-			final ArrayList<ConvMessage> messageList = messageListMap.get(mContactNumber);
+			HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
+			final LinkedList<ConvMessage> messageList = messageListMap.get(mContactNumber);
 			String label = null;
 			if(messageList != null)
 			{
@@ -3561,11 +3563,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
 		{
-			Map<String, Utils.PairModified<Long, Long>> messageStatusMap = (Map<String, Utils.PairModified<Long, Long>>) object;
-			Utils.PairModified<Long, Long> pair = messageStatusMap.get(mConversation.getMsisdn());
+			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
+			PairModified<PairModified<Long, Set<String>>, Long> pair = messageStatusMap.get(mConversation.getMsisdn());
 			if (pair != null)
 			{
-				long mrMsgId = (long) pair.getFirst();
+				long mrMsgId = (long) pair.getFirst().getFirst();
 				long drMsgId = (long) pair.getSecond();
 
 				while (mrMsgId > 0)
@@ -3896,7 +3898,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 	
-	private void addBulkMessages(ArrayList<ConvMessage> messageList)
+	private void addBulkMessages(LinkedList<ConvMessage> messageList)
 	{
 		if (messages != null && mAdapter != null)
 		{

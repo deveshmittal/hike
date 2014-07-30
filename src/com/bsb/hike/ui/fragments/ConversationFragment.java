@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -81,9 +82,9 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.HikeTip.TipType;
-import com.bsb.hike.utils.Utils.PairModified;
 
 public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener, HikeFragmentable
 {
@@ -1738,16 +1739,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
 		{
 			Logger.d(getClass().getSimpleName(), "New bulk msg event sent or received.");
-			HashMap<String, ArrayList<ConvMessage>> messageListMap = (HashMap<String, ArrayList<ConvMessage>>) object;
+			HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
 
 			if (messageListMap != null)
 			{
-				for (Entry<String, ArrayList<ConvMessage>> entry : messageListMap.entrySet())
+				for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
 				{
 					if (entry != null)
 					{
 						String msisdn = entry.getKey();
-						ArrayList<ConvMessage> messageList = entry.getValue();
+						LinkedList<ConvMessage> messageList = entry.getValue();
 						final Conversation conv = mConversationsByMSISDN.get(msisdn);
 						if (conv != null)
 						{
@@ -1826,19 +1827,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
 		{
-			Map<String, Utils.PairModified<Long, Long>> messageStatusMap = (Map<String, Utils.PairModified<Long, Long>>) object;
+			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
 
 			if (messageStatusMap != null)
 			{
-				for (Entry<String, PairModified<Long, Long>> entry : messageStatusMap.entrySet())
+				for (Entry<String, PairModified<PairModified<Long, Set<String>>, Long>> entry : messageStatusMap.entrySet())
 				{
 					if (entry != null)
 					{
 						final String msisdn = entry.getKey();
-						PairModified<Long, Long> pair = entry.getValue();
+						PairModified<PairModified<Long, Set<String>>, Long> pair = entry.getValue();
 						if (pair != null)
 						{
-							long mrMsgId = (long) pair.getFirst();
+							long mrMsgId = (long) pair.getFirst().getFirst();
 							long drMsgId = (long) pair.getSecond();
 
 							if (mrMsgId > 0)

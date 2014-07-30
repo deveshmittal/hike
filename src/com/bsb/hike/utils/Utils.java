@@ -38,6 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -4026,43 +4027,6 @@ public class Utils
 
 	}
 	
-	/*
-	 *   This class is replacement for java pair class {@link Pair}. In pair class the first and second fields are both final so cannot be modified.
-	 *   This class overcomes this limitation and can be used in cases where we need to modify pair fields
-	 */
-	public static class PairModified<L, R>
-	{
-		private L l;
-
-		private R r;
-
-		public PairModified(L l, R r)
-		{
-			this.l = l;
-			this.r = r;
-		}
-
-		public L getFirst()
-		{
-			return l;
-		}
-
-		public R getSecond()
-		{
-			return r;
-		}
-
-		public void setFirst(L l)
-		{
-			this.l = l;
-		}
-
-		public void setSecond(R r)
-		{
-			this.r = r;
-		}
-	}
-
 	public static boolean isPackageInstalled(Context context, String packageName)
 	{
 		PackageManager pm = context.getPackageManager();
@@ -4204,4 +4168,78 @@ public class Utils
 		else
 			return (Integer.toString(bytes) + " B");
 	}
+	
+	public static boolean isCompressed(byte[] bytes)
+    {
+        try
+		{
+			if ((bytes == null) || (bytes.length < 2))
+			{
+			    return false;
+			}
+			else
+			{
+			    return ((bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC)) && (bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8)));
+			}
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+    }
+	
+	public static byte[] uncompressByteArray(byte[] bytes) throws IOException
+    {
+       
+		int DEFAULT_BUFFER_SIZE = 1024 *4;
+		
+		if (!isCompressed(bytes))
+        {
+            return bytes;
+        }
+
+        ByteArrayInputStream bais = null;
+        GZIPInputStream gzis = null;
+        ByteArrayOutputStream baos = null;
+
+        try
+        {
+            bais = new ByteArrayInputStream(bytes);
+            gzis = new GZIPInputStream(bais);
+            baos = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+
+            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+            int n = 0;
+            while (-1 != (n = gzis.read(buffer))) {
+            	baos.write(buffer, 0, n);
+            }
+            gzis.close();
+            bais.close();
+
+            byte[] uncompressedByteArray = baos.toByteArray();
+            baos.close();
+
+
+            return uncompressedByteArray;
+        }
+        catch (IOException ioex)
+        {
+            throw ioex;
+        }
+        finally
+        {
+            if(gzis != null)
+            {
+            	gzis.close();
+            }
+            if(bais != null)
+            {
+            	bais.close();
+            }
+            if(baos != null)
+            {
+            	baos.close();
+            }
+        }
+    }
 }
