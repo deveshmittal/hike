@@ -1668,6 +1668,25 @@ public class HikeConstants
 	public static final String WATSAPP_INVITE_MESSAGE_KEY = "wa_msg";
 
 	public static final String WATSAPP_INVITE_ENABLED = "i_wa";
+	
+	public static final class ImageQuality
+	{
+		public static final int QUALITY_ORIGINAL = 1;
+
+		public static final int QUALITY_MEDIUM = 2;
+
+		public static final int QUALITY_SMALL = 3;
+
+		public static final int QUALITY_DEFAULT = QUALITY_SMALL;
+
+		public static final String IMAGE_QUALITY_ORIGINAL = "Original";
+
+		public static final String IMAGE_QUALITY_MEDIUM = "Medium";
+
+		public static final String IMAGE_QUALITY_SMALL = "Small";
+		
+		public static final String IMAGE_QUALITY_DEFAULT = IMAGE_QUALITY_SMALL;
+	}
 
 	public static class MESSAGE_TYPE
 	{

@@ -34,12 +34,14 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.MediaStore.MediaColumns;
 import android.support.v4.content.LocalBroadcastManager;
@@ -49,6 +51,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
@@ -843,6 +846,22 @@ public class UploadFileTask extends FileTransferBase
 		int resCode = 0;
 		try
 		{
+			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+			String imageQuality = ImageQuality.IMAGE_QUALITY_DEFAULT;
+			switch (quality)
+			{
+			case ImageQuality.QUALITY_ORIGINAL:
+				imageQuality = ImageQuality.IMAGE_QUALITY_ORIGINAL;
+				break;
+			case ImageQuality.QUALITY_MEDIUM:
+				imageQuality = ImageQuality.IMAGE_QUALITY_MEDIUM;
+				break;
+			case ImageQuality.QUALITY_SMALL:
+				imageQuality = ImageQuality.IMAGE_QUALITY_SMALL;
+				break;
+			}
+			post.addHeader("Image-Quality", imageQuality);
 			post.addHeader("Connection", "Keep-Alive");
 			post.addHeader("Content-Name", selectedFile.getName());
 			post.addHeader("X-Thumbnail-Required", "0");
