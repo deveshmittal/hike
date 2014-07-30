@@ -418,6 +418,8 @@ public class HikeConstants
 	public static final String BODY = "b";
 	
 	public static final String MESSAGES = "msgs";
+	
+	public static final String FILE_IMAGE_QUALITY = "img_quality";
 
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
@@ -1679,11 +1681,11 @@ public class HikeConstants
 
 		public static final int QUALITY_DEFAULT = QUALITY_SMALL;
 
-		public static final String IMAGE_QUALITY_ORIGINAL = "Original";
+		public static final String IMAGE_QUALITY_ORIGINAL = "O";
 
-		public static final String IMAGE_QUALITY_MEDIUM = "Medium";
+		public static final String IMAGE_QUALITY_MEDIUM = "M";
 
-		public static final String IMAGE_QUALITY_SMALL = "Small";
+		public static final String IMAGE_QUALITY_SMALL = "S";
 		
 		public static final String IMAGE_QUALITY_DEFAULT = IMAGE_QUALITY_SMALL;
 	}

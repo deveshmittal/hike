@@ -173,6 +173,7 @@ public class UploadFileTask extends FileTransferBase
 				fileName = destinationFile.getName();
 				Bitmap thumbnail = null;
 				String thumbnailString = null;
+				String quality = null;
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
 					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
@@ -184,6 +185,7 @@ public class UploadFileTask extends FileTransferBase
 						if (bd != null)
 							thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(fileKey).getBitmap();
 					}
+					quality = getImageQuality();
 				}
 				else if (hikeFileType == HikeFileType.VIDEO)
 				{
@@ -200,7 +202,8 @@ public class UploadFileTask extends FileTransferBase
 					thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
 					// thumbnail.recycle();
 				}
-				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(), (int) mFile.length());
+				
+				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(), (int) mFile.length(), quality);
 			}
 			else
 			// this is the case for picasa picture
@@ -223,7 +226,7 @@ public class UploadFileTask extends FileTransferBase
 				{
 					fileName = destinationFile.getName();
 				}
-				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, null, null, recordingDuration, HikeConstants.PICASA_PREFIX + picasaUri.toString(), 0);
+				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, null, null, recordingDuration, HikeConstants.PICASA_PREFIX + picasaUri.toString(), 0, ImageQuality.IMAGE_QUALITY_ORIGINAL);
 			}
 			userContext = createConvMessage(fileName, metadata, msisdn, isRecipientOnhike);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);
@@ -248,11 +251,11 @@ public class UploadFileTask extends FileTransferBase
 	}
 
 	private JSONObject getFileTransferMetadata(String fileName, String fileType, HikeFileType hikeFileType, String thumbnailString, Bitmap thumbnail, long recordingDuration,
-			String sourceFilePath, int fileSize) throws JSONException
+			String sourceFilePath, int fileSize, String img_quality) throws JSONException
 	{
 		JSONArray files = new JSONArray();
 		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration,
-				sourceFilePath, fileSize, true).serialize());
+				sourceFilePath, fileSize, true, img_quality).serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 		return metadata;
@@ -346,7 +349,8 @@ public class UploadFileTask extends FileTransferBase
 			{
 				throw new Exception("Network error");
 			}
-			JSONObject metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail);
+			
+			JSONObject metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, ImageQuality.IMAGE_QUALITY_ORIGINAL);
 			hikeFile.removeSourceFile();
 			((ConvMessage) userContext).setMetadata(metadata);
 			HikeConversationsDatabase.getInstance().updateMessageMetadata(((ConvMessage) userContext).getMsgID(), ((ConvMessage) userContext).getMetadata());
@@ -360,10 +364,10 @@ public class UploadFileTask extends FileTransferBase
 		Logger.d(getClass().getSimpleName(), "Upload state bin file :: " + fileName + ".bin." + ((ConvMessage) userContext).getMsgID());
 	}
 
-	private JSONObject getFileTransferMetadata(String fileName, String fileType, HikeFileType hikeFileType, String thumbnailString, Bitmap thumbnail) throws JSONException
+	private JSONObject getFileTransferMetadata(String fileName, String fileType, HikeFileType hikeFileType, String thumbnailString, Bitmap thumbnail, String img_quality) throws JSONException
 	{
 		JSONArray files = new JSONArray();
-		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration, true)
+		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail, recordingDuration, true, img_quality)
 				.serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
@@ -878,22 +882,6 @@ public class UploadFileTask extends FileTransferBase
 		int resCode = 0;
 		try
 		{
-			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
-			String imageQuality = ImageQuality.IMAGE_QUALITY_DEFAULT;
-			switch (quality)
-			{
-			case ImageQuality.QUALITY_ORIGINAL:
-				imageQuality = ImageQuality.IMAGE_QUALITY_ORIGINAL;
-				break;
-			case ImageQuality.QUALITY_MEDIUM:
-				imageQuality = ImageQuality.IMAGE_QUALITY_MEDIUM;
-				break;
-			case ImageQuality.QUALITY_SMALL:
-				imageQuality = ImageQuality.IMAGE_QUALITY_SMALL;
-				break;
-			}
-			post.addHeader("Image-Quality", imageQuality);
 			post.addHeader("Connection", "Keep-Alive");
 			post.addHeader("Content-Name", selectedFile.getName());
 			post.addHeader("X-Thumbnail-Required", "0");
@@ -1052,5 +1040,24 @@ public class UploadFileTask extends FileTransferBase
 		{
 			context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(selectedFile)));
 		}
+	}
+	
+	private String getImageQuality(){
+		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+		String imageQuality = ImageQuality.IMAGE_QUALITY_DEFAULT;
+		switch (quality)
+		{
+		case ImageQuality.QUALITY_ORIGINAL:
+			imageQuality = ImageQuality.IMAGE_QUALITY_ORIGINAL;
+			break;
+		case ImageQuality.QUALITY_MEDIUM:
+			imageQuality = ImageQuality.IMAGE_QUALITY_MEDIUM;
+			break;
+		case ImageQuality.QUALITY_SMALL:
+			imageQuality = ImageQuality.IMAGE_QUALITY_SMALL;
+			break;
+		}
+		return imageQuality;
 	}
 }
