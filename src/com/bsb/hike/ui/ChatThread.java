@@ -893,15 +893,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			if (Utils.isGroupConversation(ChatThread.this.mConversation.getMsisdn()))
 			{
 				GroupConversation gConv = (GroupConversation) mConversation;
-				String number = impMessage.getGroupParticipantMsisdn();
+				String number = null;					
+				String name = gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn());
+
+				if (((GroupConversation) mConversation).getGroupParticipant(impMessage.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
+				{
+					number = impMessage.getGroupParticipantMsisdn();
+				}
 
 				if (number != null)
 				{
-					dateSender.setText(number + " ~ " + gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
+					dateSender.setText(number + " ~ " + name);
 				}
 				else
 				{
-					dateSender.setText(gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
+					dateSender.setText(name);
 				}
 			}
 		}
@@ -7388,10 +7394,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					if (pin_unread_count > 0)
 					{
-						if (pin_unread_count >= 10)
+						if (pin_unread_count >= HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY)
+						{
 							pin_unread.setText(R.string.max_pin_unread_counter);
+							pin_unread.startAnimation(Utils.getNotificationIndicatorAnim());
+						}
 						else
+						{
 							pin_unread.setText(Integer.toString(pin_unread_count));
+							pin_unread.startAnimation(Utils.getNotificationIndicatorAnim());
+						}
 					}
 					else
 						pin_unread.setVisibility(View.GONE);
