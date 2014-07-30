@@ -585,9 +585,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	/*
-	 * It will add message in db and return true in case message was successfully added 
-	 * and will return false if message was duplicate and cannot be inserted in database
+	/**
+	 * Adds single message to database
+	 * @param message
+	 * 			- message to be added to database
+	 * @return result of {@link #addConversations(List)} function
 	 */
 	public boolean addConversationMessages(ConvMessage message)
 	{
@@ -671,7 +673,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor conversationCursor = null;
 		try
 		{
-			mDb.beginTransaction();
 			conversationCursor = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MESSAGE_ID, DBConstants.CONV_ID }, DBConstants.MSISDN + "=?", new String[] { groupId }, null, null,
 					null);
 			c = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.READ_BY, DBConstants.MESSAGE_ID }, DBConstants.GROUP_ID + " =? ", new String[] { groupId },
@@ -688,6 +689,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			if (c.moveToFirst())
 			{
+				mDb.beginTransaction();
 				String readByString = null;
 				long msgId = c.getInt(c.getColumnIndex(DBConstants.MESSAGE_ID));
 
@@ -770,10 +772,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					}
 				}
 				
+				mDb.setTransactionSuccessful();
 				return maxMsgId;
-
 			}
-			mDb.setTransactionSuccessful();
+			
 		}
 		finally
 		{
@@ -1195,7 +1197,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Logger.d(getClass().getSimpleName(), "Message hash: " + msgHash);
 		return msgHash;
 	}
-
+	/**
+	 * 
+	 * @param convMessages
+	 * 			-- list of messages to be added to database
+	 * @return
+	 * 		   <li><b>true</b> if messages successfully added to database</li>
+	 * 		   <li><b>false</b> if messages are not inserted to database possibly due to duplicate</li>
+	 */
 	public boolean addConversations(List<ConvMessage> convMessages)
 	{
 		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
@@ -1228,7 +1237,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				catch (Exception e)
 				{
-					// TODO Auto-generated catch block
+					// duplicate message return false
 					Logger.e(getClass().getSimpleName(), "Duplicate value ", e);
 					return false;
 				}
@@ -1254,7 +1263,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					}
 					catch (Exception e)
 					{
-						// TODO Auto-generated catch block
+						// duplicate message return false
 						Logger.e(getClass().getSimpleName(), "Duplicate value ", e);
 						return false;
 					}
@@ -1299,7 +1308,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			mDb.endTransaction();
 		}
 	}
-
+	
+	/**
+	 * 
+	 * @param convMessages
+	 * 			-- list of messages came in bulk packet
+	 * @return
+	 * 		   <li><b>list</b> of non duplicate messages successfully added to database</li>
+	 * 		  
+	 */
 	public LinkedList<ConvMessage> addConversationsBulk(List<ConvMessage> convMessages)
 	{
 		HashMap<String, Conversation> convesationMap = new HashMap<String, Conversation>();
@@ -1326,7 +1343,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				catch (Exception e)
 				{
-					// TODO Auto-generated catch block
+					// duplicate message . Skip further processing
 					Logger.e(getClass().getSimpleName(), "Duplicate value ", e);
 					continue;
 				}
@@ -1350,7 +1367,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					}
 					catch (Exception e)
 					{
-						// TODO Auto-generated catch block
+						// duplicate message . Skip further processing
 						Logger.e(getClass().getSimpleName(), "Duplicate value ", e);
 						continue;
 					}
@@ -1365,7 +1382,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					String msisdn = conv.getMsisdn();
 					if (convesationMap.get(msisdn) == null)
 					{
-						conversation = this.getConversationBulk(msisdn, 0);
+						conversation = this.getConversation(msisdn, 0);
 						convesationMap.put(msisdn, conversation);
 					}
 					else
@@ -1396,7 +1413,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			insertStatement.close();
 		}
 	}
-
+	
+	/**
+	 * 
+	 * @param convMessages
+	 * 			-- list of messages to be added to conversation table
+	 * @param lastPinMap
+	 * 			-- list of pin messages to be added to conversation table
+	 */
 	public void addLastConversations(List<ConvMessage> convMessages, HashMap<String, PairModified<ConvMessage, Integer>> lastPinMap)
 	{
 		for (ConvMessage conv : convMessages)
@@ -1799,15 +1823,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 			}
 			List<ConvMessage> messages;
-			if (limit != -1 && unreadCount > limit)
+			if (limit != 0)
 			{
-				messages = getConversationThread(msisdn, convid, unreadCount, conv, -1);
+				if (limit != -1 && unreadCount > limit)
+				{
+					messages = getConversationThread(msisdn, convid, unreadCount, conv, -1);
+				}
+				else
+				{
+					messages = getConversationThread(msisdn, convid, limit, conv, -1);
+				}
+				conv.setMessages(messages);
 			}
-			else
-			{
-				messages = getConversationThread(msisdn, convid, limit, conv, -1);
-			}
-			conv.setMessages(messages);
 			conv.setUnreadCount(unreadCount);
 
 			return conv;
@@ -3997,8 +4024,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				insertStatement.executeInsert();
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.CHAT_BACKGROUND_CHANGED, new Pair<String, ChatTheme>(msisdn, chatTheme));
-				mDb.setTransactionSuccessful();
 			}
+			mDb.setTransactionSuccessful();
 		}
 		finally
 		{
