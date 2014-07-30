@@ -287,10 +287,10 @@ public class Conversation implements Comparable<Conversation>
 		this.metaData = metaData;
 	}
 
-	public class MetaData
+	public static class MetaData
 	{
 		/**
-		 * sample json : {'pin':{'id':'1','unreadCount':'1','toShow':'true'} }
+		 * sample json : {'pin':{'id':'1','unreadCount':'1','toShow':'true','timestamp':'XXX'} }
 		 */
 		JSONObject jsonObject;
 
@@ -314,6 +314,17 @@ public class Conversation implements Comparable<Conversation>
 		{
 			JSONObject pinJSON = getPinJson(pinType);
 			return pinJSON.getLong(HikeConstants.ID);
+		}
+		
+		public long getLastPinTimeStamp(int pinType) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			return pinJSON.getLong(HikeConstants.TIMESTAMP);
+		}
+		public void setLastPinTimeStamp(int pinType, long timeStamp) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			pinJSON.put(HikeConstants.TIMESTAMP, timeStamp);
 		}
 
 		public int getUnreadCount(int pinType) throws JSONException
