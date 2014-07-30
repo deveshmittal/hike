@@ -194,7 +194,7 @@ public class AccountUtils
 			catch (Exception e)
 			{
 				sslException = true;
-				schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), port));
+				schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), PRODUCTION_PORT));
 			}
 		}
 		else
@@ -221,7 +221,7 @@ public class AccountUtils
 			URI uri = request.getURI();
 			try
 			{
-				request.setURI(new URI("http", uri.getUserInfo(), uri.getHost(), port, uri.getPath(), uri.getQuery(), uri.getFragment()));
+				request.setURI(new URI("http", uri.getUserInfo(), uri.getHost(), PRODUCTION_PORT, uri.getPath(), uri.getQuery(), uri.getFragment()));
 			}
 			catch (URISyntaxException e)
 			{
