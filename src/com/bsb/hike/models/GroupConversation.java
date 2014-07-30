@@ -1,6 +1,8 @@
 package com.bsb.hike.models;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -14,7 +16,6 @@ import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -57,9 +58,7 @@ public class GroupConversation extends Conversation
 			GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(contactNum, contactNum, contactName, contactNum, onHike), false, onDnd);
 			Logger.d(getClass().getSimpleName(), "Parsing JSON and adding contact to conversation: " + contactNum);
 			this.groupParticipantList.put(contactNum, new Pair<GroupParticipant, String>(groupParticipant, contactName));
-			ContactManager.getInstance().addGroupParticipants(getMsisdn(), groupParticipantList);
 		}
-
 		String groupName = ContactManager.getInstance().getName(getMsisdn());
 		setContactName(groupName);
 	}
@@ -84,6 +83,16 @@ public class GroupConversation extends Conversation
 		this.groupParticipantList = groupParticipantList;
 	}
 
+	public void setGroupParticipantList(List<Pair<GroupParticipant, String>> groupParticipantList)
+	{
+		this.groupParticipantList = new HashMap<String, Pair<GroupParticipant, String>>();
+		for (Pair<GroupParticipant, String> grpParticipant : groupParticipantList)
+		{
+			String msisdn = grpParticipant.first.getContactInfo().getMsisdn();
+			this.groupParticipantList.put(msisdn, grpParticipant);
+		}
+	}
+
 	public Map<String, Pair<GroupParticipant, String>> getGroupParticipantList()
 	{
 		return groupParticipantList;
@@ -103,7 +112,7 @@ public class GroupConversation extends Conversation
 
 	public String getLabel()
 	{
-		return !TextUtils.isEmpty(getContactName()) ? getContactName() : Utils.defaultGroupName(groupParticipantList);
+		return !TextUtils.isEmpty(getContactName()) ? getContactName() : Utils.defaultGroupName(new ArrayList<Pair<GroupParticipant,String>>(groupParticipantList.values()));
 	}
 
 	public void setIsMuted(boolean isMuted)

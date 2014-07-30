@@ -2,6 +2,7 @@ package com.bsb.hike.tasks;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -188,7 +189,13 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 		if (removeExistingParticipants)
 		{
-			Map<String, Pair<GroupParticipant, String>> groupParticipants = ContactManager.getInstance().getGroupParticipants(existingGroupId, true, false);
+			List<Pair<GroupParticipant,String>> groupParticipantsList = ContactManager.getInstance().getGroupParticipants(existingGroupId, true, false);
+			Map<String, Pair<GroupParticipant, String>> groupParticipants = new HashMap<String, Pair<GroupParticipant,String>>();
+			for(Pair<GroupParticipant,String> grpParticipant : groupParticipantsList)
+			{
+				String msisdn = grpParticipant.first.getContactInfo().getMsisdn();
+				groupParticipants.put(msisdn, grpParticipant);
+			}
 
 			removeContactsFromList(friendTaskList, groupParticipants);
 			removeContactsFromList(hikeTaskList, groupParticipants);

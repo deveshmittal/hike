@@ -1746,7 +1746,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		boolean participantsAlreadyAdded = true;
 		boolean infoChangeOnly = false;
 
-		Map<String, Pair<GroupParticipant, String>> currentParticipants = ContactManager.getInstance().getGroupParticipants(groupId, true, false);
+		List<Pair<GroupParticipant, String>> currentParticipantsList = ContactManager.getInstance().getGroupParticipants(groupId, true, false);
+		Map<String, Pair<GroupParticipant, String>> currentParticipants = new HashMap<String, Pair<GroupParticipant, String>>();
+		for (Pair<GroupParticipant, String> grpParticipant : currentParticipantsList)
+		{
+			String msisdn = grpParticipant.first.getContactInfo().getMsisdn();
+			currentParticipants.put(msisdn, grpParticipant);
+		}
+
 		if (currentParticipants.isEmpty())
 		{
 			participantsAlreadyAdded = false;
@@ -1778,6 +1785,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			return HikeConstants.NO_CHANGE;
 		}
 
+		Map<String, Pair<GroupParticipant, String>> newParticipants = new HashMap<String, Pair<GroupParticipant, String>>();
 		SQLiteStatement insertStatement = null;
 		InsertHelper ih = null;
 		try
@@ -1797,9 +1805,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.HAS_LEFT), 0);
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.ON_DND), groupParticipant.onDnd() ? 1 : 0);
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.SHOWN_STATUS), groupParticipant.getContactInfo().isOnhike() ? 1 : 0);
-
 				insertStatement.executeInsert();
+				
+				newParticipants.put(participant.getKey(), new Pair<GroupParticipant, String>(groupParticipant, participant.getValue().second));
 			}
+			
+			ContactManager.getInstance().addGroupParticipants(groupId, newParticipants);
 			return infoChangeOnly ? HikeConstants.PARTICIPANT_STATUS_CHANGE : HikeConstants.NEW_PARTICIPANT;
 		}
 		finally
@@ -2177,7 +2188,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String groupId = groupCursor.getString(groupIdIdx);
 				String groupName = groupCursor.getString(groupNameIdx);
 
-				Map<String, Pair<GroupParticipant, String>> groupParticipantMap = ContactManager.getInstance().getGroupParticipants(groupId, true, false, false);
+				List<Pair<GroupParticipant, String>> groupParticipantMap = ContactManager.getInstance().getGroupParticipants(groupId, true, false, false);
 				groupName = TextUtils.isEmpty(groupName) ? Utils.defaultGroupName(groupParticipantMap) : groupName;
 				int numMembers = groupParticipantMap.size();
 

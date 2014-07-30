@@ -764,7 +764,7 @@ public class ContactManager implements ITransientCache
 	 * @param groupId
 	 * @return
 	 */
-	public Map<String, Pair<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
+	public List<Pair<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
 	{
 		return getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly, true);
 	}
@@ -775,7 +775,7 @@ public class ContactManager implements ITransientCache
 	 * @param groupId
 	 * @return
 	 */
-	public Map<String, Pair<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
+	public List<Pair<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
 	{
 		Pair<Map<String, Pair<GroupParticipant, String>>, List<String>> groupPair = transientCache.getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly,
 				fetchParticipants);
@@ -794,6 +794,7 @@ public class ContactManager implements ITransientCache
 				for (String ms : allMsisdns)
 				{
 					ContactInfo contact = transientCache.getContact(ms);
+
 					if (null != contact)
 					{
 						// increment ref count
@@ -835,7 +836,9 @@ public class ContactManager implements ITransientCache
 		}
 
 		transientCache.insertGroupParticipants(groupId, groupParticipantsMap);
-		return groupParticipantsMap;
+		
+		List<Pair<GroupParticipant, String>> groupParticipantsList = new ArrayList<Pair<GroupParticipant,String>>(groupParticipantsMap.values());
+		return groupParticipantsList;
 	}
 
 	/**
