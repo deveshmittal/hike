@@ -7386,10 +7386,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					if (pin_unread_count > 0)
 					{
-						if (pin_unread_count >= 10)
+						if (pin_unread_count >= HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY)
+						{
 							pin_unread.setText(R.string.max_pin_unread_counter);
+							pin_unread.startAnimation(Utils.getNotificationIndicatorAnim());
+						}
 						else
+						{
 							pin_unread.setText(Integer.toString(pin_unread_count));
+							pin_unread.startAnimation(Utils.getNotificationIndicatorAnim());
+						}
 					}
 					else
 						pin_unread.setVisibility(View.GONE);
