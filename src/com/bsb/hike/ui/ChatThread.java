@@ -391,7 +391,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean showingChatThemePicker;
 
-	private boolean showingImpMessagePin;
+	private boolean showingImpMessagePinCreate,showingPIN;
 
 	private ImageView backgroundImage;
 
@@ -921,20 +921,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onClick(View v)
 			{
-				tipView.setVisibility(View.GONE);
-				tipView = null;
-				MetaData metadata = mConversation.getMetaData();
-				try
-				{
-					metadata.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, false);
-				}
-				catch (JSONException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA,mConversation);
+				hidePin();
 				
 			}
 		});
@@ -962,6 +949,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			tipView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), animationId));
 		}
+		showingPIN = true;
+	}
+	private void hidePin(){
+		showingPIN = false;
+		tipView.setVisibility(View.GONE);
+		tipView = null;
+		MetaData metadata = mConversation.getMetaData();
+		try
+		{
+			metadata.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, false);
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA,mConversation);
 	}
 
 	private void showTipIfRequired()
@@ -1187,7 +1192,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if (showingChatThemePicker || showingImpMessagePin)
+		if (showingChatThemePicker || showingImpMessagePinCreate)
 		{
 			return false;
 		}
@@ -1210,7 +1215,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
-		if (mConversation == null || showingChatThemePicker || showingImpMessagePin)
+		if (mConversation == null || showingChatThemePicker || showingImpMessagePinCreate)
 		{
 			return super.onPrepareOptionsMenu(menu);
 		}
@@ -1314,7 +1319,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (attachmentWindow != null)
 		{
-			if (showingImpMessagePin)
+			if (showingImpMessagePinCreate)
 			{
 				View v = attachmentWindow.getContentView();
 				v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_out_animation));
@@ -1680,7 +1685,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 
 		ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, message, isConversationOnHike());
-		if (showingImpMessagePin)
+		if (showingImpMessagePinCreate)
 		{
 			convMessage.setMessageType((Integer) v.getTag());
 			Object metaData = v.getTag(R.id.message_info);
@@ -2010,8 +2015,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Logger.w("ChatThread", "DIFFERENT MSISDN CLOSING CONTEXT MENU!!");
 			closeContextMenu();
 		}
-		if(showingImpMessagePin){
+		if(showingImpMessagePinCreate){
 			dismissPinCreateView();
+		}
+		if(showingPIN){
+			hidePin();
 		}
 	}
 
@@ -4593,7 +4601,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void setupPinImpMessageTextBased()
 	{
 		setupPinImpMessageActionBar();
-		showingImpMessagePin = true;
+		showingImpMessagePinCreate = true;
 		invalidateOptionsMenu();
 		dismissPopupWindow();
 		final View content = findViewById(R.id.impMessageCreateView);
@@ -4627,7 +4635,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			tipView.setVisibility(View.VISIBLE);
 		}
 		// Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
-		showingImpMessagePin = false;
+		showingImpMessagePinCreate = false;
 		setupActionBar(false);
 		invalidateOptionsMenu();
 		mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
@@ -5860,7 +5868,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			outState.putBoolean(HikeConstants.Extras.CHAT_THEME_WINDOW_OPEN, true);
 			outState.putInt(HikeConstants.Extras.SELECTED_THEME, temporaryTheme.ordinal());
 		}
-		if (showingImpMessagePin)
+		if (showingImpMessagePinCreate)
 		{
 			outState.putInt(HikeConstants.Extras.PIN_TYPE_SHOWING, HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 		}
