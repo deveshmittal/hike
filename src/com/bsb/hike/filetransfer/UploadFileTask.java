@@ -781,7 +781,7 @@ public class UploadFileTask extends FileTransferBase
 			HttpClient client = new DefaultHttpClient();
 			client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
 			HttpHead head = new HttpHead(mUrl.toString());
-			head.addHeader("Cookie", "user=" + token + ";uid=" + uId);
+			head.addHeader("Cookie", "user=" + token + ";UID=" + uId);
 
 			HttpResponse resp = client.execute(head);
 			int resCode = resp.getStatusLine().getStatusCode();
@@ -848,8 +848,8 @@ public class UploadFileTask extends FileTransferBase
 			post.addHeader("X-Thumbnail-Required", "0");
 			post.addHeader("X-SESSION-ID", X_SESSION_ID);
 			post.addHeader("X-CONTENT-RANGE", contentRange);
-			post.addHeader("Cookie", "user=" + token + ";uid=" + uId);
-			Logger.d(getClass().getSimpleName(), "user=" + token + ";uid=" + uId);
+			post.addHeader("Cookie", "user=" + token + ";UID=" + uId);
+			Logger.d(getClass().getSimpleName(), "user=" + token + ";UID=" + uId);
 			post.setHeader("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
 
 			post.setEntity(new ByteArrayEntity(fileBytes));
