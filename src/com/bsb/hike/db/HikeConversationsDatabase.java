@@ -673,7 +673,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor conversationCursor = null;
 		try
 		{
-			mDb.beginTransaction();
 			conversationCursor = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MESSAGE_ID, DBConstants.CONV_ID }, DBConstants.MSISDN + "=?", new String[] { groupId }, null, null,
 					null);
 			c = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.READ_BY, DBConstants.MESSAGE_ID }, DBConstants.GROUP_ID + " =? ", new String[] { groupId },
@@ -690,6 +689,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			if (c.moveToFirst())
 			{
+				mDb.beginTransaction();
 				String readByString = null;
 				long msgId = c.getInt(c.getColumnIndex(DBConstants.MESSAGE_ID));
 
@@ -772,10 +772,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					}
 				}
 				
+				mDb.setTransactionSuccessful();
 				return maxMsgId;
-
 			}
-			mDb.setTransactionSuccessful();
+			
 		}
 		finally
 		{
