@@ -878,38 +878,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 		TextView text = (TextView) tipView.findViewById(R.id.text);
-		TextView dateSender = (TextView) tipView.findViewById(R.id.date);
 		if (impMessage.getMetadata() != null && impMessage.getMetadata().isGhostMessage())
 		{
 			tipView.findViewById(R.id.main_content).setBackgroundResource(R.drawable.pin_bg_black);
 			text.setTextColor(getResources().getColor(R.color.gray));
-		}
-		if (impMessage.isSent())
-		{
-			dateSender.setText("You");
-		}
-		else
-		{
-			if (Utils.isGroupConversation(ChatThread.this.mConversation.getMsisdn()))
-			{
-				GroupConversation gConv = (GroupConversation) mConversation;
-				String number = null;					
-				String name = gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn());
-
-				if (((GroupConversation) mConversation).getGroupParticipant(impMessage.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
-				{
-					number = impMessage.getGroupParticipantMsisdn();
-				}
-
-				if (number != null)
-				{
-					dateSender.setText(number + " ~ " + name);
-				}
-				else
-				{
-					dateSender.setText(name);
-				}
-			}
 		}
 		CharSequence markedUp = impMessage.getMessage();
 		SmileyParser smileyParser = SmileyParser.getInstance();
@@ -917,8 +889,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		text.setText(markedUp);
 		Linkify.addLinks(text, Linkify.ALL);
 		Linkify.addLinks(text, Utils.shortCodeRegex, "tel:");
-
-		dateSender.setText(dateSender.getText() + ", " + impMessage.getTimestampFormatted(false, getApplicationContext()));
+		if(mConversation instanceof GroupConversation){
+			String name;
+			if(impMessage.isSent()){
+				name="You: ";
+			}else{
+				name = ((GroupConversation) mConversation).getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()) + ": ";
+			}
+		ForegroundColorSpan fSpan = new ForegroundColorSpan(getResources().getColor(R.color.pin_name_color));
+		String str = name+text.getText();
+		SpannableString spanStr = new SpannableString(str);
+		spanStr.setSpan(fSpan, 0, name.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		spanStr.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.pin_text_color)), name.length(), str.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		text.setText(spanStr);
+		}
 		View cross = tipView.findViewById(R.id.cross);
 		cross.setTag(impMessage);
 		cross.setOnClickListener(new OnClickListener()
