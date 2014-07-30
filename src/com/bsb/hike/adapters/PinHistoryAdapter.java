@@ -160,10 +160,9 @@ public class PinHistoryAdapter extends BaseAdapter
 			case TEXT:
 			{
 				convertView = inflater.inflate(R.layout.pin_history, null);
-				viewHolder.sender = (TextView) convertView.findViewById(R.id.senderName);
+				viewHolder.sender = (TextView) convertView.findViewById(R.id.sender);
 				viewHolder.detail = (TextView) convertView.findViewById(R.id.text);
-				viewHolder.timestamp = (TextView) convertView.findViewById(R.id.date);
-				convertView.findViewById(R.id.cross).setVisibility(View.GONE);
+				viewHolder.timestamp = (TextView) convertView.findViewById(R.id.timestamp);
 			}
 				break;
 			case DATE_SEP:
@@ -184,7 +183,7 @@ public class PinHistoryAdapter extends BaseAdapter
 			ConvMessage textPin = (ConvMessage) data;
 			if (textPin.isSent())
 			{
-				viewHolder.sender.setText("You");
+				viewHolder.sender.setText("You, ");
 			}
 			else
 			{
@@ -201,11 +200,11 @@ public class PinHistoryAdapter extends BaseAdapter
 
 					if (number != null)
 					{
-						viewHolder.sender.setText(number + " ~ " + name);
+						viewHolder.sender.setText(number + " ~ " + name + ", ");
 					}
 					else
 					{
-						viewHolder.sender.setText(name);
+						viewHolder.sender.setText(name + ", ");
 					}
 				}
 			}
