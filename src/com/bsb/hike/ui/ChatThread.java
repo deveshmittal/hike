@@ -893,15 +893,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			if (Utils.isGroupConversation(ChatThread.this.mConversation.getMsisdn()))
 			{
 				GroupConversation gConv = (GroupConversation) mConversation;
-				String number = impMessage.getGroupParticipantMsisdn();
+				String number = null;					
+				String name = gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn());
+
+				if (((GroupConversation) mConversation).getGroupParticipant(impMessage.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
+				{
+					number = impMessage.getGroupParticipantMsisdn();
+				}
 
 				if (number != null)
 				{
-					dateSender.setText(number + " ~ " + gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
+					dateSender.setText(number + " ~ " + name);
 				}
 				else
 				{
-					dateSender.setText(gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
+					dateSender.setText(name);
 				}
 			}
 		}
