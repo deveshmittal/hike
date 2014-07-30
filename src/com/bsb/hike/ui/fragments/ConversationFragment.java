@@ -121,6 +121,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					continue;
 				}
+				else if(conv instanceof GroupConversation)
+				{
+					//TODO in case of leaving group from group info screen ==> 2 gcl event will trigger
+					//we can avoid these by moving delete conversation task to db
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+				}
+
 				ids.add(conv.getConvId());
 				msisdns.add(conv.getMsisdn());
 				editor.remove(conv.getMsisdn());
@@ -129,7 +136,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			db = HikeConversationsDatabase.getInstance();
 			db.deleteConversation(ids.toArray(new Long[] {}), msisdns);
-
+			
 			return convs;
 		}
 
@@ -600,7 +607,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						public void onClick(View v)
 						{
 							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
-							leaveGroup(conv);
+							deleteConversation(conv);
 							deleteConfirmDialog.dismiss();
 						}
 					};
@@ -916,17 +923,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		Collections.sort(displayedConversations, mConversationsComparator);
 		notifyDataSetChanged();
-	}
-
-	private void leaveGroup(Conversation conv)
-	{
-		if (conv == null)
-		{
-			Logger.d(getClass().getSimpleName(), "Invalid conversation");
-			return;
-		}
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
-		deleteConversation(conv);
 	}
 
 	private void deleteConversation(Conversation conv)
