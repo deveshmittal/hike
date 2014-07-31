@@ -182,6 +182,13 @@ public class TransientCache extends ContactsCache
 				ContactTuple tuple = transientContacts.get(contact.getMsisdn());
 				tuple.setContact(contact);
 			}
+			else
+			{
+				// if contact not found to be updated then add in the transient cache and we should set allContactsLoaded to false because if all contacts are loaded even then we
+				// can't find some contacts in cache that means some new contacts have been added in addressbook
+				insertContact(contact);
+				allContactsLoaded = false;
+			}
 		}
 		finally
 		{
