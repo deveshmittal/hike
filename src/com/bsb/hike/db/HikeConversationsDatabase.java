@@ -707,20 +707,27 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				ContentValues contentValues = new ContentValues();
 
-				try
-				{
+				
 					if(idPresent)				// We have to update readbyString 
 					{
 						readByString = c.getString(c.getColumnIndex(DBConstants.READ_BY));
 
 						JSONArray readByArray;
-						if (TextUtils.isEmpty(readByString))
+						try
 						{
-							readByArray = new JSONArray();
+							if (TextUtils.isEmpty(readByString))
+							{
+								readByArray = new JSONArray();
+							}
+							else
+							{
+								readByArray = new JSONArray(readByString);
+							}
 						}
-						else
+						catch (JSONException e)
 						{
-							readByArray = new JSONArray(readByString);
+							Logger.w(getClass().getSimpleName(), "Invalid JSON", e);
+							readByArray = new JSONArray();
 						}
 						/*
 						 * Checking if this number has already been added.
@@ -739,13 +746,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 							readByArray.put(msisdn);
 							contentValues.put(DBConstants.READ_BY, readByArray.toString());
 							mDb.update(DBConstants.GROUP_INFO_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[] { groupId });
-						}
+						}	
 					}
-				}
-				catch (JSONException e)
-				{
-					Logger.w(getClass().getSimpleName(), "Invalid JSON", e);
-				}
+				
 
 				long maxMsgId = getMrIdForGroup(groupId, ids);			// get max sent message id from list of ids
 
@@ -837,9 +840,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						return;
 					}
 					
+					JSONArray readByArray;
 					try
 					{
-						JSONArray readByArray;
 						if (TextUtils.isEmpty(readByString))
 						{
 							readByArray = new JSONArray();
@@ -848,43 +851,45 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						{
 							readByArray = new JSONArray(readByString);
 						}
-						/*
-						 * Checking if this number has already been added.
-						 */
-						boolean alreadyAdded = false;
-						for(String msisdn : pair.getFirst().getSecond())
-						{
-							for (int i = 0; i < readByArray.length(); i++)
-							{
-								if (readByArray.optString(i).equals(msisdn))
-								{
-									alreadyAdded = true;
-									break;
-								}
-							}
-							if (!alreadyAdded)
-							{
-								readByArray.put(msisdn);
-							}
-						}
-						
-						long conversationMsgId = conversationCursor.getLong(conversationCursor.getColumnIndex(DBConstants.MESSAGE_ID));
-	
-						ContentValues contentValues = new ContentValues();
-						if(conversationMsgId == maxMsgId)
-						{
-							contentValues.put(DBConstants.MSG_STATUS, State.SENT_DELIVERED_READ.ordinal());
-							mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { groupId });
-						}
-						contentValues.clear();
-						contentValues.put(DBConstants.READ_BY, readByArray.toString());
-						mDb.update(DBConstants.GROUP_INFO_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[] { groupId });
 
 					}
 					catch (JSONException e)
 					{
 						Logger.w(getClass().getSimpleName(), "Invalid JSON", e);
+						readByArray = new JSONArray();
 					}
+					/*
+					 * Checking if this number has already been added.
+					 */
+					boolean alreadyAdded = false;
+					for(String msisdn : pair.getFirst().getSecond())
+					{
+						for (int i = 0; i < readByArray.length(); i++)
+						{
+							if (readByArray.optString(i).equals(msisdn))
+							{
+								alreadyAdded = true;
+								break;
+							}
+						}
+						if (!alreadyAdded)
+						{
+							readByArray.put(msisdn);
+						}
+					}
+
+					long conversationMsgId = conversationCursor.getLong(conversationCursor.getColumnIndex(DBConstants.MESSAGE_ID));
+
+					ContentValues contentValues = new ContentValues();
+					if(conversationMsgId == maxMsgId)
+					{
+						contentValues.put(DBConstants.MSG_STATUS, State.SENT_DELIVERED_READ.ordinal());
+						mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { groupId });
+					}
+					contentValues.clear();
+					contentValues.put(DBConstants.READ_BY, readByArray.toString());
+					mDb.update(DBConstants.GROUP_INFO_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[] { groupId });
+
 
 				}
 			}
