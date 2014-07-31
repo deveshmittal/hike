@@ -1330,7 +1330,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			long msgId = -1;
 
-			int unreadMessageCount = 0;
 			for (ConvMessage conv : convMessages)
 			{
 
@@ -1398,19 +1397,32 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				{
 					addSharedMedia(msgId, conv.getConversation().getConvId());
 				}
-				if (Utils.shouldIncrementCounter(conv))
-				{
-					unreadMessageCount++;
-				}
 				resultList.add(conv);
 			}
-			incrementUnreadCounter(convMessages.get(0).getMsisdn(), unreadMessageCount);
 			Logger.d("BulkProcess", "adding conversation returning");
 			return resultList;
 		}
 		finally
 		{
 			insertStatement.close();
+		}
+	}
+	
+	/**
+	 * This function updates unread count for each msisdn/groupId
+	 *  
+	 * @param messageListMap
+	 * 			-- map of msisdn/groupid to list of conversation messages
+	 */
+	public void incrementUnreadCountBulk(Map<String, LinkedList<ConvMessage>> messageListMap)
+	{
+		for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
+		{
+			LinkedList<ConvMessage> list= entry.getValue();
+			if(!list.isEmpty())
+			{
+				incrementUnreadCounter(entry.getKey(), list.size());
+			}
 		}
 	}
 	

@@ -1813,6 +1813,14 @@ public class MqttMessagesManager
 		}
 		
 		/*
+		 * Increment unread count for each msisdn/groupId
+		 */
+		if(messageListMap.size() > 0)
+		{
+			convDb.incrementUnreadCountBulk(messageListMap);
+		}
+		
+		/*
 		 * contains last message for each conversation to be added to conversation table
 		 */
 		ArrayList<ConvMessage> lastMessageList = new ArrayList<ConvMessage>(messageListMap.keySet().size());
