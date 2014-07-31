@@ -20,6 +20,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gms.internal.co;
@@ -39,16 +40,17 @@ public class PinHistoryAdapter extends BaseAdapter
 	private PinHistoryItemsListener mListener;
 
 	private boolean addDateInBetween;
-
+	private boolean isDefaultTheme;
 	public static interface PinHistoryItemsListener
 	{
 		public void onLastItemRequested();
 	}
 
 	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn, long convId, Conversation conversation, PinHistoryItemsListener listener,
-			boolean addDateInbetween)
+			boolean addDateInbetween,ChatTheme theme)
 	{
 		this.context = context;
+		this.isDefaultTheme = theme == ChatTheme.DEFAULT;
 		this.addDateInBetween = addDateInbetween;
 		this.mConversation = conversation;
 
@@ -167,6 +169,7 @@ public class PinHistoryAdapter extends BaseAdapter
 				break;
 			case DATE_SEP:
 				convertView = inflater.inflate(R.layout.message_day_container, null);
+				setDayIndicatorColor(convertView);
 				break;
 			}
 			convertView.setTag(viewHolder);
@@ -225,6 +228,27 @@ public class PinHistoryAdapter extends BaseAdapter
 		}
 
 		return convertView;
+	}
+	
+	private void setDayIndicatorColor(View inflated){
+		TextView dayTextView = (TextView) inflated.findViewById(R.id.day);
+		View dayLeft = inflated.findViewById(R.id.day_left);
+		View dayRight = inflated.findViewById(R.id.day_right);
+
+
+		if (isDefaultTheme)
+		{
+			dayTextView.setTextColor(context.getResources().getColor(R.color.list_item_header));
+			dayLeft.setBackgroundColor(context.getResources().getColor(R.color.day_line));
+			dayRight.setBackgroundColor(context.getResources().getColor(R.color.day_line));
+		}
+		else
+		{
+			dayTextView.setTextColor(context.getResources().getColor(R.color.white));
+			dayLeft.setBackgroundColor(context.getResources().getColor(R.color.white));
+			dayRight.setBackgroundColor(context.getResources().getColor(R.color.white));
+		}
+			
 	}
 
 	private void addDateInBetween()

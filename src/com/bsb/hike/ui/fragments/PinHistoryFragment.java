@@ -136,10 +136,10 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 	public void onActivityCreated(Bundle savedInstanceState)
 	{
 		super.onActivityCreated(savedInstanceState);
-
-		PHadapter = new PinHistoryAdapter(getActivity(), textPins, msisdn, convId, mConversation, this, true);
+		PHadapter = new PinHistoryAdapter(getActivity(), textPins, msisdn, convId, mConversation, this, true,chatTheme);
 
 		setListAdapter(PHadapter);
+		
 		
 	}
 
