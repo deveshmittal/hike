@@ -1291,6 +1291,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// hide pop up if any
 			return attachmentClicked();
 		case R.id.overflow_menu:
+			Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
 			showOverFlowMenu();
 			break;
 		case R.id.pin_imp:
