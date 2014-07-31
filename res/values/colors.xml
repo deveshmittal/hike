@@ -253,18 +253,18 @@
     <color name="bubble_blue">#d4feff</color>
     <color name="bubble_celebration_space">#e4cdfe</color>
     <color name="bubble_chatty_bechy_techy">#b9fffb</color>
-    <color name="bubble_forest_study_sporty_fifa">#dcffa0</color>
+    <color name="bubble_forest_study_sporty_fifa_nature">#dcffa0</color>
     <color name="bubble_green">#ecffcf</color>
-    <color name="bubble_love_floral_kisses_valentines_girly_ipl_blurredlight">#feebdd</color>
+    <color name="bubble_love_floral_kisses_valentines_girly_ipl_blurredlight_love2">#feebdd</color>
     <color name="bubble_night">#91d8fa</color>
     <color name="bubble_owl">#7acdc8</color>
-    <color name="bubble_smiley_geometric1">#ffffcd</color>
+    <color name="bubble_smiley_geometric1_independence">#ffffcd</color>
     <color name="bubble_stary_Space">#a7d3fe</color>
     <color name="bubble_creepy">#c0dded</color>
     <color name="bubble_hikin_couple_mountain">#fce3c5</color>
     <color name="bubble_mr_right_exam">#ffd7ac</color>
     <color name="bubble_music">#d2f0ff</color>
-    <color name="bubble_rains_beach_2">#b2e5ff</color>
+    <color name="bubble_beach_2">#b2e5ff</color>
     <color name="bubble_white">#ffffff</color>
 	<color name="green_connected">#87d156</color>
     <color name="action_bar_btn_disable">#38b1fe</color>
@@ -339,5 +339,8 @@
     <color name="ftue_card_invite_click_text">#01b085</color>
     <color name="image_quality_popup_text_color">#333333</color>
     <color name="black_30">#4D000000</color>
+    <color name="yellow_sticky_note">#fff38f</color>
+    <color name="light_gray">#404040</color>
+    <color name="gray">#cccccc</color>
 </resources>
 	

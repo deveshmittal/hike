@@ -54,6 +54,8 @@ public class HikeConstants
 	public static final String HIKE_MESSAGE = "hm";
 
 	public static final String SMS_MESSAGE = "sm";
+	
+	public static final String PIN_MESSAGE = "pin";
 
 	public static final String TIMESTAMP = "ts";
 
@@ -126,7 +128,9 @@ public class HikeConstants
 	public static final String ADDRESS = "add";
 
 	public static final String POKE = "poke";
-
+	
+	public static final String IS_GHOST = "is_ghost";
+	
 	public static final String ID = "id";
 
 	public static final String TOKEN = "token";
@@ -412,6 +416,8 @@ public class HikeConstants
 	public static final String HEADER = "h";
 	
 	public static final String BODY = "b";
+	
+	public static final String MESSAGES = "msgs";
 
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
@@ -466,6 +472,8 @@ public class HikeConstants
 	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
 
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
+
+	public static final String UPGRADE_MSG_HASH_GROUP_READBY = "upgradeMsgHashGroupReadby";
 
 	public static final String UPGRADE_AVATAR_CONV_DB = "upgradeAvtarProgressConv";
 
@@ -566,7 +574,7 @@ public class HikeConstants
 	// More explanation required?
 	public static final int NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP = 2;
 
-	public static final String APP_API_VERSION = "2";
+	public static final String APP_API_VERSION = "3";
 
 	public static final int NUM_SMS_PER_FRIEND = 10;
 
@@ -699,6 +707,10 @@ public class HikeConstants
 	public static final String GOOGLE_PLUS_PREFIX = "content://com.google.android.apps.photos.content";
 
 	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 40;
+
+	public static final int MAX_PINS_TO_LOAD_INITIALLY = 20;
+
+	public static final int MAX_OLDER_PINS_TO_LOAD_EACH_TIME = 20;
 
 	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 20;
 
@@ -885,6 +897,12 @@ public class HikeConstants
 	
 	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
 
+
+	public static final String PIN = "pin";
+
+	public static final String UNREAD_COUNT = "unreadCount";
+
+	public static final String TO_SHOW = "toShow";
 
 	public static final class ResultCodes
 	{
@@ -1570,6 +1588,8 @@ public class HikeConstants
 		public static final String TOGGLE_STEALTH = "ts";
 		
 		public static final String POPUP = "popup"; //this is a generic popup type
+		
+		public static final String BULK_MESSAGE = "bm";
 
 		public static final String REMOVE_PIC = "icr";
 
@@ -1655,10 +1675,23 @@ public class HikeConstants
 	public static final String PACKAGE_WATSAPP = "com.whatsapp";
 
 	public static final long IMAGE_SIZE_SMALL = 50 * 1024;
-	
+
 	public static final long IMAGE_SIZE_MEDIUM = 80 * 1024;
 
 	public static final String WATSAPP_INVITE_MESSAGE_KEY = "wa_msg";
 
 	public static final String WATSAPP_INVITE_ENABLED = "i_wa";
+
+	public static class MESSAGE_TYPE
+	{
+		public static final int PLAIN_TEXT = 0;
+
+		public static final int TEXT_PIN = 1;
+	}
+	
+	public static final String TEXT_PINS = "text_pins";
+
+	public static final String EXTRA_CONV_ID = "conv_id";
+	
+	public static final int MAX_PIN_CONTENT_LINES_IN_HISTORY = 10;
 }
