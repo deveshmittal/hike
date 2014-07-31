@@ -945,8 +945,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	}
 	private void hidePin(){
 		showingPIN = false;
-		tipView.setVisibility(View.GONE);
-		tipView = null;
+		playUpDownAnimation(tipView);
 		MetaData metadata = mConversation.getMetaData();
 		try
 		{
@@ -959,6 +958,37 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		
 		mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA,mConversation);
+	}
+	
+	private void playUpDownAnimation(final View view){
+		Animation an = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.down_up_up_part);
+		an.setAnimationListener(new AnimationListener()
+		{
+			
+			@Override
+			public void onAnimationStart(Animation animation)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				view.setVisibility(View.GONE);
+				if(view==tipView){
+					tipView = null;
+				}
+			}
+		});
+		view.startAnimation(an);
 	}
 
 	private void showTipIfRequired()
@@ -4654,8 +4684,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		final View v = findViewById(R.id.impMessageCreateView);
 		if(animId!=-1){
 			Animation an = AnimationUtils.loadAnimation(getApplicationContext(), animId);
-		}
+			playUpDownAnimation(v);
+		}else{
 		v.setVisibility(View.GONE);
+		}
 	}
 
 	private void setupPinImpMessageActionBar()
