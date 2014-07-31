@@ -86,6 +86,7 @@ public class Conversation implements Comparable<Conversation>
 	{
 		this.lastPin = string;
 	}
+	
 
 	public int getUnreadPinCount()
 	{
@@ -290,7 +291,7 @@ public class Conversation implements Comparable<Conversation>
 	public static class MetaData
 	{
 		/**
-		 * sample json : {'pin':{'id':'1','unreadCount':'1','toShow':'true','timestamp':'XXX'} }
+		 * sample json : {'pin':{'id':'1','unreadCount':'1','toShow':'true','timestamp':'XXX','displayed':'false'} }
 		 */
 		JSONObject jsonObject;
 
@@ -378,7 +379,11 @@ public class Conversation implements Comparable<Conversation>
 		public void decrementUnreadCount(int pinType) throws JSONException
 		{
 			JSONObject pinJSON = getPinJson(pinType);
-			pinJSON.put(HikeConstants.UNREAD_COUNT, pinJSON.getInt(HikeConstants.UNREAD_COUNT) - 1);
+			int unreadCount =pinJSON.getInt(HikeConstants.UNREAD_COUNT);
+			if(unreadCount>0)
+			{
+		    	pinJSON.put(HikeConstants.UNREAD_COUNT, pinJSON.getInt(HikeConstants.UNREAD_COUNT) - 1);
+			}
 		}
 
 		public void setShowLastPin(int pinType, boolean isShow) throws JSONException
@@ -387,6 +392,26 @@ public class Conversation implements Comparable<Conversation>
 			pinJson.put(HikeConstants.TO_SHOW, isShow);
 		}
 
+		
+
+		public void setPinDisplayed(int pinType, boolean isShow) throws JSONException
+		{
+			JSONObject pinJson = getPinJson(pinType);
+			pinJson.put(HikeConstants.PIN_DISPLAYED, isShow);
+		}
+		public boolean isPinDisplayed(int pinType)
+		{
+			try
+			{
+				JSONObject pinJson = getPinJson(pinType);
+				return pinJson.getBoolean(HikeConstants.PIN_DISPLAYED);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+				return false;
+			}
+		}
 		@Override
 		public String toString()
 		{

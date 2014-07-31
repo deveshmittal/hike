@@ -483,6 +483,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mComposeViewWatcher.setBtnEnabled();
 			mComposeView.requestFocus();
 		}
+		if(showingPIN)
+		{
+			   decrementUnreadPInCount();
+		}
 	}
 
 	private void showPopUpIfRequired()
@@ -863,6 +867,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		editor.putBoolean(HikeMessengerApp.SHOWN_PIN_TIP, true);
 		editor.commit();
 		}
+		
 		if (tipView != null)
 		{
 			tipView.setVisibility(View.GONE);
@@ -940,11 +945,32 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			tipView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), animationId));
 		}
 		showingPIN = true;
+		//decrement the unread count if message pinned
+		   
+		     decrementUnreadPInCount();
+	}
+	
+	
+     public void decrementUnreadPInCount()
+	{
+		MetaData metadata = mConversation.getMetaData();
+		if(!metadata.isPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN) && activityVisible)
+		{
+		try
+		{
+			metadata.setPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
+			metadata.decrementUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA,mConversation);
+		}
 	}
 	private void hidePin(){
-		showingPIN = false;
-		tipView.setVisibility(View.GONE);
-		tipView = null;
+		hidePinFromUI();
 		MetaData metadata = mConversation.getMetaData();
 		try
 		{
@@ -957,6 +983,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		
 		mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA,mConversation);
+	}
+
+	private void hidePinFromUI()
+	{
+		showingPIN = false;
+		tipView.setVisibility(View.GONE);
+		tipView = null;
 	}
 
 	private void showTipIfRequired()
@@ -2014,8 +2047,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			dismissPinCreateView(-1);
 		}
 		if(showingPIN){
-			hidePin();
+			hidePinFromUI();
+			invalidateOptionsMenu();
 		}
+		showImpMessageIfRequired();
 	}
 
 	private void initiateFileTransferFromIntentData(String fileType, String filePath)
@@ -4057,6 +4092,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			{
+				mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
 				showImpMessage(convMessage, playPinAnim ? R.anim.up_down_fade_in : -1);
 			}
 			mAdapter.addMessage(convMessage);
@@ -7390,7 +7426,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					try
 					{
 						// -1 because most recent pin will be at stick at top
-						pin_unread_count = mConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN) - 1;
+						pin_unread_count = mConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 					}
 					catch (JSONException e)
 					{
