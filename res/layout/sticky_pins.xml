@@ -25,4 +25,8 @@
         android:divider="@null"
         android:dividerHeight="0dp" />
 
+    <include
+        android:id="@android:id/empty"
+        layout="@layout/nudge_tutorial_pop_up" />
+
 </RelativeLayout>

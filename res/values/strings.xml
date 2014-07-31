@@ -1135,4 +1135,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="ftue_pin_header">Use pins</string>
     <string name="ftue_pin_body">to share key messages</string>
     <string name="xyz_posted_pin">%1$s posted an pin</string>
+    <string name="pinHistoryTutorialText">No pins yet</string>
 </resources>

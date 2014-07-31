@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +19,10 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout.LayoutParams;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.bsb.hike.HikeConstants;
@@ -31,6 +35,7 @@ import com.bsb.hike.adapters.PinHistoryAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
@@ -127,8 +132,45 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA,mConversation);
 		
+		View pinEmptyState = getPinEmptyState(chatTheme);
+		if (pinEmptyState != null)
+		{
+			ViewGroup empty = (ViewGroup) view.findViewById(android.R.id.empty);
+			empty.removeAllViews();
+			empty.addView(pinEmptyState);
+			mPinListView.setEmptyView(empty);
+		}
+		
+		mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA,mConversation);
+	}
+	
+	private TextView getPinEmptyState(ChatTheme chatTheme)
+	{
+		try
+		{
+			TextView tv = (TextView) LayoutInflater.from(getActivity()).inflate(chatTheme.systemMessageLayoutId(), null, false);
+			tv.setText(R.string.pinHistoryTutorialText);
+			if (chatTheme == ChatTheme.DEFAULT)
+			{
+				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pin_empty_state_default, 0, 0, 0);
+			}
+			else
+			{
+				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pin_empty_state, 0, 0, 0);
+			}
+			tv.setCompoundDrawablePadding(10);
+			android.widget.ScrollView.LayoutParams lp = new ScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			lp.gravity = Gravity.CENTER;
+			tv.setLayoutParams(lp);
+			return tv;
+		}
+		catch (Exception e)
+		{
+			// if chat theme starts returning layout id which is not text-view, playSafe
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override
