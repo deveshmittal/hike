@@ -1,9 +1,12 @@
 package com.bsb.hike.ui;
 
+import java.io.File;
 import java.util.ArrayList;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -35,6 +38,8 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.GalleryImageLoader;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, OnScrollListener, OnPageChangeListener, HikePubSub.Listener
@@ -96,7 +101,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		selectedGrid.setOnScrollListener(this);
 		selectedGrid.setOnItemClickListener(this);
 
-		pagerAdapter = new GalleryPagerAdapter();
+		pagerAdapter = new GalleryPagerAdapter(actualSize);
 		selectedPager.setAdapter(pagerAdapter);
 		selectedPager.setOnPageChangeListener(this);
 
@@ -174,18 +179,60 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			@Override
 			public void onClick(View v)
 			{
-				ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
+				final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
+				long sizeOriginal = 0;
 				for (GalleryItem galleryItem : galleryItems)
 				{
 					fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
+					File file = new File(galleryItem.getFilePath());
+					sizeOriginal += file.length();
 				}
-				String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
-				boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
-
-				fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
-				Utils.executeAsyncTask(fileTransferTask);
-
-				progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+				
+				final String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+				final boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
+				
+				if (!HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
+				{
+					HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
+					{
+						@Override
+						public void onSucess(Dialog dialog)
+						{
+							fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+							Utils.executeAsyncTask(fileTransferTask);
+	
+							progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+							dialog.dismiss();
+						}
+	
+						@Override
+						public void negativeClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+	
+						@Override
+						public void positiveClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+	
+						@Override
+						public void neutralClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+					}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
+				}
+				else
+				{
+					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+					Utils.executeAsyncTask(fileTransferTask);
+					progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+				}
 			}
 		});
 
@@ -265,10 +312,10 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 		int viewerWidth;
 
-		public GalleryPagerAdapter()
+		public GalleryPagerAdapter(int size_image)
 		{
 			layoutInflater = LayoutInflater.from(GallerySelectionViewer.this);
-			galleryImageLoader = new GalleryImageLoader(GallerySelectionViewer.this);
+			galleryImageLoader = new GalleryImageLoader(GallerySelectionViewer.this, size_image);
 
 			int padding = 2 * getResources().getDimensionPixelSize(R.dimen.gallery_selection_padding);
 
@@ -313,7 +360,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			ImageView galleryImageView = (ImageView) page.findViewById(R.id.album_image);
 			galleryImageView.setScaleType(ScaleType.FIT_CENTER);
 
-			galleryImageLoader.loadImage(GalleryImageLoader.GALLERY_KEY_PREFIX + galleryItem.getId(), galleryImageView, false, true);
+			galleryImageLoader.loadImage(GalleryImageLoader.GALLERY_KEY_PREFIX + galleryItem.getFilePath(), galleryImageView, false, true);
 
 			setupButtonSpacing(galleryImageView, removeImage);
 
@@ -326,9 +373,14 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 		private void setupButtonSpacing(ImageView galleryImageView, ImageButton removeImage)
 		{
+			Drawable drawable = galleryImageView.getDrawable();
+			if (drawable == null)
+			{
+				return;
+			}
 
-			int drawableHeight = galleryImageView.getDrawable().getIntrinsicHeight();
-			int drawableWidth = galleryImageView.getDrawable().getIntrinsicWidth();
+			int drawableHeight = drawable.getIntrinsicHeight();
+			int drawableWidth = drawable.getIntrinsicWidth();
 
 			int imageWidth;
 			int imageHeight;
@@ -358,7 +410,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		{
 			int postion = (Integer) v.getTag();
 			galleryItems.remove(postion);
-			galleryGridItems.remove(postion + 1);
+			galleryGridItems.remove(postion);
 
 			gridAdapter.notifyDataSetChanged();
 			pagerAdapter.notifyDataSetChanged();

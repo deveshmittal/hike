@@ -94,6 +94,8 @@ public class AccountUtils
 
 	public static String base = HTTP_STRING + host + "/v1";
 
+	public static String baseV2 = HTTP_STRING + host + "/v2";
+
 	public static final String PRODUCTION_FT_HOST = "ft.im.hike.in";
 
 	public static String fileTransferHost = PRODUCTION_FT_HOST;
@@ -171,8 +173,8 @@ public class AccountUtils
 		/*
 		 * set the connection timeout to 6 seconds, and the waiting for data timeout to 30 seconds
 		 */
-		HttpConnectionParams.setConnectionTimeout(params, 6000);
-		HttpConnectionParams.setSoTimeout(params, 30 * 1000);
+		HttpConnectionParams.setConnectionTimeout(params, HikeConstants.CONNECT_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(params, HikeConstants.SOCKET_TIMEOUT);
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 
@@ -506,7 +508,7 @@ public class AccountUtils
 		// Assert.assertTrue("Token is empty", !TextUtils.isEmpty(mToken));
 	}
 
-	public static void setProfile(String name, Birthday birthdate, boolean isFemale) throws NetworkErrorException, IllegalStateException
+	public static void setProfile(String name) throws NetworkErrorException, IllegalStateException
 	{
 		HttpPost httppost = new HttpPost(base + "/account/profile");
 		addToken(httppost);
@@ -515,21 +517,6 @@ public class AccountUtils
 		try
 		{
 			data.put("name", name);
-			data.put("gender", isFemale ? "f" : "m");
-			if (birthdate != null)
-			{
-				JSONObject bday = new JSONObject();
-				if(birthdate.day != 0)
-				{
-					bday.put("day", birthdate.day);
-				}
-				if(birthdate.month != 0)
-				{
-					bday.put("month", birthdate.month);
-				}
-				bday.put("year", birthdate.year);
-				data.put("dob", bday);
-			}
 			data.put("screen", "signup");
 
 			AbstractHttpEntity entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);

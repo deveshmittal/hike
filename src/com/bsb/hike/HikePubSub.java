@@ -1,14 +1,11 @@
 package com.bsb.hike;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import com.bsb.hike.utils.Logger;
 
 public class HikePubSub implements Runnable
 {
@@ -177,7 +174,7 @@ public class HikePubSub implements Runnable
 
 	public static final String REFRESH_RECENTS = "refreshRecents";
 
-	public static final String SWITCHED_DATA_CONNECTION = "switchedDataConnection";
+	public static final String SSL_PREFERENCE_CHANGED = "sslPrefChanged";
 
 	public static final String GROUP_REVIVED = "groupRevived";
 
@@ -303,9 +300,57 @@ public class HikePubSub implements Runnable
 
 	public static final String CONTACT_SYNCED = "contactSynced";
 
-	public static final String MQTT_CONNECTED = "mqttConnected";
-
 	public static final String DISMISS_GROUP_CHAT_TIP = "dismissGroupChatTip";
+	
+	public static final String IPS_CHANGED = "ipsChanged";
+
+	public static final String DISMISS_STEALTH_FTUE_CONV_TIP = "dismissStealthFtueConvTip";
+
+	public static final String SHOW_STEALTH_FTUE_CONV_TIP = "showStealthFtueConvTip";
+
+	public static final String SHOW_STEALTH_FTUE_SET_PASS_TIP = "showStealthFtueSetPassTip";
+
+	public static final String SHOW_STEALTH_FTUE_ENTER_PASS_TIP = "showStealthFtueEnterPassTip";
+
+	public static final String STEALTH_MODE_TOGGLED = "stealthModeToggled";
+
+	public static final String CLEAR_FTUE_STEALTH_CONV = "clearFtueStealthConv";
+
+	public static final String STEALTH_CONVERSATION_MARKED = "stealthConverstaionMarked";
+
+	public static final String STEALTH_CONVERSATION_UNMARKED = "stealthConversationUnmarked";
+
+	public static final String RESET_STEALTH_INITIATED = "resetStealthInitiated";
+
+	public static final String RESET_STEALTH_CANCELLED = "resetStealthCancelled";
+
+	public static final String STEALTH_MODE_RESET_COMPLETE = "stealthModeResetComplete";
+
+	public static final String CONNECTED_TO_MQTT = "connectedToMqtt";
+
+	public static final String CLOSE_CURRENT_STEALTH_CHAT = "closeCurrentStealthChat";
+
+	public static final String APP_FOREGROUNDED = "appForegrounded";
+
+	public static final String REMOVE_WELCOME_HIKE_TIP = "removeWelcomeHikeTip";
+
+	public static final String STEALTH_POPUP_WITH_PUSH = "stealthPopupShowPush";
+
+	public static final String ATOMIC_POPUP_WITH_PUSH = "atomicPopupShowPush";
+
+	public static final String REMOVE_START_NEW_CHAT_TIP = "removeStartNewChatTip";
+
+	public static final String REMOVE_STEALTH_UNREAD_TIP = "removeStealthUnreadTip";
+
+	public static final String STEALTH_UNREAD_TIP_CLICKED = "stealthUnreadTipClicked";
+	
+	public static final String UPDATE_PIN_METADATA = "pinUpdated";
+
+	public static String FRIEND_REQ_COUNT_RESET = "resetFriendRequest";
+	
+	public static String HIKE_TO_OFFLINE_PUSH = "hikeToOfflinePush";
+
+	public static String PROFILE_UPDATE_FINISH = "profileUpdateFinish";
 
 	private final Thread mThread;
 
@@ -315,60 +360,79 @@ public class HikePubSub implements Runnable
 
 	public HikePubSub()
 	{
-		listeners = Collections.synchronizedMap(new HashMap<String, Set<Listener>>());
+		listeners = new ConcurrentHashMap<String, Set<Listener>>();
 		mQueue = new LinkedBlockingQueue<Operation>();
 		mThread = new Thread(this);
 		mThread.start();
 	}
 
-	synchronized public void addListener(String type, Listener listener)
+	public void addListener(String type, Listener listener)
 	{
-		addListeners(listener, type);
+		add(type, listener);
 	}
 
-	synchronized public void addListeners(Listener listener, String... types)
+	public void addListeners(Listener listener, String... types)
 	{
 		for (String type : types)
 		{
-			Set<Listener> list = listeners.get(type);
-			if (list == null)
-			{
-				list = new CopyOnWriteArraySet<Listener>();
-				listeners.put(type, list);
-			}
-			list.add(listener);
+			add(type, listener);
 		}
 	}
 
-	synchronized public boolean publish(String type, Object o)
+	private void add(String type, Listener listener)
 	{
-		if (!listeners.containsKey(type))
+		Set<Listener> list;
+		list = listeners.get(type);
+		if (list == null)
 		{
-			return false;
+			synchronized (this) // take a smaller lock
+			{
+				if ((list = listeners.get(type)) == null)
+				{
+					list = new CopyOnWriteArraySet<Listener>();
+					listeners.put(type, list);
+				}
+			}
 		}
-		mQueue.add(new Operation(type, o));
-		return true;
+		list.add(listener);
 	}
 
 	/*
 	 * We also need to make removeListener a synchronized method. if we don't do that it would lead to memory inconsistency issue. in our case some activities won't get destroyed
 	 * unless we unregister all listeners and in that slot if activity receives a pubsub event it would try to handle this event which may lead to anything unusual.
 	 */
-	synchronized public void removeListener(String type, Listener listener)
+	public void removeListener(String type, Listener listener)
 	{
-		removeListeners(listener, type);
+		remove(type, listener);
 	}
 
-	synchronized public void removeListeners(Listener listener, String... types)
+	public void removeListeners(Listener listener, String... types)
 	{
 		for (String type : types)
 		{
-			Set<Listener> l = listeners.get(type);
-			if (l != null)
-			{
-				l.remove(listener);
-			}
+			remove(type, listener);
 		}
+	}
+
+	private void remove(String type, Listener listener)
+	{
+		Set<Listener> l = null;
+		l = listeners.get(type);
+		if (l != null)
+		{
+			l.remove(listener);
+		}
+	}
+
+	public boolean publish(String type, Object o)
+	{
+		Set<Listener> l = listeners.get(type);
+		if (l != null && l.size() >= 0)
+		{
+			mQueue.add(new Operation(type, o));
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -383,27 +447,24 @@ public class HikePubSub implements Runnable
 			}
 			catch (InterruptedException e)
 			{
-				Logger.e("PubSub", "exception while running", e);
 				continue;
 			}
 			if (op == DONE_OPERATION)
 			{
 				break;
 			}
-
 			String type = op.type;
 			Object o = op.payload;
 
 			Set<Listener> list = listeners.get(type);
 
-			if (list == null)
+			if (list == null || list.isEmpty())
 			{
 				continue;
 			}
 
 			for (Listener l : list)
 			{
-
 				l.onEventReceived(type, o);
 			}
 		}

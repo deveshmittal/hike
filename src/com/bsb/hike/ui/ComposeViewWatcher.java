@@ -84,11 +84,11 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements Runnable,
 		}
 		if (!canSend)
 		{
-			mButton.setImageResource(R.drawable.ic_walkie_talkie);
+			mButton.setImageResource(R.drawable.walkie_talkie_btn_selector);
 		}
 		else
 		{
-			mButton.setImageResource(R.drawable.ic_send);
+			mButton.setImageResource(R.drawable.send_btn_selector);
 		}
 		if (mConversation instanceof GroupConversation)
 		{
@@ -158,7 +158,6 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements Runnable,
 
 	public void sendEndTyping()
 	{
-		mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(HikeConstants.MqttMessageTypes.END_TYPING));
 		mTextLastChanged = 0;
 	}
 

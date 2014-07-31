@@ -2,7 +2,6 @@ package com.bsb.hike.db;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,6 +28,8 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.FtueContactInfo;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.Protip;
@@ -82,6 +83,7 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.REMOVE_PROTIP, this);
 		mPubSub.addListener(HikePubSub.GAMING_PROTIP_DOWNLOADED, this);
 		mPubSub.addListener(HikePubSub.CLEAR_CONVERSATION, this);
+		mPubSub.addListener(HikePubSub.UPDATE_PIN_METADATA, this);
 	}
 
 	@Override
@@ -315,17 +317,26 @@ public class DbConversationListener implements Listener
 				for (ConvMessage convMessage : messages)
 				{
 
-					JSONObject messageJSON = convMessage.serialize().getJSONObject(HikeConstants.DATA);
-
-					messagesArray.put(messageJSON);
-
 					mConversationDb.updateIsHikeMessageState(convMessage.getMsgID(), false);
 
 					convMessage.setSMS(true);
 				}
+				
+				/*
+				 * We will send combined string of all the messages
+				 * in json of last convMessage object
+				 */
+				ConvMessage lastMessage = messages.get(messages.size() -1);
+				
+				ConvMessage convMessage = new ConvMessage(Utils.combineInOneSmsString(context, true, messages, true), lastMessage.getMsisdn(), 
+						lastMessage.getTimestamp(), lastMessage.getState(), lastMessage.getMsgID(), lastMessage.getMappedMsgID());
+				convMessage.setConversation(lastMessage.getConversation());
+				JSONObject messageJSON = convMessage.serialize().getJSONObject(HikeConstants.DATA);
+
+				messagesArray.put(messageJSON);
 
 				data.put(HikeConstants.BATCH_MESSAGE, messagesArray);
-				data.put(HikeConstants.COUNT, messages.size());
+				data.put(HikeConstants.COUNT, 1);
 				data.put(HikeConstants.MESSAGE_ID, messages.get(0).getMsgID());
 
 				jsonObject.put(HikeConstants.DATA, data);
@@ -347,19 +358,16 @@ public class DbConversationListener implements Listener
 			{
 				return;
 			}
-			/*
-			 * Reversing order since we want to send the oldest message first
-			 */
-			Collections.reverse(messages);
 
 			sendNativeSMSFallbackLogEvent(messages.get(0).getConversation().isOnhike(), Utils.isUserOnline(context), messages.size());
 
 			for (ConvMessage convMessage : messages)
 			{
-				sendNativeSMS(convMessage);
 				convMessage.setSMS(true);
 				mConversationDb.updateIsHikeMessageState(convMessage.getMsgID(), false);
 			}
+			ConvMessage lastMessage = messages.get(messages.size() - 1);
+			sendNativeSMS(new ConvMessage(Utils.combineInOneSmsString(context, true, messages, false), lastMessage.getMsisdn(), lastMessage.getTimestamp(), State.UNKNOWN, lastMessage.getMsgID(), -1));
 
 			mPubSub.publish(HikePubSub.CHANGED_MESSAGE_TYPE, null);
 		}
@@ -389,6 +397,13 @@ public class DbConversationListener implements Listener
 			Pair<String, Long> values = (Pair<String, Long>) object;
 			Long convId = values.second;
 			mConversationDb.clearConversation(convId);
+		}
+		else if (HikePubSub.UPDATE_PIN_METADATA.equals(type))
+		{
+			
+				Conversation conv = (Conversation)object;
+				HikeConversationsDatabase.getInstance().updateConversationMetadata(conv.getConvId(), conv.getMetaData());
+			
 		}
 	}
 
@@ -502,6 +517,7 @@ public class DbConversationListener implements Listener
 				ftueData.put(HikeConstants.SCREEN, HikeConstants.FTUE);
 				data.put(HikeConstants.METADATA, ftueData);
 			}
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 			obj.put(HikeConstants.DATA, data);
 			Logger.d(getClass().getSimpleName(), "Sending add friends packet, Object: "+obj.toString());
 		}
@@ -519,6 +535,7 @@ public class DbConversationListener implements Listener
 		{
 			obj.put(HikeConstants.TYPE, type);
 			obj.put(HikeConstants.DATA, msisdn);
+			obj.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 		}
 		catch (JSONException e)
 		{

@@ -1,44 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/indicator_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_new_msg"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingRight="10dp"
-    android:weightSum="10" >
+    android:gravity="center"
+    android:orientation="horizontal" >
 
+    <TextView
+        android:id="@+id/indicator_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="3 new messages"
+        android:textColor="@color/white"
+        android:textSize="14dp"
+        android:textStyle="bold"
+        android:paddingLeft="10dp"
+        android:visibility="gone" />
+    
     <ImageView
         android:id="@+id/indicator_img"
-        android:layout_width="14dp"
-        android:layout_height="11dp"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="3dp"
-        android:layout_centerVertical="true"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:scaleType="centerInside"
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp"
+        android:layout_marginTop="1dp"
         android:src="@drawable/ic_inverted_triangle" />
     
     <ImageView
         android:id="@+id/up_indicator_img"
-        android:layout_width="14dp"
-        android:layout_height="11dp"
-        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginBottom="1dp"
-        android:layout_centerVertical="true"
         android:visibility="gone"
+        android:paddingLeft="10dp"
+        android:scaleType="centerInside"
+        android:paddingRight="10dp"
         android:src="@drawable/ic_inverted_up_triangle" />
 
-    <TextView
-        android:id="@+id/indicator_text"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toLeftOf="@id/indicator_img"
-        android:gravity="center"
-        android:text="3 new messages"
-        android:textColor="@color/white"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:visibility="gone" />
-
-</RelativeLayout>
+</LinearLayout>

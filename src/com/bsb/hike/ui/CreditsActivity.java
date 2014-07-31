@@ -9,7 +9,9 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -19,6 +21,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
@@ -92,9 +95,19 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 
 		View receiveSmsParent = findViewById(R.id.receive_sms_item);
 		View freeSMSParent = findViewById(R.id.free_sms_item);
+		View undeliveredSmsParent = findViewById(R.id.undelivered_sms_item);
 
-		setupPreferenceLayout(receiveSmsParent, true);
 		setupPreferenceLayout(freeSMSParent, false);
+		if(!Utils.isKitkatOrHigher())
+		{
+			setupPreferenceLayout(receiveSmsParent, true);
+			setupUndeliveredSmsPrefLayout();
+		}
+		else
+		{
+			undeliveredSmsParent.setVisibility(View.GONE);
+			receiveSmsParent.setVisibility(View.GONE);
+		}
 
 		receiveSmsParent.setOnClickListener(new OnClickListener()
 		{
@@ -131,6 +144,16 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 				Utils.sendFreeSmsLogEvent(isChecked);
 			}
 		});
+		
+		undeliveredSmsParent.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				showSMSDialog();
+			}
+		});
 	}
 
 	private boolean togglePreference(String key, CheckBox checkBox)
@@ -158,6 +181,32 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 		icon.setImageResource(receiveSmsPref ? R.drawable.preference_default_client : R.drawable.preference_free_sms);
 		checkBox.setChecked(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(receiveSmsPref ? HikeConstants.RECEIVE_SMS_PREF : HikeConstants.FREE_SMS_PREF,
 				receiveSmsPref ? false : true));
+	}
+	
+	private void setupUndeliveredSmsPrefLayout()
+	{
+		View parent = findViewById(R.id.undelivered_sms_item);
+		TextView title = (TextView) parent.findViewById(R.id.undelivered_sms_title);
+		TextView summary = (TextView) parent.findViewById(R.id.undelivered_sms_summary);
+		ImageView icon = (ImageView) parent.findViewById(R.id.undelivered_sms_icon);
+
+		String titleString = getString(R.string.hike_offline);
+		String summaryString = getString(R.string.undelivered_sms_setting_summary);
+		if (PreferenceManager.getDefaultSharedPreferences(CreditsActivity.this).getBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, false))
+		{
+			if (PreferenceManager.getDefaultSharedPreferences(CreditsActivity.this).getBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, false))
+			{ 
+				titleString += " - " + getString(R.string.regular_sms);
+			}
+			else
+			{
+				titleString += " - " + getString(R.string.free_hike_sms);
+			}
+			summaryString = getString(R.string.undelivered_sms_setting_remember);
+		}
+		title.setText(titleString);
+		summary.setText(summaryString);
+		icon.setImageResource(R.drawable.ic_bolt_blue);
 	}
 
 	public void onInviteClick(View v)
@@ -274,5 +323,153 @@ public class CreditsActivity extends HikeAppStateBaseFragmentActivity implements
 
 		actionBar.setCustomView(actionBarView);
 	}
+	
+	private void showSMSDialog()
+	{
+		final Dialog dialog = new Dialog(CreditsActivity.this, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.sms_undelivered_popup);
+		dialog.setCancelable(true);
 
+		TextView popupHeader = (TextView) dialog.findViewById(R.id.popup_header);
+		View hikeSMS = dialog.findViewById(R.id.hike_sms_container);
+		View nativeSMS = dialog.findViewById(R.id.native_sms_container);
+		TextView nativeHeader = (TextView) dialog.findViewById(R.id.native_sms_header);
+		TextView nativeSubtext = (TextView) dialog.findViewById(R.id.native_sms_subtext);
+		TextView hikeSmsHeader = (TextView) dialog.findViewById(R.id.hike_sms_header);
+		TextView hikeSmsSubtext = (TextView) dialog.findViewById(R.id.hike_sms_subtext);
+		
+		popupHeader.setText(getString(R.string.choose_setting));
+		hikeSmsSubtext.setText(getString(R.string.free_hike_sms_subtext, settings.getInt(HikeMessengerApp.SMS_SETTING, 0)));
+		
+		final CheckBox sendHike = (CheckBox) dialog.findViewById(R.id.hike_sms_checkbox);
+
+		final CheckBox sendNative = (CheckBox) dialog.findViewById(R.id.native_sms_checkbox);
+
+		final Button alwaysBtn = (Button) dialog.findViewById(R.id.btn_always);
+		final Button justOnceBtn = (Button) dialog.findViewById(R.id.btn_just_once);
+		
+		boolean sendNativeAlwaysPref = PreferenceManager.getDefaultSharedPreferences(CreditsActivity.this).getBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_PREF, false);
+		
+		sendHike.setChecked(!sendNativeAlwaysPref);
+		sendNative.setChecked(sendNativeAlwaysPref);
+
+		nativeHeader.setText(R.string.regular_sms);
+		hikeSmsHeader.setText(R.string.free_hike_sms);
+
+		OnClickListener hikeSMSOnClickListener =  new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				sendHike.setChecked(true);
+				sendNative.setChecked(false);
+			}
+		};
+		
+		OnClickListener nativeSMSOnClickListener =  new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				sendHike.setChecked(false);
+				sendNative.setChecked(true);
+			}
+		};
+		
+		hikeSMS.setOnClickListener(hikeSMSOnClickListener);
+		sendHike.setOnClickListener(hikeSMSOnClickListener);
+		nativeSMS.setOnClickListener(nativeSMSOnClickListener);
+		sendNative.setOnClickListener(nativeSMSOnClickListener);
+
+		alwaysBtn.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				if (!sendHike.isChecked() && !PreferenceManager.getDefaultSharedPreferences(CreditsActivity.this).getBoolean(HikeConstants.RECEIVE_SMS_PREF, false))
+				{
+					showSMSClientDialog(sendHike.isChecked());
+				}
+				else
+				{
+					smsDialogActionClicked(true, sendHike.isChecked());
+				}
+				dialog.dismiss();
+			}
+		});
+		
+		justOnceBtn.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				smsDialogActionClicked(false, sendHike.isChecked());
+				dialog.dismiss();
+			}
+		});
+
+		dialog.show();
+	}
+	
+	private void smsDialogActionClicked(boolean alwaysBtnClicked, boolean isSendHikeChecked)
+	{
+		if(alwaysBtnClicked)
+		{
+			Utils.setSendUndeliveredAlwaysAsSmsSetting(CreditsActivity.this, true, !isSendHikeChecked);
+		}
+		else
+		{
+			Utils.setSendUndeliveredAlwaysAsSmsSetting(CreditsActivity.this, false);
+		}
+		setupUndeliveredSmsPrefLayout();
+	}
+	
+	private void showSMSClientDialog(final boolean isSendHikeChecked)
+	{
+
+		HikeDialogListener smsClientDialogListener = new HikeDialog.HikeDialogListener()
+		{
+
+			@Override
+			public void positiveClicked(Dialog dialog)
+			{
+				
+				Utils.setReceiveSmsSetting(CreditsActivity.this, true);
+				if (!settings.getBoolean(HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false))
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_SMS_SYNC_DIALOG, null);
+				}
+				smsDialogActionClicked(true, isSendHikeChecked);
+				setupPreferenceLayout(findViewById(R.id.receive_sms_item), true);
+				dialog.dismiss();
+			}
+
+			@Override
+			public void neutralClicked(Dialog dialog)
+			{
+				
+			}
+
+			@Override
+			public void negativeClicked(Dialog dialog)
+			{
+				smsDialogActionClicked(false, isSendHikeChecked);
+				dialog.dismiss();
+			}
+
+			@Override
+			public void onSucess(Dialog dialog)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+		};
+		
+		Dialog dialog = HikeDialog.showDialog(CreditsActivity.this, HikeDialog.SMS_CLIENT_DIALOG, smsClientDialogListener, false, null, false);  
+		dialog.show();
+	}
 }

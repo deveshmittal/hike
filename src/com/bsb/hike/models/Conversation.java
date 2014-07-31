@@ -30,6 +30,15 @@ public class Conversation implements Comparable<Conversation>
 				return 1;
 			}
 
+			if (lhs instanceof ConversationTip)
+			{
+				return -1;
+			}
+			else if (rhs instanceof ConversationTip)
+			{
+				return 1;
+			}
+
 			return rhs.compareTo(lhs);
 		}
 	}
@@ -62,6 +71,35 @@ public class Conversation implements Comparable<Conversation>
 
 	private int unreadCount;
 
+	private int unreadPinCount;
+
+	private String lastPin;
+
+	private MetaData metaData;
+
+	public String getLastPin()
+	{
+		return lastPin;
+	}
+
+	public void setLastPin(String string)
+	{
+		this.lastPin = string;
+	}
+	
+
+	public int getUnreadPinCount()
+	{
+		return unreadPinCount;
+	}
+
+	public void setUnreadPinCount(int unreadPinCount)
+	{
+		this.unreadPinCount = unreadPinCount;
+	}
+
+	private boolean isStealth;
+
 	public void setOnhike(boolean onhike)
 	{
 		this.onhike = onhike;
@@ -87,10 +125,16 @@ public class Conversation implements Comparable<Conversation>
 
 	public Conversation(String msisdn, long convId, String contactName, boolean onhike)
 	{
+		this(msisdn, convId, contactName, onhike, false);
+	}
+
+	public Conversation(String msisdn, long convId, String contactName, boolean onhike, boolean isStealth)
+	{
 		this.msisdn = msisdn;
 		this.convId = convId;
 		this.contactName = contactName;
 		this.onhike = onhike;
+		this.isStealth = isStealth;
 		this.messages = new ArrayList<ConvMessage>();
 	}
 
@@ -160,6 +204,16 @@ public class Conversation implements Comparable<Conversation>
 		return messages;
 	}
 
+	public void setIsStealth(boolean isStealth)
+	{
+		this.isStealth = isStealth;
+	}
+
+	public boolean isStealth()
+	{
+		return isStealth;
+	}
+
 	@Override
 	public int hashCode()
 	{
@@ -167,7 +221,6 @@ public class Conversation implements Comparable<Conversation>
 		int result = 1;
 		result = prime * result + ((contactName == null) ? 0 : contactName.hashCode());
 		result = prime * result + (int) (convId ^ (convId >>> 32));
-		result = prime * result + ((messages == null) ? 0 : messages.hashCode());
 		result = prime * result + ((msisdn == null) ? 0 : msisdn.hashCode());
 		result = prime * result + (onhike ? 1231 : 1237);
 		return result;
@@ -192,13 +245,6 @@ public class Conversation implements Comparable<Conversation>
 			return false;
 		if (convId != other.convId)
 			return false;
-		if (messages == null)
-		{
-			if (other.messages != null)
-				return false;
-		}
-		else if (!messages.equals(other.messages))
-			return false;
 		if (msisdn == null)
 		{
 			if (other.msisdn != null)
@@ -218,6 +264,7 @@ public class Conversation implements Comparable<Conversation>
 		{
 			object.put(HikeConstants.TYPE, type);
 			object.put(HikeConstants.TO, msisdn);
+			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 		}
 		catch (JSONException e)
 		{
@@ -229,5 +276,147 @@ public class Conversation implements Comparable<Conversation>
 	public void setContactName(String contactName)
 	{
 		this.contactName = contactName;
+	}
+
+	public MetaData getMetaData()
+	{
+		return metaData;
+	}
+
+	public void setMetaData(MetaData metaData)
+	{
+		this.metaData = metaData;
+	}
+
+	public static class MetaData
+	{
+		/**
+		 * sample json : {'pin':{'id':'1','unreadCount':'1','toShow':'true','timestamp':'XXX','displayed':'false'} }
+		 */
+		JSONObject jsonObject;
+
+		public MetaData(String jsonString) throws JSONException
+		{
+			if (jsonString != null)
+			{
+				jsonObject = new JSONObject(jsonString);
+			}
+			else
+			{
+				jsonObject = new JSONObject();
+			}
+		}
+
+		public long getLastPinId(int pinType) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			return pinJSON.getLong(HikeConstants.ID);
+		}
+		
+		public long getLastPinTimeStamp(int pinType) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			if(pinJSON.has(HikeConstants.TIMESTAMP))
+			{
+				return pinJSON.getLong(HikeConstants.TIMESTAMP);
+			}
+			return -1;
+		}
+		public void setLastPinTimeStamp(int pinType, long timeStamp) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			pinJSON.put(HikeConstants.TIMESTAMP, timeStamp);
+		}
+
+		public int getUnreadCount(int pinType) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			return pinJSON.getInt(HikeConstants.UNREAD_COUNT);
+		}
+
+		public boolean isShowLastPin(int pinType)
+		{
+			try
+			{
+				JSONObject pinJson = getPinJson(pinType);
+				return pinJson.getBoolean(HikeConstants.TO_SHOW);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+				return false;
+			}
+		}
+
+		private JSONObject getPinJson(int pinType) throws JSONException
+		{
+			JSONObject json = jsonObject.optJSONObject(HikeConstants.PIN);
+			if (json == null)
+			{
+				jsonObject.put(HikeConstants.PIN, json = new JSONObject());
+			}
+			return json;
+		}
+
+		public void setLastPinId(int pinType, long id) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			pinJSON.put(HikeConstants.ID, id);
+		}
+
+		public void setUnreadCount(int pinType, int count) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			pinJSON.put(HikeConstants.UNREAD_COUNT, count);
+		}
+
+		public void incrementUnreadCount(int pinType) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			pinJSON.put(HikeConstants.UNREAD_COUNT, pinJSON.getInt(HikeConstants.UNREAD_COUNT) + 1);
+		}
+		
+		public void decrementUnreadCount(int pinType) throws JSONException
+		{
+			JSONObject pinJSON = getPinJson(pinType);
+			int unreadCount =pinJSON.getInt(HikeConstants.UNREAD_COUNT);
+			if(unreadCount>0)
+			{
+		    	pinJSON.put(HikeConstants.UNREAD_COUNT, pinJSON.getInt(HikeConstants.UNREAD_COUNT) - 1);
+			}
+		}
+
+		public void setShowLastPin(int pinType, boolean isShow) throws JSONException
+		{
+			JSONObject pinJson = getPinJson(pinType);
+			pinJson.put(HikeConstants.TO_SHOW, isShow);
+		}
+
+		
+
+		public void setPinDisplayed(int pinType, boolean isShow) throws JSONException
+		{
+			JSONObject pinJson = getPinJson(pinType);
+			pinJson.put(HikeConstants.PIN_DISPLAYED, isShow);
+		}
+		public boolean isPinDisplayed(int pinType)
+		{
+			try
+			{
+				JSONObject pinJson = getPinJson(pinType);
+				return pinJson.getBoolean(HikeConstants.PIN_DISPLAYED);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+				return false;
+			}
+		}
+		@Override
+		public String toString()
+		{
+			return jsonObject.toString();
+		}
+
 	}
 }

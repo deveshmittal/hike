@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -206,12 +207,21 @@ public abstract class MyAsyncTask<Params, Progress, Result>
 		}
 	};
 
+	//TODO we need to handle this in a better way.
+	private static RejectedExecutionHandler executionHandler = new RejectedExecutionHandler()
+	{
+		@Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor)
+		{
+		}
+	};
+
 	private static final BlockingQueue<Runnable> sPoolWorkQueue = new LinkedBlockingQueue<Runnable>(128);
 
 	/**
 	 * An {@link Executor} that can be used to execute tasks in parallel.
 	 */
-	public static final Executor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE, TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
+	public static final Executor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE, TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory, executionHandler);
 
 	/**
 	 * An {@link Executor} that executes tasks one at a time in serial order. This serialization is global to a particular process.

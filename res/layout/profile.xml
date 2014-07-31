@@ -3,7 +3,7 @@
     android:id="@+id/parent_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/updates_bg" >
+    android:background="@color/standerd_background" >
 
     <ListView
         android:id="@+id/profile_content"

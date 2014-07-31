@@ -41,6 +41,8 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
@@ -828,8 +830,11 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity implements C
 				Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
 				// Scale it to required size
 				int width = (int) getResources().getDimension(R.dimen.share_my_location_drawable_width);
-				Drawable scaled_dr = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, width, width, true));
 
+				Bitmap b = HikeBitmapFactory.createScaledBitmap(bitmap, width, width, Bitmap.Config.RGB_565, true, true, false);
+				Drawable scaled_dr = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
+
+				Logger.d("BitmapLocation","size : "+BitmapUtils.getBitmapSize(b));
 				holder.txt_itemName.setCompoundDrawablesWithIntrinsicBounds(scaled_dr, null, null, null);
 				holder.txt_itemName.setCompoundDrawablePadding((int) getResources().getDimension(R.dimen.share_my_location_drawable_padding));
 			}

@@ -6,21 +6,24 @@
         android:icon="@drawable/actionbar_ic_delete"
         android:showAsAction="always"
         android:title="@string/delete"/>
-    
+    <item
+        android:id="@+id/share_msgs"
+        android:icon="@drawable/share_icon"
+        android:showAsAction="always"
+        android:title="@string/share"
+        android:visible="false"/>
     <item
         android:id="@+id/copy_msgs"
         android:icon="@drawable/actionbar_ic_copy"
         android:showAsAction="always"
         android:title="@string/copy"
         android:visible="false"/>
-    
     <item
         android:id="@+id/forward_msgs"
         android:icon="@drawable/actionbar_ic_forward"
         android:showAsAction="always"
         android:title="@string/forward"/>
-    
-   <item
+    <item
         android:id="@+id/action_mode_overflow_menu"
         android:icon="@drawable/ic_overflow"
         android:showAsAction="always"

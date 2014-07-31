@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    android:gravity="center_vertical|left"
+    android:minHeight="30dp"
+    android:paddingBottom="4dp" >
+
+    <ViewStub
+        android:id="@+id/day_stub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout="@layout/message_day_container" />
+
+    <include
+        android:id="@+id/avatar_container"
+        android:layout_width="@dimen/chatthread_avatar"
+        android:layout_height="@dimen/chatthread_avatar"
+        android:layout_below="@id/day_container"
+        android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
+        android:layout_marginTop="2.5dp"
+        layout="@layout/message_sender_avatar" />
+
+    <RelativeLayout
+        android:id="@+id/message_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/day_container"
+        android:layout_marginBottom="3dp"
+        android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
+        android:layout_marginTop="3dp"
+        android:layout_marginRight="10dp"
+        android:layout_toRightOf="@id/avatar_container"
+        android:background="@drawable/ic_bubble_white_selector"
+        android:paddingLeft="18dp"
+        android:paddingRight="12dp" >
+
+        <include
+            android:id="@+id/sender_details"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            layout="@layout/message_sender_details" />
+
+        <com.bsb.hike.view.CustomReceiveMessageTextView
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/sender_details"
+            android:gravity="left"
+            android:maxWidth="265dp"
+            android:text="Thanks lksad jfljasldkf alsdf lkasfdalsk"
+            android:textColor="@color/chat_color"
+            android:textSize="16sp" />
+    </RelativeLayout>
+
+    <include
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/message_container"
+        android:layout_alignRight="@id/message_container"
+        android:layout_marginBottom="6dp"
+        android:layout_marginRight="8dp"
+        layout="@layout/message_time_status" />
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@id/message_container"
+        android:layout_below="@id/day_container"
+        layout="@layout/message_overlay" />
+
+</RelativeLayout>
