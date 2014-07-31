@@ -1520,7 +1520,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					{
 						convMetaData = new Conversation.MetaData(null);
 						convMetaData.setLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN, conv.getMsgID());
-						convMetaData.setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, conv.isSent() ? 0 : 1);
 					}
 					long preTimeStamp = convMetaData.getLastPinTimeStamp(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 					long currentTimeStamp = conv.getTimestamp();
@@ -1610,8 +1609,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						metadata.incrementUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 					}
 				}
+				metadata.setPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN, false);
 				metadata.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
-				metadata.setLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN, msg.getMsgID());
+    			metadata.setLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN, msg.getMsgID());
 				metadata.setLastPinTimeStamp(HikeConstants.MESSAGE_TYPE.TEXT_PIN, msg.getTimestamp());
 			}
 		}
@@ -4152,14 +4152,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			/* TODO this should be ORDER BY timestamp */
 			String query = "SELECT " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + "," + DBConstants.TIMESTAMP + "," + DBConstants.MESSAGE_ID + ","
 					+ DBConstants.MAPPED_MSG_ID + "," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.IS_HIKE_MESSAGE + ","
-					+ DBConstants.READ_BY + "," + DBConstants.MESSAGE_TYPE + " FROM " + DBConstants.MESSAGES_TABLE + " where " + selection + " LIMIT " + limitStr + " OFFSET "
+					+ DBConstants.READ_BY + "," + DBConstants.MESSAGE_TYPE + " FROM " + DBConstants.MESSAGES_TABLE + " where " + selection + " order by " + DBConstants.MESSAGE_ID + " DESC LIMIT " + limitStr + " OFFSET "
 					+ startFrom;
 			c = mDb.rawQuery(query, new String[] { Long.toString(conv.getConvId()) });
 
 			List<ConvMessage> elements = getMessagesFromDB(c, conv);
-
-			// Collections.reverse(elements);
-
+						
 			return elements;
 		}
 		finally

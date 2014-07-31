@@ -1,53 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
 
     <RelativeLayout
-        android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:background="@drawable/pin_chat_bg_yellow"
-        android:minHeight="70dp" >
+        android:background="@color/pin_color" >
+
+        <ImageView
+            android:id="@+id/pattern"
+            android:layout_width="16dp"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/main_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignTop="@+id/main_content"
+            android:scaleType="fitXY"
+            android:src="@drawable/pin_pattern" />
+
+        <RelativeLayout
+            android:id="@+id/main_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/cross"
+            android:layout_toRightOf="@+id/pattern"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="15dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="sample"
+                android:textColor="@color/black"
+                android:textSize="17sp"
+                android:textStyle="italic" />
+        </RelativeLayout>
 
         <ImageView
             android:id="@+id/cross"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/main_content"
             android:layout_alignParentRight="true"
-            android:paddingBottom="20dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="10dp"
-            android:paddingTop="4dp"
+            android:layout_alignTop="@+id/main_content"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp"
             android:src="@drawable/ic_cross" />
-
-        <com.bsb.hike.view.CustomFontTextView
-            android:layout_marginTop="13dp"
-            android:id="@+id/text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="4dp"
-            android:maxLines="2"
-            android:text="sample"
-            android:textColor="@color/black"
-            android:textSize="18sp"
-            android:textStyle="normal" />
-
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_below="@+id/text"
-            android:layout_marginRight="-1dp"
-            android:layout_marginTop="3dp"
-            android:text="just now"
-            android:textColor="@color/dark_yellow_sticky_note"
-            android:textSize="12sp"
-            android:textStyle="italic" />
     </RelativeLayout>
 
-</RelativeLayout>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        android:src="@drawable/pin_shadow" />
+
+</LinearLayout>

@@ -29,6 +29,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.FtueContactInfo;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.Protip;
@@ -81,6 +82,7 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.REMOVE_PROTIP, this);
 		mPubSub.addListener(HikePubSub.GAMING_PROTIP_DOWNLOADED, this);
 		mPubSub.addListener(HikePubSub.CLEAR_CONVERSATION, this);
+		mPubSub.addListener(HikePubSub.UPDATE_PIN_METADATA, this);
 	}
 
 	@Override
@@ -352,6 +354,13 @@ public class DbConversationListener implements Listener
 			Pair<String, Long> values = (Pair<String, Long>) object;
 			Long convId = values.second;
 			mConversationDb.clearConversation(convId);
+		}
+		else if (HikePubSub.UPDATE_PIN_METADATA.equals(type))
+		{
+			
+				Conversation conv = (Conversation)object;
+				HikeConversationsDatabase.getInstance().updateConversationMetadata(conv.getConvId(), conv.getMetaData());
+			
 		}
 	}
 

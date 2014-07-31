@@ -712,7 +712,7 @@ public class HikeConstants
 
 	public static final int MAX_PINS_TO_LOAD_INITIALLY = 20;
 
-	public static final int MAX_OLDER_PINS_TO_LOAD_EACH_TIME = 20;
+	public static final int MAX_OLDER_PINS_TO_LOAD_EACH_TIME = 10;
 
 	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 20;
 
@@ -905,6 +905,8 @@ public class HikeConstants
 	public static final String UNREAD_COUNT = "unreadCount";
 
 	public static final String TO_SHOW = "toShow";
+	
+	public static final String PIN_DISPLAYED = "displayed";
 
 	public static final class ResultCodes
 	{
@@ -1223,6 +1225,7 @@ public class HikeConstants
 
 		public static final String TOTAL_MSGS_CURRENTLY_LOADED = "totalMsgsCurrentlyLoaded";
 		
+		public static final String PIN_TYPE_SHOWING="pinTypeShowing";
 	}
 
 	public static final class LogEvent
