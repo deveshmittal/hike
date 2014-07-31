@@ -1218,6 +1218,8 @@ public class HikeConstants
 		public static final String IS_RESET_PASS = "isResetStealthPasswordFlow";
 		
 		public static final String HAS_TIP = "hasTip";
+
+		public static final String TOTAL_MSGS_CURRENTLY_LOADED = "totalMsgsCurrentlyLoaded";
 		
 	}
 

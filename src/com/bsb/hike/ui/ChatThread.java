@@ -2071,7 +2071,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
 		 */
-		mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
+		if(savedInstanceState != null && savedInstanceState.containsKey(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED))
+		{
+			mConversation = mConversationDb.getConversation(mContactNumber, savedInstanceState.getInt(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED));
+		}
+		else
+		{
+			mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY);
+		}
+		
 		if (mConversation == null)
 		{
 			if (Utils.isGroupConversation(mContactNumber))
@@ -2261,7 +2269,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			/*
 			 * We need to close the tip without any animation if opening from
 			 */
-			hideHikeToOfflineTip(false, false, true);
+			hideHikeToOfflineTip(false, false, true, false);
 		}
 		if(!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
 		{
@@ -5999,6 +6007,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS, selectedNonTextMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS, selectedCancelableMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_COUNT, shareableMessagesCount);
+			outState.putInt(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED, mAdapter.getCount());
 		}
 		if (attachmentWindow != null && attachmentWindow.isShowing() && temporaryTheme != null)
 		{
@@ -8044,7 +8053,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		sethikeToOfflineMode(true);
 	}
 
-	public void hideHikeToOfflineTip(final boolean messagesSent, final boolean isNativeSms, boolean hideWithoutAnimation)
+	public void hideHikeToOfflineTip(final boolean messagesSent, final boolean isNativeSms, boolean hideWithoutAnimation, boolean calledFromMsgDelivered)
 	{
 		if(hikeToOfflineTipview == null)
 		{ 
@@ -8108,17 +8117,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(hikeToOfflineTipview.getAnimation() == null)
 		{
 			setHikeOfflineTipHideAnimation(hikeToOfflineTipview, animationListener, hideWithoutAnimation);
+			
+			if(calledFromMsgDelivered)
+			{
+				/*
+				 * we need to update last seen value coz we might
+				 * have updated contact's last seen value in between
+				 * when hike offline tip was showing
+				 */
+				updateLastSeen();
+			}
 		}
 	}
 	
 	public void hideHikeToOfflineTip()
 	{
-		hideHikeToOfflineTip(false, false, false);
+		hideHikeToOfflineTip(false, false, false, false);
 	}
 	
 	public void hideHikeToOfflineTip(final boolean messagesSent, final boolean isNativeSms)
 	{
-		hideHikeToOfflineTip(messagesSent, isNativeSms, false);
+		hideHikeToOfflineTip(messagesSent, isNativeSms, false, false);
 	}
 	
 	public void sethikeToOfflineMode(boolean isOn)

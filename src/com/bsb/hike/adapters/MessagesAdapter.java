@@ -4102,14 +4102,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					 * if all messages are delivered OR we don't have any undelivered messages than only we should reset this timer not on delivery of some message
 					 */
 					chatThread.shouldRunTimerForHikeOfflineTip = true;
-					chatThread.hideHikeToOfflineTip();
-					/*
-					 * we need to update last seen value coz we might have updated contact's last seen value in between when hike offline tip was showing
-					 */
-					if (msgDelivered)
-					{
-						chatThread.updateLastSeen();
-					}
+
+					chatThread.hideHikeToOfflineTip(false, false, false, msgDelivered);
 				}
 				if (firstPendingConvMessage.equals(convMessage))
 				{
