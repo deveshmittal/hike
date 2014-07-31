@@ -25,6 +25,8 @@ import com.bsb.hike.ui.CreateNewGroupActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
+import com.bsb.hike.ui.WebViewActivity;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
@@ -333,6 +335,14 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			else if (item.getType() == EmptyConversationItem.INVITE)
 			{
 				openActivityAndSendLogEvent(HikeListActivity.class, HikeConstants.LogEvent.FTUE_CARD_INVITE_CLICKED);
+			}
+			else if (item.getType() == EmptyConversationItem.HIKE_OFFLINE)
+			{
+				Intent intent = new Intent(context, WebViewActivity.class);
+				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.h2oTutorialUrl);
+				intent.putExtra(HikeConstants.Extras.TITLE, context.getResources().getString(R.string.hike_offline_caps));
+				context.startActivity(intent);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_HIKE_OFFLINE_CLICKED);
 			}
 		}
 	};

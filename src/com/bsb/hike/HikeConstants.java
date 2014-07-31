@@ -896,6 +896,9 @@ public class HikeConstants
 	public static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
 	
 	public static final String SHOW_STEALTH_POPUP = "stlthrmd";
+	
+	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
+
 
 	public static final String PIN = "pin";
 
@@ -1217,6 +1220,8 @@ public class HikeConstants
 		public static final String IS_RESET_PASS = "isResetStealthPasswordFlow";
 		
 		public static final String HAS_TIP = "hasTip";
+
+		public static final String TOTAL_MSGS_CURRENTLY_LOADED = "totalMsgsCurrentlyLoaded";
 		
 	}
 
@@ -1468,6 +1473,14 @@ public class HikeConstants
 		public static final String WATS_APP_INVITE = "inv_wa";
 
 		public static final String FTUE_CARD_INVITE_CLICKED = "ftueCardInviteClicked";
+
+		public static final String SHOW_TIMELINE_TOP_BAR = "showTimelineTopBar";
+
+		public static final String FAVOURITE_FROM_OVERFLOW = "favoriteFromOverflow";
+		
+		public static final String STATUS_UPDATE_FROM_OVERFLOW = "statusUpdateFromOverflow";
+
+		public static final String FTUE_CARD_HIKE_OFFLINE_CLICKED = "ftueCardHikeOfflineClicked";
 	}
 
 	public static final class MqttMessageTypes

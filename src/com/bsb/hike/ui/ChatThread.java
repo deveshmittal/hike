@@ -2055,6 +2055,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void createConversation()
 	{
 		/*
+		 * Fix for forward crash : Happens due to the action mode is remain enabled on switching the orientation before forwarding.
+		 */
+		invalidateOptionsMenu();
+		/*
 		 * If we are in a stealth conversation when the stealth mode is off, we should exit the conversation.
 		 */
 		if (HikeMessengerApp.isStealthMsisdn(mContactNumber))
@@ -2080,7 +2084,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
 		 */
-		mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
+		if(savedInstanceState != null && savedInstanceState.containsKey(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED))
+		{
+			mConversation = mConversationDb.getConversation(mContactNumber, savedInstanceState.getInt(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED));
+		}
+		else
+		{
+			mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY);
+		}
+		
 		if (mConversation == null)
 		{
 			if (Utils.isGroupConversation(mContactNumber))
@@ -2271,7 +2283,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			/*
 			 * We need to close the tip without any animation if opening from
 			 */
-			hideHikeToOfflineTip(false, false, true);
+			hideHikeToOfflineTip(false, false, true, false);
 		}
 		if (!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
 		{
@@ -3689,9 +3701,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
-					Intent intent = new Intent(ChatThread.this, HomeActivity.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
+					finish();
 				}
 			});
 		}
@@ -4676,7 +4686,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		try
 		{
 			TextView tv = (TextView) LayoutInflater.from(getBaseContext()).inflate(chatTheme.systemMessageLayoutId(), null, false);
-			tv.setText((mConversation instanceof GroupConversation) ? R.string.chatThreadNudgeTutorialText_group : R.string.chatThreadNudgeTutorialText);
+			Random random = new Random();
+			String[] randomStringsArray = getResources().getStringArray(R.array.chat_thread_empty_state_tutorial_text);
+			tv.setText(randomStringsArray[random.nextInt(randomStringsArray.length)]);
 			if (chatTheme == ChatTheme.DEFAULT)
 			{
 				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_intro_nudge_default, 0, 0, 0);
@@ -4688,6 +4700,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			tv.setCompoundDrawablePadding(10);
 			android.widget.ScrollView.LayoutParams lp = new ScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lp.gravity = Gravity.CENTER;
+			lp.leftMargin = (int) getResources().getDimension(R.dimen.empty_tutorial_margin);
+			lp.rightMargin = (int) getResources().getDimension(R.dimen.empty_tutorial_margin);
 			tv.setLayoutParams(lp);
 			return tv;
 		}
@@ -6053,6 +6067,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS, selectedNonTextMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS, selectedCancelableMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_COUNT, shareableMessagesCount);
+			outState.putInt(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED, mAdapter.getCount());
 		}
 		if (attachmentWindow != null && attachmentWindow.isShowing() && temporaryTheme != null)
 		{
@@ -8098,7 +8113,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		sethikeToOfflineMode(true);
 	}
 
-	public void hideHikeToOfflineTip(final boolean messagesSent, final boolean isNativeSms, boolean hideWithoutAnimation)
+	public void hideHikeToOfflineTip(final boolean messagesSent, final boolean isNativeSms, boolean hideWithoutAnimation, boolean calledFromMsgDelivered)
 	{
 		if (hikeToOfflineTipview == null)
 		{
@@ -8163,17 +8178,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (hikeToOfflineTipview.getAnimation() == null)
 		{
 			setHikeOfflineTipHideAnimation(hikeToOfflineTipview, animationListener, hideWithoutAnimation);
+			
+			if(calledFromMsgDelivered)
+			{
+				/*
+				 * we need to update last seen value coz we might
+				 * have updated contact's last seen value in between
+				 * when hike offline tip was showing
+				 */
+				updateLastSeen();
+			}
 		}
 	}
 
 	public void hideHikeToOfflineTip()
 	{
-		hideHikeToOfflineTip(false, false, false);
+		hideHikeToOfflineTip(false, false, false, false);
 	}
 
 	public void hideHikeToOfflineTip(final boolean messagesSent, final boolean isNativeSms)
 	{
-		hideHikeToOfflineTip(messagesSent, isNativeSms, false);
+		hideHikeToOfflineTip(messagesSent, isNativeSms, false, false);
 	}
 
 	public void sethikeToOfflineMode(boolean isOn)
