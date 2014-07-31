@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.nio.CharBuffer;
 import java.security.KeyStore;
@@ -165,7 +167,7 @@ public class AccountUtils
 		appVersion = version;
 	}
 
-	public static synchronized HttpClient getClient()
+	public static synchronized HttpClient createClient()
 	{
 		if (mClient != null)
 		{
@@ -184,6 +186,7 @@ public class AccountUtils
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 
+		boolean sslException = false;
 		if (ssl)
 		{
 			try
@@ -196,7 +199,8 @@ public class AccountUtils
 			}
 			catch (Exception e)
 			{
-				schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), port));
+				sslException = true;
+				schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), PRODUCTION_PORT));
 			}
 		}
 		else
@@ -205,9 +209,34 @@ public class AccountUtils
 		}
 
 		ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
-		mClient = new DefaultHttpClient(cm, params);
-		mClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + appVersion);
-		return mClient;
+		HttpClient httpClient = new DefaultHttpClient(cm, params);
+		httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + appVersion);
+
+		mClient = !sslException ? httpClient : null;
+		return httpClient;
+	}
+
+	public static HttpClient getClient(HttpRequestBase request)
+	{
+		HttpClient client = createClient();
+		/*
+		 * if trying to register https on ssl throws exception than we need to change "https" request urls to "http" one.
+		 */
+		if (ssl && client.getConnectionManager().getSchemeRegistry().getSchemeNames().contains("http"))
+		{
+			URI uri = request.getURI();
+			try
+			{
+				request.setURI(new URI("http", uri.getUserInfo(), uri.getHost(), PRODUCTION_PORT, uri.getPath(), uri.getQuery(), uri.getFragment()));
+			}
+			catch (URISyntaxException e)
+			{
+				e.printStackTrace();
+			}
+			Logger.d("SSLException", "Modified URI =" + request.getURI().toString());
+		}
+		return client;
+
 	}
 
 	public static void addUserAgent(URLConnection urlConnection)
@@ -222,7 +251,7 @@ public class AccountUtils
 
 	public static JSONObject executeRequest(HttpRequestBase request)
 	{
-		HttpClient client = getClient();
+		HttpClient client = getClient(request);
 		HttpResponse response;
 		try
 		{
@@ -852,7 +881,7 @@ public class AccountUtils
 		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferUploadBase + "/user/pft/");
 		addToken(req);
 		req.addHeader("X-SESSION-ID", sessionId);
-		HttpClient httpclient = getClient();
+		HttpClient httpclient = getClient(req);
 		HttpResponse response = httpclient.execute(req);
 		StatusLine statusLine = response.getStatusLine();
 		if (statusLine.getStatusCode() == HttpStatus.SC_OK)
@@ -875,7 +904,7 @@ public class AccountUtils
 	{
 		HttpRequestBase req = new HttpGet(AccountUtils.fileTransferUploadBase + "/user/ft/" + fileKey);
 		addToken(req);
-		HttpClient httpclient = getClient();
+		HttpClient httpclient = getClient(req);
 		HttpResponse response = httpclient.execute(req);
 		StatusLine statusLine = response.getStatusLine();
 		if (statusLine.getStatusCode() == HttpStatus.SC_OK)
