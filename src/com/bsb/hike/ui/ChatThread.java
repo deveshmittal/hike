@@ -989,6 +989,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	}
 	
 	private void playUpDownAnimation(final View view){
+		if(view==null)
+		{
+			return;
+		}
 		Animation an = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.down_up_up_part);
 		an.setAnimationListener(new AnimationListener()
 		{
