@@ -2197,14 +2197,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
 		 */
+		int toLoad = 0;
 		if(savedInstanceState != null && savedInstanceState.containsKey(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED))
 		{
-			mConversation = mConversationDb.getConversation(mContactNumber, savedInstanceState.getInt(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED));
+			toLoad = savedInstanceState.getInt(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED);
+			
 		}
 		else
 		{
-			mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY);
+			toLoad = HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY;
 		}
+		mConversation = mConversationDb.getConversation(mContactNumber, toLoad,Utils.isGroupConversation(mContactNumber));
 		
 		if (mConversation == null)
 		{
