@@ -234,8 +234,6 @@ public class HikeDialog
 		final CheckBox small = (CheckBox) dialog.findViewById(R.id.hike_small_checkbox);
 		final CheckBox medium = (CheckBox) dialog.findViewById(R.id.hike_medium_checkbox);
 		final CheckBox original = (CheckBox) dialog.findViewById(R.id.hike_original_checkbox);
-		//CustomFontButton always = (CustomFontButton) dialog.findViewById(R.id.btn_always);
-		//CustomFontButton justOnce = (CustomFontButton) dialog.findViewById(R.id.btn_just_once);
 		CustomFontTextView header = (CustomFontTextView) dialog.findViewById(R.id.image_quality_popup_header);
 		CustomFontTextView smallSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_small_cftv);
 		CustomFontTextView mediumSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_medium_cftv);
@@ -325,62 +323,6 @@ public class HikeDialog
 					callOnSucess(listener, dialog);
 					
 					break;
-					
-				/*case R.id.btn_always:
-					if (medium.isChecked())
-					{
-						editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_MEDIUM);
-					}
-					else if (original.isChecked())
-					{
-						editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_ORIGINAL);
-					}
-					else
-					{
-						editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_SMALL);
-					}
-					editor.commit();
-					
-					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, true);
-
-					if (listener != null)
-					{
-						listener.onSucess(dialog);
-					}
-					else
-					{
-						dialog.dismiss();
-					}
-					
-					break;
-					
-				case R.id.btn_just_once:
-					if (medium.isChecked())
-					{
-						editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_MEDIUM);
-					}
-					else if (original.isChecked())
-					{
-						editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_ORIGINAL);
-					}
-					else
-					{
-						editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_SMALL);
-					}
-					editor.commit();
-					
-					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, false);
-
-					if (listener != null)
-					{
-						listener.onSucess(dialog);
-					}
-					else
-					{
-						dialog.dismiss();
-					}
-					
-					break;*/
 				}
 			}
 		};
@@ -388,8 +330,6 @@ public class HikeDialog
 		small_ll.setOnClickListener(onClickListener);
 		medium_ll.setOnClickListener(onClickListener);
 		original_ll.setOnClickListener(onClickListener);
-		//always.setOnClickListener(onClickListener);
-		//justOnce.setOnClickListener(onClickListener);
 
 		dialog.show();
 		return dialog;
