@@ -1849,7 +1849,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
 		 */
-		mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY);
+		if(savedInstanceState != null && savedInstanceState.containsKey(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED))
+		{
+			mConversation = mConversationDb.getConversation(mContactNumber, savedInstanceState.getInt(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED));
+		}
+		else
+		{
+			mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY);
+		}
+		
 		if (mConversation == null)
 		{
 			if (Utils.isGroupConversation(mContactNumber))
@@ -5413,6 +5421,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS, selectedNonTextMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS, selectedCancelableMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_COUNT, shareableMessagesCount);
+			outState.putInt(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED, mAdapter.getCount());
 		}
 		if (attachmentWindow != null && attachmentWindow.isShowing() && temporaryTheme != null)
 		{
