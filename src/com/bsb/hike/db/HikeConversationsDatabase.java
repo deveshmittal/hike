@@ -809,7 +809,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			
 			if(maxMsgId == -1)
 			{
-				return ;
+				continue;
 			}
 			try
 			{
@@ -818,7 +818,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				
 				conversationCursor = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=?", new String[] { groupId }, null, null,
 						null);
-
+				
+				if (!conversationCursor.moveToFirst())
+				{
+					continue;
+				}
 				if (c.moveToFirst())
 				{
 					String readByString = null;
