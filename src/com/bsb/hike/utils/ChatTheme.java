@@ -64,7 +64,7 @@ public enum ChatTheme
 		@Override
 		public int inLineUpdateBGResId()
 		{
-			return R.drawable.bg_status_chat_thread_custom_theme;
+			return R.drawable.bg_status_chat_thread_default_theme;
 		}
 
 		@Override
