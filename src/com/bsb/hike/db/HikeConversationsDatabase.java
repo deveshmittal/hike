@@ -809,7 +809,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			
 			if(maxMsgId == -1)
 			{
-				return ;
+				continue;
 			}
 			try
 			{
@@ -818,7 +818,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				
 				conversationCursor = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=?", new String[] { groupId }, null, null,
 						null);
-
+				
+				if (!conversationCursor.moveToFirst())
+				{
+					continue;
+				}
 				if (c.moveToFirst())
 				{
 					String readByString = null;
@@ -1164,20 +1168,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	private String createMessageHash(ConvMessage msg)
 	{
 		String msgHash = null;
-		if (!msg.isSent())
+		if (!msg.isSent() && (msg.getParticipantInfoState() == ParticipantInfoState.NO_INFO))
 		{
-			if (TextUtils.isEmpty(msg.getMessage()))
-			{
-				msgHash = msg.getMsisdn() + msg.getMappedMsgID();
-			}
-			else
-			{
-				msgHash = msg.getMsisdn() + msg.getMappedMsgID() + msg.getMessage().charAt(0) + msg.getMessage().charAt(msg.getMessage().length() - 1);
-			}
-			if(msg.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
-			{
-				msgHash = msgHash + msg.getTimestamp();
-			}
+			msgHash = msg.getMsisdn() + msg.getMappedMsgID() + msg.getMessage().charAt(0) + msg.getMessage().charAt(msg.getMessage().length() - 1);
 			Logger.d(getClass().getSimpleName(), "Message hash: " + msgHash);
 		}
 		return msgHash;
