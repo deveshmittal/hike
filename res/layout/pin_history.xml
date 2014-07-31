@@ -25,8 +25,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/pattern"
-            android:paddingBottom="20dp"
-            android:paddingTop="13dp" >
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp" >
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/sender"
@@ -35,7 +35,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_marginLeft="15dp"
                 android:text="Kavin"
-                android:textColor="#cfb190"
+                android:textColor="#b89c7e"
                 android:textSize="12sp" />
 
             <com.bsb.hike.view.CustomFontTextView
@@ -45,7 +45,7 @@
                 android:layout_marginLeft="2dp"
                 android:layout_toRightOf="@id/sender"
                 android:text="12:30 AM"
-                android:textColor="#cfb190"
+                android:textColor="#b89c7e"
                 android:textSize="12sp"
                 android:textStyle="italic" />
 
@@ -54,12 +54,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="0dp"
                 android:layout_marginRight="15dp"
                 android:layout_below="@id/sender"
                 android:text="Mass bunk tomorrow! Let’s all go for a movie at DT Cinema."
                 android:textColor="#45400e"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:textStyle="italic" />
         </RelativeLayout>
     </RelativeLayout>

@@ -8,10 +8,14 @@ import android.graphics.Bitmap;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ImageView.ScaleType;
@@ -24,7 +28,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.PinHistoryAdapter;
-import com.bsb.hike.adapters.PinHistoryAdapter.PinHistoryItemsListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
@@ -33,7 +36,7 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
-public class PinHistoryFragment extends SherlockListFragment implements PinHistoryItemsListener
+public class PinHistoryFragment extends SherlockListFragment implements OnScrollListener
 {
 	private PinHistoryAdapter PHadapter;
 			
@@ -52,6 +55,12 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 	private long convId;
 
 	private HikePubSub mPubSub;
+	
+	private ListView mPinListView;
+	
+	private boolean mLoadingMorePins;
+	
+	private boolean mReachedEnd;
 		
 	public PinHistoryFragment()
 	{
@@ -71,7 +80,7 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 	{
 		View parent = inflater.inflate(R.layout.sticky_pins, null);
 		
-		ListView pinsList = (ListView) parent.findViewById(android.R.id.list);
+		mPinListView = (ListView) parent.findViewById(android.R.id.list);
 		
 		backgroundImage = (ImageView) parent.findViewById(R.id.pin_history_background);
 
@@ -83,7 +92,13 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 		
 		chatTheme = mDb.getChatThemeForMsisdn(msisdn);
 		
-		pinsList.setEmptyView(parent.findViewById(android.R.id.empty));
+		mPinListView.setEmptyView(parent.findViewById(android.R.id.empty));
+		
+		PHadapter = new PinHistoryAdapter(getActivity(), textPins, msisdn, convId, mConversation, true,chatTheme);
+
+		setListAdapter(PHadapter);		
+
+		mPinListView.setOnScrollListener(this);
 		
 		return parent;
 	}
@@ -136,11 +151,6 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 	public void onActivityCreated(Bundle savedInstanceState)
 	{
 		super.onActivityCreated(savedInstanceState);
-		PHadapter = new PinHistoryAdapter(getActivity(), textPins, msisdn, convId, mConversation, this, true,chatTheme);
-
-		setListAdapter(PHadapter);
-		
-		
 	}
 
 	@Override
@@ -188,17 +198,48 @@ public class PinHistoryFragment extends SherlockListFragment implements PinHisto
 	}
 
 	@Override
-	public void onLastItemRequested() 
-	{		
-		this.textPins = mDb.getAllPinMessage(PHadapter.getCount(), HikeConstants.MAX_OLDER_PINS_TO_LOAD_EACH_TIME, msisdn, mConversation);
+	public void onScrollStateChanged(AbsListView view, int scrollState) 
+	{
 		
-		if(textPins != null && textPins.size() <= 0)
+	}
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) 
+	{
+		if (!mReachedEnd && !mLoadingMorePins && textPins != null && !textPins.isEmpty() && (firstVisibleItem + visibleItemCount)  <= totalItemCount - 5)
 		{
-			PHadapter.removeItemViewListener();
-		}
-		else
-		{
-			this.PHadapter.appendPinstoView(textPins);
+			mLoadingMorePins = true;
+			
+			AsyncTask<Void, Void, List<ConvMessage>> asyncTask = new AsyncTask<Void, Void, List<ConvMessage>>()
+			{
+				@Override
+				protected List<ConvMessage> doInBackground(Void... params)
+				{
+					return mDb.getAllPinMessage(PHadapter.getCurrentPinsCount(), HikeConstants.MAX_OLDER_PINS_TO_LOAD_EACH_TIME, msisdn, mConversation);
+				}
+
+				@Override
+				protected void onPostExecute(List<ConvMessage> result)
+				{
+					if (!result.isEmpty())
+					{
+						PHadapter.appendPinstoView(result);
+					}
+					else
+					{
+						mReachedEnd = true;
+					}
+					mLoadingMorePins = false;
+				}
+			};
+			if (Utils.isHoneycombOrHigher())
+			{
+				asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			}
+			else
+			{
+				asyncTask.execute();
+			}
 		}
 	}
 }

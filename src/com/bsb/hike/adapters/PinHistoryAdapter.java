@@ -2,7 +2,6 @@ package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
@@ -10,12 +9,10 @@ import android.content.Context;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
@@ -23,7 +20,6 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
-import com.google.android.gms.internal.co;
 
 public class PinHistoryAdapter extends BaseAdapter
 {
@@ -37,17 +33,11 @@ public class PinHistoryAdapter extends BaseAdapter
 
 	private Conversation mConversation;
 
-	private PinHistoryItemsListener mListener;
-
 	private boolean addDateInBetween;
-	private boolean isDefaultTheme;
-	public static interface PinHistoryItemsListener
-	{
-		public void onLastItemRequested();
-	}
 
-	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn, long convId, Conversation conversation, PinHistoryItemsListener listener,
-			boolean addDateInbetween,ChatTheme theme)
+	private boolean isDefaultTheme;
+
+	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn, long convId, Conversation conversation, boolean addDateInbetween, ChatTheme theme)
 	{
 		this.context = context;
 		this.isDefaultTheme = theme == ChatTheme.DEFAULT;
@@ -57,8 +47,6 @@ public class PinHistoryAdapter extends BaseAdapter
 		this.textPins = textPins;
 		addDateInBetween();
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-		setItemViewListener(listener);
 	}
 
 	private enum ViewType
@@ -72,16 +60,6 @@ public class PinHistoryAdapter extends BaseAdapter
 		addDateInBetween();
 	}
 
-	private void setItemViewListener(PinHistoryItemsListener listener)
-	{
-		this.mListener = listener;
-	}
-
-	public void removeItemViewListener()
-	{
-		this.mListener = null;
-	}
-
 	private class ViewHolder
 	{
 		TextView sender;
@@ -89,14 +67,17 @@ public class PinHistoryAdapter extends BaseAdapter
 		TextView detail;
 
 		TextView timestamp;
-
-		View parent;
 	}
 
 	@Override
 	public int getCount()
 	{
 		return listData.size();
+	}
+
+	public int getCurrentPinsCount()
+	{
+		return textPins.size();
 	}
 
 	@Override
@@ -143,10 +124,6 @@ public class PinHistoryAdapter extends BaseAdapter
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		if (position == getCount() - 1 && mListener != null)
-		{
-			mListener.onLastItemRequested();
-		}
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
 		final Object data = getItem(position);
@@ -193,7 +170,7 @@ public class PinHistoryAdapter extends BaseAdapter
 				if (Utils.isGroupConversation(textPin.getMsisdn()))
 				{
 					GroupConversation gConv = (GroupConversation) mConversation;
-					String number = null;					
+					String number = null;
 					String name = gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn());
 
 					if (((GroupConversation) mConversation).getGroupParticipant(textPin.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
@@ -229,12 +206,12 @@ public class PinHistoryAdapter extends BaseAdapter
 
 		return convertView;
 	}
-	
-	private void setDayIndicatorColor(View inflated){
+
+	private void setDayIndicatorColor(View inflated)
+	{
 		TextView dayTextView = (TextView) inflated.findViewById(R.id.day);
 		View dayLeft = inflated.findViewById(R.id.day_left);
 		View dayRight = inflated.findViewById(R.id.day_right);
-
 
 		if (isDefaultTheme)
 		{
@@ -248,7 +225,7 @@ public class PinHistoryAdapter extends BaseAdapter
 			dayLeft.setBackgroundColor(context.getResources().getColor(R.color.white));
 			dayRight.setBackgroundColor(context.getResources().getColor(R.color.white));
 		}
-			
+
 	}
 
 	private void addDateInBetween()
