@@ -581,6 +581,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		while (c.moveToNext())
 		{
 			String msisdn = c.getString(msisdnIdx);
+
+			/*
+			 * query with aggregate functions always return at least one row which will have everything null. Accounting for that.
+			 */
+			if (TextUtils.isEmpty(msisdn))
+			{
+				continue;
+			}
+
 			if (distinct && msisdnSet.contains(msisdn))
 			{
 				continue;
@@ -1810,6 +1819,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			while (c.moveToNext())
 			{
 				String msisdn = c.getString(msisdnIdx);
+
+				/*
+				 * query with aggregate functions always return at least one row which will have everything null.
+				 */
+				if (TextUtils.isEmpty(msisdn))
+				{
+					continue;
+				}
+
 				String name = c.getString(nameIdx);
 				boolean onHike = c.getInt(onHikeIdx) != 0;
 

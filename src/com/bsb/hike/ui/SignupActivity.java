@@ -754,7 +754,17 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			number = number.replace("+91", "");
 			enterEditText.setText(number);
-			enterEditText.setSelection(number.length());
+			/*
+			 * Saw a few crashes here. Catching the exception since we don't seem to be doing anything wrong here.
+			 */
+			try
+			{
+				enterEditText.setSelection(number.length());
+			}
+			catch (IndexOutOfBoundsException e)
+			{
+				Logger.w(getClass().getSimpleName(), "IOOB thrown while setting the number's textbox selection");
+			}
 		}
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
 		invalidNum.setVisibility(View.INVISIBLE);
