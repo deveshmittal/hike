@@ -206,7 +206,7 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) 
 	{
-		if (!mReachedEnd && !mLoadingMorePins && textPins != null && !textPins.isEmpty() && (firstVisibleItem + visibleItemCount)  <= totalItemCount)
+		if (!mReachedEnd && !mLoadingMorePins && textPins != null && !textPins.isEmpty() && (firstVisibleItem + visibleItemCount)  <= totalItemCount - 5)
 		{
 			mLoadingMorePins = true;
 			
