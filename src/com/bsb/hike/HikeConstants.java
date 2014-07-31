@@ -896,6 +896,8 @@ public class HikeConstants
 	public static final String UNREAD_COUNT = "unreadCount";
 
 	public static final String TO_SHOW = "toShow";
+	
+	public static final String PIN_DISPLAYED = "displayed";
 
 	public static final class ResultCodes
 	{
