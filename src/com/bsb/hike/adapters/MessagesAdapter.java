@@ -3427,16 +3427,26 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 
 		sendHike.setChecked(true);
-		if (!nativeOnly && chatThread.getCurrentSmsBalance() < selectedSmsCount)
+		if(!nativeOnly)
 		{
-			// disable Free Hike Sms Field and enabling the native sms one.
-			hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext_diabled, chatThread.getCurrentSmsBalance()));
-			hikeSmsSubtext.setEnabled(false);
-			hikeSmsHeader.setEnabled(false);
-			hikeSMS.setEnabled(false);
-			sendHike.setEnabled(false);
-			sendHike.setChecked(false);
-			sendNative.setChecked(true);
+			if (chatThread.getCurrentSmsBalance() < selectedSmsCount)
+			{
+				// disable Free Hike Sms Field and enabling the native sms one.
+				hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext_diabled, chatThread.getCurrentSmsBalance()));
+				hikeSmsSubtext.setEnabled(false);
+				hikeSmsHeader.setEnabled(false);
+				hikeSMS.setEnabled(false);
+				sendHike.setEnabled(false);
+				sendHike.setChecked(false);
+				sendNative.setChecked(true);
+			}
+			else
+			{
+				//Now we only show sms dialog if user has 0 free sms
+				// otherwise we just send a free sms by default
+				sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages(true));
+				return;
+			}
 		}
 
 		nativeHeader.setText(context.getString(R.string.regular_sms));

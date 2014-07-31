@@ -3682,9 +3682,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
-					Intent intent = new Intent(ChatThread.this, HomeActivity.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
+					finish();
 				}
 			});
 		}
@@ -4626,7 +4624,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		try
 		{
 			TextView tv = (TextView) LayoutInflater.from(getBaseContext()).inflate(chatTheme.systemMessageLayoutId(), null, false);
-			tv.setText((mConversation instanceof GroupConversation) ? R.string.chatThreadNudgeTutorialText_group : R.string.chatThreadNudgeTutorialText);
+			Random random = new Random();
+			String[] randomStringsArray = getResources().getStringArray(R.array.chat_thread_empty_state_tutorial_text);
+			tv.setText(randomStringsArray[random.nextInt(randomStringsArray.length)]);
 			if (chatTheme == ChatTheme.DEFAULT)
 			{
 				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_intro_nudge_default, 0, 0, 0);
@@ -4638,6 +4638,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			tv.setCompoundDrawablePadding(10);
 			android.widget.ScrollView.LayoutParams lp = new ScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lp.gravity = Gravity.CENTER;
+			lp.leftMargin = (int) getResources().getDimension(R.dimen.empty_tutorial_margin);
+			lp.rightMargin = (int) getResources().getDimension(R.dimen.empty_tutorial_margin);
 			tv.setLayoutParams(lp);
 			return tv;
 		}

@@ -24,6 +24,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Utils;
 
 public class SettingsActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener
 {
@@ -206,9 +207,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.account);
 			break;
 		case 4:
-			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.privacy_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.privacy);
+			intent = Utils.getIntentForPrivacyScreen(this);
 			break;
 		case 5:
 			Intent contactSyncIntent = new Intent(HikeService.MQTT_CONTACT_SYNC_ACTION);

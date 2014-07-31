@@ -160,6 +160,7 @@ import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.SignupActivity;
@@ -1509,6 +1510,7 @@ public class Utils
 		AccountUtils.rewardsUrl = httpString + (isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE : AccountUtils.REWARDS_STAGING_BASE);
 		AccountUtils.gamesUrl = httpString + (isProductionServer ? AccountUtils.GAMES_PRODUCTION_BASE : AccountUtils.GAMES_STAGING_BASE);
 		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE : AccountUtils.STICKERS_STAGING_BASE);
+		AccountUtils.h2oTutorialUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.H2O_TUTORIAL_PRODUCTION_BASE : AccountUtils.H2O_TUTORIAL_STAGING_BASE);
 		Logger.d("SSL", "Base: " + AccountUtils.base);
 		Logger.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);
 		Logger.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferUploadBase);
@@ -4182,6 +4184,14 @@ public class Utils
 			return (Integer.toString(bytes) + " B");
 	}
 	
+	public static Intent getIntentForPrivacyScreen(Context context)
+	{
+		Intent intent = new Intent(context, HikePreferences.class);
+		intent.putExtra(HikeConstants.Extras.PREF, R.xml.privacy_preferences);
+		intent.putExtra(HikeConstants.Extras.TITLE, R.string.privacy);
+		return intent;
+	}
+
 	public static boolean isCompressed(byte[] bytes)
     {
         try
