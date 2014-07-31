@@ -48,10 +48,12 @@ public class GroupConversation extends Conversation
 		this.groupOwner = jsonObject.getString(HikeConstants.FROM);
 		this.groupParticipantList = new HashMap<String, Pair<GroupParticipant, String>>();
 		JSONArray array = jsonObject.getJSONArray(HikeConstants.DATA);
+		List<String> msisdns = new ArrayList<String>();
 		for (int i = 0; i < array.length(); i++)
 		{
 			JSONObject nameMsisdn = array.getJSONObject(i);
 			String contactNum = nameMsisdn.getString(HikeConstants.MSISDN);
+			msisdns.add(contactNum);
 			String contactName = nameMsisdn.getString(HikeConstants.NAME);
 			boolean onHike = nameMsisdn.optBoolean(HikeConstants.ON_HIKE);
 			boolean onDnd = nameMsisdn.optBoolean(HikeConstants.DND);
@@ -59,6 +61,17 @@ public class GroupConversation extends Conversation
 			Logger.d(getClass().getSimpleName(), "Parsing JSON and adding contact to conversation: " + contactNum);
 			this.groupParticipantList.put(contactNum, new Pair<GroupParticipant, String>(groupParticipant, contactName));
 		}
+
+		List<ContactInfo> contacts = ContactManager.getInstance().getContact(msisdns, true, false);
+		for (ContactInfo contact : contacts)
+		{
+			Pair<GroupParticipant, String> grpPair = this.groupParticipantList.get(contact.getMsisdn());
+			if (null != grpPair)
+			{
+				grpPair.first.setContactInfo(contact);
+			}
+		}
+
 		String groupName = ContactManager.getInstance().getName(getMsisdn());
 		setContactName(groupName);
 	}
