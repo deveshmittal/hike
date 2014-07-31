@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
@@ -36,16 +37,9 @@ public class PinHistoryAdapter extends BaseAdapter
 
 	private Conversation mConversation;
 
-	private PinHistoryItemsListener mListener;
-
 	private boolean addDateInBetween;
 
-	public static interface PinHistoryItemsListener
-	{
-		public void onLastItemRequested();
-	}
-
-	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn, long convId, Conversation conversation, PinHistoryItemsListener listener,
+	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn, long convId, Conversation conversation,
 			boolean addDateInbetween)
 	{
 		this.context = context;
@@ -55,8 +49,6 @@ public class PinHistoryAdapter extends BaseAdapter
 		this.textPins = textPins;
 		addDateInBetween();
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-		setItemViewListener(listener);
 	}
 
 	private enum ViewType
@@ -70,16 +62,6 @@ public class PinHistoryAdapter extends BaseAdapter
 		addDateInBetween();
 	}
 
-	private void setItemViewListener(PinHistoryItemsListener listener)
-	{
-		this.mListener = listener;
-	}
-
-	public void removeItemViewListener()
-	{
-		this.mListener = null;
-	}
-
 	private class ViewHolder
 	{
 		TextView sender;
@@ -87,8 +69,6 @@ public class PinHistoryAdapter extends BaseAdapter
 		TextView detail;
 
 		TextView timestamp;
-
-		View parent;
 	}
 
 	@Override
@@ -97,6 +77,11 @@ public class PinHistoryAdapter extends BaseAdapter
 		return listData.size();
 	}
 
+	public int getCurrentPinsCount()
+	{
+		return textPins.size();
+	}
+	
 	@Override
 	public Object getItem(int position)
 	{
@@ -141,10 +126,6 @@ public class PinHistoryAdapter extends BaseAdapter
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		if (position == getCount() - 1 && mListener != null)
-		{
-			mListener.onLastItemRequested();
-		}
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
 		final Object data = getItem(position);
