@@ -71,7 +71,6 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.BLOCK_USER, this);
 		mPubSub.addListener(HikePubSub.UNBLOCK_USER, this);
 		mPubSub.addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
-		mPubSub.addListener(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE, this);
 		mPubSub.addListener(HikePubSub.FAVORITE_TOGGLED, this);
 		mPubSub.addListener(HikePubSub.MUTE_CONVERSATION_TOGGLED, this);
 		mPubSub.addListener(HikePubSub.FRIEND_REQUEST_ACCEPTED, this);
@@ -127,7 +126,11 @@ public class DbConversationListener implements Listener
 				}
 				if (convMessage.isGroupChat())
 				{
-					mPubSub.publish(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE, convMessage.getMsisdn());
+					convMessage = mConversationDb.showParticipantStatusMessage(convMessage.getMsisdn());
+					if(convMessage != null)
+					{
+						mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+					}
 				}
 			}
 		}
@@ -179,52 +182,6 @@ public class DbConversationListener implements Listener
 		{
 			Logger.d("DBCONVERSATION LISTENER", "(Sender) Message sent confirmed for msgID -> " + (Long) object);
 			updateDB(object, ConvMessage.State.SENT_CONFIRMED.ordinal());
-		}
-		else if (HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE.equals(type))
-		{
-			String groupId = (String) object;
-
-			Map<String, GroupParticipant> smsParticipants = mConversationDb.getGroupParticipants(groupId, true, true);
-
-			if (smsParticipants.isEmpty())
-			{
-				return;
-			}
-
-			JSONObject dndJSON = new JSONObject();
-			JSONArray dndParticipants = new JSONArray();
-
-			for (Entry<String, GroupParticipant> smsParticipantEntry : smsParticipants.entrySet())
-			{
-				GroupParticipant smsParticipant = smsParticipantEntry.getValue();
-				String msisdn = smsParticipantEntry.getKey();
-				if (smsParticipant.onDnd())
-				{
-					dndParticipants.put(msisdn);
-				}
-			}
-
-			if (dndParticipants.length() == 0)
-			{
-				// No DND participants. Just return
-				return;
-			}
-			try
-			{
-				dndJSON.put(HikeConstants.FROM, groupId);
-				dndJSON.put(HikeConstants.TYPE, HikeConstants.DND);
-				dndJSON.put(HikeConstants.DND_USERS, dndParticipants);
-
-				ConvMessage convMessage = new ConvMessage(dndJSON, null, context, false);
-				mConversationDb.addConversationMessages(convMessage);
-				mConversationDb.updateShownStatus(groupId);
-
-				mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
-			}
-			catch (JSONException e)
-			{
-				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
-			}
 		}
 		else if (HikePubSub.FAVORITE_TOGGLED.equals(type) || HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type) || HikePubSub.REJECT_FRIEND_REQUEST.equals(type))
 		{

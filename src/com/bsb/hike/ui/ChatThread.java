@@ -7,9 +7,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -196,6 +199,7 @@ import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
@@ -342,7 +346,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED,
 			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED, HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
-			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED};
+			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
+			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA };
 
 	private EmoticonType emoticonType;
 
@@ -2163,6 +2168,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void createConversation()
 	{
 		/*
+		 * Fix for forward crash : Happens due to the action mode is remain enabled on switching the orientation before forwarding.
+		 */
+		invalidateOptionsMenu();
+		/*
 		 * If we are in a stealth conversation when the stealth mode is off, we should exit the conversation.
 		 */
 		if (HikeMessengerApp.isStealthMsisdn(mContactNumber))
@@ -2188,7 +2197,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
 		 */
-		mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
+		if(savedInstanceState != null && savedInstanceState.containsKey(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED))
+		{
+			mConversation = mConversationDb.getConversation(mContactNumber, savedInstanceState.getInt(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED));
+		}
+		else
+		{
+			mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY);
+		}
+		
 		if (mConversation == null)
 		{
 			if (Utils.isGroupConversation(mContactNumber))
@@ -2202,9 +2219,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			mConversation = mConversationDb.addConversation(mContactNumber, false, "", null);
 		}
-
 		/*
 		 * Setting a flag which tells us whether the group contains sms users or not.
+		 * Set participant ready by list
 		 */
 		if (mConversation instanceof GroupConversation)
 		{
@@ -2220,6 +2237,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 			((GroupConversation) mConversation).setHasSmsUser(hasSmsUser);
+			
+			Pair<String,Long> pair = HikeConversationsDatabase.getInstance().getReadByValueForGroup(mConversation.getMsisdn());
+			if (pair != null)
+			{
+				String readBy = pair.first;
+				long msgId = pair.second;
+				((GroupConversation)mConversation).setupReadByList(readBy, msgId);
+			}
+			
 		}
 
 		mLabel = mConversation.getLabel();
@@ -2381,7 +2407,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			/*
 			 * We need to close the tip without any animation if opening from
 			 */
-			hideHikeToOfflineTip(false, false, true);
+			hideHikeToOfflineTip(false, false, true, false);
 		}
 		if (!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
 		{
@@ -3396,10 +3422,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
 				{
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
-					if (msg.isGroupChat())
-					{
-						msg.setReadByArray(HikeConversationsDatabase.getInstance().getReadByValueForMessageID(msg.getMsgID()));
-					}
 					removeFromMessageMap(msg);
 				}
 			}
@@ -3832,9 +3854,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
-					Intent intent = new Intent(ChatThread.this, HomeActivity.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
+					finish();
 				}
 			});
 		}
@@ -3869,6 +3889,171 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					lastSeenScheduler.start(contactInfo.getMsisdn(), lastSeenFetchedCallback);
 				}
 			});
+		}
+		/*
+		 * Receives conversation group-id, the message id for the message read packet, and the participant msisdn.
+		 */
+		else if (HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
+		{
+			Pair<String, Pair<Long,String>> pair = (Pair<String, Pair<Long, String>>) object;
+			// If the msisdn don't match we simply return
+			if (!mConversation.getMsisdn().equals(pair.first))
+			{
+				return;
+			}
+			Long mrMsgId = pair.second.first;
+			for (int i = messages.size() - 1 ; i>=0; i--)
+			{
+				ConvMessage msg = messages.get(i);
+				if (msg != null && msg.isSent())
+				{
+					long id = msg.getMsgID();
+					if (id > mrMsgId)
+					{
+						continue;
+					}
+					if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+					{
+						msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+						removeFromMessageMap(msg);
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+			String participant = pair.second.second;
+			// TODO we could keep a map of msgId -> conversation objects
+			// somewhere to make this faster
+			((GroupConversation)mConversation).updateReadByList(participant,mrMsgId);
+			runOnUiThread(mUpdateAdapter);
+		}
+		/*
+		 * The list of messages is processed.
+		 * The messages are added and the UI is updated at once.
+		 */
+		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
+		{
+			HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
+			final LinkedList<ConvMessage> messageList = messageListMap.get(mContactNumber);
+			String label = null;
+			if(messageList != null)
+			{
+				JSONArray ids = new JSONArray();
+				for (final ConvMessage message : messageList)
+				{
+					if (hasWindowFocus())
+					{
+						message.setState(ConvMessage.State.RECEIVED_READ);
+						if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+						{
+							ids.put(String.valueOf(message.getMappedMsgID()));
+						}
+						
+					}
+					
+					if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO && mConversation instanceof GroupConversation)
+					{
+						HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
+						((GroupConversation) mConversation).setGroupParticipantList(hCDB.getGroupParticipants(mConversation.getMsisdn(), false, false));
+					}
+
+					label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
+					if (activityVisible && Utils.isPlayTickSound(getApplicationContext()))
+					{
+						Utils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
+					}
+				}
+				final String convLabel = label;
+				runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						if (convLabel != null)
+						{
+							setLabel(convLabel);
+						}
+						addBulkMessages(messageList);
+						Logger.d(getClass().getSimpleName(), "calling chatThread.addMessage() Line no. : 2219");
+					}
+				});
+				
+				
+				if (ids != null && ids.length() > 0)
+				{
+					JSONObject jsonObject = new JSONObject();
+					try
+					{
+						jsonObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
+						jsonObject.put(HikeConstants.TO, mConversation.getMsisdn());
+						jsonObject.put(HikeConstants.DATA, ids);
+					}
+					catch (JSONException e)
+					{
+						e.printStackTrace();
+					}
+					// TODO make the calls here.
+					mPubSub.publish(HikePubSub.MQTT_PUBLISH, jsonObject);
+					mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT, mConversation.getMsisdn());
+					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
+				}
+			}
+		}
+		/*
+		 * The list of msisdns and their maximum ids for DR and MR packets is received.
+		 * The messages are updated in the chat thread.
+		 */
+		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
+		{
+			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
+			PairModified<PairModified<Long, Set<String>>, Long> pair = messageStatusMap.get(mConversation.getMsisdn());
+			if (pair != null)
+			{
+				long mrMsgId = (long) pair.getFirst().getFirst();
+				long drMsgId = (long) pair.getSecond();
+				if (mrMsgId > drMsgId)
+				{
+					drMsgId = mrMsgId;
+				}
+
+				if (mConversation instanceof GroupConversation)
+				{
+					for ( String msisdn : pair.getFirst().getSecond())
+					{
+						((GroupConversation)mConversation).updateReadByList(msisdn, mrMsgId);
+					}
+				}
+				for (int i = messages.size() - 1 ; i>=0; i--)
+				{
+					ConvMessage msg = messages.get(i);
+					if (msg != null && msg.isSent())
+					{
+						long id = msg.getMsgID();
+						if (id <= mrMsgId)
+						{
+							if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+							{
+								msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+								removeFromMessageMap(msg);
+							}
+							else
+							{
+								break;
+							}
+						}
+						else if (id <= drMsgId)
+						{
+							if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
+							{
+								msg.setState(ConvMessage.State.SENT_DELIVERED);
+							}
+						}
+					}
+				}
+				runOnUiThread(mUpdateAdapter);
+			}
 		}
 	}
 
@@ -4129,7 +4314,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				showImpMessage(convMessage, playPinAnim ? R.anim.up_down_fade_in : -1);
 			}
 			mAdapter.addMessage(convMessage);
-			addtoMessageMap(messages.size() - 1, messages.size());
+
+			if (mConversation instanceof GroupConversation)
+			{
+				if (convMessage.isSent())
+				{
+					((GroupConversation) mConversation).setupReadByList(null, convMessage.getMsgID());
+				}
+			}
+			addtoMessageMap(messages.size() - 1 ,messages.size());
 
 			// Reset this boolean to load more messages when the user scrolls to
 			// the top
@@ -4185,10 +4378,105 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			});
 		}
 	}
+	
+	/**
+	 * Adds a complete list of messages at the end of the messages list and updates the UI at once
+	 * 
+	 * @param messageList
+	 * 			The list of messages to be added.
+	 */
+	private void addBulkMessages(LinkedList<ConvMessage> messageList)
+	{
+		if (messages != null && mAdapter != null)
+		{
+			TypingNotification typingNotification = null;
+			/*
+			 * If we were showing the typing bubble, we remove it from the add the new message and add the typing bubble back again
+			 */
+			if (!messages.isEmpty() && messages.get(messages.size() - 1).getTypingNotification() != null)
+			{
+				typingNotification = messages.get(messages.size() - 1).getTypingNotification();
+				messages.remove(messages.size() - 1);
+			}
+			mAdapter.addMessages(messageList, messages.size());
+
+			// Reset this boolean to load more messages when the user scrolls to
+			// the top
+			reachedEnd = false;
+
+			ConvMessage convMessage = messageList.get(messageList.size() - 1);
+			/*
+			 * We add the typing notification back if the message was sent by the user or someone in the group is still typing.
+			 */
+			if (typingNotification != null)
+			{
+				if (convMessage.isSent())
+				{
+					mAdapter.addMessage(new ConvMessage(typingNotification));
+				}
+				else if (mConversation instanceof GroupConversation)
+				{
+					if (!((GroupTypingNotification) typingNotification).getGroupParticipantList().isEmpty())
+					{
+						Logger.d("TypingNotification", "Size in chat thread: " + ((GroupTypingNotification) typingNotification).getGroupParticipantList().size());
+						mAdapter.addMessage(new ConvMessage(typingNotification));
+					}
+				}
+			}
+			mAdapter.notifyDataSetChanged();
+
+			/*
+			 * Don't scroll to bottom if the user is at older messages. It's possible that the user might be reading them.
+			 */
+			if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
+			{
+				if (convMessage.getTypingNotification() == null
+						&& (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
+				{
+					showUnreadCountIndicator(messageList.size());
+				}
+				return;
+			}
+			else
+			{
+				mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+			}
+			/*
+			 * Resetting the transcript mode once the list has scrolled to the bottom.
+			 */
+			mHandler.post(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_DISABLED);
+				}
+			});
+		}
+	}
 
 	private void showUnreadCountIndicator()
 	{
 		unreadMessageCount++;
+		// fast scroll indicator and unread message should not show
+		// simultaneously.
+		bottomFastScrollIndicator.setVisibility(View.GONE);
+		unreadMessageIndicator.setVisibility(View.VISIBLE);
+		TextView indicatorText = (TextView) findViewById(R.id.indicator_text);
+		indicatorText.setVisibility(View.VISIBLE);
+		if (unreadMessageCount == 1)
+		{
+			indicatorText.setText(getResources().getString(R.string.one_new_message));
+		}
+		else
+		{
+			indicatorText.setText(getResources().getString(R.string.num_new_messages, unreadMessageCount));
+		}
+	}
+	
+	private void showUnreadCountIndicator(int unreadCount)
+	{
+		unreadMessageCount += unreadCount;
 		// fast scroll indicator and unread message should not show
 		// simultaneously.
 		bottomFastScrollIndicator.setVisibility(View.GONE);
@@ -4554,7 +4842,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		try
 		{
 			TextView tv = (TextView) LayoutInflater.from(getBaseContext()).inflate(chatTheme.systemMessageLayoutId(), null, false);
-			tv.setText((mConversation instanceof GroupConversation) ? R.string.chatThreadNudgeTutorialText_group : R.string.chatThreadNudgeTutorialText);
+			Random random = new Random();
+			String[] randomStringsArray = getResources().getStringArray(R.array.chat_thread_empty_state_tutorial_text);
+			tv.setText(randomStringsArray[random.nextInt(randomStringsArray.length)]);
 			if (chatTheme == ChatTheme.DEFAULT)
 			{
 				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_intro_nudge_default, 0, 0, 0);
@@ -4566,6 +4856,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			tv.setCompoundDrawablePadding(10);
 			android.widget.ScrollView.LayoutParams lp = new ScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lp.gravity = Gravity.CENTER;
+			lp.leftMargin = (int) getResources().getDimension(R.dimen.empty_tutorial_margin);
+			lp.rightMargin = (int) getResources().getDimension(R.dimen.empty_tutorial_margin);
 			tv.setLayoutParams(lp);
 			return tv;
 		}
@@ -5943,6 +6235,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS, selectedNonTextMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS, selectedCancelableMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_COUNT, shareableMessagesCount);
+			outState.putInt(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED, mAdapter.getCount());
 		}
 		if (attachmentWindow != null && attachmentWindow.isShowing() && temporaryTheme != null)
 		{
@@ -7998,7 +8291,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		sethikeToOfflineMode(true);
 	}
 
-	public void hideHikeToOfflineTip(final boolean messagesSent, final boolean isNativeSms, boolean hideWithoutAnimation)
+	public void hideHikeToOfflineTip(final boolean messagesSent, final boolean isNativeSms, boolean hideWithoutAnimation, boolean calledFromMsgDelivered)
 	{
 		if (hikeToOfflineTipview == null)
 		{
@@ -8063,17 +8356,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (hikeToOfflineTipview.getAnimation() == null)
 		{
 			setHikeOfflineTipHideAnimation(hikeToOfflineTipview, animationListener, hideWithoutAnimation);
+			
+			if(calledFromMsgDelivered)
+			{
+				/*
+				 * we need to update last seen value coz we might
+				 * have updated contact's last seen value in between
+				 * when hike offline tip was showing
+				 */
+				updateLastSeen();
+			}
 		}
 	}
 
 	public void hideHikeToOfflineTip()
 	{
-		hideHikeToOfflineTip(false, false, false);
+		hideHikeToOfflineTip(false, false, false, false);
 	}
 
 	public void hideHikeToOfflineTip(final boolean messagesSent, final boolean isNativeSms)
 	{
-		hideHikeToOfflineTip(messagesSent, isNativeSms, false);
+		hideHikeToOfflineTip(messagesSent, isNativeSms, false, false);
 	}
 
 	public void sethikeToOfflineMode(boolean isOn)

@@ -31,6 +31,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
@@ -667,8 +668,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}, dialogStrings);
 			}
 		}
-		else if (HikeConstants.IMAGE_QUALITY.equals(preference.getKey()))
-		{
+		/*else if (HikeConstants.IMAGE_QUALITY.equals(preference.getKey()))		Not needed now
+		{	
 			HikeDialog.showDialog(HikePreferences.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
 			{
 				@Override
@@ -700,7 +701,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}
 			}, (Object[]) null);
 
-		}
+		}*/
 		else if(HikeConstants.CHANGE_STEALTH_PASSCODE.equals(preference.getKey()))
 		{
 			LockPattern.confirmPattern(HikePreferences.this, true);
@@ -815,29 +816,29 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			updateNotifPrefView();
 			break;
 		case R.xml.media_download_preferences:
-			updateMedia();
+			//updateMedia();	//Not needed now.
 		}
 	}
-
-	private void updateMedia()
+	//This function is also not needed now
+	/*private void updateMedia()
 	{
 		Preference preference = getPreferenceScreen().findPreference(HikeConstants.IMAGE_QUALITY);
 		if (HikeSharedPreferenceUtil.getInstance(HikePreferences.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
 		{
 			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(HikePreferences.this);
 
-			int imageQuality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
+			int imageQuality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
 
 			String qualityString = "";
 			switch (imageQuality)
 			{
-			case 1:
+			case ImageQuality.QUALITY_ORIGINAL:
 				qualityString = "Original";
 				break;
-			case 2:
+			case ImageQuality.QUALITY_MEDIUM:
 				qualityString = "Medium";
 				break;
-			case 3:
+			case ImageQuality.QUALITY_SMALL:
 				qualityString = "Small";
 				break;
 			}
@@ -847,7 +848,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			preference.setTitle(getResources().getString(R.string.image_quality_prefs));
 		}
-	}
+	}*/
 	
 	private void updateNotifPrefView()
 	{

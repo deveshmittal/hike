@@ -10,11 +10,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -70,6 +72,7 @@ import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -2416,7 +2419,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					participantNameUnsaved.setVisibility(View.VISIBLE);
 				}
 				else
-				{
+				{   
+					participantName.setSingleLine(true);
+					participantName.setEllipsize(android.text.TextUtils.TruncateAt.END);
+					name = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(convMessage.getGroupParticipantMsisdn());
 					participantName.setText(name);
 					participantNameUnsaved.setVisibility(View.GONE);
 				}
@@ -2894,9 +2900,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private void setReadByForGroup(ConvMessage convMessage, TextView tv)
 	{
 		GroupConversation groupConversation = (GroupConversation) conversation;
-		JSONArray readByArray = convMessage.getReadByArray();
+		
+		LinkedList<String>readByList = groupConversation.getReadByList();
 
-		if (readByArray == null || groupConversation.getGroupMemberAliveCount() == readByArray.length())
+		if (readByList == null)
+		{
+			tv.setText("");
+		}
+		else if (groupConversation.getGroupMemberAliveCount() == readByList.size())
 		{
 			tv.setText(R.string.read_by_everyone);
 		}
@@ -2904,7 +2915,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			StringBuilder sb = new StringBuilder();
 
-			int lastIndex = readByArray.length() - HikeConstants.MAX_READ_BY_NAMES;
+			int lastIndex = readByList.size() - HikeConstants.MAX_READ_BY_NAMES;
 
 			boolean moreNamesThanMaxCount = false;
 			if (lastIndex < 0)
@@ -2924,9 +2935,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				moreNamesThanMaxCount = true;
 			}
 
-			for (int i = readByArray.length() - 1; i >= lastIndex; i--)
+			for (int i = readByList.size() - 1; i >= lastIndex; i--)
 			{
-				sb.append(groupConversation.getGroupParticipantFirstName(readByArray.optString(i)));
+				sb.append(groupConversation.getGroupParticipantFirstName(readByList.get(i)));
 				if (i > lastIndex + 1)
 				{
 					sb.append(", ");
@@ -3347,16 +3358,26 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 
 		sendHike.setChecked(true);
-		if (!nativeOnly && chatThread.getCurrentSmsBalance() < selectedSmsCount)
+		if(!nativeOnly)
 		{
-			// disable Free Hike Sms Field and enabling the native sms one.
-			hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext_diabled, chatThread.getCurrentSmsBalance()));
-			hikeSmsSubtext.setEnabled(false);
-			hikeSmsHeader.setEnabled(false);
-			hikeSMS.setEnabled(false);
-			sendHike.setEnabled(false);
-			sendHike.setChecked(false);
-			sendNative.setChecked(true);
+			if (chatThread.getCurrentSmsBalance() < selectedSmsCount)
+			{
+				// disable Free Hike Sms Field and enabling the native sms one.
+				hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext_diabled, chatThread.getCurrentSmsBalance()));
+				hikeSmsSubtext.setEnabled(false);
+				hikeSmsHeader.setEnabled(false);
+				hikeSMS.setEnabled(false);
+				sendHike.setEnabled(false);
+				sendHike.setChecked(false);
+				sendNative.setChecked(true);
+			}
+			else
+			{
+				//Now we only show sms dialog if user has 0 free sms
+				// otherwise we just send a free sms by default
+				sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages(true));
+				return;
+			}
 		}
 
 		nativeHeader.setText(context.getString(R.string.regular_sms));
@@ -4012,14 +4033,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					 * if all messages are delivered OR we don't have any undelivered messages than only we should reset this timer not on delivery of some message
 					 */
 					chatThread.shouldRunTimerForHikeOfflineTip = true;
-					chatThread.hideHikeToOfflineTip();
-					/*
-					 * we need to update last seen value coz we might have updated contact's last seen value in between when hike offline tip was showing
-					 */
-					if (msgDelivered)
-					{
-						chatThread.updateLastSeen();
-					}
+
+					chatThread.hideHikeToOfflineTip(false, false, false, msgDelivered);
 				}
 				if (firstPendingConvMessage.equals(convMessage))
 				{

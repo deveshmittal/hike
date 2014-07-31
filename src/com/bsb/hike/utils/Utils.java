@@ -38,6 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -129,6 +130,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.HikeConstants.SMSSyncState;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
@@ -161,6 +163,7 @@ import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.SignupActivity;
@@ -1265,6 +1268,17 @@ public class Utils
 	{
 		return name.trim().split(" ", 2)[0];
 	}
+	
+	public static String getFirstNameAndSurname(String name)
+	{
+		/*String fullname = name.trim().split(" ", 2)[0];
+		if(name.contains(" "))
+		{
+		  int spaceIndex = name.indexOf(" ");
+		  fullname.concat(" " + name.charAt(spaceIndex + 1)); 
+		}*/
+		return name;
+	}
 
 	public static double getFreeSpace()
 	{
@@ -1348,16 +1362,16 @@ public class Utils
 			String imageOrientation = Utils.getImageOrientation(srcFilePath);
 			Bitmap tempBmp = null;
 			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
-			if (quality == 2)
+			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+			if (quality == ImageQuality.QUALITY_MEDIUM)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
 						Bitmap.Config.RGB_565, true, false);
 			}
-			else if (quality != 1)
+			else if (quality != ImageQuality.QUALITY_ORIGINAL)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX,
-						Bitmap.Config.RGB_565, true, false);
+						Bitmap.Config.RGB_565, false, false);  //Reducing further for small 
 			}
 			tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 			if (tempBmp != null)
@@ -1399,6 +1413,14 @@ public class Utils
 			Logger.e("Utils", "WTF Error while reading/writing/closing file", ex);
 			return false;
 		}
+	}
+
+	public static void resetImageQuality(SharedPreferences appPrefs)
+	{
+		// TODO Auto-generated method stub
+		final Editor editor = appPrefs.edit();
+		editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+		editor.commit();
 	}
 
 	public static String getImageOrientation(String filePath)
@@ -1499,6 +1521,7 @@ public class Utils
 		AccountUtils.rewardsUrl = httpString + (isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE : AccountUtils.REWARDS_STAGING_BASE);
 		AccountUtils.gamesUrl = httpString + (isProductionServer ? AccountUtils.GAMES_PRODUCTION_BASE : AccountUtils.GAMES_STAGING_BASE);
 		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE : AccountUtils.STICKERS_STAGING_BASE);
+		AccountUtils.h2oTutorialUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.H2O_TUTORIAL_PRODUCTION_BASE : AccountUtils.H2O_TUTORIAL_STAGING_BASE);
 		Logger.d("SSL", "Base: " + AccountUtils.base);
 		Logger.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);
 		Logger.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferUploadBase);
@@ -4041,7 +4064,7 @@ public class Utils
 		}
 
 	}
-
+	
 	public static boolean isPackageInstalled(Context context, String packageName)
 	{
 		PackageManager pm = context.getPackageManager();
@@ -4184,6 +4207,88 @@ public class Utils
 			return (Integer.toString(bytes) + " B");
 	}
 	
+	public static Intent getIntentForPrivacyScreen(Context context)
+	{
+		Intent intent = new Intent(context, HikePreferences.class);
+		intent.putExtra(HikeConstants.Extras.PREF, R.xml.privacy_preferences);
+		intent.putExtra(HikeConstants.Extras.TITLE, R.string.privacy);
+		return intent;
+	}
+
+	public static boolean isCompressed(byte[] bytes)
+    {
+        try
+		{
+			if ((bytes == null) || (bytes.length < 2))
+			{
+			    return false;
+			}
+			else
+			{
+			    return ((bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC)) && (bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8)));
+			}
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+    }
+	
+	public static byte[] uncompressByteArray(byte[] bytes) throws IOException
+    {
+       
+		int DEFAULT_BUFFER_SIZE = 1024 *4;
+		
+		if (!isCompressed(bytes))
+        {
+            return bytes;
+        }
+
+        ByteArrayInputStream bais = null;
+        GZIPInputStream gzis = null;
+        ByteArrayOutputStream baos = null;
+
+        try
+        {
+            bais = new ByteArrayInputStream(bytes);
+            gzis = new GZIPInputStream(bais);
+            baos = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+
+            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+            int n = 0;
+            while (-1 != (n = gzis.read(buffer))) {
+            	baos.write(buffer, 0, n);
+            }
+            gzis.close();
+            bais.close();
+
+            byte[] uncompressedByteArray = baos.toByteArray();
+            baos.close();
+
+
+            return uncompressedByteArray;
+        }
+        catch (IOException ioex)
+        {
+            throw ioex;
+        }
+        finally
+        {
+            if(gzis != null)
+            {
+            	gzis.close();
+            }
+            if(bais != null)
+            {
+            	bais.close();
+            }
+            if(baos != null)
+            {
+            	baos.close();
+            }
+        }
+    }
+
 	public static void emoticonClicked(Context context,int emoticonIndex,EditText composeBox){
 		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(emoticonIndex, System.currentTimeMillis());
 		// We don't add an emoticon if the compose box is near its maximum

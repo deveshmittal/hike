@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.bsb.hike.service.HikeMqttManagerNew;
@@ -54,9 +55,16 @@ public class GCMIntentService extends GCMBaseIntentService
 		if(null != jsonString && jsonString.length() > 0)
 		{
 			Logger.d("HikeToOffline", "Gcm push received : json :" + jsonString);
-			Bundle bundle =  new Bundle();
-			bundle.putString(HikeConstants.Extras.OFFLINE_PUSH_KEY, jsonString);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_TO_OFFLINE_PUSH, bundle);
+			/*
+			 * if user has turned off hike offline notification setting then dont
+			 * show hike offline push
+			 */
+			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.HIKE_OFFLINE_NOTIFICATION_PREF, true))
+			{
+				Bundle bundle =  new Bundle();
+				bundle.putString(HikeConstants.Extras.OFFLINE_PUSH_KEY, jsonString);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_TO_OFFLINE_PUSH, bundle);
+			}
 		}
 		context.sendBroadcast(new Intent(HikeMqttManagerNew.MQTT_CONNECTION_CHECK_ACTION).putExtra("reconnect", reconnect));
 	}

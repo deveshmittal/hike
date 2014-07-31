@@ -360,6 +360,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void onClick(View v)
 			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SHOW_TIMELINE_TOP_BAR);
 				Intent intent = new Intent(HomeActivity.this, TimelineActivity.class);
 				startActivity(intent);
 			}
@@ -1358,6 +1359,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
 					break;
 				case 8:
+					Utils.sendUILogEvent(HikeConstants.LogEvent.STATUS_UPDATE_FROM_OVERFLOW);
 					intent = new Intent(HomeActivity.this, StatusUpdate.class);
 					break;
 				case 9:
@@ -1365,6 +1367,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					Utils.executeAsyncTask(logsTask);
 					break;
 				case 10:
+					Utils.sendUILogEvent(HikeConstants.LogEvent.FAVOURITE_FROM_OVERFLOW);
 					intent = new Intent(HomeActivity.this, PeopleActivity.class);
 					break;	
 				}

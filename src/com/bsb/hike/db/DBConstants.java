@@ -36,6 +36,8 @@ public class DBConstants
 	public static final String MESSAGE_ID = "msgid";
 
 	public static final String MAPPED_MSG_ID = "mappedMsgId";
+	
+	public static final String MESSAGE_HASH = "msgHash";
 
 	public static final String CONV_ID = "convid";
 	
@@ -193,4 +195,6 @@ public class DBConstants
 	public static final String CHAT_BG_INDEX = "chatBgIndex";
 
 	public static final String IS_STEALTH = "isStealth";
+	
+	public static final String MESSAGE_HASH_INDEX = "messageHashIndex";
 }
