@@ -418,6 +418,8 @@ public class HikeConstants
 	public static final String BODY = "b";
 	
 	public static final String MESSAGES = "msgs";
+	
+	public static final String FILE_IMAGE_QUALITY = "img_quality";
 
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
@@ -710,7 +712,7 @@ public class HikeConstants
 
 	public static final int MAX_PINS_TO_LOAD_INITIALLY = 20;
 
-	public static final int MAX_OLDER_PINS_TO_LOAD_EACH_TIME = 20;
+	public static final int MAX_OLDER_PINS_TO_LOAD_EACH_TIME = 10;
 
 	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 20;
 
@@ -894,12 +896,17 @@ public class HikeConstants
 	public static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
 	
 	public static final String SHOW_STEALTH_POPUP = "stlthrmd";
+	
+	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
+
 
 	public static final String PIN = "pin";
 
 	public static final String UNREAD_COUNT = "unreadCount";
 
 	public static final String TO_SHOW = "toShow";
+	
+	public static final String PIN_DISPLAYED = "displayed";
 
 	public static final class ResultCodes
 	{
@@ -1215,6 +1222,8 @@ public class HikeConstants
 		public static final String IS_RESET_PASS = "isResetStealthPasswordFlow";
 		
 		public static final String HAS_TIP = "hasTip";
+
+		public static final String TOTAL_MSGS_CURRENTLY_LOADED = "totalMsgsCurrentlyLoaded";
 		
 		public static final String PIN_TYPE_SHOWING="pinTypeShowing";
 	}
@@ -1467,6 +1476,14 @@ public class HikeConstants
 		public static final String WATS_APP_INVITE = "inv_wa";
 
 		public static final String FTUE_CARD_INVITE_CLICKED = "ftueCardInviteClicked";
+
+		public static final String SHOW_TIMELINE_TOP_BAR = "showTimelineTopBar";
+
+		public static final String FAVOURITE_FROM_OVERFLOW = "favoriteFromOverflow";
+		
+		public static final String STATUS_UPDATE_FROM_OVERFLOW = "statusUpdateFromOverflow";
+
+		public static final String FTUE_CARD_HIKE_OFFLINE_CLICKED = "ftueCardHikeOfflineClicked";
 	}
 
 	public static final class MqttMessageTypes
@@ -1669,6 +1686,25 @@ public class HikeConstants
 	public static final String WATSAPP_INVITE_MESSAGE_KEY = "wa_msg";
 
 	public static final String WATSAPP_INVITE_ENABLED = "i_wa";
+	
+	public static final class ImageQuality
+	{
+		public static final int QUALITY_ORIGINAL = 1;
+
+		public static final int QUALITY_MEDIUM = 2;
+
+		public static final int QUALITY_SMALL = 3;
+
+		public static final int QUALITY_DEFAULT = QUALITY_SMALL;
+
+		public static final String IMAGE_QUALITY_ORIGINAL = "O";
+
+		public static final String IMAGE_QUALITY_MEDIUM = "M";
+
+		public static final String IMAGE_QUALITY_SMALL = "S";
+		
+		public static final String IMAGE_QUALITY_DEFAULT = IMAGE_QUALITY_SMALL;
+	}
 
 	public static class MESSAGE_TYPE
 	{

@@ -114,6 +114,8 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -128,6 +130,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.HikeConstants.SMSSyncState;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
@@ -160,6 +163,7 @@ import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.SignupActivity;
@@ -1264,6 +1268,17 @@ public class Utils
 	{
 		return name.trim().split(" ", 2)[0];
 	}
+	
+	public static String getFirstNameAndSurname(String name)
+	{
+		/*String fullname = name.trim().split(" ", 2)[0];
+		if(name.contains(" "))
+		{
+		  int spaceIndex = name.indexOf(" ");
+		  fullname.concat(" " + name.charAt(spaceIndex + 1)); 
+		}*/
+		return name;
+	}
 
 	public static double getFreeSpace()
 	{
@@ -1347,16 +1362,16 @@ public class Utils
 			String imageOrientation = Utils.getImageOrientation(srcFilePath);
 			Bitmap tempBmp = null;
 			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
-			if (quality == 2)
+			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+			if (quality == ImageQuality.QUALITY_MEDIUM)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
 						Bitmap.Config.RGB_565, true, false);
 			}
-			else if (quality != 1)
+			else if (quality != ImageQuality.QUALITY_ORIGINAL)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX,
-						Bitmap.Config.RGB_565, true, false);
+						Bitmap.Config.RGB_565, false, false);  //Reducing further for small 
 			}
 			tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 			if (tempBmp != null)
@@ -1398,6 +1413,14 @@ public class Utils
 			Logger.e("Utils", "WTF Error while reading/writing/closing file", ex);
 			return false;
 		}
+	}
+
+	public static void resetImageQuality(SharedPreferences appPrefs)
+	{
+		// TODO Auto-generated method stub
+		final Editor editor = appPrefs.edit();
+		editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+		editor.commit();
 	}
 
 	public static String getImageOrientation(String filePath)
@@ -1498,6 +1521,7 @@ public class Utils
 		AccountUtils.rewardsUrl = httpString + (isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE : AccountUtils.REWARDS_STAGING_BASE);
 		AccountUtils.gamesUrl = httpString + (isProductionServer ? AccountUtils.GAMES_PRODUCTION_BASE : AccountUtils.GAMES_STAGING_BASE);
 		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE : AccountUtils.STICKERS_STAGING_BASE);
+		AccountUtils.h2oTutorialUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.H2O_TUTORIAL_PRODUCTION_BASE : AccountUtils.H2O_TUTORIAL_STAGING_BASE);
 		Logger.d("SSL", "Base: " + AccountUtils.base);
 		Logger.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);
 		Logger.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferUploadBase);
@@ -4183,6 +4207,14 @@ public class Utils
 			return (Integer.toString(bytes) + " B");
 	}
 	
+	public static Intent getIntentForPrivacyScreen(Context context)
+	{
+		Intent intent = new Intent(context, HikePreferences.class);
+		intent.putExtra(HikeConstants.Extras.PREF, R.xml.privacy_preferences);
+		intent.putExtra(HikeConstants.Extras.TITLE, R.string.privacy);
+		return intent;
+	}
+
 	public static boolean isCompressed(byte[] bytes)
     {
         try
@@ -4267,5 +4299,48 @@ public class Utils
 		}
 		SmileyParser.getInstance().addSmiley(composeBox, emoticonIndex);
 	}
+	
+	public static Animation getNotificationIndicatorAnim()
+	{
+		AnimationSet animSet = new AnimationSet(true);
+		float a = 0.5f;
+		float b = 1.15f;
+		float c = 0.8f;
+		float d = 1.07f;
+		float e = 1f;
+		int initialOffset = 0;
+		float pivotX = 0.5f;
+		float pivotY = 0.5f;
+		Animation anim0 = new ScaleAnimation(1, a, 1, a, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		anim0.setInterpolator(new AccelerateInterpolator(2f));
+		anim0.setStartOffset(initialOffset);
+		anim0.setDuration(150);
+		animSet.addAnimation(anim0);
 
+		Animation anim1 = new ScaleAnimation(1, b/a, 1, b/a, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		anim1.setInterpolator(new AccelerateInterpolator(2f));
+		anim1.setDuration(200);
+		anim1.setStartOffset(initialOffset+ anim0.getDuration());
+		animSet.addAnimation(anim1);
+
+		Animation anim2 = new ScaleAnimation(1f, c/b, 1f, c/b, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		anim2.setInterpolator(new AccelerateInterpolator(-1f));
+		anim2.setDuration(150);
+		anim2.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration());
+		animSet.addAnimation(anim2);
+
+		Animation anim3 = new ScaleAnimation(1f, d/c, 1f, d/c, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		anim2.setInterpolator(new AccelerateInterpolator(1f));
+		anim3.setDuration(150);
+		anim3.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration() + anim2.getDuration());
+		animSet.addAnimation(anim3);
+
+		Animation anim4 = new ScaleAnimation(1f, e/d, 1f, e/d, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		anim4.setInterpolator(new AccelerateInterpolator(1f));
+		anim4.setDuration(150);
+		anim4.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration() + anim2.getDuration() + anim3.getDuration());
+		animSet.addAnimation(anim4);
+
+		return animSet;
+	}
 }

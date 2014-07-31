@@ -396,7 +396,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean showingChatThemePicker;
 
-	private boolean showingImpMessagePin;
+	private boolean showingImpMessagePinCreate,showingPIN;
 
 	private ImageView backgroundImage;
 
@@ -487,6 +487,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			/* check if the send button should be enabled */
 			mComposeViewWatcher.setBtnEnabled();
 			mComposeView.requestFocus();
+		}
+		if(showingPIN)
+		{
+			   decrementUnreadPInCount();
 		}
 	}
 
@@ -868,6 +872,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		editor.putBoolean(HikeMessengerApp.SHOWN_PIN_TIP, true);
 		editor.commit();
 		}
+		
 		if (tipView != null)
 		{
 			tipView.setVisibility(View.GONE);
@@ -883,41 +888,33 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 		TextView text = (TextView) tipView.findViewById(R.id.text);
-		TextView dateSender = (TextView) tipView.findViewById(R.id.date);
 		if (impMessage.getMetadata() != null && impMessage.getMetadata().isGhostMessage())
 		{
 			tipView.findViewById(R.id.main_content).setBackgroundResource(R.drawable.pin_bg_black);
 			text.setTextColor(getResources().getColor(R.color.gray));
 		}
-		if (impMessage.isSent())
-		{
-			dateSender.setText("You");
-		}
-		else
-		{
-			if (Utils.isGroupConversation(ChatThread.this.mConversation.getMsisdn()))
-			{
-				GroupConversation gConv = (GroupConversation) mConversation;
-				String number = impMessage.getGroupParticipantMsisdn();
-
-				if (number != null)
-				{
-					dateSender.setText(number + " ~ " + gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
-				}
-				else
-				{
-					dateSender.setText(gConv.getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()));
+		String name="";
+			if(impMessage.isSent()){
+				name="You: ";
+			}else{
+				if(mConversation instanceof GroupConversation){
+				name = ((GroupConversation) mConversation).getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()) + ": ";
 				}
 			}
-		}
-		CharSequence markedUp = impMessage.getMessage();
+		
+		ForegroundColorSpan fSpan = new ForegroundColorSpan(getResources().getColor(R.color.pin_name_color));
+		String str = name+impMessage.getMessage();
+		SpannableString spanStr = new SpannableString(str);
+		spanStr.setSpan(fSpan, 0, name.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		spanStr.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.pin_text_color)), name.length(), str.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		CharSequence markedUp = spanStr;
 		SmileyParser smileyParser = SmileyParser.getInstance();
 		markedUp = smileyParser.addSmileySpans(markedUp, false);
 		text.setText(markedUp);
 		Linkify.addLinks(text, Linkify.ALL);
 		Linkify.addLinks(text, Utils.shortCodeRegex, "tel:");
-
-		dateSender.setText(dateSender.getText() + ", " + impMessage.getTimestampFormatted(false, getApplicationContext()));
+//		text.setText(spanStr);
+		
 		View cross = tipView.findViewById(R.id.cross);
 		cross.setTag(impMessage);
 		cross.setOnClickListener(new OnClickListener()
@@ -926,20 +923,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onClick(View v)
 			{
-				tipView.setVisibility(View.GONE);
-				tipView = null;
-				MetaData metadata = mConversation.getMetaData();
-				try
-				{
-					metadata.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, false);
-				}
-				catch (JSONException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA,mConversation);
+				hidePin();
 				
 			}
 		});
@@ -963,10 +947,92 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			tipView.setVisibility(View.GONE);
 		}
-		if (animationId != -1)
+		if (animationId != -1 && !showingPIN)
 		{
 			tipView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), animationId));
 		}
+		showingPIN = true;
+		//decrement the unread count if message pinned
+		   
+		     decrementUnreadPInCount();
+	}
+	
+	
+     public void decrementUnreadPInCount()
+	{
+		MetaData metadata = mConversation.getMetaData();
+		if(!metadata.isPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN) && activityVisible)
+		{
+		try
+		{
+			metadata.setPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
+			metadata.decrementUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA,mConversation);
+		}
+	}
+	private void hidePin(){
+		hidePinFromUI();
+		playUpDownAnimation(tipView);
+		MetaData metadata = mConversation.getMetaData();
+		try
+		{
+			metadata.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, false);
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA,mConversation);
+	}
+	
+	private void playUpDownAnimation(final View view){
+		if(view==null)
+		{
+			return;
+		}
+		Animation an = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.down_up_up_part);
+		an.setAnimationListener(new AnimationListener()
+		{
+			
+			@Override
+			public void onAnimationStart(Animation animation)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				view.setVisibility(View.GONE);
+				if(view==tipView){
+					tipView = null;
+				}
+			}
+		});
+		view.startAnimation(an);
+	}
+
+	private void hidePinFromUI()
+	{
+		showingPIN = false;
+		tipView.setVisibility(View.GONE);
+		tipView = null;
 	}
 
 	private void showTipIfRequired()
@@ -1036,7 +1102,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (findViewById(R.id.impMessageCreateView).getVisibility() == View.VISIBLE)
 		{
-			dismissPinCreateView();
+			dismissPinCreateView(R.anim.down_up_up_part);
 			return;
 		}
 		if (isActionModeOn)
@@ -1192,7 +1258,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if (showingChatThemePicker || showingImpMessagePin)
+		if (showingChatThemePicker || showingImpMessagePinCreate)
 		{
 			return false;
 		}
@@ -1215,7 +1281,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
-		if (mConversation == null || showingChatThemePicker || showingImpMessagePin)
+		if (mConversation == null || showingChatThemePicker || showingImpMessagePinCreate)
 		{
 			return super.onPrepareOptionsMenu(menu);
 		}
@@ -1269,6 +1335,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// hide pop up if any
 			return attachmentClicked();
 		case R.id.overflow_menu:
+			Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
 			showOverFlowMenu();
 			break;
 		case R.id.pin_imp:
@@ -1319,7 +1386,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		if (attachmentWindow != null)
 		{
-			if (showingImpMessagePin)
+			if (showingImpMessagePinCreate)
 			{
 				View v = attachmentWindow.getContentView();
 				v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_out_animation));
@@ -1657,7 +1724,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void sendMessage(ConvMessage convMessage)
 	{
-		addMessage(convMessage);
+		sendMessage(convMessage,false);
+	}
+	
+	private void sendMessage(ConvMessage convMessage,boolean playPinAnim)
+	{
+		addMessage(convMessage,playPinAnim);
 
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 	}
@@ -1685,7 +1757,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 
 		ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, message, isConversationOnHike());
-		if (showingImpMessagePin)
+		if (showingImpMessagePinCreate)
 		{
 			convMessage.setMessageType((Integer) v.getTag());
 			Object metaData = v.getTag(R.id.message_info);
@@ -1712,7 +1784,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 		mComposeView.setText("");
-		sendMessage(convMessage);
+		sendMessage(convMessage,!showingImpMessagePinCreate);
 
 		if (mComposeViewWatcher != null)
 		{
@@ -2015,9 +2087,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Logger.w("ChatThread", "DIFFERENT MSISDN CLOSING CONTEXT MENU!!");
 			closeContextMenu();
 		}
-		if(showingImpMessagePin){
-			dismissPinCreateView();
+		if(showingImpMessagePinCreate){
+			dismissPinCreateView(-1);
 		}
+		if(showingPIN){
+			hidePinFromUI();
+			invalidateOptionsMenu();
+		}
+		showImpMessageIfRequired();
 	}
 
 	private void initiateFileTransferFromIntentData(String fileType, String filePath)
@@ -2091,6 +2168,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void createConversation()
 	{
 		/*
+		 * Fix for forward crash : Happens due to the action mode is remain enabled on switching the orientation before forwarding.
+		 */
+		invalidateOptionsMenu();
+		/*
 		 * If we are in a stealth conversation when the stealth mode is off, we should exit the conversation.
 		 */
 		if (HikeMessengerApp.isStealthMsisdn(mContactNumber))
@@ -2116,7 +2197,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
 		 */
-		mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
+		int toLoad = 0;
+		if(savedInstanceState != null && savedInstanceState.containsKey(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED))
+		{
+			toLoad = savedInstanceState.getInt(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED);
+			
+		}
+		else
+		{
+			toLoad = HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY;
+		}
+		mConversation = mConversationDb.getConversation(mContactNumber, toLoad,Utils.isGroupConversation(mContactNumber));
+		
 		if (mConversation == null)
 		{
 			if (Utils.isGroupConversation(mContactNumber))
@@ -2318,7 +2410,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			/*
 			 * We need to close the tip without any animation if opening from
 			 */
-			hideHikeToOfflineTip(false, false, true);
+			hideHikeToOfflineTip(false, false, true, false);
 		}
 		if (!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
 		{
@@ -3765,19 +3857,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
-					Intent intent = new Intent(ChatThread.this, HomeActivity.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
+					finish();
 				}
 			});
 		}
-		else if (HikePubSub.UPDATE_PIN_METADATA.equals(type))
-		{
-			
-				Conversation conv = (Conversation)object;
-				HikeConversationsDatabase.getInstance().updateConversationMetadata(conv.getConvId(), conv.getMetaData());
-			
-		}
+		
 		else if (HikePubSub.APP_FOREGROUNDED.equals(type))
 		{
 
@@ -3809,30 +3893,49 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 		}
+		/*
+		 * Receives conversation group-id, the message id for the message read packet, and the participant msisdn.
+		 */
 		else if (HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
 		{
-			Pair<String, Pair<long[],String>> pair = (Pair<String, Pair<long[], String>>) object;
+			Pair<String, Pair<Long,String>> pair = (Pair<String, Pair<Long, String>>) object;
 			// If the msisdn don't match we simply return
 			if (!mConversation.getMsisdn().equals(pair.first))
 			{
 				return;
 			}
-			long[] ids = pair.second.first;
-			for (int i = 0; i < ids.length; i++)
+			Long mrMsgId = pair.second.first;
+			for (int i = messages.size() - 1 ; i>=0; i--)
 			{
-				ConvMessage msg = findMessageById(ids[i]);
-				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+				ConvMessage msg = messages.get(i);
+				if (msg != null && msg.isSent())
 				{
-					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
-					removeFromMessageMap(msg);
+					long id = msg.getMsgID();
+					if (id > mrMsgId)
+					{
+						continue;
+					}
+					if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+					{
+						msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+						removeFromMessageMap(msg);
+					}
+					else
+					{
+						break;
+					}
 				}
 			}
 			String participant = pair.second.second;
 			// TODO we could keep a map of msgId -> conversation objects
 			// somewhere to make this faster
-			((GroupConversation)mConversation).updateReadByList(participant,ids[ids.length - 1]);
+			((GroupConversation)mConversation).updateReadByList(participant,mrMsgId);
 			runOnUiThread(mUpdateAdapter);
 		}
+		/*
+		 * The list of messages is processed.
+		 * The messages are added and the UI is updated at once.
+		 */
 		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
 		{
 			HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
@@ -3875,7 +3978,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						{
 							setLabel(convLabel);
 						}
-						// TODO optimize it for complete messageList
 						addBulkMessages(messageList);
 						Logger.d(getClass().getSimpleName(), "calling chatThread.addMessage() Line no. : 2219");
 					}
@@ -3902,6 +4004,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
+		/*
+		 * The list of msisdns and their maximum ids for DR and MR packets is received.
+		 * The messages are updated in the chat thread.
+		 */
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
 		{
 			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
@@ -3910,6 +4016,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				long mrMsgId = (long) pair.getFirst().getFirst();
 				long drMsgId = (long) pair.getSecond();
+				if (mrMsgId > drMsgId)
+				{
+					drMsgId = mrMsgId;
+				}
 
 				if (mConversation instanceof GroupConversation)
 				{
@@ -3918,31 +4028,31 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						((GroupConversation)mConversation).updateReadByList(msisdn, mrMsgId);
 					}
 				}
-				while (mrMsgId > 0)
+				for (int i = messages.size() - 1 ; i>=0; i--)
 				{
-					ConvMessage msg = findMessageById(mrMsgId);
-					if (msg != null)
+					ConvMessage msg = messages.get(i);
+					if (msg != null && msg.isSent())
 					{
-						msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
-						removeFromMessageMap(msg);
-						mrMsgId -= 1;
-					}
-					else
-					{
-						mrMsgId = 0;
-					}
-				}
-				while (drMsgId > 0)
-				{
-					ConvMessage msg = findMessageById(drMsgId);
-					if (msg != null)
-					{
-						msg.setState(ConvMessage.State.SENT_DELIVERED);
-						drMsgId -= 1;
-					}
-					else
-					{
-						drMsgId = 0;
+						long id = msg.getMsgID();
+						if (id <= mrMsgId)
+						{
+							if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+							{
+								msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+								removeFromMessageMap(msg);
+							}
+							else
+							{
+								break;
+							}
+						}
+						else if (id <= drMsgId)
+						{
+							if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
+							{
+								msg.setState(ConvMessage.State.SENT_DELIVERED);
+							}
+						}
 					}
 				}
 				runOnUiThread(mUpdateAdapter);
@@ -4185,6 +4295,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void addMessage(ConvMessage convMessage)
 	{
+		addMessage(convMessage, false);
+	}
+	
+	private void addMessage(ConvMessage convMessage, boolean playPinAnim)
+	{
 		if (messages != null && mAdapter != null)
 		{
 			TypingNotification typingNotification = null;
@@ -4198,7 +4313,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			{
-				showImpMessage(convMessage, R.anim.up_down_fade_in);
+				mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
+				showImpMessage(convMessage, playPinAnim ? R.anim.up_down_fade_in : -1);
 			}
 			mAdapter.addMessage(convMessage);
 
@@ -4266,6 +4382,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 	
+	/**
+	 * Adds a complete list of messages at the end of the messages list and updates the UI at once
+	 * 
+	 * @param messageList
+	 * 			The list of messages to be added.
+	 */
 	private void addBulkMessages(LinkedList<ConvMessage> messageList)
 	{
 		if (messages != null && mAdapter != null)
@@ -4723,7 +4845,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		try
 		{
 			TextView tv = (TextView) LayoutInflater.from(getBaseContext()).inflate(chatTheme.systemMessageLayoutId(), null, false);
-			tv.setText((mConversation instanceof GroupConversation) ? R.string.chatThreadNudgeTutorialText_group : R.string.chatThreadNudgeTutorialText);
+			Random random = new Random();
+			String[] randomStringsArray = getResources().getStringArray(R.array.chat_thread_empty_state_tutorial_text);
+			tv.setText(randomStringsArray[random.nextInt(randomStringsArray.length)]);
 			if (chatTheme == ChatTheme.DEFAULT)
 			{
 				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_intro_nudge_default, 0, 0, 0);
@@ -4735,6 +4859,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			tv.setCompoundDrawablePadding(10);
 			android.widget.ScrollView.LayoutParams lp = new ScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lp.gravity = Gravity.CENTER;
+			lp.leftMargin = (int) getResources().getDimension(R.dimen.empty_tutorial_margin);
+			lp.rightMargin = (int) getResources().getDimension(R.dimen.empty_tutorial_margin);
 			tv.setLayoutParams(lp);
 			return tv;
 		}
@@ -4839,11 +4965,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void setupPinImpMessageTextBased()
 	{
 		setupPinImpMessageActionBar();
-		showingImpMessagePin = true;
+		showingImpMessagePinCreate = true;
 		invalidateOptionsMenu();
 		dismissPopupWindow();
 		final View content = findViewById(R.id.impMessageCreateView);
 		content.setVisibility(View.VISIBLE);
+		if(isKeyboardOpen){
+			mBottomView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.up_down_lower_part));
+		}
+		mBottomView.setVisibility(View.GONE);
+		content.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.up_down_fade_in));
 		mComposeView.requestFocus();
 		Utils.showSoftKeyboard(getApplicationContext(), mComposeView);
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
@@ -4859,29 +4990,36 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			}
 		});
-		mBottomView.setVisibility(View.GONE);
+		
 		if (tipView != null)
 		{
 			tipView.setVisibility(View.GONE);
 		}
 	}
 
-	private void dismissPinCreateView()
+	private void dismissPinCreateView(int animId)
 	{
 		if (tipView != null)
 		{
 			tipView.setVisibility(View.VISIBLE);
 		}
 		// Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
-		showingImpMessagePin = false;
+		showingImpMessagePinCreate = false;
 		setupActionBar(false);
 		invalidateOptionsMenu();
 		mComposeView = (CustomFontEditText) findViewById(R.id.msg_compose);
 		// ChatThread.this.chatLayout.requestFocus();
 		mComposeView.requestFocus();
 		dismissPopupWindow();
+		mBottomView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.down_up_lower_part));
 		mBottomView.setVisibility(View.VISIBLE);
-		findViewById(R.id.impMessageCreateView).setVisibility(View.GONE);
+		final View v = findViewById(R.id.impMessageCreateView);
+		if(animId!=-1){
+			Animation an = AnimationUtils.loadAnimation(getApplicationContext(), animId);
+			playUpDownAnimation(v);
+		}else{
+		v.setVisibility(View.GONE);
+		}
 	}
 
 	private void setupPinImpMessageActionBar()
@@ -4905,7 +5043,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onClick(View v)
 			{
-				dismissPinCreateView();
+				dismissPinCreateView(R.anim.down_up_up_part);
 			}
 		});
 
@@ -4930,7 +5068,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				if (!TextUtils.isEmpty(mComposeView.getText().toString().trim()))
 				{
 					onSendClick(v);
-					dismissPinCreateView();
+					dismissPinCreateView(-1);
 				}
 				else
 				{
@@ -6100,13 +6238,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			outState.putInt(HikeConstants.Extras.SELECTED_NON_TEXT_MSGS, selectedNonTextMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_CANCELABLE_MSGS, selectedCancelableMsgs);
 			outState.putInt(HikeConstants.Extras.SELECTED_SHARABLE_MSGS_COUNT, shareableMessagesCount);
+			outState.putInt(HikeConstants.Extras.TOTAL_MSGS_CURRENTLY_LOADED, mAdapter.getCount());
 		}
 		if (attachmentWindow != null && attachmentWindow.isShowing() && temporaryTheme != null)
 		{
 			outState.putBoolean(HikeConstants.Extras.CHAT_THEME_WINDOW_OPEN, true);
 			outState.putInt(HikeConstants.Extras.SELECTED_THEME, temporaryTheme.ordinal());
 		}
-		if (showingImpMessagePin)
+		if (showingImpMessagePinCreate)
 		{
 			outState.putInt(HikeConstants.Extras.PIN_TYPE_SHOWING, HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 		}
@@ -7618,7 +7757,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					try
 					{
 						// -1 because most recent pin will be at stick at top
-						pin_unread_count = mConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN) - 1;
+						pin_unread_count = mConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 					}
 					catch (JSONException e)
 					{
@@ -7626,10 +7765,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					if (pin_unread_count > 0)
 					{
-						if (pin_unread_count >= 10)
+						if (pin_unread_count >= HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY)
+						{
 							pin_unread.setText(R.string.max_pin_unread_counter);
+							pin_unread.startAnimation(Utils.getNotificationIndicatorAnim());
+						}
 						else
+						{
 							pin_unread.setText(Integer.toString(pin_unread_count));
+							pin_unread.startAnimation(Utils.getNotificationIndicatorAnim());
+						}
 					}
 					else
 						pin_unread.setVisibility(View.GONE);
@@ -8149,7 +8294,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		sethikeToOfflineMode(true);
 	}
 
-	public void hideHikeToOfflineTip(final boolean messagesSent, final boolean isNativeSms, boolean hideWithoutAnimation)
+	public void hideHikeToOfflineTip(final boolean messagesSent, final boolean isNativeSms, boolean hideWithoutAnimation, boolean calledFromMsgDelivered)
 	{
 		if (hikeToOfflineTipview == null)
 		{
@@ -8214,17 +8359,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (hikeToOfflineTipview.getAnimation() == null)
 		{
 			setHikeOfflineTipHideAnimation(hikeToOfflineTipview, animationListener, hideWithoutAnimation);
+			
+			if(calledFromMsgDelivered)
+			{
+				/*
+				 * we need to update last seen value coz we might
+				 * have updated contact's last seen value in between
+				 * when hike offline tip was showing
+				 */
+				updateLastSeen();
+			}
 		}
 	}
 
 	public void hideHikeToOfflineTip()
 	{
-		hideHikeToOfflineTip(false, false, false);
+		hideHikeToOfflineTip(false, false, false, false);
 	}
 
 	public void hideHikeToOfflineTip(final boolean messagesSent, final boolean isNativeSms)
 	{
-		hideHikeToOfflineTip(messagesSent, isNativeSms, false);
+		hideHikeToOfflineTip(messagesSent, isNativeSms, false, false);
 	}
 
 	public void sethikeToOfflineMode(boolean isOn)

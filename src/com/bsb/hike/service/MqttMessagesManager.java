@@ -579,10 +579,10 @@ public class MqttMessagesManager
 	}
 	
 	/**
-	 * This function does processing on filetransfer message
+	 * This function does processing on file transfer message
 	 * 
 	 * @param convMessage
-	 * 			the ConvMessage object with message id and conversation set
+	 * 			the ConvMessage object with message id and conversation object initialized
 	 */
 	private void messageProcessFT(ConvMessage convMessage)
 	{
@@ -734,17 +734,32 @@ public class MqttMessagesManager
 			{
 				ids[i] = msgIds.optLong(i);
 			}
-			convDb.setReadByForGroup(id, ids, participantMsisdn);
-			Pair<long[],String> pair = new Pair<long[],String>(ids,participantMsisdn);
-			Pair<String, Pair<long[],String>> groupPair = new Pair<String, Pair<long[],String>>(id, pair);
-			this.pubSub.publish(HikePubSub.GROUP_MESSAGE_DELIVERED_READ, groupPair);
+			long maxMsgId = convDb.setReadByForGroup(id, ids, participantMsisdn);
+			
+			if(maxMsgId > 0)
+			{
+				Pair<Long,String> pair = new Pair<Long,String>(maxMsgId,participantMsisdn);
+				Pair<String , Pair<Long,String>> groupPair = new Pair<String, Pair<Long,String>>(id, pair);
+				this.pubSub.publish(HikePubSub.GROUP_MESSAGE_DELIVERED_READ, groupPair);
+			}
 		}
 	}
 	
 	/**
 	 * <li>This function does specific "mr" processing for bulk.</li>
-	 * <li> adds max message id form msgids list to {@link #messageStatusMap} first field if this id is grater than that present in second field
+	 * <p> In 1-1 conversation it adds max message id from ids list to {@link #messageStatusMap} first field if 
+	 * this id is greater than that present in first field</p>
+	 * 
+	 * <p> In group conversation since we receive mr for messages sent by others also
+	 * we have to first check whether the list of ids present in mr belongs to our conversation or not.
+	 * <br>We call {@link HikeConversationsDatabase#getMrIdForGroup(String, long[])} passing groupId and ids as arguments.</br> It will return max id from list
+	 * if it belongs to this conversation else it will return -1. 
+	 * <li>if id returned is less than that already present in first field we simply return</li>
+	 * <li>if equals we have to participant msisdn to set</li>
+	 * <li>if greater than we have clear set and update update both set and msgid fields in pair</li>
+	 * 
 	 * @param jsonObj
+	 * 			-- mr json containing list of ids 
 	 * @throws JSONException
 	 */
 	private void saveMessageReadBulk(JSONObject jsonObj) throws JSONException
@@ -761,15 +776,6 @@ public class MqttMessagesManager
 			return;
 		}
 		
-		long msgID = -1;
-		for (int i = 0; i < msgIds.length(); i++)
-		{
-			long tempId = msgIds.optLong(i);
-			if(tempId > msgID)
-			{
-				msgID = tempId;
-			}
-		}
 
 		if(messageStatusMap.get(id) == null)
 		{
@@ -784,18 +790,45 @@ public class MqttMessagesManager
 		}
 		
 		PairModified<Long, Set<String>> pair = messageStatusMap.get(id).getFirst();
+		long msgID = -1;
 		
 		if (Utils.isGroupConversation(id))
 		{
-			if(pair.getFirst() != msgID)
+			long[] ids = new long[msgIds.length()];
+			for (int i = 0; i < msgIds.length(); i++)
 			{
-				pair.setSecond(new HashSet<String>());
+				ids[i] = msgIds.optLong(i);
+			}
+			
+			msgID = convDb.getMrIdForGroup(id, ids);
+			if(pair.getFirst() > msgID)
+			{
+				return ;
+			}
+			
+			if(pair.getFirst() < msgID)
+			{
+				pair.setFirst(msgID);
+				pair.getSecond().clear();
 			}
 			pair.getSecond().add(participantMsisdn);
 		}
-		if(msgID > pair.getFirst())
+		else
 		{
-			pair.setFirst(msgID);
+			
+			for (int i = 0; i < msgIds.length(); i++)
+			{
+				long tempId = msgIds.optLong(i);
+				if(tempId > msgID)
+				{
+					msgID = tempId;
+				}
+				if(msgID > pair.getFirst())
+				{
+					pair.setFirst(msgID);
+				}
+			}
+
 		}
 	}
 
@@ -1651,9 +1684,10 @@ public class MqttMessagesManager
 		}
 	}
 	/**
+	 * <br>This function handles bulk packet</br>
 	 * 
 	 * @param bulkObj
-	 * 			- bulk json object from server
+	 * 			- bulk json object of type "bm"
 	 * @throws JSONException
 	 */
 	
@@ -1674,10 +1708,14 @@ public class MqttMessagesManager
 
 				Logger.d("BulkProcess", "started");
 				long time1 = System.currentTimeMillis();
-
+				
+				/*
+				 * Initialize all the datastructures used for bulk packet processing
+				 */
 				messageList = new LinkedList<ConvMessage>(); // it will store all the convMessage object that can be added to list in one transaction
 				messageListMap = new HashMap<String, LinkedList<ConvMessage>>(); // it will store list of conversation objects based on msisdn
 				messageStatusMap = new HashMap<String, PairModified<PairModified<Long, Set<String>>, Long>>(); // it will store pair mapping to msisdn. pair first value is a pair which contains max "mr" msgid and msisdns of participants that read it.																									   // pair second value is max "dr" message id
+				
 				try
 				{
 					userWriteDb.beginTransaction();
@@ -1702,7 +1740,8 @@ public class MqttMessagesManager
 				}
 				catch (Exception e)
 				{
-					shouldFallBackToNormal = true;
+					Logger.e("BulkProcessor", "Exception during processing ", e);
+					shouldFallBackToNormal = true;   // fallback to one message processing
 				}
 				finally
 				{
@@ -1714,6 +1753,9 @@ public class MqttMessagesManager
 					Logger.d("bulkPacket", "total time : " + (System.currentTimeMillis() - time1));
 				}
 				
+				/*
+				 * If there is some exception processing bulk packet we fallback to normal single message processing of bulk packet messages
+				 */
 				if(shouldFallBackToNormal)
 				{
 					i = 0;
@@ -1733,16 +1775,21 @@ public class MqttMessagesManager
 	
 	private void finalProcessing() throws JSONException
 	{
+		
+		/*
+		 * The list returned by {@link HikeConversationsDatabase#addConversationsBulk(List<ConvMessages>)} contains non duplicate messages
+		 * This list is used for further processing
+		 */
+		
 		if(messageList.size() > 0)
 		{
 			messageList = convDb.addConversationsBulk(messageList);
 		}
 		
 		/*
-		 * The list returned by {@link com.bsb.hike.db.HikeConversationsDatabase#addConversationsBulk(List<ConvMessages>)} contains non duplicate messages
-		 * This list is used for further processing
+		 * lastPinMap is map of msisdn to a pair containing last pin message for a conversation 
+		 * and count of total number of pin messages in bulk packet for that conversation
 		 */
-		
 		HashMap<String, PairModified<ConvMessage, Integer>> lastPinMap = new HashMap<String, PairModified<ConvMessage,Integer>>();
 		
 		for (ConvMessage convMessage : messageList)
@@ -1752,7 +1799,7 @@ public class MqttMessagesManager
 			{
 				messageListMap.put(msisdn, new LinkedList<ConvMessage>());
 			}
-			messageListMap.get(msisdn).add(convMessage);
+			messageListMap.get(msisdn).add(convMessage);  // adds each message into messageListMap according to msisdn
 			
 			if(convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			{
@@ -1760,23 +1807,43 @@ public class MqttMessagesManager
 				{
 					lastPinMap.put(msisdn, new PairModified<ConvMessage, Integer>(null, 0));
 				}
-				lastPinMap.get(msisdn).setFirst(convMessage);
-				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() + 1);
+				lastPinMap.get(msisdn).setFirst(convMessage);						      // update last pin message for a msisdn
+				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() + 1); // increment pin unread count for a msisdn
 			}
 		}
 		
+		/*
+		 * Increment unread count for each msisdn/groupId
+		 */
+		if(messageListMap.size() > 0)
+		{
+			convDb.incrementUnreadCountBulk(messageListMap);
+		}
 		
+		/*
+		 * contains last message for each conversation to be added to conversation table
+		 */
 		ArrayList<ConvMessage> lastMessageList = new ArrayList<ConvMessage>(messageListMap.keySet().size());
 		for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
 		{
 			LinkedList<ConvMessage> list= entry.getValue();
-			lastMessageList.add(list.get(list.size() -1));
+			if (list.size() > 0)
+			{
+				lastMessageList.add(list.get(list.size() -1));
+			}
 		}
 		
+		/*
+		 * add last message and last pin and unread pin count to conversation table
+		 */
 		if(lastMessageList.size() > 0)
 		{
 			convDb.addLastConversations(lastMessageList, lastPinMap);
 		}
+		
+		/*
+		 * update status of messages and also update readByString in group info table for each group
+		 */
 		if(messageStatusMap.size() > 0)
 		{
 			convDb.updateStatusBulk(messageStatusMap);
@@ -1784,12 +1851,16 @@ public class MqttMessagesManager
 		}
 		
 		/*
-		 * Process for ft messages
+		 * Since now messages contains message id and conversation object we can process ft messages
 		 */
 		for(ConvMessage convMessage : messageList)
 		{
 			messageProcessFT(convMessage);
 		}
+		
+		/*
+		 * publish the events for updating chat thread and conversation table
+		 */
 		this.pubSub.publish(HikePubSub.BULK_MESSAGE_RECEIVED, messageListMap);
 		this.pubSub.publish(HikePubSub.BULK_MESSAGE_DELIVERED_READ, messageStatusMap);
 		this.pubSub.publish(HikePubSub.BULK_MESSAGE_NOTIFICATION, messageList.get(messageList.size() - 1));

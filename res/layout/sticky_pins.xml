@@ -3,7 +3,7 @@
     android:id="@+id/sticky_parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/chat_thread_default_bg"
+    android:background="@color/white"
     android:orientation="vertical" >
 
     <com.bsb.hike.ui.utils.RecyclingImageView
@@ -24,5 +24,9 @@
         android:layout_marginTop="@dimen/chat_thread_margin_top"
         android:divider="@null"
         android:dividerHeight="0dp" />
+
+    <include
+        android:id="@android:id/empty"
+        layout="@layout/nudge_tutorial_pop_up" />
 
 </RelativeLayout>

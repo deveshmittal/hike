@@ -112,7 +112,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 {
 	private enum ViewType
 	{
-		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION, UNKNOWN_BLOCK_ADD
+		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION, UNKNOWN_BLOCK_ADD, PIN_TEXT_SENT, PIN_TEXT_RECEIVE
 	};
 
 	private static class DayHolder
@@ -295,6 +295,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private boolean isHikeToOfflineMode = false;
 
+	private String myMsisdn;
+
 	/*
 	 * this is set of all the currently visible messages which are stuck in tick and are not sms
 	 */
@@ -322,6 +324,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		this.mSelectedItemsIds = new HashSet<Long>();
 		setLastSentMessagePosition();
 		this.shownSdrIntroTip = preferences.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false);
+		this.myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 	}
 
 	public void setChatTheme(ChatTheme theme)
@@ -564,11 +567,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else if (convMessage.isSent())
 		{
-			type = conversation.isOnhike() ? ViewType.SEND_HIKE : ViewType.SEND_SMS;
+			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			{
+				type = ViewType.PIN_TEXT_SENT;
+			}
+			else
+			{
+				type = conversation.isOnhike() ? ViewType.SEND_HIKE : ViewType.SEND_SMS;
+			}
 		}
 		else
 		{
-			type = ViewType.RECEIVE;
+			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			{
+				type = ViewType.PIN_TEXT_RECEIVE;
+			}
+			else
+			{
+				type = ViewType.RECEIVE;
+			}
 		}
 
 		return type.ordinal();
@@ -1783,7 +1800,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 		}
 
-		else if (viewType == ViewType.STATUS_MESSAGE)
+		else if (viewType == ViewType.STATUS_MESSAGE || viewType == ViewType.PIN_TEXT_SENT || viewType == ViewType.PIN_TEXT_RECEIVE)
 		{
 			StatusViewHolder statusHolder = null;
 			if (v == null)
@@ -1825,76 +1842,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				statusHolder.messageTextView.setTextColor(context.getResources().getColor(R.color.white));
 			}
 			statusHolder.container.setBackgroundResource(chatTheme.inLineUpdateBGResId());
-
-			StatusMessage statusMessage = convMessage.getMetadata().getStatusMessage();
-
-			statusHolder.dayTextView.setText(context.getString(R.string.xyz_posted_update, Utils.getFirstName(conversation.getLabel())));
-
-			statusHolder.messageInfo.setText(statusMessage.getTimestampFormatted(true, context));
-
-			if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT)
+			if (viewType == ViewType.STATUS_MESSAGE)
 			{
-				SmileyParser smileyParser = SmileyParser.getInstance();
-				statusHolder.messageTextView.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
-				Linkify.addLinks(statusHolder.messageTextView, Linkify.ALL);
-
+				fillStatusMessageData(statusHolder, convMessage, v);
 			}
-			else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
+			else if (viewType == ViewType.PIN_TEXT_RECEIVE || viewType == ViewType.PIN_TEXT_SENT)
 			{
-				statusHolder.messageTextView.setText(R.string.changed_profile);
-			}
-
-			if (statusMessage.hasMood())
-			{
-				statusHolder.image.setBackgroundDrawable(null);
-				statusHolder.image.setImageResource(EmoticonConstants.moodMapping.get(statusMessage.getMoodId()));
-				statusHolder.avatarFrame.setVisibility(View.GONE);
-			}
-			else
-			{
-				setAvatar(conversation.getMsisdn(), statusHolder.image);
-				statusHolder.avatarFrame.setVisibility(View.VISIBLE);
-			}
-
-			statusHolder.container.setTag(convMessage);
-			if (!isActionModeOn)
-			{
-				statusHolder.container.setEnabled(true);
-				statusHolder.container.setOnClickListener(this);
-			}
-			else
-			{
-				statusHolder.container.setEnabled(false);
-			}
-
-			boolean showTip = false;
-			boolean shownStatusTip = preferences.getBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, false);
-
-			if (!shownStatusTip)
-			{
-				if (chatThread.tipView == null)
-				{
-					showTip = true;
-				}
-				else
-				{
-					TipType tipType = (TipType) chatThread.tipView.getTag();
-					if (tipType == TipType.STATUS && statusMessage.getMappedId().equals(statusIdForTip))
-					{
-						showTip = true;
-					}
-				}
-			}
-
-			if (showTip)
-			{
-				chatThread.tipView = v.findViewById(R.id.status_tip);
-				statusIdForTip = statusMessage.getMappedId();
-				HikeTip.showTip(chatThread, TipType.STATUS, chatThread.tipView, Utils.getFirstName(conversation.getLabel()));
-			}
-			else
-			{
-				v.findViewById(R.id.status_tip).setVisibility(View.GONE);
+				fillPinTextData(statusHolder, convMessage, v);
 			}
 		}
 		else if (viewType == ViewType.PARTICIPANT_INFO)
@@ -2250,39 +2204,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		int bottomPad = messageContainer.getPaddingBottom();
 		if (convMessage.isSent() && messageContainer != null)
 		{
-
-			/* label outgoing hike conversations in green */
-//			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-//			{
-//				// for text based pins, we need yellow bubble irrespective of themes
-//
-//				messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_sent_yellow);
-//
-//			}
-//			else
-//			{
-				if (chatTheme == ChatTheme.DEFAULT)
-				{
-					messageContainer.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector : R.drawable.ic_bubble_green_selector);
-				}
-				else
-				{
-					messageContainer.setBackgroundResource(chatTheme.bubbleResId());
-				}
-//			}
-
+			if (chatTheme == ChatTheme.DEFAULT)
+			{
+				messageContainer.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector : R.drawable.ic_bubble_green_selector);
+			}
+			else
+			{
+				messageContainer.setBackgroundResource(chatTheme.bubbleResId());
+			}
 		}
-		// else
-		// {
-		// if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-		// {
-		// messageContainer.setBackgroundResource(R.drawable.pin_bubble_bg_received_yellow);
-		// }
-		// else
-		// {
-		// messageContainer.setBackgroundResource(R.drawable.ic_bubble_white_selector);
-		// }
-		// }
 		messageContainer.setPadding(leftPad, topPad, rightPad, bottomPad);
 	}
 
@@ -2489,7 +2419,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					participantNameUnsaved.setVisibility(View.VISIBLE);
 				}
 				else
-				{
+				{   
+					participantName.setSingleLine(true);
+					participantName.setEllipsize(android.text.TextUtils.TruncateAt.END);
+					name = ((GroupConversation) conversation).getGroupParticipantFirstNameAndSurname(convMessage.getGroupParticipantMsisdn());
 					participantName.setText(name);
 					participantNameUnsaved.setVisibility(View.GONE);
 				}
@@ -2787,7 +2720,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		/*
 		 * We show the time stamp in the status message separately so no need to show this time stamp.
 		 */
-		if (ViewType.values()[getItemViewType(position)] == ViewType.STATUS_MESSAGE)
+		ViewType viewtype = ViewType.values()[getItemViewType(position)];
+		if (viewtype == ViewType.STATUS_MESSAGE || viewtype == ViewType.PIN_TEXT_RECEIVE || viewtype == ViewType.PIN_TEXT_SENT)
 		{
 			return false;
 		}
@@ -3424,16 +3358,26 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 
 		sendHike.setChecked(true);
-		if (!nativeOnly && chatThread.getCurrentSmsBalance() < selectedSmsCount)
+		if(!nativeOnly)
 		{
-			// disable Free Hike Sms Field and enabling the native sms one.
-			hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext_diabled, chatThread.getCurrentSmsBalance()));
-			hikeSmsSubtext.setEnabled(false);
-			hikeSmsHeader.setEnabled(false);
-			hikeSMS.setEnabled(false);
-			sendHike.setEnabled(false);
-			sendHike.setChecked(false);
-			sendNative.setChecked(true);
+			if (chatThread.getCurrentSmsBalance() < selectedSmsCount)
+			{
+				// disable Free Hike Sms Field and enabling the native sms one.
+				hikeSmsSubtext.setText(context.getString(R.string.free_hike_sms_subtext_diabled, chatThread.getCurrentSmsBalance()));
+				hikeSmsSubtext.setEnabled(false);
+				hikeSmsHeader.setEnabled(false);
+				hikeSMS.setEnabled(false);
+				sendHike.setEnabled(false);
+				sendHike.setChecked(false);
+				sendNative.setChecked(true);
+			}
+			else
+			{
+				//Now we only show sms dialog if user has 0 free sms
+				// otherwise we just send a free sms by default
+				sendAllMessagesAsSMS(false, getAllUnsentSelectedMessages(true));
+				return;
+			}
 		}
 
 		nativeHeader.setText(context.getString(R.string.regular_sms));
@@ -4089,14 +4033,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					 * if all messages are delivered OR we don't have any undelivered messages than only we should reset this timer not on delivery of some message
 					 */
 					chatThread.shouldRunTimerForHikeOfflineTip = true;
-					chatThread.hideHikeToOfflineTip();
-					/*
-					 * we need to update last seen value coz we might have updated contact's last seen value in between when hike offline tip was showing
-					 */
-					if (msgDelivered)
-					{
-						chatThread.updateLastSeen();
-					}
+
+					chatThread.hideHikeToOfflineTip(false, false, false, msgDelivered);
 				}
 				if (firstPendingConvMessage.equals(convMessage))
 				{
@@ -4169,5 +4107,107 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return -1;
 		}
 		return firstPendingConvMessage.getMsgID();
+	}
+
+	private void fillStatusMessageData(StatusViewHolder statusHolder, ConvMessage convMessage, View v)
+	{
+		StatusMessage statusMessage = convMessage.getMetadata().getStatusMessage();
+
+		statusHolder.dayTextView.setText(context.getString(R.string.xyz_posted_update, Utils.getFirstName(conversation.getLabel())));
+
+		statusHolder.messageInfo.setText(statusMessage.getTimestampFormatted(true, context));
+
+		if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT)
+		{
+			SmileyParser smileyParser = SmileyParser.getInstance();
+			statusHolder.messageTextView.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
+			Linkify.addLinks(statusHolder.messageTextView, Linkify.ALL);
+
+		}
+		else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
+		{
+			statusHolder.messageTextView.setText(R.string.changed_profile);
+		}
+
+		if (statusMessage.hasMood())
+		{
+			statusHolder.image.setBackgroundDrawable(null);
+			statusHolder.image.setImageResource(EmoticonConstants.moodMapping.get(statusMessage.getMoodId()));
+			statusHolder.avatarFrame.setVisibility(View.GONE);
+		}
+		else
+		{
+			setAvatar(conversation.getMsisdn(), statusHolder.image);
+			statusHolder.avatarFrame.setVisibility(View.VISIBLE);
+		}
+
+		statusHolder.container.setTag(convMessage);
+		if (!isActionModeOn)
+		{
+			statusHolder.container.setEnabled(true);
+			statusHolder.container.setOnClickListener(this);
+		}
+		else
+		{
+			statusHolder.container.setEnabled(false);
+		}
+
+		boolean showTip = false;
+		boolean shownStatusTip = preferences.getBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, false);
+
+		if (!shownStatusTip)
+		{
+			if (chatThread.tipView == null)
+			{
+				showTip = true;
+			}
+			else
+			{
+				TipType tipType = (TipType) chatThread.tipView.getTag();
+				if (tipType == TipType.STATUS && statusMessage.getMappedId().equals(statusIdForTip))
+				{
+					showTip = true;
+				}
+			}
+		}
+
+		if (showTip)
+		{
+			chatThread.tipView = v.findViewById(R.id.status_tip);
+			statusIdForTip = statusMessage.getMappedId();
+			HikeTip.showTip(chatThread, TipType.STATUS, chatThread.tipView, Utils.getFirstName(conversation.getLabel()));
+		}
+		else
+		{
+			v.findViewById(R.id.status_tip).setVisibility(View.GONE);
+		}
+	}
+
+	private void fillPinTextData(StatusViewHolder statusHolder, ConvMessage convMessage, View v)
+	{
+		String name = convMessage.isSent() ? "You" : (conversation instanceof GroupConversation) ? ((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn()) : "" ;
+		statusHolder.dayTextView.setText(context.getString(R.string.xyz_posted_pin, name));
+
+		statusHolder.messageInfo.setText(convMessage.getTimestampFormatted(true, context));
+
+		SmileyParser smileyParser = SmileyParser.getInstance();
+		statusHolder.messageTextView.setText(smileyParser.addSmileySpans(convMessage.getMessage(), true));
+		Linkify.addLinks(statusHolder.messageTextView, Linkify.ALL);
+
+		setAvatar(convMessage.isSent()? myMsisdn:convMessage.getGroupParticipantMsisdn(), statusHolder.image);
+		statusHolder.avatarFrame.setVisibility(View.VISIBLE);
+
+		statusHolder.container.setTag(convMessage);
+		if (!isActionModeOn)
+		{
+			statusHolder.container.setEnabled(true);
+			statusHolder.container.setOnClickListener(this);
+		}
+		else
+		{
+			statusHolder.container.setEnabled(false);
+		}
+
+
 	}
 }
