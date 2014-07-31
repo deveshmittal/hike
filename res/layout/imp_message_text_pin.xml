@@ -25,8 +25,8 @@
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@+id/cross"
             android:layout_toRightOf="@+id/pattern"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp" >
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp" >
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/text"
@@ -49,8 +49,8 @@
             android:layout_alignBottom="@+id/main_content"
             android:layout_alignParentRight="true"
             android:layout_alignTop="@+id/main_content"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp"
             android:src="@drawable/ic_cross" />
     </RelativeLayout>
 
