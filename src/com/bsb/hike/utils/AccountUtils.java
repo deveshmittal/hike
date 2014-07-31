@@ -80,7 +80,7 @@ public class AccountUtils
 
 	public static final String PRODUCTION_HOST = "api.im.hike.in";
 
-	public static final String STAGING_HOST = "staging2.im.hike.in";
+	public static final String STAGING_HOST = "staging.im.hike.in";
 
 	public static final int PRODUCTION_PORT = 80;
 

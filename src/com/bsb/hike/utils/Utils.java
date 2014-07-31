@@ -128,6 +128,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.HikeConstants.SMSSyncState;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
@@ -1359,16 +1360,16 @@ public class Utils
 			String imageOrientation = Utils.getImageOrientation(srcFilePath);
 			Bitmap tempBmp = null;
 			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, 2);
-			if (quality == 2)
+			int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+			if (quality == ImageQuality.QUALITY_MEDIUM)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
 						Bitmap.Config.RGB_565, true, false);
 			}
-			else if (quality != 1)
+			else if (quality != ImageQuality.QUALITY_ORIGINAL)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX,
-						Bitmap.Config.RGB_565, true, false);
+						Bitmap.Config.RGB_565, false, false);  //Reducing further for small 
 			}
 			tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 			if (tempBmp != null)
@@ -1410,6 +1411,14 @@ public class Utils
 			Logger.e("Utils", "WTF Error while reading/writing/closing file", ex);
 			return false;
 		}
+	}
+
+	public static void resetImageQuality(SharedPreferences appPrefs)
+	{
+		// TODO Auto-generated method stub
+		final Editor editor = appPrefs.edit();
+		editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+		editor.commit();
 	}
 
 	public static String getImageOrientation(String filePath)
@@ -3169,7 +3178,7 @@ public class Utils
 		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
 		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
 
-		Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(activity, conv.getMsisdn());
+		Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(activity, conv.getMsisdn(), false);
 
 		Bitmap bitmap = HikeBitmapFactory.drawableToBitmap(avatarDrawable, Bitmap.Config.RGB_565);
 
@@ -3645,16 +3654,28 @@ public class Utils
 		postText.setEnabled(enabled);
 	}
 
-	public static Drawable getAvatarDrawableForNotificationOrShortcut(Context context, String msisdn)
+	public static Drawable getAvatarDrawableForNotificationOrShortcut(Context context, String msisdn, boolean isPin)
 	{
 		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
+		
 		if (drawable == null)
 		{
 			Drawable background = context.getResources().getDrawable(BitmapUtils.getDefaultAvatarResourceId(msisdn, false));
-			Drawable iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+			
+			Drawable iconDrawable = null;
+			
+			if(!isPin)
+			{
+				iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+			}
+			else
+			{
+				iconDrawable = context.getResources().getDrawable(R.drawable.ic_pin_notification);
+			}
+			
 			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });
 		}
-		return drawable;
+		return drawable;		
 	}
 
 	public static void getRecommendedAndHikeContacts(Context context, List<ContactInfo> recommendedContacts, List<ContactInfo> hikeContacts, List<ContactInfo> friendsList)

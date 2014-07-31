@@ -342,5 +342,7 @@
     <color name="yellow_sticky_note">#fff38f</color>
     <color name="light_gray">#404040</color>
     <color name="gray">#cccccc</color>
+    <color name="sticky_yellow">#fff4aa</color>
+    <color name="dark_yellow_sticky_note">#aea559</color>
 </resources>
 	
