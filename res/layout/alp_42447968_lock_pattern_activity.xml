@@ -18,12 +18,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/alp_42447968_pattern_red_background"
     android:orientation="vertical" >
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/alp_42447968_pattern_red_background" >
+        android:layout_height="wrap_content" >
 
         <LinearLayout
             android:id="@+id/alp_42447968_textview_info_group"
@@ -139,9 +139,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:layout_marginTop="20dp"
+        android:paddingBottom="12dp"
+        android:textColor="@drawable/change_password_setting_text_selector"
         android:text="@string/change_password_from_privacy"
         android:visibility = "gone"
-        android:textSize="14dp" />
+        android:textSize="12dp" />
 
 </LinearLayout>

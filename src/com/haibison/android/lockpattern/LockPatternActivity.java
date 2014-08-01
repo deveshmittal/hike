@@ -488,7 +488,7 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
         		&& changePasswordSetting != null)
         {
         	changePasswordSetting.setVisibility(View.VISIBLE);
-        	changePasswordSetting.setText(Html.fromHtml(getString(R.string.change_password_from_privacy)));
+        	changePasswordSetting.setText(getString(R.string.change_password_from_privacy));
         	changePasswordSetting.setOnClickListener(new View.OnClickListener()
 			{
 				
