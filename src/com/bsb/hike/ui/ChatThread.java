@@ -8497,7 +8497,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		intent.putExtra(HikeConstants.TEXT_PINS, mContactNumber);
 		intent.putExtra(HikeConstants.EXTRA_CONV_ID, mConversation.getConvId());
 		startActivity(intent);
-		overridePendingTransition(R.anim.slide_in_left_pins, R.anim.slide_out_left_pins);
 		try
 		{
 			mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
