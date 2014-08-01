@@ -879,7 +879,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if (impMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
-			tipView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_text_pin, null);
+			tipView = LayoutInflater.from(this).inflate(R.layout.imp_message_text_pin, null);
 		}
 
 		if (tipView == null)
@@ -8520,7 +8520,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		intent.putExtra(HikeConstants.TEXT_PINS, mContactNumber);
 		intent.putExtra(HikeConstants.EXTRA_CONV_ID, mConversation.getConvId());
 		startActivity(intent);
-		overridePendingTransition(R.anim.slide_in_left_pins, R.anim.slide_out_left_pins);
 		try
 		{
 			mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
