@@ -933,7 +933,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onClick(View v)
 			{
-				showPinHistory();
+				showPinHistory(false);
 			}
 		});
 		LinearLayout ll = ((LinearLayout) findViewById(R.id.impMessageContainer));
@@ -1508,7 +1508,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Utils.executeConvAsyncTask(emailTask, mConversation);
 					break;
 				case 8:
-					showPinHistory();
+					showPinHistory(true);
 					break;
 				case 5:
 					clearConversation();
@@ -1732,6 +1732,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		addMessage(convMessage,playPinAnim);
 
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
+		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+		{
+			if (convMessage.getHashMessage()==HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE)
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_POSTED_VIA_ICON);
+
+			}
+			else
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_POSTED_VIA_HASH_PIN);
+			}
+		}
 	}
 
 	public void onSendClick(View v)
@@ -1765,7 +1777,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				try
 				{
-					convMessage.setMetadata((JSONObject) metaData);
+					JSONObject metaD = (JSONObject) metaData;
+					convMessage.setMetadata(metaD);
+					if(metaD.has(HikeConstants.PIN_MESSAGE))
+					{
+						int value = metaD.getInt(HikeConstants.PIN_MESSAGE);
+						if(value==1)
+						{
+							convMessage.setHashMessage(HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE);
+						}
+					}
+					
 				}
 				catch (JSONException e)
 				{
@@ -1827,6 +1849,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				jsonObject.put(HikeConstants.PIN_MESSAGE, 1);
 				convMessage.setMetadata(jsonObject);
+				convMessage.setHashMessage(HikeConstants.HASH_MESSAGE_TYPE.HASH_PIN_MESSAGE);
 				return true;
 			}
 			catch (JSONException je)
@@ -8489,7 +8512,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	}
 
-	private void showPinHistory()
+	private void showPinHistory(boolean viaMenu)
 	{
 		Intent intent = new Intent();
 		intent.setClass(ChatThread.this, PinHistoryActivity.class);
@@ -8506,6 +8529,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		if(viaMenu)
+		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_MENU);
+		}else
+		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK);
 		}
 	}
 }

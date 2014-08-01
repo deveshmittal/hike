@@ -1476,14 +1476,23 @@ public class HikeConstants
 		public static final String WATS_APP_INVITE = "inv_wa";
 
 		public static final String FTUE_CARD_INVITE_CLICKED = "ftueCardInviteClicked";
-
-		public static final String SHOW_TIMELINE_TOP_BAR = "showTimelineTopBar";
+		
+ 		public static final String SHOW_TIMELINE_TOP_BAR = "showTimelineTopBar";
 
 		public static final String FAVOURITE_FROM_OVERFLOW = "favoriteFromOverflow";
 		
 		public static final String STATUS_UPDATE_FROM_OVERFLOW = "statusUpdateFromOverflow";
 
 		public static final String FTUE_CARD_HIKE_OFFLINE_CLICKED = "ftueCardHikeOfflineClicked";
+		
+		public static final String PIN_POSTED_VIA_ICON = "pinPostedViaIcon";
+		
+		public static final String PIN_POSTED_VIA_HASH_PIN = "pinPostedViaHashPin";
+		
+		public static final String PIN_HISTORY_VIA_MENU = "pinHistoryViaMenu";
+		
+		public static final String PIN_HISTORY_VIA_PIN_CLICK = "pinHistoryViaPinClick";
+		
 	}
 
 	public static final class MqttMessageTypes
@@ -1711,6 +1720,13 @@ public class HikeConstants
 		public static final int PLAIN_TEXT = 0;
 
 		public static final int TEXT_PIN = 1;
+	}
+	
+	public static class HASH_MESSAGE_TYPE
+	{
+		public static final int DEFAULT_MESSAGE = 0;
+
+		public static final int HASH_PIN_MESSAGE = 1;
 	}
 	
 	public static final String TEXT_PINS = "text_pins";

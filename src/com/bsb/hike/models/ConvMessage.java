@@ -61,6 +61,18 @@ public class ConvMessage
 	private boolean shouldShowPush = true;
 
 	private boolean isTickSoundPlayed = false;
+	
+	private int  hashMessage= HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE;
+
+	public int getHashMessage()
+	{
+		return hashMessage;
+	}
+
+	public void setHashMessage(int hashMessage)
+	{
+		this.hashMessage = hashMessage;
+	}
 
 	private int unreadCount = -1;
 	private int messageType = HikeConstants.MESSAGE_TYPE.PLAIN_TEXT;
