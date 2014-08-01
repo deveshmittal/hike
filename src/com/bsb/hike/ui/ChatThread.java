@@ -978,8 +978,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 	private void hidePin(){
-		hidePinFromUI();
-		playUpDownAnimation(tipView);
+		hidePinFromUI(true);
 		MetaData metadata = mConversation.getMetaData();
 		try
 		{
@@ -1029,11 +1028,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		view.startAnimation(an);
 	}
 
-	private void hidePinFromUI()
+	private void hidePinFromUI(boolean playAnim)
 	{
 		showingPIN = false;
+		if(playAnim){
+		playUpDownAnimation(tipView);	
+		}else{
 		tipView.setVisibility(View.GONE);
 		tipView = null;
+		}
 	}
 
 	private void showTipIfRequired()
@@ -2093,7 +2096,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			dismissPinCreateView(-1);
 		}
 		if(showingPIN){
-			hidePinFromUI();
+			hidePinFromUI(false);
 		}
 		invalidateOptionsMenu();
 		showImpMessageIfRequired();
