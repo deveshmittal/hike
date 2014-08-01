@@ -105,4 +105,8 @@ public class CustomAlertDialog extends Dialog
 		});
 	}
 
+	public void setCancelButtonVisibility(int val)
+	{
+		btnCancel.setVisibility(val);
+	}
 }

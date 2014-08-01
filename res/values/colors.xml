@@ -332,5 +332,6 @@
     <color name="jellies_text">#ffffff</color>
     <color name="jellies_text_shadow">#45211b</color>
     <color name="jellies_div">#45211b</color>
+    <color name="red_empty_field">#ef554e</color>
 </resources>
 	
