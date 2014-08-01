@@ -879,7 +879,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if (impMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
-			tipView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.imp_message_text_pin, null);
+			tipView = LayoutInflater.from(this).inflate(R.layout.imp_message_text_pin, null);
 		}
 
 		if (tipView == null)
