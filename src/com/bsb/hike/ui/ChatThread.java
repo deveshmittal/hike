@@ -8502,7 +8502,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		overridePendingTransition(R.anim.slide_in_left_pins, R.anim.slide_out_left_pins);
 		try
 		{
+			if(mConversation.getMetaData()!=null){
 			mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
+			}else{
+				Toast.makeText(getApplicationContext(), "Some Error Occured!", Toast.LENGTH_SHORT).show();
+			}
 		}
 		catch (JSONException e)
 		{
