@@ -1264,7 +1264,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		getSupportMenuInflater().inflate(isActionModeOn ? R.menu.multi_select_chat_menu : R.menu.chat_thread_menu, menu);
 		// for group chat we show pin and one:one, we show theme
-		if (mConversation instanceof GroupConversation)
+		if ( Utils.isGroupConversation(mContactNumber))
 		{
 			menu.getItem(0).setVisible(false);
 			menu.getItem(1).setVisible(true);
@@ -2092,8 +2092,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if(showingPIN){
 			hidePinFromUI();
-			invalidateOptionsMenu();
 		}
+		invalidateOptionsMenu();
 		showImpMessageIfRequired();
 	}
 
