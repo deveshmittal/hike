@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import java.util.Random;
 import java.util.Set;
 
@@ -977,8 +978,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 	private void hidePin(){
-		hidePinFromUI();
-		playUpDownAnimation(tipView);
+		hidePinFromUI(true);
 		MetaData metadata = mConversation.getMetaData();
 		try
 		{
@@ -1028,11 +1028,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		view.startAnimation(an);
 	}
 
-	private void hidePinFromUI()
+	private void hidePinFromUI(boolean playAnim)
 	{
 		showingPIN = false;
+		if(playAnim){
+		playUpDownAnimation(tipView);	
+		}else{
 		tipView.setVisibility(View.GONE);
 		tipView = null;
+		}
 	}
 
 	private void showTipIfRequired()
@@ -1264,7 +1268,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		getSupportMenuInflater().inflate(isActionModeOn ? R.menu.multi_select_chat_menu : R.menu.chat_thread_menu, menu);
 		// for group chat we show pin and one:one, we show theme
-		if (mConversation instanceof GroupConversation)
+		if ( Utils.isGroupConversation(mContactNumber))
 		{
 			menu.getItem(0).setVisible(false);
 			menu.getItem(1).setVisible(true);
@@ -1835,7 +1839,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	 */
 	private boolean checkMessageTypeFromHash(ConvMessage convMessage)
 	{
-		if (convMessage.getMessage().matches("(?i)" + HASH_PIN + ".*"))
+		Pattern p = Pattern.compile("(?i)" + HASH_PIN + ".*",Pattern.DOTALL);
+		if (p.matcher(convMessage.getMessage()).matches())
 		{
 			convMessage.setMessage(convMessage.getMessage().substring(HASH_PIN.length()).trim());
 			if (TextUtils.isEmpty(convMessage.getMessage()))
@@ -2114,9 +2119,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			dismissPinCreateView(-1);
 		}
 		if(showingPIN){
-			hidePinFromUI();
-			invalidateOptionsMenu();
+			hidePinFromUI(false);
 		}
+		invalidateOptionsMenu();
 		showImpMessageIfRequired();
 	}
 
@@ -8522,7 +8527,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		startActivity(intent);
 		try
 		{
+			if(mConversation.getMetaData()!=null){
 			mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
+			}else{
+				Toast.makeText(getApplicationContext(), "Some Error Occured!", Toast.LENGTH_SHORT).show();
+			}
 		}
 		catch (JSONException e)
 		{
