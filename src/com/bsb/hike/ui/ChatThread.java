@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import java.util.Random;
 import java.util.Set;
 
@@ -1813,7 +1814,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	 */
 	private boolean checkMessageTypeFromHash(ConvMessage convMessage)
 	{
-		if (convMessage.getMessage().matches("(?i)" + HASH_PIN + ".*"))
+		Pattern p = Pattern.compile("(?i)" + HASH_PIN + ".*",Pattern.DOTALL);
+		if (p.matcher(convMessage.getMessage()).matches())
 		{
 			convMessage.setMessage(convMessage.getMessage().substring(HASH_PIN.length()).trim());
 			if (TextUtils.isEmpty(convMessage.getMessage()))
