@@ -6,8 +6,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.FutureTask;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -49,6 +52,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
@@ -78,6 +82,7 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.HikeTip.TipType;
 
@@ -121,6 +126,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					continue;
 				}
+				else if(conv instanceof GroupConversation)
+				{
+					//TODO in case of leaving group from group info screen ==> 2 gcl event will trigger
+					//we can avoid these by moving delete conversation task to db
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+				}
+
 				ids.add(conv.getConvId());
 				msisdns.add(conv.getMsisdn());
 				editor.remove(conv.getMsisdn());
@@ -129,7 +141,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			db = HikeConversationsDatabase.getInstance();
 			db.deleteConversation(ids.toArray(new Long[] {}), msisdns);
-
+			
 			return convs;
 		}
 
@@ -174,7 +186,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, 
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_START_NEW_CHAT_TIP,
-			HikePubSub.REMOVE_STEALTH_UNREAD_TIP };
+			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ };
 
 	private ConversationsAdapter mAdapter;
 
@@ -600,7 +612,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						public void onClick(View v)
 						{
 							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
-							leaveGroup(conv);
+							deleteConversation(conv);
 							deleteConfirmDialog.dismiss();
 						}
 					};
@@ -918,17 +930,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		notifyDataSetChanged();
 	}
 
-	private void leaveGroup(Conversation conv)
-	{
-		if (conv == null)
-		{
-			Logger.d(getClass().getSimpleName(), "Invalid conversation");
-			return;
-		}
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
-		deleteConversation(conv);
-	}
-
 	private void deleteConversation(Conversation conv)
 	{
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
@@ -1101,7 +1102,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void run()
 				{
-					addMessage(conv, finalMessage);
+					addMessage(conv, finalMessage, true);
 				}
 			});
 
@@ -1273,13 +1274,27 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				});
 			}
 		}
-		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))
+		/*
+		 * Receives conversation group-id, the message id for the message read packet, and the participant msisdn.
+		 */
+		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type) || HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
 		{
-			Pair<String, long[]> pair = (Pair<String, long[]>) object;
+			String sender = null;
+			long[] ids;
+			if (HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
+			{
+				Pair<String, Pair<Long,String>> pair = (Pair<String, Pair<Long, String>>) object;
+				sender = pair.first;
+				ids = new long[] { pair.second.first} ;
+			}
+			else
+			{
+				Pair<String, long[]> pair = (Pair<String, long[]>) object;
+				sender = pair.first;
+				ids = (long[]) pair.second;
+			}
 
-			final String msisdn = pair.first;
-
-			long[] ids = (long[]) pair.second;
+			final String msisdn = sender;
 
 			ConvMessage lastConvMessage = null;
 
@@ -1731,6 +1746,182 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 			});
 		}
+		/*
+		 * The list of messages is processed.
+		 * The messages are added and the UI is updated at once.
+		 */
+		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
+		{
+			Logger.d(getClass().getSimpleName(), "New bulk msg event sent or received.");
+			HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
+
+			if (messageListMap != null)
+			{
+				for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
+				{
+					if (entry != null)
+					{
+						String msisdn = entry.getKey();
+						LinkedList<ConvMessage> messageList = entry.getValue();
+						final Conversation conv = mConversationsByMSISDN.get(msisdn);
+						if (conv != null)
+						{
+							int unreadCount = 0;
+							for (ConvMessage convMessage : messageList)
+							{
+								if (Utils.shouldIncrementCounter(convMessage))
+								{
+									unreadCount++ ;
+								}
+							}
+							if (unreadCount > 0)
+							{
+								conv.setUnreadCount(conv.getUnreadCount() + unreadCount);
+							}
+							ConvMessage message = messageList.get(messageList.size() - 1);
+							if (message.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
+							{
+								if (!conv.getMessages().isEmpty())
+								{
+									ConvMessage prevMessage = conv.getMessages().get(conv.getMessages().size() - 1);
+									String metadata = message.getMetadata().serialize();
+									message = new ConvMessage(message.getMessage(), message.getMsisdn(), prevMessage.getTimestamp(), prevMessage.getState(), prevMessage.getMsgID(),
+											prevMessage.getMappedMsgID(), message.getGroupParticipantMsisdn());
+									try
+									{
+										message.setMetadata(metadata);
+									}
+									catch (JSONException e)
+									{
+										e.printStackTrace();
+									}
+								}
+							}
+							// For updating the group name if some participant has joined or
+							// left the group
+							else if ((conv instanceof GroupConversation) && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+							{
+								HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
+								((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn(), false, false));
+							}
+
+							final ConvMessage finalMessage = message;
+//							if (conv.getMessages().size() > 0)
+//							{
+//								if (finalMessage.getMsgID() < conv.getMessages().get(conv.getMessages().size() - 1).getMsgID())
+//								{
+//									return;
+//								}
+//							}
+							if (!isAdded())
+							{
+								return;
+							}
+							getActivity().runOnUiThread(new Runnable()
+							{
+								@Override
+								public void run()
+								{
+									addMessage(conv,finalMessage,false);
+								}
+							});
+						}
+						else
+						{
+							// When a message gets sent from a user we don't have a
+							// conversation for, the message gets
+							// broadcasted first then the conversation gets created. It's
+							// okay that we don't add it now, because
+							// when the conversation is broadcasted it will contain the
+							// messages
+						}
+					}
+				}
+				getActivity().runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						Collections.sort(displayedConversations, mConversationsComparator);
+						notifyDataSetChanged();
+					}
+				});
+			}
+		}
+		/*
+		 * The list of msisdns and their maximum ids for DR and MR packets is received.
+		 * The messages are updated in the chat thread.
+		 */
+		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
+		{
+			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
+
+			if (messageStatusMap != null)
+			{
+				for (Entry<String, PairModified<PairModified<Long, Set<String>>, Long>> entry : messageStatusMap.entrySet())
+				{
+					if (entry != null)
+					{
+						final String msisdn = entry.getKey();
+						PairModified<PairModified<Long, Set<String>>, Long> pair = entry.getValue();
+						if (pair != null)
+						{
+							long mrMsgId = (long) pair.getFirst().getFirst();
+							long drMsgId = (long) pair.getSecond();
+
+							if (mrMsgId > 0)
+							{
+								ConvMessage msg = findMessageById(mrMsgId);
+								if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+								{
+									// If the msisdn don't match we simply return
+									if (!msg.getMsisdn().equals(msisdn))
+									{
+										return;
+									}
+
+									msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+
+									if (!isAdded())
+									{
+										return;
+									}
+
+									final ConvMessage message = msg;
+								}
+							}
+							if (drMsgId > 0)
+							{
+								final ConvMessage msg = findMessageById(drMsgId);
+								if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
+								{
+									// If the msisdn don't match we simply return
+									if (!msg.getMsisdn().equals(msisdn))
+									{
+										return;
+									}
+
+									msg.setState(ConvMessage.State.SENT_DELIVERED);
+
+									if (!isAdded())
+									{
+										return;
+									}
+								}
+							}
+						}
+					}
+				}
+				getActivity().runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						notifyDataSetChanged();
+					}
+				});
+			}
+		}
 	}
 
 	private Conversation getFirstConversation()
@@ -1892,7 +2083,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		mAdapter.updateViewsRelatedToMessageState(parentView, convMessage, conversation);
 	}
 
-	private void addMessage(Conversation conv, ConvMessage convMessage)
+	private void addMessage(Conversation conv, ConvMessage convMessage, boolean sortAndUpdateView)
 	{
 		boolean newConversationAdded = false;
 
@@ -1911,7 +2102,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		conv.addMessage(convMessage);
 		Logger.d(getClass().getSimpleName(), "new message is " + convMessage);
 
-		sortAndUpdateTheView(conv, convMessage, newConversationAdded);
+		if (sortAndUpdateView)
+		{
+			sortAndUpdateTheView(conv, convMessage, newConversationAdded);
+		}
 	}
 
 	public void movedFromEmptyToNonEmpty()

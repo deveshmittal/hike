@@ -242,6 +242,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String SERVER_TIME_OFFSET = "serverTimeOffset";
 
 	public static final String SHOWN_EMOTICON_TIP = "shownEmoticonTip1";
+	
+	public static final String SHOWN_PIN_TIP = "shownPinTip";
 
 	public static final String SHOWN_MOODS_TIP = "shownMoodsTip1";
 
@@ -594,6 +596,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		// -1 in both cases means an uninitialized setting, mostly on first
 		// launch or interrupted upgrades.
 		int convInt = settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1);
+		int msgHashGrpReadUpgrade = settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1);
 		ACRA.init(this);
 		CustomReportSender customReportSender = new CustomReportSender();
 		ErrorReporter.getInstance().setReportSender(customReportSender);
@@ -613,6 +616,14 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			mEditor.commit();
 		}
 
+		if (msgHashGrpReadUpgrade == -1)
+		{
+			Editor mEditor = settings.edit();
+			// set the pref to 0 to indicate we've reached the state to init the
+			// hike conversation database.
+			mEditor.putInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, 0);
+			mEditor.commit();
+		}
 		/*
 		 * Resetting the stealth mode when the app starts. 
 		 */
@@ -648,7 +659,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
-		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || TEST)
+		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || 
+				settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1 || TEST)
 		{
 			// turn off future push notifications as soon as the app has
 			// started.
