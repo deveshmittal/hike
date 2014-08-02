@@ -333,17 +333,12 @@ public class MqttMessagesManager
 			if (!groupRevived && !this.convDb.doesConversationExist(groupConversation.getMsisdn()))
 			{
 				Logger.d(getClass().getSimpleName(), "The group conversation does not exists");
-				groupConversation = (GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, "", groupConversation.getGroupOwner());
-
+				String groupName = "";
 				if (metadata != null)
 				{
-					String groupName = metadata.optString(HikeConstants.NAME);
-					if (!TextUtils.isEmpty(groupName))
-					{
-						convDb.setGroupName(groupConversation.getMsisdn(), groupName);
-						groupConversation.setContactName(groupName);
-					}
+					groupName = metadata.optString(HikeConstants.NAME);
 				}
+				groupConversation = (GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, groupName, groupConversation.getGroupOwner());
 				// Adding a key to the json signify that this was the GCJ
 				// received for group creation
 				jsonObj.put(HikeConstants.NEW_GROUP, true);
