@@ -281,6 +281,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			httpRequestURL = "/account";
 			fetchPersistentData();
 
+			if(Intent.ACTION_ATTACH_DATA.equals(getIntent().getAction()))
+			{
+				setProfileImage(HikeConstants.GALLERY_RESULT, RESULT_OK, getIntent());
+			}
 			if (getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false))
 			{
 				// set pubsub listeners
