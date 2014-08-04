@@ -845,7 +845,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean showImpMessageIfRequired()
 	{
-		if (mConversation.getMetaData() != null && mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
+		if (mConversation instanceof GroupConversation && mConversation.getMetaData() != null && mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
 		{
 			ConvMessage impMessage = mConversationDb.getLastPinForConversation(mConversation);
 			if (impMessage != null)
@@ -4339,7 +4339,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				typingNotification = messages.get(messages.size() - 1).getTypingNotification();
 				messages.remove(messages.size() - 1);
 			}
-			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			if (mConversation instanceof GroupConversation && convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			{
 				mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
 				showImpMessage(convMessage, playPinAnim ? R.anim.up_down_fade_in : -1);
