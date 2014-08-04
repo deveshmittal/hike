@@ -1562,7 +1562,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				mContactName = mContactNumber = Utils.normalizeNumber(phoneNumber, prefs.getString(HikeMessengerApp.COUNTRY_CODE, HikeConstants.INDIA_COUNTRY_CODE));
 			}
 
-			createConversation();
+			if (!createConversation())
+			{
+				return;
+			}
 		}
 		else if (intent.hasExtra(HikeConstants.Extras.MSISDN) && !intent.hasExtra(HikeConstants.Extras.GROUP_CHAT))
 		{
@@ -1572,7 +1575,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mContactNumber = intent.getStringExtra(HikeConstants.Extras.MSISDN);
 			mContactName = intent.getStringExtra(HikeConstants.Extras.NAME);
 
-			createConversation();
+			if (!createConversation())
+			{
+				return;
+			}
 			if (intent.getBooleanExtra(HikeConstants.Extras.INVITE, false))
 			{
 				intent.removeExtra(HikeConstants.Extras.INVITE);
@@ -1820,8 +1826,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	/**
 	 * Renders the chats for a given user
+	 * @return
+	 * true if the conversation was created. False otherwise.
 	 */
-	private void createConversation()
+	private boolean createConversation()
 	{
 		/*
 		 * If we are in a stealth conversation when the stealth mode is off, we should exit the conversation.
@@ -1858,7 +1866,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				Toast toast = Toast.makeText(this, R.string.invalid_group_chat, Toast.LENGTH_LONG);
 				toast.show();
 				onBackPressed();
-				return;
+				return false;
 			}
 
 			mConversation = mConversationDb.addConversation(mContactNumber, false, "", null);
@@ -2152,6 +2160,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * Resetting the Orientation Change flag to be used again
 		 */
 		wasOrientationChanged = false;
+
+		return true;
 	}
 
 	private void showStickerFtueTip()
