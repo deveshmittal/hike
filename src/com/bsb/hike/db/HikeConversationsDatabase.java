@@ -909,6 +909,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public void setMessageState(String msisdn, long msgId, int status)
 	{
+		if(msgId == -1)
+		{
+			return ;
+		}
 		int minStatusOrdinal;
 		int maxStatusOrdinal;
 		if (status <= State.SENT_DELIVERED_READ.ordinal())
