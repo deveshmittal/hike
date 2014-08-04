@@ -453,72 +453,80 @@ public class ToastListener implements Listener
 		}
 		else if (HikePubSub.BULK_MESSAGE_NOTIFICATION.equals(type))
 		{
-			ConvMessage message = (ConvMessage) object;
-			if (message.isShouldShowPush())
+			ArrayList<ConvMessage> messageList = (ArrayList<ConvMessage>) object;
+			if(messageList == null || messageList.isEmpty())
 			{
-				HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-				message.setConversation(hCDB.getConversation(message.getMsisdn(), 0));
+				return ;
+			}
+			
+			for(ConvMessage message : messageList)
+			{
+				if (message.isShouldShowPush())
+				{
+					HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
+					message.setConversation(hCDB.getConversation(message.getMsisdn(), 0));
 
-				if (message.getConversation() == null)
-				{
-					Logger.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
-					return;
-				}
-				if ((message.getConversation() instanceof GroupConversation) && ((GroupConversation) message.getConversation()).isMuted())
-				{
-					Logger.d(getClass().getSimpleName(), "Group has been muted");
-					return;
-				}
-				if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
-						|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
-				{
-					if (message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
+					if (message.getConversation() == null)
 					{
-						boolean showNotification = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.CHAT_BG_NOTIFICATION_PREF, true);
-						if (!showNotification)
+						Logger.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
+						return;
+					}
+					if ((message.getConversation() instanceof GroupConversation) && ((GroupConversation) message.getConversation()).isMuted())
+					{
+						Logger.d(getClass().getSimpleName(), "Group has been muted");
+						return;
+					}
+					if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
+							|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
+					{
+						if (message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
 						{
-							return;
+							boolean showNotification = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.CHAT_BG_NOTIFICATION_PREF, true);
+							if (!showNotification)
+							{
+								return;
+							}
 						}
-					}
 
-					Activity activity = (currentActivity != null) ? currentActivity.get() : null;
-					if ((activity instanceof ChatThread))
-					{
-						String contactNumber = ((ChatThread) activity).getContactNumber();
-						if (message.getMsisdn().equals(contactNumber))
+						Activity activity = (currentActivity != null) ? currentActivity.get() : null;
+						if ((activity instanceof ChatThread))
 						{
-							return;
+							String contactNumber = ((ChatThread) activity).getContactNumber();
+							if (message.getMsisdn().equals(contactNumber))
+							{
+								return;
+							}
 						}
-					}
 
-					/*
-					 * the foreground activity isn't going to show this message so Toast it
-					 */
-					ContactInfo contactInfo;
-					if (message.isGroupChat())
-					{
-						Logger.d("ToastListener", "GroupName is " + message.getConversation().getLabel());
-						contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), message.getConversation().getLabel(), message.getMsisdn());
-					}
-					else
-					{
-						contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn(), false);
-					}
-
-					if (message.getConversation().isStealth())
-					{
-						this.toaster.notifyStealthMessage();
-					}
-					else
-					{
 						/*
-						 * Check if this is a big picture message, else toast a normal push message
+						 * the foreground activity isn't going to show this message so Toast it
 						 */
-						Bitmap bigPicture = returnBigPicture(message, context);
-						this.toaster.notifyMessage(contactInfo, message, bigPicture != null ? true : false, bigPicture);
-					}
-				}
+						ContactInfo contactInfo;
+						if (message.isGroupChat())
+						{
+							Logger.d("ToastListener", "GroupName is " + message.getConversation().getLabel());
+							contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), message.getConversation().getLabel(), message.getMsisdn());
+						}
+						else
+						{
+							contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn(), false);
+						}
 
+						if (message.getConversation().isStealth())
+						{
+							this.toaster.notifyStealthMessage();
+						}
+						else
+						{
+							/*
+							 * Check if this is a big picture message, else toast a normal push message
+							 */
+							Bitmap bigPicture = returnBigPicture(message, context);
+							this.toaster.notifyMessage(contactInfo, message, bigPicture != null ? true : false, bigPicture);
+						}
+					}
+
+				}
 			}
 		}
 	}

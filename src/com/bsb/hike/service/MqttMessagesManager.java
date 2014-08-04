@@ -697,6 +697,12 @@ public class MqttMessagesManager
 		{
 			messageStatusMap.put(msisdn, new PairModified<PairModified<Long, Set<String>>, Long>(null, (long) -1));
 		}
+		if(null == messageStatusMap.get(msisdn).getFirst())
+		{
+			Set<String> msisdnSet = new HashSet<String>();
+			PairModified<Long, Set<String>> pair = new PairModified<Long, Set<String>>((long) -1, msisdnSet);
+			messageStatusMap.get(msisdn).setFirst(pair);
+		}
 		if(msgID > messageStatusMap.get(msisdn).getSecond())
 		{
 			messageStatusMap.get(msisdn).setSecond(msgID);
@@ -1863,7 +1869,7 @@ public class MqttMessagesManager
 		 */
 		this.pubSub.publish(HikePubSub.BULK_MESSAGE_RECEIVED, messageListMap);
 		this.pubSub.publish(HikePubSub.BULK_MESSAGE_DELIVERED_READ, messageStatusMap);
-		this.pubSub.publish(HikePubSub.BULK_MESSAGE_NOTIFICATION, messageList.get(messageList.size() - 1));
+		this.pubSub.publish(HikePubSub.BULK_MESSAGE_NOTIFICATION,lastMessageList);
 	}
 	
 	private void addToLists(String msisdn, ConvMessage convMessage)

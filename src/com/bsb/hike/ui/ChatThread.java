@@ -821,11 +821,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		screenOffBR = new ScreenOffReceiver();
 		registerReceiver(screenOffBR, new IntentFilter(Intent.ACTION_SCREEN_OFF));
-		// give priority to imp message , say pin message
-		if (!showImpMessageIfRequired())
-		{
-			showTipIfRequired();
-		}
 		final int whichPinEditShowing = savedInstanceState!=null ? savedInstanceState.getInt(HikeConstants.Extras.PIN_TYPE_SHOWING) : 0;
 		if(whichPinEditShowing!=0){
 			mHandler.post(new Runnable()
@@ -845,7 +840,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean showImpMessageIfRequired()
 	{
-		if (mConversation.getMetaData() != null && mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
+		if (mConversation instanceof GroupConversation && mConversation.getMetaData() != null && mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
 		{
 			ConvMessage impMessage = mConversationDb.getLastPinForConversation(mConversation);
 			if (impMessage != null)
@@ -2128,7 +2123,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			hidePinFromUI(false);
 		}
 		invalidateOptionsMenu();
-		showImpMessageIfRequired();
+		// give priority to imp message , say pin message
+		if (!showImpMessageIfRequired())
+		{
+			showTipIfRequired();
+		}
 	}
 
 	private void initiateFileTransferFromIntentData(String fileType, String filePath)
@@ -3179,6 +3178,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(convID);
 			mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT, mConversation.getMsisdn());
 			mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
+
+			Logger.d("UnreadBug", "Unread count event triggered");
 			/*
 			 * If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read avoid sending read notifications for group chats
 			 */
@@ -4349,7 +4350,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				typingNotification = messages.get(messages.size() - 1).getTypingNotification();
 				messages.remove(messages.size() - 1);
 			}
-			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			if (mConversation instanceof GroupConversation && convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			{
 				mConversation = mConversationDb.getConversation(mContactNumber, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
 				showImpMessage(convMessage, playPinAnim ? R.anim.up_down_fade_in : -1);
@@ -5071,10 +5072,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		View saveBtn = actionBarView.findViewById(R.id.done_container);
 		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		TextView saveText = (TextView) actionBarView.findViewById(R.id.save);
 		ViewGroup closeContainer = (ViewGroup) actionBarView.findViewById(R.id.close_container);
 
 		title.setText(R.string.create_pin);
-
+		saveText.setText(R.string.pin);
+	
 		closeContainer.setOnClickListener(new OnClickListener()
 		{
 
