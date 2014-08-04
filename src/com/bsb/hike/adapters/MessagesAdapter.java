@@ -3610,6 +3610,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		int downloadImage;
 		int retryImage;
 		int pauseImage;
+		int playImage = -1;
 		if (ext)
 		{
 			retryImage = R.drawable.ic_retry_other;
@@ -3621,6 +3622,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			retryImage = R.drawable.ic_retry_image_video;
 			pauseImage = R.drawable.ic_pause_image_video;
 			downloadImage = R.drawable.ic_download_image_video;
+			playImage = R.drawable.ic_videoicon;
 		}
 		holder.ftAction.setVisibility(View.GONE);
 		holder.circularProgressBg.setVisibility(View.GONE);
@@ -3635,11 +3637,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.ftAction.setVisibility(View.VISIBLE);
 				holder.circularProgressBg.setVisibility(View.VISIBLE);
 			}
-			else if (TextUtils.isEmpty(hikeFile.getFileKey()))
+			else
 			{
-				holder.ftAction.setImageResource(retryImage);
-				holder.ftAction.setVisibility(View.VISIBLE);
-				holder.circularProgressBg.setVisibility(View.VISIBLE);
+				if (TextUtils.isEmpty(hikeFile.getFileKey()))
+				{
+					holder.ftAction.setImageResource(retryImage);
+					holder.ftAction.setVisibility(View.VISIBLE);
+					holder.circularProgressBg.setVisibility(View.VISIBLE);
+				}
+				else if(hikeFile.getHikeFileType() == HikeFileType.VIDEO && !ext)
+				{
+					holder.ftAction.setImageResource(playImage);
+					holder.ftAction.setVisibility(View.VISIBLE);
+					holder.circularProgressBg.setVisibility(View.VISIBLE);
+				}
 			}
 			break;
 		case IN_PROGRESS:
@@ -3666,6 +3677,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.ftAction.setImageResource(retryImage);
 			holder.ftAction.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
+			break;
+		case COMPLETED:
+			if(hikeFile.getHikeFileType() == HikeFileType.VIDEO && !ext)
+			{
+				holder.ftAction.setImageResource(playImage);
+				holder.ftAction.setVisibility(View.VISIBLE);
+				holder.circularProgressBg.setVisibility(View.VISIBLE);
+			}
 			break;
 		default:
 			break;
