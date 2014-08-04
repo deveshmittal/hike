@@ -317,7 +317,7 @@ public class TransientCache extends ContactsCache
 			{
 				String msisdn = mapEntry.getKey();
 				ContactInfo contact = mapEntry.getValue();
-				ContactTuple tuple = transientContacts.get(msisdn); // TODO should also check in persistence cache
+				ContactTuple tuple = transientContacts.get(msisdn);
 				if (null != tuple)
 				{
 					tuple.setContact(contact);
@@ -325,6 +325,9 @@ public class TransientCache extends ContactsCache
 				}
 				else
 				{
+					ContactInfo perContact = ContactManager.getInstance().getContact(msisdn);
+					if (null != perContact)
+						contact = perContact;
 					tuple = new ContactTuple(1, contact);
 					temp.put(msisdn, tuple);
 				}
