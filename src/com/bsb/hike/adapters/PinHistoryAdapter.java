@@ -237,15 +237,15 @@ public class PinHistoryAdapter extends BaseAdapter
 			{
 				long timeStamp = textPins.get(0).getTimestamp();
 				Calendar c = Calendar.getInstance();
-				c.setTimeInMillis(timeStamp);
+				c.setTimeInMillis(timeStamp * 1000);
 				String timeToShow = textPins.get(0).getMessageDate(context);
 				newData.add(timeToShow);
 				newData.add(textPins.get(0));
 				for (int i = 1; i < textPins.size(); i++)
 				{
 					Calendar newC = Calendar.getInstance();
-					newC.setTimeInMillis(textPins.get(i).getTimestamp());
-					if (c.get(Calendar.DAY_OF_MONTH) != newC.get(Calendar.DAY_OF_MONTH))
+					newC.setTimeInMillis(textPins.get(i).getTimestamp() * 1000);
+					if (c.get(Calendar.DAY_OF_YEAR) != newC.get(Calendar.DAY_OF_YEAR))
 					{
 						newData.add(textPins.get(i).getMessageDate(context));
 						c = newC;
