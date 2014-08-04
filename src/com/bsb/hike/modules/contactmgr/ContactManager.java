@@ -29,6 +29,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import com.bsb.hike.db.DbException;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
@@ -755,6 +756,18 @@ public class ContactManager implements ITransientCache
 			updateContacts(updatedContact);
 		}
 		hDb.updateInvitedTimestamp(msisdn, time);
+	}
+
+	public Map<String, String> getGroupNames(List<String> grpIds)
+	{
+		Map<String, String> groupNames = HikeConversationsDatabase.getInstance().getGroupNames(grpIds);
+		for (Entry<String, String> mapEntry : groupNames.entrySet())
+		{
+			String groupId = mapEntry.getKey();
+			String groupName = mapEntry.getValue();
+			persistenceCache.insertGroup(groupId, groupName);
+		}
+		return groupNames;
 	}
 
 	/**

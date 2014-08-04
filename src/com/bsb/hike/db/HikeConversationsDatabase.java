@@ -839,10 +839,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			boolean convAlreadyExist = ContactManager.getInstance().isConvExists(conv.getMsisdn());
 			String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
-			
+
 			bindConversationInsert(insertStatement, conv);
 			msgId = insertStatement.executeInsert();
-			
+
 			addThumbnailStringToMetadata(conv.getMetadata(), thumbnailString);
 
 			// if conversation does not exist and is not a group message, create new conversation
@@ -1329,8 +1329,48 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return grpLastMsisdns;
 	}
 
+	public Map<String, String> getGroupNames(List<String> grpIds)
+	{
+		StringBuilder groupIds = new StringBuilder("(");
+		for (String grpId : grpIds)
+		{
+			groupIds.append(DatabaseUtils.sqlEscapeString(grpId) + ",");
+		}
+		int idx = groupIds.lastIndexOf(",");
+		if (idx >= 0)
+		{
+			groupIds.replace(idx, groupIds.length(), ")");
+		}
+		
+		Cursor groupInfoCursor = null;
+		try
+		{
+			groupInfoCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.GROUP_ID, DBConstants.GROUP_NAME }, DBConstants.GROUP_ID + "IN" + groupIds, null,
+					null, null, null);
+			Map<String, String> map = new HashMap<String, String>();
+			final int groupIdIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ID);
+			final int groupNameIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_NAME);
+			while (groupInfoCursor.moveToNext())
+			{
+				String groupId = groupInfoCursor.getString(groupIdIdx);
+				String groupName = groupInfoCursor.getString(groupNameIdx);
+				map.put(groupId, groupName);
+			}
+			return map;
+		}
+		finally
+		{
+			if (null != groupInfoCursor)
+			{
+				groupInfoCursor.close();
+			}
+
+		}
+	}
+
 	/**
 	 * Returns a hash map between group id and group name
+	 * 
 	 * @return
 	 */
 	public Map<String, String> getGroupNames()
@@ -1372,7 +1412,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				DBConstants.TIMESTAMP, DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.UNREAD_COUNT,
 				DBConstants.IS_STEALTH }, null, null, null, null, null);
 
-		List<Conversation> conversations = new ArrayList<Conversation>();
+		Map<String, Conversation> conversations = new HashMap<String, Conversation>();
 
 		final int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
 		final int convIdx = c.getColumnIndex(DBConstants.CONV_ID);
@@ -1388,6 +1428,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		try
 		{
+			List<String> groupIds = new ArrayList<String>();
+			List<String> msisdns = new ArrayList<String>();
 			while (c.moveToNext())
 			{
 				Conversation conv;
@@ -1399,19 +1441,29 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				if (Utils.isGroupConversation(msisdn))
 				{
-					conv = new GroupConversation(msisdn, convid, ContactManager.getInstance().getName(msisdn), null, true);
+					String name = ContactManager.getInstance().getName(msisdn);
+					if (null == name)
+					{
+						groupIds.add(msisdn);
+					}
+					conv = new GroupConversation(msisdn, convid, name, null, true);
 				}
 				else
 				{
 					conv = new Conversation(msisdn, convid);
 					ContactInfo contact = ContactManager.getInstance().getContact(conv.getMsisdn());
-					conv.setContactName(contact.getName());
-					conv.setOnhike(contact.isOnhike());
+					if (null == contact)
+					{
+						msisdns.add(msisdn);
+					}
+					else
+					{
+						conv.setContactName(contact.getName());
+						conv.setOnhike(contact.isOnhike());
+					}
 				}
-				// TODO if contact not found then make a db call
 				conv.setUnreadCount(c.getInt(unreadCountColumn));
 				conv.setIsStealth(c.getInt(isStealthColumn) == 1);
-
 				/*
 				 * If the message does not contain any text or metadata, its an empty message and the conversation is blank.
 				 */
@@ -1431,18 +1483,38 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 					conv.addMessage(message);
 				}
-				
-				conversations.add(conv);
+				conversations.put(msisdn, conv);
 			}
 
+			if (msisdns.size() > 0)
+			{
+				List<ContactInfo> contacts = ContactManager.getInstance().getContact(msisdns, false, true);
+				for (ContactInfo contact : contacts)
+				{
+					Conversation conv = conversations.get(contact.getMsisdn());
+					conv.setContactName(contact.getName());
+					conv.setOnhike(contact.isOnhike());
+				}
+			}
+
+			if (groupIds.size() > 0)
+			{
+				Map<String, String> groupNames = ContactManager.getInstance().getGroupNames(groupIds);
+				for (Entry<String, String> mapEntry : groupNames.entrySet())
+				{
+					Conversation conv = conversations.get(mapEntry.getKey());
+					conv.setContactName(mapEntry.getValue());
+				}
+			}
 		}
 		finally
 		{
 			c.close();
 		}
-		Collections.sort(conversations, Collections.reverseOrder());
+		List<Conversation> conversationsList = new ArrayList<Conversation>(conversations.values());
+		Collections.sort(conversationsList, Collections.reverseOrder());
 		Logger.d("ConversationsTimeTest", "Query time: " + (System.currentTimeMillis() - t1));
-		return conversations;
+		return conversationsList;
 	}
 
 	private ConvMessage getLastMessageForConversation(String msisdn)
@@ -1806,10 +1878,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.ON_DND), groupParticipant.onDnd() ? 1 : 0);
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.SHOWN_STATUS), groupParticipant.getContactInfo().isOnhike() ? 1 : 0);
 				insertStatement.executeInsert();
-				
+
 				newParticipants.put(participant.getKey(), new Pair<GroupParticipant, String>(groupParticipant, participant.getValue().second));
 			}
-			
+
 			ContactManager.getInstance().addGroupParticipants(groupId, newParticipants);
 			return infoChangeOnly ? HikeConstants.PARTICIPANT_STATUS_CHANGE : HikeConstants.NEW_PARTICIPANT;
 		}
