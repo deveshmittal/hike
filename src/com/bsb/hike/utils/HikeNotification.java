@@ -300,7 +300,14 @@ public class HikeNotification
 				key = participant.getMsisdn();
 			}
 			partName = key;
-			message = key + HikeConstants.SEPARATOR + message;
+			if (isPin)
+			{
+				message = key +" "+ context.getString(R.string.pin_notif_text) + HikeConstants.SEPARATOR + message;
+			}
+			else
+			{
+				message = key + HikeConstants.SEPARATOR + message;
+			}
 			key = gConv.getLabel();
 		}
 
