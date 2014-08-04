@@ -363,10 +363,10 @@ public class ContactManager implements ITransientCache
 	{
 		List<String> msisdns = persistenceCache.removeOlderLastGroupMsisdn(groupId, currentGroupMsisdns);
 		List<String> msisdnsDB = new ArrayList<String>();
-		for(String ms : msisdns)
+		for (String ms : msisdns)
 		{
 			ContactInfo contact = transientCache.getContact(ms);
-			if(null == contact)
+			if (null == contact)
 			{
 				msisdnsDB.add(ms);
 			}
@@ -417,7 +417,7 @@ public class ContactManager implements ITransientCache
 	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType[] favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
 	{
 		List<ContactInfo> contacts = transientCache.getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
-		
+
 		if (!transientCache.allContactsLoaded)
 		{
 			for (ContactInfo con : contacts)
@@ -434,7 +434,7 @@ public class ContactManager implements ITransientCache
 	public List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
 	{
 		List<ContactInfo> contacts = transientCache.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
-		
+
 		if (!transientCache.allContactsLoaded)
 		{
 			for (ContactInfo con : contacts)
@@ -472,7 +472,7 @@ public class ContactManager implements ITransientCache
 		 */
 		Pair<String, Map<String, Integer>> data = getMostContactedContacts(context, limit * 2);
 		List<ContactInfo> contacts = transientCache.getNonHikeMostContactedContacts(data.first, data.second, limit);
-		
+
 		if (!transientCache.isAllContactsLoaded())
 		{
 			for (ContactInfo con : contacts)
@@ -510,7 +510,6 @@ public class ContactManager implements ITransientCache
 	public void load()
 	{
 		// TODO Auto-generated method stub
-
 	}
 
 	/**
@@ -834,15 +833,15 @@ public class ContactManager implements ITransientCache
 				}
 			}
 		}
-
 		transientCache.insertGroupParticipants(groupId, groupParticipantsMap);
-		
-		List<Pair<GroupParticipant, String>> groupParticipantsList = new ArrayList<Pair<GroupParticipant,String>>(groupParticipantsMap.values());
+
+		List<Pair<GroupParticipant, String>> groupParticipantsList = new ArrayList<Pair<GroupParticipant, String>>(groupParticipantsMap.values());
 		return groupParticipantsList;
 	}
 
 	/**
 	 * This method adds group participants for a particular <code>groupId</code> into {@link TransientCache}.
+	 * 
 	 * @param groupId
 	 * @param participantList
 	 */
@@ -853,6 +852,7 @@ public class ContactManager implements ITransientCache
 
 	/**
 	 * This method removes group participant of a particular group from transient cache
+	 * 
 	 * @param groupId
 	 * @param msisdn
 	 */
@@ -863,16 +863,18 @@ public class ContactManager implements ITransientCache
 
 	/**
 	 * Sets the group name in persistence cache , should be called when group name is changed
+	 * 
 	 * @param groupId
 	 * @param name
 	 */
-	public void setGroupName(String groupId,String name)
+	public void setGroupName(String groupId, String name)
 	{
 		persistenceCache.setGroupName(groupId, name);
 	}
-	
+
 	/**
 	 * Returns the number of participants in a particular group.
+	 * 
 	 * @param groupId
 	 * @return
 	 */
@@ -880,7 +882,7 @@ public class ContactManager implements ITransientCache
 	{
 		return transientCache.getGroupParticipantsCount(groupId);
 	}
-	
+
 	/*
 	 * Call this when we think the address book has changed. Checks for updates, posts to the server, writes them to the local database and updates existing conversations
 	 */
@@ -955,19 +957,19 @@ public class ContactManager implements ITransientCache
 			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
 
 			updateContacts(updatedContacts);
-			
+
 			List<ContactInfo> contactsToDelete = new ArrayList<ContactInfo>();
-			
-			for(Entry<String,List<ContactInfo>> mapEntry : hike_contacts_by_id.entrySet())
+
+			for (Entry<String, List<ContactInfo>> mapEntry : hike_contacts_by_id.entrySet())
 			{
 				List<ContactInfo> contacts = mapEntry.getValue();
 				contactsToDelete.addAll(contacts);
 			}
-						
+
 			deleteContacts(contactsToDelete);
-			
+
 			/* Delete ids from hike user DB */
-			deleteMultipleContactInDB(hike_contacts_by_id.keySet()); 
+			deleteMultipleContactInDB(hike_contacts_by_id.keySet());
 			updateContactsinDB(updatedContacts);
 
 		}

@@ -148,6 +148,7 @@ public class TransientCache extends ContactsCache
 
 	/**
 	 * Removes the group participant from {@link #groupParticipants} , should be called when user leaves a group chat.
+	 * 
 	 * @param groupId
 	 * @param msisdn
 	 */
@@ -157,7 +158,7 @@ public class TransientCache extends ContactsCache
 		try
 		{
 			Map<String, Pair<GroupParticipant, String>> groupParticipantsList = groupParticipants.get(groupId);
-			if(null != groupParticipantsList)
+			if (null != groupParticipantsList)
 			{
 				groupParticipantsList.remove(msisdn);
 			}
@@ -167,6 +168,7 @@ public class TransientCache extends ContactsCache
 			writeLock.unlock();
 		}
 	}
+
 	/**
 	 * updates the contact in memory
 	 * 
@@ -307,9 +309,7 @@ public class TransientCache extends ContactsCache
 	void loadMemory()
 	{
 		Map<String, ContactInfo> contactMap = hDb.getAllContactInfo();
-
 		LinkedHashMap<String, ContactTuple> temp = new LinkedHashMap<String, ContactTuple>();
-
 		writeLock.lock();
 		try
 		{
@@ -333,9 +333,7 @@ public class TransientCache extends ContactsCache
 				}
 				transientContacts.remove(msisdn);
 			}
-
 			temp.putAll(transientContacts);
-
 			transientContacts = temp;
 		}
 		finally
@@ -714,15 +712,15 @@ public class TransientCache extends ContactsCache
 			readLock.lock();
 			try
 			{
-			for (Entry<String, ContactTuple> mapEntry : transientContacts.entrySet())
-			{
-				ContactTuple tuple = mapEntry.getValue();
-				if (null != tuple && tuple.getContact().getPhoneNum().equals(number))
+				for (Entry<String, ContactTuple> mapEntry : transientContacts.entrySet())
 				{
-					contact = tuple.getContact();
-					break;
+					ContactTuple tuple = mapEntry.getValue();
+					if (null != tuple && tuple.getContact().getPhoneNum().equals(number))
+					{
+						contact = tuple.getContact();
+						break;
+					}
 				}
-			}
 			}
 			finally
 			{

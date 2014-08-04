@@ -505,18 +505,13 @@ class PersistenceCache extends ContactsCache
 		if (msisdns.size() > 0)
 		{
 			Map<String, ContactInfo> map = hDb.getContactInfoFromMsisdns(msisdns, true);
-
 			for (Entry<String, ContactInfo> mapEntry : map.entrySet())
 			{
 				ContactInfo contact = mapEntry.getValue();
-
 				insertContact(contact, ifOneToOneConversation);
-
 			}
-
 			return new ArrayList<ContactInfo>(map.values());
 		}
-
 		return null;
 	}
 
