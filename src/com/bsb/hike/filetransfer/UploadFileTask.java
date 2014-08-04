@@ -290,7 +290,7 @@ public class UploadFileTask extends FileTransferBase
 			else
 			{
 				mFile = new File(hikeFile.getSourceFilePath());
-				if (mFile.exists() && hikeFileType == HikeFileType.IMAGE)
+				if (mFile.exists() && hikeFileType == HikeFileType.IMAGE && !mFile.getPath().startsWith(Utils.getFileParent(hikeFileType, true)))
 				{
 					selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName, true);
 					if (selectedFile == null)
