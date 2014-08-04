@@ -5061,10 +5061,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		View saveBtn = actionBarView.findViewById(R.id.done_container);
 		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		TextView saveText = (TextView) actionBarView.findViewById(R.id.save);
 		ViewGroup closeContainer = (ViewGroup) actionBarView.findViewById(R.id.close_container);
 
 		title.setText(R.string.create_pin);
-
+		saveText.setText(R.string.pin);
+	
 		closeContainer.setOnClickListener(new OnClickListener()
 		{
 
