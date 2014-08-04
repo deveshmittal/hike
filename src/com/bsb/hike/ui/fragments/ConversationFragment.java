@@ -1475,15 +1475,20 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else if (HikePubSub.RESET_UNREAD_COUNT.equals(type))
 		{
 			String msisdn = (String) object;
+			Logger.d("UnreadBug", "Unread count event received for " + msisdn);
+
 			final Conversation conv = mConversationsByMSISDN.get(msisdn);
 			if (conv == null)
 			{
+				Logger.d("UnreadBug", "Unread count event received for null conversation: " + msisdn);
 				return;
 			}
 			conv.setUnreadCount(0);
+			Logger.d("UnreadBug", "Unread count event received for non null conversation: " + conv.toString());
 
 			if (!isAdded())
 			{
+				Logger.d("UnreadBug", "Unread count event received but fragment not added");
 				return;
 			}
 			getActivity().runOnUiThread(new Runnable()
@@ -1492,10 +1497,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void run()
 				{
+					Logger.d("UnreadBug", "Unread count event received updating UI...");
+
 					List<ConvMessage> messages = conv.getMessages();
 
 					if (messages.isEmpty())
 					{
+						Logger.d("UnreadBug", "Unread count event received but messages list is empty");
 						return;
 					}
 
@@ -1878,6 +1886,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		if (!wasViewSetup())
 		{
+			Logger.d("UnreadBug", "Unread count event received but view wasn't setup");
 			return;
 		}
 
@@ -1885,6 +1894,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		if (parentView == null)
 		{
+			Logger.d("UnreadBug", "Unread count event received but parent view was null");
 			notifyDataSetChanged();
 			return;
 		}
