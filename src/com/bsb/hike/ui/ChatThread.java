@@ -821,11 +821,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		screenOffBR = new ScreenOffReceiver();
 		registerReceiver(screenOffBR, new IntentFilter(Intent.ACTION_SCREEN_OFF));
-		// give priority to imp message , say pin message
-		if (!showImpMessageIfRequired())
-		{
-			showTipIfRequired();
-		}
 		final int whichPinEditShowing = savedInstanceState!=null ? savedInstanceState.getInt(HikeConstants.Extras.PIN_TYPE_SHOWING) : 0;
 		if(whichPinEditShowing!=0){
 			mHandler.post(new Runnable()
@@ -2099,7 +2094,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			hidePinFromUI(false);
 		}
 		invalidateOptionsMenu();
-		showImpMessageIfRequired();
+		// give priority to imp message , say pin message
+		if (!showImpMessageIfRequired())
+		{
+			showTipIfRequired();
+		}
 	}
 
 	private void initiateFileTransferFromIntentData(String fileType, String filePath)
