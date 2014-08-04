@@ -125,7 +125,16 @@ public class GroupConversation extends Conversation
 
 	public String getLabel()
 	{
-		return !TextUtils.isEmpty(getContactName()) ? getContactName() : Utils.defaultGroupName(new ArrayList<Pair<GroupParticipant,String>>(groupParticipantList.values()));
+		if (!TextUtils.isEmpty(getContactName()))
+			return getContactName();
+		else
+		{
+			setGroupParticipantList(ContactManager.getInstance().getGroupParticipants(getMsisdn(), false, false));
+			// Before contact manager we were adding all the group participants to conversation object initially when getConversations of HikeConversationDatabase is called
+			// But now we do lazy loading, we don't have group participants when we are on home screen
+			// In case of empty group name, group Participants are needed so setting it here.
+			return Utils.defaultGroupName(new ArrayList<Pair<GroupParticipant, String>>(groupParticipantList.values()));
+		}
 	}
 
 	public void setIsMuted(boolean isMuted)
