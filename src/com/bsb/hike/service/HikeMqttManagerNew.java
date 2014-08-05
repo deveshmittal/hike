@@ -150,6 +150,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private boolean connectUsingIp = false;
 
 	private volatile short fastReconnect = 0;
+	
+	/* Time after which a reconnect on mqtt thread is reattempted (Time in 'ms')*/
+	private short MQTT_WAIT_BEFORE_RECONNECT_TIME = 10; 
 
 	/*
 	 * When disconnecting (forcibly) it might happen that some messages are waiting for acks or delivery. So before disconnecting,wait for this time to let mqtt finish the work and
@@ -576,7 +579,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	{
 		try
 		{
-			connectOnMqttThread(10);
+			connectOnMqttThread(MQTT_WAIT_BEFORE_RECONNECT_TIME);
 		}
 		catch (Exception e)
 		{
@@ -865,7 +868,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		op = null;
 		mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
 		if (reconnect)
-			connectOnMqttThread(10); // try reconnection after 10 ms
+			connectOnMqttThread(MQTT_WAIT_BEFORE_RECONNECT_TIME); // try reconnection after 10 ms
 		else
 		{
 			try
@@ -1153,7 +1156,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				}
 				// Till this point disconnect has already happened due to exception (This is as per lib)
 				else if (reConnect)
-					connectOnMqttThread(20);
+					connectOnMqttThread(MQTT_WAIT_BEFORE_RECONNECT_TIME);
 			}
 			else
 			{
