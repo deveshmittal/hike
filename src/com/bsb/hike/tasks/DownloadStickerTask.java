@@ -154,34 +154,19 @@ public class DownloadStickerTask extends StickerTaskBase
 
 				try
 				{
+					Sticker s = new Sticker(category, stickerId);
 					if (downloadType.equals(DownloadType.MORE_STICKERS) || downloadType.equals(DownloadType.UPDATE) && stickerPageAdapter != null)
 					{
-						Sticker s = new Sticker(category, stickerId);
-						// if this sticker is in app sticker, ignore it
-						if(s.isInAppSticker())
-							continue;
-						stickerPageAdapter.getStickerList().add(s);
+						// if this sticker is not in app sticker, add it to list
+						if(!s.isInAppSticker())
+							stickerPageAdapter.getStickerList().add(s);
 					}
 					// some hack : seems server was sending stickers which already exist so it was leading to duplicate issue
 					// so we save small sticker , if not present already
 
 					File f = saveLargeStickers(largeStickerDir, stickerId, stickerData);
-					boolean saveSmall = true;
-					if (existingStickers != null)
-					{
-						for (String stId : existingStickers)
-						{
-							if (stId.equals(stickerId))
-							{
-								saveSmall = false;
-								break;
-							}
-						}
-					}
-					if (saveSmall)
-					{
+					if(!s.isInAppSticker())
 						saveSmallStickers(smallStickerDir, stickerId, f);
-					}
 				}
 				catch (FileNotFoundException e)
 				{
