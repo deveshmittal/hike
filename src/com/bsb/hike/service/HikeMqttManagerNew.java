@@ -142,17 +142,17 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private short keepAliveSeconds = HikeConstants.KEEP_ALIVE; // this is the time for which conn will remain open w/o messages
 
 	private static short connectionTimeoutSec = 60;
-	
+
 	List<String> serverURIs = null;
 
 	private volatile int ipConnectCount = 0;
-	
+
 	private boolean connectUsingIp = false;
 
 	private volatile short fastReconnect = 0;
-	
-	/* Time after which a reconnect on mqtt thread is reattempted (Time in 'ms')*/
-	private short MQTT_WAIT_BEFORE_RECONNECT_TIME = 10; 
+
+	/* Time after which a reconnect on mqtt thread is reattempted (Time in 'ms') */
+	private short MQTT_WAIT_BEFORE_RECONNECT_TIME = 10;
 
 	/*
 	 * When disconnecting (forcibly) it might happen that some messages are waiting for acks or delivery. So before disconnecting,wait for this time to let mqtt finish the work and
@@ -360,7 +360,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		context.registerReceiver(this, filter);
 		LocalBroadcastManager.getInstance(context).registerReceiver(this, filter);
 		setServerUris();
-		//mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
+		// mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
 	}
 
 	private boolean isNetworkAvailable()
@@ -433,7 +433,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		{
 			reconnectTime *= 2;
 		}
-		reconnectTime = reconnectTime > HikeConstants.MAX_RECONNECT_TIME ? HikeConstants.MAX_RECONNECT_TIME : reconnectTime;
+		// if reconnectTime is 0, select the random value. This will happen in case of forceExp = true
+		reconnectTime = reconnectTime > HikeConstants.MAX_RECONNECT_TIME ? HikeConstants.MAX_RECONNECT_TIME
+				: (reconnectTime == 0 ? (new Random()).nextInt(HikeConstants.RECONNECT_TIME) + 1 : reconnectTime);
 		return reconnectTime;
 	}
 
@@ -560,20 +562,21 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 		return mqtt.isConnected();
 	}
-	
+
 	private boolean isConnecting()
 	{
 		if (mqtt == null)
 			return false;
 		return mqtt.isConnecting();
 	}
-	
+
 	private boolean isDisconnecting()
 	{
 		if (mqtt == null)
 			return false;
 		return mqtt.isDisconnecting();
 	}
+
 	// This function should be called always from external classes inorder to run connect on MQTT thread
 	public void connectOnMqttThread()
 	{
@@ -743,8 +746,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			serverURIs.add(PRODUCTION_BROKER_HOST_NAME);
 			for (int i = 0; i < len; i++)
 			{
-				//serverURIs[i + 1] = 
-				if(ipArray.optString(i) != null)
+				// serverURIs[i + 1] =
+				if (ipArray.optString(i) != null)
 				{
 					serverURIs.add(ipArray.optString(i));
 				}
@@ -780,7 +783,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		{
 			return brokerHostName + ":" + brokerPortNumber;
 		}
-		if(connectUsingIp)
+		if (connectUsingIp)
 		{
 			return getIp() + ":" + brokerPortNumber;
 		}
@@ -1060,7 +1063,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 							{
 								Long msgId = packet.getMsgId();
 								Logger.d(TAG, "Recieved S status for msg with id : " + msgId);
-								//HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
+								// HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
 							}
 						}
 						if (haveUnsentMessages.get())
@@ -1122,7 +1125,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			Random random = new Random();
 			int reconnectIn = random.nextInt(HikeConstants.SERVER_UNAVAILABLE_MAX_CONNECT_TIME) + 1;
 			scheduleNextConnectionCheck(reconnectIn * 60); // Converting minutes to seconds
-			
+
 			break;
 		case MqttException.REASON_CODE_CLIENT_ALREADY_DISCONNECTED:
 			Logger.e(TAG, "Client already disconnected.");
@@ -1152,7 +1155,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				{
 					Logger.e(TAG, "DNS Failure , Connect using ips");
 					connectUsingIp = true;
-					scheduleNextConnectionCheck(getConnRetryTime());	
+					scheduleNextConnectionCheck(getConnRetryTime());
 				}
 				// Till this point disconnect has already happened due to exception (This is as per lib)
 				else if (reConnect)
@@ -1224,7 +1227,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		default:
 			Logger.e(TAG, "In Default : " + e.getMessage());
 			mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
-			connectOnMqttThread();
+			connectOnMqttThread(getConnRetryTime());
 			break;
 		}
 		Logger.e(TAG, "Default Exception : " + e.getMessage());
@@ -1347,22 +1350,22 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		editor.commit();
 		setServerUris();
 	}
-	
+
 	private String getIp()
 	{
 		Random random = new Random();
-		int index = random.nextInt(serverURIs.size() -1) + 1;
-		if(ipConnectCount == serverURIs.size())
+		int index = random.nextInt(serverURIs.size() - 1) + 1;
+		if (ipConnectCount == serverURIs.size())
 		{
 			ipConnectCount = 0;
 			return serverURIs.get(0);
 		}
 		else
 		{
-			ipConnectCount ++;
+			ipConnectCount++;
 			return serverURIs.get(index);
 		}
-		
+
 	}
 
 	// This class is just for testing .....
@@ -1383,33 +1386,35 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			t.setName("Test Thread");
 			t.start();
 		}
-		
+
 		private void testUj()
 		{
 			int count = 0;
-			String myMsisdn  = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
-			String msisdn  = "+919999238132";
-			String msisdn1  = "+919868185209";
-			if(myMsisdn != null)
+			String myMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+			String msisdn = "+919999238132";
+			String msisdn1 = "+919868185209";
+			if (myMsisdn != null)
 			{
-				if(msisdn.equalsIgnoreCase(myMsisdn))
+				if (msisdn.equalsIgnoreCase(myMsisdn))
 				{
-					return ;
+					return;
 				}
 			}
 			Random rand = new Random();
-			
+
 			JSONObject bulkPacket = new JSONObject();
 			JSONObject data = new JSONObject();
 			JSONObject msgs = new JSONObject();
 			JSONArray bulkMsgArray = new JSONArray();
 			for (int i = 0; i < 25; i++)
 			{
-				String ujString = String.format("{\"t\": \"uj\",\"d\":{\"msisdn\":\"%s\"},\"ts\":%d,\"st\":\"ru\"}",msisdn,Math.abs(System.currentTimeMillis() + rand.nextLong()));
-				String ujString1 = String.format("{\"t\": \"uj\",\"d\":{\"msisdn\":\"%s\"},\"ts\":%d,\"st\":\"ru\"}",msisdn1,Math.abs(System.currentTimeMillis() + rand.nextLong()));
+				String ujString = String
+						.format("{\"t\": \"uj\",\"d\":{\"msisdn\":\"%s\"},\"ts\":%d,\"st\":\"ru\"}", msisdn, Math.abs(System.currentTimeMillis() + rand.nextLong()));
+				String ujString1 = String.format("{\"t\": \"uj\",\"d\":{\"msisdn\":\"%s\"},\"ts\":%d,\"st\":\"ru\"}", msisdn1,
+						Math.abs(System.currentTimeMillis() + rand.nextLong()));
 				try
 				{
-					
+
 					JSONObject o = new JSONObject(ujString);
 					JSONObject o1 = new JSONObject(ujString1);
 					bulkMsgArray.put(o);
@@ -1420,7 +1425,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 			}
 			try
 			{
@@ -1429,27 +1434,27 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				bulkPacket.put(HikeConstants.DATA, data);
 				bulkPacket.put(HikeConstants.TIMESTAMP, System.currentTimeMillis());
 				mqttMessageManager.saveMqttMessage(bulkPacket);
-				
+
 			}
 			catch (JSONException e)
 			{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
-		
+
 		private void testMsg()
 		{
 			int count = 0;
-			String myMsisdn  = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
-			String msisdn  = "+919582974797";
-			
-			if(myMsisdn != null)
+			String myMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+			String msisdn = "+919582974797";
+
+			if (myMsisdn != null)
 			{
-				if(msisdn.equalsIgnoreCase(myMsisdn))
+				if (msisdn.equalsIgnoreCase(myMsisdn))
 				{
-					return ;
+					return;
 				}
 			}
 			for (int i = 0; i < 50; i++)
@@ -1458,7 +1463,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				Random rand = new Random();
 				String data = String.format("{\"t\": \"m\",\"to\": \"" + msisdn + "\",\"d\":{\"hm\":\"%d\",\"i\":%d, \"ts\":%d}}", rand.nextLong(), rand.nextLong(),
 						System.currentTimeMillis());
-				
+
 				Logger.d(TAG, "Sending msg : " + data);
 				Message msg = Message.obtain();
 				msg.what = 12341;
