@@ -84,13 +84,11 @@ public class DownloadStickerTask extends StickerTaskBase
 		boolean reachedEnd = false;
 
 		JSONArray existingStickerIds = new JSONArray();
-		String[] existingStickers = null;
 		/*
 		 * If the category is the default one, we should add the default stickers as well.
 		 */
 		if (category.categoryId.equals(StickerCategoryId.humanoid))
 		{
-			existingStickers = StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID;
 			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID)
 			{
 				existingStickerIds.put(stickerId);
@@ -98,7 +96,6 @@ public class DownloadStickerTask extends StickerTaskBase
 		}
 		else if (category.categoryId.equals(StickerCategoryId.expressions))
 		{
-			existingStickers = StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS;
 			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS)
 			{
 				existingStickerIds.put(stickerId);
