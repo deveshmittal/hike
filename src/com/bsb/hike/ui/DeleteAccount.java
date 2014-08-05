@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
@@ -18,6 +17,7 @@ import com.bsb.hike.tasks.DeleteAccountTask.DeleteAccountListener;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.HikeMessengerApp;;
 
 public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements DeleteAccountListener
 {
@@ -92,7 +92,6 @@ public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements D
 	{
 		if (resultCode != RESULT_OK)
 		{
-			Toast.makeText(getApplicationContext(), "Some error occured", Toast.LENGTH_SHORT).show();
 			return;
 		}
 		if (requestCode == HikeConstants.ResultCodes.SELECT_COUNTRY)
@@ -114,42 +113,71 @@ public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements D
 	public void deleteAccountClicked(View v)
 	{
 		String phoneNu = phoneNum.getText().toString();
+		String countryCod = countryCode.getText().toString();
+		String fullMSISDN = "+" + countryCod + phoneNu;
+		
+		
 		if (TextUtils.isEmpty(phoneNu))
 		{
+			phoneNum.setHintTextColor(getResources().getColor(R.color.red_empty_field));
 			phoneNum.setBackgroundResource(R.drawable.bg_phone_bar);
 			phoneNum.startAnimation(AnimationUtils.loadAnimation(DeleteAccount.this, R.anim.shake));
-			return;
+			return;			
 		}
-		phoneNum.setBackgroundResource(R.drawable.bg_country_picker_selector);
-		final CustomAlertDialog firstConfirmDialog = new CustomAlertDialog(this);
-		firstConfirmDialog.setHeader(R.string.are_you_sure);
-		firstConfirmDialog.setBody(R.string.delete_confirm_msg_1);
-		View.OnClickListener firstDialogContinueClickListener = new View.OnClickListener()
+		else
 		{
-
-			@Override
-			public void onClick(View v)
-			{
-				firstConfirmDialog.dismiss();
-				task = new DeleteAccountTask(DeleteAccount.this, true, getApplicationContext());
-
-				Utils.executeBoolResultAsyncTask(task);
-				showProgressDialog();
+			String msisdn = getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
+			
+			if(!fullMSISDN.equalsIgnoreCase(msisdn))
+			{				
+				final CustomAlertDialog correctMSISDNConfirmDialog = new CustomAlertDialog(this);
+				correctMSISDNConfirmDialog.setHeader(R.string.incorrect_msisdn_warning);
+				correctMSISDNConfirmDialog.setBody(R.string.incorrect_msisdn_msg);
+				
+				View.OnClickListener correctMSISDNConfirmListener = new View.OnClickListener() 
+				{					
+					@Override
+					public void onClick(View v) 
+					{
+						correctMSISDNConfirmDialog.dismiss();
+					}
+				};
+				correctMSISDNConfirmDialog.setOkButton(R.string.ok, correctMSISDNConfirmListener);
+				correctMSISDNConfirmDialog.setCancelButtonVisibility(View.GONE);
+				correctMSISDNConfirmDialog.show();
 			}
-		};
-
-		View.OnClickListener firstDialogOnCancelListener = new View.OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
+			else
 			{
-				firstConfirmDialog.dismiss();
+				phoneNum.setBackgroundResource(R.drawable.bg_country_picker_selector);
+				final CustomAlertDialog firstConfirmDialog = new CustomAlertDialog(this);
+				firstConfirmDialog.setHeader(R.string.are_you_sure);
+				firstConfirmDialog.setBody(R.string.delete_confirm_msg_1);				
+				View.OnClickListener firstDialogContinueClickListener = new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						firstConfirmDialog.dismiss();
+						task = new DeleteAccountTask(DeleteAccount.this, true, getApplicationContext());
+
+						Utils.executeBoolResultAsyncTask(task);
+						showProgressDialog();
+					}
+				};
+
+				View.OnClickListener firstDialogOnCancelListener = new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						firstConfirmDialog.dismiss();
+					}
+				};
+				firstConfirmDialog.setOkButton(R.string.confirm, firstDialogContinueClickListener);
+				firstConfirmDialog.setCancelButton(R.string.cancel, firstDialogOnCancelListener);
+				firstConfirmDialog.show();
 			}
-		};
-		firstConfirmDialog.setOkButton(R.string.confirm, firstDialogContinueClickListener);
-		firstConfirmDialog.setCancelButton(R.string.cancel, firstDialogOnCancelListener);
-		firstConfirmDialog.show();
+		}
 	}
 
 	/**

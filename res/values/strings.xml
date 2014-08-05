@@ -929,8 +929,6 @@
     <string name="vib_short_key">Short</string>
     <string name="vib_long_key">Long</string>
     <string name="delete_account_heading">DELETING YOUR ACCOUNT WILL</string>
-    <string name="delete_account_description">Delete all your messages, free SMS and hike rewards</string>
-    <string name="delete_account_heading_2">To delete your account, enter the following details</string>
     <string name="delete_my_account">DELETE MY ACOOUNT</string>
     <string name="chat_unmarked_stealth_first">You’ve marked a chat visible. It’ll now be visible to anyone who opens hike.</string>
     <string name="tickSoundTitle">Conversation tones</string>
@@ -1097,4 +1095,46 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="free_download">Free Download</string>
      <string name="send_sms_file_msg">sent you a file</string>
     <string name="use_this_quality_for_sending_images">Use this quality for sending images</string>
+    <string name="select_all_confirmation_header">Invite All</string>
+    <string name="select_all_confirmation_msg">Send invite to %1$d contacts to download hike?</string>
+    <string name="change_password_from_privacy">Change Password from Settings > Privacy</string>
+    <string name="hike_offline_caps">Hike Offline</string>
+    <string-array name="chat_thread_empty_state_tutorial_text">
+        <item>#StartSomething</item>
+        <item>It\'s always a good time to say hi :)</item>
+        <item>They\'re staring at the same thing... write the first message.</item>
+        <item>The screen would look a lot better with a conversation in it!</item>
+        <item>Billions of messages have been sent on hike. #StartSomething</item>
+        <item>Say something awesome!</item>
+        <item>You\'ll miss 100% of the conversations you never had. #SaySomething</item>
+        <item>Millions of messages sent in the last hour... you can\'t even think of one?</item>
+        <item>Be social</item>
+        <item>I accept emojis and stickers as hello :)</item>
+        <item>Say something before your battery runs out</item>
+        <item>One-lines accepted</item>
+        <item>To start with, monosyllabic conversations will do</item>
+        <item>Thank god I\'m not an introvert on chat! I\'ll say...</item>
+        <item>In many cultures, silence is considered rude.</item>
+        <item>If only there was a way to start a chat. Oh wait...</item>
+    </string-array>
+    <string name="hike_offline_notifications">Hike offline notifications</string>
+    <string name="h2o_notifications_setting_summary">Enable hike offline notifications for contacts </string>
+    <string name="pin_header">Pathik</string>
+    <string name="pin_detail">Mass bunk tomorrow! Let\'s all go for a movie at DT Mall</string>
+    <string name="postAnonymously">Post Anonymously</string>
+    <string name="create_pin">Create Pin</string>
+    <string name="pin_history">Pin History</string>
+    <string name="max_pin_unread_counter">9+</string>
+    <string name="pin_text_hint">Share something important...</string>
+    <string name="chat_theme_small">Chat Theme</string>
+    <string name="ftue_pin_header">Use pins</string>
+    <string name="ftue_pin_body">to share key messages</string>
+    <string name="xyz_posted_pin">%1$s posted a pin</string>
+    <string name="pinHistoryTutorialText">No pins yet</string>
+    <string name="incorrect_msisdn_warning">Incorrect Number</string>
+    <string name="incorrect_msisdn_msg">Please enter the number registered with hike on this phone.</string>
+    <string name="delete_account_description">delete all your messages, free SMS and hike rewards</string>
+    <string name="delete_account_heading_2">To delete your account, enter your number</string>
+    <string name="pin_notif_text">has posted a pin</string>
+    
 </resources>

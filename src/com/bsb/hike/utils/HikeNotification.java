@@ -219,6 +219,11 @@ public class HikeNotification
 
 	public void notifyMessage(final ContactInfo contactInfo, final ConvMessage convMsg, boolean isRich, Bitmap bigPictureImage)
 	{
+		boolean isPin = false;
+		
+		if(convMsg.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			isPin = true;
+		
 		final String msisdn = convMsg.getMsisdn();
 		// we are using the MSISDN now to group the notifications
 		final int notificationId = msisdn.hashCode();
@@ -295,7 +300,14 @@ public class HikeNotification
 				key = participant.getMsisdn();
 			}
 			partName = key;
-			message = key + HikeConstants.SEPARATOR + message;
+			if (isPin)
+			{
+				message = key +" "+ context.getString(R.string.pin_notif_text) + HikeConstants.SEPARATOR + message;
+			}
+			else
+			{
+				message = key + HikeConstants.SEPARATOR + message;
+			}
 			key = gConv.getLabel();
 		}
 
@@ -316,12 +328,12 @@ public class HikeNotification
 			else
 				message = messageString;
 			// big picture messages ! intercept !
-			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, !convMsg.isStickerMessage());
+			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, !convMsg.isStickerMessage(), isPin);
 		}
 		else
 		{
 			// regular message
-			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, null);
+			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, null, isPin);
 		}
 	}
 	
@@ -404,7 +416,7 @@ public class HikeNotification
 
 		final String text = context.getString(R.string.add_as_favorite_notification, key);
 
-		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, msisdn, null);
+		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, msisdn, null, false);
 		addNotificationId(notificationId);
 	}
 
@@ -461,7 +473,7 @@ public class HikeNotification
 			return;
 		}
 
-		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, statusMessage.getMsisdn(), null);
+		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, statusMessage.getMsisdn(), null, false);
 		addNotificationId(notificationId);
 	}
 
@@ -484,7 +496,7 @@ public class HikeNotification
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn.toString());
 
-		showNotification(notificationIntent, icon, System.currentTimeMillis(), notificationId, text, key, message, msisdn, bigPictureImage);
+		showNotification(notificationIntent, icon, System.currentTimeMillis(), notificationId, text, key, message, msisdn, bigPictureImage, false);
 	}
 
 	public void notifyBatchUpdate(final String header, final String message)
@@ -502,7 +514,7 @@ public class HikeNotification
 
 		final String text = message;
 
-		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, null, null); // TODO: change this.
+		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, null, null, false); // TODO: change this.
 		addNotificationId(notificationId);
 	}
 
@@ -542,12 +554,12 @@ public class HikeNotification
 	}
 
 	private void showNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text, final String key,
-			final String message, final String msisdn, final Bitmap bigPictureImage, boolean isFTMessage)
+			final String message, final String msisdn, final Bitmap bigPictureImage, boolean isFTMessage, boolean isPin)
 	{
 
 		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 
-		final Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(context, msisdn);
+		final Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(context, msisdn, isPin);
 
 		final int smallIconId = returnSmallIcon();
 
@@ -576,9 +588,9 @@ public class HikeNotification
 	}
 
 	private void showNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text, final String key,
-			final String message, final String msisdn, final Bitmap bigPictureImage)
+			final String message, final String msisdn, final Bitmap bigPictureImage, boolean isPin)
 	{
-		showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, false);
+		showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, false, isPin);
 	}
 
 	private int returnSmallIcon()

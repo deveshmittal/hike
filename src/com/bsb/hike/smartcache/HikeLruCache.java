@@ -138,17 +138,6 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 			// that it has been removed from the memory cache
 			((RecyclingBitmapDrawable) oldValue).setIsCached(false);
 		}
-		else
-		{
-			// The removed entry is a standard BitmapDrawable
-
-			if (Utils.isHoneycombOrHigher())
-			{
-				// We're running on Honeycomb or later, so add the bitmap
-				// to a SoftReference set for possible use with inBitmap later
-				reusableBitmaps.add(new MySoftReference<Bitmap>(oldValue.getBitmap()));
-			}
-		}
 	}
 
 	public BitmapDrawable putInCache(String data, BitmapDrawable value)
