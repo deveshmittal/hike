@@ -175,11 +175,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		NOT_CONNECTED_UNKNOWN_REASON // failed to connect for some reason
 	}
 
-	public enum ServerConnectionStatus
-	{
-		ACCEPTED, UNACCEPTABLE_PROTOCOL_VERSION, IDENTIFIER_REJECTED, SERVER_UNAVAILABLE, BAD_USERNAME_OR_PASSWORD, NOT_AUTHORIZED, UNKNOWN
-	}
-
 	private class ActivityCheckRunnable implements Runnable
 	{
 		@Override
@@ -458,24 +453,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	public Messenger getMessenger()
 	{
 		return mMessenger;
-	}
-
-	private ServerConnectionStatus getServerStatusCode(String msg)
-	{
-		if (msg.contains(ServerConnectionStatus.ACCEPTED.toString()))
-			return ServerConnectionStatus.ACCEPTED;
-		else if (msg.contains(ServerConnectionStatus.BAD_USERNAME_OR_PASSWORD.toString()))
-			return ServerConnectionStatus.BAD_USERNAME_OR_PASSWORD;
-		else if (msg.contains(ServerConnectionStatus.IDENTIFIER_REJECTED.toString()))
-			return ServerConnectionStatus.IDENTIFIER_REJECTED;
-		else if (msg.contains(ServerConnectionStatus.NOT_AUTHORIZED.toString()))
-			return ServerConnectionStatus.NOT_AUTHORIZED;
-		else if (msg.contains(ServerConnectionStatus.SERVER_UNAVAILABLE.toString()))
-			return ServerConnectionStatus.SERVER_UNAVAILABLE;
-		else if (msg.contains(ServerConnectionStatus.UNACCEPTABLE_PROTOCOL_VERSION.toString()))
-			return ServerConnectionStatus.UNACCEPTABLE_PROTOCOL_VERSION;
-		else
-			return ServerConnectionStatus.UNKNOWN;
 	}
 
 	private void acquireWakeLock()
