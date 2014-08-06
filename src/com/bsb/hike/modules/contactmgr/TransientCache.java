@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -875,5 +876,26 @@ public class TransientCache extends ContactsCache
 				return hDb.doesContactExist(msisdn);
 			}
 		}
+	}
+
+	List<Pair<AtomicBoolean, ContactInfo>> getBlockedUserList()
+	{
+		List<ContactInfo> contacts = getAllContacts(true);
+		List<Pair<AtomicBoolean, ContactInfo>> blockedUserList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
+		List<Pair<AtomicBoolean, ContactInfo>> allUserList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
+		Set<String> blockedMsisdns = hDb.getBlockedMsisdnSet();
+		for (ContactInfo contact : contacts)
+		{
+			if ((blockedMsisdns.contains(contact.getMsisdn())))
+			{
+				blockedUserList.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(true), contact));
+			}
+			else
+			{
+				allUserList.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(false), contact));
+			}
+		}
+		blockedUserList.addAll(allUserList);
+		return blockedUserList;
 	}
 }

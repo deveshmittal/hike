@@ -738,7 +738,7 @@ public class ContactManager implements ITransientCache
 
 	public List<Pair<AtomicBoolean, ContactInfo>> getBlockedUserList()
 	{
-		return hDb.getBlockedUserList();
+		return transientCache.getBlockedUserList();
 	}
 
 	public FtueContactsData getFTUEContacts(SharedPreferences prefs)
