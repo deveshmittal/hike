@@ -344,9 +344,9 @@
     <color name="gray">#cccccc</color>
     <color name="sticky_yellow">#fff4aa</color>
     <color name="dark_yellow_sticky_note">#aea559</color>
-    <color name="pin_color">#ffe0be</color>
     <color name="pin_name_color">#cf9b6b</color>
     <color name="pin_text_color">#45400e</color>
     <color name="red_empty_field">#ef554e</color>
+    <color name="pin_color">#fff38f</color>    
 </resources>
 	

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -70,7 +71,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
@@ -103,6 +103,7 @@ import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
@@ -155,7 +156,6 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
@@ -170,7 +170,6 @@ import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
-import com.google.android.gms.internal.co;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
@@ -196,6 +195,8 @@ public class Utils
 	public static int densityDpi;
 
 	private static Lock lockObj = new ReentrantLock();
+
+	private static final String defaultCountryName = "India";
 
 	static
 	{
@@ -4343,4 +4344,98 @@ public class Utils
 
 		return animSet;
 	}
+	
+	public static void setupCountryCodeData(Context context, String countryCode, final EditText countryCodeEditor, final TextView countryNameEditor,
+			final ArrayList<String> countriesArray, final HashMap<String, String> countriesMap, final HashMap<String, String> codesMap, final HashMap<String, String> languageMap)
+	{
+		try
+		{
+			BufferedReader reader = new BufferedReader(new InputStreamReader(context.getResources().getAssets().open("countries.txt")));
+			String line;
+			while ((line = reader.readLine()) != null)
+			{
+				String[] args = line.split(";");
+				countriesArray.add(0, args[1]);
+				countriesMap.put(args[1], args[2]);
+				codesMap.put(args[2], args[1]);
+				languageMap.put(args[0], args[1]);
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		Collections.sort(countriesArray, new Comparator<String>()
+		{
+			@Override
+			public int compare(String lhs, String rhs)
+			{
+				return lhs.compareTo(rhs);
+			}
+		});
+
+		String prevCode = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).getString(HikeMessengerApp.TEMP_COUNTRY_CODE, "");
+		if (TextUtils.isEmpty(countryCode))
+		{
+			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+			String countryIso = TextUtils.isEmpty(prevCode) ? manager.getNetworkCountryIso().toUpperCase() : prevCode;
+			String countryName = languageMap.get(countryIso);
+			
+			if (countryName == null || selectCountry(countryName, countriesMap, countriesArray, countryCode, countryCodeEditor, countryNameEditor))
+			{
+				selectCountry(defaultCountryName, countriesMap, countriesArray, countryCode, countryCodeEditor, countryNameEditor);
+			}
+		}
+
+		countryCodeEditor.addTextChangedListener(new TextWatcher()
+		{
+
+			@Override
+			public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
+			{
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
+			{
+			}
+
+			@Override
+			public void afterTextChanged(Editable arg0)
+			{
+				String text = countryCodeEditor.getText().toString();
+				String countryName = codesMap.get(text);
+				if (countryName != null)
+				{
+					int index = countriesArray.indexOf(countryName);
+					if (index != -1)
+					{
+						countryNameEditor.setText(countryName);
+					}
+					else
+					{
+						countryNameEditor.setText(R.string.wrong_country);
+					}
+				}
+				else
+				{
+					countryNameEditor.setText(R.string.wrong_country);
+				}
+			}
+		});
+	}
+	
+	public static boolean selectCountry(String countryName, HashMap<String, String> countriesMap, ArrayList<String> countriesArray, String countryCode, 
+			TextView countryCodeEditor, TextView countryNameEditor)
+	{
+		int index = countriesArray.indexOf(countryName);
+		if (index != -1)
+		{
+			countryCode = countriesMap.get(countryName);
+			countryCodeEditor.setText(countryCode);
+			countryNameEditor.setText(countryName);
+		}
+		return !TextUtils.isEmpty(countryCode);
+	}	
 }
