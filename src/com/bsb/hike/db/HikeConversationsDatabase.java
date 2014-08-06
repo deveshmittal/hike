@@ -752,7 +752,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				long maxMsgId = getMrIdForGroup(groupId, ids);			// get max sent message id from list of ids
 
-				if(maxMsgId != -1)
+				if(maxMsgId > 0)
 				{
 
 					long conversationMsgId = conversationCursor.getLong(conversationCursor.getColumnIndex(DBConstants.MESSAGE_ID));
