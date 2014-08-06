@@ -44,7 +44,7 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 	{
 		super(activity, viewItemId, getItems(activity));
 		this.context = activity;
-		this.blockedUsers = ContactManager.getInstance().getBlockedUsers();
+		this.blockedUsers = ContactManager.getInstance().getBlockedMsisdnSet();
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		iconLoader = new IconLoader(context, mIconImageSize);
 	}

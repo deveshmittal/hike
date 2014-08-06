@@ -562,11 +562,6 @@ public class ContactManager implements ITransientCache
 		return hDb.updateHikeContact(msisdn, onhike);
 	}
 
-	public Set<String> getBlockedUsers()
-	{
-		return hDb.getBlockedUsers();
-	}
-
 	public boolean hasIcon(String msisdn)
 	{
 		ContactInfo contact = getContact(msisdn);
