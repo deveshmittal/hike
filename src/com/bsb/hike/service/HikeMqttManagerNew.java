@@ -1161,7 +1161,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			Logger.e(TAG, "Client not connected retry connection");
 			mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
 			if (reConnect)
-				connectOnMqttThread();
+				scheduleNextConnectionCheck(getConnRetryTime());	// since we can get this exception many times due to server exception or during deployment so we dont retry frequently instead with backoff
 			break;
 		case MqttException.REASON_CODE_FAILED_AUTHENTICATION:
 			clearSettings();

@@ -1277,6 +1277,30 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		return true;
 	}
 
+	private void onCreateThemeMenu(Menu menu)
+	{
+		menu.getItem(0).setVisible(true);
+		menu.getItem(1).setVisible(false);
+		if(tipView!=null && tipView.getVisibility()== View.VISIBLE && tipView.getTag()==TipType.PIN)
+		{
+			HikeTip.closeTip(TipType.PIN, tipView, prefs);;
+		}
+	}
+
+	private void onCreatePinMenu(Menu menu)
+	{
+		menu.getItem(0).setVisible(false);
+		menu.getItem(1).setVisible(true);
+		if (tipView == null)
+		{
+			if (((GroupConversation) mConversation).getIsGroupAlive() && (!prefs.getBoolean(HikeMessengerApp.SHOWN_PIN_TIP, false)))
+			{
+
+				showPinFtueTip();
+			}
+		}
+	}
+
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
@@ -2426,13 +2450,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					showStickerFtueTip();
 				}
 			}
-            if (shownSticker && (mConversation instanceof GroupConversation) && ((GroupConversation) mConversation).getIsGroupAlive())
-			{
-				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_PIN_TIP, false))
-				{
-					showPinFtueTip();
-				}
-			}
+          
 		}
 		
 		
@@ -2625,6 +2643,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			public void onClick(View v)
 			{
 				HikeTip.closeTip(TipType.PIN, tipView, prefs);
+				
 			}
 		});
 	}
@@ -4887,15 +4906,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Random random = new Random();
 			String[] randomStringsArray = getResources().getStringArray(R.array.chat_thread_empty_state_tutorial_text);
 			tv.setText(randomStringsArray[random.nextInt(randomStringsArray.length)]);
-			if (chatTheme == ChatTheme.DEFAULT)
-			{
-				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_intro_nudge_default, 0, 0, 0);
-			}
-			else
-			{
-				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_nudge, 0, 0, 0);
-			}
-			tv.setCompoundDrawablePadding(10);
 			android.widget.ScrollView.LayoutParams lp = new ScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lp.gravity = Gravity.CENTER;
 			lp.leftMargin = (int) getResources().getDimension(R.dimen.empty_tutorial_margin);
