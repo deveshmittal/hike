@@ -616,7 +616,7 @@ public class HikeConstants
 
 	public static final int MAX_DURATION_RECORDING_SEC = 360;
 
-	public static final int MAX_DIMENSION_THUMBNAIL_PX = 180;
+	public static final int MAX_DIMENSION_THUMBNAIL_PX = 270;
 
 	public static final int MAX_DIMENSION_LOCATION_THUMBNAIL_PX = 220;
 

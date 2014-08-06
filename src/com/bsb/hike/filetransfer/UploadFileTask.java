@@ -177,7 +177,7 @@ public class UploadFileTask extends FileTransferBase
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
 					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
-							Bitmap.Config.RGB_565, true, false);
+							Bitmap.Config.RGB_565, false, false);
 					thumbnail = Utils.getRotatedBitmap(destinationFile.getPath(), thumbnail);
 					if (thumbnail == null && !TextUtils.isEmpty(fileKey))
 					{
