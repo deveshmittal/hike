@@ -525,7 +525,8 @@ class HikeUserDatabase extends SQLiteOpenHelper
 			c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.ID + ", " + DBConstants.MSISDN + ", " + DBConstants.PHONE
 					+ ", " + DBConstants.LAST_MESSAGED + ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + ", "
 					+ DBConstants.HIKE_JOIN_TIME + ", " + DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", " + DBConstants.INVITE_TIMESTAMP + " from "
-					+ DBConstants.USERS_TABLE + " GROUP BY " + DBConstants.MSISDN + " ORDER BY " + DBConstants.NAME + " COLLATE NOCASE ", null);
+					+ DBConstants.USERS_TABLE + " WHERE " + DBConstants.MSISDN + " !='null'" + " GROUP BY " + DBConstants.MSISDN + " ORDER BY " + DBConstants.NAME
+					+ " COLLATE NOCASE ", null);
 
 			while (c.moveToNext())
 			{
