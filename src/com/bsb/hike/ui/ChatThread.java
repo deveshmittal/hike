@@ -4167,15 +4167,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Random random = new Random();
 			String[] randomStringsArray = getResources().getStringArray(R.array.chat_thread_empty_state_tutorial_text);
 			tv.setText(randomStringsArray[random.nextInt(randomStringsArray.length)]);
-			if (chatTheme == ChatTheme.DEFAULT)
-			{
-				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_intro_nudge_default, 0, 0, 0);
-			}
-			else
-			{
-				tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_nudge, 0, 0, 0);
-			}
-			tv.setCompoundDrawablePadding(10);
 			android.widget.ScrollView.LayoutParams lp = new ScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lp.gravity = Gravity.CENTER;
 			lp.leftMargin = (int) getResources().getDimension(R.dimen.empty_tutorial_margin);
