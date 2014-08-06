@@ -41,6 +41,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -5109,7 +5110,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					if(chatThread.getCurrentSmsBalance() < getSelectedFreeSmsCount())
 					{
-						Toast.makeText(context, context.getString(R.string.kitkat_not_enough_sms, chatThread.getCurrentSmsBalance()), Toast.LENGTH_LONG);
+						Toast toast = Toast.makeText(context, context.getString(R.string.kitkat_not_enough_sms, chatThread.getCurrentSmsBalance()), Toast.LENGTH_LONG);
+						toast.setGravity(Gravity.CENTER, 0, 0);
+						toast.show();
 					}
 					else
 					{
