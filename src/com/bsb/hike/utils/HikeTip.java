@@ -78,6 +78,7 @@ public class HikeTip
 		parentView.setVisibility(View.GONE);
 
 		Editor editor = preferences.edit();
+		parentView = null;
 
 		switch (tipType)
 		{
