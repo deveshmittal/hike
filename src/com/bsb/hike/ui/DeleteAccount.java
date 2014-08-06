@@ -1,5 +1,8 @@
 package com.bsb.hike.ui;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +10,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -21,18 +25,30 @@ import com.bsb.hike.HikeMessengerApp;;
 
 public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements DeleteAccountListener
 {
+	private TextView countryName, phoneNum;
 
-	private TextView countryName, countryCode, phoneNum;
-
+	private EditText countryCode;
+	
 	ProgressDialog progressDialog;
 
 	DeleteAccountTask task;
+	
+	private String country_code;
+
+	private ArrayList<String> countriesArray = new ArrayList<String>();
+
+	private HashMap<String, String> countriesMap = new HashMap<String, String>();
+
+	private HashMap<String, String> codesMap = new HashMap<String, String>();
+
+	private HashMap<String, String> languageMap = new HashMap<String, String>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.delete_account_confirmation);
+		
 		initViewComponents();
 		setupActionBar();
 		handleOrientationChanegs();
@@ -76,8 +92,9 @@ public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements D
 	private void initViewComponents()
 	{
 		countryName = (TextView) findViewById(R.id.selected_country_name);
-		countryCode = (TextView) findViewById(R.id.country_picker);
+		countryCode = (EditText) findViewById(R.id.country_picker);
 		phoneNum = (TextView) findViewById(R.id.et_enter_num);
+		Utils.setupCountryCodeData(this, country_code, countryCode, countryName, countriesArray, countriesMap, codesMap, languageMap);
 	}
 
 	public void onCountryPickerClick(View v)
@@ -243,5 +260,4 @@ public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements D
 		}
 		super.onDestroy();
 	}
-
 }
