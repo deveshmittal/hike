@@ -1104,12 +1104,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string-array name="chat_thread_empty_state_tutorial_text">
         <item>#StartSomething</item>
         <item>It\'s always a good time to say hi :)</item>
-        <item>They\'re staring at the same thing... write the first message.</item>
-        <item>The screen would look a lot better with a conversation in it!</item>
-        <item>Billions of messages have been sent on hike. #StartSomething</item>
         <item>Say something awesome!</item>
-        <item>You\'ll miss 100% of the conversations you never had. #SaySomething</item>
-        <item>Millions of messages sent in the last hour... you can\'t even think of one?</item>
         <item>Be social</item>
         <item>I accept emojis and stickers as hello :)</item>
         <item>Say something before your battery runs out</item>
@@ -1118,6 +1113,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
         <item>Thank god I\'m not an introvert on chat! I\'ll say...</item>
         <item>In many cultures, silence is considered rude.</item>
         <item>If only there was a way to start a chat. Oh wait...</item>
+        <item>@string/chatThreadNudgeTutorialText</item>
     </string-array>
     <string name="hike_offline_notifications">Hike offline notifications</string>
     <string name="h2o_notifications_setting_summary">Enable hike offline notifications for contacts </string>
