@@ -2063,8 +2063,10 @@ public class MqttMessagesManager
 		else if(HikeConstants.MqttMessageTypes.REMOVE_PIC.equals(type))
 		{
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
-			HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+			if (HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn))
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+			}
 		}
 		else if(HikeConstants.MqttMessageTypes.BULK_MESSAGE.equals(type))
 		{

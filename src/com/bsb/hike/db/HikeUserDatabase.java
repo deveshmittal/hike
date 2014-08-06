@@ -1474,21 +1474,30 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void removeIcon(String msisdn)
+	public boolean removeIcon(String msisdn)
 	{
 		/*
 		 * We delete the older file that contained the larger avatar image for this msisdn.
 		 */
 		Utils.removeLargerProfileImageForMsisdn(msisdn);
 
-		mDb.delete(DBConstants.THUMBNAILS_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
+		int deletedRows = mDb.delete(DBConstants.THUMBNAILS_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
 
-		mDb.delete(DBConstants.ROUNDED_THUMBNAIL_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
+		int deletedRowsFromRoundedTable = mDb.delete(DBConstants.ROUNDED_THUMBNAIL_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
 
 		String whereClause = DBConstants.MSISDN + "=?"; // msisdn;
 		ContentValues customPhotoFlag = new ContentValues(1);
 		customPhotoFlag.put(DBConstants.HAS_CUSTOM_PHOTO, 0);
 		mDb.update(DBConstants.USERS_TABLE, customPhotoFlag, whereClause, new String[] { msisdn });
+		if (deletedRows + deletedRowsFromRoundedTable > 0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		
 	}
 
 	public void updateContactRecency(String msisdn, long timeStamp)

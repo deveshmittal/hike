@@ -295,10 +295,11 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 			return b;
 	}
 
-	public void deleteIconForMSISDN(String msisdn)
+	public boolean deleteIconForMSISDN(String msisdn)
 	{
-		HikeUserDatabase.getInstance().removeIcon(msisdn);
+		boolean rowsDeleted =HikeUserDatabase.getInstance().removeIcon(msisdn);
 		clearIconForMSISDN(msisdn);
+		return rowsDeleted;
 	}
 
 	public void clearIconForMSISDN(String msisdn)
