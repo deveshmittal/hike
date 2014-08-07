@@ -1265,13 +1265,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		// for group chat we show pin and one:one, we show theme
 		if ( Utils.isGroupConversation(mContactNumber))
 		{
-			menu.getItem(0).setVisible(false);
-			menu.getItem(1).setVisible(true);
+			onCreatePinMenu( menu);
 		}
 		else
 		{
-			menu.getItem(0).setVisible(true);
-			menu.getItem(1).setVisible(false);
+			onCreateThemeMenu( menu);
 		}
 		mMenu = menu;
 		return true;
@@ -1293,7 +1291,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		menu.getItem(1).setVisible(true);
 		if (tipView == null)
 		{
-			if (((GroupConversation) mConversation).getIsGroupAlive() && (!prefs.getBoolean(HikeMessengerApp.SHOWN_PIN_TIP, false)))
+			if (mConversation!=null &&((GroupConversation) mConversation).getIsGroupAlive() && (!prefs.getBoolean(HikeMessengerApp.SHOWN_PIN_TIP, false)))
 			{
 
 				showPinFtueTip();
