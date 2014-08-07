@@ -47,8 +47,6 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
-import com.google.android.gms.internal.co;
-import com.google.android.gms.internal.ed;
 
 public class ConversationsAdapter extends BaseAdapter
 {
