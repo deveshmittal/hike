@@ -1320,7 +1320,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		menu.getItem(1).setVisible(false);
 		if(tipView!=null && tipView.getVisibility()== View.VISIBLE && tipView.getTag()==TipType.PIN)
 		{
-			HikeTip.closeTip(TipType.PIN, tipView, prefs);;
+			tipView.setVisibility(View.GONE);
+			tipView = null;
 		}
 	}
 
