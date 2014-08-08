@@ -321,6 +321,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private boolean isOnline = false;
 
 	private View hikeToOfflineTipview;
+	
+	private TextView topUnreadPinsIndicator;
 
 	private int HIKE_TO_OFFLINE_TIP_STATE_1 = 1;
 
@@ -493,6 +495,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			   decrementUnreadPInCount();
 		}
+		updateOverflowMenuUnreadCount();
 	}
 
 	private void showPopUpIfRequired()
@@ -1272,6 +1275,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			onCreateThemeMenu( menu);
 		}
 		mMenu = menu;
+		
+		if(!isActionModeOn)
+		{
+			topUnreadPinsIndicator = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.top_bar_indicator);
+
+			mMenu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new OnClickListener() 
+			{			
+				@Override
+				public void onClick(View v) 
+				{
+					showOverFlowMenu();
+				}
+			});
+		}
 		return true;
 	}
 
@@ -1297,6 +1314,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				showPinFtueTip();
 			}
 		}
+		updateOverflowMenuUnreadCount();
 	}
 
 	@Override
@@ -8565,6 +8583,85 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}else
 		{
 			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK);
+		}
+	}
+	
+	private void updateOverflowMenuUnreadCount()
+	{
+		int count = -1;
+		
+		try 
+		{
+			if(mConversation != null && mConversation.getMetaData() != null)
+			{
+				count = mConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+			}
+		}
+		catch (JSONException e) 
+		{
+			e.printStackTrace();
+		}
+				
+		if (topUnreadPinsIndicator != null)
+		{
+			final int uCount = count;
+			
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					updateOverflowUnreadCount(uCount, 1000);
+				}
+			});
+		}
+	}
+	
+	private void updateOverflowUnreadCount(final int count, int delayTime)
+	{
+		if (count < 1)
+		{
+			topUnreadPinsIndicator.setVisibility(View.GONE);
+		}
+		else
+		{
+			mHandler.postDelayed(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					int newCount = -1;
+					
+					try 
+					{
+						newCount = mConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+					}
+					catch (JSONException e) 
+					{
+						e.printStackTrace();
+					}
+					
+					if (topUnreadPinsIndicator != null)
+					{						
+						if (newCount < 1)
+						{
+							topUnreadPinsIndicator.setVisibility(View.GONE);
+						}
+						else if (newCount > 9)
+						{
+							topUnreadPinsIndicator.setVisibility(View.VISIBLE);
+							topUnreadPinsIndicator.setText("9+");
+							topUnreadPinsIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
+						}
+						else if (newCount > 0)
+						{
+							topUnreadPinsIndicator.setVisibility(View.VISIBLE);
+							topUnreadPinsIndicator.setText(String.valueOf(count));
+							topUnreadPinsIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
+						}
+					}
+				}
+			}, delayTime);
 		}
 	}
 }
