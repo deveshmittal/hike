@@ -18,7 +18,7 @@
         android:title="@string/attach"/>
     <item
         android:id="@+id/overflow_menu"
-        android:icon="@drawable/ic_overflow"
+        android:actionLayout="@layout/overflow_icon_view"
         android:showAsAction="always"
         android:title="@string/other"/>
 
