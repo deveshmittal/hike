@@ -82,6 +82,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
@@ -909,8 +910,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		text.setText(markedUp);
 		Linkify.addLinks(text, Linkify.ALL);
 		Linkify.addLinks(text, Utils.shortCodeRegex, "tel:");
-//		text.setText(spanStr);
-		
+		text.setMovementMethod(new LinkMovementMethod()
+		{
+			@Override
+			public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event)
+			{
+				// TODO Auto-generated method stub
+				boolean result = super.onTouchEvent(widget, buffer, event);
+				if (!result)
+				{
+					showPinHistory(false);
+				}
+				return result;
+			}
+		});
+		// text.setText(spanStr);
+
 		View cross = tipView.findViewById(R.id.cross);
 		cross.setTag(impMessage);
 		cross.setOnClickListener(new OnClickListener()
