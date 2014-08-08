@@ -261,7 +261,8 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * Returns the name of an unsaved contact using groupId as name is different in different group
+	 * Returns name of a contact using groupId. This first checks the contactInfo name as contact can be saved contact or unsaved contact.For unsaved we need group id as unsaved
+	 * contacts name is different in different groups
 	 * 
 	 * @param groupId
 	 * @param msisdn
@@ -272,14 +273,18 @@ public class TransientCache extends ContactsCache
 		readLock.lock();
 		try
 		{
-			Map<String, Pair<GroupParticipant, String>> map = groupParticipants.get(groupId);
-			if (null != map)
+			String name = getName(msisdn);
+			if (null == name)
 			{
-				Pair<GroupParticipant, String> grpParticipantPair = map.get(msisdn);
-				if (null != grpParticipantPair)
-					return grpParticipantPair.second;
+				Map<String, Pair<GroupParticipant, String>> map = groupParticipants.get(groupId);
+				if (null != map)
+				{
+					Pair<GroupParticipant, String> grpParticipantPair = map.get(msisdn);
+					if (null != grpParticipantPair)
+						name = grpParticipantPair.second;
+				}
 			}
-			return null;
+			return name;
 		}
 		finally
 		{

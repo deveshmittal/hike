@@ -310,7 +310,8 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * Returns name of an unsaved contact using groupId as unsaved contacts name is different in different groups
+	 * Returns name of a contact using groupId. This first checks the contactInfo name as contact can be saved contact or unsaved contact.For unsaved we need group id as unsaved
+	 * contacts name is different in different groups
 	 * 
 	 * @param groupId
 	 * @param msisdn
@@ -318,10 +319,22 @@ class PersistenceCache extends ContactsCache
 	 */
 	String getName(String groupId, String msisdn)
 	{
-		GroupDetails grpDetails = groupPersistence.get(groupId);
-		if (null != grpDetails)
-			return grpDetails.getName(msisdn);
-		return null;
+		readLock.lock();
+		try
+		{
+			String name = getName(msisdn); // can be a saved contact
+			if (null == name)
+			{
+				GroupDetails grpDetails = groupPersistence.get(groupId);
+				if (null != grpDetails)
+					name = grpDetails.getName(msisdn);
+			}
+			return name;
+		}
+		finally
+		{
+			readLock.unlock();
+		}
 	}
 
 	/**
