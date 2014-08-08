@@ -461,6 +461,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	public void setChatTheme(ChatTheme theme)
 	{
+		if(theme == null)
+		{
+			Logger.d("MessageAdapter","ChatTheme is null in setChatTheme Method");
+			return;
+		}
 		chatTheme = theme;
 		isDefaultTheme = chatTheme == ChatTheme.DEFAULT;
 		notifyDataSetChanged();
