@@ -35,7 +35,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_marginLeft="15dp"
                 android:text="Kavin"
-                android:textColor="#b89c7e"
+                android:textColor="#af9d52"
                 android:textSize="12sp" />
 
             <com.bsb.hike.view.CustomFontTextView
@@ -45,7 +45,7 @@
                 android:layout_marginLeft="2dp"
                 android:layout_toRightOf="@id/sender"
                 android:text="12:30 AM"
-                android:textColor="#b89c7e"
+                android:textColor="#af9d52"
                 android:textSize="12sp"
                 android:textStyle="italic" />
 
