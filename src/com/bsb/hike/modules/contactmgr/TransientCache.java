@@ -864,12 +864,21 @@ public class TransientCache extends ContactsCache
 	 */
 	int getGroupParticipantsCount(String groupId)
 	{
-		Map<String, Pair<GroupParticipant, String>> g = groupParticipants.get(groupId);
-		if (null != g)
+		readLock.lock();
+		try
 		{
-			return g.size();
+			Map<String, Pair<GroupParticipant, String>> g = groupParticipants.get(groupId);
+			if (null != g)
+			{
+				return g.size();
+			}
+		}
+		finally
+		{
+			readLock.unlock();
 		}
 		return HikeConversationsDatabase.getInstance().getActiveParticipantCount(groupId);
+
 	}
 
 	/**
