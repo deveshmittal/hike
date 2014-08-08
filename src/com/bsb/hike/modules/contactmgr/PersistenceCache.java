@@ -672,6 +672,12 @@ class PersistenceCache extends ContactsCache
 		}
 	}
 
+	/**
+	 * This method returns true or false depending on whether group exists or not
+	 * 
+	 * @param groupId
+	 * @return
+	 */
 	public boolean isGroupExists(String groupId)
 	{
 		readLock.lock();
@@ -685,6 +691,12 @@ class PersistenceCache extends ContactsCache
 		}
 	}
 
+	/**
+	 * Inserts the group with group id and groupName in the {@link #groupPersistence}
+	 * 
+	 * @param grpId
+	 * @param groupName
+	 */
 	public void insertGroup(String grpId, String groupName)
 	{
 		writeLock.lock();

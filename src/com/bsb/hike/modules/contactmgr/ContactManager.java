@@ -113,7 +113,7 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * This is used to remove the list of msisdns from either group or 1-1 conversation
+	 * This is used to remove the list of msisdns from either group or 1-1 conversation and should be called when multiple group or one to one conversations are deleted.
 	 * 
 	 * @param msisdns
 	 */
@@ -133,7 +133,7 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * This method is used when contacts are deleted from the addressbook and we set their name to null in the cache
+	 * This method is used when contacts are deleted from the address book and we set their name to null in the cache
 	 * 
 	 * @param contacts
 	 */
@@ -147,7 +147,7 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * This method updates the contact info object in memory
+	 * This method updates the contact info object in memory and if not found in memory then loads it in {@link TransientCache}.
 	 * 
 	 * @param contact
 	 */
@@ -165,7 +165,7 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * This updates a list of contactInfo objects in memory
+	 * This updates a list of contactInfo objects in memory and if not found in memory then loads it in {@link TransientCache}
 	 * 
 	 * @param updatescontacts
 	 */
@@ -177,6 +177,13 @@ public class ContactManager implements ITransientCache
 		}
 	}
 
+	/**
+	 * This method returns the name of a particular <code>msisdn</code>.For name of a group participant {@link #getName(String, String)} should be used because it also handles the
+	 * unsaved contact name in a group.
+	 * 
+	 * @param msisdn
+	 * @return Returns the name of contact or group depending on msisdn whether it is phone number of contact or group id
+	 */
 	public String getName(String msisdn)
 	{
 		String name = persistenceCache.getName(msisdn);
@@ -187,6 +194,15 @@ public class ContactManager implements ITransientCache
 		return name;
 	}
 
+	/**
+	 * This method simple returns the name from contact Info object if contact is saved else use the {@link PersistenceCache} and {@link TransientCache} to get the name of an
+	 * unsaved contact.
+	 * 
+	 * @param groupId
+	 *            group id is needed as unsaved contact name can be different in different groups. Name for unsaved contact is same as in group creator address book.
+	 * @param msisdn
+	 * @return
+	 */
 	public String getName(String groupId, String msisdn)
 	{
 		String name = getName(msisdn); // maybe a saved contact in a group
@@ -201,6 +217,13 @@ public class ContactManager implements ITransientCache
 		return name;
 	}
 
+	/**
+	 * This method sets the name of an unsaved contact in both {@link PersistenceCache} and {@link TransientCache}.
+	 * 
+	 * @param grpId
+	 * @param msisdn
+	 * @param name
+	 */
 	public void setUnknownContactName(String grpId, String msisdn, String name)
 	{
 		persistenceCache.setUnknownContactName(grpId, msisdn, name);
@@ -208,9 +231,9 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * This function will return name or null for a particular msisdn
+	 * This function will return {@link ContactInfo} object or null for a particular msisdn
 	 * <p>
-	 * Search in Persistence first, if not found, search in Transient
+	 * Search in {@link PersistenceCache} first, if not found, search in {@link TransientCache}
 	 * </p>
 	 * 
 	 * @param msisdn
@@ -227,9 +250,10 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * Returns the contactInfo for a particular msisdn.If not found in memory makes a db call
+	 * Returns the {@link ContactInfo} for a particular msisdn. If not found in memory makes a DB call. This method should be called when {@link ContactInfo} object is needed even
+	 * if it is an unsaved contact.
 	 * <p>
-	 * Inserts the object in transient memory if loadInTransient is set to true otherwise in persistence memory
+	 * Inserts the object in {@link TransientCache} if <code>loadInTransient</code> is set to true otherwise in {@link PersistenceCache}.
 	 * </p>
 	 * 
 	 * @param msisdn
@@ -242,7 +266,7 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * Returns the contactInfo for a particular msisdn.If not found in memory makes a db call
+	 * Returns the {@link ContactInfo} for a particular msisdn. If not found in memory makes a DB call
 	 * <p>
 	 * Inserts the object in transient memory if loadInTransient is set to true otherwise in persistence memory
 	 * </p>
@@ -250,7 +274,7 @@ public class ContactManager implements ITransientCache
 	 * @param msisdn
 	 * @param loadInTransient
 	 * @param ifNotFoundReturnNull
-	 *            if set to true returns null if not a saved contact
+	 *            if set to true and contact is not saved in address book then returns null
 	 * @return
 	 */
 	public ContactInfo getContact(String msisdn, boolean loadInTransient, boolean ifOneToOneConversation, boolean ifNotFoundReturnNull)
@@ -290,7 +314,9 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * Returns List of contactInfo objects for a some msisdns. Inserts the contactInfo in transient if loadInTransient is set to true otherwise in persistence memory
+	 * Returns List of {@link ContactInfo} objects for some msisdns. Inserts the contact in {@link TransientCache} if <code>loadInTransient</code> is set to true otherwise in
+	 * {@link PersistenceCache}. ANd this method also handles the case where we want to load in persistence and contact is already in transient cache then we put this contact in
+	 * persistence too.
 	 * 
 	 * @param msisdns
 	 * @param loadInTransient
@@ -360,6 +386,12 @@ public class ContactManager implements ITransientCache
 		return transientCache.getAllContacts();
 	}
 
+	/**
+	 * This method should be called when last message in a group is changed, we remove the previous contact from the {@link PersistenceCache} and inserts the new contacts in memory
+	 * 
+	 * @param groupId
+	 * @param currentGroupMsisdns
+	 */
 	public void removeOlderLastGroupMsisdns(String groupId, List<String> currentGroupMsisdns)
 	{
 		List<String> msisdns = persistenceCache.removeOlderLastGroupMsisdn(groupId, currentGroupMsisdns);
@@ -379,16 +411,54 @@ public class ContactManager implements ITransientCache
 		persistenceCache.putInCache(msisdnsDB, false);
 	}
 
+	/**
+	 * This method returns a list {@link ContactInfo} objects of a particular favorite type and if parameter <code>onHike</code> is one then these are hike contacts otherwise non
+	 * hike contacts. This list should not contain contact whose msisdn is same as parameter <code>myMsisdn</code>. Unsaved contacts are also included in these.
+	 * 
+	 * @param favoriteType
+	 * @param onHike
+	 * @param myMsisdn
+	 * @return
+	 */
 	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType favoriteType, int onHike, String myMsisdn)
 	{
 		return getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, false, false);
 	}
 
+	/**
+	 * This method returns a list {@link ContactInfo} objects of a particular favorite type and if parameter <code>onHike</code> is one then these are hike contacts otherwise non
+	 * hike contacts. This list should not contain contact whose msisdn is same as parameter <code>myMsisdn</code>.
+	 * <p>
+	 * If parameter <code>nativeSMSOn</code> is false then contacts which are either hike contacts or contacts whose msisdns start with '+91' are included in the list
+	 * </p>
+	 * Returned list may also contain unsaved contacts.
+	 * 
+	 * @param favoriteType
+	 * @param onHike
+	 * @param myMsisdn
+	 * @param nativeSMSOn
+	 * @return
+	 */
 	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn)
 	{
 		return getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, nativeSMSOn, false);
 	}
 
+	/**
+	 * This method returns a list {@link ContactInfo} objects of a particular favorite type and if parameter <code>onHike</code> is one then these are hike contacts otherwise non
+	 * hike contacts. This list should not contain contact whose msisdn is same as parameter <code>myMsisdn</code>.
+	 * <p>
+	 * If parameter <code>nativeSMSOn</code> is false then contacts which are either hike contacts or contacts whose msisdns start with '+91' are included in the list
+	 * </p>
+	 * If parameter <code>ignoreUnknownContacts</code> is set to true then returned list does not contains unsaved contacts
+	 * 
+	 * @param favoriteType
+	 * @param onHike
+	 * @param myMsisdn
+	 * @param nativeSMSOn
+	 * @param ignoreUnknownContacts
+	 * @return
+	 */
 	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
 	{
 		if (favoriteType == FavoriteType.NOT_FRIEND)
@@ -415,6 +485,21 @@ public class ContactManager implements ITransientCache
 		}
 	}
 
+	/**
+	 * This method returns a list {@link ContactInfo} objects of favorite types given by array parameter <code>favoriteType</code> and if parameter <code>onHike</code> is one then
+	 * these are hike contacts otherwise non hike contacts. This list should not contain contact whose msisdn is same as parameter <code>myMsisdn</code>.
+	 * <p>
+	 * If parameter <code>nativeSMSOn</code> is false then contacts which are either hike contacts or contacts whose msisdns start with '+91' are included in the list
+	 * </p>
+	 * If parameter <code>ignoreUnknownContacts</code> is set to true then returned list does not contains unsaved contacts
+	 * 
+	 * @param favoriteType
+	 * @param onHike
+	 * @param myMsisdn
+	 * @param nativeSMSOn
+	 * @param ignoreUnknownContacts
+	 * @return
+	 */
 	public List<ContactInfo> getContactsOfFavoriteType(FavoriteType[] favoriteType, int onHike, String myMsisdn, boolean nativeSMSOn, boolean ignoreUnknownContacts)
 	{
 		List<ContactInfo> contacts = transientCache.getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, nativeSMSOn, ignoreUnknownContacts);
@@ -432,6 +517,17 @@ public class ContactManager implements ITransientCache
 		return contacts;
 	}
 
+	/**
+	 * This method returns a list of {@link ContactInfo} objects which are hike contacts and msisdns are in parameter <code>msisdnsIn</code> and not in <code>msisdnsNotIn</code>.
+	 * List should also not contain contact corresponding to msisdn in parameter <code>myMsisdn</code>.
+	 * 
+	 * @param limit
+	 *            Maximum number of hike contacts that are needed
+	 * @param msisdnsIn
+	 * @param msisdnsNotIn
+	 * @param myMsisdn
+	 * @return
+	 */
 	public List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
 	{
 		List<ContactInfo> contacts = transientCache.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
@@ -449,6 +545,11 @@ public class ContactManager implements ITransientCache
 		return contacts;
 	}
 
+	/**
+	 * This method returns the non hike contacts
+	 * 
+	 * @return
+	 */
 	public List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts()
 	{
 		List<Pair<AtomicBoolean, ContactInfo>> nonHikeContacts = transientCache.getNonHikeContacts();
@@ -466,6 +567,13 @@ public class ContactManager implements ITransientCache
 		return nonHikeContacts;
 	}
 
+	/**
+	 * This method returns the list of {@link ContactInfo} objects which are not on hike and are the most contacted contacts of the user
+	 * 
+	 * @param limit
+	 *            Maximum number of contacts that are needed
+	 * @return
+	 */
 	public List<ContactInfo> getNonHikeMostContactedContacts(int limit)
 	{
 		/*
@@ -487,6 +595,12 @@ public class ContactManager implements ITransientCache
 		return contacts;
 	}
 
+	/**
+	 * This method returns {@link ContactInfo} object whose phoneNumber matches with parameter <code>number</code>. And if not found in memory makes DB query
+	 * 
+	 * @param number
+	 * @return
+	 */
 	public ContactInfo getContactInfoFromPhoneNo(String number)
 	{
 		ContactInfo contact = persistenceCache.getContactInfoFromPhoneNo(number);
@@ -497,6 +611,13 @@ public class ContactManager implements ITransientCache
 		return transientCache.getContactInfoFromPhoneNo(number);
 	}
 
+	/**
+	 * The parameter <code>number</code> can be either Phone number or msisdn, so this method returns {@link ContactInfo} object in which either Phone number matches number or
+	 * msisdn matches number.
+	 * 
+	 * @param number
+	 * @return
+	 */
 	public ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number)
 	{
 		ContactInfo contact = persistenceCache.getContactInfoFromPhoneNoOrMsisdn(number);
@@ -525,7 +646,7 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * Thread safe implementation
+	 * Thread safe implementation. Returns true if group with parameter <code>groupId</code> already exists.
 	 * 
 	 * @param groupId
 	 * @return
@@ -535,21 +656,44 @@ public class ContactManager implements ITransientCache
 		return persistenceCache.isGroupExists(groupId);
 	}
 
+	/**
+	 * This method inserts a group with <code>grpId</code> and <code>groupName</code> in the {@link PersistenceCache}. Should be called when new group is created.
+	 * 
+	 * @param grpId
+	 * @param groupName
+	 */
 	public void insertGroup(String grpId, String groupName)
 	{
 		persistenceCache.insertGroup(grpId, groupName);
 	}
 
+	/**
+	 * This method deletes the contacts of particular set of ids given by parameter <code>keySet</code> from users database
+	 * 
+	 * @param keySet
+	 */
 	public void deleteMultipleContactInDB(Set<String> keySet)
 	{
 		hDb.deleteMultipleRows(keySet);
 	}
 
+	/**
+	 * This method updates the contacts given as parameter <code>updatedContacts</code> in the database
+	 * 
+	 * @param updatedContacts
+	 */
 	public void updateContactsinDB(List<ContactInfo> updatedContacts)
 	{
 		hDb.updateContacts(updatedContacts);
 	}
 
+	/**
+	 * This method updates the hike status of a contact in memory (if currently loaded in memory) and as well as in the database
+	 * 
+	 * @param msisdn
+	 * @param onhike
+	 * @return
+	 */
 	public int updateHikeStatus(String msisdn, boolean onhike)
 	{
 		ContactInfo contact = getContact(msisdn);
@@ -562,6 +706,13 @@ public class ContactManager implements ITransientCache
 		return hDb.updateHikeContact(msisdn, onhike);
 	}
 
+	/**
+	 * This method checks whether a contact has a icon or not. First we check if contact is loaded or not and if it is loaded then {@link ContactInfo#hasCustomPhoto()} is used
+	 * otherwise check in database is made.
+	 * 
+	 * @param msisdn
+	 * @return
+	 */
 	public boolean hasIcon(String msisdn)
 	{
 		ContactInfo contact = getContact(msisdn);
@@ -572,6 +723,12 @@ public class ContactManager implements ITransientCache
 		return hDb.hasIcon(msisdn);
 	}
 
+	/**
+	 * This method updates the <code>lastMessaged</code> parameter of {@link ContactInfo} object and also updates it in database
+	 * 
+	 * @param msisdn
+	 * @param timestamp
+	 */
 	public void updateContactRecency(String msisdn, long timestamp)
 	{
 		ContactInfo contact = getContact(msisdn);
@@ -584,11 +741,22 @@ public class ContactManager implements ITransientCache
 		hDb.updateContactRecency(msisdn, timestamp);
 	}
 
+	/**
+	 * This method is used to insert in block table when a contact is blocked
+	 * 
+	 * @param msisdn
+	 */
 	public void block(String msisdn)
 	{
 		hDb.block(msisdn);
 	}
 
+	/**
+	 * This method updates the favorite type of a contact in memory as well as in database
+	 * 
+	 * @param msisdn
+	 * @param ftype
+	 */
 	public void toggleContactFavorite(String msisdn, FavoriteType ftype)
 	{
 		ContactInfo contact = getContact(msisdn);
@@ -601,11 +769,21 @@ public class ContactManager implements ITransientCache
 		hDb.toggleContactFavorite(msisdn, ftype);
 	}
 
+	/**
+	 * This method deletes the msisdn from the block table when a contact is unblocked
+	 * 
+	 * @param msisdn
+	 */
 	public void unblock(String msisdn)
 	{
 		hDb.unblock(msisdn);
 	}
 
+	/**
+	 * This method removes the icon from database and also updates the <code>hasCustomPhoto</code> parameter of {@link ContactInfo} object
+	 * 
+	 * @param msisdn
+	 */
 	public void removeIcon(String msisdn)
 	{
 		ContactInfo contact = getContact(msisdn);
@@ -618,6 +796,12 @@ public class ContactManager implements ITransientCache
 		hDb.removeIcon(msisdn);
 	}
 
+	/**
+	 * This method updates the hike join time of a contact in memory as well as in database
+	 * 
+	 * @param msisdn
+	 * @param hikeJoinTime
+	 */
 	public void setHikeJoinTime(String msisdn, long hikeJoinTime)
 	{
 		ContactInfo contact = getContact(msisdn);
@@ -630,7 +814,14 @@ public class ContactManager implements ITransientCache
 		hDb.setHikeJoinTime(msisdn, hikeJoinTime);
 	}
 
-	public void setIcon(String msisdn, byte[] data, boolean b)
+	/**
+	 * This method sets the contacts icon in database and updates the <code>hasCustomPhoto</code> parameter of {@link ContactInfo}
+	 * 
+	 * @param msisdn
+	 * @param data
+	 * @param isProfileImage
+	 */
+	public void setIcon(String msisdn, byte[] data, boolean isProfileImage)
 	{
 		ContactInfo contact = getContact(msisdn);
 		if (null != contact)
@@ -639,9 +830,16 @@ public class ContactManager implements ITransientCache
 			updatedContact.setHasCustomPhoto(true);
 			updateContacts(updatedContact);
 		}
-		hDb.setIcon(msisdn, data, b);
+		hDb.setIcon(msisdn, data, isProfileImage);
 	}
 
+	/**
+	 * This method returns the favorite type of a contact. If contact is already loaded in memory then we can get from {@link ContactInfo#getFavoriteType()} otherwise we make a
+	 * database query.
+	 * 
+	 * @param msisdn
+	 * @return
+	 */
 	public FavoriteType getFriendshipStatus(String msisdn)
 	{
 		ContactInfo contact = getContact(msisdn);
@@ -652,21 +850,44 @@ public class ContactManager implements ITransientCache
 		return hDb.getFriendshipStatus(msisdn);
 	}
 
+	/**
+	 * This method returns the string of an icon in thumbnails table
+	 * 
+	 * @param id
+	 * @return
+	 */
 	public String getIconIdentifierString(String id)
 	{
 		return hDb.getIconIdentifierString(id);
 	}
 
+	/**
+	 * This method changes the favorite type of contacts in memory as well as in database using the json passed as parameter
+	 * 
+	 * @param favorites
+	 */
 	public void setMultipleContactsToFavorites(JSONObject favorites)
 	{
 		hDb.setMultipleContactsToFavorites(favorites);
 	}
 
+	/**
+	 * This method returns true if a particular msisdn is blocked otherwise false
+	 * 
+	 * @param msisdn
+	 * @return
+	 */
 	public boolean isBlocked(String msisdn)
 	{
 		return hDb.isBlocked(msisdn);
 	}
 
+	/**
+	 * This method updates the last seen time of a contact in memory as well as in database
+	 * 
+	 * @param msisdn
+	 * @param lastSeenTime
+	 */
 	public void updateLastSeenTime(String msisdn, long lastSeenTime)
 	{
 		ContactInfo contact = getContact(msisdn);
@@ -679,6 +900,12 @@ public class ContactManager implements ITransientCache
 		hDb.updateLastSeenTime(msisdn, lastSeenTime);
 	}
 
+	/**
+	 * This methods updates the <code>isOffline</code> parameter of {@link ContactInfo} object in memory as well as in database
+	 * 
+	 * @param msisdn
+	 * @param isOffline
+	 */
 	public void updateIsOffline(String msisdn, int isOffline)
 	{
 		ContactInfo contact = getContact(msisdn);
@@ -701,26 +928,58 @@ public class ContactManager implements ITransientCache
 		hDb.makeOlderAvatarsRounded();
 	}
 
+	/**
+	 * This method returns a drawable of an icon from the database
+	 * 
+	 * @param msisdn
+	 * @param rounded
+	 *            if true returns rounded drawable from rounded thumbnails table
+	 * @return
+	 */
 	public Drawable getIcon(String msisdn, boolean rounded)
 	{
 		return hDb.getIcon(msisdn, rounded);
 	}
 
+	/**
+	 * This method returns a byte array of an icon from the database
+	 * 
+	 * @param id
+	 * @param rounded
+	 *            if true returns rounded thumbnail byte array from rounded thumbnails table
+	 * @return
+	 */
 	public byte[] getIconByteArray(String id, boolean rounded)
 	{
 		return hDb.getIconByteArray(id, rounded);
 	}
 
+	/**
+	 * Deletes all the users database tables
+	 */
 	public void deleteAll()
 	{
 		hDb.deleteAll();
 	}
 
+	/**
+	 * This methods returns a HashSet of blocked msisdns
+	 * 
+	 * @return
+	 */
 	public Set<String> getBlockedMsisdnSet()
 	{
 		return hDb.getBlockedMsisdnSet();
 	}
 
+	/**
+	 * Sets the address book from the list of contacts Deletes any existing contacts from the db
+	 * 
+	 * @param contacts
+	 *            list of contacts to set/add
+	 * @param blockedMsisdns
+	 * @throws DbException
+	 */
 	public void setAddressBookAndBlockList(List<ContactInfo> contacts, List<String> blockedMsisdns) throws DbException
 	{
 		hDb.setAddressBookAndBlockList(contacts, blockedMsisdns);
@@ -731,16 +990,33 @@ public class ContactManager implements ITransientCache
 		hDb.syncContactExtraInfo();
 	}
 
+	/**
+	 * This method returns the list of contacts and it is paired with a AtomicBoolean which tells whether a contact is blocked or not.
+	 * 
+	 * @return
+	 */
 	public List<Pair<AtomicBoolean, ContactInfo>> getBlockedUserList()
 	{
 		return transientCache.getBlockedUserList();
 	}
 
+	/**
+	 * This method returns an object of {@link FtueContactsData} class which includes server recommended contacts and hike and sms contacts and their count
+	 * 
+	 * @param prefs
+	 * @return
+	 */
 	public FtueContactsData getFTUEContacts(SharedPreferences prefs)
 	{
 		return hDb.getFTUEContacts(prefs);
 	}
 
+	/**
+	 * This method updates the invite time stamp in memory as well as in database
+	 * 
+	 * @param msisdn
+	 * @param time
+	 */
 	public void updateInvitedTimestamp(String msisdn, long time)
 	{
 		ContactInfo contact = getContact(msisdn);
@@ -753,6 +1029,12 @@ public class ContactManager implements ITransientCache
 		hDb.updateInvitedTimestamp(msisdn, time);
 	}
 
+	/**
+	 * This method returns a map of group id and group name for a list of group ids given as a parameter and inserts these in {@link PersistenceCache}
+	 * 
+	 * @param grpIds
+	 * @return
+	 */
 	public Map<String, String> getGroupNames(List<String> grpIds)
 	{
 		Map<String, String> groupNames = HikeConversationsDatabase.getInstance().getGroupNames(grpIds);
@@ -766,9 +1048,11 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * Returns a list of participants to a group
+	 * Returns a list of participants to a group with their names in case of unsaved contact. This method also increases the reference count if contact is already loaded in memory
 	 * 
 	 * @param groupId
+	 * @param activeOnly
+	 * @param notShownStatusMsgOnly
 	 * @return
 	 */
 	public List<Pair<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
@@ -777,9 +1061,12 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * Returns a list of participants to a group
+	 * Returns a list of participants of a group with their names in case of unsaved contact. This method also increases the reference count if contact is already loaded in memory
 	 * 
 	 * @param groupId
+	 * @param activeOnly
+	 * @param notShownStatusMsgOnly
+	 * @param fetchParticipants
 	 * @return
 	 */
 	public List<Pair<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
@@ -859,7 +1146,7 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * This method removes group participant of a particular group from transient cache
+	 * This method removes group participant of a particular group from {@link TransientCache}
 	 * 
 	 * @param groupId
 	 * @param msisdn
@@ -891,8 +1178,10 @@ public class ContactManager implements ITransientCache
 		return transientCache.getGroupParticipantsCount(groupId);
 	}
 
-	/*
+	/**
 	 * Call this when we think the address book has changed. Checks for updates, posts to the server, writes them to the local database and updates existing conversations
+	 * 
+	 * @param ctx
 	 */
 	public void syncUpdates(Context ctx)
 	{
@@ -1045,10 +1334,15 @@ public class ContactManager implements ITransientCache
 			}
 			l.add(contactInfo);
 		}
-
 		return ret;
 	}
 
+	/**
+	 * This method is used to get the contacts from the phone's address book and used during contact sync up
+	 * 
+	 * @param ctx
+	 * @return
+	 */
 	public List<ContactInfo> getContacts(Context ctx)
 	{
 		HashSet<String> contactsToStore = new HashSet<String>();
@@ -1190,6 +1484,14 @@ public class ContactManager implements ITransientCache
 		return contactinfos;
 	}
 
+	/**
+	 * This method updates the hike status of a contact in memory (if currently loaded in memory) and as well as in the database
+	 * 
+	 * @param ctx
+	 * @param msisdn
+	 * @param onhike
+	 * @return
+	 */
 	public int updateHikeStatus(Context ctx, String msisdn, boolean onhike)
 	{
 		ContactInfo contact = getContact(msisdn);
@@ -1272,6 +1574,10 @@ public class ContactManager implements ITransientCache
 	/**
 	 * This method will give us the user's most contacted contacts. We also try to get the greenblue contacts if the user has them synced and then sort those based on times
 	 * contacts.
+	 * 
+	 * @param context
+	 * @param limit
+	 * @return
 	 */
 	public Pair<String, Map<String, Integer>> getMostContactedContacts(Context context, int limit)
 	{
@@ -1407,6 +1713,12 @@ public class ContactManager implements ITransientCache
 		}
 	}
 
+	/**
+	 * This method updates the parameter <code>onGreenBlue</code> of {@link ContactInfo} , sets it to true for contacts which are also on WA
+	 * 
+	 * @param context
+	 * @param contactinfos
+	 */
 	public void setGreenBlueStatus(Context context, List<ContactInfo> contactinfos)
 	{
 		Cursor greenblueContactsCursor = null;
@@ -1485,5 +1797,4 @@ public class ContactManager implements ITransientCache
 			}
 		}
 	}
-
 }

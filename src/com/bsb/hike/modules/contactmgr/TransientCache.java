@@ -74,7 +74,7 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * inserts contact in {@link #transientContacts} if name field in contactInfo is not null otherwise in {@link #unsavedContacts}
+	 * Inserts contact in {@link #transientContacts}.
 	 * <p>
 	 * Make sure that it is not already in memory , we are setting reference count to one here
 	 * </p>
@@ -171,7 +171,7 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * updates the contact in memory
+	 * updates the contact in memory and if not found in memory inserts the contact in {@link #transientContacts}
 	 * 
 	 * @param contact
 	 */
@@ -200,8 +200,8 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * Returns the list of all the contacts sorted by their names. If boolean {@link #allContactsLoaded} is true then all the contacts are retrieved from {@link #transientContacts}
-	 * and {@link #unsavedContacts}.
+	 * Returns the list of all the contacts sorted by their names.If boolean {@link #allContactsLoaded} is true then all the contacts are retrieved from {@link #transientContacts}.
+	 * This method returns both saved and unsaved contacts.
 	 * 
 	 * @return
 	 */
@@ -210,6 +210,13 @@ public class TransientCache extends ContactsCache
 		return getAllContacts(false);
 	}
 
+	/**
+	 * Returns the list of all the contacts sorted by their names.If boolean {@link #allContactsLoaded} is true then all the contacts are retrieved from {@link #transientContacts}.
+	 * If parameter <code>ignoreUnknownContacts</code> is true then returned list only contains saved contacts otherwise both saved and unsaved contacts.
+	 * 
+	 * @param ignoreUnknownContacts
+	 * @return
+	 */
 	List<ContactInfo> getAllContacts(boolean ignoreUnknownContacts)
 	{
 		if (!allContactsLoaded)
@@ -219,7 +226,7 @@ public class TransientCache extends ContactsCache
 		}
 
 		List<ContactInfo> allContacts = new ArrayList<ContactInfo>();
-		// Traverse through savedContacts and add in allCOntacts list
+		// Traverse through transientContacts and add in allCOntacts list
 		readLock.lock();
 		try
 		{
@@ -860,6 +867,12 @@ public class TransientCache extends ContactsCache
 		return HikeConversationsDatabase.getInstance().getActiveParticipantCount(groupId);
 	}
 
+	/**
+	 * This method returns whether contact exist or not if all contacts are loaded then we can get this from memory otherwise we make a DB query
+	 * 
+	 * @param msisdn
+	 * @return
+	 */
 	boolean doesContactExist(String msisdn)
 	{
 		ContactInfo contact = getContact(msisdn);
@@ -878,6 +891,11 @@ public class TransientCache extends ContactsCache
 		}
 	}
 
+	/**
+	 * This returns the list of pair of boolean and {@link ContactInfo} objects, boolean tells whether a contact is blocked or not.
+	 * 
+	 * @return
+	 */
 	List<Pair<AtomicBoolean, ContactInfo>> getBlockedUserList()
 	{
 		List<ContactInfo> contacts = getAllContacts(true);
