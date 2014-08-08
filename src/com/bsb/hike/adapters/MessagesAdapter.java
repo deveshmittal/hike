@@ -732,6 +732,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			dayHolder = stickerHolder;
 			stickerHolder.placeHolder.setBackgroundResource(0);
+			stickerHolder.loader.setVisibility(View.GONE);
 			Sticker sticker = metadata.getSticker();
 			setSenderDetails(convMessage, position, stickerHolder, true);
 			/*
@@ -786,7 +787,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
 					if (stickerDrawable != null)
 					{
-						stickerHolder.loader.setVisibility(View.GONE);
 						stickerHolder.placeHolder.setBackgroundResource(0);
 						stickerHolder.image.setVisibility(View.VISIBLE);
 						// largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
