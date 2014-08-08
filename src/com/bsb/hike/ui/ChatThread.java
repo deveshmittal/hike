@@ -1040,12 +1040,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void hidePinFromUI(boolean playAnim)
 	{
+		if (!showingPIN)
+		{
+			return;
+		}
 		showingPIN = false;
-		if(playAnim){
-		playUpDownAnimation(tipView);	
-		}else{
-		tipView.setVisibility(View.GONE);
-		tipView = null;
+		if (playAnim)
+		{
+			playUpDownAnimation(tipView);
+		}
+		else
+		{
+			tipView.setVisibility(View.GONE);
+			tipView = null;
 		}
 	}
 
@@ -1588,6 +1595,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				mAdapter.notifyDataSetChanged();
 				clearConfirmDialog.dismiss();
+				hidePinFromUI(true);
 			}
 		};
 
