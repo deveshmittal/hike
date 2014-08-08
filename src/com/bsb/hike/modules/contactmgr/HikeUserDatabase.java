@@ -1857,11 +1857,6 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		mDb.update(DBConstants.USERS_TABLE, values, whereClause, whereArgs);
 	}
 
-	int getFriendTableRowCount()
-	{
-		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM " + DBConstants.FAVORITES_TABLE, null);
-	}
-
 	void updateLastSeenTime(String msisdn, long lastSeenTime)
 	{
 		ContentValues contentValues = new ContentValues();
