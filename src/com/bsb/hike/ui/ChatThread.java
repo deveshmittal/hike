@@ -534,6 +534,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					public void run()
 					{
 						setupThemePicker(chatTheme);
+						Logger.d("ChatThread", "Calling setchattheme from showPopupIfRequired");
 						setChatTheme(chatTheme);
 					}
 				});
@@ -2533,6 +2534,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else
 		{
 			selectedTheme = mConversationDb.getChatThemeForMsisdn(mContactNumber);
+			Logger.d("ChatThread", "Calling setchattheme from createConversation");
 			setChatTheme(selectedTheme);
 		}
 
@@ -3938,6 +3940,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
+					Logger.d("ChatThread", "Calling setchattheme from onEventRecieved");
 					setChatTheme(selectedTheme);
 				}
 			});
@@ -4812,6 +4815,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				temporaryTheme = ChatTheme.values()[position];
 				gridAdapter.notifyDataSetChanged();
+				Logger.d("ChatThread", "Calling setchattheme from showThemePicker onItemClick");
 				setChatTheme(temporaryTheme);
 			}
 		});
@@ -4824,6 +4828,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				temporaryTheme = null;
 
+				Logger.d("ChatThread", "Calling setchattheme from showThemePicker onDismissListener");
 				setChatTheme(selectedTheme);
 
 				setupActionBar(false);
@@ -4963,6 +4968,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void sendChatThemeMessage()
 	{
+		if(selectedTheme == null)
+		{
+			Logger.d("ChatThread","selectedTheme is null in sendChatThemeMessage Method");
+			return;
+		}
+
 		long timestamp = System.currentTimeMillis() / 1000;
 		mConversationDb.setChatBackground(mContactNumber, selectedTheme.bgId(), timestamp);
 
