@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import android.database.DatabaseUtils;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -548,7 +548,8 @@ public class TransientCache extends ContactsCache
 				{
 					String msisdn = mapEntry.getKey();
 					ContactInfo contactInfo = mapEntry.getValue().getContact();
-					if (msisdnsIn.contains(msisdn) && (!msisdnsNotIn.contains(msisdn)) && !msisdn.equals(myMsisdn) && contactInfo.isOnhike())
+					if (msisdnsIn.contains(DatabaseUtils.sqlEscapeString(msisdn)) && (!msisdnsNotIn.contains(DatabaseUtils.sqlEscapeString(msisdn))) && !msisdn.equals(myMsisdn)
+							&& contactInfo.isOnhike())
 					{
 						contacts.add(contactInfo);
 						limit--;
@@ -624,9 +625,9 @@ public class TransientCache extends ContactsCache
 			{
 				for (Entry<String, ContactTuple> savedMapEntry : transientContacts.entrySet())
 				{
-					String msisdn = savedMapEntry.getKey();
 					ContactInfo contactInfo = savedMapEntry.getValue().getContact();
-					if (phoneNumbers.contains(msisdn) && !contactInfo.isOnhike())
+					String phoneNum = contactInfo.getPhoneNum();
+					if (phoneNumbers.contains(DatabaseUtils.sqlEscapeString(phoneNum)) && !contactInfo.isOnhike())
 					{
 						contacts.add(contactInfo);
 						limit = limit - 1;
