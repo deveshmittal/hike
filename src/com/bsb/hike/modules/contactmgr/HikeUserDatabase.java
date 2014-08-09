@@ -1050,36 +1050,24 @@ class HikeUserDatabase extends SQLiteOpenHelper
 
 	List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts()
 	{
-		Cursor c = null;
+		List<Pair<AtomicBoolean, ContactInfo>> contactInfos = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
 
-		try
+		Map<String, ContactInfo> contactMap = getContactMap(HikeConstants.NOT_ON_HIKE_VALUE);
+
+		Set<String> blockMsisdns = getBlockedMsisdnSet();
+
+		for (String msisdn : blockMsisdns)
 		{
-			List<Pair<AtomicBoolean, ContactInfo>> contactInfos = new ArrayList<Pair<AtomicBoolean, ContactInfo>>(c.getCount());
-
-			Map<String, ContactInfo> contactMap = getContactMap(HikeConstants.NOT_ON_HIKE_VALUE);
-
-			Set<String> blockMsisdns = getBlockedMsisdnSet();
-
-			for (String msisdn : blockMsisdns)
-			{
-				contactMap.remove(msisdn);
-			}
-
-			for (Entry<String, ContactInfo> mapEntry : contactMap.entrySet())
-			{
-				ContactInfo contactInfo = mapEntry.getValue();
-				contactInfos.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(false), contactInfo));
-			}
-
-			return contactInfos;
+			contactMap.remove(msisdn);
 		}
-		finally
+
+		for (Entry<String, ContactInfo> mapEntry : contactMap.entrySet())
 		{
-			if (c != null)
-			{
-				c.close();
-			}
+			ContactInfo contactInfo = mapEntry.getValue();
+			contactInfos.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(false), contactInfo));
 		}
+
+		return contactInfos;
 	}
 
 	private List<ContactInfo> getContactInfo(String query, FavoriteType favoriteType, boolean ignoreUnknownContacts)
