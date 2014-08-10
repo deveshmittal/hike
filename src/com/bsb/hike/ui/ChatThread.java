@@ -82,6 +82,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
@@ -321,6 +322,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private boolean isOnline = false;
 
 	private View hikeToOfflineTipview;
+	
+	private TextView topUnreadPinsIndicator;
 
 	private int HIKE_TO_OFFLINE_TIP_STATE_1 = 1;
 
@@ -493,6 +496,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			   decrementUnreadPInCount();
 		}
+		updateOverflowMenuUnreadCount();
 	}
 
 	private void showPopUpIfRequired()
@@ -530,6 +534,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					public void run()
 					{
 						setupThemePicker(chatTheme);
+						Logger.d("ChatThread", "Calling setchattheme from showPopupIfRequired");
 						setChatTheme(chatTheme);
 					}
 				});
@@ -909,8 +914,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		text.setText(markedUp);
 		Linkify.addLinks(text, Linkify.ALL);
 		Linkify.addLinks(text, Utils.shortCodeRegex, "tel:");
-//		text.setText(spanStr);
-		
+		text.setMovementMethod(new LinkMovementMethod()
+		{
+			@Override
+			public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event)
+			{
+				// TODO Auto-generated method stub
+				boolean result = super.onTouchEvent(widget, buffer, event);
+				if (!result)
+				{
+					showPinHistory(false);
+				}
+				return result;
+			}
+		});
+		// text.setText(spanStr);
+
 		View cross = tipView.findViewById(R.id.cross);
 		cross.setTag(impMessage);
 		cross.setOnClickListener(new OnClickListener()
@@ -1025,12 +1044,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void hidePinFromUI(boolean playAnim)
 	{
+		if (!showingPIN)
+		{
+			return;
+		}
 		showingPIN = false;
-		if(playAnim){
-		playUpDownAnimation(tipView);	
-		}else{
-		tipView.setVisibility(View.GONE);
-		tipView = null;
+		if (playAnim)
+		{
+			playUpDownAnimation(tipView);
+		}
+		else
+		{
+			tipView.setVisibility(View.GONE);
+			tipView = null;
 		}
 	}
 
@@ -1272,6 +1298,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			onCreateThemeMenu( menu);
 		}
 		mMenu = menu;
+		
+		if(!isActionModeOn)
+		{
+			topUnreadPinsIndicator = (TextView) menu.findItem(R.id.overflow_menu).getActionView().findViewById(R.id.top_bar_indicator);
+
+			mMenu.findItem(R.id.overflow_menu).getActionView().setOnClickListener(new OnClickListener() 
+			{			
+				@Override
+				public void onClick(View v) 
+				{
+					showOverFlowMenu();
+				}
+			});
+		}
 		return true;
 	}
 
@@ -1281,7 +1321,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		menu.getItem(1).setVisible(false);
 		if(tipView!=null && tipView.getVisibility()== View.VISIBLE && tipView.getTag()==TipType.PIN)
 		{
-			HikeTip.closeTip(TipType.PIN, tipView, prefs);;
+			tipView.setVisibility(View.GONE);
+			tipView = null;
 		}
 	}
 
@@ -1297,6 +1338,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				showPinFtueTip();
 			}
 		}
+		updateOverflowMenuUnreadCount();
 	}
 
 	@Override
@@ -1573,6 +1615,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				mAdapter.notifyDataSetChanged();
 				clearConfirmDialog.dismiss();
+				hidePinFromUI(true);
 			}
 		};
 
@@ -2491,6 +2534,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else
 		{
 			selectedTheme = mConversationDb.getChatThemeForMsisdn(mContactNumber);
+			Logger.d("ChatThread", "Calling setchattheme from createConversation");
 			setChatTheme(selectedTheme);
 		}
 
@@ -3896,6 +3940,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
+					Logger.d("ChatThread", "Calling setchattheme from onEventRecieved");
 					setChatTheme(selectedTheme);
 				}
 			});
@@ -4770,6 +4815,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				temporaryTheme = ChatTheme.values()[position];
 				gridAdapter.notifyDataSetChanged();
+				Logger.d("ChatThread", "Calling setchattheme from showThemePicker onItemClick");
 				setChatTheme(temporaryTheme);
 			}
 		});
@@ -4782,6 +4828,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				temporaryTheme = null;
 
+				Logger.d("ChatThread", "Calling setchattheme from showThemePicker onDismissListener");
 				setChatTheme(selectedTheme);
 
 				setupActionBar(false);
@@ -4921,6 +4968,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void sendChatThemeMessage()
 	{
+		if(selectedTheme == null)
+		{
+			Logger.d("ChatThread","selectedTheme is null in sendChatThemeMessage Method");
+			return;
+		}
+
 		long timestamp = System.currentTimeMillis() / 1000;
 		mConversationDb.setChatBackground(mContactNumber, selectedTheme.bgId(), timestamp);
 
@@ -8565,6 +8618,85 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}else
 		{
 			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK);
+		}
+	}
+	
+	private void updateOverflowMenuUnreadCount()
+	{
+		int count = -1;
+		
+		try 
+		{
+			if(mConversation != null && mConversation.getMetaData() != null)
+			{
+				count = mConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+			}
+		}
+		catch (JSONException e) 
+		{
+			e.printStackTrace();
+		}
+				
+		if (topUnreadPinsIndicator != null)
+		{
+			final int uCount = count;
+			
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					updateOverflowUnreadCount(uCount, 1000);
+				}
+			});
+		}
+	}
+	
+	private void updateOverflowUnreadCount(final int count, int delayTime)
+	{
+		if (count < 1)
+		{
+			topUnreadPinsIndicator.setVisibility(View.GONE);
+		}
+		else
+		{
+			mHandler.postDelayed(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					int newCount = -1;
+					
+					try 
+					{
+						newCount = mConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+					}
+					catch (JSONException e) 
+					{
+						e.printStackTrace();
+					}
+					
+					if (topUnreadPinsIndicator != null)
+					{						
+						if (newCount < 1)
+						{
+							topUnreadPinsIndicator.setVisibility(View.GONE);
+						}
+						else if (newCount > 9)
+						{
+							topUnreadPinsIndicator.setVisibility(View.VISIBLE);
+							topUnreadPinsIndicator.setText("9+");
+							topUnreadPinsIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
+						}
+						else if (newCount > 0)
+						{
+							topUnreadPinsIndicator.setVisibility(View.VISIBLE);
+							topUnreadPinsIndicator.setText(String.valueOf(count));
+							topUnreadPinsIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
+						}
+					}
+				}
+			}, delayTime);
 		}
 	}
 }

@@ -1086,4 +1086,43 @@
     <string name="ftue_card_body_invite">Du verdienst Rs20 Gesprächszeit für jeden Freund, der hike beitritt.</string>
     <string name="ftue_card_click_invite">Fange jetzt an, Freunde einzuladen!</string>
     <string name="free_download">Gratis-Download</string>
+    <string name="send_sms_file_msg">hat dir eine Datei geschickt</string>
+    <string name="use_this_quality_for_sending_images">Diese Qualität zum Senden von Bildern verwenden</string>
+    <string name="select_all_confirmation_header">Alle einladen</string>
+    <string name="select_all_confirmation_msg">Einladung zum Herunterladen von hike an %1$d Kontakte senden?</string>
+    <string name="change_password_from_privacy">Passwort über Einstellungen > Datenschutz ändern</string>
+    <string name="hike_offline_caps">Hike Offline</string>
+    <string-array name="chat_thread_empty_state_tutorial_text">
+        <item>#TeileEtwas</item>
+        <item>Es ist nie verkehrt, hallo zu sagen :-)</item>
+        <item>Sage etwas Tolles!</item>
+        <item>Sei sozial</item>
+        <item>Ich akzeptiere Emoji-Smileys und Sticker als Begrüßung :-)</item>
+        <item>Sage etwas, bevor dein Akku leer ist</item>
+        <item>Einzeiler werden akzeptiert</item>
+        <item>Zu Beginn reicht auch eine kurze Nachricht</item>
+        <item>Zum Glück bin ich beim Chatten nicht introvertiert.</item>
+        <item>In vielen Kulturen wird Schweigen als unhöflich empfunden.</item>
+        <item>Wie könnte man nur einen Chat starten. Ach, ich hab da eine Idee...</item>
+        <item>@string/chatThreadNudgeTutorialText</item>
+    </string-array>
+    <string name="hike_offline_notifications">Hike Offline-Benachrichtigungen</string>
+    <string name="h2o_notifications_setting_summary">Aktiviere hike Offline-Benachrichtigungen für Kontakte </string>
+    <string name="pin_header">Pathik</string>
+    <string name="pin_detail">Lasst uns morgen alle blau machen. Wir treffen uns vorm Kino.</string>
+    <string name="postAnonymously">Anonym posten</string>
+    <string name="create_pin">PIN erstellen</string>
+    <string name="pin_history">PIN-Chronik</string>
+    <string name="max_pin_unread_counter">9+</string>
+    <string name="pin_text_hint">Teile etwas Wichtiges mit...</string>
+    <string name="chat_theme_small">Chatmotiv</string>
+    <string name="ftue_pin_header">Verwende PINs,</string>
+    <string name="ftue_pin_body">um wichtige Nachrichten zu teilen</string>
+    <string name="xyz_posted_pin">%1$s hat eine PIN gepostet</string>
+    <string name="pinHistoryTutorialText">Noch keine PINs</string>
+    <string name="incorrect_msisdn_warning">Falsche Nummer</string>
+    <string name="incorrect_msisdn_msg">Bitte gib die Nummer ein, die du bei der Registrierung von hike auf diesem Handy angegeben hast.</string>
+    <string name="delete_account_description">all deine Nachrichten, Frei-SMS und hike-Belohnungen gelöscht</string>
+    <string name="delete_account_heading_2">Zum Löschen deines Kontos gib bitte deine Nummer ein</string>
+    
 </resources>     

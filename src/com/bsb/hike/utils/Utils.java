@@ -3660,23 +3660,22 @@ public class Utils
 	public static Drawable getAvatarDrawableForNotificationOrShortcut(Context context, String msisdn, boolean isPin)
 	{
 		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
-		
-		if (drawable == null)
+
+		if(isPin || drawable == null)
 		{
 			Drawable background = context.getResources().getDrawable(BitmapUtils.getDefaultAvatarResourceId(msisdn, false));
 			
 			Drawable iconDrawable = null;
 			
-			if(!isPin)
-			{
-				iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
-			}
-			else
+			if(isPin)
 			{
 				iconDrawable = context.getResources().getDrawable(R.drawable.ic_pin_notification);
 			}
-			
-			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });
+			else
+			{
+				iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);				
+			}
+			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });			
 		}
 		return drawable;		
 	}
