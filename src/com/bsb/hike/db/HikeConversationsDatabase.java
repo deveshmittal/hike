@@ -1612,8 +1612,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					{
 						metadata.incrementUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 					}
+				
+					metadata.setPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN, false);
 				}
-				metadata.setPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN, false);
+				else
+				{
+					metadata.setPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);					
+				}
+				
 				metadata.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
     			metadata.setLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN, msg.getMsgID());
 				metadata.setLastPinTimeStamp(HikeConstants.MESSAGE_TYPE.TEXT_PIN, msg.getTimestamp());
