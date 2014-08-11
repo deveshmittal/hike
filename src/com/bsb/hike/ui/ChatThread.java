@@ -1318,7 +1318,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		menu.getItem(0).setVisible(true);
 		menu.getItem(1).setVisible(false);
-		if(tipView!=null && tipView.getVisibility()== View.VISIBLE && tipView.getTag()==TipType.PIN)
+		if(tipView!=null && tipView.getVisibility()== View.VISIBLE && tipView.getTag() instanceof TipType && (TipType)tipView.getTag()==TipType.PIN)
 		{
 			tipView.setVisibility(View.GONE);
 			tipView = null;
@@ -6408,8 +6408,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					resetAtomicPopUpKey(HikeMessengerApp.ATOMIC_POP_UP_STICKER);
 					if (tipView != null)
 					{
-						TipType viewTipType = (TipType) tipView.getTag();
-						if (viewTipType == TipType.EMOTICON)
+						Object tag = tipView.getTag();
+						
+						if (tag instanceof TipType && ((TipType)tag == TipType.EMOTICON))
 						{
 							HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
 							Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
@@ -7590,8 +7591,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		if (tipView != null && tipView.getVisibility() == View.VISIBLE)
 		{
-			TipType tipType = (TipType) tipView.getTag();
-			if (tipType == TipType.LAST_SEEN)
+			Object tag = tipView.getTag();
+			
+			if (tag instanceof TipType && ((TipType)tag == TipType.LAST_SEEN))
 			{
 				tipView.setVisibility(View.INVISIBLE);
 			}
