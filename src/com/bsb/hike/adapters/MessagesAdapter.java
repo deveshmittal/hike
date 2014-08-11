@@ -4171,10 +4171,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else
 			{
-				TipType tipType = (TipType) chatThread.tipView.getTag();
+				Object tag = chatThread.tipView.getTag();
+				if(tag instanceof TipType){
+				TipType tipType = (TipType) tag;
 				if (tipType == TipType.STATUS && statusMessage.getMappedId().equals(statusIdForTip))
 				{
 					showTip = true;
+				}
 				}
 			}
 		}
