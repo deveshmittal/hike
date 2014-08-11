@@ -97,6 +97,31 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
+	 * Inserts a list contacts in {@link #transientContacts}
+	 * 
+	 * @param contacts
+	 */
+	void insertContact(List<ContactInfo> contacts)
+	{
+		writeLock.lock();
+		try
+		{
+			for (ContactInfo contact : contacts)
+			{
+				if (!transientContacts.containsKey(contact.getMsisdn()))
+				{
+					ContactTuple tuple = new ContactTuple(1, contact);
+					transientContacts.put(contact.getMsisdn(), tuple);
+				}
+			}
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	/**
 	 * Inserts the map of msisdn and <code>GroupParticipant</code> into {@link #groupParticipants} with <code>grpId</code> as key.
 	 * 
 	 * @param grpId
@@ -437,6 +462,7 @@ public class TransientCache extends ContactsCache
 			{
 				contacts.addAll(map.values());
 			}
+			insertContact(contacts);
 		}
 		return contacts;
 	}
@@ -524,6 +550,7 @@ public class TransientCache extends ContactsCache
 			{
 				contacts.addAll(map.values());
 			}
+			insertContact(contacts);
 		}
 		return contacts;
 	}
@@ -566,6 +593,7 @@ public class TransientCache extends ContactsCache
 		else
 		{
 			contacts = hDb.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
+			insertContact(contacts);
 		}
 		return contacts;
 	}
@@ -606,6 +634,23 @@ public class TransientCache extends ContactsCache
 		else
 		{
 			contacts = hDb.getNonHikeContacts();
+			writeLock.lock();
+			try
+			{
+				for (Pair<AtomicBoolean, ContactInfo> contactPair : contacts)
+				{
+					ContactInfo contact = contactPair.second;
+					if (!transientContacts.containsKey(contact.getMsisdn()))
+					{
+						ContactTuple tuple = new ContactTuple(1, contact);
+						transientContacts.put(contact.getMsisdn(), tuple);
+					}
+				}
+			}
+			finally
+			{
+				writeLock.unlock();
+			}
 		}
 		return contacts;
 	}
@@ -660,6 +705,7 @@ public class TransientCache extends ContactsCache
 		else
 		{
 			contacts = hDb.getNonHikeMostContactedContactsFromListOfNumbers(phoneNumbers, mostContactedValues, limit);
+			insertContact(contacts);
 		}
 		return contacts;
 	}
