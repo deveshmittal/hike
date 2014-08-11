@@ -347,7 +347,8 @@ public class HikeNotification
 			return;
 		}
 
-		final int notificationId = HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID;
+		final int notificationId = (msisdnList.size() > 1)  ? HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID : msisdnList.get(0).hashCode();
+		
 		final Intent notificationIntent = new Intent(context, ChatThread.class);
 		
 		String firstMsisdn = msisdnList.get(0);
