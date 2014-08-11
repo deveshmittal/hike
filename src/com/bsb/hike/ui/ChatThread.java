@@ -400,7 +400,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean showingChatThemePicker;
 
-	private boolean showingImpMessagePinCreate,showingPIN;
+	private boolean showingImpMessagePinCreate;
 
 	private ImageView backgroundImage;
 
@@ -492,7 +492,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mComposeViewWatcher.setBtnEnabled();
 			mComposeView.requestFocus();
 		}
-		if(showingPIN)
+		if(isShowingPin())
 		{
 			   decrementUnreadPInCount();
 		}
@@ -962,11 +962,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			tipView.setVisibility(View.GONE);
 		}
-		if (animationId != -1 && !showingPIN)
+		if (animationId != -1 && !isShowingPin())
 		{
 			tipView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), animationId));
 		}
-		showingPIN = true;
+		tipView.setTag(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 		//decrement the unread count if message pinned
 		   
 		     decrementUnreadPInCount();
@@ -1044,11 +1044,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void hidePinFromUI(boolean playAnim)
 	{
-		if (!showingPIN)
+		if (!isShowingPin())
 		{
 			return;
 		}
-		showingPIN = false;
 		if (playAnim)
 		{
 			playUpDownAnimation(tipView);
@@ -2184,7 +2183,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(showingImpMessagePinCreate){
 			dismissPinCreateView(-1);
 		}
-		if(showingPIN){
+		if(isShowingPin()){
 			hidePinFromUI(false);
 		}
 		invalidateOptionsMenu();
@@ -2633,6 +2632,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void showStickerFtueTip()
 	{
+		// if some other tip is visible , make its visibility gone, giving more priority to sticker tip 
+		if(tipView!=null){
+			tipView.setVisibility(View.GONE);
+		}
 		tipView = findViewById(R.id.emoticon_tip);
 		tipView.setVisibility(View.VISIBLE);
 		tipView.setOnTouchListener(new OnTouchListener()
@@ -8698,5 +8701,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}, delayTime);
 		}
+	}
+	
+	private boolean isShowingPin(){
+		return tipView!=null && tipView.getTag() instanceof Integer && ((Integer)tipView.getTag() == HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 	}
 }
