@@ -412,7 +412,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 * using the same token as rewards token, as per DK sir's mail
 		 */
 		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.gamesUrl + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
-		intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.games));
+		intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.hike_extras));
 		return intent;
 	}
 
@@ -1214,7 +1214,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
 		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.games), 3));
+			optionsList.add(new OverFlowMenuItem(getString(R.string.hike_extras), 3));
 		}
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
 		{
