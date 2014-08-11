@@ -1288,15 +1288,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return false;
 		}
 		getSupportMenuInflater().inflate(isActionModeOn ? R.menu.multi_select_chat_menu : R.menu.chat_thread_menu, menu);
-		// for group chat we show pin and one:one, we show theme
-		if ( Utils.isGroupConversation(mContactNumber))
-		{
-			onCreatePinMenu( menu);
-		}
-		else
-		{
-			onCreateThemeMenu( menu);
-		}
 		mMenu = menu;
 		
 		if(!isActionModeOn)
@@ -1311,6 +1302,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					showOverFlowMenu();
 				}
 			});
+		}
+		// for group chat we show pin and one:one, we show theme
+		if ( Utils.isGroupConversation(mContactNumber))
+		{
+			onCreatePinMenu( menu);
+		}
+		else
+		{
+			onCreateThemeMenu( menu);
 		}
 		return true;
 	}
