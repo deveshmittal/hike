@@ -6,10 +6,11 @@
     <ImageView
         android:id="@+id/overflow_icon_image"
         android:layout_width="56dp"
+        android:contentDescription="Overflow menu"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
         android:scaleType="centerInside"
-        android:src="@drawable/ic_overflow_home" />
+        android:src="@drawable/ic_overflow_home"/>
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/top_bar_indicator"
