@@ -170,13 +170,16 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			}
 			else
 			{
-				if (contactInfo.isOnhike())
+				if (null != contactInfo.getName())
 				{
-					hikeTaskList.add(contactInfo);
-				}
-				else if (fetchSmsContacts && shouldShowSmsContact(msisdn))
-				{
-					smsTaskList.add(contactInfo);
+					if (contactInfo.isOnhike())
+					{
+						hikeTaskList.add(contactInfo);
+					}
+					else if (fetchSmsContacts && shouldShowSmsContact(msisdn))
+					{
+						smsTaskList.add(contactInfo);
+					}
 				}
 			}
 		}

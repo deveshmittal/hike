@@ -619,7 +619,7 @@ public class TransientCache extends ContactsCache
 					{
 						ContactTuple tuple = savedMapEntry.getValue();
 						ContactInfo contactInfo = tuple.getContact();
-						if (!contactInfo.isOnhike())
+						if (!contactInfo.isOnhike() && (null != contactInfo.getName()))
 						{
 							contacts.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(false), contactInfo));
 						}
@@ -672,7 +672,7 @@ public class TransientCache extends ContactsCache
 				{
 					ContactInfo contactInfo = savedMapEntry.getValue().getContact();
 					String phoneNum = contactInfo.getPhoneNum();
-					if (phoneNumbers.contains(DatabaseUtils.sqlEscapeString(phoneNum)) && !contactInfo.isOnhike())
+					if (phoneNumbers.contains(DatabaseUtils.sqlEscapeString(phoneNum)) && !contactInfo.isOnhike() && (null != contactInfo.getName()))
 					{
 						contacts.add(contactInfo);
 						limit = limit - 1;
