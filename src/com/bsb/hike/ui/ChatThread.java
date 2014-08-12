@@ -1615,6 +1615,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				mAdapter.notifyDataSetChanged();
 				clearConfirmDialog.dismiss();
 				hidePinFromUI(true);
+				
+				try
+				{
+					if(mConversation.getMetaData()!=null)
+					{
+						mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);						
+					}
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+				updateOverflowMenuUnreadCount();
+				mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
 			}
 		};
 

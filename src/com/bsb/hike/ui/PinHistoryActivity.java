@@ -80,26 +80,20 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity
 
 	private void setupMainFragment(Bundle savedInstanceState)
 	{
-		if (savedInstanceState != null) {
-            return;
-        }
-				
-		mainFragment = new PinHistoryFragment();
-		
 		msisdn = getIntent().getExtras().getString(HikeConstants.TEXT_PINS);
-		
+
 		convId = getIntent().getExtras().getLong(HikeConstants.EXTRA_CONV_ID);
-		
-		Bundle bundle = new Bundle();
-		
-		bundle.putString(HikeConstants.TEXT_PINS, msisdn);
-		
-		bundle.putLong(HikeConstants.EXTRA_CONV_ID, convId);
-		
-		mainFragment.setArguments(bundle);
-		
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.parent_layout, mainFragment).commit();		
+
+		if(getSupportFragmentManager().findFragmentByTag(HikeConstants.PIN_HISTORY_FRAGMENT_TAG) == null)
+		{			
+			Bundle bundle = new Bundle();
+			bundle.putString(HikeConstants.TEXT_PINS, msisdn);
+			bundle.putLong(HikeConstants.EXTRA_CONV_ID, convId);
+
+			mainFragment = new PinHistoryFragment();
+			mainFragment.setArguments(bundle);
+			getSupportFragmentManager().beginTransaction().add(R.id.parent_layout, mainFragment, HikeConstants.PIN_HISTORY_FRAGMENT_TAG).commit();		
+		}
 	}
 	
 	@Override
