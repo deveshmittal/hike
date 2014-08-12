@@ -74,15 +74,15 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 	@Override
 	public void setArguments(Bundle args) 
 	{
-		super.setArguments(args);
-		
-		msisdn = args.getString(HikeConstants.TEXT_PINS);
-		
-		convId = args.getLong(HikeConstants.EXTRA_CONV_ID);
+		super.setArguments(args);		
 	}
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
+		msisdn = getArguments().getString(HikeConstants.TEXT_PINS);
+		
+		convId = getArguments().getLong(HikeConstants.EXTRA_CONV_ID);
+
 		View parent = inflater.inflate(R.layout.sticky_pins, null);
 		
 		mPinListView = (ListView) parent.findViewById(android.R.id.list);
