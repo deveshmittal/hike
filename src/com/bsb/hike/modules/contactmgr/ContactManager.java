@@ -389,13 +389,20 @@ public class ContactManager implements ITransientCache
 	/**
 	 * This method should be called when last message in a group is changed, we remove the previous contact from the {@link PersistenceCache} and inserts the new contacts in memory
 	 * 
-	 * @param groupId
-	 * @param currentGroupMsisdns
+	 * @param map
 	 */
-	public void removeOlderLastGroupMsisdns(String groupId, List<String> currentGroupMsisdns)
+	public void removeOlderLastGroupMsisdns(Map<String, JSONObject> map)
 	{
-		List<String> msisdns = persistenceCache.removeOlderLastGroupMsisdn(groupId, currentGroupMsisdns);
+		List<String> msisdns = new ArrayList<String>();
 		List<String> msisdnsDB = new ArrayList<String>();
+
+		for (Entry<String, JSONObject> mapEntry : map.entrySet())
+		{
+			String groupId = mapEntry.getKey();
+			List<String> lastMsisdns = HikeConversationsDatabase.getInstance().getGroupLastMsgMsisdn(mapEntry.getValue());
+			msisdns.addAll(persistenceCache.removeOlderLastGroupMsisdn(groupId, lastMsisdns));
+		}
+
 		for (String ms : msisdns)
 		{
 			ContactInfo contact = transientCache.getContact(ms);

@@ -830,6 +830,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		int unreadMessageCount = 0;
 
+		Map<String, JSONObject> map = new HashMap<String, JSONObject>();
+		
 		for (ConvMessage conv : convMessages)
 		{
 			if (Utils.shouldIncrementCounter(conv))
@@ -870,6 +872,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				addSharedMedia(msgId, conv.getConversation().getConvId());
 			}
 
+			if(Utils.isGroupConversation(conv.getMsisdn()))
+			{
+				map.put(conv.getMsisdn(), conv.getMetadata().getJSON());
+			}
 			/*
 			 * Updating the conversations table
 			 */
@@ -880,7 +886,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		insertStatement.close();
 		mDb.setTransactionSuccessful();
 		mDb.endTransaction();
-
+		ContactManager.getInstance().removeOlderLastGroupMsisdns(map);
 		incrementUnreadCounter(convMessages.get(0).getMsisdn(), unreadMessageCount);
 	}
 
@@ -1232,11 +1238,28 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				if (Utils.isGroupConversation(msisdn))
 				{
-					List<String> grpMsisdns = getGroupLastMsgMsisdn(msisdn, metadata, groupParticipant);
-
-					if (null != grpMsisdns && grpMsisdns.size() > 0)
+					List<String> grpMsisdns;
+					try
 					{
-						grpLastMsisdns.put(msisdn, grpMsisdns);
+						grpMsisdns = getGroupLastMsgMsisdn(new JSONObject(metadata));
+						if (null != grpMsisdns)
+						{
+							if (grpMsisdns.size() == 0)
+							{
+								if (null != groupParticipant && !groupParticipant.equals(""))
+								{
+									grpMsisdns.add(groupParticipant);
+								}
+							}
+							else
+							{
+								grpLastMsisdns.put(msisdn, grpMsisdns);
+							}
+						}
+					}
+					catch (JSONException e)
+					{
+						Logger.e("HikeConversationsDatabase", "Exception while getting last group message msisdns : " + e);
 					}
 				}
 				else
@@ -1257,13 +1280,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	}
 
-	private List<String> getGroupLastMsgMsisdn(String groupId, String metadataString, String groupParticipant)
+	public List<String> getGroupLastMsgMsisdn(JSONObject metadata)
 	{
 		List<String> grpLastMsisdns = new ArrayList<String>();
-		JSONObject metadata;
 		try
 		{
-			metadata = new JSONObject(metadataString);
 			ParticipantInfoState participantInfoState = metadata.has(HikeConstants.DND_USERS) || metadata.has(HikeConstants.DND_NUMBERS) ? ParticipantInfoState.DND_USER
 					: ParticipantInfoState.fromJSON(metadata);
 			switch (participantInfoState)
@@ -1318,14 +1339,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			Logger.e(getClass().getSimpleName(), "Exception while getting last message in group msisdn from metadata " + e);
 		}
-
-		if (grpLastMsisdns.size() == 0)
-		{
-			if (null != groupParticipant && !groupParticipant.equals(""))
-			{
-				grpLastMsisdns.add(groupParticipant);
-			}
-		}
 		return grpLastMsisdns;
 	}
 
@@ -1341,7 +1354,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			groupIds.replace(idx, groupIds.length(), ")");
 		}
-		
+
 		Cursor groupInfoCursor = null;
 		try
 		{
