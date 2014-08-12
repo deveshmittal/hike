@@ -400,7 +400,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean showingChatThemePicker;
 
-	private boolean showingImpMessagePinCreate,showingPIN;
+	private boolean showingImpMessagePinCreate;
 
 	private ImageView backgroundImage;
 
@@ -492,7 +492,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mComposeViewWatcher.setBtnEnabled();
 			mComposeView.requestFocus();
 		}
-		if(showingPIN)
+		if(isShowingPin())
 		{
 			   decrementUnreadPInCount();
 		}
@@ -962,11 +962,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			tipView.setVisibility(View.GONE);
 		}
-		if (animationId != -1 && !showingPIN)
+		if (animationId != -1 && !isShowingPin())
 		{
 			tipView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), animationId));
 		}
-		showingPIN = true;
+		tipView.setTag(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 		//decrement the unread count if message pinned
 		   
 		     decrementUnreadPInCount();
@@ -1044,11 +1044,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void hidePinFromUI(boolean playAnim)
 	{
-		if (!showingPIN)
+		if (!isShowingPin())
 		{
 			return;
 		}
-		showingPIN = false;
 		if (playAnim)
 		{
 			playUpDownAnimation(tipView);
@@ -1288,15 +1287,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return false;
 		}
 		getSupportMenuInflater().inflate(isActionModeOn ? R.menu.multi_select_chat_menu : R.menu.chat_thread_menu, menu);
-		// for group chat we show pin and one:one, we show theme
-		if ( Utils.isGroupConversation(mContactNumber))
-		{
-			onCreatePinMenu( menu);
-		}
-		else
-		{
-			onCreateThemeMenu( menu);
-		}
 		mMenu = menu;
 		
 		if(!isActionModeOn)
@@ -1312,6 +1302,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 		}
+		// for group chat we show pin and one:one, we show theme
+		if ( Utils.isGroupConversation(mContactNumber))
+		{
+			onCreatePinMenu( menu);
+		}
+		else
+		{
+			onCreateThemeMenu( menu);
+		}
 		return true;
 	}
 
@@ -1319,7 +1318,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{
 		menu.getItem(0).setVisible(true);
 		menu.getItem(1).setVisible(false);
-		if(tipView!=null && tipView.getVisibility()== View.VISIBLE && tipView.getTag()==TipType.PIN)
+		if(tipView!=null && tipView.getVisibility()== View.VISIBLE && tipView.getTag() instanceof TipType && (TipType)tipView.getTag()==TipType.PIN)
 		{
 			tipView.setVisibility(View.GONE);
 			tipView = null;
@@ -1616,6 +1615,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				mAdapter.notifyDataSetChanged();
 				clearConfirmDialog.dismiss();
 				hidePinFromUI(true);
+				
+				try
+				{
+					if(mConversation.getMetaData()!=null)
+					{
+						mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);						
+					}
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+				updateOverflowMenuUnreadCount();
+				mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
 			}
 		};
 
@@ -2184,7 +2197,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(showingImpMessagePinCreate){
 			dismissPinCreateView(-1);
 		}
-		if(showingPIN){
+		if(isShowingPin()){
 			hidePinFromUI(false);
 		}
 		invalidateOptionsMenu();
@@ -2633,6 +2646,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void showStickerFtueTip()
 	{
+		// if some other tip is visible , make its visibility gone, giving more priority to sticker tip 
+		if(tipView!=null){
+			tipView.setVisibility(View.GONE);
+		}
 		tipView = findViewById(R.id.emoticon_tip);
 		tipView.setVisibility(View.VISIBLE);
 		tipView.setOnTouchListener(new OnTouchListener()
@@ -6405,8 +6422,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					resetAtomicPopUpKey(HikeMessengerApp.ATOMIC_POP_UP_STICKER);
 					if (tipView != null)
 					{
-						TipType viewTipType = (TipType) tipView.getTag();
-						if (viewTipType == TipType.EMOTICON)
+						Object tag = tipView.getTag();
+						
+						if (tag instanceof TipType && ((TipType)tag == TipType.EMOTICON))
 						{
 							HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
 							Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
@@ -7587,8 +7605,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		if (tipView != null && tipView.getVisibility() == View.VISIBLE)
 		{
-			TipType tipType = (TipType) tipView.getTag();
-			if (tipType == TipType.LAST_SEEN)
+			Object tag = tipView.getTag();
+			
+			if (tag instanceof TipType && ((TipType)tag == TipType.LAST_SEEN))
 			{
 				tipView.setVisibility(View.INVISIBLE);
 			}
@@ -8698,5 +8717,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}, delayTime);
 		}
+	}
+	
+	private boolean isShowingPin(){
+		return tipView!=null && tipView.getTag() instanceof Integer && ((Integer)tipView.getTag() == HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 	}
 }
