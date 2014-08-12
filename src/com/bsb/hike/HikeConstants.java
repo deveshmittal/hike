@@ -749,6 +749,8 @@ public class HikeConstants
 	public static final String HIKE_FILE_LIST_NAME = "hikeFiles";
 
 	public static final String STATUS_MESSAGE_HEADER = "hike-status-message";
+	
+	public static final String PIN_HISTORY_FRAGMENT_TAG = "pin-history-fragment";
 
 	/*
 	 * Contact Type
