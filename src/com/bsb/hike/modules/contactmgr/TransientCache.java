@@ -939,11 +939,11 @@ public class TransientCache extends ContactsCache
 		ContactInfo contact = getContact(msisdn);
 		if (allContactsLoaded)
 		{
-			return (null != contact);
+			return (null != contact && null != contact.getName());
 		}
 		else
 		{
-			if (null != contact)
+			if (null != contact && null != contact.getName())
 				return true;
 			else
 			{

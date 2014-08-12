@@ -918,8 +918,17 @@ public class ContactManager implements ITransientCache
 		hDb.updateIsOffline(msisdn, isOffline);
 	}
 
+	/**
+	 * This method checks whether a contact exists or not i.e it is a saved contact or not
+	 * 
+	 * @param msisdn
+	 * @return
+	 */
 	public boolean doesContactExist(String msisdn)
 	{
+		ContactInfo contact = persistenceCache.getContact(msisdn);
+		if (null != contact && null != contact.getName())
+			return true;
 		return transientCache.doesContactExist(msisdn);
 	}
 
