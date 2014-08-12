@@ -9,7 +9,8 @@
         android:contentDescription="Overflow menu"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        android:scaleType="centerInside"/>
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_overflow_home"/>
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/top_bar_indicator"
