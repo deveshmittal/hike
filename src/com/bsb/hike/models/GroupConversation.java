@@ -149,6 +149,7 @@ public class GroupConversation extends Conversation
 				}
 				object.put(HikeConstants.DATA, array);
 			}
+			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 		}
 		catch (JSONException e)
 		{

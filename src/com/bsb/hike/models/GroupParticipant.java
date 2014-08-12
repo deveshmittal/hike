@@ -49,6 +49,11 @@ public class GroupParticipant implements Comparable<GroupParticipant>
 		return contactInfo;
 	}
 
+	public void setContactInfo(ContactInfo info)
+	{
+		contactInfo = info;
+	}
+
 	@Override
 	public int compareTo(GroupParticipant another)
 	{

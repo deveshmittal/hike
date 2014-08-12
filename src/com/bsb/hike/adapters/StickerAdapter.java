@@ -31,6 +31,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.EmoticonType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerPageAdapter.ViewType;
@@ -183,6 +184,11 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 								@Override
 								public void run()
 								{
+									if (!isCurrentEmoticonTypeStickers())
+									{
+										return;
+									}
+
 									stickerPageAdapter.notifyDataSetChanged();
 								}
 							});
@@ -206,6 +212,11 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 							@Override
 							public void run()
 							{
+								if (!isCurrentEmoticonTypeStickers())
+								{
+									return;
+								}
+
 								Logger.d(getClass().getSimpleName(), "Download failed for new category " + cat.categoryId.name());
 
 								spo.getDownloadingParent().setVisibility(View.GONE);
@@ -274,8 +285,29 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 	}
 
+	/**
+	 * This method was added to ensure that the current emoticon type in the chat thread is of sticker type. This was added since there was a case in low end devices where the
+	 * palette was dismissed but the sticker's scroll listener still tried to get categories
+	 * 
+	 * @return
+	 */
+	private boolean isCurrentEmoticonTypeStickers()
+	{
+		EmoticonType emoticonType = ((ChatThread) activity).getCurrentEmoticonType();
+		if (emoticonType != EmoticonType.STICKERS)
+		{
+			return false;
+		}
+		return true;
+	}
+
 	private void initStickers(StickerPageObjects spo, final StickerCategory category)
 	{
+		if (!isCurrentEmoticonTypeStickers())
+		{
+			return;
+		}
+
 		final StickerLoader worker = new StickerLoader(activity.getApplicationContext());
 		spo.getDownloadingParent().setVisibility(View.GONE);
 		spo.getDownloadingFailedButton().setVisibility(View.GONE);
@@ -309,9 +341,9 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 			long t1 = System.currentTimeMillis();
 			stickersList = new ArrayList<Sticker>();
-			if (category.categoryId.equals(StickerCategoryId.doggy))
+			if (category.categoryId.equals(StickerCategoryId.expressions))
 			{
-				addDefaultStickers(stickersList, category, StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY);
+				addDefaultStickers(stickersList, category, StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS);
 			}
 			else if (category.categoryId.equals(StickerCategoryId.humanoid))
 			{
@@ -385,6 +417,11 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				}
 
 				int currentIdx = ((ChatThread) activity).getCurrentPage();
+				if (currentIdx == -1)
+				{
+					return;
+				}
+
 				StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
 				if (stickersList.isEmpty() || !category.categoryId.equals(sc.categoryId)
 						|| !activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(category.categoryId.downloadPref(), false) || category.hasReachedEnd())

@@ -80,30 +80,33 @@ public class TagEditText extends EditText
 	 * 
 	 * @param text
 	 */
-	public void appendTag(String text, String uniqueness, Object data)
+	private void appendTag(String text, String uniqueness, Object data)
 	{
 
 		String customuniqueness = generateUniqueness(uniqueness);
 		addedTags.put(customuniqueness, data);
 		ImageSpan span = SpanUtil.getImageSpanFromTextView(getContext(), R.layout.tag, R.id.tagTV, text);
-		addedSpans.put(customuniqueness, span);
-		spanToUniqueness.put(span, uniqueness);
-		SpannableStringBuilder ssb = new SpannableStringBuilder();
-		Set<ImageSpan> allSpans = spanToUniqueness.keySet();
-		for (ImageSpan ispan : allSpans)
+		if (span != null)
 		{
-			ssb.append(SPAN_REPLACEMENT + " ");
-			int length = ssb.length();
-			// -1 for space
-			ssb.setSpan(ispan, length - SPAN_REPLACEMENT.length() - 1, length - 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		}
-		needCallback = false;
-		setText(ssb);
-		setSelection(ssb.length());
-		if (listener != null)
-		{
-			listener.tagAdded(data, uniqueness);
-			listener.charResetAfterSeperator();
+			addedSpans.put(customuniqueness, span);
+			spanToUniqueness.put(span, uniqueness);
+			SpannableStringBuilder ssb = new SpannableStringBuilder();
+			Set<ImageSpan> allSpans = spanToUniqueness.keySet();
+			for (ImageSpan ispan : allSpans)
+			{
+				ssb.append(SPAN_REPLACEMENT + " ");
+				int length = ssb.length();
+				// -1 for space
+				ssb.setSpan(ispan, length - SPAN_REPLACEMENT.length() - 1, length - 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			}
+			needCallback = false;
+			setText(ssb);
+			setSelection(ssb.length());
+			if (listener != null)
+			{
+				listener.tagAdded(data, uniqueness);
+				listener.charResetAfterSeperator();
+			}
 		}
 	}
 

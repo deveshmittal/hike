@@ -17,6 +17,7 @@
         android:layout_weight="10"
         android:paddingBottom="5dp"
         android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:paddingTop="5dp"
         android:shadowColor="#4D000000"
         android:shadowDy="0.6"

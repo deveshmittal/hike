@@ -51,9 +51,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -64,21 +64,15 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -87,15 +81,20 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.media.AudioManager;
 import android.media.ExifInterface;
+import android.media.MediaPlayer;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.provider.DocumentsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
@@ -109,7 +108,6 @@ import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Pair;
-import android.util.Patterns;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -124,7 +122,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -133,11 +130,12 @@ import android.widget.Toast;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeConstants.SMSSyncState;
-import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -149,6 +147,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
@@ -162,11 +161,11 @@ import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.SignupActivity;
+import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WelcomeActivity;
-import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
@@ -176,7 +175,7 @@ public class Utils
 	public static Pattern msisdnRegex;
 
 	public static Pattern pinRegex;
-
+ 
 	public static String shortCodeIntent;
 
 	private static Animation mOutToRight;
@@ -188,6 +187,8 @@ public class Utils
 	private static TranslateAnimation mInFromRight;
 
 	public static float densityMultiplier = 1.0f;
+
+	public static int densityDpi;
 
 	private static Lock lockObj = new ReentrantLock();
 
@@ -331,70 +332,6 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.MSISDN, Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo.getId() : contactInfo.getMsisdn());
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
-	}
-
-	static private int iconHash(String s)
-	{
-		/*
-		 * ignore everything after :: so that your large icon by default matches your msisdn
-		 */
-		s = s.split("::")[0];
-		int count = 0;
-		for (int i = 0; i < s.length(); ++i)
-		{
-			count += s.charAt(i);
-		}
-
-		return count;
-	}
-
-	public static Drawable getDefaultIconForUser(Context context, String msisdn)
-	{
-		return getDefaultIconForUser(context, msisdn, false);
-	}
-
-	public static Drawable getDefaultIconForUser(Context context, String msisdn, boolean rounded)
-	{
-		return context.getResources().getDrawable(getDefaultAvatarResourceId(msisdn, rounded));
-	}
-
-	public static BitmapDrawable getDefaultIconForUserFromDecodingRes(Context context, String msisdn)
-	{
-		return getDefaultIconForUserFromDecodingRes(context, msisdn, false);
-	}
-
-	public static BitmapDrawable getDefaultIconForUserFromDecodingRes(Context context, String msisdn, boolean rounded)
-	{
-		return getBitmapDrawable(context.getResources(), BitmapFactory.decodeResource(context.getResources(), getDefaultAvatarResourceId(msisdn, rounded)));
-	}
-
-	public static int getDefaultAvatarResourceId(String msisdn, boolean rounded)
-	{
-		int count = 5;
-		int id;
-		switch (iconHash(msisdn) % count)
-		{
-		case 0:
-			id = rounded ? R.drawable.avatar_01_rounded : R.drawable.avatar_01;
-			break;
-		case 1:
-			id = rounded ? R.drawable.avatar_02_rounded : R.drawable.avatar_02;
-			break;
-		case 2:
-			id = rounded ? R.drawable.avatar_03_rounded : R.drawable.avatar_03;
-			break;
-		case 3:
-			id = rounded ? R.drawable.avatar_04_rounded : R.drawable.avatar_04;
-			break;
-		case 4:
-			id = rounded ? R.drawable.avatar_05_rounded : R.drawable.avatar_05;
-			break;
-		default:
-			id = rounded ? R.drawable.avatar_01_rounded : R.drawable.avatar_01;
-			break;
-		}
-
-		return id;
 	}
 
 	/** Create a File for saving an image or video */
@@ -561,46 +498,6 @@ public class Utils
 			path.append(HikeConstants.SENT_ROOT);
 		}
 		return path.toString();
-	}
-
-	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap)
-	{
-		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
-		Canvas canvas = new Canvas(output);
-
-		final int color = 0xff424242;
-		final Paint paint = new Paint();
-		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-		final RectF rectF = new RectF(rect);
-		final float roundPx = 4;
-
-		paint.setAntiAlias(true);
-		canvas.drawARGB(0, 0, 0, 0);
-		paint.setColor(color);
-		canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-
-		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-		canvas.drawBitmap(bitmap, rect, rect, paint);
-
-		return output;
-	}
-
-	public static Bitmap getCircularBitmap(Bitmap bitmap)
-	{
-		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
-		Canvas canvas = new Canvas(output);
-
-		final int color = 0xff424242;
-		final Paint paint = new Paint();
-		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-
-		paint.setAntiAlias(true);
-		canvas.drawARGB(0, 0, 0, 0);
-		paint.setColor(color);
-		canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2, bitmap.getWidth() / 2, paint);
-		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-		canvas.drawBitmap(bitmap, rect, rect, paint);
-		return output;
 	}
 
 	public static void savedAccountCredentials(AccountInfo accountInfo, SharedPreferences.Editor editor)
@@ -842,6 +739,7 @@ public class Utils
 			data.put(HikeConstants.LogEvent.DEVICE, device);
 			data.put(HikeConstants.LogEvent.CARRIER, carrier);
 			data.put(HikeConstants.LogEvent.APP_VERSION, appVersion);
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 			object.put(HikeConstants.DATA, data);
 
 			return object;
@@ -884,6 +782,7 @@ public class Utils
 				}
 				editor.commit();
 				data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
+				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 				obj.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 				obj.put(HikeConstants.DATA, data);
@@ -912,6 +811,7 @@ public class Utils
 	public static void setDensityMultiplier(DisplayMetrics displayMetrics)
 	{
 		Utils.densityMultiplier = displayMetrics.scaledDensity;
+		Utils.densityDpi = displayMetrics.densityDpi;
 	}
 
 	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
@@ -1101,6 +1001,7 @@ public class Utils
 			JSONObject data = new JSONObject();
 			data.put(HikeConstants.UPGRADE, upgrade);
 			data.put(HikeConstants.SENDBOT, sendbot);
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 			requestAccountInfo.put(HikeConstants.DATA, data);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, requestAccountInfo);
@@ -1131,6 +1032,14 @@ public class Utils
 		Intent s = new Intent(android.content.Intent.ACTION_SEND);
 		s.setType("text/plain");
 		s.putExtra(Intent.EXTRA_TEXT, message);
+		context.startActivity(s);
+	}
+
+	public static void startShareImageIntent(Context context, String mimeType, String imagePath)
+	{
+		Intent s = new Intent(android.content.Intent.ACTION_SEND);
+		s.setType(mimeType);
+		s.putExtra(Intent.EXTRA_STREAM, Uri.parse(imagePath));
 		context.startActivity(s);
 	}
 
@@ -1240,7 +1149,7 @@ public class Utils
 
 		return thumbnail;
 	}
-	
+
 	public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail, boolean applyBitmapConfig)
 	{
 		Bitmap thumbnail = null;
@@ -1262,11 +1171,11 @@ public class Utils
 
 		options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth) / (dimensionLimit));
 		options.inJustDecodeBounds = false;
-		if(applyBitmapConfig)
+		if (applyBitmapConfig)
 		{
 			options.inPreferredConfig = Config.RGB_565;
 		}
-		
+
 		thumbnail = BitmapFactory.decodeFile(filePath, options);
 		/*
 		 * Should only happen when the external storage does not have enough free space
@@ -1281,7 +1190,54 @@ public class Utils
 		}
 
 		return thumbnail;
-}
+	}
+
+	public static Bitmap getRotatedBitmap(String path, Bitmap bitmap)
+	{
+		if (bitmap  == null)
+		{
+			return null;
+		}
+
+		Bitmap rotatedBitmap = null;
+		Matrix m = new Matrix();
+		ExifInterface exif = null;
+		int orientation = 1;
+
+		try
+		{
+			if (path != null)
+			{
+				// Getting Exif information of the file
+				exif = new ExifInterface(path);
+			}
+			if (exif != null)
+			{
+				orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0);
+				switch (orientation)
+				{
+				case ExifInterface.ORIENTATION_ROTATE_270:
+					m.preRotate(270);
+					break;
+
+				case ExifInterface.ORIENTATION_ROTATE_90:
+					m.preRotate(90);
+					break;
+				case ExifInterface.ORIENTATION_ROTATE_180:
+					m.preRotate(180);
+					break;
+				}
+				// Rotates the image according to the orientation
+				rotatedBitmap = HikeBitmapFactory.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+			}
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		return rotatedBitmap;
+	}
 
 	public static Bitmap makeSquareThumbnail(Bitmap thumbnail, int dimensionLimit)
 	{
@@ -1326,15 +1282,24 @@ public class Utils
 
 	public static String getRealPathFromUri(Uri contentUri, Activity activity)
 	{
+		String filePath = null;
 		String[] proj = { MediaStore.Images.Media.DATA };
 		Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
 		if (cursor == null || cursor.getCount() == 0)
 		{
-			return null;
+			//return null;
 		}
-		int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-		cursor.moveToFirst();
-		return cursor.getString(column_index);
+		else
+		{
+			int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+			cursor.moveToFirst();
+			filePath = cursor.getString(column_index);
+		}
+		if(filePath == null)
+		{
+			filePath = FilePath.getPath(activity.getBaseContext(), contentUri);
+		}
+		return filePath;
 	}
 
 	public static enum ExternalStorageState
@@ -1392,13 +1357,14 @@ public class Utils
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
 				String imageOrientation = Utils.getImageOrientation(srcFilePath);
-				Bitmap tempBmp = Utils.scaleDownImage(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, false);
-				tempBmp = Utils.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
+				Bitmap tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX,
+						Bitmap.Config.RGB_565, true, false);
+				tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 				// Temporary fix for when a user uploads a file through Picasa
 				// on ICS or higher.
 				if (tempBmp != null)
 				{
-					byte[] fileBytes = Utils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG, 75);
+					byte[] fileBytes = BitmapUtils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG, 75);
 					tempBmp.recycle();
 					src = new ByteArrayInputStream(fileBytes);
 				}
@@ -1434,6 +1400,11 @@ public class Utils
 		catch (IOException e)
 		{
 			Logger.e("Utils", "Error while reading/writing/closing file", e);
+			return false;
+		}
+		catch (Exception ex)
+		{
+			Logger.e("Utils", "WTF Error while reading/writing/closing file", ex);
 			return false;
 		}
 	}
@@ -1493,6 +1464,13 @@ public class Utils
 		return b;
 	}
 
+	public static void setupUri(Context ctx)
+	{
+		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		boolean connectUsingSSL = Utils.switchSSLOn(ctx);
+		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), connectUsingSSL);
+	}
+
 	public static void setupServerURL(boolean isProductionServer, boolean ssl)
 	{
 		Logger.d("SSL", "Switching SSL on? " + ssl);
@@ -1509,10 +1487,12 @@ public class Utils
 		if (isProductionServer)
 		{
 			AccountUtils.base = httpString + AccountUtils.host + "/v1";
+			AccountUtils.baseV2 = httpString + AccountUtils.host + "/v2";
 		}
 		else
 		{
 			AccountUtils.base = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v1";
+			AccountUtils.baseV2 = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v2";
 		}
 
 		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
@@ -1973,11 +1953,11 @@ public class Utils
 			return thumbnailString;
 		}
 
-		Bitmap thumbnailBmp = Utils.stringToBitmap(thumbnailString);
-		if (!Utils.isThumbnailSquare(thumbnailBmp))
+		Bitmap thumbnailBmp = HikeBitmapFactory.stringToBitmap(thumbnailString);
+		if (!BitmapUtils.isThumbnailSquare(thumbnailBmp))
 		{
-			Bitmap squareThumbnail = Utils.makeSquareThumbnail(thumbnailBmp, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
-			thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(squareThumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
+			Bitmap squareThumbnail = HikeBitmapFactory.makeSquareThumbnail(thumbnailBmp);
+			thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(squareThumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
 			squareThumbnail.recycle();
 			squareThumbnail = null;
 		}
@@ -2054,7 +2034,7 @@ public class Utils
 	public static boolean isPicasaUri(String picasaUriString)
 	{
 		return (picasaUriString.toString().startsWith(HikeConstants.OTHER_PICASA_URI_START) || picasaUriString.toString().startsWith(HikeConstants.JB_PICASA_URI_START)
-				|| picasaUriString.toString().startsWith("http") || picasaUriString.toString().startsWith(HikeConstants.GMAIL_PREFIX));
+				|| picasaUriString.toString().startsWith("http") || picasaUriString.toString().startsWith(HikeConstants.GMAIL_PREFIX) || picasaUriString.toString().startsWith(HikeConstants.GOOGLE_PLUS_PREFIX));
 	}
 
 	public static Uri makePicasaUri(Uri uri)
@@ -2068,6 +2048,12 @@ public class Utils
 		return uri;
 	}
 
+	/**
+	 * This will return true when SSL toggle is on and connection type is WIFI
+	 * 
+	 * @param context
+	 * @return
+	 */
 	public static boolean switchSSLOn(Context context)
 	{
 		/*
@@ -2124,7 +2110,8 @@ public class Utils
 
 	public static void vibrateNudgeReceived(Context context)
 	{
-		if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.VIBRATE_PREF, true))
+		String VIB_OFF = context.getResources().getString(R.string.vib_off);
+		if (VIB_OFF.equals(PreferenceManager.getDefaultSharedPreferences(context).getString(HikeConstants.VIBRATE_PREF_LIST, getOldVibratePref(context))))
 		{
 			return;
 		}
@@ -2134,7 +2121,8 @@ public class Utils
 		if (ringerMode != AudioManager.RINGER_MODE_SILENT)
 		{
 			Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-			vibrator.vibrate(100);
+			if (vibrator != null)
+				vibrator.vibrate(100);
 		}
 	}
 
@@ -2291,6 +2279,16 @@ public class Utils
 		imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 	}
 
+	public static void showSoftKeyboard(Context context, View v)
+	{
+		if (v == null)
+		{
+			return;
+		}
+		InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.showSoftInput(v, InputMethodManager.RESULT_UNCHANGED_SHOWN);
+	}
+
 	public static void sendLocaleToServer(Context context)
 	{
 		JSONObject object = new JSONObject();
@@ -2299,6 +2297,7 @@ public class Utils
 		try
 		{
 			data.put(HikeConstants.LOCALE, context.getResources().getConfiguration().locale.getLanguage());
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
 			object.put(HikeConstants.DATA, data);
@@ -2406,29 +2405,26 @@ public class Utils
 	}
 
 	public static int getResolutionId()
-	{
-		int densityMultiplierX100 = (int) (densityMultiplier * 100);
-		Logger.d("Stickers", "Resolutions * 100: " + densityMultiplierX100);
-
-		if (densityMultiplierX100 > 200)
+	{	
+		switch(densityDpi)
 		{
-			return HikeConstants.XXHDPI_ID;
-		}
-		else if (densityMultiplierX100 > 150)
-		{
-			return HikeConstants.XHDPI_ID;
-		}
-		else if (densityMultiplierX100 > 100)
-		{
-			return HikeConstants.HDPI_ID;
-		}
-		else if (densityMultiplierX100 > 75)
-		{
+		case 120:
+		   return HikeConstants.LDPI_ID;
+		case 160:
 			return HikeConstants.MDPI_ID;
-		}
-		else
-		{
-			return HikeConstants.LDPI_ID;
+		case 240:
+			return HikeConstants.HDPI_ID;
+		case 320:
+			return HikeConstants.XHDPI_ID;
+		case 213:
+			return HikeConstants.HDPI_ID;
+		case 480:
+			return HikeConstants.XXHDPI_ID;
+		case 640:
+		case 400:
+			return HikeConstants.XXHDPI_ID;
+		default:
+			return HikeConstants.HDPI_ID;
 		}
 	}
 
@@ -2437,25 +2433,6 @@ public class Utils
 		FileOutputStream fos = new FileOutputStream(file);
 
 		byte[] b = Base64.decode(base64String, Base64.DEFAULT);
-		if (b == null)
-		{
-			throw new IOException();
-		}
-		fos.write(b);
-		fos.flush();
-		fos.close();
-	}
-
-	public static void saveBitmapToFile(File file, Bitmap bitmap) throws IOException
-	{
-		saveBitmapToFile(file, bitmap, CompressFormat.PNG, 70);
-	}
-
-	public static void saveBitmapToFile(File file, Bitmap bitmap, CompressFormat compressFormat, int quality) throws IOException
-	{
-		FileOutputStream fos = new FileOutputStream(file);
-
-		byte[] b = bitmapToBytes(bitmap, compressFormat, quality);
 		if (b == null)
 		{
 			throw new IOException();
@@ -2480,13 +2457,66 @@ public class Utils
 		return !TextUtils.isEmpty(context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.NAME_SETTING, null));
 	}
 
-	public static void sendAppState(Context context)
+	public static void appStateChanged(Context context)
+	{
+		appStateChanged(context, true, false);
+	}
+
+	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded)
+	{
+		appStateChanged(context, resetStealth, checkIfActuallyBackgrounded, true, false);
+	}
+
+	public static void appStateChanged(Context context, boolean resetStealth, boolean checkIfActuallyBackgrounded, boolean requestBulkLastSeen, boolean dueToConnect)
 	{
 		if (!isUserAuthenticated(context))
 		{
 			return;
 		}
 
+		if (checkIfActuallyBackgrounded)
+		{
+			boolean screenOn = isScreenOn(context);
+			Logger.d("HikeAppState", "Screen On? " + screenOn);
+
+			if (screenOn)
+			{
+				boolean isForegrounded = isAppForeground(context);
+
+				if (isForegrounded)
+				{
+					if (HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+					{
+						Logger.d("HikeAppState", "Wrong state! correcting it");
+						HikeMessengerApp.currentState = CurrentState.RESUMED;
+						return;
+					}
+				}
+			}
+		}
+
+		sendAppState(context, requestBulkLastSeen, dueToConnect);
+
+		if (resetStealth)
+		{
+			if (HikeMessengerApp.currentState != CurrentState.OPENED && HikeMessengerApp.currentState != CurrentState.RESUMED)
+			{
+				resetStealthMode(context);
+			}
+			else
+			{
+				clearStealthResetTimer(context);
+			}
+		}
+	}
+
+	public static boolean isScreenOn(Context context)
+	{
+		return ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
+	}
+
+	private static void sendAppState(Context context, boolean requestBulkLastSeen, boolean dueToConnect)
+	{
 		JSONObject object = new JSONObject();
 
 		try
@@ -2498,13 +2528,21 @@ public class Utils
 
 				JSONObject data = new JSONObject();
 				data.put(HikeConstants.JUST_OPENED, HikeMessengerApp.currentState == CurrentState.OPENED);
-				data.put(HikeConstants.BULK_LAST_SEEN, true); // adding this for
-																// bulk
+				/*
+				 * We don't need to request for the bulk last seen from here anymore. We have the HTTP call for this.
+				 */
+				data.put(HikeConstants.BULK_LAST_SEEN, false);
 				object.put(HikeConstants.DATA, data);
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
+			}
+			else if (!dueToConnect)
+			{
+				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
 			}
 			else
 			{
-				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
+				return;
 			}
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH_LOW, object);
 		}
@@ -2512,7 +2550,16 @@ public class Utils
 		{
 			Logger.w("AppState", "Invalid json", e);
 		}
+	}
 
+	private static void resetStealthMode(Context context)
+	{
+		StealthResetTimer.getInstance(context).resetStealthToggle();
+	}
+
+	private static void clearStealthResetTimer(Context context)
+	{
+		StealthResetTimer.getInstance(context).clearScheduledStealthToggleTimer();
 	}
 
 	public static String getLastSeenTimeAsString(Context context, long lastSeenTime, int offline)
@@ -2679,87 +2726,6 @@ public class Utils
 		}
 	}
 
-	public static void showTip(final Activity activity, final TipType tipType, final View parentView)
-	{
-		showTip(activity, tipType, parentView, null);
-	}
-
-	public static void showTip(final Activity activity, final TipType tipType, final View parentView, String name)
-	{
-		parentView.setVisibility(View.VISIBLE);
-
-		View container = parentView.findViewById(R.id.tip_container);
-		TextView tipText = (TextView) parentView.findViewById(R.id.tip_text);
-		ImageButton closeTip = (ImageButton) parentView.findViewById(R.id.close);
-
-		switch (tipType)
-		{
-		case EMOTICON:
-			container.setBackgroundResource(R.drawable.bg_sticker_ftue);
-			tipText.setText(R.string.sticker_ftue_body);
-			break;
-		case LAST_SEEN:
-			container.setBackgroundResource(R.drawable.bg_tip_top_left);
-			tipText.setText(R.string.last_seen_tip_friends);
-			break;
-		case MOOD:
-			container.setBackgroundResource(R.drawable.bg_tip_top_left);
-			tipText.setText(R.string.moods_tip);
-			break;
-		case STATUS:
-			container.setBackgroundResource(R.drawable.bg_tip_top_left);
-			tipText.setText(activity.getString(R.string.status_tip, name));
-			break;
-		case CHAT_BG_FTUE:
-			container.setBackgroundResource(R.drawable.bg_tip_top_right);
-			tipText.setText(R.string.chat_bg_ftue_tip);
-			break;
-		}
-		if (closeTip != null)
-		{
-			closeTip.setOnClickListener(new OnClickListener()
-			{
-
-				@Override
-				public void onClick(View v)
-				{
-					closeTip(tipType, parentView, activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0));
-				}
-			});
-		}
-
-		parentView.setTag(tipType);
-	}
-
-	public static void closeTip(TipType tipType, View parentView, SharedPreferences preferences)
-	{
-		parentView.setVisibility(View.GONE);
-
-		Editor editor = preferences.edit();
-
-		switch (tipType)
-		{
-		case EMOTICON:
-			editor.putBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
-			break;
-		case LAST_SEEN:
-			editor.putBoolean(HikeMessengerApp.SHOWN_LAST_SEEN_TIP, true);
-			break;
-		case MOOD:
-			editor.putBoolean(HikeMessengerApp.SHOWN_MOODS_TIP, true);
-			break;
-		case STATUS:
-			editor.putBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, true);
-			break;
-		case CHAT_BG_FTUE:
-			editor.putBoolean(HikeMessengerApp.SHOWN_CHAT_BG_TOOL_TIP, true);
-			editor.putBoolean(HikeMessengerApp.SHOWN_NEW_CHAT_BG_TOOL_TIP, true);
-			break;
-		}
-
-		editor.commit();
-	}
-
 	public static void blockOrientationChange(Activity activity)
 	{
 		final int rotation = activity.getWindowManager().getDefaultDisplay().getOrientation();
@@ -2826,6 +2792,7 @@ public class Utils
 		{
 			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
 			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
@@ -2967,26 +2934,14 @@ public class Utils
 		return jObject;
 	}
 
-	public static Bitmap drawableToBitmap(Drawable drawable)
-	{
-		if (drawable instanceof BitmapDrawable)
-		{
-			return ((BitmapDrawable) drawable).getBitmap();
-		}
-		/*
-		 * http://developer.android.com/reference/android/graphics/Bitmap.Config. html
-		 */
-		Bitmap bitmap = Bitmap.createBitmap((int) (48 * densityMultiplier), (int) (48 * densityMultiplier), Config.ARGB_8888);
-
-		Canvas canvas = new Canvas(bitmap);
-		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-		drawable.draw(canvas);
-		return bitmap;
-	}
-
 	public static boolean isHoneycombOrHigher()
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+	}
+
+	public static boolean isKitkatOrHigher()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 	}
 
 	public static void executeAsyncTask(AsyncTask<Void, Void, Void> asyncTask)
@@ -3085,7 +3040,7 @@ public class Utils
 		}
 	}
 
-	public static void executeContactInfoListResultTask(AsyncTask<Void, Void, List<ContactInfo>> asyncTask)
+	public static void executeContactInfoListResultTask(AsyncTask<Void, Void, FtueContactsData> asyncTask)
 	{
 		if (isHoneycombOrHigher())
 		{
@@ -3133,20 +3088,6 @@ public class Utils
 		}
 	}
 
-	public static Bitmap returnScaledBitmap(Bitmap src, Context context)
-	{
-		Resources res = context.getResources();
-		if (isHoneycombOrHigher())
-		{
-			int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
-			int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
-			return src = Bitmap.createScaledBitmap(src, width, height, false);
-		}
-		else
-			return src;
-
-	}
-
 	public static boolean getSendSmsPref(Context context)
 	{
 		return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.SEND_SMS_PREF, false);
@@ -3166,12 +3107,20 @@ public class Utils
 		}
 	}
 
-	public static void resetUnseenStatusCount(SharedPreferences prefs)
+	public static void resetUnseenStatusCount(Context context)
 	{
-		Editor editor = prefs.edit();
-		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
-		editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
-		editor.commit();
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
+	}
+	
+	public static void resetOverflowCountHomeScreen(Context context)
+	{
+		if (HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.FRIEND_REQ_COUNT, 0) > 0)
+		{
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+		}
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FRIEND_REQ_COUNT_RESET, null);
 	}
 
 	public static boolean shouldIncrementCounter(ConvMessage convMessage)
@@ -3187,6 +3136,7 @@ public class Utils
 			intent.putExtra(HikeConstants.Extras.NAME, conversation.getContactName());
 		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;
 	}
 
@@ -3199,11 +3149,11 @@ public class Utils
 
 		Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(activity, conv.getMsisdn());
 
-		Bitmap bitmap = Utils.drawableToBitmap(avatarDrawable);
+		Bitmap bitmap = HikeBitmapFactory.drawableToBitmap(avatarDrawable, Bitmap.Config.RGB_565);
 
 		int dimension = (int) (Utils.densityMultiplier * 48);
 
-		Bitmap scaled = Bitmap.createScaledBitmap(bitmap, dimension, dimension, false);
+		Bitmap scaled = HikeBitmapFactory.createScaledBitmap(bitmap, dimension, dimension, Bitmap.Config.RGB_565, false, true, true);
 		bitmap = null;
 		intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
 		intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
@@ -3324,7 +3274,7 @@ public class Utils
 			Logger.w("LE", "Invalid json");
 		}
 	}
-
+	
 	public static void sendMd5MismatchEvent(String fileName, String fileKey, String md5, int recBytes, boolean downloading)
 	{
 		try
@@ -3338,7 +3288,7 @@ public class Utils
 			metadata.put(HikeConstants.MD5_HASH, md5);
 			metadata.put(HikeConstants.FILE_SIZE, recBytes);
 			metadata.put(HikeConstants.DOWNLOAD, downloading);
-
+			
 			data.put(HikeConstants.METADATA, metadata);
 
 			sendLogEvent(data);
@@ -3349,67 +3299,6 @@ public class Utils
 		}
 	}
 
-	public static Bitmap returnBigPicture(ConvMessage convMessage, Context context)
-	{
-
-		HikeFile hikeFile = null;
-		Bitmap bigPictureImage = null;
-
-		// Check if this is a file transfer message of image type
-		// construct a bitmap only if the big picture condition matches
-		if (convMessage.isFileTransferMessage())
-		{
-			hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-			if (hikeFile != null)
-			{
-				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE && hikeFile.wasFileDownloaded() && hikeFile.getThumbnail() != null)
-				{
-					final String filePath = hikeFile.getFilePath(); // check
-					bigPictureImage = BitmapFactory.decodeFile(filePath);
-				}
-			}
-
-		}
-		// check if this is a sticker message and find if its non-downloaded or
-		// non present.
-		if (convMessage.isStickerMessage())
-		{
-			final Sticker sticker = convMessage.getMetadata().getSticker();
-			/*
-			 * If this is the first category, then the sticker are a part of the app bundle itself
-			 */
-			if (sticker.isDefaultSticker())
-			{
-				int resourceId = 0;
-
-				if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
-				{
-					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[sticker.getStickerIndex()];
-				}
-				else if (StickerCategoryId.doggy.equals(sticker.getCategory().categoryId))
-				{
-					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY[sticker.getStickerIndex()];
-				}
-
-				if (resourceId > 0)
-				{
-					final Drawable dr = context.getResources().getDrawable(resourceId);
-					bigPictureImage = Utils.drawableToBitmap(dr);
-				}
-
-			}
-			else
-			{
-				final String filePath = sticker.getStickerPath(context);
-				if (!TextUtils.isEmpty(filePath))
-				{
-					bigPictureImage = BitmapFactory.decodeFile(filePath);
-				}
-			}
-		}
-		return bigPictureImage;
-	}
-	
 	public static class MMX implements Serializable
 	{
 		private String id; //Android ID as an unique 64-bit hex string
@@ -3575,10 +3464,28 @@ public class Utils
 		return returnVal;
 	}
 
-	public static Intent getHomeActivityIntent(Context context, final int tabIndex)
+	public static Intent getHomeActivityIntent(Context context)
 	{
 		final Intent intent = new Intent(context, HomeActivity.class);
-		intent.putExtra(HikeConstants.Extras.TAB_INDEX, tabIndex);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		return intent;
+	}
+
+	public static Intent getPeopleActivityIntent(Context context)
+	{
+		final Intent intent = new Intent(context, PeopleActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(HikeConstants.Extras.FROM_NOTIFICATION, true);
+
+		return intent;
+	}
+
+	public static Intent getTimelineActivityIntent(Context context)
+	{
+		final Intent intent = new Intent(context, TimelineActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(HikeConstants.Extras.FROM_NOTIFICATION, true);
 
 		return intent;
 	}
@@ -3681,11 +3588,6 @@ public class Utils
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD;
 	}
 
-	public static boolean hasHoneycomb()
-	{
-		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
-	}
-
 	public static boolean hasHoneycombMR1()
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1;
@@ -3705,44 +3607,6 @@ public class Utils
 	{
 		double freeSpaceAvailable = getFreeSpace();
 		return freeSpaceAvailable > HikeConstants.PROFILE_PIC_FREE_SPACE;
-	}
-
-	public static int getBitmapSize(Bitmap bitmap)
-	{
-		if (bitmap == null)
-			return 0;
-		// From KitKat onward use getAllocationByteCount() as allocated bytes can potentially be
-		// larger than bitmap byte count.
-		if (Utils.hasKitKat())
-		{
-			return bitmap.getAllocationByteCount();
-		}
-
-		if (Utils.hasHoneycombMR1())
-		{
-			return bitmap.getByteCount();
-		}
-
-		// Pre HC-MR1
-		return bitmap.getRowBytes() * bitmap.getHeight();
-	}
-
-	public static BitmapDrawable getBitmapDrawable(Resources mResources, final Bitmap bitmap)
-	{
-		if (bitmap == null)
-			return null;
-
-		if (Utils.hasHoneycomb())
-		{
-			// Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
-			return new BitmapDrawable(mResources, bitmap);
-		}
-		else
-		{
-			// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
-			// which will recycle automagically
-			return new RecyclingBitmapDrawable(mResources, bitmap);
-		}
 	}
 
 	public static int getNumColumnsForGallery(Resources resources, int sizeOfImage)
@@ -3841,22 +3705,6 @@ public class Utils
 		return false;
 	}
 
-	public static String getEmail(Context context)
-	{
-		String email = null;
-		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-		Account[] accounts = AccountManager.get(context).getAccounts();
-		for (Account account : accounts)
-		{
-			if (emailPattern.matcher(account.name).matches())
-			{
-				email = account.name;
-				break;
-			}
-		}
-		return email;
-	}
-
 	public static void startChatThread(Context context, ContactInfo contactInfo)
 	{
 		Intent intent = new Intent(context, ChatThread.class);
@@ -3866,6 +3714,7 @@ public class Utils
 		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		context.startActivity(intent);
 	}
 
@@ -3881,7 +3730,7 @@ public class Utils
 		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
 		if (drawable == null)
 		{
-			Drawable background = context.getResources().getDrawable(Utils.getDefaultAvatarResourceId(msisdn, false));
+			Drawable background = context.getResources().getDrawable(BitmapUtils.getDefaultAvatarResourceId(msisdn, false));
 			Drawable iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
 			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });
 		}
@@ -3973,5 +3822,296 @@ public class Utils
 		}
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
+	}
+
+	public static void addToContacts(Activity context, String msisdn)
+	{
+		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+		i.putExtra(Insert.PHONE, msisdn);
+		context.startActivity(i);
+	}
+
+	public static boolean isPlayTickSound(Context context)
+	{
+		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		return tm.getCallState() == TelephonyManager.CALL_STATE_IDLE && !am.isMusicActive()
+				&& (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true));
+	}
+
+	/**
+	 * we are using stream_ring so that use can control volume from mobile and this stream is not in use when user is chatting and vice-versa
+	 * 
+	 * @param context
+	 * @param soundId
+	 */
+	public static void playSoundFromRaw(Context context, int soundId)
+	{
+
+		Logger.i("sound", "playing sound " + soundId);
+		MediaPlayer mp = new MediaPlayer();
+		mp.setAudioStreamType(AudioManager.STREAM_RING);
+		Resources res = context.getResources();
+		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
+
+		try
+		{
+			mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+			afd.close();
+
+			mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
+			{
+
+				@Override
+				public void onCompletion(MediaPlayer mp)
+				{
+					mp.release();
+
+				}
+			});
+			mp.prepare();
+			mp.start();
+
+		}
+		catch (IllegalArgumentException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IllegalStateException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void playDefaultNotificationSound(Context context)
+	{
+		try
+		{
+			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+			Ringtone r = RingtoneManager.getRingtone(context, notification);
+			r.play();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public static final void cancelScheduledStealthReset(Context context)
+	{
+		HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
+	}
+
+	public static long getOldTimestamp(int min)
+	{
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MINUTE, -min);
+		long old = cal.getTimeInMillis();
+		return old;
+	};
+
+	public static boolean isAppForeground(Context context)
+	{
+		ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+		List<RunningAppProcessInfo> l = mActivityManager.getRunningAppProcesses();
+		Iterator<RunningAppProcessInfo> i = l.iterator();
+		while (i.hasNext())
+		{
+			RunningAppProcessInfo info = i.next();
+
+			if (info.uid == context.getApplicationInfo().uid && info.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static String replaceUrlSpaces(String fileUriString)
+	{
+		/*
+		 * In some phones URI is received with spaces in file path
+		 * we should first replace all these spaces with %20 than
+		 * pass it on to URI.create() method. URI.create() method
+		 * treats space as an invalid charactor in URI. 
+		 */
+		return fileUriString.replace(" ", "%20");
+	}
+
+	/*
+	 * This function is to respect old vibrate preference before vib list pref , if previous was on send, VIB Default else return VIB_OFF
+	 */
+	public static String getOldVibratePref(Context context)
+	{
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
+		Resources res = context.getResources();
+		String vibOff = res.getString(R.string.vib_off);
+		String vibDef = res.getString(R.string.vib_default);
+
+		if (preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, true))
+		{
+			return vibDef;
+		}
+		else
+		{
+			return vibOff;
+		}
+	}
+
+	/*
+	 * This function is to respect old sound preference before sound list pref , if previous was on then check for hike jingle, else return SOUND_OFF
+	 */
+	public static String getOldSoundPref(Context context)
+	{
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
+		Resources res = context.getResources();
+		String notifSoundOff = res.getString(R.string.notif_sound_off);
+		String notifSoundDefault = res.getString(R.string.notif_sound_default);
+		String notifSoundHike = res.getString(R.string.notif_sound_Hike);
+
+		if (preferenceManager.getBoolean(HikeConstants.SOUND_PREF, true))
+		{
+			if (preferenceManager.getBoolean(HikeConstants.HIKE_JINGLE_PREF, true))
+			{
+				return notifSoundHike;
+			}
+			return notifSoundDefault;
+		}
+		else
+		{
+			return notifSoundOff;
+		}
+	}
+
+	public static int getFreeSMSCount(Context context)
+	{
+		return context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, context.MODE_PRIVATE).getInt(HikeMessengerApp.SMS_SETTING, 0);
+	}
+
+	public static void handleBulkLastSeenPacket(Context context, JSONObject jsonObj) throws JSONException
+	{
+		/*
+		 * {"t": "bls", "ts":<server timestamp>, "d": {"lastseens":{"+919818149394":<last_seen_time_in_epoch> ,"+919810335374":<last_seen_time_in_epoch>}}}
+		 */
+		JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+		JSONObject lastSeens = null;
+		if (data != null)
+			lastSeens = data.getJSONObject(HikeConstants.BULK_LAST_SEEN_KEY);
+		// Iterator<String> iterator = lastSeens.keys();
+
+		if (lastSeens != null)
+		{
+			for (Iterator<String> iterator = lastSeens.keys(); iterator.hasNext();)
+			{
+				String msisdn = iterator.next();
+				int isOffline;
+				long lastSeenTime = lastSeens.getLong(msisdn);
+				if (lastSeenTime > 0)
+				{
+					isOffline = 1;
+					lastSeenTime = Utils.applyServerTimeOffset(context, lastSeenTime);
+				}
+				else
+				{
+					/*
+					 * Otherwise the last seen time notifies that the user is either online or has turned the setting off.
+					 */
+					isOffline = (int) lastSeenTime;
+					lastSeenTime = System.currentTimeMillis() / 1000;
+				}
+				HikeUserDatabase userDb = HikeUserDatabase.getInstance();
+
+				userDb.updateLastSeenTime(msisdn, lastSeenTime);
+				userDb.updateIsOffline(msisdn, (int) isOffline);
+
+				HikeMessengerApp.lastSeenFriendsMap.put(msisdn, new Pair<Integer, Long>(isOffline, lastSeenTime));
+
+			}
+			HikeMessengerApp.getPubSub().publish(HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, null);
+		}
+	}
+
+	public static void updateLastSeenTimeInBulk(List<ContactInfo> contactList)
+	{
+		for (ContactInfo contactInfo : contactList)
+		{
+			String msisdn = contactInfo.getMsisdn();
+			if (HikeMessengerApp.lastSeenFriendsMap.containsKey(msisdn))
+			{
+				Pair<Integer, Long> lastSeenValuePair = HikeMessengerApp.lastSeenFriendsMap.get(msisdn);
+
+				int isOffline = lastSeenValuePair.first;
+
+				long updatedLastSeenValue = lastSeenValuePair.second;
+				long previousLastSeen = contactInfo.getLastSeenTime();
+
+				if (updatedLastSeenValue > previousLastSeen)
+				{
+					contactInfo.setLastSeenTime(updatedLastSeenValue);
+				}
+				contactInfo.setOffline(isOffline);
+			}
+		}
+	}
+
+	public static boolean isListContainsMsisdn(List<ContactInfo> contacts, String msisdn)
+	{
+		for(ContactInfo contactInfo : contacts)
+		{
+			if(contactInfo.getMsisdn().equals(msisdn))
+			{
+				Logger.d("tesst", "matched");
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Adding this method to compute the overall count for showing in overflow menu on home screen
+	 * @param accountPref
+	 * @param count
+	 * @return
+	 */
+	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref)
+	{
+		int overallCount = 0;
+		if(!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
+		{
+			overallCount++;
+		}
+		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
+		{
+			overallCount++;
+		}
+		int frCount = accountPref.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+		if(frCount>0)
+		{
+			overallCount += frCount;
+		}
+
+		return overallCount;
+	}
+	
+	public static void incrementOrDecrementHomeOverflowCount(SharedPreferences accountPref, int count)
+	{
+		int currentCount = accountPref.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+
+		currentCount += count;
+		if (currentCount >=0)
+		{
+			Editor editor = accountPref.edit();
+			editor.putInt(HikeMessengerApp.FRIEND_REQ_COUNT, currentCount);
+			editor.commit();
+		}
+
 	}
 }

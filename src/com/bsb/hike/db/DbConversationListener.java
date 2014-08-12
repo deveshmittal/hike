@@ -502,6 +502,7 @@ public class DbConversationListener implements Listener
 				ftueData.put(HikeConstants.SCREEN, HikeConstants.FTUE);
 				data.put(HikeConstants.METADATA, ftueData);
 			}
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 			obj.put(HikeConstants.DATA, data);
 			Logger.d(getClass().getSimpleName(), "Sending add friends packet, Object: "+obj.toString());
 		}
@@ -519,6 +520,7 @@ public class DbConversationListener implements Listener
 		{
 			obj.put(HikeConstants.TYPE, type);
 			obj.put(HikeConstants.DATA, msisdn);
+			obj.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 		}
 		catch (JSONException e)
 		{
