@@ -264,4 +264,30 @@ public class PinHistoryAdapter extends BaseAdapter
 		listData = newData;
 		notifyDataSetChanged();
 	}
+	
+	public void addPinMessage(ConvMessage convMsg)
+	{
+		textPins.add(0, convMsg);
+		
+		long timeStamp = textPins.get(0).getTimestamp();
+		Calendar cFirst = Calendar.getInstance();
+		cFirst.setTimeInMillis(timeStamp * 1000);
+		
+		if(textPins.size() > 1)
+		{
+			Calendar cSecond = Calendar.getInstance();
+			cSecond.setTimeInMillis(((ConvMessage)textPins.get(1)).getTimestamp() * 1000);
+			
+			if (cFirst.get(Calendar.DAY_OF_YEAR) != cSecond.get(Calendar.DAY_OF_YEAR))
+			{
+				listData.add(0,((ConvMessage)listData.get(0)).getMessageDate(context));
+			}
+			listData.add(1, convMsg);
+		}
+		else
+		{
+			listData.add(0,((ConvMessage)textPins.get(0)).getMessageDate(context));
+			listData.add(convMsg);
+		}
+	}
 }
