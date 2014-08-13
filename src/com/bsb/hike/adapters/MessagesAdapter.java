@@ -92,6 +92,7 @@ import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.DownloadSingleStickerTask;
 import com.bsb.hike.ui.ChatThread;
@@ -297,6 +298,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private boolean isHikeToOfflineMode = false;
 
 	private String myMsisdn;
+	
+	private HighQualityThumbLoader hqThumbLoader;
 
 	/*
 	 * this is set of all the currently visible messages which are stuck in tick and are not sms
@@ -326,6 +329,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		setLastSentMessagePosition();
 		this.shownSdrIntroTip = preferences.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false);
 		this.myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
+		
+		hqThumbLoader = new HighQualityThumbLoader();
+		hqThumbLoader.setImageFadeIn(false);
+		hqThumbLoader.setDefaultDrawableNull(false);
 	}
 
 	public void setChatTheme(ChatTheme theme)
@@ -1286,6 +1293,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				showThumbnail = ((convMessage.isSent()) || (conversation instanceof GroupConversation) || (!TextUtils.isEmpty(conversation.getContactName())) || (hikeFile
 						.wasFileDownloaded()));
+				
+					
 				if (hikeFile.getThumbnail() == null && !TextUtils.isEmpty(hikeFile.getFileKey()))
 				{
 					thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(hikeFile.getFileKey());
@@ -1297,18 +1306,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				if (showThumbnail)
 				{
-					imageHolder.fileThumb.setBackgroundDrawable(thumbnail);
+					imageHolder.fileThumb.setImageDrawable(thumbnail);
+					hqThumbLoader.setLoadingImage(thumbnail);
+					hqThumbLoader.loadImage(hikeFile.getFilePath(), imageHolder.fileThumb, isListFlinging);
 				}
 				else
 				{
 					createMediaThumb(imageHolder.fileThumb);
 				}
-
+				
 				RelativeLayout.LayoutParams fileThumbParams = (RelativeLayout.LayoutParams) imageHolder.fileThumb.getLayoutParams();
 
 				if (showThumbnail)
 				{
-					imageHolder.fileThumb.setScaleType(ScaleType.CENTER);
+					imageHolder.fileThumb.setScaleType(ScaleType.CENTER_CROP);
 					fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
 					fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail.getIntrinsicHeight());
 					/*
@@ -1339,7 +1350,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							fileThumbParams.width = width;
 					}
 				}
-				imageHolder.fileThumb.setScaleType(ScaleType.CENTER);
+				imageHolder.fileThumb.setScaleType(ScaleType.CENTER_CROP);
 				imageHolder.fileThumb.setLayoutParams(fileThumbParams);
 
 				imageHolder.fileThumb.setVisibility(View.VISIBLE);
@@ -4239,5 +4250,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 
 
+	}
+	
+	private boolean isListFlinging;
+
+	public void setIsListFlinging(boolean isFling)
+	{
+		boolean notify = isFling != isListFlinging;
+
+		isListFlinging = isFling;
+		hqThumbLoader.setPauseWork(isListFlinging);
 	}
 }

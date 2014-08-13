@@ -37,6 +37,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
@@ -199,7 +200,9 @@ public class UploadFileTask extends FileTransferBase
 				}
 				if (thumbnail != null)
 				{
-					thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
+					byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 1);
+					thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+					thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
 					// thumbnail.recycle();
 				}
 				
@@ -342,7 +345,9 @@ public class UploadFileTask extends FileTransferBase
 			}
 			if (thumbnail != null)
 			{
-				thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
+				byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 1);
+				thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+				thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
 				// thumbnail.recycle();
 			}
 			else
@@ -504,7 +509,6 @@ public class UploadFileTask extends FileTransferBase
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, ((ConvMessage) userContext));
 			_state = FTState.COMPLETED;
 			deleteStateFile();
-
 		}
 		catch (MalformedURLException e)
 		{
