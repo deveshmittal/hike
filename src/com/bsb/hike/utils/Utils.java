@@ -4140,10 +4140,9 @@ public class Utils
 	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref)
 	{
 		int overallCount = 0;
-		if(!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
-		{
-			overallCount++;
-		}
+		/*
+		 * Not considering games option for micromax
+		 */
 		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
 		{
 			overallCount++;
