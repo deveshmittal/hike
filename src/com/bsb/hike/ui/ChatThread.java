@@ -4914,7 +4914,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (chatTheme != ChatTheme.DEFAULT)
 		{
 			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
-			backgroundImage.setImageDrawable(getChatTheme(chatTheme));
+			backgroundImage.setImageDrawable(Utils.getChatTheme(chatTheme, this));
 		}
 		else
 		{
@@ -7968,31 +7968,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				Logger.i("chatadapter", mAdapter.getCount() + " --total items");
 			}
 		}, 2000);
-	}
-
-	public Drawable getChatTheme(ChatTheme chatTheme)
-	{
-		/*
-		 * for xhdpi and above we should not scale down the chat theme nodpi asset for hdpi and below to save memory we should scale it down
-		 */
-		int inSampleSize = 1;
-		if (!chatTheme.isTiled() && Utils.densityMultiplier < 2)
-		{
-			inSampleSize = 2;
-		}
-
-		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), inSampleSize);
-
-		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
-
-		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= " + BitmapUtils.getBitmapSize(b));
-
-		if (bd != null && chatTheme.isTiled())
-		{
-			bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
-		}
-
-		return bd;
 	}
 
 	private static int possibleKeyboardHeight;
