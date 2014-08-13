@@ -23,7 +23,7 @@
                 android:paddingLeft="11dp"
                 android:paddingRight="11dp"
                 android:text="@string/terms"
-                android:textColor="#adb2b9"
+                android:textColor="@color/white"
                 android:textSize="16sp" />
         </LinearLayout>
         
@@ -35,7 +35,7 @@
             android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp"
             android:layout_toLeftOf="@id/terms_and_conditions"
-            android:background="#eaeced" />
+            android:background="#66d8f5" />
         
         <ImageView
             android:id="@+id/ic_micromax"

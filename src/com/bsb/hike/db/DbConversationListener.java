@@ -2,7 +2,6 @@ package com.bsb.hike.db;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,6 +28,8 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.FtueContactInfo;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.Protip;
@@ -70,7 +71,6 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.BLOCK_USER, this);
 		mPubSub.addListener(HikePubSub.UNBLOCK_USER, this);
 		mPubSub.addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
-		mPubSub.addListener(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE, this);
 		mPubSub.addListener(HikePubSub.FAVORITE_TOGGLED, this);
 		mPubSub.addListener(HikePubSub.MUTE_CONVERSATION_TOGGLED, this);
 		mPubSub.addListener(HikePubSub.FRIEND_REQUEST_ACCEPTED, this);
@@ -82,6 +82,7 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.REMOVE_PROTIP, this);
 		mPubSub.addListener(HikePubSub.GAMING_PROTIP_DOWNLOADED, this);
 		mPubSub.addListener(HikePubSub.CLEAR_CONVERSATION, this);
+		mPubSub.addListener(HikePubSub.UPDATE_PIN_METADATA, this);
 	}
 
 	@Override
@@ -125,7 +126,11 @@ public class DbConversationListener implements Listener
 				}
 				if (convMessage.isGroupChat())
 				{
-					mPubSub.publish(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE, convMessage.getMsisdn());
+					convMessage = mConversationDb.showParticipantStatusMessage(convMessage.getMsisdn());
+					if(convMessage != null)
+					{
+						mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+					}
 				}
 			}
 		}
@@ -177,52 +182,6 @@ public class DbConversationListener implements Listener
 		{
 			Logger.d("DBCONVERSATION LISTENER", "(Sender) Message sent confirmed for msgID -> " + (Long) object);
 			updateDB(object, ConvMessage.State.SENT_CONFIRMED.ordinal());
-		}
-		else if (HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE.equals(type))
-		{
-			String groupId = (String) object;
-
-			Map<String, GroupParticipant> smsParticipants = mConversationDb.getGroupParticipants(groupId, true, true);
-
-			if (smsParticipants.isEmpty())
-			{
-				return;
-			}
-
-			JSONObject dndJSON = new JSONObject();
-			JSONArray dndParticipants = new JSONArray();
-
-			for (Entry<String, GroupParticipant> smsParticipantEntry : smsParticipants.entrySet())
-			{
-				GroupParticipant smsParticipant = smsParticipantEntry.getValue();
-				String msisdn = smsParticipantEntry.getKey();
-				if (smsParticipant.onDnd())
-				{
-					dndParticipants.put(msisdn);
-				}
-			}
-
-			if (dndParticipants.length() == 0)
-			{
-				// No DND participants. Just return
-				return;
-			}
-			try
-			{
-				dndJSON.put(HikeConstants.FROM, groupId);
-				dndJSON.put(HikeConstants.TYPE, HikeConstants.DND);
-				dndJSON.put(HikeConstants.DND_USERS, dndParticipants);
-
-				ConvMessage convMessage = new ConvMessage(dndJSON, null, context, false);
-				mConversationDb.addConversationMessages(convMessage);
-				mConversationDb.updateShownStatus(groupId);
-
-				mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
-			}
-			catch (JSONException e)
-			{
-				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
-			}
 		}
 		else if (HikePubSub.FAVORITE_TOGGLED.equals(type) || HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type) || HikePubSub.REJECT_FRIEND_REQUEST.equals(type))
 		{
@@ -315,17 +274,26 @@ public class DbConversationListener implements Listener
 				for (ConvMessage convMessage : messages)
 				{
 
-					JSONObject messageJSON = convMessage.serialize().getJSONObject(HikeConstants.DATA);
-
-					messagesArray.put(messageJSON);
-
 					mConversationDb.updateIsHikeMessageState(convMessage.getMsgID(), false);
 
 					convMessage.setSMS(true);
 				}
+				
+				/*
+				 * We will send combined string of all the messages
+				 * in json of last convMessage object
+				 */
+				ConvMessage lastMessage = messages.get(messages.size() -1);
+				
+				ConvMessage convMessage = new ConvMessage(Utils.combineInOneSmsString(context, true, messages, true), lastMessage.getMsisdn(), 
+						lastMessage.getTimestamp(), lastMessage.getState(), lastMessage.getMsgID(), lastMessage.getMappedMsgID());
+				convMessage.setConversation(lastMessage.getConversation());
+				JSONObject messageJSON = convMessage.serialize().getJSONObject(HikeConstants.DATA);
+
+				messagesArray.put(messageJSON);
 
 				data.put(HikeConstants.BATCH_MESSAGE, messagesArray);
-				data.put(HikeConstants.COUNT, messages.size());
+				data.put(HikeConstants.COUNT, 1);
 				data.put(HikeConstants.MESSAGE_ID, messages.get(0).getMsgID());
 
 				jsonObject.put(HikeConstants.DATA, data);
@@ -347,19 +315,16 @@ public class DbConversationListener implements Listener
 			{
 				return;
 			}
-			/*
-			 * Reversing order since we want to send the oldest message first
-			 */
-			Collections.reverse(messages);
 
 			sendNativeSMSFallbackLogEvent(messages.get(0).getConversation().isOnhike(), Utils.isUserOnline(context), messages.size());
 
 			for (ConvMessage convMessage : messages)
 			{
-				sendNativeSMS(convMessage);
 				convMessage.setSMS(true);
 				mConversationDb.updateIsHikeMessageState(convMessage.getMsgID(), false);
 			}
+			ConvMessage lastMessage = messages.get(messages.size() - 1);
+			sendNativeSMS(new ConvMessage(Utils.combineInOneSmsString(context, true, messages, false), lastMessage.getMsisdn(), lastMessage.getTimestamp(), State.UNKNOWN, lastMessage.getMsgID(), -1));
 
 			mPubSub.publish(HikePubSub.CHANGED_MESSAGE_TYPE, null);
 		}
@@ -389,6 +354,13 @@ public class DbConversationListener implements Listener
 			Pair<String, Long> values = (Pair<String, Long>) object;
 			Long convId = values.second;
 			mConversationDb.clearConversation(convId);
+		}
+		else if (HikePubSub.UPDATE_PIN_METADATA.equals(type))
+		{
+			
+				Conversation conv = (Conversation)object;
+				HikeConversationsDatabase.getInstance().updateConversationMetadata(conv.getConvId(), conv.getMetaData());
+			
 		}
 	}
 

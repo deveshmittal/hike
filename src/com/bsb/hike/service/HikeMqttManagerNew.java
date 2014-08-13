@@ -15,6 +15,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
+import org.eclipse.paho.client.mqttv3.IMqttActionListenerNew;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -135,20 +136,25 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 	private static final int STAGING_BROKER_PORT_NUMBER_SSL = 8883;
 
+	private static final int FALLBACK_BROKER_PORT_NUMBER = 5222;
+	
 	// this represents number of msgs published whose callback is not yet arrived
 	private short MAX_INFLIGHT_MESSAGES_ALLOWED = 100;
 
 	private short keepAliveSeconds = HikeConstants.KEEP_ALIVE; // this is the time for which conn will remain open w/o messages
 
 	private static short connectionTimeoutSec = 60;
-	
+
 	List<String> serverURIs = null;
 
 	private volatile int ipConnectCount = 0;
-	
+
 	private boolean connectUsingIp = false;
 
 	private volatile short fastReconnect = 0;
+
+	/* Time after which a reconnect on mqtt thread is reattempted (Time in 'ms') */
+	private short MQTT_WAIT_BEFORE_RECONNECT_TIME = 10;
 
 	/*
 	 * When disconnecting (forcibly) it might happen that some messages are waiting for acks or delivery. So before disconnecting,wait for this time to let mqtt finish the work and
@@ -169,11 +175,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		CONNECTING, // attempting to connect
 		CONNECTED, // connected
 		NOT_CONNECTED_UNKNOWN_REASON // failed to connect for some reason
-	}
-
-	public enum ServerConnectionStatus
-	{
-		ACCEPTED, UNACCEPTABLE_PROTOCOL_VERSION, IDENTIFIER_REJECTED, SERVER_UNAVAILABLE, BAD_USERNAME_OR_PASSWORD, NOT_AUTHORIZED, UNKNOWN
 	}
 
 	private class ActivityCheckRunnable implements Runnable
@@ -356,7 +357,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		context.registerReceiver(this, filter);
 		LocalBroadcastManager.getInstance(context).registerReceiver(this, filter);
 		setServerUris();
-		// mqttThreadHandler.postDelayed(new TestOutmsgs(), 15 * 1000); // this is just for testing
+		// mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
 	}
 
 	private boolean isNetworkAvailable()
@@ -429,7 +430,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		{
 			reconnectTime *= 2;
 		}
-		reconnectTime = reconnectTime > HikeConstants.MAX_RECONNECT_TIME ? HikeConstants.MAX_RECONNECT_TIME : reconnectTime;
+		// if reconnectTime is 0, select the random value. This will happen in case of forceExp = true
+		reconnectTime = reconnectTime > HikeConstants.MAX_RECONNECT_TIME ? HikeConstants.MAX_RECONNECT_TIME
+				: (reconnectTime == 0 ? (new Random()).nextInt(HikeConstants.RECONNECT_TIME) + 1 : reconnectTime);
 		return reconnectTime;
 	}
 
@@ -452,24 +455,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	public Messenger getMessenger()
 	{
 		return mMessenger;
-	}
-
-	private ServerConnectionStatus getServerStatusCode(String msg)
-	{
-		if (msg.contains(ServerConnectionStatus.ACCEPTED.toString()))
-			return ServerConnectionStatus.ACCEPTED;
-		else if (msg.contains(ServerConnectionStatus.BAD_USERNAME_OR_PASSWORD.toString()))
-			return ServerConnectionStatus.BAD_USERNAME_OR_PASSWORD;
-		else if (msg.contains(ServerConnectionStatus.IDENTIFIER_REJECTED.toString()))
-			return ServerConnectionStatus.IDENTIFIER_REJECTED;
-		else if (msg.contains(ServerConnectionStatus.NOT_AUTHORIZED.toString()))
-			return ServerConnectionStatus.NOT_AUTHORIZED;
-		else if (msg.contains(ServerConnectionStatus.SERVER_UNAVAILABLE.toString()))
-			return ServerConnectionStatus.SERVER_UNAVAILABLE;
-		else if (msg.contains(ServerConnectionStatus.UNACCEPTABLE_PROTOCOL_VERSION.toString()))
-			return ServerConnectionStatus.UNACCEPTABLE_PROTOCOL_VERSION;
-		else
-			return ServerConnectionStatus.UNKNOWN;
 	}
 
 	private void acquireWakeLock()
@@ -557,12 +542,26 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		return mqtt.isConnected();
 	}
 
+	private boolean isConnecting()
+	{
+		if (mqtt == null)
+			return false;
+		return mqtt.isConnecting();
+	}
+
+	private boolean isDisconnecting()
+	{
+		if (mqtt == null)
+			return false;
+		return mqtt.isDisconnecting();
+	}
+
 	// This function should be called always from external classes inorder to run connect on MQTT thread
 	public void connectOnMqttThread()
 	{
 		try
 		{
-			connectOnMqttThread(10);
+			connectOnMqttThread(MQTT_WAIT_BEFORE_RECONNECT_TIME);
 		}
 		catch (Exception e)
 		{
@@ -653,7 +652,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				mqtt.setCallback(getMqttCallback());
 				Logger.d(TAG, "Number of max inflight msgs allowed : " + mqtt.getMaxflightMessages());
 			}
-			if (isConnected())
+			if (isConnected() || isConnecting() || isDisconnecting())
 				return;
 
 			mqttConnStatus = MQTTConnectionStatus.CONNECTING;
@@ -726,8 +725,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			serverURIs.add(PRODUCTION_BROKER_HOST_NAME);
 			for (int i = 0; i < len; i++)
 			{
-				//serverURIs[i + 1] = 
-				if(ipArray.optString(i) != null)
+				// serverURIs[i + 1] =
+				if (ipArray.optString(i) != null)
 				{
 					serverURIs.add(ipArray.optString(i));
 				}
@@ -763,9 +762,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		{
 			return brokerHostName + ":" + brokerPortNumber;
 		}
-		if(connectUsingIp)
+		if (connectUsingIp)
 		{
-			return getIp() + ":" + brokerPortNumber;
+			return getIp() + ":" + FALLBACK_BROKER_PORT_NUMBER;
 		}
 		else
 		{
@@ -851,7 +850,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		op = null;
 		mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
 		if (reconnect)
-			connectOnMqttThread(10); // try reconnection after 10 ms
+			connectOnMqttThread(MQTT_WAIT_BEFORE_RECONNECT_TIME); // try reconnection after 10 ms
 		else
 		{
 			try
@@ -943,7 +942,9 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					try
 					{
 						cancelNetworkErrorTimer();
-						String messageBody = new String(arg1.getPayload(), "UTF-8");
+						byte[] bytes = arg1.getPayload();
+						bytes = Utils.uncompressByteArray(bytes);
+						String messageBody = new String(bytes, "UTF-8");
 						Logger.i(TAG, "messageArrived called " + messageBody);
 						JSONObject jsonObj = new JSONObject(messageBody);
 						mqttMessageManager.saveMqttMessage(jsonObj);
@@ -1025,7 +1026,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			 * String.format("Inflight msgs : %d , MaxInflight count : %d .... Waiting for sometime", mqtt.getInflightMessages(), mqtt.getMaxflightMessages())); Thread.sleep(30); }
 			 * catch (InterruptedException e) { // TODO Auto-generated catch block e.printStackTrace(); } }
 			 */
-			mqtt.publish(this.topic + HikeConstants.PUBLISH_TOPIC, packet.getMessage(), qos, false, packet, new IMqttActionListener()
+			mqtt.publish(this.topic + HikeConstants.PUBLISH_TOPIC, packet.getMessage(), qos, false, packet, new IMqttActionListenerNew()
 			{
 				@Override
 				public void onSuccess(IMqttToken arg0)
@@ -1041,7 +1042,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 							{
 								Long msgId = packet.getMsgId();
 								Logger.d(TAG, "Recieved S status for msg with id : " + msgId);
-								HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
+								// HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
 							}
 						}
 						if (haveUnsentMessages.get())
@@ -1062,6 +1063,18 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					Logger.e(TAG, "Message delivery failed for : " + arg0.getMessageId() + ", exception : " + arg1.getMessage());
 					haveUnsentMessages.set(true);
 					connectOnMqttThread();
+				}
+
+				@Override
+				public void notifyWrittenOnSocket(IMqttToken asyncActionToken)
+				{
+					HikePacket packet = (HikePacket) asyncActionToken.getUserContext();
+					if (packet.getMsgId() > 0)
+					{
+						Long msgId = packet.getMsgId();
+						Logger.d(TAG, "Socket written success for msg with id : " + msgId);
+						HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
+					}
 				}
 			});
 		}
@@ -1091,7 +1104,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			Random random = new Random();
 			int reconnectIn = random.nextInt(HikeConstants.SERVER_UNAVAILABLE_MAX_CONNECT_TIME) + 1;
 			scheduleNextConnectionCheck(reconnectIn * 60); // Converting minutes to seconds
-			
+
 			break;
 		case MqttException.REASON_CODE_CLIENT_ALREADY_DISCONNECTED:
 			Logger.e(TAG, "Client already disconnected.");
@@ -1114,18 +1127,18 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				scheduleNextConnectionCheck(1); // try reconnect after 1 sec, so that disconnect happens properly
 			break;
 		case MqttException.REASON_CODE_CLIENT_EXCEPTION:
-			if (e != null && e.getCause() != null)
+			if (e.getCause() != null)
 			{
 				Logger.e(TAG, "Exception : " + e.getCause().getMessage());
 				if (e.getCause() instanceof UnknownHostException)
 				{
 					Logger.e(TAG, "DNS Failure , Connect using ips");
 					connectUsingIp = true;
-					scheduleNextConnectionCheck(getConnRetryTime());	
+					scheduleNextConnectionCheck(getConnRetryTime());
 				}
 				// Till this point disconnect has already happened due to exception (This is as per lib)
 				else if (reConnect)
-					connectOnMqttThread(20);
+					connectOnMqttThread(MQTT_WAIT_BEFORE_RECONNECT_TIME);
 			}
 			else
 			{
@@ -1150,7 +1163,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			Logger.e(TAG, "Client not connected retry connection");
 			mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
 			if (reConnect)
-				connectOnMqttThread();
+				scheduleNextConnectionCheck(getConnRetryTime());	// since we can get this exception many times due to server exception or during deployment so we dont retry frequently instead with backoff
 			break;
 		case MqttException.REASON_CODE_FAILED_AUTHENTICATION:
 			clearSettings();
@@ -1188,12 +1201,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			break;
 		case MqttException.REASON_CODE_UNEXPECTED_ERROR:
 			// This could happen while reading or writing error on a socket, hence disconnection happens
-			connectOnMqttThread(20);
+			connectOnMqttThread(MQTT_WAIT_BEFORE_RECONNECT_TIME);
 			break;
 		default:
 			Logger.e(TAG, "In Default : " + e.getMessage());
 			mqttConnStatus = MQTTConnectionStatus.NOT_CONNECTED;
-			connectOnMqttThread();
+			connectOnMqttThread(getConnRetryTime());
 			break;
 		}
 		Logger.e(TAG, "Default Exception : " + e.getMessage());
@@ -1316,22 +1329,22 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		editor.commit();
 		setServerUris();
 	}
-	
+
 	private String getIp()
 	{
 		Random random = new Random();
-		int index = random.nextInt(serverURIs.size() -1) + 1;
-		if(ipConnectCount == serverURIs.size())
+		int index = random.nextInt(serverURIs.size() - 1) + 1;
+		if (ipConnectCount == serverURIs.size())
 		{
 			ipConnectCount = 0;
 			return serverURIs.get(0);
 		}
 		else
 		{
-			ipConnectCount ++;
+			ipConnectCount++;
 			return serverURIs.get(index);
 		}
-		
+
 	}
 
 	// This class is just for testing .....
@@ -1346,44 +1359,118 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				@Override
 				public void run()
 				{
-					int count = 0;
-					for (int i = 0; i < 1000; i++)
-					{
-						count++;
-						String data = String.format("{\"t\": \"m\",\"to\": \"+918826670738\",\"d\":{\"hm\":\"%d\",\"i\":%d, \"ts\":%d}}", count + 10, count,
-								System.currentTimeMillis());
-						Logger.d(TAG, "Sending msg : " + data);
-						Message msg = Message.obtain();
-						msg.what = 12341;
-						Bundle bundle = new Bundle();
-						bundle.putString(HikeConstants.MESSAGE, data);
-						msg.setData(bundle);
-						msg.replyTo = mMessenger;
-						try
-						{
-							mMessenger.send(msg);
-							Thread.sleep(20);
-						}
-						catch (RemoteException e)
-						{
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						catch (InterruptedException e)
-						{
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						catch (Exception e)
-						{
-
-						}
-					}
-
+					testUj();
 				}
 			});
 			t.setName("Test Thread");
 			t.start();
+		}
+
+		private void testUj()
+		{
+			int count = 0;
+			String myMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+			String msisdn = "+919999238132";
+			String msisdn1 = "+919868185209";
+			if (myMsisdn != null)
+			{
+				if (msisdn.equalsIgnoreCase(myMsisdn))
+				{
+					return;
+				}
+			}
+			Random rand = new Random();
+
+			JSONObject bulkPacket = new JSONObject();
+			JSONObject data = new JSONObject();
+			JSONObject msgs = new JSONObject();
+			JSONArray bulkMsgArray = new JSONArray();
+			for (int i = 0; i < 25; i++)
+			{
+				String ujString = String
+						.format("{\"t\": \"uj\",\"d\":{\"msisdn\":\"%s\"},\"ts\":%d,\"st\":\"ru\"}", msisdn, Math.abs(System.currentTimeMillis() + rand.nextLong()));
+				String ujString1 = String.format("{\"t\": \"uj\",\"d\":{\"msisdn\":\"%s\"},\"ts\":%d,\"st\":\"ru\"}", msisdn1,
+						Math.abs(System.currentTimeMillis() + rand.nextLong()));
+				try
+				{
+
+					JSONObject o = new JSONObject(ujString);
+					JSONObject o1 = new JSONObject(ujString1);
+					bulkMsgArray.put(o);
+					bulkMsgArray.put(o1);
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+			try
+			{
+				bulkPacket.put(HikeConstants.TYPE, "bm");
+				data.put("msgs", bulkMsgArray);
+				bulkPacket.put(HikeConstants.DATA, data);
+				bulkPacket.put(HikeConstants.TIMESTAMP, System.currentTimeMillis());
+				mqttMessageManager.saveMqttMessage(bulkPacket);
+
+			}
+			catch (JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+
+		private void testMsg()
+		{
+			int count = 0;
+			String myMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+			String msisdn = "+919582974797";
+
+			if (myMsisdn != null)
+			{
+				if (msisdn.equalsIgnoreCase(myMsisdn))
+				{
+					return;
+				}
+			}
+			for (int i = 0; i < 50; i++)
+			{
+				count++;
+				Random rand = new Random();
+				String data = String.format("{\"t\": \"m\",\"to\": \"" + msisdn + "\",\"d\":{\"hm\":\"%d\",\"i\":%d, \"ts\":%d}}", rand.nextLong(), rand.nextLong(),
+						System.currentTimeMillis());
+
+				Logger.d(TAG, "Sending msg : " + data);
+				Message msg = Message.obtain();
+				msg.what = 12341;
+				Bundle bundle = new Bundle();
+				bundle.putString(HikeConstants.MESSAGE, data);
+				msg.setData(bundle);
+				msg.replyTo = mMessenger;
+				try
+				{
+					mMessenger.send(msg);
+					Thread.sleep(20);
+				}
+				catch (RemoteException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				catch (InterruptedException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				catch (Exception e)
+				{
+
+				}
+			}
+
 		}
 	}
 

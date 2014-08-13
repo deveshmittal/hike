@@ -6,8 +6,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.FutureTask;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -49,6 +52,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
@@ -61,29 +65,35 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.ConversationTip;
+import com.bsb.hike.models.EmptyConversationContactItem;
+import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
-import com.bsb.hike.ui.FtueCardsActivity;
 import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.ui.HikeFragmentable;
+import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.HikeTip.TipType;
 
-public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener
+public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener, HikeFragmentable
 {
 
 	private class DeleteConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]>
 	{
 
 		Context context;
+
 		boolean publishStealthEvent;
 
 		public DeleteConversationsAsyncTask(Context context)
@@ -116,6 +126,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					continue;
 				}
+				else if(conv instanceof GroupConversation)
+				{
+					//TODO in case of leaving group from group info screen ==> 2 gcl event will trigger
+					//we can avoid these by moving delete conversation task to db
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+				}
+
 				ids.add(conv.getConvId());
 				msisdns.add(conv.getMsisdn());
 				editor.remove(conv.getMsisdn());
@@ -124,7 +141,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			db = HikeConversationsDatabase.getInstance();
 			db.deleteConversation(ids.toArray(new Long[] {}), msisdns);
-
+			
 			return convs;
 		}
 
@@ -169,7 +186,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, 
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_START_NEW_CHAT_TIP,
-			HikePubSub.REMOVE_STEALTH_UNREAD_TIP };
+			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ };
 
 	private ConversationsAdapter mAdapter;
 
@@ -235,76 +252,44 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if(!HomeActivity.ftueContactsData.getHikeContacts().isEmpty())
 		{
 			int hikeContactCount = HomeActivity.ftueContactsData.getTotalHikeContactsCount();
-			EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getHikeContacts(), getResources().getString(R.string.ftue_hike_contact_card_header, hikeContactCount), EmptyConversationItem.HIKE_CONTACTS);
+			EmptyConversationItem hikeContactsItem = new EmptyConversationContactItem(HomeActivity.ftueContactsData.getHikeContacts(), getResources().getString(R.string.ftue_hike_contact_card_header, hikeContactCount), EmptyConversationItem.HIKE_CONTACTS);
 			ftueListItems.add(hikeContactsItem);
 		}
 		/*
 		 * We only add this item if hike contacts are less than 
 		 * certain threashold
 		 */
-		if(HomeActivity.ftueContactsData.getHikeContacts().size() < HikeConstants.FTUE_HIKE_CONTACT_MIN_LIMIT 
+		if(HomeActivity.ftueContactsData.getHikeContacts().size() == 0
 				&& !HomeActivity.ftueContactsData.getSmsContacts().isEmpty())
 		{
 			int smsContactCount = HomeActivity.ftueContactsData.getTotalSmsContactsCount();
-			EmptyConversationItem hikeContactsItem = new EmptyConversationItem(HomeActivity.ftueContactsData.getSmsContacts(), getResources().getString(R.string.ftue_sms_contact_card_header, smsContactCount), EmptyConversationItem.SMS_CONTACTS);
+			EmptyConversationItem hikeContactsItem = new EmptyConversationContactItem(HomeActivity.ftueContactsData.getSmsContacts(), getResources().getString(R.string.ftue_sms_contact_card_header, smsContactCount), EmptyConversationItem.SMS_CONTACTS);
 			ftueListItems.add(hikeContactsItem);
 		}
-		if(ftueListView.getHeaderViewsCount()==0 && ftueListView.getFooterViewsCount() == 0)
+		if (ftueListView.getFooterViewsCount() == 0)
 		{
-			setupWelcomeToHikeCard(ftueListView, !HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOWN_WELCOME_TO_HIKE_CARD, false));
 			addBottomPadding(ftueListView);
 		}
+		addFtueCards(ftueListItems);
 		ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
 	}
 
-	private void setupWelcomeToHikeCard(ListView ftueListView, boolean asHeader)
+	private void addFtueCards(List<EmptyConversationItem> ftueListItems)
 	{
-		View welcomeCardView = LayoutInflater.from(getActivity()).inflate(
-				R.layout.ftue_welcome_card_content, null);
-		TextView startExploringBtn = (TextView) welcomeCardView.findViewById(R.id.card_btn);
-		TextView cardTextHeader = (TextView) welcomeCardView.findViewById(R.id.card_txt_header);
-		TextView cardTextMsg = (TextView) welcomeCardView.findViewById(R.id.card_txt_msg);
-		ImageView cardHeaderImage = (ImageView) welcomeCardView.findViewById(R.id.card_header_img_bg);
+		ftueListItems.add(new EmptyConversationItem(EmptyConversationItem.SEPERATOR));
 		
-		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), R.drawable.bg_ct_love_tile, 1);
-		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
-		bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
-		cardHeaderImage.setImageDrawable(bd);
-		
-		View.OnClickListener onClickListner = new View.OnClickListener()
-		{
-			
-			@Override
-			public void onClick(View v)
-			{
-				
-				Intent intent = new Intent(getActivity(), FtueCardsActivity.class);
-				startActivity(intent);
-				
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_WELCOME_CARD_CLICKED);
-			}
-			
-		};
-		welcomeCardView.setOnClickListener(onClickListner);
-		startExploringBtn.setOnClickListener(onClickListner);
-		
-		if(asHeader)
-		{
-			cardTextHeader.setText(R.string.welcome_to_hike);
-			cardTextMsg.setText(R.string.ftue_welcome_card_msg);
-			startExploringBtn.setText(R.string.start_exploring);
-			ftueListView.addHeaderView(welcomeCardView);
-		}
-		else
-		{
-			cardTextHeader.setText(R.string.ftue_welcome_card_header_second);
-			cardTextMsg.setText(R.string.ftue_welcome_card_msg_second);
-			startExploringBtn.setText(R.string.explore_upper_case);
-			ftueListView.addFooterView(welcomeCardView);
-		}
-		
+		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.LAST_SEEN, R.drawable.ftue_card_last_seen_img_small, getResources().getColor(R.color.ftue_card_last_seen),
+				R.string.ftue_card_header_last_seen, R.string.ftue_card_body_last_seen, R.string.ftue_card_click_text_last_seen, getResources().getColor(R.color.ftue_card_last_seen_click_text)));
+		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.GROUP, R.drawable.ftue_card_group_img_small, getResources().getColor(R.color.ftue_card_group),
+				R.string.group_chat, R.string.ftue_card_body_group, R.string.ftue_card_click_group, getResources().getColor(R.color.ftue_card_group_click_text)));
+		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.INVITE, R.drawable.ftue_card_invite_img_small, getResources().getColor(R.color.ftue_card_invite),
+				R.string.invite_friends, R.string.ftue_card_body_invite, R.string.ftue_card_click_invite, getResources().getColor(R.color.ftue_card_invite_click_text)));
+		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.HIKE_OFFLINE, R.drawable.ftue_card_hike_offline_img_small, getResources().getColor(R.color.ftue_card_hike_offline),
+				R.string.ftue_card_header_hike_offline, R.string.ftue_card_body_hike_offline, R.string.ftue_card_click_text_hike_offline, getResources().getColor(R.color.ftue_card_hike_offline_click_text)));
+		ftueListItems.add(new EmptyConversationFtueCardItem(EmptyConversationItem.STICKERS, R.drawable.ftue_card_sticker_img_small, getResources().getColor(R.color.ftue_card_sticker),
+				R.string.ftue_card_header_sticker, R.string.ftue_card_body_sticker, R.string.ftue_card_click_text_sticker, getResources().getColor(R.color.ftue_card_sticker_click_text)));
 	}
-	
+
 	/*
 	 * We are adding this footer in empty state list view
 	 * to give proper padding at the bottom of the list.
@@ -444,6 +429,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					dialog.dismiss();
 					
 					Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+				}
+
+				@Override
+				public void onSucess(Dialog dialog)
+				{
+					// TODO Auto-generated method stub
+					
 				}
 			}, dialogStrings);
 		}
@@ -620,7 +612,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						public void onClick(View v)
 						{
 							Utils.logEvent(getActivity(), HikeConstants.LogEvent.DELETE_CONVERSATION);
-							leaveGroup(conv);
+							deleteConversation(conv);
 							deleteConfirmDialog.dismiss();
 						}
 					};
@@ -816,6 +808,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void ShowTipIfNeeded(boolean hasNoConversation)
 	{
+		// to prevent more than one tip to display at a time , it can happen at time of onnewintent
+		if(!hasNoConversation && displayedConversations.get(0) instanceof ConversationTip){
+			displayedConversations.remove(0);
+		}
+		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(this.getActivity().getApplicationContext());
+		String tip = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
+		Logger.i("tip", "#" + tip + "#-currenttype");
 		if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.RESET_STEALTH_TIP));
@@ -829,11 +828,31 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.START_NEW_CHAT_TIP));
 		}
-		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false) )
+		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false))
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_UNREAD_TIP));
 		}
-		
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_PROFILE_PIC))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_PROFILE_PIC_TIP));
+			// show atomic pop up profile pic
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_FAVOURITES))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_FAVOURTITES_TIP));
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_INVITE))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_INVITE_TIP));
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_STATUS))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_STATUS_TIP));
+		}
+		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL))
+		{
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_INFO_TIP));
+		}
 	}
 
 	private void setupConversationLists()
@@ -909,17 +928,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		Collections.sort(displayedConversations, mConversationsComparator);
 		notifyDataSetChanged();
-	}
-
-	private void leaveGroup(Conversation conv)
-	{
-		if (conv == null)
-		{
-			Logger.d(getClass().getSimpleName(), "Invalid conversation");
-			return;
-		}
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
-		deleteConversation(conv);
 	}
 
 	private void deleteConversation(Conversation conv)
@@ -1094,7 +1102,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void run()
 				{
-					addMessage(conv, finalMessage);
+					addMessage(conv, finalMessage, true);
 				}
 			});
 
@@ -1266,13 +1274,27 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				});
 			}
 		}
-		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))
+		/*
+		 * Receives conversation group-id, the message id for the message read packet, and the participant msisdn.
+		 */
+		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type) || HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
 		{
-			Pair<String, long[]> pair = (Pair<String, long[]>) object;
+			String sender = null;
+			long[] ids;
+			if (HikePubSub.GROUP_MESSAGE_DELIVERED_READ.equals(type))
+			{
+				Pair<String, Pair<Long,String>> pair = (Pair<String, Pair<Long, String>>) object;
+				sender = pair.first;
+				ids = new long[] { pair.second.first} ;
+			}
+			else
+			{
+				Pair<String, long[]> pair = (Pair<String, long[]>) object;
+				sender = pair.first;
+				ids = (long[]) pair.second;
+			}
 
-			final String msisdn = pair.first;
-
-			long[] ids = (long[]) pair.second;
+			final String msisdn = sender;
 
 			ConvMessage lastConvMessage = null;
 
@@ -1468,15 +1490,20 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else if (HikePubSub.RESET_UNREAD_COUNT.equals(type))
 		{
 			String msisdn = (String) object;
+			Logger.d("UnreadBug", "Unread count event received for " + msisdn);
+
 			final Conversation conv = mConversationsByMSISDN.get(msisdn);
 			if (conv == null)
 			{
+				Logger.d("UnreadBug", "Unread count event received for null conversation: " + msisdn);
 				return;
 			}
 			conv.setUnreadCount(0);
+			Logger.d("UnreadBug", "Unread count event received for non null conversation: " + conv.toString());
 
 			if (!isAdded())
 			{
+				Logger.d("UnreadBug", "Unread count event received but fragment not added");
 				return;
 			}
 			getActivity().runOnUiThread(new Runnable()
@@ -1485,10 +1512,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void run()
 				{
+					Logger.d("UnreadBug", "Unread count event received updating UI...");
+
 					List<ConvMessage> messages = conv.getMessages();
 
 					if (messages.isEmpty())
 					{
+						Logger.d("UnreadBug", "Unread count event received but messages list is empty");
 						return;
 					}
 
@@ -1724,6 +1754,182 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 			});
 		}
+		/*
+		 * The list of messages is processed.
+		 * The messages are added and the UI is updated at once.
+		 */
+		else if (HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
+		{
+			Logger.d(getClass().getSimpleName(), "New bulk msg event sent or received.");
+			HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
+
+			if (messageListMap != null)
+			{
+				for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
+				{
+					if (entry != null)
+					{
+						String msisdn = entry.getKey();
+						LinkedList<ConvMessage> messageList = entry.getValue();
+						final Conversation conv = mConversationsByMSISDN.get(msisdn);
+						if (conv != null)
+						{
+							int unreadCount = 0;
+							for (ConvMessage convMessage : messageList)
+							{
+								if (Utils.shouldIncrementCounter(convMessage))
+								{
+									unreadCount++ ;
+								}
+							}
+							if (unreadCount > 0)
+							{
+								conv.setUnreadCount(conv.getUnreadCount() + unreadCount);
+							}
+							ConvMessage message = messageList.get(messageList.size() - 1);
+							if (message.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
+							{
+								if (!conv.getMessages().isEmpty())
+								{
+									ConvMessage prevMessage = conv.getMessages().get(conv.getMessages().size() - 1);
+									String metadata = message.getMetadata().serialize();
+									message = new ConvMessage(message.getMessage(), message.getMsisdn(), prevMessage.getTimestamp(), prevMessage.getState(), prevMessage.getMsgID(),
+											prevMessage.getMappedMsgID(), message.getGroupParticipantMsisdn());
+									try
+									{
+										message.setMetadata(metadata);
+									}
+									catch (JSONException e)
+									{
+										e.printStackTrace();
+									}
+								}
+							}
+							// For updating the group name if some participant has joined or
+							// left the group
+							else if ((conv instanceof GroupConversation) && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+							{
+								HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
+								((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn(), false, false));
+							}
+
+							final ConvMessage finalMessage = message;
+//							if (conv.getMessages().size() > 0)
+//							{
+//								if (finalMessage.getMsgID() < conv.getMessages().get(conv.getMessages().size() - 1).getMsgID())
+//								{
+//									return;
+//								}
+//							}
+							if (!isAdded())
+							{
+								return;
+							}
+							getActivity().runOnUiThread(new Runnable()
+							{
+								@Override
+								public void run()
+								{
+									addMessage(conv,finalMessage,false);
+								}
+							});
+						}
+						else
+						{
+							// When a message gets sent from a user we don't have a
+							// conversation for, the message gets
+							// broadcasted first then the conversation gets created. It's
+							// okay that we don't add it now, because
+							// when the conversation is broadcasted it will contain the
+							// messages
+						}
+					}
+				}
+				getActivity().runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						Collections.sort(displayedConversations, mConversationsComparator);
+						notifyDataSetChanged();
+					}
+				});
+			}
+		}
+		/*
+		 * The list of msisdns and their maximum ids for DR and MR packets is received.
+		 * The messages are updated in the chat thread.
+		 */
+		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
+		{
+			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
+
+			if (messageStatusMap != null)
+			{
+				for (Entry<String, PairModified<PairModified<Long, Set<String>>, Long>> entry : messageStatusMap.entrySet())
+				{
+					if (entry != null)
+					{
+						final String msisdn = entry.getKey();
+						PairModified<PairModified<Long, Set<String>>, Long> pair = entry.getValue();
+						if (pair != null)
+						{
+							long mrMsgId = (long) pair.getFirst().getFirst();
+							long drMsgId = (long) pair.getSecond();
+
+							if (mrMsgId > 0)
+							{
+								ConvMessage msg = findMessageById(mrMsgId);
+								if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+								{
+									// If the msisdn don't match we simply return
+									if (!msg.getMsisdn().equals(msisdn))
+									{
+										return;
+									}
+
+									msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+
+									if (!isAdded())
+									{
+										return;
+									}
+
+									final ConvMessage message = msg;
+								}
+							}
+							if (drMsgId > 0)
+							{
+								final ConvMessage msg = findMessageById(drMsgId);
+								if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
+								{
+									// If the msisdn don't match we simply return
+									if (!msg.getMsisdn().equals(msisdn))
+									{
+										return;
+									}
+
+									msg.setState(ConvMessage.State.SENT_DELIVERED);
+
+									if (!isAdded())
+									{
+										return;
+									}
+								}
+							}
+						}
+					}
+				}
+				getActivity().runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						notifyDataSetChanged();
+					}
+				});
+			}
+		}
 	}
 
 	private Conversation getFirstConversation()
@@ -1871,6 +2077,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		if (!wasViewSetup())
 		{
+			Logger.d("UnreadBug", "Unread count event received but view wasn't setup");
 			return;
 		}
 
@@ -1878,6 +2085,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		if (parentView == null)
 		{
+			Logger.d("UnreadBug", "Unread count event received but parent view was null");
 			notifyDataSetChanged();
 			return;
 		}
@@ -1885,7 +2093,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		mAdapter.updateViewsRelatedToMessageState(parentView, convMessage, conversation);
 	}
 
-	private void addMessage(Conversation conv, ConvMessage convMessage)
+	private void addMessage(Conversation conv, ConvMessage convMessage, boolean sortAndUpdateView)
 	{
 		boolean newConversationAdded = false;
 
@@ -1904,7 +2112,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		conv.addMessage(convMessage);
 		Logger.d(getClass().getSimpleName(), "new message is " + convMessage);
 
-		sortAndUpdateTheView(conv, convMessage, newConversationAdded);
+		if (sortAndUpdateView)
+		{
+			sortAndUpdateTheView(conv, convMessage, newConversationAdded);
+		}
 	}
 
 	public void movedFromEmptyToNonEmpty()
@@ -2172,11 +2383,22 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		default:
 			break;
 		}
-		
+
 		if (mAdapter.getCount() == 0)
 		{
 			setEmptyState();
 		}
+	}
+
+	@Override
+	public void onNewintent(Intent intent)
+	{
+		if (intent.getBooleanExtra(HikeConstants.Extras.HAS_TIP, false))
+		{
+			ShowTipIfNeeded(displayedConversations.isEmpty());
+			notifyDataSetChanged();
+		}
+
 	}
 
 }

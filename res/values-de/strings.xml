@@ -988,16 +988,141 @@
      <string name="ftue_hike_offline_card_msg">Sende Nachrichten an deine Freunde, wenn sie offline sind.</string>
      <string name="ftue_favorites_card_msg">Nur Favoriten können deine Statusmitteilung und Angabe zu Zuletzt online sehen.</string>
      <string name="ftue_themes_card_msg">Gestalte deine Unterhaltungen mit unseren schönen Chatmotiven bunt.</string>
-     <string name="themes">Motive</string>
-     <string name="ftue_updates_are_fun_with_favorites">Nur Favoriten können deine Statusmitteilung und Angabe zu Zuletzt online sehen. Überlege dir genau, wenn du als Favorit auswählst.</string>
-     <string name="ftue_sms_contact_card_subtext">Möchtest du ihnen eine Gratis-SMS senden?</string>
-     <string name="new_chat_tip_header">Chat starten</string>
-     <string name="sticker_tip_msg">Tippe auf das Sticker-Symbol, um das Stickerfeld zu öffnen!</string>
-     <string name="ftue_welcome_card_header_second">hike erkunden</string>
-     <string name="ftue_welcome_card_msg_second">Hike steckt voller toller Dinge! Tippe, um Näheres zu erfahren.</string>
-     <string name="explore_upper_case">ERKUNDEN</string>
-     <string name="new_chat_tip_msg">Tippen um zu komponieren</string>
-     <string name="ftue_status_update_card_header">Drücken Sie sich</string>
-     <string name="ftue_status_update_card_msg">Tippen Sie hier, um ein Status-Update zu posten. Nur Ihre Favoriten können sie sehen.</string>
-     
-</resources>
+    <string name="themes">Motive</string>
+    <string name="ftue_updates_are_fun_with_favorites">Nur Favoriten können deine Statusmeldung und deinen Zuletzt-online-Status sehen. Wähle sie wohlüberlegt aus!</string>
+    <string name="new_chat_tip_header">Chat starten</string>
+    <string name="ftue_welcome_card_header_second">hike erkunden</string>
+    <string name="ftue_welcome_card_msg_second">Hike steckt voller toller Dinge! Tippe, um Näheres zu erfahren.</string>
+    <string name="explore_upper_case">ERKUNDEN</string>
+    <string name="hikins">Wir sind Hikins</string>
+    <string name="expressions">Drücke alles aus</string>
+    <string name="bollywood">Bollywood Masala</string>
+    <string name="rageface">Wie sieht dein Wutgesicht aus?</string>
+    <string name="youandi">Du &amp; ich</string>
+    <string name="wackysmilyes">Verdrehte Smileys</string>
+    <string name="avatars">Superhelden-Avatare</string>
+    <string name="thingsIndianSay">Das sagen Inder</string>
+    <string name="loveyouforever">Ich liebe dich für immer und ewig</string>
+    <string name="sportmaniacs">Sport-Maniacs</string>
+    <string name="meawmiley">Miau, ich bin Miley!</string>
+    <string name="snuggles">Bezauberndes Kuscheln</string>
+    <string name="recent_empty_string">Häufig verwendete Sticker werden hier angezeigt</string>
+    <string name="recent_icon_text">Häufig verwendete Emoticons werden hier angezeigt</string>
+    <string name="native_sms_invite_1">Hallo! Komme auch zum hike Messenger!\n Hike ist die einzige Messaging-App aus Indien! Jetzt über http://hike.in/ herunterladen. Lebe dein Leben mit hike.</string>
+    <string name="native_sms_invite_2">Hallo! Schau dir mal den hike Messenger an und sende jetzt Docs, PPTs, MP3s und mehr mit jeweils bis zu 100 MB! Jetzt über http://hike.in/ herunterladen. Lebe dein Leben mit Hike!</string>
+    <string name="native_sms_invite_3">Hallo! Schau dir mal den hike Messenger an. Die App bietet tolle Sticker &amp; herrliche Chatmotive! Jetzt über http://hike.in herunterladen! Lebe dein Leben mit Hike!</string>
+    <string name="native_sms_invite_4">Hallo! Schau dir mal den hike Messenger an. Die App ermöglicht dir, deine Zuletzt-online-Angabe nur ausgewählten Freunden zu zeigen! Jetzt über http://hike.in herunterladen! Lebe dein Leben mit Hike!</string>
+    <string name="native_sms_invite_5">Hallo! Schau dir mal den hike Messenger an. Du kannst jetzt deine privaten Chats vor anderen Personen verbergen. Jetzt über http://hike.in herunterladen! Lebe dein Leben mit Hike!</string>
+    <string name="native_sms_invite_6">Hallo! Schau dir mal den hike Messenger an. Du kannst sogar mit Freunden chatten, die nicht online sind! Jetzt über http://hike.in herunterladen! Lebe dein Leben mit Hike!</string>
+    <string name="ftue_card_header_last_seen">Zul.online</string>
+    <string name="ftue_card_body_last_seen">Nur Favoriten können deine Zuletzt-online-Angabe &amp; Statusmeldungen sehen</string>
+    <string name="ftue_card_click_text_last_seen">Tippe hier, um sie auszuwählen!</string>
+    <string name="ftue_card_header_hidden_mode">Geheimmodus</string>
+    <string name="ftue_card_body_hidden_mode">Markiere deine Chats als verborgen und öffne sie über eine PIN</string>
+    <string name="ftue_card_click_text_hidden_mode">Tippe hier, um loszulegen!</string>
+    <string name="ftue_card_header_hike_offline">Nutze Hike offline</string>
+    <string name="ftue_card_body_hike_offline">Sende Nachrichten an Freunde, selbst wenn sie nicht online sind</string>
+    <string name="ftue_card_click_text_hike_offline">Es funktioniert wie von Zauberhand!</string>
+    <string name="ftue_card_header_sticker">Sticker</string>
+    <string name="ftue_card_body_sticker">Wenn dir die Worte fehlen, nutze Sticker.</string>
+    <string name="ftue_card_click_text_sticker">Du wirst sie lieben!</string>
+    <string name="ftue_card_sep">Tolle Dinge, die du mit hike machen kannst</string>
+     <string name="change_stealth_password">Passwort ändern</string>
+     <string name="change_stealth_password_body">Ändere das Passwort deines Geheimmodus</string>
+     <string name="invited">Eingeladen</string>
+     <string name="invite_more">MEHR EINLADEN</string>
+     <string name="invite_sent">Einladung gesendet</string>
+     <string name="send_invite">%1$d einladen</string>
+     <string name="hike_to_offline_tip_msg">Hier tippen, um Gratis-SMS zu senden</string>
+     <string name="new_chat_tip_msg">Zum Schreiben tippen</string>
+     <string name="ftue_status_update_card_header">Drücke dich aus</string>
+     <string name="ftue_status_update_card_msg">Hier tippen, um eine Statusmeldung zu veröffentlichen. Nur deine Favoriten können sie lesen.</string>
+     <string name="earn_free_sms">Hol dir Gratis-SMS</string>
+     <string name="email_body">Ich habe mir soeben den neuen hike-Messenger heruntergeladen. Was für ein Unterschied zu WhatsApp!\n\nHike hat tolle Sticker zu bieten und ich kann selbst bestimmen, welche Personen erfahren dürfen, wann ich zuletzt online war. Außerdem sind die Chatmotive echt cool.\n\nUnd das Beste daran ist, dass Hike einen Geheimmodus hat, über den ich private Nachrichten vor der Welt verbergen kann! Einfach spitze!\n\nLade dir die App schnell herunter: http://hike.in</string>
+     <string name="email_subject">Lebe dein Leben mit hike</string>
+     <string name="reciever_is_offline">%1$s ist offline</string>
+     <string name="send_uppercase">SENDEN</string>
+     <string name="hike_offline_mode_msg">wird als %1$d SMS gesendet</string>
+     <string name="messages_sent">Nachrichten gesendet!</string>
+     <string name="hike_offline_messages_sent_msg">Du hast noch %1$d Gratis-SMS übrig</string>
+     <string name="always">Immer</string>
+     <string name="just_once">Nur einmal</string>
+     <string name="undelivered_sms_setting_summary">Immer fragen</string>
+    <string name="wicked_jellies">Verhexte Jellies</string>
+     <string name="hike_to_offline_push_title_single">%1$s ist offline</string>
+      <string name="hike_to_offline_push_title_multiple">Mehrere Personen sind offline</string>
+     <string name="hike_to_offline_text">Sende offline Nachrichten über hike </string>
+    <string name="invite_with_watsapp">WhatsApp</string>
+    <string name="watsapp_invitation">Hallo! Komme auch zum hike Messenger, der einzigen Messaging-App aus Indien! Hike ermöglicht dir, deinen Zuletzt-online-Status nur ausgewählten Freunden zu zeigen, Nachrichten an Freunde zu schicken, wenn sie offline sind, und tolle Sticker zu senden.\n\nAußerdem kannst du alle Dateiformate mit jeweils bis zu 100 MB teilen, so z. B. Dokumente, Lieder, Filme usw. ;) http://get.hike.in/</string>
+    <string name="extra_invite">Extra</string>
+     <string name="profile_pic_header">Profilbild</string>
+     <string name="profile_pic_display_info">Nur Favoriten zeigen</string>
+     <string name="undelivered_sms_setting_remember">Meine Präferenz ist gespeichert</string>
+     <string name="send_sms_sticker_msg">hat dir einen Sticker gesendet</string>
+     <string name="send_sms_img_msg">hat dir ein Bild gesendet</string>
+     <string name="send_sms_video_msg">schickt dir ein Video</string>
+     <string name="send_sms_location_msg">hat seinen/ihren Standort geteilt </string>
+     <string name="send_sms_contact_msg">teilt einen Kontakt</string>
+     <string name="send_sms_audio_msg">schickt dir ein Audio</string>
+     <string name="free_hike_sms_subtext">Noch %1$d</string>
+     <string name="free_hike_sms_subtext_diabled">Noch %1$d. Nutze Hike häufiger, um mehr Gratis-SMS zu erhalten.</string>
+     <string name="carrier_charges_apply">Mobilfunkdaten fallen an</string>
+     <string name="send_sms_as">Sende %1$d SMS als</string>
+     <string name="choose_setting">Einstellung wählen</string>
+     <string name="kitkat_not_enough_sms">Nur noch %1$d SMS. Nutze Hike häufiger, um mehr Gratis-SMS zu erhalten.</string>
+     <string name="sent_by_hike">über eine Gratis-SMS von hike gesendet</string>
+     <string name="tap_plus_add_favorites">Nur Favoriten können deine Statusmeldung und deinen Zuletzt-online-Status sehen. Wähle sie wohlüberlegt aus!</string>
+     <string name="add_as_favorite_menu">Favorit hinzufügen</string>
+	 <string name="remove_from_favorites">Favorit entfernen</string>
+	 <string name="file_attachment_info">Medien &amp; Dateien mit bis zu 100 MB teilen</string>
+	 <string name="ftue_sms_contact_card_header">Du hast keine Kontakte bei hike</string>
+	 <string name="ftue_sms_contact_card_subtext">Lade sie ein und verdiene Rs20 Gesprächszeit für jeden Freund, der beitritt.</string>
+     <string name="send_free_sms">Gratis-SMS senden</string>
+     <string name="send_paid_sms">Kostenpflichtige SMS senden</string>
+     <string name="next_uppercase">WEITER</string>
+     <string name="regular_sms_sent_confirmation">Als reguläre SMS senden</string>
+    <string name="ftue_card_body_group">Chatte mit bis zu %1$d Freunden. Das sind mehr als je zuvor.</string>
+    <string name="ftue_card_click_group">Tippe, um eine Gruppe zu erstellen!</string>
+    <string name="ftue_card_body_invite">Du verdienst Rs20 Gesprächszeit für jeden Freund, der hike beitritt.</string>
+    <string name="ftue_card_click_invite">Fange jetzt an, Freunde einzuladen!</string>
+    <string name="free_download">Gratis-Download</string>
+    <string name="send_sms_file_msg">hat dir eine Datei geschickt</string>
+    <string name="use_this_quality_for_sending_images">Diese Qualität zum Senden von Bildern verwenden</string>
+    <string name="select_all_confirmation_header">Alle einladen</string>
+    <string name="select_all_confirmation_msg">Einladung zum Herunterladen von hike an %1$d Kontakte senden?</string>
+    <string name="change_password_from_privacy">Passwort über Einstellungen > Datenschutz ändern</string>
+    <string name="hike_offline_caps">Hike Offline</string>
+    <string-array name="chat_thread_empty_state_tutorial_text">
+        <item>#TeileEtwas</item>
+        <item>Es ist nie verkehrt, hallo zu sagen :-)</item>
+        <item>Sage etwas Tolles!</item>
+        <item>Sei sozial</item>
+        <item>Ich akzeptiere Emoji-Smileys und Sticker als Begrüßung :-)</item>
+        <item>Sage etwas, bevor dein Akku leer ist</item>
+        <item>Einzeiler werden akzeptiert</item>
+        <item>Zu Beginn reicht auch eine kurze Nachricht</item>
+        <item>Zum Glück bin ich beim Chatten nicht introvertiert.</item>
+        <item>In vielen Kulturen wird Schweigen als unhöflich empfunden.</item>
+        <item>Wie könnte man nur einen Chat starten. Ach, ich hab da eine Idee...</item>
+        <item>@string/chatThreadNudgeTutorialText</item>
+    </string-array>
+    <string name="hike_offline_notifications">Hike Offline-Benachrichtigungen</string>
+    <string name="h2o_notifications_setting_summary">Aktiviere hike Offline-Benachrichtigungen für Kontakte </string>
+    <string name="pin_header">Pathik</string>
+    <string name="pin_detail">Lasst uns morgen alle blau machen. Wir treffen uns vorm Kino.</string>
+    <string name="postAnonymously">Anonym posten</string>
+    <string name="create_pin">PIN erstellen</string>
+    <string name="pin_history">PIN-Chronik</string>
+    <string name="max_pin_unread_counter">9+</string>
+    <string name="pin_text_hint">Teile etwas Wichtiges mit...</string>
+    <string name="chat_theme_small">Chatmotiv</string>
+    <string name="ftue_pin_header">Verwende PINs,</string>
+    <string name="ftue_pin_body">um wichtige Nachrichten zu teilen</string>
+    <string name="xyz_posted_pin">%1$s hat eine PIN gepostet</string>
+    <string name="pinHistoryTutorialText">Noch keine PINs</string>
+    <string name="incorrect_msisdn_warning">Falsche Nummer</string>
+    <string name="incorrect_msisdn_msg">Bitte gib die Nummer ein, die du bei der Registrierung von hike auf diesem Handy angegeben hast.</string>
+    <string name="delete_account_description">all deine Nachrichten, Frei-SMS und hike-Belohnungen gelöscht</string>
+    <string name="delete_account_heading_2">Zum Löschen deines Kontos gib bitte deine Nummer ein</string>
+    
+</resources>     

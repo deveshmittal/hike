@@ -10,8 +10,7 @@
         style="@style/HomeList"
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"
-        android:background="@color/white"
-        android:fastScrollEnabled="false" />
+        android:background="@color/white" />
 
     <include
         android:id="@+id/spinner"

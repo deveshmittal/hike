@@ -25,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -125,6 +126,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		}
 		setupActionBar();
 		Utils.executeContactListResultTask(new SetupContactList());
+		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 	}
 
 	private void init()
@@ -165,9 +167,14 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				@Override
 				public void onClick(View v)
 				{
-					if(calledFromFTUE)
+					final CheckBox selectAllCB = (CheckBox) findViewById(R.id.select_all_cb);
+					if(selectAllCB.isChecked())
 					{
-						showInviteConfirmationPopup();
+						showInviteConfirmationPopup(true);
+					}
+					else if(calledFromFTUE)
+					{
+						showInviteConfirmationPopup(false);
 					}
 					else
 					{
@@ -222,11 +229,10 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		init();
 	}
 	
-	private void showInviteConfirmationPopup()
+	private void showInviteConfirmationPopup(boolean selectAllChecked)
 	{
 		final CustomAlertDialog confirmDialog = new CustomAlertDialog(this);
-		confirmDialog.setHeader(R.string.invite_friends);
-		confirmDialog.setBody(getResources().getString(R.string.invite_friends_confirmation_msg, selectedContacts.size()));
+		
 		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
 		{
 
@@ -238,8 +244,18 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			}
 		};
 
-		confirmDialog.setOkButton(R.string.invite_1, dialogOkClickListener);
-		confirmDialog.setCancelButton(R.string.cancel);
+		if(!selectAllChecked)
+		{
+			confirmDialog.setHeader(R.string.invite_friends);
+			confirmDialog.setBody(getResources().getString(R.string.invite_friends_confirmation_msg, selectedContacts.size()));
+		}
+		else
+		{
+			confirmDialog.setHeader(R.string.select_all_confirmation_header);
+			confirmDialog.setBody(getResources().getString(R.string.select_all_confirmation_msg, selectedContacts.size()));
+		}
+		confirmDialog.setOkButton(R.string.yes, dialogOkClickListener);
+		confirmDialog.setCancelButton(R.string.no);
 		confirmDialog.show();
 	}
 

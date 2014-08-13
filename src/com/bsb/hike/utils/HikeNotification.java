@@ -1,5 +1,8 @@
 package com.bsb.hike.utils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -55,7 +58,8 @@ public class HikeNotification
 	public static final int STEALTH_NOTIFICATION_ID = -127;
 	
 	public static final int STEALTH_POPUP_NOTIFICATION_ID = -128;
-
+	
+	public static final int HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID = -129;
 
 	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
 
@@ -128,6 +132,7 @@ public class HikeNotification
 		 * invoke the chat thread here. The Stealth tip popup should already be showing here ideally by now.
 		 */
 		final Intent notificationIntent = Utils.getHomeActivityIntent(context);
+		notificationIntent.putExtra(HikeConstants.Extras.HAS_TIP, true);
 		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
 
 		notificationIntent.setData((Uri.parse("custom://" + STEALTH_POPUP_NOTIFICATION_ID)));
@@ -141,7 +146,28 @@ public class HikeNotification
 
 	}
 
-	
+	public void notifyAtomicPopup(final String message, Intent notificationIntent)
+	{
+		/*
+		 * return straight away if the block notification setting is ON
+		 */
+		if (sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
+		{
+			return;
+		}
+
+		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
+
+		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		final int smallIconId = returnSmallIcon();
+
+		NotificationCompat.Builder mBuilder = getNotificationBuilder(context.getString(R.string.team_hike), message, message, avatarDrawable, smallIconId, false);
+		setNotificationIntentForBuilder(mBuilder, notificationIntent);
+
+		notificationManager.notify(FREE_SMS_POPUP_NOTIFICATION_ID, mBuilder.getNotification());
+
+	}
+
 	public void notifyMessage(final Protip proTip)
 	{
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
@@ -193,6 +219,11 @@ public class HikeNotification
 
 	public void notifyMessage(final ContactInfo contactInfo, final ConvMessage convMsg, boolean isRich, Bitmap bigPictureImage)
 	{
+		boolean isPin = false;
+		
+		if(convMsg.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			isPin = true;
+		
 		final String msisdn = convMsg.getMsisdn();
 		// we are using the MSISDN now to group the notifications
 		final int notificationId = msisdn.hashCode();
@@ -269,7 +300,14 @@ public class HikeNotification
 				key = participant.getMsisdn();
 			}
 			partName = key;
-			message = key + HikeConstants.SEPARATOR + message;
+			if (isPin)
+			{
+				message = key +" "+ context.getString(R.string.pin_notif_text) + HikeConstants.SEPARATOR + message;
+			}
+			else
+			{
+				message = key + HikeConstants.SEPARATOR + message;
+			}
 			key = gConv.getLabel();
 		}
 
@@ -290,13 +328,45 @@ public class HikeNotification
 			else
 				message = messageString;
 			// big picture messages ! intercept !
-			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, !convMsg.isStickerMessage());
+			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, !convMsg.isStickerMessage(), isPin);
 		}
 		else
 		{
 			// regular message
-			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, null);
+			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, null, isPin);
 		}
+	}
+	
+	public void notifyHikeToOfflinePush(ArrayList<String> msisdnList, HashMap<String, String> nameMap)
+	{
+		/*
+		 * return straight away if the block notification setting is ON
+		 */
+		if (sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
+		{
+			return;
+		}
+
+		final int notificationId = HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID;
+		final Intent notificationIntent = new Intent(context, ChatThread.class);
+		
+		String firstMsisdn = msisdnList.get(0);
+		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, (firstMsisdn));
+		notificationIntent.putExtra(HikeConstants.Extras.NAME, (nameMap.get(firstMsisdn)));
+
+		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.offline_notification);
+		final int smallIconId = returnSmallIcon();
+		
+		String title = (msisdnList.size() > 1)  ? context.getString(R.string.hike_to_offline_push_title_multiple, msisdnList.size()) : (HikeMessengerApp.isStealthMsisdn(firstMsisdn) ? context.getString(R.string.stealth_notification_message) : context.getString(R.string.hike_to_offline_push_title_single, nameMap.get(firstMsisdn)));
+		String message = context.getString(R.string.hike_to_offline_text);
+		NotificationCompat.Builder mBuilder = getNotificationBuilder(title, message, message, avatarDrawable, smallIconId, false);
+		setNotificationIntentForBuilder(mBuilder, notificationIntent);
+
+		notificationManager.notify(notificationId, mBuilder.getNotification());
+
 	}
 
 	public void notifyStealthMessage()
@@ -346,7 +416,7 @@ public class HikeNotification
 
 		final String text = context.getString(R.string.add_as_favorite_notification, key);
 
-		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, msisdn, null);
+		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, msisdn, null, false);
 		addNotificationId(notificationId);
 	}
 
@@ -403,7 +473,7 @@ public class HikeNotification
 			return;
 		}
 
-		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, statusMessage.getMsisdn(), null);
+		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, statusMessage.getMsisdn(), null, false);
 		addNotificationId(notificationId);
 	}
 
@@ -426,7 +496,7 @@ public class HikeNotification
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn.toString());
 
-		showNotification(notificationIntent, icon, System.currentTimeMillis(), notificationId, text, key, message, msisdn, bigPictureImage);
+		showNotification(notificationIntent, icon, System.currentTimeMillis(), notificationId, text, key, message, msisdn, bigPictureImage, false);
 	}
 
 	public void notifyBatchUpdate(final String header, final String message)
@@ -444,7 +514,7 @@ public class HikeNotification
 
 		final String text = message;
 
-		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, null, null); // TODO: change this.
+		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, null, null, false); // TODO: change this.
 		addNotificationId(notificationId);
 	}
 
@@ -484,12 +554,12 @@ public class HikeNotification
 	}
 
 	private void showNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text, final String key,
-			final String message, final String msisdn, final Bitmap bigPictureImage, boolean isFTMessage)
+			final String message, final String msisdn, final Bitmap bigPictureImage, boolean isFTMessage, boolean isPin)
 	{
 
 		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 
-		final Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(context, msisdn);
+		final Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(context, msisdn, isPin);
 
 		final int smallIconId = returnSmallIcon();
 
@@ -518,9 +588,9 @@ public class HikeNotification
 	}
 
 	private void showNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text, final String key,
-			final String message, final String msisdn, final Bitmap bigPictureImage)
+			final String message, final String msisdn, final Bitmap bigPictureImage, boolean isPin)
 	{
-		showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, false);
+		showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, false, isPin);
 	}
 
 	private int returnSmallIcon()
@@ -602,10 +672,7 @@ public class HikeNotification
 
 	public void setNotificationIntentForBuilder(NotificationCompat.Builder mBuilder, Intent notificationIntent)
 	{
-		final TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-		stackBuilder.addNextIntent(notificationIntent);
-
-		final PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-		mBuilder.setContentIntent(resultPendingIntent);
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		mBuilder.setContentIntent(contentIntent);
 	}
 }

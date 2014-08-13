@@ -36,6 +36,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ResultReceiver;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -48,8 +49,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.bsb.hike.BuildConfig;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Utils;
 import com.haibison.android.lockpattern.util.IEncrypter;
 import com.haibison.android.lockpattern.util.InvalidEncrypterException;
 import com.haibison.android.lockpattern.util.LoadingDialog;
@@ -479,6 +482,25 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
         mBtnCancel = (Button) findViewById(R.id.alp_42447968_button_cancel);
         mBtnConfirm = (Button) findViewById(R.id.alp_42447968_button_confirm);
 
+        TextView changePasswordSetting = (TextView) findViewById(R.id.change_password_setting);
+        if(!ACTION_CREATE_PATTERN.equals(getIntent().getAction()) 
+        		&& !getIntent().getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false) 
+        		&& changePasswordSetting != null)
+        {
+        	changePasswordSetting.setVisibility(View.VISIBLE);
+        	changePasswordSetting.setText(getString(R.string.change_password_from_privacy));
+        	changePasswordSetting.setOnClickListener(new View.OnClickListener()
+			{
+				
+				@Override
+				public void onClick(View arg0)
+				{
+					Intent intent = Utils.getIntentForPrivacyScreen(LockPatternActivity.this);
+					startActivity(intent);
+					finishWithNegativeResult(RESULT_CANCELED);
+				}
+			});
+        }
         /*
          * LOCK PATTERN VIEW
          */
@@ -535,8 +557,12 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
             if (infoText != null)
                 mTextInfo.setText(infoText);
             else
-                mTextInfo
-                        .setText(R.string.alp_42447968_msg_draw_an_unlock_pattern);
+            {
+            	//checking whether this was invoked in a normal flow or stealth reset flow.
+            	//we use a different string if this was invoked from the reset flow
+                mTextInfo.setText(getIntent().getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false)
+                		?R.string.alp_42447968_msg_draw_new_pattern : R.string.alp_42447968_msg_draw_an_unlock_pattern);
+            }
 
             /*
              * BUTTON OK
@@ -566,8 +592,11 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
         }// ACTION_CREATE_PATTERN
         else if (ACTION_COMPARE_PATTERN.equals(getIntent().getAction())) {
             if (TextUtils.isEmpty(infoText))
-                mTextInfo
-                        .setText(R.string.alp_42447968_msg_draw_pattern_to_unlock);
+            {
+            	mTextInfo.setText(getIntent().getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false)
+                		?R.string.alp_42447968_msg_draw_pattern_to_unlock_in_reset : R.string.alp_42447968_msg_draw_pattern_to_unlock);
+            }
+       
             else
                 mTextInfo.setText(infoText);
             if (getIntent().hasExtra(EXTRA_PENDING_INTENT_FORGOT_PATTERN)) {
@@ -579,9 +608,8 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
             mFooter.setVisibility(View.GONE);
         }// ACTION_COMPARE_PATTERN
         else if (ACTION_VERIFY_CAPTCHA.equals(getIntent().getAction())) {
-            mTextInfo
-                    .setText(R.string.alp_42447968_msg_redraw_pattern_to_confirm);
-
+				
+        	mTextInfo.setText(getIntent().getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false)?R.string.alp_42447968_msg_redraw_new_pattern_confirm:R.string.alp_42447968_msg_redraw_pattern_to_confirm);
             /*
              * NOTE: EXTRA_PATTERN should hold a char[] array. In this case we
              * use it as a temporary variable to hold a list of Cell.
@@ -762,6 +790,7 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
      *            cases, it can be set to {@code null}.
      */
     private void finishWithResultOk(char[] pattern) {
+    	mIntentResult.putExtra(HikeConstants.Extras.STEALTH_PASS_RESET,getIntent().getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false));
         if (ACTION_CREATE_PATTERN.equals(getIntent().getAction()))
             mIntentResult.putExtra(EXTRA_PATTERN, pattern);
         else {
@@ -815,7 +844,8 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
      * {@link #RESULT_FORGOT_PATTERN}).
      */
     private void finishWithNegativeResult(int resultCode) {
-        if (ACTION_COMPARE_PATTERN.equals(getIntent().getAction()))
+    	mIntentResult.putExtra(HikeConstants.Extras.STEALTH_PASS_RESET,getIntent().getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false));
+    	if (ACTION_COMPARE_PATTERN.equals(getIntent().getAction()))
             mIntentResult.putExtra(EXTRA_RETRY_COUNT, mRetryCount);
 
         setResult(resultCode, mIntentResult);

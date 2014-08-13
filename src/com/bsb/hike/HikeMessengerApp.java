@@ -242,6 +242,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String SERVER_TIME_OFFSET = "serverTimeOffset";
 
 	public static final String SHOWN_EMOTICON_TIP = "shownEmoticonTip1";
+	
+	public static final String SHOWN_PIN_TIP = "shownPinTip";
 
 	public static final String SHOWN_MOODS_TIP = "shownMoodsTip1";
 
@@ -352,12 +354,46 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String STEALTH_UNREAD_TIP_MESSAGE = "stealthUnreadTipMessage";
 
 	public static final String STEALTH_UNREAD_TIP_HEADER = "stealthUnreadTipHeader";
-	
+
 	public static final String LAST_STEALTH_POPUP_ID = "lastStealthPopupId";
 
 	public static final String SHOWN_WELCOME_TO_HIKE_CARD = "shownWelcomeToHikeCard";
 
 	public static final String FRIEND_REQ_COUNT = "frReqCount";
+	
+	public static final String HAS_UNSET_SMS_PREFS_ON_KITKAT_UPGRAGE = "hasUnsetSmsPrefsOnKitkatUpgrade";
+
+	public static final String ATOMIC_POP_UP_TYPE_MAIN = "apuTypeMain";
+
+	public static final String ATOMIC_POP_UP_TYPE_CHAT = "apuTypeChat";
+
+	public static final String ATOMIC_POP_UP_STICKER = "stk";
+
+	public static final String ATOMIC_POP_UP_PROFILE_PIC = "pp";
+
+	public static final String ATOMIC_POP_UP_ATTACHMENT = "ft";
+
+	public static final String ATOMIC_POP_UP_INFORMATIONAL = "info";
+
+	public static final String ATOMIC_POP_UP_FAVOURITES = "fav";
+
+	public static final String ATOMIC_POP_UP_THEME = "theme";
+
+	public static final String ATOMIC_POP_UP_INVITE = "inv";
+
+	public static final String ATOMIC_POP_UP_STATUS = "stts";
+
+	public static final String ATOMIC_POP_UP_NOTIF_MESSAGE = "apuNotifMessage";
+
+	public static final String ATOMIC_POP_UP_NOTIF_SCREEN = "apuNotifScreen";
+
+	public static final String ATOMIC_POP_UP_HEADER_MAIN = "apuHeaderMain";
+
+	public static final String ATOMIC_POP_UP_MESSAGE_MAIN = "apuMessageMain";
+
+	public static final String ATOMIC_POP_UP_HEADER_CHAT = "apuHeaderChat";
+
+	public static final String ATOMIC_POP_UP_MESSAGE_CHAT = "apuMessageChat";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -560,6 +596,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		// -1 in both cases means an uninitialized setting, mostly on first
 		// launch or interrupted upgrades.
 		int convInt = settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1);
+		int msgHashGrpReadUpgrade = settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1);
 		ACRA.init(this);
 		CustomReportSender customReportSender = new CustomReportSender();
 		ErrorReporter.getInstance().setReportSender(customReportSender);
@@ -579,6 +616,14 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			mEditor.commit();
 		}
 
+		if (msgHashGrpReadUpgrade == -1)
+		{
+			Editor mEditor = settings.edit();
+			// set the pref to 0 to indicate we've reached the state to init the
+			// hike conversation database.
+			mEditor.putInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, 0);
+			mEditor.commit();
+		}
 		/*
 		 * Resetting the stealth mode when the app starts. 
 		 */
@@ -614,7 +659,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
-		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || TEST)
+		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || 
+				settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1 || TEST)
 		{
 			// turn off future push notifications as soon as the app has
 			// started.
@@ -667,6 +713,19 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		{
 			Editor editor = preferenceManager.edit();
 			editor.putBoolean(HikeConstants.STATUS_BOOLEAN_PREF, preferenceManager.getInt(HikeConstants.STATUS_PREF, 0) == 0);
+			editor.commit();
+		}
+		
+		if(Utils.isKitkatOrHigher() && !HikeSharedPreferenceUtil.getInstance(this).getData(HAS_UNSET_SMS_PREFS_ON_KITKAT_UPGRAGE, false))
+		{
+			/*
+			 * On upgrade in kitkat or higher we need to reset sms setting preferences 
+			 * as we are now removing these settings from UI.
+			 */
+			HikeSharedPreferenceUtil.getInstance(this).saveData(HAS_UNSET_SMS_PREFS_ON_KITKAT_UPGRAGE, true);
+			Editor editor = preferenceManager.edit();
+			editor.remove(HikeConstants.SEND_SMS_PREF);
+			editor.remove(HikeConstants.RECEIVE_SMS_PREF);
 			editor.commit();
 		}
 
@@ -731,6 +790,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
+		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_SUPPORT, "hike support");
 		initHikeLruCache(getApplicationContext());
 
 		/*

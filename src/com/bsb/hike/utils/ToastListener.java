@@ -1,12 +1,21 @@
 package com.bsb.hike.utils;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -36,6 +45,7 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
@@ -56,7 +66,7 @@ public class ToastListener implements Listener
 	String[] hikePubSubListeners = { HikePubSub.PUSH_AVATAR_DOWNLOADED, HikePubSub.PUSH_FILE_DOWNLOADED, HikePubSub.PUSH_STICKER_DOWNLOADED, HikePubSub.MESSAGE_RECEIVED,
 			HikePubSub.NEW_ACTIVITY, HikePubSub.CONNECTION_STATUS, HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED, HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED, HikePubSub.UPDATE_PUSH, HikePubSub.APPLICATIONS_PUSH,
-			HikePubSub.SHOW_FREE_INVITE_SMS, HikePubSub.STEALTH_POPUP_WITH_PUSH};
+			HikePubSub.SHOW_FREE_INVITE_SMS, HikePubSub.STEALTH_POPUP_WITH_PUSH, HikePubSub.HIKE_TO_OFFLINE_PUSH, HikePubSub.ATOMIC_POPUP_WITH_PUSH, HikePubSub.BULK_MESSAGE_NOTIFICATION };
 
 	public ToastListener(Context context)
 	{
@@ -135,7 +145,7 @@ public class ToastListener implements Listener
 						contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn(), false);
 					}
 
-					if(message.getConversation().isStealth())
+					if (message.getConversation().isStealth())
 					{
 						this.toaster.notifyStealthMessage();
 					}
@@ -172,11 +182,11 @@ public class ToastListener implements Listener
 				return;
 			}
 			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
-			if (activity instanceof PeopleActivity) 
+			if (activity instanceof PeopleActivity)
 			{
 				return;
 			}
-			if(HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
+			if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
 			{
 				this.toaster.notifyStealthMessage();
 			}
@@ -248,7 +258,7 @@ public class ToastListener implements Listener
 				Logger.d(getClass().getSimpleName(), "Group has been muted");
 				return;
 			}
-			if(message.getConversation().isStealth())
+			if (message.getConversation().isStealth())
 			{
 				Logger.d(getClass().getSimpleName(), "this conversation is stealth");
 				return;
@@ -326,10 +336,196 @@ public class ToastListener implements Listener
 			if (object != null && object instanceof Bundle)
 			{
 				Bundle bundle = (Bundle) object;
-				String header = bundle.getString(HikeConstants.Extras.STEALTH_PUSH_HEADER);
+				String header = bundle.getString(HikeConstants.Extras.STEALTH_PUSH_BODY);
 				if (!TextUtils.isEmpty(header))
 				{
-					toaster.notifyStealthPopup(header);  //TODO: toasting header for now
+					toaster.notifyStealthPopup(header); // TODO: toasting header for now
+				}
+			}
+		}
+		else if (HikePubSub.ATOMIC_POPUP_WITH_PUSH.equals(type))
+		{
+			if (object != null && object instanceof Bundle)
+			{
+				Bundle bundle = (Bundle) object;
+				String header = bundle.getString(HikeMessengerApp.ATOMIC_POP_UP_NOTIF_MESSAGE);
+				String className = bundle.getString(HikeMessengerApp.ATOMIC_POP_UP_NOTIF_SCREEN);
+				if (!TextUtils.isEmpty(header))
+				{
+					Intent notificationIntent;
+					try
+					{
+						notificationIntent = new Intent(context, Class.forName(className));
+						notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						notificationIntent.putExtra(HikeConstants.Extras.HAS_TIP, true);
+						toaster.notifyAtomicPopup(header, notificationIntent);
+					}
+					catch (ClassNotFoundException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+				}
+			}
+		}
+		else if (HikePubSub.HIKE_TO_OFFLINE_PUSH.equals(type))
+		{
+			if (object != null && object instanceof Bundle)
+			{
+				Bundle bundle = (Bundle) object;
+				String offlineMsisdnsString = bundle.getString(HikeConstants.Extras.OFFLINE_PUSH_KEY);
+				try
+				{
+					JSONObject offlineMsisdnsObject = new JSONObject(offlineMsisdnsString);
+					JSONArray offlineMsisdnsArray = offlineMsisdnsObject.optJSONArray(HikeConstants.Extras.OFFLINE_MSISDNS);
+
+					if (null != offlineMsisdnsArray && offlineMsisdnsArray.length() > 0)
+					{
+						int length = offlineMsisdnsArray.length();
+						ArrayList<String> msisdnList = new ArrayList<String>(length); // original msisdn list
+						for (int i = 0; i < length; i++)
+						{
+							msisdnList.add(offlineMsisdnsArray.getString(i));
+						}
+
+						String msisdnStatement = getMsisdnStatement(msisdnList);
+
+						ArrayList<String> filteredMsisdnList = HikeConversationsDatabase.getInstance().getOfflineMsisdnsList(msisdnStatement); // this db query will return new list
+																																				// which can be of different order
+																																				// and different length
+
+						if (filteredMsisdnList == null || filteredMsisdnList.size() == 0)
+						{
+							Logger.e("HikeToOffline", "no chats with undelivered messages");
+							return;
+						}
+
+						msisdnStatement = getMsisdnStatement(filteredMsisdnList);
+						List<ContactInfo> contactList = this.db.getContactNamesFromMsisdnList(msisdnStatement); // contact info list
+
+						HashMap<String, String> nameMap = new HashMap<String, String>(); // nameMap to map msisdn to corresponding name
+						for (ContactInfo contactInfo : contactList)
+						{
+							nameMap.put(contactInfo.getMsisdn(), contactInfo.getName());
+						}
+
+						for (String msisdn : filteredMsisdnList)
+						{
+							if (nameMap.get(msisdn) == null)
+							{
+								nameMap.put(msisdn, msisdn);
+							}
+						}
+
+						filteredMsisdnList.clear();
+						for (String msisdn : msisdnList) // running loop to bring back original order
+						{
+							if (nameMap.containsKey(msisdn))
+							{
+								filteredMsisdnList.add(msisdn);
+							}
+						}
+
+						Activity activity = (currentActivity != null) ? currentActivity.get() : null;
+
+						if ((activity instanceof ChatThread))
+						{
+							String contactNumber = ((ChatThread) activity).getContactNumber();
+							if (filteredMsisdnList.get(0).equals(contactNumber))
+							{
+								Logger.e("HikeToOffline", "same chat thread open");
+								return;
+							}
+						}
+						toaster.notifyHikeToOfflinePush(msisdnList, nameMap);
+
+					}
+				}
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					Logger.e("HikeToOffline", "Json Exception", e);
+				}
+
+			}
+		}
+		else if (HikePubSub.BULK_MESSAGE_NOTIFICATION.equals(type))
+		{
+			ArrayList<ConvMessage> messageList = (ArrayList<ConvMessage>) object;
+			if(messageList == null || messageList.isEmpty())
+			{
+				return ;
+			}
+			
+			for(ConvMessage message : messageList)
+			{
+				if (message.isShouldShowPush())
+				{
+					HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
+					message.setConversation(hCDB.getConversation(message.getMsisdn(), 0));
+
+					if (message.getConversation() == null)
+					{
+						Logger.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
+						return;
+					}
+					if ((message.getConversation() instanceof GroupConversation) && ((GroupConversation) message.getConversation()).isMuted())
+					{
+						Logger.d(getClass().getSimpleName(), "Group has been muted");
+						return;
+					}
+					if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
+							|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
+					{
+						if (message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
+						{
+							boolean showNotification = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.CHAT_BG_NOTIFICATION_PREF, true);
+							if (!showNotification)
+							{
+								return;
+							}
+						}
+
+						Activity activity = (currentActivity != null) ? currentActivity.get() : null;
+						if ((activity instanceof ChatThread))
+						{
+							String contactNumber = ((ChatThread) activity).getContactNumber();
+							if (message.getMsisdn().equals(contactNumber))
+							{
+								return;
+							}
+						}
+
+						/*
+						 * the foreground activity isn't going to show this message so Toast it
+						 */
+						ContactInfo contactInfo;
+						if (message.isGroupChat())
+						{
+							Logger.d("ToastListener", "GroupName is " + message.getConversation().getLabel());
+							contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), message.getConversation().getLabel(), message.getMsisdn());
+						}
+						else
+						{
+							contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn(), false);
+						}
+
+						if (message.getConversation().isStealth())
+						{
+							this.toaster.notifyStealthMessage();
+						}
+						else
+						{
+							/*
+							 * Check if this is a big picture message, else toast a normal push message
+							 */
+							Bitmap bigPicture = returnBigPicture(message, context);
+							this.toaster.notifyMessage(contactInfo, message, bigPicture != null ? true : false, bigPicture);
+						}
+					}
+
 				}
 			}
 		}
@@ -395,7 +591,7 @@ public class ToastListener implements Listener
 		}
 		return bigPictureImage;
 	}
-	
+
 	private void notifyConnStatus(MQTTConnectionStatus status)
 	{
 		/* only show the trying to connect message after we've connected once */
@@ -413,6 +609,26 @@ public class ToastListener implements Listener
 			}
 			return;
 		}
+
+	}
+
+	// added for db query
+	private String getMsisdnStatement(ArrayList<String> msisdnList)
+	{
+
+		StringBuilder sb = new StringBuilder("(");
+		;
+		for (String msisdn : msisdnList)
+		{
+
+			sb.append(DatabaseUtils.sqlEscapeString(msisdn));
+
+			sb.append(",");
+
+		}
+		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
+
+		return sb.toString();
 
 	}
 

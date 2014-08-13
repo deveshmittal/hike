@@ -94,8 +94,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="1px"
             android:background="@color/white"
-            android:fadingEdge="none"
-            android:fastScrollEnabled="true" />
+            android:fadingEdge="none" />
 
         <include layout="@layout/list_empty_view" >
         </include>

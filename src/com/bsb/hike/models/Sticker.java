@@ -20,7 +20,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	/*
 	 * Used for the local stickers. Will be -1 for non local stickers
 	 */
-	private int stickerIndex = -1;
+	private int stickerIndex = -1; 
 
 	private String stickerId;
 
@@ -125,7 +125,6 @@ public class Sticker implements Serializable, Comparable<Sticker>
 			return false;
 		}
 		return false;
-
 	}
 
 	/**
@@ -259,5 +258,15 @@ public class Sticker implements Serializable, Comparable<Sticker>
 				return;
 			}
 		}
+	}
+
+	public boolean isInAppSticker()
+	{
+		if(category != null)
+		{
+			if((category.categoryId == StickerCategoryId.humanoid || category.categoryId == StickerCategoryId.expressions) && stickerIndex >= 0)
+				return true;
+		}
+		return false;
 	}
 }
