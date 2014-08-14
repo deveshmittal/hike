@@ -880,11 +880,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				HikeMessengerApp.addStealthMsisdnToMap(conv.getMsisdn());
 			}
 
-			if (conv.getMessages().isEmpty() && !(conv instanceof GroupConversation))
-			{
-				iter.remove();
-			}
-			else if ((stealthValue == HikeConstants.STEALTH_OFF || stealthValue == HikeConstants.STEALTH_ON_FAKE) && conv.isStealth())
+//			if (conv.getMessages().isEmpty() && !(conv instanceof GroupConversation))
+//			{
+//				iter.remove();
+//			}
+			if ((stealthValue == HikeConstants.STEALTH_OFF || stealthValue == HikeConstants.STEALTH_ON_FAKE) && conv.isStealth())
 			{
 				mConversationsAdded.add(conv.getMsisdn());
 				iter.remove();
