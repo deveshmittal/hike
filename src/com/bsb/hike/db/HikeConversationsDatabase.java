@@ -2880,9 +2880,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				String msisdn = c.getString(c.getColumnIndex(DBConstants.MSISDN));
 				allMsisdns.add(msisdn);
-				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, c.getString(c.getColumnIndex(DBConstants.NAME)), msisdn, c.getInt(c
-						.getColumnIndex(DBConstants.ONHIKE)) != 0), c.getInt(c.getColumnIndex(DBConstants.HAS_LEFT)) != 0, c.getInt(c.getColumnIndex(DBConstants.ON_DND)) != 0);
-				participantList.put(msisdn, new Pair<GroupParticipant, String>(groupParticipant, null));
+				String name = c.getString(c.getColumnIndex(DBConstants.NAME));
+				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, name, msisdn, c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0),
+						c.getInt(c.getColumnIndex(DBConstants.HAS_LEFT)) != 0, c.getInt(c.getColumnIndex(DBConstants.ON_DND)) != 0);
+				participantList.put(msisdn, new Pair<GroupParticipant, String>(groupParticipant, name));
 			}
 
 			return new Pair<Map<String, Pair<GroupParticipant, String>>, List<String>>(participantList, allMsisdns);
