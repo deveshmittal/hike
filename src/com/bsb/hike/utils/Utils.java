@@ -168,8 +168,10 @@ import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.TimelineActivity;
+import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
+import com.google.android.gms.internal.co;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
@@ -4437,4 +4439,12 @@ public class Utils
 		}
 		return !TextUtils.isEmpty(countryCode);
 	}	
+	
+	public static void startWebViewActivity(Context context,String url,String title){
+		Intent intent = new Intent(context, WebViewActivity.class);
+		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, url);
+		intent.putExtra(HikeConstants.Extras.TITLE, title);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		context.startActivity(intent);
+	}
 }
