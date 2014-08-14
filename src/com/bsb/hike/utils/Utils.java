@@ -171,7 +171,6 @@ import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
-import com.google.android.gms.internal.co;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
