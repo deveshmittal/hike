@@ -2104,7 +2104,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				/*
 				 * If the message does not contain any text or metadata, its an empty message and the conversation is blank.
 				 */
-				if (!TextUtils.isEmpty(messageString) || !TextUtils.isEmpty(metadata) || Utils.isGroupConversation(msisdn))
+				if (!TextUtils.isEmpty(messageString) || !TextUtils.isEmpty(metadata))
 				{
 					ConvMessage message = new ConvMessage(messageString, msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)), c.getLong(msgIdColumn),
 							c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn));

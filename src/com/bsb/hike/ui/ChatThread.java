@@ -1477,9 +1477,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			optionsList.add(new OverFlowMenuItem(getString(isMuted ? R.string.unmute_group : R.string.mute_group), 2));
 
-			optionsList.add(new OverFlowMenuItem(getString(R.string.clear_chat), 5));
 		}
-
+		optionsList.add(new OverFlowMenuItem(getString(R.string.clear_chat), 5));
 		optionsList.add(new OverFlowMenuItem(getString(R.string.email_chat), 3));
 
 		if (mConversation instanceof GroupConversation)
@@ -1628,7 +1627,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					e.printStackTrace();
 				}
 				updateOverflowMenuUnreadCount();
+				if(mConversation instanceof GroupConversation){
 				mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
+				}
 			}
 		};
 
