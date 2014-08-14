@@ -23,6 +23,8 @@ public class ConversationTip extends Conversation
 	public static final int ATOMIC_STATUS_TIP = 10;
 
 	public static final int ATOMIC_INFO_TIP = 11;
+	
+	public static final int ATOMIC_HTTP_TIP = 12;
 
 	private int tipType;
 
