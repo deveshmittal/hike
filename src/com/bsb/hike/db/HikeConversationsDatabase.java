@@ -1213,6 +1213,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			int unreadMessageCount = 0;
 			int unreadPinMessageCount = 0;
 
+			Map<String, JSONObject> map = new HashMap<String, JSONObject>();
+
 			for (ConvMessage conv : convMessages)
 			{
 
@@ -1286,13 +1288,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				 */
 				ContentValues contentValues = getContentValueForConversationMessage(conv);
 				mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { conv.getMsisdn() });
-				
+
 				// upgrade groupInfoTable
 				updateReadBy(conv);
+				if (Utils.isGroupConversation(conv.getMsisdn()))
+				{
+					map.put(conv.getMsisdn(), conv.getMetadata().getJSON());
+				}
 			}
 
 			incrementUnreadCounter(convMessages.get(0).getMsisdn(), unreadMessageCount);
 			mDb.setTransactionSuccessful();
+			ContactManager.getInstance().removeOlderLastGroupMsisdns(map);
 			return true;
 		}
 		finally
