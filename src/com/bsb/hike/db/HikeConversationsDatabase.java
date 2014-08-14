@@ -527,6 +527,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			editor.putInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, 1);
 			editor.commit();
 		}
+		
+		/*
+		 * Version 28 migrates msisdn entries to message table
+		 */
+		if (oldVersion < 28)
+		{
+			// Edit the preference to ensure that HikeMessenger app knows we've
+			// reached the
+			// upgrade flow for version 28
+			Editor editor = mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+			editor.putInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, 1);
+			editor.commit();
+		}
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike)
@@ -4254,7 +4267,65 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			mDb.endTransaction();
 		}
 	}
-
+	
+	public void upgradeForDatabaseVersion28()
+	{
+		try
+		{
+			mDb.beginTransaction();
+			addMessageMsisdn();
+			mDb.setTransactionSuccessful();
+		}
+		catch (Exception e)
+		{
+			Logger.e(getClass().getSimpleName(), "Exception : ", e);
+			e.printStackTrace();
+		}
+		finally
+		{
+			mDb.endTransaction();
+		}
+	}
+	
+	private void addMessageMsisdn()
+	{
+		Cursor c = null;
+		try
+		{
+			ArrayList<Pair<String, String>> convIdtoMsisdn = new ArrayList<Pair<String, String>>();
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.MSISDN }, null, null, null, null, null);
+			
+			final int convIdIndex = c.getColumnIndex(DBConstants.CONV_ID);
+			final int msisdnIndex = c.getColumnIndex(DBConstants.MSISDN);
+			
+			while (c.moveToNext())
+			{
+				Integer convId = c.getInt(convIdIndex);
+				String msisdn = c.getString(msisdnIndex);
+				convIdtoMsisdn.add(new Pair<String, String>(convId.toString(),msisdn));
+			}
+			
+			for (Pair<String, String> pair : convIdtoMsisdn)
+			{
+				ContentValues contentValues = new ContentValues();
+				contentValues.put(DBConstants.MSISDN, pair.second);
+				mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.CONV_ID + "=?", new String[] { pair.first });
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "Exception in adding msisdn ",e);
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+	
 	private void addMessageHashAndMsisdn()
 	{
 		Cursor c = null;
