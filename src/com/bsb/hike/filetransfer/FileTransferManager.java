@@ -438,7 +438,7 @@ public class FileTransferManager extends BroadcastReceiver
 		else
 			fss = getDownloadFileState(msgId, mFile);
 
-		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED)
+		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.INITIALIZED)
 		{
 			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 			if (obj != null)
@@ -553,7 +553,7 @@ public class FileTransferManager extends BroadcastReceiver
 				e.printStackTrace();
 			}
 		}
-		return fss;
+		return fss != null ? fss : new FileSavedState();
 	}
 
 	// this function gives the state of uploading for a file

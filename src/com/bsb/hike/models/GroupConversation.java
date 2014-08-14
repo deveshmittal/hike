@@ -1,8 +1,10 @@
 package com.bsb.hike.models;
 
 import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -32,6 +34,10 @@ public class GroupConversation extends Conversation
 	private boolean hasSmsUser;
 
 	private Map<String, Pair<GroupParticipant, String>> groupParticipantList;
+	
+	private long lastSentMsgId = -1;
+	
+	private LinkedList<String> readByParticipantsList;
 
 	private int groupMemberAliveCount;
 
@@ -122,6 +128,11 @@ public class GroupConversation extends Conversation
 		String name = HikeMessengerApp.getContactManager().getName(getMsisdn(), contact.getMsisdn());
 		return Utils.getFirstName(name);
 	}
+	
+	public String getGroupParticipantFirstNameAndSurname(String msisdn)
+	{
+		return getGroupParticipant(msisdn).getContactInfo().getFirstNameAndSurname();
+	}
 
 	public String getLabel()
 	{
@@ -193,5 +204,70 @@ public class GroupConversation extends Conversation
 			Logger.e("ConvMessage", "invalid json message", e);
 		}
 		return object;
+	}
+	
+	public void setupReadByList(String readBy, long msgId)
+	{
+		if (msgId < 1)
+		{
+			return;
+		}
+		
+		if (readByParticipantsList == null)
+		{
+			readByParticipantsList = new LinkedList<String>();
+		}
+		readByParticipantsList.clear();
+		lastSentMsgId = msgId;
+		
+		if (readBy == null)
+		{
+			return;
+		}
+		try
+		{
+			JSONArray readByArray;
+			readByArray = new JSONArray(readBy);
+			for (int i = 0; i < readByArray.length(); i++)
+			{
+				readByParticipantsList.add(readByArray.optString(i));
+			}
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void updateReadByList(String msisdn, long msgId)
+	{
+		if (lastSentMsgId > msgId || TextUtils.isEmpty(msisdn))
+		{
+			return;
+		}
+		if (readByParticipantsList == null)
+		{
+			readByParticipantsList = new LinkedList<String>();
+		}
+		
+		if (lastSentMsgId == msgId)
+		{
+			if (!readByParticipantsList.contains(msisdn))
+			{
+				readByParticipantsList.add(msisdn);
+			}
+		}
+		else if (lastSentMsgId < msgId)
+		{
+			readByParticipantsList.clear();
+			readByParticipantsList.add(msisdn);
+			lastSentMsgId = msgId;
+		}
+	}
+	
+	public LinkedList<String> getReadByList()
+	{
+		return readByParticipantsList;
 	}
 }

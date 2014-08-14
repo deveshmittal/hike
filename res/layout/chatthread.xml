@@ -41,20 +41,58 @@
             android:layout_marginTop="@dimen/chat_thread_margin_top"
             android:layout_weight="30" >
 
-            <include
-                android:id="@+id/sms_toggle_button"
-                layout="@layout/sms_toggle_item" />
+            <LinearLayout
+                android:id="@+id/tipContainerTop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:orientation="vertical" >
+
+                <include
+                    android:id="@+id/sms_toggle_button"
+                    layout="@layout/sms_toggle_item" />
+            </LinearLayout>
 
             <ListView
                 android:id="@+id/conversations_list"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:layout_below="@id/sms_toggle_button"
+                android:layout_above="@+id/tipContainerBottom"
+                android:layout_alignWithParentIfMissing="true"
+                android:layout_below="@+id/tipContainerTop"
+                android:layout_marginTop="-5dp"
                 android:cacheColorHint="#00000000"
                 android:divider="@null"
                 android:fadingEdge="none"
                 android:listSelector="@android:color/transparent" >
             </ListView>
+
+            <LinearLayout
+                android:id="@+id/impMessageContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/conversation_mute"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/conversation_mute" >
+
+                <include
+                    android:id="@+id/impMessageCreateView"
+                    layout="@layout/imp_message_pin_pop_up"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tipContainerBottom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:orientation="vertical" >
+            </LinearLayout>
 
             <include
                 android:id="@android:id/empty"
@@ -119,6 +157,16 @@
 
                 <include layout="@layout/sticker_tool_tip" />
             </LinearLayout>
+            
+            <LinearLayout
+                android:id="@+id/pin_tip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:visibility="gone" >
+
+                <include layout="@layout/pin_tool_tip" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/walkie_talkie_tip"
@@ -150,7 +198,8 @@
                 android:id="@+id/scroll_bottom_indicator"
                 android:layout_width="35dp"
                 android:layout_height="34dp"
-                android:layout_alignParentBottom="true"
+                android:layout_above="@+id/tipContainerBottom"
+                android:layout_alignWithParentIfMissing="true"
                 android:layout_alignParentRight="true"
                 android:layout_marginBottom="12dp"
                 android:layout_marginRight="16dp"
@@ -164,7 +213,7 @@
                 android:layout_width="35dp"
                 android:layout_height="34dp"
                 android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
+                android:layout_alignTop="@id/conversations_list"
                 android:layout_marginRight="16dp"
                 android:layout_marginTop="12dp"
                 android:visibility="gone" >

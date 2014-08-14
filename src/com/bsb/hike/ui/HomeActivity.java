@@ -311,6 +311,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			return;
 		}
+		if (mainFragment != null)
+		{
+			mainFragment.onNewintent(intent);
+		}
 	}
 
 	@Override
@@ -357,6 +361,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void onClick(View v)
 			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SHOW_TIMELINE_TOP_BAR);
 				Intent intent = new Intent(HomeActivity.this, TimelineActivity.class);
 				startActivity(intent);
 			}
@@ -408,7 +413,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 * using the same token as rewards token, as per DK sir's mail
 		 */
 		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.gamesUrl + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
-		intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.games));
+		intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.hike_extras));
 		return intent;
 	}
 
@@ -615,6 +620,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		super.onStart();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
+		long t1, t2;
+		t1 = System.currentTimeMillis();
+		Utils.clearJar(this);
+		t2 = System.currentTimeMillis();
+		Logger.d("clearJar", "time : " + (t2 - t1));
 	}
 
 	@Override
@@ -1068,13 +1078,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 						{
 							topBarIndicator.setVisibility(View.VISIBLE);
 							topBarIndicator.setText("9+");
-							topBarIndicator.startAnimation(getNotificationIndicatorAnim());
+							topBarIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
 						}
 						else if (newCount > 0)
 						{
 							topBarIndicator.setVisibility(View.VISIBLE);
 							topBarIndicator.setText(String.valueOf(count));
-							topBarIndicator.startAnimation(getNotificationIndicatorAnim());
+							topBarIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
 						}
 					}
 				}
@@ -1205,7 +1215,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
 		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.games), 3));
+			optionsList.add(new OverFlowMenuItem(getString(R.string.hike_extras), 3));
 		}
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
 		{
@@ -1350,6 +1360,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
 					break;
 				case 8:
+					Utils.sendUILogEvent(HikeConstants.LogEvent.STATUS_UPDATE_FROM_OVERFLOW);
 					intent = new Intent(HomeActivity.this, StatusUpdate.class);
 					break;
 				case 9:
@@ -1357,6 +1368,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					Utils.executeAsyncTask(logsTask);
 					break;
 				case 10:
+					Utils.sendUILogEvent(HikeConstants.LogEvent.FAVOURITE_FROM_OVERFLOW);
 					intent = new Intent(HomeActivity.this, PeopleActivity.class);
 					break;	
 				}
@@ -1535,6 +1547,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			public void negativeClicked(Dialog dialog)
 			{
 			}
+
+			@Override
+			public void onSucess(Dialog dialog)
+			{
+				// TODO Auto-generated method stub
+				
+			}
 		};
 	}
 
@@ -1566,64 +1585,19 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 						{
 							timelineTopBarIndicator.setVisibility(View.VISIBLE);
 							timelineTopBarIndicator.setText("9+");
-							timelineTopBarIndicator.startAnimation(getNotificationIndicatorAnim());
+							timelineTopBarIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
 						}
 						else if (count > 0)
 						{
 							timelineTopBarIndicator.setVisibility(View.VISIBLE);
 							timelineTopBarIndicator.setText(String.valueOf(count));
-							timelineTopBarIndicator.startAnimation(getNotificationIndicatorAnim());
+							timelineTopBarIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
 						}
 					}
 				}
 			}, delayTime);
 		}
 	}
-	
-	private Animation getNotificationIndicatorAnim()
-	{
-		AnimationSet animSet = new AnimationSet(true);
-		float a = 0.5f;
-		float b = 1.15f;
-		float c = 0.8f;
-		float d = 1.07f;
-		float e = 1f;
-		int initialOffset = 0;
-		float pivotX = 0.5f;
-		float pivotY = 0.5f;
-		Animation anim0 = new ScaleAnimation(1, a, 1, a, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
-		anim0.setInterpolator(new AccelerateInterpolator(2f));
-		anim0.setStartOffset(initialOffset);
-		anim0.setDuration(150);
-		animSet.addAnimation(anim0);
-
-		Animation anim1 = new ScaleAnimation(1, b/a, 1, b/a, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
-		anim1.setInterpolator(new AccelerateInterpolator(2f));
-		anim1.setDuration(200);
-		anim1.setStartOffset(initialOffset+ anim0.getDuration());
-		animSet.addAnimation(anim1);
-
-		Animation anim2 = new ScaleAnimation(1f, c/b, 1f, c/b, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
-		anim2.setInterpolator(new AccelerateInterpolator(-1f));
-		anim2.setDuration(150);
-		anim2.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration());
-		animSet.addAnimation(anim2);
-
-		Animation anim3 = new ScaleAnimation(1f, d/c, 1f, d/c, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
-		anim2.setInterpolator(new AccelerateInterpolator(1f));
-		anim3.setDuration(150);
-		anim3.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration() + anim2.getDuration());
-		animSet.addAnimation(anim3);
-
-		Animation anim4 = new ScaleAnimation(1f, e/d, 1f, e/d, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
-		anim4.setInterpolator(new AccelerateInterpolator(1f));
-		anim4.setDuration(150);
-		anim4.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration() + anim2.getDuration() + anim3.getDuration());
-		animSet.addAnimation(anim4);
-
-		return animSet;
-	}
-	
 
 	private void hikeLogoClicked()
 	{
@@ -1645,7 +1619,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				findViewById(R.id.stealth_double_tap_tip).setVisibility(View.GONE);
 				tipTypeShowing = null;
-				LockPattern.createNewPattern(HomeActivity.this);
+				LockPattern.createNewPattern(HomeActivity.this, false);
 			}
 			else
 			{
@@ -1675,7 +1649,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			final int stealthType = HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 			if (stealthType == HikeConstants.STEALTH_OFF)
 			{
-				LockPattern.confirmPattern(HomeActivity.this);
+				LockPattern.confirmPattern(HomeActivity.this, false);
 			}
 			else
 			{

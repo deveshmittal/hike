@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -28,6 +30,7 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.DbException;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -791,7 +794,7 @@ public class ContactManager implements ITransientCache
 	 * 
 	 * @param msisdn
 	 */
-	public void removeIcon(String msisdn)
+	public boolean removeIcon(String msisdn)
 	{
 		ContactInfo contact = getContact(msisdn);
 		if (null != contact)
@@ -800,7 +803,7 @@ public class ContactManager implements ITransientCache
 			updatedContact.setHasCustomPhoto(false);
 			updateContacts(updatedContact);
 		}
-		hDb.removeIcon(msisdn);
+		return hDb.removeIcon(msisdn);
 	}
 
 	/**
@@ -1510,13 +1513,6 @@ public class ContactManager implements ITransientCache
 	 */
 	public int updateHikeStatus(Context ctx, String msisdn, boolean onhike)
 	{
-		ContactInfo contact = getContact(msisdn);
-		if (null != contact)
-		{
-			ContactInfo updatedContact = new ContactInfo(contact);
-			updatedContact.setOnhike(onhike);
-			updateContacts(updatedContact);
-		}
 		return updateHikeStatus(msisdn, onhike);
 	}
 
@@ -1619,6 +1615,11 @@ public class ContactManager implements ITransientCache
 				while (greenblueContactsCursor.moveToNext())
 				{
 					greenblueContactIds.append(greenblueContactsCursor.getInt(id) + ",");
+					String msisdn = greenblueContactsCursor.getInt(id)+"";
+					if(isIndianMobileNumber(msisdn))
+					{
+					greenblueContactIds.append(msisdn + ",");
+					}
 				}
 				greenblueContactIds.replace(greenblueContactIds.lastIndexOf(","), greenblueContactIds.length(), ")");
 			}
@@ -1696,6 +1697,21 @@ public class ContactManager implements ITransientCache
 		}
 	}
 
+	public boolean isIndianMobileNumber(String number)
+	{
+		if (HikeMessengerApp.isIndianUser())
+		{
+			Pattern pattern = Pattern.compile("^(?:(?:\\+|0{0,2})91(\\s*[\\-]\\s*)?|[0]?)?[789]\\d{9}$");
+			Matcher matcher = pattern.matcher(number);
+			if (matcher.matches())
+				return true;
+		}else{
+			return true;
+		}
+
+		return false;
+	}
+	
 	private void extractContactInfo(Cursor c, StringBuilder sb, Map<String, Integer> numbers, boolean greenblueContacts)
 	{
 		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
@@ -1709,6 +1725,7 @@ public class ContactManager implements ITransientCache
 			{
 				continue;
 			}
+			if(isIndianMobileNumber(number)){
 
 			/*
 			 * We apply a multiplier of 2 for greenblue contacts to give them a greater weight.
@@ -1726,6 +1743,7 @@ public class ContactManager implements ITransientCache
 
 			number = DatabaseUtils.sqlEscapeString(number);
 			sb.append(number + ",");
+			}
 		}
 	}
 

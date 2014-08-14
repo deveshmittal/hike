@@ -388,8 +388,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 						showingLastSeen = !TextUtils.isEmpty(lastSeenString);
 					}
 
-					nameTextView.setText(contactInfo.getFirstName());
-
+					nameTextView.setText(contactInfo.getFirstNameAndSurname());
 					if (!showingLastSeen)
 					{
 						mainInfo.setText(contactInfo.isOnhike() ? R.string.on_hike : R.string.on_sms);

@@ -5,7 +5,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 public class DBConstants
 {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 25;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 27;
 
 	public static final int USERS_DATABASE_VERSION = 15;
 
@@ -36,8 +36,14 @@ public class DBConstants
 	public static final String MESSAGE_ID = "msgid";
 
 	public static final String MAPPED_MSG_ID = "mappedMsgId";
+	
+	public static final String MESSAGE_HASH = "msgHash";
 
 	public static final String CONV_ID = "convid";
+	
+	public static final String MESSAGE_TYPE = "type";
+
+	public static final String CONVERSATION_METADATA = "convMetadata";
 
 	public static final String ONHIKE = "onhike";
 
@@ -189,4 +195,6 @@ public class DBConstants
 	public static final String CHAT_BG_INDEX = "chatBgIndex";
 
 	public static final String IS_STEALTH = "isStealth";
+	
+	public static final String MESSAGE_HASH_INDEX = "messageHashIndex";
 }

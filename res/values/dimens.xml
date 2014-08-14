@@ -147,5 +147,8 @@
 	<dimen name="card_header_text_padding_left">10dp</dimen>
 	<dimen name="card_header_text_padding_right">10dp</dimen>
 	<dimen name="updates_margin_top">8.5dp</dimen>
+	<dimen name="logo_top_margin">90dp</dimen>
+	<dimen name="welcome_bottom_margin">25dp</dimen>
+	<dimen name="empty_tutorial_margin">20dp</dimen>
 	
 </resources>
