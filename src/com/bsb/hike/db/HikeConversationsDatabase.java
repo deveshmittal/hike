@@ -1202,8 +1202,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
 				+ DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
-				+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + " ) " + " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ?, ? FROM "
-				+ DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN + "=?");
+				+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + " ) " + " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID
+				+ ", ?, ?, ? FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN + "=?");
 		try
 		{
 			mDb.beginTransaction();
@@ -1223,8 +1223,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				bindConversationInsert(insertStatement, conv);
 
 				/*
-				 * In case message is duplicate insert statement will throw exception . 
-				 * It will catch that exception and will return false denoting duplicate message case
+				 * In case message is duplicate insert statement will throw exception . It will catch that exception and will return false denoting duplicate message case
 				 */
 				try
 				{
@@ -1237,11 +1236,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					return false;
 				}
 
-
 				addThumbnailStringToMetadata(conv.getMetadata(), thumbnailString);
 				/*
-				 * Represents we dont have any conversation made for this msisdn. Here we are also checking whether the message is a group message, If it is and the conversation does
-				 * not exist we do not add a conversation.
+				 * Represents we dont have any conversation made for this msisdn. Here we are also checking whether the message is a group message, If it is and the conversation
+				 * does not exist we do not add a conversation.
 				 */
 				if (msgId <= 0 && !Utils.isGroupConversation(conv.getMsisdn()))
 				{
@@ -1417,8 +1415,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
 		{
-			LinkedList<ConvMessage> list= entry.getValue();
-			if(!list.isEmpty())
+			LinkedList<ConvMessage> list = entry.getValue();
+			if (!list.isEmpty())
 			{
 				incrementUnreadCounter(entry.getKey(), list.size());
 			}
@@ -1439,16 +1437,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			String msisdn = conv.getMsisdn();
 			ContentValues contentValues = getContentValueForConversationMessage(conv);
 			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
-			
-			if(lastPinMap.get(conv.getMsisdn()) != null)
+
+			if (lastPinMap.get(conv.getMsisdn()) != null)
 			{
 				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() - 1);
 			}
 		}
-		
+
 		for (Entry<String, PairModified<ConvMessage, Integer>> entry : lastPinMap.entrySet())
 		{
-			PairModified<ConvMessage, Integer> pair= entry.getValue();
+			PairModified<ConvMessage, Integer> pair = entry.getValue();
 			String msisdn = entry.getKey();
 			ContentValues contentValues = getContentValueForPinConversationMessage(pair.getFirst(), new ContentValues(), pair.getSecond());
 			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
@@ -2295,7 +2293,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					// conv.setMetadata(convMetadata);
 				}
 
-				
 				/*
 				 * If the message does not contain any text or metadata, its an empty message and the conversation is blank.
 				 */
@@ -2757,7 +2754,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				ih.close();
 			}
-			
+
 			mDb.endTransaction();
 		}
 	}
