@@ -1300,7 +1300,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				if (conv.isFileTransferMessage() && conv.getConversation() != null)
 				{
-					addSharedMedia(msgId, conv.getConversation().getConvId());
+					addSharedMedia(conv);
 				}
 				if (Utils.shouldIncrementCounter(conv))
 				{
@@ -1413,7 +1413,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				if (conv.isFileTransferMessage() && conv.getConversation() != null)
 				{
-					addSharedMedia(msgId, conv.getConversation().getConvId());
+					addSharedMedia(conv);
 				}
 				resultList.add(conv);
 			}
@@ -3827,20 +3827,53 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		initialiseSharedMediaAndFileThumbnailTable(mDb);
 	}
 
-	public void addSharedMedia(long messageId, long convId)
+	public void addSharedMedia(ConvMessage convMessage)
 	{
-		ContentValues sharedMediaValues = getSharedMediaContentValues(messageId, convId);
+		ContentValues sharedMediaValues = getSharedMediaContentValues(convMessage);
 
 		mDb.insert(DBConstants.SHARED_MEDIA_TABLE, null, sharedMediaValues);
 	}
 
-	private ContentValues getSharedMediaContentValues(long messageId, long convId)
+	private ContentValues getSharedMediaContentValues(ConvMessage convMessage )
 	{
-		ContentValues sharedMediaValues = new ContentValues();
-		sharedMediaValues.put(DBConstants.MESSAGE_ID, messageId);
-		sharedMediaValues.put(DBConstants.CONV_ID, convId);
+		ContentValues contentValues = new ContentValues();
+		boolean isSent = ConvMessage.isMessageSent(convMessage.getState());
+		contentValues.put(DBConstants.MESSAGE_ID, convMessage.getMsgID());
+		contentValues.put(DBConstants.MSISDN, convMessage.getMsisdn());
+		contentValues.put(DBConstants.TIMESTAMP, convMessage.getTimestamp());
+		contentValues.put(DBConstants.IS_SENT, isSent);
+		contentValues.put(DBConstants.HIKE_FILE_TYPE, convMessage.getMetadata().getHikeFiles().get(0).getHikeFileType().ordinal());
+		
+		/*
+		 * We need to remove thumbnail from metadata json only
+		 * in case of recieved files.
+		 * In case of sent files we need to refer to thumbnail field
+		 * in json object until file is fully uploaded.
+		 */
+		if(!isSent)
+		{
+			String thumbnailString = null;
+			try
+			{
+				/*
+				 * We need to remove thumbnail from json object before saving in sharedMediaTable 
+				 */
+				thumbnailString = convMessage.getMetadata().getJSON().optJSONArray(HikeConstants.FILES).optJSONObject(0).getString(HikeConstants.THUMBNAIL);
+				convMessage.getMetadata().getJSON().optJSONArray(HikeConstants.FILES).optJSONObject(0).remove(HikeConstants.THUMBNAIL);
+				contentValues.put(DBConstants.MESSAGE_METADATA, convMessage.getMetadata().getJSON().optJSONArray(HikeConstants.FILES).optJSONObject(0).toString());
+				addThumbnailStringToMetadata(convMessage.getMetadata(), thumbnailString);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		else
+		{
+			contentValues.put(DBConstants.MESSAGE_METADATA, convMessage.getMetadata().getJSON().optJSONArray(HikeConstants.FILES).optJSONObject(0).toString());
+		}
 
-		return sharedMediaValues;
+		return contentValues;
 	}
 
 	public void addFileThumbnail(String fileKey, byte[] imageBytes)
