@@ -45,6 +45,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -3777,8 +3778,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						continue;
 					}
 
-					ContentValues sharedMediaValues = getSharedMediaContentValues(messageId, convId);
-					mDb.insert(DBConstants.SHARED_MEDIA_TABLE, null, sharedMediaValues);
+					/*
+					 * we don't need to initialize sharedMediaTable here.
+					 */
 
 					JSONObject fileJson = fileJsonArray.getJSONObject(0);
 
@@ -4274,6 +4276,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			mDb.beginTransaction();
 			addMessageMsisdn();
+			updateToNewSharedMediaTable();
 			mDb.setTransactionSuccessful();
 		}
 		catch (Exception e)
@@ -4602,5 +4605,91 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
+	
+	public void updateToNewSharedMediaTable()
+	{
+		final String TEMP_SHARED_MEDIA_TABLE = "tempSharedMediaTable";
 
+		/*
+		 * Renaming current sharedMediaTable to temp_sharedMediaTable
+		 */
+		String sql1 = "ALTER TABLE " + DBConstants.SHARED_MEDIA_TABLE + " RENAME TO " + TEMP_SHARED_MEDIA_TABLE;
+
+		/*
+		 * creating new sharedMediaTable with updated schema
+		 */
+		String sql2 = "CREATE TABLE IF NOT EXISTS " + DBConstants.SHARED_MEDIA_TABLE + " (" + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY, "
+				+ DBConstants.MSISDN + " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.IS_SENT + " INT, " + DBConstants.HIKE_FILE_TYPE + " INTEGER, "
+				+ DBConstants.MESSAGE_METADATA + " TEXT"+ " )";
+
+		/*
+		 * selecting rows from messages table for all msgIds from old shared Media table
+		 * SELECT msgid, msisdn, timestamp, msgStatus, metadata FROM messages where messages.msgId IN (SELECT msgid FROM tempSharedMediaTable);
+		 */
+		String sql3 = "SELECT " + DBConstants.MESSAGE_ID + ", " + DBConstants.MSISDN + ", " +  DBConstants.TIMESTAMP + ", " + DBConstants.MSG_STATUS + ", "
+				+ DBConstants.MESSAGE_METADATA + " FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.MESSAGES_TABLE + "." + DBConstants.MESSAGE_ID
+				+ " IN ( SELECT " + DBConstants.MESSAGE_ID + " FROM " + TEMP_SHARED_MEDIA_TABLE + " )";
+
+		String sql4 = "DROP TABLE " + TEMP_SHARED_MEDIA_TABLE;
+
+		mDb.execSQL(sql1);
+		mDb.execSQL(sql2);
+
+		Cursor c = null;
+		try
+		{
+			c = mDb.rawQuery(sql3, null);
+			
+			final int msgIdIndex = c.getColumnIndex(DBConstants.MESSAGE_ID);
+			final int msisdnIndex = c.getColumnIndex(DBConstants.MSISDN);
+			final int tsIndex = c.getColumnIndex(DBConstants.TIMESTAMP);
+			final int msgStatusIndex = c.getColumnIndex(DBConstants.MSG_STATUS);
+			final int metadataIndex = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
+			
+			while (c.moveToNext())
+			{
+				long msgId = c.getLong(msgIdIndex);
+				String msisdn = c.getString(msisdnIndex);
+				long ts = c.getLong(tsIndex);
+				int messageStatus = c.getInt(msgStatusIndex);
+				String messageMetadataString = c.getString(metadataIndex);
+				
+				ContentValues contentValues = new ContentValues();
+				contentValues.put(DBConstants.MESSAGE_ID, msgId);
+				contentValues.put(DBConstants.MSISDN, msisdn);
+				contentValues.put(DBConstants.TIMESTAMP, ts);
+				contentValues.put(DBConstants.IS_SENT, ConvMessage.isMessageSent(State.values()[messageStatus]));
+
+				/*
+				 * Extracting the hikeFileType from message metadata 
+				 */
+				JSONObject metadataFileArrayJson = new JSONObject(messageMetadataString);
+				JSONObject messageMetadata = metadataFileArrayJson.optJSONArray(HikeConstants.FILES).optJSONObject(0);
+				String contentTypeString = messageMetadata.optString(HikeConstants.CONTENT_TYPE);
+				boolean isRecording = messageMetadata.optLong(HikeConstants.PLAYTIME, -1) != -1;
+				HikeFileType hikeFileType = HikeFileType.fromString(contentTypeString, isRecording);
+				
+				contentValues.put(DBConstants.HIKE_FILE_TYPE, hikeFileType.ordinal());
+				contentValues.put(DBConstants.MESSAGE_METADATA, messageMetadata.toString());
+				mDb.insert(DBConstants.SHARED_MEDIA_TABLE, null, contentValues);
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "Exception in updateReadByArrayForGroups",e);
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		
+		/*
+		 * Now we can drop the temprory shared media table.
+		 */
+		mDb.execSQL(sql4);
+	}
 }
