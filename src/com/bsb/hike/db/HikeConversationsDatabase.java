@@ -152,7 +152,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ " TEXT UNIQUE, " + DBConstants.HEADER + " TEXT, " + DBConstants.PROTIP_TEXT + " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.IMAGE_URL
 				+ " TEXT, " + DBConstants.WAIT_TIME + " INTEGER, " + DBConstants.PROTIP_GAMING_DOWNLOAD_URL + " TEXT" + " )";
 		db.execSQL(sql);
-		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.SHARED_MEDIA_TABLE + " (" + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY, " + DBConstants.CONV_ID + " INTEGER" + " )";
+		sql = getSharedMediaTableCreateQuery();
 		db.execSQL(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.FILE_THUMBNAIL_TABLE + " (" + DBConstants.FILE_KEY + " TEXT PRIMARY KEY, " + DBConstants.IMAGE + " BLOB" + " )";
 		db.execSQL(sql);
@@ -4651,9 +4651,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		/*
 		 * creating new sharedMediaTable with updated schema
 		 */
-		String sql2 = "CREATE TABLE IF NOT EXISTS " + DBConstants.SHARED_MEDIA_TABLE + " (" + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY, "
-				+ DBConstants.MSISDN + " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.IS_SENT + " INT, " + DBConstants.HIKE_FILE_TYPE + " INTEGER, "
-				+ DBConstants.MESSAGE_METADATA + " TEXT"+ " )";
+		String sql2 = getSharedMediaTableCreateQuery();
 
 		/*
 		 * selecting rows from messages table for all msgIds from old shared Media table
@@ -4725,4 +4723,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		 */
 		mDb.execSQL(sql4);
 	}
+	
+	public String getSharedMediaTableCreateQuery()
+	{
+		/*
+		 * creating new sharedMediaTable with updated schema
+		 */
+		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.SHARED_MEDIA_TABLE + " (" + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY, "
+				+ DBConstants.MSISDN + " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.IS_SENT + " INT, " + DBConstants.HIKE_FILE_TYPE + " INTEGER, "
+				+ DBConstants.MESSAGE_METADATA + " TEXT"+ " )";
+		
+		return sql;
+	}
+
 }
