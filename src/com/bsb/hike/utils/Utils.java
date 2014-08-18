@@ -3443,7 +3443,6 @@ public class Utils
 	{
 		long time = (long) System.currentTimeMillis() / 1000;
 		ConvMessage convMessage = new ConvMessage(message, msisdn, time, state);
-		convMessage.setConversation(mConversation);
 		convMessage.setSMS(!isOnhike);
 
 		return convMessage;

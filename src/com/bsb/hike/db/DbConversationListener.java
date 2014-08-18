@@ -288,7 +288,6 @@ public class DbConversationListener implements Listener
 				
 				ConvMessage convMessage = new ConvMessage(Utils.combineInOneSmsString(context, true, messages, true), lastMessage.getMsisdn(), 
 						lastMessage.getTimestamp(), lastMessage.getState(), lastMessage.getMsgID(), lastMessage.getMappedMsgID());
-				convMessage.setConversation(lastMessage.getConversation());
 				JSONObject messageJSON = convMessage.serialize().getJSONObject(HikeConstants.DATA);
 
 				messagesArray.put(messageJSON);
@@ -317,7 +316,9 @@ public class DbConversationListener implements Listener
 				return;
 			}
 
-			sendNativeSMSFallbackLogEvent(messages.get(0).getConversation().isOnhike(), Utils.isUserOnline(context), messages.size());
+			ContactInfo contactInfo = ContactManager.getInstance().getContact(messages.get(0).getMsisdn(), true, false);
+
+			sendNativeSMSFallbackLogEvent(contactInfo.isOnhike(), Utils.isUserOnline(context), messages.size());
 
 			for (ConvMessage convMessage : messages)
 			{

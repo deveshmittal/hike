@@ -454,9 +454,9 @@ public class MqttMessagesManager
 		}
 
 		/*
-		 * Return if there is no conversation mapped to this message
+		 * Return if there is no conversation for this msisdn.
 		 */
-		if (convMessage.getConversation() == null)
+		if (ContactManager.getInstance().isConvExists(convMessage.getMsisdn()))
 		{
 			return;
 		}
@@ -555,13 +555,13 @@ public class MqttMessagesManager
 		{
 			if (convMessage.getMetadata().isPokeMessage())
 			{
-				Conversation conversation = convMessage.getConversation();
 				boolean vibrate = false;
-				if (conversation != null)
+				String msisdn = convMessage.getMsisdn();
+				if (ContactManager.getInstance().isConvExists(msisdn))
 				{
-					if (conversation instanceof GroupConversation)
+					if (Utils.isGroupConversation(msisdn))
 					{
-						if (!((GroupConversation) conversation).isMuted())
+						if (!HikeConversationsDatabase.getInstance().isGroupMuted(msisdn))
 						{
 							vibrate = true;
 						}
@@ -601,10 +601,12 @@ public class MqttMessagesManager
 			Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
 		}
 
+		ContactManager manager = ContactManager.getInstance();
+		String msisdn = convMessage.getMsisdn();
 		/*
 		 * Start auto download for media files
 		 */
-		if (convMessage.isFileTransferMessage() && (convMessage.getConversation() != null) && (!TextUtils.isEmpty(convMessage.getConversation().getContactName())))
+		if (convMessage.isFileTransferMessage() && (manager.isConvExists(msisdn)) && (!TextUtils.isEmpty(manager.getName(msisdn))))
 		{
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();

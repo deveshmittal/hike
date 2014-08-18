@@ -92,17 +92,16 @@ public class ToastListener implements Listener
 			ConvMessage message = (ConvMessage) object;
 			if (message.isShouldShowPush())
 			{
-				HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-				message.setConversation(hCDB.getConversation(message.getMsisdn(), 0));
 
-				if (message.getConversation() == null)
+				boolean doesConversationExist = ContactManager.getInstance().isConvExists(message.getMsisdn());
+
+				if (doesConversationExist)
 				{
 					Logger.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
 					return;
 				}
-				if ((message.getConversation() instanceof GroupConversation) && ((GroupConversation) message.getConversation()).isMuted())
+				if (isGroupConversationAndMuted(message.getMsisdn()))
 				{
-					Logger.d(getClass().getSimpleName(), "Group has been muted");
 					return;
 				}
 				if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
@@ -133,15 +132,15 @@ public class ToastListener implements Listener
 					ContactInfo contactInfo;
 					if (message.isGroupChat())
 					{
-						Logger.d("ToastListener", "GroupName is " + message.getConversation().getLabel());
-						contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), message.getConversation().getLabel(), message.getMsisdn());
+						Logger.d("ToastListener", "GroupName is " + ContactManager.getInstance().getName(message.getMsisdn()));
+						contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), ContactManager.getInstance().getName(message.getMsisdn()), message.getMsisdn());
 					}
 					else
 					{
 						contactInfo = HikeMessengerApp.getContactManager().getContact(message.getMsisdn(), false, true);
 					}
 
-					if (message.getConversation().isStealth())
+					if(HikeMessengerApp.isStealthMsisdn(message.getMsisdn()))
 					{
 						this.toaster.notifyStealthMessage();
 					}
@@ -249,12 +248,11 @@ public class ToastListener implements Listener
 				return;
 			}
 
-			if ((message.getConversation() instanceof GroupConversation) && ((GroupConversation) message.getConversation()).isMuted())
+			if (isGroupConversationAndMuted(message.getMsisdn()))
 			{
-				Logger.d(getClass().getSimpleName(), "Group has been muted");
 				return;
 			}
-			if (message.getConversation().isStealth())
+			if(HikeMessengerApp.isStealthMsisdn(message.getMsisdn()))
 			{
 				Logger.d(getClass().getSimpleName(), "this conversation is stealth");
 				return;
@@ -265,8 +263,8 @@ public class ToastListener implements Listener
 				ContactInfo contactInfo;
 				if (message.isGroupChat())
 				{
-					Logger.d("ToastListener", "GroupName is " + message.getConversation().getLabel());
-					contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), message.getConversation().getLabel(), message.getMsisdn());
+					Logger.d("ToastListener", "GroupName is " + ContactManager.getInstance().getName(message.getMsisdn()));
+					contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), ContactManager.getInstance().getName(message.getMsisdn()), message.getMsisdn());
 				}
 				else
 				{
@@ -460,16 +458,16 @@ public class ToastListener implements Listener
 				if (message.isShouldShowPush())
 				{
 					HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-					message.setConversation(hCDB.getConversation(message.getMsisdn(), 0));
 
-					if (message.getConversation() == null)
+					String msisdn = message.getMsisdn();
+
+					if (ContactManager.getInstance().isConvExists(msisdn))
 					{
 						Logger.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
 						return;
 					}
-					if ((message.getConversation() instanceof GroupConversation) && ((GroupConversation) message.getConversation()).isMuted())
+					if (isGroupConversationAndMuted(message.getMsisdn()))
 					{
-						Logger.d(getClass().getSimpleName(), "Group has been muted");
 						return;
 					}
 					if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
@@ -500,15 +498,15 @@ public class ToastListener implements Listener
 						ContactInfo contactInfo;
 						if (message.isGroupChat())
 						{
-							Logger.d("ToastListener", "GroupName is " + message.getConversation().getLabel());
-							contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), message.getConversation().getLabel(), message.getMsisdn());
+							Logger.d("ToastListener", "GroupName is " + ContactManager.getInstance().getName(msisdn));
+							contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), ContactManager.getInstance().getName(msisdn), message.getMsisdn());
 						}
 						else
 						{
 							contactInfo = ContactManager.getInstance().getContact(message.getMsisdn(), true, false);
 						}
 
-						if (message.getConversation().isStealth())
+						if (HikeMessengerApp.isStealthMsisdn(msisdn))
 						{
 							this.toaster.notifyStealthMessage();
 						}
@@ -525,6 +523,19 @@ public class ToastListener implements Listener
 				}
 			}
 		}
+	}
+
+	private boolean isGroupConversationAndMuted(String msisdn)
+	{
+		if ((Utils.isGroupConversation(msisdn)))
+		{
+			if (HikeConversationsDatabase.getInstance().isGroupMuted(msisdn))
+			{
+				Logger.d(getClass().getSimpleName(), "Group has been muted");
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private Bitmap returnBigPicture(ConvMessage convMessage, Context context)

@@ -3391,11 +3391,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			if (msisdn.equals(mContactNumber))
 			{
-				/*
-				 * we publish the message before the conversation is created, so it's safer to just tack it on here
-				 */
-				message.setConversation(mConversation);
-
 				if (hasWindowFocus())
 				{
 					message.setState(ConvMessage.State.RECEIVED_READ);
