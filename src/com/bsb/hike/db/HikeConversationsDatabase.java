@@ -1254,11 +1254,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				 */
 				if (msgId <= 0 && !Utils.isGroupConversation(conv.getMsisdn()))
 				{
-					Conversation conversation = addConversation(conv.getMsisdn(), !conv.isSMS(), null, null);
-					if (conversation != null)
-					{
-						conversation.addMessage(conv);
-					}
+					addConversation(conv.getMsisdn(), !conv.isSMS(), null, null, conv);
 
 					bindConversationInsert(insertStatement, conv);
 					try
@@ -1360,11 +1356,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				 */
 				if (msgId <= 0 && !Utils.isGroupConversation(conv.getMsisdn()))
 				{
-					Conversation conversation = addConversation(conv.getMsisdn(), !conv.isSMS(), null, null);
-					if (conversation != null)
-					{
-						conversation.addMessage(conv);
-					}
+					addConversation(conv.getMsisdn(), !conv.isSMS(), null, null, conv);
 
 					bindConversationInsert(insertStatement, conv);
 					try
@@ -1651,6 +1643,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	public Conversation addConversation(String msisdn, boolean onhike, String groupName, String groupOwner)
+	{
+		return addConversation(msisdn, onhike, groupName, groupOwner, null);
+	}
+
 	/**
 	 * Add a conversation to the db
 	 * 
@@ -1660,9 +1657,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 *            true iff the contact is onhike. If this is false, we consult the local db as well
 	 * @param groupName
 	 *            the name of the group. Sent as <code>null</code> if the conversation is not a group conversation
+	 * @param initialConvMessage
+	 * 			  the initial ConvMessage object to be added to the conversation before publishing the new conversation event
 	 * @return Conversation object representing the conversation
 	 */
-	public Conversation addConversation(String msisdn, boolean onhike, String groupName, String groupOwner)
+	public Conversation addConversation(String msisdn, boolean onhike, String groupName, String groupOwner, ConvMessage initialConvMessage)
 	{
 		ContactInfo contactInfo = Utils.isGroupConversation(msisdn) ? new ContactInfo(msisdn, msisdn, groupName, msisdn) : HikeMessengerApp.getContactManager().getContact(msisdn,
 				false, true);
@@ -1723,6 +1722,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				{
 					conv = new Conversation(msisdn, (contactInfo != null) ? contactInfo.getName() : null, onhike);
 				}
+				if (initialConvMessage != null)
+				{
+					conv.addMessage(initialConvMessage);
+				}
+
 				HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_CONVERSATION, conv);
 				return conv;
 
