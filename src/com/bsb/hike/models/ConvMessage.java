@@ -513,8 +513,7 @@ public class ConvMessage
 	@Override
 	public String toString()
 	{
-		String convId = mConversation == null ? "null" : Long.toString(mConversation.getConvId());
-		return "ConvMessage [mConversation=" + convId + ", mMessage=" + mMessage + ", mMsisdn=" + mMsisdn + ", mTimestamp=" + mTimestamp + ", mIsSent=" + mIsSent + ", mState="
+		return "ConvMessage [mMessage=" + mMessage + ", mMsisdn=" + mMsisdn + ", mTimestamp=" + mTimestamp + ", mIsSent=" + mIsSent + ", mState="
 				+ mState + "]";
 	}
 

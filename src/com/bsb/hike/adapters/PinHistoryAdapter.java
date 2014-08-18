@@ -37,7 +37,7 @@ public class PinHistoryAdapter extends BaseAdapter
 
 	private boolean isDefaultTheme;
 
-	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn, long convId, Conversation conversation, boolean addDateInbetween, ChatTheme theme)
+	public PinHistoryAdapter(Activity context, List<ConvMessage> textPins, String userMsisdn, Conversation conversation, boolean addDateInbetween, ChatTheme theme)
 	{
 		this.context = context;
 		this.isDefaultTheme = theme == ChatTheme.DEFAULT;

@@ -1606,7 +1606,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			@Override
 			public void onClick(View v)
 			{
-				mPubSub.publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(mContactNumber, mConversation.getConvId()));
+				mPubSub.publish(HikePubSub.CLEAR_CONVERSATION, mContactNumber);
 				messages.clear();
 				if (messageMap != null)
 				{
@@ -2593,10 +2593,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		mUpdateAdapter = new UpdateAdapter(mAdapter);
 
-		/* clear any toast notifications */
-		NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		mgr.cancel((int) mConversation.getConvId());
-
 		if (checkNetworkError())
 		{
 			showNetworkError(true);
@@ -3252,8 +3248,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				setSMSReadInNative();
 			}
 
-			long convID = mConversation.getConvId();
-			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(convID);
+			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(mConversation.getMsisdn());
 			mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT, mConversation.getMsisdn());
 			mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
@@ -7169,7 +7164,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				protected List<ConvMessage> doInBackground(Void... params)
 				{
 					return mConversationDb
-							.getConversationThread(msisdn, conversation.getConvId(), HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME, conversation, firstMessageId);
+							.getConversationThread(msisdn, HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME, conversation, firstMessageId);
 				}
 
 				@Override
@@ -8616,7 +8611,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		intent.setClass(ChatThread.this, PinHistoryActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.putExtra(HikeConstants.TEXT_PINS, mContactNumber);
-		intent.putExtra(HikeConstants.EXTRA_CONV_ID, mConversation.getConvId());
 		startActivity(intent);
 		try
 		{
