@@ -405,6 +405,105 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		addBlockList(blockedMsisdns);
 	}
 
+	private ContactInfo processContact(Cursor c)
+	{
+		int idx = c.getColumnIndex(DBConstants.ID);
+		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+		int nameIdx = c.getColumnIndex(DBConstants.NAME);
+		int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
+		int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
+		int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
+		int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
+		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+		int favoriteIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
+		int hikeJoinTimeIdx = c.getColumnIndex(DBConstants.HIKE_JOIN_TIME);
+		int isOfflineIdx = c.getColumnIndex(DBConstants.IS_OFFLINE);
+		int lastSeenTimeIdx = c.getColumnIndex(DBConstants.LAST_SEEN);
+
+		long hikeJoinTime = 0;
+		if (hikeJoinTimeIdx != -1)
+		{
+			hikeJoinTime = c.getLong(hikeJoinTimeIdx);
+		}
+		ContactInfo contactInfo = new ContactInfo(c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0,
+				c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx), c.getInt(hasCustomPhotoIdx) == 1, hikeJoinTime);
+		if (favoriteIdx != -1)
+		{
+			int favoriteTypeOrd = c.getInt(favoriteIdx);
+			contactInfo.setFavoriteType(FavoriteType.values()[favoriteTypeOrd]);
+		}
+		else
+		{
+			contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
+		}
+
+		if (isOfflineIdx != -1)
+		{
+			contactInfo.setOffline(c.getInt(isOfflineIdx));
+		}
+
+		if (lastSeenTimeIdx != -1)
+		{
+			contactInfo.setLastSeenTime(c.getLong(lastSeenTimeIdx));
+		}
+		return contactInfo;
+	}
+
+	private List<ContactInfo> extractContactInfo(Cursor c)
+	{
+		return extractContactInfo(c, false);
+	}
+
+	private List<ContactInfo> extractContactInfo(Cursor c, boolean distinct)
+	{
+		List<ContactInfo> contactInfos = new ArrayList<ContactInfo>(c.getCount());
+		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+		Set<String> msisdnSet = null;
+		if (distinct)
+		{
+			msisdnSet = new HashSet<String>();
+		}
+
+		while (c.moveToNext())
+		{
+			String msisdn = c.getString(msisdnIdx);
+
+			if (TextUtils.isEmpty(msisdn))
+			{
+				continue;
+			}
+
+			if (distinct && msisdnSet.contains(msisdn))
+			{
+				continue;
+			}
+			else if (distinct)
+			{
+				msisdnSet.add(msisdn);
+			}
+			ContactInfo contactInfo = processContact(c);
+			contactInfos.add(contactInfo);
+		}
+		return contactInfos;
+	}
+
+	private Map<String, ContactInfo> extractContactInfoMap(Cursor c)
+	{
+		Map<String, ContactInfo> contactMap = new HashMap<String, ContactInfo>();
+		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+		while (c.moveToNext())
+		{
+			String msisdn = c.getString(msisdnIdx);
+			if (TextUtils.isEmpty(msisdn))
+			{
+				continue;
+			}
+			ContactInfo contactInfo = processContact(c);
+			contactMap.put(contactInfo.getMsisdn(), contactInfo);
+		}
+		return contactMap;
+	}
+
 	ContactInfo getContactInfoFromMSISDN(String msisdn, boolean ifNotFoundReturnNull)
 	{
 		Cursor c = null;
@@ -474,46 +573,7 @@ class HikeUserDatabase extends SQLiteOpenHelper
 
 		return contactInfos.get(0);
 	}
-
-	private Map<String, ContactInfo> extractContactInfoMap(Cursor c)
-	{
-		Map<String, ContactInfo> contactMap = new HashMap<String, ContactInfo>();
-
-		while (c.moveToNext())
-		{
-			ContactInfo contactInfo = processContact(c);
-			contactMap.put(contactInfo.getMsisdn(), contactInfo);
-		}
-		return contactMap;
-	}
-
-	private Map<String, ContactInfo> getContactMap()
-	{
-		Cursor c = null;
-
-		Map<String, ContactInfo> contactMap = new HashMap<String, ContactInfo>();
-
-		try
-		{
-			c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.ID + ", " + DBConstants.MSISDN + ", " + DBConstants.PHONE
-					+ ", " + DBConstants.LAST_MESSAGED + ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + ", "
-					+ DBConstants.HIKE_JOIN_TIME + ", " + DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", " + DBConstants.INVITE_TIMESTAMP + " from "
-					+ DBConstants.USERS_TABLE + " GROUP BY " + DBConstants.MSISDN, null);
-
-			contactMap = extractContactInfoMap(c);
-
-			return contactMap;
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
-
-	}
-
+	
 	private LinkedHashMap<String, ContactInfo> getSortedContactMap()
 	{
 
@@ -964,82 +1024,6 @@ class HikeUserDatabase extends SQLiteOpenHelper
 				c.close();
 			}
 		}
-	}
-
-	private List<ContactInfo> extractContactInfo(Cursor c)
-	{
-		return extractContactInfo(c, false);
-	}
-
-	private List<ContactInfo> extractContactInfo(Cursor c, boolean distinct)
-	{
-		List<ContactInfo> contactInfos = new ArrayList<ContactInfo>(c.getCount());
-		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
-		Set<String> msisdnSet = null;
-		if (distinct)
-		{
-			msisdnSet = new HashSet<String>();
-		}
-
-		while (c.moveToNext())
-		{
-			String msisdn = c.getString(msisdnIdx);
-			if (distinct && msisdnSet.contains(msisdn))
-			{
-				continue;
-			}
-			else if (distinct)
-			{
-				msisdnSet.add(msisdn);
-			}
-			ContactInfo contactInfo = processContact(c);
-			contactInfos.add(contactInfo);
-		}
-		return contactInfos;
-	}
-
-	private ContactInfo processContact(Cursor c)
-	{
-		int idx = c.getColumnIndex(DBConstants.ID);
-		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
-		int nameIdx = c.getColumnIndex(DBConstants.NAME);
-		int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
-		int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
-		int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
-		int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
-		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
-		int favoriteIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
-		int hikeJoinTimeIdx = c.getColumnIndex(DBConstants.HIKE_JOIN_TIME);
-		int isOfflineIdx = c.getColumnIndex(DBConstants.IS_OFFLINE);
-		int lastSeenTimeIdx = c.getColumnIndex(DBConstants.LAST_SEEN);
-
-		long hikeJoinTime = 0;
-		if (hikeJoinTimeIdx != -1)
-		{
-			hikeJoinTime = c.getLong(hikeJoinTimeIdx);
-		}
-		ContactInfo contactInfo = new ContactInfo(c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0,
-				c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx), c.getInt(hasCustomPhotoIdx) == 1, hikeJoinTime);
-		if (favoriteIdx != -1)
-		{
-			int favoriteTypeOrd = c.getInt(favoriteIdx);
-			contactInfo.setFavoriteType(FavoriteType.values()[favoriteTypeOrd]);
-		}
-		else
-		{
-			contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
-		}
-
-		if (isOfflineIdx != -1)
-		{
-			contactInfo.setOffline(c.getInt(isOfflineIdx));
-		}
-
-		if (lastSeenTimeIdx != -1)
-		{
-			contactInfo.setLastSeenTime(c.getLong(lastSeenTimeIdx));
-		}
-		return contactInfo;
 	}
 
 	/**
