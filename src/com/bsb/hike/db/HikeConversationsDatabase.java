@@ -1120,7 +1120,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MESSAGE_ID + "=? AND " + DBConstants.IS_STATUS_MSG + " = 0", new String[] { String.valueOf(msgID) });
 
+		updateSharedMediaTableMetadata(msgID, metadata);
+		
 		addThumbnailStringToMetadata(metadata, thumbnailString);
+	}
+
+	private void updateSharedMediaTableMetadata(long msgId, MessageMetadata metadata)
+	{
+		if(metadata.getJSON().has(HikeConstants.FILES))
+		{
+			ContentValues contentValues = new ContentValues(1);
+			contentValues.put(DBConstants.MESSAGE_METADATA, metadata.getJSON().optJSONArray(HikeConstants.FILES).optJSONObject(0).toString());
+			mDb.update(DBConstants.SHARED_MEDIA_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { String.valueOf(msgId) });
+		}
 	}
 
 	public void updateConversationMetadata(long convId, Conversation.MetaData metadata)
