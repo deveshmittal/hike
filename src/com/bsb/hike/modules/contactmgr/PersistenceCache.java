@@ -100,22 +100,25 @@ class PersistenceCache extends ContactsCache
 	 */
 	void insertContact(ContactInfo contact, boolean ifOneToOneConversation)
 	{
-		writeLock.lock();
-		try
+		if (null != contact)
 		{
-			if (ifOneToOneConversation)
+			writeLock.lock();
+			try
 			{
-				convsContactsPersistence.put(contact.getMsisdn(), contact);
+				if (ifOneToOneConversation)
+				{
+					convsContactsPersistence.put(contact.getMsisdn(), contact);
+				}
+				else
+				{
+					ContactTuple tuple = new ContactTuple(1, contact);
+					groupContactsPersistence.put(contact.getMsisdn(), tuple);
+				}
 			}
-			else
+			finally
 			{
-				ContactTuple tuple = new ContactTuple(1, contact);
-				groupContactsPersistence.put(contact.getMsisdn(), tuple);
+				writeLock.unlock();
 			}
-		}
-		finally
-		{
-			writeLock.unlock();
 		}
 	}
 

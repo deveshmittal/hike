@@ -84,15 +84,18 @@ public class TransientCache extends ContactsCache
 	 */
 	void insertContact(ContactInfo contact)
 	{
-		writeLock.lock();
-		try
+		if (null != contact)
 		{
-			ContactTuple tuple = new ContactTuple(1, contact);
-			transientContacts.put(contact.getMsisdn(), tuple);
-		}
-		finally
-		{
-			writeLock.unlock();
+			writeLock.lock();
+			try
+			{
+				ContactTuple tuple = new ContactTuple(1, contact);
+				transientContacts.put(contact.getMsisdn(), tuple);
+			}
+			finally
+			{
+				writeLock.unlock();
+			}
 		}
 	}
 
@@ -110,8 +113,11 @@ public class TransientCache extends ContactsCache
 			{
 				if (!transientContacts.containsKey(contact.getMsisdn()))
 				{
-					ContactTuple tuple = new ContactTuple(1, contact);
-					transientContacts.put(contact.getMsisdn(), tuple);
+					if (null != contact)
+					{
+						ContactTuple tuple = new ContactTuple(1, contact);
+						transientContacts.put(contact.getMsisdn(), tuple);
+					}
 				}
 			}
 		}
