@@ -50,6 +50,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
@@ -4746,6 +4747,53 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ DBConstants.MESSAGE_METADATA + " TEXT"+ " )";
 		
 		return sql;
+	}
+
+	public List<HikeSharedFile> getSharedMedia(String msisdn, int limit, long maxMsgId, boolean onlyMedia)
+	{
+		String limitStr = (limit == -1) ? null : new Integer(limit).toString();
+		String selection = DBConstants.MSISDN + " = ?" + (maxMsgId == -1 ? "" : " AND " + DBConstants.MESSAGE_ID + "<" + maxMsgId) + " AND "
+				+ (onlyMedia ? DBConstants.HIKE_FILE_TYPE+" != "+HikeFileType.OTHER.ordinal() : DBConstants.HIKE_FILE_TYPE+" = "+HikeFileType.OTHER.ordinal());
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.SHARED_MEDIA_TABLE, new String[] { DBConstants.MESSAGE_ID, DBConstants.TIMESTAMP, DBConstants.IS_SENT,
+					DBConstants.MESSAGE_METADATA }, selection, new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + " DESC", limitStr);
+
+
+			final int msgIdIndex = c.getColumnIndex(DBConstants.MESSAGE_ID);
+			final int tsIndex = c.getColumnIndex(DBConstants.TIMESTAMP);
+			final int isSentIndex = c.getColumnIndex(DBConstants.IS_SENT);
+			final int metadataIndex = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
+			
+			List<HikeSharedFile> sharedFilesList = new ArrayList<HikeSharedFile>(c.getCount());
+			
+			while (c.moveToNext())
+			{
+				long msgId = c.getLong(msgIdIndex);
+				long ts = c.getLong(tsIndex);
+				boolean isSent = c.getInt(isSentIndex) != 0;
+				String messageMetadata = c.getString(metadataIndex);
+				
+				sharedFilesList.add(new HikeSharedFile(new JSONObject(messageMetadata), isSent, msgId, msisdn, ts));
+			}
+			
+			Collections.reverse(sharedFilesList);
+
+			return sharedFilesList;
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		return null;
 	}
 
 }
