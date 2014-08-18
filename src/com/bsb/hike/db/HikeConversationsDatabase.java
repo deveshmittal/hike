@@ -538,6 +538,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			editor.putInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, 1);
 			editor.commit();
 		}
+
+		/*
+		 * Version 29 removes the empty one-to-one conversations
+		 */
+		if (oldVersion < 29)
+		{
+			deleteEmptyConversations();
+		}
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike)
