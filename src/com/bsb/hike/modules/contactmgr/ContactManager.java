@@ -725,11 +725,6 @@ public class ContactManager implements ITransientCache
 	 */
 	public boolean hasIcon(String msisdn)
 	{
-		ContactInfo contact = getContact(msisdn);
-		if (null != contact)
-		{
-			return contact.hasCustomPhoto();
-		}
 		return hDb.hasIcon(msisdn);
 	}
 
@@ -796,13 +791,6 @@ public class ContactManager implements ITransientCache
 	 */
 	public boolean removeIcon(String msisdn)
 	{
-		ContactInfo contact = getContact(msisdn);
-		if (null != contact)
-		{
-			ContactInfo updatedContact = new ContactInfo(contact);
-			updatedContact.setHasCustomPhoto(false);
-			updateContacts(updatedContact);
-		}
 		return hDb.removeIcon(msisdn);
 	}
 
@@ -833,13 +821,6 @@ public class ContactManager implements ITransientCache
 	 */
 	public void setIcon(String msisdn, byte[] data, boolean isProfileImage)
 	{
-		ContactInfo contact = getContact(msisdn);
-		if (null != contact)
-		{
-			ContactInfo updatedContact = new ContactInfo(contact);
-			updatedContact.setHasCustomPhoto(true);
-			updateContacts(updatedContact);
-		}
 		hDb.setIcon(msisdn, data, isProfileImage);
 	}
 
@@ -1615,10 +1596,10 @@ public class ContactManager implements ITransientCache
 				while (greenblueContactsCursor.moveToNext())
 				{
 					greenblueContactIds.append(greenblueContactsCursor.getInt(id) + ",");
-					String msisdn = greenblueContactsCursor.getInt(id)+"";
-					if(isIndianMobileNumber(msisdn))
+					String msisdn = greenblueContactsCursor.getInt(id) + "";
+					if (isIndianMobileNumber(msisdn))
 					{
-					greenblueContactIds.append(msisdn + ",");
+						greenblueContactIds.append(msisdn + ",");
 					}
 				}
 				greenblueContactIds.replace(greenblueContactIds.lastIndexOf(","), greenblueContactIds.length(), ")");
@@ -1705,13 +1686,15 @@ public class ContactManager implements ITransientCache
 			Matcher matcher = pattern.matcher(number);
 			if (matcher.matches())
 				return true;
-		}else{
+		}
+		else
+		{
 			return true;
 		}
 
 		return false;
 	}
-	
+
 	private void extractContactInfo(Cursor c, StringBuilder sb, Map<String, Integer> numbers, boolean greenblueContacts)
 	{
 		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
@@ -1725,24 +1708,25 @@ public class ContactManager implements ITransientCache
 			{
 				continue;
 			}
-			if(isIndianMobileNumber(number)){
-
-			/*
-			 * We apply a multiplier of 2 for greenblue contacts to give them a greater weight.
-			 */
-			int lastTimeContacted = greenblueContacts ? 2 * c.getInt(timesContactedIdx) : c.getInt(timesContactedIdx);
-
-			/*
-			 * Checking if we already have this number and whether the last time contacted was sooner than the newer value.
-			 */
-			if (numbers.containsKey(number) && numbers.get(number) > lastTimeContacted)
+			if (isIndianMobileNumber(number))
 			{
-				continue;
-			}
-			numbers.put(number, lastTimeContacted);
 
-			number = DatabaseUtils.sqlEscapeString(number);
-			sb.append(number + ",");
+				/*
+				 * We apply a multiplier of 2 for greenblue contacts to give them a greater weight.
+				 */
+				int lastTimeContacted = greenblueContacts ? 2 * c.getInt(timesContactedIdx) : c.getInt(timesContactedIdx);
+
+				/*
+				 * Checking if we already have this number and whether the last time contacted was sooner than the newer value.
+				 */
+				if (numbers.containsKey(number) && numbers.get(number) > lastTimeContacted)
+				{
+					continue;
+				}
+				numbers.put(number, lastTimeContacted);
+
+				number = DatabaseUtils.sqlEscapeString(number);
+				sb.append(number + ",");
 			}
 		}
 	}
