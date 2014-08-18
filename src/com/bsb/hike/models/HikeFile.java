@@ -283,6 +283,11 @@ public class HikeFile
 		}
 		return null;
 	}
+	
+	public HikeFile()
+	{
+		
+	}
 
 	public String getFileName()
 	{
@@ -347,6 +352,11 @@ public class HikeFile
 		return hikeFileType;
 	}
 
+	public void setHikeFileType(HikeFileType hikeFileType)
+	{
+		this.hikeFileType = hikeFileType;
+	}
+
 	public double getLatitude()
 	{
 		return latitude;
@@ -370,6 +380,11 @@ public class HikeFile
 	public long getRecordingDuration()
 	{
 		return recordingDuration;
+	}
+
+	public void setRecordingDuration(long recordingDuration)
+	{
+		this.recordingDuration = recordingDuration;
 	}
 
 	public boolean wasFileDownloaded()
@@ -416,6 +431,11 @@ public class HikeFile
 	{
 		return sourceFilePath;
 	}
+	
+	public void setSourceFilePath(String sourceFilePath)
+	{
+		this.sourceFilePath = sourceFilePath;
+	}
 
 	public void removeSourceFile()
 	{
@@ -450,6 +470,16 @@ public class HikeFile
 	public void setFileName(String fName)
 	{
 		fileName = fName;
+	}
+
+	public boolean isSent()
+	{
+		return isSent;
+	}
+
+	public void setSent(boolean isSent)
+	{
+		this.isSent = isSent;
 	}
 
 }
