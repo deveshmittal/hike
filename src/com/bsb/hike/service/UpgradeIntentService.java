@@ -56,6 +56,17 @@ public class UpgradeIntentService extends IntentService
 			editor.putBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false);
 			editor.commit();
 		}
+		
+		if (prefs.getInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, -1) == 1)
+		{
+			upgradeForDatabaseVersion28();
+			// setting the preferences to 2 to indicate we're done with the
+			// migration !
+			Editor editor = prefs.edit();
+			editor.putInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, 2);
+			editor.putBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false);
+			editor.commit();
+		}
 	}
 
 	public UpgradeIntentService()
@@ -78,5 +89,10 @@ public class UpgradeIntentService extends IntentService
 	private void addMessageHashNMsisdnNReadByForGroup()
 	{
 		HikeConversationsDatabase.getInstance().addMessageHashNMsisdnNReadByForGroup();
+	}
+	
+	private void upgradeForDatabaseVersion28()
+	{
+		HikeConversationsDatabase.getInstance().upgradeForDatabaseVersion28();
 	}
 }
