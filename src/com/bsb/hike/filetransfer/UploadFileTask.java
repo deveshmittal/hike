@@ -178,7 +178,7 @@ public class UploadFileTask extends FileTransferBase
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
 					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
-							Bitmap.Config.RGB_565, false, false);
+							Bitmap.Config.ARGB_8888, false, false);
 					thumbnail = Utils.getRotatedBitmap(destinationFile.getPath(), thumbnail);
 					if (thumbnail == null && !TextUtils.isEmpty(fileKey))
 					{
@@ -200,9 +200,28 @@ public class UploadFileTask extends FileTransferBase
 				}
 				if (thumbnail != null)
 				{
-					byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 1);
-					thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
-					thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+					Bitmap.CompressFormat compressFormat = null;
+					if(Utils.hasIceCreamSandwich())
+						compressFormat = Bitmap.CompressFormat.WEBP;
+					else
+						compressFormat = Bitmap.CompressFormat.JPEG;
+					if (hikeFileType == HikeFileType.IMAGE)
+					{
+						Bitmap bluredThumb = Utils.createBlurredImage(thumbnail, context);
+						if(bluredThumb == null){
+							byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, 5);
+							thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+							thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+						}else{
+							byte [] tBytes = BitmapUtils.bitmapToBytes(bluredThumb, compressFormat, 10);
+							thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+							thumbnail = bluredThumb;
+						}
+					}else if (hikeFileType == HikeFileType.VIDEO){
+						byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, 75);
+						thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+					}
 					// thumbnail.recycle();
 				}
 				
@@ -336,7 +355,7 @@ public class UploadFileTask extends FileTransferBase
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
 				thumbnail = HikeBitmapFactory.scaleDownBitmap(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
-						Bitmap.Config.RGB_565, true, false);
+						Bitmap.Config.ARGB_8888, true, false);
 				thumbnail = Utils.getRotatedBitmap(selectedFile.getPath(), thumbnail);
 			}
 			else if (hikeFileType == HikeFileType.VIDEO)
@@ -345,9 +364,28 @@ public class UploadFileTask extends FileTransferBase
 			}
 			if (thumbnail != null)
 			{
-				byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 1);
-				thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
-				thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+				Bitmap.CompressFormat compressFormat = null;
+				if(Utils.hasIceCreamSandwich())
+					compressFormat = Bitmap.CompressFormat.WEBP;
+				else
+					compressFormat = Bitmap.CompressFormat.JPEG;
+				if (hikeFileType == HikeFileType.IMAGE)
+				{
+					Bitmap bluredThumb = Utils.createBlurredImage(thumbnail, context);
+					if(bluredThumb == null){
+						byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, 5);
+						thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+					}else{
+						byte [] tBytes = BitmapUtils.bitmapToBytes(bluredThumb, compressFormat, 10);
+						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+						thumbnail = bluredThumb;
+					}
+				}else if (hikeFileType == HikeFileType.VIDEO){
+					byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, 75);
+					thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+					thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+				}
 				// thumbnail.recycle();
 			}
 			else

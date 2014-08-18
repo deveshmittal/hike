@@ -97,6 +97,10 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
@@ -3474,10 +3478,20 @@ public class Utils
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
 	}
+	
+	public static boolean hasJellyBeanMR1()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
+	}
 
 	public static boolean hasKitKat()
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+	}
+	
+	public static boolean hasIceCreamSandwich()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 	}
 
 	public static boolean hasEnoughFreeSpaceForProfilePic()
@@ -4437,4 +4451,26 @@ public class Utils
 		}
 		return !TextUtils.isEmpty(countryCode);
 	}	
+	
+	public static Bitmap createBlurredImage (Bitmap originalBitmap, Context context)
+	{
+		final int BLUR_RADIUS = 10;
+		if(hasJellyBeanMR1()){
+			Bitmap output = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+	
+		    RenderScript rs = RenderScript.create(context.getApplicationContext());
+		    ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+		    Allocation inAlloc = Allocation.createFromBitmap(rs, originalBitmap, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_GRAPHICS_TEXTURE);
+		    Allocation outAlloc = Allocation.createFromBitmap(rs, output);
+		    script.setRadius(BLUR_RADIUS);
+		    script.setInput(inAlloc);
+		    script.forEach(outAlloc);
+		    outAlloc.copyTo(output);
+	
+		    rs.destroy();
+	
+		    return output;
+		}
+		return null;
+	}
 }
