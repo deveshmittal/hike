@@ -4654,4 +4654,33 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	public void deleteEmptyConversations()
+	{
+		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] {DBConstants.MESSAGE, DBConstants.MSISDN, DBConstants.MESSAGE_METADATA}, null, null, null, null, null);
+
+		int msgIdx = c.getColumnIndex(DBConstants.MESSAGE);
+		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+		int metadataIdx = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
+
+		StringBuilder deleteSelection = new StringBuilder("(");
+
+		while (c.moveToNext())
+		{
+			String message = c.getString(msgIdx);
+			String metadata = c.getString(metadataIdx);
+			String msisdn = c.getString(msisdnIdx);
+
+			if (message == null && metadata == null && !Utils.isGroupConversation(msisdn))
+			{
+				deleteSelection.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+			}
+		}
+
+		String deleteSelectionString = deleteSelection.toString();
+		if (!"(".equals(deleteSelectionString))
+		{
+			deleteSelectionString = deleteSelectionString.substring(0, deleteSelectionString.length() - 1) + ")";
+			mDb.delete(DBConstants.CONVERSATIONS_TABLE, DBConstants.MSISDN + " IN " + deleteSelectionString, null);
+		}
+	}
 }
