@@ -877,11 +877,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				HikeMessengerApp.addStealthMsisdnToMap(conv.getMsisdn());
 			}
 
-			if (conv.getMessages().isEmpty() && !(conv instanceof GroupConversation))
-			{
-				iter.remove();
-			}
-			else if ((stealthValue == HikeConstants.STEALTH_OFF || stealthValue == HikeConstants.STEALTH_ON_FAKE) && conv.isStealth())
+			if ((stealthValue == HikeConstants.STEALTH_OFF || stealthValue == HikeConstants.STEALTH_ON_FAKE) && conv.isStealth())
 			{
 				mConversationsAdded.add(conv.getMsisdn());
 				iter.remove();
@@ -1184,6 +1180,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						movedFromEmptyToNonEmpty();
 					}
 					displayedConversations.add(conversation);
+					Collections.sort(displayedConversations, mConversationsComparator);
 
 					notifyDataSetChanged();
 				}

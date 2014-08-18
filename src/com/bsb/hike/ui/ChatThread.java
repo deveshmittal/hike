@@ -2334,7 +2334,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return false;
 			}
 
-			mConversation = mConversationDb.addConversation(mContactNumber, false, "", null);
+			ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(mContactNumber, false, true);
+			mConversation = new Conversation(mContactNumber, (contactInfo != null) ? contactInfo.getName() : null, contactInfo.isOnhike());
 		}
 		/*
 		 * Setting a flag which tells us whether the group contains sms users or not.
