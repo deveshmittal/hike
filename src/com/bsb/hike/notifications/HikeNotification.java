@@ -1,7 +1,8 @@
-package com.bsb.hike.utils;
+package com.bsb.hike.notifications;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -12,20 +13,20 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
+import android.text.Html;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -35,7 +36,9 @@ import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.Utils;
 
 public class HikeNotification
 {
@@ -43,23 +46,31 @@ public class HikeNotification
 
 	private String NOTIF_SOUND_OFF, NOTIF_SOUND_DEFAULT, NOTIF_SOUND_HIKE;
 
-	public static final int HIKE_NOTIFICATION = 0;
+	public static final int HIKE_NOTIFICATION = -89;
 
-	public static final int BATCH_SU_NOTIFICATION_ID = 9876;
+	public static final int BATCH_SU_NOTIFICATION_ID = 89;
 
-	public static final int PROTIP_NOTIFICATION_ID = -123;
+	public static final int PROTIP_NOTIFICATION_ID = -89;
 
-	public static final int GAMING_PACKET_NOTIFICATION_ID = -124;
+	public static final int GAMING_PACKET_NOTIFICATION_ID = -89;
 
-	public static final int FREE_SMS_POPUP_NOTIFICATION_ID = -125;
+	public static final int FREE_SMS_POPUP_NOTIFICATION_ID = -89;
 
-	public static final int APP_UPDATE_AVAILABLE_ID = -126;
+	public static final int APP_UPDATE_AVAILABLE_ID = -90;
 
-	public static final int STEALTH_NOTIFICATION_ID = -127;
-	
-	public static final int STEALTH_POPUP_NOTIFICATION_ID = -128;
-	
-	public static final int HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID = -129;
+	public static final int STEALTH_NOTIFICATION_ID = -89;
+
+	public static final int STEALTH_POPUP_NOTIFICATION_ID = -89;
+
+	public static final int HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID = -89;
+
+	// We need a constant notification id for bulk/big text notifications. Since
+	// we are using msisdn for other single notifications, it is safe to use any
+	// number <= 99
+	public static final int HIKE_SUMMARY_NOTIFICATION_ID = -89;
+
+	// We need a key to pair notification id. This will be used to retrieve notification id on notification dismiss/action.
+	public static final String HIKE_NOTIFICATION_ID_KEY = "hike.notification";
 
 	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
 
@@ -73,11 +84,18 @@ public class HikeNotification
 
 	private final SharedPreferences sharedPreferences;
 
+	private HikeUserDatabase db;
+
+	private HikeNotificationMsgStack hikeNotifMsgStack;
+
 	public HikeNotification(final Context context)
 	{
 		this.context = context;
 		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		this.sharedPreferences = context.getSharedPreferences(HikeMessengerApp.STATUS_NOTIFICATION_SETTING, 0);
+		this.db = HikeUserDatabase.getInstance();
+		this.hikeNotifMsgStack = HikeNotificationMsgStack.getInstance(context);
+
 		if (VIB_DEF == null)
 		{
 			Resources res = context.getResources();
@@ -98,6 +116,18 @@ public class HikeNotification
 		 */
 		if (sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
 		{
+			return;
+		}
+
+		// if notification message stack is empty, add to it and proceed with single notification display
+		// else add to stack and notify clubbed messages
+		if (hikeNotifMsgStack.isEmpty())
+		{
+			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), bodyString);
+		}
+		else
+		{
+			notifyStringMessage(context.getString(R.string.app_name), bodyString);
 			return;
 		}
 
@@ -128,6 +158,18 @@ public class HikeNotification
 			return;
 		}
 
+		// if notification message stack is empty, add to it and proceed with single notification display
+		// else add to stack and notify clubbed messages
+		if (hikeNotifMsgStack.isEmpty())
+		{
+			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), headerString);
+		}
+		else
+		{
+			notifyStringMessage(context.getString(R.string.app_name), headerString);
+			return;
+		}
+
 		/*
 		 * invoke the chat thread here. The Stealth tip popup should already be showing here ideally by now.
 		 */
@@ -143,7 +185,6 @@ public class HikeNotification
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 
 		notificationManager.notify(FREE_SMS_POPUP_NOTIFICATION_ID, mBuilder.getNotification());
-
 	}
 
 	public void notifyAtomicPopup(final String message, Intent notificationIntent)
@@ -153,6 +194,18 @@ public class HikeNotification
 		 */
 		if (sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
 		{
+			return;
+		}
+
+		// if notification message stack is empty, add to it and proceed with single notification display
+		// else add to stack and notify clubbed messages
+		if (hikeNotifMsgStack.isEmpty())
+		{
+			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), message);
+		}
+		else
+		{
+			notifyStringMessage(context.getString(R.string.app_name), message);
 			return;
 		}
 
@@ -170,6 +223,19 @@ public class HikeNotification
 
 	public void notifyMessage(final Protip proTip)
 	{
+
+		// if notification message stack is empty, add to it and proceed with single notification display
+		// else add to stack and notify clubbed messages
+		if (hikeNotifMsgStack.isEmpty())
+		{
+			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), proTip.getHeader());
+		}
+		else
+		{
+			notifyStringMessage(context.getString(R.string.app_name), proTip.getHeader());
+			return;
+		}
+
 		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
 
 		// we've got to invoke the timeline here
@@ -220,10 +286,10 @@ public class HikeNotification
 	public void notifyMessage(final ContactInfo contactInfo, final ConvMessage convMsg, boolean isRich, Bitmap bigPictureImage)
 	{
 		boolean isPin = false;
-		
-		if(convMsg.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+
+		if (convMsg.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			isPin = true;
-		
+
 		final String msisdn = convMsg.getMsisdn();
 		// we are using the MSISDN now to group the notifications
 		final int notificationId = msisdn.hashCode();
@@ -302,7 +368,7 @@ public class HikeNotification
 			partName = key;
 			if (isPin)
 			{
-				message = key +" "+ context.getString(R.string.pin_notif_text) + HikeConstants.SEPARATOR + message;
+				message = key + " " + context.getString(R.string.pin_notif_text) + HikeConstants.SEPARATOR + message;
 			}
 			else
 			{
@@ -327,16 +393,126 @@ public class HikeNotification
 			}
 			else
 				message = messageString;
+
+			// if notification message stack is empty, add to it and proceed with single notification display
+			// else add to stack and notify clubbed messages
+			if (hikeNotifMsgStack.isEmpty())
+			{
+				hikeNotifMsgStack.addMessage(key, message);
+			}
+			else
+			{
+				notifyStringMessage(key, message);
+				return;
+			}
+
 			// big picture messages ! intercept !
-			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, !convMsg.isStickerMessage(), isPin);
+			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, !convMsg.isStickerMessage(), isPin, false, null,
+					null);
 		}
 		else
 		{
+			// if notification message stack is empty, add to it and proceed with single notification display
+			// else add to stack and notify clubbed messages
+			if (hikeNotifMsgStack.isEmpty())
+			{
+				hikeNotifMsgStack.addMessage(key, message);
+			}
+			else
+			{
+				notifyStringMessage(key, message);
+				return;
+			}
 			// regular message
-			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, null, isPin);
+			showNotification(notificationIntent, icon, timestamp, HIKE_SUMMARY_NOTIFICATION_ID, text, key, message, msisdn, null, isPin);
 		}
 	}
-	
+
+	public void notifyStringMessage(String msisdn, String message)
+	{
+		Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.ic_launcher);
+
+		try
+		{
+			hikeNotifMsgStack.addMessage(msisdn, message);
+		}
+		catch (IllegalArgumentException e)
+		{
+			e.printStackTrace();
+			return;
+		}
+
+		hikeNotifMsgStack.invalidateConvMsgList();
+
+		showInboxStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
+				hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getSendersList(),
+				hikeNotifMsgStack.getNotificationBigText(), hikeNotifMsgStack.isFromSingleMsisdn() ? hikeNotifMsgStack.lastAddedMsisdn : "bulk",
+				hikeNotifMsgStack.getNotificationSubText(), avatarDrawable, hikeNotifMsgStack.getBigTextList());
+
+	}
+
+	public void notifySummaryMessage(final ArrayList<ConvMessage> convMessagesList)
+	{
+		for (ConvMessage convMsg : convMessagesList)
+		{
+			ContactInfo contactInfo;
+			if (convMsg.isGroupChat())
+			{
+				contactInfo = new ContactInfo(convMsg.getMsisdn(), convMsg.getMsisdn(), convMsg.getConversation().getLabel(), convMsg.getMsisdn());
+			}
+			else
+			{
+				contactInfo = this.db.getContactInfoFromMSISDN(convMsg.getMsisdn(), false);
+			}
+
+			if ((convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || convMsg.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND))
+			{
+				notifyMessage(contactInfo, convMsg, false, null);
+				continue;
+			}
+
+			hikeNotifMsgStack.addConvMessage(convMsg);
+		}
+
+		hikeNotifMsgStack.invalidateConvMsgList();
+
+		boolean isSingleMsisdn = hikeNotifMsgStack.isFromSingleMsisdn();
+
+		Drawable avatarDrawable = null;
+		if (!isSingleMsisdn)
+		{
+			avatarDrawable = context.getResources().getDrawable(R.drawable.ic_launcher);
+		}
+
+		if (hikeNotifMsgStack.getNotificationTextLines() == 1)
+		{
+			// Possibility to show big picture message
+			ConvMessage convMessage = hikeNotifMsgStack.getLastInsertedConvMessage();
+
+			if (convMessage.isInvite())
+			{
+				 return;
+			}
+			else if (convMessage.isStickerMessage() || convMessage.isFileTransferMessage())
+			{
+				Bitmap bigPictureImage = ToastListener.returnBigPicture(convMessage, context);
+				if (bigPictureImage != null)
+				{
+					showNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
+							hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getSendersList(),
+							hikeNotifMsgStack.getNotificationBigText(), convMessage.getMsisdn(), bigPictureImage, !convMessage.isStickerMessage(), false, false, null, null);
+					return;
+				}
+			}
+		}
+
+		showInboxStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
+				hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
+				hikeNotifMsgStack.getNotificationBigText(), isSingleMsisdn ? hikeNotifMsgStack.lastAddedMsisdn : "bulk", hikeNotifMsgStack.getNotificationSubText(),
+				avatarDrawable, hikeNotifMsgStack.getBigTextList());
+
+	}
+
 	public void notifyHikeToOfflinePush(ArrayList<String> msisdnList, HashMap<String, String> nameMap)
 	{
 		/*
@@ -347,9 +523,21 @@ public class HikeNotification
 			return;
 		}
 
+		// if notification message stack is empty, add to it and proceed with single notification display
+		// else add to stack and notify clubbed messages
+		if (hikeNotifMsgStack.isEmpty())
+		{
+			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), context.getString(R.string.hike_to_offline_text));
+		}
+		else
+		{
+			notifyStringMessage(context.getString(R.string.app_name), context.getString(R.string.hike_to_offline_text));
+			return;
+		}
+
 		final int notificationId = HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID;
 		final Intent notificationIntent = new Intent(context, ChatThread.class);
-		
+
 		String firstMsisdn = msisdnList.get(0);
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, (firstMsisdn));
 		notificationIntent.putExtra(HikeConstants.Extras.NAME, (nameMap.get(firstMsisdn)));
@@ -359,9 +547,11 @@ public class HikeNotification
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.offline_notification);
 		final int smallIconId = returnSmallIcon();
-		
-		String title = (msisdnList.size() > 1)  ? context.getString(R.string.hike_to_offline_push_title_multiple, msisdnList.size()) : (HikeMessengerApp.isStealthMsisdn(firstMsisdn) ? context.getString(R.string.stealth_notification_message) : context.getString(R.string.hike_to_offline_push_title_single, nameMap.get(firstMsisdn)));
+
+		String title = (msisdnList.size() > 1) ? context.getString(R.string.hike_to_offline_push_title_multiple, msisdnList.size()) : context.getString(
+				R.string.hike_to_offline_push_title_single, nameMap.get(firstMsisdn));
 		String message = context.getString(R.string.hike_to_offline_text);
+
 		NotificationCompat.Builder mBuilder = getNotificationBuilder(title, message, message, avatarDrawable, smallIconId, false);
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 
@@ -378,6 +568,26 @@ public class HikeNotification
 
 		String text = message;
 
+		/*
+		 * return straight away if the block notification setting is ON
+		 */
+		if (sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
+		{
+			return;
+		}
+
+		// if notification message stack is empty, add to it and proceed with single notification display
+		// else add to stack and notify clubbed messages
+		if (hikeNotifMsgStack.isEmpty())
+		{
+			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), context.getString(R.string.stealth_notification_message));
+		}
+		else
+		{
+			notifyStringMessage(context.getString(R.string.app_name), context.getString(R.string.stealth_notification_message));
+			return;
+		}
+
 		// we've got to invoke the timeline here
 		final Intent notificationIntent = Utils.getHomeActivityIntent(context);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
@@ -390,15 +600,20 @@ public class HikeNotification
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 
 		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
-		{
-			notificationManager.notify(notificationId, mBuilder.getNotification());
-			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime : System.currentTimeMillis();
-		}
+		notificationManager.notify(notificationId, mBuilder.getNotification());
+		lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime : System.currentTimeMillis();
 	}
 
 	public void notifyFavorite(final ContactInfo contactInfo)
 	{
+		/*
+		 * return straight away if the block notification setting is ON
+		 */
+		if (sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
+		{
+			return;
+		}
+
 		final int notificationId = contactInfo.getMsisdn().hashCode();
 
 		final String msisdn = contactInfo.getMsisdn();
@@ -415,6 +630,18 @@ public class HikeNotification
 		final String message = context.getString(R.string.add_as_favorite_notification_line);
 
 		final String text = context.getString(R.string.add_as_favorite_notification, key);
+
+		// if notification message stack is empty, add to it and proceed with single notification display
+		// else add to stack and notify clubbed messages
+		if (hikeNotifMsgStack.isEmpty())
+		{
+			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), text);
+		}
+		else
+		{
+			notifyStringMessage(context.getString(R.string.app_name), text);
+			return;
+		}
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, msisdn, null, false);
 		addNotificationId(notificationId);
@@ -473,6 +700,18 @@ public class HikeNotification
 			return;
 		}
 
+		// if notification message stack is empty, add to it and proceed with single notification display
+		// else add to stack and notify clubbed messages
+		if (hikeNotifMsgStack.isEmpty())
+		{
+			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), text);
+		}
+		else
+		{
+			notifyStringMessage(context.getString(R.string.app_name), text);
+			return;
+		}
+
 		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, statusMessage.getMsisdn(), null, false);
 		addNotificationId(notificationId);
 	}
@@ -496,6 +735,18 @@ public class HikeNotification
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn.toString());
 
+		// if notification message stack is empty, add to it and proceed with single notification display
+		// else add to stack and notify clubbed messages
+		if (hikeNotifMsgStack.isEmpty())
+		{
+			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), text);
+		}
+		else
+		{
+			notifyStringMessage(context.getString(R.string.app_name), text);
+			return;
+		}
+
 		showNotification(notificationIntent, icon, System.currentTimeMillis(), notificationId, text, key, message, msisdn, bigPictureImage, false);
 	}
 
@@ -513,7 +764,17 @@ public class HikeNotification
 		final String key = header;
 
 		final String text = message;
-
+		// if notification message stack is empty, add to it and proceed with single notification display
+		// else add to stack and notify clubbed messages
+		if (hikeNotifMsgStack.isEmpty())
+		{
+			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), text);
+		}
+		else
+		{
+			notifyStringMessage(context.getString(R.string.app_name), text);
+			return;
+		}
 		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, null, null, false); // TODO: change this.
 		addNotificationId(notificationId);
 	}
@@ -551,15 +812,71 @@ public class HikeNotification
 	public void cancelAllNotifications()
 	{
 		notificationManager.cancelAll();
+		hikeNotifMsgStack.resetMsgStack();
 	}
 
-	private void showNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text, final String key,
-			final String message, final String msisdn, final Bitmap bigPictureImage, boolean isFTMessage, boolean isPin)
+	private void showInboxStyleNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text,
+			final String key, final String message, final String msisdn, String subMessage, Drawable argAvatarDrawable, List<String> inboxLines)
 	{
 
 		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 
-		final Drawable avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(context, msisdn, isPin);
+		Drawable avatarDrawable = null;
+		if (argAvatarDrawable == null)
+		{
+			avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(context, msisdn, false);
+		}
+		else
+		{
+			avatarDrawable = argAvatarDrawable;
+		}
+
+		final int smallIconId = returnSmallIcon();
+
+		NotificationCompat.Builder mBuilder;
+		mBuilder = null;
+		mBuilder = getNotificationBuilder(key, subMessage, text.toString(), avatarDrawable, smallIconId, false);
+		NotificationCompat.InboxStyle inBoxStyle = new NotificationCompat.InboxStyle();
+		inBoxStyle.setBigContentTitle(key);
+		inBoxStyle.setSummaryText(subMessage);
+
+		// Moves events into the big view
+		for (int i = 0; i < inboxLines.size(); i++)
+		{
+			inBoxStyle.addLine(Html.fromHtml(inboxLines.get(i)));
+		}
+
+		// Moves the big view style object into the notification object.
+		mBuilder.setStyle(inBoxStyle);
+
+		setNotificationIntentForBuilder(mBuilder, notificationIntent);
+
+		setOnDeleteIntent(mBuilder, notificationId);
+
+		mBuilder.setNumber(hikeNotifMsgStack.getUnreadMessages());
+
+		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
+		{
+			notificationManager.notify(notificationId, mBuilder.getNotification());
+			lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime : System.currentTimeMillis();
+		}
+	}
+
+	private void showNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text, final String key,
+			final String message, final String msisdn, final Bitmap bigPictureImage, boolean isFTMessage, boolean isPin, boolean isBigText, String subMessage,
+			Drawable argAvatarDrawable)
+	{
+		final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
+
+		Drawable avatarDrawable = null;
+		if (argAvatarDrawable == null)
+		{
+			avatarDrawable = Utils.getAvatarDrawableForNotificationOrShortcut(context, msisdn, isPin);
+		}
+		else
+		{
+			avatarDrawable = argAvatarDrawable;
+		}
 
 		final int smallIconId = returnSmallIcon();
 
@@ -576,7 +893,20 @@ public class HikeNotification
 		}
 		else
 		{
-			mBuilder = getNotificationBuilder(key, message, text.toString(), avatarDrawable, smallIconId, false);
+			mBuilder = null;
+			if (isBigText)
+			{
+				mBuilder = getNotificationBuilder(key, subMessage, text.toString(), avatarDrawable, smallIconId, false);
+				NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+				bigTextStyle.setBigContentTitle(key);
+				bigTextStyle.bigText(message);
+				bigTextStyle.setSummaryText(subMessage);
+				mBuilder.setStyle(bigTextStyle);
+			}
+			else
+			{
+				mBuilder = getNotificationBuilder(key, message, text.toString(), avatarDrawable, smallIconId, false);
+			}
 		}
 
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
@@ -590,7 +920,7 @@ public class HikeNotification
 	private void showNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text, final String key,
 			final String message, final String msisdn, final Bitmap bigPictureImage, boolean isPin)
 	{
-		showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, false, isPin);
+		showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, false, isPin, false, null, null);
 	}
 
 	private int returnSmallIcon()
@@ -674,5 +1004,39 @@ public class HikeNotification
 	{
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		mBuilder.setContentIntent(contentIntent);
+	}
+
+	/**
+	 * Add action to a notification builder object. This will add action buttons to the built notification. More at <a
+	 * href="http://developer.android.com/guide/topics/ui/notifiers/notifications.html#Actions">Notification Actions</a>
+	 * 
+	 * @param notificationBuilder
+	 * @param icon
+	 * @param title
+	 * @param actionIntent
+	 * @return
+	 */
+	public NotificationCompat.Builder addNotificationActions(NotificationCompat.Builder notificationBuilder, int icon, CharSequence title, PendingIntent actionIntent)
+	{
+		notificationBuilder.addAction(icon, title, actionIntent);
+		return notificationBuilder;
+	}
+
+	/**
+	 * Set on delete intent for notifications. This is required in-order to perform actions on notification dismissed/deleted.
+	 * 
+	 * @param mBuilder
+	 * @param notificationId
+	 * @return
+	 */
+	public NotificationCompat.Builder setOnDeleteIntent(NotificationCompat.Builder mBuilder, int notificationId)
+	{
+		Intent intent = new Intent(context, NotificationDismissedReceiver.class);
+		intent.putExtra(HIKE_NOTIFICATION_ID_KEY, notificationId);
+
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), notificationId, intent, 0);
+		mBuilder.setDeleteIntent(pendingIntent);
+
+		return mBuilder;
 	}
 }
