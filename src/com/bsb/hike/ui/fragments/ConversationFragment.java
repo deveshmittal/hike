@@ -2052,7 +2052,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return null;
 		}
 
-		return getListView().getChildAt(index);
+		return getListView().getChildAt(index- getListView().getFirstVisiblePosition());
 	}
 
 	private void updateViewForNameChange(Conversation conversation)
@@ -2153,7 +2153,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				return;
 			}
 
-			View parentView = getListView().getChildAt(newIndex);
+			View parentView = getListView().getChildAt(newIndex - getListView().getFirstVisiblePosition());
 
 			if (parentView == null)
 			{
