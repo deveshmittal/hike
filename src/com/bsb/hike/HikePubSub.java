@@ -61,6 +61,8 @@ public class HikePubSub implements Runnable
 																				// by
 																				// the
 																				// same.
+	
+	public static final String GROUP_MESSAGE_DELIVERED_READ = "groupMessageDeliveredRead";
 
 	public static final String WS_CLOSE = "ws_close";
 
@@ -343,6 +345,14 @@ public class HikePubSub implements Runnable
 	public static final String REMOVE_STEALTH_UNREAD_TIP = "removeStealthUnreadTip";
 
 	public static final String STEALTH_UNREAD_TIP_CLICKED = "stealthUnreadTipClicked";
+	
+	public static final String BULK_MESSAGE_RECEIVED = "bulkMessagesReceived";
+
+	public static final String BULK_MESSAGE_DELIVERED_READ = "bulkMessageDeliveredRead";
+	
+	public static final String BULK_MESSAGE_NOTIFICATION = "bulkMessageNotification";
+	
+	public static final String UPDATE_PIN_METADATA = "pinUpdated";
 
 	public static final String CONTACT_SYNC_STARTED = "contactSyncStarted";
 

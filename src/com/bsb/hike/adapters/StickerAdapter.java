@@ -361,7 +361,11 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 					String[] stickerIds = categoryDir.list(StickerManager.getInstance().stickerFileFilter);
 					for (String stickerId : stickerIds)
 					{
-						stickersList.add(new Sticker(category, stickerId));
+						Sticker s = new Sticker(category, stickerId);
+						// if the sticker is in app sticker, ignore it
+						if(s.isInAppSticker())
+							continue;
+						stickersList.add(s);
 					}
 				}
 			}

@@ -47,6 +47,15 @@
         android:summary="@string/mute_status_notification_subtext"
         android:title="@string/mute_status_notification_header"
         android:widgetLayout="@layout/checkbox_widget" />
+    
+    <com.bsb.hike.view.IconCheckBoxPreference
+        icon="ic_bolt_yellow"
+        android:defaultValue="true"
+        android:key="hikeOfflineNotificationPref"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/h2o_notifications_setting_summary"
+        android:title="@@string/hike_offline_notifications"
+        android:widgetLayout="@layout/checkbox_widget" />
 	
 	<!-- this is the chat theme notification setting. commented out for now -->
 	<!-- <com.bsb.hike.view.IconCheckBoxPreference

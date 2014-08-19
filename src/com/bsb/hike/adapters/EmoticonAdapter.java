@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.GridView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Logger;
@@ -33,7 +34,7 @@ public class EmoticonAdapter extends PagerAdapter implements StickerEmoticonIcon
 
 	private Activity activity;
 
-	private EditText composeBox;
+	private EmoticonClickListener listener;
 
 	private int[] emoticonResIds;
 
@@ -43,18 +44,18 @@ public class EmoticonAdapter extends PagerAdapter implements StickerEmoticonIcon
 
 	private int idOffset;
 
-	public EmoticonAdapter(Activity activity, EditText composeBox, boolean isPortrait, int[] categoryResIds)
+	public EmoticonAdapter(Activity activity, EmoticonClickListener listener, boolean isPortrait, int[] categoryResIds)
 	{
-		this(activity, composeBox, isPortrait, categoryResIds, false);
+		this(activity, listener, isPortrait, categoryResIds, false);
 	}
 
-	public EmoticonAdapter(Activity activity, EditText composeBox, boolean isPortrait, int[] categoryResIds, boolean emojiOnly)
+	public EmoticonAdapter(Activity activity, EmoticonClickListener listener, boolean isPortrait, int[] categoryResIds, boolean emojiOnly)
 	{
 		MAX_EMOTICONS_PER_ROW = isPortrait ? MAX_EMOTICONS_PER_ROW_PORTRAIT : MAX_EMOTICONS_PER_ROW_LANDSCAPE;
 
 		this.inflater = LayoutInflater.from(activity);
 		this.activity = activity;
-		this.composeBox = composeBox;
+		this.listener = listener;
 		this.categoryResIds = categoryResIds;
 
 		emoticonResIds = emojiOnly ? EmoticonConstants.EMOJI_RES_IDS : EmoticonConstants.DEFAULT_SMILEY_RES_IDS;
@@ -96,7 +97,7 @@ public class EmoticonAdapter extends PagerAdapter implements StickerEmoticonIcon
 		emoticonGrid.setNumColumns(MAX_EMOTICONS_PER_ROW);
 		emoticonGrid.setVerticalScrollBarEnabled(false);
 		emoticonGrid.setHorizontalScrollBarEnabled(false);
-		emoticonGrid.setAdapter(new EmoticonPageAdapter(activity, emoticonSubCategories, emoticonResIds, position, idOffset, composeBox));
+		emoticonGrid.setAdapter(new EmoticonPageAdapter(activity, emoticonSubCategories, emoticonResIds, position, idOffset, listener));
 
 		((ViewPager) container).addView(emoticonPage);
 		return emoticonPage;

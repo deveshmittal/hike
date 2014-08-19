@@ -207,9 +207,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.account);
 			break;
 		case 4:
-			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.privacy_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.privacy);
+			intent = Utils.getIntentForPrivacyScreen(this);
 			break;
 		case 5:
 			if(HikeMessengerApp.syncingContacts)
