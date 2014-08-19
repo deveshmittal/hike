@@ -621,7 +621,7 @@ public class TransientCache extends ContactsCache
 				for (Entry<String, ContactTuple> savedMapEntry : transientContacts.entrySet())
 				{
 					String msisdn = savedMapEntry.getKey();
-					if (!blockSet.contains(msisdn))
+					if (!blockSet.contains(msisdn) && ContactManager.getInstance().isIndianMobileNumber(msisdn))
 					{
 						ContactTuple tuple = savedMapEntry.getValue();
 						ContactInfo contactInfo = tuple.getContact();
