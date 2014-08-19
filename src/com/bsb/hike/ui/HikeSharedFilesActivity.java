@@ -1,9 +1,14 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -34,9 +39,11 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeSharedFileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity implements OnScrollListener, OnItemClickListener, OnItemLongClickListener
@@ -433,7 +440,39 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 			deleteConfirmDialog.setCancelButton(R.string.cancel);
 			deleteConfirmDialog.show();
 			return true;
+		case R.id.forward_msgs:
+			ArrayList<Long> selectedMsgIds = new ArrayList<Long>(selectedSharedFileItems.keySet());
+			Collections.sort(selectedMsgIds);
+			Intent intent = new Intent(HikeSharedFilesActivity.this, ComposeChatActivity.class);
+			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+			JSONArray multipleMsgArray = new JSONArray();
+			try
+			{
+				for (int i = 0; i < selectedMsgIds.size(); i++)
+				{
+					HikeSharedFile hikeFile = selectedSharedFileItems.get(selectedMsgIds.get(i));
+					JSONObject multiMsgFwdObject = new JSONObject();
+					multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
+
+					multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
+					multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
+					if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+					{
+						multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
+					}
+
+					multipleMsgArray.put(multiMsgFwdObject);
+				}
+			}
+			catch (JSONException e)
+			{
+				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
+			}
+			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
+			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, msisdn);
+			startActivity(intent);
+			return true;
 		}
-		return true;
+		return false;
 	}
 }
