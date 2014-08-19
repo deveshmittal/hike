@@ -30,22 +30,15 @@ public class ContactUtils
 	/*
 	 * Call this when we think the address book has changed. Checks for updates, posts to the server, writes them to the local database and updates existing conversations
 	 */
-	public static void syncUpdates(Context ctx)
+	public static boolean syncUpdates(Context ctx)
 	{
-
-		if (!Utils.isUserOnline(ctx))
-		{
-			Logger.d("CONTACT UTILS", "Airplane mode is on , skipping sync update tasks.");
-			return;
-		}
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 
 		List<ContactInfo> newContacts = getContacts(ctx);
 		if (newContacts == null)
 		{
-			return;
+			return false;
 		}
-
 		Map<String, List<ContactInfo>> new_contacts_by_id = convertToMap(newContacts);
 		Map<String, List<ContactInfo>> hike_contacts_by_id = convertToMap(db.getContacts(false));
 
@@ -88,7 +81,7 @@ public class ContactUtils
 		if ((new_contacts_by_id.isEmpty()) && (hike_contacts_by_id.isEmpty()))
 		{
 			Logger.d("ContactUtils", "DB in sync");
-			return;
+			return false;
 		}
 
 		try
@@ -118,6 +111,7 @@ public class ContactUtils
 		{
 			Logger.e("ContactUtils", "error updating addressbook", e);
 		}
+		return true;
 	}
 
 	private static boolean areListsEqual(List<ContactInfo> list1, List<ContactInfo> list2)
