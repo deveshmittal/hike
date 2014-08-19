@@ -473,7 +473,7 @@ public class HikeNotification
 			return;
 		}
 
-		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, statusMessage.getMsisdn(), null, false);
+		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, statusMessage.getMappedId(), null, false);
 		addNotificationId(notificationId);
 	}
 
