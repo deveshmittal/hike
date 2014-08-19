@@ -4759,9 +4759,21 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public List<HikeSharedFile> getSharedMedia(String msisdn, int limit, long maxMsgId, boolean onlyMedia)
 	{
+		return getSharedMedia(msisdn, limit, maxMsgId, onlyMedia, true);
+	}
+
+	/*
+	 * itemsToLeft : true implies all items which has msgId less than given msgId : false implies all items which has msgId greater than given msgId
+	 * 
+	 * returns list in order of msgId max to min.
+	 */
+	public List<HikeSharedFile> getSharedMedia(String msisdn, int limit, long givenMsgId, boolean onlyMedia, boolean itemsToLeft)
+	{
 		String limitStr = (limit == -1) ? null : new Integer(limit).toString();
-		String selection = DBConstants.MSISDN + " = ?" + (maxMsgId == -1 ? "" : " AND " + DBConstants.MESSAGE_ID + "<" + maxMsgId) + " AND "
-				+ (onlyMedia ? DBConstants.HIKE_FILE_TYPE+" != "+HikeFileType.OTHER.ordinal() : DBConstants.HIKE_FILE_TYPE+" = "+HikeFileType.OTHER.ordinal());
+		String msgIdSelection = DBConstants.MESSAGE_ID + (itemsToLeft ? "<" : ">") + givenMsgId;
+
+		String selection = DBConstants.MSISDN + " = ?" + (givenMsgId == -1 ? "" : " AND " + msgIdSelection) + " AND "
+				+ (onlyMedia ? DBConstants.HIKE_FILE_TYPE + " != " + HikeFileType.OTHER.ordinal() : DBConstants.HIKE_FILE_TYPE + " = " + HikeFileType.OTHER.ordinal());
 		Cursor c = null;
 		try
 		{
