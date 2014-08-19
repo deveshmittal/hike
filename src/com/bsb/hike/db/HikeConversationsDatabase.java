@@ -4786,8 +4786,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				sharedFilesList.add(new HikeSharedFile(new JSONObject(messageMetadata), isSent, msgId, msisdn, ts));
 			}
 			
-			Collections.reverse(sharedFilesList);
-
 			return sharedFilesList;
 		}
 		catch (JSONException e)
