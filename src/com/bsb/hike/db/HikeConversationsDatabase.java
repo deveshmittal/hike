@@ -2473,6 +2473,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		Long[] bindArgs = new Long[] { convMessage.getMsgID() };
 		mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.MESSAGE_ID + "= ?", bindArgs);
+		
+		if(convMessage.isFileTransferMessage())
+		{
+			mDb.execSQL("DELETE FROM " + DBConstants.SHARED_MEDIA_TABLE + " WHERE " + DBConstants.MESSAGE_ID + "= ?", bindArgs);
+		}
 
 		if (isLastMessage)
 		{
@@ -2487,6 +2492,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		 * Clearing the messages table.
 		 */
 		mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.CONV_ID + "= ?", args);
+
+		// TODO need to do this in convId to msisdn change
+		// mDb.execSQL("DELETE FROM " + DBConstants.SHARED_MEDIA_TABLE + " WHERE " + DBConstants.MSISDN + "= ?", bindArgs);
 
 		/*
 		 * Next we have to clear the conversation table.
