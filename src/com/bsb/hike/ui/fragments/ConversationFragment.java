@@ -1390,7 +1390,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					Conversation conversation = mConversationsByMSISDN.get(msisdn);
 
-					if (!wasViewSetup())
+					if (!wasViewSetup() || null == conversation)
 					{
 						return;
 					}
@@ -2075,7 +2075,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void updateViewForMessageStateChange(Conversation conversation, ConvMessage convMessage)
 	{
-		if (!wasViewSetup())
+		if (!wasViewSetup() || null == conversation)
 		{
 			Logger.d("UnreadBug", "Unread count event received but view wasn't setup");
 			return;
