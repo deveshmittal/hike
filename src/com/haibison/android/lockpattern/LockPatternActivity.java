@@ -36,6 +36,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ResultReceiver;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -51,6 +52,7 @@ import com.bsb.hike.BuildConfig;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Utils;
 import com.haibison.android.lockpattern.util.IEncrypter;
 import com.haibison.android.lockpattern.util.InvalidEncrypterException;
 import com.haibison.android.lockpattern.util.LoadingDialog;
@@ -480,6 +482,25 @@ public class LockPatternActivity extends HikeAppStateBaseFragmentActivity {
         mBtnCancel = (Button) findViewById(R.id.alp_42447968_button_cancel);
         mBtnConfirm = (Button) findViewById(R.id.alp_42447968_button_confirm);
 
+        TextView changePasswordSetting = (TextView) findViewById(R.id.change_password_setting);
+        if(!ACTION_CREATE_PATTERN.equals(getIntent().getAction()) 
+        		&& !getIntent().getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false) 
+        		&& changePasswordSetting != null)
+        {
+        	changePasswordSetting.setVisibility(View.VISIBLE);
+        	changePasswordSetting.setText(getString(R.string.change_password_from_privacy));
+        	changePasswordSetting.setOnClickListener(new View.OnClickListener()
+			{
+				
+				@Override
+				public void onClick(View arg0)
+				{
+					Intent intent = Utils.getIntentForPrivacyScreen(LockPatternActivity.this);
+					startActivity(intent);
+					finishWithNegativeResult(RESULT_CANCELED);
+				}
+			});
+        }
         /*
          * LOCK PATTERN VIEW
          */

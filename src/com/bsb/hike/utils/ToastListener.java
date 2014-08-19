@@ -66,7 +66,7 @@ public class ToastListener implements Listener
 	String[] hikePubSubListeners = { HikePubSub.PUSH_AVATAR_DOWNLOADED, HikePubSub.PUSH_FILE_DOWNLOADED, HikePubSub.PUSH_STICKER_DOWNLOADED, HikePubSub.MESSAGE_RECEIVED,
 			HikePubSub.NEW_ACTIVITY, HikePubSub.CONNECTION_STATUS, HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED, HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED, HikePubSub.UPDATE_PUSH, HikePubSub.APPLICATIONS_PUSH,
-			HikePubSub.SHOW_FREE_INVITE_SMS, HikePubSub.STEALTH_POPUP_WITH_PUSH, HikePubSub.HIKE_TO_OFFLINE_PUSH, HikePubSub.ATOMIC_POPUP_WITH_PUSH };
+			HikePubSub.SHOW_FREE_INVITE_SMS, HikePubSub.STEALTH_POPUP_WITH_PUSH, HikePubSub.HIKE_TO_OFFLINE_PUSH, HikePubSub.ATOMIC_POPUP_WITH_PUSH, HikePubSub.BULK_MESSAGE_NOTIFICATION };
 
 	public ToastListener(Context context)
 	{
@@ -449,6 +449,84 @@ public class ToastListener implements Listener
 					Logger.e("HikeToOffline", "Json Exception", e);
 				}
 
+			}
+		}
+		else if (HikePubSub.BULK_MESSAGE_NOTIFICATION.equals(type))
+		{
+			ArrayList<ConvMessage> messageList = (ArrayList<ConvMessage>) object;
+			if(messageList == null || messageList.isEmpty())
+			{
+				return ;
+			}
+			
+			for(ConvMessage message : messageList)
+			{
+				if (message.isShouldShowPush())
+				{
+					HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
+					message.setConversation(hCDB.getConversation(message.getMsisdn(), 0));
+
+					if (message.getConversation() == null)
+					{
+						Logger.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
+						return;
+					}
+					if ((message.getConversation() instanceof GroupConversation) && ((GroupConversation) message.getConversation()).isMuted())
+					{
+						Logger.d(getClass().getSimpleName(), "Group has been muted");
+						return;
+					}
+					if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
+							|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
+					{
+						if (message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
+						{
+							boolean showNotification = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.CHAT_BG_NOTIFICATION_PREF, true);
+							if (!showNotification)
+							{
+								return;
+							}
+						}
+
+						Activity activity = (currentActivity != null) ? currentActivity.get() : null;
+						if ((activity instanceof ChatThread))
+						{
+							String contactNumber = ((ChatThread) activity).getContactNumber();
+							if (message.getMsisdn().equals(contactNumber))
+							{
+								return;
+							}
+						}
+
+						/*
+						 * the foreground activity isn't going to show this message so Toast it
+						 */
+						ContactInfo contactInfo;
+						if (message.isGroupChat())
+						{
+							Logger.d("ToastListener", "GroupName is " + message.getConversation().getLabel());
+							contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), message.getConversation().getLabel(), message.getMsisdn());
+						}
+						else
+						{
+							contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn(), false);
+						}
+
+						if (message.getConversation().isStealth())
+						{
+							this.toaster.notifyStealthMessage();
+						}
+						else
+						{
+							/*
+							 * Check if this is a big picture message, else toast a normal push message
+							 */
+							Bitmap bigPicture = returnBigPicture(message, context);
+							this.toaster.notifyMessage(contactInfo, message, bigPicture != null ? true : false, bigPicture);
+						}
+					}
+
+				}
 			}
 		}
 	}

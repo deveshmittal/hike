@@ -15,118 +15,134 @@
    limitations under the License.
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
-    
-    <LinearLayout
-        android:id="@+id/alp_42447968_textview_info_group"
-        android:layout_width="wrap_content"
-	    android:layout_height="56dp"
-	    android:gravity="center"
-	    android:paddingTop="10dp"
-	    android:layout_centerHorizontal="true" >
-	    
-	    <RelativeLayout
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:paddingLeft="7dp"
-	        android:paddingRight="7dp" >
-	        
-	        <ImageView
-	            android:id="@+id/stealth_passcode_img" 
-		        android:src="@drawable/ic_stealth_passcode"
-		        android:layout_centerVertical="true"
-		        android:layout_alignParentTop="true"
-		        android:paddingTop="3dp"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:paddingRight="9dp" />
-	        
-	        <com.bsb.hike.view.CustomFontTextView
-		        android:id="@+id/alp_42447968_textview_info"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="Your patterns don’t match. Try again. jla aldfa ld faldf alsdf a"
-		        android:layout_toRightOf="@id/stealth_passcode_img"
-		        android:layout_alignTop="@id/stealth_passcode_img"
-		        android:textAppearance="?android:attr/textAppearanceMedium"
-		        android:layout_centerVertical="true"
-		        android:textIsSelectable="true"
-		        android:textSize="14dp" />
-	        
-	    </RelativeLayout>
-    
-    </LinearLayout>
+    android:layout_height="wrap_content"
+    android:background="@color/alp_42447968_pattern_red_background"
+    android:orientation="vertical" >
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:paddingBottom="12dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:layout_above="@+id/alp_42447968_viewgroup_footer"
-        android:layout_below="@id/alp_42447968_textview_info_group" >
+        android:layout_height="wrap_content" >
 
-        <com.haibison.android.lockpattern.widget.LockPatternView
-            android:id="@+id/alp_42447968_view_lock_pattern"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="9dp"
-            android:layout_centerInParent="true" />
-    </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/alp_42447968_viewgroup_footer"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical"
-        android:visibility="gone" >
-
-        <!-- A separator view -->
-        
-        <View
-             android:layout_width="match_parent"
-             android:layout_height="1dp"
-             android:background="@color/stealth_ftue_popup_divider" />
-        
         <LinearLayout
-            style="?attr/alp_42447968_button_bar_style"
-            android:layout_width="match_parent"
-            android:layout_height="47dp"
-            android:orientation="horizontal" >
+            android:id="@+id/alp_42447968_textview_info_group"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:paddingTop="10dp" >
 
-            <com.bsb.hike.view.CustomFontButton
-                android:id="@+id/alp_42447968_button_cancel"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-	    		android:background="@drawable/popup_button_bg_selector"
-	    		android:textSize="16sp"
-	    		android:textColor="@drawable/popup_button_text_color_selector"
-	    		android:gravity="center"
-                android:layout_weight="1"
-                android:text="@string/cancel"
-                android:visibility="gone" />
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="7dp"
+                android:paddingRight="7dp" >
+
+                <ImageView
+                    android:id="@+id/stealth_passcode_img"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerVertical="true"
+                    android:paddingRight="9dp"
+                    android:paddingTop="3dp"
+                    android:src="@drawable/ic_stealth_passcode" />
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/alp_42447968_textview_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/stealth_passcode_img"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@id/stealth_passcode_img"
+                    android:text="Your patterns don’t match. Try again. jla aldfa ld faldf alsdf a"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textIsSelectable="true"
+                    android:textSize="14dp" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/alp_42447968_viewgroup_footer"
+            android:layout_below="@id/alp_42447968_textview_info_group"
+            android:gravity="center"
+            android:paddingBottom="12dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" >
+
+            <com.haibison.android.lockpattern.widget.LockPatternView
+                android:id="@+id/alp_42447968_view_lock_pattern"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginBottom="9dp" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/alp_42447968_viewgroup_footer"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <!-- A separator view -->
 
             <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
                 android:background="@color/stealth_ftue_popup_divider" />
-            
-            <com.bsb.hike.view.CustomFontButton
-                android:id="@+id/alp_42447968_button_confirm"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-	    		android:background="@drawable/popup_button_bg_selector"
-	    		android:textSize="16sp"
-	    		android:textColor="@drawable/popup_button_text_color_selector"
-	    		android:gravity="center"
-                android:layout_weight="1"
-                android:enabled="false"
-                android:text="@string/continue_txt" />
+
+            <LinearLayout
+                style="?attr/alp_42447968_button_bar_style"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:orientation="horizontal" >
+
+                <com.bsb.hike.view.CustomFontButton
+                    android:id="@+id/alp_42447968_button_cancel"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/popup_button_bg_selector"
+                    android:gravity="center"
+                    android:text="@string/cancel"
+                    android:textColor="@drawable/popup_button_text_color_selector"
+                    android:textSize="16sp"
+                    android:visibility="gone" />
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/stealth_ftue_popup_divider" />
+
+                <com.bsb.hike.view.CustomFontButton
+                    android:id="@+id/alp_42447968_button_confirm"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/popup_button_bg_selector"
+                    android:enabled="false"
+                    android:gravity="center"
+                    android:text="@string/continue_txt"
+                    android:textColor="@drawable/popup_button_text_color_selector"
+                    android:textSize="16sp" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-  
-</RelativeLayout>
+    </RelativeLayout>
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/change_password_setting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingBottom="12dp"
+        android:textColor="@drawable/change_password_setting_text_selector"
+        android:text="@string/change_password_from_privacy"
+        android:visibility = "gone"
+        android:textSize="12dp" />
+
+</LinearLayout>

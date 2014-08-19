@@ -84,13 +84,11 @@ public class DownloadStickerTask extends StickerTaskBase
 		boolean reachedEnd = false;
 
 		JSONArray existingStickerIds = new JSONArray();
-		String[] existingStickers = null;
 		/*
 		 * If the category is the default one, we should add the default stickers as well.
 		 */
 		if (category.categoryId.equals(StickerCategoryId.humanoid))
 		{
-			existingStickers = StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID;
 			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID)
 			{
 				existingStickerIds.put(stickerId);
@@ -98,7 +96,6 @@ public class DownloadStickerTask extends StickerTaskBase
 		}
 		else if (category.categoryId.equals(StickerCategoryId.expressions))
 		{
-			existingStickers = StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS;
 			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS)
 			{
 				existingStickerIds.put(stickerId);
@@ -107,11 +104,11 @@ public class DownloadStickerTask extends StickerTaskBase
 
 		if (smallStickerDir.exists())
 		{
-			String[] stickerIds = smallStickerDir.list();
+			String[] stickerIds = smallStickerDir.list(StickerManager.getInstance().stickerFileFilter);
 			for (String stickerId : stickerIds)
 			{
 				existingStickerIds.put(stickerId);
-				Logger.d(getClass().getSimpleName(), "Exising id: " + stickerId);
+				Logger.d(getClass().getSimpleName(), "Existing id: " + stickerId);
 			}
 		}
 		else
@@ -154,30 +151,19 @@ public class DownloadStickerTask extends StickerTaskBase
 
 				try
 				{
+					Sticker s = new Sticker(category, stickerId);
 					if (downloadType.equals(DownloadType.MORE_STICKERS) || downloadType.equals(DownloadType.UPDATE) && stickerPageAdapter != null)
 					{
-						stickerPageAdapter.getStickerList().add(new Sticker(category, stickerId));
+						// if this sticker is not in app sticker, add it to list
+						if(!s.isInAppSticker())
+							stickerPageAdapter.getStickerList().add(s);
 					}
 					// some hack : seems server was sending stickers which already exist so it was leading to duplicate issue
 					// so we save small sticker , if not present already
 
 					File f = saveLargeStickers(largeStickerDir, stickerId, stickerData);
-					boolean saveSmall = true;
-					if (existingStickers != null)
-					{
-						for (String stId : existingStickers)
-						{
-							if (stId.equals(stickerId))
-							{
-								saveSmall = false;
-								break;
-							}
-						}
-					}
-					if (saveSmall)
-					{
+					if(!s.isInAppSticker())
 						saveSmallStickers(smallStickerDir, stickerId, f);
-					}
 				}
 				catch (FileNotFoundException e)
 				{
