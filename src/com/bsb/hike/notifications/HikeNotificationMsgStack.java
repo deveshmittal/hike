@@ -494,11 +494,18 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		if (isFromSingleMsisdn())
 		{
-			return getNewMessages() + " new messages.";
+			if (getNewMessages() <= 1)
+			{
+				return mContext.getString(R.string.one_new_message);
+			}
+			else
+			{
+				return String.format(mContext.getString(R.string.num_new_messages), getNewMessages());
+			}
 		}
 		else
 		{
-			return "Total " + getNewConversations() + " conversations.";
+			return String.format(mContext.getString(R.string.num_new_conversations), getNewConversations());
 		}
 	}
 
@@ -694,11 +701,11 @@ public class HikeNotificationMsgStack implements Listener
 
 		if (getNewMessages() <= 1)
 		{
-			return mMessageTitlePairList.size() + " new message";
+			return mContext.getString(R.string.one_new_message);
 		}
 		else
 		{
-			return mMessageTitlePairList.size() + " new messages";
+			return String.format(mContext.getString(R.string.num_new_messages), getNewMessages());
 		}
 	}
 }
