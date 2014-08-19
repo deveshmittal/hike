@@ -544,7 +544,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		 */
 		if (oldVersion < 29)
 		{
-			deleteEmptyConversations();
+			deleteEmptyConversations(db);
 		}
 	}
 
@@ -4662,7 +4662,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void deleteEmptyConversations()
+	public void deleteEmptyConversations(SQLiteDatabase mDb)
 	{
 		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] {DBConstants.MESSAGE, DBConstants.MSISDN, DBConstants.MESSAGE_METADATA}, null, null, null, null, null);
 
