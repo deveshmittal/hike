@@ -423,7 +423,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		List<ContactInfo> contactInfos = null;
 		try
 		{
-			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
+			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, "max(" + DBConstants.ID + ") as " + DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
 					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO, DBConstants.FAVORITE_TYPE_SELECTION, DBConstants.HIKE_JOIN_TIME,
 					DBConstants.IS_OFFLINE, DBConstants.LAST_SEEN }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
 
@@ -581,6 +581,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		while (c.moveToNext())
 		{
 			String msisdn = c.getString(msisdnIdx);
+
+			/*
+			 * query with aggregate functions always return at least one row which will have everything null. Accounting for that.
+			 */
+			if (TextUtils.isEmpty(msisdn))
+			{
+				continue;
+			}
+
 			if (distinct && msisdnSet.contains(msisdn))
 			{
 				continue;
@@ -1465,21 +1474,30 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void removeIcon(String msisdn)
+	public boolean removeIcon(String msisdn)
 	{
 		/*
 		 * We delete the older file that contained the larger avatar image for this msisdn.
 		 */
 		Utils.removeLargerProfileImageForMsisdn(msisdn);
 
-		mDb.delete(DBConstants.THUMBNAILS_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
+		int deletedRows = mDb.delete(DBConstants.THUMBNAILS_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
 
-		mDb.delete(DBConstants.ROUNDED_THUMBNAIL_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
+		int deletedRowsFromRoundedTable = mDb.delete(DBConstants.ROUNDED_THUMBNAIL_TABLE, DBConstants.MSISDN + "=?", new String[] { msisdn });
 
 		String whereClause = DBConstants.MSISDN + "=?"; // msisdn;
 		ContentValues customPhotoFlag = new ContentValues(1);
 		customPhotoFlag.put(DBConstants.HAS_CUSTOM_PHOTO, 0);
 		mDb.update(DBConstants.USERS_TABLE, customPhotoFlag, whereClause, new String[] { msisdn });
+		if (deletedRows + deletedRowsFromRoundedTable > 0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		
 	}
 
 	public void updateContactRecency(String msisdn, long timeStamp)
@@ -1552,6 +1570,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			insertStatement.bindLong(ih.getColumnIndex(DBConstants.FAVORITE_TYPE), favoriteType.ordinal());
 
 			insertStatement.executeInsert();
+			mDb.setTransactionSuccessful();
 		}
 		finally
 		{
@@ -1563,7 +1582,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			{
 				ih.close();
 			}
-			mDb.setTransactionSuccessful();
 			mDb.endTransaction();
 		}
 	}
@@ -1796,7 +1814,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
-			c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " + DBConstants.MSISDN + ", " + DBConstants.ONHIKE + ", "
+			c = mReadDb.rawQuery("SELECT max(" + DBConstants.ID + ") AS " + DBConstants.ID + ", " + DBConstants.NAME + ", " + DBConstants.MSISDN + ", " + DBConstants.ONHIKE + ", "
 					+ DBConstants.HAS_CUSTOM_PHOTO + " from " + DBConstants.USERS_TABLE + " WHERE " + DBConstants.MSISDN + " IN " + msisdns + " GROUP BY " + DBConstants.MSISDN,
 					null);
 
@@ -1810,6 +1828,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			while (c.moveToNext())
 			{
 				String msisdn = c.getString(msisdnIdx);
+
+				/*
+				 * query with aggregate functions always return at least one row which will have everything null.
+				 */
+				if (TextUtils.isEmpty(msisdn))
+				{
+					continue;
+				}
+
 				String name = c.getString(nameIdx);
 				boolean onHike = c.getInt(onHikeIdx) != 0;
 
@@ -1871,6 +1898,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 				insertStatement.executeInsert();
 			}
+			mDb.setTransactionSuccessful();
 		}
 		finally
 		{
@@ -1882,7 +1910,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			{
 				ih.close();
 			}
-			mDb.setTransactionSuccessful();
 			mDb.endTransaction();
 
 			if (favorites.length() > 0)
@@ -2308,9 +2335,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		List<ContactInfo> contactInfos = null;
 		try
 		{
-			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
+			c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, "max(" + DBConstants.ID + ") as " + DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
 					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO },
-					DBConstants.MSISDN + " != ?", new String[] { myMsisdn }, null, null, DBConstants.NAME + " COLLATE NOCASE");
+					DBConstants.MSISDN + " != ?", new String[] { myMsisdn }, DBConstants.MSISDN, null, DBConstants.NAME + " COLLATE NOCASE");
 
 			contactInfos = extractContactInfo(c, true);
 

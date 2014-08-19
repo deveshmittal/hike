@@ -903,7 +903,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					{
 						if (isBackPressed)
 						{
-							finishEditing();
+							HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
 						}
 					}
 
@@ -922,7 +922,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						}
 						if (isBackPressed)
 						{
-							finishEditing();
+							HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
 						}
 					}
 				});
@@ -1035,7 +1035,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 					if (isBackPressed)
 					{
-						finishEditing();
+						HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
 					}
 				}
 			});
@@ -1122,7 +1122,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		if (isBackPressed)
 		{
-			finishEditing();
+			HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_UPDATE_FINISH, null);
 		}
 	}
 

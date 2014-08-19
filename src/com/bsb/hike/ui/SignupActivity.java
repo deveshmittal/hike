@@ -747,14 +747,24 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		selectedCountryPicker.setEnabled(true);
 		enterEditText.setEnabled(true);
 
-		setupCountryCodeData();
+		Utils.setupCountryCodeData(this, countryCode, countryPicker, selectedCountryName, countriesArray, countriesMap, codesMap, languageMap);
 		TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 		String number = manager.getLine1Number();
 		if (number != null && number.startsWith("+91"))
 		{
 			number = number.replace("+91", "");
 			enterEditText.setText(number);
-			enterEditText.setSelection(number.length());
+			/*
+			 * Saw a few crashes here. Catching the exception since we don't seem to be doing anything wrong here.
+			 */
+			try
+			{
+				enterEditText.setSelection(number.length());
+			}
+			catch (IndexOutOfBoundsException e)
+			{
+				Logger.w(getClass().getSimpleName(), "IOOB thrown while setting the number's textbox selection");
+			}
 		}
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
 		invalidNum.setVisibility(View.INVISIBLE);
@@ -1665,85 +1675,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				}
 			});
 		}
-	}
-
-	private void setupCountryCodeData()
-	{
-		try
-		{
-			BufferedReader reader = new BufferedReader(new InputStreamReader(getResources().getAssets().open("countries.txt")));
-			String line;
-			while ((line = reader.readLine()) != null)
-			{
-				String[] args = line.split(";");
-				countriesArray.add(0, args[1]);
-				countriesMap.put(args[1], args[2]);
-				codesMap.put(args[2], args[1]);
-				languageMap.put(args[0], args[1]);
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-
-		Collections.sort(countriesArray, new Comparator<String>()
-		{
-			@Override
-			public int compare(String lhs, String rhs)
-			{
-				return lhs.compareTo(rhs);
-			}
-		});
-
-		String prevCode = accountPrefs.getString(HikeMessengerApp.TEMP_COUNTRY_CODE, "");
-		if (TextUtils.isEmpty(countryCode))
-		{
-			TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-			String countryIso = TextUtils.isEmpty(prevCode) ? manager.getNetworkCountryIso().toUpperCase() : prevCode;
-			String countryName = languageMap.get(countryIso);
-			if (countryName == null || selectCountry(countryName))
-			{
-				selectCountry(defaultCountryName);
-			}
-		}
-
-		countryPicker.addTextChangedListener(new TextWatcher()
-		{
-
-			@Override
-			public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
-			{
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
-			{
-			}
-
-			@Override
-			public void afterTextChanged(Editable arg0)
-			{
-				String text = countryPicker.getText().toString();
-				String countryName = codesMap.get(text);
-				if (countryName != null)
-				{
-					int index = countriesArray.indexOf(countryName);
-					if (index != -1)
-					{
-						selectedCountryName.setText(countryName);
-					}
-					else
-					{
-						selectedCountryName.setText(R.string.wrong_country);
-					}
-				}
-				else
-				{
-					selectedCountryName.setText(R.string.wrong_country);
-				}
-			}
-		});
 	}
 
 	private boolean selectCountry(String countryName)
