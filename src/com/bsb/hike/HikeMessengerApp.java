@@ -429,6 +429,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static volatile boolean networkError;
 
+	public static volatile boolean syncingContacts = false;
+
 	public Handler appStateHandler;
 
 	class IncomingHandler extends Handler
