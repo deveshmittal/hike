@@ -26,12 +26,16 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeSharedFileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.HikeSharedFile;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
@@ -379,5 +383,57 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 			return;
 		}
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, selectedSharedFileItems.size()));
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		if (multiSelectMode)
+		{
+			onActionModeItemClicked(item);
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	public boolean onActionModeItemClicked(MenuItem item)
+	{
+		switch (item.getItemId())
+		{
+		case R.id.delete_msgs:
+			final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(HikeSharedFilesActivity.this);
+			if (selectedSharedFileItems.size() == 1)
+			{
+				deleteConfirmDialog.setHeader(R.string.confirm_delete_msg_header);
+				deleteConfirmDialog.setBody(R.string.confirm_delete_msg);
+			}
+			else
+			{
+				deleteConfirmDialog.setHeader(R.string.confirm_delete_msgs_header);
+				deleteConfirmDialog.setBody(getString(R.string.confirm_delete_msgs, selectedSharedFileItems.size()));
+			}
+			View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					ArrayList<Long> msgIds = new ArrayList<Long>(selectedSharedFileItems.size());
+					for (HikeSharedFile file : selectedSharedFileItems.values())
+					{
+						msgIds.add(file.getMsgId());
+					}
+					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, msgIds);
+					sharedFilesList.removeAll(selectedSharedFileItems.values());
+					destroyActionMode();
+					deleteConfirmDialog.dismiss();
+				}
+			};
+
+			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
+			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			deleteConfirmDialog.show();
+			return true;
+		}
+		return true;
 	}
 }

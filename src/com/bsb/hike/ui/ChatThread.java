@@ -3805,14 +3805,34 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD.equals(type))
 		{
-			final ConvMessage convMessage = (ConvMessage) object;
+			if(!(object instanceof ArrayList<?>))
+			{
+				return;
+			}
+			final ArrayList<Long> msgIds = (ArrayList<Long>) object;
 			runOnUiThread(new Runnable()
 			{
 
 				@Override
 				public void run()
 				{
-					removeMessage(convMessage);
+					if(mAdapter == null || msgIds.isEmpty())
+					{
+						return;
+					}
+					ConvMessage convMessage = null;
+					for (Long msgId : msgIds)
+					{
+						for (int pos=0; pos<mAdapter.getCount(); pos++)
+						{
+							if(mAdapter.getItem(pos).getMsgID() == msgId)
+							{
+								convMessage = mAdapter.getItem(pos);
+								deleteMessage(convMessage);
+								break;
+							}
+						}
+					}
 				}
 			});
 		}
@@ -4650,6 +4670,33 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mPubSub.publish(HikePubSub.DELETE_MESSAGE, new Pair<ConvMessage, Boolean>(convMessage, lastMessage));
 		mAdapter.removeMessage(convMessage);
 		mAdapter.notifyDataSetChanged();
+	}
+	
+	/*
+	 * 1. remove message from chat thread and db
+	 * 2. remove message from offline messages set of messagesAdapter
+	 * 3. if ongoing file transfer message than cancel the task
+	 */
+	private void deleteMessage(ConvMessage convMessage)
+	{
+		removeMessage(convMessage);
+		if (!convMessage.isSMS() && convMessage.getState() == State.SENT_CONFIRMED)
+		{
+			mAdapter.removeFromUndeliverdMessage(convMessage);
+			if (mAdapter.isSelected(convMessage))
+			{
+				mAdapter.toggleSelection(convMessage);
+			}
+		}
+
+		if (convMessage.isFileTransferMessage())
+		{
+			// @GM cancelTask has been changed
+			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			File file = hikeFile.getFile();
+			FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent());
+			mAdapter.notifyDataSetChanged();
+		}
 	}
 
 	@Override
@@ -7670,27 +7717,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					for (ConvMessage convMessage : selectedMessagesMap.values())
 					{
-						removeMessage(convMessage);
-						if (!convMessage.isSMS() && convMessage.getState() == State.SENT_CONFIRMED)
-						{
-							mAdapter.removeFromUndeliverdMessage(convMessage);
-							if (mAdapter.isSelected(convMessage))
-							{
-								mAdapter.toggleSelection(convMessage);
-							}
-						}
-
-						if (convMessage.isFileTransferMessage())
-						{
-							if (convMessage.isFileTransferMessage())
-							{
-								// @GM cancelTask has been changed
-								HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-								File file = hikeFile.getFile();
-								FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent());
-								mAdapter.notifyDataSetChanged();
-							}
-						}
+						deleteMessage(convMessage);
 					}
 					destroyActionMode();
 					deleteConfirmDialog.dismiss();
