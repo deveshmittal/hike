@@ -52,6 +52,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -4166,5 +4167,20 @@ public class Utils
 		}
 		else
 			return (Integer.toString(bytes) + " B");
+	}
+
+	public static AlertDialog showNetworkUnavailableDialog(Context context)
+	{
+		final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setMessage(R.string.no_internet_try_again);
+		builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which)
+			{
+				dialog.dismiss();
+			}
+		});
+		AlertDialog dialog = builder.create();
+		dialog.show();
+		return dialog;
 	}
 }
