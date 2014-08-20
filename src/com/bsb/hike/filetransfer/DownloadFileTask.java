@@ -296,7 +296,6 @@ public class DownloadFileTask extends FileTransferBase
 							retry = false;
 						}
 						break;
-					case PAUSING:
 					case PAUSED:
 						_state = FTState.PAUSED;
 						Logger.d(getClass().getSimpleName(), "FT PAUSED");

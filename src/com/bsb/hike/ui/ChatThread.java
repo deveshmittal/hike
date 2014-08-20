@@ -1758,7 +1758,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					selectedNonForwadableMsg(isMsgSelected);
 				}
-				if ((fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.PAUSING))
+				if ((fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED ))
 				{
 					/*
 					 * File Transfer is in progress. this can be canceled.

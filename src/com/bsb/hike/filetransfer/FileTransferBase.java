@@ -32,7 +32,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	public enum FTState
 	{
 		NOT_STARTED, INITIALIZED, IN_PROGRESS, // DOWNLOADING OR UPLOADING
-		PAUSED, CANCELLED, COMPLETED, ERROR, PAUSING
+		PAUSED, CANCELLED, COMPLETED, ERROR
 	}
 
 	protected static String NETWORK_ERROR_1 = "timed out";

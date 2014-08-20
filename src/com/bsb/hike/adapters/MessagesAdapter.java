@@ -1041,7 +1041,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				switch (fss.getFTState())
 				{
 				case INITIALIZED:
-				case PAUSING:
 				case IN_PROGRESS:
 					wtHolder.initialization.setVisibility(View.VISIBLE);
 					break;
@@ -2506,7 +2505,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			showTransferProgress(holder, fss, msgId, hikeFile, isSent);
 			break;
 		case INITIALIZED:
-		case PAUSING:
 			holder.ftAction.setImageResource(0);
 			holder.ftAction.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
@@ -3095,7 +3093,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						{
 							FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 						}
-						else if (fss.getFTState() != FTState.PAUSING && fss.getFTState() != FTState.INITIALIZED)
+						else if (fss.getFTState() != FTState.INITIALIZED)
 						{
 							FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
 						}
@@ -3124,7 +3122,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 					}
-					else if (fss.getFTState() != FTState.PAUSING && fss.getFTState() != FTState.INITIALIZED)
+					else if (fss.getFTState() != FTState.INITIALIZED)
 					{
 						FileTransferManager.getInstance(context).downloadFile(receivedFile, hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(), convMessage,
 								true);

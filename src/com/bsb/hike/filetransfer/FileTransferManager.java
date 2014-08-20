@@ -740,7 +740,7 @@ public class FileTransferManager extends BroadcastReceiver
 		else
 			fss = getDownloadFileState(mFile, msgId);
 
-		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSING || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
+		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
 		{
 			if (fss.getTotalSize() > 0)
 			{

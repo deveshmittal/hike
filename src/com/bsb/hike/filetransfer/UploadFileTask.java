@@ -772,7 +772,6 @@ public class UploadFileTask extends FileTransferBase
 			_state = FTState.COMPLETED;
 			deleteStateFile();
 			break;
-		case PAUSING:
 		case PAUSED:
 			_state = FTState.PAUSED;
 			Logger.d(getClass().getSimpleName(), "FT PAUSED");
