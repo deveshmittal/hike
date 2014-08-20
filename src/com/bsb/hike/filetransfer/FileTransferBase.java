@@ -101,6 +101,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected volatile Thread mThread = null;
 
 	protected ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
+	
+	protected int pausedProgress ;
 
 	protected FileTransferBase(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, long msgId, HikeFileType hikeFileType)
 	{
@@ -305,6 +307,16 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	public Object getUserContext()
 	{
 		return userContext;
+	}
+	
+	public int getPausedProgress()
+	{
+		return this.pausedProgress;
+	}
+
+	public void setPausedProgress(int pausedProgress)
+	{
+		this.pausedProgress = pausedProgress;
 	}
 
 }

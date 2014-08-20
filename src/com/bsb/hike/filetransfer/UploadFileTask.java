@@ -756,7 +756,8 @@ public class UploadFileTask extends FileTransferBase
 				temp *= 100;
 				temp /= _totalSize;
 				progressPercentage = (int) temp;
-				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+				if(_state != FTState.PAUSED)
+					LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 			}
 		}
 
@@ -772,6 +773,7 @@ public class UploadFileTask extends FileTransferBase
 			deleteStateFile();
 			break;
 		case PAUSING:
+		case PAUSED:
 			_state = FTState.PAUSED;
 			Logger.d(getClass().getSimpleName(), "FT PAUSED");
 			// In case upload was complete response JSON is to be saved not the Session_ID
@@ -1060,7 +1062,9 @@ public class UploadFileTask extends FileTransferBase
 		if (userContext != null)
 		{
 			FileTransferManager.getInstance(context).removeTask(((ConvMessage) userContext).getMsgID());
-			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+			this.pausedProgress = -1;
+			if(result != FTResult.PAUSED)
+				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		}
 
 		if (result != FTResult.PAUSED && result != FTResult.SUCCESS)
