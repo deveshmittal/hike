@@ -1,7 +1,6 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,12 +26,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -3578,8 +3579,10 @@ public class Utils
 		}
 	}
 
-	public static String getServerRecommendedContactsSelection(String serverRecommendedArrayString, String myMsisdn)
+	public static Set<String> getServerRecommendedContactsSelection(String serverRecommendedArrayString, String myMsisdn)
 	{
+		Set<String> msisdns = new HashSet<String>();
+
 		if (TextUtils.isEmpty(serverRecommendedArrayString))
 		{
 			return null;
@@ -3592,25 +3595,16 @@ public class Utils
 				return null;
 			}
 
-			StringBuilder sb = new StringBuilder("(");
 			int i = 0;
 			for (i = 0; i < serverRecommendedArray.length(); i++)
 			{
 				String msisdn = serverRecommendedArray.optString(i);
 				if (!myMsisdn.equals(msisdn))
 				{
-					sb.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+					msisdns.add(msisdn);
 				}
 			}
-			/*
-			 * Making sure the string exists.
-			 */
-			if (sb.lastIndexOf(",") == -1)
-			{
-				return null;
-			}
-			sb.replace(sb.lastIndexOf(","), sb.length(), ")");
-			return sb.toString();
+			return msisdns;
 		}
 		catch (JSONException e)
 		{
@@ -3690,9 +3684,9 @@ public class Utils
 		friendsList.addAll(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.REQUEST_SENT_REJECTED, HikeConstants.BOTH_VALUE, msisdn, false));
 
 		Logger.d("AddFriendsActivity", " friendsList size " + friendsList.size());
-		String recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(settings.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), msisdn);
+		Set<String> recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(settings.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), msisdn);
 		Logger.d("AddFriendsActivity", " recommendedContactsSelection " + recommendedContactsSelection);
-		if (!TextUtils.isEmpty(recommendedContactsSelection))
+		if (!recommendedContactsSelection.isEmpty())
 		{
 			recommendedContacts.addAll(HikeMessengerApp.getContactManager().getHikeContacts(-1, recommendedContactsSelection, null, msisdn));
 		}
@@ -4436,16 +4430,24 @@ public class Utils
 	}
 
 	// added for db query
-	public static String getMsisdnStatement(ArrayList<String> msisdnList)
+	public static String getMsisdnStatement(Collection<String> msisdnList)
 	{
 		StringBuilder sb = new StringBuilder("(");
-		for (String msisdn : msisdnList)
+		if (null != msisdnList)
 		{
-			sb.append(DatabaseUtils.sqlEscapeString(msisdn));
-			sb.append(",");
+			for (String msisdn : msisdnList)
+			{
+				sb.append(DatabaseUtils.sqlEscapeString(msisdn));
+				sb.append(",");
+			}
 		}
-		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
+
+		int idx = sb.lastIndexOf(",");
+		if (idx >= 0)
+			sb.replace(idx, sb.length(), ")");
+		else
+			sb.append(")");
+
 		return sb.toString();
 	}
-
 }

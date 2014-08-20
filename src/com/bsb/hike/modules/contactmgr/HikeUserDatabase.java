@@ -2032,20 +2032,20 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		db.replace(DBConstants.ROUNDED_THUMBNAIL_TABLE, null, contentValues);
 	}
 
-	private String getQueryableNumbersString(List<ContactInfo> contactInfos)
+	private Set<String> getQueryableNumbersString(List<ContactInfo> contactInfos)
 	{
+		Set<String> msisdns = new HashSet<String>();
 		if (contactInfos.isEmpty())
 		{
 			return null;
 		}
-		StringBuilder sb = new StringBuilder("(");
+		
 		for (ContactInfo contactInfo : contactInfos)
 		{
-			sb.append(DatabaseUtils.sqlEscapeString(contactInfo.getMsisdn()) + ",");
+			msisdns.add(contactInfo.getMsisdn());
 		}
-		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
-
-		return sb.toString();
+		
+		return msisdns;
 	}
 
 	FtueContactsData getFTUEContacts(SharedPreferences preferences)
@@ -2061,9 +2061,9 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		/*
 		 * adding server recommended contacts to ftue contacts list;
 		 */
-		String recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(preferences.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), myMsisdn);
+		Set<String> recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(preferences.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), myMsisdn);
 		Logger.d("getFTUEContacts", "recommendedContactsSelection = " + recommendedContactsSelection);
-		if (!TextUtils.isEmpty(recommendedContactsSelection))
+		if (!recommendedContactsSelection.isEmpty())
 		{
 			List<ContactInfo> recommendedContacts = HikeMessengerApp.getContactManager().getHikeContacts(limit * 2, recommendedContactsSelection, null, myMsisdn);
 			if (recommendedContacts.size() >= limit)
@@ -2113,7 +2113,7 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		 */
 		if (limit > 0)
 		{
-			String currentSelection = getQueryableNumbersString(ftueContactsData.getHikeContacts());
+			Set<String> currentSelection = getQueryableNumbersString(ftueContactsData.getHikeContacts());
 			List<ContactInfo> hikeContacts = HikeMessengerApp.getContactManager().getHikeContacts(limit * 2, null, currentSelection, myMsisdn);
 			if (hikeContacts.size() >= limit)
 			{

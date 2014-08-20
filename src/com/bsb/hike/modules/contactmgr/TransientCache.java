@@ -23,6 +23,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.Utils;
 
 public class TransientCache extends ContactsCache
 {
@@ -570,7 +571,7 @@ public class TransientCache extends ContactsCache
 	 * @param myMsisdn
 	 * @return
 	 */
-	List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
+	List<ContactInfo> getHikeContacts(int limit, Set<String> msisdnsIn, Set<String> msisdnsNotIn, String myMsisdn)
 	{
 		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
 		if (allContactsLoaded)
@@ -582,7 +583,7 @@ public class TransientCache extends ContactsCache
 				{
 					String msisdn = mapEntry.getKey();
 					ContactInfo contactInfo = mapEntry.getValue().getFirst();
-					if (msisdnsIn.contains(DatabaseUtils.sqlEscapeString(msisdn)) && (!msisdnsNotIn.contains(DatabaseUtils.sqlEscapeString(msisdn))) && !msisdn.equals(myMsisdn)
+					if (null != msisdnsIn && msisdnsIn.contains(msisdn) && (null != msisdnsNotIn && !msisdnsNotIn.contains(msisdn)) && (null != myMsisdn && !msisdn.equals(myMsisdn))
 							&& contactInfo.isOnhike())
 					{
 						contacts.add(contactInfo);
@@ -599,7 +600,9 @@ public class TransientCache extends ContactsCache
 		}
 		else
 		{
-			contacts = hDb.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
+			String msisdnsInStatement = Utils.getMsisdnStatement(msisdnsIn);
+			String msisdnsNotInStatement = Utils.getMsisdnStatement(msisdnsNotIn);
+			contacts = hDb.getHikeContacts(limit, msisdnsInStatement, msisdnsNotInStatement, myMsisdn);
 			insertContact(contacts);
 		}
 		return contacts;
