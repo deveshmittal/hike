@@ -181,7 +181,7 @@ public class Utils
 	public static Pattern msisdnRegex;
 
 	public static Pattern pinRegex;
- 
+
 	public static String shortCodeIntent;
 
 	private static Animation mOutToRight;
@@ -643,7 +643,7 @@ public class Utils
 	public static String defaultGroupName(List<Pair<GroupParticipant, String>> participantList)
 	{
 		List<GroupParticipant> groupParticipants = new ArrayList<GroupParticipant>();
-		for (Pair<GroupParticipant,String> participant : participantList)
+		for (Pair<GroupParticipant, String> participant : participantList)
 		{
 			if (!participant.first.hasLeft())
 			{
@@ -1122,7 +1122,7 @@ public class Utils
 
 	public static Bitmap getRotatedBitmap(String path, Bitmap bitmap)
 	{
-		if (bitmap  == null)
+		if (bitmap == null)
 		{
 			return null;
 		}
@@ -1224,7 +1224,7 @@ public class Utils
 		}
 		if (cursor == null || cursor.getCount() == 0)
 		{
-			//return null;
+			// return null;
 		}
 		else
 		{
@@ -1232,7 +1232,7 @@ public class Utils
 			cursor.moveToFirst();
 			filePath = cursor.getString(column_index);
 		}
-		if(filePath == null)
+		if (filePath == null)
 		{
 			filePath = FilePath.getPath(activity.getBaseContext(), contentUri);
 		}
@@ -1271,15 +1271,12 @@ public class Utils
 	{
 		return name.trim().split(" ", 2)[0];
 	}
-	
+
 	public static String getFirstNameAndSurname(String name)
 	{
-		/*String fullname = name.trim().split(" ", 2)[0];
-		if(name.contains(" "))
-		{
-		  int spaceIndex = name.indexOf(" ");
-		  fullname.concat(" " + name.charAt(spaceIndex + 1)); 
-		}*/
+		/*
+		 * String fullname = name.trim().split(" ", 2)[0]; if(name.contains(" ")) { int spaceIndex = name.indexOf(" "); fullname.concat(" " + name.charAt(spaceIndex + 1)); }
+		 */
 		return name;
 	}
 
@@ -1356,7 +1353,7 @@ public class Utils
 			return false;
 		}
 	}
-	
+
 	public static boolean copyImage(String srcFilePath, String destFilePath, Context context)
 	{
 		try
@@ -1374,7 +1371,7 @@ public class Utils
 			else if (quality != ImageQuality.QUALITY_ORIGINAL)
 			{
 				tempBmp = HikeBitmapFactory.scaleDownBitmap(srcFilePath, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_LOW_FULL_SIZE_PX,
-						Bitmap.Config.RGB_565, false, false);  //Reducing further for small 
+						Bitmap.Config.RGB_565, false, false); // Reducing further for small
 			}
 			tempBmp = HikeBitmapFactory.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 			if (tempBmp != null)
@@ -1387,7 +1384,7 @@ public class Utils
 			{
 				src = new FileInputStream(new File(srcFilePath));
 			}
-			
+
 			OutputStream dest = new FileOutputStream(new File(destFilePath));
 
 			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
@@ -2053,7 +2050,8 @@ public class Utils
 	public static boolean isPicasaUri(String picasaUriString)
 	{
 		return (picasaUriString.toString().startsWith(HikeConstants.OTHER_PICASA_URI_START) || picasaUriString.toString().startsWith(HikeConstants.JB_PICASA_URI_START)
-				|| picasaUriString.toString().startsWith("http") || picasaUriString.toString().startsWith(HikeConstants.GMAIL_PREFIX) || picasaUriString.toString().startsWith(HikeConstants.GOOGLE_PLUS_PREFIX));
+				|| picasaUriString.toString().startsWith("http") || picasaUriString.toString().startsWith(HikeConstants.GMAIL_PREFIX) || picasaUriString.toString().startsWith(
+				HikeConstants.GOOGLE_PLUS_PREFIX));
 	}
 
 	public static Uri makePicasaUri(Uri uri)
@@ -2344,7 +2342,7 @@ public class Utils
 		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_ALWAYS_AS_SMS_PREF, value);
 		editor.commit();
 	}
-	
+
 	public static void setSendUndeliveredAlwaysAsSmsSetting(Context context, boolean value, boolean nativeSms)
 	{
 		Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
@@ -2432,11 +2430,11 @@ public class Utils
 	}
 
 	public static int getResolutionId()
-	{	
-		switch(densityDpi)
+	{
+		switch (densityDpi)
 		{
 		case 120:
-		   return HikeConstants.LDPI_ID;
+			return HikeConstants.LDPI_ID;
 		case 160:
 			return HikeConstants.MDPI_ID;
 		case 240:
@@ -2786,7 +2784,7 @@ public class Utils
 			switch (hikeFile.getHikeFileType())
 			{
 			case IMAGE:
-					return context.getString(R.string.send_sms_img_msg);
+				return context.getString(R.string.send_sms_img_msg);
 			case VIDEO:
 				return context.getString(R.string.send_sms_video_msg);
 			case AUDIO:
@@ -3150,7 +3148,7 @@ public class Utils
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
-	
+
 	public static void resetOverflowCountHomeScreen(Context context)
 	{
 		if (HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.FRIEND_REQ_COUNT, 0) > 0)
@@ -3311,7 +3309,7 @@ public class Utils
 			Logger.w("LE", "Invalid json");
 		}
 	}
-	
+
 	public static void sendMd5MismatchEvent(String fileName, String fileKey, String md5, int recBytes, boolean downloading)
 	{
 		try
@@ -3325,7 +3323,7 @@ public class Utils
 			metadata.put(HikeConstants.MD5_HASH, md5);
 			metadata.put(HikeConstants.FILE_SIZE, recBytes);
 			metadata.put(HikeConstants.DOWNLOAD, downloading);
-			
+
 			data.put(HikeConstants.METADATA, metadata);
 
 			sendLogEvent(data);
@@ -3656,23 +3654,23 @@ public class Utils
 	{
 		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
 
-		if(isPin || drawable == null)
+		if (isPin || drawable == null)
 		{
 			Drawable background = context.getResources().getDrawable(BitmapUtils.getDefaultAvatarResourceId(msisdn, false));
-			
+
 			Drawable iconDrawable = null;
-			
-			if(isPin)
+
+			if (isPin)
 			{
 				iconDrawable = context.getResources().getDrawable(R.drawable.ic_pin_notification);
 			}
 			else
 			{
-				iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);				
+				iconDrawable = context.getResources().getDrawable(Utils.isGroupConversation(msisdn) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
 			}
-			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });			
+			drawable = new LayerDrawable(new Drawable[] { background, iconDrawable });
 		}
-		return drawable;		
+		return drawable;
 	}
 
 	public static void getRecommendedAndHikeContacts(Context context, List<ContactInfo> recommendedContacts, List<ContactInfo> hikeContacts, List<ContactInfo> friendsList)
@@ -3694,7 +3692,8 @@ public class Utils
 		Logger.d("AddFriendsActivity", " size recommendedContacts = " + recommendedContacts.size());
 
 		hikeContacts.addAll(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE, msisdn, false));
-		hikeContacts.addAll(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED_REJECTED, HikeConstants.ON_HIKE_VALUE, msisdn, false, true));
+		hikeContacts.addAll(HikeMessengerApp.getContactManager()
+				.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED_REJECTED, HikeConstants.ON_HIKE_VALUE, msisdn, false, true));
 		hikeContacts.addAll(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE, msisdn, false, true));
 	}
 
@@ -3732,7 +3731,7 @@ public class Utils
 			public void onSucess(Dialog dialog)
 			{
 				// TODO Auto-generated method stub
-				
+
 			}
 		}, contactInfo.getFirstName());
 	}
@@ -3882,10 +3881,8 @@ public class Utils
 	public static String replaceUrlSpaces(String fileUriString)
 	{
 		/*
-		 * In some phones URI is received with spaces in file path
-		 * we should first replace all these spaces with %20 than
-		 * pass it on to URI.create() method. URI.create() method
-		 * treats space as an invalid charactor in URI. 
+		 * In some phones URI is received with spaces in file path we should first replace all these spaces with %20 than pass it on to URI.create() method. URI.create() method
+		 * treats space as an invalid charactor in URI.
 		 */
 		return fileUriString.replace(" ", "%20");
 	}
@@ -4005,9 +4002,9 @@ public class Utils
 
 	public static boolean isListContainsMsisdn(List<ContactInfo> contacts, String msisdn)
 	{
-		for(ContactInfo contactInfo : contacts)
+		for (ContactInfo contactInfo : contacts)
 		{
-			if(contactInfo.getMsisdn().equals(msisdn))
+			if (contactInfo.getMsisdn().equals(msisdn))
 			{
 				Logger.d("tesst", "matched");
 				return true;
@@ -4018,6 +4015,7 @@ public class Utils
 
 	/**
 	 * Adding this method to compute the overall count for showing in overflow menu on home screen
+	 * 
 	 * @param accountPref
 	 * @param count
 	 * @return
@@ -4025,7 +4023,7 @@ public class Utils
 	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref)
 	{
 		int overallCount = 0;
-		if(!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
+		if (!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
 		{
 			overallCount++;
 		}
@@ -4034,20 +4032,20 @@ public class Utils
 			overallCount++;
 		}
 		int frCount = accountPref.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
-		if(frCount>0)
+		if (frCount > 0)
 		{
 			overallCount += frCount;
 		}
 
 		return overallCount;
 	}
-	
+
 	public static void incrementOrDecrementHomeOverflowCount(SharedPreferences accountPref, int count)
 	{
 		int currentCount = accountPref.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 
 		currentCount += count;
-		if (currentCount >=0)
+		if (currentCount >= 0)
 		{
 			Editor editor = accountPref.edit();
 			editor.putInt(HikeMessengerApp.FRIEND_REQ_COUNT, currentCount);
@@ -4055,7 +4053,7 @@ public class Utils
 		}
 
 	}
-	
+
 	public static boolean isPackageInstalled(Context context, String packageName)
 	{
 		PackageManager pm = context.getPackageManager();
@@ -4124,7 +4122,7 @@ public class Utils
 			}
 		}
 	}
-	
+
 	public static String combineInOneSmsString(Context context, boolean resetTimestamp, Collection<ConvMessage> convMessages, boolean isFreeHikeSms)
 	{
 		String combinedMessageString = "";
@@ -4135,43 +4133,43 @@ public class Utils
 			{
 				break;
 			}
-			
+
 			if (resetTimestamp && convMessage.getState().ordinal() < State.SENT_CONFIRMED.ordinal())
 			{
 				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
 			}
-			
+
 			combinedMessageString += Utils.getMessageDisplayText(convMessage, context);
-			
+
 			if (++count >= HikeConstants.MAX_FALLBACK_NATIVE_SMS)
 			{
 				break;
 			}
-			
+
 			/*
 			 * Added line enters among messages
 			 */
-			if(count != convMessages.size())
+			if (count != convMessages.size())
 			{
 				combinedMessageString += "\n\n";
 			}
 		}
-		
-		if(isFreeHikeSms)
+
+		if (isFreeHikeSms)
 		{
-			combinedMessageString += "\n\n"+"- "+context.getString(R.string.sent_by_hike);
+			combinedMessageString += "\n\n" + "- " + context.getString(R.string.sent_by_hike);
 		}
-		
+
 		return combinedMessageString;
 	}
-	
+
 	// @GM
 	// The following methods returns the user readable size when passed the bytes in size
 	public static String getSizeForDisplay(int bytes)
 	{
 		if (bytes <= 0)
 			return ("");
-		if (bytes >= 1000 * 1024 *1024)
+		if (bytes >= 1000 * 1024 * 1024)
 		{
 			int gb = bytes / (1024 * 1024 * 1024);
 			int gbPoint = bytes % (1024 * 1024 * 1024);
@@ -4197,7 +4195,7 @@ public class Utils
 		else
 			return (Integer.toString(bytes) + " B");
 	}
-	
+
 	public static Intent getIntentForPrivacyScreen(Context context)
 	{
 		Intent intent = new Intent(context, HikePreferences.class);
@@ -4207,80 +4205,81 @@ public class Utils
 	}
 
 	public static boolean isCompressed(byte[] bytes)
-    {
-        try
+	{
+		try
 		{
 			if ((bytes == null) || (bytes.length < 2))
 			{
-			    return false;
+				return false;
 			}
 			else
 			{
-			    return ((bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC)) && (bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8)));
+				return ((bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC)) && (bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8)));
 			}
 		}
 		catch (Exception e)
 		{
 			return false;
 		}
-    }
-	
+	}
+
 	public static byte[] uncompressByteArray(byte[] bytes) throws IOException
-    {
-       
-		int DEFAULT_BUFFER_SIZE = 1024 *4;
-		
+	{
+
+		int DEFAULT_BUFFER_SIZE = 1024 * 4;
+
 		if (!isCompressed(bytes))
-        {
-            return bytes;
-        }
+		{
+			return bytes;
+		}
 
-        ByteArrayInputStream bais = null;
-        GZIPInputStream gzis = null;
-        ByteArrayOutputStream baos = null;
+		ByteArrayInputStream bais = null;
+		GZIPInputStream gzis = null;
+		ByteArrayOutputStream baos = null;
 
-        try
-        {
-            bais = new ByteArrayInputStream(bytes);
-            gzis = new GZIPInputStream(bais);
-            baos = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+		try
+		{
+			bais = new ByteArrayInputStream(bytes);
+			gzis = new GZIPInputStream(bais);
+			baos = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
 
-            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
-            int n = 0;
-            while (-1 != (n = gzis.read(buffer))) {
-            	baos.write(buffer, 0, n);
-            }
-            gzis.close();
-            bais.close();
+			byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+			int n = 0;
+			while (-1 != (n = gzis.read(buffer)))
+			{
+				baos.write(buffer, 0, n);
+			}
+			gzis.close();
+			bais.close();
 
-            byte[] uncompressedByteArray = baos.toByteArray();
-            baos.close();
+			byte[] uncompressedByteArray = baos.toByteArray();
+			baos.close();
 
+			return uncompressedByteArray;
+		}
+		catch (IOException ioex)
+		{
+			throw ioex;
+		}
+		finally
+		{
+			if (gzis != null)
+			{
+				gzis.close();
+			}
+			if (bais != null)
+			{
+				bais.close();
+			}
+			if (baos != null)
+			{
+				baos.close();
+			}
+		}
+	}
 
-            return uncompressedByteArray;
-        }
-        catch (IOException ioex)
-        {
-            throw ioex;
-        }
-        finally
-        {
-            if(gzis != null)
-            {
-            	gzis.close();
-            }
-            if(bais != null)
-            {
-            	bais.close();
-            }
-            if(baos != null)
-            {
-            	baos.close();
-            }
-        }
-    }
-
-	public static void emoticonClicked(Context context,int emoticonIndex,EditText composeBox){
+	public static void emoticonClicked(Context context, int emoticonIndex, EditText composeBox)
+	{
 		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(emoticonIndex, System.currentTimeMillis());
 		// We don't add an emoticon if the compose box is near its maximum
 		// length of characters
@@ -4290,7 +4289,7 @@ public class Utils
 		}
 		SmileyParser.getInstance().addSmiley(composeBox, emoticonIndex);
 	}
-	
+
 	public static Animation getNotificationIndicatorAnim()
 	{
 		AnimationSet animSet = new AnimationSet(true);
@@ -4308,25 +4307,25 @@ public class Utils
 		anim0.setDuration(150);
 		animSet.addAnimation(anim0);
 
-		Animation anim1 = new ScaleAnimation(1, b/a, 1, b/a, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		Animation anim1 = new ScaleAnimation(1, b / a, 1, b / a, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
 		anim1.setInterpolator(new AccelerateInterpolator(2f));
 		anim1.setDuration(200);
-		anim1.setStartOffset(initialOffset+ anim0.getDuration());
+		anim1.setStartOffset(initialOffset + anim0.getDuration());
 		animSet.addAnimation(anim1);
 
-		Animation anim2 = new ScaleAnimation(1f, c/b, 1f, c/b, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		Animation anim2 = new ScaleAnimation(1f, c / b, 1f, c / b, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
 		anim2.setInterpolator(new AccelerateInterpolator(-1f));
 		anim2.setDuration(150);
 		anim2.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration());
 		animSet.addAnimation(anim2);
 
-		Animation anim3 = new ScaleAnimation(1f, d/c, 1f, d/c, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		Animation anim3 = new ScaleAnimation(1f, d / c, 1f, d / c, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
 		anim2.setInterpolator(new AccelerateInterpolator(1f));
 		anim3.setDuration(150);
 		anim3.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration() + anim2.getDuration());
 		animSet.addAnimation(anim3);
 
-		Animation anim4 = new ScaleAnimation(1f, e/d, 1f, e/d, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
+		Animation anim4 = new ScaleAnimation(1f, e / d, 1f, e / d, Animation.RELATIVE_TO_SELF, pivotX, Animation.RELATIVE_TO_SELF, pivotY);
 		anim4.setInterpolator(new AccelerateInterpolator(1f));
 		anim4.setDuration(150);
 		anim4.setStartOffset(initialOffset + anim0.getDuration() + anim1.getDuration() + anim2.getDuration() + anim3.getDuration());
@@ -4334,7 +4333,7 @@ public class Utils
 
 		return animSet;
 	}
-	
+
 	public static void setupCountryCodeData(Context context, String countryCode, final EditText countryCodeEditor, final TextView countryNameEditor,
 			final ArrayList<String> countriesArray, final HashMap<String, String> countriesMap, final HashMap<String, String> codesMap, final HashMap<String, String> languageMap)
 	{
@@ -4371,7 +4370,7 @@ public class Utils
 			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 			String countryIso = TextUtils.isEmpty(prevCode) ? manager.getNetworkCountryIso().toUpperCase() : prevCode;
 			String countryName = languageMap.get(countryIso);
-			
+
 			if (countryName == null || selectCountry(countryName, countriesMap, countriesArray, countryCode, countryCodeEditor, countryNameEditor))
 			{
 				selectCountry(defaultCountryName, countriesMap, countriesArray, countryCode, countryCodeEditor, countryNameEditor);
@@ -4415,9 +4414,9 @@ public class Utils
 			}
 		});
 	}
-	
-	public static boolean selectCountry(String countryName, HashMap<String, String> countriesMap, ArrayList<String> countriesArray, String countryCode, 
-			TextView countryCodeEditor, TextView countryNameEditor)
+
+	public static boolean selectCountry(String countryName, HashMap<String, String> countriesMap, ArrayList<String> countriesArray, String countryCode, TextView countryCodeEditor,
+			TextView countryNameEditor)
 	{
 		int index = countriesArray.indexOf(countryName);
 		if (index != -1)
