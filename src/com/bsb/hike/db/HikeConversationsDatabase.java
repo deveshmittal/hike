@@ -4470,7 +4470,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		try
 		{
 			HashMap<String, String> groupIdMap = getAllGroupConversations();
-			String convIdStatement = getConvIdStatement(groupIdMap.keySet());
+			String convIdStatement = Utils.getMsisdnStatement(groupIdMap.keySet());
 			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { " MAX (" + DBConstants.MESSAGE_ID + ") AS msgid", DBConstants.READ_BY, DBConstants.CONV_ID },
 					DBConstants.CONV_ID + " IN " + convIdStatement + " AND " + DBConstants.MSG_STATUS + " = " + State.SENT_DELIVERED_READ.ordinal(), null, DBConstants.CONV_ID,
 					null, null);
@@ -4534,25 +4534,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 		return groupIdMap;
-	}
-
-	private String getConvIdStatement(Collection<String> collection)
-	{
-
-		StringBuilder sb = new StringBuilder("(");
-		;
-		for (String convId : collection)
-		{
-
-			sb.append(DatabaseUtils.sqlEscapeString(convId));
-
-			sb.append(",");
-
-		}
-		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
-
-		return sb.toString();
-
 	}
 
 	/**
