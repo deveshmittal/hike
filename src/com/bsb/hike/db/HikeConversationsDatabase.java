@@ -525,7 +525,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			editor.putInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, 1);
 			editor.commit();
 		}
-		
+
 		/*
 		 * Version 28 migrates msisdn entries to message table
 		 */
@@ -629,8 +629,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public long[] setAllDeliveredMessagesReadForMsisdn(String msisdn, JSONArray msgIds)
 	{
-		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<" + State.SENT_DELIVERED_READ.ordinal(),
-				new String[] { msisdn }, null, null, null);
+		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<"
+				+ State.SENT_DELIVERED_READ.ordinal(), new String[] { msisdn }, null, null, null);
 		long[] ids = new long[c.getCount() + msgIds.length()];
 
 		if (ids.length == 0 && msgIds.length() == 0)
@@ -691,8 +691,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor conversationCursor = null;
 		try
 		{
-			conversationCursor = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=?",
-					new String[] { groupId }, null, null, null);
+			conversationCursor = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=?", new String[] { groupId }, null,
+					null, null);
 			c = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.READ_BY, DBConstants.MESSAGE_ID }, DBConstants.GROUP_ID + " =? ", new String[] { groupId },
 					null, null, null);
 
@@ -939,8 +939,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		long[] ids = null;
 		try
 		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=?  AND " + DBConstants.MSG_STATUS + ">=" + minStatusOrdinal + " AND "
-					+ DBConstants.MSG_STATUS + "<" + maxStatusOrdinal + " AND " + DBConstants.MESSAGE_ID + "<=" + msgId, new String[] { msisdn }, null, null, null);
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=?  AND " + DBConstants.MSG_STATUS + ">=" + minStatusOrdinal
+					+ " AND " + DBConstants.MSG_STATUS + "<" + maxStatusOrdinal + " AND " + DBConstants.MESSAGE_ID + "<=" + msgId, new String[] { msisdn }, null, null, null);
 
 			ids = new long[c.getCount()];
 			int i = 0;
@@ -1013,15 +1013,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			maxStatusOrdinal = status;
 		}
 
-		updateStatement = updateStatement
-				+ " AND "
-				+ DBConstants.MSG_STATUS
-				+ " >= "
-				+ minStatusOrdinal
-				+ " AND "
-				+ DBConstants.MSG_STATUS
-				+ " <= "
-				+ maxStatusOrdinal
+		updateStatement = updateStatement + " AND " + DBConstants.MSG_STATUS + " >= " + minStatusOrdinal + " AND " + DBConstants.MSG_STATUS + " <= " + maxStatusOrdinal
 				+ (!TextUtils.isEmpty(msisdn) ? (" AND " + DBConstants.MSISDN + " =" + DatabaseUtils.sqlEscapeString(msisdn)) : "");
 
 		ContentValues contentValues = new ContentValues();
@@ -1221,8 +1213,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
 				+ DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
-				+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MSISDN + " ) " + " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ?, ?, ? FROM "
-				+ DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN + "=?");
+				+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MSISDN + " ) "
+				+ " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ?, ?, ? FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "."
+				+ DBConstants.MSISDN + "=?");
 		try
 		{
 			mDb.beginTransaction();
@@ -1335,8 +1328,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		LinkedList<ConvMessage> resultList = new LinkedList<ConvMessage>();
 		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
 				+ DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
-				+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MSISDN + " ) " + " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ?, ?, ? FROM "
-				+ DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN + "=?");
+				+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MSISDN + " ) "
+				+ " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ?, ?, ? FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "."
+				+ DBConstants.MSISDN + "=?");
 		try
 		{
 			long msgId = -1;
@@ -1666,7 +1660,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * @param groupName
 	 *            the name of the group. Sent as <code>null</code> if the conversation is not a group conversation
 	 * @param initialConvMessage
-	 * 			  the initial ConvMessage object to be added to the conversation before publishing the new conversation event
+	 *            the initial ConvMessage object to be added to the conversation before publishing the new conversation event
 	 * @return Conversation object representing the conversation
 	 */
 	public Conversation addConversation(String msisdn, boolean onhike, String groupName, String groupOwner, ConvMessage initialConvMessage)
@@ -1788,13 +1782,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			if (getMetadata)
 			{
-				c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT,
-						DBConstants.IS_STEALTH, DBConstants.CONVERSATION_METADATA }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
+				c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT, DBConstants.IS_STEALTH,
+						DBConstants.CONVERSATION_METADATA }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
 			}
 			else
 			{
-				c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT,
-						DBConstants.IS_STEALTH }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
+				c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT, DBConstants.IS_STEALTH },
+						DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
 			}
 			if (!c.moveToFirst())
 			{
@@ -1880,8 +1874,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Conversation conv = null;
 		try
 		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT,
-					DBConstants.IS_STEALTH }, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONTACT_ID, DBConstants.ONHIKE, DBConstants.UNREAD_COUNT, DBConstants.IS_STEALTH },
+					DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
 			if (!c.moveToFirst())
 			{
 				Logger.d(getClass().getSimpleName(), "Could not find db entry");
@@ -1940,8 +1934,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Conversation conv = null;
 		try
 		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE, DBConstants.MSG_STATUS,
-					DBConstants.TIMESTAMP, DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.ONHIKE },
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.TIMESTAMP,
+					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.ONHIKE },
 					DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
 			if (!c.moveToFirst())
 			{
@@ -2222,15 +2216,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		if (getMetadata)
 		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE, DBConstants.MSG_STATUS,
-					DBConstants.TIMESTAMP, DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT,
-					DBConstants.UNREAD_COUNT, DBConstants.IS_STEALTH, DBConstants.CONVERSATION_METADATA }, null, null, null, null, null);
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.TIMESTAMP,
+					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.UNREAD_COUNT,
+					DBConstants.IS_STEALTH, DBConstants.CONVERSATION_METADATA }, null, null, null, null, null);
 		}
 		else
 		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE, DBConstants.MSG_STATUS,
-					DBConstants.TIMESTAMP, DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT,
-					DBConstants.UNREAD_COUNT, DBConstants.IS_STEALTH }, null, null, null, null, null);
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.TIMESTAMP,
+					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.UNREAD_COUNT,
+					DBConstants.IS_STEALTH }, null, null, null, null, null);
 		}
 
 		Map<String, Conversation> conversations = new HashMap<String, Conversation>();
@@ -2570,8 +2564,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		try
 		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, null, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + " DESC LIMIT "
-					+ 1);
+			c = mDb.query(DBConstants.MESSAGES_TABLE, null, DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + " DESC LIMIT " + 1);
 			boolean conversationEmpty = false;
 			if (c.moveToFirst())
 			{
@@ -3052,8 +3045,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				String msisdn = c.getString(c.getColumnIndex(DBConstants.MSISDN));
 				String name = c.getString(c.getColumnIndex(DBConstants.NAME));
-				groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, name, msisdn, c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0),
-						c.getInt(c.getColumnIndex(DBConstants.HAS_LEFT)) != 0, c.getInt(c.getColumnIndex(DBConstants.ON_DND)) != 0);
+				groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, name, msisdn, c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0), c.getInt(c
+						.getColumnIndex(DBConstants.HAS_LEFT)) != 0, c.getInt(c.getColumnIndex(DBConstants.ON_DND)) != 0);
 			}
 
 			if (groupParticipant != null)
@@ -3481,8 +3474,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor c1 = null;
 		try
 		{
-			c1 = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MESSAGE_METADATA }, DBConstants.IS_STATUS_MSG + "=1 AND "
-					+ DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null, null);
+			c1 = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MESSAGE_METADATA }, DBConstants.IS_STATUS_MSG + "=1 AND " + DBConstants.MSISDN + "=?",
+					new String[] { msisdn }, null, null, null);
 			if (c1.moveToFirst())
 			{
 				String metadataString = c1.getString(c1.getColumnIndex(DBConstants.MESSAGE_METADATA));
@@ -4273,10 +4266,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		ArrayList<String> msisdnResult = null;
 		try
 		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] {
-					" MIN (" + DBConstants.TIMESTAMP + ") AS TIME", DBConstants.MSISDN },
-							DBConstants.MSISDN + " IN " + msisdnStatement + " AND " + DBConstants.MSG_STATUS + "=" + State.SENT_CONFIRMED.ordinal() + " AND  "
-							+ DBConstants.IS_HIKE_MESSAGE + "=" + "1", null, DBConstants.MSISDN, null, null);
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { " MIN (" + DBConstants.TIMESTAMP + ") AS TIME", DBConstants.MSISDN }, DBConstants.MSISDN + " IN "
+					+ msisdnStatement + " AND " + DBConstants.MSG_STATUS + "=" + State.SENT_CONFIRMED.ordinal() + " AND  " + DBConstants.IS_HIKE_MESSAGE + "=" + "1", null,
+					DBConstants.MSISDN, null, null);
 
 			if (c != null)
 			{
@@ -4327,7 +4319,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			mDb.endTransaction();
 		}
 	}
-	
+
 	public void upgradeForDatabaseVersion28()
 	{
 		try
@@ -4346,7 +4338,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			mDb.endTransaction();
 		}
 	}
-	
+
 	private void addMessageMsisdn()
 	{
 		Cursor c = null;
@@ -4354,17 +4346,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			ArrayList<Pair<String, String>> convIdtoMsisdn = new ArrayList<Pair<String, String>>();
 			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.MSISDN }, null, null, null, null, null);
-			
+
 			final int convIdIndex = c.getColumnIndex(DBConstants.CONV_ID);
 			final int msisdnIndex = c.getColumnIndex(DBConstants.MSISDN);
-			
+
 			while (c.moveToNext())
 			{
 				Integer convId = c.getInt(convIdIndex);
 				String msisdn = c.getString(msisdnIndex);
-				convIdtoMsisdn.add(new Pair<String, String>(convId.toString(),msisdn));
+				convIdtoMsisdn.add(new Pair<String, String>(convId.toString(), msisdn));
 			}
-			
+
 			for (Pair<String, String> pair : convIdtoMsisdn)
 			{
 				ContentValues contentValues = new ContentValues();
@@ -4375,7 +4367,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			Logger.e(getClass().getSimpleName(), "Exception in adding msisdn ",e);
+			Logger.e(getClass().getSimpleName(), "Exception in adding msisdn ", e);
 		}
 		finally
 		{
@@ -4385,7 +4377,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
-	
+
 	private void addMessageHashAndMsisdn()
 	{
 		Cursor c = null;
@@ -4629,8 +4621,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { " MAX (" + DBConstants.MESSAGE_ID + ") AS msgid" }, DBConstants.MSISDN + "=?  AND " + DBConstants.MESSAGE_ID + " IN " + sb.toString(),
-					new String[] { groupId }, null, null, null);
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { " MAX (" + DBConstants.MESSAGE_ID + ") AS msgid" }, DBConstants.MSISDN + "=?  AND " + DBConstants.MESSAGE_ID
+					+ " IN " + sb.toString(), new String[] { groupId }, null, null, null);
 			if (c.moveToFirst())
 			{
 				return c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
@@ -4648,7 +4640,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public void deleteEmptyConversations(SQLiteDatabase mDb)
 	{
-		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] {DBConstants.MESSAGE, DBConstants.MSISDN, DBConstants.MESSAGE_METADATA}, null, null, null, null, null);
+		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MESSAGE, DBConstants.MSISDN, DBConstants.MESSAGE_METADATA }, null, null, null, null, null);
 
 		int msgIdx = c.getColumnIndex(DBConstants.MESSAGE);
 		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
