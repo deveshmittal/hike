@@ -14,7 +14,9 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ThumbnailUtils;
 import android.os.Build.VERSION_CODES;
+import android.provider.MediaStore;
 import android.support.v4.util.LruCache;
 
 import com.bsb.hike.BitmapModule.BitmapUtils;
@@ -24,6 +26,8 @@ import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.MySoftReference;
 
@@ -289,6 +293,37 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 				return null;
 			}
 			putInCache(key, bd);
+			return bd;
+		}
+		else
+			return b;
+	}
+	
+	public BitmapDrawable getSharedMediaThumbnailFromCache(String fileKey, String destFilePath, int fileSize, boolean isImage)
+	{
+		BitmapDrawable b = get(fileKey);
+		if (b == null)
+		{
+			Bitmap thumbnail = null;
+			Logger.d("tesst", "isImage = "+isImage);
+			if (isImage)
+			{
+				thumbnail = HikeBitmapFactory.scaleDownBitmap(destFilePath, fileSize, fileSize, Bitmap.Config.RGB_565, false, false);
+				thumbnail = Utils.getRotatedBitmap(destFilePath, thumbnail);
+			}
+			else //Video
+			{
+				Logger.d("tesst", "video  = "+destFilePath);
+				thumbnail = ThumbnailUtils.createVideoThumbnail(destFilePath, MediaStore.Images.Thumbnails.MICRO_KIND);
+			}
+			
+			if (thumbnail == null)
+			{
+				Logger.d("tesst", "thumbnail is null "+ destFilePath);
+				return null;
+			}
+			BitmapDrawable bd = new BitmapDrawable(context.getResources(), thumbnail);
+			putInCache(fileKey, bd);
 			return bd;
 		}
 		else
