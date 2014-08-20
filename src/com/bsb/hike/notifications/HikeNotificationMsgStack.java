@@ -24,6 +24,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.Utils;
@@ -82,6 +83,8 @@ public class HikeNotificationMsgStack implements Listener
 
 	// Used to store msisdns which is required to display "From X conversations" in notifications.
 	private HashSet<String> uniqueMsisdns = new HashSet<String>();
+
+	private boolean forceBlockNotificationSound;
 
 	public static void init(Context context)
 	{
@@ -142,6 +145,15 @@ public class HikeNotificationMsgStack implements Listener
 			}
 
 			mLastInsertedConvMessage = argConvMessage;
+		}
+
+		if ((argConvMessage.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND))
+		{
+			forceBlockNotificationSound = true;
+		}
+		else
+		{
+			forceBlockNotificationSound = false;
 		}
 	}
 
@@ -446,7 +458,7 @@ public class HikeNotificationMsgStack implements Listener
 	 * 
 	 * @return
 	 */
-	public String getSendersList()
+	public String getSendersCSV()
 	{
 		StringBuilder notificationMsgTitle = new StringBuilder();
 
@@ -708,5 +720,10 @@ public class HikeNotificationMsgStack implements Listener
 		{
 			return String.format(mContext.getString(R.string.num_new_messages), getNewMessages());
 		}
+	}
+
+	public boolean forceBlockNotificationSound()
+	{
+		return forceBlockNotificationSound;
 	}
 }
