@@ -2030,19 +2030,22 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					List<String> grpMsisdns;
 					try
 					{
-						grpMsisdns = getGroupLastMsgMsisdn(new JSONObject(metadata));
-						if (null != grpMsisdns)
+						if (null != metadata)
 						{
-							if (grpMsisdns.size() == 0)
+							grpMsisdns = getGroupLastMsgMsisdn(new JSONObject(metadata));
+							if (null != grpMsisdns)
 							{
-								if (null != groupParticipant && !groupParticipant.equals(""))
+								if (grpMsisdns.size() == 0)
 								{
-									grpMsisdns.add(groupParticipant);
+									if (null != groupParticipant && !groupParticipant.equals(""))
+									{
+										grpMsisdns.add(groupParticipant);
+									}
 								}
-							}
-							else
-							{
-								grpLastMsisdns.put(msisdn, grpMsisdns);
+								else
+								{
+									grpLastMsisdns.put(msisdn, grpMsisdns);
+								}
 							}
 						}
 					}
