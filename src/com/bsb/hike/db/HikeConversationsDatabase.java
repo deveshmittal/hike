@@ -4777,10 +4777,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * 
 	 * returns list in order of msgId max to min.
 	 */
-	public List<HikeSharedFile> getSharedMedia(String msisdn, int limit, long givenMsgId, boolean onlyMedia, boolean itemsToLeft)
+	public List<HikeSharedFile> getSharedMedia(String msisdn, int limit, long givenMsgId, boolean onlyMedia, boolean itemsToRight)
 	{
 		String limitStr = (limit == -1) ? null : new Integer(limit).toString();
-		String msgIdSelection = DBConstants.MESSAGE_ID + (itemsToLeft ? "<" : ">") + givenMsgId;
+		String msgIdSelection = DBConstants.MESSAGE_ID + (itemsToRight ? "<" : ">") + givenMsgId;
 
 		String selection = DBConstants.MSISDN + " = ?" + (givenMsgId == -1 ? "" : " AND " + msgIdSelection) + " AND "
 				+ (onlyMedia ? DBConstants.HIKE_FILE_TYPE + " != " + HikeFileType.OTHER.ordinal() : DBConstants.HIKE_FILE_TYPE + " = " + HikeFileType.OTHER.ordinal());
@@ -4788,7 +4788,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		try
 		{
 			c = mDb.query(DBConstants.SHARED_MEDIA_TABLE, new String[] { DBConstants.MESSAGE_ID, DBConstants.TIMESTAMP, DBConstants.IS_SENT,
-					DBConstants.MESSAGE_METADATA }, selection, new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + " DESC", limitStr);
+					DBConstants.MESSAGE_METADATA }, selection, new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + (itemsToRight ? " DESC" : " ASC"), limitStr);
 
 
 			final int msgIdIndex = c.getColumnIndex(DBConstants.MESSAGE_ID);
