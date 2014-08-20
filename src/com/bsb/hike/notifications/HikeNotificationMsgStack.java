@@ -68,8 +68,6 @@ public class HikeNotificationMsgStack implements Listener
 
 	public String lastAddedMsisdn;
 
-	private boolean isFromSingleMsisdn;
-
 	private long latestAddedTimestamp;
 
 	private final int MAX_LINES = 8;
@@ -194,21 +192,7 @@ public class HikeNotificationMsgStack implements Listener
 	 */
 	private synchronized void addPair(String argMsisdn, String argMessage)
 	{
-		if (lastAddedMsisdn == null)
-		{
-			lastAddedMsisdn = argMsisdn;
-			isFromSingleMsisdn = true;
-		}
-		else
-		{
-			if (isFromSingleMsisdn)
-			{
-				if (!lastAddedMsisdn.equals(argMsisdn))
-				{
-					isFromSingleMsisdn = false;
-				}
-			}
-		}
+		lastAddedMsisdn = argMsisdn;
 
 		// Sort/Trim/Group message pair list to show messages smartly
 
@@ -326,7 +310,7 @@ public class HikeNotificationMsgStack implements Listener
 	 */
 	public boolean isFromSingleMsisdn()
 	{
-		return isFromSingleMsisdn;
+		return uniqueMsisdns.size() == 1 ? true : false;
 	}
 
 	/**
@@ -337,7 +321,7 @@ public class HikeNotificationMsgStack implements Listener
 
 		// If new messages belong to different users/groups, redirect the user
 		// to conversations list
-		if (!isFromSingleMsisdn)
+		if (!isFromSingleMsisdn())
 		{
 			mNotificationIntent = new Intent(mContext, HomeActivity.class);
 			mNotificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -381,7 +365,7 @@ public class HikeNotificationMsgStack implements Listener
 	public int getNotificationIcon()
 	{
 
-		if (isFromSingleMsisdn)
+		if (isFromSingleMsisdn())
 		{
 			return R.drawable.ic_stat_notify;
 		}
@@ -420,7 +404,7 @@ public class HikeNotificationMsgStack implements Listener
 
 			notificationMsgTitle = HikeNotificationUtils.getNameForMsisdn(mContext, mDb, mConvDb, convMsgPair.first);
 
-			if (!isFromSingleMsisdn)
+			if (!isFromSingleMsisdn())
 			{
 				bigText.append("<strong>" + notificationMsgTitle + "</strong>:  " + convMsgPair.second);
 			}
@@ -631,7 +615,6 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		mMessageTitlePairList.clear();
 		lastAddedMsisdn = null;
-		isFromSingleMsisdn = false;
 		totalNewMessages = 0;
 		uniqueMsisdns.clear();
 	}

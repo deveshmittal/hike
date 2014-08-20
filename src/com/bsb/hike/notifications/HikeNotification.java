@@ -488,7 +488,7 @@ public class HikeNotification
 		hikeNotifMsgStack.invalidateConvMsgList();
 
 		showInboxStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
-				hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getSendersCSV(),
+				hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 				hikeNotifMsgStack.getNotificationBigText(), hikeNotifMsgStack.isFromSingleMsisdn() ? hikeNotifMsgStack.lastAddedMsisdn : "bulk",
 				hikeNotifMsgStack.getNotificationSubText(), avatarDrawable, hikeNotifMsgStack.getBigTextList(), false);
 
@@ -496,21 +496,25 @@ public class HikeNotification
 
 	public void notifySummaryMessage(final ArrayList<ConvMessage> convMessagesList)
 	{
+		// TODO: improve this
 		if (convMessagesList.size() == 1)
 		{
 			ConvMessage convMsg = convMessagesList.get(0);
-			ContactInfo contactInfo;
-			if (convMsg.isGroupChat())
+			if (convMsg.getParticipantInfoState() != null && convMsg.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
 			{
-				contactInfo = new ContactInfo(convMsg.getMsisdn(), convMsg.getMsisdn(), convMsg.getConversation().getLabel(), convMsg.getMsisdn());
-			}
-			else
-			{
-				contactInfo = this.db.getContactInfoFromMSISDN(convMsg.getMsisdn(), false);
-			}
+				ContactInfo contactInfo;
+				if (convMsg.isGroupChat())
+				{
+					contactInfo = new ContactInfo(convMsg.getMsisdn(), convMsg.getMsisdn(), convMsg.getConversation().getLabel(), convMsg.getMsisdn());
+				}
+				else
+				{
+					contactInfo = this.db.getContactInfoFromMSISDN(convMsg.getMsisdn(), false);
+				}
 
-			notifyMessage(contactInfo, convMsg, false, null);
-			return;
+				notifyMessage(contactInfo, convMsg, false, null);
+				return;
+			}
 		}
 
 		hikeNotifMsgStack.addConvMessageList(convMessagesList);
