@@ -284,6 +284,18 @@ public class HikeFile
 		return null;
 	}
 	
+	public String getExactFilePath()
+	{
+		if(hikeFileType == HikeFileType.IMAGE || !TextUtils.isEmpty(fileKey))
+		{
+			return getFilePath();
+		}
+		else 
+		{
+			return sourceFilePath;
+		}
+	}
+	
 	public String getFileName()
 	{
 		return fileName;

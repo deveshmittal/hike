@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 
 public class SharedFileImageLoader extends ImageWorker
 {
@@ -22,12 +22,15 @@ public class SharedFileImageLoader extends ImageWorker
 	@Override
 	protected Bitmap processBitmap(String data)
 	{
-		BitmapDrawable bd = HikeMessengerApp.getLruCache().getFileIconFromCache(data);
+		String[] dataArray = data.split("::");
+		String filePath = dataArray[0];
+		HikeFileType hikeFileType = HikeFileType.values()[Integer.valueOf(dataArray[1])];
+
+		BitmapDrawable bd = HikeMessengerApp.getLruCache().getSharedMediaThumbnailFromCache(data, filePath, size_image, (hikeFileType == HikeFileType.IMAGE));
 		if (bd != null)
 			return bd.getBitmap();
 
-		Bitmap b = HikeBitmapFactory.scaleDownBitmap(data, size_image, size_image, Bitmap.Config.RGB_565, true, false);
-		return b;
+		return null;
 	}
 
 	@Override
