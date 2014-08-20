@@ -496,8 +496,9 @@ public class HikeNotification
 
 	public void notifySummaryMessage(final ArrayList<ConvMessage> convMessagesList)
 	{
-		for (ConvMessage convMsg : convMessagesList)
+		if (convMessagesList.size() == 1)
 		{
+			ConvMessage convMsg = convMessagesList.get(0);
 			ContactInfo contactInfo;
 			if (convMsg.isGroupChat())
 			{
@@ -508,14 +509,11 @@ public class HikeNotification
 				contactInfo = this.db.getContactInfoFromMSISDN(convMsg.getMsisdn(), false);
 			}
 
-			if ((convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || convMsg.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND))
-			{
-				notifyMessage(contactInfo, convMsg, false, null);
-				continue;
-			}
-
-			hikeNotifMsgStack.addConvMessage(convMsg);
+			notifyMessage(contactInfo, convMsg, false, null);
+			return;
 		}
+
+		hikeNotifMsgStack.addConvMessageList(convMessagesList);
 
 		hikeNotifMsgStack.invalidateConvMsgList();
 

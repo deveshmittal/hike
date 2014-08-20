@@ -74,9 +74,6 @@ public class HikeNotificationMsgStack implements Listener
 
 	private final int MAX_LINES = 8;
 
-	// This is used to store items temporarily while grouping items in the main data list
-	private LinkedList<Pair<String, String>> tempMessageTitlePairList = new LinkedList<Pair<String, String>>();
-
 	private boolean sortedTillEnd;
 
 	private int totalNewMessages;
@@ -86,11 +83,11 @@ public class HikeNotificationMsgStack implements Listener
 
 	private boolean forceBlockNotificationSound;
 
-	public static void init(Context context)
+	private static void init(Context context)
 	{
 		if (mHikeNotifMsgStack == null)
 		{
-			mContext = context;
+			mContext = context.getApplicationContext();
 			mHikeNotifMsgStack = new HikeNotificationMsgStack();
 		}
 	}
@@ -220,6 +217,9 @@ public class HikeNotificationMsgStack implements Listener
 		// Check if the latest message has the same msisdn.
 		// Else, iterate through the list, move newPair's message group to the bottom
 		Iterator<Pair<String, String>> messageTitleListIterator = mMessageTitlePairList.iterator();
+
+		// This is used to store items temporarily while grouping items in the main data list
+		LinkedList<Pair<String, String>> tempMessageTitlePairList = new LinkedList<Pair<String, String>>();
 
 		if (!mMessageTitlePairList.isEmpty() && !mMessageTitlePairList.getLast().first.equals(newPair.first))
 		{
