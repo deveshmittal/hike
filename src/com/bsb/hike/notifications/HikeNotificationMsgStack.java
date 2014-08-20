@@ -2,6 +2,7 @@ package com.bsb.hike.notifications;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,12 +71,17 @@ public class HikeNotificationMsgStack implements Listener
 
 	private long latestAddedTimestamp;
 
-	private final int MAX_LINES = 7;
+	private final int MAX_LINES = 8;
 
 	// This is used to store items temporarily while grouping items in the main data list
-	LinkedList<Pair<String, String>> tempMessageTitlePairList = new LinkedList<Pair<String, String>>();
+	private LinkedList<Pair<String, String>> tempMessageTitlePairList = new LinkedList<Pair<String, String>>();
 
 	private boolean sortedTillEnd;
+
+	private int totalNewMessages;
+
+	// Used to store msisdns which is required to display "From X conversations" in notifications.
+	private HashSet<String> uniqueMsisdns = new HashSet<String>();
 
 	public static void init(Context context)
 	{
@@ -104,6 +110,11 @@ public class HikeNotificationMsgStack implements Listener
 		this.mDb = HikeUserDatabase.getInstance();
 		this.mConvDb = HikeConversationsDatabase.getInstance();
 
+		// We register for NEW_ACTIVITY so that when a chat thread is opened,
+		// all unread notifications against the msisdn can be cleared
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_ACTIVITY, this);
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
 	}
 
 	/**
@@ -119,7 +130,7 @@ public class HikeNotificationMsgStack implements Listener
 			// Add to ticker text string
 			Pair<String, String> convMessagePair = HikeNotificationUtils.getNotificationPreview(mContext, mDb, argConvMessage);
 
-			addPair(convMessagePair.second, convMessagePair.first);
+			addPair(argConvMessage.getMsisdn(), convMessagePair.first);
 
 			if (mTickerText != null)
 			{
@@ -173,7 +184,7 @@ public class HikeNotificationMsgStack implements Listener
 	 * @param argMsisdn
 	 * @param argMessage
 	 */
-	private void addPair(String argMsisdn, String argMessage)
+	private synchronized void addPair(String argMsisdn, String argMessage)
 	{
 		if (lastAddedMsisdn == null)
 		{
@@ -247,6 +258,10 @@ public class HikeNotificationMsgStack implements Listener
 		}
 
 		latestAddedTimestamp = System.currentTimeMillis();
+
+		totalNewMessages++;
+
+		uniqueMsisdns.add(argMsisdn);
 	}
 
 	/**
@@ -281,7 +296,7 @@ public class HikeNotificationMsgStack implements Listener
 	/**
 	 * Invalidate object - use if there are changes to notifications messages stack
 	 */
-	public void invalidateConvMsgList()
+	public synchronized void invalidateConvMsgList()
 	{
 		updateNotificationIntent();
 
@@ -289,11 +304,8 @@ public class HikeNotificationMsgStack implements Listener
 
 		mNotificationTextLines = mMessageTitlePairList.size();
 
-		mNotificationTextLines = mNotificationTextLines > 7 ? 7 : mNotificationTextLines;
+		mNotificationTextLines = mNotificationTextLines > MAX_LINES ? MAX_LINES : mNotificationTextLines;
 
-		// We register for NEW_ACTIVITY so that when a chat thread is opened,
-		// all unread notifications against the msisdn can be cleared
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_ACTIVITY, this);
 	}
 
 	/**
@@ -395,11 +407,11 @@ public class HikeNotificationMsgStack implements Listener
 
 			String notificationMsgTitle = mContext.getString(R.string.app_name);
 
-			notificationMsgTitle = convMsgPair.first;
+			notificationMsgTitle = HikeNotificationUtils.getNameForMsisdn(mContext, mDb, mConvDb, convMsgPair.first);
 
 			if (!isFromSingleMsisdn)
 			{
-				bigText.append("<strong>" + notificationMsgTitle + "</strong>  " + convMsgPair.second);
+				bigText.append("<strong>" + notificationMsgTitle + "</strong>:  " + convMsgPair.second);
 			}
 			else
 			{
@@ -604,11 +616,13 @@ public class HikeNotificationMsgStack implements Listener
 	/**
 	 * Clear all messages in the notifications stack
 	 */
-	public void resetMsgStack()
+	public synchronized void resetMsgStack()
 	{
 		mMessageTitlePairList.clear();
 		lastAddedMsisdn = null;
 		isFromSingleMsisdn = false;
+		totalNewMessages = 0;
+		uniqueMsisdns.clear();
 	}
 
 	/**
@@ -662,7 +676,7 @@ public class HikeNotificationMsgStack implements Listener
 	 */
 	public int getNewMessages()
 	{
-		return mMessageTitlePairList.size();
+		return totalNewMessages;
 	}
 
 	/**
@@ -672,19 +686,7 @@ public class HikeNotificationMsgStack implements Listener
 	 */
 	public int getNewConversations()
 	{
-		int newConv = 0;
-		String previousMsisdn = null;
-
-		for (Pair<String, String> pair : mMessageTitlePairList)
-		{
-			if (previousMsisdn == null || !previousMsisdn.equals(pair.first))
-			{
-				previousMsisdn = pair.first;
-				newConv++;
-			}
-		}
-
-		return newConv;
+		return uniqueMsisdns.size();
 	}
 
 	/**
@@ -696,7 +698,7 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		if (isFromSingleMsisdn())
 		{
-			return lastAddedMsisdn;
+			return HikeNotificationUtils.getNameForMsisdn(mContext, mDb, mConvDb, lastAddedMsisdn);
 		}
 
 		if (getNewMessages() <= 1)

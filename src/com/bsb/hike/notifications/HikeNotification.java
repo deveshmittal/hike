@@ -499,7 +499,7 @@ public class HikeNotification
 				if (bigPictureImage != null)
 				{
 					showNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
-							hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getSendersList(),
+							hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 							hikeNotifMsgStack.getNotificationBigText(), convMessage.getMsisdn(), bigPictureImage, !convMessage.isStickerMessage(), false, false, null, null);
 					return;
 				}

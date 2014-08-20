@@ -7,6 +7,7 @@ import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -15,6 +16,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.Utils;
 
 public class HikeNotificationUtils
 {
@@ -101,5 +103,19 @@ public class HikeNotificationUtils
 		}
 
 		return new Pair<String, String>(message, key);
+	}
+
+	public static String getNameForMsisdn(Context context, HikeUserDatabase db, HikeConversationsDatabase convDb, String argMsisdn)
+	{
+		String name = argMsisdn;
+		if (Utils.isGroupConversation(argMsisdn))
+		{
+			name = convDb.getGroupName(argMsisdn);
+		}
+		else
+		{
+			name = db.getContactInfoFromMSISDN(argMsisdn, false).getNameOrMsisdn();
+		}
+		return name;
 	}
 }
