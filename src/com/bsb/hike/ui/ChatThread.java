@@ -72,6 +72,7 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -177,6 +178,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
@@ -186,6 +188,7 @@ import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.ui.utils.HashSpanWatcher;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
@@ -1501,6 +1504,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			optionsList.add(new OverFlowMenuItem(getString(R.string.pin_history), 8));
 		}
 
+		optionsList.add(new OverFlowMenuItem(getString(R.string.shared_media), 9));
 		dismissPopupWindow();
 
 		attachmentWindow = new PopupWindow(this);
@@ -1586,6 +1590,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					break;
 				case 4:
 					setupThemePicker(null);
+					break;
+				case 9:
+					if(!messages.isEmpty())
+					{
+						Intent imageIntent = new Intent(ChatThread.this, HikeSharedFilesActivity.class);
+						imageIntent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
+						imageIntent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
+						startActivity(imageIntent);
+					}
 					break;
 				}
 
