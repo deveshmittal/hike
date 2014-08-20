@@ -1,5 +1,6 @@
 package com.bsb.hike.models;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Parcel;
@@ -12,30 +13,20 @@ public class HikeSharedFile extends HikeFile implements Parcelable
 	private String msisdn;
 
 	private long timeStamp;
+	
+	private JSONObject fileJSON;
 
 	public HikeSharedFile(JSONObject fileJSON, boolean isSent, long msgId, String msisdn, long timeStamp)
 	{
 		super(fileJSON, isSent);
 
+		this.fileJSON = fileJSON;
+		
 		this.msgId = msgId;
 
 		this.msisdn = msisdn;
 
 		this.timeStamp = timeStamp;
-	}
-
-	public HikeSharedFile(Parcel source)
-	{
-		setMsgId(source.readLong());
-		setMsisdn(source.readString());
-		setTimeStamp(source.readLong());
-		setFileKey(source.readString());
-		setFileName(source.readString());
-		setSourceFilePath(source.readString());
-		setFileTypeString(source.readString());
-		setHikeFileType(HikeFileType.values()[source.readInt()]);
-		setRecordingDuration(source.readLong());
-		setSent(source.readInt() == 1);
 	}
 
 	public long getMsgId()
@@ -68,6 +59,16 @@ public class HikeSharedFile extends HikeFile implements Parcelable
 		this.timeStamp = timeStamp;
 	}
 
+	public JSONObject getFileJSON()
+	{
+		return fileJSON;
+	}
+
+	public void setFileJSON(JSONObject fileJSON)
+	{
+		this.fileJSON = fileJSON;
+	}
+
 	@Override
 	public int describeContents()
 	{
@@ -80,13 +81,40 @@ public class HikeSharedFile extends HikeFile implements Parcelable
 		dest.writeLong(msgId);
 		dest.writeString(msisdn);
 		dest.writeLong(timeStamp);
-		dest.writeString(this.getFileKey());
-		dest.writeString(this.getFileName());
-		dest.writeString(this.getFilePath());
-		dest.writeString(this.getFileTypeString());
-		dest.writeInt(this.getHikeFileType().ordinal());
-		dest.writeLong(this.getRecordingDuration());
 		dest.writeInt(this.isSent() ? 1 : 0);
+		dest.writeString(fileJSON.toString());
 	}
+	
+
+	public static final Creator<HikeSharedFile> CREATOR = new Creator<HikeSharedFile>()
+	{
+		@Override
+		public HikeSharedFile[] newArray(int size)
+		{
+			return new HikeSharedFile[size];
+		}
+
+		@Override
+		public HikeSharedFile createFromParcel(Parcel source)
+		{
+
+			long msgId = source.readLong();
+			String msisdn = source.readString();
+			long timeStamp = source.readLong();
+			boolean isSent = source.readInt() == 1;
+			String fileJsonString = source.readString();
+			try
+			{
+				JSONObject fileJSON = new JSONObject(fileJsonString);
+				return new HikeSharedFile(fileJSON, isSent, msgId, msisdn, timeStamp);
+			}
+			catch (JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+	};
 
 }
