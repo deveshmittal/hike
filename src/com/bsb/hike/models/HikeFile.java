@@ -284,11 +284,6 @@ public class HikeFile
 		return null;
 	}
 	
-	public HikeFile()
-	{
-		
-	}
-
 	public String getFileName()
 	{
 		return fileName;
