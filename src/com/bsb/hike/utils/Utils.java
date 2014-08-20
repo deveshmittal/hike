@@ -4433,5 +4433,19 @@ public class Utils
 			countryNameEditor.setText(countryName);
 		}
 		return !TextUtils.isEmpty(countryCode);
-	}	
+	}
+
+	// added for db query
+	public static String getMsisdnStatement(ArrayList<String> msisdnList)
+	{
+		StringBuilder sb = new StringBuilder("(");
+		for (String msisdn : msisdnList)
+		{
+			sb.append(DatabaseUtils.sqlEscapeString(msisdn));
+			sb.append(",");
+		}
+		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
+		return sb.toString();
+	}
+
 }

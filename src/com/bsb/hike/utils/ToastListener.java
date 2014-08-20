@@ -383,7 +383,7 @@ public class ToastListener implements Listener
 							msisdnList.add(offlineMsisdnsArray.getString(i));
 						}
 
-						String msisdnStatement = getMsisdnStatement(msisdnList);
+						String msisdnStatement = Utils.getMsisdnStatement(msisdnList);
 
 						ArrayList<String> filteredMsisdnList = HikeConversationsDatabase.getInstance().getOfflineMsisdnsList(msisdnStatement); // this db query will return new list
 																																				// which can be of different order
@@ -395,7 +395,7 @@ public class ToastListener implements Listener
 							return;
 						}
 
-						msisdnStatement = getMsisdnStatement(filteredMsisdnList);
+						msisdnStatement = Utils.getMsisdnStatement(filteredMsisdnList);
 						List<ContactInfo> contactList = ContactManager.getInstance().getContact(filteredMsisdnList, true, false); // contact info list
 
 						HashMap<String, String> nameMap = new HashMap<String, String>(); // nameMap to map msisdn to corresponding name
@@ -618,25 +618,4 @@ public class ToastListener implements Listener
 		}
 
 	}
-
-	// added for db query
-	private String getMsisdnStatement(ArrayList<String> msisdnList)
-	{
-
-		StringBuilder sb = new StringBuilder("(");
-		;
-		for (String msisdn : msisdnList)
-		{
-
-			sb.append(DatabaseUtils.sqlEscapeString(msisdn));
-
-			sb.append(",");
-
-		}
-		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
-
-		return sb.toString();
-
-	}
-
 }
