@@ -329,4 +329,11 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 		}
 		return null;
 	}
+	
+	@Override
+	protected void onDestroy() 
+	{
+		super.onDestroy();
+		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
+	}
 }
