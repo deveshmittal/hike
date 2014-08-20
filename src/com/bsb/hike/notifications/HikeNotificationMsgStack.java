@@ -114,7 +114,6 @@ public class HikeNotificationMsgStack implements Listener
 		// all unread notifications against the msisdn can be cleared
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_ACTIVITY, this);
 
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
 	}
 
 	/**
