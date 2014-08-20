@@ -446,7 +446,7 @@ public class TransientCache extends ContactsCache
 				for (Entry<String, PairModified<ContactInfo, Integer>> savedMapEntry : transientContacts.entrySet())
 				{
 					String msisdn = savedMapEntry.getKey();
-					if (!blockSet.contains(msisdn) && !msisdn.equals(myMsisdn))
+					if (!blockSet.contains(msisdn) && (null != myMsisdn) && !msisdn.equals(myMsisdn))
 					{
 						PairModified<ContactInfo, Integer> contactPair = savedMapEntry.getValue();
 						ContactInfo contact = contactPair.getFirst();
@@ -539,7 +539,7 @@ public class TransientCache extends ContactsCache
 						}
 					}
 
-					if (flag && !blockSet.contains(msisdn) && !msisdn.equals(myMsisdn))
+					if (flag && !blockSet.contains(msisdn) && (null != myMsisdn) && !msisdn.equals(myMsisdn))
 					{
 						contacts.add(contactInfo);
 					}
@@ -679,7 +679,7 @@ public class TransientCache extends ContactsCache
 				{
 					ContactInfo contactInfo = savedMapEntry.getValue().getFirst();
 					String phoneNum = contactInfo.getPhoneNum();
-					if (phoneNumbers.contains(DatabaseUtils.sqlEscapeString(phoneNum)) && !contactInfo.isOnhike() && (null != contactInfo.getName()))
+					if (null != phoneNumbers && phoneNumbers.contains(DatabaseUtils.sqlEscapeString(phoneNum)) && !contactInfo.isOnhike() && (null != contactInfo.getName()))
 					{
 						contacts.add(contactInfo);
 						limit = limit - 1;
@@ -735,7 +735,8 @@ public class TransientCache extends ContactsCache
 				for (Entry<String, PairModified<ContactInfo, Integer>> mapEntry : transientContacts.entrySet())
 				{
 					PairModified<ContactInfo, Integer> contactPair = mapEntry.getValue();
-					if (null != contactPair && contactPair.getFirst().getPhoneNum().equals(number))
+					String phoneNum = contactPair.getFirst().getPhoneNum();
+					if (null != contactPair && null != number && phoneNum.equals(number))
 					{
 						contact = contactPair.getFirst();
 						break;
@@ -782,7 +783,8 @@ public class TransientCache extends ContactsCache
 				for (Entry<String, PairModified<ContactInfo, Integer>> mapEntry : transientContacts.entrySet())
 				{
 					PairModified<ContactInfo, Integer> contactPair = mapEntry.getValue();
-					if (null != contactPair && contactPair.getFirst().getPhoneNum().equals(number))
+					String phoneNum = contactPair.getFirst().getPhoneNum();
+					if (null != contactPair && null != number && phoneNum.equals(number))
 					{
 						contact = contactPair.getFirst();
 						break;
