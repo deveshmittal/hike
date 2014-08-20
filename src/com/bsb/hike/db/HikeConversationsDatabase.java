@@ -4781,9 +4781,27 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		String limitStr = (limit == -1) ? null : new Integer(limit).toString();
 		String msgIdSelection = DBConstants.MESSAGE_ID + (itemsToRight ? "<" : ">") + givenMsgId;
+		
+		StringBuilder hfTypeSelection = null;
+		
+		if (onlyMedia)
+		{
+			HikeFileType[] mediaFileTypes = {HikeFileType.AUDIO, HikeFileType.AUDIO_RECORDING, HikeFileType.IMAGE, HikeFileType.VIDEO};
+			hfTypeSelection = new StringBuilder("(");
+			for (HikeFileType hfType : mediaFileTypes)
+			{
+				hfTypeSelection.append(hfType.ordinal() + ",");
+			}
+			hfTypeSelection.replace(hfTypeSelection.lastIndexOf(","), hfTypeSelection.length(), ")");
+		}
+		else
+		{
+			hfTypeSelection = new StringBuilder(DBConstants.HIKE_FILE_TYPE + " = " + HikeFileType.OTHER.ordinal());
+		}
 
 		String selection = DBConstants.MSISDN + " = ?" + (givenMsgId == -1 ? "" : " AND " + msgIdSelection) + " AND "
-				+ (onlyMedia ? DBConstants.HIKE_FILE_TYPE + " != " + HikeFileType.OTHER.ordinal() : DBConstants.HIKE_FILE_TYPE + " = " + HikeFileType.OTHER.ordinal());
+				+ (DBConstants.HIKE_FILE_TYPE  + " IN " + hfTypeSelection.toString());
+		
 		Cursor c = null;
 		try
 		{
