@@ -62,6 +62,8 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	
 	private String TAG = "PhotoViewerFragment";
 	
+	private int PAGER_LIMIT = 3;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -154,14 +156,14 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	public void onPageSelected(int position)
 	{
 		// TODO Auto-generated method stub
-		if (!reachedEndRight && !loadingMoreItems && position == (getCount() - 3))
+		if (!reachedEndRight && !loadingMoreItems && position == (getCount() - PAGER_LIMIT))
 		{
 			loadingMoreItems = true;
 			//Logger.d(TAG,"loading items from right : " + maxMsgId);
 			loadItems(reachedEndRight, maxMsgId, HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY, true);
 		}
 
-		if (!reachedEndLeft && !loadingMoreItems && position == 3)
+		if (!reachedEndLeft && !loadingMoreItems && position == PAGER_LIMIT)
 		{
 			loadingMoreItems = true;
 			//Logger.d(TAG, "loading items from left : " + minMsgId);
@@ -205,20 +207,16 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	
 	public void loadItems(boolean reachedEnd, long maxMsgId, int limit, boolean itemsToRight)
 	{
-		if (Utils.isHoneycombOrHigher())
-		{
-			new GetMoreItemsTask(reachedEnd, maxMsgId, limit, itemsToRight).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		}
-		else
-		{
-			 new GetMoreItemsTask(reachedEnd, maxMsgId, limit, itemsToRight).execute();
-		}
+		loadItems(reachedEnd, maxMsgId, limit, itemsToRight, false, 0);
 	}
 	//function called to load items to the left of viewpager
 	public void loadItems(boolean reachedEnd, long msgId, int limit, boolean itemsToRight, boolean applyOffset, int prevPosition)
 	{
-		this.applyOffset = applyOffset;
-		this.prevPosition = prevPosition;
+		if(applyOffset)
+		{
+			this.applyOffset = applyOffset;
+			this.prevPosition = prevPosition;
+		}
 		if (Utils.isHoneycombOrHigher())
 		{
 			new GetMoreItemsTask(reachedEnd, msgId, limit, itemsToRight).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
