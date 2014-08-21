@@ -852,6 +852,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL))
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_INFO_TIP));
+		}else if(tip.equals(HikeMessengerApp.ATOMIC_POP_UP_HTTP)){
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_HTTP_TIP));
 		}
 	}
 
@@ -877,6 +879,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				stealthConversations.add(conv);
 				HikeMessengerApp.addStealthMsisdnToMap(conv.getMsisdn());
 			}
+
 
 			if ((stealthValue == HikeConstants.STEALTH_OFF || stealthValue == HikeConstants.STEALTH_ON_FAKE) && conv.isStealth())
 			{
