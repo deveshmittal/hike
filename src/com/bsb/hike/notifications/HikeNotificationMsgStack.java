@@ -81,6 +81,8 @@ public class HikeNotificationMsgStack implements Listener
 
 	private boolean forceBlockNotificationSound;
 
+	private int stealthMessages;
+
 	private static void init(Context context)
 	{
 		if (mHikeNotifMsgStack == null)
@@ -193,6 +195,16 @@ public class HikeNotificationMsgStack implements Listener
 	private synchronized void addPair(String argMsisdn, String argMessage)
 	{
 		lastAddedMsisdn = argMsisdn;
+		
+
+//		if (argMsisdn.equals(HikeNotification.HIKE_STEALTH_MESSAGE_KEY))
+//		{
+//			stealthMessages++;
+//			if(uniqueMsisdns.contains(argMsisdn)){
+//				
+//				return;
+//			}
+//		}
 
 		// Sort/Trim/Group message pair list to show messages smartly
 
@@ -617,6 +629,7 @@ public class HikeNotificationMsgStack implements Listener
 		lastAddedMsisdn = null;
 		totalNewMessages = 0;
 		uniqueMsisdns.clear();
+		stealthMessages = 0;
 	}
 
 	/**

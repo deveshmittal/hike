@@ -107,7 +107,12 @@ public class HikeNotificationUtils
 
 	public static String getNameForMsisdn(Context context, HikeUserDatabase db, HikeConversationsDatabase convDb, String argMsisdn)
 	{
-		String name = argMsisdn;
+		
+		if(HikeNotification.HIKE_STEALTH_MESSAGE_KEY.equals(argMsisdn)){
+			return context.getString(R.string.app_name);
+		}
+			
+		String name = null;
 		if (Utils.isGroupConversation(argMsisdn))
 		{
 			name = convDb.getGroupName(argMsisdn);
@@ -116,6 +121,11 @@ public class HikeNotificationUtils
 		{
 			name = db.getContactInfoFromMSISDN(argMsisdn, false).getNameOrMsisdn();
 		}
+		
+		if(TextUtils.isEmpty(name)){
+			name = argMsisdn;
+		}
+		
 		return name;
 	}
 }

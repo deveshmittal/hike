@@ -71,6 +71,8 @@ public class HikeNotification
 
 	// We need a key to pair notification id. This will be used to retrieve notification id on notification dismiss/action.
 	public static final String HIKE_NOTIFICATION_ID_KEY = "hike.notification";
+	
+	public static final String HIKE_STEALTH_MESSAGE_KEY = "HIKE_STEALTH_MESSAGE_KEY";
 
 	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
 
@@ -84,8 +86,6 @@ public class HikeNotification
 
 	private final SharedPreferences sharedPreferences;
 
-	private HikeUserDatabase db;
-
 	private HikeNotificationMsgStack hikeNotifMsgStack;
 
 	public HikeNotification(final Context context)
@@ -93,7 +93,6 @@ public class HikeNotification
 		this.context = context;
 		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		this.sharedPreferences = context.getSharedPreferences(HikeMessengerApp.STATUS_NOTIFICATION_SETTING, 0);
-		this.db = HikeUserDatabase.getInstance();
 		this.hikeNotifMsgStack = HikeNotificationMsgStack.getInstance(context);
 
 		if (VIB_DEF == null)
@@ -413,25 +412,11 @@ public class HikeNotification
 			// else add to stack and notify clubbed messages
 			if (hikeNotifMsgStack.isEmpty())
 			{
-				if (convMsg.isGroupChat())
-				{
-					hikeNotifMsgStack.addMessage(convMsg.getMsisdn(), message);
-				}
-				else
-				{
-					hikeNotifMsgStack.addMessage(key, message);
-				}
+				hikeNotifMsgStack.addMessage(convMsg.getMsisdn(), message);
 			}
 			else
 			{
-				if (convMsg.isGroupChat())
-				{
-					notifyStringMessage(convMsg.getMsisdn(), message);
-				}
-				else
-				{
-					notifyStringMessage(key, message);
-				}
+				notifyStringMessage(convMsg.getMsisdn(), message);
 				return;
 			}
 
@@ -445,25 +430,11 @@ public class HikeNotification
 			// else add to stack and notify clubbed messages
 			if (hikeNotifMsgStack.isEmpty())
 			{
-				if (convMsg.isGroupChat())
-				{
-					hikeNotifMsgStack.addMessage(convMsg.getMsisdn(), message);
-				}
-				else
-				{
-					hikeNotifMsgStack.addMessage(key, message);
-				}
+				hikeNotifMsgStack.addMessage(convMsg.getMsisdn(), message);
 			}
 			else
 			{
-				if (convMsg.isGroupChat())
-				{
-					notifyStringMessage(convMsg.getMsisdn(), message);
-				}
-				else
-				{
-					notifyStringMessage(key, message);
-				}
+				notifyStringMessage(convMsg.getMsisdn(), message);
 				return;
 			}
 			// regular message
@@ -473,8 +444,13 @@ public class HikeNotification
 
 	public void notifyStringMessage(String msisdn, String message)
 	{
-		Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.ic_launcher);
+		boolean isSingleMsisdn = hikeNotifMsgStack.isFromSingleMsisdn();
 
+		Drawable avatarDrawable = null;
+		if (!isSingleMsisdn)
+		{
+			avatarDrawable = context.getResources().getDrawable(R.drawable.ic_launcher);
+		}
 		try
 		{
 			hikeNotifMsgStack.addMessage(msisdn, message);
@@ -496,27 +472,6 @@ public class HikeNotification
 
 	public void notifySummaryMessage(final ArrayList<ConvMessage> convMessagesList)
 	{
-		// TODO: improve this
-		if (convMessagesList.size() == 1)
-		{
-			ConvMessage convMsg = convMessagesList.get(0);
-			if (convMsg.getParticipantInfoState() != null && convMsg.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
-			{
-				ContactInfo contactInfo;
-				if (convMsg.isGroupChat())
-				{
-					contactInfo = new ContactInfo(convMsg.getMsisdn(), convMsg.getMsisdn(), convMsg.getConversation().getLabel(), convMsg.getMsisdn());
-				}
-				else
-				{
-					contactInfo = this.db.getContactInfoFromMSISDN(convMsg.getMsisdn(), false);
-				}
-
-				notifyMessage(contactInfo, convMsg, false, null);
-				return;
-			}
-		}
-
 		hikeNotifMsgStack.addConvMessageList(convMessagesList);
 
 		hikeNotifMsgStack.invalidateConvMsgList();
@@ -609,7 +564,7 @@ public class HikeNotification
 		final int notificationId = STEALTH_NOTIFICATION_ID;
 
 		String message = context.getString(R.string.stealth_notification_message);
-		String key = "hike";
+		String key = HIKE_STEALTH_MESSAGE_KEY;
 
 		String text = message;
 

@@ -210,7 +210,14 @@ public class ToastListener implements Listener
 				{
 					contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn(), false);
 				}
-				toaster.notifyMessage(contactInfo, message, true, bigPicture);
+				
+				// TODO : Commented this because for FT messages we get 2 packets from PubSub,
+				// 1. Message received (with the thumbnail)
+				// 2. Push file downloaded
+				// The above two results in duplicate notifications being displayed
+				// X - Sent you a Photo
+				// X - Sent you a Photo
+				// toaster.notifyMessage(contactInfo, message, true, bigPicture);
 			}
 		}
 		else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type))
