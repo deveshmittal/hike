@@ -48,6 +48,21 @@ public class RecyclingImageView extends ImageView
 	}
 
 	/**
+	 * @see android.widget.ImageView#setImageResource(int)
+	 */
+	@Override
+	public void setImageResource(int resId)
+	{
+		// get previous drawable
+		final Drawable previousDrawable = getDrawable();
+
+		super.setImageResource(resId);
+
+		// Notify previous drawable so it is no longer displayed
+		notifyDrawable(previousDrawable, false);
+	}
+	
+	/**
 	 * @see android.widget.ImageView#setImageDrawable(android.graphics.drawable.Drawable)
 	 */
 	@Override

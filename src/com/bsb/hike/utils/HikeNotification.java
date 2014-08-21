@@ -26,14 +26,17 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 
@@ -289,16 +292,19 @@ public class HikeNotification
 		// chat
 		if (convMsg.isGroupChat() && !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn()) && convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
+			GroupParticipant groupParticipant = HikeConversationsDatabase.getInstance().getGroupParticipant(convMsg.getMsisdn(), convMsg.getGroupParticipantMsisdn());
 
-			GroupConversation gConv = (GroupConversation) convMsg.getConversation();
+			if (groupParticipant != null)
+			{
+				ContactInfo participant = HikeConversationsDatabase.getInstance().getGroupParticipant(convMsg.getMsisdn(), convMsg.getGroupParticipantMsisdn()).getContactInfo();
 
-			ContactInfo participant = gConv.getGroupParticipant(convMsg.getGroupParticipantMsisdn()).getContactInfo();
-
-			key = participant.getName();
+				key = participant.getName();
+			}
 			if (TextUtils.isEmpty(key))
 			{
-				key = participant.getMsisdn();
+				key = convMsg.getGroupParticipantMsisdn();
 			}
+
 			partName = key;
 			if (isPin)
 			{
@@ -308,7 +314,7 @@ public class HikeNotification
 			{
 				message = key + HikeConstants.SEPARATOR + message;
 			}
-			key = gConv.getLabel();
+			key = ContactManager.getInstance().getName(convMsg.getMsisdn());
 		}
 
 		boolean doesBigPictureExist = (bigPictureImage == null) ? false : true;
@@ -347,7 +353,8 @@ public class HikeNotification
 			return;
 		}
 
-		final int notificationId = HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID;
+		final int notificationId = (msisdnList.size() > 1)  ? HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID : msisdnList.get(0).hashCode();
+		
 		final Intent notificationIntent = new Intent(context, ChatThread.class);
 		
 		String firstMsisdn = msisdnList.get(0);
@@ -473,7 +480,7 @@ public class HikeNotification
 			return;
 		}
 
-		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, statusMessage.getMsisdn(), null, false);
+		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, statusMessage.getMappedId(), null, false);
 		addNotificationId(notificationId);
 	}
 

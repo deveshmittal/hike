@@ -30,7 +30,7 @@ public class ConversationTip extends Conversation
 
 	public ConversationTip(int tipType)
 	{
-		super(null, -1);
+		super(null);
 		this.tipType = tipType;
 	}
 

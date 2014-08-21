@@ -2,25 +2,26 @@ package com.bsb.hike.tasks;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.adapters.FriendsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -143,12 +144,9 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			addToStealthList(groupTaskList, groupsStealthList, true);
 		}
 
-		HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
-
 		long queryTime = System.currentTimeMillis();
-		List<ContactInfo> allContacts = hikeUserDatabase.fetchAllContacts(myMsisdn);
-		Map<String, FavoriteType> favTypeMap = hikeUserDatabase.fetchFavoriteTypeMap();
-		Set<String> blockSet = hikeUserDatabase.getBlockedMsisdnSet();
+		List<ContactInfo> allContacts = HikeMessengerApp.getContactManager().getAllContacts();
+		Set<String> blockSet = ContactManager.getInstance().getBlockedMsisdnSet();
 		Logger.d("TestQuery", "qeury time: " + (System.currentTimeMillis() - queryTime));
 
 		friendTaskList = new ArrayList<ContactInfo>();
@@ -164,48 +162,26 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 				continue;
 			}
 
-			FavoriteType favoriteType = favTypeMap.get(msisdn);
-			contactInfo.setFavoriteType(favoriteType);
+			FavoriteType favoriteType = contactInfo.getFavoriteType();
 
 			if (shouldAddToFavorites(favoriteType))
 			{
 				friendTaskList.add(contactInfo);
-
-				/*
-				 * Removing the contacts that have already been added to the list. At the end we will be left with unknown contacts.
-				 */
-				favTypeMap.remove(msisdn);
 			}
 			else
 			{
-				if (contactInfo.isOnhike())
+				if (null != contactInfo.getName())
 				{
-					hikeTaskList.add(contactInfo);
-				}
-				else if (fetchSmsContacts && shouldShowSmsContact(msisdn))
-				{
-					smsTaskList.add(contactInfo);
+					if (contactInfo.isOnhike())
+					{
+						hikeTaskList.add(contactInfo);
+					}
+					else if (fetchSmsContacts && shouldShowSmsContact(msisdn))
+					{
+						smsTaskList.add(contactInfo);
+					}
 				}
 			}
-		}
-
-		/*
-		 * Adding the unknown favorites.
-		 */
-		for (Entry<String, FavoriteType> favoriteTypeEntry : favTypeMap.entrySet())
-		{
-			String msisdn = favoriteTypeEntry.getKey();
-			FavoriteType favoriteType = favoriteTypeEntry.getValue();
-
-			if (!shouldAddToFavorites(favoriteType) || !shouldShowSmsContact(msisdn))
-			{
-				continue;
-			}
-
-			ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, null, msisdn);
-			contactInfo.setFavoriteType(favoriteType);
-
-			friendTaskList.add(contactInfo);
 		}
 
 		Logger.d("TestQuery", "Iteration time: " + (System.currentTimeMillis() - iterationTime));
@@ -216,7 +192,13 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 		if (removeExistingParticipants)
 		{
-			Map<String, GroupParticipant> groupParticipants = HikeConversationsDatabase.getInstance().getGroupParticipants(existingGroupId, true, false);
+			List<Pair<GroupParticipant,String>> groupParticipantsList = ContactManager.getInstance().getGroupParticipants(existingGroupId, true, false);
+			Map<String, Pair<GroupParticipant, String>> groupParticipants = new HashMap<String, Pair<GroupParticipant,String>>();
+			for(Pair<GroupParticipant,String> grpParticipant : groupParticipantsList)
+			{
+				String msisdn = grpParticipant.first.getContactInfo().getMsisdn();
+				groupParticipants.put(msisdn, grpParticipant);
+			}
 
 			removeContactsFromList(friendTaskList, groupParticipants);
 			removeContactsFromList(hikeTaskList, groupParticipants);
@@ -225,9 +207,9 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 				removeContactsFromList(smsTaskList, groupParticipants);
 			}
 
-			for (GroupParticipant groupParticipant : groupParticipants.values())
+			for (Pair<GroupParticipant,String> groupParticipant : groupParticipants.values())
 			{
-				ContactInfo contactInfo = groupParticipant.getContactInfo();
+				ContactInfo contactInfo = groupParticipant.first.getContactInfo();
 
 				selectedPeople.put(contactInfo.getMsisdn(), contactInfo);
 			}
@@ -296,7 +278,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		}
 	}
 
-	private void removeContactsFromList(List<ContactInfo> contactList, Map<String, GroupParticipant> groupParticipants)
+	private void removeContactsFromList(List<ContactInfo> contactList, Map<String, Pair<GroupParticipant, String>> groupParticipants)
 	{
 		for (Iterator<ContactInfo> iter = contactList.iterator(); iter.hasNext();)
 		{

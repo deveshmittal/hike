@@ -584,6 +584,7 @@ public class ConversationsAdapter extends BaseAdapter
 		 */
 		if(!conversation.getMsisdn().equals(viewHolder.msisdn))
 		{
+			Logger.i("UnreadBug", "msisdns different !!! conversation msisdn : " + conversation.getMsisdn() + " veiwHolderMsisdn : " + viewHolder.msisdn);
 			return;
 		}
 

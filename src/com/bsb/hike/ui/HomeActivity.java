@@ -61,11 +61,11 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.tasks.SendLogsTask;
@@ -298,6 +298,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if (overFlowWindow != null && overFlowWindow.isShowing())
 			overFlowWindow.dismiss();
 		HikeMessengerApp.getPubSub().removeListeners(this, homePubSubListeners);
+		HikeMessengerApp.getContactManager().unload();
 		super.onDestroy();
 	}
 
@@ -1098,7 +1099,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		@Override
 		protected FtueContactsData doInBackground(Void... params)
 		{
-			FtueContactsData ftueContactsDataResult = HikeUserDatabase.getInstance().getFTUEContacts(accountPrefs);
+			FtueContactsData ftueContactsDataResult = ContactManager.getInstance().getFTUEContacts(accountPrefs);
 			/*
 			 * This msisdn type will be the identifier for ftue contacts in the friends tab.
 			 */
