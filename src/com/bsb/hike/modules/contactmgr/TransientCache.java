@@ -375,22 +375,29 @@ public class TransientCache extends ContactsCache
 			{
 				String msisdn = mapEntry.getKey();
 				ContactInfo contact = mapEntry.getValue();
+				ContactManager.getInstance().updateContacts(contact); // updates in persistence if availabale in persistence
+				/*
+				 * Since we maintain same reference to contactInfo object in persistence and transient cache , updateContacts method will update the contact in both persistence and
+				 * transient cache both if contact is already in persistence and transient cache respectively. So if we get contactpair from transient cache as not null that means
+				 * it is updated otherwise we have to create a new object and insert in transient cache which is done using a temp map.
+				 */
 				PairModified<ContactInfo, Integer> contactPair = transientContacts.get(msisdn);
-				if (null != contactPair)
+				if (null == contactPair)
 				{
-					contactPair.setFirst(contact);
-					temp.put(msisdn, contactPair);
-				}
-				else
-				{
-					ContactInfo perContact = ContactManager.getInstance().getContact(msisdn);
-					if (null != perContact)
-						contact = perContact;
 					contactPair = new PairModified<ContactInfo, Integer>(contact, 1);
-					temp.put(msisdn, contactPair);
 				}
+				temp.put(msisdn, contactPair);
+
+				/*
+				 * temp map is needed here because transient cache can contain both saved and unsaved contacts , by executing the below line we are removing the saved from
+				 * transient cache as they are already inserted in temp.
+				 */
 				transientContacts.remove(msisdn);
 			}
+			
+			/*
+			 * Now transient cache contains only unsaved contacts we are adding them to temp map and then assigning temp to transient contacts 
+			 */
 			temp.putAll(transientContacts);
 			transientContacts = temp;
 		}
