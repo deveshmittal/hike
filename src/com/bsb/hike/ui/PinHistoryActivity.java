@@ -1,17 +1,25 @@
 package com.bsb.hike.ui;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.json.JSONException;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout.LayoutParams;
@@ -33,10 +41,11 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 
-public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity implements OnScrollListener, HikePubSub.Listener 
+public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity implements OnScrollListener, HikePubSub.Listener, OnItemLongClickListener 
 {	
 	private PinHistoryAdapter pinAdapter;
 	
@@ -59,6 +68,10 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 	private boolean mLoadingMorePins;
 	
 	private boolean mReachedEnd;
+	
+	private boolean isActionModeOn;
+	
+	private TextView mActionModeTitle;
 		
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED};
 
@@ -96,9 +109,11 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 		
 		mPinListView.setEmptyView(findViewById(android.R.id.empty));
 		
-		pinAdapter = new PinHistoryAdapter(this, textPins, msisdn, convId, mConversation, true,chatTheme);
+		pinAdapter = new PinHistoryAdapter(this, textPins, msisdn, convId, mConversation, true,chatTheme, this);
 
 		mPinListView.setOnScrollListener(this);
+		
+		mPinListView.setOnItemLongClickListener(this);
 		
 		mPinListView.setAdapter(pinAdapter);
 		
@@ -169,6 +184,12 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
+		if(isActionModeOn)
+		{
+			getSupportMenuInflater().inflate(R.menu.multi_select_chat_menu, menu);
+			
+			menu.findItem(R.id.forward_msgs).setVisible(false);
+		}
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -181,7 +202,11 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		return super.onOptionsItemSelected(item);
+		if(isActionModeOn)
+		{
+			return onActionModeItemClicked(item);
+		}
+		return true;
 	}
 	
 	@Override
@@ -319,4 +344,155 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 		super.onDestroy();
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 	}
+
+	private void setupActionModeActionBar()
+	{
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(R.layout.action_mode_action_bar, null);
+
+		View closeBtn = actionBarView.findViewById(R.id.close_action_mode);
+		mActionModeTitle = (TextView) actionBarView.findViewById(R.id.title);
+		ViewGroup closeContainer = (ViewGroup) actionBarView.findViewById(R.id.close_container);
+
+		closeContainer.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				destroyActionMode();
+			}
+		});
+		actionBar.setCustomView(actionBarView);
+
+		Animation slideIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_left_noalpha);
+		slideIn.setInterpolator(new AccelerateDecelerateInterpolator());
+		slideIn.setDuration(200);
+		closeBtn.startAnimation(slideIn);
+		
+		initializeActionMode();
+	}
+	
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) 
+	{
+		return showPinContextMenu((ConvMessage)pinAdapter.getItem(position));
+	}
+	
+	public boolean showPinContextMenu(ConvMessage pinMsg)
+	{
+		if(pinMsg == null)
+		{
+			return false;
+		}
+		pinAdapter.toggleSelection(pinMsg);
+		
+		boolean hasCheckedItems = pinAdapter.getSelectedPinsCount() > 0;
+		
+		if(hasCheckedItems && !isActionModeOn)
+		{
+			setupActionModeActionBar();
+		}
+		else if(!hasCheckedItems && isActionModeOn)
+		{
+			destroyActionMode();
+		}
+		
+		if(isActionModeOn)
+		{
+			setActionModeTitle(pinAdapter.getSelectedPinsCount());
+		}
+		invalidateOptionsMenu();
+		
+		return true;
+	}
+	
+	private void destroyActionMode()
+	{
+		pinAdapter.removeSelection();		
+		setActionModeOn(false);
+		setupActionBar();
+		
+		invalidateOptionsMenu();
+	}
+	
+	private void setActionModeTitle(int count)
+	{
+		if (mActionModeTitle != null)
+		{
+			mActionModeTitle.setText(getString(R.string.selected_count, count));
+		}
+	}
+	
+	public boolean initializeActionMode()
+	{
+		setActionModeOn(true);
+		
+		if (pinAdapter.getSelectedPinsCount() > 0)
+		{
+			setActionModeTitle(pinAdapter.getSelectedPinsCount());
+		}
+		return true;
+	}
+	
+	private void setActionModeOn(boolean isOn)
+	{
+		isActionModeOn = isOn;
+		pinAdapter.setActionMode(isOn);
+		pinAdapter.notifyDataSetChanged();
+	}
+	
+	public boolean onActionModeItemClicked(MenuItem item)
+	{
+		final HashMap<Long, ConvMessage> selectedMessagesMap = pinAdapter.getSelectedPinsMap();
+		
+		switch (item.getItemId())
+		{
+		case R.id.delete_msgs:
+			final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(PinHistoryActivity.this);
+			
+			if (pinAdapter.getSelectedPinsCount() == 1)
+			{
+				deleteConfirmDialog.setHeader(R.string.confirm_delete_pin_header);
+				deleteConfirmDialog.setBody(R.string.confirm_delete_pin);
+			}
+			else
+			{
+				deleteConfirmDialog.setHeader(R.string.confirm_delete_pins_header);
+				deleteConfirmDialog.setBody(getString(R.string.confirm_delete_pins, pinAdapter.getSelectedPinsCount()));
+			}
+			View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					for (ConvMessage convMessage : selectedMessagesMap.values())
+					{
+						removeMessage(convMessage);						
+					}
+					pinAdapter.notifyDataSetChanged();
+					destroyActionMode();
+					deleteConfirmDialog.dismiss();
+				}
+			};
+
+			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
+			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			deleteConfirmDialog.show();
+			return true;
+			
+		default:
+			destroyActionMode();
+		return false;
+		}
+	}
+	
+	private void removeMessage(ConvMessage pinMessage)
+	{
+		// TODO: fix the lastMessage implementation while code merge. lastMessage should be true only when message to be deleted is the last message in the conversation
+		boolean lastMessage = pinMessage.equals(textPins.get(textPins.size() - 1));
+		HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ConvMessage, Boolean>(pinMessage, lastMessage));
+		pinAdapter.removeMessage(pinMessage);
+	}	
 }
