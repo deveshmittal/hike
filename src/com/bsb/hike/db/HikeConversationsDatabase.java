@@ -4761,7 +4761,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		
 		if (onlyMedia)
 		{
-			HikeFileType[] mediaFileTypes = {HikeFileType.AUDIO, HikeFileType.AUDIO_RECORDING, HikeFileType.IMAGE, HikeFileType.VIDEO};
+			HikeFileType[] mediaFileTypes = {HikeFileType.IMAGE, HikeFileType.VIDEO};
 			hfTypeSelection = new StringBuilder("(");
 			for (HikeFileType hfType : mediaFileTypes)
 			{
