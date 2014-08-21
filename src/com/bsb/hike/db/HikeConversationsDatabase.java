@@ -2469,20 +2469,37 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	/* deletes a single message */
-	public void deleteMessage(ConvMessage convMessage, boolean isLastMessage)
+	/* deletes a multiple messages */
+	public void deleteMessages(ArrayList<Long> msgIds, String msisdn, boolean isLastMessage)
 	{
-		Long[] bindArgs = new Long[] { convMessage.getMsgID() };
-		mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.MESSAGE_ID + "= ?", bindArgs);
-		
-		if(convMessage.isFileTransferMessage())
+		StringBuilder inSelection = new StringBuilder("("+msgIds.get(0));
+		for (int i=0; i<msgIds.size(); i++)
 		{
-			mDb.execSQL("DELETE FROM " + DBConstants.SHARED_MEDIA_TABLE + " WHERE " + DBConstants.MESSAGE_ID + "= ?", bindArgs);
+			inSelection.append("," + Long.toString(msgIds.get(i)));
 		}
-
-		if (isLastMessage)
+		inSelection.append(")");
+		try
 		{
-			deleteMessageFromConversation(convMessage.getMsisdn(), convMessage.getConversation().getConvId());
+			mDb.beginTransaction();
+			mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.MESSAGE_ID + " IN "+ inSelection.toString());
+			
+			mDb.execSQL("DELETE FROM " + DBConstants.SHARED_MEDIA_TABLE + " WHERE " + DBConstants.MESSAGE_ID + " IN "+ inSelection.toString());
+
+			if (isLastMessage)
+			{
+				//TODO uncomment this when merging with convid change
+				//deleteMessageFromConversation(msisdn);
+			}
+			mDb.setTransactionSuccessful();
+		}
+		catch (Exception e)
+		{
+			Logger.e(getClass().getSimpleName(), "Exception : ", e);
+			e.printStackTrace();
+		}
+		finally
+		{
+			mDb.endTransaction();
 		}
 	}
 
