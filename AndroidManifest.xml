@@ -279,6 +279,9 @@
                     <action android:name="android.intent.action.TIME_SET" />
                 </intent-filter>
             </receiver>
+            <receiver android:name="com.bsb.hike.notifications.NotificationDismissedReceiver" 
+                android:exported="false">
+            </receiver>
 
          <activity
             android:name="com.bsb.hike.ui.DeleteAccount"
