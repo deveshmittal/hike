@@ -283,7 +283,19 @@ public class HikeFile
 		}
 		return null;
 	}
-
+	
+	public String getExactFilePath()
+	{
+		if(hikeFileType == HikeFileType.IMAGE || !TextUtils.isEmpty(fileKey))
+		{
+			return getFilePath();
+		}
+		else 
+		{
+			return sourceFilePath;
+		}
+	}
+	
 	public String getFileName()
 	{
 		return fileName;
@@ -347,6 +359,11 @@ public class HikeFile
 		return hikeFileType;
 	}
 
+	public void setHikeFileType(HikeFileType hikeFileType)
+	{
+		this.hikeFileType = hikeFileType;
+	}
+
 	public double getLatitude()
 	{
 		return latitude;
@@ -370,6 +387,11 @@ public class HikeFile
 	public long getRecordingDuration()
 	{
 		return recordingDuration;
+	}
+
+	public void setRecordingDuration(long recordingDuration)
+	{
+		this.recordingDuration = recordingDuration;
 	}
 
 	public boolean wasFileDownloaded()
@@ -416,6 +438,11 @@ public class HikeFile
 	{
 		return sourceFilePath;
 	}
+	
+	public void setSourceFilePath(String sourceFilePath)
+	{
+		this.sourceFilePath = sourceFilePath;
+	}
 
 	public void removeSourceFile()
 	{
@@ -450,6 +477,16 @@ public class HikeFile
 	public void setFileName(String fName)
 	{
 		fileName = fName;
+	}
+
+	public boolean isSent()
+	{
+		return isSent;
+	}
+
+	public void setSent(boolean isSent)
+	{
+		this.isSent = isSent;
 	}
 
 }
