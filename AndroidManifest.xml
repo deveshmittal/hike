@@ -198,6 +198,9 @@
         </activity>
         <activity android:name="com.bsb.hike.ui.GalleryActivity" >
         </activity>
+         <activity android:name="com.bsb.hike.ui.HikeSharedFilesActivity" >
+        </activity>
+        
         <activity android:name="com.bsb.hike.ui.GallerySelectionViewer" >
         </activity>
         <activity android:name="com.bsb.hike.ui.CountrySelectActivity" >

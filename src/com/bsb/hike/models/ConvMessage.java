@@ -247,7 +247,7 @@ public class ConvMessage
 		this.mTimestamp = timestamp;
 		this.msgID = msgid;
 		this.mappedMsgId = mappedMsgId;
-		mIsSent = (msgState == State.SENT_UNCONFIRMED || msgState == State.SENT_CONFIRMED || msgState == State.SENT_DELIVERED || msgState == State.SENT_DELIVERED_READ || msgState == State.SENT_FAILED);
+		mIsSent = isMessageSent(msgState);
 		this.groupParticipantMsisdn = groupParticipantMsisdn;
 		this.mIsSMS = isSMS;
 		this.messageType= type;
@@ -857,4 +857,9 @@ public class ConvMessage
 		this.isTickSoundPlayed = isTickSoundPlayed;
 	}
 
+	
+	public static boolean isMessageSent(State msgState)
+	{
+		return !(msgState==State.RECEIVED_READ || msgState == State.RECEIVED_UNREAD);
+	}
 }

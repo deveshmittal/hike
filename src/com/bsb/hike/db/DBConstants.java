@@ -197,4 +197,8 @@ public class DBConstants
 	public static final String IS_STEALTH = "isStealth";
 	
 	public static final String MESSAGE_HASH_INDEX = "messageHashIndex";
+
+	public static final String HIKE_FILE_TYPE = "hikeFileType";
+
+	public static final String IS_SENT = "isSent";
 }
