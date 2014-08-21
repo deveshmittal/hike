@@ -22,13 +22,15 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.Utils;
 
 public class TransientCache extends ContactsCache
 {
 	HikeUserDatabase hDb;
 
 	// Transient Memory for contacts with their reference count
-	private Map<String, ContactTuple> transientContacts;
+	private Map<String, PairModified<ContactInfo, Integer>> transientContacts;
 
 	// Transient memory for contacts of group participants
 	private Map<String, Map<String, Pair<GroupParticipant, String>>> groupParticipants;
@@ -44,7 +46,7 @@ public class TransientCache extends ContactsCache
 	 */
 	TransientCache(HikeUserDatabase db)
 	{
-		transientContacts = new LinkedHashMap<String, ContactTuple>();
+		transientContacts = new LinkedHashMap<String, PairModified<ContactInfo, Integer>>();
 		groupParticipants = new HashMap<String, Map<String, Pair<GroupParticipant, String>>>();
 		hDb = db;
 	}
@@ -60,12 +62,12 @@ public class TransientCache extends ContactsCache
 		readLock.lock();
 		try
 		{
-			ContactTuple tuple = transientContacts.get(key);
-			if (null == tuple)
+			PairModified<ContactInfo, Integer> contactPair = transientContacts.get(key);
+			if (null == contactPair)
 			{
 				return null;
 			}
-			return tuple.getContact();
+			return contactPair.getFirst();
 		}
 		finally
 		{
@@ -89,8 +91,8 @@ public class TransientCache extends ContactsCache
 			writeLock.lock();
 			try
 			{
-				ContactTuple tuple = new ContactTuple(1, contact);
-				transientContacts.put(contact.getMsisdn(), tuple);
+				PairModified<ContactInfo, Integer> contactPair = new PairModified<ContactInfo, Integer>(contact, 1);
+				transientContacts.put(contact.getMsisdn(), contactPair);
 			}
 			finally
 			{
@@ -115,8 +117,8 @@ public class TransientCache extends ContactsCache
 				{
 					if (null != contact)
 					{
-						ContactTuple tuple = new ContactTuple(1, contact);
-						transientContacts.put(contact.getMsisdn(), tuple);
+						PairModified<ContactInfo, Integer> contactPair = new PairModified<ContactInfo, Integer>(contact, 1);
+						transientContacts.put(contact.getMsisdn(), contactPair);
 					}
 				}
 			}
@@ -162,11 +164,11 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			ContactTuple tuple = transientContacts.get(msisdn);
-			if (null != tuple)
+			PairModified<ContactInfo, Integer> contactPair = transientContacts.get(msisdn);
+			if (null != contactPair)
 			{
-				tuple.setReferenceCount(tuple.getReferenceCount() - 1);
-				if (tuple.getReferenceCount() == 0)
+				contactPair.setSecond(contactPair.getSecond() - 1);
+				if (contactPair.getSecond() == 0)
 				{
 					transientContacts.remove(msisdn);
 				}
@@ -213,8 +215,8 @@ public class TransientCache extends ContactsCache
 		{
 			if (transientContacts.containsKey(contact.getMsisdn()))
 			{
-				ContactTuple tuple = transientContacts.get(contact.getMsisdn());
-				tuple.setContact(contact);
+				PairModified<ContactInfo, Integer> contactPair = transientContacts.get(contact.getMsisdn());
+				contactPair.setFirst(contact);
 			}
 			else
 			{
@@ -261,13 +263,13 @@ public class TransientCache extends ContactsCache
 		readLock.lock();
 		try
 		{
-			for (Entry<String, ContactTuple> mapEntry : transientContacts.entrySet())
+			for (Entry<String, PairModified<ContactInfo, Integer>> mapEntry : transientContacts.entrySet())
 			{
-				ContactTuple tuple = mapEntry.getValue();
-				ContactInfo contact = tuple.getContact();
+				PairModified<ContactInfo, Integer> contactPair = mapEntry.getValue();
+				ContactInfo contact = contactPair.getFirst();
 				if (ignoreUnknownContacts && null == contact.getName())
 					continue;
-				allContacts.add(tuple.getContact());
+				allContacts.add(contactPair.getFirst());
 			}
 		}
 		finally
@@ -275,6 +277,18 @@ public class TransientCache extends ContactsCache
 			readLock.unlock();
 		}
 		return allContacts;
+	}
+
+	/**
+	 * This method returns all the contacts this also includes contactInfo of for same msisdn saved with different names in address book and used during contact syncing. Here
+	 * everytime we have to make a db query because we only keep the latest contact for a particular msisdn in the cache and not all. We are not adding the contacts in the map here
+	 * as when after sync updates we get the diff between phone address book and our database then we update that diff in the cache as well.
+	 * 
+	 * @return
+	 */
+	List<ContactInfo> getAllContactsForSyncing()
+	{
+		return hDb.getAllContactsForSyncing();
 	}
 
 	/**
@@ -353,7 +367,7 @@ public class TransientCache extends ContactsCache
 	void loadMemory()
 	{
 		Map<String, ContactInfo> contactMap = hDb.getAllContactInfo();
-		LinkedHashMap<String, ContactTuple> temp = new LinkedHashMap<String, ContactTuple>();
+		LinkedHashMap<String, PairModified<ContactInfo, Integer>> temp = new LinkedHashMap<String, PairModified<ContactInfo, Integer>>();
 		writeLock.lock();
 		try
 		{
@@ -361,22 +375,29 @@ public class TransientCache extends ContactsCache
 			{
 				String msisdn = mapEntry.getKey();
 				ContactInfo contact = mapEntry.getValue();
-				ContactTuple tuple = transientContacts.get(msisdn);
-				if (null != tuple)
+				ContactManager.getInstance().updateContacts(contact); // updates in persistence if availabale in persistence
+				/*
+				 * Since we maintain same reference to contactInfo object in persistence and transient cache , updateContacts method will update the contact in both persistence and
+				 * transient cache both if contact is already in persistence and transient cache respectively. So if we get contactpair from transient cache as not null that means
+				 * it is updated otherwise we have to create a new object and insert in transient cache which is done using a temp map.
+				 */
+				PairModified<ContactInfo, Integer> contactPair = transientContacts.get(msisdn);
+				if (null == contactPair)
 				{
-					tuple.setContact(contact);
-					temp.put(msisdn, tuple);
+					contactPair = new PairModified<ContactInfo, Integer>(contact, 1);
 				}
-				else
-				{
-					ContactInfo perContact = ContactManager.getInstance().getContact(msisdn);
-					if (null != perContact)
-						contact = perContact;
-					tuple = new ContactTuple(1, contact);
-					temp.put(msisdn, tuple);
-				}
+				temp.put(msisdn, contactPair);
+
+				/*
+				 * temp map is needed here because transient cache can contain both saved and unsaved contacts , by executing the below line we are removing the saved from
+				 * transient cache as they are already inserted in temp.
+				 */
 				transientContacts.remove(msisdn);
 			}
+			
+			/*
+			 * Now transient cache contains only unsaved contacts we are adding them to temp map and then assigning temp to transient contacts 
+			 */
 			temp.putAll(transientContacts);
 			transientContacts = temp;
 		}
@@ -442,13 +463,13 @@ public class TransientCache extends ContactsCache
 			readLock.lock();
 			try
 			{
-				for (Entry<String, ContactTuple> savedMapEntry : transientContacts.entrySet())
+				for (Entry<String, PairModified<ContactInfo, Integer>> savedMapEntry : transientContacts.entrySet())
 				{
 					String msisdn = savedMapEntry.getKey();
-					if (!blockSet.contains(msisdn) && !msisdn.equals(myMsisdn))
+					if (!blockSet.contains(msisdn) && (null != myMsisdn) && !msisdn.equals(myMsisdn))
 					{
-						ContactTuple tuple = savedMapEntry.getValue();
-						ContactInfo contact = tuple.getContact();
+						PairModified<ContactInfo, Integer> contactPair = savedMapEntry.getValue();
+						ContactInfo contact = contactPair.getFirst();
 						if (!(ignoreUnknownContacts && (null == contact.getName())))
 						{
 							contacts.add(contact);
@@ -493,11 +514,11 @@ public class TransientCache extends ContactsCache
 			readLock.lock();
 			try
 			{
-				for (Entry<String, ContactTuple> savedMapEntry : transientContacts.entrySet())
+				for (Entry<String, PairModified<ContactInfo, Integer>> savedMapEntry : transientContacts.entrySet())
 				{
 					String msisdn = savedMapEntry.getKey();
-					ContactTuple tuple = savedMapEntry.getValue();
-					ContactInfo contactInfo = tuple.getContact();
+					PairModified<ContactInfo, Integer> contactPair = savedMapEntry.getValue();
+					ContactInfo contactInfo = contactPair.getFirst();
 
 					if (ignoreUnknownContacts && (null == contactInfo.getName()))
 					{
@@ -538,7 +559,7 @@ public class TransientCache extends ContactsCache
 						}
 					}
 
-					if (flag && !blockSet.contains(msisdn) && !msisdn.equals(myMsisdn))
+					if (flag && !blockSet.contains(msisdn) && (null != myMsisdn) && !msisdn.equals(myMsisdn))
 					{
 						contacts.add(contactInfo);
 					}
@@ -569,7 +590,7 @@ public class TransientCache extends ContactsCache
 	 * @param myMsisdn
 	 * @return
 	 */
-	List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
+	List<ContactInfo> getHikeContacts(int limit, Set<String> msisdnsIn, Set<String> msisdnsNotIn, String myMsisdn)
 	{
 		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
 		if (allContactsLoaded)
@@ -577,12 +598,12 @@ public class TransientCache extends ContactsCache
 			readLock.lock();
 			try
 			{
-				for (Entry<String, ContactTuple> mapEntry : transientContacts.entrySet())
+				for (Entry<String, PairModified<ContactInfo, Integer>> mapEntry : transientContacts.entrySet())
 				{
 					String msisdn = mapEntry.getKey();
-					ContactInfo contactInfo = mapEntry.getValue().getContact();
-					if (msisdnsIn.contains(DatabaseUtils.sqlEscapeString(msisdn)) && (!msisdnsNotIn.contains(DatabaseUtils.sqlEscapeString(msisdn))) && !msisdn.equals(myMsisdn)
-							&& contactInfo.isOnhike())
+					ContactInfo contactInfo = mapEntry.getValue().getFirst();
+					if (null != msisdnsIn && msisdnsIn.contains(msisdn) && (null != msisdnsNotIn && !msisdnsNotIn.contains(msisdn))
+							&& (null != myMsisdn && !msisdn.equals(myMsisdn)) && contactInfo.isOnhike())
 					{
 						contacts.add(contactInfo);
 						limit--;
@@ -598,7 +619,9 @@ public class TransientCache extends ContactsCache
 		}
 		else
 		{
-			contacts = hDb.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
+			String msisdnsInStatement = Utils.getMsisdnStatement(msisdnsIn);
+			String msisdnsNotInStatement = Utils.getMsisdnStatement(msisdnsNotIn);
+			contacts = hDb.getHikeContacts(limit, msisdnsInStatement, msisdnsNotInStatement, myMsisdn);
 			insertContact(contacts);
 		}
 		return contacts;
@@ -618,13 +641,13 @@ public class TransientCache extends ContactsCache
 			readLock.lock();
 			try
 			{
-				for (Entry<String, ContactTuple> savedMapEntry : transientContacts.entrySet())
+				for (Entry<String, PairModified<ContactInfo, Integer>> savedMapEntry : transientContacts.entrySet())
 				{
 					String msisdn = savedMapEntry.getKey();
 					if (!blockSet.contains(msisdn) && ContactManager.getInstance().isIndianMobileNumber(msisdn))
 					{
-						ContactTuple tuple = savedMapEntry.getValue();
-						ContactInfo contactInfo = tuple.getContact();
+						PairModified<ContactInfo, Integer> contactPair = savedMapEntry.getValue();
+						ContactInfo contactInfo = contactPair.getFirst();
 						if (!contactInfo.isOnhike() && (null != contactInfo.getName()))
 						{
 							contacts.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(false), contactInfo));
@@ -643,13 +666,13 @@ public class TransientCache extends ContactsCache
 			writeLock.lock();
 			try
 			{
-				for (Pair<AtomicBoolean, ContactInfo> contactPair : contacts)
+				for (Pair<AtomicBoolean, ContactInfo> con : contacts)
 				{
-					ContactInfo contact = contactPair.second;
+					ContactInfo contact = con.second;
 					if (!transientContacts.containsKey(contact.getMsisdn()))
 					{
-						ContactTuple tuple = new ContactTuple(1, contact);
-						transientContacts.put(contact.getMsisdn(), tuple);
+						PairModified<ContactInfo, Integer> contactPair = new PairModified<ContactInfo, Integer>(contact, 1);
+						transientContacts.put(contact.getMsisdn(), contactPair);
 					}
 				}
 			}
@@ -674,11 +697,11 @@ public class TransientCache extends ContactsCache
 			readLock.lock();
 			try
 			{
-				for (Entry<String, ContactTuple> savedMapEntry : transientContacts.entrySet())
+				for (Entry<String, PairModified<ContactInfo, Integer>> savedMapEntry : transientContacts.entrySet())
 				{
-					ContactInfo contactInfo = savedMapEntry.getValue().getContact();
+					ContactInfo contactInfo = savedMapEntry.getValue().getFirst();
 					String phoneNum = contactInfo.getPhoneNum();
-					if (phoneNumbers.contains(DatabaseUtils.sqlEscapeString(phoneNum)) && !contactInfo.isOnhike() && (null != contactInfo.getName()))
+					if (null != phoneNumbers && phoneNumbers.contains(DatabaseUtils.sqlEscapeString(phoneNum)) && !contactInfo.isOnhike() && (null != contactInfo.getName()))
 					{
 						contacts.add(contactInfo);
 						limit = limit - 1;
@@ -731,12 +754,13 @@ public class TransientCache extends ContactsCache
 			readLock.lock();
 			try
 			{
-				for (Entry<String, ContactTuple> mapEntry : transientContacts.entrySet())
+				for (Entry<String, PairModified<ContactInfo, Integer>> mapEntry : transientContacts.entrySet())
 				{
-					ContactTuple tuple = mapEntry.getValue();
-					if (null != tuple && tuple.getContact().getPhoneNum().equals(number))
+					PairModified<ContactInfo, Integer> contactPair = mapEntry.getValue();
+					String phoneNum = contactPair.getFirst().getPhoneNum();
+					if (null != contactPair && null != number && phoneNum.equals(number))
 					{
-						contact = tuple.getContact();
+						contact = contactPair.getFirst();
 						break;
 					}
 				}
@@ -778,12 +802,13 @@ public class TransientCache extends ContactsCache
 			readLock.lock();
 			try
 			{
-				for (Entry<String, ContactTuple> mapEntry : transientContacts.entrySet())
+				for (Entry<String, PairModified<ContactInfo, Integer>> mapEntry : transientContacts.entrySet())
 				{
-					ContactTuple tuple = mapEntry.getValue();
-					if (null != tuple && tuple.getContact().getPhoneNum().equals(number))
+					PairModified<ContactInfo, Integer> contactPair = mapEntry.getValue();
+					String phoneNum = contactPair.getFirst().getPhoneNum();
+					if (null != contactPair && null != number && phoneNum.equals(number))
 					{
-						contact = tuple.getContact();
+						contact = contactPair.getFirst();
 						break;
 					}
 				}
@@ -814,10 +839,10 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			ContactTuple tuple = transientContacts.get(contact.getMsisdn());
-			if (null != tuple)
+			PairModified<ContactInfo, Integer> contactPair = transientContacts.get(contact.getMsisdn());
+			if (null != contactPair)
 			{
-				tuple.getContact().setName(null);
+				contactPair.getFirst().setName(null);
 			}
 		}
 		finally
@@ -897,10 +922,10 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			ContactTuple tuple = transientContacts.get(msisdn);
-			if (null != tuple)
+			PairModified<ContactInfo, Integer> contactPair = transientContacts.get(msisdn);
+			if (null != contactPair)
 			{
-				tuple.setReferenceCount(tuple.getReferenceCount() + 1);
+				contactPair.setSecond(contactPair.getSecond() + 1);
 			}
 		}
 		finally

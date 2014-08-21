@@ -538,7 +538,7 @@ public class ContactManager implements ITransientCache
 	 * @param myMsisdn
 	 * @return
 	 */
-	public List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
+	public List<ContactInfo> getHikeContacts(int limit, Set<String> msisdnsIn, Set<String> msisdnsNotIn, String myMsisdn)
 	{
 		List<ContactInfo> contacts = transientCache.getHikeContacts(limit, msisdnsIn, msisdnsNotIn, myMsisdn);
 
@@ -1199,7 +1199,7 @@ public class ContactManager implements ITransientCache
 		}
 
 		Map<String, List<ContactInfo>> new_contacts_by_id = convertToMap(newContacts);
-		Map<String, List<ContactInfo>> hike_contacts_by_id = convertToMap(transientCache.getAllContacts(true));
+		Map<String, List<ContactInfo>> hike_contacts_by_id = convertToMap(transientCache.getAllContactsForSyncing());
 
 		/*
 		 * iterate over every item in the phone db, items that are equal remove from both maps items that are different, leave in 'new' map and remove from 'hike' map send the

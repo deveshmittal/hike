@@ -2,14 +2,16 @@ package com.bsb.hike.modules.contactmgr;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.bsb.hike.utils.PairModified;
+
 public class GroupDetails
 {
 
 	private String groupName;
 
-	private ConcurrentLinkedQueue<pair> lastMsisdns;
+	private ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns;
 
-	GroupDetails(String grpName, ConcurrentLinkedQueue<pair> lastMsisdns)
+	GroupDetails(String grpName, ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns)
 	{
 		this.groupName = grpName;
 		this.lastMsisdns = lastMsisdns;
@@ -25,12 +27,12 @@ public class GroupDetails
 		groupName = grpName;
 	}
 
-	ConcurrentLinkedQueue<pair> getLastMsisdns()
+	ConcurrentLinkedQueue<PairModified<String, String>> getLastMsisdns()
 	{
 		return lastMsisdns;
 	}
 
-	void setLastMsisdns(ConcurrentLinkedQueue<pair> lastMsisdns)
+	void setLastMsisdns(ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns)
 	{
 		this.lastMsisdns = lastMsisdns;
 	}
@@ -39,11 +41,11 @@ public class GroupDetails
 	{
 		if (null != lastMsisdns)
 		{
-			for (pair msPair : lastMsisdns)
+			for (PairModified<String, String> msPair : lastMsisdns)
 			{
-				if (msisdn.equals(msPair.first))
+				if (msisdn.equals(msPair.getFirst()))
 				{
-					msPair.second = name;
+					msPair.setSecond(name);
 				}
 			}
 		}
@@ -53,11 +55,11 @@ public class GroupDetails
 	{
 		if (null != lastMsisdns)
 		{
-			for (pair msPair : lastMsisdns)
+			for (PairModified<String, String> msPair : lastMsisdns)
 			{
-				if (msisdn.equals(msPair.first))
+				if (msisdn.equals(msPair.getFirst()))
 				{
-					return msPair.second;
+					return msPair.getSecond();
 				}
 			}
 		}

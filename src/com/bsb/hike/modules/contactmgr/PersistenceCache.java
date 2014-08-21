@@ -16,6 +16,7 @@ import android.util.Pair;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
 class PersistenceCache extends ContactsCache
@@ -26,7 +27,7 @@ class PersistenceCache extends ContactsCache
 	private Map<String, ContactInfo> convsContactsPersistence;
 
 	// Memory persistence for all group conversation last messaged contacts with reference count that should always be loaded
-	private Map<String, ContactTuple> groupContactsPersistence;
+	private Map<String, PairModified<ContactInfo, Integer>> groupContactsPersistence;
 
 	// Memory persistence for all group names and list of msisdns(last message in group) that should always be loaded
 	private Map<String, GroupDetails> groupPersistence;
@@ -44,7 +45,7 @@ class PersistenceCache extends ContactsCache
 	{
 		hDb = db;
 		convsContactsPersistence = new HashMap<String, ContactInfo>();
-		groupContactsPersistence = new HashMap<String, ContactTuple>();
+		groupContactsPersistence = new HashMap<String, PairModified<ContactInfo, Integer>>();
 		groupPersistence = new HashMap<String, GroupDetails>();
 		loadMemory();
 	}
@@ -64,10 +65,10 @@ class PersistenceCache extends ContactsCache
 			c = convsContactsPersistence.get(key);
 			if (null == c) // contact not found in persistence cache
 			{
-				ContactTuple tuple = groupContactsPersistence.get(key);
-				if (null != tuple)
+				PairModified<ContactInfo, Integer> contactPair = groupContactsPersistence.get(key);
+				if (null != contactPair)
 				{
-					c = tuple.getContact();
+					c = contactPair.getFirst();
 				}
 			}
 			return c;
@@ -111,8 +112,8 @@ class PersistenceCache extends ContactsCache
 				}
 				else
 				{
-					ContactTuple tuple = new ContactTuple(1, contact);
-					groupContactsPersistence.put(contact.getMsisdn(), tuple);
+					PairModified<ContactInfo, Integer> contactPair = new PairModified<ContactInfo, Integer>(contact, 1);
+					groupContactsPersistence.put(contact.getMsisdn(), contactPair);
 				}
 			}
 			finally
@@ -169,11 +170,11 @@ class PersistenceCache extends ContactsCache
 		}
 		else
 		{
-			ContactTuple tuple = groupContactsPersistence.get(msisdn);
-			if (null != tuple)
+			PairModified<ContactInfo, Integer> contactPair = groupContactsPersistence.get(msisdn);
+			if (null != contactPair)
 			{
-				tuple.setReferenceCount(tuple.getReferenceCount() - 1);
-				if (tuple.getReferenceCount() == 0)
+				contactPair.setSecond(contactPair.getSecond() - 1);
+				if (contactPair.getSecond() == 0)
 				{
 					groupContactsPersistence.remove(msisdn);
 				}
@@ -194,10 +195,10 @@ class PersistenceCache extends ContactsCache
 			GroupDetails grpDetails = groupPersistence.get(grpId);
 			if (null != grpDetails)
 			{
-				ConcurrentLinkedQueue<pair> lastMsisdns = grpDetails.getLastMsisdns();
-				for (pair msPair : lastMsisdns)
+				ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns = grpDetails.getLastMsisdns();
+				for (PairModified<String, String> msPair : lastMsisdns)
 				{
-					removeFromCache(msPair.first, false);
+					removeFromCache(msPair.getFirst(), false);
 				}
 				groupPersistence.remove(grpId);
 			}
@@ -224,10 +225,10 @@ class PersistenceCache extends ContactsCache
 			}
 			else
 			{
-				ContactTuple tuple = groupContactsPersistence.get(contact.getMsisdn());
-				if (null != tuple)
+				PairModified<ContactInfo, Integer> contactPair = groupContactsPersistence.get(contact.getMsisdn());
+				if (null != contactPair)
 				{
-					tuple.setContact(contact);
+					contactPair.setFirst(contact);
 				}
 			}
 		}
@@ -294,10 +295,10 @@ class PersistenceCache extends ContactsCache
 			c = convsContactsPersistence.get(msisdn);
 			if (null == c)
 			{
-				ContactTuple tuple = groupContactsPersistence.get(msisdn);
-				if (null != tuple)
+				PairModified<ContactInfo, Integer> contactPair = groupContactsPersistence.get(msisdn);
+				if (null != contactPair)
 				{
-					c = tuple.getContact();
+					c = contactPair.getFirst();
 				}
 			}
 
@@ -388,13 +389,13 @@ class PersistenceCache extends ContactsCache
 			String grpId = mapEntry.getKey();
 			String name = mapEntry.getValue();
 			List<String> lastMsisdns = groupLastMsisdnsMap.get(grpId);
-			ConcurrentLinkedQueue<pair> lastMsisdnsConcurrentLinkedQueue = new ConcurrentLinkedQueue<pair>();
+			ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdnsConcurrentLinkedQueue = new ConcurrentLinkedQueue<PairModified<String, String>>();
 			if (null != lastMsisdns)
 			{
 				grouplastMsisdns.addAll(lastMsisdns);
 				for (String ms : lastMsisdns)
 				{
-					lastMsisdnsConcurrentLinkedQueue.add(new pair(ms, null));
+					lastMsisdnsConcurrentLinkedQueue.add(new PairModified<String, String>(ms, null));
 					// name for unsaved contact will be set later because at this point we don't know which msisdns are saved and which are not.
 				}
 			}
@@ -431,8 +432,8 @@ class PersistenceCache extends ContactsCache
 		{
 			String msisdn = mapEntry.getKey();
 			ContactInfo contact = mapEntry.getValue();
-			ContactTuple tuple = new ContactTuple(1, contact);
-			groupContactsPersistence.put(msisdn, tuple);
+			PairModified<ContactInfo, Integer> contactPair = new PairModified<ContactInfo, Integer>(contact, 1);
+			groupContactsPersistence.put(msisdn, contactPair);
 
 			if (null == contact.getName())
 			{
@@ -458,10 +459,11 @@ class PersistenceCache extends ContactsCache
 			GroupDetails grpDetails = groupPersistence.get(groupId);
 			if (null != grpDetails)
 			{
-				ConcurrentLinkedQueue<pair> list = grpDetails.getLastMsisdns();
-				for (pair msPair : list)
+				ConcurrentLinkedQueue<PairModified<String, String>> list = grpDetails.getLastMsisdns();
+				for (PairModified<String, String> msPair : list)
 				{
-					msPair.second = map.get(msPair.first);
+					String name = map.get(msPair.getFirst());
+					msPair.setSecond(name);
 				}
 			}
 		}
@@ -568,19 +570,19 @@ class PersistenceCache extends ContactsCache
 			List<String> msisdns = new ArrayList<String>();
 			if (null != nameAndLastMsisdns)
 			{
-				ConcurrentLinkedQueue<pair> grpMsisdns = nameAndLastMsisdns.getLastMsisdns();
+				ConcurrentLinkedQueue<PairModified<String, String>> grpMsisdns = nameAndLastMsisdns.getLastMsisdns();
 				if (null != grpMsisdns)
 				{
 					boolean flag;
 					writeLock.lock();
 					try
 					{
-						for (pair msisdnPair : grpMsisdns)
+						for (PairModified<String, String> msisdnPair : grpMsisdns)
 						{
 							flag = false;
 							for (String ms : currentGroupMsisdns)
 							{
-								if (ms.equals(msisdnPair.first))
+								if (ms.equals(msisdnPair.getFirst()))
 								{
 									flag = true;
 									break;
@@ -588,25 +590,25 @@ class PersistenceCache extends ContactsCache
 							}
 							if (!flag)
 							{
-								removeFromCache(msisdnPair.first, false);
+								removeFromCache(msisdnPair.getFirst(), false);
 							}
 							else
 							{
 								// if contact is in group map then increase ref count by 1
-								ContactTuple tuple = groupContactsPersistence.get(msisdnPair.first);
-								if (null != tuple)
+								PairModified<ContactInfo, Integer> contactPair = groupContactsPersistence.get(msisdnPair.getFirst());
+								if (null != contactPair)
 								{
-									tuple.setReferenceCount(tuple.getReferenceCount() + 1);
+									contactPair.setSecond(contactPair.getSecond() + 1);
 								}
 								else
 								{
 									// if contact is in convsMap then insert in groupMap with ref count 1
-									ContactInfo contact = convsContactsPersistence.get(msisdnPair.first);
+									ContactInfo contact = convsContactsPersistence.get(msisdnPair.getFirst());
 									if (null == contact)
 									{
 										// get contact from db
 										// add to a list
-										msisdns.add(msisdnPair.first);
+										msisdns.add(msisdnPair.getFirst());
 									}
 									else
 									{
@@ -627,7 +629,7 @@ class PersistenceCache extends ContactsCache
 
 				for (String ms : currentGroupMsisdns)
 				{
-					pair msisdnNamePair = new pair(ms, null); // TODO name for unsaved contact
+					PairModified<String, String> msisdnNamePair = new PairModified<String, String>(ms, null); // TODO name for unsaved contact
 					grpMsisdns.add(msisdnNamePair);
 				}
 			}
@@ -718,7 +720,7 @@ class PersistenceCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			ConcurrentLinkedQueue<pair> clq = new ConcurrentLinkedQueue<pair>();
+			ConcurrentLinkedQueue<PairModified<String, String>> clq = new ConcurrentLinkedQueue<PairModified<String, String>>();
 			GroupDetails grpDetails = new GroupDetails(groupName, clq);
 			groupPersistence.put(grpId, grpDetails);
 		}
@@ -758,12 +760,12 @@ class PersistenceCache extends ContactsCache
 
 			if (null == contact)
 			{
-				for (Entry<String, ContactTuple> mapEntry : groupContactsPersistence.entrySet())
+				for (Entry<String, PairModified<ContactInfo, Integer>> mapEntry : groupContactsPersistence.entrySet())
 				{
-					ContactTuple tuple = mapEntry.getValue();
-					if (null != tuple && tuple.getContact().getPhoneNum().equals(number))
+					PairModified<ContactInfo, Integer> contactPair = mapEntry.getValue();
+					if (null != contactPair && contactPair.getFirst().getPhoneNum().equals(number))
 					{
-						contact = tuple.getContact();
+						contact = contactPair.getFirst();
 						break;
 					}
 				}
@@ -802,12 +804,12 @@ class PersistenceCache extends ContactsCache
 
 			if (null == contact)
 			{
-				for (Entry<String, ContactTuple> mapEntry : groupContactsPersistence.entrySet())
+				for (Entry<String, PairModified<ContactInfo, Integer>> mapEntry : groupContactsPersistence.entrySet())
 				{
-					ContactTuple tuple = mapEntry.getValue();
-					if (null != tuple && tuple.getContact().getPhoneNum().equals(number))
+					PairModified<ContactInfo, Integer> contactPair = mapEntry.getValue();
+					if (null != contactPair && contactPair.getFirst().getPhoneNum().equals(number))
 					{
-						contact = tuple.getContact();
+						contact = contactPair.getFirst();
 						break;
 					}
 				}
