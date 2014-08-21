@@ -284,6 +284,20 @@ public class HikeService extends Service
 		}
 
 		sm.setupStickerCategoryList(settings);
+		/*
+		* This preference has been used here because of a prepopulated recent sticker enhancement
+		* it will delete all the default stickers as we are adding some more default stickers 
+		*/
+		if (!preferenceManager.contains(StickerManager.REMOVE_DEFAULT_STICKERS))
+		{
+			sm.deleteDefaultDownloadedExpressionsStickers();
+			sm.deleteDefaultDownloadedStickers();
+			
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(StickerManager.REMOVE_DEFAULT_STICKERS, true);
+			editor.commit();
+		}
+		sm.loadRecentStickers();
 
 		/*
 		 * This preference has been used here because of a bug where we were inserting this key in the settings preference
@@ -292,7 +306,7 @@ public class HikeService extends Service
 		{
 			sm.removeHumanoidSticker();
 		}
-
+		
 		if (!preferenceManager.getBoolean(StickerManager.EXPRESSIONS_CATEGORY_INSERT_TO_DB, false))
 		{
 			sm.insertExpressionsCategory();

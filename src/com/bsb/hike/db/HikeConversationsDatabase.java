@@ -1521,6 +1521,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 					}
 					contentValues.put(DBConstants.CONVERSATION_METADATA, convMetaData.toString());
+					HikeMessengerApp.getPubSub().publish(HikePubSub.CONV_META_DATA_UPDATED, convMetaData);
 				}
 				catch (JSONException e)
 				{
