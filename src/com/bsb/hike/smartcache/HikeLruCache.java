@@ -299,37 +299,6 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 			return b;
 	}
 	
-	public BitmapDrawable getSharedMediaThumbnailFromCache(String fileKey, String destFilePath, int fileSize, boolean isImage)
-	{
-		BitmapDrawable b = get(fileKey);
-		if (b == null)
-		{
-			Bitmap thumbnail = null;
-			Logger.d("tesst", "isImage = "+isImage);
-			if (isImage)
-			{
-				thumbnail = HikeBitmapFactory.scaleDownBitmap(destFilePath, fileSize, fileSize, Bitmap.Config.RGB_565, false, false);
-				thumbnail = Utils.getRotatedBitmap(destFilePath, thumbnail);
-			}
-			else //Video
-			{
-				Logger.d("tesst", "video  = "+destFilePath);
-				thumbnail = ThumbnailUtils.createVideoThumbnail(destFilePath, MediaStore.Images.Thumbnails.MICRO_KIND);
-			}
-			
-			if (thumbnail == null)
-			{
-				Logger.d("tesst", "thumbnail is null "+ destFilePath);
-				return null;
-			}
-			BitmapDrawable bd = new BitmapDrawable(context.getResources(), thumbnail);
-			putInCache(fileKey, bd);
-			return bd;
-		}
-		else
-			return b;
-	}
-
 	public boolean deleteIconForMSISDN(String msisdn)
 	{
 		boolean rowsDeleted =HikeUserDatabase.getInstance().removeIcon(msisdn);

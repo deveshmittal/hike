@@ -95,7 +95,7 @@ public class SharedMediaAdapter extends PagerAdapter
 		}
 
 		galleryImageView.setScaleType(ScaleType.FIT_CENTER);
-		sharedMediaLoader.loadImage(sharedMediaItem.getFilePath(), galleryImageView, false);
+		sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(), galleryImageView, false);
 		
 		((ViewPager) container).addView(page);
 		return page;

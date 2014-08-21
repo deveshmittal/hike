@@ -69,6 +69,11 @@ public class HikeSharedFile extends HikeFile implements Parcelable
 		this.fileJSON = fileJSON;
 	}
 
+	public String  getImageLoaderKey()
+	{
+		return this.getExactFilePath() + "::" + this.getHikeFileType().ordinal(); 
+	}
+
 	@Override
 	public int describeContents()
 	{
