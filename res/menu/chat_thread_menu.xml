@@ -5,7 +5,12 @@
         android:id="@+id/chat_bg"
         android:icon="@drawable/ic_chat_background"
         android:showAsAction="always"
-        android:title="@string/change_theme"/>
+        android:title="@string/chat_theme"/>
+    <item
+        android:id="@+id/pin_imp"
+        android:icon="@drawable/ic_pin_it"
+        android:showAsAction="always"
+        android:title="@string/create_pin"/>
     <item
         android:id="@+id/attachment"
         android:icon="@drawable/ic_attachment"
@@ -13,7 +18,7 @@
         android:title="@string/attach"/>
     <item
         android:id="@+id/overflow_menu"
-        android:icon="@drawable/ic_overflow"
+        android:actionLayout="@layout/overflow_icon_view"
         android:showAsAction="always"
         android:title="@string/other"/>
 

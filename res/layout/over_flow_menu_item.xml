@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="48dp"
+    android:layout_height="wrap_content"
+    android:minHeight="48dp"
     android:gravity="center"
-    android:paddingLeft="11dp"
+    android:paddingLeft="18dp"
     android:paddingRight="11dp" >
 
     <RelativeLayout
@@ -25,15 +26,6 @@
                 style="@style/AvatarStyle" />
         </RelativeLayout>
         
-        <ImageView
-            android:id="@+id/arrow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_group_tip_arrow"
-            android:visibility="gone" />
-
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/item_title"
             android:layout_width="fill_parent"
@@ -67,6 +59,20 @@
             android:text="0"
             android:textColor="#a59b94"
             android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+       
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/friend_req_count"
+           	android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/ic_games_indicator"
+            android:gravity="center"
+            android:text="0"
+            android:textColor="@color/white"
+            android:textSize="13sp"
             android:textStyle="bold"
             android:visibility="gone" />
     </RelativeLayout>

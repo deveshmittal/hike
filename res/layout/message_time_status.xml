@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/time_status"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="bottom"
+    android:orientation="horizontal" >
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:00"
+        android:textColor="@color/black_45"
+        android:textSize="12sp"
+        android:textStyle="italic" />
+
+    <ImageView
+        android:id="@+id/status"
+        android:layout_width="21dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_tick"
+        android:layout_marginBottom="3dp"
+        android:layout_marginLeft="3dp"
+        android:visibility="gone" />
+
+</LinearLayout>

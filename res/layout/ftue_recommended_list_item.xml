@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@drawable/list_item"
+        android:orientation="horizontal"
+        android:paddingLeft="22dp" >
+
+        <RelativeLayout
+            android:id="@+id/avatar_container"
+            android:layout_width="@dimen/hike_list_item_avtar"
+            android:layout_height="@dimen/hike_list_item_avtar"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true" >
+
+            <com.bsb.hike.ui.utils.RecyclingImageView
+                android:id="@+id/avatar"
+                style="@style/AvatarStyle.Padding" />
+        </RelativeLayout>
+        
+          <com.bsb.hike.view.CustomFontTextView
+             android:id="@+id/invite_Text"
+             android:layout_width="60dp"
+             android:layout_height="30dp"
+             android:layout_alignParentRight="true"
+             android:layout_centerVertical="true"
+             android:gravity="center"
+             android:text="@string/invited"
+             android:textColor="@color/white"
+             android:textSize="13sp"
+             android:textStyle="bold|italic"
+             android:visibility="gone" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/invite_Text"
+            android:layout_width="60dp"
+            android:layout_height="30dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:text="@string/invited"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold|italic"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/add_friend"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/list_item"
+            android:paddingLeft="14dp"
+            android:paddingRight="12dp"
+            android:src="@drawable/ic_add_friend"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/add_friend_divider"
+            android:layout_width="1dp"
+            android:layout_height="32dp"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/add_friend"
+            android:background="@color/list_divider"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="10dp"
+            android:layout_toLeftOf="@id/add_friend"
+            android:layout_toRightOf="@id/avatar_container"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/contact"
+                android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
+                style="@style/SmallListContactItemHeader" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/info"
+                android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
+                style="@style/SmallListContactItemSubText"
+                android:visibility="visible" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/list_divider" />
+
+</LinearLayout>

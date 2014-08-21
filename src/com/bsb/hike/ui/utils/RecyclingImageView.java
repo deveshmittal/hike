@@ -1,5 +1,7 @@
 package com.bsb.hike.ui.utils;
 
+import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;

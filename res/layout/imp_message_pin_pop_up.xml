@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/pin_color" >
+
+        <ImageView
+            android:id="@+id/pattern"
+            android:layout_width="16dp"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/main_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignTop="@+id/main_content"
+            android:scaleType="fitXY"
+            android:src="@drawable/pin_pattern" />
+
+        <RelativeLayout
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:id="@+id/main_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/emo_btn"
+            android:layout_toRightOf="@+id/pattern" >
+
+            <com.bsb.hike.view.CustomFontEditText
+				android:hint="@string/pin_text_hint"
+				android:textColorHint="#d0ad87"
+				android:textColor="@color/pin_text_color"
+                android:id="@+id/messageedittext"
+                android:background="@null"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="15dp"
+                android:maxLines="2"
+                android:textSize="17sp"
+                android:textStyle="italic" />
+        </RelativeLayout>
+
+        <ImageView
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:id="@+id/emo_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/main_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/main_content"
+            android:src="@drawable/ic_emoticon" />
+    </RelativeLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        android:src="@drawable/pin_shadow" />
+
+</LinearLayout>

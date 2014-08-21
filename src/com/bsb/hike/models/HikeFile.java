@@ -14,6 +14,7 @@ import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
@@ -151,13 +152,15 @@ public class HikeFile
 	private JSONArray events;
 
 	private boolean isSent;
+	
+	private String img_quality;
 
 	public HikeFile(JSONObject fileJSON, boolean isSent)
 	{
 		this.fileName = fileJSON.optString(HikeConstants.FILE_NAME);
 		this.fileTypeString = fileJSON.optString(HikeConstants.CONTENT_TYPE);
 		this.thumbnailString = fileJSON.optString(HikeConstants.THUMBNAIL, null);
-		this.thumbnail = thumbnail == null ? Utils.stringToDrawable(thumbnailString) : thumbnail;
+		this.thumbnail = thumbnail == null ? HikeBitmapFactory.stringToDrawable(thumbnailString) : thumbnail;
 		this.sourceFilePath = fileJSON.optString(HikeConstants.SOURCE_FILE_PATH);
 		if(isSent)
 		{
@@ -182,32 +185,35 @@ public class HikeFile
 		this.recordingDuration = fileJSON.optLong(HikeConstants.PLAYTIME, -1);
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
 		this.isSent = isSent;
+		this.img_quality = fileJSON.optString(HikeConstants.FILE_IMAGE_QUALITY, null);
 		// this.file = TextUtils.isEmpty(this.fileKey) ? null : Utils
 		// .getOutputMediaFile(hikeFileType, fileName);
 	}
 
-	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, boolean isSent)
+	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, boolean isSent, String img_quality)
 	{
 		this.fileName = fileName;
 		this.fileTypeString = fileTypeString;
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.thumbnail = HikeBitmapFactory.getBitmapDrawable(thumbnail);
 		this.recordingDuration = recordingDuration;
 		this.isSent = isSent;
+		this.img_quality = img_quality;
 	}
 
-	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, String source, int fileSize, boolean isSent)
+	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, String source, int fileSize, boolean isSent, String img_quality)
 	{
 		this.fileName = fileName;
 		this.fileTypeString = fileTypeString;
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.thumbnail = HikeBitmapFactory.getBitmapDrawable(thumbnail);
 		this.recordingDuration = recordingDuration;
 		this.sourceFilePath = source;
 		this.isSent = isSent;
 		this.fileSize = fileSize;
+		this.img_quality = img_quality;
 	}
 
 	public HikeFile(double latitude, double longitude, int zoomLevel, String address, String thumbnailString, Bitmap thumbnail, boolean isSent)
@@ -220,7 +226,7 @@ public class HikeFile
 		this.hikeFileType = HikeFileType.fromString(fileTypeString);
 		this.address = address;
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.thumbnail = HikeBitmapFactory.getBitmapDrawable(thumbnail);
 		this.isSent = isSent;
 	}
 
@@ -234,9 +240,13 @@ public class HikeFile
 			fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
 			fileJSON.putOpt(HikeConstants.FILE_SIZE, fileSize);
 			fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
-			if(isSent)
+			if(isSent && (getHikeFileType() != HikeFileType.CONTACT) && (getHikeFileType() != HikeFileType.LOCATION))
 			{
-				fileJSON.putOpt(HikeConstants.FILE_PATH, getFile().getPath());
+				File file = getFile();
+				if (file != null)
+				{
+					fileJSON.putOpt(HikeConstants.FILE_PATH, file.getPath());
+				}
 			}
 			if (sourceFilePath != null)
 			{
@@ -260,6 +270,9 @@ public class HikeFile
 				fileJSON.putOpt(HikeConstants.EMAILS, emails);
 				fileJSON.putOpt(HikeConstants.ADDRESSES, addresses);
 				fileJSON.putOpt(HikeConstants.EVENTS, events);
+			}
+			if(this.hikeFileType == HikeFileType.IMAGE && this.img_quality != null){
+				fileJSON.putOpt(HikeConstants.FILE_IMAGE_QUALITY, this.img_quality);
 			}
 
 			return fileJSON;

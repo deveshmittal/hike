@@ -73,7 +73,16 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 		return Utils.getFirstName(this.name);
 	}
-
+    
+	public String getFirstNameAndSurname()
+	{
+		if(TextUtils.isEmpty(name))
+		{
+			return this.msisdn;
+		}
+		
+		return Utils.getFirstNameAndSurname(this.name);
+	}
 	public void setName(String name)
 	{
 		this.name = name;
@@ -333,7 +342,9 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		return json;
 	}
 
-	public static LastSeenComparator lastSeenTimeComparator = new LastSeenComparator();
+	public static LastSeenComparator lastSeenTimeComparator = new LastSeenComparator(true);
+	
+	public static LastSeenComparator lastSeenTimeComparatorWithoutFav = new LastSeenComparator(false);
 
 	@Override
 	public int compareTo(ContactInfo rhs)
