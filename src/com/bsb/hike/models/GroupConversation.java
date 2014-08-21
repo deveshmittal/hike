@@ -36,16 +36,16 @@ public class GroupConversation extends Conversation
 
 	private int groupMemberAliveCount;
 
-	public GroupConversation(String msisdn, long convId, String contactName, String groupOwner, boolean isGroupAlive)
+	public GroupConversation(String msisdn, String contactName, String groupOwner, boolean isGroupAlive)
 	{
-		super(msisdn, convId, contactName, true);
+		super(msisdn, contactName, true);
 		this.groupOwner = groupOwner;
 		this.isGroupAlive = isGroupAlive;
 	}
 
 	public GroupConversation(JSONObject jsonObject, Context context) throws JSONException
 	{
-		super(jsonObject.getString(HikeConstants.TO), 0, null, true);
+		super(jsonObject.getString(HikeConstants.TO), null, true);
 		this.groupOwner = jsonObject.getString(HikeConstants.FROM);
 		this.groupParticipantList = new HashMap<String, GroupParticipant>();
 		JSONArray array = jsonObject.getJSONArray(HikeConstants.DATA);

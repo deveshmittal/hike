@@ -57,8 +57,6 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 
 	private Conversation mConversation;
 
-	private long convId;
-
 	private HikePubSub mPubSub;
 	
 	private ListView mPinListView;
@@ -81,8 +79,6 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 	{
 		msisdn = getArguments().getString(HikeConstants.TEXT_PINS);
 		
-		convId = getArguments().getLong(HikeConstants.EXTRA_CONV_ID);
-
 		View parent = inflater.inflate(R.layout.sticky_pins, null);
 		
 		mPinListView = (ListView) parent.findViewById(android.R.id.list);
@@ -99,7 +95,7 @@ public class PinHistoryFragment extends SherlockListFragment implements OnScroll
 		
 		mPinListView.setEmptyView(parent.findViewById(android.R.id.empty));
 		
-		PHadapter = new PinHistoryAdapter(getActivity(), textPins, msisdn, convId, mConversation, true,chatTheme);
+		PHadapter = new PinHistoryAdapter(getActivity(), textPins, msisdn, mConversation, true,chatTheme);
 
 		setListAdapter(PHadapter);		
 

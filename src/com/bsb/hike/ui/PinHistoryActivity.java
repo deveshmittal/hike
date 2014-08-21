@@ -22,8 +22,6 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity
 		
 	private String msisdn;
 
-	private long convId;
-	
 	private ChatTheme chatTheme;
 		
 	protected void onCreate(Bundle savedInstanceState)
@@ -82,13 +80,10 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity
 	{
 		msisdn = getIntent().getExtras().getString(HikeConstants.TEXT_PINS);
 
-		convId = getIntent().getExtras().getLong(HikeConstants.EXTRA_CONV_ID);
-
 		if(getSupportFragmentManager().findFragmentByTag(HikeConstants.PIN_HISTORY_FRAGMENT_TAG) == null)
 		{			
 			Bundle bundle = new Bundle();
 			bundle.putString(HikeConstants.TEXT_PINS, msisdn);
-			bundle.putLong(HikeConstants.EXTRA_CONV_ID, convId);
 
 			mainFragment = new PinHistoryFragment();
 			mainFragment.setArguments(bundle);

@@ -356,15 +356,14 @@ public class DbConversationListener implements Listener
 		}
 		else if (HikePubSub.CLEAR_CONVERSATION.equals(type))
 		{
-			Pair<String, Long> values = (Pair<String, Long>) object;
-			Long convId = values.second;
-			mConversationDb.clearConversation(convId);
+			String msisdn = (String) object;
+			mConversationDb.clearConversation(msisdn);
 		}
 		else if (HikePubSub.UPDATE_PIN_METADATA.equals(type))
 		{
 			
 				Conversation conv = (Conversation)object;
-				HikeConversationsDatabase.getInstance().updateConversationMetadata(conv.getConvId(), conv.getMetaData());
+				HikeConversationsDatabase.getInstance().updateConversationMetadata(conv.getMsisdn(), conv.getMetaData());
 			
 		}
 	}

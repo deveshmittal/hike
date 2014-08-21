@@ -114,7 +114,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		protected Conversation[] doInBackground(Conversation... convs)
 		{
 			HikeConversationsDatabase db = null;
-			ArrayList<Long> ids = new ArrayList<Long>(convs.length);
 			ArrayList<String> msisdns = new ArrayList<String>(convs.length);
 			Editor editor = context.getSharedPreferences(HikeConstants.DRAFT_SETTING, Context.MODE_PRIVATE).edit();
 			for (Conversation conv : convs)
@@ -133,15 +132,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
 				}
 
-				ids.add(conv.getConvId());
 				msisdns.add(conv.getMsisdn());
 				editor.remove(conv.getMsisdn());
 			}
 			editor.commit();
 
 			db = HikeConversationsDatabase.getInstance();
-			db.deleteConversation(ids.toArray(new Long[] {}), msisdns);
-			
+			db.deleteConversation(msisdns);
+
 			return convs;
 		}
 
@@ -162,7 +160,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					continue;
 				}
-				mgr.cancel((int) conversation.getConvId());
 				mAdapter.remove(conversation);
 				mConversationsByMSISDN.remove(conversation.getMsisdn());
 				mConversationsAdded.remove(conversation.getMsisdn());
@@ -758,7 +755,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			@Override
 			public void onClick(View v)
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(conv.getMsisdn(), conv.getConvId()));
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_CONVERSATION, conv.getMsisdn());
 				clearConfirmDialog.dismiss();
 			}
 		};
@@ -1567,9 +1564,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else if (HikePubSub.CLEAR_CONVERSATION.equals(type))
 		{
-			Pair<String, Long> values = (Pair<String, Long>) object;
-
-			String msisdn = values.first;
+			String msisdn = (String) object;
 			clearConversation(msisdn);
 		}
 		else if (HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE.equals(type))
