@@ -456,7 +456,7 @@ public class MqttMessagesManager
 		/*
 		 * Return if there is no conversation for this msisdn.
 		 */
-		if (ContactManager.getInstance().isConvExists(convMessage.getMsisdn()))
+		if (!ContactManager.getInstance().isConvExists(convMessage.getMsisdn()))
 		{
 			return;
 		}
