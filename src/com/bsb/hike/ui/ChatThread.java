@@ -72,6 +72,7 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
@@ -1127,6 +1128,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void onBackPressed()
 	{
+		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
+		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+		
+		if (fragment != null)
+		{	
+			PhotoViewerFragment.onPhotoBack(fragment, fragmentTransaction, getSupportActionBar());
+			return;
+		}
 		if (findViewById(R.id.impMessageCreateView).getVisibility() == View.VISIBLE)
 		{
 			dismissPinCreateView(R.anim.down_up_up_part);

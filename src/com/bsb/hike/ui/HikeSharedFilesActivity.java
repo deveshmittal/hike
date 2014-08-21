@@ -130,6 +130,14 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	@Override
 	public void onBackPressed()
 	{
+		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
+		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+		
+		if (fragment != null)
+		{	
+			PhotoViewerFragment.onPhotoBack(fragment, fragmentTransaction, getSupportActionBar());
+			return;
+		}
 		if (multiSelectMode)
 		{
 			destroyActionMode();

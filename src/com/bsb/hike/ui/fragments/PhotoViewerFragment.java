@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
@@ -157,5 +158,16 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		fragmentTransaction.add(resId, photoViewerFragment, HikeConstants.IMAGE_FRAGMENT_TAG);
 		fragmentTransaction.commitAllowingStateLoss();
 		
+	}
+	
+	public static void onPhotoBack(Fragment fragment, FragmentTransaction fragmentTransaction, ActionBar actionBar)
+	{
+		if (fragment != null && fragment.isVisible() && fragment instanceof PhotoViewerFragment)
+		{	
+			fragmentTransaction.remove(fragment);
+			fragmentTransaction.commitAllowingStateLoss();
+			actionBar.show();
+			return;
+		}
 	}
 }
