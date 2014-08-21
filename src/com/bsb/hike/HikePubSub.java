@@ -359,6 +359,8 @@ public class HikePubSub implements Runnable
 	public static String HIKE_TO_OFFLINE_PUSH = "hikeToOfflinePush";
 
 	public static String PROFILE_UPDATE_FINISH = "profileUpdateFinish";
+	
+	public static final String CONV_META_DATA_UPDATED = "convMetaDataUpdated";
 
 	private final Thread mThread;
 
