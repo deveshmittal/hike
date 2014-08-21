@@ -207,20 +207,16 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	
 	public void loadItems(boolean reachedEnd, long maxMsgId, int limit, boolean itemsToRight)
 	{
-		if (Utils.isHoneycombOrHigher())
-		{
-			new GetMoreItemsTask(reachedEnd, maxMsgId, limit, itemsToRight).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		}
-		else
-		{
-			 new GetMoreItemsTask(reachedEnd, maxMsgId, limit, itemsToRight).execute();
-		}
+		loadItems(reachedEnd, maxMsgId, limit, itemsToRight, false, 0);
 	}
 	//function called to load items to the left of viewpager
 	public void loadItems(boolean reachedEnd, long msgId, int limit, boolean itemsToRight, boolean applyOffset, int prevPosition)
 	{
-		this.applyOffset = applyOffset;
-		this.prevPosition = prevPosition;
+		if(applyOffset)
+		{
+			this.applyOffset = applyOffset;
+			this.prevPosition = prevPosition;
+		}
 		if (Utils.isHoneycombOrHigher())
 		{
 			new GetMoreItemsTask(reachedEnd, msgId, limit, itemsToRight).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
