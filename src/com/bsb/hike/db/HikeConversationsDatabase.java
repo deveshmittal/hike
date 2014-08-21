@@ -1136,7 +1136,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	private void updateSharedMediaTableMetadata(long msgId, MessageMetadata metadata)
 	{
 		ContentValues contentValues = new ContentValues(1);
-		putMetadataAccordingToFileType(contentValues, metadata);
+		putMetadataAccordingToFileType(contentValues, metadata, false);
 		if(!contentValues.containsKey(DBConstants.MESSAGE_METADATA))
 		{
 			return;
@@ -3844,26 +3844,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		contentValues.put(DBConstants.IS_SENT, isSent);
 		contentValues.put(DBConstants.HIKE_FILE_TYPE, convMessage.getMetadata().getHikeFiles().get(0).getHikeFileType().ordinal());
 
-		String thumbnailString = null;
-		/*
-		 * We need to remove thumbnail from json object before saving in sharedMediaTable
-		 */
-		thumbnailString = convMessage.getMetadata().getJSON().optJSONArray(HikeConstants.FILES).optJSONObject(0).optString(HikeConstants.THUMBNAIL);
-		if (!TextUtils.isEmpty(thumbnailString))
-		{
-			convMessage.getMetadata().getJSON().optJSONArray(HikeConstants.FILES).optJSONObject(0).remove(HikeConstants.THUMBNAIL);
-		}
-
-		putMetadataAccordingToFileType(contentValues, convMessage.getMetadata());
-
-		if (!TextUtils.isEmpty(thumbnailString))
-		{
-			addThumbnailStringToMetadata(convMessage.getMetadata(), thumbnailString);
-		}
+		putMetadataAccordingToFileType(contentValues, convMessage.getMetadata(), true);
+		
 		return contentValues;
 	}
 
-	private void putMetadataAccordingToFileType(ContentValues contentValues, MessageMetadata metadata)
+	private void putMetadataAccordingToFileType(ContentValues contentValues, MessageMetadata metadata, boolean removeThumbnail)
 	{
 		if (HikeConstants.LOCATION_CONTENT_TYPE.equals(metadata.getJSON().optString(HikeConstants.CONTENT_TYPE)))
 		{
@@ -3871,7 +3857,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 		else if (metadata.getJSON().has(HikeConstants.FILES))
 		{
+			String thumbnailString = null;
+			if(removeThumbnail)
+			{
+				/*
+				 * We need to remove thumbnail from json object before saving in sharedMediaTable
+				 */
+				thumbnailString = metadata.getJSON().optJSONArray(HikeConstants.FILES).optJSONObject(0).optString(HikeConstants.THUMBNAIL);
+				if (!TextUtils.isEmpty(thumbnailString))
+				{
+					metadata.getJSON().optJSONArray(HikeConstants.FILES).optJSONObject(0).remove(HikeConstants.THUMBNAIL);
+				}
+			}
 			contentValues.put(DBConstants.MESSAGE_METADATA, metadata.getJSON().optJSONArray(HikeConstants.FILES).optJSONObject(0).toString());
+			
+			if (thumbnailString != null && !TextUtils.isEmpty(thumbnailString))
+			{
+				addThumbnailStringToMetadata(metadata, thumbnailString);
+			}
 		}
 	}
 
