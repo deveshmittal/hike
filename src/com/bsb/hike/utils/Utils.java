@@ -171,6 +171,7 @@ import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.TimelineActivity;
+import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
 import com.google.android.maps.GeoPoint;
@@ -4449,19 +4450,28 @@ public class Utils
 			sb.append(")");
 
 		return sb.toString();
-	}	
-	
+	}
+
+	public static void startWebViewActivity(Context context, String url, String title)
+	{
+		Intent intent = new Intent(context, WebViewActivity.class);
+		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, url);
+		intent.putExtra(HikeConstants.Extras.TITLE, title);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		context.startActivity(intent);
+	}
+
 	public static Drawable getChatTheme(ChatTheme chatTheme, Context context)
 	{
 		/*
 		 * for xhdpi and above we should not scale down the chat theme nodpi asset for hdpi and below to save memory we should scale it down
 		 */
 		int inSampleSize = 1;
-		if(!chatTheme.isTiled() && Utils.densityMultiplier < 2)
+		if (!chatTheme.isTiled() && Utils.densityMultiplier < 2)
 		{
 			inSampleSize = 2;
 		}
-		
+
 		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(context.getResources(), chatTheme.bgResId(), inSampleSize);
 
 		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(context.getResources(), b);
@@ -4475,10 +4485,10 @@ public class Utils
 
 		return bd;
 	}
-	
+
 	public static void resetPinUnreadCount(Conversation conv)
 	{
-		if(conv.getMetaData() != null)
+		if (conv.getMetaData() != null)
 		{
 			try
 			{

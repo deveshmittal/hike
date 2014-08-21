@@ -1738,4 +1738,6 @@ public class HikeConstants
 	public static final String EXTRA_CONV_ID = "conv_id";
 	
 	public static final int MAX_PIN_CONTENT_LINES_IN_HISTORY = 10;
+	
+	public static final String URL = "url";
 }

@@ -2460,7 +2460,13 @@ public class MqttMessagesManager
 				pref.saveData(keys[0], header);
 				pref.saveData(keys[1], body);
 				pref.saveData(keys[2], subType);
+				String url = data.optString(HikeConstants.URL);
+				if(!TextUtils.isEmpty(url) && HikeMessengerApp.ATOMIC_POP_UP_HTTP.equals(subType)){
+				pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_HTTP_URL, url);
+				}
 				Logger.i("tip", "writing to pref passed " + header + " -- " + body + " -- subtype " + subType);
+			}else{
+				Logger.i("tip", "writing to pref failed , could not find keys  " );
 			}
 		}
 		else
@@ -2493,7 +2499,7 @@ public class MqttMessagesManager
 		Logger.i("tip", "subtype for main");
 		if (HikeMessengerApp.ATOMIC_POP_UP_FAVOURITES.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_INVITE.equals(subType)
 				|| HikeMessengerApp.ATOMIC_POP_UP_PROFILE_PIC.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_STATUS.equals(subType)
-				|| HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL.equals(subType))
+				|| HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_HTTP.equals(subType))
 		{
 			// show notification
 			if (notificationTextIfApplicable != null)
