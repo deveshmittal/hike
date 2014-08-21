@@ -1,7 +1,9 @@
 package com.bsb.hike.service;
 
 import java.io.File;
+
 import java.util.Calendar;
+
 import java.util.List;
 
 import org.json.JSONException;
@@ -32,16 +34,15 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
@@ -66,7 +67,7 @@ public class HikeService extends Service
 		public void run()
 		{
 			Logger.d("ContactsChanged", "calling syncUpdates");
-			ContactUtils.syncUpdates(this.context);
+			ContactManager.getInstance().syncUpdates(this.context);
 			if (manualSync)
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNCED, null);
@@ -852,8 +853,8 @@ public class HikeService extends Service
 				return;
 			}
 
-			List<ContactInfo> contactinfos = HikeUserDatabase.getInstance().getContacts();
-			ContactUtils.setGreenBlueStatus(context, contactinfos);
+			List<ContactInfo> contactinfos = ContactManager.getInstance().getAllContacts();
+			ContactManager.getInstance().setGreenBlueStatus(context, contactinfos);
 			JSONObject data = AccountUtils.getWAJsonContactList(contactinfos);
 
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/info", RequestType.OTHER, new HikeHttpCallback()

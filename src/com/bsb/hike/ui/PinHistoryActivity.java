@@ -60,7 +60,7 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 	private HikeConversationsDatabase mDb;
 
 	private Conversation mConversation;
-
+	
 	private long convId;
 	
 	private ListView mPinListView;
