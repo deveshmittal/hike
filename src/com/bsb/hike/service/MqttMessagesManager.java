@@ -112,6 +112,7 @@ public class MqttMessagesManager
 	private MqttMessagesManager(Context context)
 	{
 		this.convDb = HikeConversationsDatabase.getInstance();
+		this.userWriteDb = ContactManager.getInstance().getWritableDatabase();
 		this.convWriteDb = convDb.getWritableDatabase();
 		this.settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.context = context;
