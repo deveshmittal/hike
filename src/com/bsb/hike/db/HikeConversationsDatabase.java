@@ -3845,23 +3845,21 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		contentValues.put(DBConstants.HIKE_FILE_TYPE, convMessage.getMetadata().getHikeFiles().get(0).getHikeFileType().ordinal());
 
 		String thumbnailString = null;
-		try
+		/*
+		 * We need to remove thumbnail from json object before saving in sharedMediaTable
+		 */
+		thumbnailString = convMessage.getMetadata().getJSON().optJSONArray(HikeConstants.FILES).optJSONObject(0).optString(HikeConstants.THUMBNAIL);
+		if (!TextUtils.isEmpty(thumbnailString))
 		{
-			/*
-			 * We need to remove thumbnail from json object before saving in sharedMediaTable
-			 */
-			thumbnailString = convMessage.getMetadata().getJSON().optJSONArray(HikeConstants.FILES).optJSONObject(0).getString(HikeConstants.THUMBNAIL);
 			convMessage.getMetadata().getJSON().optJSONArray(HikeConstants.FILES).optJSONObject(0).remove(HikeConstants.THUMBNAIL);
+		}
 
-			putMetadataAccordingToFileType(contentValues, convMessage.getMetadata());
+		putMetadataAccordingToFileType(contentValues, convMessage.getMetadata());
 
+		if (!TextUtils.isEmpty(thumbnailString))
+		{
 			addThumbnailStringToMetadata(convMessage.getMetadata(), thumbnailString);
 		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
-
 		return contentValues;
 	}
 
