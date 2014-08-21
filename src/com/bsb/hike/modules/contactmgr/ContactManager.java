@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.ContactsContract;
@@ -76,6 +77,11 @@ public class ContactManager implements ITransientCache
 			}
 		}
 		return _instance;
+	}
+
+	public SQLiteDatabase getWritableDatabase()
+	{
+		return hDb.getWritableDatabase();
 	}
 
 	public void init(Context ctx)
