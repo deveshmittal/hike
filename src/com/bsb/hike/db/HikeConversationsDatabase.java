@@ -2295,24 +2295,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					// conv.setMetadata(convMetadata);
 				}
 
-				/*
-				 * If the message does not contain any text or metadata, its an empty message and the conversation is blank.
-				 */
-				if (!TextUtils.isEmpty(messageString) || !TextUtils.isEmpty(metadata))
+				ConvMessage message = new ConvMessage(messageString, msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)), c.getLong(msgIdColumn),
+						c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn));
+				try
 				{
-					ConvMessage message = new ConvMessage(messageString, msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)), c.getLong(msgIdColumn),
-							c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn));
-					try
-					{
-						message.setMetadata(metadata);
-					}
-					catch (JSONException e)
-					{
-						Logger.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
-					}
-
-					conv.addMessage(message);
+					message.setMetadata(metadata);
 				}
+				catch (JSONException e)
+				{
+					Logger.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
+				}
+
+				conv.addMessage(message);
+
 				conversations.put(msisdn, conv);
 			}
 
