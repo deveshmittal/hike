@@ -733,6 +733,7 @@ public class HikeNotification
 		}
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, statusMessage.getMsisdn(), null, false, false);
+		
 		addNotificationId(notificationId);
 	}
 
