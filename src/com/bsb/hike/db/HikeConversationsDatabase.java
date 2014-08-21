@@ -1117,12 +1117,23 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		ContentValues contentValues = new ContentValues(1);
 		contentValues.put(DBConstants.MESSAGE_METADATA, metadata.serialize());
-		mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { String.valueOf(msgID) });
-
-		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MESSAGE_ID + "=? AND " + DBConstants.IS_STATUS_MSG + " = 0", new String[] { String.valueOf(msgID) });
-
-		updateSharedMediaTableMetadata(msgID, metadata);
-		
+		try
+		{
+			mDb.beginTransaction();
+			mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { String.valueOf(msgID) });
+			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MESSAGE_ID + "=? AND " + DBConstants.IS_STATUS_MSG + " = 0", new String[] { String.valueOf(msgID) });
+			updateSharedMediaTableMetadata(msgID, metadata);
+			mDb.setTransactionSuccessful();
+		}
+		catch (Exception e)
+		{
+			Logger.e(getClass().getSimpleName(), "Exception in updateMessageMetadata: ", e);
+			e.printStackTrace();
+		}
+		finally
+		{
+			mDb.endTransaction();
+		}
 		addThumbnailStringToMetadata(metadata, thumbnailString);
 	}
 
