@@ -1234,6 +1234,8 @@ public class HikeConstants
 		public static final String PIN_TYPE_SHOWING="pinTypeShowing";
 
 		public static final String SHARED_FILE_ITEMS = "sharedFileItems";
+		
+		public static final String IS_LAST_MESSAGE = "isLastMessage";
 	}
 
 	public static final class LogEvent

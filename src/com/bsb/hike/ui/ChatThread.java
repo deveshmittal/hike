@@ -3725,19 +3725,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						return;
 					}
-					ConvMessage convMessage = null;
-					for (Long msgId : msgIds)
-					{
-						for (int pos=0; pos<mAdapter.getCount(); pos++)
-						{
-							if(mAdapter.getItem(pos).getMsgID() == msgId)
-							{
-								convMessage = mAdapter.getItem(pos);
-								deleteMessage(convMessage);
-								break;
-							}
-						}
-					}
+					removeMessages(msgIds);
 				}
 			});
 		}
@@ -4569,12 +4557,44 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
-	private void removeMessage(ConvMessage convMessage)
+	private void removeMessages(ArrayList<Long> msgIds)
 	{
-		boolean lastMessage = convMessage.equals(messages.get(messages.size() - 1));
-		mPubSub.publish(HikePubSub.DELETE_MESSAGE, new Pair<ConvMessage, Boolean>(convMessage, lastMessage));
-		mAdapter.removeMessage(convMessage);
+		Collections.sort(msgIds);
+		//TODO if last message is typing notification we will get wrong result here
+		boolean isLastMessage = (msgIds.get(msgIds.size()-1) == messages.get(messages.size() - 1).getMsgID());
+		Bundle bundle = new Bundle();
+		bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, isLastMessage);
+		bundle.putString(HikeConstants.Extras.MSISDN, mContactNumber);
+		mPubSub.publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
+		deleteMessages(msgIds);
 		mAdapter.notifyDataSetChanged();
+	}
+	
+	private void deleteMessages(ArrayList<Long> msgIds)
+	{
+		/*
+		 * Iterating in reverse order since its more likely the user wants to delete one of his/her latest messages.
+		 */
+		int lastIndex = msgIds.size() - 1;
+		for (int i = lastIndex; i >= 0; i--)
+		{
+			/*
+			 * break if we have reached first message which is not in UI.
+			 */
+			long msgId = msgIds.get(i);
+			if (msgId < messages.get(0).getMsgID())
+			{
+				break;
+			}
+			for (ConvMessage convMessage : messages)
+			{
+				if (convMessage.getMsgID() == msgId)
+				{
+					deleteMessage(convMessage);
+					break;
+				}
+			}
+		}
 	}
 	
 	/*
@@ -4584,7 +4604,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	 */
 	private void deleteMessage(ConvMessage convMessage)
 	{
-		removeMessage(convMessage);
+		mAdapter.removeMessage(convMessage);
 		if (!convMessage.isSMS() && convMessage.getState() == State.SENT_CONFIRMED)
 		{
 			mAdapter.removeFromUndeliverdMessage(convMessage);
@@ -7603,6 +7623,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		switch (item.getItemId())
 		{
 		case R.id.delete_msgs:
+			final ArrayList<Long> selectedMsgIdsToDelete = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(ChatThread.this);
 			if (mAdapter.getSelectedCount() == 1)
 			{
@@ -7620,10 +7641,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void onClick(View v)
 				{
-					for (ConvMessage convMessage : selectedMessagesMap.values())
-					{
-						deleteMessage(convMessage);
-					}
+					removeMessages(selectedMsgIdsToDelete);
 					destroyActionMode();
 					deleteConfirmDialog.dismiss();
 				}
