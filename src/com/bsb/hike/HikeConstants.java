@@ -1744,4 +1744,8 @@ public class HikeConstants
 	public static final String EXTRA_CONV_ID = "conv_id";
 	
 	public static final int MAX_PIN_CONTENT_LINES_IN_HISTORY = 10;
+	
+	public static final String MEDIA_POSITION = "position";
+	
+	public static final String FROM_CHAT_THREAD = "ct";
 }

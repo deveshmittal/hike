@@ -13,6 +13,9 @@ import org.json.JSONObject;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.os.Parcelable;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
@@ -41,6 +45,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
+import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
@@ -70,6 +75,8 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	private boolean reachedEnd = false;
 	
 	private boolean loadingMoreItems = false;
+	
+	private String TAG = "HikeSharedFilesActivity";
 	
 	public boolean isMultiSelectMode()
 	{
@@ -123,6 +130,14 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	@Override
 	public void onBackPressed()
 	{
+		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
+		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+		
+		if (fragment != null)
+		{	
+			PhotoViewerFragment.onPhotoBack(fragment, fragmentTransaction, getSupportActionBar());
+			return;
+		}
 		if (multiSelectMode)
 		{
 			destroyActionMode();
@@ -286,9 +301,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 					}
 					else
 					{
-						/*
-						 * This signifies that we've reached the end. No need to query the db anymore unless we add a new message.
-						 */
+						Logger.d(TAG,"No more items found in Db");
 						reachedEnd = true;
 					}
 					loadingMoreItems = false;
@@ -317,7 +330,6 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	{
 		HikeSharedFile sharedFileItem = sharedFilesList.get(position);
 
-		Intent intent;
 		if (multiSelectMode)
 		{
 			if (selectedSharedFileItems.containsKey(sharedFileItem.getMsgId()))
@@ -351,9 +363,12 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		}
 		else
 		{
-			intent = new Intent();
-			intent.putParcelableArrayListExtra(HikeConstants.Extras.SHARED_FILE_ITEMS, new ArrayList<HikeSharedFile>(selectedSharedFileItems.values()));
 			// TODO send this intent to photo viewer
+			Bundle arguments = new Bundle();
+			arguments.putParcelableArrayList(HikeConstants.Extras.SHARED_FILE_ITEMS, (ArrayList<? extends Parcelable>) sharedFilesList);
+			arguments.putInt(HikeConstants.MEDIA_POSITION, position);
+			arguments.putString(HikeConstants.Extras.MSISDN, msisdn);
+			PhotoViewerFragment.openPhoto(R.id.parent_layout, HikeSharedFilesActivity.this, arguments);
 		}
 
 	}
