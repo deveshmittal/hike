@@ -1320,7 +1320,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				// upgrade groupInfoTable
 				updateReadBy(conv);
-				if (Utils.isGroupConversation(conv.getMsisdn()))
+				if (Utils.isGroupConversation(conv.getMsisdn()) && conv.getMetadata() != null)
 				{
 					map.put(conv.getMsisdn(), conv.getMetadata().getJSON());
 				}
