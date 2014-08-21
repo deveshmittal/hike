@@ -14,7 +14,6 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -40,7 +39,6 @@ public class HikeNotificationUtils
 		ContactInfo contactInfo;
 		if (convMsg.isGroupChat())
 		{
-			Logger.d("HikeNotificationStack2", "GroupName is " + convMsg.getConversation().getLabel());
 			contactInfo = new ContactInfo(convMsg.getMsisdn(), convMsg.getMsisdn(), convMsg.getConversation().getLabel(), convMsg.getMsisdn());
 		}
 		else
@@ -105,13 +103,24 @@ public class HikeNotificationUtils
 		return new Pair<String, String>(message, key);
 	}
 
+	/**
+	 * Provides name for msisdn
+	 * 
+	 * @param context
+	 * @param db
+	 * @param convDb
+	 * @param argMsisdn
+	 * @return
+	 */
 	public static String getNameForMsisdn(Context context, HikeUserDatabase db, HikeConversationsDatabase convDb, String argMsisdn)
 	{
-		
-		if(HikeNotification.HIKE_STEALTH_MESSAGE_KEY.equals(argMsisdn)){
+
+		// TODO: Use new contact manager class here instead of querying from db.
+		if (HikeNotification.HIKE_STEALTH_MESSAGE_KEY.equals(argMsisdn))
+		{
 			return context.getString(R.string.app_name);
 		}
-			
+
 		String name = null;
 		if (Utils.isGroupConversation(argMsisdn))
 		{
@@ -121,11 +130,12 @@ public class HikeNotificationUtils
 		{
 			name = db.getContactInfoFromMSISDN(argMsisdn, false).getNameOrMsisdn();
 		}
-		
-		if(TextUtils.isEmpty(name)){
+
+		if (TextUtils.isEmpty(name))
+		{
 			name = argMsisdn;
 		}
-		
+
 		return name;
 	}
 }

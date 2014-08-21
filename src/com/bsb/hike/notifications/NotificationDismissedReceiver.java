@@ -19,21 +19,16 @@ public class NotificationDismissedReceiver extends BroadcastReceiver
 	@Override
 	public void onReceive(Context context, Intent intent)
 	{
-		try
+		if (intent != null)
 		{
-			int notificationId = intent.getExtras().getInt(HikeNotification.HIKE_NOTIFICATION_ID_KEY);
+			int notificationId = intent.getIntExtra(HikeNotification.HIKE_NOTIFICATION_ID_KEY, 0);
 
 			if (notificationId == HikeNotification.HIKE_SUMMARY_NOTIFICATION_ID)
 			{
 				HikeNotificationMsgStack.getInstance(context).resetMsgStack();
 			}
+		}
 
-		}
-		catch (NullPointerException e)
-		{
-			// We did not receive any data in intent. Hence no action to be performed.
-			return;
-		}
 	}
 
 }

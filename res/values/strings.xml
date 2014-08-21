@@ -902,6 +902,7 @@
 
     <string name="stealth_enter_pass_tip">Setup is complete! Tap on \'hi\' to access your hidden chats.</string>
     <string name="stealth_notification_message">You have a new notification</string>
+    <string name="stealth_notification_messages">You have new notifications</string>
     <string name="retry">Retry</string>
     <string name="reset_complete_stealth_header">Reset Hidden Mode</string>
     <string name="reset_complete_stealth_info">Forgot your password? Reset Hidden Mode. All hidden chats will be deleted.</string>

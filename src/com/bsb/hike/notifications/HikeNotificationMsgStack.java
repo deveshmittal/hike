@@ -81,8 +81,6 @@ public class HikeNotificationMsgStack implements Listener
 
 	private boolean forceBlockNotificationSound;
 
-	private int stealthMessages;
-
 	private static void init(Context context)
 	{
 		if (mHikeNotifMsgStack == null)
@@ -195,16 +193,22 @@ public class HikeNotificationMsgStack implements Listener
 	private synchronized void addPair(String argMsisdn, String argMessage)
 	{
 		lastAddedMsisdn = argMsisdn;
-		
 
-//		if (argMsisdn.equals(HikeNotification.HIKE_STEALTH_MESSAGE_KEY))
-//		{
-//			stealthMessages++;
-//			if(uniqueMsisdns.contains(argMsisdn)){
-//				
-//				return;
-//			}
-//		}
+		if (argMsisdn.equals(HikeNotification.HIKE_STEALTH_MESSAGE_KEY))
+		{
+			if (uniqueMsisdns.contains(argMsisdn))
+			{
+				for (Pair<String, String> pair : mMessageTitlePairList)
+				{
+					if (pair.first.equals(argMsisdn))
+					{
+						mMessageTitlePairList.remove(pair);
+						argMessage = mContext.getString(R.string.stealth_notification_messages);
+						break;
+					}
+				}
+			}
+		}
 
 		// Sort/Trim/Group message pair list to show messages smartly
 
@@ -460,25 +464,18 @@ public class HikeNotificationMsgStack implements Listener
 
 		for (Pair<String, String> entry : mMessageTitlePairList)
 		{
-			try
+			// Take any message from message list since the contact info will
+			// remain the same
+			String msisdn = entry.first;
+			ContactInfo contactInfo;
+			if (Utils.isGroupConversation(msisdn))
 			{
-				// Take any message from message list since the contact info will
-				// remain the same
-				String msisdn = entry.first;
-				ContactInfo contactInfo;
-				if (Utils.isGroupConversation(msisdn))
-				{
-					notificationMsgTitle.append(mConvDb.getConversation(msisdn, 1).getLabel() + "\n");
-				}
-				else
-				{
-					contactInfo = mDb.getContactInfoFromMSISDN(msisdn, true);
-					notificationMsgTitle.append(contactInfo != null && !TextUtils.isEmpty(contactInfo.getName()) ? contactInfo.getName() : msisdn + "\n");
-				}
+				notificationMsgTitle.append(mConvDb.getConversation(msisdn, 1).getLabel() + "\n");
 			}
-			catch (NullPointerException e)
+			else
 			{
-				e.printStackTrace();
+				contactInfo = mDb.getContactInfoFromMSISDN(msisdn, true);
+				notificationMsgTitle.append(contactInfo != null && !TextUtils.isEmpty(contactInfo.getName()) ? contactInfo.getName() : msisdn + "\n");
 			}
 		}
 
@@ -555,17 +552,13 @@ public class HikeNotificationMsgStack implements Listener
 		 */
 		if (HikePubSub.NEW_ACTIVITY.equals(type))
 		{
-			try
+			if (object instanceof Activity)
 			{
 				Activity activity = (Activity) object;
 				if ((activity instanceof ChatThread || activity instanceof HomeActivity))
 				{
 					resetMsgStack();
 				}
-			}
-			catch (ClassCastException ex)
-			{
-				ex.printStackTrace();
 			}
 		}
 	}
@@ -629,7 +622,6 @@ public class HikeNotificationMsgStack implements Listener
 		lastAddedMsisdn = null;
 		totalNewMessages = 0;
 		uniqueMsisdns.clear();
-		stealthMessages = 0;
 	}
 
 	/**
