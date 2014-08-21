@@ -1391,7 +1391,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					Conversation conversation = mConversationsByMSISDN.get(msisdn);
 
-					if (!wasViewSetup())
+					if (!wasViewSetup() || null == conversation)
 					{
 						return;
 					}
@@ -2066,7 +2066,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return null;
 		}
 
-		return getListView().getChildAt(index);
+		return getListView().getChildAt(index- getListView().getFirstVisiblePosition());
 	}
 
 	private void updateViewForNameChange(Conversation conversation)
@@ -2089,7 +2089,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void updateViewForMessageStateChange(Conversation conversation, ConvMessage convMessage)
 	{
-		if (!wasViewSetup())
+		if (!wasViewSetup() || null == conversation)
 		{
 			Logger.d("UnreadBug", "Unread count event received but view wasn't setup");
 			return;
@@ -2167,7 +2167,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				return;
 			}
 
-			View parentView = getListView().getChildAt(newIndex);
+			View parentView = getListView().getChildAt(newIndex - getListView().getFirstVisiblePosition());
 
 			if (parentView == null)
 			{
