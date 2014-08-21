@@ -469,7 +469,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		ContactInfo userContactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 
-		GroupConversation groupConversation = new GroupConversation(groupId, 0, null, userContactInfo.getMsisdn(), true);
+		GroupConversation groupConversation = new GroupConversation(groupId, null, userContactInfo.getMsisdn(), true);
 		groupConversation.setGroupParticipantList(participantList);
 
 		Logger.d(getClass().getSimpleName(), "Creating group: " + groupId);
