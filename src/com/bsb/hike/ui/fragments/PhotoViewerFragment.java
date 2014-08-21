@@ -76,7 +76,9 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	{
 		View parent = inflater.inflate(R.layout.shared_media_viewer, null);
 		selectedPager = (ViewPager) parent.findViewById(R.id.selection_pager);
-		sizeOfImage = getResources().getDimensionPixelSize(R.dimen.gallery_selection_item_size);
+		int screenWidth = getResources().getDisplayMetrics().widthPixels;
+		int screenHeight = getResources().getDisplayMetrics().heightPixels;
+		sizeOfImage = screenWidth < screenHeight ? screenWidth : screenHeight;
 		setupActionBar();
 		numColumns = Utils.getNumColumnsForGallery(getResources(), sizeOfImage);
 		actualSize = Utils.getActualSizeForGallery(getResources(), sizeOfImage, numColumns);
