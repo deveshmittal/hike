@@ -984,6 +984,27 @@ class HikeUserDatabase extends SQLiteOpenHelper
 
 	}
 
+	List<ContactInfo> getAllContactsForSyncing()
+	{
+		Cursor c = null;
+		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
+		try
+		{
+			c = mReadDb.rawQuery("SELECT " + DBConstants.ID + ", " + DBConstants.NAME + ", " + DBConstants.MSISDN + ", " + DBConstants.PHONE + ", " + DBConstants.LAST_MESSAGED
+					+ ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + ", " + DBConstants.HIKE_JOIN_TIME + ", "
+					+ DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", " + DBConstants.INVITE_TIMESTAMP + " from " + DBConstants.USERS_TABLE, null);
+			contacts = extractContactInfo(c);
+			return contacts;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
 	List<ContactInfo> getHikeContacts(int limit, String msisdnsIn, String msisdnsNotIn, String myMsisdn)
 	{
 		Cursor c = null;

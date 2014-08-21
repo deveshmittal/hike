@@ -280,6 +280,18 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
+	 * This method returns all the contacts this also includes contactInfo of for same msisdn saved with different names in address book and used during contact syncing. Here
+	 * everytime we have to make a db query because we only keep the latest contact for a particular msisdn in the cache and not all. We are not adding the contacts in the map here
+	 * as when after sync updates we get the diff between phone address book and our database then we update that diff in the cache as well.
+	 * 
+	 * @return
+	 */
+	List<ContactInfo> getAllContactsForSyncing()
+	{
+		return hDb.getAllContactsForSyncing();
+	}
+
+	/**
 	 * This method returns the name of contact using <code>msisdn</code> parameter.
 	 * 
 	 * @param msisdn
