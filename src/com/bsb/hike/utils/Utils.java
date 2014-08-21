@@ -4463,4 +4463,20 @@ public class Utils
 
 		return bd;
 	}
+	
+	public static void resetPinUnreadCount(Conversation conv)
+	{
+		if(conv.getMetaData() != null)
+		{
+			try
+			{
+				conv.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+			HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, conv);
+		}
+	}
 }

@@ -112,17 +112,8 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 		{
 			backgroundImage.setImageResource(chatTheme.bgResId());
 		}
-		MetaData metadata = mConversation.getMetaData();
 		
-		try
-		{
-			metadata.setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
-		HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
+		Utils.resetPinUnreadCount(mConversation);
 		
 		View pinEmptyState = getPinEmptyState(chatTheme);
 		
@@ -289,15 +280,7 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 						});
 					}
 				}
-				try 
-				{
-					mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
-				}
-				catch (JSONException e) 
-				{
-					e.printStackTrace();
-				}
-				HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
+				Utils.resetPinUnreadCount(mConversation);
 			}
 		}
 	}

@@ -1615,20 +1615,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				mAdapter.notifyDataSetChanged();
 				clearConfirmDialog.dismiss();
 				hidePinFromUI(true);
-				
-				try
-				{
-					if(mConversation.getMetaData()!=null)
-					{
-						mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);						
-					}
-				}
-				catch (JSONException e)
-				{
-					e.printStackTrace();
-				}
+
+				Utils.resetPinUnreadCount(mConversation);
 				updateOverflowMenuUnreadCount();
-				mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
 			}
 		};
 
@@ -8594,19 +8583,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		intent.putExtra(HikeConstants.TEXT_PINS, mContactNumber);
 		intent.putExtra(HikeConstants.EXTRA_CONV_ID, mConversation.getConvId());
 		startActivity(intent);
-		try
-		{
-			if(mConversation.getMetaData()!=null){
-			mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
-			}else{
-				Toast.makeText(getApplicationContext(), "Some Error Occured!", Toast.LENGTH_SHORT).show();
-			}
-		}
-		catch (JSONException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Utils.resetPinUnreadCount(mConversation);
+		
 		if(viaMenu)
 		{
 			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_MENU);
