@@ -1134,4 +1134,9 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="delete_my_account">DELETE MY ACCOUNT</string>
     <string name="hike_extras">Hike Extras</string>
 	<string name="set_profile_pic">hike profile picture</string>
+    <string name="confirm_delete_pin_header">Delete pin</string>
+    <string name="confirm_delete_pin">Are you sure you want to delete this pin?</string>
+    <string name="confirm_delete_pins_header">Delete pins</string>
+    <string name="confirm_delete_pins">Are you sure you want to delete these %1$s pins?</string>    
+    
 </resources>

@@ -351,7 +351,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED, HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
-			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA };
+			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA,HikePubSub.CONV_META_DATA_UPDATED };
 
 	private EmoticonType emoticonType;
 
@@ -1615,20 +1615,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				mAdapter.notifyDataSetChanged();
 				clearConfirmDialog.dismiss();
 				hidePinFromUI(true);
-				
-				try
-				{
-					if(mConversation.getMetaData()!=null)
-					{
-						mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);						
-					}
-				}
-				catch (JSONException e)
-				{
-					e.printStackTrace();
-				}
+
+				Utils.resetPinUnreadCount(mConversation);
 				updateOverflowMenuUnreadCount();
-				mPubSub.publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
 			}
 		};
 
@@ -4175,6 +4164,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				runOnUiThread(mUpdateAdapter);
 			}
+		}else if(HikePubSub.CONV_META_DATA_UPDATED.equals(type)){
+			mConversation.setMetaData((MetaData) object);
 		}
 	}
 
@@ -4914,7 +4905,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (chatTheme != ChatTheme.DEFAULT)
 		{
 			backgroundImage.setScaleType(chatTheme.isTiled() ? ScaleType.FIT_XY : ScaleType.CENTER_CROP);
-			backgroundImage.setImageDrawable(getChatTheme(chatTheme));
+			backgroundImage.setImageDrawable(Utils.getChatTheme(chatTheme, this));
 		}
 		else
 		{
@@ -7970,31 +7961,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}, 2000);
 	}
 
-	public Drawable getChatTheme(ChatTheme chatTheme)
-	{
-		/*
-		 * for xhdpi and above we should not scale down the chat theme nodpi asset for hdpi and below to save memory we should scale it down
-		 */
-		int inSampleSize = 1;
-		if (!chatTheme.isTiled() && Utils.densityMultiplier < 2)
-		{
-			inSampleSize = 2;
-		}
-
-		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(getResources(), chatTheme.bgResId(), inSampleSize);
-
-		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(getResources(), b);
-
-		Logger.d(getClass().getSimpleName(), "chat themes bitmap size= " + BitmapUtils.getBitmapSize(b));
-
-		if (bd != null && chatTheme.isTiled())
-		{
-			bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
-		}
-
-		return bd;
-	}
-
 	private static int possibleKeyboardHeight;
 
 	private static int possibleKeyboardHeightLand;
@@ -8617,19 +8583,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		intent.putExtra(HikeConstants.TEXT_PINS, mContactNumber);
 		intent.putExtra(HikeConstants.EXTRA_CONV_ID, mConversation.getConvId());
 		startActivity(intent);
-		try
-		{
-			if(mConversation.getMetaData()!=null){
-			mConversation.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
-			}else{
-				Toast.makeText(getApplicationContext(), "Some Error Occured!", Toast.LENGTH_SHORT).show();
-			}
-		}
-		catch (JSONException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Utils.resetPinUnreadCount(mConversation);
+		
 		if(viaMenu)
 		{
 			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_MENU);
