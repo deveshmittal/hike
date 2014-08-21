@@ -92,75 +92,6 @@ public class ToastListener implements Listener
 
 			currentActivity = new WeakReference<Activity>(activity);
 		}
-		else if (HikePubSub.MESSAGE_RECEIVED.equals(type))
-		{
-			ConvMessage message = (ConvMessage) object;
-			if (message.isShouldShowPush())
-			{
-
-				boolean doesConversationExist = ContactManager.getInstance().isConvExists(message.getMsisdn());
-
-				if (doesConversationExist)
-				{
-					Logger.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
-					return;
-				}
-				if (isGroupConversationAndMuted(message.getMsisdn()))
-				{
-					return;
-				}
-				if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
-						|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
-				{
-					if (message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
-					{
-						boolean showNotification = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.CHAT_BG_NOTIFICATION_PREF, true);
-						if (!showNotification)
-						{
-							return;
-						}
-					}
-
-					Activity activity = (currentActivity != null) ? currentActivity.get() : null;
-					if ((activity instanceof ChatThread))
-					{
-						String contactNumber = ((ChatThread) activity).getContactNumber();
-						if (message.getMsisdn().equals(contactNumber))
-						{
-							return;
-						}
-					}
-
-					/*
-					 * the foreground activity isn't going to show this message so Toast it
-					 */
-					ContactInfo contactInfo;
-					if (message.isGroupChat())
-					{
-						Logger.d("ToastListener", "GroupName is " + ContactManager.getInstance().getName(message.getMsisdn()));
-						contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), ContactManager.getInstance().getName(message.getMsisdn()), message.getMsisdn());
-					}
-					else
-					{
-						contactInfo = HikeMessengerApp.getContactManager().getContact(message.getMsisdn(), false, true);
-					}
-
-					if(HikeMessengerApp.isStealthMsisdn(message.getMsisdn()))
-					{
-						this.toaster.notifyStealthMessage();
-					}
-					else
-					{
-						/*
-						 * Check if this is a big picture message, else toast a normal push message
-						 */
-						Bitmap bigPicture = returnBigPicture(message, context);
-						this.toaster.notifyMessage(contactInfo, message, bigPicture != null ? true : false, bigPicture);
-					}
-				}
-
-			}
-		}
 		else if (HikePubSub.CONNECTION_STATUS.equals(type))
 		{
 			HikeMqttManagerNew.MQTTConnectionStatus status = (HikeMqttManagerNew.MQTTConnectionStatus) object;
@@ -528,11 +459,9 @@ public class ToastListener implements Listener
 			{
 				if (message.isShouldShowPush())
 				{
-					HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-
 					String msisdn = message.getMsisdn();
 
-					if (ContactManager.getInstance().isConvExists(msisdn))
+					if (Utils.isGroupConversation(msisdn) && !ContactManager.getInstance().isConvExists(msisdn))
 					{
 						Logger.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
 						continue;
@@ -564,21 +493,8 @@ public class ToastListener implements Listener
 							}
 						}
 
-						/*
-						 * the foreground activity isn't going to show this message so Toast it
-						 */
-						ContactInfo contactInfo;
-						if (message.isGroupChat())
-						{
-							Logger.d("ToastListener", "GroupName is " + ContactManager.getInstance().getName(msisdn));
-							contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), ContactManager.getInstance().getName(msisdn), message.getMsisdn());
-						}
-						else
-						{
-							contactInfo = ContactManager.getInstance().getContact(message.getMsisdn(), true, false);
-						}
-
 						if (HikeMessengerApp.isStealthMsisdn(msisdn))
+						{
 							this.toaster.notifyStealthMessage();
 						}
 						else
@@ -592,10 +508,11 @@ public class ToastListener implements Listener
 					this.toaster.notifySummaryMessage(filteredMessageList);
 				}
 			
-				// Remove unused references
-				filteredMessageList.clear();
-				filteredMessageList = null;
 			}
+			// Remove unused references
+			filteredMessageList.clear();
+			filteredMessageList = null;
+		}
 	}
 
 	private boolean isGroupConversationAndMuted(String msisdn)
