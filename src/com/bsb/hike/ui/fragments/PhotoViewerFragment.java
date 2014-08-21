@@ -2,7 +2,10 @@ package com.bsb.hike.ui.fragments;
 
 import java.util.ArrayList;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
@@ -143,5 +146,16 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	{
 		ActionBar actionBar = getSherlockActivity().getSupportActionBar();
 		actionBar.hide();
+	}
+	
+	public static void openPhoto (int resId, Context context, Bundle arguments)
+	{
+		PhotoViewerFragment photoViewerFragment = new PhotoViewerFragment();
+		photoViewerFragment.setArguments(arguments);
+
+		FragmentTransaction fragmentTransaction = ((FragmentActivity) context).getSupportFragmentManager().beginTransaction();
+		fragmentTransaction.add(resId, photoViewerFragment, HikeConstants.IMAGE_FRAGMENT_TAG);
+		fragmentTransaction.commitAllowingStateLoss();
+		
 	}
 }

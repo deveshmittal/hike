@@ -36,8 +36,11 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -87,6 +90,7 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
 import com.bsb.hike.models.StatusMessage;
@@ -97,6 +101,7 @@ import com.bsb.hike.tasks.DownloadSingleStickerTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
+import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -3175,7 +3180,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else
 		{
-			openFile.setDataAndType(Uri.fromFile(receivedFile), hikeFile.getFileTypeString());
+			Bundle arguments = new Bundle();
+			ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
+			hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn() , convMessage.getTimestamp()));
+			arguments.putParcelableArrayList(HikeConstants.Extras.SHARED_FILE_ITEMS, hsf);
+			arguments.putInt(HikeConstants.MEDIA_POSITION, hsf.size()-1);
+			arguments.putBoolean(HikeConstants.FROM_CHAT_THREAD, true);
+			arguments.putString(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
+			PhotoViewerFragment.openPhoto(R.id.chatThreadParentLayout, context, arguments);
+			
+			return;
 		}
 		try
 		{
