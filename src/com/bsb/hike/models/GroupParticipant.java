@@ -2,6 +2,7 @@ package com.bsb.hike.models;
 
 import java.util.Comparator;
 
+import android.text.TextUtils;
 import android.util.Pair;
 
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -94,7 +95,28 @@ public class GroupParticipant implements Comparable<GroupParticipant>
 					return 1;
 				}
 			}
-			return lhsContactInfo.compareTo(rhsContactInfo);
+
+			if (TextUtils.isEmpty(lhs.getSecond()) && TextUtils.isEmpty(rhs.getSecond()))
+			{
+				return (lhsContactInfo.getMsisdn().toLowerCase().compareTo(rhsContactInfo.getMsisdn().toLowerCase()));
+			}
+			else if (TextUtils.isEmpty(lhs.getSecond()))
+			{
+				return 1;
+			}
+			else if (TextUtils.isEmpty(rhs.getSecond()))
+			{
+				return -1;
+			}
+			else if (lhs.getSecond().startsWith("+") && !rhs.getSecond().startsWith("+"))
+			{
+				return 1;
+			}
+			else if (!lhs.getSecond().startsWith("+") && rhs.getSecond().startsWith("+"))
+			{
+				return -1;
+			}
+			return (lhs.getSecond().toLowerCase().compareTo(rhs.getSecond().toLowerCase()));
 		}
 	};
 }
