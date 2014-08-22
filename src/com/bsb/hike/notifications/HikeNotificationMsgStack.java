@@ -85,6 +85,10 @@ public class HikeNotificationMsgStack implements Listener
 		{
 			mContext = context.getApplicationContext();
 			mHikeNotifMsgStack = new HikeNotificationMsgStack();
+
+			// We register for NEW_ACTIVITY so that when a chat thread is opened,
+			// all unread notifications against the msisdn can be cleared
+			HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_ACTIVITY, mHikeNotifMsgStack);
 		}
 	}
 
@@ -104,11 +108,6 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		mMessageTitlePairList = new LinkedList<Pair<String, String>>();
 		this.mConvDb = HikeConversationsDatabase.getInstance();
-
-		// We register for NEW_ACTIVITY so that when a chat thread is opened,
-		// all unread notifications against the msisdn can be cleared
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_ACTIVITY, this);
-
 	}
 
 	/**
@@ -139,7 +138,9 @@ public class HikeNotificationMsgStack implements Listener
 			mLastInsertedConvMessage = argConvMessage;
 		}
 
-		if ((argConvMessage.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND))
+		// Do not play sound in case of bg change
+		if ((argConvMessage.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
+				|| (argConvMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED))
 		{
 			forceBlockNotificationSound = true;
 		}
@@ -147,6 +148,7 @@ public class HikeNotificationMsgStack implements Listener
 		{
 			forceBlockNotificationSound = false;
 		}
+
 	}
 
 	/**
@@ -187,7 +189,7 @@ public class HikeNotificationMsgStack implements Listener
 	 * @param argMsisdn
 	 * @param argMessage
 	 */
-	private synchronized void addPair(String argMsisdn, String argMessage)
+	private void addPair(String argMsisdn, String argMessage)
 	{
 		lastAddedMsisdn = argMsisdn;
 
@@ -304,7 +306,7 @@ public class HikeNotificationMsgStack implements Listener
 	/**
 	 * Invalidate object - use if there are changes to notifications messages stack
 	 */
-	public synchronized void invalidateConvMsgList()
+	public void invalidateConvMsgList()
 	{
 		updateNotificationIntent();
 
@@ -551,9 +553,9 @@ public class HikeNotificationMsgStack implements Listener
 			if (object instanceof Activity)
 			{
 				Activity activity = (Activity) object;
-				if ((activity instanceof ChatThread || activity instanceof HomeActivity))
+				if ((activity instanceof ChatThread))
 				{
-					resetMsgStack();
+					HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
 				}
 			}
 		}
@@ -612,7 +614,7 @@ public class HikeNotificationMsgStack implements Listener
 	/**
 	 * Clear all messages in the notifications stack
 	 */
-	public synchronized void resetMsgStack()
+	public void resetMsgStack()
 	{
 		mMessageTitlePairList.clear();
 		lastAddedMsisdn = null;
