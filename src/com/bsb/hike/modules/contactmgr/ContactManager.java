@@ -1125,6 +1125,13 @@ public class ContactManager implements ITransientCache
 					{
 						String name = groupParticipantPair.first.getContactInfo().getName();
 						setUnknownContactName(groupId, contactInfo.getMsisdn(), name);
+
+						/*
+						 * For unsaved participants we don't have Contact information in users table -- their on hike status is not known to us. We get on hike status of unsaved
+						 * contact in a group from group members table
+						 */
+						ContactInfo con = groupParticipantPair.first.getContactInfo();
+						contactInfo.setOnhike(con.isOnhike());
 						groupParticipantPair.first.setContactInfo(contactInfo);
 					}
 					else
