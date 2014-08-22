@@ -5,6 +5,7 @@ import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.utils.Utils;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 
 public class HighQualityThumbLoader extends ImageWorker
 {
@@ -17,6 +18,9 @@ public class HighQualityThumbLoader extends ImageWorker
 	@Override
 	protected Bitmap processBitmap(String data)
 	{
+		BitmapDrawable bd = this.getImageCache().get(data);
+		if (bd != null)
+			return bd.getBitmap();
 		Bitmap thumbnail = null;
 		thumbnail = HikeBitmapFactory.scaleDownBitmap(data, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, Bitmap.Config.RGB_565, false,
 				false);

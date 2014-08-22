@@ -7114,12 +7114,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 	};
-	
-	private int previousFirstVisibleItem;
-
-	private int velocity;
-
-	private long previousEventTime;
 
 	@Override
 	public void onScroll(AbsListView view, final int firstVisibleItem, int visibleItemCount, int totalItemCount)
@@ -7233,23 +7227,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			hideUpFastScrollIndicator();
 		}
 		currentFirstVisibleItem = firstVisibleItem;
-		
-		if (previousFirstVisibleItem != firstVisibleItem)
-		{
-			long currTime = System.currentTimeMillis();
-			long timeToScrollOneElement = currTime - previousEventTime;
-			velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
-
-			previousFirstVisibleItem = firstVisibleItem;
-			previousEventTime = currTime;
-		}
-
-		if (mAdapter == null)
-		{
-			return;
-		}
-
-		mAdapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_IMAGES);
 	}
 
 	@Override
@@ -7293,6 +7270,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 				}, 2000);
 			}
+		}
+		
+		if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE){
+			mAdapter.setIsListFlinging(true);
+		}else{
+			mAdapter.setIsListFlinging(false);
 		}
 	}
 

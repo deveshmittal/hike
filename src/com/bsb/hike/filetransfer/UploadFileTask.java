@@ -37,7 +37,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
@@ -210,7 +209,7 @@ public class UploadFileTask extends FileTransferBase
 						Bitmap bluredThumb = Utils.createBlurredImage(thumbnail, context);
 						if(bluredThumb == null){
 							byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, 5);
-							thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+							thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
 							thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
 						}else{
 							byte [] tBytes = BitmapUtils.bitmapToBytes(bluredThumb, compressFormat, 10);
@@ -219,7 +218,7 @@ public class UploadFileTask extends FileTransferBase
 						}
 					}else if (hikeFileType == HikeFileType.VIDEO){
 						byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, 75);
-						thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+						thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
 						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
 					}
 					// thumbnail.recycle();
@@ -374,7 +373,7 @@ public class UploadFileTask extends FileTransferBase
 					Bitmap bluredThumb = Utils.createBlurredImage(thumbnail, context);
 					if(bluredThumb == null){
 						byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, 5);
-						thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+						thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
 						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
 					}else{
 						byte [] tBytes = BitmapUtils.bitmapToBytes(bluredThumb, compressFormat, 10);
@@ -383,7 +382,7 @@ public class UploadFileTask extends FileTransferBase
 					}
 				}else if (hikeFileType == HikeFileType.VIDEO){
 					byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, 75);
-					thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+					thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
 					thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
 				}
 				// thumbnail.recycle();
