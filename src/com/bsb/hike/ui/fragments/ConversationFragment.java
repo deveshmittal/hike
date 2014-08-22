@@ -1,6 +1,7 @@
 package com.bsb.hike.ui.fragments;
 
 import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -59,7 +60,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.adapters.EmptyConversationsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -71,6 +71,7 @@ import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.HikeDialog;
@@ -115,7 +116,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		protected Conversation[] doInBackground(Conversation... convs)
 		{
 			HikeConversationsDatabase db = null;
-			ArrayList<Long> ids = new ArrayList<Long>(convs.length);
 			ArrayList<String> msisdns = new ArrayList<String>(convs.length);
 			Editor editor = context.getSharedPreferences(HikeConstants.DRAFT_SETTING, Context.MODE_PRIVATE).edit();
 			for (Conversation conv : convs)
@@ -134,15 +134,15 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
 				}
 
-				ids.add(conv.getConvId());
 				msisdns.add(conv.getMsisdn());
 				editor.remove(conv.getMsisdn());
 			}
 			editor.commit();
 
 			db = HikeConversationsDatabase.getInstance();
-			db.deleteConversation(ids.toArray(new Long[] {}), msisdns);
-			
+			db.deleteConversation(msisdns);
+
+			ContactManager.getInstance().removeContacts(msisdns);
 			return convs;
 		}
 
@@ -163,7 +163,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					continue;
 				}
-				mgr.cancel((int) conversation.getConvId());
 				mAdapter.remove(conversation);
 				mConversationsByMSISDN.remove(conversation.getMsisdn());
 				mConversationsAdded.remove(conversation.getMsisdn());
@@ -542,7 +541,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		if (!(conv instanceof GroupConversation) && conv.getContactName() == null)
 		{
-			optionsList.add(HikeUserDatabase.getInstance().isBlocked(conv.getMsisdn())?getString(R.string.unblock_title):getString(R.string.block_title));
+			optionsList.add(ContactManager.getInstance().isBlocked(conv.getMsisdn())?getString(R.string.unblock_title):getString(R.string.block_title));
 		}
 		if (conv instanceof GroupConversation)
 		{
@@ -759,7 +758,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			@Override
 			public void onClick(View v)
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_CONVERSATION, new Pair<String, Long>(conv.getMsisdn(), conv.getConvId()));
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_CONVERSATION, conv.getMsisdn());
 				clearConfirmDialog.dismiss();
 			}
 		};
@@ -853,6 +852,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL))
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_INFO_TIP));
+		}else if(tip.equals(HikeMessengerApp.ATOMIC_POP_UP_HTTP)){
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_HTTP_TIP));
 		}
 	}
 
@@ -879,11 +880,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				HikeMessengerApp.addStealthMsisdnToMap(conv.getMsisdn());
 			}
 
-			if (conv.getMessages().isEmpty() && !(conv instanceof GroupConversation))
-			{
-				iter.remove();
-			}
-			else if ((stealthValue == HikeConstants.STEALTH_OFF || stealthValue == HikeConstants.STEALTH_ON_FAKE) && conv.isStealth())
+
+			if ((stealthValue == HikeConstants.STEALTH_OFF || stealthValue == HikeConstants.STEALTH_ON_FAKE) && conv.isStealth())
 			{
 				mConversationsAdded.add(conv.getMsisdn());
 				iter.remove();
@@ -1081,8 +1079,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			// left the group
 			else if ((conv instanceof GroupConversation) && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 			{
-				HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-				((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn(), false, false));
+				ContactManager conMgr = ContactManager.getInstance();
+				((GroupConversation) conv).setGroupParticipantList(conMgr.getGroupParticipants(conv.getMsisdn(), false, false));
 			}
 
 			final ConvMessage finalMessage = message;
@@ -1186,6 +1184,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						movedFromEmptyToNonEmpty();
 					}
 					displayedConversations.add(conversation);
+					Collections.sort(displayedConversations, mConversationsComparator);
 
 					notifyDataSetChanged();
 				}
@@ -1391,7 +1390,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					Conversation conversation = mConversationsByMSISDN.get(msisdn);
 
-					if (!wasViewSetup())
+					if (!wasViewSetup() || null == conversation)
 					{
 						return;
 					}
@@ -1411,8 +1410,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type))
 		{
 			String groupId = (String) object;
-			HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
-			final String groupName = db.getGroupName(groupId);
+			final String groupName = ContactManager.getInstance().getName(groupId);
 
 			final Conversation conv = mConversationsByMSISDN.get(groupId);
 			if (conv == null)
@@ -1568,9 +1566,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 		else if (HikePubSub.CLEAR_CONVERSATION.equals(type))
 		{
-			Pair<String, Long> values = (Pair<String, Long>) object;
-
-			String msisdn = values.first;
+			String msisdn = (String) object;
 			clearConversation(msisdn);
 		}
 		else if (HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE.equals(type))
@@ -1810,8 +1806,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 							// left the group
 							else if ((conv instanceof GroupConversation) && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 							{
-								HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-								((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn(), false, false));
+								ContactManager conMgr = ContactManager.getInstance();
+								((GroupConversation) conv).setGroupParticipantList(conMgr.getGroupParticipants(conv.getMsisdn(), false, false));
 							}
 
 							final ConvMessage finalMessage = message;
@@ -2066,7 +2062,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return null;
 		}
 
-		return getListView().getChildAt(index);
+		return getListView().getChildAt(index- getListView().getFirstVisiblePosition());
 	}
 
 	private void updateViewForNameChange(Conversation conversation)
@@ -2089,7 +2085,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void updateViewForMessageStateChange(Conversation conversation, ConvMessage convMessage)
 	{
-		if (!wasViewSetup())
+		if (!wasViewSetup() || null == conversation)
 		{
 			Logger.d("UnreadBug", "Unread count event received but view wasn't setup");
 			return;
@@ -2167,7 +2163,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				return;
 			}
 
-			View parentView = getListView().getChildAt(newIndex);
+			View parentView = getListView().getChildAt(newIndex - getListView().getFirstVisiblePosition());
 
 			if (parentView == null)
 			{

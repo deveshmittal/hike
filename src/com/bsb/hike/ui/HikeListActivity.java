@@ -44,8 +44,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
@@ -80,9 +80,9 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	private TextView title;
 
 	private ImageView backIcon;
-	
+
 	List<Pair<AtomicBoolean, ContactInfo>> firstSectionList;
-	
+
 	private boolean calledFromFTUE = false;
 
 	@Override
@@ -99,7 +99,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		{
 			type = Type.INVITE;
 		}
-		
+
 		if (getIntent().getBooleanExtra(HikeConstants.Extras.CALLED_FROM_FTUE_POPUP, false))
 		{
 			calledFromFTUE = true;
@@ -156,7 +156,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		doneBtn = actionBarView.findViewById(R.id.done_container);
 
 		doneBtn.setVisibility(View.VISIBLE);
-		
+
 		Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, false);
 
 		if (type != Type.BLOCK)
@@ -228,7 +228,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 		init();
 	}
-	
+
 	private void showInviteConfirmationPopup(boolean selectAllChecked)
 	{
 		final CustomAlertDialog confirmDialog = new CustomAlertDialog(this);
@@ -362,13 +362,13 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			findViewById(R.id.progress_container).setVisibility(View.GONE);
 
 			ViewGroup selectAllContainer = (ViewGroup) findViewById(R.id.select_all_container);
-			
-			firstSectionList = new ArrayList<Pair<AtomicBoolean,ContactInfo>>();
-			
+
+			firstSectionList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
+
 			switch (type)
 			{
 			case BLOCK:
-				getBlockedContactsList(contactList, firstSectionList); 
+				getBlockedContactsList(contactList, firstSectionList);
 				selectAllContainer.setVisibility(View.GONE);
 				break;
 			case INVITE:
@@ -400,18 +400,18 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 						selectAllCB.setChecked(!selectAllCB.isChecked());
 					}
 				});
-				
+
 				getRecommendedInvitesList(contactList, firstSectionList);
 				break;
 			}
 
-			HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> completeSectionsData = new HashMap<Integer, List<Pair<AtomicBoolean,ContactInfo>>>();
+			HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> completeSectionsData = new HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>>();
 			contactList.removeAll(firstSectionList);
-			if(!firstSectionList.isEmpty())
+			if (!firstSectionList.isEmpty())
 			{
-				completeSectionsData.put(0,firstSectionList);
+				completeSectionsData.put(0, firstSectionList);
 			}
-			completeSectionsData.put(completeSectionsData.size(),contactList);
+			completeSectionsData.put(completeSectionsData.size(), contactList);
 			adapter = new HikeInviteAdapter(HikeListActivity.this, -1, completeSectionsData, type == Type.BLOCK);
 			input.addTextChangedListener(adapter);
 
@@ -425,7 +425,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		HashMap<Integer, List<Pair<AtomicBoolean, ContactInfo>>> contactListMap = adapter.getCompleteList();
 
-		for(Entry<Integer, List<Pair<AtomicBoolean, ContactInfo>>> entry : contactListMap.entrySet())
+		for (Entry<Integer, List<Pair<AtomicBoolean, ContactInfo>>> entry : contactListMap.entrySet())
 		{
 			for (Pair<AtomicBoolean, ContactInfo> pair : entry.getValue())
 			{
@@ -447,14 +447,12 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 	private List<Pair<AtomicBoolean, ContactInfo>> getContactList()
 	{
-		HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
-
 		switch (type)
 		{
 		case BLOCK:
-			return hUDB.getBlockedUserList();
+			return ContactManager.getInstance().getBlockedUserList();
 		case INVITE:
-			return hUDB.getNonHikeContacts();
+			return HikeMessengerApp.getContactManager().getNonHikeContacts();
 		}
 		return null;
 	}
@@ -508,13 +506,13 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				data.put(HikeConstants.MESSAGE_ID, time);
 				data.put(HikeConstants.LIST, inviteArray);
 				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
-				if(calledFromFTUE)
+				if (calledFromFTUE)
 				{
 					JSONObject ftueData = new JSONObject();
 					ftueData.put(HikeConstants.SCREEN, HikeConstants.FTUE);
 					data.put(HikeConstants.METADATA, ftueData);
 				}
-				
+
 				mqttPacket.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, mqttPacket);
@@ -551,7 +549,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		if (!selectedContacts.isEmpty())
 		{
 			Utils.toggleActionBarElementsEnable(doneBtn, arrow, postText, true);
-			if(type != Type.BLOCK)
+			if (type != Type.BLOCK)
 			{
 				postText.setText(getString(R.string.send_invite, selectedContacts.size()));
 			}
@@ -562,7 +560,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			init();
 		}
 	}
-	
+
 	private void getBlockedContactsList(List<Pair<AtomicBoolean, ContactInfo>> contactList, List<Pair<AtomicBoolean, ContactInfo>> firstSectionList)
 	{
 		/*
@@ -586,7 +584,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 	private void getRecommendedInvitesList(List<Pair<AtomicBoolean, ContactInfo>> contactList, List<Pair<AtomicBoolean, ContactInfo>> firstSectionList)
 	{
 		int limit = 6;
-		List<ContactInfo> recommendedContactList = HikeUserDatabase.getInstance().getNonHikeMostContactedContacts(20);
+		List<ContactInfo> recommendedContactList = HikeMessengerApp.getContactManager().getNonHikeMostContactedContacts(20);
 		if (recommendedContactList.size() >= limit)
 		{
 			recommendedContactList = recommendedContactList.subList(0, limit);
@@ -594,8 +592,9 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 		for (Pair<AtomicBoolean, ContactInfo> pair : contactList)
 		{
 			ContactInfo contactInfo = pair.second;
-			if(recommendedContactList.contains(contactInfo)){
-				if(calledFromFTUE)
+			if (recommendedContactList.contains(contactInfo))
+			{
+				if (calledFromFTUE)
 				{
 					pair.first.set(true);
 					selectedContacts.add(contactInfo.getMsisdn());

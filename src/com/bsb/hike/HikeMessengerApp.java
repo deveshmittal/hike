@@ -42,9 +42,10 @@ import android.util.Pair;
 import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
@@ -57,7 +58,6 @@ import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
-import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
 
@@ -383,6 +383,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ATOMIC_POP_UP_STATUS = "stts";
 
+	public static final String ATOMIC_POP_UP_HTTP = "http";
+	
+	public static final String ATOMIC_POP_UP_HTTP_URL = "httpUrl";
+	
 	public static final String ATOMIC_POP_UP_NOTIF_MESSAGE = "apuNotifMessage";
 
 	public static final String ATOMIC_POP_UP_NOTIF_SCREEN = "apuNotifScreen";
@@ -665,7 +669,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		// succeeded by the
 		// onUpgrade() calls being triggered in the respective databases.
 		HikeConversationsDatabase.init(this);
-		HikeUserDatabase.init(this);
 
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
@@ -801,7 +804,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_SUPPORT, "hike support");
 		initHikeLruCache(getApplicationContext());
-
+		initContactManager();
 		/*
 		 * Fetching all stealth contacts on app creation so that the conversation cannot be opened through the shortcut or share screen.
 		 */
@@ -835,6 +838,19 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static HikeLruCache getLruCache()
 	{
 		return cache;
+	}
+
+	private static ContactManager conMgr;
+
+	private void initContactManager()
+	{
+		conMgr = ContactManager.getInstance();
+		conMgr.init(getApplicationContext());
+	}
+
+	public static ContactManager getContactManager()
+	{
+		return conMgr;
 	}
 
 	private void makeNoMediaFiles()
