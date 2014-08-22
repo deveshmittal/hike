@@ -641,14 +641,14 @@ public class Utils
 		return !msisdn.startsWith("+");
 	}
 
-	public static String defaultGroupName(List<Pair<GroupParticipant, String>> participantList)
+	public static String defaultGroupName(List<PairModified<GroupParticipant, String>> participantList)
 	{
 		List<GroupParticipant> groupParticipants = new ArrayList<GroupParticipant>();
-		for (Pair<GroupParticipant, String> participant : participantList)
+		for (PairModified<GroupParticipant, String> participant : participantList)
 		{
-			if (!participant.first.hasLeft())
+			if (!participant.getFirst().hasLeft())
 			{
-				groupParticipants.add(participant.first);
+				groupParticipants.add(participant.getFirst());
 			}
 		}
 		Collections.sort(groupParticipants);

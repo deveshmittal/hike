@@ -2334,9 +2334,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			hashWatcher = new HashSpanWatcher(mComposeView, HASH_PIN, getResources().getColor(R.color.sticky_yellow));
 			boolean hasSmsUser = false;
-			for (Entry<String, Pair<GroupParticipant,String>> entry : ((GroupConversation) mConversation).getGroupParticipantList().entrySet())
+			for (Entry<String, PairModified<GroupParticipant,String>> entry : ((GroupConversation) mConversation).getGroupParticipantList().entrySet())
 			{
-				GroupParticipant groupParticipant = entry.getValue().first;
+				GroupParticipant groupParticipant = entry.getValue().getFirst();
 				if (!groupParticipant.getContactInfo().isOnhike())
 				{
 					hasSmsUser = true;

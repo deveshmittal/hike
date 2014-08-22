@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.ContactsContract;
@@ -40,6 +41,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.modules.iface.ITransientCache;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -76,6 +78,11 @@ public class ContactManager implements ITransientCache
 			}
 		}
 		return _instance;
+	}
+
+	public SQLiteDatabase getWritableDatabase()
+	{
+		return hDb.getWritableDatabase();
 	}
 
 	public void init(Context ctx)
@@ -180,6 +187,11 @@ public class ContactManager implements ITransientCache
 		}
 	}
 
+	public String getName(String msisdn)
+	{
+		return getName(msisdn, false);
+	}
+
 	/**
 	 * This method returns the name of a particular <code>msisdn</code>.For name of a group participant {@link #getName(String, String)} should be used because it also handles the
 	 * unsaved contact name in a group. This method does not make a database query if contact is not in memory but returns the msisdn.
@@ -187,14 +199,14 @@ public class ContactManager implements ITransientCache
 	 * @param msisdn
 	 * @return Returns the name of contact or group depending on msisdn whether it is phone number of contact or group id
 	 */
-	public String getName(String msisdn)
+	public String getName(String msisdn, boolean returnNullIfNotFound)
 	{
 		String name = persistenceCache.getName(msisdn);
 		if (null == name)
 		{
 			name = transientCache.getName(msisdn);
 		}
-		if (null == name)
+		if (null == name && !returnNullIfNotFound)
 			return msisdn;
 		return name;
 	}
@@ -221,13 +233,14 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * This method sets the name of an unsaved contact in both {@link PersistenceCache} and {@link TransientCache}.
+	 * This method sets the name of a group participant contact in both {@link PersistenceCache} and {@link TransientCache}. In case of saved contact it is address book name and in
+	 * case of unsaved it is name obtained from group members table.
 	 * 
 	 * @param grpId
 	 * @param msisdn
 	 * @param name
 	 */
-	public void setUnknownContactName(String grpId, String msisdn, String name)
+	public void setGroupParticipantContactName(String grpId, String msisdn, String name)
 	{
 		persistenceCache.setUnknownContactName(grpId, msisdn, name);
 		transientCache.setUnknownContactName(grpId, msisdn, name);
@@ -1055,7 +1068,7 @@ public class ContactManager implements ITransientCache
 	 * @param notShownStatusMsgOnly
 	 * @return
 	 */
-	public List<Pair<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
+	public List<PairModified<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
 	{
 		return getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly, true);
 	}
@@ -1069,11 +1082,11 @@ public class ContactManager implements ITransientCache
 	 * @param fetchParticipants
 	 * @return
 	 */
-	public List<Pair<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
+	public List<PairModified<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
 	{
-		Pair<Map<String, Pair<GroupParticipant, String>>, List<String>> groupPair = transientCache.getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly,
+		Pair<Map<String, PairModified<GroupParticipant, String>>, List<String>> groupPair = transientCache.getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly,
 				fetchParticipants);
-		Map<String, Pair<GroupParticipant, String>> groupParticipantsMap = groupPair.first;
+		Map<String, PairModified<GroupParticipant, String>> groupParticipantsMap = groupPair.first;
 		List<String> allMsisdns = groupPair.second;
 
 		if (null != allMsisdns)
@@ -1114,23 +1127,31 @@ public class ContactManager implements ITransientCache
 
 				for (ContactInfo contactInfo : list)
 				{
-					Pair<GroupParticipant, String> groupParticipantPair = groupParticipantsMap.get(contactInfo.getMsisdn());
+					PairModified<GroupParticipant, String> groupParticipantPair = groupParticipantsMap.get(contactInfo.getMsisdn());
 					if (contactInfo.getName() == null)
 					{
-						String name = groupParticipantPair.first.getContactInfo().getName();
-						setUnknownContactName(groupId, contactInfo.getMsisdn(), name);
-						groupParticipantPair.first.setContactInfo(contactInfo);
+						String name = groupParticipantPair.getFirst().getContactInfo().getName();
+						groupParticipantPair.setSecond(name);
+
+						/*
+						 * For unsaved participants we don't have Contact information in users table -- their on hike status is not known to us. We get on hike status of unsaved
+						 * contact in a group from group members table
+						 */
+						ContactInfo con = groupParticipantPair.getFirst().getContactInfo();
+						contactInfo.setOnhike(con.isOnhike());
+						groupParticipantPair.getFirst().setContactInfo(contactInfo);
 					}
 					else
 					{
-						groupParticipantPair.first.setContactInfo(contactInfo);
+						groupParticipantPair.getFirst().setContactInfo(contactInfo);
+						groupParticipantPair.setSecond(contactInfo.getName());
 					}
 				}
 			}
 		}
 		transientCache.insertGroupParticipants(groupId, groupParticipantsMap);
 
-		List<Pair<GroupParticipant, String>> groupParticipantsList = new ArrayList<Pair<GroupParticipant, String>>(groupParticipantsMap.values());
+		List<PairModified<GroupParticipant, String>> groupParticipantsList = new ArrayList<PairModified<GroupParticipant, String>>(groupParticipantsMap.values());
 		return groupParticipantsList;
 	}
 
@@ -1140,9 +1161,9 @@ public class ContactManager implements ITransientCache
 	 * @param groupId
 	 * @param participantList
 	 */
-	public void addGroupParticipants(String groupId, Map<String, Pair<GroupParticipant, String>> participantList)
+	public void addGroupParticipants(String groupId, Map<String, PairModified<GroupParticipant, String>> participantList)
 	{
-		transientCache.insertGroupParticipants(groupId, participantList);
+		transientCache.addGroupParticipants(groupId, participantList);
 	}
 
 	/**
