@@ -18,6 +18,7 @@ import android.os.Parcelable;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -92,6 +93,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);  //Making the action bar overlay on top of the current view
 		setContentView(R.layout.gallery);
 
 		selectedSharedFileItems = new HashMap<Long, HikeSharedFile>();
