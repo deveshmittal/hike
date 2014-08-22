@@ -186,6 +186,11 @@ public class ContactManager implements ITransientCache
 		}
 	}
 
+	public String getName(String msisdn)
+	{
+		return getName(msisdn, false);
+	}
+
 	/**
 	 * This method returns the name of a particular <code>msisdn</code>.For name of a group participant {@link #getName(String, String)} should be used because it also handles the
 	 * unsaved contact name in a group. This method does not make a database query if contact is not in memory but returns the msisdn.
@@ -193,14 +198,14 @@ public class ContactManager implements ITransientCache
 	 * @param msisdn
 	 * @return Returns the name of contact or group depending on msisdn whether it is phone number of contact or group id
 	 */
-	public String getName(String msisdn)
+	public String getName(String msisdn, boolean returnNullIfNotFound)
 	{
 		String name = persistenceCache.getName(msisdn);
 		if (null == name)
 		{
 			name = transientCache.getName(msisdn);
 		}
-		if (null == name)
+		if (null == name && !returnNullIfNotFound)
 			return msisdn;
 		return name;
 	}

@@ -2,6 +2,8 @@ package com.bsb.hike.models;
 
 import java.util.Comparator;
 
+import android.util.Pair;
+
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 
 public class GroupParticipant implements Comparable<GroupParticipant>
@@ -60,14 +62,14 @@ public class GroupParticipant implements Comparable<GroupParticipant>
 		return this.contactInfo.compareTo(another.contactInfo);
 	}
 
-	public static Comparator<GroupParticipant> lastSeenTimeComparator = new Comparator<GroupParticipant>()
+	public static Comparator<Pair<GroupParticipant, String>> lastSeenTimeComparator = new Comparator<Pair<GroupParticipant, String>>()
 	{
 
 		@Override
-		public int compare(GroupParticipant lhs, GroupParticipant rhs)
+		public int compare(Pair<GroupParticipant, String> lhs, Pair<GroupParticipant, String> rhs)
 		{
-			ContactInfo lhsContactInfo = lhs.contactInfo;
-			ContactInfo rhsContactInfo = rhs.contactInfo;
+			ContactInfo lhsContactInfo = lhs.first.contactInfo;
+			ContactInfo rhsContactInfo = rhs.first.contactInfo;
 
 			if (lhsContactInfo.getFavoriteType() != rhsContactInfo.getFavoriteType())
 			{

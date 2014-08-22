@@ -608,16 +608,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		// Adding an item for the header
 		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.HEADER_ID));
 
-		List<GroupParticipant> participants = new ArrayList<GroupParticipant>();
+		List<Pair<GroupParticipant, String>> participants = new ArrayList<Pair<GroupParticipant, String>>();
 
-		for(Entry<String,Pair<GroupParticipant,String>> mapEntry : participantMap.entrySet())
+		for (Entry<String, Pair<GroupParticipant, String>> mapEntry : participantMap.entrySet())
 		{
-			participants.add(mapEntry.getValue().first);
+			participants.add(mapEntry.getValue());
 		}
 
 		if (!participantMap.containsKey(userInfo.getContactInfo().getMsisdn()))
 		{
-			participants.add(userInfo);
+			participants.add(new Pair<GroupParticipant, String>(userInfo, null));
 		}
 
 		Collections.sort(participants, GroupParticipant.lastSeenTimeComparator);
@@ -625,7 +625,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		/*
 		 * Adding an element to for the 'add participant' element.
 		 */
-		participants.add(0, null);
+		participants.add(0, new Pair<GroupParticipant, String>(null, null));
 
 		int loopCount = participants.size() / 2;
 		if (participants.size() % 2 != 0)
@@ -638,13 +638,15 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			int index1 = 2 * i;
 			int index2 = 2 * i + 1;
 
-			GroupParticipant[] groupParticipants = new GroupParticipant[2];
-			groupParticipants[0] = participants.get(index1);
+			List<Pair<GroupParticipant, String>> groupParticipants = new ArrayList<Pair<GroupParticipant, String>>(2);
+			groupParticipants.add(participants.get(index1));
 
 			if (index2 < participants.size())
 			{
-				groupParticipants[1] = participants.get(index2);
+				groupParticipants.add(participants.get(index2));
 			}
+			else
+				groupParticipants.add(new Pair<GroupParticipant, String>(null, null));
 
 			profileItems.add(new ProfileItem.ProfileGroupItem(groupParticipants));
 		}

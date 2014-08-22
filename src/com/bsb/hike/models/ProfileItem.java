@@ -1,5 +1,9 @@
 package com.bsb.hike.models;
 
+import java.util.List;
+
+import android.util.Pair;
+
 public abstract class ProfileItem
 {
 
@@ -46,20 +50,20 @@ public abstract class ProfileItem
 	public static class ProfileGroupItem extends ProfileItem
 	{
 
-		private GroupParticipant[] groupParticipants;
+		private List<Pair<GroupParticipant, String>> groupParticipants;
 
 		public ProfileGroupItem(int itemId)
 		{
 			super(itemId);
 		}
 
-		public ProfileGroupItem(GroupParticipant[] groupParticipants)
+		public ProfileGroupItem(List<Pair<GroupParticipant, String>> groupParticipants)
 		{
 			super(0);
 			this.groupParticipants = groupParticipants;
 		}
 
-		public GroupParticipant[] getGroupParticipants()
+		public List<Pair<GroupParticipant, String>> getGroupParticipants()
 		{
 			return groupParticipants;
 		}
