@@ -1,9 +1,12 @@
-package com.bsb.hike.utils;
+package com.bsb.hike.notifications;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,9 +46,11 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.TimelineActivity;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
 public class ToastListener implements Listener
@@ -86,75 +91,6 @@ public class ToastListener implements Listener
 			}
 
 			currentActivity = new WeakReference<Activity>(activity);
-		}
-		else if (HikePubSub.MESSAGE_RECEIVED.equals(type))
-		{
-			ConvMessage message = (ConvMessage) object;
-			if (message.isShouldShowPush())
-			{
-
-				boolean doesConversationExist = ContactManager.getInstance().isConvExists(message.getMsisdn());
-
-				if (doesConversationExist)
-				{
-					Logger.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
-					return;
-				}
-				if (isGroupConversationAndMuted(message.getMsisdn()))
-				{
-					return;
-				}
-				if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
-						|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
-				{
-					if (message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
-					{
-						boolean showNotification = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.CHAT_BG_NOTIFICATION_PREF, true);
-						if (!showNotification)
-						{
-							return;
-						}
-					}
-
-					Activity activity = (currentActivity != null) ? currentActivity.get() : null;
-					if ((activity instanceof ChatThread))
-					{
-						String contactNumber = ((ChatThread) activity).getContactNumber();
-						if (message.getMsisdn().equals(contactNumber))
-						{
-							return;
-						}
-					}
-
-					/*
-					 * the foreground activity isn't going to show this message so Toast it
-					 */
-					ContactInfo contactInfo;
-					if (message.isGroupChat())
-					{
-						Logger.d("ToastListener", "GroupName is " + ContactManager.getInstance().getName(message.getMsisdn()));
-						contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), ContactManager.getInstance().getName(message.getMsisdn()), message.getMsisdn());
-					}
-					else
-					{
-						contactInfo = HikeMessengerApp.getContactManager().getContact(message.getMsisdn(), false, true);
-					}
-
-					if(HikeMessengerApp.isStealthMsisdn(message.getMsisdn()))
-					{
-						this.toaster.notifyStealthMessage();
-					}
-					else
-					{
-						/*
-						 * Check if this is a big picture message, else toast a normal push message
-						 */
-						Bitmap bigPicture = returnBigPicture(message, context);
-						this.toaster.notifyMessage(contactInfo, message, bigPicture != null ? true : false, bigPicture);
-					}
-				}
-
-			}
 		}
 		else if (HikePubSub.CONNECTION_STATUS.equals(type))
 		{
@@ -270,7 +206,14 @@ public class ToastListener implements Listener
 				{
 					contactInfo = HikeMessengerApp.getContactManager().getContact(message.getMsisdn(), true, true);
 				}
-				toaster.notifyMessage(contactInfo, message, true, bigPicture);
+				
+				// TODO : Commented this because for FT messages we get 2 packets from PubSub,
+				// 1. Message received (with the thumbnail)
+				// 2. Push file downloaded
+				// The above two results in duplicate notifications being displayed
+				// X - Sent you a Photo
+				// X - Sent you a Photo
+				// toaster.notifyMessage(contactInfo, message, true, bigPicture);
 			}
 		}
 		else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type))
@@ -333,7 +276,8 @@ public class ToastListener implements Listener
 				String header = bundle.getString(HikeConstants.Extras.STEALTH_PUSH_BODY);
 				if (!TextUtils.isEmpty(header))
 				{
-					toaster.notifyStealthPopup(header); // TODO: toasting header for now
+					toaster.notifyStealthPopup(header); // TODO: toasting header
+														// for now
 				}
 			}
 		}
@@ -385,9 +329,12 @@ public class ToastListener implements Listener
 
 						String msisdnStatement = Utils.getMsisdnStatement(msisdnList);
 
-						ArrayList<String> filteredMsisdnList = HikeConversationsDatabase.getInstance().getOfflineMsisdnsList(msisdnStatement); // this db query will return new list
-																																				// which can be of different order
-																																				// and different length
+						ArrayList<String> filteredMsisdnList = HikeConversationsDatabase.getInstance().getOfflineMsisdnsList(msisdnStatement); // this db query will
+																																				// return new list
+																																				// which can be of
+																																				// different order
+																																				// and different
+																																				// length
 
 						if (filteredMsisdnList == null || filteredMsisdnList.size() == 0)
 						{
@@ -413,7 +360,9 @@ public class ToastListener implements Listener
 						}
 
 						filteredMsisdnList.clear();
-						for (String msisdn : msisdnList) // running loop to bring back original order
+						for (String msisdn : msisdnList) // running loop to
+															// bring back
+															// original order
 						{
 							if (nameMap.containsKey(msisdn))
 							{
@@ -445,30 +394,82 @@ public class ToastListener implements Listener
 
 			}
 		}
-		else if (HikePubSub.BULK_MESSAGE_NOTIFICATION.equals(type))
+		else if (HikePubSub.BULK_MESSAGE_NOTIFICATION.equals(type) || HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
-			ArrayList<ConvMessage> messageList = (ArrayList<ConvMessage>) object;
+			// Received bulk message map (msisdn - ConvMessage(s) pairs)
+			LinkedList<ConvMessage> messageList = null;
+			Map<String, LinkedList<ConvMessage>> messageListMap = null;
+			if (object instanceof ConvMessage)
+			{
+				if (messageList == null)
+				{
+					messageList = new LinkedList<ConvMessage>();
+				}
+
+				ConvMessage receivedMsg = (ConvMessage) object;
+				messageList.add(receivedMsg);
+			}
+			else if (object instanceof List)
+			{
+				try
+				{
+					messageList = (LinkedList<ConvMessage>) object;
+				}
+				catch (ClassCastException ex)
+				{
+					ex.printStackTrace();
+					Logger.e("BulkMessageNotification", "Class cast exception", ex);
+				}
+			}
+			else if (object instanceof Map)
+			{
+				try
+				{
+					messageListMap = (Map<String, LinkedList<ConvMessage>>) object;
+					if (messageList == null)
+					{
+						messageList = new LinkedList<ConvMessage>();
+					}
+
+					for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
+					{
+						messageList.addAll(entry.getValue());
+					}
+
+				}
+				catch (ClassCastException ex)
+				{
+					ex.printStackTrace();
+					Logger.e("BulkMessageNotification", "Class cast exception", ex);
+				}
+			}
+
 			if (messageList == null || messageList.isEmpty())
 			{
 				return;
 			}
 
+			// Iterate through all messages, removing the ones not to be
+			// displayed/ included in notification
+			// Maintain a list to store the ones to be included in the
+			// notification
+			ArrayList<ConvMessage> filteredMessageList = new ArrayList<ConvMessage>();
+
 			for (ConvMessage message : messageList)
 			{
 				if (message.isShouldShowPush())
 				{
-					HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-
 					String msisdn = message.getMsisdn();
 
-					if (ContactManager.getInstance().isConvExists(msisdn))
+					if (Utils.isGroupConversation(msisdn) && !ContactManager.getInstance().isConvExists(msisdn))
 					{
 						Logger.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
-						return;
+						continue;
 					}
 					if (isGroupConversationAndMuted(message.getMsisdn()))
 					{
-						return;
+						Logger.d(getClass().getSimpleName(), "Group has been muted");
+						continue;
 					}
 					if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
 							|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
@@ -478,7 +479,7 @@ public class ToastListener implements Listener
 							boolean showNotification = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.CHAT_BG_NOTIFICATION_PREF, true);
 							if (!showNotification)
 							{
-								return;
+								continue;
 							}
 						}
 
@@ -488,22 +489,8 @@ public class ToastListener implements Listener
 							String contactNumber = ((ChatThread) activity).getContactNumber();
 							if (message.getMsisdn().equals(contactNumber))
 							{
-								return;
+								continue;
 							}
-						}
-
-						/*
-						 * the foreground activity isn't going to show this message so Toast it
-						 */
-						ContactInfo contactInfo;
-						if (message.isGroupChat())
-						{
-							Logger.d("ToastListener", "GroupName is " + ContactManager.getInstance().getName(msisdn));
-							contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), ContactManager.getInstance().getName(msisdn), message.getMsisdn());
-						}
-						else
-						{
-							contactInfo = ContactManager.getInstance().getContact(message.getMsisdn(), true, false);
 						}
 
 						if (HikeMessengerApp.isStealthMsisdn(msisdn))
@@ -512,16 +499,19 @@ public class ToastListener implements Listener
 						}
 						else
 						{
-							/*
-							 * Check if this is a big picture message, else toast a normal push message
-							 */
-							Bitmap bigPicture = returnBigPicture(message, context);
-							this.toaster.notifyMessage(contactInfo, message, bigPicture != null ? true : false, bigPicture);
+							filteredMessageList.add(message);
 						}
 					}
-
 				}
+				if (!filteredMessageList.isEmpty())
+				{
+					this.toaster.notifySummaryMessage(filteredMessageList);
+				}
+			
 			}
+			// Remove unused references
+			filteredMessageList.clear();
+			filteredMessageList = null;
 		}
 	}
 
@@ -538,7 +528,7 @@ public class ToastListener implements Listener
 		return false;
 	}
 
-	private Bitmap returnBigPicture(ConvMessage convMessage, Context context)
+	public static Bitmap returnBigPicture(ConvMessage convMessage, Context context)
 	{
 
 		HikeFile hikeFile = null;

@@ -36,8 +36,11 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -87,16 +90,19 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.DownloadSingleStickerTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
+import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -297,6 +303,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private boolean isHikeToOfflineMode = false;
 
 	private String myMsisdn;
+	
+	private HighQualityThumbLoader hqThumbLoader;
 
 	/*
 	 * this is set of all the currently visible messages which are stuck in tick and are not sms
@@ -326,6 +334,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		setLastSentMessagePosition();
 		this.shownSdrIntroTip = preferences.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false);
 		this.myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
+		
+		hqThumbLoader = new HighQualityThumbLoader();
+		hqThumbLoader.setImageFadeIn(false);
+		hqThumbLoader.setDefaultDrawableNull(false);
 	}
 
 	public void setChatTheme(ChatTheme theme)
@@ -1034,7 +1046,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				switch (fss.getFTState())
 				{
 				case INITIALIZED:
-				case PAUSING:
 				case IN_PROGRESS:
 					wtHolder.initialization.setVisibility(View.VISIBLE);
 					break;
@@ -1286,6 +1297,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				showThumbnail = ((convMessage.isSent()) || (conversation instanceof GroupConversation) || (!TextUtils.isEmpty(conversation.getContactName())) || (hikeFile
 						.wasFileDownloaded()));
+				
+					
 				if (hikeFile.getThumbnail() == null && !TextUtils.isEmpty(hikeFile.getFileKey()))
 				{
 					thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(hikeFile.getFileKey());
@@ -1297,18 +1310,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				if (showThumbnail)
 				{
-					imageHolder.fileThumb.setBackgroundDrawable(thumbnail);
+					imageHolder.fileThumb.setImageDrawable(thumbnail);
+					hqThumbLoader.setLoadingImage(thumbnail);
+					hqThumbLoader.loadImage(hikeFile.getFilePath(), imageHolder.fileThumb, isListFlinging);
 				}
 				else
 				{
 					createMediaThumb(imageHolder.fileThumb);
 				}
-
+				
 				RelativeLayout.LayoutParams fileThumbParams = (RelativeLayout.LayoutParams) imageHolder.fileThumb.getLayoutParams();
 
 				if (showThumbnail)
 				{
-					imageHolder.fileThumb.setScaleType(ScaleType.CENTER);
+					imageHolder.fileThumb.setScaleType(ScaleType.CENTER_CROP);
 					fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
 					fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail.getIntrinsicHeight());
 					/*
@@ -1339,7 +1354,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							fileThumbParams.width = width;
 					}
 				}
-				imageHolder.fileThumb.setScaleType(ScaleType.CENTER);
+				imageHolder.fileThumb.setScaleType(ScaleType.CENTER_CROP);
 				imageHolder.fileThumb.setLayoutParams(fileThumbParams);
 
 				imageHolder.fileThumb.setVisibility(View.VISIBLE);
@@ -2495,7 +2510,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			showTransferProgress(holder, fss, msgId, hikeFile, isSent);
 			break;
 		case INITIALIZED:
-		case PAUSING:
 			holder.ftAction.setImageResource(0);
 			holder.ftAction.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
@@ -2536,9 +2550,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		int progress = FileTransferManager.getInstance(context).getFTProgress(msgId, hikeFile.getFile(), isSent);
 		int chunkSize = FileTransferManager.getInstance(context).getChunkSize(msgId);
-		if (fss.getTotalSize() <= 0 || (fss.getTransferredSize() == 0 && fss.getFTState() == FTState.IN_PROGRESS))
+		if (fss.getTotalSize() <= 0 && isSent)
 		{
 			showTransferInitialization(holder, hikeFile);
+		}else if((fss.getTransferredSize() == 0 && fss.getFTState() == FTState.IN_PROGRESS)){
+			holder.circularProgress.setProgress(5 * 0.01f);
+			holder.circularProgress.setVisibility(View.VISIBLE);
+			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}
 		else
 		{
@@ -3080,7 +3098,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						{
 							FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 						}
-						else if (fss.getFTState() != FTState.PAUSING && fss.getFTState() != FTState.INITIALIZED)
+						else if (fss.getFTState() != FTState.INITIALIZED)
 						{
 							FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
 						}
@@ -3109,7 +3127,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 					}
-					else if (fss.getFTState() != FTState.PAUSING && fss.getFTState() != FTState.INITIALIZED)
+					else if (fss.getFTState() != FTState.INITIALIZED)
 					{
 						FileTransferManager.getInstance(context).downloadFile(receivedFile, hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(), convMessage,
 								true);
@@ -3194,7 +3212,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else
 		{
-			openFile.setDataAndType(Uri.fromFile(receivedFile), hikeFile.getFileTypeString());
+			Bundle arguments = new Bundle();
+			ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
+			hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn() , convMessage.getTimestamp()));
+			arguments.putParcelableArrayList(HikeConstants.Extras.SHARED_FILE_ITEMS, hsf);
+			arguments.putInt(HikeConstants.MEDIA_POSITION, hsf.size()-1);
+			arguments.putBoolean(HikeConstants.FROM_CHAT_THREAD, true);
+			arguments.putString(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
+			PhotoViewerFragment.openPhoto(R.id.chatThreadParentLayout, context, arguments);
+			
+			return;
 		}
 		try
 		{
@@ -4239,5 +4266,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 
 
+	}
+	
+	private boolean isListFlinging;
+
+	public void setIsListFlinging(boolean isFling)
+	{
+		boolean notify = isFling != isListFlinging;
+
+		isListFlinging = isFling;
+		hqThumbLoader.setPauseWork(isListFlinging);
+		
+		if(notify){
+			notifyDataSetChanged();
+		}
 	}
 }

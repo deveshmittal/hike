@@ -73,7 +73,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private enum ViewType
 	{
-		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP, WELCOME_HIKE_TIP, START_NEW_CHAT_TIP, STEALTH_UNREAD_TIP, ATOMIC_PROFILE_PIC_TIP, ATOMIC_FAVOURITE_TIP, ATOMIC_INVITE_TIP, ATOMIC_STATUS_TIP, ATOMIC_INFO_TIP
+		CONVERSATION, STEALTH_FTUE_TIP_VIEW, RESET_STEALTH_TIP, WELCOME_HIKE_TIP, START_NEW_CHAT_TIP, STEALTH_UNREAD_TIP, ATOMIC_PROFILE_PIC_TIP, ATOMIC_FAVOURITE_TIP, ATOMIC_INVITE_TIP, ATOMIC_STATUS_TIP, ATOMIC_INFO_TIP,ATOMIC_HTTP_TIP
 	}
 
 	private class ViewHolder
@@ -170,7 +170,8 @@ public class ConversationsAdapter extends BaseAdapter
 				return ViewType.ATOMIC_STATUS_TIP.ordinal();
 			case ConversationTip.ATOMIC_INFO_TIP:
 				return ViewType.ATOMIC_INFO_TIP.ordinal();
-
+			case ConversationTip.ATOMIC_HTTP_TIP:
+				return ViewType.ATOMIC_HTTP_TIP.ordinal();
 			}
 		}
 		return ViewType.CONVERSATION.ordinal();
@@ -231,6 +232,7 @@ public class ConversationsAdapter extends BaseAdapter
 			case ATOMIC_INVITE_TIP:
 			case ATOMIC_STATUS_TIP:
 			case ATOMIC_INFO_TIP:
+			case ATOMIC_HTTP_TIP:
 				v = inflater.inflate(R.layout.tip_left_arrow, parent, false);
 				viewHolder.avatar = (ImageView) v.findViewById(R.id.arrow_pointer);
 				viewHolder.headerText = (TextView) v.findViewById(R.id.tip_header);
@@ -380,7 +382,7 @@ public class ConversationsAdapter extends BaseAdapter
 			return v;
 		}
 		else if (viewType == ViewType.ATOMIC_PROFILE_PIC_TIP || viewType == ViewType.ATOMIC_FAVOURITE_TIP || viewType == ViewType.ATOMIC_INVITE_TIP
-				|| viewType == ViewType.ATOMIC_STATUS_TIP || viewType == ViewType.ATOMIC_INFO_TIP)
+				|| viewType == ViewType.ATOMIC_STATUS_TIP || viewType == ViewType.ATOMIC_INFO_TIP || viewType == ViewType.ATOMIC_HTTP_TIP)
 		{
 			HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(context);
 			String headerTxt = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER_MAIN, "");
@@ -408,6 +410,9 @@ public class ConversationsAdapter extends BaseAdapter
 			else if (viewType == ViewType.ATOMIC_INFO_TIP)
 			{
 				clickParentEnabled = false;
+				viewHolder.avatar.setImageResource(R.drawable.ic_information);
+			}else if(viewType == ViewType.ATOMIC_HTTP_TIP)
+			{
 				viewHolder.avatar.setImageResource(R.drawable.ic_information);
 			}
 			viewHolder.closeTip.setOnClickListener(new OnClickListener()
@@ -466,6 +471,7 @@ public class ConversationsAdapter extends BaseAdapter
 
 	private void resetAtomicPopUpKey(int position)
 	{
+		HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(context);
 		Conversation con = conversationList.get(position);
 		if (con instanceof ConversationTip)
 		{
@@ -484,10 +490,17 @@ public class ConversationsAdapter extends BaseAdapter
 			case ConversationTip.ATOMIC_STATUS_TIP:
 				context.startActivity(new Intent(context, StatusUpdate.class));
 				break;
+			case ConversationTip.ATOMIC_HTTP_TIP:
+				String url = pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HTTP_URL, null);
+				if(!TextUtils.isEmpty(url)){
+				Utils.startWebViewActivity(context, url, pref.getData(HikeMessengerApp.ATOMIC_POP_UP_HEADER_MAIN, ""));
+				pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_HTTP_URL, "");
+				}
+				break;
 			}
 			conversationList.remove(position);
 			notifyDataSetChanged();
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
+			pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_TYPE_MAIN, "");
 		}
 
 	}

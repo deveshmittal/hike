@@ -45,6 +45,7 @@ import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
@@ -57,7 +58,6 @@ import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
-import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
 
@@ -383,6 +383,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ATOMIC_POP_UP_STATUS = "stts";
 
+	public static final String ATOMIC_POP_UP_HTTP = "http";
+	
+	public static final String ATOMIC_POP_UP_HTTP_URL = "httpUrl";
+	
 	public static final String ATOMIC_POP_UP_NOTIF_MESSAGE = "apuNotifMessage";
 
 	public static final String ATOMIC_POP_UP_NOTIF_SCREEN = "apuNotifScreen";
@@ -704,10 +708,13 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			Logger.d(getClass().getSimpleName(), "Init for apptracker sdk finished" + !preferenceManager.contains(HikeConstants.SSL_PREF));
 		}
 
-		if (!preferenceManager.contains(HikeConstants.SSL_PREF))
+		boolean isSAUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE);
+
+		// Setting SSL_PREF as false for existing SA users with SSL_PREF = true
+		if (!preferenceManager.contains(HikeConstants.SSL_PREF) || (isSAUser && settings.getBoolean(HikeConstants.SSL_PREF, false)))
 		{
 			Editor editor = preferenceManager.edit();
-			editor.putBoolean(HikeConstants.SSL_PREF, !isIndianUser);
+			editor.putBoolean(HikeConstants.SSL_PREF, !(isIndianUser || isSAUser));
 			editor.commit();
 		}
 

@@ -100,6 +100,10 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
@@ -171,6 +175,7 @@ import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.TimelineActivity;
+import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
 import com.google.android.maps.GeoPoint;
@@ -3475,10 +3480,20 @@ public class Utils
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
 	}
+	
+	public static boolean hasJellyBeanMR1()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
+	}
 
 	public static boolean hasKitKat()
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+	}
+	
+	public static boolean hasIceCreamSandwich()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 	}
 
 	public static boolean hasEnoughFreeSpaceForProfilePic()
@@ -4449,19 +4464,28 @@ public class Utils
 			sb.append(")");
 
 		return sb.toString();
-	}	
-	
+	}
+
+	public static void startWebViewActivity(Context context, String url, String title)
+	{
+		Intent intent = new Intent(context, WebViewActivity.class);
+		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, url);
+		intent.putExtra(HikeConstants.Extras.TITLE, title);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		context.startActivity(intent);
+	}
+
 	public static Drawable getChatTheme(ChatTheme chatTheme, Context context)
 	{
 		/*
 		 * for xhdpi and above we should not scale down the chat theme nodpi asset for hdpi and below to save memory we should scale it down
 		 */
 		int inSampleSize = 1;
-		if(!chatTheme.isTiled() && Utils.densityMultiplier < 2)
+		if (!chatTheme.isTiled() && Utils.densityMultiplier < 2)
 		{
 			inSampleSize = 2;
 		}
-		
+
 		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(context.getResources(), chatTheme.bgResId(), inSampleSize);
 
 		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(context.getResources(), b);
@@ -4475,10 +4499,10 @@ public class Utils
 
 		return bd;
 	}
-	
+
 	public static void resetPinUnreadCount(Conversation conv)
 	{
-		if(conv.getMetaData() != null)
+		if (conv.getMetaData() != null)
 		{
 			try
 			{
@@ -4490,5 +4514,27 @@ public class Utils
 			}
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, conv);
 		}
+	}	
+	
+	public static Bitmap createBlurredImage (Bitmap originalBitmap, Context context)
+	{
+		final int BLUR_RADIUS = 10;
+		if(hasJellyBeanMR1()){
+			Bitmap output = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+	
+		    RenderScript rs = RenderScript.create(context.getApplicationContext());
+		    ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+		    Allocation inAlloc = Allocation.createFromBitmap(rs, originalBitmap, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_GRAPHICS_TEXTURE);
+		    Allocation outAlloc = Allocation.createFromBitmap(rs, output);
+		    script.setRadius(BLUR_RADIUS);
+		    script.setInput(inAlloc);
+		    script.forEach(outAlloc);
+		    outAlloc.copyTo(output);
+	
+		    rs.destroy();
+	
+		    return output;
+		}
+		return null;
 	}
 }

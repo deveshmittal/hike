@@ -15,6 +15,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -135,10 +136,14 @@ public class DbConversationListener implements Listener
 		}
 		else if (HikePubSub.DELETE_MESSAGE.equals(type))
 		{
-			Pair<ConvMessage, Boolean> deleteMessage = (Pair<ConvMessage, Boolean>) object;
-			ConvMessage message = deleteMessage.first;
-			mConversationDb.deleteMessage(deleteMessage.first, deleteMessage.second);
-			persistence.removeMessage(message.getMsgID());
+			Pair<ArrayList<Long>, Bundle> deleteMessage = (Pair<ArrayList<Long>, Bundle>) object;
+			ArrayList<Long> msgIds = deleteMessage.first;
+			Bundle bundle = deleteMessage.second;
+			boolean isLastMessage = bundle.getBoolean(HikeConstants.Extras.IS_LAST_MESSAGE);
+			String msisdn = bundle.getString(HikeConstants.Extras.MSISDN);
+			
+			mConversationDb.deleteMessages(msgIds, msisdn, isLastMessage);
+			persistence.removeMessages(msgIds);
 		}
 		else if (HikePubSub.MESSAGE_FAILED.equals(type)) // server got msg
 		// from client 1 and

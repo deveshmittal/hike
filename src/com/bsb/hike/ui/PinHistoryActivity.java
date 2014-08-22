@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -445,7 +446,7 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 	
 	public boolean onActionModeItemClicked(MenuItem item)
 	{
-		final HashMap<Long, ConvMessage> selectedMessagesMap = pinAdapter.getSelectedPinsMap();
+		final ArrayList<Long> selectedPinIds = new ArrayList<Long>(pinAdapter.getSelectedPinsIds());;
 		
 		switch (item.getItemId())
 		{
@@ -467,10 +468,7 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 				@Override
 				public void onClick(View v)
 				{
-					for (ConvMessage convMessage : selectedMessagesMap.values())
-					{
-						removeMessage(convMessage);						
-					}
+					removeMessage(selectedPinIds);					
 					pinAdapter.notifyDataSetChanged();
 					destroyActionMode();
 					deleteConfirmDialog.dismiss();
@@ -488,11 +486,27 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 		}
 	}
 	
-	private void removeMessage(ConvMessage pinMessage)
+	/**
+	 * Removes the selected pins from db and updates pin adapter 
+	 * 
+	 * @param selectedPinIds message ids of pins to be deleted
+	 */
+	private void removeMessage(ArrayList<Long> selectedPinIds)
 	{
-		// TODO: fix the lastMessage implementation while code merge. lastMessage should be true only when message to be deleted is the last message in the conversation
-		boolean lastMessage = pinMessage.equals(textPins.get(textPins.size() - 1));
-		HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ConvMessage, Boolean>(pinMessage, lastMessage));
-		pinAdapter.removeMessage(pinMessage);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, selectedPinIds);
+		
+		final HashMap<Long, ConvMessage> selectedMessagesMap = pinAdapter.getSelectedPinsMap();
+
+		if(selectedMessagesMap.containsKey(textPins.get(0).getMsgID()))
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.LATEST_PIN_DELETED, textPins.get(0).getMsgID());			
+		}
+
+		int size = selectedMessagesMap.size();
+		
+		for(int i=0; i<size; i++)
+		{
+			pinAdapter.removeMessage(selectedMessagesMap.get(selectedPinIds.get(i)));
+		}
 	}	
 }
