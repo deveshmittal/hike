@@ -492,12 +492,14 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 		
 		final HashMap<Long, ConvMessage> selectedMessagesMap = pinAdapter.getSelectedPinsMap();
 
-		if(selectedMessagesMap.containsValue(textPins.get(0)))
+		if(selectedMessagesMap.containsKey(textPins.get(0).getMsgID()))
 		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.LATEST_PIN_DELETED, selectedPinIds);			
+			HikeMessengerApp.getPubSub().publish(HikePubSub.LATEST_PIN_DELETED, textPins.get(0).getMsgID());			
 		}
 
-		for(int i=0; i<selectedMessagesMap.size(); i++)
+		int size = selectedMessagesMap.size();
+		
+		for(int i=0; i<size; i++)
 		{
 			pinAdapter.removeMessage(selectedMessagesMap.get(selectedPinIds.get(i)));
 		}

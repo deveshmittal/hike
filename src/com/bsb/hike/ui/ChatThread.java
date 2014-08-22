@@ -3734,14 +3734,29 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if(HikePubSub.LATEST_PIN_DELETED.equals(type))
 		{
-			runOnUiThread(new Runnable() 
-			{				
-				@Override
-				public void run() 
+			long msgId = (Long)object;
+			
+			try 
+			{
+				long pinIdFromMetadata = mConversation.getMetaData().getLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+				
+				if(msgId==pinIdFromMetadata)
 				{
-					hidePinFromUI(true);
+					runOnUiThread(new Runnable() 
+					{				
+						@Override
+						public void run() 
+						{
+							hidePinFromUI(true);
+						}
+					});
 				}
-			});
+			}
+			catch (JSONException e) 
+			{
+				e.printStackTrace();
+			}
+			
 		}
 		else if (HikePubSub.GROUP_REVIVED.equals(type))
 		{
