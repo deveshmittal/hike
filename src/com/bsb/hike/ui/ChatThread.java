@@ -7273,9 +7273,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		
 		if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE){
-			mAdapter.setIsListFlinging(true);
-		}else{
 			mAdapter.setIsListFlinging(false);
+		}else{
+			mAdapter.setIsListFlinging(true);
 		}
 	}
 
