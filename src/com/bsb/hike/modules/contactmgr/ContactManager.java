@@ -227,13 +227,14 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * This method sets the name of an unsaved contact in both {@link PersistenceCache} and {@link TransientCache}.
+	 * This method sets the name of a group participant contact in both {@link PersistenceCache} and {@link TransientCache}. In case of saved contact it is address book name and in
+	 * case of unsaved it is name obtained from group members table.
 	 * 
 	 * @param grpId
 	 * @param msisdn
 	 * @param name
 	 */
-	public void setUnknownContactName(String grpId, String msisdn, String name)
+	public void setGroupParticipantContactName(String grpId, String msisdn, String name)
 	{
 		persistenceCache.setUnknownContactName(grpId, msisdn, name);
 		transientCache.setUnknownContactName(grpId, msisdn, name);
@@ -1124,7 +1125,7 @@ public class ContactManager implements ITransientCache
 					if (contactInfo.getName() == null)
 					{
 						String name = groupParticipantPair.first.getContactInfo().getName();
-						setUnknownContactName(groupId, contactInfo.getMsisdn(), name);
+						setGroupParticipantContactName(groupId, contactInfo.getMsisdn(), name);
 
 						/*
 						 * For unsaved participants we don't have Contact information in users table -- their on hike status is not known to us. We get on hike status of unsaved
@@ -1137,6 +1138,7 @@ public class ContactManager implements ITransientCache
 					else
 					{
 						groupParticipantPair.first.setContactInfo(contactInfo);
+						setGroupParticipantContactName(groupId, contactInfo.getMsisdn(), contactInfo.getName());
 					}
 				}
 			}
