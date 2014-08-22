@@ -765,6 +765,8 @@ public class HikeConstants
 
 	public static final String INDIA_COUNTRY_CODE = "+91";
 
+	public static final String SAUDI_ARABIA_COUNTRY_CODE = "+966";
+
 	public static final int MDPI_TIMES_10 = 11;
 
 	public static final String NAMESPACE = "http://schemas.android.com/apk/res/com.bsb.hike";

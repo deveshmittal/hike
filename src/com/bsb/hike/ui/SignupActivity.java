@@ -387,6 +387,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				 * Setting the app value as to if the user is Indian or not.
 				 */
 				String countryCode = accountPrefs.getString(HikeMessengerApp.COUNTRY_CODE, "");
+				boolean isSAUser = countryCode.equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE);
+
 				StickerManager.setStickersForIndianUsers(HikeConstants.INDIA_COUNTRY_CODE.equals(countryCode), accountPrefs);
 
 				Editor accountEditor = accountPrefs.edit();
@@ -400,7 +402,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 				Editor editor = prefs.edit();
 				editor.putBoolean(HikeConstants.FREE_SMS_PREF, HikeMessengerApp.isIndianUser());
-				editor.putBoolean(HikeConstants.SSL_PREF, !HikeMessengerApp.isIndianUser());
+				editor.putBoolean(HikeConstants.SSL_PREF, !(HikeMessengerApp.isIndianUser() || isSAUser));
 				editor.remove(HikeMessengerApp.TEMP_COUNTRY_CODE);
 				editor.commit();
 
