@@ -486,6 +486,11 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 		}
 	}
 	
+	/**
+	 * Removes the selected pins from db and updates pin adapter 
+	 * 
+	 * @param selectedPinIds message ids of pins to be deleted
+	 */
 	private void removeMessage(ArrayList<Long> selectedPinIds)
 	{
 		HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, selectedPinIds);
