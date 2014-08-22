@@ -76,7 +76,9 @@ public class SharedMediaAdapter extends PagerAdapter
 
 		ImageView galleryImageView = (ImageView) page.findViewById(R.id.album_image);
 
-		if (!sharedMediaItem.getFileTypeString().toString().contains(IMAGE_TAG))
+		galleryImageView.setScaleType(ScaleType.FIT_CENTER);
+		sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(), galleryImageView, false);
+		if (galleryImageView.getDrawable() != null && !sharedMediaItem.getFileTypeString().toString().contains(IMAGE_TAG))
 		{
 			Button playBtn = (Button) page.findViewById(R.id.play_media);
 			playBtn.setVisibility(View.VISIBLE);
@@ -93,9 +95,6 @@ public class SharedMediaAdapter extends PagerAdapter
 				}
 			});
 		}
-
-		galleryImageView.setScaleType(ScaleType.FIT_CENTER);
-		sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(), galleryImageView, false);
 		
 		((ViewPager) container).addView(page);
 		return page;
