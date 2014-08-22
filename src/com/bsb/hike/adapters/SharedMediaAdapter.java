@@ -77,7 +77,7 @@ public class SharedMediaAdapter extends PagerAdapter
 		TouchImageView galleryImageView = (TouchImageView) page.findViewById(R.id.album_image);
 		galleryImageView.setZoom(1.0f);
 		galleryImageView.setScaleType(ScaleType.FIT_CENTER);
-		sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(), galleryImageView, false);
+		sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(true), galleryImageView, false);
 		if (galleryImageView.getDrawable() != null && !sharedMediaItem.getFileTypeString().toString().contains(IMAGE_TAG))
 		{
 			Button playBtn = (Button) page.findViewById(R.id.play_media);
