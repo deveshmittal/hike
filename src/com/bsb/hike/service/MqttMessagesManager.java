@@ -407,6 +407,7 @@ public class MqttMessagesManager
 		String msisdn = jsonObj.optString(HikeConstants.DATA);
 		if (this.convDb.setParticipantLeft(groupId, msisdn) > 0)
 		{
+			ContactManager.getInstance().removeGroupParticipant(groupId, msisdn);
 			saveStatusMsg(jsonObj, jsonObj.getString(HikeConstants.TO));
 		}
 	}
