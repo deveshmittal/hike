@@ -797,7 +797,7 @@ public class TransientCache extends ContactsCache
 		else
 		{
 			contact = hDb.getContactInfoFromPhoneNo(number);
-			if (null == getContact(contact.getMsisdn()))
+			if (null != contact && null == getContact(contact.getMsisdn()))
 			{
 				insertContact(contact);
 			}
@@ -845,7 +845,7 @@ public class TransientCache extends ContactsCache
 		else
 		{
 			contact = hDb.getContactInfoFromPhoneNoOrMsisdn(number);
-			if (null == getContact(contact.getMsisdn()))
+			if (null != contact && null == getContact(contact.getMsisdn()))
 			{
 				insertContact(contact);
 			}
