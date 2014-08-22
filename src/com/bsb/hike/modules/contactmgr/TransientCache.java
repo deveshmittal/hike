@@ -155,6 +155,30 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
+	 * This method adds groupParticipants only if there is an entry for a particular group in {@link #groupParticipants}.To ensure either all participants are added in the group or
+	 * none
+	 * 
+	 * @param grpId
+	 * @param groupParticipantsMap
+	 */
+	void addGroupParticipants(String grpId, Map<String, PairModified<GroupParticipant, String>> groupParticipantsMap)
+	{
+		writeLock.lock();
+		try
+		{
+			Map<String, PairModified<GroupParticipant, String>> grpParticipants = groupParticipants.get(grpId);
+			if (null != grpParticipants)
+			{
+				grpParticipants.putAll(groupParticipantsMap);
+			}
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	/**
 	 * Removes this contact from memory if reference count is one otherwise decrements the reference count
 	 * 
 	 * @param contact
@@ -394,9 +418,9 @@ public class TransientCache extends ContactsCache
 				 */
 				transientContacts.remove(msisdn);
 			}
-			
+
 			/*
-			 * Now transient cache contains only unsaved contacts we are adding them to temp map and then assigning temp to transient contacts 
+			 * Now transient cache contains only unsaved contacts we are adding them to temp map and then assigning temp to transient contacts
 			 */
 			temp.putAll(transientContacts);
 			transientContacts = temp;

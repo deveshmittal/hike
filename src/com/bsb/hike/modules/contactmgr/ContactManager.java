@@ -1163,7 +1163,7 @@ public class ContactManager implements ITransientCache
 	 */
 	public void addGroupParticipants(String groupId, Map<String, PairModified<GroupParticipant, String>> participantList)
 	{
-		transientCache.insertGroupParticipants(groupId, participantList);
+		transientCache.addGroupParticipants(groupId, participantList);
 	}
 
 	/**
