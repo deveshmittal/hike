@@ -13,6 +13,7 @@
 
         <ImageView
             android:id="@+id/pattern"
+            android:contentDescription="side pattern in history"
             android:layout_width="16dp"
             android:layout_height="match_parent"
             android:layout_alignBottom="@+id/main_content"
@@ -31,6 +32,7 @@
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/sender"
+                android:contentDescription="sender name in history"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
@@ -41,6 +43,7 @@
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/timestamp"
+                android:contentDescription="timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="2dp"
@@ -52,6 +55,7 @@
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/text"
+                android:contentDescription="pin content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/sender"
@@ -66,6 +70,7 @@
 
         <View
             android:id="@+id/selected_state_overlay"
+            android:contentDescription="selected pin overlay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/pattern"
@@ -74,6 +79,8 @@
     </RelativeLayout>
 
     <ImageView
+        android:id="@+id/pin_shado"
+        android:contentDescription="pin shadow in history"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="fitXY"

@@ -11,6 +11,7 @@
 
         <ImageView
             android:id="@+id/pattern"
+            android:contentDescription="pin side pattern in chat thread"
             android:layout_width="16dp"
             android:layout_height="match_parent"
             android:layout_alignBottom="@+id/main_content"
@@ -33,6 +34,7 @@
 				android:textColorHint="#d0ad87"
 				android:textColor="@color/pin_text_color"
                 android:id="@+id/messageedittext"
+                android:contentDescription="pin text editor"
                 android:background="@null"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -47,6 +49,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:id="@+id/emo_btn"
+            android:contentDescription="side emoticon button in pin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/main_content"
@@ -56,6 +59,8 @@
     </RelativeLayout>
 
     <ImageView
+        android:id="@+id/pin_shado"
+        android:contentDescription="pin editor shadow in chat thread"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="fitXY"
