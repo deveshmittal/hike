@@ -676,7 +676,9 @@ public class HikeNotification
 		{
 			return;
 		}
-		final int notificationId = statusMessage.getMsisdn().hashCode();
+//		final int notificationId = statusMessage.getMsisdn().hashCode();
+		
+		final int notificationId = HIKE_SUMMARY_NOTIFICATION_ID;
 
 		final long timeStamp = statusMessage.getTimeStamp();
 
