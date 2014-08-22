@@ -110,6 +110,8 @@ public class HikeConstants
 	public static final String FILE_KEY = "fk";
 
 	public static final String FILE_PATH = "fp";
+	
+	public static final String DOWNLOAD_FILE_URL_KEY = "url";
 
 	public static final String CREDITS = "credits";
 
