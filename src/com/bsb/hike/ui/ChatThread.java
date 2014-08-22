@@ -356,7 +356,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED, HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
-			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA,HikePubSub.CONV_META_DATA_UPDATED };
+			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA,HikePubSub.CONV_META_DATA_UPDATED, HikePubSub.LATEST_PIN_DELETED };
 
 	private EmoticonType emoticonType;
 
@@ -3731,6 +3731,32 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					removeMessages(msgIds);
 				}
 			});
+		}
+		else if(HikePubSub.LATEST_PIN_DELETED.equals(type))
+		{
+			long msgId = (Long)object;
+			
+			try 
+			{
+				long pinIdFromMetadata = mConversation.getMetaData().getLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+				
+				if(msgId==pinIdFromMetadata)
+				{
+					runOnUiThread(new Runnable() 
+					{				
+						@Override
+						public void run() 
+						{
+							hidePinFromUI(true);
+						}
+					});
+				}
+			}
+			catch (JSONException e) 
+			{
+				e.printStackTrace();
+			}
+			
 		}
 		else if (HikePubSub.GROUP_REVIVED.equals(type))
 		{
