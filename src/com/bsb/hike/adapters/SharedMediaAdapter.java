@@ -11,13 +11,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.smartImageLoader.SharedFileImageLoader;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.view.TouchImageView;
 
 public class SharedMediaAdapter extends PagerAdapter
 {
@@ -74,9 +74,11 @@ public class SharedMediaAdapter extends PagerAdapter
 		View page = layoutInflater.inflate(R.layout.gallery_layout_item, container, false);
 		final HikeSharedFile sharedMediaItem = sharedMediaItems.get(position);
 
-		ImageView galleryImageView = (ImageView) page.findViewById(R.id.album_image);
-
-		if (!sharedMediaItem.getFileTypeString().toString().contains(IMAGE_TAG))
+		TouchImageView galleryImageView = (TouchImageView) page.findViewById(R.id.album_image);
+		galleryImageView.setZoom(1.0f);
+		galleryImageView.setScaleType(ScaleType.FIT_CENTER);
+		sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(true), galleryImageView, false);
+		if (galleryImageView.getDrawable() != null && !sharedMediaItem.getFileTypeString().toString().contains(IMAGE_TAG))
 		{
 			Button playBtn = (Button) page.findViewById(R.id.play_media);
 			playBtn.setVisibility(View.VISIBLE);
@@ -93,9 +95,6 @@ public class SharedMediaAdapter extends PagerAdapter
 				}
 			});
 		}
-
-		galleryImageView.setScaleType(ScaleType.FIT_CENTER);
-		sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(), galleryImageView, false);
 		
 		((ViewPager) container).addView(page);
 		return page;

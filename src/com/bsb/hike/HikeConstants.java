@@ -1751,4 +1751,6 @@ public class HikeConstants
 	public static final String MEDIA_POSITION = "position";
 	
 	public static final String FROM_CHAT_THREAD = "ct";
+
+	public static final String LARGE = "large";
 }
