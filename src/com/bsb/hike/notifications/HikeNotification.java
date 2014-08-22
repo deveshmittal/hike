@@ -125,7 +125,7 @@ public class HikeNotification
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), bodyString);
+			notifyStringMessage(context.getString(R.string.app_name), bodyString, false);
 			return;
 		}
 
@@ -164,7 +164,7 @@ public class HikeNotification
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), headerString);
+			notifyStringMessage(context.getString(R.string.app_name), headerString, false);
 			return;
 		}
 
@@ -203,7 +203,7 @@ public class HikeNotification
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), message);
+			notifyStringMessage(context.getString(R.string.app_name), message, false);
 			return;
 		}
 
@@ -230,7 +230,7 @@ public class HikeNotification
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), proTip.getHeader());
+			notifyStringMessage(context.getString(R.string.app_name), proTip.getHeader(), false);
 			return;
 		}
 
@@ -415,7 +415,7 @@ public class HikeNotification
 			}
 			else
 			{
-				notifyStringMessage(convMsg.getMsisdn(), message);
+				notifyStringMessage(convMsg.getMsisdn(), message, false);
 				return;
 			}
 
@@ -433,7 +433,7 @@ public class HikeNotification
 			}
 			else
 			{
-				notifyStringMessage(convMsg.getMsisdn(), message);
+				notifyStringMessage(convMsg.getMsisdn(), message, false);
 				return;
 			}
 			// regular message
@@ -441,7 +441,7 @@ public class HikeNotification
 		}
 	}
 
-	public void notifyStringMessage(String msisdn, String message)
+	public void notifyStringMessage(String msisdn, String message, boolean forceNotPlaySound)
 	{
 		boolean isSingleMsisdn = hikeNotifMsgStack.isFromSingleMsisdn();
 
@@ -467,15 +467,15 @@ public class HikeNotification
 			showBigTextStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 					hikeNotifMsgStack.getNotificationBigText(), isSingleMsisdn ? hikeNotifMsgStack.lastAddedMsisdn : "bulk", hikeNotifMsgStack.getNotificationSubText(),
-					avatarDrawable, hikeNotifMsgStack.forceBlockNotificationSound());
-		
+					avatarDrawable, forceNotPlaySound);
+
 		}
 		else
 		{
 			showInboxStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 					hikeNotifMsgStack.getNotificationBigText(), isSingleMsisdn ? hikeNotifMsgStack.lastAddedMsisdn : "bulk", hikeNotifMsgStack.getNotificationSubText(),
-					avatarDrawable, hikeNotifMsgStack.getBigTextList(), hikeNotifMsgStack.forceBlockNotificationSound());
+					avatarDrawable, hikeNotifMsgStack.getBigTextList(), forceNotPlaySound);
 		}
 	}
 
@@ -509,7 +509,8 @@ public class HikeNotification
 				{
 					showNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 							hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
-							hikeNotifMsgStack.getNotificationBigText(), convMessage.getMsisdn(), bigPictureImage, !convMessage.isStickerMessage(), false, false, null, null, false);
+							hikeNotifMsgStack.getNotificationBigText(), convMessage.getMsisdn(), bigPictureImage, !convMessage.isStickerMessage(), false, false,
+							hikeNotifMsgStack.getNotificationSubText(), null, false);
 					return;
 				}
 			}
@@ -521,7 +522,7 @@ public class HikeNotification
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 					hikeNotifMsgStack.getNotificationBigText(), isSingleMsisdn ? hikeNotifMsgStack.lastAddedMsisdn : "bulk", hikeNotifMsgStack.getNotificationSubText(),
 					avatarDrawable, hikeNotifMsgStack.forceBlockNotificationSound());
-		
+
 		}
 		else
 		{
@@ -551,7 +552,7 @@ public class HikeNotification
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), context.getString(R.string.hike_to_offline_text));
+			notifyStringMessage(context.getString(R.string.app_name), context.getString(R.string.hike_to_offline_text), false);
 			return;
 		}
 
@@ -604,7 +605,7 @@ public class HikeNotification
 		}
 		else
 		{
-			notifyStringMessage(key, context.getString(R.string.stealth_notification_message));
+			notifyStringMessage(key, context.getString(R.string.stealth_notification_message), false);
 			return;
 		}
 
@@ -634,7 +635,7 @@ public class HikeNotification
 			return;
 		}
 
-		final int notificationId = contactInfo.getMsisdn().hashCode();
+		final int notificationId = HIKE_SUMMARY_NOTIFICATION_ID;
 
 		final String msisdn = contactInfo.getMsisdn();
 
@@ -659,7 +660,7 @@ public class HikeNotification
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), text);
+			notifyStringMessage(context.getString(R.string.app_name), text, false);
 			return;
 		}
 
@@ -676,8 +677,8 @@ public class HikeNotification
 		{
 			return;
 		}
-//		final int notificationId = statusMessage.getMsisdn().hashCode();
-		
+		// final int notificationId = statusMessage.getMsisdn().hashCode();
+
 		final int notificationId = HIKE_SUMMARY_NOTIFICATION_ID;
 
 		final long timeStamp = statusMessage.getTimeStamp();
@@ -711,8 +712,12 @@ public class HikeNotification
 		}
 		else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
 		{
-			message = context.getString(R.string.status_profile_pic_notification, key);
-			text = key + " " + message;
+			// message = context.getString(R.string.status_profile_pic_notification, key);
+			// text = key + " " + message;
+
+			// If it is a profile pic change, return since we can display big picture notification using notify
+			// BigPictureStatusNotification() triggered by HikePubSub.PUSH_AVATAR_DOWNLOADED
+			return;
 		}
 		else
 		{
@@ -730,11 +735,11 @@ public class HikeNotification
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), text);
+			notifyStringMessage(context.getString(R.string.app_name), text, true);
 			return;
 		}
 
-		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, statusMessage.getMsisdn(), null, false, false);
+		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, statusMessage.getMsisdn(), null, false, true);
 		addNotificationId(notificationId);
 	}
 
@@ -746,7 +751,7 @@ public class HikeNotification
 			return;
 		}
 
-		final int notificationId = msisdn.hashCode();
+		final int notificationId = HIKE_SUMMARY_NOTIFICATION_ID;
 		final String key = TextUtils.isEmpty(name) ? msisdn : name;
 		final String message = context.getString(R.string.status_profile_pic_notification);
 		final String text = key + " " + message;
@@ -765,11 +770,11 @@ public class HikeNotification
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), text);
+			notifyStringMessage(context.getString(R.string.app_name), text, false);
 			return;
 		}
 
-		showNotification(notificationIntent, icon, System.currentTimeMillis(), notificationId, text, key, message, msisdn, bigPictureImage, false, false);
+		showNotification(notificationIntent, icon, System.currentTimeMillis(), notificationId, text, key, message, msisdn, bigPictureImage, false, true);
 	}
 
 	public void notifyBatchUpdate(final String header, final String message)
@@ -794,7 +799,7 @@ public class HikeNotification
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), text);
+			notifyStringMessage(context.getString(R.string.app_name), text, false);
 			return;
 		}
 		showNotification(notificationIntent, icon, timeStamp, notificationId, text, key, message, null, null, false, false); // TODO: change this.
@@ -950,10 +955,10 @@ public class HikeNotification
 			mBuilder = getNotificationBuilder(key, message, text.toString(), avatarDrawable, smallIconId, isFTMessage);
 			final NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
 			bigPicStyle.setBigContentTitle(key);
-			bigPicStyle.setSummaryText(message);
-			mBuilder.setStyle(bigPicStyle);
-			// set the big picture image
+			bigPicStyle.setSummaryText(subMessage);
 			bigPicStyle.bigPicture(bigPictureImage);
+			mBuilder.setSubText(subMessage);
+			mBuilder.setStyle(bigPicStyle);
 		}
 		else
 		{
@@ -973,6 +978,7 @@ public class HikeNotification
 			}
 		}
 
+		mBuilder.setNumber(hikeNotifMsgStack.getUnreadMessages());
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
 		{
@@ -984,7 +990,8 @@ public class HikeNotification
 	private void showNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text, final String key,
 			final String message, final String msisdn, final Bitmap bigPictureImage, boolean isPin, boolean forceNotPlaySound)
 	{
-		showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, false, isPin, true, null, null, forceNotPlaySound);
+		showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, false, isPin, true,
+				hikeNotifMsgStack.getNotificationSubText(), null, forceNotPlaySound);
 	}
 
 	private int returnSmallIcon()
