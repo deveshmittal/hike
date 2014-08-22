@@ -1677,7 +1677,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					selectedNonForwadableMsg(isMsgSelected);
 				}
-				if ((fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.PAUSING))
+				if ((fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED ))
 				{
 					/*
 					 * File Transfer is in progress. this can be canceled.
@@ -7296,6 +7296,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 				}, 2000);
 			}
+		}
+		
+		if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE){
+			mAdapter.setIsListFlinging(false);
+		}else{
+			mAdapter.setIsListFlinging(true);
 		}
 	}
 
