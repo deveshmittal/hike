@@ -85,6 +85,7 @@ import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
 public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
@@ -109,7 +110,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private String emailTxt;
 
-	private Map<String, Pair<GroupParticipant, String>> participantMap;
+	private Map<String, PairModified<GroupParticipant, String>> participantMap;
 
 	private ProfileType profileType;
 
@@ -577,9 +578,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		/*
 		 * Removing inactive participants
 		 */
-		for (Entry<String, Pair<GroupParticipant, String>> participantEntry : participantMap.entrySet())
+		for (Entry<String, PairModified<GroupParticipant, String>> participantEntry : participantMap.entrySet())
 		{
-			GroupParticipant groupParticipant = participantEntry.getValue().first;
+			GroupParticipant groupParticipant = participantEntry.getValue().getFirst();
 			if (groupParticipant.hasLeft())
 			{
 				inactiveMsisdns.add(participantEntry.getKey());
@@ -612,16 +613,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		// Adding an item for the header
 		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.HEADER_ID));
 
-		List<GroupParticipant> participants = new ArrayList<GroupParticipant>();
+		List<PairModified<GroupParticipant, String>> participants = new ArrayList<PairModified<GroupParticipant, String>>();
 
-		for(Entry<String,Pair<GroupParticipant,String>> mapEntry : participantMap.entrySet())
+		for (Entry<String, PairModified<GroupParticipant, String>> mapEntry : participantMap.entrySet())
 		{
-			participants.add(mapEntry.getValue().first);
+			participants.add(mapEntry.getValue());
 		}
 
 		if (!participantMap.containsKey(userInfo.getContactInfo().getMsisdn()))
 		{
-			participants.add(userInfo);
+			participants.add(new PairModified<GroupParticipant, String>(userInfo, null));
 		}
 
 		Collections.sort(participants, GroupParticipant.lastSeenTimeComparator);
@@ -629,7 +630,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		/*
 		 * Adding an element to for the 'add participant' element.
 		 */
-		participants.add(0, null);
+		participants.add(0, new PairModified<GroupParticipant, String>(null, null));
 
 		int loopCount = participants.size() / 2;
 		if (participants.size() % 2 != 0)
@@ -642,13 +643,15 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			int index1 = 2 * i;
 			int index2 = 2 * i + 1;
 
-			GroupParticipant[] groupParticipants = new GroupParticipant[2];
-			groupParticipants[0] = participants.get(index1);
+			List<PairModified<GroupParticipant, String>> groupParticipants = new ArrayList<PairModified<GroupParticipant, String>>(2);
+			groupParticipants.add(participants.get(index1));
 
 			if (index2 < participants.size())
 			{
-				groupParticipants[1] = participants.get(index2);
+				groupParticipants.add(participants.get(index2));
 			}
+			else
+				groupParticipants.add(new PairModified<GroupParticipant, String>(null, null));
 
 			profileItems.add(new ProfileItem.ProfileGroupItem(groupParticipants));
 		}
@@ -1700,7 +1703,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					List<ContactInfo> contacts = HikeMessengerApp.getContactManager().getContact(msisdns, true, true);
 					for (ContactInfo contactInfo : contacts)
 					{
-						participantMap.put(contactInfo.getMsisdn(), new Pair<GroupParticipant, String>(new GroupParticipant(contactInfo), null));
+						participantMap.put(contactInfo.getMsisdn(), new PairModified<GroupParticipant, String>(new GroupParticipant(contactInfo), null));
 						if (contactInfo.getName() == null)
 						{
 							msisdnsGroupTable.add(contactInfo.getMsisdn());
@@ -1715,7 +1718,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					{
 						String msisdn = mapEntry.getKey();
 						String name = mapEntry.getValue();
-						participantMap.get(msisdn).first.getContactInfo().setName(name);
+						participantMap.get(msisdn).getFirst().getContactInfo().setName(name);
 					}
 				}
 

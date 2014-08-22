@@ -1,10 +1,9 @@
 package com.bsb.hike.models;
 
 import java.util.ArrayList;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -20,6 +19,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
 public class GroupConversation extends Conversation
@@ -33,7 +33,7 @@ public class GroupConversation extends Conversation
 
 	private boolean hasSmsUser;
 
-	private Map<String, Pair<GroupParticipant, String>> groupParticipantList;
+	private Map<String, PairModified<GroupParticipant, String>> groupParticipantList;
 	
 	private long lastSentMsgId = -1;
 	
@@ -52,7 +52,7 @@ public class GroupConversation extends Conversation
 	{
 		super(jsonObject.getString(HikeConstants.TO), null, true);
 		this.groupOwner = jsonObject.getString(HikeConstants.FROM);
-		this.groupParticipantList = new HashMap<String, Pair<GroupParticipant, String>>();
+		this.groupParticipantList = new HashMap<String, PairModified<GroupParticipant, String>>();
 		JSONArray array = jsonObject.getJSONArray(HikeConstants.DATA);
 		List<String> msisdns = new ArrayList<String>();
 		for (int i = 0; i < array.length(); i++)
@@ -65,16 +65,16 @@ public class GroupConversation extends Conversation
 			boolean onDnd = nameMsisdn.optBoolean(HikeConstants.DND);
 			GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(contactNum, contactNum, contactName, contactNum, onHike), false, onDnd);
 			Logger.d(getClass().getSimpleName(), "Parsing JSON and adding contact to conversation: " + contactNum);
-			this.groupParticipantList.put(contactNum, new Pair<GroupParticipant, String>(groupParticipant, contactName));
+			this.groupParticipantList.put(contactNum, new PairModified<GroupParticipant, String>(groupParticipant, contactName));
 		}
 
 		List<ContactInfo> contacts = ContactManager.getInstance().getContact(msisdns, true, false);
 		for (ContactInfo contact : contacts)
 		{
-			Pair<GroupParticipant, String> grpPair = this.groupParticipantList.get(contact.getMsisdn());
+			PairModified<GroupParticipant, String> grpPair = this.groupParticipantList.get(contact.getMsisdn());
 			if (null != grpPair)
 			{
-				grpPair.first.setContactInfo(contact);
+				grpPair.getFirst().setContactInfo(contact);
 			}
 		}
 
@@ -97,29 +97,29 @@ public class GroupConversation extends Conversation
 		this.isGroupAlive = isAlive;
 	}
 
-	public void setGroupParticipantList(Map<String, Pair<GroupParticipant, String>> groupParticipantList)
+	public void setGroupParticipantList(Map<String, PairModified<GroupParticipant, String>> groupParticipantList)
 	{
 		this.groupParticipantList = groupParticipantList;
 	}
 
-	public void setGroupParticipantList(List<Pair<GroupParticipant, String>> groupParticipantList)
+	public void setGroupParticipantList(List<PairModified<GroupParticipant, String>> groupParticipantList)
 	{
-		this.groupParticipantList = new HashMap<String, Pair<GroupParticipant, String>>();
-		for (Pair<GroupParticipant, String> grpParticipant : groupParticipantList)
+		this.groupParticipantList = new HashMap<String, PairModified<GroupParticipant, String>>();
+		for (PairModified<GroupParticipant, String> grpParticipant : groupParticipantList)
 		{
-			String msisdn = grpParticipant.first.getContactInfo().getMsisdn();
+			String msisdn = grpParticipant.getFirst().getContactInfo().getMsisdn();
 			this.groupParticipantList.put(msisdn, grpParticipant);
 		}
 	}
 
-	public Map<String, Pair<GroupParticipant, String>> getGroupParticipantList()
+	public Map<String, PairModified<GroupParticipant, String>> getGroupParticipantList()
 	{
 		return groupParticipantList;
 	}
 
 	public GroupParticipant getGroupParticipant(String msisdn)
 	{
-		return groupParticipantList.containsKey(msisdn) ? groupParticipantList.get(msisdn).first : new GroupParticipant(new ContactInfo(msisdn, msisdn, msisdn, msisdn));
+		return groupParticipantList.containsKey(msisdn) ? groupParticipantList.get(msisdn).getFirst() : new GroupParticipant(new ContactInfo(msisdn, msisdn, msisdn, msisdn));
 	}
 
 	public String getGroupParticipantFirstName(String msisdn)
@@ -144,7 +144,7 @@ public class GroupConversation extends Conversation
 			// Before contact manager we were adding all the group participants to conversation object initially when getConversations of HikeConversationDatabase is called
 			// But now we do lazy loading, we don't have group participants when we are on home screen
 			// In case of empty group name, group Participants are needed so setting it here.
-			return Utils.defaultGroupName(new ArrayList<Pair<GroupParticipant, String>>(groupParticipantList.values()));
+			return Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(groupParticipantList.values()));
 		}
 	}
 
@@ -188,10 +188,10 @@ public class GroupConversation extends Conversation
 			if (type.equals(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN))
 			{
 				JSONArray array = new JSONArray();
-				for (Entry<String, Pair<GroupParticipant, String>> participant : groupParticipantList.entrySet())
+				for (Entry<String, PairModified<GroupParticipant, String>> participant : groupParticipantList.entrySet())
 				{
 					JSONObject nameMsisdn = new JSONObject();
-					nameMsisdn.put(HikeConstants.NAME, participant.getValue().first.getContactInfo().getName());
+					nameMsisdn.put(HikeConstants.NAME, participant.getValue().getFirst().getContactInfo().getName());
 					nameMsisdn.put(HikeConstants.MSISDN, participant.getKey());
 					array.put(nameMsisdn);
 				}

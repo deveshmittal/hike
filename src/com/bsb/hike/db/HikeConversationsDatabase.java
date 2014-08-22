@@ -2710,16 +2710,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * @param participantList
 	 *            A list of the participants to be added
 	 */
-	public int addGroupParticipants(String groupId, Map<String, Pair<GroupParticipant, String>> participantList)
+	public int addGroupParticipants(String groupId, Map<String, PairModified<GroupParticipant, String>> participantList)
 	{
 		boolean participantsAlreadyAdded = true;
 		boolean infoChangeOnly = false;
 
-		List<Pair<GroupParticipant, String>> currentParticipantsList = ContactManager.getInstance().getGroupParticipants(groupId, true, false);
-		Map<String, Pair<GroupParticipant, String>> currentParticipants = new HashMap<String, Pair<GroupParticipant, String>>();
-		for (Pair<GroupParticipant, String> grpParticipant : currentParticipantsList)
+		List<PairModified<GroupParticipant, String>> currentParticipantsList = ContactManager.getInstance().getGroupParticipants(groupId, true, false);
+		Map<String, PairModified<GroupParticipant, String>> currentParticipants = new HashMap<String, PairModified<GroupParticipant, String>>();
+		for (PairModified<GroupParticipant, String> grpParticipant : currentParticipantsList)
 		{
-			String msisdn = grpParticipant.first.getContactInfo().getMsisdn();
+			String msisdn = grpParticipant.getFirst().getContactInfo().getMsisdn();
 			currentParticipants.put(msisdn, grpParticipant);
 		}
 
@@ -2727,7 +2727,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			participantsAlreadyAdded = false;
 		}
-		for (Entry<String, Pair<GroupParticipant, String>> newParticipantEntry : participantList.entrySet())
+		for (Entry<String, PairModified<GroupParticipant, String>> newParticipantEntry : participantList.entrySet())
 		{
 			if (!currentParticipants.containsKey(newParticipantEntry.getKey()))
 			{
@@ -2736,13 +2736,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 			else
 			{
-				GroupParticipant currentParticipant = currentParticipants.get(newParticipantEntry.getKey()).first;
-				if (currentParticipant.onDnd() != newParticipantEntry.getValue().first.onDnd())
+				GroupParticipant currentParticipant = currentParticipants.get(newParticipantEntry.getKey()).getFirst();
+				if (currentParticipant.onDnd() != newParticipantEntry.getValue().getFirst().onDnd())
 				{
 					participantsAlreadyAdded = false;
 					infoChangeOnly = true;
 				}
-				if (currentParticipant.getContactInfo().isOnhike() != newParticipantEntry.getValue().first.getContactInfo().isOnhike())
+				if (currentParticipant.getContactInfo().isOnhike() != newParticipantEntry.getValue().getFirst().getContactInfo().isOnhike())
 				{
 					participantsAlreadyAdded = false;
 					infoChangeOnly = true;
@@ -2754,7 +2754,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			return HikeConstants.NO_CHANGE;
 		}
 
-		Map<String, Pair<GroupParticipant, String>> newParticipants = new HashMap<String, Pair<GroupParticipant, String>>();
+		Map<String, PairModified<GroupParticipant, String>> newParticipants = new HashMap<String, PairModified<GroupParticipant, String>>();
 		SQLiteStatement insertStatement = null;
 		InsertHelper ih = null;
 		try
@@ -2764,19 +2764,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					+ DBConstants.NAME + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_LEFT + ", " + DBConstants.ON_DND + ", " + DBConstants.SHOWN_STATUS + " ) "
 					+ " VALUES (?, ?, ?, ?, ?, ?, ?)");
 			mDb.beginTransaction();
-			for (Entry<String, Pair<GroupParticipant, String>> participant : participantList.entrySet())
+			for (Entry<String, PairModified<GroupParticipant, String>> participant : participantList.entrySet())
 			{
-				GroupParticipant groupParticipant = participant.getValue().first;
+				GroupParticipant groupParticipant = participant.getValue().getFirst();
 				insertStatement.bindString(ih.getColumnIndex(DBConstants.GROUP_ID), groupId);
 				insertStatement.bindString(ih.getColumnIndex(DBConstants.MSISDN), participant.getKey());
-				insertStatement.bindString(ih.getColumnIndex(DBConstants.NAME), groupParticipant.getContactInfo().getName());
+				insertStatement.bindString(ih.getColumnIndex(DBConstants.NAME), participant.getValue().getSecond());
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.ONHIKE), groupParticipant.getContactInfo().isOnhike() ? 1 : 0);
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.HAS_LEFT), 0);
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.ON_DND), groupParticipant.onDnd() ? 1 : 0);
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.SHOWN_STATUS), groupParticipant.getContactInfo().isOnhike() ? 1 : 0);
 				insertStatement.executeInsert();
 
-				newParticipants.put(participant.getKey(), new Pair<GroupParticipant, String>(groupParticipant, participant.getValue().second));
+				newParticipants.put(participant.getKey(), new PairModified<GroupParticipant, String>(groupParticipant, participant.getValue().getSecond()));
 			}
 			ContactManager.getInstance().addGroupParticipants(groupId, newParticipants);
 			mDb.setTransactionSuccessful();
@@ -2899,7 +2899,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * @param groupId
 	 * @return
 	 */
-	public Pair<Map<String, Pair<GroupParticipant, String>>, List<String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
+	public Pair<Map<String, PairModified<GroupParticipant, String>>, List<String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
 	{
 		String selection = DBConstants.GROUP_ID + " =? " + (activeOnly ? " AND " + DBConstants.HAS_LEFT + "=0" : "")
 				+ (notShownStatusMsgOnly ? " AND " + DBConstants.SHOWN_STATUS + "=0" : "");
@@ -2909,7 +2909,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.HAS_LEFT, DBConstants.ONHIKE, DBConstants.NAME, DBConstants.ON_DND },
 					selection, new String[] { groupId }, null, null, null);
 
-			Map<String, Pair<GroupParticipant, String>> participantList = new HashMap<String, Pair<GroupParticipant, String>>();
+			Map<String, PairModified<GroupParticipant, String>> participantList = new HashMap<String, PairModified<GroupParticipant, String>>();
 			List<String> allMsisdns = new ArrayList<String>();
 			while (c.moveToNext())
 			{
@@ -2918,10 +2918,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String name = c.getString(c.getColumnIndex(DBConstants.NAME));
 				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, name, msisdn, c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0),
 						c.getInt(c.getColumnIndex(DBConstants.HAS_LEFT)) != 0, c.getInt(c.getColumnIndex(DBConstants.ON_DND)) != 0);
-				participantList.put(msisdn, new Pair<GroupParticipant, String>(groupParticipant, name));
+				participantList.put(msisdn, new PairModified<GroupParticipant, String>(groupParticipant, name));
 			}
 
-			return new Pair<Map<String, Pair<GroupParticipant, String>>, List<String>>(participantList, allMsisdns);
+			return new Pair<Map<String, PairModified<GroupParticipant, String>>, List<String>>(participantList, allMsisdns);
 		}
 		finally
 		{
@@ -3163,7 +3163,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String groupId = groupCursor.getString(groupIdIdx);
 				String groupName = groupCursor.getString(groupNameIdx);
 
-				List<Pair<GroupParticipant, String>> groupParticipantMap = ContactManager.getInstance().getGroupParticipants(groupId, true, false, false);
+				List<PairModified<GroupParticipant, String>> groupParticipantMap = ContactManager.getInstance().getGroupParticipants(groupId, true, false, false);
 				groupName = TextUtils.isEmpty(groupName) ? Utils.defaultGroupName(groupParticipantMap) : groupName;
 				int numMembers = groupParticipantMap.size();
 
@@ -4246,7 +4246,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	public ConvMessage showParticipantStatusMessage(String groupId)
 	{
 
-		List<Pair<GroupParticipant, String>> smsParticipants = ContactManager.getInstance().getGroupParticipants(groupId, true, true);
+		List<PairModified<GroupParticipant, String>> smsParticipants = ContactManager.getInstance().getGroupParticipants(groupId, true, true);
 
 		if (smsParticipants.isEmpty())
 		{
@@ -4256,9 +4256,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		JSONObject dndJSON = new JSONObject();
 		JSONArray dndParticipants = new JSONArray();
 
-		for (Pair<GroupParticipant, String> smsParticipantEntry : smsParticipants)
+		for (PairModified<GroupParticipant, String> smsParticipantEntry : smsParticipants)
 		{
-			GroupParticipant smsParticipant = smsParticipantEntry.first;
+			GroupParticipant smsParticipant = smsParticipantEntry.getFirst();
 			String msisdn = smsParticipant.getContactInfo().getMsisdn();
 			if (smsParticipant.onDnd())
 			{

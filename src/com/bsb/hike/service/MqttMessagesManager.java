@@ -418,6 +418,7 @@ public class MqttMessagesManager
 
 		if (this.convDb.setGroupName(groupId, groupname) > 0)
 		{
+			ContactManager.getInstance().setGroupName(groupId, groupname);
 			this.pubSub.publish(HikePubSub.GROUP_NAME_CHANGED, groupId);
 
 			boolean showPush = true;
