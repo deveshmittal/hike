@@ -37,6 +37,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
@@ -177,7 +178,7 @@ public class UploadFileTask extends FileTransferBase
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
 					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
-							Bitmap.Config.RGB_565, false, false);
+							Bitmap.Config.ARGB_8888, false, false);
 					thumbnail = Utils.getRotatedBitmap(destinationFile.getPath(), thumbnail);
 					if (thumbnail == null && !TextUtils.isEmpty(fileKey))
 					{
@@ -199,7 +200,28 @@ public class UploadFileTask extends FileTransferBase
 				}
 				if (thumbnail != null)
 				{
-					thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
+					Bitmap.CompressFormat compressFormat = null;
+					if(Utils.hasIceCreamSandwich())
+						compressFormat = Bitmap.CompressFormat.WEBP;
+					else
+						compressFormat = Bitmap.CompressFormat.JPEG;
+					if (hikeFileType == HikeFileType.IMAGE)
+					{
+						Bitmap bluredThumb = Utils.createBlurredImage(thumbnail, context);
+						if(bluredThumb == null){
+							byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, 5);
+							thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+							thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+						}else{
+							byte [] tBytes = BitmapUtils.bitmapToBytes(bluredThumb, compressFormat, 10);
+							thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+							thumbnail = bluredThumb;
+						}
+					}else if (hikeFileType == HikeFileType.VIDEO){
+						byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, 75);
+						thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+					}
 					// thumbnail.recycle();
 				}
 				
@@ -333,7 +355,7 @@ public class UploadFileTask extends FileTransferBase
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
 				thumbnail = HikeBitmapFactory.scaleDownBitmap(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
-						Bitmap.Config.RGB_565, true, false);
+						Bitmap.Config.ARGB_8888, true, false);
 				thumbnail = Utils.getRotatedBitmap(selectedFile.getPath(), thumbnail);
 			}
 			else if (hikeFileType == HikeFileType.VIDEO)
@@ -342,7 +364,28 @@ public class UploadFileTask extends FileTransferBase
 			}
 			if (thumbnail != null)
 			{
-				thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
+				Bitmap.CompressFormat compressFormat = null;
+				if(Utils.hasIceCreamSandwich())
+					compressFormat = Bitmap.CompressFormat.WEBP;
+				else
+					compressFormat = Bitmap.CompressFormat.JPEG;
+				if (hikeFileType == HikeFileType.IMAGE)
+				{
+					Bitmap bluredThumb = Utils.createBlurredImage(thumbnail, context);
+					if(bluredThumb == null){
+						byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, 5);
+						thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+					}else{
+						byte [] tBytes = BitmapUtils.bitmapToBytes(bluredThumb, compressFormat, 10);
+						thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+						thumbnail = bluredThumb;
+					}
+				}else if (hikeFileType == HikeFileType.VIDEO){
+					byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, 75);
+					thumbnail = BitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+					thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+				}
 				// thumbnail.recycle();
 			}
 			else
@@ -504,7 +547,6 @@ public class UploadFileTask extends FileTransferBase
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, ((ConvMessage) userContext));
 			_state = FTState.COMPLETED;
 			deleteStateFile();
-
 		}
 		catch (MalformedURLException e)
 		{
@@ -714,7 +756,8 @@ public class UploadFileTask extends FileTransferBase
 				temp *= 100;
 				temp /= _totalSize;
 				progressPercentage = (int) temp;
-				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+				if(_state != FTState.PAUSED)
+					LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 			}
 		}
 
@@ -729,7 +772,7 @@ public class UploadFileTask extends FileTransferBase
 			_state = FTState.COMPLETED;
 			deleteStateFile();
 			break;
-		case PAUSING:
+		case PAUSED:
 			_state = FTState.PAUSED;
 			Logger.d(getClass().getSimpleName(), "FT PAUSED");
 			// In case upload was complete response JSON is to be saved not the Session_ID
@@ -1018,7 +1061,9 @@ public class UploadFileTask extends FileTransferBase
 		if (userContext != null)
 		{
 			FileTransferManager.getInstance(context).removeTask(((ConvMessage) userContext).getMsgID());
-			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+			this.pausedProgress = -1;
+			if(result != FTResult.PAUSED)
+				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		}
 
 		if (result != FTResult.PAUSED && result != FTResult.SUCCESS)

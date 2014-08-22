@@ -299,6 +299,12 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 			return b;
 	}
 	
+	public BitmapDrawable getHQthumbFromCache(String key)
+	{
+		BitmapDrawable b = get(key);
+		return b;
+	}
+
 	public boolean deleteIconForMSISDN(String msisdn)
 	{
         boolean rowsDeleted = ContactManager.getInstance().removeIcon(msisdn);
