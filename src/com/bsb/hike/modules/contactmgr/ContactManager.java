@@ -41,6 +41,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.modules.iface.ITransientCache;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -1067,7 +1068,7 @@ public class ContactManager implements ITransientCache
 	 * @param notShownStatusMsgOnly
 	 * @return
 	 */
-	public List<Pair<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
+	public List<PairModified<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
 	{
 		return getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly, true);
 	}
@@ -1081,11 +1082,11 @@ public class ContactManager implements ITransientCache
 	 * @param fetchParticipants
 	 * @return
 	 */
-	public List<Pair<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
+	public List<PairModified<GroupParticipant, String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly, boolean fetchParticipants)
 	{
-		Pair<Map<String, Pair<GroupParticipant, String>>, List<String>> groupPair = transientCache.getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly,
+		Pair<Map<String, PairModified<GroupParticipant, String>>, List<String>> groupPair = transientCache.getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly,
 				fetchParticipants);
-		Map<String, Pair<GroupParticipant, String>> groupParticipantsMap = groupPair.first;
+		Map<String, PairModified<GroupParticipant, String>> groupParticipantsMap = groupPair.first;
 		List<String> allMsisdns = groupPair.second;
 
 		if (null != allMsisdns)
@@ -1126,23 +1127,23 @@ public class ContactManager implements ITransientCache
 
 				for (ContactInfo contactInfo : list)
 				{
-					Pair<GroupParticipant, String> groupParticipantPair = groupParticipantsMap.get(contactInfo.getMsisdn());
+					PairModified<GroupParticipant, String> groupParticipantPair = groupParticipantsMap.get(contactInfo.getMsisdn());
 					if (contactInfo.getName() == null)
 					{
-						String name = groupParticipantPair.first.getContactInfo().getName();
+						String name = groupParticipantPair.getFirst().getContactInfo().getName();
 						setGroupParticipantContactName(groupId, contactInfo.getMsisdn(), name);
 
 						/*
 						 * For unsaved participants we don't have Contact information in users table -- their on hike status is not known to us. We get on hike status of unsaved
 						 * contact in a group from group members table
 						 */
-						ContactInfo con = groupParticipantPair.first.getContactInfo();
+						ContactInfo con = groupParticipantPair.getFirst().getContactInfo();
 						contactInfo.setOnhike(con.isOnhike());
-						groupParticipantPair.first.setContactInfo(contactInfo);
+						groupParticipantPair.getFirst().setContactInfo(contactInfo);
 					}
 					else
 					{
-						groupParticipantPair.first.setContactInfo(contactInfo);
+						groupParticipantPair.getFirst().setContactInfo(contactInfo);
 						setGroupParticipantContactName(groupId, contactInfo.getMsisdn(), contactInfo.getName());
 					}
 				}
@@ -1150,7 +1151,7 @@ public class ContactManager implements ITransientCache
 		}
 		transientCache.insertGroupParticipants(groupId, groupParticipantsMap);
 
-		List<Pair<GroupParticipant, String>> groupParticipantsList = new ArrayList<Pair<GroupParticipant, String>>(groupParticipantsMap.values());
+		List<PairModified<GroupParticipant, String>> groupParticipantsList = new ArrayList<PairModified<GroupParticipant, String>>(groupParticipantsMap.values());
 		return groupParticipantsList;
 	}
 
@@ -1160,7 +1161,7 @@ public class ContactManager implements ITransientCache
 	 * @param groupId
 	 * @param participantList
 	 */
-	public void addGroupParticipants(String groupId, Map<String, Pair<GroupParticipant, String>> participantList)
+	public void addGroupParticipants(String groupId, Map<String, PairModified<GroupParticipant, String>> participantList)
 	{
 		transientCache.insertGroupParticipants(groupId, participantList);
 	}

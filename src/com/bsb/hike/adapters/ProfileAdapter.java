@@ -37,6 +37,7 @@ import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 import com.bsb.hike.smartImageLoader.TimelineImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -331,13 +332,13 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			LinearLayout parentView = (LinearLayout) v;
 			parentView.removeAllViews();
 
-			List<Pair<GroupParticipant, String>> groupParticipants = ((ProfileGroupItem) profileItem).getGroupParticipants();
+			List<PairModified<GroupParticipant, String>> groupParticipants = ((ProfileGroupItem) profileItem).getGroupParticipants();
 
 			int counter = 0;
-			for (Pair<GroupParticipant, String> groupParticipantPair : groupParticipants)
+			for (PairModified<GroupParticipant, String> groupParticipantPair : groupParticipants)
 			{
 
-				GroupParticipant groupParticipant = groupParticipantPair.first;
+				GroupParticipant groupParticipant = groupParticipantPair.getFirst();
 
 				View groupParticipantParentView = inflater.inflate(R.layout.group_profile_item, parentView, false);
 
@@ -391,8 +392,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 						showingLastSeen = !TextUtils.isEmpty(lastSeenString);
 					}
 
-					String groupParticipantName = groupParticipantPair.second;;
-					if (null == groupParticipantPair.second)
+					String groupParticipantName = groupParticipantPair.getSecond();
+					if (null == groupParticipantName)
 					{
 						groupParticipantName = contactInfo.getFirstNameAndSurname();
 					}

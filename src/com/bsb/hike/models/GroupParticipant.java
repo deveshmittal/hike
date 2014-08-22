@@ -5,6 +5,7 @@ import java.util.Comparator;
 import android.util.Pair;
 
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.utils.PairModified;
 
 public class GroupParticipant implements Comparable<GroupParticipant>
 {
@@ -62,14 +63,14 @@ public class GroupParticipant implements Comparable<GroupParticipant>
 		return this.contactInfo.compareTo(another.contactInfo);
 	}
 
-	public static Comparator<Pair<GroupParticipant, String>> lastSeenTimeComparator = new Comparator<Pair<GroupParticipant, String>>()
+	public static Comparator<PairModified<GroupParticipant, String>> lastSeenTimeComparator = new Comparator<PairModified<GroupParticipant, String>>()
 	{
 
 		@Override
-		public int compare(Pair<GroupParticipant, String> lhs, Pair<GroupParticipant, String> rhs)
+		public int compare(PairModified<GroupParticipant, String> lhs, PairModified<GroupParticipant, String> rhs)
 		{
-			ContactInfo lhsContactInfo = lhs.first.contactInfo;
-			ContactInfo rhsContactInfo = rhs.first.contactInfo;
+			ContactInfo lhsContactInfo = lhs.getFirst().contactInfo;
+			ContactInfo rhsContactInfo = rhs.getFirst().contactInfo;
 
 			if (lhsContactInfo.getFavoriteType() != rhsContactInfo.getFavoriteType())
 			{

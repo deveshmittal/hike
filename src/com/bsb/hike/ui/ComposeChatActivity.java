@@ -58,6 +58,7 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.TagEditText;
@@ -462,12 +463,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			// Group alredy exists. Fetch existing participants.
 			newGroup = false;
 		}
-		Map<String, Pair<GroupParticipant, String>> participantList = new HashMap<String, Pair<GroupParticipant, String>>();
+		Map<String, PairModified<GroupParticipant, String>> participantList = new HashMap<String, PairModified<GroupParticipant, String>>();
 
 		for (ContactInfo particpant : selectedContactList)
 		{
 			GroupParticipant groupParticipant = new GroupParticipant(particpant);
-			participantList.put(particpant.getMsisdn(), new Pair<GroupParticipant, String>(groupParticipant, null));
+			participantList.put(particpant.getMsisdn(), new PairModified<GroupParticipant, String>(groupParticipant, null));
 		}
 		ContactInfo userContactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 

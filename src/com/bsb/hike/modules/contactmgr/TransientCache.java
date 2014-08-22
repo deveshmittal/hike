@@ -33,7 +33,7 @@ public class TransientCache extends ContactsCache
 	private Map<String, PairModified<ContactInfo, Integer>> transientContacts;
 
 	// Transient memory for contacts of group participants
-	private Map<String, Map<String, Pair<GroupParticipant, String>>> groupParticipants;
+	private Map<String, Map<String, PairModified<GroupParticipant, String>>> groupParticipants;
 
 	private final ReentrantReadWriteLock readWriteLockTrans = new ReentrantReadWriteLock(true);
 
@@ -47,7 +47,7 @@ public class TransientCache extends ContactsCache
 	TransientCache(HikeUserDatabase db)
 	{
 		transientContacts = new LinkedHashMap<String, PairModified<ContactInfo, Integer>>();
-		groupParticipants = new HashMap<String, Map<String, Pair<GroupParticipant, String>>>();
+		groupParticipants = new HashMap<String, Map<String, PairModified<GroupParticipant, String>>>();
 		hDb = db;
 	}
 
@@ -135,15 +135,15 @@ public class TransientCache extends ContactsCache
 	 * @param grpId
 	 * @param groupParticipantsMap
 	 */
-	void insertGroupParticipants(String grpId, Map<String, Pair<GroupParticipant, String>> groupParticipantsMap)
+	void insertGroupParticipants(String grpId, Map<String, PairModified<GroupParticipant, String>> groupParticipantsMap)
 	{
 		writeLock.lock();
 		try
 		{
-			Map<String, Pair<GroupParticipant, String>> groupParticipantsList = groupParticipants.get(grpId);
+			Map<String, PairModified<GroupParticipant, String>> groupParticipantsList = groupParticipants.get(grpId);
 			if (null == groupParticipantsList)
 			{
-				groupParticipantsList = new HashMap<String, Pair<GroupParticipant, String>>();
+				groupParticipantsList = new HashMap<String, PairModified<GroupParticipant, String>>();
 				groupParticipants.put(grpId, groupParticipantsList);
 			}
 			groupParticipantsList.putAll(groupParticipantsMap);
@@ -191,7 +191,7 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			Map<String, Pair<GroupParticipant, String>> groupParticipantsList = groupParticipants.get(groupId);
+			Map<String, PairModified<GroupParticipant, String>> groupParticipantsList = groupParticipants.get(groupId);
 			if (null != groupParticipantsList)
 			{
 				groupParticipantsList.remove(msisdn);
@@ -321,12 +321,12 @@ public class TransientCache extends ContactsCache
 			String name = getName(msisdn);
 			if (null == name)
 			{
-				Map<String, Pair<GroupParticipant, String>> map = groupParticipants.get(groupId);
+				Map<String, PairModified<GroupParticipant, String>> map = groupParticipants.get(groupId);
 				if (null != map)
 				{
-					Pair<GroupParticipant, String> grpParticipantPair = map.get(msisdn);
+					PairModified<GroupParticipant, String> grpParticipantPair = map.get(msisdn);
 					if (null != grpParticipantPair)
-						name = grpParticipantPair.second;
+						name = grpParticipantPair.getSecond();
 				}
 			}
 			return name;
@@ -348,11 +348,11 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			Map<String, Pair<GroupParticipant, String>> groupParticipantMap = groupParticipants.get(grpId);
+			Map<String, PairModified<GroupParticipant, String>> groupParticipantMap = groupParticipants.get(grpId);
 			if (null != groupParticipantMap)
 			{
-				GroupParticipant grpParticipant = groupParticipantMap.get(msisdn).first;
-				groupParticipantMap.put(msisdn, new Pair<GroupParticipant, String>(grpParticipant, name));
+				GroupParticipant grpParticipant = groupParticipantMap.get(msisdn).getFirst();
+				groupParticipantMap.put(msisdn, new PairModified<GroupParticipant, String>(grpParticipant, name));
 			}
 		}
 		finally
@@ -887,17 +887,17 @@ public class TransientCache extends ContactsCache
 	 * @param fetchParticipants
 	 * @return
 	 */
-	Pair<Map<String, Pair<GroupParticipant, String>>, List<String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly,
+	Pair<Map<String, PairModified<GroupParticipant, String>>, List<String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly,
 			boolean fetchParticipants)
 	{
-		Map<String, Pair<GroupParticipant, String>> groupParticipantsMap = null;
+		Map<String, PairModified<GroupParticipant, String>> groupParticipantsMap = null;
 		readLock.lock();
 		try
 		{
 			groupParticipantsMap = groupParticipants.get(groupId);
 			if (null != groupParticipantsMap)
 			{
-				return new Pair<Map<String, Pair<GroupParticipant, String>>, List<String>>(groupParticipantsMap, null);
+				return new Pair<Map<String, PairModified<GroupParticipant, String>>, List<String>>(groupParticipantsMap, null);
 			}
 		}
 		finally
@@ -945,7 +945,7 @@ public class TransientCache extends ContactsCache
 		readLock.lock();
 		try
 		{
-			Map<String, Pair<GroupParticipant, String>> g = groupParticipants.get(groupId);
+			Map<String, PairModified<GroupParticipant, String>> g = groupParticipants.get(groupId);
 			if (null != g)
 			{
 				return g.size();
