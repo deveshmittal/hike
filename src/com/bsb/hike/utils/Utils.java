@@ -74,6 +74,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
+import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -4437,4 +4438,45 @@ public class Utils
 		}
 		return !TextUtils.isEmpty(countryCode);
 	}	
+	
+	public static Drawable getChatTheme(ChatTheme chatTheme, Context context)
+	{
+		/*
+		 * for xhdpi and above we should not scale down the chat theme nodpi asset for hdpi and below to save memory we should scale it down
+		 */
+		int inSampleSize = 1;
+		if(!chatTheme.isTiled() && Utils.densityMultiplier < 2)
+		{
+			inSampleSize = 2;
+		}
+		
+		Bitmap b = HikeBitmapFactory.decodeSampledBitmapFromResource(context.getResources(), chatTheme.bgResId(), inSampleSize);
+
+		BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(context.getResources(), b);
+
+		Logger.d(context.getClass().getSimpleName(), "chat themes bitmap size= " + BitmapUtils.getBitmapSize(b));
+
+		if (bd != null && chatTheme.isTiled())
+		{
+			bd.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+		}
+
+		return bd;
+	}
+	
+	public static void resetPinUnreadCount(Conversation conv)
+	{
+		if(conv.getMetaData() != null)
+		{
+			try
+			{
+				conv.getMetaData().setUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN, 0);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+			HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, conv);
+		}
+	}
 }
