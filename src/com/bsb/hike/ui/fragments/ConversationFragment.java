@@ -270,7 +270,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			addBottomPadding(ftueListView);
 		}
-		addFtueCards(ftueListItems);
+		if(HomeActivity.ftueContactsData.getHikeContacts().isEmpty())
+		{
+			addFtueCards(ftueListItems);
+		}
 		ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
 	}
 
