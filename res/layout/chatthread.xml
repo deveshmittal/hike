@@ -287,7 +287,6 @@
                             android:layout_weight="0.9"
                             android:background="@null"
                             android:gravity="center_vertical"
-                            android:hint="@string/type_to_compose"
                             android:imeOptions="actionSend"
                             android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
                             android:lineSpacingExtra="1dp"

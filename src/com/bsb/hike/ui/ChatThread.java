@@ -3179,7 +3179,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			removeSMSToggle();
 
-			mComposeView.setHint(mConversation instanceof GroupConversation ? R.string.group_msg : R.string.hike_msg);
 			if ((mConversation instanceof GroupConversation) && ((GroupConversation) mConversation).hasSmsUser())
 			{
 				if (mCredits == 0)
@@ -3199,7 +3198,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else
 		{
 			updateChatMetadata();
-			mComposeView.setHint(R.string.sms_msg);
 		}
 	}
 
@@ -4313,18 +4311,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			if (!TextUtils.isEmpty(mComposeView.getText()))
 			{
 				mComposeView.setText("");
-			}
-			if (mConversation instanceof GroupConversation)
-			{
-				mComposeView.setHint(R.string.group_msg);
-			}
-			else if (mConversation.isOnhike())
-			{
-				mComposeView.setHint(R.string.hike_msg);
-			}
-			else
-			{
-				mComposeView.setHint(R.string.sms_msg);
 			}
 			mComposeView.setEnabled(true);
 		}
