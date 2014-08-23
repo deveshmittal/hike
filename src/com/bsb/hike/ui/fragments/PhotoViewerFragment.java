@@ -23,6 +23,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.SharedMediaAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.HikeSharedFile;
+import com.bsb.hike.ui.utils.DepthPageTransformer;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -110,6 +111,12 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 			}
 		});
 		
+		if(Utils.isHoneycombOrHigher())  //The method setPageTransformer works only on API 11+. For lower devices, we can add margin to the view pager to show gap between adjacent views. 
+			selectedPager.setPageTransformer(true, new DepthPageTransformer());
+		else
+			selectedPager.setPageMargin((int) getResources().getDimension(R.dimen.horizontal_page_margin));
+
+		setupActionBar();
 		//Load media to the right and left of the view pager if this fragment is called from ChatThread.
 		if(fromChatThread)
 		{	Logger.d(TAG,  " MsgId : " + sharedMediaItems.get(0).getMsgId());
