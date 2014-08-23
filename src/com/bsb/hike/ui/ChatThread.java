@@ -4942,15 +4942,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else
 		{
 			findViewById(R.id.sms_toggle_button).setVisibility(View.GONE);
-			View nudgeTutorial = getNudgeTutorialView(chatTheme);
-			if (nudgeTutorial != null)
-			{
-				ViewGroup empty = (ViewGroup) findViewById(android.R.id.empty);
-				empty.removeAllViews();
-				empty.addView(nudgeTutorial);
-				empty.setOnTouchListener(this);
-				mConversationsView.setEmptyView(empty);
-			}
 		}
 		setMuteViewBackground();
 
@@ -4958,29 +4949,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		actionBar.setBackgroundDrawable(getResources().getDrawable(chatTheme.headerBgResId()));
 		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setDisplayShowTitleEnabled(true);
-	}
-
-	private TextView getNudgeTutorialView(ChatTheme chatTheme)
-	{
-		try
-		{
-			TextView tv = (TextView) LayoutInflater.from(getBaseContext()).inflate(chatTheme.systemMessageLayoutId(), null, false);
-			Random random = new Random();
-			String[] randomStringsArray = getResources().getStringArray(R.array.chat_thread_empty_state_tutorial_text);
-			tv.setText(randomStringsArray[random.nextInt(randomStringsArray.length)]);
-			android.widget.ScrollView.LayoutParams lp = new ScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			lp.gravity = Gravity.CENTER;
-			lp.leftMargin = (int) getResources().getDimension(R.dimen.empty_tutorial_margin);
-			lp.rightMargin = (int) getResources().getDimension(R.dimen.empty_tutorial_margin);
-			tv.setLayoutParams(lp);
-			return tv;
-		}
-		catch (Exception e)
-		{
-			// if chattheme starts returning layout id which is not textview, playSafe
-			e.printStackTrace();
-		}
-		return null;
 	}
 
 	private void sendChatThemeMessage()
