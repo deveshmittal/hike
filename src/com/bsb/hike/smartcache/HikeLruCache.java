@@ -50,6 +50,8 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable> implements Hi
 	protected Resources mResources;
 
 	private Context context;
+	
+	public static final short HALF_SIZE = 2;
 
 	/**
 	 * A holder class that contains cache parameters.
