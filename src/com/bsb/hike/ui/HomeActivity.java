@@ -61,6 +61,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.FtueContactsData;
@@ -1369,7 +1370,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 10:
 					Utils.sendUILogEvent(HikeConstants.LogEvent.FAVOURITE_FROM_OVERFLOW);
 					intent = new Intent(HomeActivity.this, PeopleActivity.class);
-					break;	
+					break;
+				case 21:
+					DBBackupRestore.getInstance().backupDB();
+					break;
+				case 22:
+					DBBackupRestore.getInstance().restoreDB();
+					break;
 				}
 
 				if (intent != null)
@@ -1410,6 +1417,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private void addEmailLogItem(List<OverFlowMenuItem> overFlowMenuItems)
 	{
 		overFlowMenuItems.add(new OverFlowMenuItem("Send logs", 9));
+		overFlowMenuItems.add(new OverFlowMenuItem("Backup", 21));
+		overFlowMenuItems.add(new OverFlowMenuItem("Restore", 22));
 	}
 
 	@Override

@@ -726,6 +726,8 @@ public class HikeConstants
 
 	public static final String HIKE_MEDIA_DIRECTORY_ROOT = Environment.getExternalStorageDirectory() + "/Hike/Media";
 
+	public static final String HIKE_BACKUP_DIRECTORY_ROOT = Environment.getExternalStorageDirectory() + "/Hike/Backup";
+
 	public static final String PROFILE_ROOT = "/hike Profile Images";
 
 	public static final String IMAGE_ROOT = "/hike Images";
