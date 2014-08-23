@@ -313,6 +313,21 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	public void clearIconCache()
 	{
 		evictAll();
+		System.gc();
+	}
+	
+	/**
+	 * 
+	 * @param fraction
+	 * 	-- fraction to which cache should be reduced
+	 * 
+	 * <p>For example in case value of fraction is 5 then max size of cache before this function returns will be 
+	 * size()/5</p>
+	 */
+	public void trim(short fraction)
+	{
+		trimToSize(size()/fraction);
+		System.gc();
 	}
 
 	public Drawable getSticker(String path)
