@@ -1,7 +1,9 @@
 package com.bsb.hike.service;
 
 import java.io.File;
+
 import java.util.Calendar;
+
 import java.util.List;
 
 import org.json.JSONException;
@@ -32,16 +34,15 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
@@ -66,7 +67,7 @@ public class HikeService extends Service
 		public void run()
 		{
 			Logger.d("ContactsChanged", "calling syncUpdates");
-			ContactUtils.syncUpdates(this.context);
+			ContactManager.getInstance().syncUpdates(this.context);
 			if (manualSync)
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNCED, null);
@@ -283,6 +284,20 @@ public class HikeService extends Service
 		}
 
 		sm.setupStickerCategoryList(settings);
+		/*
+		* This preference has been used here because of a prepopulated recent sticker enhancement
+		* it will delete all the default stickers as we are adding some more default stickers 
+		*/
+		if (!preferenceManager.contains(StickerManager.REMOVE_DEFAULT_STICKERS))
+		{
+			sm.deleteDefaultDownloadedExpressionsStickers();
+			sm.deleteDefaultDownloadedStickers();
+			
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(StickerManager.REMOVE_DEFAULT_STICKERS, true);
+			editor.commit();
+		}
+		sm.loadRecentStickers();
 
 		/*
 		 * This preference has been used here because of a bug where we were inserting this key in the settings preference
@@ -291,7 +306,7 @@ public class HikeService extends Service
 		{
 			sm.removeHumanoidSticker();
 		}
-
+		
 		if (!preferenceManager.getBoolean(StickerManager.EXPRESSIONS_CATEGORY_INSERT_TO_DB, false))
 		{
 			sm.insertExpressionsCategory();
@@ -838,8 +853,8 @@ public class HikeService extends Service
 				return;
 			}
 
-			List<ContactInfo> contactinfos = HikeUserDatabase.getInstance().getContacts();
-			ContactUtils.setGreenBlueStatus(context, contactinfos);
+			List<ContactInfo> contactinfos = ContactManager.getInstance().getAllContacts();
+			ContactManager.getInstance().setGreenBlueStatus(context, contactinfos);
 			JSONObject data = AccountUtils.getWAJsonContactList(contactinfos);
 
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/info", RequestType.OTHER, new HikeHttpCallback()

@@ -162,7 +162,15 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		final IconCheckBoxPreference sslPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.SSL_PREF);
 		if (sslPreference != null)
 		{
-			sslPreference.setOnPreferenceChangeListener(this);
+			String countryCode = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.COUNTRY_CODE, "");
+			if(countryCode.equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE))
+			{
+				getPreferenceScreen().removePreference(sslPreference);
+			}
+			else
+			{
+				sslPreference.setOnPreferenceChangeListener(this);
+			}
 		}
 
 		Preference blockedListPreference = getPreferenceScreen().findPreference(HikeConstants.BLOKED_LIST_PREF);
@@ -226,7 +234,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 			{
-				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 				{
 					resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
 					resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
@@ -455,11 +463,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		else if (HikeConstants.HELP_FAQS_PREF.equals(preference.getKey()))
 		{
 			Logger.d(getClass().getSimpleName(), "FAQ preference selected");
-			Intent intent = new Intent(HikePreferences.this, WebViewActivity.class);
-			intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, HikeConstants.HELP_URL);
-			intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.faq));
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
+			Utils.startWebViewActivity(getApplicationContext(),HikeConstants.HELP_URL,getString(R.string.faq));
 		}
 		else if (HikeConstants.HELP_FEEDBACK_PREF.equals(preference.getKey()))
 		{

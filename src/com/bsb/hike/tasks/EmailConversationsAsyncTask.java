@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
@@ -26,6 +27,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
 public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]>
@@ -55,7 +57,7 @@ public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, C
 			HikeConversationsDatabase db = null;
 			String msisdn = convs[k].getMsisdn();
 			StringBuilder sBuilder = new StringBuilder();
-			Map<String, GroupParticipant> participantMap = null;
+			Map<String, PairModified<GroupParticipant,String>> participantMap = null;
 
 			db = HikeConversationsDatabase.getInstance();
 			Conversation conv = db.getConversation(msisdn, -1);
@@ -87,7 +89,7 @@ public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, C
 				boolean isSent = cMessage.isSent();
 				if (cMessage.isGroupChat()) // gc naming logic
 				{
-					GroupParticipant gPart = participantMap.get(cMessage.getGroupParticipantMsisdn());
+					GroupParticipant gPart = participantMap.get(cMessage.getGroupParticipantMsisdn()).getFirst();
 
 					if (gPart != null)
 					{
