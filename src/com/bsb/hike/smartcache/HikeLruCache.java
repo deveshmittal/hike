@@ -14,7 +14,9 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ThumbnailUtils;
 import android.os.Build.VERSION_CODES;
+import android.provider.MediaStore;
 import android.support.v4.util.LruCache;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -24,8 +26,10 @@ import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
 import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.MySoftReference;
 
@@ -274,7 +278,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable> implements Hi
 			int idx = key.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
 			if (idx > 0)
 				key = key.substring(0, idx);
-			BitmapDrawable bd = (BitmapDrawable) HikeUserDatabase.getInstance().getIcon(key, rounded);
+			BitmapDrawable bd = (BitmapDrawable) ContactManager.getInstance().getIcon(key, rounded);
 			if (bd != null)
 			{
 				putInCache(cacheKey, bd);
@@ -304,8 +308,8 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable> implements Hi
 
 	public boolean deleteIconForMSISDN(String msisdn)
 	{
-		boolean rowsDeleted =HikeUserDatabase.getInstance().removeIcon(msisdn);
-		clearIconForMSISDN(msisdn);
+        boolean rowsDeleted = ContactManager.getInstance().removeIcon(msisdn);
+        clearIconForMSISDN(msisdn);
 		return rowsDeleted;
 	}
 

@@ -1437,7 +1437,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	{
 		if (emptyView != null)
 		{
-
+			if(loadingView != null)
+				loadingView.setVisibility(View.GONE);
 			listView.setEmptyView(emptyView);
 		}
 	}
