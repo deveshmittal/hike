@@ -17,6 +17,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION_CODES;
 import android.support.v4.util.LruCache;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
@@ -27,7 +29,7 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.MySoftReference;
 
-public class HikeLruCache extends LruCache<String, BitmapDrawable>
+public class HikeLruCache extends LruCache<String, BitmapDrawable> implements HikePubSub.Listener
 {
 
 	// Default memory cache size in kilobytes
@@ -99,6 +101,8 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	}
 
 	private final Set<MySoftReference<Bitmap>> reusableBitmaps;
+	
+	private String[] pubSubListeners = {HikePubSub.APP_BACKGROUNDED};
 
 	public HikeLruCache(ImageCacheParams cacheParams, Context context)
 	{
@@ -106,6 +110,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		reusableBitmaps = Utils.canInBitmap() ? Collections.synchronizedSet(new HashSet<MySoftReference<Bitmap>>()) : null;
 		this.context = context;
 		this.mResources = context.getResources();
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
 	public static HikeLruCache getInstance(ImageCacheParams cacheParams, Context context)
@@ -354,5 +359,20 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	public void removeItemForKey(String key)
 	{
 		remove(key);
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		// TODO Auto-generated method stub
+		if(HikePubSub.APP_BACKGROUNDED.equals(type))
+		{
+			
+			/**
+			 * clear LRU cache on getting this event
+			 */
+			clearIconCache();
+		}
+		
 	}
 }
