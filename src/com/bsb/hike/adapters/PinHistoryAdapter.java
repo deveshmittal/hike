@@ -127,7 +127,7 @@ public class PinHistoryAdapter extends BaseAdapter implements OnLongClickListene
 	@Override
 	public boolean isEnabled(int position)
 	{
-		return true;
+		return getItem(position) instanceof ConvMessage;
 	}
 
 	@Override
@@ -140,6 +140,7 @@ public class PinHistoryAdapter extends BaseAdapter implements OnLongClickListene
 		}
 		return ViewType.DATE_SEP.ordinal();
 	}
+
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
@@ -428,4 +429,5 @@ public class PinHistoryAdapter extends BaseAdapter implements OnLongClickListene
 	{
 		isActionModeOn = isOn;
 	}
+	
 }
