@@ -1106,6 +1106,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     </string-array>
     <string name="hike_offline_notifications">Hike offline notifications</string>
     <string name="h2o_notifications_setting_summary">Enable hike offline notifications for contacts </string>
+    <string name="notifications_contact_join_title">Contact joining notification</string>
+    <string name="notifications_contact_join_summary">Notify when a contact joins hike</string>
     <string name="pin_header">Pathik</string>
     <string name="pin_detail">Mass bunk tomorrow! Let\'s all go for a movie at DT Mall</string>
     <string name="postAnonymously">Post Anonymously</string>
