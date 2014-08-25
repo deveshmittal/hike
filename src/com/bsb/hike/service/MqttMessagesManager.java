@@ -2462,8 +2462,21 @@ public class MqttMessagesManager
 				pref.saveData(keys[1], body);
 				pref.saveData(keys[2], subType);
 				String url = data.optString(HikeConstants.URL);
+				// for http based generic URL
 				if(!TextUtils.isEmpty(url) && HikeMessengerApp.ATOMIC_POP_UP_HTTP.equals(subType)){
 				pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_HTTP_URL, url);
+				}else if(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC.equals(subType)){
+					// for app specific generic tip
+					String what = data.optString(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC_WHAT);
+					if(!TextUtils.isEmpty(what)){
+						try{
+						pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC_WHAT, Integer.parseInt(what));
+						}catch(NumberFormatException nf){
+							nf.printStackTrace();
+							// don know where to go on click, lets remove key so tip id not displayed
+							pref.saveData(keys[0], "");
+						}
+					}
 				}
 				Logger.i("tip", "writing to pref passed " + header + " -- " + body + " -- subtype " + subType);
 			}else{
@@ -2500,7 +2513,8 @@ public class MqttMessagesManager
 		Logger.i("tip", "subtype for main");
 		if (HikeMessengerApp.ATOMIC_POP_UP_FAVOURITES.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_INVITE.equals(subType)
 				|| HikeMessengerApp.ATOMIC_POP_UP_PROFILE_PIC.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_STATUS.equals(subType)
-				|| HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_HTTP.equals(subType))
+				|| HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_HTTP.equals(subType)
+				|| HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC.equals(subType))
 		{
 			// show notification
 			if (notificationTextIfApplicable != null)
