@@ -234,8 +234,6 @@ public class HikeNotification
 			return;
 		}
 
-		final SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
-
 		// we've got to invoke the timeline here
 		final Intent notificationIntent = Utils.getTimelineActivityIntent(context);
 		notificationIntent.putExtra(HikeConstants.Extras.NAME, context.getString(R.string.team_hike));
@@ -261,7 +259,6 @@ public class HikeNotification
 	 */
 	public void notifyUpdatePush(int updateType, String packageName, String message, boolean isApplicationsPushUpdate)
 	{
-
 		message = (TextUtils.isEmpty(message)) ? context.getString(R.string.update_app) : message;
 		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
 		final int smallIconId = returnSmallIcon();

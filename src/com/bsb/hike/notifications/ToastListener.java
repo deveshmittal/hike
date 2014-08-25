@@ -72,6 +72,11 @@ public class ToastListener implements Listener
 			HikePubSub.SHOW_FREE_INVITE_SMS, HikePubSub.STEALTH_POPUP_WITH_PUSH, HikePubSub.HIKE_TO_OFFLINE_PUSH, HikePubSub.ATOMIC_POPUP_WITH_PUSH,
 			HikePubSub.BULK_MESSAGE_NOTIFICATION };
 
+	/**
+	 * Used to check whether NUJ/RUJ message notifications are disabled
+	 */
+	private SharedPreferences mDefaultPreferences;
+
 	public ToastListener(Context context)
 	{
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
@@ -79,6 +84,7 @@ public class ToastListener implements Listener
 		this.db = HikeUserDatabase.getInstance();
 		this.context = context;
 		mCurrentUnnotifiedStatus = MQTTConnectionStatus.NOT_CONNECTED;
+		mDefaultPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 	}
 
 	@Override
@@ -210,7 +216,7 @@ public class ToastListener implements Listener
 				{
 					contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn(), false);
 				}
-				
+
 				// TODO : Commented this because for FT messages we get 2 packets from PubSub,
 				// 1. Message received (with the thumbnail)
 				// 2. Push file downloaded
@@ -484,6 +490,14 @@ public class ToastListener implements Listener
 						Logger.d(getClass().getSimpleName(), "Group has been muted");
 						continue;
 					}
+
+					if (message.getParticipantInfoState() != null && message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN
+							&& (!mDefaultPreferences.getBoolean("hikeNUJNotificationPref", true)))
+					{
+						// User has disabled NUJ/RUJ message notifications
+						continue;
+					}
+
 					if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
 							|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
 					{
