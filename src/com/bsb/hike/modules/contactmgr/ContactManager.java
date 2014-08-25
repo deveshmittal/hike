@@ -1149,7 +1149,13 @@ public class ContactManager implements ITransientCache
 				}
 			}
 		}
-		transientCache.insertGroupParticipants(groupId, groupParticipantsMap);
+
+		/*
+		 * When activeOnly is false and notShownStatusMsgOnly is false then only we get all the group participants therefore we should insert in transient cache only when we have
+		 * all the group participants and not partial.
+		 */
+		if (!activeOnly && !notShownStatusMsgOnly)
+			transientCache.insertGroupParticipants(groupId, groupParticipantsMap);
 
 		List<PairModified<GroupParticipant, String>> groupParticipantsList = new ArrayList<PairModified<GroupParticipant, String>>(groupParticipantsMap.values());
 		return groupParticipantsList;
