@@ -871,4 +871,23 @@ public class ConvMessage
 		this.isTickSoundPlayed = isTickSoundPlayed;
 	}
 
+	/**
+	 * Whether a notification sound should be played while displaying this message in Android notifications shade
+	 * 
+	 * @return
+	 */
+	public boolean isSilent()
+	{
+		// Do not play sound in case of bg change, participant joined, nuj/ruj, status updates
+		if ((getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) || (getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
+				|| (getParticipantInfoState() == ParticipantInfoState.USER_JOIN) || (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 }

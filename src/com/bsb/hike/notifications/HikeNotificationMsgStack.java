@@ -128,29 +128,10 @@ public class HikeNotificationMsgStack implements Listener
 
 			addPair(argConvMessage.getMsisdn(), convMessagePair.first);
 
-			if (mTickerText != null)
-			{
-				mTickerText.append("\n" + convMessagePair.second + " - " + convMessagePair.first);
-			}
-			else
-			{
-				mTickerText = new StringBuilder();
-				mTickerText.append(convMessagePair.second + " - " + convMessagePair.first);
-			}
-
 			mLastInsertedConvMessage = argConvMessage;
 		}
 
-		// Do not play sound in case of bg change
-		if ((argConvMessage.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
-				|| (argConvMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED))
-		{
-			forceBlockNotificationSound = true;
-		}
-		else
-		{
-			forceBlockNotificationSound = false;
-		}
+		forceBlockNotificationSound = argConvMessage.isSilent();
 
 	}
 
@@ -275,6 +256,16 @@ public class HikeNotificationMsgStack implements Listener
 		totalNewMessages++;
 
 		uniqueMsisdns.add(argMsisdn);
+
+		if (mTickerText != null)
+		{
+			mTickerText.append("\n" + HikeNotificationUtils.getNameForMsisdn(mContext, mDb, mConvDb, argMsisdn) + " - " + argMessage);
+		}
+		else
+		{
+			mTickerText = new StringBuilder();
+			mTickerText.append(HikeNotificationUtils.getNameForMsisdn(mContext, mDb, mConvDb, argMsisdn) + " - " + argMessage);
+		}
 	}
 
 	/**
@@ -349,15 +340,24 @@ public class HikeNotificationMsgStack implements Listener
 		// users
 		else
 		{
-			mNotificationIntent = new Intent(mContext, ChatThread.class);
-			mNotificationIntent.putExtra(HikeConstants.Extras.MSISDN, lastAddedMsisdn);
-			mNotificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			if (lastAddedMsisdn.contains(mContext.getString(R.string.app_name)))
+			{
+				mNotificationIntent = new Intent(mContext, HomeActivity.class);
+				mNotificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			}
+			else
+			{
 
-			/*
-			 * notifications appear to be cached, and their .equals doesn't check 'Extra's. In order to prevent the wrong intent being fired, set a data field that's unique to the
-			 * conversation we want to open. http://groups .google.com/group/android-developers/browse_thread/thread /e61ec1e8d88ea94d/1fe953564bd11609?#1fe953564bd11609
-			 */
-			mNotificationIntent.setData((Uri.parse("custom://" + getNotificationId())));
+				mNotificationIntent = new Intent(mContext, ChatThread.class);
+				mNotificationIntent.putExtra(HikeConstants.Extras.MSISDN, lastAddedMsisdn);
+				mNotificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+				/*
+				 * notifications appear to be cached, and their .equals doesn't check 'Extra's. In order to prevent the wrong intent being fired, set a data field that's unique to
+				 * the conversation we want to open. http://groups .google.com/group/android-developers/browse_thread/thread /e61ec1e8d88ea94d/1fe953564bd11609?#1fe953564bd11609
+				 */
+				mNotificationIntent.setData((Uri.parse("custom://" + getNotificationId())));
+			}
 		}
 	}
 

@@ -282,20 +282,7 @@ public class HikeNotification
 	{
 		boolean isPin = false;
 
-		boolean forceBlockNotificationSound = false;
-
-		try
-		{
-			if (convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || convMsg.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
-			{
-				forceBlockNotificationSound = true;
-			}
-		}
-		catch (NullPointerException ex)
-		{
-			ex.printStackTrace();
-			// Might not contain participant info state. proceed.
-		}
+		boolean forceBlockNotificationSound = convMsg.isSilent();
 
 		if (convMsg.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			isPin = true;
@@ -767,7 +754,7 @@ public class HikeNotification
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), text, false);
+			notifyStringMessage(context.getString(R.string.app_name), text, true);
 			return;
 		}
 
@@ -949,7 +936,7 @@ public class HikeNotification
 		NotificationCompat.Builder mBuilder;
 		if (bigPictureImage != null)
 		{
-			mBuilder = getNotificationBuilder(key, message, text.toString(), avatarDrawable, smallIconId, isFTMessage);
+			mBuilder = getNotificationBuilder(key, message, text.toString(), avatarDrawable, smallIconId, forceNotPlaySound);
 			final NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
 			bigPicStyle.setBigContentTitle(key);
 			bigPicStyle.setSummaryText(subMessage);
