@@ -995,7 +995,6 @@
     <string name="ftue_themes_card_msg">Make your conversations colorful with our beautiful chat themes.</string>
     <string name="themes">Themes</string>
     <string name="ftue_updates_are_fun_with_favorites">Only favorites can see your status update and last seen. Choose them wisely!</string>
-    <string name="new_chat_tip_header">Start a chat</string>
     <string name="ftue_welcome_card_header_second">Explore hike</string>
     <string name="ftue_welcome_card_msg_second">Hike is full of awesome things! Tap to check them out.</string>
     <string name="explore_upper_case">EXPLORE</string>
@@ -1039,7 +1038,6 @@
      <string name="invite_sent">Invite sent</string>
      <string name="send_invite">Invite (%1$d)</string>
      <string name="hike_to_offline_tip_msg">Tap here to send free SMS</string>
-     <string name="new_chat_tip_msg">tap to compose</string>
      <string name="ftue_status_update_card_header">Express yourself</string>
      <string name="ftue_status_update_card_msg">Tap here to post a status update. Only your favorites can see them.</string>
      <string name="earn_free_sms">Earn free SMS</string>
