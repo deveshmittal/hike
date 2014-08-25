@@ -24,6 +24,7 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
 public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
@@ -192,11 +193,11 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 		if (removeExistingParticipants)
 		{
-			List<Pair<GroupParticipant,String>> groupParticipantsList = ContactManager.getInstance().getGroupParticipants(existingGroupId, true, false);
-			Map<String, Pair<GroupParticipant, String>> groupParticipants = new HashMap<String, Pair<GroupParticipant,String>>();
-			for(Pair<GroupParticipant,String> grpParticipant : groupParticipantsList)
+			List<PairModified<GroupParticipant,String>> groupParticipantsList = ContactManager.getInstance().getGroupParticipants(existingGroupId, true, false);
+			Map<String, PairModified<GroupParticipant, String>> groupParticipants = new HashMap<String, PairModified<GroupParticipant,String>>();
+			for(PairModified<GroupParticipant,String> grpParticipant : groupParticipantsList)
 			{
-				String msisdn = grpParticipant.first.getContactInfo().getMsisdn();
+				String msisdn = grpParticipant.getFirst().getContactInfo().getMsisdn();
 				groupParticipants.put(msisdn, grpParticipant);
 			}
 
@@ -207,9 +208,9 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 				removeContactsFromList(smsTaskList, groupParticipants);
 			}
 
-			for (Pair<GroupParticipant,String> groupParticipant : groupParticipants.values())
+			for (PairModified<GroupParticipant,String> groupParticipant : groupParticipants.values())
 			{
-				ContactInfo contactInfo = groupParticipant.first.getContactInfo();
+				ContactInfo contactInfo = groupParticipant.getFirst().getContactInfo();
 
 				selectedPeople.put(contactInfo.getMsisdn(), contactInfo);
 			}
@@ -278,7 +279,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		}
 	}
 
-	private void removeContactsFromList(List<ContactInfo> contactList, Map<String, Pair<GroupParticipant, String>> groupParticipants)
+	private void removeContactsFromList(List<ContactInfo> contactList, Map<String, PairModified<GroupParticipant, String>> groupParticipants)
 	{
 		for (Iterator<ContactInfo> iter = contactList.iterator(); iter.hasNext();)
 		{

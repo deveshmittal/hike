@@ -105,7 +105,7 @@ public class HikeSharedFileAdapter extends BaseAdapter
 		{
 			holder.galleryThumb.setImageDrawable(null);
 			
-			thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(), holder.galleryThumb, isListFlinging);
+			thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), holder.galleryThumb, isListFlinging);
 
 			holder.galleryThumb.setScaleType(ScaleType.CENTER_CROP);
 		}

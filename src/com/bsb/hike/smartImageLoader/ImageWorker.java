@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -71,6 +73,8 @@ public abstract class ImageWorker
 	private boolean setDefaultAvatarIfNoCustomIcon = false;
 
 	private boolean setHiResDefaultAvatar = false;
+	
+	private boolean setDefaultDrawableNull = true;
 
 	protected ImageWorker()
 	{
@@ -134,8 +138,10 @@ public abstract class ImageWorker
 		}
 		else
 		{
-			imageView.setImageDrawable(null);
-			imageView.setBackgroundDrawable(null);
+			if(setDefaultDrawableNull){
+				imageView.setImageDrawable(null);
+				imageView.setBackgroundDrawable(null);
+			}
 		}
 		if (mImageCache != null)
 		{
@@ -248,6 +254,16 @@ public abstract class ImageWorker
 	{
 		mLoadingBitmap = bitmap;
 	}
+	
+	/**
+	 * Set placeholder bitmap that shows when the the background thread is running.
+	 * 
+	 * @param bitmap
+	 */
+	public void setLoadingImage(Drawable bitmap)
+	{
+		mLoadingBitmap = drawableToBitmap(bitmap);
+	}
 
 	/**
 	 * Set placeholder bitmap that shows when the the background thread is running.
@@ -295,6 +311,11 @@ public abstract class ImageWorker
 		this.setHiResDefaultAvatar = b;
 	}
 
+	public void setDefaultDrawableNull(boolean b)
+	{
+		this.setDefaultDrawableNull = b;
+	}
+	
 	/**
 	 * Subclasses should override this to define any processing or work that must happen to produce the final bitmap. This will be executed in a background thread and be long
 	 * running. For example, you could resize a large bitmap here, or pull down an image from the network.
@@ -583,5 +604,18 @@ public abstract class ImageWorker
 	public HikeLruCache getLruCache()
 	{
 		return this.mImageCache;
+	}
+	
+	public static Bitmap drawableToBitmap (Drawable drawable) {
+	    if (drawable instanceof BitmapDrawable) {
+	        return ((BitmapDrawable)drawable).getBitmap();
+	    }
+
+	    Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Config.ARGB_8888);
+	    Canvas canvas = new Canvas(bitmap); 
+	    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+	    drawable.draw(canvas);
+
+	    return bitmap;
 	}
 }

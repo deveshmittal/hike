@@ -710,10 +710,13 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			Logger.d(getClass().getSimpleName(), "Init for apptracker sdk finished" + !preferenceManager.contains(HikeConstants.SSL_PREF));
 		}
 
-		if (!preferenceManager.contains(HikeConstants.SSL_PREF))
+		boolean isSAUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE);
+
+		// Setting SSL_PREF as false for existing SA users with SSL_PREF = true
+		if (!preferenceManager.contains(HikeConstants.SSL_PREF) || (isSAUser && settings.getBoolean(HikeConstants.SSL_PREF, false)))
 		{
 			Editor editor = preferenceManager.edit();
-			editor.putBoolean(HikeConstants.SSL_PREF, !isIndianUser);
+			editor.putBoolean(HikeConstants.SSL_PREF, !(isIndianUser || isSAUser));
 			editor.commit();
 		}
 
