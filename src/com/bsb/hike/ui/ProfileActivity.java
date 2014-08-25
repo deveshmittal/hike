@@ -1682,34 +1682,34 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				final JSONArray participants = obj.optJSONArray(HikeConstants.DATA);
 
 				List<String> msisdns = new ArrayList<String>();
-				List<String> msisdnsGroupTable = new ArrayList<String>();
-				for (int i = 0; i < participants.length(); i++)
+				try
 				{
-					String msisdn = participants.optJSONObject(i).optString(HikeConstants.MSISDN);
-					msisdns.add(msisdn);
+					for (int i = 0; i < participants.length(); i++)
+					{
+						String msisdn = participants.optJSONObject(i).optString(HikeConstants.MSISDN);
+						String contactName = participants.optJSONObject(i).getString(HikeConstants.NAME);
+						boolean onHike = participants.optJSONObject(i).optBoolean(HikeConstants.ON_HIKE);
+						boolean onDnd = participants.optJSONObject(i).optBoolean(HikeConstants.DND);
+						GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, contactName, msisdn, onHike), false, onDnd);
+						participantMap.put(msisdn, new PairModified<GroupParticipant, String>(groupParticipant, contactName));
+						msisdns.add(msisdn);
+					}
 				}
-
+				catch (JSONException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 				if (msisdns.size() > 0)
 				{
 					List<ContactInfo> contacts = HikeMessengerApp.getContactManager().getContact(msisdns, true, true);
 					for (ContactInfo contactInfo : contacts)
 					{
-						participantMap.put(contactInfo.getMsisdn(), new PairModified<GroupParticipant, String>(new GroupParticipant(contactInfo), null));
-						if (contactInfo.getName() == null)
-						{
-							msisdnsGroupTable.add(contactInfo.getMsisdn());
-						}
-					}
-				}
-
-				if (msisdnsGroupTable.size() > 0)
-				{
-					Map<String, String> contacts = HikeConversationsDatabase.getInstance().getGroupParticipantNameMap(mLocalMSISDN, msisdnsGroupTable);
-					for (Entry<String, String> mapEntry : contacts.entrySet())
-					{
-						String msisdn = mapEntry.getKey();
-						String name = mapEntry.getValue();
-						participantMap.get(msisdn).getFirst().getContactInfo().setName(name);
+						GroupParticipant grpParticipant = participantMap.get(contactInfo.getMsisdn()).getFirst();
+						ContactInfo con = grpParticipant.getContactInfo();
+						contactInfo.setOnhike(con.isOnhike());
+						grpParticipant.setContactInfo(contactInfo);
 					}
 				}
 
