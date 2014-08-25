@@ -215,6 +215,11 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 	@Override
 	public void onBackPressed()
 	{
+		if(isActionModeOn)
+		{
+			destroyActionMode();
+			return;
+		}
 		super.onBackPressed();
 	}
 		
