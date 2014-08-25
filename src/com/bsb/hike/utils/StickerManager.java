@@ -227,6 +227,26 @@ public class StickerManager
 				return "bollywoodDownloadShown";
 			}
 		},
+		indian
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.indian;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_indian;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "indianDownloadShown";
+			}
+		},
 		doggy
 		{
 			@Override
@@ -265,26 +285,6 @@ public class StickerManager
 			public String downloadPref()
 			{
 				return "rfDownloadShown";
-			}
-		},
-		indian
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.indian;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_indian;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "indianDownloadShown";
 			}
 		},
 		jelly
