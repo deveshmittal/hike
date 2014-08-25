@@ -410,6 +410,10 @@ public class TransientCache extends ContactsCache
 				{
 					contactPair = new PairModified<ContactInfo, Integer>(contact, 1);
 				}
+				else
+				{
+					contactPair.setFirst(contact);
+				}
 				temp.put(msisdn, contactPair);
 
 				/*
