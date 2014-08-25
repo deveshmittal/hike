@@ -551,6 +551,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		/*
 		 * We show this tip only to new signup users
 		 */
+		settings.edit().putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true).commit();
 		return Boolean.TRUE;
 	}
 
