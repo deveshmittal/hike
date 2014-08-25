@@ -163,15 +163,8 @@ public class ContactManager implements ITransientCache
 	 */
 	public void updateContacts(ContactInfo contact)
 	{
-		ContactInfo con = persistenceCache.getContact(contact.getMsisdn());
-		if (null != con)
-		{
-			persistenceCache.updateContact(contact);
-		}
-		else
-		{
-			transientCache.updateContact(contact);
-		}
+		persistenceCache.updateContact(contact);
+		transientCache.updateContact(contact);
 	}
 
 	/**
