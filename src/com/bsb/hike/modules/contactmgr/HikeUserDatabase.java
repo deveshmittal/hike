@@ -2100,7 +2100,7 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		 */
 		Set<String> recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(preferences.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), myMsisdn);
 		Logger.d("getFTUEContacts", "recommendedContactsSelection = " + recommendedContactsSelection);
-		if (!recommendedContactsSelection.isEmpty())
+		if (null != recommendedContactsSelection && !recommendedContactsSelection.isEmpty())
 		{
 			List<ContactInfo> recommendedContacts = HikeMessengerApp.getContactManager().getHikeContacts(limit * 2, recommendedContactsSelection, null, myMsisdn);
 			if (recommendedContacts.size() >= limit)
