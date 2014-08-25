@@ -254,13 +254,13 @@ public class HikeNotificationMsgStack implements Listener
 
 		// If list size > MAX_LINES, remove messages starting from top.
 		// Skip if there is only 1 message exists from a particular msisdn
-		while (mMessageTitlePairList.size() > MAX_LINES && !sortedTillEnd)
+		while (mMessageTitlePairList.size() > (MAX_LINES > 7 ? 7 : MAX_LINES) && !sortedTillEnd)
 		{
 			trimMessagePairList();
 		}
 
 		// If this list is still > MAX_LINES, remove oldest message-msisdn pairs
-		if (mMessageTitlePairList.size() > MAX_LINES)
+		if (mMessageTitlePairList.size() > (MAX_LINES > 7 ? 7 : MAX_LINES))
 		{
 			int toBeTrimmed = mMessageTitlePairList.size() - MAX_LINES;
 
