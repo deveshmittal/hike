@@ -34,9 +34,11 @@ public class CBCEncryption
 
 	public static final String decryptExt = ".dec";
 
-	private static int pswdIterations = 65536;
+	private static int pswdIterations = 2048;
 
 	private static int keySize = 256;
+
+	private static int cipherStreamBytesize = 256;
 
 	private static byte[] ivBytes = { 'I', 'n', 'i', 't', 'i', 'a', 'l', 'i', 'z', 'e', 'V', 'e', 'c', 't', 'o', 'r' };
 
@@ -61,7 +63,7 @@ public class CBCEncryption
 		CipherOutputStream cos = new CipherOutputStream(fos, cipher);
 		// Write bytes
 		int b;
-		byte[] d = new byte[8];
+		byte[] d = new byte[cipherStreamBytesize];
 		while ((b = fis.read(d)) != -1)
 		{
 			cos.write(d, 0, b);
@@ -92,7 +94,7 @@ public class CBCEncryption
 		cipher.init(Cipher.DECRYPT_MODE, getKeySpec(password), getIvSpec());
 		CipherInputStream cis = new CipherInputStream(fis, cipher);
 		int b;
-		byte[] d = new byte[8];
+		byte[] d = new byte[cipherStreamBytesize];
 		while ((b = cis.read(d)) != -1)
 		{
 			fos.write(d, 0, b);
