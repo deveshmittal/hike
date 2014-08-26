@@ -3010,8 +3010,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.NAME }, DBConstants.GROUP_ID + " = ? AND " + DBConstants.MSISDN
-					+ " IN ? ", new String[] { groupId, msisdnsDB.toString() }, null, null, null);
+			c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.NAME }, DBConstants.GROUP_ID + " =? AND " + DBConstants.MSISDN + " IN "
+					+ msisdnsDB.toString(), new String[] { groupId }, null, null, null);
 			String name = "";
 
 			while (c.moveToNext())
