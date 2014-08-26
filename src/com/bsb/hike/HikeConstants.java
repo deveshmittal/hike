@@ -846,7 +846,7 @@ public class HikeConstants
 
 	public static final int FTUE_LIMIT = 5;
 	
-	public static final int FTUE_CONTACT_CARD_LIMIT = 4;
+	public static final int FTUE_CONTACT_CARD_LIMIT = 5;
 
 	public static final String FTUE_MSISDN_TYPE = "ftueContact";
 
