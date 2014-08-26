@@ -220,16 +220,12 @@ class PersistenceCache extends ContactsCache
 		try
 		{
 			if (convsContactsPersistence.containsKey(contact.getMsisdn()))
-			{
 				convsContactsPersistence.put(contact.getMsisdn(), contact);
-			}
-			else
+			
+			PairModified<ContactInfo, Integer> contactPair = groupContactsPersistence.get(contact.getMsisdn());
+			if (null != contactPair)
 			{
-				PairModified<ContactInfo, Integer> contactPair = groupContactsPersistence.get(contact.getMsisdn());
-				if (null != contactPair)
-				{
-					contactPair.setFirst(contact);
-				}
+				contactPair.setFirst(contact);
 			}
 		}
 		finally
