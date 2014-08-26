@@ -1625,6 +1625,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public boolean showMessageContextMenu(ConvMessage message)
 	{
+		if(showingImpMessagePinCreate)
+		{
+			return true;
+		}
 		dismissPopupWindow();
 		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null || message.isBlockAddHeader())
 		{
