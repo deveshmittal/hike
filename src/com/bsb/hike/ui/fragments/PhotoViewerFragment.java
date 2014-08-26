@@ -421,6 +421,9 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, msisdn);
 			startActivity(intent);
 			return true;
+		case R.id.share_msgs:
+			getCurrentSelectedItem().shareFile(getSherlockActivity());
+			return true;
 		}
 		return false;
 	}
@@ -429,7 +432,7 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 	{
 		menu.clear();
-		inflater.inflate(R.menu.multi_select_chat_menu, menu);
+		inflater.inflate(R.menu.photo_viewer_option_menu, menu);
 		super.onCreateOptionsMenu(menu, inflater);
 	}
 	
