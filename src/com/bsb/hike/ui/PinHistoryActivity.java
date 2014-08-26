@@ -5,12 +5,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,7 +38,6 @@ import com.bsb.hike.adapters.PinHistoryAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
