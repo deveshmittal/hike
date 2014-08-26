@@ -3840,6 +3840,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		boolean isSent = ConvMessage.isMessageSent(convMessage.getState());
 		contentValues.put(DBConstants.MESSAGE_ID, convMessage.getMsgID());
 		contentValues.put(DBConstants.MSISDN, convMessage.getMsisdn());
+		contentValues.put(DBConstants.GROUP_PARTICIPANT, convMessage.getGroupParticipantMsisdn() != null ? convMessage.getGroupParticipantMsisdn() : "");
 		contentValues.put(DBConstants.TIMESTAMP, convMessage.getTimestamp());
 		contentValues.put(DBConstants.IS_SENT, isSent);
 		contentValues.put(DBConstants.HIKE_FILE_TYPE, convMessage.getMetadata().getHikeFiles().get(0).getHikeFileType().ordinal());
@@ -4653,9 +4654,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		/*
 		 * selecting rows from messages table for all msgIds from old shared Media table
-		 * SELECT msgid, msisdn, timestamp, msgStatus, metadata FROM messages where messages.msgId IN (SELECT msgid FROM tempSharedMediaTable);
+		 * SELECT msgid, msisdn, fromMsisdn, timestamp, msgStatus, metadata FROM messages where messages.msgId IN (SELECT msgid FROM tempSharedMediaTable);
 		 */
-		String sql3 = "SELECT " + DBConstants.MESSAGE_ID + ", " + DBConstants.MSISDN + ", " +  DBConstants.TIMESTAMP + ", " + DBConstants.MSG_STATUS + ", "
+		String sql3 = "SELECT " + DBConstants.MESSAGE_ID + ", " + DBConstants.MSISDN + ", " + DBConstants.GROUP_PARTICIPANT + ", " +  DBConstants.TIMESTAMP + ", " + DBConstants.MSG_STATUS + ", "
 				+ DBConstants.MESSAGE_METADATA + " FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.MESSAGES_TABLE + "." + DBConstants.MESSAGE_ID
 				+ " IN ( SELECT " + DBConstants.MESSAGE_ID + " FROM " + TEMP_SHARED_MEDIA_TABLE + " )";
 
@@ -4671,6 +4672,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			
 			final int msgIdIndex = c.getColumnIndex(DBConstants.MESSAGE_ID);
 			final int msisdnIndex = c.getColumnIndex(DBConstants.MSISDN);
+			final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
 			final int tsIndex = c.getColumnIndex(DBConstants.TIMESTAMP);
 			final int msgStatusIndex = c.getColumnIndex(DBConstants.MSG_STATUS);
 			final int metadataIndex = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
@@ -4682,10 +4684,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				long ts = c.getLong(tsIndex);
 				int messageStatus = c.getInt(msgStatusIndex);
 				String messageMetadataString = c.getString(metadataIndex);
+				String groupParticipant = c.getString(groupParticipantColumn);
 				
 				ContentValues contentValues = new ContentValues();
 				contentValues.put(DBConstants.MESSAGE_ID, msgId);
 				contentValues.put(DBConstants.MSISDN, msisdn);
+				contentValues.put(DBConstants.GROUP_PARTICIPANT, groupParticipant);
 				contentValues.put(DBConstants.TIMESTAMP, ts);
 				contentValues.put(DBConstants.IS_SENT, ConvMessage.isMessageSent(State.values()[messageStatus]));
 
@@ -4736,7 +4740,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		 * creating new sharedMediaTable with updated schema
 		 */
 		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.SHARED_MEDIA_TABLE + " (" + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY, "
-				+ DBConstants.MSISDN + " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.IS_SENT + " INT, " + DBConstants.HIKE_FILE_TYPE + " INTEGER, "
+				+ DBConstants.MSISDN + " TEXT, " + DBConstants.GROUP_PARTICIPANT + " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.IS_SENT + " INT, " + DBConstants.HIKE_FILE_TYPE + " INTEGER, "
 				+ DBConstants.MESSAGE_METADATA + " TEXT"+ " )";
 		
 		return sql;
@@ -4780,11 +4784,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.SHARED_MEDIA_TABLE, new String[] { DBConstants.MESSAGE_ID, DBConstants.TIMESTAMP, DBConstants.IS_SENT,
+			c = mDb.query(DBConstants.SHARED_MEDIA_TABLE, new String[] { DBConstants.MESSAGE_ID, DBConstants.GROUP_PARTICIPANT, DBConstants.TIMESTAMP, DBConstants.IS_SENT,
 					DBConstants.MESSAGE_METADATA }, selection, new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + (itemsToRight ? " DESC" : " ASC"), limitStr);
 
 
 			final int msgIdIndex = c.getColumnIndex(DBConstants.MESSAGE_ID);
+			final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
 			final int tsIndex = c.getColumnIndex(DBConstants.TIMESTAMP);
 			final int isSentIndex = c.getColumnIndex(DBConstants.IS_SENT);
 			final int metadataIndex = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
@@ -4797,8 +4802,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				long ts = c.getLong(tsIndex);
 				boolean isSent = c.getInt(isSentIndex) != 0;
 				String messageMetadata = c.getString(metadataIndex);
+				String groupParticipantMsisdn = c.getString(groupParticipantColumn);
 				
-				sharedFilesList.add(new HikeSharedFile(new JSONObject(messageMetadata), isSent, msgId, msisdn, ts));
+				sharedFilesList.add(new HikeSharedFile(new JSONObject(messageMetadata), isSent, msgId, msisdn, ts, groupParticipantMsisdn));
 			}
 			
 			return sharedFilesList;

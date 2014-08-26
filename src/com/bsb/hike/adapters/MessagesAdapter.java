@@ -3182,7 +3182,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			Bundle arguments = new Bundle();
 			ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
-			hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn() , convMessage.getTimestamp()));
+			hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn() , convMessage.getTimestamp(), convMessage.getGroupParticipantMsisdn()));
 			arguments.putParcelableArrayList(HikeConstants.Extras.SHARED_FILE_ITEMS, hsf);
 			arguments.putInt(HikeConstants.MEDIA_POSITION, hsf.size()-1);
 			arguments.putBoolean(HikeConstants.FROM_CHAT_THREAD, true);
