@@ -1129,11 +1129,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public void onBackPressed()
 	{
 		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
-		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-		
 		if (fragment != null)
-		{	
-			PhotoViewerFragment.onPhotoBack(fragment, fragmentTransaction, getSupportActionBar());
+		{
+			PhotoViewerFragment.onPhotoBack(fragment, getSupportFragmentManager(), getSupportActionBar(), getWindow());
 			setupActionBar(false);
 			return;
 		}
@@ -2232,6 +2230,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				finish();
 			}
+		}
+		
+		/*
+		 * To handle the case when photo viewer is opened from chat thread and user forwards/share some item. In this case we should close the photo viewer.
+		 */
+		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
+		if (fragment != null)
+		{
+			PhotoViewerFragment.onPhotoBack(fragment, getSupportFragmentManager(), getSupportActionBar(), getWindow());
 		}
 
 		// This prevent the activity from simply finishing and opens up the last

@@ -23,6 +23,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.view.Window;
+
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
@@ -248,8 +250,11 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		
 	}
 	
-	public static void onPhotoBack(Fragment fragment, FragmentTransaction fragmentTransaction, ActionBar actionBar)
+	public static void onPhotoBack(Fragment fragment, FragmentManager fragmentManager, ActionBar actionBar, Window currentWindow)
 	{
+		currentWindow.clearFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
 		if (fragment != null && fragment.isVisible() && fragment instanceof PhotoViewerFragment)
 		{	
 			fragmentTransaction.remove(fragment);

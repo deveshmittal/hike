@@ -15,7 +15,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.os.Parcelable;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,7 +32,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
@@ -137,11 +135,9 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	public void onBackPressed()
 	{
 		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
-		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-		
 		if (fragment != null)
 		{	
-			PhotoViewerFragment.onPhotoBack(fragment, fragmentTransaction, getSupportActionBar());
+			PhotoViewerFragment.onPhotoBack(fragment, getSupportFragmentManager(), getSupportActionBar(), getWindow());
 			setupActionBar();
 			return;
 		}
