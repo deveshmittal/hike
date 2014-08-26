@@ -489,4 +489,24 @@ public class HikeFile
 		this.isSent = isSent;
 	}
 
+	public void shareFile(Context context)
+	{
+		switch (getHikeFileType())
+		{
+		case LOCATION:
+		case CONTACT:
+		case PROFILE:
+			return;
+
+		default:
+			break;
+		}
+		/*
+		 * getting exact file path to support sharing even not fully uploaded files
+		 */
+		String currentFileSelectionPath = HikeConstants.FILE_SHARE_PREFIX + getExactFilePath();
+		String currentFileSelectionMimeType = getFileTypeString();
+		Utils.startShareImageIntent(context, currentFileSelectionMimeType, currentFileSelectionPath);
+	}
+
 }

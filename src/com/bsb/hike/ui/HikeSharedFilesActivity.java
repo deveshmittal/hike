@@ -258,6 +258,8 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 			{
 				menu.findItem(R.id.forward_msgs).setVisible(true);
 			}
+			
+			menu.findItem(R.id.share_msgs).setVisible(selectedSharedFileItems.size() == 1);
 		}
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -337,6 +339,24 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
+		handleItemClick(position, id);
+	}
+
+	@Override
+	public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
+	{
+		if (!multiSelectMode)
+		{
+			setupMultiSelectActionBar();
+		}
+
+		handleItemClick(position, id);
+
+		return true;
+	}
+
+	private void handleItemClick(int position, long id)
+	{
 		HikeSharedFile sharedFileItem = sharedFilesList.get(position);
 
 		if (multiSelectMode)
@@ -352,22 +372,14 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 				{
 					setMultiSelectTitle();
 				}
-
-				if (selectedSharedFileItems.size() == FileTransferManager.getInstance(this).remainingTransfers())
-				{
-					invalidateOptionsMenu();
-				}
 			}
 			else
 			{
 				selectedSharedFileItems.put(sharedFileItem.getMsgId(), sharedFileItem);
 				setMultiSelectTitle();
-				if (selectedSharedFileItems.size() > FileTransferManager.getInstance(this).remainingTransfers())
-				{
-					invalidateOptionsMenu();
-				}
 			}
-			
+
+			invalidateOptionsMenu();
 			adapter.notifyDataSetChanged();
 		}
 		else
@@ -379,32 +391,6 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 			arguments.putString(HikeConstants.Extras.MSISDN, msisdn);
 			PhotoViewerFragment.openPhoto(R.id.parent_layout, HikeSharedFilesActivity.this, arguments);
 		}
-
-	}
-
-	@Override
-	public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
-	{
-		if (!multiSelectMode)
-		{
-			setupMultiSelectActionBar();
-		}
-
-		if (selectedSharedFileItems.size() >= FileTransferManager.getInstance(this).remainingTransfers())
-		{
-			Toast.makeText(this, getString(R.string.max_num_files_reached, FileTransferManager.getInstance(this).getTaskLimit()), Toast.LENGTH_SHORT).show();
-			return false;
-		}
-
-		HikeSharedFile sharedFileItem = sharedFilesList.get(position);
-
-		selectedSharedFileItems.put(sharedFileItem.getMsgId(), sharedFileItem);
-
-		adapter.notifyDataSetChanged();
-
-		setMultiSelectTitle();
-
-		return true;
 	}
 
 	private void setMultiSelectTitle()
@@ -495,6 +481,18 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, msisdn);
 			startActivity(intent);
+			return true;
+		case R.id.share_msgs:
+			if (selectedSharedFileItems.size() == 1)
+			{
+				HikeSharedFile hikeSharedFile = selectedSharedFileItems.values().iterator().next();
+				hikeSharedFile.shareFile(HikeSharedFilesActivity.this);
+				destroyActionMode();
+			}
+			else
+			{
+				Toast.makeText(HikeSharedFilesActivity.this, "Some error occured!", Toast.LENGTH_SHORT).show();
+			}
 			return true;
 		}
 		return false;

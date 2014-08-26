@@ -7750,9 +7750,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				ConvMessage message = selectedMessagesMap.get(selectedMsgIds.get(0));
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-				String currentFileSelectionPath = HikeConstants.FILE_SHARE_PREFIX + hikeFile.getFilePath();
-				String currentFileSelectionMimeType = hikeFile.getFileTypeString();
-				Utils.startShareImageIntent(ChatThread.this, currentFileSelectionMimeType, currentFileSelectionPath);
+				hikeFile.shareFile(ChatThread.this);
 				destroyActionMode();
 			}
 			else
