@@ -1135,6 +1135,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="pin_notif_text">has posted a pin</string>
     <string name="delete_my_account">DELETE MY ACCOUNT</string>
     <string name="hike_extras">Hike Extras</string>
+    <string name="sticker_download_failed_large_file">Download failed due to insufficient space. Please free some space and try again.</string>
 	<string name="set_profile_pic">hike profile picture</string>
     <string name="confirm_delete_pin_header">Delete pin</string>
     <string name="confirm_delete_pin">Are you sure you want to delete this pin?</string>

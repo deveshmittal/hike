@@ -4245,6 +4245,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			findViewById(R.id.emo_btn).setEnabled(false);
 			findViewById(R.id.sticker_btn).setEnabled(false);
 		}
+		if (tipView != null && tipView.getVisibility() == View.VISIBLE)
+		{
+			Object tag = tipView.getTag();
+			
+			if (tag instanceof TipType && ((TipType)tag == TipType.EMOTICON))
+			{
+				HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
+				tipView = null;
+			}
+		}
 	}
 
 	private void nonZeroCredits()
