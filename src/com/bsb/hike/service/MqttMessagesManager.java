@@ -724,8 +724,6 @@ public class MqttMessagesManager
 		JSONArray msgIds = jsonObj.optJSONArray(HikeConstants.DATA);
 		String id = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
 
-		String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.FROM) : "";
-
 		if (msgIds == null)
 		{
 			Logger.e(getClass().getSimpleName(), "Update Error : Message id Array is empty or null . Check problem");
@@ -745,6 +743,11 @@ public class MqttMessagesManager
 		}
 		else
 		{
+			String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.FROM) : "";
+			if(TextUtils.isEmpty(participantMsisdn))
+			{
+				return ;
+			}
 			ids = new long[msgIds.length()];
 			for (int i = 0; i < msgIds.length(); i++)
 			{
