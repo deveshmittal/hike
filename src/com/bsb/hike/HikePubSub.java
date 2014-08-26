@@ -354,6 +354,8 @@ public class HikePubSub implements Runnable
 	
 	public static final String UPDATE_PIN_METADATA = "pinUpdated";
 
+	public static final String HIKE_SHARED_FILE_DELETED = "hikeSharedFileDeleted";
+
 	public static String FRIEND_REQ_COUNT_RESET = "resetFriendRequest";
 	
 	public static String HIKE_TO_OFFLINE_PUSH = "hikeToOfflinePush";

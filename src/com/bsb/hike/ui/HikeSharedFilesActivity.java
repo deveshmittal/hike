@@ -89,6 +89,8 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		this.multiSelectMode = multiSelectMode;
 	}
 
+	private String[] pubSubListeners = { HikePubSub.HIKE_SHARED_FILE_DELETED };
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -118,6 +120,8 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		int numColumns = Utils.getNumColumnsForGallery(getResources(), sizeOfImage);
 		int actualSize = Utils.getActualSizeForGallery(getResources(), sizeOfImage, numColumns);
 
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+		
 		sharedFilesList = HikeConversationsDatabase.getInstance().getSharedMedia(msisdn, HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY, -1, true);
 		adapter = new HikeSharedFileAdapter(this, sharedFilesList, actualSize, selectedSharedFileItems, false);
 
@@ -494,5 +498,37 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 			return true;
 		}
 		return false;
+	}
+	
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		 if (HikePubSub.HIKE_SHARED_FILE_DELETED.equals(type))
+			{
+				if(!(object instanceof HikeSharedFile))
+				{
+					return;
+				}
+				final HikeSharedFile hikeSharedFile = (HikeSharedFile) object;
+				runOnUiThread(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						sharedFilesList.remove(hikeSharedFile);
+						adapter.notifyDataSetChanged();
+					}
+				});
+			}
+
+		super.onEventReceived(type, object);
+	}
+	
+	@Override
+	protected void onDestroy()
+	{
+		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
+		super.onDestroy();
 	}
 }

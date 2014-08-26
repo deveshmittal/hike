@@ -390,6 +390,10 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 					ArrayList<Long> msgIds = new ArrayList<Long>(1);
 					msgIds.add(getCurrentSelectedItem().getMsgId());
 					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, msgIds);
+					if(!fromChatThread)
+					{
+						HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_SHARED_FILE_DELETED, getCurrentSelectedItem());
+					}
 					removeCurrentSelectedItem();
 					deleteConfirmDialog.dismiss();
 				}
