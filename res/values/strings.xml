@@ -1141,5 +1141,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="confirm_delete_pins_header">Delete pins</string>
     <string name="confirm_delete_pins">Are you sure you want to delete these %1$s pins?</string>    
     <string name="shared_media">Shared Media</string>
-    
+    <string name="no_internet_try_again">No internet connection. Please try again later.</string>
+    <string name="refresh">Refresh</string>
 </resources>

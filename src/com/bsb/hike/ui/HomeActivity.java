@@ -963,12 +963,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		else if (HikePubSub.CONTACT_SYNCED.equals(type))
 		{
+			Boolean[] ret = (Boolean[]) object;
+			final boolean manualSync = ret[0];
 			runOnUiThread(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					Toast.makeText(getApplicationContext(), R.string.contacts_synced, Toast.LENGTH_SHORT).show();
+					if(manualSync)
+						Toast.makeText(getApplicationContext(), R.string.contacts_synced, Toast.LENGTH_SHORT).show();
 				}
 			});
 		}
