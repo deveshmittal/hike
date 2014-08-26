@@ -993,7 +993,23 @@ class HikeUserDatabase extends SQLiteOpenHelper
 			c = mReadDb.rawQuery("SELECT " + DBConstants.ID + ", " + DBConstants.NAME + ", " + DBConstants.MSISDN + ", " + DBConstants.PHONE + ", " + DBConstants.LAST_MESSAGED
 					+ ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + ", " + DBConstants.HIKE_JOIN_TIME + ", "
 					+ DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", " + DBConstants.INVITE_TIMESTAMP + " from " + DBConstants.USERS_TABLE, null);
-			contacts = extractContactInfo(c);
+
+			Map<String, FavoriteType> favTypeMap = getFavoriteMap();
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			while (c.moveToNext())
+			{
+				String msisdn = c.getString(msisdnIdx);
+				if (TextUtils.isEmpty(msisdn))
+				{
+					continue;
+				}
+				ContactInfo contact = processContact(c);
+				if (favTypeMap.containsKey(contact.getMsisdn()))
+				{
+					contact.setFavoriteType(favTypeMap.get(contact.getMsisdn()));
+				}
+				contacts.add(contact);
+			}
 			return contacts;
 		}
 		finally
@@ -2084,7 +2100,7 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		 */
 		Set<String> recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(preferences.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), myMsisdn);
 		Logger.d("getFTUEContacts", "recommendedContactsSelection = " + recommendedContactsSelection);
-		if (!recommendedContactsSelection.isEmpty())
+		if (null != recommendedContactsSelection && !recommendedContactsSelection.isEmpty())
 		{
 			List<ContactInfo> recommendedContacts = HikeMessengerApp.getContactManager().getHikeContacts(limit * 2, recommendedContactsSelection, null, myMsisdn);
 			if (recommendedContacts.size() >= limit)

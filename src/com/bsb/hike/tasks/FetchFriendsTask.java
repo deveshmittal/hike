@@ -158,6 +158,10 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		for (ContactInfo contactInfo : allContacts)
 		{
 			String msisdn = contactInfo.getMsisdn();
+			if (msisdn.equals(myMsisdn))
+			{
+				continue;
+			}
 			if (blockSet.contains(msisdn))
 			{
 				continue;
