@@ -768,7 +768,7 @@
     <string name="i_am_a_girl">I am a girl</string>
     <string name="about_you">About you</string>
     <string name="tell_us_more">Tell us more</string>
-    <string name="add_friend_popup_msg">You can message anyone but only your friends can see your status updates and last seen. Choose them wisely!</string>
+    <string name="add_friend_popup_msg">You can message anyone but only your friends can see your status updates and last seen. Choose them wisely!</string>
     <string name="start_adding">Start adding friends</string>
     <string name="how_young_are_you">How young are you?</string>
     <string name="your_name">Your name</string>
@@ -855,7 +855,7 @@
 	<string name="add_as_favorite_notification">%1$s added you as a favorite</string>
     <string name="add_as_favorite_notification_line">Added you as a favorite</string>
     <string name="favorite_confirmed_notification">You can now see %1$s\'s Last Seen and Status Updates</string>
-    <string name="add_favorites_popup_msg">You can message anyone but only your favorites can see your status updates and last seen. Choose them wisely!</string>
+    <string name="add_favorites_popup_msg">You can message anyone but only your favorites can see your status updates and last seen. Choose them wisely!</string>
     <string name="favorites_on_hike_tut">Favorites on hike</string>
     <string name="start_adding_favorites">Start adding favorites</string>
     <string name="favorites_upper_case">FAVORITES</string>
@@ -1143,4 +1143,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="shared_media">Shared Media</string>
     <string name="no_internet_try_again">No internet connection. Please try again later.</string>
     <string name="refresh">Refresh</string>
+    <string name="stealth_info_tip_header">Hidden Mode</string>
+    <string name="stealth_info_tip_subtext">Hide your chats. Tap on \'hi\' to get started.</string>
 </resources>
