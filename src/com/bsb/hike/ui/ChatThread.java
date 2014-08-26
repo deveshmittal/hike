@@ -8262,7 +8262,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		});
 	}
 
-	public void updateLastSeen()
+	private void updateLastSeen()
 	{
 		updateLastSeen(contactInfo.getMsisdn(), contactInfo.getOffline(), contactInfo.getLastSeenTime());
 	}

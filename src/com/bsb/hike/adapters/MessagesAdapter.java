@@ -4072,7 +4072,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				chatThread.shouldRunTimerForHikeOfflineTip = true;
 				chatThread.hideHikeToOfflineTip();
 				updateFirstPendingConvMessage();
-				chatThread.updateLastSeen();
 			}
 		});
 	}
