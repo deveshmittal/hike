@@ -208,7 +208,6 @@ public class SocialNetInviteAdapter extends ArrayAdapter<Pair<AtomicBoolean, Soc
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		imgLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{

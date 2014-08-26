@@ -881,7 +881,6 @@ public class ConversationsAdapter extends BaseAdapter
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		iconLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{

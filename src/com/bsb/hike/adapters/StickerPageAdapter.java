@@ -329,7 +329,6 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		stickerLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{

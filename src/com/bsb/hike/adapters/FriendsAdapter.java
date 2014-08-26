@@ -1460,7 +1460,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		iconloader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{

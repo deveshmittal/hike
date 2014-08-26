@@ -711,8 +711,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		bigPicImageLoader.setPauseWork(isListFlinging);
-		iconLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{

@@ -367,9 +367,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		super.onPause();
 		if (profileAdapter != null)
 		{
-			profileAdapter.getTimelineImageLoader().setPauseWork(false);
 			profileAdapter.getTimelineImageLoader().setExitTasksEarly(true);
-			profileAdapter.getIconImageLoader().setPauseWork(false);
 			profileAdapter.getIconImageLoader().setExitTasksEarly(true);
 		}
 	}

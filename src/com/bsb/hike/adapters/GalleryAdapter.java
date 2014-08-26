@@ -149,7 +149,6 @@ public class GalleryAdapter extends BaseAdapter
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		galleryImageLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{

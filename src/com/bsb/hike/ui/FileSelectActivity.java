@@ -741,7 +741,6 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 			boolean notify = b != isListFlinging;
 
 			isListFlinging = b;
-			fileImageLoader.setPauseWork(isListFlinging);
 
 			if (notify && !isListFlinging)
 			{

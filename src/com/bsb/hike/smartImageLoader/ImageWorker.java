@@ -64,10 +64,6 @@ public abstract class ImageWorker
 
 	private AtomicBoolean mExitTasksEarly = new AtomicBoolean(false);
 
-	protected boolean mPauseWork = false;
-
-	private final Object mPauseWorkLock = new Object();
-
 	protected Resources mResources;
 
 	private boolean setDefaultAvatarIfNoCustomIcon = false;
@@ -298,7 +294,6 @@ public abstract class ImageWorker
 	public void setExitTasksEarly(boolean exitTasksEarly)
 	{
 		mExitTasksEarly.set(exitTasksEarly);
-		setPauseWork(false);
 	}
 
 	public void setDefaultAvatarIfNoCustomIcon(boolean b)
@@ -430,21 +425,6 @@ public abstract class ImageWorker
 			Bitmap bitmap = null;
 			BitmapDrawable drawable = null;
 
-			// Wait here if work is paused and the task is not cancelled
-			synchronized (mPauseWorkLock)
-			{
-				while (mPauseWork && !isCancelled())
-				{
-					try
-					{
-						mPauseWorkLock.wait();
-					}
-					catch (InterruptedException e)
-					{
-					}
-				}
-			}
-
 			// If the bitmap was not found in the cache and this task has not been cancelled by
 			// another thread and the ImageView that was originally bound to this task is still
 			// bound back to this task and our "exit early" flag is not set, then call the main
@@ -500,10 +480,6 @@ public abstract class ImageWorker
 		protected void onCancelled(BitmapDrawable value)
 		{
 			super.onCancelled(value);
-			synchronized (mPauseWorkLock)
-			{
-				mPauseWorkLock.notifyAll();
-			}
 		}
 
 		/**
@@ -579,25 +555,6 @@ public abstract class ImageWorker
 		catch (Exception e)
 		{
 			Logger.d(TAG, "Bitmap is already recycled when setImageDrawable is called in ImageWorker post processing.");
-		}
-	}
-
-	/**
-	 * Pause any ongoing background work. This can be used as a temporary measure to improve performance. For example background work could be paused when a ListView or GridView is
-	 * being scrolled using a {@link android.widget.AbsListView.OnScrollListener} to keep scrolling smooth.
-	 * <p>
-	 * If work is paused, be sure setPauseWork(false) is called again before your fragment or activity is destroyed (for example during {@link android.app.Activity#onPause()}), or
-	 * there is a risk the background thread will never finish.
-	 */
-	public void setPauseWork(boolean pauseWork)
-	{
-		synchronized (mPauseWorkLock)
-		{
-			mPauseWork = pauseWork;
-			if (!mPauseWork)
-			{
-				mPauseWorkLock.notifyAll();
-			}
 		}
 	}
 
