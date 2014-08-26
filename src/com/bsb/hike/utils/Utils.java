@@ -4437,4 +4437,29 @@ public class Utils
 		}
 		return !TextUtils.isEmpty(countryCode);
 	}	
+	
+	public static void handleFileForwardObject(JSONObject multiMsgFwdObject, HikeFile hikeFile) throws JSONException
+	{
+		multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
+		if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+		{
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.ZOOM_LEVEL, hikeFile.getZoomLevel());
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.LATITUDE, hikeFile.getLatitude());
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.LONGITUDE, hikeFile.getLongitude());
+		}
+		else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
+		{
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.CONTACT_METADATA, hikeFile.serialize().toString());
+		}
+		else
+		{
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
+			if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+			{
+				multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
+			}
+		}
+
+	}
 }

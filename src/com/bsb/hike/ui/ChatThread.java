@@ -1134,6 +1134,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (fragment != null)
 		{	
 			PhotoViewerFragment.onPhotoBack(fragment, fragmentTransaction, getSupportActionBar());
+			setupActionBar(false);
 			return;
 		}
 		if (findViewById(R.id.impMessageCreateView).getVisibility() == View.VISIBLE)
@@ -1305,6 +1306,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return onActionModeItemClicked(item);
 		}
 
+		
+		PhotoViewerFragment photoViewerFragment = PhotoViewerFragment.getCurrentPhotoViewerFragment(getSupportFragmentManager());
+		if(photoViewerFragment != null)
+		{
+			return false;
+		}
+		
 		switch (item.getItemId())
 		{
 		case R.id.chat_bg:
@@ -2923,6 +2931,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		});
 
+		actionBar.setBackgroundDrawable(getResources().getDrawable(selectedTheme.headerBgResId()));
 		actionBar.setCustomView(actionBarView);
 	}
 
@@ -7685,26 +7694,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					if (message.isFileTransferMessage())
 					{
 						HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-						multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
-						if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
-						{
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.ZOOM_LEVEL, hikeFile.getZoomLevel());
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.LATITUDE, hikeFile.getLatitude());
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.LONGITUDE, hikeFile.getLongitude());
-						}
-						else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
-						{
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.CONTACT_METADATA, hikeFile.serialize().toString());
-						}
-						else
-						{
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
-							if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
-							{
-								multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
-							}
-						}
+						Utils.handleFileForwardObject(multiMsgFwdObject, hikeFile);
 					}
 					else if (message.isStickerMessage())
 					{

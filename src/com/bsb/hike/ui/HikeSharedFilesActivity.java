@@ -138,6 +138,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		if (fragment != null)
 		{	
 			PhotoViewerFragment.onPhotoBack(fragment, fragmentTransaction, getSupportActionBar());
+			setupActionBar();
 			return;
 		}
 		if (multiSelectMode)
@@ -175,6 +176,8 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 			}
 		});
 
+		actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_header));
+		
 		actionBar.setCustomView(actionBarView);
 	}
 

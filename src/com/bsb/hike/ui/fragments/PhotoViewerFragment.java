@@ -4,26 +4,40 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-
+import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.SharedMediaAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.HikeSharedFile;
+import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.utils.DepthPageTransformer;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -130,7 +144,7 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		
 		return parent;
 	}
-
+	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState)
 	{
@@ -188,10 +202,41 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	
 	private void setupActionBar()
 	{
+
 		ActionBar actionBar = getSherlockActivity().getSupportActionBar();
-		actionBar.hide(); //More items related to actionbar will be added
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = getSherlockActivity().getLayoutInflater().inflate(R.layout.compose_action_bar, null);
+		actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_header_transparent_3x));
+
+		View backContainer = actionBarView.findViewById(R.id.back);
+
+		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		title.setText(getString(R.string.shared_media));
+
+		TextView subText = (TextView) actionBarView.findViewById(R.id.subtext);
+		subText.setVisibility(View.GONE);
+
+		actionBarView.findViewById(R.id.seprator).setVisibility(View.GONE);
+
+		backContainer.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				finish();
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
 	}
 	
+	private void finish()
+	{
+		getSherlockActivity().onBackPressed();
+	}
+
 	public static void openPhoto (int resId, Context context, Bundle arguments)
 	{
 		PhotoViewerFragment photoViewerFragment = new PhotoViewerFragment();
@@ -307,5 +352,86 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	private int getCount()
 	{
 		return sharedMediaItems.size();
+	}
+	
+	public HikeSharedFile getCurrentSelectedItem()
+	{
+		return sharedMediaItems.get(selectedPager.getCurrentItem());
+	}
+	
+	public void removeCurrentSelectedItem()
+	{
+		sharedMediaItems.remove(selectedPager.getCurrentItem());
+		if(sharedMediaItems.isEmpty())
+		{
+			//if list is empty close the fragment
+			finish();
+		}
+		smAdapter.notifyDataSetChanged();
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		switch (item.getItemId())
+		{
+		//deletes current selected item from viewpager 
+		case R.id.delete_msgs:
+			final CustomAlertDialog deleteConfirmDialog = new CustomAlertDialog(getSherlockActivity());
+			deleteConfirmDialog.setHeader(R.string.confirm_delete_msg_header);
+			deleteConfirmDialog.setBody(R.string.confirm_delete_msg);
+			
+			View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					ArrayList<Long> msgIds = new ArrayList<Long>(1);
+					msgIds.add(getCurrentSelectedItem().getMsgId());
+					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, msgIds);
+					removeCurrentSelectedItem();
+					deleteConfirmDialog.dismiss();
+				}
+			};
+
+			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
+			deleteConfirmDialog.setCancelButton(R.string.cancel);
+			deleteConfirmDialog.show();
+			return true;
+		case R.id.forward_msgs:
+			Intent intent = new Intent(getSherlockActivity(), ComposeChatActivity.class);
+			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+			JSONArray multipleMsgArray = new JSONArray();
+			try
+			{
+				JSONObject multiMsgFwdObject = new JSONObject();
+				Utils.handleFileForwardObject(multiMsgFwdObject, getCurrentSelectedItem());
+				multipleMsgArray.put(multiMsgFwdObject);
+			}
+			catch (JSONException e)
+			{
+				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
+			}
+			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
+			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, msisdn);
+			startActivity(intent);
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+	{
+		menu.clear();
+		inflater.inflate(R.menu.multi_select_chat_menu, menu);
+		super.onCreateOptionsMenu(menu, inflater);
+	}
+	
+	public static PhotoViewerFragment getCurrentPhotoViewerFragment(FragmentManager fragmentManager)
+	{
+		PhotoViewerFragment fragment = (PhotoViewerFragment) fragmentManager.findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
+		return fragment;
 	}
 }
