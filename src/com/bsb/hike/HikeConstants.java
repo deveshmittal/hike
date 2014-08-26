@@ -1762,5 +1762,7 @@ public class HikeConstants
 	public static final int ATOMIC_APP_TIP_TIMELINE = 6;
 	public static final int ATOMIC_APP_TIP_INVITE_FREE_SMS = 8;
 	public static final int ATOMIC_APP_TIP_INVITE_WATSAPP = 9;
+	public static final int ATOMIC_APP_TIP_HIKE_EXTRA = 10;
+	public static final int ATOMIC_APP_TIP_HIKE_REWARDS = 11;
 	
 }

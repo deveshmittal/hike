@@ -545,6 +545,12 @@ public class ConversationsAdapter extends BaseAdapter
 		case HikeConstants.ATOMIC_APP_TIP_TIMELINE:
 			IntentManager.openTimeLine(context);
 			break;
+		case HikeConstants.ATOMIC_APP_TIP_HIKE_EXTRA:
+			IntentManager.openHikeExtras(context);
+			break;
+		case HikeConstants.ATOMIC_APP_TIP_HIKE_REWARDS:
+			IntentManager.openHikeRewards(context);
+			break;
 		default:
 			return;
 		}
