@@ -530,18 +530,6 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * This method Updates the contact by setting the name to null for the contact that is deleted from address book
-	 * 
-	 * @param contact
-	 */
-	void contactDeleted(ContactInfo contact)
-	{
-		ContactInfo updatedContact = new ContactInfo(contact);
-		updatedContact.setName(null);
-		updateContact(updatedContact);
-	}
-
-	/**
 	 * This method is used for removing msisdns from the group persistence cache when last message in group is changed and their reference count is decremented in group contacts
 	 * map by one which is done by {@link #removeFromCache} method
 	 * 

@@ -151,8 +151,9 @@ public class ContactManager implements ITransientCache
 	{
 		for (ContactInfo contact : contacts)
 		{
-			persistenceCache.contactDeleted(contact);
-			transientCache.contactDeleted(contact);
+			contact.setName(null);
+			contact.setId(contact.getMsisdn());
+			updateContacts(contact);
 		}
 	}
 

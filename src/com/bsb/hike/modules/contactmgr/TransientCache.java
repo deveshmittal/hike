@@ -858,28 +858,6 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * Updates the contact by setting the name to null and move it from saved to unsaved contacts map
-	 * 
-	 * @param contact
-	 */
-	void contactDeleted(ContactInfo contact)
-	{
-		writeLock.lock();
-		try
-		{
-			PairModified<ContactInfo, Integer> contactPair = transientContacts.get(contact.getMsisdn());
-			if (null != contactPair)
-			{
-				contactPair.getFirst().setName(null);
-			}
-		}
-		finally
-		{
-			writeLock.unlock();
-		}
-	}
-
-	/**
 	 * clears the transient memory
 	 */
 	void clearMemory()
