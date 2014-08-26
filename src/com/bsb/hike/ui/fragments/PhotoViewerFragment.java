@@ -209,7 +209,7 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
 		View actionBarView = getSherlockActivity().getLayoutInflater().inflate(R.layout.compose_action_bar, null);
-		actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_header_transparent_3x));
+		actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_header_photo_viewer));
 
 		View backContainer = actionBarView.findViewById(R.id.back);
 
