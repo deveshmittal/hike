@@ -918,21 +918,39 @@ public class TransientCache extends ContactsCache
 	Pair<Map<String, PairModified<GroupParticipant, String>>, List<String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly,
 			boolean fetchParticipants)
 	{
-		Map<String, PairModified<GroupParticipant, String>> groupParticipantsMap = null;
-		readLock.lock();
-		try
+		if (!notShownStatusMsgOnly)
 		{
-			groupParticipantsMap = groupParticipants.get(groupId);
-			if (null != groupParticipantsMap)
+			readLock.lock();
+			try
 			{
-				return new Pair<Map<String, PairModified<GroupParticipant, String>>, List<String>>(groupParticipantsMap, null);
+				Map<String, PairModified<GroupParticipant, String>> groupParticipantsMap = groupParticipants.get(groupId);
+				if (null != groupParticipantsMap)
+				{
+					Map<String, PairModified<GroupParticipant, String>> grpParticipants = new HashMap<String, PairModified<GroupParticipant, String>>();
+					for (Entry<String, PairModified<GroupParticipant, String>> mapEntry : groupParticipantsMap.entrySet())
+					{
+						String msisdn = mapEntry.getKey();
+						GroupParticipant grp = mapEntry.getValue().getFirst();
+						if (!activeOnly)
+						{
+							grpParticipants.put(msisdn, mapEntry.getValue());
+						}
+						else
+						{
+							if (!grp.hasLeft())
+							{
+								grpParticipants.put(msisdn, mapEntry.getValue());
+							}
+						}
+					}
+					return new Pair<Map<String, PairModified<GroupParticipant, String>>, List<String>>(grpParticipants, null);
+				}
+			}
+			finally
+			{
+				readLock.unlock();
 			}
 		}
-		finally
-		{
-			readLock.unlock();
-		}
-
 		return HikeConversationsDatabase.getInstance().getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly);
 	}
 
