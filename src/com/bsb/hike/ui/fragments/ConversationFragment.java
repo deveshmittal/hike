@@ -2351,36 +2351,42 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		Conversation conversation = mAdapter.getItem(0);
 
+		/*
+		 * Remove tip if already showing as the first element on the UI
+		 */
 		if(conversation instanceof ConversationTip && ((ConversationTip) conversation).getTipType() == tipType)
 		{
 			mAdapter.remove(conversation);
 			switch (tipType)
 			{
-			case ConversationTip.RESET_STEALTH_TIP:
-				mAdapter.resetCountDownSetter();
-				break;
-			case ConversationTip.WELCOME_HIKE_TIP:
-				showingWelcomeHikeConvTip = false;
-				break;	
-			case ConversationTip.STEALTH_INFO_TIP:
-				HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false);
-				break;
-			default:
-				break;
+				case ConversationTip.RESET_STEALTH_TIP:
+					mAdapter.resetCountDownSetter();
+					break;
+				case ConversationTip.WELCOME_HIKE_TIP:
+					showingWelcomeHikeConvTip = false;
+					break;
+				default:
+					break;
 			}
 			notifyDataSetChanged();
 		}
-		
+
+		/*
+		 * Remove tip always: for cases when we want to remove the tip before it is actually shown on the UI
+		 */
 		switch (tipType)
 		{
-		case ConversationTip.WELCOME_HIKE_TIP:
-			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
-			break;	
-		case ConversationTip.STEALTH_UNREAD_TIP:
-			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false);
-			break;
-		default:
-			break;
+			case ConversationTip.WELCOME_HIKE_TIP:
+				HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
+				break;
+			case ConversationTip.STEALTH_INFO_TIP:
+				HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false);
+				break;
+			case ConversationTip.STEALTH_UNREAD_TIP:
+				HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false);
+				break;
+			default:
+				break;
 		}
 
 		if (mAdapter.getCount() == 0)
