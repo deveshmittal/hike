@@ -249,8 +249,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_WALKIE_TALKIE_TIP = "shownWalkieTalkieTip";
 
-	public static final String SHOWN_STATUS_TIP = "shownStatusTip";
-
 	public static final String SHOWN_LAST_SEEN_TIP = "shownLastSeenTip";
 
 	public static final String PROTIP_WAIT_TIME = "protipWaitTime";
