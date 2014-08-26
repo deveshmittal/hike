@@ -51,12 +51,14 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.TagEditText;
@@ -100,7 +102,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private LastSeenScheduler lastSeenScheduler;
 
-	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LAST_SEEN_TIME_BULK_UPDATED };
+	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED, HikePubSub.LAST_SEEN_TIME_UPDATED,
+			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED };
 
 	private int previousFirstVisibleItem;
 
@@ -460,16 +463,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			// Group alredy exists. Fetch existing participants.
 			newGroup = false;
 		}
-		Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();
+		Map<String, PairModified<GroupParticipant, String>> participantList = new HashMap<String, PairModified<GroupParticipant, String>>();
 
 		for (ContactInfo particpant : selectedContactList)
 		{
 			GroupParticipant groupParticipant = new GroupParticipant(particpant);
-			participantList.put(particpant.getMsisdn(), groupParticipant);
+			participantList.put(particpant.getMsisdn(), new PairModified<GroupParticipant, String>(groupParticipant, null));
 		}
 		ContactInfo userContactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 
-		GroupConversation groupConversation = new GroupConversation(groupId, 0, null, userContactInfo.getMsisdn(), true);
+		GroupConversation groupConversation = new GroupConversation(groupId, null, userContactInfo.getMsisdn(), true);
 		groupConversation.setGroupParticipantList(participantList);
 
 		Logger.d(getClass().getSimpleName(), "Creating group: " + groupId);
@@ -478,6 +481,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		if (newGroup)
 		{
 			mConversationDb.addConversation(groupConversation.getMsisdn(), false, groupName, groupConversation.getGroupOwner());
+			ContactManager.getInstance().insertGroup(groupConversation.getMsisdn(),groupName);
 		}
 
 		try
@@ -714,9 +718,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else if (type != null && presentIntent.hasExtra(Intent.EXTRA_STREAM))
 		{
-			if(type.startsWith(HikeConstants.SHARE_CONTACT_CONTENT_TYPE))
+			if (type.startsWith(HikeConstants.SHARE_CONTACT_CONTENT_TYPE))
 			{
-				//TODO need to handle this case of contact sharing
+				// TODO need to handle this case of contact sharing
 				Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
 				return;
 			}
@@ -814,7 +818,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 			runOnUiThread(new Runnable()
 			{
-				
+
 				@Override
 				public void run()
 				{
@@ -891,7 +895,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	FriendsListFetchedCallback friendsListFetchedCallback = new FriendsListFetchedCallback()
 	{
-		
+
 		@Override
 		public void listFetched()
 		{

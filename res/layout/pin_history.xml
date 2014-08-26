@@ -5,6 +5,7 @@
     android:orientation="vertical" >
 
     <RelativeLayout
+        android:id="@+id/pin_history"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
@@ -12,6 +13,7 @@
 
         <ImageView
             android:id="@+id/pattern"
+            android:contentDescription="side pattern in history"
             android:layout_width="16dp"
             android:layout_height="match_parent"
             android:layout_alignBottom="@+id/main_content"
@@ -30,6 +32,7 @@
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/sender"
+                android:contentDescription="sender name in history"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
@@ -40,6 +43,7 @@
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/timestamp"
+                android:contentDescription="timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="2dp"
@@ -51,20 +55,32 @@
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/text"
+                android:contentDescription="pin content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginRight="15dp"
                 android:layout_below="@id/sender"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="0dp"
                 android:text="Mass bunk tomorrow! Let’s all go for a movie at DT Cinema."
                 android:textColor="#45400e"
                 android:textSize="16sp"
                 android:textStyle="italic" />
         </RelativeLayout>
+
+        <View
+            android:id="@+id/selected_state_overlay"
+            android:contentDescription="selected pin overlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/pattern"
+            android:layout_alignTop="@id/pin_history"
+            android:hapticFeedbackEnabled="false" />
     </RelativeLayout>
 
     <ImageView
+        android:id="@+id/pin_shado"
+        android:contentDescription="pin shadow in history"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="fitXY"
