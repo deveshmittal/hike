@@ -611,9 +611,15 @@ class PersistenceCache extends ContactsCache
 				// lock is not needed here because grpMsisdns is concurrentLinkedQueue
 				grpMsisdns.clear();
 
+				Map<String, String> groupParticipantsNameMap = new HashMap<String, String>();
+				if (currentGroupMsisdns.size() > 0)
+				{
+					groupParticipantsNameMap = HikeConversationsDatabase.getInstance().getGroupParticipantNameMap(groupId, currentGroupMsisdns);
+				}
+
 				for (String ms : currentGroupMsisdns)
 				{
-					PairModified<String, String> msisdnNamePair = new PairModified<String, String>(ms, null); // TODO name for unsaved contact
+					PairModified<String, String> msisdnNamePair = new PairModified<String, String>(ms, groupParticipantsNameMap.get(ms));
 					grpMsisdns.add(msisdnNamePair);
 				}
 			}
