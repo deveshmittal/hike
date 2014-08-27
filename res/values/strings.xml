@@ -526,7 +526,6 @@
     <string name="sms_with_hike_info">You can now send and receive regular SMS with hike. To do so, you\'ll need to make hike your primary SMS inbox.</string>
     <string name="last_seen_header">Show Last Seen</string>
     <string name="last_seen_info">Turning off last seen will hide your friends\' status from you as well</string>
-    <string name="user_back_on_hike">%1$s is back on hike. Say hi :)</string>
     <string name="sticker">Sticker</string>
     <string name="fun_free_messaging">Fun, free messaging for life</string>
     <string name="invite_sms">Invite via SMS</string>
@@ -1145,4 +1144,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="shared_media">Shared Media</string>
     <string name="no_internet_try_again">No internet connection. Please try again later.</string>
     <string name="refresh">Refresh</string>
+    <string name="user_back_on_hike">%1$s is now on hike, say hi</string>
 </resources>
