@@ -8,7 +8,7 @@
         android:title="@string/post_new_update"/>
     <item
         android:id="@+id/show_people"
-        android:icon="@drawable/ic_show_people"
+        android:actionLayout="@layout/overflow_icon_view"
         android:showAsAction="always"
         android:title="@string/favorites"/>
     <item
