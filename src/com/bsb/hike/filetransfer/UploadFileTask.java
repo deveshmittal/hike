@@ -203,11 +203,6 @@ public class UploadFileTask extends FileTransferBase
 				}
 				if (thumbnail != null)
 				{
-					Bitmap.CompressFormat compressFormat = null;
-					if(Utils.hasIceCreamSandwich())
-						compressFormat = Bitmap.CompressFormat.WEBP;
-					else
-						compressFormat = Bitmap.CompressFormat.JPEG;
 					int compressQuality = 5;
 					if (hikeFileType == HikeFileType.IMAGE)
 					{
@@ -220,7 +215,7 @@ public class UploadFileTask extends FileTransferBase
 					}else{
 						compressQuality = 75;
 					}
-					byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, compressQuality);
+					byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, compressQuality);
 					thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
 					thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
 					// thumbnail.recycle();
@@ -369,11 +364,6 @@ public class UploadFileTask extends FileTransferBase
 			}
 			if (thumbnail != null)
 			{
-				Bitmap.CompressFormat compressFormat = null;
-				if(Utils.hasIceCreamSandwich())
-					compressFormat = Bitmap.CompressFormat.WEBP;
-				else
-					compressFormat = Bitmap.CompressFormat.JPEG;
 				int compressQuality = 5;
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
@@ -386,7 +376,7 @@ public class UploadFileTask extends FileTransferBase
 				}else{
 					compressQuality = 75;
 				}
-				byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, compressFormat, compressQuality);
+				byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, compressQuality);
 				thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
 				thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
 				
