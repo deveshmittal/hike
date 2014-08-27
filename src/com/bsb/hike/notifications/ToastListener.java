@@ -485,7 +485,8 @@ public class ToastListener implements Listener
 						continue;
 					}
 
-					if (message.getParticipantInfoState() != null && message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
+					if (message.getParticipantInfoState() != null && message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
+							&& message.getMetadata().isNewGroup())
 					{
 						continue;
 					}
