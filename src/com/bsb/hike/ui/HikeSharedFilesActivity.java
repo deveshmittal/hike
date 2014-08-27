@@ -543,17 +543,22 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	
 	public static Intent getHikeSharedFilesActivityIntent(Context context, Conversation conversation)
 	{
+		Pair<String[], String[]> msisdnAndNameArrays = Utils.getMsisdnToNameArray(conversation);
+		return getHikeSharedFilesActivityIntent(context, conversation instanceof GroupConversation, conversation.getLabel(), 
+				msisdnAndNameArrays.first, msisdnAndNameArrays.second, conversation.getMsisdn());
+	}
+
+	public static Intent getHikeSharedFilesActivityIntent(Context context, boolean isGroup, String conversationName, String[] msisdnArray, String[] nameArray, String msisdn)
+	{
 		Intent intent = new Intent(context, HikeSharedFilesActivity.class);
-		intent.putExtra(HikeConstants.Extras.IS_GROUP_CONVERSATION, conversation instanceof GroupConversation);
-		intent.putExtra(HikeConstants.Extras.CONVERSATION_NAME, conversation.getLabel());
-		if(conversation instanceof GroupConversation)
+		intent.putExtra(HikeConstants.Extras.IS_GROUP_CONVERSATION, isGroup);
+		intent.putExtra(HikeConstants.Extras.CONVERSATION_NAME, conversationName);
+		if (isGroup)
 		{
-			Pair<String[], String[]> msisdnAndNameArrays = Utils.getMsisdnToNameArray(conversation);
-			intent.putExtra(HikeConstants.Extras.PARTICIPANT_MSISDN_ARRAY, msisdnAndNameArrays.first);
-			intent.putExtra(HikeConstants.Extras.PARTICIPANT_NAME_ARRAY, msisdnAndNameArrays.second);
+			intent.putExtra(HikeConstants.Extras.PARTICIPANT_MSISDN_ARRAY, msisdnArray);
+			intent.putExtra(HikeConstants.Extras.PARTICIPANT_NAME_ARRAY, nameArray);
 		}
-		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
-		intent.putExtra(HikeConstants.Extras.ON_HIKE, conversation.isOnhike());
+		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
 		return intent;
 	}
 }

@@ -45,6 +45,15 @@
             android:textColor="@color/white"
             android:textSize="12dp"
             android:textStyle="normal" />
+
+        <ImageView
+            android:id="@+id/gallary_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/item_time_stamp"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@id/sender_name"
+            android:src="@drawable/ic_gallary_view" />
     </RelativeLayout>
 
 </FrameLayout>

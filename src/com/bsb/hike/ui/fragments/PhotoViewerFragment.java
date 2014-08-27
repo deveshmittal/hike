@@ -25,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.view.Window;
 
@@ -43,6 +44,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.HikeSharedFilesActivity;
 import com.bsb.hike.ui.utils.DepthPageTransformer;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.Logger;
@@ -100,6 +102,8 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	
 	String[] nameArray;
 
+	private ImageView gallaryButton;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -139,6 +143,17 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		selectedPager = (ViewPager) parent.findViewById(R.id.selection_pager);
 		senderName = (TextView) parent.findViewById(R.id.sender_name);
 		itemTimeStamp = (TextView) parent.findViewById(R.id.item_time_stamp);
+		gallaryButton  = (ImageView) parent.findViewById(R.id.gallary_button);
+		
+		gallaryButton.setOnClickListener(new OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(getSherlockActivity(), isGroup, conversationName, msisdnArray, nameArray, msisdn));
+			}
+		});
 	}
 
 	private void readArguments()
