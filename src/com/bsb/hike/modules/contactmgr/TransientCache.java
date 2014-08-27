@@ -375,8 +375,12 @@ public class TransientCache extends ContactsCache
 			Map<String, PairModified<GroupParticipant, String>> groupParticipantMap = groupParticipants.get(grpId);
 			if (null != groupParticipantMap)
 			{
-				GroupParticipant grpParticipant = groupParticipantMap.get(msisdn).getFirst();
-				groupParticipantMap.put(msisdn, new PairModified<GroupParticipant, String>(grpParticipant, name));
+				PairModified<GroupParticipant, String> grpParticipantPair = groupParticipantMap.get(msisdn);
+				if (null != grpParticipantPair)
+				{
+					GroupParticipant grpParticipant = grpParticipantPair.getFirst();
+					groupParticipantMap.put(msisdn, new PairModified<GroupParticipant, String>(grpParticipant, name));
+				}
 			}
 		}
 		finally
