@@ -2109,7 +2109,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				movedFromEmptyToNonEmpty();
 			}
 		}
-		conv.addMessage(convMessage);
+		conv.clearMessageListAndAddMessage(convMessage);
 		Logger.d(getClass().getSimpleName(), "new message is " + convMessage);
 
 		if (sortAndUpdateView)
