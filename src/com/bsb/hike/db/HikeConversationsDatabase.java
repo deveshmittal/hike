@@ -4933,7 +4933,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				while (c.moveToNext());
 			}
-			return unreadMessages;
 		}
 		finally
 		{
@@ -4942,5 +4941,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				c.close();
 			}
 		}
+
+		return unreadMessages;
 	}
 }
