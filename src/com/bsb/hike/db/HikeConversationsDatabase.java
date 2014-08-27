@@ -1303,7 +1303,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					if (conv.getMetadata() != null)
 						lastMsisdns = getGroupLastMsgMsisdn(conv.getMetadata().getJSON());
 
-					if (lastMsisdns.size() == 0)
+					if (lastMsisdns.size() == 0 && null != conv.getGroupParticipantMsisdn())
 					{
 						lastMsisdns.add(conv.getGroupParticipantMsisdn());
 					}
