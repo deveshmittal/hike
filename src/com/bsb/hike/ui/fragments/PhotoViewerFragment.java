@@ -111,17 +111,38 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View parent = inflater.inflate(R.layout.shared_media_viewer, null);
+		
+		initializeViews(parent);
+		
+		readArguments();
+		
+		intialiazeViewPager();
+		
+		setupActionBar();
+		
+		//Load media to the right and left of the view pager if this fragment is called from ChatThread.
+		if(fromChatThread)
+		{	Logger.d(TAG,  " MsgId : " + sharedMediaItems.get(0).getMsgId());
+			loadItems(false,sharedMediaItems.get(0).getMsgId(),HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY/2,false, true, initialPosition);  //Left
+			loadItems(false,sharedMediaItems.get(0).getMsgId(),HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY/2, true);         //Right
+		}
+		else
+		{
+			setSelection(initialPosition);  //Opened from the gallery perhaps, hence set the view pager to the required position
+		}
+		
+		return parent;
+	}
+	
+	private void initializeViews(View parent)
+	{
 		selectedPager = (ViewPager) parent.findViewById(R.id.selection_pager);
 		senderName = (TextView) parent.findViewById(R.id.sender_name);
 		itemTimeStamp = (TextView) parent.findViewById(R.id.item_time_stamp);
-		
-		int screenWidth = getResources().getDisplayMetrics().widthPixels;
-		int screenHeight = getResources().getDisplayMetrics().heightPixels;
-		sizeOfImage = screenWidth < screenHeight ? screenWidth : screenHeight;
-		setupActionBar();
-		numColumns = Utils.getNumColumnsForGallery(getResources(), sizeOfImage);
-		actualSize = Utils.getActualSizeForGallery(getResources(), sizeOfImage, numColumns);
-		
+	}
+
+	private void readArguments()
+	{
 		sharedMediaItems = getArguments().getParcelableArrayList(HikeConstants.Extras.SHARED_FILE_ITEMS);
 		initialPosition = getArguments().getInt(HikeConstants.MEDIA_POSITION);
 		msisdn = getArguments().getString(HikeConstants.Extras.MSISDN, null);
@@ -138,6 +159,15 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 				msisdnToNameMap.put(msisdnArray[i], nameArray[i]);
 			}
 		}
+	}
+	
+	private void intialiazeViewPager()
+	{
+		int screenWidth = getResources().getDisplayMetrics().widthPixels;
+		int screenHeight = getResources().getDisplayMetrics().heightPixels;
+		sizeOfImage = screenWidth < screenHeight ? screenWidth : screenHeight;
+		numColumns = Utils.getNumColumnsForGallery(getResources(), sizeOfImage);
+		actualSize = Utils.getActualSizeForGallery(getResources(), sizeOfImage, numColumns);
 
 		minMsgId = sharedMediaItems.get(0).getMsgId();
 		maxMsgId = sharedMediaItems.get(getCount()-1).getMsgId();
@@ -167,22 +197,8 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 			selectedPager.setPageTransformer(true, new DepthPageTransformer());
 		else
 			selectedPager.setPageMargin((int) getResources().getDimension(R.dimen.horizontal_page_margin));
-
-		setupActionBar();
-		//Load media to the right and left of the view pager if this fragment is called from ChatThread.
-		if(fromChatThread)
-		{	Logger.d(TAG,  " MsgId : " + sharedMediaItems.get(0).getMsgId());
-			loadItems(false,sharedMediaItems.get(0).getMsgId(),HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY/2,false, true, initialPosition);  //Left
-			loadItems(false,sharedMediaItems.get(0).getMsgId(),HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY/2, true);         //Right
-		}
-		else
-		{
-			setSelection(initialPosition);  //Opened from the gallery perhaps, hence set the view pager to the required position
-		}
-		
-		return parent;
 	}
-	
+
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState)
 	{
