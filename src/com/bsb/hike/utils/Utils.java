@@ -4042,12 +4042,6 @@ public class Utils
 		{
 			overallCount++;
 		}
-		int frCount = accountPref.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
-		if(frCount>0)
-		{
-			overallCount += frCount;
-		}
-
 		return overallCount;
 	}
 	

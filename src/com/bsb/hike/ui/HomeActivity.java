@@ -1208,8 +1208,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 */
 		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
 		
-		optionsList.add(new OverFlowMenuItem(getString(R.string.favorites), 10));
-		
 		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
 
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
@@ -1287,17 +1285,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 					freeSmsCount.setVisibility(View.GONE);
 				}
-				
-				TextView friendRequestCount = (TextView) convertView.findViewById(R.id.friend_req_count);
-				int frCount = accountPrefs.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
-				if(frCount>0 && item.getKey() == 10)
-				{
-					friendRequestCount.setText(Integer.toString(frCount));
-					friendRequestCount.setVisibility(View.VISIBLE);
-
-				}
-				else
-					friendRequestCount.setVisibility(View.GONE);
 
 				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
 				newGamesIndicator.setText("1");
@@ -1365,10 +1352,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 9:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
-					break;
-				case 10:
-					Utils.sendUILogEvent(HikeConstants.LogEvent.FAVOURITE_FROM_OVERFLOW);
-					intent = new Intent(HomeActivity.this, PeopleActivity.class);
 					break;	
 				}
 
