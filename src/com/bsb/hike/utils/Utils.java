@@ -50,6 +50,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -4461,6 +4462,48 @@ public class Utils
 			}
 		}
 
+	}
+	
+	public static String getFormattedDate(Context context, long timestamp)
+	{
+		Date date = new Date(timestamp * 1000);
+		String format;
+		if (android.text.format.DateFormat.is24HourFormat(context))
+		{
+			format = "d MMM ''yy";
+		}
+		else
+		{
+			format = "d MMM ''yy";
+		}
+
+		DateFormat df = new SimpleDateFormat(format);
+		return df.format(date);
+	}
+	
+	public static String getFormattedTime(boolean pretty, Context context, long timestamp)
+	{
+		Date date = new Date(timestamp * 1000);
+		if (pretty)
+		{
+			PrettyTime p = new PrettyTime();
+			return p.format(date);
+		}
+		else
+		{
+			String format;
+			if (android.text.format.DateFormat.is24HourFormat(context))
+			{
+				format = "HH:mm";
+			}
+			else
+			{
+				format = "h:mm aaa";
+			}
+
+			DateFormat df = new SimpleDateFormat(format);
+			return df.format(date);
+		}
 	}
 
 	public static Pair<String[], String[]> getMsisdnToNameArray(Conversation conversation)

@@ -112,6 +112,9 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	{
 		View parent = inflater.inflate(R.layout.shared_media_viewer, null);
 		selectedPager = (ViewPager) parent.findViewById(R.id.selection_pager);
+		senderName = (TextView) parent.findViewById(R.id.sender_name);
+		itemTimeStamp = (TextView) parent.findViewById(R.id.item_time_stamp);
+		
 		int screenWidth = getResources().getDisplayMetrics().widthPixels;
 		int screenHeight = getResources().getDisplayMetrics().heightPixels;
 		sizeOfImage = screenWidth < screenHeight ? screenWidth : screenHeight;
@@ -227,6 +230,29 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 			//Logger.d(TAG, "loading items from left : " + minMsgId);
 			loadItems(reachedEndLeft, minMsgId, HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY, false, true, position);
 
+		}
+		
+		senderName.setText(getSenderName(position));
+		long timeStamp = sharedMediaItems.get(position).getTimeStamp();
+		String date = Utils.getFormattedDate(getSherlockActivity(), timeStamp);
+		String time = Utils.getFormattedTime(false, getSherlockActivity(), timeStamp);
+		itemTimeStamp.setText(date+", "+time);
+	}
+
+	private String getSenderName(int position)
+	{
+		HikeSharedFile hsf = sharedMediaItems.get(position);
+		if(hsf.isSent())
+		{
+			return getString(R.string.you);
+		}
+		else if (isGroup)
+		{
+			return msisdnToNameMap.get(hsf.getGroupParticipantMsisdn());
+		}
+		else 
+		{
+			return conversationName;
 		}
 	}
 
