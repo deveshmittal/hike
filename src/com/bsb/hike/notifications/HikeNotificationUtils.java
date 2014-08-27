@@ -19,6 +19,9 @@ import com.bsb.hike.utils.Utils;
 
 public class HikeNotificationUtils
 {
+	
+	public static final String HIKE_NUJ_PREFS_BOOLEAN_KEY = "hikeNUJNotificationPref";
+	
 	/**
 	 * Utility method to get a "msisdn/name - message" preview from ConvMsg.
 	 * 

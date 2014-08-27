@@ -492,7 +492,7 @@ public class ToastListener implements Listener
 					}
 
 					if (message.getParticipantInfoState() != null && message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN
-							&& (!mDefaultPreferences.getBoolean("hikeNUJNotificationPref", true)))
+							&& (!mDefaultPreferences.getBoolean(HikeNotificationUtils.HIKE_NUJ_PREFS_BOOLEAN_KEY, true)))
 					{
 						// User has disabled NUJ/RUJ message notifications
 						continue;
