@@ -528,18 +528,6 @@ public class HikeNotification
 			return;
 		}
 
-		// if notification message stack is empty, add to it and proceed with single notification display
-		// else add to stack and notify clubbed messages
-		if (hikeNotifMsgStack.isEmpty())
-		{
-			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), context.getString(R.string.hike_to_offline_text));
-		}
-		else
-		{
-			notifyStringMessage(context.getString(R.string.app_name), context.getString(R.string.hike_to_offline_text), false);
-			return;
-		}
-
 		final int notificationId = HIKE_TO_OFFLINE_PUSH_NOTIFICATION_ID;
 		final Intent notificationIntent = new Intent(context, ChatThread.class);
 
@@ -553,9 +541,23 @@ public class HikeNotification
 		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.offline_notification);
 		final int smallIconId = returnSmallIcon();
 
-		String title = (msisdnList.size() > 1) ? context.getString(R.string.hike_to_offline_push_title_multiple, msisdnList.size()) : context.getString(
-				R.string.hike_to_offline_push_title_single, nameMap.get(firstMsisdn));
+		String title = (msisdnList.size() > 1) ? context.getString(R.string.hike_to_offline_push_title_multiple, msisdnList.size()) : (HikeMessengerApp
+				.isStealthMsisdn(firstMsisdn) ? context.getString(R.string.stealth_notification_message) : context.getString(R.string.hike_to_offline_push_title_single,
+				nameMap.get(firstMsisdn)));
 		String message = context.getString(R.string.hike_to_offline_text);
+		
+
+		// if notification message stack is empty, add to it and proceed with single notification display
+		// else add to stack and notify clubbed messages
+		if (hikeNotifMsgStack.isEmpty())
+		{
+			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), title);
+		}
+		else
+		{
+			notifyStringMessage(context.getString(R.string.app_name), title, false);
+			return;
+		}
 
 		NotificationCompat.Builder mBuilder = getNotificationBuilder(title, message, message, avatarDrawable, smallIconId, false);
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
