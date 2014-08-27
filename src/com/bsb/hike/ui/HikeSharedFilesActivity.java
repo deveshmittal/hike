@@ -559,6 +559,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 			intent.putExtra(HikeConstants.Extras.PARTICIPANT_NAME_ARRAY, nameArray);
 		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;
 	}
 }
