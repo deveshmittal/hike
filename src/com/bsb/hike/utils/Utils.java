@@ -2274,6 +2274,8 @@ public class Utils
 			notificationCount += accountPrefs.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 		}
 
+		int frCount = accountPrefs.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+		notificationCount += frCount;
 		return notificationCount;
 	}
 
