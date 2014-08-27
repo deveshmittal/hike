@@ -20,10 +20,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
@@ -51,10 +48,6 @@ public class HikeNotificationMsgStack implements Listener
 	private HikeConversationsDatabase mConvDb;
 
 	private ArrayList<String> mBigTextList;
-
-	private int mUnreadMessages;
-
-	private int mUnreadConversations;
 
 	private ConvMessage mLastInsertedConvMessage;
 
@@ -301,12 +294,9 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		updateNotificationIntent();
 
-		updateMessagesCount();
-
 		mNotificationTextLines = mMessageTitlePairList.size();
 
 		mNotificationTextLines = mNotificationTextLines > MAX_LINES ? MAX_LINES : mNotificationTextLines;
-
 	}
 
 	/**
@@ -523,24 +513,6 @@ public class HikeNotificationMsgStack implements Listener
 		}
 	}
 
-	/**
-	 * Updates number of unread messages/conversations from conversations database
-	 */
-	private void updateMessagesCount()
-	{
-		mUnreadMessages = 0;
-		mUnreadConversations = 0;
-		List<Conversation> convList = mConvDb.getConversations();
-		for (Conversation conv : convList)
-		{
-			if (conv.getUnreadCount() > 0)
-			{
-				mUnreadMessages += conv.getUnreadCount();
-				mUnreadConversations++;
-			}
-		}
-	}
-
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
@@ -583,17 +555,7 @@ public class HikeNotificationMsgStack implements Listener
 	 */
 	public int getUnreadMessages()
 	{
-		return mUnreadMessages;
-	}
-
-	/**
-	 * Returns number of conversations containing unread messages from the conversations database
-	 * 
-	 * @return
-	 */
-	public int getUnreadConversations()
-	{
-		return mUnreadConversations;
+		return mConvDb.getTotalUnreadMessages();
 	}
 
 	/**
