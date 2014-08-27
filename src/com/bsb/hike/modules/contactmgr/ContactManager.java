@@ -316,7 +316,14 @@ public class ContactManager implements ITransientCache
 				{
 					con = transientCache.getContact(msisdn);
 					persistenceCache.insertContact(con, ifOneToOneConversation);
-
+				}
+				else
+				{
+					/*
+					 * Now contact is in persistence cache but it can be either in 1-1 contacts map or group contacts map. Below method will move the contact from group map to 1-1
+					 * map if contact is of 1-1 conversation and vice versa
+					 */
+					persistenceCache.move(msisdn, ifOneToOneConversation);
 				}
 			}
 		}

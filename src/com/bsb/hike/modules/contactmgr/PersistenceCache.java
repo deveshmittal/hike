@@ -155,6 +155,39 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
+	 * This method checks if contact is in {@link #groupContactsPersistence} and it is also 1-1 conversation contact then moves it in {@link #convsContactsPersistence} and also
+	 * vice versa
+	 * 
+	 * @param msisdn
+	 * @param ifOneToOneConversation
+	 */
+	void move(String msisdn, boolean ifOneToOneConversation)
+	{
+		if (ifOneToOneConversation)
+		{
+			if (!convsContactsPersistence.containsKey(msisdn))
+			{
+				ContactInfo contact = null;
+				PairModified<ContactInfo, Integer> contactPair = groupContactsPersistence.get(msisdn);
+				if (null != contactPair)
+				{
+					contact = contactPair.getFirst();
+				}
+				insertContact(contact);
+			}
+		}
+		else
+		{
+			if (!groupPersistence.containsKey(msisdn))
+			{
+				ContactInfo contact = convsContactsPersistence.get(msisdn);
+				insertContact(contact, ifOneToOneConversation);
+			}
+		}
+
+	}
+
+	/**
 	 * This method is not Thread safe , removes the contact for a particular msisdn from the cache - if it is one to one conversation removes from {@link #convsContactsPersistence}
 	 * otherwise decrements the reference count by one , if reference count becomes zero then remove it completely from {@link #groupContactsPersistence}
 	 * 
