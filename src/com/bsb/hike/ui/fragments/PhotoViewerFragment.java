@@ -25,6 +25,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.view.Window;
@@ -52,6 +54,8 @@ import com.bsb.hike.utils.Utils;
 
 public class PhotoViewerFragment extends SherlockFragment implements OnPageChangeListener
 {
+	private View mParent;
+	
 	private SharedMediaAdapter smAdapter;
 
 	private ViewPager selectedPager;
@@ -114,9 +118,9 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-		View parent = inflater.inflate(R.layout.shared_media_viewer, null);
+		mParent = inflater.inflate(R.layout.shared_media_viewer, null);
 		
-		initializeViews(parent);
+		initializeViews(mParent);
 		
 		readArguments();
 		
@@ -135,7 +139,7 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 			setSelection(initialPosition);  //Opened from the gallery perhaps, hence set the view pager to the required position
 		}
 		
-		return parent;
+		return mParent;
 	}
 	
 	private void initializeViews(View parent)
@@ -190,7 +194,7 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		if(getArguments().containsKey(HikeConstants.FROM_CHAT_THREAD))
 			fromChatThread = getArguments().getBoolean(HikeConstants.FROM_CHAT_THREAD);
 		
-		smAdapter = new SharedMediaAdapter(getActivity(), actualSize, sharedMediaItems, msisdn, selectedPager);
+		smAdapter = new SharedMediaAdapter(getActivity(), actualSize, sharedMediaItems, msisdn, selectedPager, this);
 		selectedPager.setAdapter(smAdapter);
 		selectedPager.setOnPageChangeListener(this);
 		
@@ -556,5 +560,35 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	{
 		PhotoViewerFragment fragment = (PhotoViewerFragment) fragmentManager.findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
 		return fragment;
+	}
+	
+	@Override
+	public void onResume()
+	{
+		if(!getSherlockActivity().getSupportActionBar().isShowing())
+		{
+			toggleViewsVisibility();
+		}
+		super.onResume();
+	}
+
+	public void toggleViewsVisibility()
+	{
+		ActionBar actionbar = getSherlockActivity().getSupportActionBar();
+		Animation animation;
+		if(!actionbar.isShowing())
+		{
+			actionbar.show();
+			animation = AnimationUtils.loadAnimation(getSherlockActivity(), R.anim.fade_in_animation);
+		}
+		else
+		{
+			actionbar.hide();
+			animation = AnimationUtils.loadAnimation(getSherlockActivity(), R.anim.fade_out_animation);
+		}
+		animation.setDuration(300);
+		animation.setFillAfter(true);
+		mParent.findViewById(R.id.info_group).startAnimation(animation);
+		mParent.findViewById(R.id.gradient).startAnimation(animation);
 	}
 }
