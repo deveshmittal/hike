@@ -29,20 +29,20 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
@@ -59,8 +59,6 @@ public class ToastListener implements Listener
 	private WeakReference<Activity> currentActivity;
 
 	private HikeNotification toaster;
-
-	private HikeUserDatabase db;
 
 	private Context context;
 
@@ -81,7 +79,6 @@ public class ToastListener implements Listener
 	{
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
 		this.toaster = new HikeNotification(context);
-		this.db = HikeUserDatabase.getInstance();
 		this.context = context;
 		mCurrentUnnotifiedStatus = MQTTConnectionStatus.NOT_CONNECTED;
 		mDefaultPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -193,12 +190,11 @@ public class ToastListener implements Listener
 				return;
 			}
 
-			if ((message.getConversation() instanceof GroupConversation) && ((GroupConversation) message.getConversation()).isMuted())
+			if (isGroupConversationAndMuted(message.getMsisdn()))
 			{
-				Logger.d(getClass().getSimpleName(), "Group has been muted");
 				return;
 			}
-			if (message.getConversation().isStealth())
+			if(HikeMessengerApp.isStealthMsisdn(message.getMsisdn()))
 			{
 				Logger.d(getClass().getSimpleName(), "this conversation is stealth");
 				return;
@@ -209,12 +205,12 @@ public class ToastListener implements Listener
 				ContactInfo contactInfo;
 				if (message.isGroupChat())
 				{
-					Logger.d("ToastListener", "GroupName is " + message.getConversation().getLabel());
-					contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), message.getConversation().getLabel(), message.getMsisdn());
+					Logger.d("ToastListener", "GroupName is " + ContactManager.getInstance().getName(message.getMsisdn()));
+					contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), ContactManager.getInstance().getName(message.getMsisdn()), message.getMsisdn());
 				}
 				else
 				{
-					contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn(), false);
+					contactInfo = HikeMessengerApp.getContactManager().getContact(message.getMsisdn(), true, true);
 				}
 
 				// TODO : Commented this because for FT messages we get 2 packets from PubSub,
@@ -337,7 +333,7 @@ public class ToastListener implements Listener
 							msisdnList.add(offlineMsisdnsArray.getString(i));
 						}
 
-						String msisdnStatement = getMsisdnStatement(msisdnList);
+						String msisdnStatement = Utils.getMsisdnStatement(msisdnList);
 
 						ArrayList<String> filteredMsisdnList = HikeConversationsDatabase.getInstance().getOfflineMsisdnsList(msisdnStatement); // this db query will
 																																				// return new list
@@ -352,18 +348,10 @@ public class ToastListener implements Listener
 							return;
 						}
 
-						msisdnStatement = getMsisdnStatement(filteredMsisdnList);
-						List<ContactInfo> contactList = this.db.getContactNamesFromMsisdnList(msisdnStatement); // contact
-																												// info
-																												// list
+						msisdnStatement = Utils.getMsisdnStatement(filteredMsisdnList);
+						List<ContactInfo> contactList = ContactManager.getInstance().getContact(filteredMsisdnList, true, false); // contact info list
 
-						HashMap<String, String> nameMap = new HashMap<String, String>(); // nameMap
-																							// to
-																							// map
-																							// msisdn
-																							// to
-																							// corresponding
-																							// name
+						HashMap<String, String> nameMap = new HashMap<String, String>(); // nameMap to map msisdn to corresponding name
 						for (ContactInfo contactInfo : contactList)
 						{
 							nameMap.put(contactInfo.getMsisdn(), contactInfo.getName());
@@ -477,15 +465,14 @@ public class ToastListener implements Listener
 			{
 				if (message.isShouldShowPush())
 				{
-					HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-					message.setConversation(hCDB.getConversation(message.getMsisdn(), 0));
+					String msisdn = message.getMsisdn();
 
-					if (message.getConversation() == null)
+					if (Utils.isGroupConversation(msisdn) && !ContactManager.getInstance().isConvExists(msisdn))
 					{
 						Logger.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
 						continue;
 					}
-					if ((message.getConversation() instanceof GroupConversation) && ((GroupConversation) message.getConversation()).isMuted())
+					if (isGroupConversationAndMuted(message.getMsisdn()))
 					{
 						Logger.d(getClass().getSimpleName(), "Group has been muted");
 						continue;
@@ -525,7 +512,7 @@ public class ToastListener implements Listener
 							}
 						}
 
-						if (message.getConversation().isStealth())
+						if (HikeMessengerApp.isStealthMsisdn(msisdn))
 						{
 							this.toaster.notifyStealthMessage();
 						}
@@ -535,18 +522,29 @@ public class ToastListener implements Listener
 						}
 					}
 				}
+				if (!filteredMessageList.isEmpty())
+				{
+					this.toaster.notifySummaryMessage(filteredMessageList);
+				}
+			
 			}
-
-			if (!filteredMessageList.isEmpty())
-			{
-				this.toaster.notifySummaryMessage(filteredMessageList);
-			}
-
 			// Remove unused references
 			filteredMessageList.clear();
 			filteredMessageList = null;
-
 		}
+	}
+
+	private boolean isGroupConversationAndMuted(String msisdn)
+	{
+		if ((Utils.isGroupConversation(msisdn)))
+		{
+			if (HikeConversationsDatabase.getInstance().isGroupMuted(msisdn))
+			{
+				Logger.d(getClass().getSimpleName(), "Group has been muted");
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static Bitmap returnBigPicture(ConvMessage convMessage, Context context)
@@ -629,25 +627,4 @@ public class ToastListener implements Listener
 		}
 
 	}
-
-	// added for db query
-	private String getMsisdnStatement(ArrayList<String> msisdnList)
-	{
-
-		StringBuilder sb = new StringBuilder("(");
-		;
-		for (String msisdn : msisdnList)
-		{
-
-			sb.append(DatabaseUtils.sqlEscapeString(msisdn));
-
-			sb.append(",");
-
-		}
-		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
-
-		return sb.toString();
-
-	}
-
 }

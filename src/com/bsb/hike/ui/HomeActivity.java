@@ -61,11 +61,11 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.tasks.SendLogsTask;
@@ -77,6 +77,7 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -298,6 +299,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if (overFlowWindow != null && overFlowWindow.isShowing())
 			overFlowWindow.dismiss();
 		HikeMessengerApp.getPubSub().removeListeners(this, homePubSubListeners);
+		HikeMessengerApp.getContactManager().unload();
 		super.onDestroy();
 	}
 
@@ -402,28 +404,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 	}
 
-	private Intent getGamingIntent()
-	{
 
-		SharedPreferences prefs = this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		Intent intent = new Intent(this.getApplicationContext(), WebViewActivity.class);
-		intent.putExtra(HikeConstants.Extras.GAMES_PAGE, true);
-		/*
-		 * using the same token as rewards token, as per DK sir's mail
-		 */
-		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.gamesUrl + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
-		intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.hike_extras));
-		return intent;
-	}
-
-	private Intent getRewardsIntent()
-	{
-		SharedPreferences prefs = this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		Intent intent = new Intent(this.getApplicationContext(), WebViewActivity.class);
-		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.rewardsUrl + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
-		intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.rewards));
-		return intent;
-	}
+	
 
 	private void showSMSClientDialog()
 	{
@@ -981,12 +963,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		else if (HikePubSub.CONTACT_SYNCED.equals(type))
 		{
+			Boolean[] ret = (Boolean[]) object;
+			final boolean manualSync = ret[0];
 			runOnUiThread(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					Toast.makeText(getApplicationContext(), R.string.contacts_synced, Toast.LENGTH_SHORT).show();
+					if(manualSync)
+						Toast.makeText(getApplicationContext(), R.string.contacts_synced, Toast.LENGTH_SHORT).show();
 				}
 			});
 		}
@@ -1098,7 +1083,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		@Override
 		protected FtueContactsData doInBackground(Void... params)
 		{
-			FtueContactsData ftueContactsDataResult = HikeUserDatabase.getInstance().getFTUEContacts(accountPrefs);
+			FtueContactsData ftueContactsDataResult = ContactManager.getInstance().getFTUEContacts(accountPrefs);
 			/*
 			 * This msisdn type will be the identifier for ftue contacts in the friends tab.
 			 */
@@ -1344,13 +1329,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true);
 					editor.commit();
 					updateOverFlowMenuNotification();
-					intent = getGamingIntent();
+					intent = IntentManager.getGamingIntent(HomeActivity.this);
 					break;
 				case 4:
 					editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true);
 					editor.commit();
 					updateOverFlowMenuNotification();
-					intent = getRewardsIntent();
+					intent = IntentManager.getRewardsIntent(HomeActivity.this);
 					break;
 				case 5:
 					intent = new Intent(HomeActivity.this, SettingsActivity.class);

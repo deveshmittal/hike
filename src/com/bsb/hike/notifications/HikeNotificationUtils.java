@@ -8,20 +8,21 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
 public class HikeNotificationUtils
 {
-	
+
 	public static final String HIKE_NUJ_PREFS_BOOLEAN_KEY = "hikeNUJNotificationPref";
-	
+
 	/**
 	 * Utility method to get a "msisdn/name - message" preview from ConvMsg.
 	 * 
@@ -30,7 +31,7 @@ public class HikeNotificationUtils
 	 * @param convMsg
 	 * @return
 	 */
-	public static Pair<String, String> getNotificationPreview(Context context, HikeUserDatabase db, ConvMessage convMsg)
+	public static Pair<String, String> getNotificationPreview(Context context, ConvMessage convMsg)
 	{
 
 		final String msisdn = convMsg.getMsisdn();
@@ -39,14 +40,16 @@ public class HikeNotificationUtils
 		String message = (!convMsg.isFileTransferMessage()) ? convMsg.getMessage() : HikeFileType.getFileTypeMessage(context, convMsg.getMetadata().getHikeFiles().get(0)
 				.getHikeFileType(), convMsg.isSent());
 
+		ContactManager contactManager = ContactManager.getInstance();
+
 		ContactInfo contactInfo;
 		if (convMsg.isGroupChat())
 		{
-			contactInfo = new ContactInfo(convMsg.getMsisdn(), convMsg.getMsisdn(), convMsg.getConversation().getLabel(), convMsg.getMsisdn());
+			contactInfo = new ContactInfo(convMsg.getMsisdn(), convMsg.getMsisdn(), contactManager.getName(msisdn), convMsg.getMsisdn());
 		}
 		else
 		{
-			contactInfo = db.getContactInfoFromMSISDN(convMsg.getMsisdn(), false);
+			contactInfo = contactManager.getContact(msisdn, true, false);
 		}
 
 		if (TextUtils.isEmpty(message)
@@ -77,14 +80,17 @@ public class HikeNotificationUtils
 		if (convMsg.isGroupChat() && !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn()) && convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
 
-			GroupConversation gConv = (GroupConversation) convMsg.getConversation();
+			GroupParticipant groupParticipant = HikeConversationsDatabase.getInstance().getGroupParticipant(convMsg.getMsisdn(), convMsg.getGroupParticipantMsisdn());
 
-			ContactInfo participant = gConv.getGroupParticipant(convMsg.getGroupParticipantMsisdn()).getContactInfo();
+			if (groupParticipant != null)
+			{
+				ContactInfo participant = HikeConversationsDatabase.getInstance().getGroupParticipant(convMsg.getMsisdn(), convMsg.getGroupParticipantMsisdn()).getContactInfo();
 
-			key = participant.getName();
+				key = participant.getName();
+			}
 			if (TextUtils.isEmpty(key))
 			{
-				key = participant.getMsisdn();
+				key = convMsg.getGroupParticipantMsisdn();
 			}
 
 			boolean isPin = false;
@@ -100,7 +106,7 @@ public class HikeNotificationUtils
 			{
 				message = key + HikeConstants.SEPARATOR + message;
 			}
-			key = gConv.getLabel();
+			key = ContactManager.getInstance().getName(convMsg.getMsisdn());
 		}
 
 		return new Pair<String, String>(message, key);
@@ -115,7 +121,7 @@ public class HikeNotificationUtils
 	 * @param argMsisdn
 	 * @return
 	 */
-	public static String getNameForMsisdn(Context context, HikeUserDatabase db, HikeConversationsDatabase convDb, String argMsisdn)
+	public static String getNameForMsisdn(Context context, String argMsisdn)
 	{
 
 		// TODO: Use new contact manager class here instead of querying from db.
@@ -124,15 +130,7 @@ public class HikeNotificationUtils
 			return context.getString(R.string.app_name);
 		}
 
-		String name = null;
-		if (Utils.isGroupConversation(argMsisdn))
-		{
-			name = convDb.getGroupName(argMsisdn);
-		}
-		else
-		{
-			name = db.getContactInfoFromMSISDN(argMsisdn, false).getNameOrMsisdn();
-		}
+		String name = ContactManager.getInstance().getName(argMsisdn);
 
 		if (TextUtils.isEmpty(name))
 		{

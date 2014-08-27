@@ -24,6 +24,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Utils;
 
 public class SettingsActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener
@@ -188,42 +189,37 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		switch (position)
 		{
 		case 0:
-			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.notification_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.notifications);
+			IntentManager.openSettingNotification(this);
 			break;
 
 		case 1:
-			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.media_download_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.auto_download_media);
+			IntentManager.openSettingMedia(this);
 			break;
 		case 2:
-			intent = new Intent(this, CreditsActivity.class);
+			IntentManager.openSettingSMS(this);
 			break;
 		case 3:
-			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.account_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.account);
+			IntentManager.openSettingAccount(this);
 			break;
 		case 4:
-			intent = Utils.getIntentForPrivacyScreen(this);
+			IntentManager.openSettingPrivacy(this);
 			break;
 		case 5:
+			if(HikeMessengerApp.syncingContacts)
+				return;
+			if(!Utils.isUserOnline(this))
+			{
+				Utils.showNetworkUnavailableDialog(this);
+				return;
+			}
 			Intent contactSyncIntent = new Intent(HikeService.MQTT_CONTACT_SYNC_ACTION);
 			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
 			sendBroadcast(contactSyncIntent);
 			Toast.makeText(getApplicationContext(), R.string.contacts_sync_started, Toast.LENGTH_SHORT).show();
 			break;
 		case 6:
-			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.help_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.help);
+			IntentManager.openSettingHelp(this);
 			break;
-		}
-		if (intent != null)
-		{
-			startActivity(intent);
 		}
 	}
 }

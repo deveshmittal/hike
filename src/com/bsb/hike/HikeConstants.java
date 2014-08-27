@@ -765,6 +765,8 @@ public class HikeConstants
 
 	public static final String INDIA_COUNTRY_CODE = "+91";
 
+	public static final String SAUDI_ARABIA_COUNTRY_CODE = "+966";
+
 	public static final int MDPI_TIMES_10 = 11;
 
 	public static final String NAMESPACE = "http://schemas.android.com/apk/res/com.bsb.hike";
@@ -844,7 +846,7 @@ public class HikeConstants
 
 	public static final int FTUE_LIMIT = 5;
 	
-	public static final int FTUE_CONTACT_CARD_LIMIT = 4;
+	public static final int FTUE_CONTACT_CARD_LIMIT = 5;
 
 	public static final String FTUE_MSISDN_TYPE = "ftueContact";
 
@@ -911,6 +913,8 @@ public class HikeConstants
 	public static final String TO_SHOW = "toShow";
 	
 	public static final String PIN_DISPLAYED = "displayed";
+	
+	public static final int MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY = 51;
 
 	public static final class ResultCodes
 	{
@@ -1230,6 +1234,10 @@ public class HikeConstants
 		public static final String TOTAL_MSGS_CURRENTLY_LOADED = "totalMsgsCurrentlyLoaded";
 		
 		public static final String PIN_TYPE_SHOWING="pinTypeShowing";
+
+		public static final String SHARED_FILE_ITEMS = "sharedFileItems";
+		
+		public static final String IS_LAST_MESSAGE = "isLastMessage";
 	}
 
 	public static final class LogEvent
@@ -1738,4 +1746,23 @@ public class HikeConstants
 	public static final String EXTRA_CONV_ID = "conv_id";
 	
 	public static final int MAX_PIN_CONTENT_LINES_IN_HISTORY = 10;
+	
+	public static final String URL = "url";
+	public static final String MEDIA_POSITION = "position";
+	
+	public static final String FROM_CHAT_THREAD = "ct";
+
+	public static final String LARGE = "large";
+	
+	public static final int ATOMIC_APP_TIP_SETTINGS = 1;
+	public static final int ATOMIC_APP_TIP_SETTINGS_NOTIF = 2;
+	public static final int ATOMIC_APP_TIP_SETTINGS_MEDIA = 3;
+	public static final int ATOMIC_APP_TIP_SETTINGS_SMS = 4;
+	public static final int ATOMIC_APP_TIP_SETTINGS_PRIVACY = 5;
+	public static final int ATOMIC_APP_TIP_TIMELINE = 6;
+	public static final int ATOMIC_APP_TIP_INVITE_FREE_SMS = 8;
+	public static final int ATOMIC_APP_TIP_INVITE_WATSAPP = 9;
+	public static final int ATOMIC_APP_TIP_HIKE_EXTRA = 10;
+	public static final int ATOMIC_APP_TIP_HIKE_REWARDS = 11;
+	
 }

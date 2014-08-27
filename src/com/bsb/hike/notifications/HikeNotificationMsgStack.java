@@ -20,11 +20,11 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.Utils;
@@ -47,8 +47,6 @@ public class HikeNotificationMsgStack implements Listener
 	private LinkedList<Pair<String, String>> mMessageTitlePairList;
 
 	private Intent mNotificationIntent;
-
-	private HikeUserDatabase mDb;
 
 	private HikeConversationsDatabase mConvDb;
 
@@ -109,7 +107,6 @@ public class HikeNotificationMsgStack implements Listener
 	private HikeNotificationMsgStack()
 	{
 		mMessageTitlePairList = new LinkedList<Pair<String, String>>();
-		this.mDb = HikeUserDatabase.getInstance();
 		this.mConvDb = HikeConversationsDatabase.getInstance();
 	}
 
@@ -124,7 +121,7 @@ public class HikeNotificationMsgStack implements Listener
 		{
 
 			// Add to ticker text string
-			Pair<String, String> convMessagePair = HikeNotificationUtils.getNotificationPreview(mContext, mDb, argConvMessage);
+			Pair<String, String> convMessagePair = HikeNotificationUtils.getNotificationPreview(mContext, argConvMessage);
 
 			addPair(argConvMessage.getMsisdn(), convMessagePair.first);
 
@@ -259,12 +256,12 @@ public class HikeNotificationMsgStack implements Listener
 
 		if (mTickerText != null)
 		{
-			mTickerText.append("\n" + HikeNotificationUtils.getNameForMsisdn(mContext, mDb, mConvDb, argMsisdn) + " - " + argMessage);
+			mTickerText.append("\n" + HikeNotificationUtils.getNameForMsisdn(mContext, argMsisdn) + " - " + argMessage);
 		}
 		else
 		{
 			mTickerText = new StringBuilder();
-			mTickerText.append(HikeNotificationUtils.getNameForMsisdn(mContext, mDb, mConvDb, argMsisdn) + " - " + argMessage);
+			mTickerText.append(HikeNotificationUtils.getNameForMsisdn(mContext, argMsisdn) + " - " + argMessage);
 		}
 	}
 
@@ -420,7 +417,7 @@ public class HikeNotificationMsgStack implements Listener
 
 			String notificationMsgTitle = mContext.getString(R.string.app_name);
 
-			notificationMsgTitle = HikeNotificationUtils.getNameForMsisdn(mContext, mDb, mConvDb, convMsgPair.first);
+			notificationMsgTitle = HikeNotificationUtils.getNameForMsisdn(mContext, convMsgPair.first);
 
 			if (!isFromSingleMsisdn())
 			{
@@ -469,15 +466,14 @@ public class HikeNotificationMsgStack implements Listener
 			// Take any message from message list since the contact info will
 			// remain the same
 			String msisdn = entry.first;
-			ContactInfo contactInfo;
 			if (Utils.isGroupConversation(msisdn))
 			{
 				notificationMsgTitle.append(mConvDb.getConversation(msisdn, 1).getLabel() + "\n");
 			}
 			else
 			{
-				contactInfo = mDb.getContactInfoFromMSISDN(msisdn, true);
-				notificationMsgTitle.append(contactInfo != null && !TextUtils.isEmpty(contactInfo.getName()) ? contactInfo.getName() : msisdn + "\n");
+				String name = ContactManager.getInstance().getName(msisdn);
+				notificationMsgTitle.append(name + "\n");
 			}
 		}
 
@@ -699,7 +695,7 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		if (isFromSingleMsisdn())
 		{
-			return HikeNotificationUtils.getNameForMsisdn(mContext, mDb, mConvDb, lastAddedMsisdn);
+			return HikeNotificationUtils.getNameForMsisdn(mContext, lastAddedMsisdn);
 		}
 
 		if (getNewMessages() <= 1)

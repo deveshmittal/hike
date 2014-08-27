@@ -202,6 +202,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				final StickerCategory cat = (StickerCategory) b.getSerializable(StickerManager.STICKER_CATEGORY);
 				final DownloadType type = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
 				final StickerPageObjects spo = stickerObjMap.get(cat.categoryId);
+				final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
 				// if this category is already loaded then only proceed else ignore
 				if (spo != null)
 				{
@@ -222,6 +223,10 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 								spo.getDownloadingParent().setVisibility(View.GONE);
 								spo.getStickerListView().setVisibility(View.GONE);
 								spo.getDownloadingFailedButton().setVisibility(View.VISIBLE);
+								if(failedDueToLargeFile)
+								{
+									spo.getDownloadingFailedButton().setText(R.string.sticker_download_failed_large_file);
+								}
 								spo.getDownloadingFailedButton().setOnClickListener(new OnClickListener()
 								{
 									@Override
