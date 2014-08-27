@@ -1224,7 +1224,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					if (Utils.isPicasaUri(selectedFileUri.toString()))
 					{
 						isPicasaImage = true;
-						path = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, false).getAbsolutePath();
+						File file = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, false);
+						if (null != file)
+							path = file.getAbsolutePath();
 					}
 					else
 					{
