@@ -860,7 +860,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 			if (HikePubSub.REJECT_FRIEND_REQUEST.equals(type)|| (HikePubSub.FAVORITE_TOGGLED.equals(type) && (favoriteToggle.second.equals(FavoriteType.REQUEST_RECEIVED) || favoriteToggle.second.equals(FavoriteType.FRIEND))))
 			{
-				updateOverFlowMenuNotification();
+				updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 0);
 			}
 
 			if (ftueContactsData.isEmpty())
@@ -1036,13 +1036,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		else if(HikePubSub.FRIEND_REQ_COUNT_RESET.equals(type))
 		{
 			runOnUiThread( new Runnable() {
-			@Override
-			public void run()
-			{
-
-				
-					topBarIndicator.setVisibility(View.INVISIBLE);
-
+				@Override
+				public void run()
+				{
+					updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 0);
 				}
 			});
 		}
