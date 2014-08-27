@@ -1225,7 +1225,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			int unreadMessageCount = 0;
 			int unreadPinMessageCount = 0;
 
-			Map<String, JSONObject> map = new HashMap<String, JSONObject>();
+			Map<String, List<String>> map = new HashMap<String, List<String>>();
 
 			for (ConvMessage conv : convMessages)
 			{
@@ -1297,9 +1297,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				// upgrade groupInfoTable
 				updateReadBy(conv);
-				if (Utils.isGroupConversation(conv.getMsisdn()) && conv.getMetadata() != null)
+				if (Utils.isGroupConversation(conv.getMsisdn()))
 				{
-					map.put(conv.getMsisdn(), conv.getMetadata().getJSON());
+					List<String> lastMsisdns = new ArrayList<String>();
+					if (conv.getMetadata() != null)
+						lastMsisdns = getGroupLastMsgMsisdn(conv.getMetadata().getJSON());
+
+					if (lastMsisdns.size() == 0)
+					{
+						lastMsisdns.add(conv.getGroupParticipantMsisdn());
+					}
+					map.put(conv.getMsisdn(), lastMsisdns);
 				}
 			}
 

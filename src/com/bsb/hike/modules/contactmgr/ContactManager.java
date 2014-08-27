@@ -408,18 +408,16 @@ public class ContactManager implements ITransientCache
 	 * 
 	 * @param map
 	 */
-	public void removeOlderLastGroupMsisdns(Map<String, JSONObject> map)
+	public void removeOlderLastGroupMsisdns(Map<String, List<String>> map)
 	{
 		List<String> msisdns = new ArrayList<String>();
 		List<String> msisdnsDB = new ArrayList<String>();
 
-		Map<String, List<String>> grpLastMsisdns = new HashMap<String, List<String>>();
-		for (Entry<String, JSONObject> mapEntry : map.entrySet())
+		for (Entry<String, List<String>> mapEntry : map.entrySet())
 		{
 			String groupId = mapEntry.getKey();
-			List<String> lastMsisdns = HikeConversationsDatabase.getInstance().getGroupLastMsgMsisdn(mapEntry.getValue());
+			List<String> lastMsisdns = mapEntry.getValue();
 			msisdns.addAll(persistenceCache.removeOlderLastGroupMsisdn(groupId, lastMsisdns));
-			grpLastMsisdns.put(groupId, lastMsisdns);
 		}
 
 		for (String ms : msisdns)
@@ -435,7 +433,7 @@ public class ContactManager implements ITransientCache
 			}
 		}
 		persistenceCache.putInCache(msisdnsDB, false);
-		for (Entry<String, List<String>> mapEntry : grpLastMsisdns.entrySet())
+		for (Entry<String, List<String>> mapEntry : map.entrySet())
 		{
 			String groupId = mapEntry.getKey();
 			List<String> last = mapEntry.getValue();
