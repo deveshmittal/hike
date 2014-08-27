@@ -358,7 +358,10 @@ public class ClientComms
 		}
 
 		// Stop any new tokens being saved by app and throwing an exception if they do
-		tokenStore.quiesce(new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING));
+		if(tokenStore != null)
+		{
+			tokenStore.quiesce(new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING));
+		}
 
 		// Notify any outstanding tokens with the exception of
 		// con or discon which may be returned and will be notified at
@@ -368,7 +371,10 @@ public class ClientComms
 		try
 		{
 			// Clean session handling and tidy up
-			clientState.disconnected(reason);
+			if(clientState != null)
+			{
+				clientState.disconnected(reason);
+			}
 		}
 		catch (Exception ex)
 		{
