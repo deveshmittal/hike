@@ -1514,10 +1514,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 9:
 					if(!messages.isEmpty())
 					{
-						Intent imageIntent = new Intent(ChatThread.this, HikeSharedFilesActivity.class);
-						imageIntent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
-						imageIntent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
-						startActivity(imageIntent);
+						startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ChatThread.this, mConversation));
 					}
 					break;
 				}

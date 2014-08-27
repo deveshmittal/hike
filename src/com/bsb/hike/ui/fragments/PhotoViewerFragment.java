@@ -2,7 +2,9 @@ package com.bsb.hike.ui.fragments;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,6 +20,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,6 +39,8 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.SharedMediaAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.utils.DepthPageTransformer;
@@ -71,16 +76,30 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	
 	private boolean loadingMoreItems = false;
 	
+	private Map<String, String> msisdnToNameMap;
+	
 	private long minMsgId;
 	
 	private long maxMsgId;
 	
 	private boolean applyOffset = false;
 	
+	private TextView senderName;
+	
+	private TextView itemTimeStamp;
+	
+	private boolean isGroup = false;
+	
+	private String conversationName;
+	
 	private String TAG = "PhotoViewerFragment";
 	
 	private int PAGER_LIMIT = 3;
 	
+	String[] msisdnArray;
+	
+	String[] nameArray;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -102,7 +121,21 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		
 		sharedMediaItems = getArguments().getParcelableArrayList(HikeConstants.Extras.SHARED_FILE_ITEMS);
 		initialPosition = getArguments().getInt(HikeConstants.MEDIA_POSITION);
-		msisdn = getArguments().getString(HikeConstants.Extras.MSISDN);
+		msisdn = getArguments().getString(HikeConstants.Extras.MSISDN, null);
+		isGroup = getArguments().getBoolean(HikeConstants.Extras.IS_GROUP_CONVERSATION, false);
+		conversationName = getArguments().getString(HikeConstants.Extras.CONVERSATION_NAME, null);
+		
+		if(isGroup)
+		{
+			msisdnArray = getArguments().getStringArray(HikeConstants.Extras.PARTICIPANT_MSISDN_ARRAY);
+			nameArray = getArguments().getStringArray(HikeConstants.Extras.PARTICIPANT_NAME_ARRAY);
+			msisdnToNameMap = new HashMap<String, String>(msisdnArray.length);
+			for(int i=0; i<msisdnArray.length; i++)
+			{
+				msisdnToNameMap.put(msisdnArray[i], nameArray[i]);
+			}
+		}
+
 		minMsgId = sharedMediaItems.get(0).getMsgId();
 		maxMsgId = sharedMediaItems.get(getCount()-1).getMsgId();
 		
@@ -239,9 +272,30 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		getSherlockActivity().onBackPressed();
 	}
 
-	public static void openPhoto (int resId, Context context, Bundle arguments)
+	public static void openPhoto(int resId, Context context, ArrayList<HikeSharedFile> hikeSharedFiles, boolean fromChatThread, Conversation conversation)
+	{
+		Pair<String[], String[]> msisdnAndNameArrays = Utils.getMsisdnToNameArray(conversation);
+		openPhoto(resId, context, hikeSharedFiles, fromChatThread, hikeSharedFiles.size() - 1, conversation.getMsisdn(), conversation.getLabel(),
+				conversation instanceof GroupConversation, msisdnAndNameArrays.first, msisdnAndNameArrays.second);
+	}
+
+	public static void openPhoto(int resId, Context context, ArrayList<HikeSharedFile> hikeSharedFiles, boolean fromChatThread, int mediaPosition, String fromMsisdn,
+			String convName, boolean isGroup, String[] msisdnArray, String[] nameArray)
 	{
 		PhotoViewerFragment photoViewerFragment = new PhotoViewerFragment();
+		Bundle arguments = new Bundle();
+		arguments.putInt(HikeConstants.MEDIA_POSITION, mediaPosition);
+		arguments.putBoolean(HikeConstants.FROM_CHAT_THREAD, fromChatThread);
+		arguments.putString(HikeConstants.Extras.MSISDN, fromMsisdn);
+		arguments.putString(HikeConstants.Extras.CONVERSATION_NAME, convName);
+		arguments.putParcelableArrayList(HikeConstants.Extras.SHARED_FILE_ITEMS, hikeSharedFiles);
+		arguments.putBoolean(HikeConstants.Extras.IS_GROUP_CONVERSATION, isGroup);
+		if (isGroup)
+		{
+			arguments.putStringArray(HikeConstants.Extras.PARTICIPANT_MSISDN_ARRAY, msisdnArray);
+			arguments.putStringArray(HikeConstants.Extras.PARTICIPANT_NAME_ARRAY, nameArray);
+		}
+
 		photoViewerFragment.setArguments(arguments);
 
 		FragmentTransaction fragmentTransaction = ((FragmentActivity) context).getSupportFragmentManager().beginTransaction();

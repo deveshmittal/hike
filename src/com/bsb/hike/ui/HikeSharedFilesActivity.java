@@ -10,11 +10,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.os.Parcelable;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -42,7 +44,9 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeSharedFileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.utils.CustomAlertDialog;
@@ -74,6 +78,14 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	private boolean reachedEnd = false;
 	
 	private boolean loadingMoreItems = false;
+	
+	private boolean isGroup = false;
+	
+	private String conversationName;
+	
+	private String[] msisdnArray = null;
+	
+	private String[] nameArray = null;
 	
 	private String TAG = "HikeSharedFilesActivity";
 	
@@ -110,6 +122,13 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		}
 
 		msisdn = data.getString(HikeConstants.Extras.MSISDN);
+		isGroup = data.getBoolean(HikeConstants.Extras.IS_GROUP_CONVERSATION, false);
+		conversationName = data.getString(HikeConstants.Extras.CONVERSATION_NAME, null);
+		if(isGroup)
+		{
+			msisdnArray = data.getStringArray(HikeConstants.Extras.PARTICIPANT_MSISDN_ARRAY);
+			nameArray = data.getStringArray(HikeConstants.Extras.PARTICIPANT_NAME_ARRAY);
+		}
 
 		GridView gridView = (GridView) findViewById(R.id.gallery);
 
@@ -380,12 +399,8 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		}
 		else
 		{
-			// TODO send this intent to photo viewer
-			Bundle arguments = new Bundle();
-			arguments.putParcelableArrayList(HikeConstants.Extras.SHARED_FILE_ITEMS, (ArrayList<? extends Parcelable>) sharedFilesList);
-			arguments.putInt(HikeConstants.MEDIA_POSITION, position);
-			arguments.putString(HikeConstants.Extras.MSISDN, msisdn);
-			PhotoViewerFragment.openPhoto(R.id.parent_layout, HikeSharedFilesActivity.this, arguments);
+			PhotoViewerFragment.openPhoto(R.id.parent_layout, HikeSharedFilesActivity.this, (ArrayList<HikeSharedFile>) sharedFilesList, 
+					false, position, msisdn, conversationName, isGroup, msisdnArray, nameArray);
 		}
 	}
 
@@ -524,5 +539,21 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	{
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		super.onDestroy();
+	}
+	
+	public static Intent getHikeSharedFilesActivityIntent(Context context, Conversation conversation)
+	{
+		Intent intent = new Intent(context, HikeSharedFilesActivity.class);
+		intent.putExtra(HikeConstants.Extras.IS_GROUP_CONVERSATION, conversation instanceof GroupConversation);
+		intent.putExtra(HikeConstants.Extras.CONVERSATION_NAME, conversation.getLabel());
+		if(conversation instanceof GroupConversation)
+		{
+			Pair<String[], String[]> msisdnAndNameArrays = Utils.getMsisdnToNameArray(conversation);
+			intent.putExtra(HikeConstants.Extras.PARTICIPANT_MSISDN_ARRAY, msisdnAndNameArrays.first);
+			intent.putExtra(HikeConstants.Extras.PARTICIPANT_NAME_ARRAY, msisdnAndNameArrays.second);
+		}
+		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.ON_HIKE, conversation.isOnhike());
+		return intent;
 	}
 }

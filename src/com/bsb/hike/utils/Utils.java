@@ -4462,4 +4462,23 @@ public class Utils
 		}
 
 	}
+
+	public static Pair<String[], String[]> getMsisdnToNameArray(Conversation conversation)
+	{
+		if( conversation instanceof GroupConversation)
+		{
+			Map<String, GroupParticipant> groupParticipants = ((GroupConversation) conversation).getGroupParticipantList();
+			String[] msisdnArray = new String[groupParticipants.size()];
+			String[] nameArray = new String[groupParticipants.size()];
+			
+			int i = 0;
+			for (GroupParticipant groupParticipant : groupParticipants.values())
+			{
+				msisdnArray[i] = groupParticipant.getContactInfo().getMsisdn();
+				nameArray[i++] = groupParticipant.getContactInfo().getName();
+			}
+			return new Pair<String[], String[]>(msisdnArray, nameArray);
+		}
+		return new Pair<String[], String[]>(null, null);
+	}
 }
