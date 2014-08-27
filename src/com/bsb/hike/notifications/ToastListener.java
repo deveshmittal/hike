@@ -36,7 +36,6 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
@@ -479,7 +478,7 @@ public class ToastListener implements Listener
 					}
 
 					if (message.getParticipantInfoState() != null && message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN
-							&& (!mDefaultPreferences.getBoolean(HikeNotificationUtils.HIKE_NUJ_PREFS_BOOLEAN_KEY, true)))
+							&& (!mDefaultPreferences.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true)))
 					{
 						// User has disabled NUJ/RUJ message notifications
 						continue;

@@ -472,6 +472,10 @@ public class HikeConstants
 	public static final String HELP_FEEDBACK_PREF = "helpFeedback";
 
 	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
+	
+	public static final String NUJ_NOTIF_BOOLEAN_PREF = "hikeNUJNotificationPref";
+	
+	public static final String H2O_NOTIF_BOOLEAN_PREF = "hikeOfflineNotificationPref";
 
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
 
@@ -1504,6 +1508,17 @@ public class HikeConstants
 		public static final String PIN_HISTORY_VIA_MENU = "pinHistoryViaMenu";
 		
 		public static final String PIN_HISTORY_VIA_PIN_CLICK = "pinHistoryViaPinClick";
+		
+		/*
+		 * Settings screen <screen> = settingsS <event> = notifNUJEnabled, notifH2OEnabled, notifNUJDisabled, notifH2ODisabled
+		 */
+		public static final String SETTINGS_NOTIFICATION_NUJ_ON = "settingsSNotifNUJEnabled";
+		
+		public static final String SETTINGS_NOTIFICATION_H2O_ON = "settingsSNotifH2OEnabled";
+		
+		public static final String SETTINGS_NOTIFICATION_NUJ_OFF = "settingsSNotifNUJDisabled";
+		
+		public static final String SETTINGS_NOTIFICATION_H2O_OFF = "settingsSNotifH2ODisabled";
 		
 	}
 
