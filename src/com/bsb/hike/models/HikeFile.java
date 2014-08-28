@@ -488,6 +488,16 @@ public class HikeFile
 	{
 		this.isSent = isSent;
 	}
+	
+	public File getFileFromExactFilePath()
+	{
+		String exactFilePath = getExactFilePath();
+		if(file == null || !file.getAbsolutePath().equals(exactFilePath))
+		{
+			file = new File(exactFilePath);
+		}
+		return file;
+	}
 
 	public void shareFile(Context context)
 	{

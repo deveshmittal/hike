@@ -2,6 +2,13 @@ package com.bsb.hike.models;
 
 import java.io.File;
 
+import android.text.TextUtils;
+import android.webkit.MimeTypeMap;
+
+import com.bsb.hike.R;
+import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.Utils;
+
 public class FileListItem
 {
 	private int icon;
@@ -18,6 +25,8 @@ public class FileListItem
 
 	private File file;
 	
+	private HikeSharedFile hikeSharedFile;
+	
 	public FileListItem(int icon, String title, String subtitle, String extension, String mimeType, boolean showThumbnail, File file)
 	{
 		this.icon = icon;
@@ -33,6 +42,13 @@ public class FileListItem
 		this.showThumbnail = showThumbnail;
 		
 		this.file = file;
+	}
+	
+	public FileListItem(HikeSharedFile hikeSharedFile)
+	{
+		this.hikeSharedFile = hikeSharedFile;
+		
+		setListItemAttributesFromFile(this, hikeSharedFile.getFileFromExactFilePath());
 	}
 	
 	public FileListItem()
@@ -102,11 +118,51 @@ public class FileListItem
 
 	public File getFile()
 	{
-		return file;
+		return hikeSharedFile == null ? file : hikeSharedFile.getFileFromExactFilePath();
 	}
 
 	public void setFile(File file)
 	{
-		this.file = file;
+		if(hikeSharedFile == null)
+		{
+			this.file = file;
+		}
+		else
+		{
+			hikeSharedFile.setFile(file);
+		}
 	}
+
+	public HikeSharedFile getHikeSharedFile()
+	{
+		return hikeSharedFile;
+	}
+
+	public void setHikeSharedFile(HikeSharedFile hikeSharedFile)
+	{
+		this.hikeSharedFile = hikeSharedFile;
+	}
+	
+	public void setListItemAttributesFromFile(FileListItem item, File file)
+	{
+		item.setTitle(file.getName());
+		item.setFile(file);
+		if (file.isDirectory())
+		{
+			item.setIcon(R.drawable.ic_folder);
+		}
+		else
+		{
+			String extension = Utils.getFileExtension(file.getName());
+			item.setExtension(TextUtils.isEmpty(extension) ? "?" : extension);
+			item.setSubtitle(Utils.formatFileSize(file.length()));
+			item.setMimeType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(item.getExtension()));
+
+			if (!TextUtils.isEmpty(item.getMimeType()) && HikeFileType.IMAGE == HikeFileType.fromString(item.getMimeType()))
+			{
+				item.setShowThumbnail(true);
+			}
+		}
+	}
+
 }

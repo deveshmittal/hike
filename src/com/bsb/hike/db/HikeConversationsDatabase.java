@@ -45,6 +45,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.FileListItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
@@ -4801,6 +4802,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				sharedFilesList = new ArrayList<HikeSharedFile>(c.getCount());
 			}
+			else
+			{
+				sharedFilesList = new ArrayList<FileListItem>(c.getCount());
+			}
 			
 			while (c.moveToNext())
 			{
@@ -4814,6 +4819,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				if(onlyMedia)
 				{
 					((List<HikeSharedFile>) sharedFilesList).add(hikeSharedFile);
+				}
+				else
+				{
+					((List<FileListItem>) sharedFilesList).add(new FileListItem(hikeSharedFile));
 				}
 			}
 			
