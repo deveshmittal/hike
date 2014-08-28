@@ -298,13 +298,13 @@ public class HikeService extends Service
 		* This preference has been used here because of a prepopulated recent sticker enhancement
 		* it will delete all the default stickers as we are adding some more default stickers 
 		*/
-		if (!preferenceManager.contains(StickerManager.REMOVE_DEFAULT_STICKERS))
+		if (!preferenceManager.contains(StickerManager.REMOVE_DEFAULT_CAT_STICKERS))
 		{
 			sm.deleteDefaultDownloadedExpressionsStickers();
 			sm.deleteDefaultDownloadedStickers();
 			
 			Editor editor = preferenceManager.edit();
-			editor.putBoolean(StickerManager.REMOVE_DEFAULT_STICKERS, true);
+			editor.putBoolean(StickerManager.REMOVE_DEFAULT_CAT_STICKERS, true);
 			editor.commit();
 		}
 		sm.loadRecentStickers();
