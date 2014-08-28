@@ -2290,6 +2290,8 @@ public class Utils
 			notificationCount += accountPrefs.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 		}
 
+		int frCount = accountPrefs.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+		notificationCount += frCount;
 		return notificationCount;
 	}
 
@@ -3164,13 +3166,13 @@ public class Utils
 		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
 
-	public static void resetOverflowCountHomeScreen(Context context)
+	public static void resetFriendsCount(Context context)
 	{
 		if (HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.FRIEND_REQ_COUNT, 0) > 0)
 		{
 			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 		}
-		HikeMessengerApp.getPubSub().publish(HikePubSub.FRIEND_REQ_COUNT_RESET, null);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_COUNT_CHANGED, null);
 	}
 
 	public static boolean shouldIncrementCounter(ConvMessage convMessage)
@@ -4056,12 +4058,6 @@ public class Utils
 		{
 			overallCount++;
 		}
-		int frCount = accountPref.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
-		if (frCount > 0)
-		{
-			overallCount += frCount;
-		}
-
 		return overallCount;
 	}
 
@@ -4076,7 +4072,7 @@ public class Utils
 			editor.putInt(HikeMessengerApp.FRIEND_REQ_COUNT, currentCount);
 			editor.commit();
 		}
-
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_COUNT_CHANGED, null);
 	}
 
 	public static boolean isPackageInstalled(Context context, String packageName)

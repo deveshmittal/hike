@@ -120,6 +120,7 @@ public class ToastListener implements Listener
 			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
 			if (activity instanceof PeopleActivity)
 			{
+				Utils.resetFriendsCount(activity);
 				return;
 			}
 			if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
