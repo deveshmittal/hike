@@ -4242,7 +4242,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		isListFlinging = isFling;
 		hqThumbLoader.setPauseWork(isListFlinging);
 		
-		if(notify){
+		if(notify && !isListFlinging){
 			notifyDataSetChanged();
 		}
 	}
