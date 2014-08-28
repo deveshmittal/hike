@@ -731,19 +731,20 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{
 			participants.add(userInfo);
 		}
-
+		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.MEMBERS, participants.size() + ""));		//Adding group member count
 		Collections.sort(participants, GroupParticipant.lastSeenTimeComparator);
 
-		/*
-		 * Adding an element to for the 'add participant' element.
-		 */
-		participants.add(0, null);
-
-		int loopCount = participants.size() / 2;
-		if (participants.size() % 2 != 0)
+		for (int i = 0; i < participants.size(); i++)
 		{
-			loopCount++;
+			GroupParticipant[] groupParticipants = new GroupParticipant[1];
+			groupParticipants[0] = participants.get(i);
+			profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.GROUP_MEMBER, groupParticipants));
 		}
+		isGroupOwner = userInfo.getContactInfo().getMsisdn().equals(groupConversation.getGroupOwner());
+		//Add -> Add member tab
+		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.ADD_MEMBERS, null));
+		
+	}
 
 	private void addSharedMedia()
 	{
@@ -2273,6 +2274,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		mDialog = ProgressDialog.show(this, null, getString(R.string.deleting_status));
 	}
 
+	public void onAddGroupMemberClicked(View v)
+	{
+		openAddToGroup();
+	}
+	
 	@Override
 	public void onClick(View v)
 	{
@@ -2305,16 +2311,13 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		//Group Participant was clicked
 		
 		GroupParticipant groupParticipant = (GroupParticipant) v.getTag();
+		
 		if (groupParticipant == null)
 		{
-			Intent intent = new Intent(ProfileActivity.this, ComposeChatActivity.class);
-			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
-			intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mLocalMSISDN);
-			startActivity(intent);
-
+			openAddToGroup();
 		}
-		else
-		{
+		else if(groupParticipant!=null)
+		{	
 			ContactInfo contactInfo = groupParticipant.getContactInfo();
 
 			if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))

@@ -140,6 +140,18 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		{
 			viewType = ViewType.SHARED_CONTENT;
 		}
+		else if (ProfileItem.MEMBERS == itemId)
+		{
+			viewType = ViewType.MEMBERS;
+		}
+		else if (ProfileItem.GROUP_MEMBER == itemId)
+		{
+			viewType = ViewType.GROUP_PARTICIPANT;
+		}
+		else if (ProfileItem.ADD_MEMBERS == itemId)
+		{
+			viewType = ViewType.ADD_MEMBERS;
+		}
 		else if (ProfileItem.EMPTY_ID == itemId)
 		{
 			viewType = ViewType.EMPTY_STATUS;
@@ -242,8 +254,17 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.icon = (ImageView) v.findViewById(R.id.shared_pin_icon);
 				break;
 
+			case MEMBERS:
+				v = inflater.inflate(R.layout.friends_group_view, null);
+				viewHolder.text = (TextView) v.findViewById(R.id.name);
+				viewHolder.subText = (TextView) v.findViewById(R.id.count);
+				break;
 
 			case GROUP_PARTICIPANT:
+				v = new LinearLayout(context);
+				break;
+
+			case ADD_MEMBERS:
 				v = new LinearLayout(context);
 				break;
 
@@ -421,6 +442,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			
 			break;
 
+
+		case MEMBERS:
+			viewHolder.text.setText(context.getResources().getString(R.string.members));
+			viewHolder.subText.setText((String) profileItem.getText());
 			break;
 
 		case GROUP_PARTICIPANT:
@@ -428,108 +453,81 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			parentView.removeAllViews();
 
 			GroupParticipant[] groupParticipants = ((ProfileGroupItem) profileItem).getGroupParticipants();
-
+			parentView.setBackgroundColor(Color.WHITE);
 			for (int i = 0; i < groupParticipants.length; i++)
 			{
-				GroupParticipant groupParticipant = groupParticipants[i];
-
 				View groupParticipantParentView = inflater.inflate(R.layout.group_profile_item, parentView, false);
 
 				TextView nameTextView = (TextView) groupParticipantParentView.findViewById(R.id.name);
 				TextView mainInfo = (TextView) groupParticipantParentView.findViewById(R.id.main_info);
 
-				if (groupParticipant == null)
+				GroupParticipant groupParticipant = groupParticipants[i];
+				ImageView avatar = (ImageView) groupParticipantParentView.findViewById(R.id.avatar);
+				ImageView avatarFrame = (ImageView) groupParticipantParentView.findViewById(R.id.avatar_frame);
+				View ownerIndicator = groupParticipantParentView.findViewById(R.id.owner_indicator);
+				ContactInfo contactInfo = groupParticipant.getContactInfo();
+				if (contactInfo.getMsisdn().equals(groupConversation.getGroupOwner()))
 				{
-					/*
-					 * if the second element is null, we just make it invisible.
-					 */
-					if (i == 1)
-					{
-						groupParticipantParentView.setVisibility(View.INVISIBLE);
-					}
-
-					View avatarContainer = groupParticipantParentView.findViewById(R.id.avatar_container);
-
-					View addParticipantView = groupParticipantParentView.findViewById(R.id.add_participant);
-
-					avatarContainer.setVisibility(View.GONE);
-					addParticipantView.setVisibility(View.VISIBLE);
-					mainInfo.setVisibility(View.GONE);
-
-					nameTextView.setText(R.string.add_people);
+					ownerIndicator.setVisibility(View.VISIBLE);
 				}
 				else
 				{
-					ImageView avatar = (ImageView) groupParticipantParentView.findViewById(R.id.avatar);
-					ImageView avatarFrame = (ImageView) groupParticipantParentView.findViewById(R.id.avatar_frame);
-					View ownerIndicator = groupParticipantParentView.findViewById(R.id.owner_indicator);
-
-					ContactInfo contactInfo = groupParticipant.getContactInfo();
-
-					if (contactInfo.getMsisdn().equals(groupConversation.getGroupOwner()))
-					{
-						ownerIndicator.setVisibility(View.VISIBLE);
-					}
-					else
-					{
-						ownerIndicator.setVisibility(View.GONE);
-					}
-
-					int offline = contactInfo.getOffline();
-
-					String lastSeenString = null;
-					boolean showingLastSeen = false;
-					if (lastSeenPref && contactInfo.getFavoriteType() == FavoriteType.FRIEND && !contactInfo.getMsisdn().equals(contactInfo.getId()))
-					{
-						lastSeenString = Utils.getLastSeenTimeAsString(context, contactInfo.getLastSeenTime(), offline, true);
-						showingLastSeen = !TextUtils.isEmpty(lastSeenString);
-					}
-
-					nameTextView.setText(contactInfo.getFirstNameAndSurname());
-					if (!showingLastSeen)
-					{
-						mainInfo.setText(contactInfo.isOnhike() ? R.string.on_hike : R.string.on_sms);
-					}
-					else
-					{
-						mainInfo.setText(lastSeenString);
-					}
-
-					if (showingLastSeen && offline == 0)
-					{
-						mainInfo.setTextColor(context.getResources().getColor(R.color.unread_message));
-						avatarFrame.setImageResource(R.drawable.frame_avatar_highlight);
-					}
-					else
-					{
-						mainInfo.setTextColor(context.getResources().getColor(R.color.participant_last_seen));
-						avatarFrame.setImageDrawable(null);
-					}
-					setAvatar(contactInfo.getMsisdn(), avatar);
-
-					groupParticipantParentView.setOnLongClickListener(profileActivity);
+					ownerIndicator.setVisibility(View.GONE);
 				}
-
-				LayoutParams layoutParams = (LayoutParams) groupParticipantParentView.getLayoutParams();
-				int margin = context.getResources().getDimensionPixelSize(R.dimen.updates_margin);
-
-				layoutParams.leftMargin = margin;
-				layoutParams.topMargin = margin;
-				if (i == groupParticipants.length - 1)
+				int offline = contactInfo.getOffline();
+				String lastSeenString = null;
+				boolean showingLastSeen = false;
+				if (lastSeenPref && contactInfo.getFavoriteType() == FavoriteType.FRIEND && !contactInfo.getMsisdn().equals(contactInfo.getId()))
 				{
-					layoutParams.rightMargin = margin;
+					lastSeenString = Utils.getLastSeenTimeAsString(context, contactInfo.getLastSeenTime(), offline, true);
+					showingLastSeen = !TextUtils.isEmpty(lastSeenString);
 				}
-
-				if (position == getCount() - 1)
+				nameTextView.setText(contactInfo.getFirstNameAndSurname());
+				if (!showingLastSeen)
 				{
-					layoutParams.bottomMargin = margin;
+					mainInfo.setText(contactInfo.isOnhike() ? R.string.on_hike : R.string.on_sms);
 				}
+				else
+				{
+					mainInfo.setText(lastSeenString);
+				}
+				if (showingLastSeen && offline == 0)
+				{
+					mainInfo.setTextColor(context.getResources().getColor(R.color.unread_message));
+					avatarFrame.setImageResource(R.drawable.frame_avatar_highlight);
+				}
+				else
+				{
+					mainInfo.setTextColor(context.getResources().getColor(R.color.participant_last_seen));
+					avatarFrame.setImageDrawable(null);
+				}
+				setAvatar(contactInfo.getMsisdn(), avatar);
+				groupParticipantParentView.setOnLongClickListener(profileActivity);
 				groupParticipantParentView.setTag(groupParticipant);
 
 				groupParticipantParentView.setOnClickListener(profileActivity);
 
 				parentView.addView(groupParticipantParentView);
 			}
+			break;
+
+		case ADD_MEMBERS:
+			LinearLayout addMemberLayout = (LinearLayout) v;
+			addMemberLayout.removeAllViews();
+			View groupParticipantParentView = inflater.inflate(R.layout.group_profile_item, addMemberLayout, false);
+			View avatarContainer = groupParticipantParentView.findViewById(R.id.avatar_container);
+			avatarContainer.setVisibility(View.GONE);
+			TextView nameTextView = (TextView) groupParticipantParentView.findViewById(R.id.name);
+			TextView mainInfo = (TextView) groupParticipantParentView.findViewById(R.id.main_info);
+			ImageView avatar = (ImageView) groupParticipantParentView.findViewById(R.id.add_participant);
+			avatar.setVisibility(View.VISIBLE);
+			nameTextView.setText(R.string.add_people);
+			nameTextView.setTextColor(context.getResources().getColor(R.color.blue_hike));
+			mainInfo.setVisibility(View.GONE);
+			groupParticipantParentView.setTag(null);
+			groupParticipantParentView.setOnClickListener(profileActivity);
+			addMemberLayout.addView(groupParticipantParentView);
+
 			break;
 
 		case STATUS:
