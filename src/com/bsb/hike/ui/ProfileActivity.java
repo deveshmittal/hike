@@ -396,6 +396,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			}
 		});
 		
+		actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_header));
 		actionBar.setCustomView(actionBarView);
 	}
 	
@@ -1020,10 +1021,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public void onBackPressed()
 	{
-		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
-		if (fragment != null)
-		{	getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
-			setupActionBar();
+		if(removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
+		{
+			return;
 		}
 		
 		if (this.profileType == ProfileType.USER_PROFILE_EDIT)
@@ -2446,6 +2446,18 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	public void callBtnClicked(View v)
 	{
 		Utils.onCallClicked(ProfileActivity.this, mLocalMSISDN);
+	}
+	
+	@Override
+	public boolean removeFragment(String tag)
+	{
+		// TODO Auto-generated method stub
+		boolean isRemoved = super.removeFragment(tag);
+		if(isRemoved)
+		{
+			setupActionBar();
+		}
+		return isRemoved;
 	}
 	
 }
