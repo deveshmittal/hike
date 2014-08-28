@@ -34,6 +34,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.ProfileItem;
+import com.bsb.hike.models.ProfileItem.ProfileContactItem;
 import com.bsb.hike.models.ProfileItem.ProfileGroupItem;
 import com.bsb.hike.models.ProfileItem.ProfileSharedContent;
 import com.bsb.hike.models.ProfileItem.ProfileSharedMedia;
@@ -86,10 +87,20 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	private IconLoader iconLoader;
 
 	private TimelineImageLoader bigPicImageLoader;
-	
+
 	private ProfilePicImageLoader profileImageLoader;
 
 	private int mIconImageSize;
+
+	private static final int SHOW_CONTACTS_STATUS = 0;
+	
+	private static final int NOT_A_FRIEND = 1;
+
+	private static final int UNKNOWN_ON_HIKE = 2;
+
+	private static final int REQUEST_RECEIVED = 3;
+
+	private static final int UNKNOWN_NOT_ON_HIKE = 4;
 
 	public ProfileAdapter(ProfileActivity profileActivity, List<ProfileItem> itemList, GroupConversation groupConversation, ContactInfo contactInfo, boolean myProfile)
 	{
@@ -159,6 +170,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		else if (ProfileItem.REQUEST_ID == itemId)
 		{
 			viewType = ViewType.REQUEST;
+		}
+		else if (ProfileItem.HEADER_ID_PROFILE == itemId)
+		{
+			viewType = ViewType.HEADER_PROFILE;
 		}
 		else
 		{
@@ -231,6 +246,16 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 				viewHolder.image = (ImageView) v.findViewById(R.id.profile);
 				viewHolder.icon = (ImageView) v.findViewById(R.id.change_profile);
+				break;
+
+			case HEADER_PROFILE:
+				v = inflater.inflate(R.layout.profile_header_other, null);
+				viewHolder.text = (TextView) v.findViewById(R.id.name);
+				viewHolder.subText = (TextView) v.findViewById(R.id.subtext);
+				viewHolder.image = (ImageView) v.findViewById(R.id.profile_image);
+				viewHolder.parent = v.findViewById(R.id.profile_header);
+				viewHolder.extraInfo = (TextView) v.findViewById(R.id.add_fav_tv);
+				viewHolder.icon = (ImageView) v.findViewById(R.id.add_fav_star);
 				break;
 
 
@@ -328,7 +353,11 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 		switch (viewType)
 		{
-		case HEADER:
+		case HEADER_PROFILE:
+		case HEADER_GROUP:
+			if (groupProfile)
+				viewHolder.editName.setText(groupConversation.getLabel());
+
 			String msisdn;
 			String name;
 			StatusMessage status;
@@ -358,10 +387,59 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			{
 				viewHolder.image.setImageBitmap(profilePreview);
 			}
-			viewHolder.icon.setVisibility(View.VISIBLE);
-			if (myProfile || groupProfile)
+
+			if (mContactInfo != null)
 			{
-				viewHolder.icon.setImageResource(R.drawable.ic_change_profile_pic);
+				int contactType = ((ProfileItem.ProfileContactItem) profileItem).getContactType();
+				switch (contactType)
+				{
+				case SHOW_CONTACTS_STATUS:
+					status = (StatusMessage) ((ProfileItem.ProfileContactItem) profileItem).getText();
+					if (status.getStatusMessageType() == StatusMessageType.JOINED_HIKE)
+					{
+						if (status.getTimeStamp() == 0)
+							viewHolder.subText.setText(status.getText());
+						else
+							viewHolder.subText.setText(status.getText() + " " + status.getTimestampFormatted(true, context));
+					}
+					else
+					{
+						SmileyParser smileyParser = SmileyParser.getInstance();
+						viewHolder.subText.setText(smileyParser.addSmileySpans(status.getText(), true));
+					}
+					break;
+
+				case UNKNOWN_ON_HIKE:
+					viewHolder.subText.setText(context.getResources().getString(R.string.on_hike));
+					viewHolder.parent.findViewById(R.id.add_fav_view).setVisibility(View.GONE);
+					break;
+					
+				case NOT_A_FRIEND:
+					LinearLayout fav_layout = (LinearLayout) viewHolder.parent.findViewById(R.id.add_fav_view);
+					fav_layout.setVisibility(View.VISIBLE);
+					viewHolder.subText.setText(context.getResources().getString(R.string.on_hike));
+					viewHolder.extraInfo.setTextColor(context.getResources().getColor(R.color.add_fav));
+					viewHolder.extraInfo.setText(context.getResources().getString(R.string.add_fav));
+					viewHolder.icon.setImageResource(R.drawable.ic_add_friend);
+					break;
+					
+				case REQUEST_RECEIVED:
+					LinearLayout req_layout = (LinearLayout) viewHolder.parent.findViewById(R.id.remove_fav);
+					req_layout.setVisibility(View.VISIBLE);
+					viewHolder.subText.setVisibility(View.GONE);
+					break;
+
+				case UNKNOWN_NOT_ON_HIKE:
+					LinearLayout invite_layout = (LinearLayout) viewHolder.parent.findViewById(R.id.add_fav_view);
+					invite_layout.setVisibility(View.VISIBLE);
+					viewHolder.subText.setText(context.getResources().getString(R.string.on_sms));
+					viewHolder.extraInfo.setTextColor(context.getResources().getColor(R.color.blue_hike));
+					viewHolder.extraInfo.setText(context.getResources().getString(R.string.ftue_add_prompt_invite_title));
+					viewHolder.icon.setImageResource(R.drawable.ic_invite_to_hike);
+					break;
+				}
+			}
+			break;
 			}
 			else
 			{

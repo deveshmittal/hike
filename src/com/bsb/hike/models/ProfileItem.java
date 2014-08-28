@@ -92,6 +92,30 @@ public abstract class ProfileItem
 		}
 	}
 
+	public static class ProfileContactItem extends ProfileItem
+	{
+		public static enum contactType
+		{ SHOW_CONTACTS_STATUS, NOT_A_FRIEND, UNKNOWN_ON_HIKE, REQUEST_RECEIVED, UNKNOWN_NOT_ON_HIKE }
+		
+		private int contact;
+		
+		public ProfileContactItem(int itemId, contactType contact ,Object text)
+		{
+			super(itemId, text);
+			this.contact = contact.ordinal();
+		}
+		
+		public ProfileContactItem(int itemId, Object text)
+		{
+			// TODO Auto-generated constructor stub
+			super(itemId, text);
+		}
+		
+		public int getContactType()
+		{
+			return contact;
+		}
+	}
 	
 	public static class ProfileSharedMedia extends ProfileItem
 	{

@@ -637,8 +637,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private void setupContactProfileList()
 	{
 		profileItems.clear();
-		// Adding an item for the header
-		profileItems.add(new ProfileItem.ProfileStatusItem(ProfileItem.HEADER_ID));
+		addProfileHeader();
+	}
 
 	private void shouldAddSharedMedia()
 	{
@@ -649,20 +649,47 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			addSharedMedia();
 		}
 
-		if (showContactsUpdates(contactInfo))
+	private void addProfileHeader()
+	{	
+		// TODO Auto-generated method stub
+		if (showContactsUpdates(contactInfo))  //Favourite case
+		{	
+			List<StatusMessage> statusMessages = HikeConversationsDatabase.getInstance().getStatusMessages(false,1, -1, mLocalMSISDN);
+			addStatusMessageAsProfileItems(statusMessages);
+		}
+		else if(contactInfo.isOnhike() && (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED))
+		{	
+			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.NOT_A_FRIEND, null)); 
+		}
+		
+		else if(contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT)
 		{
-
-			addStatusMessageAsProfileItems(HikeConversationsDatabase.getInstance().getStatusMessages(false, HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1, mLocalMSISDN));
-
-			if (contactInfo.isOnhike() && contactInfo.getHikeJoinTime() > 0)
-			{
-				profileItems.add(getJoinedHikeStatus(contactInfo));
-			}
+			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE, ProfileContactItem.contactType.UNKNOWN_ON_HIKE, null));
+		}
+		//Request_Received --->> Show add/not now screen.
+		else if(contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
+		{
+			//Show add/not now screen.
+			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE, ProfileContactItem.contactType.REQUEST_RECEIVED, null));
+		}
+		else if(!contactInfo.isOnhike())
+		{ 
+			//Known and on SMS
+			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.UNKNOWN_NOT_ON_HIKE, null)); //Add to favourite, onHike contact
 		}
 	}
 
 	private void addStatusMessageAsProfileItems(List<StatusMessage> statusMessages)
 	{
+		if(statusMessages.size()>0)
+		{
+			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE, ProfileContactItem.contactType.SHOW_CONTACTS_STATUS, statusMessages.get(statusMessages.size() - 1)));
+			return;
+		}
+		
+		profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.SHOW_CONTACTS_STATUS, getJoinedHikeStatus(contactInfo)));
+	}
+	
 		for (StatusMessage statusMessage : statusMessages)
 		{
 			profileItems.add(new ProfileItem.ProfileStatusItem(statusMessage));
@@ -1968,10 +1995,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				{
 					if (showContactsUpdates(contactInfo))
 					{
-						profileItems.add(getJoinedHikeStatus(contactInfo));
+						invalidateOptionsMenu();
+						setupContactProfileList();
+						profileAdapter.notifyDataSetChanged();
 					}
-
-					profileAdapter.notifyDataSetChanged();
 				}
 			});
 		}
@@ -2042,10 +2069,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 	}
 
-	private ProfileItem getJoinedHikeStatus(ContactInfo contactInfo)
+	private StatusMessage getJoinedHikeStatus(ContactInfo contactInfo)
 	{
-		return new ProfileItem.ProfileStatusItem(new StatusMessage(HikeConstants.JOINED_HIKE_STATUS_ID, null, contactInfo.getMsisdn(), contactInfo.getName(),
-				getString(R.string.joined_hike_update), StatusMessageType.JOINED_HIKE, contactInfo.getHikeJoinTime()));
+		return new StatusMessage(HikeConstants.JOINED_HIKE_STATUS_ID, null, contactInfo.getMsisdn(), contactInfo.getName(),
+				getString(R.string.joined_hike_update), StatusMessageType.JOINED_HIKE, contactInfo.getHikeJoinTime());
 	}
 
 	@Override
