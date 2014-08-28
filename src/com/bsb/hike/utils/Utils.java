@@ -3166,7 +3166,7 @@ public class Utils
 		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
 
-	public static void resetFriendsCount(Context context)
+	public static void resetUnseenFriendRequestCount(Context context)
 	{
 		if (HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.FRIEND_REQ_COUNT, 0) > 0)
 		{
