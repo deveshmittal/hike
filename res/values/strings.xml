@@ -1134,5 +1134,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="delete_my_account">DELETE MY ACCOUNT</string>
     <string name="hike_extras">Hike Extras</string>
     <string name="shared_media">Shared Media</string>
+    <string name="shared_files">Shared Files</string>
     
 </resources>
