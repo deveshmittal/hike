@@ -422,7 +422,7 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		@Override
 		protected List<HikeSharedFile> doInBackground(Void... params)
 		{
-			return HikeConversationsDatabase.getInstance().getSharedMedia(msisdn, limit, msgId, true, itemsToRight);
+			return (List<HikeSharedFile>) HikeConversationsDatabase.getInstance().getSharedMedia(msisdn, limit, msgId, true, itemsToRight);
 		}
 
 		@Override

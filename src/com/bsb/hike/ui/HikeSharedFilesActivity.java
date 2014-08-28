@@ -139,7 +139,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 		
-		sharedFilesList = HikeConversationsDatabase.getInstance().getSharedMedia(msisdn, HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY, -1, true);
+		sharedFilesList = (List<HikeSharedFile>) HikeConversationsDatabase.getInstance().getSharedMedia(msisdn, HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY, -1, true);
 		adapter = new HikeSharedFileAdapter(this, sharedFilesList, actualSize, selectedSharedFileItems, false);
 
 		gridView.setNumColumns(numColumns);
@@ -314,7 +314,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 				@Override
 				protected List<HikeSharedFile> doInBackground(Void... params)
 				{
-					return  HikeConversationsDatabase.getInstance().getSharedMedia(msisdn, HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY, lastItemId, true);
+					return  (List<HikeSharedFile>) HikeConversationsDatabase.getInstance().getSharedMedia(msisdn, HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY, lastItemId, true);
 				}
 
 				@Override

@@ -4746,7 +4746,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return sql;
 	}
 
-	public List<HikeSharedFile> getSharedMedia(String msisdn, int limit, long maxMsgId, boolean onlyMedia)
+	public List<?> getSharedMedia(String msisdn, int limit, long maxMsgId, boolean onlyMedia)
 	{
 		return getSharedMedia(msisdn, limit, maxMsgId, onlyMedia, true);
 	}
@@ -4756,7 +4756,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * 
 	 * returns list in order of msgId max to min.
 	 */
-	public List<HikeSharedFile> getSharedMedia(String msisdn, int limit, long givenMsgId, boolean onlyMedia, boolean itemsToRight)
+	public List<?> getSharedMedia(String msisdn, int limit, long givenMsgId, boolean onlyMedia, boolean itemsToRight)
 	{
 		String limitStr = (limit == -1) ? null : new Integer(limit).toString();
 		String msgIdSelection = DBConstants.MESSAGE_ID + (itemsToRight ? "<" : ">") + givenMsgId;
@@ -4796,7 +4796,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			final int isSentIndex = c.getColumnIndex(DBConstants.IS_SENT);
 			final int metadataIndex = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
 			
-			List<HikeSharedFile> sharedFilesList = new ArrayList<HikeSharedFile>(c.getCount());
+			List<?> sharedFilesList;
+			if(onlyMedia)
+			{
+				sharedFilesList = new ArrayList<HikeSharedFile>(c.getCount());
+			}
 			
 			while (c.moveToNext())
 			{
@@ -4806,7 +4810,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String messageMetadata = c.getString(metadataIndex);
 				String groupParticipantMsisdn = c.getString(groupParticipantColumn);
 				
-				sharedFilesList.add(new HikeSharedFile(new JSONObject(messageMetadata), isSent, msgId, msisdn, ts, groupParticipantMsisdn));
+				HikeSharedFile hikeSharedFile = new HikeSharedFile(new JSONObject(messageMetadata), isSent, msgId, msisdn, ts, groupParticipantMsisdn);
+				if(onlyMedia)
+				{
+					((List<HikeSharedFile>) sharedFilesList).add(hikeSharedFile);
+				}
 			}
 			
 			return sharedFilesList;
