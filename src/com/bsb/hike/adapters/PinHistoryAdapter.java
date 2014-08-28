@@ -173,7 +173,7 @@ public class PinHistoryAdapter extends BaseAdapter
 					String number = null;
 					String name = gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn());
 
-					if (((GroupConversation) mConversation).getGroupParticipant(textPin.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
+					if (((GroupConversation) mConversation).getGroupParticipant(textPin.getGroupParticipantMsisdn()).getFirst().getContactInfo().isUnknownContact())
 					{
 						number = textPin.getGroupParticipantMsisdn();
 					}

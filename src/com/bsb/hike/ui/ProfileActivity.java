@@ -1774,10 +1774,19 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			}
 			else if (profileType == ProfileType.GROUP_INFO)
 			{
-				GroupParticipant groupParticipant = groupConversation.getGroupParticipant(msisdn);
-				if (groupParticipant == null)
+				PairModified<GroupParticipant, String> groupParticipantPair = groupConversation.getGroupParticipant(msisdn);
+				GroupParticipant groupParticipant = null;
+				if(null == groupParticipantPair)
 				{
 					return;
+				}
+				else
+				{
+					groupParticipant = groupParticipantPair.getFirst();
+					if (groupParticipant == null)
+					{
+						return;
+					}
 				}
 				groupParticipant.getContactInfo().setOnhike(HikePubSub.USER_JOINED.equals(type));
 			}

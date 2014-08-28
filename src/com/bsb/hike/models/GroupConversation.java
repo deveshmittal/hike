@@ -117,9 +117,10 @@ public class GroupConversation extends Conversation
 		return groupParticipantList;
 	}
 
-	public GroupParticipant getGroupParticipant(String msisdn)
+	public PairModified<GroupParticipant, String> getGroupParticipant(String msisdn)
 	{
-		return groupParticipantList.containsKey(msisdn) ? groupParticipantList.get(msisdn).getFirst() : new GroupParticipant(new ContactInfo(msisdn, msisdn, msisdn, msisdn));
+		return groupParticipantList.containsKey(msisdn) ? groupParticipantList.get(msisdn) : new PairModified<GroupParticipant, String>(new GroupParticipant(new ContactInfo(
+				msisdn, msisdn, msisdn, msisdn)), msisdn);
 	}
 
 	public String getGroupParticipantFirstName(String msisdn)
@@ -128,10 +129,10 @@ public class GroupConversation extends Conversation
 		String name = HikeMessengerApp.getContactManager().getName(getMsisdn(), contact.getMsisdn());
 		return Utils.getFirstName(name);
 	}
-	
+
 	public String getGroupParticipantFirstNameAndSurname(String msisdn)
 	{
-		return getGroupParticipant(msisdn).getContactInfo().getFirstNameAndSurname();
+		return getGroupParticipant(msisdn).getSecond();
 	}
 
 	public String getLabel()
@@ -191,7 +192,7 @@ public class GroupConversation extends Conversation
 				for (Entry<String, PairModified<GroupParticipant, String>> participant : groupParticipantList.entrySet())
 				{
 					JSONObject nameMsisdn = new JSONObject();
-					nameMsisdn.put(HikeConstants.NAME, participant.getValue().getFirst().getContactInfo().getName());
+					nameMsisdn.put(HikeConstants.NAME, participant.getValue().getSecond());
 					nameMsisdn.put(HikeConstants.MSISDN, participant.getKey());
 					array.put(nameMsisdn);
 				}

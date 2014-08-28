@@ -2413,7 +2413,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				String number = null;
 				String name = ((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn());
-				if (((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
+				if (((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getFirst().getContactInfo().isUnknownContact())
 				{
 					number = convMessage.getGroupParticipantMsisdn();
 				}
@@ -2576,8 +2576,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			final ConvMessage message = (ConvMessage) v.getTag();
 			ArrayList<String> optionsList = new ArrayList<String>();
 			String number = null;
-			final String name = ((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().getName();
-			if (((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
+			final String name = ((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getSecond();
+			if (((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getFirst().getContactInfo().isUnknownContact())
 			{
 				number = message.getGroupParticipantMsisdn();
 				optionsList.add(context.getString(R.string.add_to_contacts));
