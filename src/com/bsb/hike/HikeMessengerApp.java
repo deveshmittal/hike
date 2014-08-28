@@ -265,8 +265,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String INVITED_FACEBOOK_FRIENDS_IDS = "invitedFacebookFriendsIds";
 
-	public static final String NOTIFIED_NO_STATUS = "notifiedNoStatus";
-
 	public static final String SERVER_RECOMMENDED_CONTACTS = "serverRecommendedContacts";
 
 	public static final String FIRST_VIEW_FTUE_LIST_TIMESTAMP = "firstViewFtueListTimestamp";
@@ -774,24 +772,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		catch (NameNotFoundException e)
 		{
 			Logger.e(getClass().getSimpleName(), "Invalid package", e);
-		}
-
-		/*
-		 * We will increase the unseen status count by one if the user has not posted any updates and if we have never notified the user of this before.
-		 */
-		if (!settings.contains(NOTIFIED_NO_STATUS))
-		{
-			String lastStatus = settings.getString(HikeMessengerApp.LAST_STATUS, "");
-
-			Editor editor = settings.edit();
-			if (TextUtils.isEmpty(lastStatus))
-			{
-				int count = settings.getInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
-				count++;
-				editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, count);
-			}
-			editor.putBoolean(NOTIFIED_NO_STATUS, true);
-			editor.commit();
 		}
 
 		/*

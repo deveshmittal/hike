@@ -1286,7 +1286,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
 				newGamesIndicator.setText("1");
-								
+
+				/*
+				 * Rewards & Games indicator bubble are by default shown even if the keys are not stored in shared pref. 
+				 */
 				boolean isGamesClicked = accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, false);
 				boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
 				if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked))

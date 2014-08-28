@@ -969,11 +969,9 @@ public class MqttMessagesManager
 			}
 			editor.putString(HikeMessengerApp.REWARDS_TOKEN, account.optString(HikeConstants.REWARDS_TOKEN));
 			editor.putBoolean(HikeMessengerApp.SHOW_REWARDS, account.optBoolean(HikeConstants.SHOW_REWARDS));
-			editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, !account.optBoolean(HikeConstants.SHOW_REWARDS));
 
 			editor.putString(HikeMessengerApp.GAMES_TOKEN, account.optString(HikeConstants.REWARDS_TOKEN));
 			editor.putBoolean(HikeMessengerApp.SHOW_GAMES, account.optBoolean(HikeConstants.SHOW_GAMES));
-			editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, !account.optBoolean(HikeConstants.SHOW_GAMES));
 
 			if (account.optBoolean(HikeConstants.SHOW_REWARDS))
 			{
