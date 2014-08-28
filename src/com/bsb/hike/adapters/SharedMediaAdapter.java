@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView.ScaleType;
 
 import com.bsb.hike.R;
@@ -19,7 +18,6 @@ import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.SharedFileImageLoader;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.view.TouchImageView;
 
 public class SharedMediaAdapter extends PagerAdapter implements OnClickListener
@@ -86,9 +84,8 @@ public class SharedMediaAdapter extends PagerAdapter implements OnClickListener
 		sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(true), galleryImageView, false);
 		if (sharedMediaItem.getHikeFileType() == HikeFileType.VIDEO)
 		{
-			Button playBtn = (Button) page.findViewById(R.id.play_media);
-			playBtn.setVisibility(View.VISIBLE);
 			page.findViewById(R.id.progress_bar).setVisibility(View.GONE);
+			page.findViewById(R.id.play_media).setVisibility(View.VISIBLE);
 		}
 		
 		galleryImageView.setTag(sharedMediaItem);
