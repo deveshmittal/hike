@@ -684,11 +684,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE, ProfileContactItem.contactType.UNKNOWN_ON_HIKE, null));
 		}
 		//Request_Received --->> Show add/not now screen.
-		else if(contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
-		{
-			//Show add/not now screen.
-			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE, ProfileContactItem.contactType.REQUEST_RECEIVED, null));
-		}
+		
 		else if(!contactInfo.isOnhike())
 		{ 
 			//Known and on SMS
@@ -700,11 +696,19 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		if(statusMessages.size()>0)
 		{
-			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE, ProfileContactItem.contactType.SHOW_CONTACTS_STATUS, statusMessages.get(statusMessages.size() - 1)));
+			addBasedOnFavType(statusMessages.get(statusMessages.size() - 1));
 			return;
 		}
-		
-		profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.SHOW_CONTACTS_STATUS, getJoinedHikeStatus(contactInfo)));
+		addBasedOnFavType(getJoinedHikeStatus(contactInfo));
+	}
+	
+	private void addBasedOnFavType(StatusMessage status)
+	{
+		if(contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
+		{	profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.REQUEST_RECEIVED, status));
+			return;
+		}
+		profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.SHOW_CONTACTS_STATUS, status));
 	}
 	
 	private void addStatusMessagesAsMyProfileItems(List<StatusMessage> statusMessages)

@@ -390,8 +390,17 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				int contactType = ((ProfileItem.ProfileContactItem) profileItem).getContactType();
 				switch (contactType)
 				{
+				
+				case REQUEST_RECEIVED:
+					LinearLayout req_layout = (LinearLayout) viewHolder.parent.findViewById(R.id.remove_fav);
+					req_layout.setVisibility(View.VISIBLE);
+					
 				case SHOW_CONTACTS_STATUS:
 					status = (StatusMessage) ((ProfileItem.ProfileContactItem) profileItem).getText();
+					if(contactType == SHOW_CONTACTS_STATUS)   //The layout wasn't becoming invisible, if the request was accepted from above case.
+					{	LinearLayout req_layout_fav = (LinearLayout) viewHolder.parent.findViewById(R.id.remove_fav);
+						req_layout_fav.setVisibility(View.GONE);
+					}
 					if (status.getStatusMessageType() == StatusMessageType.JOINED_HIKE)
 					{
 						if (status.getTimeStamp() == 0)
@@ -420,12 +429,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					viewHolder.icon.setImageResource(R.drawable.ic_add_friend);
 					break;
 					
-				case REQUEST_RECEIVED:
-					LinearLayout req_layout = (LinearLayout) viewHolder.parent.findViewById(R.id.remove_fav);
-					req_layout.setVisibility(View.VISIBLE);
-					viewHolder.subText.setVisibility(View.GONE);
-					break;
-
 				case UNKNOWN_NOT_ON_HIKE:
 					LinearLayout invite_layout = (LinearLayout) viewHolder.parent.findViewById(R.id.add_fav_view);
 					invite_layout.setVisibility(View.VISIBLE);

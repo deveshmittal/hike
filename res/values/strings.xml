@@ -1158,4 +1158,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="refresh">Refresh</string>
     <string name="user_back_on_hike">%1$s is now on hike, say hi</string>
     <string name="team_hike">hike</string>
+    <string name="add_fav_msg">Is now sharing last seen and status updates. Would you like to do the same?</string>
 </resources>
