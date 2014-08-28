@@ -61,6 +61,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	
 	public static final String OPEN_GALLERY = "OpenGallery";
 	
+	public static final String IMAGE_TAG = "image";
+	
 	private static enum ViewType
 	{
 		HEADER, HEADER_PROFILE, HEADER_GROUP, SHARED_MEDIA, SHARED_CONTENT, STATUS, PROFILE_PIC_UPDATE, GROUP_PARTICIPANT, EMPTY_STATUS, REQUEST, MEMBERS, ADD_MEMBERS, PHONE_NUMBER
@@ -488,6 +490,11 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				for (HikeSharedFile galleryItem : sharedMedia)
 				{
 					View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
+					View image_duration = image_thumb.findViewById(R.id.vid_time_layout);
+					if(!galleryItem.getFileTypeString().toString().contains(IMAGE_TAG))
+					{
+						image_duration.setVisibility(View.VISIBLE);
+					}
 					image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
 					image.setTag(galleryItem);
 					thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), image);
