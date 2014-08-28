@@ -1625,6 +1625,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public boolean showMessageContextMenu(ConvMessage message)
 	{
+		if(showingImpMessagePinCreate)
+		{
+			return true;
+		}
 		dismissPopupWindow();
 		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO || message.getTypingNotification() != null || message.isBlockAddHeader())
 		{
@@ -4004,9 +4008,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			String label = null;
 			if(messageList != null)
 			{
+				ConvMessage pin = null;				
 				JSONArray ids = new JSONArray();
-				for (final ConvMessage message : messageList)
+				for (ConvMessage message : messageList)
 				{
+					if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+					{
+						pin = message;
+					}
 					if (hasWindowFocus())
 					{
 						message.setState(ConvMessage.State.RECEIVED_READ);
@@ -4030,6 +4039,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 				}
 				final String convLabel = label;
+				final ConvMessage pinMsg = pin;
+
 				runOnUiThread(new Runnable()
 				{
 					@Override
@@ -4041,6 +4052,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 						addBulkMessages(messageList);
 						Logger.d(getClass().getSimpleName(), "calling chatThread.addMessage() Line no. : 2219");
+												
+						if(pinMsg!= null)
+						{
+							showImpMessage(pinMsg, -1);
+						}
 					}
 				});
 				
@@ -4119,7 +4135,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				runOnUiThread(mUpdateAdapter);
 			}
 		}else if(HikePubSub.CONV_META_DATA_UPDATED.equals(type)){
-			mConversation.setMetaData((MetaData) object);
+				mConversation.setMetaData((MetaData) object);
 		}
 	}
 

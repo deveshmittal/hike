@@ -1128,6 +1128,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		ContentValues contentValues = new ContentValues(1);
 		contentValues.put(DBConstants.CONVERSATION_METADATA, metadata.toString());
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
+		HikeMessengerApp.getPubSub().publish(HikePubSub.CONV_META_DATA_UPDATED, metadata);
 	}
 
 	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv)
@@ -1586,6 +1587,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 					convMetaData = updatePinMetadata(conv, convMetaData, unreadCount);
 					contentValues.put(DBConstants.CONVERSATION_METADATA, convMetaData.toString());
+					HikeMessengerApp.getPubSub().publish(HikePubSub.CONV_META_DATA_UPDATED, convMetaData);
 				}
 				catch (JSONException e)
 				{
