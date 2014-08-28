@@ -841,8 +841,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private void setupProfileScreen(Bundle savedInstanceState)
 	{
-		setContentView(R.layout.profile);
-
 		contactInfo = Utils.getUserContactInfo(preferences);
 
 		profileItems = new ArrayList<ProfileItem>();
