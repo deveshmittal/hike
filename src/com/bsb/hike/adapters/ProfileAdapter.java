@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.text.util.Linkify;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,7 @@ import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 import com.bsb.hike.smartImageLoader.TimelineImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -330,11 +332,13 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			LinearLayout parentView = (LinearLayout) v;
 			parentView.removeAllViews();
 
-			GroupParticipant[] groupParticipants = ((ProfileGroupItem) profileItem).getGroupParticipants();
+			List<PairModified<GroupParticipant, String>> groupParticipants = ((ProfileGroupItem) profileItem).getGroupParticipants();
 
-			for (int i = 0; i < groupParticipants.length; i++)
+			int counter = 0;
+			for (PairModified<GroupParticipant, String> groupParticipantPair : groupParticipants)
 			{
-				GroupParticipant groupParticipant = groupParticipants[i];
+
+				GroupParticipant groupParticipant = groupParticipantPair.getFirst();
 
 				View groupParticipantParentView = inflater.inflate(R.layout.group_profile_item, parentView, false);
 
@@ -346,7 +350,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					/*
 					 * if the second element is null, we just make it invisible.
 					 */
-					if (i == 1)
+					if (counter == 1)
 					{
 						groupParticipantParentView.setVisibility(View.INVISIBLE);
 					}
@@ -388,7 +392,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 						showingLastSeen = !TextUtils.isEmpty(lastSeenString);
 					}
 
-					nameTextView.setText(contactInfo.getFirstNameAndSurname());
+					String groupParticipantName = groupParticipantPair.getSecond();
+					if (null == groupParticipantName)
+					{
+						groupParticipantName = contactInfo.getFirstNameAndSurname();
+					}
+					nameTextView.setText(groupParticipantName);
 					if (!showingLastSeen)
 					{
 						mainInfo.setText(contactInfo.isOnhike() ? R.string.on_hike : R.string.on_sms);
@@ -418,7 +427,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 				layoutParams.leftMargin = margin;
 				layoutParams.topMargin = margin;
-				if (i == groupParticipants.length - 1)
+
+				if (counter == groupParticipants.size() - 1)
 				{
 					layoutParams.rightMargin = margin;
 				}
@@ -432,6 +442,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				groupParticipantParentView.setOnClickListener(profileActivity);
 
 				parentView.addView(groupParticipantParentView);
+
+				counter++;
 			}
 			break;
 

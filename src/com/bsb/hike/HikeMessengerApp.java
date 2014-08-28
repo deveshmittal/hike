@@ -249,8 +249,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_WALKIE_TALKIE_TIP = "shownWalkieTalkieTip";
 
-	public static final String SHOWN_STATUS_TIP = "shownStatusTip";
-
 	public static final String SHOWN_LAST_SEEN_TIP = "shownLastSeenTip";
 
 	public static final String PROTIP_WAIT_TIME = "protipWaitTime";
@@ -385,6 +383,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ATOMIC_POP_UP_HTTP = "http";
 	
+	public static final String ATOMIC_POP_UP_APP_GENERIC = "app";
+	
+	public static final String ATOMIC_POP_UP_APP_GENERIC_WHAT = "appWhat";
+	
 	public static final String ATOMIC_POP_UP_HTTP_URL = "httpUrl";
 	
 	public static final String ATOMIC_POP_UP_NOTIF_MESSAGE = "apuNotifMessage";
@@ -434,6 +436,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static HashMap<String, String> hikeBotNamesMap;
 
 	public static volatile boolean networkError;
+
+	public static volatile boolean syncingContacts = false;
 
 	public Handler appStateHandler;
 

@@ -478,7 +478,6 @@
     <string name="emoticons_stickers_tip">Tap here to share stickers :)</string>
     <string name="stickers_tip">New stickers!</string>
     <string name="moods_tip">Tap here to attach a wonderful mood :)</string>
-    <string name="status_tip">This is a status update posted by %1$s</string>
     <string name="walkie_talkie_tip">Tap here to use hike\'s new Walkie Talkie!</string>
     <string name="last_seen_tip">Only your Circle of Friends can see when you were last seen</string>
     <string name="dismiss">Dismiss</string>
@@ -1135,11 +1134,13 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="pin_notif_text">has posted a pin</string>
     <string name="delete_my_account">DELETE MY ACCOUNT</string>
     <string name="hike_extras">Hike Extras</string>
+    <string name="sticker_download_failed_large_file">Download failed due to insufficient space. Please free some space and try again.</string>
 	<string name="set_profile_pic">hike profile picture</string>
     <string name="confirm_delete_pin_header">Delete pin</string>
     <string name="confirm_delete_pin">Are you sure you want to delete this pin?</string>
     <string name="confirm_delete_pins_header">Delete pins</string>
     <string name="confirm_delete_pins">Are you sure you want to delete these %1$s pins?</string>    
     <string name="shared_media">Shared Media</string>
-    
+    <string name="no_internet_try_again">No internet connection. Please try again later.</string>
+    <string name="refresh">Refresh</string>
 </resources>

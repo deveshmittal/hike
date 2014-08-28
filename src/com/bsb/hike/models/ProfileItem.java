@@ -1,5 +1,11 @@
 package com.bsb.hike.models;
 
+import java.util.List;
+
+import com.bsb.hike.utils.PairModified;
+
+import android.util.Pair;
+
 public abstract class ProfileItem
 {
 
@@ -46,20 +52,20 @@ public abstract class ProfileItem
 	public static class ProfileGroupItem extends ProfileItem
 	{
 
-		private GroupParticipant[] groupParticipants;
+		private List<PairModified<GroupParticipant, String>> groupParticipants;
 
 		public ProfileGroupItem(int itemId)
 		{
 			super(itemId);
 		}
 
-		public ProfileGroupItem(GroupParticipant[] groupParticipants)
+		public ProfileGroupItem(List<PairModified<GroupParticipant, String>> groupParticipants)
 		{
 			super(0);
 			this.groupParticipants = groupParticipants;
 		}
 
-		public GroupParticipant[] getGroupParticipants()
+		public List<PairModified<GroupParticipant, String>> getGroupParticipants()
 		{
 			return groupParticipants;
 		}

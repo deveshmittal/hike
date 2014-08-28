@@ -144,4 +144,13 @@ public class RecyclingBitmapDrawable extends BitmapDrawable
 		// Pre HC-MR1
 		return bitmap.getRowBytes() * bitmap.getHeight();
 	}
+
+	/**
+	 * This is a method added for as a workaround fix for issues we were facing when we don't put the drawable in the cache (the bitmap was getting recycled). Here we increment
+	 * the cache ref count to ensure the bitmap is not recycled no matter what the display ref count is.
+	 */
+	public void incrementCacheReference()
+	{
+		setIsCached(true);
+	}
 }

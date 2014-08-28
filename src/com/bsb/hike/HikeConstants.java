@@ -846,7 +846,7 @@ public class HikeConstants
 
 	public static final int FTUE_LIMIT = 5;
 	
-	public static final int FTUE_CONTACT_CARD_LIMIT = 4;
+	public static final int FTUE_CONTACT_CARD_LIMIT = 5;
 
 	public static final String FTUE_MSISDN_TYPE = "ftueContact";
 
@@ -1753,4 +1753,16 @@ public class HikeConstants
 	public static final String FROM_CHAT_THREAD = "ct";
 
 	public static final String LARGE = "large";
+	
+	public static final int ATOMIC_APP_TIP_SETTINGS = 1;
+	public static final int ATOMIC_APP_TIP_SETTINGS_NOTIF = 2;
+	public static final int ATOMIC_APP_TIP_SETTINGS_MEDIA = 3;
+	public static final int ATOMIC_APP_TIP_SETTINGS_SMS = 4;
+	public static final int ATOMIC_APP_TIP_SETTINGS_PRIVACY = 5;
+	public static final int ATOMIC_APP_TIP_TIMELINE = 6;
+	public static final int ATOMIC_APP_TIP_INVITE_FREE_SMS = 8;
+	public static final int ATOMIC_APP_TIP_INVITE_WATSAPP = 9;
+	public static final int ATOMIC_APP_TIP_HIKE_EXTRA = 10;
+	public static final int ATOMIC_APP_TIP_HIKE_REWARDS = 11;
+	
 }

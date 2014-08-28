@@ -67,6 +67,8 @@ public class StickerManager
 	public static final String STICKER_DOWNLOAD_TYPE = "stDownloadType";
 
 	public static final String STICKER_DATA_BUNDLE = "stickerDataBundle";
+	
+	public static final String STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE = "stickerDownloadFailedTooLarge";
 
 	public static final String STICKER_CATEGORY = "stickerCategory";
 
@@ -228,6 +230,26 @@ public class StickerManager
 				return "bollywoodDownloadShown";
 			}
 		},
+		indian
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.indian;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_indian;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "indianDownloadShown";
+			}
+		},
 		doggy
 		{
 			@Override
@@ -266,26 +288,6 @@ public class StickerManager
 			public String downloadPref()
 			{
 				return "rfDownloadShown";
-			}
-		},
-		indian
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.indian;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_indian;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "indianDownloadShown";
 			}
 		},
 		jelly
