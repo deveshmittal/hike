@@ -355,7 +355,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED, HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
-			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA };
+			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA, HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT };
 
 	private EmoticonType emoticonType;
 
@@ -2232,11 +2232,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * To handle the case when photo viewer is opened from chat thread and user forwards/share some item. In this case we should close the photo viewer.
 		 */
-		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
-		if (fragment != null)
-		{
-			PhotoViewerFragment.onPhotoBack(fragment, getSupportFragmentManager(), getSupportActionBar(), getWindow());
-		}
+		PhotoViewerFragment.closePhotoViewerFragment(ChatThread.this);
 
 		// This prevent the activity from simply finishing and opens up the last
 		// screen.
@@ -4118,6 +4114,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				runOnUiThread(mUpdateAdapter);
 			}
+		}
+		else if (HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT.equals(type))
+		{
+
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					PhotoViewerFragment.closePhotoViewerFragment(ChatThread.this);
+					setupActionBar(false);
+				}
+			});
 		}
 	}
 

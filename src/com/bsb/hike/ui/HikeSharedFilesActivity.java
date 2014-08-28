@@ -148,6 +148,8 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		gridView.setOnItemClickListener(this);
 		gridView.setOnItemLongClickListener(this);
 		setupActionBar();
+		
+		HikeMessengerApp.getPubSub().publish(HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, null);
 	}
 
 	@Override

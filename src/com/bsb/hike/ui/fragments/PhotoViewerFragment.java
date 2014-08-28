@@ -49,6 +49,7 @@ import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeSharedFilesActivity;
 import com.bsb.hike.ui.utils.DepthPageTransformer;
 import com.bsb.hike.utils.CustomAlertDialog;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -591,4 +592,15 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		mParent.findViewById(R.id.info_group).startAnimation(animation);
 		mParent.findViewById(R.id.gradient).startAnimation(animation);
 	}
+	
+	public static void closePhotoViewerFragment(HikeAppStateBaseFragmentActivity activity)
+	{
+		Fragment fragment = activity.getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
+		if (fragment != null)
+		{
+			onPhotoBack(fragment, activity.getSupportFragmentManager(), activity.getSupportActionBar(), activity.getWindow());
+		}
+	}
+
+
 }
