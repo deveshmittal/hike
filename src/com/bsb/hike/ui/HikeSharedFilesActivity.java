@@ -547,7 +547,14 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		return getHikeSharedFilesActivityIntent(context, conversation instanceof GroupConversation, conversation.getLabel(), 
 				msisdnAndNameArrays.first, msisdnAndNameArrays.second, conversation.getMsisdn());
 	}
-
+	/**
+	 * used to open gallery from a 1:1 conversation
+	 */
+	
+	public static Intent getHikeSharedFilesActivityIntent(Context context, String conversationName, String msisdn)
+	{
+		return getHikeSharedFilesActivityIntent(context, false, conversationName, null, null, msisdn);
+	}
 	public static Intent getHikeSharedFilesActivityIntent(Context context, boolean isGroup, String conversationName, String[] msisdnArray, String[] nameArray, String msisdn)
 	{
 		Intent intent = new Intent(context, HikeSharedFilesActivity.class);

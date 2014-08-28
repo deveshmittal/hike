@@ -365,6 +365,15 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		
 	}
 	
+	/**
+	 * used to open photo/video from a 1:1 conversation
+	 */
+	public static void openPhoto(int resId, Context context, ArrayList<HikeSharedFile> hikeSharedFiles, boolean fromChatThread, 
+			int mediaPosition, String fromMsisdn, String convName)
+	{
+		openPhoto(resId, context, hikeSharedFiles, fromChatThread, mediaPosition, fromMsisdn, convName, false, null, null);
+	}
+	
 	public static void onPhotoBack(Fragment fragment, FragmentManager fragmentManager, ActionBar actionBar, Window currentWindow)
 	{
 		currentWindow.clearFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
