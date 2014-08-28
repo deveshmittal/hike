@@ -266,7 +266,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 						{
 							if (file.length() > sizeLimit)
 							{
-								Toast.makeText(FileSelectActivity.this, getString(R.string.max_file_size, formatFileSize(sizeLimit)), Toast.LENGTH_SHORT).show();
+								Toast.makeText(FileSelectActivity.this, getString(R.string.max_file_size, Utils.formatFileSize(sizeLimit)), Toast.LENGTH_SHORT).show();
 								return;
 							}
 						}
@@ -306,7 +306,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 				}
 				else if (file.length() > sizeLimit)
 				{
-					Toast.makeText(FileSelectActivity.this, getString(R.string.max_file_size, formatFileSize(sizeLimit)), Toast.LENGTH_SHORT).show();
+					Toast.makeText(FileSelectActivity.this, getString(R.string.max_file_size, Utils.formatFileSize(sizeLimit)), Toast.LENGTH_SHORT).show();
 					return false;
 				}
 
@@ -565,24 +565,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 				continue;
 			}
 			FileListItem item = new FileListItem();
-			item.setTitle(file.getName());
-			item.setFile(file);
-			if (file.isDirectory())
-			{
-				item.setIcon(R.drawable.ic_folder);
-			}
-			else
-			{
-				String extension = Utils.getFileExtension(file.getName());
-				item.setExtension(TextUtils.isEmpty(extension) ? "?" : extension);
-				item.setSubtitle(formatFileSize(file.length()));
-				item.setMimeType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(item.getExtension()));
-
-				if (!TextUtils.isEmpty(item.getMimeType()) && HikeFileType.IMAGE == HikeFileType.fromString(item.getMimeType()))
-				{
-					item.setShowThumbnail(true);
-				}
-			}
+			item.setListItemAttributesFromFile(item, file);
 			items.add(item);
 		}
 		listAdapter.notifyDataSetChanged();
@@ -675,7 +658,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 		{
 			return "";
 		}
-		return getString(R.string.free_of_total, formatFileSize(free), formatFileSize(total));
+		return getString(R.string.free_of_total, Utils.formatFileSize(free), Utils.formatFileSize(total));
 	}
 
 	@Override
@@ -696,26 +679,6 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
 		listAdapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_IMAGES && scrollState == OnScrollListener.SCROLL_STATE_FLING);
-	}
-
-	private String formatFileSize(long size)
-	{
-		if (size < 1024)
-		{
-			return String.format("%d B", size);
-		}
-		else if (size < 1024 * 1024)
-		{
-			return String.format("%.1f KB", size / 1024.0f);
-		}
-		else if (size < 1024 * 1024 * 1024)
-		{
-			return String.format("%.1f MB", size / 1024.0f / 1024.0f);
-		}
-		else
-		{
-			return String.format("%.1f GB", size / 1024.0f / 1024.0f / 1024.0f);
-		}
 	}
 
 	@Override
