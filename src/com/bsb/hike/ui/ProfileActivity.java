@@ -776,7 +776,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT,getResources().getString(R.string.shared_cont_pa), 0, sharedPinCount, null));
 		
 		List<PairModified<GroupParticipant, String>> participants = new ArrayList<PairModified<GroupParticipant, String>>();
-
+		
+		for (Entry<String, PairModified<GroupParticipant, String>> mapEntry : participantMap.entrySet())
+		{
+			participants.add(mapEntry.getValue());
+		}
+		
 		if (!participantMap.containsKey(userInfo.getContactInfo().getMsisdn()))
 		{
 			participants.add(new PairModified<GroupParticipant, String>(userInfo, null));
