@@ -2874,7 +2874,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			else
 			{
-				setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
+				if(mConversation != null)
+				{
+					setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
+				}
 			}
 		}
 		else

@@ -2088,7 +2088,15 @@ public class Utils
 			return false;
 		}
 		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		return (cm != null && cm.getActiveNetworkInfo() != null && (cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI));
+		try
+		{
+			return (cm != null && cm.getActiveNetworkInfo() != null && (cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI));
+		}
+		catch (NullPointerException e)
+		{
+			// TODO Auto-generated catch block
+			return false;
+		}
 	}
 
 	public static boolean renameTempProfileImage(String msisdn)
