@@ -1,5 +1,6 @@
 package com.bsb.hike.adapters;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -31,13 +32,13 @@ public class HikeSharedFileAdapter extends BaseAdapter
 
 	private int sizeOfImage;
 
-	private Map<Long, HikeSharedFile> selectedItems;
+	private HashSet<Long> selectedItems;
 
 	private int selectedItemPostion = -1;
 
 	private boolean selectedScreen = false;
 
-	public HikeSharedFileAdapter(Context context, List<HikeSharedFile> sharedFilesList, int sizeOfImage, Map<Long, HikeSharedFile> selectedItems, boolean selectedScreen)
+	public HikeSharedFileAdapter(Context context, List<HikeSharedFile> sharedFilesList, int sizeOfImage, HashSet<Long> selectedItems, boolean selectedScreen)
 	{
 		this.layoutInflater = LayoutInflater.from(context);
 		this.sharedFilesList = sharedFilesList;
@@ -115,7 +116,7 @@ public class HikeSharedFileAdapter extends BaseAdapter
 			holder.galleryThumb.setImageResource(R.drawable.ic_add_more);
 		}
 
-		if ((selectedItems != null && selectedItems.containsKey(galleryItem.getMsgId())) || selectedItemPostion == position)
+		if ((selectedItems != null && selectedItems.contains(galleryItem.getMsgId())) || selectedItemPostion == position)
 		{
 			holder.selected.setSelected(true);
 		}

@@ -3,6 +3,8 @@ package com.bsb.hike.ui;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +67,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 
 	private boolean multiSelectMode;
 
-	private Map<Long, HikeSharedFile> selectedSharedFileItems;
+	private HashSet<Long> selectedSharedFileItems;
 
 	private TextView multiSelectTitle;
 
@@ -108,7 +110,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);  //Making the action bar overlay on top of the current view
 		setContentView(R.layout.gallery);
 
-		selectedSharedFileItems = new HashMap<Long, HikeSharedFile>();
+		selectedSharedFileItems = new HashSet<Long>();
 		sharedFilesList = new ArrayList<HikeSharedFile>();
 
 		Bundle data;
@@ -378,7 +380,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 
 		if (multiSelectMode)
 		{
-			if (selectedSharedFileItems.containsKey(sharedFileItem.getMsgId()))
+			if (selectedSharedFileItems.contains(sharedFileItem.getMsgId()))
 			{
 				selectedSharedFileItems.remove(sharedFileItem.getMsgId());
 				if (selectedSharedFileItems.isEmpty())
@@ -392,7 +394,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 			}
 			else
 			{
-				selectedSharedFileItems.put(sharedFileItem.getMsgId(), sharedFileItem);
+				selectedSharedFileItems.add(sharedFileItem.getMsgId());
 				setMultiSelectTitle();
 			}
 
@@ -447,13 +449,18 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 				@Override
 				public void onClick(View v)
 				{
-					ArrayList<Long> msgIds = new ArrayList<Long>(selectedSharedFileItems.size());
-					for (HikeSharedFile file : selectedSharedFileItems.values())
-					{
-						msgIds.add(file.getMsgId());
-					}
+					ArrayList<Long> msgIds = new ArrayList<Long>(selectedSharedFileItems);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, msgIds);
-					sharedFilesList.removeAll(selectedSharedFileItems.values());
+					Iterator<HikeSharedFile> iterator= sharedFilesList.iterator();
+					while (iterator.hasNext())
+					{
+						HikeSharedFile hsf = iterator.next();
+						if(selectedSharedFileItems.contains(hsf.getMsgId()))
+						{
+							iterator.remove();
+						}
+					}
+					
 					destroyActionMode();
 					deleteConfirmDialog.dismiss();
 				}
@@ -464,27 +471,31 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 			deleteConfirmDialog.show();
 			return true;
 		case R.id.forward_msgs:
-			ArrayList<Long> selectedMsgIds = new ArrayList<Long>(selectedSharedFileItems.keySet());
+			ArrayList<Long> selectedMsgIds = new ArrayList<Long>(selectedSharedFileItems);
 			Collections.sort(selectedMsgIds);
 			Intent intent = new Intent(HikeSharedFilesActivity.this, ComposeChatActivity.class);
 			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
 			JSONArray multipleMsgArray = new JSONArray();
 			try
 			{
-				for (int i = 0; i < selectedMsgIds.size(); i++)
+				Iterator<HikeSharedFile> iterator= sharedFilesList.iterator();
+				while (iterator.hasNext())
 				{
-					HikeSharedFile hikeFile = selectedSharedFileItems.get(selectedMsgIds.get(i));
-					JSONObject multiMsgFwdObject = new JSONObject();
-					multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
-
-					multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
-					multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
-					if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+					HikeSharedFile hikeFile = iterator.next();
+					if(selectedSharedFileItems.contains(hikeFile.getMsgId()))
 					{
-						multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
-					}
+						JSONObject multiMsgFwdObject = new JSONObject();
+						multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
 
-					multipleMsgArray.put(multiMsgFwdObject);
+						multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
+						multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
+						if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+						{
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
+						}
+
+						multipleMsgArray.put(multiMsgFwdObject);
+					}
 				}
 			}
 			catch (JSONException e)
@@ -498,8 +509,16 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		case R.id.share_msgs:
 			if (selectedSharedFileItems.size() == 1)
 			{
-				HikeSharedFile hikeSharedFile = selectedSharedFileItems.values().iterator().next();
-				hikeSharedFile.shareFile(HikeSharedFilesActivity.this);
+				Iterator<HikeSharedFile> iterator= sharedFilesList.iterator();
+				long msgId = selectedSharedFileItems.iterator().next();
+				while (iterator.hasNext())
+				{
+					HikeSharedFile hikeSharedFile = iterator.next();
+					if(msgId == hikeSharedFile.getMsgId())
+					{
+						hikeSharedFile.shareFile(HikeSharedFilesActivity.this);
+					}
+				}
 				destroyActionMode();
 			}
 			else
