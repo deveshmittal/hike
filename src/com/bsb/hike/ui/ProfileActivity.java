@@ -1682,25 +1682,18 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				final JSONArray participants = obj.optJSONArray(HikeConstants.DATA);
 
 				List<String> msisdns = new ArrayList<String>();
-				try
+
+				for (int i = 0; i < participants.length(); i++)
 				{
-					for (int i = 0; i < participants.length(); i++)
-					{
-						String msisdn = participants.optJSONObject(i).optString(HikeConstants.MSISDN);
-						String contactName = participants.optJSONObject(i).getString(HikeConstants.NAME);
-						boolean onHike = participants.optJSONObject(i).optBoolean(HikeConstants.ON_HIKE);
-						boolean onDnd = participants.optJSONObject(i).optBoolean(HikeConstants.DND);
-						GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, contactName, msisdn, onHike), false, onDnd);
-						participantMap.put(msisdn, new PairModified<GroupParticipant, String>(groupParticipant, contactName));
-						msisdns.add(msisdn);
-					}
+					String msisdn = participants.optJSONObject(i).optString(HikeConstants.MSISDN);
+					String contactName = participants.optJSONObject(i).optString(HikeConstants.NAME);
+					boolean onHike = participants.optJSONObject(i).optBoolean(HikeConstants.ON_HIKE);
+					boolean onDnd = participants.optJSONObject(i).optBoolean(HikeConstants.DND);
+					GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, contactName, msisdn, onHike), false, onDnd);
+					participantMap.put(msisdn, new PairModified<GroupParticipant, String>(groupParticipant, contactName));
+					msisdns.add(msisdn);
 				}
-				catch (JSONException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
+
 				if (msisdns.size() > 0)
 				{
 					List<ContactInfo> contacts = HikeMessengerApp.getContactManager().getContact(msisdns, true, true);
