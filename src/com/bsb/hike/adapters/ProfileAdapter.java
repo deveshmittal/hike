@@ -143,6 +143,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		{
 			viewType = ViewType.HEADER;
 		}
+		else if (ProfileItem.HEADER_ID_GROUP == itemId)
+		{
+			viewType = ViewType.HEADER_GROUP;
+		}
 		else if (ProfileItem.SHARED_MEDIA == itemId)
 		{
 			viewType = ViewType.SHARED_MEDIA;
@@ -262,6 +266,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.icon = (ImageView) v.findViewById(R.id.add_fav_star);
 				break;
 
+			case HEADER_GROUP:
+				v = inflater.inflate(R.layout.profile_header_group, null);
+				viewHolder.editName = (EditText) v.findViewById(R.id.name_edit);
+				viewHolder.text = (TextView) v.findViewById(R.id.name);
+				viewHolder.subText = (TextView) v.findViewById(R.id.subtext);
+				viewHolder.image = (ImageView) v.findViewById(R.id.group_profile_image);
+				viewHolder.iconFrame = (ImageView) v.findViewById(R.id.change_profile);
+				break;
 
 			case SHARED_MEDIA:
 				v = inflater.inflate(R.layout.shared_media, null);
