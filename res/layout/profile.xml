@@ -12,6 +12,7 @@
         android:cacheColorHint="#00000000"
         android:listSelector="#00000000"
         android:divider="@null"
+        android:layout_marginTop="@dimen/st__action_bar_default_height"
         android:fadingEdge="none" />
 
 </FrameLayout>
