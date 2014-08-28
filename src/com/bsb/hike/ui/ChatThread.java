@@ -5107,11 +5107,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			}
 		});
-		
-		if (tipView != null)
+		if (tipView != null && tipView.getVisibility() == View.VISIBLE && tipView.getTag() instanceof TipType && (TipType) tipView.getTag() == TipType.PIN)
 		{
 			tipView.setVisibility(View.GONE);
+			HikeTip.closeTip(TipType.PIN, tipView, prefs);
+			tipView = null;
 		}
+		
 	}
 
 	private void dismissPinCreateView(int animId)
