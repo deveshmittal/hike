@@ -38,6 +38,7 @@ import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomFontTextView;
 
 public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 {
@@ -46,7 +47,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 	private static enum ViewType
 	{
-		HEADER, STATUS, PROFILE_PIC_UPDATE, GROUP_PARTICIPANT, EMPTY_STATUS, REQUEST
+		HEADER, HEADER_PROFILE, HEADER_GROUP, SHARED_MEDIA, SHARED_CONTENT, STATUS, PROFILE_PIC_UPDATE, GROUP_PARTICIPANT, EMPTY_STATUS, REQUEST, MEMBERS, ADD_MEMBERS, PHONE_NUMBER
 	}
 
 	private Context context;
@@ -264,21 +265,23 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		case HEADER:
 			String msisdn;
 			String name;
-
+			StatusMessage status;
 			if (groupProfile)
 			{
 				msisdn = groupConversation.getMsisdn();
 				name = groupConversation.getLabel();
+				viewHolder.text.setText(name);
+				viewHolder.subText.setText(context.getString(R.string.num_people, (groupConversation.getGroupMemberAliveCount() + 1)));
 			}
 			else
 			{
 				msisdn = mContactInfo.getMsisdn();
 				name = TextUtils.isEmpty(mContactInfo.getName()) ? mContactInfo.getMsisdn() : mContactInfo.getName();
+				viewHolder.text.setText(name);
+
 			}
 
-			viewHolder.text.setText(name);
-
-			String mappedId = msisdn + PROFILE_PIC_SUFFIX;
+			String mappedId = msisdn + PROFILE_ROUND_SUFFIX;
 			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(mappedId, null, false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
 			viewHolder.image.setTag(imageViewerInfo);
 			if (profilePreview == null)

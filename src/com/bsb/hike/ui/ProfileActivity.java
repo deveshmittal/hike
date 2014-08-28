@@ -28,28 +28,38 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
@@ -71,26 +81,34 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.ProfileItem;
+import com.bsb.hike.models.ProfileItem.ProfileContactItem;
+import com.bsb.hike.models.ProfileItem.ProfileGroupItem;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomFontEditText;
+import com.bsb.hike.view.CustomFontTextView;
 
 public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
 		View.OnClickListener
 {
-
+	private TextView mName;
+	
 	private EditText mNameEdit;
 
 	private View currentSelection;
@@ -144,6 +162,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private Dialog groupEditDialog;
 
 	private boolean showingRequestItem = false;
+	
+	private Boolean showingGroupEdit = false;
+	
+	public static final String ORIENTATION_FLAG = "of";
+	
+	public static final String PROFILE_PIC_SUFFIX = "pp";
 
 	private static enum ProfileType
 	{
@@ -304,6 +328,22 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		setupActionBar();
 	}
 
+	private void setGroupNameFields(View parent)
+	{
+		// TODO Auto-generated method stub
+		showingGroupEdit = true;
+		ViewGroup parentView = (ViewGroup) parent.getParent();
+		mName = (TextView) parentView.findViewById(R.id.name);
+		mName.setVisibility(View.GONE);
+		mNameEdit = (CustomFontEditText) parentView.findViewById(R.id.name_edit);
+		mNameEdit.setVisibility(View.VISIBLE);
+		mNameEdit.requestFocus();
+		mNameEdit.setSelection(mName.getText().toString().length());
+		Utils.showSoftKeyboard(getApplicationContext(), mNameEdit);
+		setupGroupNameEditActionBar();
+		invalidateOptionsMenu();
+	}
+
 	private void setupActionBar()
 	{
 		ActionBar actionBar = getSupportActionBar();
@@ -340,8 +380,59 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				onBackPressed();
 			}
 		});
-
+		
 		actionBar.setCustomView(actionBarView);
+	}
+	
+	private void setupGroupNameEditActionBar()
+	{	
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+		View editGroupNameView = LayoutInflater.from(ProfileActivity.this).inflate(R.layout.chat_theme_action_bar, null);
+		View okBtn = editGroupNameView.findViewById(R.id.done_container);
+		ViewGroup closeContainer = (ViewGroup) editGroupNameView.findViewById(R.id.close_container);
+		TextView multiSelectTitle = (TextView) editGroupNameView.findViewById(R.id.title);
+		multiSelectTitle.setText(R.string.edit_group_name);  //Add String to strings.xml
+		final String groupNamePreEdit = mNameEdit.getText().toString();
+		okBtn.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				String groupName = mNameEdit.getText().toString();
+				if (TextUtils.isEmpty(groupName.trim()))
+				{
+					Toast toast = Toast.makeText(ProfileActivity.this, R.string.enter_valid_group_name, Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.CENTER, 0, 0);
+					toast.show();
+					return;
+				}
+				saveChanges();
+				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
+				showingGroupEdit = false;
+				setupActionBar();
+				mName.setText(groupName);
+				mName.setVisibility(View.VISIBLE);
+				mNameEdit.setVisibility(View.GONE);
+			}
+		});
+
+		closeContainer.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				setupActionBar();
+				showingGroupEdit = false;
+				mActivityState.edittedGroupName = null;
+				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
+				mName.setText(groupNamePreEdit);
+				mName.setVisibility(View.VISIBLE);
+				mNameEdit.setVisibility(View.GONE);
+			}
+		});
+		actionBar.setCustomView(editGroupNameView);
 	}
 
 	@Override
@@ -372,6 +463,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
+		if (showingGroupEdit)
+		{
+			return false;
+		}
 		switch (profileType)
 		{
 		case CONTACT_INFO:
@@ -453,8 +548,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			}
 			invalidateOptionsMenu();
 			break;
-		case R.id.edit_group_name:
-			onEditGroupNameClick(null);
+		case R.id.edit_group_picture:
+			onHeaderButtonClicked(null);
 			break;
 		case R.id.leave_group:
 			onProfileLargeBtnClick(null);
@@ -467,6 +562,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			break;
 		case R.id.edit:
 			onEditProfileClicked(null);
+			break;
+		case R.id.add_people:
+			openAddToGroup();
 			break;
 		}
 
@@ -606,8 +704,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 		profileItems.clear();
 		// Adding an item for the header
-		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.HEADER_ID));
-
+		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.HEADER_ID_GROUP, null));
 		List<GroupParticipant> participants = new ArrayList<GroupParticipant>(participantMap.values());
 
 		if (!participantMap.containsKey(userInfo.getContactInfo().getMsisdn()))
@@ -1319,7 +1416,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		ImageViewerInfo imageViewerInfo = (ImageViewerInfo) v.getTag();
 
 		String mappedId = imageViewerInfo.mappedId;
-
+		if(mappedId.contains(PROFILE_ROUND_SUFFIX))
+		{
+			mappedId = mappedId.replace(PROFILE_ROUND_SUFFIX, PROFILE_PIC_SUFFIX);
+		}
 		String url = imageViewerInfo.url;
 
 		Bundle arguments = new Bundle();
@@ -1563,6 +1663,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		groupEditDialog.show();
 	}
 
+	public void onGroupNameEditClick(View v)
+	{
+		View parent = (View) v.getParent();
+		setGroupNameFields(parent);
+	}
+	
 	public void onBlockGroupOwnerClicked(View v)
 	{
 		Button blockBtn = (Button) v;
@@ -2186,6 +2292,15 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			intent.putExtra(HikeConstants.Extras.ON_HIKE, contactInfo.isOnhike());
 			startActivity(intent);
 		}
+	}
+
+	private void openAddToGroup()
+	{
+		// TODO Auto-generated method stub
+		Intent intent = new Intent(ProfileActivity.this, ComposeChatActivity.class);
+		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mLocalMSISDN);
+		startActivity(intent);
 	}
 
 	@Override
