@@ -11,6 +11,7 @@
 
         <ImageView
             android:id="@+id/pattern"
+            android:contentDescription="pin side pattern in chat thread"
             android:layout_width="16dp"
             android:layout_height="match_parent"
             android:layout_alignBottom="@+id/main_content"
@@ -30,6 +31,7 @@
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/text"
+                android:contentDescription="pin content in chat thread"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
@@ -44,6 +46,7 @@
 
         <ImageView
             android:id="@+id/cross"
+            android:contentDescription="cross button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/main_content"
@@ -55,6 +58,8 @@
     </RelativeLayout>
 
     <ImageView
+        android:id="@+id/pin_shado"
+        android:contentDescription="pin shadow in chat thread"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="fitXY"

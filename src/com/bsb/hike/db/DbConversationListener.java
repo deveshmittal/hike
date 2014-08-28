@@ -36,6 +36,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.SmsMessageStatusReceiver;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -45,8 +46,6 @@ public class DbConversationListener implements Listener
 	private static final String SMS_SENT_ACTION = "com.bsb.hike.SMS_SENT";
 
 	HikeConversationsDatabase mConversationDb;
-
-	HikeUserDatabase mUserDb;
 
 	HikeMqttPersistence persistence;
 
@@ -61,7 +60,6 @@ public class DbConversationListener implements Listener
 		this.context = context;
 		mPubSub = HikeMessengerApp.getPubSub();
 		mConversationDb = HikeConversationsDatabase.getInstance();
-		mUserDb = HikeUserDatabase.getInstance();
 		persistence = HikeMqttPersistence.getInstance();
 
 		dayRecorded = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.DAY_RECORDED, 0);
@@ -108,7 +106,8 @@ public class DbConversationListener implements Listener
 					}
 				}
 				// Recency was already updated when the ft message was added.
-				mUserDb.updateContactRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
+				ContactManager.getInstance().updateContactRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
+
 				mPubSub.publish(HikePubSub.RECENT_CONTACTS_UPDATED, convMessage.getMsisdn());
 			}
 
@@ -157,11 +156,12 @@ public class DbConversationListener implements Listener
 		else if (HikePubSub.BLOCK_USER.equals(type))
 		{
 			String msisdn = (String) object;
-			mUserDb.block(msisdn);
+			ContactManager.getInstance().block(msisdn);
 			/*
 			 * When a user blocks someone, we reset the contact's friend type.
 			 */
-			mUserDb.toggleContactFavorite(msisdn, FavoriteType.NOT_FRIEND);
+			ContactManager.getInstance().toggleContactFavorite(msisdn, FavoriteType.NOT_FRIEND);
+
 			JSONObject blockObj = blockUnblockSerialize("b", msisdn);
 			/*
 			 * We remove the icon for a blocked user as well.
@@ -174,7 +174,7 @@ public class DbConversationListener implements Listener
 		else if (HikePubSub.UNBLOCK_USER.equals(type))
 		{
 			String msisdn = (String) object;
-			mUserDb.unblock(msisdn);
+			ContactManager.getInstance().unblock(msisdn);
 			JSONObject unblockObj = blockUnblockSerialize("ub", msisdn);
 			mPubSub.publish(HikePubSub.MQTT_PUBLISH, unblockObj);
 		}
@@ -195,7 +195,7 @@ public class DbConversationListener implements Listener
 			ContactInfo contactInfo = favoriteToggle.first;
 			FavoriteType favoriteType = favoriteToggle.second;
 
-			mUserDb.toggleContactFavorite(contactInfo.getMsisdn(), favoriteType);
+			ContactManager.getInstance().toggleContactFavorite(contactInfo.getMsisdn(), favoriteType);
 
 			if (favoriteType != FavoriteType.REQUEST_RECEIVED && favoriteType != FavoriteType.REQUEST_SENT_REJECTED && !HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type))
 			{
@@ -246,7 +246,7 @@ public class DbConversationListener implements Listener
 			/*
 			 * If the status also has an icon, we delete that as well.
 			 */
-			mUserDb.removeIcon(statusId);
+			ContactManager.getInstance().removeIcon(statusId);
 		}
 		else if (HikePubSub.HIKE_JOIN_TIME_OBTAINED.equals(type))
 		{
@@ -255,7 +255,8 @@ public class DbConversationListener implements Listener
 			String msisdn = msisdnHikeJoinTimePair.first;
 			long hikeJoinTime = msisdnHikeJoinTimePair.second;
 
-			mUserDb.setHikeJoinTime(msisdn, hikeJoinTime);
+			ContactManager.getInstance().setHikeJoinTime(msisdn, hikeJoinTime);
+			
 		}
 		else if (HikePubSub.SEND_HIKE_SMS_FALLBACK.equals(type))
 		{
@@ -292,7 +293,6 @@ public class DbConversationListener implements Listener
 				
 				ConvMessage convMessage = new ConvMessage(Utils.combineInOneSmsString(context, true, messages, true), lastMessage.getMsisdn(), 
 						lastMessage.getTimestamp(), lastMessage.getState(), lastMessage.getMsgID(), lastMessage.getMappedMsgID());
-				convMessage.setConversation(lastMessage.getConversation());
 				JSONObject messageJSON = convMessage.serialize().getJSONObject(HikeConstants.DATA);
 
 				messagesArray.put(messageJSON);
@@ -321,7 +321,9 @@ public class DbConversationListener implements Listener
 				return;
 			}
 
-			sendNativeSMSFallbackLogEvent(messages.get(0).getConversation().isOnhike(), Utils.isUserOnline(context), messages.size());
+			ContactInfo contactInfo = ContactManager.getInstance().getContact(messages.get(0).getMsisdn(), true, false);
+
+			sendNativeSMSFallbackLogEvent(contactInfo.isOnhike(), Utils.isUserOnline(context), messages.size());
 
 			for (ConvMessage convMessage : messages)
 			{

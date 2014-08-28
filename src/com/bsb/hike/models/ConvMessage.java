@@ -28,8 +28,6 @@ public class ConvMessage
 	private long mappedMsgId; // this corresponds to msgID stored in receiver's
 								// DB
 
-	private Conversation mConversation;
-
 	private String mMessage;
 
 	private String mMsisdn;
@@ -426,7 +424,6 @@ public class ConvMessage
 			}
 			break;
 		}
-		this.mConversation = conversation;
 		setState(isSelfGenerated ? State.RECEIVED_READ : State.RECEIVED_UNREAD);
 	}
 
@@ -615,7 +612,7 @@ public class ConvMessage
 				{
 					data.put(HikeConstants.MESSAGE_ID, msgID);
 
-					if(mConversation.isStealth() && isSent())
+					if(HikeMessengerApp.isStealthMsisdn(mMsisdn) && isSent())
 					{
 						data.put(HikeConstants.STEALTH, true);
 					}
@@ -641,16 +638,6 @@ public class ConvMessage
 			Logger.e("ConvMessage", "invalid json message", e);
 		}
 		return object;
-	}
-
-	public void setConversation(Conversation conversation)
-	{
-		this.mConversation = conversation;
-	}
-
-	public Conversation getConversation()
-	{
-		return mConversation;
 	}
 
 	public String getTimestampFormatted(boolean pretty, Context context)
@@ -838,7 +825,25 @@ public class ConvMessage
 		this.isTickSoundPlayed = isTickSoundPlayed;
 	}
 
-	
+	/**
+	 * Whether a notification sound should be played while displaying this message in Android notifications shade
+	 * 
+	 * @return
+	 */
+	public boolean isSilent()
+	{
+		// Do not play sound in case of bg change, participant joined, nuj/ruj, status updates
+		if ((getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) || (getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
+				|| (getParticipantInfoState() == ParticipantInfoState.USER_JOIN) || (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	public static boolean isMessageSent(State msgState)
 	{
 		return !(msgState==State.RECEIVED_READ || msgState == State.RECEIVED_UNREAD);

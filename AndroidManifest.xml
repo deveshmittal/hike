@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="660"
-    android:versionName="3.2.0" >
+    android:versionCode="711"
+    android:versionName="3.2.0.51" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -150,6 +150,13 @@
         <activity
             android:name="com.bsb.hike.ui.ProfileActivity"
             android:windowSoftInputMode="stateHidden" >
+            <intent-filter android:label="@string/set_profile_pic">
+                <action android:name="android.intent.action.ATTACH_DATA" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/*" />
+            </intent-filter>
         </activity>
         <activity
             android:name="com.bsb.hike.cropimage.CropImage"
@@ -278,6 +285,9 @@
                 <intent-filter android:priority="999" >
                     <action android:name="android.intent.action.TIME_SET" />
                 </intent-filter>
+            </receiver>
+            <receiver android:name="com.bsb.hike.notifications.NotificationDismissedReceiver" 
+                android:exported="false">
             </receiver>
 
          <activity

@@ -32,7 +32,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.FriendsAdapter;
 import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.CreateNewGroupActivity;
@@ -171,7 +170,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		}
 		else if (HikePubSub.USER_JOINED.equals(type) || HikePubSub.USER_LEFT.equals(type))
 		{
-			final ContactInfo contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN((String) object, true);
+			final ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact((String) object, true, true);
 
 			if (contactInfo == null)
 			{
@@ -275,9 +274,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 
 			boolean nativeSMSOn = Utils.getSendSmsPref(getActivity());
 
-			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
-
-			final List<ContactInfo> favoriteList = hikeUserDatabase.getContactsOfFavoriteType(new FavoriteType[] { FavoriteType.FRIEND, FavoriteType.REQUEST_RECEIVED,
+			final List<ContactInfo> favoriteList = HikeMessengerApp.getContactManager().getContactsOfFavoriteType(new FavoriteType[] { FavoriteType.FRIEND, FavoriteType.REQUEST_RECEIVED,
 					FavoriteType.REQUEST_SENT, FavoriteType.REQUEST_SENT_REJECTED }, HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn, false);
 			Collections.sort(favoriteList, ContactInfo.lastSeenTimeComparator);
 			if (!isAdded())
@@ -297,7 +294,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 		else if (HikePubSub.BLOCK_USER.equals(type) || HikePubSub.UNBLOCK_USER.equals(type))
 		{
 			String msisdn = (String) object;
-			final ContactInfo contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn, true);
+			final ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
 			final boolean blocked = HikePubSub.BLOCK_USER.equals(type);
 			if (contactInfo == null)
 			{

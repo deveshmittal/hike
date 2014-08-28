@@ -26,6 +26,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
 public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]>
@@ -55,7 +56,7 @@ public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, C
 			HikeConversationsDatabase db = null;
 			String msisdn = convs[k].getMsisdn();
 			StringBuilder sBuilder = new StringBuilder();
-			Map<String, GroupParticipant> participantMap = null;
+			Map<String, PairModified<GroupParticipant, String>> participantMap = null;
 
 			db = HikeConversationsDatabase.getInstance();
 			Conversation conv = db.getConversation(msisdn, -1);
@@ -87,11 +88,14 @@ public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, C
 				boolean isSent = cMessage.isSent();
 				if (cMessage.isGroupChat()) // gc naming logic
 				{
-					GroupParticipant gPart = participantMap.get(cMessage.getGroupParticipantMsisdn());
+					GroupParticipant gPart = null;
+					PairModified<GroupParticipant, String> groupParticipantPair = participantMap.get(cMessage.getGroupParticipantMsisdn());
+					if(null != groupParticipantPair)
+						gPart = groupParticipantPair.getFirst();
 
 					if (gPart != null)
 					{
-						fromString = (isSent == true) ? activity.getResources().getString(R.string.me_key) : gPart.getContactInfo().getName();
+						fromString = (isSent == true) ? activity.getResources().getString(R.string.me_key) : groupParticipantPair.getSecond();
 					}
 					else
 					{

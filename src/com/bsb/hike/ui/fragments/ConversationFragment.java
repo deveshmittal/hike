@@ -1,6 +1,7 @@
 package com.bsb.hike.ui.fragments;
 
 import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.concurrent.FutureTask;
 import java.util.Set;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -58,7 +60,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.adapters.EmptyConversationsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -70,6 +71,7 @@ import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.HikeDialog;
@@ -140,6 +142,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			db = HikeConversationsDatabase.getInstance();
 			db.deleteConversation(msisdns);
 
+			ContactManager.getInstance().removeContacts(msisdns);
 			return convs;
 		}
 
@@ -183,7 +186,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, 
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_START_NEW_CHAT_TIP,
-			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ };
+			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END };
 
 	private ConversationsAdapter mAdapter;
 
@@ -267,7 +270,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			addBottomPadding(ftueListView);
 		}
-		addFtueCards(ftueListItems);
+		if(HomeActivity.ftueContactsData.getHikeContacts().isEmpty())
+		{
+			addFtueCards(ftueListItems);
+		}
 		ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
 	}
 
@@ -538,7 +544,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		if (!(conv instanceof GroupConversation) && conv.getContactName() == null)
 		{
-			optionsList.add(HikeUserDatabase.getInstance().isBlocked(conv.getMsisdn())?getString(R.string.unblock_title):getString(R.string.block_title));
+			optionsList.add(ContactManager.getInstance().isBlocked(conv.getMsisdn())?getString(R.string.unblock_title):getString(R.string.block_title));
 		}
 		if (conv instanceof GroupConversation)
 		{
@@ -849,6 +855,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else if (tip.equals(HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL))
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_INFO_TIP));
+		}else if(tip.equals(HikeMessengerApp.ATOMIC_POP_UP_HTTP)){
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_HTTP_TIP));
+		}else if(tip.equals(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC)){
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_HTTP_TIP));
 		}
 	}
 
@@ -875,11 +885,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				HikeMessengerApp.addStealthMsisdnToMap(conv.getMsisdn());
 			}
 
-			if (conv.getMessages().isEmpty() && !(conv instanceof GroupConversation))
-			{
-				iter.remove();
-			}
-			else if ((stealthValue == HikeConstants.STEALTH_OFF || stealthValue == HikeConstants.STEALTH_ON_FAKE) && conv.isStealth())
+
+			if ((stealthValue == HikeConstants.STEALTH_OFF || stealthValue == HikeConstants.STEALTH_ON_FAKE) && conv.isStealth())
 			{
 				mConversationsAdded.add(conv.getMsisdn());
 				iter.remove();
@@ -1077,8 +1084,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			// left the group
 			else if ((conv instanceof GroupConversation) && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 			{
-				HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-				((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn(), false, false));
+				ContactManager conMgr = ContactManager.getInstance();
+				((GroupConversation) conv).setGroupParticipantList(conMgr.getGroupParticipants(conv.getMsisdn(), false, false));
 			}
 
 			final ConvMessage finalMessage = message;
@@ -1182,6 +1189,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						movedFromEmptyToNonEmpty();
 					}
 					displayedConversations.add(conversation);
+					Collections.sort(displayedConversations, mConversationsComparator);
 
 					notifyDataSetChanged();
 				}
@@ -1387,7 +1395,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				{
 					Conversation conversation = mConversationsByMSISDN.get(msisdn);
 
-					if (!wasViewSetup())
+					if (!wasViewSetup() || null == conversation)
 					{
 						return;
 					}
@@ -1407,8 +1415,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type))
 		{
 			String groupId = (String) object;
-			HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
-			final String groupName = db.getGroupName(groupId);
+			final String groupName = ContactManager.getInstance().getName(groupId);
 
 			final Conversation conv = mConversationsByMSISDN.get(groupId);
 			if (conv == null)
@@ -1804,8 +1811,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 							// left the group
 							else if ((conv instanceof GroupConversation) && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 							{
-								HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-								((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn(), false, false));
+								ContactManager conMgr = ContactManager.getInstance();
+								((GroupConversation) conv).setGroupParticipantList(conMgr.getGroupParticipants(conv.getMsisdn(), false, false));
 							}
 
 							final ConvMessage finalMessage = message;
@@ -1923,6 +1930,19 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						notifyDataSetChanged();
 					}
 				});
+			}
+		}
+		else if(HikePubSub.GROUP_END.equals(type))
+		{
+			String groupId = ((JSONObject) object).optString(HikeConstants.TO);
+			if(groupId != null)
+			{
+				final Conversation conv = mConversationsByMSISDN.get(groupId);
+				if (conv == null)
+				{
+					return;
+				}
+				((GroupConversation) conv).setGroupAlive(false);
 			}
 		}
 	}
@@ -2047,7 +2067,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return null;
 		}
 
-		return getListView().getChildAt(index);
+		return getListView().getChildAt(index- getListView().getFirstVisiblePosition());
 	}
 
 	private void updateViewForNameChange(Conversation conversation)
@@ -2070,7 +2090,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void updateViewForMessageStateChange(Conversation conversation, ConvMessage convMessage)
 	{
-		if (!wasViewSetup())
+		if (!wasViewSetup() || null == conversation)
 		{
 			Logger.d("UnreadBug", "Unread count event received but view wasn't setup");
 			return;
@@ -2148,7 +2168,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				return;
 			}
 
-			View parentView = getListView().getChildAt(newIndex);
+			View parentView = getListView().getChildAt(newIndex - getListView().getFirstVisiblePosition());
 
 			if (parentView == null)
 			{

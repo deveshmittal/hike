@@ -100,6 +100,7 @@ import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.DownloadSingleStickerTask;
 import com.bsb.hike.ui.ChatThread;
@@ -279,8 +280,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private VoiceMessagePlayer voiceMessagePlayer;
 
-	private String statusIdForTip;
-
 	private long msgIdForSdrTip = -1;
 
 	private SharedPreferences preferences;
@@ -307,6 +306,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private boolean isHikeToOfflineMode = false;
 
 	private String myMsisdn;
+	
+	private HighQualityThumbLoader hqThumbLoader;
 
 	/*
 	 * this is set of all the currently visible messages which are stuck in tick and are not sms
@@ -336,6 +337,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		setLastSentMessagePosition();
 		this.shownSdrIntroTip = preferences.getBoolean(HikeMessengerApp.SHOWN_SDR_INTRO_TIP, false);
 		this.myMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
+		
+		hqThumbLoader = new HighQualityThumbLoader();
+		hqThumbLoader.setImageFadeIn(false);
+		hqThumbLoader.setDefaultDrawableNull(false);
 	}
 
 	public void setChatTheme(ChatTheme theme)
@@ -1044,7 +1049,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				switch (fss.getFTState())
 				{
 				case INITIALIZED:
-				case PAUSING:
 				case IN_PROGRESS:
 					wtHolder.initialization.setVisibility(View.VISIBLE);
 					break;
@@ -1296,6 +1300,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				showThumbnail = ((convMessage.isSent()) || (conversation instanceof GroupConversation) || (!TextUtils.isEmpty(conversation.getContactName())) || (hikeFile
 						.wasFileDownloaded()));
+				
+					
 				if (hikeFile.getThumbnail() == null && !TextUtils.isEmpty(hikeFile.getFileKey()))
 				{
 					thumbnail = HikeMessengerApp.getLruCache().getFileIconFromCache(hikeFile.getFileKey());
@@ -1307,18 +1313,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				if (showThumbnail)
 				{
-					imageHolder.fileThumb.setBackgroundDrawable(thumbnail);
+					imageHolder.fileThumb.setImageDrawable(thumbnail);
+					hqThumbLoader.setLoadingImage(thumbnail);
+					hqThumbLoader.loadImage(hikeFile.getFilePath(), imageHolder.fileThumb, isListFlinging);
 				}
 				else
 				{
 					createMediaThumb(imageHolder.fileThumb);
 				}
-
+				
 				RelativeLayout.LayoutParams fileThumbParams = (RelativeLayout.LayoutParams) imageHolder.fileThumb.getLayoutParams();
 
 				if (showThumbnail)
 				{
-					imageHolder.fileThumb.setScaleType(ScaleType.CENTER);
+					imageHolder.fileThumb.setScaleType(ScaleType.CENTER_CROP);
 					fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
 					fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail.getIntrinsicHeight());
 					/*
@@ -1349,7 +1357,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							fileThumbParams.width = width;
 					}
 				}
-				imageHolder.fileThumb.setScaleType(ScaleType.CENTER);
+				imageHolder.fileThumb.setScaleType(ScaleType.CENTER_CROP);
 				imageHolder.fileThumb.setLayoutParams(fileThumbParams);
 
 				imageHolder.fileThumb.setVisibility(View.VISIBLE);
@@ -2423,7 +2431,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				String number = null;
 				String name = ((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn());
-				if (((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
+				if (((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getFirst().getContactInfo().isUnknownContact())
 				{
 					number = convMessage.getGroupParticipantMsisdn();
 				}
@@ -2455,6 +2463,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		int downloadImage;
 		int retryImage;
 		int pauseImage;
+		int playImage = -1;
 		if (ext)
 		{
 			retryImage = R.drawable.ic_retry_other;
@@ -2466,6 +2475,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			retryImage = R.drawable.ic_retry_image_video;
 			pauseImage = R.drawable.ic_pause_image_video;
 			downloadImage = R.drawable.ic_download_image_video;
+			playImage = R.drawable.ic_videoicon;
 		}
 		holder.ftAction.setVisibility(View.GONE);
 		holder.circularProgressBg.setVisibility(View.GONE);
@@ -2480,11 +2490,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				holder.ftAction.setVisibility(View.VISIBLE);
 				holder.circularProgressBg.setVisibility(View.VISIBLE);
 			}
-			else if (TextUtils.isEmpty(hikeFile.getFileKey()))
+			else
 			{
-				holder.ftAction.setImageResource(retryImage);
-				holder.ftAction.setVisibility(View.VISIBLE);
-				holder.circularProgressBg.setVisibility(View.VISIBLE);
+				if (TextUtils.isEmpty(hikeFile.getFileKey()))
+				{
+					holder.ftAction.setImageResource(retryImage);
+					holder.ftAction.setVisibility(View.VISIBLE);
+					holder.circularProgressBg.setVisibility(View.VISIBLE);
+				}
+				else if(hikeFile.getHikeFileType() == HikeFileType.VIDEO && !ext)
+				{
+					holder.ftAction.setImageResource(playImage);
+					holder.ftAction.setVisibility(View.VISIBLE);
+					holder.circularProgressBg.setVisibility(View.VISIBLE);
+				}
 			}
 			break;
 		case IN_PROGRESS:
@@ -2494,7 +2513,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			showTransferProgress(holder, fss, msgId, hikeFile, isSent);
 			break;
 		case INITIALIZED:
-		case PAUSING:
 			holder.ftAction.setImageResource(0);
 			holder.ftAction.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
@@ -2512,6 +2530,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.ftAction.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 			break;
+		case COMPLETED:
+			if(hikeFile.getHikeFileType() == HikeFileType.VIDEO && !ext)
+			{
+				holder.ftAction.setImageResource(playImage);
+				holder.ftAction.setVisibility(View.VISIBLE);
+				holder.circularProgressBg.setVisibility(View.VISIBLE);
+			}
+			break;
 		default:
 			break;
 		}
@@ -2527,9 +2553,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		int progress = FileTransferManager.getInstance(context).getFTProgress(msgId, hikeFile.getFile(), isSent);
 		int chunkSize = FileTransferManager.getInstance(context).getChunkSize(msgId);
-		if (fss.getTotalSize() <= 0 || (fss.getTransferredSize() == 0 && fss.getFTState() == FTState.IN_PROGRESS))
+		if (fss.getTotalSize() <= 0 && isSent)
 		{
 			showTransferInitialization(holder, hikeFile);
+		}else if((fss.getTransferredSize() == 0 && fss.getFTState() == FTState.IN_PROGRESS)){
+			holder.circularProgress.setProgress(5 * 0.01f);
+			holder.circularProgress.setVisibility(View.VISIBLE);
+			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}
 		else
 		{
@@ -2586,8 +2616,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			final ConvMessage message = (ConvMessage) v.getTag();
 			ArrayList<String> optionsList = new ArrayList<String>();
 			String number = null;
-			final String name = ((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().getName();
-			if (((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
+			final String name = ((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getSecond();
+			if (((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getFirst().getContactInfo().isUnknownContact())
 			{
 				number = message.getGroupParticipantMsisdn();
 				optionsList.add(context.getString(R.string.add_to_contacts));
@@ -3071,7 +3101,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						{
 							FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 						}
-						else if (fss.getFTState() != FTState.PAUSING && fss.getFTState() != FTState.INITIALIZED)
+						else if (fss.getFTState() != FTState.INITIALIZED)
 						{
 							FileTransferManager.getInstance(context).uploadFile(convMessage, conversation.isOnhike());
 						}
@@ -3100,7 +3130,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						FileTransferManager.getInstance(context).pauseTask(convMessage.getMsgID());
 					}
-					else if (fss.getFTState() != FTState.PAUSING && fss.getFTState() != FTState.INITIALIZED)
+					else if (fss.getFTState() != FTState.INITIALIZED)
 					{
 						FileTransferManager.getInstance(context).downloadFile(receivedFile, hikeFile.getFileKey(), convMessage.getMsgID(), hikeFile.getHikeFileType(), convMessage,
 								true);
@@ -4173,39 +4203,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			statusHolder.container.setEnabled(false);
 		}
-
-		boolean showTip = false;
-		boolean shownStatusTip = preferences.getBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, false);
-
-		if (!shownStatusTip)
-		{
-			if (chatThread.tipView == null)
-			{
-				showTip = true;
-			}
-			else
-			{
-				Object tag = chatThread.tipView.getTag();
-				if(tag instanceof TipType){
-				TipType tipType = (TipType) tag;
-				if (tipType == TipType.STATUS && statusMessage.getMappedId().equals(statusIdForTip))
-				{
-					showTip = true;
-				}
-				}
-			}
-		}
-
-		if (showTip)
-		{
-			chatThread.tipView = v.findViewById(R.id.status_tip);
-			statusIdForTip = statusMessage.getMappedId();
-			HikeTip.showTip(chatThread, TipType.STATUS, chatThread.tipView, Utils.getFirstName(conversation.getLabel()));
-		}
-		else
-		{
-			v.findViewById(R.id.status_tip).setVisibility(View.GONE);
-		}
 	}
 
 	private void fillPinTextData(StatusViewHolder statusHolder, ConvMessage convMessage, View v)
@@ -4234,5 +4231,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 
 
+	}
+	
+	private boolean isListFlinging;
+
+	public void setIsListFlinging(boolean isFling)
+	{
+		boolean notify = isFling != isListFlinging;
+
+		isListFlinging = isFling;
+		hqThumbLoader.setPauseWork(isListFlinging);
+		
+		if(notify && !isListFlinging){
+			notifyDataSetChanged();
+		}
 	}
 }

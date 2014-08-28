@@ -2,12 +2,14 @@ package com.bsb.hike.adapters;
 
 import java.util.List;
 
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.text.util.Linkify;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +28,6 @@ import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupConversation;
@@ -41,12 +42,14 @@ import com.bsb.hike.models.ProfileItem.ProfileSharedMedia;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 import com.bsb.hike.smartImageLoader.SharedFileImageLoader;
 import com.bsb.hike.smartImageLoader.TimelineImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -371,7 +374,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			}
 
 			String mappedId = msisdn + PROFILE_ROUND_SUFFIX;
-			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(mappedId, null, false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
+			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(mappedId, null, false, !ContactManager.getInstance().hasIcon(msisdn));
 			viewHolder.image.setTag(imageViewerInfo);
 			if (profilePreview == null)
 			{
@@ -440,7 +443,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			String contname = TextUtils.isEmpty(mContactInfo.getName()) ? mContactInfo.getMsisdn() : mContactInfo.getName();
 			viewHolder.text.setText(contname);
 			String mapedId = contmsisdn + PROFILE_PIC_SUFFIX;
-			ImageViewerInfo imageViewerInf = new ImageViewerInfo(mapedId, null, false, !HikeUserDatabase.getInstance().hasIcon(contmsisdn));
+			ImageViewerInfo imageViewerInf = new ImageViewerInfo(mapedId, null, false, !ContactManager.getInstance().hasIcon(contmsisdn));
 			viewHolder.image.setTag(imageViewerInf);
 			if (profilePreview == null)
 			{
@@ -583,16 +586,18 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			LinearLayout parentView = (LinearLayout) v;
 			parentView.removeAllViews();
 
-			GroupParticipant[] groupParticipants = ((ProfileGroupItem) profileItem).getGroupParticipants();
+			List<PairModified<GroupParticipant, String>> groupParticipants = ((ProfileGroupItem) profileItem).getGroupParticipants();
 			parentView.setBackgroundColor(Color.WHITE);
-			for (int i = 0; i < groupParticipants.length; i++)
+			for (PairModified<GroupParticipant, String> groupParticipantPair : groupParticipants)
 			{
+
+				GroupParticipant groupParticipant = groupParticipantPair.getFirst();
+
 				View groupParticipantParentView = inflater.inflate(R.layout.group_profile_item, parentView, false);
 
 				TextView nameTextView = (TextView) groupParticipantParentView.findViewById(R.id.name);
 				TextView mainInfo = (TextView) groupParticipantParentView.findViewById(R.id.main_info);
 
-				GroupParticipant groupParticipant = groupParticipants[i];
 				ImageView avatar = (ImageView) groupParticipantParentView.findViewById(R.id.avatar);
 				ImageView avatarFrame = (ImageView) groupParticipantParentView.findViewById(R.id.avatar_frame);
 				View ownerIndicator = groupParticipantParentView.findViewById(R.id.owner_indicator);
@@ -605,6 +610,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				{
 					ownerIndicator.setVisibility(View.GONE);
 				}
+				
 				int offline = contactInfo.getOffline();
 				String lastSeenString = null;
 				boolean showingLastSeen = false;
@@ -613,7 +619,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					lastSeenString = Utils.getLastSeenTimeAsString(context, contactInfo.getLastSeenTime(), offline, true);
 					showingLastSeen = !TextUtils.isEmpty(lastSeenString);
 				}
-				nameTextView.setText(contactInfo.getFirstNameAndSurname());
+				String groupParticipantName = groupParticipantPair.getSecond();
+				if (null == groupParticipantName)
+				{
+					groupParticipantName = contactInfo.getFirstNameAndSurname();
+				}
+				nameTextView.setText(groupParticipantName);
 				if (!showingLastSeen)
 				{
 					mainInfo.setText(contactInfo.isOnhike() ? R.string.on_hike : R.string.on_sms);
@@ -639,6 +650,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				groupParticipantParentView.setOnClickListener(profileActivity);
 
 				parentView.addView(groupParticipantParentView);
+
 			}
 			break;
 
