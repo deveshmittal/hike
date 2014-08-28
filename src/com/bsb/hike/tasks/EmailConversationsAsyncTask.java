@@ -95,7 +95,7 @@ public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, C
 
 					if (gPart != null)
 					{
-						fromString = (isSent == true) ? activity.getResources().getString(R.string.me_key) : gPart.getContactInfo().getName();
+						fromString = (isSent == true) ? activity.getResources().getString(R.string.me_key) : groupParticipantPair.getSecond();
 					}
 					else
 					{
