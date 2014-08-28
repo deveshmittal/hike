@@ -151,8 +151,9 @@ public class ContactManager implements ITransientCache
 	{
 		for (ContactInfo contact : contacts)
 		{
-			persistenceCache.contactDeleted(contact);
-			transientCache.contactDeleted(contact);
+			contact.setName(null);
+			contact.setId(contact.getMsisdn());
+			updateContacts(contact);
 		}
 	}
 
@@ -163,15 +164,8 @@ public class ContactManager implements ITransientCache
 	 */
 	public void updateContacts(ContactInfo contact)
 	{
-		ContactInfo con = persistenceCache.getContact(contact.getMsisdn());
-		if (null != con)
-		{
-			persistenceCache.updateContact(contact);
-		}
-		else
-		{
-			transientCache.updateContact(contact);
-		}
+		persistenceCache.updateContact(contact);
+		transientCache.updateContact(contact);
 	}
 
 	/**
@@ -322,7 +316,14 @@ public class ContactManager implements ITransientCache
 				{
 					con = transientCache.getContact(msisdn);
 					persistenceCache.insertContact(con, ifOneToOneConversation);
-
+				}
+				else
+				{
+					/*
+					 * Now contact is in persistence cache but it can be either in 1-1 contacts map or group contacts map. Below method will move the contact from group map to 1-1
+					 * map if contact is of 1-1 conversation and vice versa
+					 */
+					persistenceCache.move(msisdn, ifOneToOneConversation);
 				}
 			}
 		}
@@ -407,15 +408,15 @@ public class ContactManager implements ITransientCache
 	 * 
 	 * @param map
 	 */
-	public void removeOlderLastGroupMsisdns(Map<String, JSONObject> map)
+	public void removeOlderLastGroupMsisdns(Map<String, List<String>> map)
 	{
 		List<String> msisdns = new ArrayList<String>();
 		List<String> msisdnsDB = new ArrayList<String>();
 
-		for (Entry<String, JSONObject> mapEntry : map.entrySet())
+		for (Entry<String, List<String>> mapEntry : map.entrySet())
 		{
 			String groupId = mapEntry.getKey();
-			List<String> lastMsisdns = HikeConversationsDatabase.getInstance().getGroupLastMsgMsisdn(mapEntry.getValue());
+			List<String> lastMsisdns = mapEntry.getValue();
 			msisdns.addAll(persistenceCache.removeOlderLastGroupMsisdn(groupId, lastMsisdns));
 		}
 
@@ -432,6 +433,19 @@ public class ContactManager implements ITransientCache
 			}
 		}
 		persistenceCache.putInCache(msisdnsDB, false);
+		for (Entry<String, List<String>> mapEntry : map.entrySet())
+		{
+			String groupId = mapEntry.getKey();
+			List<String> last = mapEntry.getValue();
+			for (String ms : last)
+			{
+				ContactInfo contact = getContact(ms);
+				if (null != contact.getName())
+				{
+					setGroupParticipantContactName(groupId, ms, contact.getName());
+				}
+			}
+		}
 	}
 
 	/**
@@ -1149,7 +1163,13 @@ public class ContactManager implements ITransientCache
 				}
 			}
 		}
-		transientCache.insertGroupParticipants(groupId, groupParticipantsMap);
+
+		/*
+		 * When activeOnly is false and notShownStatusMsgOnly is false then only we get all the group participants therefore we should insert in transient cache only when we have
+		 * all the group participants and not partial.
+		 */
+		if (!activeOnly && !notShownStatusMsgOnly)
+			transientCache.insertGroupParticipants(groupId, groupParticipantsMap);
 
 		List<PairModified<GroupParticipant, String>> groupParticipantsList = new ArrayList<PairModified<GroupParticipant, String>>(groupParticipantsMap.values());
 		return groupParticipantsList;

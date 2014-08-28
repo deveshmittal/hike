@@ -15,7 +15,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
-import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
@@ -57,7 +56,7 @@ public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, C
 			HikeConversationsDatabase db = null;
 			String msisdn = convs[k].getMsisdn();
 			StringBuilder sBuilder = new StringBuilder();
-			Map<String, PairModified<GroupParticipant,String>> participantMap = null;
+			Map<String, PairModified<GroupParticipant, String>> participantMap = null;
 
 			db = HikeConversationsDatabase.getInstance();
 			Conversation conv = db.getConversation(msisdn, -1);
@@ -89,11 +88,14 @@ public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, C
 				boolean isSent = cMessage.isSent();
 				if (cMessage.isGroupChat()) // gc naming logic
 				{
-					GroupParticipant gPart = participantMap.get(cMessage.getGroupParticipantMsisdn()).getFirst();
+					GroupParticipant gPart = null;
+					PairModified<GroupParticipant, String> groupParticipantPair = participantMap.get(cMessage.getGroupParticipantMsisdn());
+					if(null != groupParticipantPair)
+						gPart = groupParticipantPair.getFirst();
 
 					if (gPart != null)
 					{
-						fromString = (isSent == true) ? activity.getResources().getString(R.string.me_key) : gPart.getContactInfo().getName();
+						fromString = (isSent == true) ? activity.getResources().getString(R.string.me_key) : groupParticipantPair.getSecond();
 					}
 					else
 					{

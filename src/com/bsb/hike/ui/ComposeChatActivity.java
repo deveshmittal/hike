@@ -504,7 +504,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		for (ContactInfo particpant : selectedContactList)
 		{
 			GroupParticipant groupParticipant = new GroupParticipant(particpant);
-			participantList.put(particpant.getMsisdn(), new PairModified<GroupParticipant, String>(groupParticipant, null));
+			participantList.put(particpant.getMsisdn(), new PairModified<GroupParticipant, String>(groupParticipant, groupParticipant.getContactInfo().getNameOrMsisdn()));
 		}
 		ContactInfo userContactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 

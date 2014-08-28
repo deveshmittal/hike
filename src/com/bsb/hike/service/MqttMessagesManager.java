@@ -461,6 +461,7 @@ public class MqttMessagesManager
 		 */
 		if (!ContactManager.getInstance().isConvExists(convMessage.getMsisdn()))
 		{
+			Logger.d(getClass().getSimpleName(), "conversation does not exist");
 			return;
 		}
 

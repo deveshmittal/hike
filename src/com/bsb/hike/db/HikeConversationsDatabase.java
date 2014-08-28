@@ -1245,7 +1245,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			int unreadMessageCount = 0;
 			int unreadPinMessageCount = 0;
 
-			Map<String, JSONObject> map = new HashMap<String, JSONObject>();
+			Map<String, List<String>> map = new HashMap<String, List<String>>();
 
 			for (ConvMessage conv : convMessages)
 			{
@@ -1314,9 +1314,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				// upgrade groupInfoTable
 				updateReadBy(conv);
-				if (Utils.isGroupConversation(conv.getMsisdn()) && conv.getMetadata() != null)
+				if (Utils.isGroupConversation(conv.getMsisdn()))
 				{
-					map.put(conv.getMsisdn(), conv.getMetadata().getJSON());
+					List<String> lastMsisdns = new ArrayList<String>();
+					if (conv.getMetadata() != null)
+						lastMsisdns = getGroupLastMsgMsisdn(conv.getMetadata().getJSON());
+
+					if (lastMsisdns.size() == 0 && null != conv.getGroupParticipantMsisdn())
+					{
+						lastMsisdns.add(conv.getGroupParticipantMsisdn());
+					}
+					map.put(conv.getMsisdn(), lastMsisdns);
 				}
 			}
 
@@ -3043,8 +3051,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.NAME }, DBConstants.GROUP_ID + " = ? AND " + DBConstants.MSISDN
-					+ " IN ? ", new String[] { groupId, msisdnsDB.toString() }, null, null, null);
+			c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.NAME }, DBConstants.GROUP_ID + " =? AND " + DBConstants.MSISDN + " IN "
+					+ msisdnsDB.toString(), new String[] { groupId }, null, null, null);
 			String name = "";
 
 			while (c.moveToNext())
