@@ -2432,7 +2432,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public void onSharedFilesClick(View v)
 	{
-		Toast.makeText(getApplicationContext(), "Shared Files clicked  ", Toast.LENGTH_LONG).show();
+		Intent intent = new Intent(this, SharedOtherFilesActivity.class);
+		intent.putExtra(HikeConstants.Extras.MSISDN, mLocalMSISDN);
+		startActivity(intent);
 	}
 	
 	public void messageBtnClicked(View v)
