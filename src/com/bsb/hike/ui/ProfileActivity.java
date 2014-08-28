@@ -214,6 +214,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private int sharedMediaCount = 0;
 	
+	private int sharedPinCount;
+	
 	private List<HikeSharedFile> sharedMedia;
 	
 	private int actualSize;
@@ -680,6 +682,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 		groupConversation = (GroupConversation) hCDB.getConversation(mLocalMSISDN, 0);
 		sharedMediaCount = hCDB.getSharedMediaCount(mLocalMSISDN);
+		sharedPinCount = hCDB.getPinCount(mLocalMSISDN);
 		participantMap = groupConversation.getGroupParticipantList();
 		List<String> inactiveMsisdns = new ArrayList<String>();
 		/*
@@ -720,6 +723,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		// Adding an item for the header
 		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.HEADER_ID_GROUP, null));
 		shouldAddSharedMedia();
+		profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT,getResources().getString(R.string.shared_cont_pa), 0, sharedPinCount, null));
+		
 		List<GroupParticipant> participants = new ArrayList<GroupParticipant>(participantMap.values());
 
 		if (!participantMap.containsKey(userInfo.getContactInfo().getMsisdn()))
@@ -2368,4 +2373,23 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		return super.onKeyUp(keyCode, event);
 	}
-}
+	
+	public void openPinHistory(View v)
+	{
+		if(groupConversation!=null)
+		{
+			Intent intent = new Intent();
+			intent.setClass(ProfileActivity.this, PinHistoryActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.putExtra(HikeConstants.TEXT_PINS, mLocalMSISDN);
+			startActivity(intent);
+			return;
+		}
+		Toast.makeText(ProfileActivity.this, "Shared Groups was Clicked ", Toast.LENGTH_LONG).show();
+	}
+	
+	public void onSharedFilesClick(View v)
+	{
+		Toast.makeText(getApplicationContext(), "Shared Files clicked  ", Toast.LENGTH_LONG).show();
+	}
+	

@@ -119,5 +119,36 @@ public abstract class ProfileItem
 		private int sizeOfImage;
 	}
 	
+	public static class ProfileSharedContent extends ProfileItem
+	{
+		public ProfileSharedContent(int itemId, Object text)
+		{
+			super(itemId, text);
+			// TODO Auto-generated constructor stub
+		}
+		public ProfileSharedContent(int itemId, Object text, int sharedFiles, int sharedPins ,List<HikeSharedFile> sharedFilesList)
+		{
+			super(itemId,text);
+			this.sharedFilesList = sharedFilesList;
+			this.sharedFiles = sharedFiles;
+			this.sharedPins = sharedPins;
+		}
+		
+		public List<HikeSharedFile> getSharedFileList()
+		{
+			return sharedFilesList;
+		}
+		public int getSharedFilesCount()
+		{
+			return sharedFiles;
+		}
+		public int getSharedPinsCount()
+		{
+			return sharedPins;
+		}
+		private List<HikeSharedFile> sharedFilesList;
+		private int sharedFiles;
+		private int sharedPins;
+	}
 	
 }

@@ -35,6 +35,7 @@ import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.ProfileItem.ProfileGroupItem;
+import com.bsb.hike.models.ProfileItem.ProfileSharedContent;
 import com.bsb.hike.models.ProfileItem.ProfileSharedMedia;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
@@ -135,6 +136,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		{
 			viewType = ViewType.SHARED_MEDIA;
 		}
+		else if (ProfileItem.SHARED_CONTENT == itemId)
+		{
+			viewType = ViewType.SHARED_CONTENT;
+		}
 		else if (ProfileItem.EMPTY_ID == itemId)
 		{
 			viewType = ViewType.EMPTY_STATUS;
@@ -223,6 +228,18 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.subText = (TextView) v.findViewById(R.id.count);
 				viewHolder.infoContainer = v.findViewById(R.id.shared_media_items);
 				viewHolder.extraInfo = (TextView) v.findViewById(R.id.sm_emptystate);
+				break;
+
+			case SHARED_CONTENT:
+				v = inflater.inflate(R.layout.shared_content, null);
+				viewHolder.parent = v.findViewById(R.id.shared_content);
+				viewHolder.text = (TextView) viewHolder.parent.findViewById(R.id.name);
+				viewHolder.subText = (TextView) viewHolder.parent.findViewById(R.id.count);
+				viewHolder.extraInfo = (TextView) v.findViewById(R.id.count_pin);
+				viewHolder.infoContainer = v.findViewById(R.id.shared_content_layout);
+				viewHolder.groupOrPins = (TextView) v.findViewById(R.id.shared_pins);
+				viewHolder.sharedFilesCount = (TextView) v.findViewById(R.id.count_sf);
+				viewHolder.icon = (ImageView) v.findViewById(R.id.shared_pin_icon);
 				break;
 
 
@@ -709,9 +726,15 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	{
 		TextView text;
 
+		EditText editName;
+
 		TextView subText;
 
 		TextView extraInfo;
+		
+		TextView sharedFilesCount;
+		
+		TextView groupOrPins;
 
 		ImageView image;
 
