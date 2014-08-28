@@ -721,6 +721,7 @@ public class UploadFileTask extends FileTransferBase
 				{
 					start += chunkSize;
 					incrementBytesTransferred(chunkSize);
+					saveFileState(X_SESSION_ID);
 					resetAndUpdate = true; // To reset retry logic and update UI
 
 					end = (int) length;
