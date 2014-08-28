@@ -638,6 +638,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		profileItems.clear();
 		addProfileHeader();
+		profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.PHONE_NUMBER, getResources().getString(R.string.phone_pa)));
+		}
 	}
 
 	private void shouldAddSharedMedia()
@@ -2423,3 +2425,14 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		Toast.makeText(getApplicationContext(), "Shared Files clicked  ", Toast.LENGTH_LONG).show();
 	}
 	
+	public void messageBtnClicked(View v)
+	{
+		openChatThread(contactInfo);
+	}
+	
+	public void callBtnClicked(View v)
+	{
+		Utils.onCallClicked(ProfileActivity.this, mLocalMSISDN);
+	}
+	
+}

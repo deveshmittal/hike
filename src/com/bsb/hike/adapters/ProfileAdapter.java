@@ -175,6 +175,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		{
 			viewType = ViewType.HEADER_PROFILE;
 		}
+		else if (ProfileItem.PHONE_NUMBER == itemId)
+		{
+			viewType = ViewType.PHONE_NUMBER;
+		}
 		else
 		{
 			if (groupProfile)
@@ -318,30 +322,13 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.parent = v.findViewById(R.id.main_content);
 				break;
 
-			case EMPTY_STATUS:
-				v = inflater.inflate(R.layout.profile_timeline_negative_item, null);
-
-				viewHolder.text = (TextView) v.findViewById(R.id.info);
-				viewHolder.icon = (ImageView) v.findViewById(R.id.icon);
-				viewHolder.btn1 = (Button) v.findViewById(R.id.btn);
-				viewHolder.btn2 = (Button) v.findViewById(R.id.add_sms_friend_btn);
+			case PHONE_NUMBER:
+				v = inflater.inflate(R.layout.shared_content, null);
+				viewHolder.infoContainer = v.findViewById(R.id.shared_content);
+				viewHolder.text = (TextView) viewHolder.infoContainer.findViewById(R.id.name);
+				viewHolder.subText = (TextView) viewHolder.infoContainer.findViewById(R.id.count);
+				viewHolder.parent = v.findViewById(R.id.phone_num);
 				break;
-
-			case REQUEST:
-				v = inflater.inflate(R.layout.profile_friend_request_item, null);
-
-				viewHolder.icon = (ImageView) v.findViewById(R.id.avatar);
-
-				viewHolder.text = (TextView) v.findViewById(R.id.name);
-				viewHolder.subText = (TextView) v.findViewById(R.id.info);
-				viewHolder.extraInfo = (TextView) v.findViewById(R.id.extra_info);
-
-				viewHolder.infoContainer = v.findViewById(R.id.btn_container);
-				viewHolder.imageBtn1 = (ImageButton) v.findViewById(R.id.yes_btn);
-				viewHolder.imageBtn2 = (ImageButton) v.findViewById(R.id.no_btn);
-
-				viewHolder.btn1 = (Button) v.findViewById(R.id.text_btn);
-				viewHolder.parent = v.findViewById(R.id.main_content);
 			}
 
 			v.setTag(viewHolder);
@@ -520,6 +507,26 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			
 			break;
 
+
+		case PHONE_NUMBER:
+			LinearLayout parentll = (LinearLayout) viewHolder.parent;
+			parentll.removeAllViews();
+			parentll.setVisibility(View.VISIBLE);
+			String head = (String) profileItem.getText();
+			viewHolder.text.setText(head);
+			viewHolder.subText.setVisibility(View.GONE);
+			View phoneNumberView = inflater.inflate(R.layout.phone_num_layout, parentll, false);
+			TextView phoneNum = (TextView) phoneNumberView.findViewById(R.id.name);
+			phoneNum.setText(mContactInfo.getMsisdn());
+			TextView phoneType = (TextView) phoneNumberView.findViewById(R.id.main_info);
+			if(mContactInfo.getMsisdnType().length()>0)
+				phoneType.setText(mContactInfo.getMsisdnType());
+			else
+				phoneType.setVisibility(View.GONE);
+			
+			parentll.addView(phoneNumberView);
+			
+			break;
 
 		case MEMBERS:
 			viewHolder.text.setText(context.getResources().getString(R.string.members));
