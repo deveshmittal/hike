@@ -349,5 +349,6 @@
     <color name="pin_text_color">#45400e</color>
     <color name="red_empty_field">#ef554e</color>
     <color name="pin_color">#fff38f</color>    
+    <color name="add_fav">#ffa201</color>
 </resources>
 	

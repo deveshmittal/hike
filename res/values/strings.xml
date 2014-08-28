@@ -565,7 +565,7 @@
     <string name="add">Add</string>
     <string name="tap_save_contact">Tap to save contact</string>
     <string name="no_updates">No updates from %1$s yet.</string>
-    <string name="add_people">Add people</string>
+    <string name="add_people">ADD A MEMBER</string>
     <string name="email_conversation">Email Conversation</string>
     <string name="me_key">me</string>
     <string name="group_name_email">"Group "</string>
@@ -768,7 +768,7 @@
     <string name="i_am_a_girl">I am a girl</string>
     <string name="about_you">About you</string>
     <string name="tell_us_more">Tell us more</string>
-    <string name="add_friend_popup_msg">You can message anyone but only your friends can see your status updates and last seen. Choose them wisely!</string>
+    <string name="add_friend_popup_msg">You can message anyone but only your friends can see your status updates and last seen. Choose them wisely!</string>
     <string name="start_adding">Start adding friends</string>
     <string name="how_young_are_you">How young are you?</string>
     <string name="your_name">Your name</string>
@@ -855,7 +855,7 @@
 	<string name="add_as_favorite_notification">%1$s added you as a favorite</string>
     <string name="add_as_favorite_notification_line">Added you as a favorite</string>
     <string name="favorite_confirmed_notification">You can now see %1$s\'s Last Seen and Status Updates</string>
-    <string name="add_favorites_popup_msg">You can message anyone but only your favorites can see your status updates and last seen. Choose them wisely!</string>
+    <string name="add_favorites_popup_msg">You can message anyone but only your favorites can see your status updates and last seen. Choose them wisely!</string>
     <string name="favorites_on_hike_tut">Favorites on hike</string>
     <string name="start_adding_favorites">Start adding favorites</string>
     <string name="favorites_upper_case">FAVORITES</string>
@@ -1134,6 +1134,17 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="delete_my_account">DELETE MY ACCOUNT</string>
     <string name="hike_extras">Hike Extras</string>
     <string name="shared_media">Shared Media</string>
+    <string name="group_admin">ADMIN</string>
     <string name="shared_files">Shared Files</string>
-    
+    <string name="add_btn">ADD</string>
+    <string name="not_now">NOT NOW</string>
+    <string name="on_hike">on hike</string>
+    <string name="add_fav">add to favorites</string>
+    <string name="shared_med">SHARED MEDIA</string>
+    <string name="pins">Pins</string>
+    <string name="groups">Groups</string>
+    <string name="members">MEMBERS</string>
+    <string name="phone_pa">PHONE</string>
+    <string name="shared_cont_pa">SHARED CONTENT</string>
+    <string name="no_media">no media yet :(</string>
 </resources>
