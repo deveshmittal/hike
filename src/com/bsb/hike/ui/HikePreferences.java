@@ -221,6 +221,19 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (mutePreference != null)
 		{
 			mutePreference.setOnPreferenceClickListener(this);
+			mutePreference.setOnPreferenceChangeListener(this);
+		}
+		
+		Preference h2oNotifPreference = getPreferenceScreen().findPreference(HikeConstants.H2O_NOTIF_BOOLEAN_PREF);
+		if (h2oNotifPreference != null)
+		{
+			h2oNotifPreference.setOnPreferenceChangeListener(this);
+		}
+		
+		Preference nujNotifPreference = getPreferenceScreen().findPreference(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF);
+		if (nujNotifPreference != null)
+		{
+			nujNotifPreference.setOnPreferenceChangeListener(this);
 		}
 
 		Preference muteChatBgPreference = getPreferenceScreen().findPreference(HikeConstants.CHAT_BG_NOTIFICATION_PREF);
@@ -755,6 +768,30 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			Utils.setupUri(this.getApplicationContext());
 			LocalBroadcastManager.getInstance(this.getApplicationContext()).sendBroadcast(new Intent(HikePubSub.SSL_PREFERENCE_CHANGED));
+		}
+		else if (HikeConstants.STATUS_BOOLEAN_PREF.equals(preference.getKey()))
+		{
+			//Handled in OnPreferenceClick
+		}
+		else if (HikeConstants.NUJ_NOTIF_BOOLEAN_PREF.equals(preference.getKey()))
+		{
+			if(isChecked)
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_ON);
+			}
+			else{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_OFF);
+			}
+		}
+		else if (HikeConstants.H2O_NOTIF_BOOLEAN_PREF.equals(preference.getKey()))
+		{
+			if(isChecked)
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_ON);
+			}
+			else{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_OFF);
+			}
 		}
 		return false;
 	}

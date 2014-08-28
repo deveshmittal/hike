@@ -10,16 +10,15 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.SmileyParser;
-import com.bsb.hike.utils.Utils;
 
 public class HikeNotificationUtils
 {
+
 	/**
 	 * Utility method to get a "msisdn/name - message" preview from ConvMsg.
 	 * 
@@ -118,7 +117,7 @@ public class HikeNotificationUtils
 	 * @param argMsisdn
 	 * @return
 	 */
-	public static String getNameForMsisdn(Context context, HikeConversationsDatabase convDb, String argMsisdn)
+	public static String getNameForMsisdn(Context context, String argMsisdn)
 	{
 
 		// TODO: Use new contact manager class here instead of querying from db.

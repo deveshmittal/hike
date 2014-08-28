@@ -4908,4 +4908,40 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			mDb.delete(DBConstants.CONVERSATIONS_TABLE, DBConstants.MSISDN + " IN " + deleteSelectionString, null);
 		}
 	}
+
+	/**
+	 * Returns the sum of unread messages for all conversations.
+	 * 
+	 * @return
+	 */
+	public int getTotalUnreadMessages()
+	{
+		int unreadMessages = 0;
+		Cursor c = null;
+
+		try
+		{
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.UNREAD_COUNT }, null, null, null, null, null);
+
+			final int unreadMessageColumn = c.getColumnIndex(DBConstants.UNREAD_COUNT);
+
+			if (c.moveToFirst())
+			{
+				do
+				{
+					unreadMessages += c.getInt(unreadMessageColumn);
+				}
+				while (c.moveToNext());
+			}
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+
+		return unreadMessages;
+	}
 }
