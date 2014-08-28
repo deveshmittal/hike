@@ -185,21 +185,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		}
 		else
 		{
-			if (groupProfile)
+			StatusMessage statusMessage = ((ProfileStatusItem) profileItem).getStatusMessage();
+			if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
 			{
-				viewType = ViewType.GROUP_PARTICIPANT;
+				viewType = ViewType.PROFILE_PIC_UPDATE;
 			}
 			else
 			{
-				StatusMessage statusMessage = ((ProfileStatusItem) profileItem).getStatusMessage();
-				if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
-				{
-					viewType = ViewType.PROFILE_PIC_UPDATE;
-				}
-				else
-				{
-					viewType = ViewType.STATUS;
-				}
+				viewType = ViewType.STATUS;
 			}
 		}
 		return viewType.ordinal();
@@ -439,10 +432,26 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				}
 			}
 			break;
+		case HEADER:
+			
+			String contmsisdn = mContactInfo.getMsisdn();
+			String contname = TextUtils.isEmpty(mContactInfo.getName()) ? mContactInfo.getMsisdn() : mContactInfo.getName();
+			viewHolder.text.setText(contname);
+			String mapedId = contmsisdn + PROFILE_PIC_SUFFIX;
+			ImageViewerInfo imageViewerInf = new ImageViewerInfo(mapedId, null, false, !HikeUserDatabase.getInstance().hasIcon(contmsisdn));
+			viewHolder.image.setTag(imageViewerInf);
+			if (profilePreview == null)
+			{
+				profileImageLoader.loadImage(mapedId, viewHolder.image, isListFlinging);
 			}
 			else
 			{
-				viewHolder.icon.setImageResource(R.drawable.ic_new_conversation);
+				viewHolder.image.setImageBitmap(profilePreview);
+			}
+			viewHolder.icon.setVisibility(View.VISIBLE);
+			if (myProfile)
+			{
+				viewHolder.icon.setImageResource(R.drawable.ic_change_profile_pic);
 			}
 
 			if (mContactInfo != null)
@@ -519,6 +528,24 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			
 			break;
 
+		case SHARED_CONTENT:
+			viewHolder.infoContainer.setVisibility(View.VISIBLE);
+			String heading = (String) profileItem.getText();
+			viewHolder.text.setText(heading);
+			viewHolder.sharedFilesCount.setText(""+ ((ProfileSharedContent) profileItem).getSharedFilesCount());
+			viewHolder.extraInfo.setText(""+ ((ProfileSharedContent) profileItem).getSharedPinsCount()); //PinCount
+			viewHolder.subText.setText(" " + ((ProfileSharedContent) profileItem).getSharedFilesCount() + ((ProfileSharedContent) profileItem).getSharedPinsCount()); 
+
+			if(groupProfile)
+			{	viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
+				viewHolder.icon.setBackground(context.getResources().getDrawable(R.drawable.ic_pin_empty_state_default));
+			}
+			else
+			{
+				viewHolder.groupOrPins.setText(context.getResources().getString(R.string.groups));
+				viewHolder.icon.setBackground(context.getResources().getDrawable(R.drawable.ic_group));
+			}
+			break;
 
 		case PHONE_NUMBER:
 			LinearLayout parentll = (LinearLayout) viewHolder.parent;
@@ -631,7 +658,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			StatusMessage statusMessage = ((ProfileStatusItem) profileItem).getStatusMessage();
 			viewHolder.text.setText(myProfile ? context.getString(R.string.me) : statusMessage.getNotNullName());
 
-			if(statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED || statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST)
+			if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED
+					|| statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST)
 			{
 				boolean friendRequestAccepted = statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED;
 

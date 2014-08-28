@@ -698,6 +698,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.SHOW_CONTACTS_STATUS, getJoinedHikeStatus(contactInfo)));
 	}
 	
+	private void addStatusMessagesAsMyProfileItems(List<StatusMessage> statusMessages)
+	{
 		for (StatusMessage statusMessage : statusMessages)
 		{
 			profileItems.add(new ProfileItem.ProfileStatusItem(statusMessage));
@@ -848,11 +850,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		// Adding an item for the header
 		profileItems.add(new ProfileItem.ProfileStatusItem(ProfileItem.HEADER_ID));
 
-		addStatusMessageAsProfileItems(HikeConversationsDatabase.getInstance().getStatusMessages(false, HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1, mLocalMSISDN));
+		addStatusMessagesAsMyProfileItems(HikeConversationsDatabase.getInstance().getStatusMessages(false, HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1, mLocalMSISDN));
 
 		if (contactInfo.isOnhike() && contactInfo.getHikeJoinTime() > 0)
 		{
-			profileItems.add(getJoinedHikeStatus(contactInfo));
+			profileItems.add(new ProfileItem.ProfileStatusItem(getJoinedHikeStatus(contactInfo)));
 		}
 
 		profileAdapter = new ProfileAdapter(this, profileItems, null, contactInfo, true);
@@ -915,10 +917,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			previousEventTime = currTime;
 		}
 
-		if (!reachedEnd && !loadingMoreMessages && !profileItems.isEmpty()
+		if ( this.profileType == ProfileType.USER_PROFILE &&  !reachedEnd && !loadingMoreMessages && !profileItems.isEmpty()
 				&& (firstVisibleItem + visibleItemCount) >= (profileItems.size() - HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES))
 		{
-
 			Logger.d(getClass().getSimpleName(), "Loading more items");
 			loadingMoreMessages = true;
 
@@ -930,11 +931,19 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				protected List<StatusMessage> doInBackground(Void... params)
 				{
 					StatusMessage statusMessage = ((ProfileStatusItem) profileItems.get(profileItems.size() - 1)).getStatusMessage();
-
+					
 					if (statusMessage != null && statusMessage.getId() == HikeConstants.JOINED_HIKE_STATUS_ID)
-					{
-						statusMessage = ((ProfileStatusItem) profileItems.get(profileItems.size() - 2)).getStatusMessage();
-						isLastMessageJoinedHike = true;
+					{	
+						try
+							{
+								statusMessage = ((ProfileStatusItem) profileItems.get(profileItems.size() - 2)).getStatusMessage();
+								isLastMessageJoinedHike = true;
+							}
+					
+						catch(ClassCastException e)
+							{	
+								e.printStackTrace();
+							}
 					}
 
 					if (statusMessage == null)
@@ -945,7 +954,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 							(int) statusMessage.getId(), mLocalMSISDN);
 					if (!olderMessages.isEmpty() && isLastMessageJoinedHike)
 					{
-						olderMessages.add(((ProfileStatusItem) getJoinedHikeStatus(contactInfo)).getStatusMessage());
+						olderMessages.add(getJoinedHikeStatus(contactInfo));
 					}
 					return olderMessages;
 				}
@@ -967,9 +976,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					}
 					else
 					{
-						/*
-						 * This signifies that we've reached the end. No need to query the db anymore unless we add a new message.
-						 */
 						reachedEnd = true;
 					}
 
@@ -1953,7 +1959,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				@Override
 				public void run()
 				{
-					profileItems.add(showingRequestItem ? 2 : 1, new ProfileItem.ProfileStatusItem(statusMessage));
+					invalidateOptionsMenu();
+					setupContactProfileList();
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
