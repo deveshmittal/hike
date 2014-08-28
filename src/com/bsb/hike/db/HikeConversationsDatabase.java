@@ -4639,6 +4639,56 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 	
+	public int getSharedMediaCount(String msisdn, boolean onlyMedia)
+	{
+		String hfTypeSelection = getSharedMediaSelection(onlyMedia);
+		
+		Cursor c = null;
+		
+		String selection =  DBConstants.MSISDN + " = ?"  + " AND "
+				+ (DBConstants.HIKE_FILE_TYPE + " IN " + hfTypeSelection);
+
+		try
+		{
+			c = mDb.rawQuery("select count(*) from " + DBConstants.SHARED_MEDIA_TABLE + " where " + selection , new String[]{msisdn});
+			c.moveToFirst();
+			return c.getInt(0);
+		}
+
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "Exception in getSharedMediaCount", e); 
+		}
+		finally
+		{
+			if(c!=null)
+				c.close();
+		}
+		return 0;
+	}
+	
+	public int getPinCount(String msisdn)
+	{
+		String selection = DBConstants.MSISDN + " = ?" + " AND " + DBConstants.MESSAGE_TYPE + "==" + HikeConstants.MESSAGE_TYPE.TEXT_PIN;
+		Cursor c = null;
+		try
+		{		c = mDb.rawQuery("select count(*) from " + DBConstants.MESSAGES_TABLE + " where " + selection, new String[] {msisdn} );
+				c.moveToFirst();
+				return c.getInt(0);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "Exception in getPinCount",e);
+		}
+		finally{
+			if(c!=null)
+				c.close();
+		}
+		return 0;
+	}
+		
 	public void updateToNewSharedMediaTable()
 	{
 		final String TEMP_SHARED_MEDIA_TABLE = "tempSharedMediaTable";
@@ -4752,6 +4802,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return getSharedMedia(msisdn, limit, maxMsgId, onlyMedia, true);
 	}
 
+	
+	public String getSharedMediaSelection(boolean onlyMedia)
+	{
+		StringBuilder hfTypeSelection = null;
+
+		HikeFileType[] mediaFileTypes;
+		if (onlyMedia)
+		{
+			mediaFileTypes = new HikeFileType[] { HikeFileType.IMAGE, HikeFileType.VIDEO };
+		}
+		else
+		{
+			mediaFileTypes = new HikeFileType[] { HikeFileType.OTHER, HikeFileType.AUDIO };
+		}
+
+		hfTypeSelection = new StringBuilder("(");
+		for (HikeFileType hfType : mediaFileTypes)
+		{
+			hfTypeSelection.append(hfType.ordinal() + ",");
+		}
+		hfTypeSelection.replace(hfTypeSelection.lastIndexOf(","), hfTypeSelection.length(), ")");
+		return hfTypeSelection.toString();
+
+	}
+	
 	/*
 	 * itemsToLeft : true implies all items which has msgId less than given msgId : false implies all items which has msgId greater than given msgId
 	 * 
@@ -4760,30 +4835,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	public List<?> getSharedMedia(String msisdn, int limit, long givenMsgId, boolean onlyMedia, boolean itemsToRight)
 	{
 		String limitStr = (limit == -1) ? null : new Integer(limit).toString();
+		
 		String msgIdSelection = DBConstants.MESSAGE_ID + (itemsToRight ? "<" : ">") + givenMsgId;
-		
-		StringBuilder hfTypeSelection = null;
-		
-		HikeFileType[] mediaFileTypes;
-		if (onlyMedia)
-		{
-			mediaFileTypes = new HikeFileType[]{HikeFileType.IMAGE, HikeFileType.VIDEO};
-		}
-		else
-		{
-			mediaFileTypes = new HikeFileType[]{HikeFileType.OTHER, HikeFileType.AUDIO};
-		}
-		
-		hfTypeSelection = new StringBuilder("(");
-		for (HikeFileType hfType : mediaFileTypes)
-		{
-			hfTypeSelection.append(hfType.ordinal() + ",");
-		}
-		hfTypeSelection.replace(hfTypeSelection.lastIndexOf(","), hfTypeSelection.length(), ")");
+		String hfTypeSelection = getSharedMediaSelection(onlyMedia);
 
-		String selection = DBConstants.MSISDN + " = ?" + (givenMsgId == -1 ? "" : " AND " + msgIdSelection) + " AND "
-				+ (DBConstants.HIKE_FILE_TYPE  + " IN " + hfTypeSelection.toString());
-		
+		String selection =  DBConstants.MSISDN + " = ?" + (givenMsgId == -1 ? "" : " AND " + msgIdSelection) + " AND "
+				+ (DBConstants.HIKE_FILE_TYPE + " IN " + hfTypeSelection);
+
 		Cursor c = null;
 		try
 		{

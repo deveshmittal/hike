@@ -589,7 +589,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.CONTACT_INFO);
 		contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(mLocalMSISDN, false);
-		sharedMediaCount = HikeConversationsDatabase.getInstance().getSharedMediaCount(mLocalMSISDN);
+		sharedMediaCount = HikeConversationsDatabase.getInstance().getSharedMediaCount(mLocalMSISDN, true);
 		sharedPinCount = 0;  //Add a query here to get shared groups count. sharedPincount is to be treated as shared group count here.
 
 		if (!contactInfo.isOnhike())
@@ -718,7 +718,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 		HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 		groupConversation = (GroupConversation) hCDB.getConversation(mLocalMSISDN, 0);
-		sharedMediaCount = hCDB.getSharedMediaCount(mLocalMSISDN);
+		sharedMediaCount = hCDB.getSharedMediaCount(mLocalMSISDN,true);
 		sharedPinCount = hCDB.getPinCount(mLocalMSISDN);
 		participantMap = groupConversation.getGroupParticipantList();
 		List<String> inactiveMsisdns = new ArrayList<String>();
