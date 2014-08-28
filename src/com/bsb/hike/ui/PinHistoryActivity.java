@@ -2,8 +2,10 @@ package com.bsb.hike.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.os.AsyncTask;
@@ -74,7 +76,7 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 	
 	private TextView mActionModeTitle;
 		
-	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED};
+	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED, HikePubSub.BULK_MESSAGE_RECEIVED};
 
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -284,29 +286,31 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 		
 		if(HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
-			final ConvMessage convMsg = (ConvMessage)object;
+			final ConvMessage convMsg = (ConvMessage)object;			
+			handleIncomingPin(convMsg);			
+		}
+		else if(HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
+		{
+			HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
+			final LinkedList<ConvMessage> messageList = messageListMap.get(msisdn);
 			
-			if(convMsg.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			if(messageList != null)
 			{
-				String msisdn = convMsg.getMsisdn();
-				
-				if(msisdn != null && msisdn.equals(this.msisdn))
+				List<ConvMessage> pinsOnly = new ArrayList<ConvMessage>();
+
+				for (final ConvMessage message : messageList)
 				{
-					
-					if(pinAdapter != null)
+					if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 					{
-						runOnUiThread(new Runnable() 
-						{						
-							@Override
-							public void run() 
-							{
-								pinAdapter.addPinMessage(convMsg);
-								pinAdapter.notifyDataSetChanged();							
-							}
-						});
+						String msisdn = message.getMsisdn();
+						
+						if(msisdn != null && msisdn.equals(this.msisdn))
+						{
+							pinsOnly.add(message);
+						}
 					}
 				}
-				Utils.resetPinUnreadCount(mConversation);
+				handleBulkPins(pinsOnly);
 			}
 		}
 	}
@@ -508,5 +512,47 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 		{
 			pinAdapter.removeMessage(selectedMessagesMap.get(selectedPinIds.get(i)));
 		}
-	}	
+	}
+	
+	private void handleIncomingPin(final ConvMessage convMsg)
+	{
+		if(convMsg.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+		{
+			String msisdn = convMsg.getMsisdn();
+			
+			if(msisdn != null && msisdn.equals(this.msisdn))
+			{
+				
+				if(pinAdapter != null)
+				{
+					runOnUiThread(new Runnable() 
+					{						
+						@Override
+						public void run() 
+						{
+							pinAdapter.addPinMessage(convMsg);
+							pinAdapter.notifyDataSetChanged();							
+						}
+					});
+				}
+			}
+			Utils.resetPinUnreadCount(mConversation);
+		}
+	}
+	
+	private void handleBulkPins(final List<ConvMessage> pinList)
+	{
+		if(pinAdapter != null)
+		{
+			runOnUiThread(new Runnable() 
+			{						
+				@Override
+				public void run() 
+				{
+					pinAdapter.addPins(pinList);
+				}
+			});
+			Utils.resetPinUnreadCount(mConversation);
+		}
+	}
 }

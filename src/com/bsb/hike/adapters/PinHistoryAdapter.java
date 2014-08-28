@@ -2,6 +2,7 @@ package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -430,4 +431,11 @@ public class PinHistoryAdapter extends BaseAdapter implements OnLongClickListene
 		isActionModeOn = isOn;
 	}
 	
+	public void addPins(List<ConvMessage> pins)
+	{
+		Collections.reverse(pins);
+		textPins.addAll(0, pins);		
+		addDateInBetween();
+		notifyDataSetChanged();
+	}
 }

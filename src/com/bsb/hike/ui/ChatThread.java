@@ -4005,7 +4005,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				ConvMessage pin = null;				
 				JSONArray ids = new JSONArray();
-				for (final ConvMessage message : messageList)
+				for (ConvMessage message : messageList)
 				{
 					if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 					{
@@ -4130,10 +4130,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				runOnUiThread(mUpdateAdapter);
 			}
 		}else if(HikePubSub.CONV_META_DATA_UPDATED.equals(type)){
-			if(hasWindowFocus())
-			{
 				mConversation.setMetaData((MetaData) object);
-			}
 		}
 	}
 
