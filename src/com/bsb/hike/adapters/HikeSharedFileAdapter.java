@@ -38,6 +38,8 @@ public class HikeSharedFileAdapter extends BaseAdapter
 
 	private boolean selectedScreen = false;
 
+	public static String IMAGE_TAG = "image";
+	
 	public HikeSharedFileAdapter(Context context, List<HikeSharedFile> sharedFilesList, int sizeOfImage, HashSet<Long> selectedItems, boolean selectedScreen)
 	{
 		this.layoutInflater = LayoutInflater.from(context);
@@ -105,6 +107,12 @@ public class HikeSharedFileAdapter extends BaseAdapter
 		if (galleryItem != null)
 		{
 			holder.galleryThumb.setImageDrawable(null);
+			if(!galleryItem.getFileTypeString().toString().contains(IMAGE_TAG))
+			{
+				View time_view = convertView.findViewById(R.id.vid_time_layout);
+				time_view.setVisibility(View.VISIBLE);
+			}
+			
 			
 			thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), holder.galleryThumb, isListFlinging);
 
