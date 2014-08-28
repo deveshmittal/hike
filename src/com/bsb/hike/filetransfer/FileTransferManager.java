@@ -491,7 +491,7 @@ public class FileTransferManager extends BroadcastReceiver
 	// this will be used when user deletes account or unlink account
 	public void deleteAllFTRFiles()
 	{
-		if (HIKE_TEMP_DIR != null)
+		if (HIKE_TEMP_DIR != null && HIKE_TEMP_DIR.listFiles() != null)
 			for (File f : HIKE_TEMP_DIR.listFiles())
 			{
 				if (f != null)

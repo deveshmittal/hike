@@ -440,6 +440,8 @@ public class HikeConstants
 	public static final String IMAGE_QUALITY = "imageQuality";
 	
 	public static final String REMEMBER_IMAGE_CHOICE = "rememberImageChoice";
+	
+	public static final String SHOW_IMAGE_QUALITY_TIP = "showImageQualityTip";
 
 	public static final String HIKEBOT = "TD-HIKE";
 
