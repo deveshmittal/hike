@@ -25,6 +25,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout.LayoutParams;
@@ -114,6 +115,8 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		setupActionBar();
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
+		
+		showTipIfRequired();
 	}
 
 	@Override
@@ -500,6 +503,31 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 					}
 				}
 			});
+		}
+	}
+	
+	private void showTipIfRequired()
+	{
+		final HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this);
+		if(pref.getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false) && pref.getData(HikeConstants.SHOW_IMAGE_QUALITY_TIP, true))
+		{
+			View view = LayoutInflater.from(this).inflate(R.layout.tip_right_arrow, null);
+			ImageView arrowPointer = (ImageView) (view.findViewById(R.id.arrow_pointer));
+			arrowPointer.getLayoutParams().width = (int) (78 * Utils.densityMultiplier);
+			arrowPointer.requestLayout();
+			arrowPointer.setImageResource(R.drawable.ftue_up_arrow);
+			((TextView) view.findViewById(R.id.tip_header)).setText("Image Settings");
+			((TextView) view.findViewById(R.id.tip_msg)).setText("Small. Medium. Original Size");
+			view.findViewById(R.id.close_tip).setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					v.setVisibility(View.GONE);
+					pref.saveData(HikeConstants.SHOW_IMAGE_QUALITY_TIP, false);
+				}
+			});
+			((LinearLayout) findViewById(R.id.tipContainerTop)).addView(view, 0);
 		}
 	}
 }
