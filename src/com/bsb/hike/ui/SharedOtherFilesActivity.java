@@ -58,6 +58,15 @@ public class SharedOtherFilesActivity extends HikeAppStateBaseFragmentActivity i
 		listView = (ListView) findViewById(R.id.file_list);
 		listView.setEmptyView(emptyView);
 		listView.setAdapter(listAdapter);
+		listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+		{
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+			{
+				FileListItem item = items.get(i);
+				HikeFile.openFile(item.getFile(), item.getHikeSharedFile().getFileTypeString(), SharedOtherFilesActivity.this);
+			}
+		});
 
 		setupActionBar();
 	}
