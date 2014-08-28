@@ -32,10 +32,13 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -52,6 +55,7 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -103,13 +107,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private LastSeenScheduler lastSeenScheduler;
 
 	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED, HikePubSub.LAST_SEEN_TIME_UPDATED,
-			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED };
+			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, HikePubSub.CONTACT_SYNC_STARTED, HikePubSub.CONTACT_SYNCED };
 
 	private int previousFirstVisibleItem;
 
 	private int velocity;
 
 	private long previousEventTime;
+
+	private boolean showingMultiSelectActionBar = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -164,6 +170,34 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
 	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		if(!showingMultiSelectActionBar)
+			getSupportMenuInflater().inflate(R.menu.compose_chat_menu, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		if(item.getItemId() == R.id.refresh_contacts)
+		{
+			if(HikeMessengerApp.syncingContacts)
+				return super.onOptionsItemSelected(item);
+			if(!Utils.isUserOnline(this))
+			{
+				Utils.showNetworkUnavailableDialog(this);
+				return super.onOptionsItemSelected(item);
+			}
+			Intent contactSyncIntent = new Intent(HikeService.MQTT_CONTACT_SYNC_ACTION);
+			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
+			sendBroadcast(contactSyncIntent);
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
 
 	private boolean shouldInitiateFileTransfer()
 	{
@@ -392,6 +426,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		if (adapter.getCurrentSelection() == 0)
 		{
 			setActionBar();
+			invalidateOptionsMenu();
 		}
 		else
 		{
@@ -405,6 +440,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		adapter.addContact((ContactInfo) data);
 		int selectedCount = adapter.getCurrentSelection();
 		setupMultiSelectActionBar();
+		invalidateOptionsMenu();
 
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, selectedCount));
 	}
@@ -550,6 +586,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		View backContainer = groupChatActionBar.findViewById(R.id.back);
 
 		title = (TextView) groupChatActionBar.findViewById(R.id.title);
+		groupChatActionBar.findViewById(R.id.seprator).setVisibility(View.GONE);
+
 		backContainer.setOnClickListener(new OnClickListener()
 		{
 
@@ -561,8 +599,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 		});
 		setTitle();
+		if(HikeMessengerApp.syncingContacts)
+		{
+			// For showing progress bar when activity is closed and opened again
+			showProgressBarContactsSync(View.VISIBLE);
+		}
 
 		actionBar.setCustomView(groupChatActionBar);
+
+		showingMultiSelectActionBar = false;
 	}
 
 	private void setTitle()
@@ -627,8 +672,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			{
 				setMode(CREATE_GROUP_MODE);
 				setActionBar();
+				invalidateOptionsMenu();
 			}
 		});
+
+		if(HikeMessengerApp.syncingContacts)
+		{
+			showProgressBarContactsSync(View.VISIBLE);
+		}
 		actionBar.setCustomView(multiSelectActionBar);
 
 		Animation slideIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_left_noalpha);
@@ -636,6 +687,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		slideIn.setDuration(200);
 		closeBtn.startAnimation(slideIn);
 		sendBtn.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_in));
+
+		showingMultiSelectActionBar = true;
 	}
 
 	private void forwardMessageTo(ContactInfo contactInfo)
@@ -869,6 +922,53 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 
 			});
+		}
+		else if(HikePubSub.CONTACT_SYNC_STARTED.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					// For showing auto/manual sync progress bar when already on the activity
+					showProgressBarContactsSync(View.VISIBLE);
+				}
+
+			});
+		}
+		else if (HikePubSub.CONTACT_SYNCED.equals(type))
+		{
+			Boolean[] ret = (Boolean[]) object;
+			final boolean contactsChanged = ret[1];
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					// Dont repopulate list if no sync changes
+					if(contactsChanged)
+						adapter.executeFetchTask();
+					showProgressBarContactsSync(View.GONE);
+				}
+
+			});
+		}
+	}
+
+	private void showProgressBarContactsSync(int value)
+	{
+		ProgressBar progress_bar = null;
+		if(groupChatActionBar!=null)
+		{
+			progress_bar = (ProgressBar)groupChatActionBar.findViewById(R.id.loading_progress);
+			progress_bar.setVisibility(value);
+		}
+		if(multiSelectActionBar!=null)
+		{
+			progress_bar = (ProgressBar)multiSelectActionBar.findViewById(R.id.loading_progress);
+			progress_bar.setVisibility(value);
 		}
 	}
 

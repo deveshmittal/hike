@@ -275,8 +275,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private VoiceMessagePlayer voiceMessagePlayer;
 
-	private String statusIdForTip;
-
 	private long msgIdForSdrTip = -1;
 
 	private SharedPreferences preferences;
@@ -4204,39 +4202,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		else
 		{
 			statusHolder.container.setEnabled(false);
-		}
-
-		boolean showTip = false;
-		boolean shownStatusTip = preferences.getBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, false);
-
-		if (!shownStatusTip)
-		{
-			if (chatThread.tipView == null)
-			{
-				showTip = true;
-			}
-			else
-			{
-				Object tag = chatThread.tipView.getTag();
-				if(tag instanceof TipType){
-				TipType tipType = (TipType) tag;
-				if (tipType == TipType.STATUS && statusMessage.getMappedId().equals(statusIdForTip))
-				{
-					showTip = true;
-				}
-				}
-			}
-		}
-
-		if (showTip)
-		{
-			chatThread.tipView = v.findViewById(R.id.status_tip);
-			statusIdForTip = statusMessage.getMappedId();
-			HikeTip.showTip(chatThread, TipType.STATUS, chatThread.tipView, Utils.getFirstName(conversation.getLabel()));
-		}
-		else
-		{
-			v.findViewById(R.id.status_tip).setVisibility(View.GONE);
 		}
 	}
 

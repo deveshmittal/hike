@@ -255,7 +255,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 				this.stickerIndex = -1;
 				return;
 			}
-			if (category.categoryId.equals(StickerCategoryId.expressions) && stickerIndex == -1)
+			if (category.categoryId.equals(StickerCategoryId.expressions)||category.categoryId.equals(StickerCategoryId.humanoid) && stickerIndex == -1)
 			{
 				setupStickerindex(category, stickerId);
 				return;

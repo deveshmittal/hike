@@ -1224,19 +1224,13 @@ public class ContactManager implements ITransientCache
 	 * 
 	 * @param ctx
 	 */
-	public void syncUpdates(Context ctx)
+	public boolean syncUpdates(Context ctx)
 	{
-
-		if (!Utils.isUserOnline(ctx))
-		{
-			Logger.d("CONTACT UTILS", "Airplane mode is on , skipping sync update tasks.");
-			return;
-		}
-
+		// Moving check if User is online to the calling class (HikeService.ContactsChanged) 
 		List<ContactInfo> newContacts = getContacts(ctx);
 		if (newContacts == null)
 		{
-			return;
+			return false;
 		}
 
 		Map<String, List<ContactInfo>> new_contacts_by_id = convertToMap(newContacts);
@@ -1281,7 +1275,7 @@ public class ContactManager implements ITransientCache
 		if ((new_contacts_by_id.isEmpty()) && (hike_contacts_by_id.isEmpty()))
 		{
 			Logger.d("ContactUtils", "DB in sync");
-			return;
+			return false;
 		}
 
 		try
@@ -1315,6 +1309,7 @@ public class ContactManager implements ITransientCache
 		{
 			Logger.e("ContactUtils", "error updating addressbook", e);
 		}
+		return true;
 	}
 
 	private boolean areListsEqual(List<ContactInfo> list1, List<ContactInfo> list2)

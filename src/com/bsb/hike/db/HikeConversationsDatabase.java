@@ -710,20 +710,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String readByString = null;
 				long msgId = c.getInt(c.getColumnIndex(DBConstants.MESSAGE_ID));
 
-				boolean idPresent = false; // boolean to check whether the list of ids contains the latest sent message id
-
-				for (int i = 0; i < ids.length; i++)
-				{
-					if (ids[i] == msgId)
-					{
-						idPresent = true;
-						break;
-					}
-				}
-
 				ContentValues contentValues = new ContentValues();
-
-				if (idPresent) // We have to update readbyString
+				
+				long maxMsgId = getMrIdForGroup(groupId, ids);			// get max sent message id from list of ids
+				
+				if(maxMsgId >= msgId)			// we are updating readBy string if max message id is greater than or equal to that present in group info table
 				{
 					readByString = c.getString(c.getColumnIndex(DBConstants.READ_BY));
 
@@ -763,9 +754,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						mDb.update(DBConstants.GROUP_INFO_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[] { groupId });
 					}
 				}
-
-				long maxMsgId = getMrIdForGroup(groupId, ids); // get max sent message id from list of ids
-
 				if (maxMsgId > 0)
 				{
 
@@ -844,7 +832,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					String readByString = null;
 					long msgId = c.getInt(c.getColumnIndex(DBConstants.MESSAGE_ID));
 
-					if (msgId == maxMsgId)
+					if (maxMsgId >= msgId)
 					{
 						readByString = c.getString(c.getColumnIndex(DBConstants.READ_BY));
 					}

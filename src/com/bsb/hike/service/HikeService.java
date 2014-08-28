@@ -66,12 +66,22 @@ public class HikeService extends Service
 		@Override
 		public void run()
 		{
-			Logger.d("ContactsChanged", "calling syncUpdates");
-			ContactManager.getInstance().syncUpdates(this.context);
-			if (manualSync)
+			if (!Utils.isUserOnline(context))
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNCED, null);
+				Logger.d("CONTACT UTILS", "Airplane mode is on , skipping sync update tasks.");
 			}
+			else
+			{
+				HikeMessengerApp.syncingContacts = true;
+				Logger.d("ContactsChanged", "calling syncUpdates, manualSync = " + manualSync);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNC_STARTED, null);
+
+				boolean contactsChanged = ContactManager.getInstance().syncUpdates(this.context);
+
+				HikeMessengerApp.syncingContacts = false;
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNCED, new Boolean[] {manualSync, contactsChanged});
+			}
+
 		}
 	}
 
@@ -496,15 +506,19 @@ public class HikeService extends Service
 		public void onChange(boolean selfChange)
 		{
 			Logger.d(getClass().getSimpleName(), "Contact content observer called");
+			if(HikeMessengerApp.syncingContacts)
+				Logger.d(getClass().getSimpleName(),"Contact Syncing already going on");
+			else
+			{
+				mContactsChanged.manualSync = manualSync;
+				HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
+				long delay = manualSync ? 0L: HikeConstants.CONTACT_UPDATE_TIMEOUT;
+				HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, delay);
+				// Schedule the next manual sync to happed 24 hours from now.
+				scheduleNextManualContactSync();
 
-			mContactsChanged.manualSync = manualSync;
-
-			HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
-			HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, HikeConstants.CONTACT_UPDATE_TIMEOUT);
-			// Schedule the next manual sync to happed 24 hours from now.
-			scheduleNextManualContactSync();
-
-			manualSync = false;
+				manualSync = false;
+			}
 		}
 	}
 
