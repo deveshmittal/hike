@@ -144,7 +144,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
-			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FRIEND_REQ_COUNT_RESET, HikePubSub.STEALTH_UNREAD_TIP_CLICKED };
+			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FAVORITE_COUNT_CHANGED, HikePubSub.STEALTH_UNREAD_TIP_CLICKED };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -858,10 +858,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		else if (HikePubSub.FAVORITE_TOGGLED.equals(type) || HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type) || HikePubSub.REJECT_FRIEND_REQUEST.equals(type))
 		{
 			Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
-			if (HikePubSub.REJECT_FRIEND_REQUEST.equals(type)|| (HikePubSub.FAVORITE_TOGGLED.equals(type) && (favoriteToggle.second.equals(FavoriteType.REQUEST_RECEIVED) || favoriteToggle.second.equals(FavoriteType.FRIEND))))
-			{
-				updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 0);
-			}
 
 			if (ftueContactsData.isEmpty())
 			{
@@ -1033,9 +1029,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 		}
-		else if(HikePubSub.FRIEND_REQ_COUNT_RESET.equals(type))
+		else if(HikePubSub.FAVORITE_COUNT_CHANGED.equals(type))
 		{
-			runOnUiThread( new Runnable() {
+			runOnUiThread( new Runnable()
+			{
 				@Override
 				public void run()
 				{

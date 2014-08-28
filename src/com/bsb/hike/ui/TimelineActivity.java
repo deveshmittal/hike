@@ -37,13 +37,13 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 
 	private SharedPreferences accountPrefs;
 
-	private String[] homePubSubListeners = { HikePubSub.FAVORITE_TOGGLED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.FRIEND_REQ_COUNT_RESET };
+	private String[] homePubSubListeners = { HikePubSub.FAVORITE_COUNT_CHANGED };
 
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
 		super.onEventReceived(type, object);
-		if(HikePubSub.FRIEND_REQ_COUNT_RESET.equals(type))
+		if (HikePubSub.FAVORITE_COUNT_CHANGED.equals(type))
 		{
 			runOnUiThread( new Runnable()
 			{
@@ -53,14 +53,6 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 					updateFriendsNotification(accountPrefs.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0), 0);
 				}
 			});
-		}
-		else if (HikePubSub.FAVORITE_TOGGLED.equals(type) || HikePubSub.REJECT_FRIEND_REQUEST.equals(type))
-		{
-			Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
-			if (HikePubSub.REJECT_FRIEND_REQUEST.equals(type)|| (HikePubSub.FAVORITE_TOGGLED.equals(type) && (favoriteToggle.second.equals(FavoriteType.REQUEST_RECEIVED) || favoriteToggle.second.equals(FavoriteType.FRIEND))))
-			{
-				updateFriendsNotification(accountPrefs.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0), 0);
-			}
 		}
 	}
 

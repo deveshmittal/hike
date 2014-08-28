@@ -354,8 +354,8 @@ public class HikePubSub implements Runnable
 	
 	public static final String UPDATE_PIN_METADATA = "pinUpdated";
 
-	public static String FRIEND_REQ_COUNT_RESET = "resetFriendRequest";
-	
+	public static final String FAVORITE_COUNT_CHANGED = "favoriteCountChanged";
+
 	public static String HIKE_TO_OFFLINE_PUSH = "hikeToOfflinePush";
 
 	public static String PROFILE_UPDATE_FINISH = "profileUpdateFinish";

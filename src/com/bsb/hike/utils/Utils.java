@@ -3156,7 +3156,7 @@ public class Utils
 		{
 			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 		}
-		HikeMessengerApp.getPubSub().publish(HikePubSub.FRIEND_REQ_COUNT_RESET, null);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_COUNT_CHANGED, null);
 	}
 
 	public static boolean shouldIncrementCounter(ConvMessage convMessage)
@@ -4058,7 +4058,7 @@ public class Utils
 			editor.putInt(HikeMessengerApp.FRIEND_REQ_COUNT, currentCount);
 			editor.commit();
 		}
-
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_COUNT_CHANGED, null);
 	}
 	
 	public static boolean isPackageInstalled(Context context, String packageName)
