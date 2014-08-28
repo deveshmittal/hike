@@ -356,7 +356,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED, HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
-			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA,HikePubSub.CONV_META_DATA_UPDATED, HikePubSub.LATEST_PIN_DELETED };
+			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA,HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT,HikePubSub.CONV_META_DATA_UPDATED, HikePubSub.LATEST_PIN_DELETED };
 
 	private EmoticonType emoticonType;
 
@@ -1129,12 +1129,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void onBackPressed()
 	{
-		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
-		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-		
-		if (fragment != null)
-		{	
-			PhotoViewerFragment.onPhotoBack(fragment, fragmentTransaction, getSupportActionBar());
+		if(removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true))
+		{
 			return;
 		}
 		if (findViewById(R.id.impMessageCreateView).getVisibility() == View.VISIBLE)
@@ -1306,6 +1302,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return onActionModeItemClicked(item);
 		}
 
+		if(isFragmentAdded(HikeConstants.IMAGE_FRAGMENT_TAG))
+		{
+			return false;
+		}
+		
 		switch (item.getItemId())
 		{
 		case R.id.chat_bg:
@@ -1508,10 +1509,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 9:
 					if(!messages.isEmpty())
 					{
-						Intent imageIntent = new Intent(ChatThread.this, HikeSharedFilesActivity.class);
-						imageIntent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
-						imageIntent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
-						startActivity(imageIntent);
+						startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ChatThread.this, mConversation));
 					}
 					break;
 				}
@@ -2221,6 +2219,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				finish();
 			}
 		}
+		
+		/*
+		 * To handle the case when photo viewer is opened from chat thread and user forwards/share some item. In this case we should close the photo viewer.
+		 */
+		removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG);
 
 		// This prevent the activity from simply finishing and opens up the last
 		// screen.
@@ -2922,6 +2925,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		});
 
+		actionBar.setBackgroundDrawable(getResources().getDrawable(selectedTheme.headerBgResId()));
 		actionBar.setCustomView(actionBarView);
 	}
 
@@ -4136,6 +4140,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}else if(HikePubSub.CONV_META_DATA_UPDATED.equals(type)){
 				mConversation.setMetaData((MetaData) object);
+		}
+		else if (HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT.equals(type))
+		{
+
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true);
+				}
+			});
 		}
 	}
 
@@ -7689,26 +7706,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					if (message.isFileTransferMessage())
 					{
 						HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-						multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
-						if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
-						{
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.ZOOM_LEVEL, hikeFile.getZoomLevel());
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.LATITUDE, hikeFile.getLatitude());
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.LONGITUDE, hikeFile.getLongitude());
-						}
-						else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
-						{
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.CONTACT_METADATA, hikeFile.serialize().toString());
-						}
-						else
-						{
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
-							multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
-							if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
-							{
-								multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
-							}
-						}
+						Utils.handleFileForwardObject(multiMsgFwdObject, hikeFile);
 					}
 					else if (message.isStickerMessage())
 					{
@@ -7764,9 +7762,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				ConvMessage message = selectedMessagesMap.get(selectedMsgIds.get(0));
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-				String currentFileSelectionPath = HikeConstants.FILE_SHARE_PREFIX + hikeFile.getFilePath();
-				String currentFileSelectionMimeType = hikeFile.getFileTypeString();
-				Utils.startShareImageIntent(ChatThread.this, currentFileSelectionMimeType, currentFileSelectionPath);
+				hikeFile.shareFile(ChatThread.this);
 				destroyActionMode();
 			}
 			else
@@ -8656,4 +8652,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private boolean isShowingPin(){
 		return tipView!=null && tipView.getTag() instanceof Integer && ((Integer)tipView.getTag() == HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 	}
+	
+	public boolean removeFragment(String tag, boolean updateActionBar)
+	{
+		boolean isRemoved = super.removeFragment(tag);
+		if (isRemoved && updateActionBar)
+		{	
+			setupActionBar(false);
+		}
+		return isRemoved;
+	}
+	
 }

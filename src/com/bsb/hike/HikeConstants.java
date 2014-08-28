@@ -1244,6 +1244,14 @@ public class HikeConstants
 		public static final String SHARED_FILE_ITEMS = "sharedFileItems";
 		
 		public static final String IS_LAST_MESSAGE = "isLastMessage";
+
+		public static final String IS_GROUP_CONVERSATION = "isGroupCoversation";
+
+		public static final String PARTICIPANT_MSISDN_ARRAY = "participantMsisdnArray";
+
+		public static final String PARTICIPANT_NAME_ARRAY = "participantNameArray";
+
+		public static final String CONVERSATION_NAME = "conversationName";
 	}
 
 	public static final class LogEvent

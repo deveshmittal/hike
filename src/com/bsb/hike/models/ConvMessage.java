@@ -642,44 +642,12 @@ public class ConvMessage
 
 	public String getTimestampFormatted(boolean pretty, Context context)
 	{
-		Date date = new Date(mTimestamp * 1000);
-		if (pretty)
-		{
-			PrettyTime p = new PrettyTime();
-			return p.format(date);
-		}
-		else
-		{
-			String format;
-			if (android.text.format.DateFormat.is24HourFormat(context))
-			{
-				format = "HH:mm";
-			}
-			else
-			{
-				format = "h:mm aaa";
-			}
-
-			DateFormat df = new SimpleDateFormat(format);
-			return df.format(date);
-		}
+		return Utils.getFormattedTime(pretty, context, mTimestamp);
 	}
 
 	public String getMessageDate(Context context)
 	{
-		Date date = new Date(mTimestamp * 1000);
-		String format;
-		if (android.text.format.DateFormat.is24HourFormat(context))
-		{
-			format = "d MMM ''yy";
-		}
-		else
-		{
-			format = "d MMM ''yy";
-		}
-
-		DateFormat df = new SimpleDateFormat(format);
-		return df.format(date);
+		return Utils.getFormattedDate(context, mTimestamp);
 	}
 
 	public void setMsgID(long msgID)

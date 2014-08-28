@@ -6,10 +6,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
@@ -507,6 +511,56 @@ public class HikeFile
 	public void setSent(boolean isSent)
 	{
 		this.isSent = isSent;
+	}
+	
+	public File getFileFromExactFilePath()
+	{
+		String exactFilePath = getExactFilePath();
+		if(file == null || !file.getAbsolutePath().equals(exactFilePath))
+		{
+			file = new File(exactFilePath);
+		}
+		return file;
+	}
+
+	public void shareFile(Context context)
+	{
+		switch (getHikeFileType())
+		{
+		case LOCATION:
+		case CONTACT:
+		case PROFILE:
+			return;
+
+		default:
+			break;
+		}
+		/*
+		 * getting exact file path to support sharing even not fully uploaded files
+		 */
+		String currentFileSelectionPath = HikeConstants.FILE_SHARE_PREFIX + getExactFilePath();
+		String currentFileSelectionMimeType = getFileTypeString();
+		Utils.startShareImageIntent(context, currentFileSelectionMimeType, currentFileSelectionPath);
+	}
+
+	public static void openFile(File file, String fileTypeString, Context context)
+	{
+		Intent openFile = new Intent(Intent.ACTION_VIEW);
+		openFile.setDataAndType(Uri.fromFile(file), fileTypeString);
+		try
+		{
+			context.startActivity(openFile);
+		}
+		catch (ActivityNotFoundException e)
+		{
+			Logger.w("HikeFile", "Trying to open an unknown format", e);
+			Toast.makeText(context, R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	public static void openFile(HikeFile hikeFile, Context context)
+	{
+		openFile(hikeFile.getFile(), hikeFile.getFileTypeString(), context);
 	}
 
 }

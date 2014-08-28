@@ -42,6 +42,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.FileListItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
@@ -633,6 +634,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<"
 				+ State.SENT_DELIVERED_READ.ordinal(), new String[] { msisdn }, null, null, null);
+
 		long[] ids = new long[c.getCount() + msgIds.length()];
 
 		if (ids.length == 0 && msgIds.length() == 0)
@@ -695,6 +697,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			conversationCursor = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=?", new String[] { groupId }, null,
 					null, null);
+
 			c = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.READ_BY, DBConstants.MESSAGE_ID }, DBConstants.GROUP_ID + " =? ", new String[] { groupId },
 					null, null, null);
 
@@ -1128,7 +1131,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		ContentValues contentValues = new ContentValues(1);
 		contentValues.put(DBConstants.CONVERSATION_METADATA, metadata.toString());
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
-		HikeMessengerApp.getPubSub().publish(HikePubSub.CONV_META_DATA_UPDATED, metadata);
 	}
 
 	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv)
@@ -2300,6 +2302,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						conv.setOnhike(contact.isOnhike());
 					}
 				}
+
 				conv.setUnreadCount(c.getInt(unreadCountColumn));
 				conv.setIsStealth(c.getInt(isStealthColumn) == 1);
 
@@ -2438,7 +2441,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 
 	}
-
+	
 	private Conversation getGroupConversation(String msisdn)
 	{
 		Cursor groupCursor = null;
@@ -3934,6 +3937,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		boolean isSent = ConvMessage.isMessageSent(convMessage.getState());
 		contentValues.put(DBConstants.MESSAGE_ID, convMessage.getMsgID());
 		contentValues.put(DBConstants.MSISDN, convMessage.getMsisdn());
+		contentValues.put(DBConstants.GROUP_PARTICIPANT, convMessage.getGroupParticipantMsisdn() != null ? convMessage.getGroupParticipantMsisdn() : "");
 		contentValues.put(DBConstants.TIMESTAMP, convMessage.getTimestamp());
 		contentValues.put(DBConstants.IS_SENT, isSent);
 		contentValues.put(DBConstants.HIKE_FILE_TYPE, convMessage.getMetadata().getHikeFiles().get(0).getHikeFileType().ordinal());
@@ -4698,8 +4702,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { " MAX (" + DBConstants.MESSAGE_ID + ") AS msgid" }, DBConstants.MSISDN + "=?  AND " + DBConstants.MESSAGE_ID
-					+ " IN " + sb.toString(), new String[] { groupId }, null, null, null);
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { " MAX (" + DBConstants.MESSAGE_ID + ") AS msgid" }, DBConstants.MSISDN + "=?  AND " + DBConstants.MESSAGE_ID + " IN " + sb.toString(),
+					new String[] { groupId }, null, null, null);
 			if (c.moveToFirst())
 			{
 				return c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
@@ -4715,6 +4719,56 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 	
+	public int getSharedMediaCount(String msisdn, boolean onlyMedia)
+	{
+		String hfTypeSelection = getSharedMediaSelection(onlyMedia);
+		
+		Cursor c = null;
+		
+		String selection =  DBConstants.MSISDN + " = ?"  + " AND "
+				+ (DBConstants.HIKE_FILE_TYPE + " IN " + hfTypeSelection);
+
+		try
+		{
+			c = mDb.rawQuery("select count(*) from " + DBConstants.SHARED_MEDIA_TABLE + " where " + selection , new String[]{msisdn});
+			c.moveToFirst();
+			return c.getInt(0);
+		}
+
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "Exception in getSharedMediaCount", e); 
+		}
+		finally
+		{
+			if(c!=null)
+				c.close();
+		}
+		return 0;
+	}
+	
+	public int getPinCount(String msisdn)
+	{
+		String selection = DBConstants.MSISDN + " = ?" + " AND " + DBConstants.MESSAGE_TYPE + "==" + HikeConstants.MESSAGE_TYPE.TEXT_PIN;
+		Cursor c = null;
+		try
+		{		c = mDb.rawQuery("select count(*) from " + DBConstants.MESSAGES_TABLE + " where " + selection, new String[] {msisdn} );
+				c.moveToFirst();
+				return c.getInt(0);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "Exception in getPinCount",e);
+		}
+		finally{
+			if(c!=null)
+				c.close();
+		}
+		return 0;
+	}
+		
 	public void updateToNewSharedMediaTable()
 	{
 		final String TEMP_SHARED_MEDIA_TABLE = "tempSharedMediaTable";
@@ -4731,9 +4785,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		/*
 		 * selecting rows from messages table for all msgIds from old shared Media table
-		 * SELECT msgid, msisdn, timestamp, msgStatus, metadata FROM messages where messages.msgId IN (SELECT msgid FROM tempSharedMediaTable);
+		 * SELECT msgid, msisdn, fromMsisdn, timestamp, msgStatus, metadata FROM messages where messages.msgId IN (SELECT msgid FROM tempSharedMediaTable);
 		 */
-		String sql3 = "SELECT " + DBConstants.MESSAGE_ID + ", " + DBConstants.MSISDN + ", " +  DBConstants.TIMESTAMP + ", " + DBConstants.MSG_STATUS + ", "
+		String sql3 = "SELECT " + DBConstants.MESSAGE_ID + ", " + DBConstants.MSISDN + ", " + DBConstants.GROUP_PARTICIPANT + ", " +  DBConstants.TIMESTAMP + ", " + DBConstants.MSG_STATUS + ", "
 				+ DBConstants.MESSAGE_METADATA + " FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.MESSAGES_TABLE + "." + DBConstants.MESSAGE_ID
 				+ " IN ( SELECT " + DBConstants.MESSAGE_ID + " FROM " + TEMP_SHARED_MEDIA_TABLE + " )";
 
@@ -4749,6 +4803,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			
 			final int msgIdIndex = c.getColumnIndex(DBConstants.MESSAGE_ID);
 			final int msisdnIndex = c.getColumnIndex(DBConstants.MSISDN);
+			final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
 			final int tsIndex = c.getColumnIndex(DBConstants.TIMESTAMP);
 			final int msgStatusIndex = c.getColumnIndex(DBConstants.MSG_STATUS);
 			final int metadataIndex = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
@@ -4760,10 +4815,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				long ts = c.getLong(tsIndex);
 				int messageStatus = c.getInt(msgStatusIndex);
 				String messageMetadataString = c.getString(metadataIndex);
+				String groupParticipant = c.getString(groupParticipantColumn);
 				
 				ContentValues contentValues = new ContentValues();
 				contentValues.put(DBConstants.MESSAGE_ID, msgId);
 				contentValues.put(DBConstants.MSISDN, msisdn);
+				contentValues.put(DBConstants.GROUP_PARTICIPANT, groupParticipant);
 				contentValues.put(DBConstants.TIMESTAMP, ts);
 				contentValues.put(DBConstants.IS_SENT, ConvMessage.isMessageSent(State.values()[messageStatus]));
 
@@ -4814,60 +4871,79 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		 * creating new sharedMediaTable with updated schema
 		 */
 		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.SHARED_MEDIA_TABLE + " (" + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY, "
-				+ DBConstants.MSISDN + " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.IS_SENT + " INT, " + DBConstants.HIKE_FILE_TYPE + " INTEGER, "
+				+ DBConstants.MSISDN + " TEXT, " + DBConstants.GROUP_PARTICIPANT + " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.IS_SENT + " INT, " + DBConstants.HIKE_FILE_TYPE + " INTEGER, "
 				+ DBConstants.MESSAGE_METADATA + " TEXT"+ " )";
 		
 		return sql;
 	}
 
-	public List<HikeSharedFile> getSharedMedia(String msisdn, int limit, long maxMsgId, boolean onlyMedia)
+	public List<?> getSharedMedia(String msisdn, int limit, long maxMsgId, boolean onlyMedia)
 	{
 		return getSharedMedia(msisdn, limit, maxMsgId, onlyMedia, true);
 	}
 
+	
+	public String getSharedMediaSelection(boolean onlyMedia)
+	{
+		StringBuilder hfTypeSelection = null;
+
+		HikeFileType[] mediaFileTypes;
+		if (onlyMedia)
+		{
+			mediaFileTypes = new HikeFileType[] { HikeFileType.IMAGE, HikeFileType.VIDEO };
+		}
+		else
+		{
+			mediaFileTypes = new HikeFileType[] { HikeFileType.OTHER, HikeFileType.AUDIO };
+		}
+
+		hfTypeSelection = new StringBuilder("(");
+		for (HikeFileType hfType : mediaFileTypes)
+		{
+			hfTypeSelection.append(hfType.ordinal() + ",");
+		}
+		hfTypeSelection.replace(hfTypeSelection.lastIndexOf(","), hfTypeSelection.length(), ")");
+		return hfTypeSelection.toString();
+
+	}
+	
 	/*
 	 * itemsToLeft : true implies all items which has msgId less than given msgId : false implies all items which has msgId greater than given msgId
 	 * 
 	 * returns list in order of msgId max to min.
 	 */
-	public List<HikeSharedFile> getSharedMedia(String msisdn, int limit, long givenMsgId, boolean onlyMedia, boolean itemsToRight)
+	public List<?> getSharedMedia(String msisdn, int limit, long givenMsgId, boolean onlyMedia, boolean itemsToRight)
 	{
 		String limitStr = (limit == -1) ? null : new Integer(limit).toString();
+		
 		String msgIdSelection = DBConstants.MESSAGE_ID + (itemsToRight ? "<" : ">") + givenMsgId;
-		
-		StringBuilder hfTypeSelection = null;
-		
-		if (onlyMedia)
-		{
-			HikeFileType[] mediaFileTypes = {HikeFileType.IMAGE, HikeFileType.VIDEO};
-			hfTypeSelection = new StringBuilder("(");
-			for (HikeFileType hfType : mediaFileTypes)
-			{
-				hfTypeSelection.append(hfType.ordinal() + ",");
-			}
-			hfTypeSelection.replace(hfTypeSelection.lastIndexOf(","), hfTypeSelection.length(), ")");
-		}
-		else
-		{
-			hfTypeSelection = new StringBuilder(DBConstants.HIKE_FILE_TYPE + " = " + HikeFileType.OTHER.ordinal());
-		}
+		String hfTypeSelection = getSharedMediaSelection(onlyMedia);
 
-		String selection = DBConstants.MSISDN + " = ?" + (givenMsgId == -1 ? "" : " AND " + msgIdSelection) + " AND "
-				+ (DBConstants.HIKE_FILE_TYPE  + " IN " + hfTypeSelection.toString());
-		
+		String selection =  DBConstants.MSISDN + " = ?" + (givenMsgId == -1 ? "" : " AND " + msgIdSelection) + " AND "
+				+ (DBConstants.HIKE_FILE_TYPE + " IN " + hfTypeSelection);
+
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.SHARED_MEDIA_TABLE, new String[] { DBConstants.MESSAGE_ID, DBConstants.TIMESTAMP, DBConstants.IS_SENT,
+			c = mDb.query(DBConstants.SHARED_MEDIA_TABLE, new String[] { DBConstants.MESSAGE_ID, DBConstants.GROUP_PARTICIPANT, DBConstants.TIMESTAMP, DBConstants.IS_SENT,
 					DBConstants.MESSAGE_METADATA }, selection, new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + (itemsToRight ? " DESC" : " ASC"), limitStr);
 
 
 			final int msgIdIndex = c.getColumnIndex(DBConstants.MESSAGE_ID);
+			final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
 			final int tsIndex = c.getColumnIndex(DBConstants.TIMESTAMP);
 			final int isSentIndex = c.getColumnIndex(DBConstants.IS_SENT);
 			final int metadataIndex = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
 			
-			List<HikeSharedFile> sharedFilesList = new ArrayList<HikeSharedFile>(c.getCount());
+			List<?> sharedFilesList;
+			if(onlyMedia)
+			{
+				sharedFilesList = new ArrayList<HikeSharedFile>(c.getCount());
+			}
+			else
+			{
+				sharedFilesList = new ArrayList<FileListItem>(c.getCount());
+			}
 			
 			while (c.moveToNext())
 			{
@@ -4875,8 +4951,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				long ts = c.getLong(tsIndex);
 				boolean isSent = c.getInt(isSentIndex) != 0;
 				String messageMetadata = c.getString(metadataIndex);
+				String groupParticipantMsisdn = c.getString(groupParticipantColumn);
 				
-				sharedFilesList.add(new HikeSharedFile(new JSONObject(messageMetadata), isSent, msgId, msisdn, ts));
+				HikeSharedFile hikeSharedFile = new HikeSharedFile(new JSONObject(messageMetadata), isSent, msgId, msisdn, ts, groupParticipantMsisdn);
+				if(onlyMedia)
+				{
+					((List<HikeSharedFile>) sharedFilesList).add(hikeSharedFile);
+				}
+				else
+				{
+					((List<FileListItem>) sharedFilesList).add(new FileListItem(hikeSharedFile));
+				}
 			}
 			
 			return sharedFilesList;
@@ -4961,3 +5046,4 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return unreadMessages;
 	}
 }
+

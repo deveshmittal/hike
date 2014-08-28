@@ -43,7 +43,7 @@ public class PinHistoryAdapter extends BaseAdapter implements OnLongClickListene
 	private boolean addDateInBetween;
 
 	private boolean isDefaultTheme;
-	
+
 	private Set<Long> mSelectedPinIds;
 	
 	private boolean isActionModeOn = false;

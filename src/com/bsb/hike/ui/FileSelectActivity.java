@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import android.app.AlertDialog;
@@ -33,8 +32,6 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,13 +41,14 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.FileListAdapter;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.smartImageLoader.FileImageLoader;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.models.FileListItem;
 
 public class FileSelectActivity extends HikeAppStateBaseFragmentActivity implements OnScrollListener, HikePubSub.Listener
 {
@@ -62,13 +60,13 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private ListView listView;
 
-	private ListAdapter listAdapter;
+	private FileListAdapter listAdapter;
 
 	private File currentDir;
 
 	private TextView emptyView;
 
-	private ArrayList<ListItem> items = new ArrayList<ListItem>();
+	private ArrayList<FileListItem> items = new ArrayList<FileListItem>();
 
 	private boolean receiverRegistered = false;
 
@@ -80,30 +78,11 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 
 	private boolean multiSelectMode;
 
-	private Map<String, ListItem> selectedFileMap;
-
 	private String currentTitle;
 
 	private volatile InitiateMultiFileTransferTask fileTransferTask;
 
 	private ProgressDialog progressDialog;
-
-	private class ListItem
-	{
-		int icon;
-
-		String title;
-
-		String subtitle = "";
-
-		String extension = "";
-
-		String mimeType;
-
-		boolean showThumbnail;
-
-		File file;
-	}
 
 	private class HistoryEntry
 	{
@@ -210,9 +189,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
 		}
 
-		selectedFileMap = new HashMap<String, ListItem>();
-
-		listAdapter = new ListAdapter(this);
+		listAdapter = new FileListAdapter(this, items);
 		emptyView = (TextView) findViewById(R.id.search_empty_view);
 		listView = (ListView) findViewById(R.id.file_list);
 		listView.setEmptyView(emptyView);
@@ -222,8 +199,8 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
 			{
-				ListItem item = items.get(i);
-				File file = item.file;
+				FileListItem item = items.get(i);
+				File file = item.getFile();
 				if (multiSelectMode)
 				{
 					if (!file.isDirectory())
@@ -233,10 +210,10 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 							Toast.makeText(FileSelectActivity.this, R.string.cannot_select_zero_byte_file, Toast.LENGTH_SHORT).show();
 							return;
 						}
-						if (selectedFileMap.containsKey(item.title))
+						if (listAdapter.isSelected(item))
 						{
-							selectedFileMap.remove(item.title);
-							if (selectedFileMap.isEmpty())
+							listAdapter.setSelected(item, false);
+							if (listAdapter.getSeletctedFileItems().isEmpty())
 							{
 								setupActionBar(currentTitle);
 								multiSelectMode = false;
@@ -248,14 +225,14 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 						}
 						else
 						{
-							if (selectedFileMap.size() >= FileTransferManager.getInstance(FileSelectActivity.this).remainingTransfers())
+							if (listAdapter.getSeletctedFileItems().size() >= FileTransferManager.getInstance(FileSelectActivity.this).remainingTransfers())
 							{
 								Toast.makeText(FileSelectActivity.this,
 										getString(R.string.max_num_files_reached, FileTransferManager.getInstance(FileSelectActivity.this).getTaskLimit()), Toast.LENGTH_SHORT)
 										.show();
 								return;
 							}
-							selectedFileMap.put(item.title, item);
+							listAdapter.setSelected(item, true);
 							setMultiSelectTitle();
 						}
 						listAdapter.notifyDataSetChanged();
@@ -275,7 +252,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 							return;
 						}
 						history.add(he);
-						setTitle(item.title);
+						setTitle(item.getTitle());
 						listView.setSelection(0);
 					}
 					else
@@ -289,7 +266,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 						{
 							if (file.length() > sizeLimit)
 							{
-								Toast.makeText(FileSelectActivity.this, getString(R.string.max_file_size, formatFileSize(sizeLimit)), Toast.LENGTH_SHORT).show();
+								Toast.makeText(FileSelectActivity.this, getString(R.string.max_file_size, Utils.formatFileSize(sizeLimit)), Toast.LENGTH_SHORT).show();
 								return;
 							}
 						}
@@ -300,7 +277,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 						Intent intent = new Intent(FileSelectActivity.this, ChatThread.class);
 						intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.MSISDN));
 						intent.putExtra(HikeConstants.Extras.FILE_PATH, file.getAbsolutePath());
-						intent.putExtra(HikeConstants.Extras.FILE_TYPE, item.mimeType);
+						intent.putExtra(HikeConstants.Extras.FILE_TYPE, item.getMimeType());
 						intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						startActivity(intent);
 					}
@@ -314,9 +291,9 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 			@Override
 			public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id)
 			{
-				ListItem listItem = items.get(position);
+				FileListItem listItem = items.get(position);
 
-				File file = listItem.file;
+				File file = listItem.getFile();
 
 				if (file.isDirectory())
 				{
@@ -329,7 +306,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 				}
 				else if (file.length() > sizeLimit)
 				{
-					Toast.makeText(FileSelectActivity.this, getString(R.string.max_file_size, formatFileSize(sizeLimit)), Toast.LENGTH_SHORT).show();
+					Toast.makeText(FileSelectActivity.this, getString(R.string.max_file_size, Utils.formatFileSize(sizeLimit)), Toast.LENGTH_SHORT).show();
 					return false;
 				}
 
@@ -339,7 +316,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 					setupMultiSelectActionBar();
 				}
 
-				if (selectedFileMap.size() >= FileTransferManager.getInstance(FileSelectActivity.this).remainingTransfers())
+				if (listAdapter.getSeletctedFileItems().size() >= FileTransferManager.getInstance(FileSelectActivity.this).remainingTransfers())
 				{
 					Toast.makeText(FileSelectActivity.this,
 							getString(R.string.max_num_files_reached, FileTransferManager.getInstance(FileSelectActivity.this).getTaskLimit()), Toast.LENGTH_SHORT)
@@ -347,7 +324,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 					return false;
 				}
 
-				selectedFileMap.put(listItem.title, listItem);
+				listAdapter.setSelected(listItem, true);
 
 				listAdapter.notifyDataSetChanged();
 
@@ -370,7 +347,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 		{
 			return;
 		}
-		multiSelectTitle.setText(getString(R.string.gallery_num_selected, selectedFileMap.size()));
+		multiSelectTitle.setText(getString(R.string.gallery_num_selected, listAdapter.getSeletctedFileItems().size()));
 	}
 
 	private void setupActionBar(String titleString)
@@ -420,13 +397,13 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 			@Override
 			public void onClick(View v)
 			{
-				ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(selectedFileMap.size());
-				for (Entry<String, ListItem> fileDetailEntry : selectedFileMap.entrySet())
+				ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(listAdapter.getSeletctedFileItems().size());
+				for (Entry<String, FileListItem> fileDetailEntry : listAdapter.getSeletctedFileItems().entrySet())
 				{
-					ListItem listItem = fileDetailEntry.getValue();
+					FileListItem listItem = fileDetailEntry.getValue();
 
-					String filePath = listItem.file.getAbsolutePath();
-					String fileType = listItem.mimeType;
+					String filePath = listItem.getFile().getAbsolutePath();
+					String fileType = listItem.getMimeType();
 
 					fileDetails.add(new Pair<String, String>(filePath, fileType));
 				}
@@ -498,7 +475,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 	{
 		if (multiSelectMode)
 		{
-			selectedFileMap.clear();
+			listAdapter.clearSelection();
 			listAdapter.notifyDataSetChanged();
 
 			setupActionBar(currentTitle);
@@ -587,25 +564,8 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 			{
 				continue;
 			}
-			ListItem item = new ListItem();
-			item.title = file.getName();
-			item.file = file;
-			if (file.isDirectory())
-			{
-				item.icon = R.drawable.ic_folder;
-			}
-			else
-			{
-				String extension = Utils.getFileExtension(file.getName());
-				item.extension = TextUtils.isEmpty(extension) ? "?" : extension;
-				item.subtitle = formatFileSize(file.length());
-				item.mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(item.extension);
-
-				if (!TextUtils.isEmpty(item.mimeType) && HikeFileType.IMAGE == HikeFileType.fromString(item.mimeType))
-				{
-					item.showThumbnail = true;
-				}
-			}
+			FileListItem item = new FileListItem();
+			item.setListItemAttributesFromFile(item, file);
 			items.add(item);
 		}
 		listAdapter.notifyDataSetChanged();
@@ -622,11 +582,11 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 		currentDir = null;
 		items.clear();
 		String extStorage = Environment.getExternalStorageDirectory().getAbsolutePath();
-		ListItem ext = new ListItem();
-		ext.title = getString(!Utils.hasGingerbread() || Environment.isExternalStorageRemovable() ? R.string.sd_card : R.string.internal_storage);
-		ext.icon = R.drawable.ic_folder;
-		ext.subtitle = getRootSubtitle(extStorage);
-		ext.file = Environment.getExternalStorageDirectory();
+		FileListItem ext = new FileListItem();
+		ext.setTitle(getString(!Utils.hasGingerbread() || Environment.isExternalStorageRemovable() ? R.string.sd_card : R.string.internal_storage));
+		ext.setIcon(R.drawable.ic_folder);
+		ext.setSubtitle(getRootSubtitle(extStorage));
+		ext.setFile(Environment.getExternalStorageDirectory());
 		items.add(ext);
 		try
 		{
@@ -662,11 +622,11 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 					try
 					{
 						boolean isSd = path.toLowerCase().contains("sd");
-						ListItem item = new ListItem();
-						item.title = getString(isSd ? R.string.sd_card : R.string.external_storage);
-						item.icon = R.drawable.ic_folder;
-						item.subtitle = getRootSubtitle(path);
-						item.file = new File(path);
+						FileListItem item = new FileListItem();
+						item.setTitle(getString(isSd ? R.string.sd_card : R.string.external_storage));
+						item.setIcon(R.drawable.ic_folder);
+						item.setSubtitle(getRootSubtitle(path));
+						item.setFile(new File(path));
 						items.add(item);
 					}
 					catch (Exception e)
@@ -680,11 +640,11 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 		{
 			Logger.e(getClass().getSimpleName(), "Exception while showing root", e);
 		}
-		ListItem fs = new ListItem();
-		fs.title = "/";
-		fs.subtitle = getString(R.string.system_root);
-		fs.icon = R.drawable.ic_folder;
-		fs.file = new File("/");
+		FileListItem fs = new FileListItem();
+		fs.setTitle("/");
+		fs.setSubtitle(getString(R.string.system_root));
+		fs.setIcon( R.drawable.ic_folder);
+		fs.setFile(new File("/"));
 		items.add(fs);
 		listAdapter.notifyDataSetChanged();
 	}
@@ -698,7 +658,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 		{
 			return "";
 		}
-		return getString(R.string.free_of_total, formatFileSize(free), formatFileSize(total));
+		return getString(R.string.free_of_total, Utils.formatFileSize(free), Utils.formatFileSize(total));
 	}
 
 	@Override
@@ -719,131 +679,6 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
 		listAdapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_IMAGES && scrollState == OnScrollListener.SCROLL_STATE_FLING);
-	}
-
-	private class ListAdapter extends BaseAdapter
-	{
-		private LayoutInflater inflater;
-
-		private FileImageLoader fileImageLoader;
-
-		private boolean isListFlinging;
-
-		public ListAdapter(Context context)
-		{
-			inflater = LayoutInflater.from(context);
-			int size = getResources().getDimensionPixelSize(R.dimen.file_thumbnail_size);
-			fileImageLoader = new FileImageLoader(size, size);
-		}
-
-		public void setIsListFlinging(boolean b)
-		{
-			boolean notify = b != isListFlinging;
-
-			isListFlinging = b;
-			fileImageLoader.setPauseWork(isListFlinging);
-
-			if (notify && !isListFlinging)
-			{
-				notifyDataSetChanged();
-			}
-		}
-
-		@Override
-		public int getCount()
-		{
-			return items.size();
-		}
-
-		@Override
-		public Object getItem(int position)
-		{
-			return items.get(position);
-		}
-
-		@Override
-		public long getItemId(int position)
-		{
-			return 0;
-		}
-
-		public int getViewTypeCount()
-		{
-			return 2;
-		}
-
-		public int getItemViewType(int pos)
-		{
-			return items.get(pos).subtitle.length() > 0 ? 0 : 1;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent)
-		{
-			View v = convertView;
-			ListItem item = items.get(position);
-			if (v == null)
-			{
-				v = inflater.inflate(R.layout.file_item, parent, false);
-				if (item.subtitle.length() == 0)
-				{
-					v.findViewById(R.id.file_item_info).setVisibility(View.GONE);
-				}
-			}
-			View selectorView = v.findViewById(R.id.selector_view);
-
-			TextView typeTextView = (TextView) v.findViewById(R.id.file_item_type);
-			((TextView) v.findViewById(R.id.file_item_title)).setText(item.title);
-
-			((TextView) v.findViewById(R.id.file_item_info)).setText(item.subtitle);
-			ImageView imageView = (ImageView) v.findViewById(R.id.file_item_thumb);
-			if (item.showThumbnail)
-			{
-				fileImageLoader.loadImage(FileImageLoader.FILE_KEY_PREFIX + item.file.getAbsolutePath(), imageView, isListFlinging);
-				imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-				imageView.setVisibility(View.VISIBLE);
-
-				typeTextView.setText(item.extension.toUpperCase().substring(0, Math.min(item.extension.length(), 4)));
-				typeTextView.setVisibility(View.VISIBLE);
-			}
-			else if (item.icon != 0)
-			{
-				imageView.setImageResource(item.icon);
-				imageView.setScaleType(ImageView.ScaleType.CENTER);
-				imageView.setVisibility(View.VISIBLE);
-				typeTextView.setVisibility(View.INVISIBLE);
-			}
-			else
-			{
-				typeTextView.setText(item.extension.toUpperCase().substring(0, Math.min(item.extension.length(), 4)));
-				imageView.setVisibility(View.GONE);
-				typeTextView.setVisibility(View.VISIBLE);
-			}
-
-			selectorView.setSelected(selectedFileMap.containsKey(item.title));
-
-			return v;
-		}
-	}
-
-	private String formatFileSize(long size)
-	{
-		if (size < 1024)
-		{
-			return String.format("%d B", size);
-		}
-		else if (size < 1024 * 1024)
-		{
-			return String.format("%.1f KB", size / 1024.0f);
-		}
-		else if (size < 1024 * 1024 * 1024)
-		{
-			return String.format("%.1f MB", size / 1024.0f / 1024.0f);
-		}
-		else
-		{
-			return String.format("%.1f GB", size / 1024.0f / 1024.0f / 1024.0f);
-		}
 	}
 
 	@Override

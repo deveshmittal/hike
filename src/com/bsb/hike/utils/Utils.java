@@ -52,6 +52,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -4520,6 +4521,113 @@ public class Utils
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, conv);
 		}
 	}	
+	
+	public static void handleFileForwardObject(JSONObject multiMsgFwdObject, HikeFile hikeFile) throws JSONException
+	{
+		multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
+		if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+		{
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.ZOOM_LEVEL, hikeFile.getZoomLevel());
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.LATITUDE, hikeFile.getLatitude());
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.LONGITUDE, hikeFile.getLongitude());
+		}
+		else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
+		{
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.CONTACT_METADATA, hikeFile.serialize().toString());
+		}
+		else
+		{
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
+			if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+			{
+				multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
+			}
+		}
+
+	}
+	
+	public static String getFormattedDate(Context context, long timestamp)
+	{
+		Date date = new Date(timestamp * 1000);
+		String format;
+		if (android.text.format.DateFormat.is24HourFormat(context))
+		{
+			format = "d MMM ''yy";
+		}
+		else
+		{
+			format = "d MMM ''yy";
+		}
+
+		DateFormat df = new SimpleDateFormat(format);
+		return df.format(date);
+	}
+	
+	public static String getFormattedTime(boolean pretty, Context context, long timestamp)
+	{
+		Date date = new Date(timestamp * 1000);
+		if (pretty)
+		{
+			PrettyTime p = new PrettyTime();
+			return p.format(date);
+		}
+		else
+		{
+			String format;
+			if (android.text.format.DateFormat.is24HourFormat(context))
+			{
+				format = "HH:mm";
+			}
+			else
+			{
+				format = "h:mm aaa";
+			}
+
+			DateFormat df = new SimpleDateFormat(format);
+			return df.format(date);
+		}
+	}
+
+	public static Pair<String[], String[]> getMsisdnToNameArray(Conversation conversation)
+	{
+		if (conversation instanceof GroupConversation)
+		{
+			Map<String, PairModified<GroupParticipant, String>> groupParticipants = ((GroupConversation) conversation).getGroupParticipantList();
+			String[] msisdnArray = new String[groupParticipants.size()];
+			String[] nameArray = new String[groupParticipants.size()];
+
+			int i = 0;
+			for (PairModified<GroupParticipant, String> groupParticipant : groupParticipants.values())
+			{
+				msisdnArray[i] = groupParticipant.getFirst().getContactInfo().getMsisdn();
+				nameArray[i++] = groupParticipant.getSecond();
+			}
+			return new Pair<String[], String[]>(msisdnArray, nameArray);
+		}
+		return new Pair<String[], String[]>(null, null);
+	}
+	
+	public static String formatFileSize(long size)
+	{
+		if (size < 1024)
+		{
+			return String.format("%d B", size);
+		}
+		else if (size < 1024 * 1024)
+		{
+			return String.format("%.1f KB", size / 1024.0f);
+		}
+		else if (size < 1024 * 1024 * 1024)
+		{
+			return String.format("%.1f MB", size / 1024.0f / 1024.0f);
+		}
+		else
+		{
+			return String.format("%.1f GB", size / 1024.0f / 1024.0f / 1024.0f);
+		}
+	}
+
 
 	public static AlertDialog showNetworkUnavailableDialog(Context context)
 	{

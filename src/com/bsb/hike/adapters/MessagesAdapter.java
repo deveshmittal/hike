@@ -13,7 +13,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,6 +48,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -87,6 +90,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -103,6 +107,7 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
+import com.bsb.hike.ui.utils.HashSpanWatcher;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -3148,21 +3153,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void openFile(HikeFile hikeFile, ConvMessage convMessage, View parent)
 	{
-		File receivedFile = hikeFile.getFile();
 		Logger.d(getClass().getSimpleName(), "Opening file");
 		Intent openFile = new Intent(Intent.ACTION_VIEW);
-		if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+		switch (hikeFile.getHikeFileType())
 		{
+		case LOCATION:
 			String uri = String.format(Locale.US, "geo:%1$f,%2$f?z=%3$d&q=%1$f,%2$f", hikeFile.getLatitude(), hikeFile.getLongitude(), hikeFile.getZoomLevel());
 			openFile.setData(Uri.parse(uri));
-		}
-		else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
-		{
+			break;
+		case CONTACT:	
 			saveContact(hikeFile);
 			return;
-		}
-		else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
-		{
+		case AUDIO_RECORDING :
 			String fileKey = hikeFile.getFileKey();
 
 			ImageView recAction = (ImageView) parent.findViewById(R.id.action);
@@ -3207,18 +3209,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				voiceMessagePlayer.playMessage(hikeFile);
 			}
 			return;
-		}
-		else
-		{
-			Bundle arguments = new Bundle();
+		case IMAGE:
+		case VIDEO:
 			ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
-			hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn() , convMessage.getTimestamp()));
-			arguments.putParcelableArrayList(HikeConstants.Extras.SHARED_FILE_ITEMS, hsf);
-			arguments.putInt(HikeConstants.MEDIA_POSITION, hsf.size()-1);
-			arguments.putBoolean(HikeConstants.FROM_CHAT_THREAD, true);
-			arguments.putString(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
-			PhotoViewerFragment.openPhoto(R.id.chatThreadParentLayout, context, arguments);
-			
+			hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn() , convMessage.getTimestamp(), convMessage.getGroupParticipantMsisdn()));
+			PhotoViewerFragment.openPhoto(R.id.chatThreadParentLayout, context, hsf, true, conversation);
+			return;
+		
+		
+		default:
+			HikeFile.openFile(hikeFile, context);
 			return;
 		}
 		try

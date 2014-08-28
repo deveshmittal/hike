@@ -22,6 +22,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
@@ -218,6 +219,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			Toast.makeText(getApplicationContext(), R.string.contacts_sync_started, Toast.LENGTH_SHORT).show();
 			break;
 		case 6:
+			HikeConversationsDatabase.getInstance().updateToNewSharedMediaTable();
 			IntentManager.openSettingHelp(this);
 			break;
 		}
