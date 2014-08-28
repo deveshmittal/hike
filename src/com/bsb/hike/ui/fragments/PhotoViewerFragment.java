@@ -14,9 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -29,7 +27,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.view.Window;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -49,7 +46,6 @@ import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeSharedFilesActivity;
 import com.bsb.hike.ui.utils.DepthPageTransformer;
 import com.bsb.hike.utils.CustomAlertDialog;
-import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -365,20 +361,6 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		
 	}
 	
-	public static void onPhotoBack(Fragment fragment, FragmentManager fragmentManager, ActionBar actionBar, Window currentWindow)
-	{
-		currentWindow.clearFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-		if (fragment != null && fragment.isVisible() && fragment instanceof PhotoViewerFragment)
-		{	
-			fragmentTransaction.remove(fragment);
-			fragmentTransaction.commitAllowingStateLoss();
-			actionBar.show();
-			return;
-		}
-	}
-	
 	public void loadItems(boolean reachedEnd, long maxMsgId, int limit, boolean itemsToRight)
 	{
 		loadItems(reachedEnd, maxMsgId, limit, itemsToRight, false, 0);
@@ -556,12 +538,6 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		super.onCreateOptionsMenu(menu, inflater);
 	}
 	
-	public static PhotoViewerFragment getCurrentPhotoViewerFragment(FragmentManager fragmentManager)
-	{
-		PhotoViewerFragment fragment = (PhotoViewerFragment) fragmentManager.findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
-		return fragment;
-	}
-	
 	@Override
 	public void onResume()
 	{
@@ -591,15 +567,4 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		mParent.findViewById(R.id.info_group).startAnimation(animation);
 		mParent.findViewById(R.id.gradient).startAnimation(animation);
 	}
-	
-	public static void closePhotoViewerFragment(HikeAppStateBaseFragmentActivity activity)
-	{
-		Fragment fragment = activity.getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
-		if (fragment != null)
-		{
-			onPhotoBack(fragment, activity.getSupportFragmentManager(), activity.getSupportActionBar(), activity.getWindow());
-		}
-	}
-
-
 }

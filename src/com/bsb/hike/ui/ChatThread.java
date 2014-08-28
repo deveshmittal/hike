@@ -1128,11 +1128,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void onBackPressed()
 	{
-		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
-		if (fragment != null)
+		if(removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true))
 		{
-			PhotoViewerFragment.onPhotoBack(fragment, getSupportFragmentManager(), getSupportActionBar(), getWindow());
-			setupActionBar(false);
 			return;
 		}
 		if (findViewById(R.id.impMessageCreateView).getVisibility() == View.VISIBLE)
@@ -1304,9 +1301,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return onActionModeItemClicked(item);
 		}
 
-		
-		PhotoViewerFragment photoViewerFragment = PhotoViewerFragment.getCurrentPhotoViewerFragment(getSupportFragmentManager());
-		if(photoViewerFragment != null)
+		if(isFragmentAdded(HikeConstants.IMAGE_FRAGMENT_TAG))
 		{
 			return false;
 		}
@@ -2232,7 +2227,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * To handle the case when photo viewer is opened from chat thread and user forwards/share some item. In this case we should close the photo viewer.
 		 */
-		PhotoViewerFragment.closePhotoViewerFragment(ChatThread.this);
+		removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG);
 
 		// This prevent the activity from simply finishing and opens up the last
 		// screen.
@@ -4124,8 +4119,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
-					PhotoViewerFragment.closePhotoViewerFragment(ChatThread.this);
-					setupActionBar(false);
+					removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true);
 				}
 			});
 		}
@@ -8690,4 +8684,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private boolean isShowingPin(){
 		return tipView!=null && tipView.getTag() instanceof Integer && ((Integer)tipView.getTag() == HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 	}
+	
+	public boolean removeFragment(String tag, boolean updateActionBar)
+	{
+		boolean isRemoved = super.removeFragment(tag);
+		if (isRemoved && updateActionBar)
+		{	
+			setupActionBar(false);
+		}
+		return isRemoved;
+	}
+	
 }
