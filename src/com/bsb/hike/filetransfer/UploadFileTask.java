@@ -203,12 +203,12 @@ public class UploadFileTask extends FileTransferBase
 				}
 				if (thumbnail != null)
 				{
-					int compressQuality = 5;
+					int compressQuality;
 					if (hikeFileType == HikeFileType.IMAGE)
 					{
 						Bitmap bluredThumb = Utils.createBlurredImage(thumbnail, context);
 						if(bluredThumb != null){
-							compressQuality = 10;
+							compressQuality = 60;
 							thumbnail = bluredThumb;
 						}else
 							compressQuality = 5;
@@ -220,7 +220,7 @@ public class UploadFileTask extends FileTransferBase
 					thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
 					// thumbnail.recycle();
 				}
-				
+				Logger.d(getClass().getSimpleName(), "Sent Thumbnail Size : " + thumbnailString.length());
 				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(), (int) mFile.length(), quality);
 			}
 			else
@@ -364,12 +364,12 @@ public class UploadFileTask extends FileTransferBase
 			}
 			if (thumbnail != null)
 			{
-				int compressQuality = 5;
+				int compressQuality;
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
 					Bitmap bluredThumb = Utils.createBlurredImage(thumbnail, context);
 					if(bluredThumb != null){
-						compressQuality = 10;
+						compressQuality = 60;
 						thumbnail = bluredThumb;
 					}else
 						compressQuality = 5;

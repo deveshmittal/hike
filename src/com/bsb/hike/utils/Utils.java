@@ -4534,7 +4534,7 @@ public class Utils
 	
 	public static Bitmap createBlurredImage (Bitmap originalBitmap, Context context)
 	{
-		final int BLUR_RADIUS = 10;
+		final int BLUR_RADIUS = 8;
 		if(hasJellyBeanMR1()){
 			Bitmap output = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
 	

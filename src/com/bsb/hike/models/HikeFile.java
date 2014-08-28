@@ -8,13 +8,13 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
@@ -160,7 +160,7 @@ public class HikeFile
 		this.fileName = fileJSON.optString(HikeConstants.FILE_NAME);
 		this.fileTypeString = fileJSON.optString(HikeConstants.CONTENT_TYPE);
 		this.thumbnailString = fileJSON.optString(HikeConstants.THUMBNAIL, null);
-		this.thumbnail = thumbnail == null ? HikeBitmapFactory.stringToDrawable(thumbnailString) : thumbnail;
+		this.thumbnail = thumbnail == null ? makeThumbnailFromString(thumbnailString) : thumbnail;
 		this.sourceFilePath = fileJSON.optString(HikeConstants.SOURCE_FILE_PATH);
 		if(isSent)
 		{
@@ -196,7 +196,7 @@ public class HikeFile
 		this.fileTypeString = fileTypeString;
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = HikeBitmapFactory.getBitmapDrawable(thumbnail);
+		this.thumbnail = makeThumbnailFromBitmap(thumbnail);
 		this.recordingDuration = recordingDuration;
 		this.isSent = isSent;
 		this.img_quality = img_quality;
@@ -208,7 +208,7 @@ public class HikeFile
 		this.fileTypeString = fileTypeString;
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = HikeBitmapFactory.getBitmapDrawable(thumbnail);
+		this.thumbnail = makeThumbnailFromBitmap(thumbnail);
 		this.recordingDuration = recordingDuration;
 		this.sourceFilePath = source;
 		this.isSent = isSent;
@@ -226,8 +226,28 @@ public class HikeFile
 		this.hikeFileType = HikeFileType.fromString(fileTypeString);
 		this.address = address;
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = HikeBitmapFactory.getBitmapDrawable(thumbnail);
+		this.thumbnail = makeThumbnailFromBitmap(thumbnail);
 		this.isSent = isSent;
+	}
+
+	private Drawable makeThumbnailFromBitmap(Bitmap bitmap)
+	{
+		Drawable thumbnail = HikeBitmapFactory.getBitmapDrawable(bitmap);
+		if (thumbnail instanceof RecyclingBitmapDrawable)
+		{
+			((RecyclingBitmapDrawable) thumbnail).incrementCacheReference();
+		}
+		return thumbnail;
+	}
+
+	private Drawable makeThumbnailFromString(String thumbnailString)
+	{
+		Drawable thumbnail = HikeBitmapFactory.stringToDrawable(thumbnailString);
+		if (thumbnail instanceof RecyclingBitmapDrawable)
+		{
+			((RecyclingBitmapDrawable) thumbnail).incrementCacheReference();
+		}
+		return thumbnail;
 	}
 
 	public JSONObject serialize()
