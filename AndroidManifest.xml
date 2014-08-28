@@ -203,6 +203,10 @@
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
+            android:name="com.bsb.hike.ui.SharedOtherFilesActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+        <activity
             android:name="com.bsb.hike.ui.CreateNewGroupActivity"
             android:windowSoftInputMode="stateVisible" >
         </activity>

@@ -14,9 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -29,7 +27,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.view.Window;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -296,9 +293,8 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		selectedPager.setCurrentItem(position, false); 
 	}
 	
-	private void setupActionBar()
+	public void setupActionBar()
 	{
-
 		ActionBar actionBar = getSherlockActivity().getSupportActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
@@ -372,20 +368,6 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 			int mediaPosition, String fromMsisdn, String convName)
 	{
 		openPhoto(resId, context, hikeSharedFiles, fromChatThread, mediaPosition, fromMsisdn, convName, false, null, null);
-	}
-	
-	public static void onPhotoBack(Fragment fragment, FragmentManager fragmentManager, ActionBar actionBar, Window currentWindow)
-	{
-		currentWindow.clearFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-		if (fragment != null && fragment.isVisible() && fragment instanceof PhotoViewerFragment)
-		{	
-			fragmentTransaction.remove(fragment);
-			fragmentTransaction.commitAllowingStateLoss();
-			actionBar.show();
-			return;
-		}
 	}
 	
 	public void loadItems(boolean reachedEnd, long maxMsgId, int limit, boolean itemsToRight)
@@ -563,12 +545,6 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		menu.clear();
 		inflater.inflate(R.menu.photo_viewer_option_menu, menu);
 		super.onCreateOptionsMenu(menu, inflater);
-	}
-	
-	public static PhotoViewerFragment getCurrentPhotoViewerFragment(FragmentManager fragmentManager)
-	{
-		PhotoViewerFragment fragment = (PhotoViewerFragment) fragmentManager.findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
-		return fragment;
 	}
 	
 	@Override

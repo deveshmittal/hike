@@ -1,7 +1,9 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +23,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.FileListItem;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Utils;
 
 public class SharedOtherFilesActivity extends HikeAppStateBaseFragmentActivity implements OnScrollListener, HikePubSub.Listener
 {
@@ -42,7 +45,13 @@ public class SharedOtherFilesActivity extends HikeAppStateBaseFragmentActivity i
 	private TextView title;
 
 	private TextView subText;
-
+	
+	private boolean mLoadingMoreFiles;
+	
+	private boolean mReachedEnd;
+	
+	String msisdn;
+		
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -50,7 +59,7 @@ public class SharedOtherFilesActivity extends HikeAppStateBaseFragmentActivity i
 
 		setContentView(R.layout.file_select_layout);
 
-		String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+		msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
 		items = (ArrayList<FileListItem>) HikeConversationsDatabase.getInstance().getSharedMedia(msisdn, HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY, -1, false);
 
 		listAdapter = new FileListAdapter(this, items);
@@ -68,6 +77,7 @@ public class SharedOtherFilesActivity extends HikeAppStateBaseFragmentActivity i
 			}
 		});
 
+		listView.setOnScrollListener(this);
 		setupActionBar();
 	}
 
@@ -122,6 +132,45 @@ public class SharedOtherFilesActivity extends HikeAppStateBaseFragmentActivity i
 			previousFirstVisibleItem = firstVisibleItem;
 			previousEventTime = currTime;
 		}
+		
+		if (!mReachedEnd && !mLoadingMoreFiles && items != null && !items.isEmpty() && (firstVisibleItem + visibleItemCount) <= totalItemCount - 5)
+		{
+			mLoadingMoreFiles = true;
+
+			AsyncTask<Void, Void, List<FileListItem>> asyncTask = new AsyncTask<Void, Void, List<FileListItem>>()
+			{
+				@Override
+				protected List<FileListItem> doInBackground(Void... params)
+				{
+					long maxMsgId = items.get(items.size() - 1).getHikeSharedFile().getMsgId();
+					return (List<FileListItem>) HikeConversationsDatabase.getInstance().getSharedMedia(msisdn, HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY, maxMsgId, false);
+				}
+
+				@Override
+				protected void onPostExecute(List<FileListItem> result)
+				{
+					if (!result.isEmpty())
+					{
+						items.addAll(result);
+						listAdapter.notifyDataSetChanged();
+					}
+					else
+					{
+						mReachedEnd = true;
+					}
+					mLoadingMoreFiles = false;
+				}
+			};
+			if (Utils.isHoneycombOrHigher())
+			{
+				asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			}
+			else
+			{
+				asyncTask.execute();
+			}
+		}
+	
 	}
 
 	@Override

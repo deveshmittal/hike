@@ -3,6 +3,8 @@ package com.bsb.hike.ui;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +16,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.os.Parcelable;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -56,7 +57,8 @@ import com.bsb.hike.utils.Utils;
 
 public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity implements OnScrollListener, OnItemClickListener, OnItemLongClickListener
 {
-
+	static String MULTISELECT_MODE = "multi_mode";
+	static String MULTISELECT_KEYS = "multi_keys";
 	private List<HikeSharedFile> sharedFilesList;
 
 	private HikeSharedFileAdapter adapter;
@@ -65,7 +67,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 
 	private boolean multiSelectMode;
 
-	private Map<Long, HikeSharedFile> selectedSharedFileItems;
+	private HashSet<Long> selectedSharedFileItems;
 
 	private TextView multiSelectTitle;
 
@@ -108,7 +110,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);  //Making the action bar overlay on top of the current view
 		setContentView(R.layout.gallery);
 
-		selectedSharedFileItems = new HashMap<Long, HikeSharedFile>();
+		selectedSharedFileItems = new HashSet<Long>();
 		sharedFilesList = new ArrayList<HikeSharedFile>();
 
 		Bundle data;
@@ -147,17 +149,27 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		gridView.setOnScrollListener(this);
 		gridView.setOnItemClickListener(this);
 		gridView.setOnItemLongClickListener(this);
+		
 		setupActionBar();
+		if(data.getBoolean(MULTISELECT_MODE)){
+			long[] selecKeys = data.getLongArray(MULTISELECT_KEYS);
+			if(selecKeys!=null){
+				int size = selecKeys.length;
+				for(int i=0;i<size;i++){
+				selectedSharedFileItems.add(selecKeys[i]);
+				}
+				multiSelectMode=true;
+				setupMultiSelectActionBar();
+			}
+		}
+		HikeMessengerApp.getPubSub().publish(HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, null);
 	}
 
 	@Override
 	public void onBackPressed()
 	{
-		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
-		if (fragment != null)
-		{	
-			PhotoViewerFragment.onPhotoBack(fragment, getSupportFragmentManager(), getSupportActionBar(), getWindow());
-			setupActionBar();
+		if(removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
+		{
 			return;
 		}
 		if (multiSelectMode)
@@ -228,6 +240,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		closeBtn.startAnimation(slideIn);
 
 		initializeActionMode();
+		setMultiSelectTitle();
 	}
 
 	public boolean initializeActionMode()
@@ -376,7 +389,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 
 		if (multiSelectMode)
 		{
-			if (selectedSharedFileItems.containsKey(sharedFileItem.getMsgId()))
+			if (selectedSharedFileItems.contains(sharedFileItem.getMsgId()))
 			{
 				selectedSharedFileItems.remove(sharedFileItem.getMsgId());
 				if (selectedSharedFileItems.isEmpty())
@@ -390,7 +403,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 			}
 			else
 			{
-				selectedSharedFileItems.put(sharedFileItem.getMsgId(), sharedFileItem);
+				selectedSharedFileItems.add(sharedFileItem.getMsgId());
 				setMultiSelectTitle();
 			}
 
@@ -445,13 +458,18 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 				@Override
 				public void onClick(View v)
 				{
-					ArrayList<Long> msgIds = new ArrayList<Long>(selectedSharedFileItems.size());
-					for (HikeSharedFile file : selectedSharedFileItems.values())
-					{
-						msgIds.add(file.getMsgId());
-					}
+					ArrayList<Long> msgIds = new ArrayList<Long>(selectedSharedFileItems);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, msgIds);
-					sharedFilesList.removeAll(selectedSharedFileItems.values());
+					Iterator<HikeSharedFile> iterator= sharedFilesList.iterator();
+					while (iterator.hasNext())
+					{
+						HikeSharedFile hsf = iterator.next();
+						if(selectedSharedFileItems.contains(hsf.getMsgId()))
+						{
+							iterator.remove();
+						}
+					}
+					
 					destroyActionMode();
 					deleteConfirmDialog.dismiss();
 				}
@@ -462,27 +480,31 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 			deleteConfirmDialog.show();
 			return true;
 		case R.id.forward_msgs:
-			ArrayList<Long> selectedMsgIds = new ArrayList<Long>(selectedSharedFileItems.keySet());
+			ArrayList<Long> selectedMsgIds = new ArrayList<Long>(selectedSharedFileItems);
 			Collections.sort(selectedMsgIds);
 			Intent intent = new Intent(HikeSharedFilesActivity.this, ComposeChatActivity.class);
 			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
 			JSONArray multipleMsgArray = new JSONArray();
 			try
 			{
-				for (int i = 0; i < selectedMsgIds.size(); i++)
+				Iterator<HikeSharedFile> iterator= sharedFilesList.iterator();
+				while (iterator.hasNext())
 				{
-					HikeSharedFile hikeFile = selectedSharedFileItems.get(selectedMsgIds.get(i));
-					JSONObject multiMsgFwdObject = new JSONObject();
-					multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
-
-					multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
-					multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
-					if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+					HikeSharedFile hikeFile = iterator.next();
+					if(selectedSharedFileItems.contains(hikeFile.getMsgId()))
 					{
-						multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
-					}
+						JSONObject multiMsgFwdObject = new JSONObject();
+						multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
 
-					multipleMsgArray.put(multiMsgFwdObject);
+						multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
+						multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
+						if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+						{
+							multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
+						}
+
+						multipleMsgArray.put(multiMsgFwdObject);
+					}
 				}
 			}
 			catch (JSONException e)
@@ -496,8 +518,16 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		case R.id.share_msgs:
 			if (selectedSharedFileItems.size() == 1)
 			{
-				HikeSharedFile hikeSharedFile = selectedSharedFileItems.values().iterator().next();
-				hikeSharedFile.shareFile(HikeSharedFilesActivity.this);
+				Iterator<HikeSharedFile> iterator= sharedFilesList.iterator();
+				long msgId = selectedSharedFileItems.iterator().next();
+				while (iterator.hasNext())
+				{
+					HikeSharedFile hikeSharedFile = iterator.next();
+					if(msgId == hikeSharedFile.getMsgId())
+					{
+						hikeSharedFile.shareFile(HikeSharedFilesActivity.this);
+					}
+				}
 				destroyActionMode();
 			}
 			else
@@ -568,5 +598,30 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		outState.putAll(getIntent().getExtras());
+		if(multiSelectMode){
+			long[] selectedValues = new long[selectedSharedFileItems.size()];
+			int i=0;
+			for(Long id : selectedSharedFileItems){
+				selectedValues[i++] = id;
+			}
+			outState.putLongArray(MULTISELECT_KEYS, selectedValues);
+			outState.putBoolean(MULTISELECT_MODE, true);
+		}
+		super.onSaveInstanceState(outState);
+	}
+	public boolean removeFragment(String tag)
+	{
+		boolean isRemoved = super.removeFragment(tag);
+		if (isRemoved)
+		{	
+			setupActionBar();
+		}
+		return isRemoved;
 	}
 }

@@ -1022,7 +1022,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
 		if (fragment != null)
 		{	getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
-			PhotoViewerFragment.onPhotoBack(fragment, getSupportFragmentManager(), getSupportActionBar(), getWindow());
 			setupActionBar();
 		}
 		
