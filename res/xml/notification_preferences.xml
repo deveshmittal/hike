@@ -31,8 +31,6 @@
 
     <com.bsb.hike.view.IconListPreference
         android:defaultValue="@string/notif_sound_Hike"
-        android:entries="@array/notificationSoundPrefKeys"
-        android:entryValues="@array/notificationSoundPrefValues"
         icon="ic_hike_jingle"
         android:key="notifSoundPref"
         android:layout="@layout/list_preference"

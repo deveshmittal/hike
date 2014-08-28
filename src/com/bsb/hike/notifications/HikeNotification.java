@@ -550,17 +550,16 @@ public class HikeNotification
 				.isStealthMsisdn(firstMsisdn) ? context.getString(R.string.stealth_notification_message) : context.getString(R.string.hike_to_offline_push_title_single,
 				nameMap.get(firstMsisdn)));
 		String message = context.getString(R.string.hike_to_offline_text);
-		
 
 		// if notification message stack is empty, add to it and proceed with single notification display
 		// else add to stack and notify clubbed messages
 		if (hikeNotifMsgStack.isEmpty())
 		{
-			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), title+": "+message);
+			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), title + ": " + message);
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), title+": "+message, false);
+			notifyStringMessage(context.getString(R.string.app_name), title + ": " + message, false);
 			return;
 		}
 
@@ -1020,19 +1019,23 @@ public class HikeNotification
 		if (!forceNotPlaySound)
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-			String notifSond = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
+			String notifSound = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
 			if (!shouldNotPlayNotification)
 			{
-				Logger.i("notif", "sound " + notifSond);
-				if (!NOTIF_SOUND_OFF.equals(notifSond))
+				Logger.i("notif", "sound " + notifSound);
+				if (!NOTIF_SOUND_OFF.equals(notifSound))
 				{
-					if (NOTIF_SOUND_HIKE.equals(notifSond))
+					if (NOTIF_SOUND_HIKE.equals(notifSound))
 					{
 						mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
 					}
-					else
+					else if (NOTIF_SOUND_DEFAULT.equals(notifSound))
 					{
 						mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
+					}
+					else
+					{
+						mBuilder.setSound(Uri.parse(notifSound));
 					}
 				}
 
