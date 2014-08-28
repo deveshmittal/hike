@@ -584,12 +584,13 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 		return super.onOptionsItemSelected(item);
 	}
-
+	
 	private void setupContactProfileScreen()
 	{
 		this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.CONTACT_INFO);
-
 		contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(mLocalMSISDN, false);
+		sharedMediaCount = HikeConversationsDatabase.getInstance().getSharedMediaCount(mLocalMSISDN);
+		sharedPinCount = 0;  //Add a query here to get shared groups count. sharedPincount is to be treated as shared group count here.
 
 		if (!contactInfo.isOnhike())
 		{
@@ -639,6 +640,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		profileItems.clear();
 		addProfileHeader();
 		profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.PHONE_NUMBER, getResources().getString(R.string.phone_pa)));
+		if(contactInfo.isOnhike())
+		{	shouldAddSharedMedia();
+			profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT, getResources().getString(R.string.shared_cont_pa), 0, sharedPinCount, null));
 		}
 	}
 
@@ -650,6 +654,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{	
 			addSharedMedia();
 		}
+		profileItems.add(new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, "" + sharedMediaCount, actualSize, sharedMedia)); //Add shared media elements
+	}
 
 	private void addProfileHeader()
 	{	
