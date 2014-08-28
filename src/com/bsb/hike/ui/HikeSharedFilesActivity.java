@@ -58,7 +58,8 @@ import com.bsb.hike.utils.Utils;
 
 public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity implements OnScrollListener, OnItemClickListener, OnItemLongClickListener
 {
-
+	static String MULTISELECT_MODE = "multi_mode";
+	static String MULTISELECT_KEYS = "multi_keys";
 	private List<HikeSharedFile> sharedFilesList;
 
 	private HikeSharedFileAdapter adapter;
@@ -149,8 +150,19 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		gridView.setOnScrollListener(this);
 		gridView.setOnItemClickListener(this);
 		gridView.setOnItemLongClickListener(this);
-		setupActionBar();
 		
+		setupActionBar();
+		if(data.getBoolean(MULTISELECT_MODE)){
+			long[] selecKeys = data.getLongArray(MULTISELECT_KEYS);
+			if(selecKeys!=null){
+				int size = selecKeys.length;
+				for(int i=0;i<size;i++){
+				selectedSharedFileItems.add(selecKeys[i]);
+				}
+				multiSelectMode=true;
+				setupMultiSelectActionBar();
+			}
+		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, null);
 	}
 
@@ -232,6 +244,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		closeBtn.startAnimation(slideIn);
 
 		initializeActionMode();
+		setMultiSelectTitle();
 	}
 
 	public boolean initializeActionMode()
@@ -582,5 +595,21 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		outState.putAll(getIntent().getExtras());
+		if(multiSelectMode){
+			long[] selectedValues = new long[selectedSharedFileItems.size()];
+			int i=0;
+			for(Long id : selectedSharedFileItems){
+				selectedValues[i++] = id;
+			}
+			outState.putLongArray(MULTISELECT_KEYS, selectedValues);
+			outState.putBoolean(MULTISELECT_MODE, true);
+		}
+		super.onSaveInstanceState(outState);
 	}
 }
