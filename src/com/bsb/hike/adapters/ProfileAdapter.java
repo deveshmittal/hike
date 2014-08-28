@@ -4,17 +4,23 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.text.util.Linkify;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView.FindListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
@@ -25,17 +31,21 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.ProfileItem.ProfileGroupItem;
+import com.bsb.hike.models.ProfileItem.ProfileSharedMedia;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
+import com.bsb.hike.smartImageLoader.SharedFileImageLoader;
 import com.bsb.hike.smartImageLoader.TimelineImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontTextView;
@@ -44,7 +54,11 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 {
 
 	public static final String PROFILE_PIC_SUFFIX = "pp";
-
+	
+	public static final String PROFILE_ROUND_SUFFIX = "round";
+	
+	public static final String OPEN_GALLERY = "OpenGallery";
+	
 	private static enum ViewType
 	{
 		HEADER, HEADER_PROFILE, HEADER_GROUP, SHARED_MEDIA, SHARED_CONTENT, STATUS, PROFILE_PIC_UPDATE, GROUP_PARTICIPANT, EMPTY_STATUS, REQUEST, MEMBERS, ADD_MEMBERS, PHONE_NUMBER
@@ -116,6 +130,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		if (ProfileItem.HEADER_ID == itemId)
 		{
 			viewType = ViewType.HEADER;
+		}
+		else if (ProfileItem.SHARED_MEDIA == itemId)
+		{
+			viewType = ViewType.SHARED_MEDIA;
 		}
 		else if (ProfileItem.EMPTY_ID == itemId)
 		{
@@ -197,6 +215,16 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.image = (ImageView) v.findViewById(R.id.profile);
 				viewHolder.icon = (ImageView) v.findViewById(R.id.change_profile);
 				break;
+
+
+			case SHARED_MEDIA:
+				v = inflater.inflate(R.layout.shared_media, null);
+				viewHolder.text = (TextView) v.findViewById(R.id.name);
+				viewHolder.subText = (TextView) v.findViewById(R.id.count);
+				viewHolder.infoContainer = v.findViewById(R.id.shared_media_items);
+				viewHolder.extraInfo = (TextView) v.findViewById(R.id.sm_emptystate);
+				break;
+
 
 			case GROUP_PARTICIPANT:
 				v = new LinearLayout(context);
@@ -319,13 +347,62 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					}
 				}
 			}
-			else if (groupProfile)
+			break;
+		case SHARED_MEDIA:
+			viewHolder.text.setText(context.getString(R.string.shared_med));
+			viewHolder.subText.setText((String) profileItem.getText()); // Query for shared_media in the profileActivity itself
+			List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
+			int sizeOfImage = ((ProfileSharedMedia) profileItem).getSizeofImage();
+			LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
+			layout.removeAllViews();
+			LayoutParams layoutParams;
+			ImageView image;
+			int smSize = Integer.valueOf(profileItem.getText().toString());
+			if(sharedMedia != null && sharedMedia.size() < smSize )
 			{
-				/*
-				 * Adding one to count self.
-				 */
-				viewHolder.subText.setText(context.getString(R.string.num_people, (groupConversation.getGroupMemberAliveCount() + 1)));
+				SharedFileImageLoader thumbnailLoader = new SharedFileImageLoader(context, sizeOfImage);
+				for (HikeSharedFile galleryItem : sharedMedia)
+				{
+					View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
+					image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
+					image.setTag(galleryItem);
+					thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), image);
+					image.setOnClickListener(profileActivity);
+					layout.addView(image_thumb);
+				}
+				//Add Arrow Icon
+				View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
+				image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
+				image.setTag(OPEN_GALLERY);
+				image.setOnClickListener(profileActivity);
+				image.setImageDrawable((context.getResources().getDrawable(R.drawable.ic_arrow)));
+				image.setScaleType(ScaleType.CENTER);
+				layout.addView(image_thumb);
 			}
+			
+			else if(sharedMedia != null && sharedMedia.size() >= smSize)
+			{
+				SharedFileImageLoader thumbnailLoader = new SharedFileImageLoader(context, sizeOfImage);
+				for (HikeSharedFile galleryItem : sharedMedia)
+				{
+					View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
+					image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
+					image.setTag(galleryItem);
+					thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), image);
+					image.setOnClickListener(profileActivity);
+					layout.addView(image_thumb);
+				}
+				
+			}
+			else
+			{		//Empty State
+				layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+				viewHolder.extraInfo.setVisibility(View.VISIBLE);
+				layout.addView(viewHolder.extraInfo);
+				layout.setLayoutParams(layoutParams);
+			}
+			
+			break;
 
 			break;
 

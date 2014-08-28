@@ -92,4 +92,32 @@ public abstract class ProfileItem
 		}
 	}
 
+	
+	public static class ProfileSharedMedia extends ProfileItem
+	{
+		public ProfileSharedMedia(int itemId, Object text)
+		{
+			super(itemId, text);
+			// TODO Auto-generated constructor stub
+		}
+		public ProfileSharedMedia(int itemId, Object text, int sizeOfImage,List<HikeSharedFile> sharedFilesList)
+		{
+			super(itemId,text);
+			this.sharedFilesList = sharedFilesList;
+			this.sizeOfImage = sizeOfImage;
+		}
+		
+		public List<HikeSharedFile> getSharedFileList()
+		{
+			return sharedFilesList;
+		}
+		public int getSizeofImage()
+		{
+			return sizeOfImage;
+		}
+		private List<HikeSharedFile> sharedFilesList;
+		private int sizeOfImage;
+	}
+	
+	
 }

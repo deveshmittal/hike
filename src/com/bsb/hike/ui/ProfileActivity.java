@@ -15,12 +15,14 @@ import org.json.JSONObject;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -209,6 +211,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private boolean isGroupOwner;
 
 	private Menu mMenu;
+	
+	private int sharedMediaCount = 0;
+	
+	private List<HikeSharedFile> sharedMedia;
+	
+	private int actualSize;
+	
+	private int maxMediaToShow = 4;
+	
+	private static final String PROFILE_ROUND_SUFFIX = "round";
 
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
@@ -626,11 +638,13 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		// Adding an item for the header
 		profileItems.add(new ProfileItem.ProfileStatusItem(ProfileItem.HEADER_ID));
 
-		showingRequestItem = false;
-		if ((!contactInfo.isOnhike() || contactInfo.getFavoriteType() != FavoriteType.FRIEND) && !HikeMessengerApp.hikeBotNamesMap.containsKey(contactInfo.getMsisdn()))
-		{
-			profileItems.add(new ProfileItem.ProfileStatusItem(ProfileItem.REQUEST_ID));
-			showingRequestItem = true;
+	private void shouldAddSharedMedia()
+	{
+		// TODO Auto-generated method stub
+		actualSize = getResources().getDimensionPixelSize(R.dimen.profile_shared_media_item_size);
+		if(sharedMediaCount>0)
+		{	
+			addSharedMedia();
 		}
 
 		if (showContactsUpdates(contactInfo))
@@ -665,7 +679,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 		HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 		groupConversation = (GroupConversation) hCDB.getConversation(mLocalMSISDN, 0);
-
+		sharedMediaCount = hCDB.getSharedMediaCount(mLocalMSISDN);
 		participantMap = groupConversation.getGroupParticipantList();
 		List<String> inactiveMsisdns = new ArrayList<String>();
 		/*
@@ -705,6 +719,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		profileItems.clear();
 		// Adding an item for the header
 		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.HEADER_ID_GROUP, null));
+		shouldAddSharedMedia();
 		List<GroupParticipant> participants = new ArrayList<GroupParticipant>(participantMap.values());
 
 		if (!participantMap.containsKey(userInfo.getContactInfo().getMsisdn()))
@@ -725,23 +740,18 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			loopCount++;
 		}
 
-		for (int i = 0; i < loopCount; i++)
-		{
-			int index1 = 2 * i;
-			int index2 = 2 * i + 1;
-
-			GroupParticipant[] groupParticipants = new GroupParticipant[2];
-			groupParticipants[0] = participants.get(index1);
-
-			if (index2 < participants.size())
-			{
-				groupParticipants[1] = participants.get(index2);
-			}
-
-			profileItems.add(new ProfileItem.ProfileGroupItem(groupParticipants));
+	private void addSharedMedia()
+	{
+		// TODO Auto-generated method stub
+		
+		HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
+		if(sharedMediaCount < maxMediaToShow )
+		{	
+			sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, sharedMediaCount, -1, true);
+			return;
 		}
-
-		isGroupOwner = userInfo.getContactInfo().getMsisdn().equals(groupConversation.getGroupOwner());
+		sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, maxMediaToShow , -1, true);
+		return;
 	}
 
 	private void setupEditScreen()
@@ -964,6 +974,13 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public void onBackPressed()
 	{
+		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
+		if (fragment != null)
+		{	getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			PhotoViewerFragment.onPhotoBack(fragment, getSupportFragmentManager(), getSupportActionBar(), getWindow());
+			setupActionBar();
+		}
+		
 		if (this.profileType == ProfileType.USER_PROFILE_EDIT)
 		{
 			isBackPressed = true;
@@ -2254,6 +2271,34 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	@Override
 	public void onClick(View v)
 	{
+		//switch (profileType)
+		if(v.getTag() instanceof HikeSharedFile)
+		{	HikeSharedFile hikeFile = (HikeSharedFile) v.getTag();
+			Bundle arguments = new Bundle();
+			ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
+			hsf.add(hikeFile);
+			arguments.putParcelableArrayList(HikeConstants.Extras.SHARED_FILE_ITEMS, hsf);
+			arguments.putInt(HikeConstants.MEDIA_POSITION, hsf.size()-1);
+			arguments.putBoolean(HikeConstants.FROM_CHAT_THREAD, true);
+			arguments.putString(HikeConstants.Extras.MSISDN, mLocalMSISDN);
+			if(this.profileType == ProfileType.GROUP_INFO)
+				PhotoViewerFragment.openPhoto(R.id.parent_layout, ProfileActivity.this, hsf, true, groupConversation);
+			else
+				PhotoViewerFragment.openPhoto(R.id.parent_layout, ProfileActivity.this, hsf, true, 0, hsf.get(0).getMsisdn(), contactInfo.getName());
+			return;
+		}
+		else if(v.getTag() instanceof String)  //Open entire gallery intent
+		{
+			
+			if(this.profileType == ProfileType.GROUP_INFO)
+				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ProfileActivity.this, groupConversation));
+			else
+				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ProfileActivity.this, contactInfo.getName(), contactInfo.getMsisdn()));
+			return;
+		}
+		
+		//Group Participant was clicked
+		
 		GroupParticipant groupParticipant = (GroupParticipant) v.getTag();
 		if (groupParticipant == null)
 		{
