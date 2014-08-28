@@ -14,7 +14,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.os.Parcelable;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -155,11 +154,8 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	@Override
 	public void onBackPressed()
 	{
-		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
-		if (fragment != null)
-		{	
-			PhotoViewerFragment.onPhotoBack(fragment, getSupportFragmentManager(), getSupportActionBar(), getWindow());
-			setupActionBar();
+		if(removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
+		{
 			return;
 		}
 		if (multiSelectMode)
@@ -563,5 +559,15 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		intent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;
+	}
+	
+	public boolean removeFragment(String tag)
+	{
+		boolean isRemoved = super.removeFragment(tag);
+		if (isRemoved)
+		{	
+			setupActionBar();
+		}
+		return isRemoved;
 	}
 }
