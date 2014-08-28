@@ -238,6 +238,8 @@ public class HikeDialog
 		CustomFontTextView smallSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_small_cftv);
 		CustomFontTextView mediumSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_medium_cftv);
 		CustomFontTextView originalSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_original_cftv);
+		Button always = (Button) dialog.findViewById(R.id.btn_always);
+		Button once = (Button) dialog.findViewById(R.id.btn_just_once);
 		
 		if(data!=null)
 			{
@@ -271,6 +273,51 @@ public class HikeDialog
 			}
 		}
 		
+		showImageQualityOption(quality, small, medium, original);
+		
+		OnClickListener imageQualityDialogOnClickListener = new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				// TODO Auto-generated method stub
+				switch (v.getId())
+				{
+				case R.id.hike_small_container:
+					showImageQualityOption(ImageQuality.QUALITY_SMALL, small, medium, original);
+					break;
+				case R.id.hike_medium_container:
+					showImageQualityOption(ImageQuality.QUALITY_MEDIUM, small, medium, original);
+					break;
+				case R.id.hike_original_container:
+					showImageQualityOption(ImageQuality.QUALITY_ORIGINAL, small, medium, original);
+					break;
+				case R.id.btn_always:
+					saveImageQualitySettings(editor, small, medium, original);
+					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, true);
+					callOnSucess(listener, dialog);
+					break;
+				case R.id.btn_just_once:
+					saveImageQualitySettings(editor, small, medium, original);
+					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, false);
+					callOnSucess(listener, dialog);
+					break;
+				}
+			}
+		};
+
+		small_ll.setOnClickListener(imageQualityDialogOnClickListener);
+		medium_ll.setOnClickListener(imageQualityDialogOnClickListener);
+		original_ll.setOnClickListener(imageQualityDialogOnClickListener);
+		always.setOnClickListener(imageQualityDialogOnClickListener);
+		once.setOnClickListener(imageQualityDialogOnClickListener);
+
+		dialog.show();
+		return dialog;
+	}
+	
+	private static void showImageQualityOption(int quality, CheckBox small, CheckBox medium, CheckBox original)
+	{
 		switch (quality)
 		{
 		case ImageQuality.QUALITY_ORIGINAL:
@@ -289,56 +336,23 @@ public class HikeDialog
 			original.setChecked(false);
 			break;
 		}
-		
-		OnClickListener onClickListener = new OnClickListener()
-		{
-			
-			@Override
-			public void onClick(View v)
-			{
-				// TODO Auto-generated method stub
-				switch (v.getId())
-				{
-				case R.id.hike_small_container:
-					small.setChecked(true);
-					medium.setChecked(false);
-					original.setChecked(false);
-					saveImageQualitySettings(editor,ImageQuality.QUALITY_SMALL);
-					callOnSucess(listener, dialog);
-					
-					break;
-				case R.id.hike_medium_container:
-					small.setChecked(false);
-					medium.setChecked(true);
-					original.setChecked(false);
-					saveImageQualitySettings(editor,ImageQuality.QUALITY_MEDIUM);
-					callOnSucess(listener, dialog);
-					
-					break;
-				case R.id.hike_original_container:
-					small.setChecked(false);
-					medium.setChecked(false);
-					original.setChecked(true);
-					saveImageQualitySettings(editor,ImageQuality.QUALITY_ORIGINAL);
-					callOnSucess(listener, dialog);
-					
-					break;
-				}
-			}
-		};
-
-		small_ll.setOnClickListener(onClickListener);
-		medium_ll.setOnClickListener(onClickListener);
-		original_ll.setOnClickListener(onClickListener);
-
-		dialog.show();
-		return dialog;
 	}
 		
-	private static void saveImageQualitySettings(Editor editor, int i)
+	private static void saveImageQualitySettings(Editor editor, CheckBox small, CheckBox medium, CheckBox original)
 	{
 		// TODO Auto-generated method stub
-		editor.putInt(HikeConstants.IMAGE_QUALITY, i);
+		if (medium.isChecked())
+		{
+			editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_MEDIUM);
+		}
+		else if (original.isChecked())
+		{
+			editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_ORIGINAL);
+		}
+		else
+		{
+			editor.putInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_SMALL);
+		}
 		editor.commit();
 	}
 

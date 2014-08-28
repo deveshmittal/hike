@@ -62,7 +62,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		final ArrayList<String> itemsSummary = new ArrayList<String>();
 
 		itemsSummary.add(getString(R.string.notifications_hintext));
-		itemsSummary.add(getString(R.string.auto_download_media_hinttext_new));
+		itemsSummary.add(getString(R.string.media_settings_hinttext));
 		itemsSummary.add(getString(R.string.sms_setting_hinttext));
 		itemsSummary.add(getString(R.string.account_hintttext));
 		itemsSummary.add(getString(R.string.privacy_setting_hinttext));

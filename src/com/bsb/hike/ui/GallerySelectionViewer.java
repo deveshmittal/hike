@@ -185,18 +185,58 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			public void onClick(View v)
 			{
 				final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
+				long sizeOriginal = 0;
 				for (GalleryItem galleryItem : galleryItems)
 				{
 					fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
+					File file = new File(galleryItem.getFilePath());
+					sizeOriginal += file.length();
 				}
 				
 				final String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
 				final boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
 				
-				fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
-				Utils.executeAsyncTask(fileTransferTask);
+				if (!HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
+				{
+					HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
+					{
+						@Override
+						public void onSucess(Dialog dialog)
+						{
+							fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+							Utils.executeAsyncTask(fileTransferTask);
+							progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+							dialog.dismiss();
+						}
 
-				progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+						@Override
+						public void negativeClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void positiveClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void neutralClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+					}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
+				}
+				else
+				{
+					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+					Utils.executeAsyncTask(fileTransferTask);
+					progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+				}
 			}
 		});
 		
@@ -245,7 +285,6 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 					}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
 				}
 		});
-
 		actionBar.setCustomView(actionBarView);
 	}
 
