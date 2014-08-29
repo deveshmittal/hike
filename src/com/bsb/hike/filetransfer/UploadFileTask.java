@@ -219,8 +219,8 @@ public class UploadFileTask extends FileTransferBase
 					thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
 					thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
 					// thumbnail.recycle();
+					Logger.d(getClass().getSimpleName(), "Sent Thumbnail Size : " + thumbnailString.length());
 				}
-				Logger.d(getClass().getSimpleName(), "Sent Thumbnail Size : " + thumbnailString.length());
 				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(), (int) mFile.length(), quality);
 			}
 			else
