@@ -648,7 +648,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		profileItems.clear();
 		addProfileHeader();
-		profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.PHONE_NUMBER, getResources().getString(R.string.phone_pa)));
+		profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.PHONE_NUMBER, null));
 		if(contactInfo.isOnhike())
 		{	shouldAddSharedMedia();
 			profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT, getResources().getString(R.string.shared_cont_pa), 0, sharedPinCount, null));
@@ -663,7 +663,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{	
 			addSharedMedia();
 		}
-		profileItems.add(new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, "" + sharedMediaCount, actualSize, sharedMedia)); //Add shared media elements
+		profileItems.add(new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, sharedMediaCount, sharedMedia)); //Add shared media elements
 	}
 
 	private void addProfileHeader()
@@ -676,19 +676,19 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		else if(contactInfo.isOnhike() && (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED))
 		{	
-			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.NOT_A_FRIEND, null)); 
+			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.NOT_A_FRIEND)); 
 		}
 		
 		else if(contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT)
 		{
-			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE, ProfileContactItem.contactType.UNKNOWN_ON_HIKE, null));
+			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE, ProfileContactItem.contactType.UNKNOWN_ON_HIKE));
 		}
 		//Request_Received --->> Show add/not now screen.
 		
 		else if(!contactInfo.isOnhike())
 		{ 
 			//Known and on SMS
-			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.UNKNOWN_NOT_ON_HIKE, null)); //Add to favourite, onHike contact
+			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.UNKNOWN_NOT_ON_HIKE)); //Add to favourite, onHike contact
 		}
 	}
 

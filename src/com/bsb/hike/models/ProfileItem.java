@@ -102,61 +102,60 @@ public abstract class ProfileItem
 		{ SHOW_CONTACTS_STATUS, NOT_A_FRIEND, UNKNOWN_ON_HIKE, REQUEST_RECEIVED, UNKNOWN_NOT_ON_HIKE }
 		
 		private int contact;
-		
-		public ProfileContactItem(int itemId, contactType contact ,Object text)
+		private StatusMessage status;
+		public ProfileContactItem(int itemId, contactType contact, StatusMessage status)
 		{
-			super(itemId, text);
+			super(itemId, null);
 			this.contact = contact.ordinal();
+			this.status = status;
 		}
 		
-		public ProfileContactItem(int itemId, Object text)
+		public ProfileContactItem(int itemId, contactType contact)
 		{
 			// TODO Auto-generated constructor stub
-			super(itemId, text);
+			super(itemId, null);
+			if(contact != null)
+			this.contact = contact.ordinal();
 		}
 		
 		public int getContactType()
 		{
 			return contact;
 		}
+		
+		public StatusMessage getContactStatus()
+		{
+			return status;
+		}
 	}
 	
 	public static class ProfileSharedMedia extends ProfileItem
 	{
-		public ProfileSharedMedia(int itemId, Object text)
+		public ProfileSharedMedia(int itemId, int sharedMediaCount,List<HikeSharedFile> sharedFilesList)
 		{
-			super(itemId, text);
-			// TODO Auto-generated constructor stub
-		}
-		public ProfileSharedMedia(int itemId, Object text, int sizeOfImage,List<HikeSharedFile> sharedFilesList)
-		{
-			super(itemId,text);
+			super(itemId,null);
 			this.sharedFilesList = sharedFilesList;
-			this.sizeOfImage = sizeOfImage;
+			this.sharedMediaCount = sharedMediaCount;
 		}
 		
 		public List<HikeSharedFile> getSharedFileList()
 		{
 			return sharedFilesList;
 		}
-		public int getSizeofImage()
+		public int getSharedMediaCount()
 		{
-			return sizeOfImage;
+			return sharedMediaCount;
 		}
 		private List<HikeSharedFile> sharedFilesList;
-		private int sizeOfImage;
+		private int sharedMediaCount;
 	}
 	
 	public static class ProfileSharedContent extends ProfileItem
 	{
-		public ProfileSharedContent(int itemId, Object text)
+		public ProfileSharedContent(int itemId, String text, int sharedFiles, int sharedPins, List<HikeSharedFile> sharedFilesList)
 		{
-			super(itemId, text);
-			// TODO Auto-generated constructor stub
-		}
-		public ProfileSharedContent(int itemId, Object text, int sharedFiles, int sharedPins ,List<HikeSharedFile> sharedFilesList)
-		{
-			super(itemId,text);
+			super(itemId,null);
+			this.text = text;
 			this.sharedFilesList = sharedFilesList;
 			this.sharedFiles = sharedFiles;
 			this.sharedPins = sharedPins;
@@ -174,9 +173,14 @@ public abstract class ProfileItem
 		{
 			return sharedPins;
 		}
+		public String getText()
+		{
+			return text;
+		}
 		private List<HikeSharedFile> sharedFilesList;
 		private int sharedFiles;
 		private int sharedPins;
+		private String text;
 	}
 	
 }

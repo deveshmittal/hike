@@ -398,7 +398,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					req_layout.setVisibility(View.VISIBLE);
 					
 				case SHOW_CONTACTS_STATUS:
-					status = (StatusMessage) ((ProfileItem.ProfileContactItem) profileItem).getText();
+					status = ((ProfileItem.ProfileContactItem) profileItem).getContactStatus();
 					if(contactType == SHOW_CONTACTS_STATUS)   //The layout wasn't becoming invisible, if the request was accepted from above case.
 					{	LinearLayout req_layout_fav = (LinearLayout) viewHolder.parent.findViewById(R.id.remove_fav);
 						req_layout_fav.setVisibility(View.GONE);
@@ -484,13 +484,13 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			break;
 		case SHARED_MEDIA:
 			viewHolder.text.setText(context.getString(R.string.shared_med));
-			viewHolder.subText.setText((String) profileItem.getText()); // Query for shared_media in the profileActivity itself
 			List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
 			LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
 			layout.removeAllViews();
 			LayoutParams layoutParams;
 			ImageView image;
-			int smSize = Integer.valueOf(profileItem.getText().toString());
+			int smSize = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
+			viewHolder.subText.setText("" + smSize);
 			if(sharedMedia != null && sharedMedia.size() < smSize )
 			{
 				for (HikeSharedFile galleryItem : sharedMedia)
@@ -543,11 +543,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 		case SHARED_CONTENT:
 			viewHolder.infoContainer.setVisibility(View.VISIBLE);
-			String heading = (String) profileItem.getText();
+			String heading = ((ProfileSharedContent)profileItem).getText();
 			viewHolder.text.setText(heading);
 			viewHolder.sharedFilesCount.setText(""+ ((ProfileSharedContent) profileItem).getSharedFilesCount());
 			viewHolder.extraInfo.setText(""+ ((ProfileSharedContent) profileItem).getSharedPinsCount()); //PinCount
-			viewHolder.subText.setText(" " + ((ProfileSharedContent) profileItem).getSharedFilesCount() + ((ProfileSharedContent) profileItem).getSharedPinsCount()); 
+			int totalfiles = ((ProfileSharedContent) profileItem).getSharedFilesCount() + ((ProfileSharedContent) profileItem).getSharedPinsCount();
+			viewHolder.subText.setText("" +  totalfiles); 
 
 			if(groupProfile)
 			{	viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
@@ -564,7 +565,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			LinearLayout parentll = (LinearLayout) viewHolder.parent;
 			parentll.removeAllViews();
 			parentll.setVisibility(View.VISIBLE);
-			String head = (String) profileItem.getText();
+			String head = context.getResources().getString(R.string.phone_pa);
 			viewHolder.text.setText(head);
 			viewHolder.subText.setVisibility(View.GONE);
 			View phoneNumberView = inflater.inflate(R.layout.phone_num_layout, parentll, false);
