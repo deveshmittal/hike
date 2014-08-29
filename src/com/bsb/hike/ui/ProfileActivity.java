@@ -87,8 +87,6 @@ import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.ProfileItem;
-import com.bsb.hike.models.ProfileItem.ProfileContactItem;
-import com.bsb.hike.models.ProfileItem.ProfileGroupItem;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
@@ -640,7 +638,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private void setupContactProfileList()
 	{
 		profileItems.clear();
-		addProfileHeader();
 		profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.PHONE_NUMBER, getResources().getString(R.string.phone_pa)));
 		if(contactInfo.isOnhike())
 		{	shouldAddSharedMedia();
@@ -659,47 +656,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		profileItems.add(new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, "" + sharedMediaCount, actualSize, sharedMedia)); //Add shared media elements
 	}
 
-	private void addProfileHeader()
-	{	
-		// TODO Auto-generated method stub
-		if (showContactsUpdates(contactInfo))  //Favourite case
-		{	
-			List<StatusMessage> statusMessages = HikeConversationsDatabase.getInstance().getStatusMessages(false,1, -1, mLocalMSISDN);
-			addStatusMessageAsProfileItems(statusMessages);
-		}
-		else if(contactInfo.isOnhike() && (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED))
-		{	
-			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.NOT_A_FRIEND, null)); 
-		}
-		
-		else if(contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT)
-		{
-			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE, ProfileContactItem.contactType.UNKNOWN_ON_HIKE, null));
-		}
-		//Request_Received --->> Show add/not now screen.
-		else if(contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
-		{
-			//Show add/not now screen.
-			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE, ProfileContactItem.contactType.REQUEST_RECEIVED, null));
-		}
-		else if(!contactInfo.isOnhike())
-		{ 
-			//Known and on SMS
-			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.UNKNOWN_NOT_ON_HIKE, null)); //Add to favourite, onHike contact
-		}
-	}
-
-	private void addStatusMessageAsProfileItems(List<StatusMessage> statusMessages)
-	{
-		if(statusMessages.size()>0)
-		{
-			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE, ProfileContactItem.contactType.SHOW_CONTACTS_STATUS, statusMessages.get(statusMessages.size() - 1)));
-			return;
-		}
-		
-		profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.SHOW_CONTACTS_STATUS, getJoinedHikeStatus(contactInfo)));
-	}
-	
 	private void addStatusMessagesAsMyProfileItems(List<StatusMessage> statusMessages)
 	{
 		for (StatusMessage statusMessage : statusMessages)
@@ -759,8 +715,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		GroupParticipant userInfo = new GroupParticipant(Utils.getUserContactInfo(preferences, true));
 
 		profileItems.clear();
-		// Adding an item for the header
-		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.HEADER_ID_GROUP, null));
 		shouldAddSharedMedia();
 		profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT,getResources().getString(R.string.shared_cont_pa), 0, sharedPinCount, null));
 		
@@ -970,7 +924,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						{
 							profileItems.remove(profileItems.size() - 1);
 						}
-						addStatusMessageAsProfileItems(olderMessages);
+						
+						addStatusMessagesAsMyProfileItems(olderMessages);
 						profileAdapter.notifyDataSetChanged();
 						profileContent.setSelectionFromTop(firstVisibleItem, scrollOffset);
 					}

@@ -11,8 +11,6 @@ public abstract class ProfileItem
 
 	public static final int REQUEST_ID = -3;
 	
-	public static final int HEADER_ID_GROUP = -4;
-	
 	public static final int SHARED_MEDIA = -5;
 	
 	public static final int SHARED_CONTENT = -6;
@@ -22,9 +20,6 @@ public abstract class ProfileItem
 	public static final int ADD_MEMBERS = -8;
 	
 	public static final int GROUP_MEMBER = -9;
-	
-	public static final int HEADER_ID_PROFILE = -10;
-	
 	public static final int PHONE_NUMBER = -11;
 
 	private int itemId;
@@ -92,31 +87,6 @@ public abstract class ProfileItem
 		}
 	}
 
-	public static class ProfileContactItem extends ProfileItem
-	{
-		public static enum contactType
-		{ SHOW_CONTACTS_STATUS, NOT_A_FRIEND, UNKNOWN_ON_HIKE, REQUEST_RECEIVED, UNKNOWN_NOT_ON_HIKE }
-		
-		private int contact;
-		
-		public ProfileContactItem(int itemId, contactType contact ,Object text)
-		{
-			super(itemId, text);
-			this.contact = contact.ordinal();
-		}
-		
-		public ProfileContactItem(int itemId, Object text)
-		{
-			// TODO Auto-generated constructor stub
-			super(itemId, text);
-		}
-		
-		public int getContactType()
-		{
-			return contact;
-		}
-	}
-	
 	public static class ProfileSharedMedia extends ProfileItem
 	{
 		public ProfileSharedMedia(int itemId, Object text)
