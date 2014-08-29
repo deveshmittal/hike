@@ -442,12 +442,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 			if(groupProfile)
 			{	viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
-				viewHolder.icon.setBackground(context.getResources().getDrawable(R.drawable.ic_pin_2));
+				viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_pin_2));
 			}
 			else
 			{
 				viewHolder.groupOrPins.setText(context.getResources().getString(R.string.groups));
-				viewHolder.icon.setBackground(context.getResources().getDrawable(R.drawable.ic_group_2));
+				viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_group_2));
 			}
 			break;
 
