@@ -77,7 +77,7 @@ public class HikeSharedFile extends HikeFile implements Parcelable
 
 	public String getGroupParticipantMsisdn()
 	{
-		return groupParticipantMsisdn;
+		return groupParticipantMsisdn != null ? groupParticipantMsisdn : "";
 	}
 
 	public void setGroupParticipantMsisdn(String groupParticipantMsisdn)
@@ -104,7 +104,7 @@ public class HikeSharedFile extends HikeFile implements Parcelable
 		dest.writeString(msisdn);
 		dest.writeLong(timeStamp);
 		dest.writeInt(this.isSent() ? 1 : 0);
-		dest.writeString(groupParticipantMsisdn.toString());
+		dest.writeString(getGroupParticipantMsisdn());
 		dest.writeString(fileJSON.toString());
 	}
 	

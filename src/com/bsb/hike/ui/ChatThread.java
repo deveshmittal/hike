@@ -1419,7 +1419,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			optionsList.add(new OverFlowMenuItem(getString(R.string.pin_history), 8));
 		}
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.shared_media), 9));
 		dismissPopupWindow();
 
 		attachmentWindow = new PopupWindow(this);
@@ -1505,12 +1504,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					break;
 				case 4:
 					setupThemePicker(null);
-					break;
-				case 9:
-					if(!messages.isEmpty())
-					{
-						startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ChatThread.this, mConversation));
-					}
 					break;
 				}
 
