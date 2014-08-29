@@ -1992,6 +1992,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			{
 				return;
 			}
+			
+			if(profileType == ProfileType.CONTACT_INFO && !showContactsUpdates(contactInfo))
+				return;
+			
 			runOnUiThread(new Runnable()
 			{
 
@@ -2000,9 +2004,14 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				{
 					if(profileType == ProfileType.CONTACT_INFO)
 					{	
-						setupContactProfileList();
-						profileAdapter.notifyDataSetChanged();
+						ProfileItem.ProfileContactItem item =	(ProfileContactItem) profileItems.get(0);
+						item.setStatus(statusMessage);
 					}
+					else if(profileType == ProfileType.USER_PROFILE)
+					{
+						profileItems.add(1, new ProfileItem.ProfileStatusItem(statusMessage));
+					}	
+					profileAdapter.notifyDataSetChanged();
 				}
 			});
 		}

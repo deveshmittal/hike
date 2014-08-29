@@ -134,6 +134,11 @@ public abstract class ProfileItem
 		{
 			return status;
 		}
+		
+		public void setStatus(StatusMessage status)
+		{
+			this.status = status;
+		}
 	}
 	
 	public static class ProfileSharedMedia extends ProfileItem
