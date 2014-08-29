@@ -150,12 +150,16 @@ public class HikeSharedFileAdapter extends BaseAdapter
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		thumbnailLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{
 			notifyDataSetChanged();
 		}
 
+	}
+	
+	public SharedFileImageLoader getSharedFileImageLoader()
+	{
+		return thumbnailLoader;
 	}
 }

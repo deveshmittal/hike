@@ -114,4 +114,9 @@ public class SharedMediaAdapter extends PagerAdapter implements OnClickListener
 			break;
 		}
 	}
+	
+	public SharedFileImageLoader getSharedFileImageLoader()
+	{
+		return sharedMediaLoader;
+	}
 }

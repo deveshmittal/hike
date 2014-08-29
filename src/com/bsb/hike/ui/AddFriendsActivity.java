@@ -197,6 +197,17 @@ public class AddFriendsActivity extends HikeAppStateBaseFragmentActivity impleme
 	}
 	
 	@Override
+	protected void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(mAdapter != null)
+		{
+			mAdapter.getIconImageLoader().setExitTasksEarly(true);
+		}
+	}
+
+	@Override
 	public void onBackPressed()
 	{
 		if(mAdapter!= null && mAdapter.getSelectedFriendsCount()>0)

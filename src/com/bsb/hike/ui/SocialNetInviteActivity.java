@@ -596,7 +596,18 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 		 * mMenu.findItem(R.id.sendInvite).setEnabled(true); else { mMenu.findItem(R.id.sendInvite).setEnabled(false); }
 		 */
 	}
-
+	
+	@Override
+	protected void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(adapter != null)
+		{
+			adapter.getSocialIconLoader().setExitTasksEarly(true);
+		}
+	}
+	
 	@Override
 	protected void onDestroy()
 	{

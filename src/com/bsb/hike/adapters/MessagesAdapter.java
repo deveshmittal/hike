@@ -3851,6 +3851,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		return iconLoader;
 	}
+	
+	public HighQualityThumbLoader getHighQualityThumbLoader()
+	{
+		return hqThumbLoader;
+	}
 
 	public void toggleSelection(ConvMessage convMsg)
 	{
@@ -4240,7 +4245,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		boolean notify = isFling != isListFlinging;
 
 		isListFlinging = isFling;
-		hqThumbLoader.setPauseWork(isListFlinging);
 		
 		if(notify && !isListFlinging){
 			notifyDataSetChanged();

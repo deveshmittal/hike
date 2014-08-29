@@ -42,7 +42,6 @@ public class FileListAdapter extends BaseAdapter
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		fileImageLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{
@@ -151,5 +150,10 @@ public class FileListAdapter extends BaseAdapter
 	public void clearSelection()
 	{
 		selectedFileMap.clear();
+	}
+	
+	public FileImageLoader getFileImageLoader()
+	{
+		return fileImageLoader;
 	}
 }

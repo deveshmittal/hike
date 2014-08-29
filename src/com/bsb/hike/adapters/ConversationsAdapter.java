@@ -926,7 +926,6 @@ public class ConversationsAdapter extends BaseAdapter
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		iconLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{
@@ -951,5 +950,10 @@ public class ConversationsAdapter extends BaseAdapter
 				updateViewsRelatedToAvatar(view, getItem(indexOfData));
 			}
 		}
+	}
+	
+	public IconLoader getIconLoader()
+	{
+		return iconLoader;
 	}
 }
