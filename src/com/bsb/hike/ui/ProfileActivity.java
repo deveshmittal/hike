@@ -218,6 +218,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private int sharedPinCount;
 	
+	private int sharedFileCount = 0;
+	
 	private List<HikeSharedFile> sharedMedia;
 	
 	private int actualSize;
@@ -733,6 +735,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		groupConversation = (GroupConversation) hCDB.getConversation(mLocalMSISDN, 0);
 		sharedMediaCount = hCDB.getSharedMediaCount(mLocalMSISDN,true);
 		sharedPinCount = hCDB.getPinCount(mLocalMSISDN);
+		sharedFileCount = hCDB.getSharedMediaCount(mLocalMSISDN, false);
 		participantMap = groupConversation.getGroupParticipantList();
 		List<String> inactiveMsisdns = new ArrayList<String>();
 		/*
@@ -773,7 +776,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		// Adding an item for the header
 		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.HEADER_ID_GROUP, null));
 		shouldAddSharedMedia();
-		profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT,getResources().getString(R.string.shared_cont_pa), 0, sharedPinCount, null));
+		profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT,getResources().getString(R.string.shared_cont_pa), sharedFileCount, sharedPinCount, null));
 		
 		List<PairModified<GroupParticipant, String>> participants = new ArrayList<PairModified<GroupParticipant, String>>();
 		
