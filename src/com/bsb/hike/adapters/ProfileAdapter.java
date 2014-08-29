@@ -533,8 +533,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			}
 			else
 			{		//Empty State
-				layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 				viewHolder.extraInfo.setVisibility(View.VISIBLE);
+				layoutParams = (LayoutParams) viewHolder.extraInfo.getLayoutParams();
+				layoutParams.width = LayoutParams.MATCH_PARENT;
+				layoutParams.height = LayoutParams.WRAP_CONTENT;
 				layout.addView(viewHolder.extraInfo);
 				layout.setLayoutParams(layoutParams);
 			}
