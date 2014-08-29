@@ -1,7 +1,6 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,6 +57,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -87,8 +87,6 @@ import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.ProfileItem;
-import com.bsb.hike.models.ProfileItem.ProfileContactItem;
-import com.bsb.hike.models.ProfileItem.ProfileGroupItem;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
@@ -104,9 +102,9 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontEditText;
-import com.bsb.hike.view.CustomFontTextView;
 
 public class ProfileActivity extends ChangeProfileImageBaseActivity implements FinishableEvent, Listener, OnLongClickListener, OnItemLongClickListener, OnScrollListener,
 		View.OnClickListener
@@ -216,7 +214,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private int sharedMediaCount = 0;
 	
-	private int sharedPinCount;
+	private int sharedPinCount = 0;
 	
 	private int sharedFileCount = 0;
 	
@@ -224,7 +222,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private int actualSize;
 	
-	private static final int MAX_MEDIA_TO_SHOW = 4;
+	private static final int maxMediaToShow = 4;
+
+	private View headerView;
 	
 	private static final String PROFILE_ROUND_SUFFIX = "round";
 
@@ -324,10 +324,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			httpRequestURL = "/account";
 			fetchPersistentData();
 
-			if(Intent.ACTION_ATTACH_DATA.equals(getIntent().getAction()))
-			{
-				setProfileImage(HikeConstants.GALLERY_RESULT, RESULT_OK, getIntent());
-			}
 			if (getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false))
 			{
 				// set pubsub listeners
@@ -598,7 +594,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private void setupContactProfileScreen()
 	{
 		this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.CONTACT_INFO);
-
 		contactInfo = HikeMessengerApp.getContactManager().getContact(mLocalMSISDN, true, true);
 		sharedMediaCount = HikeConversationsDatabase.getInstance().getSharedMediaCount(mLocalMSISDN, true);
 		sharedPinCount = 0;  //Add a query here to get shared groups count. sharedPincount is to be treated as shared group count here.
@@ -608,13 +603,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			contactInfo.setOnhike(getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, false));
 		}
 
-		profileItems = new ArrayList<ProfileItem>();
-		setupContactProfileList();
-
-		profileAdapter = new ProfileAdapter(this, profileItems, null, contactInfo, false, ContactManager.getInstance().isBlocked(mLocalMSISDN));
-		profileContent = (ListView) findViewById(R.id.profile_content);
-		profileContent.setAdapter(profileAdapter);
-		profileContent.setOnScrollListener(this);
+		initializeListviewAndAdapter();
 
 		/*
 		 * if the hike join time for a known hike contact is 0, we request the server for the hike join time.
@@ -645,12 +634,181 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			Utils.executeHttpTask(mActivityState.getHikeJoinTimeTask, hikeHttpRequest);
 		}
 	}
+	
+	private void updateProfileHeaderView()
+	{
+		addProfileHeaderView(true, false);
+	}
+	
+	private void updateProfileImageInHeaderView()
+	{
+		addProfileHeaderView(true, true);
+	}
+	
+	private void addProfileHeaderView()
+	{
+		addProfileHeaderView(false, false);
+	}
+
+	private void addProfileHeaderView(boolean isUpdate, boolean profileImageUpdated)
+	{
+		TextView text;
+		TextView subText;
+		ImageView profileImage;
+		View parentView;
+		TextView extraInfo;
+		ImageView smallIcon;
+		EditText groupNameEditText;
+		ImageView smallIconFrame;
+		
+		String msisdn;
+		String name;
+		boolean headerViewInitialized = false;
+		switch (profileType)
+		{
+		case CONTACT_INFO:
+			if(headerView == null)
+			{
+				headerViewInitialized = true;
+				headerView = getLayoutInflater().inflate(R.layout.profile_header_other, null);
+			}
+			text = (TextView) headerView.findViewById(R.id.name);
+			subText = (TextView) headerView.findViewById(R.id.subtext);
+			profileImage = (ImageView) headerView.findViewById(R.id.profile_image);
+			parentView = headerView.findViewById(R.id.profile_header);
+			extraInfo = (TextView) headerView.findViewById(R.id.add_fav_tv);
+			smallIcon = (ImageView) headerView.findViewById(R.id.add_fav_star);
+			
+			msisdn = contactInfo.getMsisdn();
+			name = TextUtils.isEmpty(contactInfo.getName()) ? contactInfo.getMsisdn() : contactInfo.getName();
+			text.setText(name);
+			
+
+			if (showContactsUpdates(contactInfo)) // Favourite case
+			{
+				addContactStatusInHeaderView(subText);
+				// Request_Received --->> Show add/not now screen.
+				if (contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
+				{
+					// Show add/not now screen.
+					LinearLayout req_layout = (LinearLayout) parentView.findViewById(R.id.remove_fav);
+					req_layout.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					LinearLayout req_layout = (LinearLayout) parentView.findViewById(R.id.remove_fav);
+					req_layout.setVisibility(View.GONE);
+				}
+				
+			}
+			else if (contactInfo.isOnhike() && (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED))
+			{
+				LinearLayout fav_layout = (LinearLayout) parentView.findViewById(R.id.add_fav_view);
+				fav_layout.setVisibility(View.VISIBLE);
+				subText.setText(getResources().getString(R.string.on_hike));
+				extraInfo.setTextColor(getResources().getColor(R.color.add_fav));
+				extraInfo.setText(getResources().getString(R.string.add_fav));
+				smallIcon.setImageResource(R.drawable.ic_add_friend);
+			}
+
+			else if (contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT)
+			{
+				subText.setText(getResources().getString(R.string.on_hike));
+				parentView.findViewById(R.id.add_fav_view).setVisibility(View.GONE);
+			}
+			// Request_Received --->> Show add/not now screen.
+			/*else if (contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
+			{
+				// Show add/not now screen.
+				LinearLayout req_layout = (LinearLayout) parentView.findViewById(R.id.remove_fav);
+				req_layout.setVisibility(View.VISIBLE);
+				subText.setVisibility(View.GONE);
+			}*/
+			else if (!contactInfo.isOnhike())
+			{
+				// UNKNOWN and on SMS
+				LinearLayout invite_layout = (LinearLayout) parentView.findViewById(R.id.add_fav_view);
+				invite_layout.setVisibility(View.VISIBLE);
+				subText.setText(getResources().getString(R.string.on_sms));
+				extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
+				extraInfo.setText(getResources().getString(R.string.ftue_add_prompt_invite_title));
+				smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
+			}
+
+			break;
+		case GROUP_INFO:
+			if(headerView == null)
+			{
+				headerViewInitialized = true;
+				headerView = getLayoutInflater().inflate(R.layout.profile_header_group, null);
+			}
+			groupNameEditText = (EditText) headerView.findViewById(R.id.name_edit);
+			text = (TextView) headerView.findViewById(R.id.name);
+			subText = (TextView) headerView.findViewById(R.id.subtext);
+			profileImage = (ImageView) headerView.findViewById(R.id.group_profile_image);
+			smallIconFrame = (ImageView) headerView.findViewById(R.id.change_profile);
+			
+			groupNameEditText.setText(groupConversation.getLabel());
+			msisdn = groupConversation.getMsisdn();
+			name = groupConversation.getLabel();
+			text.setText(name);
+			subText.setText(getString(R.string.num_people, (groupConversation.getGroupMemberAliveCount() + 1)));
+			break;
+			
+		default:
+			return;
+		}
+		
+		String mappedId = msisdn + PROFILE_ROUND_SUFFIX;
+		if(!isUpdate)
+		{
+			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(msisdn + PROFILE_PIC_SUFFIX, null, false, !ContactManager.getInstance().hasIcon(msisdn));
+			profileImage.setTag(imageViewerInfo);
+		}
+		if(headerViewInitialized || profileImageUpdated )
+		{
+			int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
+			(new ProfilePicImageLoader(this, mBigImageSize)).loadImage(mappedId, profileImage, false);
+		}
+
+		if(headerViewInitialized)
+		{
+			profileContent.addHeaderView(headerView);
+		}
+	}
+	
+	private void addContactStatusInHeaderView(TextView subText)
+	{
+		List<StatusMessage> statusMessages = HikeConversationsDatabase.getInstance().getStatusMessages(false,1, -1, mLocalMSISDN);
+		StatusMessage status;
+		if(statusMessages.size()>0)
+		{
+			status = statusMessages.get(statusMessages.size() - 1);
+			return;
+		}
+		
+		status = getJoinedHikeStatus(contactInfo);
+		
+		if (status.getStatusMessageType() == StatusMessageType.JOINED_HIKE)
+		{
+			if (status.getTimeStamp() == 0)
+				subText.setText(status.getText());
+			else
+				subText.setText(status.getText() + " " + status.getTimestampFormatted(true, ProfileActivity.this));
+		}
+		else
+		{
+			SmileyParser smileyParser = SmileyParser.getInstance();
+			subText.setText(smileyParser.addSmileySpans(status.getText(), true));
+		}
+		
+	}
+	
 
 	private void setupContactProfileList()
 	{
 		profileItems.clear();
-		addProfileHeader();
-		profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.PHONE_NUMBER, null));
+		profileItems.add(new ProfileItem.ProfilePhoneNumberItem(ProfileItem.PHONE_NUMBER, getResources().getString(R.string.phone_pa)));
 		if(contactInfo.isOnhike())
 		{	shouldAddSharedMedia();
 			profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT, getResources().getString(R.string.shared_cont_pa), 0, sharedPinCount, null));
@@ -665,54 +823,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{	
 			addSharedMedia();
 		}
-		profileItems.add(new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, sharedMediaCount, sharedMedia)); //Add shared media elements
+		profileItems.add(new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, sharedMediaCount, sharedMedia));
 	}
 
-	private void addProfileHeader()
-	{	
-		// TODO Auto-generated method stub
-		if (showContactsUpdates(contactInfo))  //Favourite case
-		{	
-			List<StatusMessage> statusMessages = HikeConversationsDatabase.getInstance().getStatusMessages(false,1, -1, mLocalMSISDN);
-			addStatusMessageAsProfileItems(statusMessages);
-		}
-		else if(contactInfo.isOnhike() && (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED))
-		{	
-			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.NOT_A_FRIEND)); 
-		}
-		
-		else if(contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT)
-		{
-			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE, ProfileContactItem.contactType.UNKNOWN_ON_HIKE));
-		}
-		//Request_Received --->> Show add/not now screen.
-		
-		else if(!contactInfo.isOnhike())
-		{ 
-			//Known and on SMS
-			profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.UNKNOWN_NOT_ON_HIKE)); //Add to favourite, onHike contact
-		}
-	}
-
-	private void addStatusMessageAsProfileItems(List<StatusMessage> statusMessages)
-	{
-		if(statusMessages.size()>0)
-		{
-			addBasedOnFavType(statusMessages.get(statusMessages.size() - 1));
-			return;
-		}
-		addBasedOnFavType(getJoinedHikeStatus(contactInfo));
-	}
-	
-	private void addBasedOnFavType(StatusMessage status)
-	{
-		if(contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
-		{	profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.REQUEST_RECEIVED, status));
-			return;
-		}
-		profileItems.add(new ProfileItem.ProfileContactItem(ProfileItem.HEADER_ID_PROFILE,ProfileContactItem.contactType.SHOW_CONTACTS_STATUS, status));
-	}
-	
 	private void addStatusMessagesAsMyProfileItems(List<StatusMessage> statusMessages)
 	{
 		for (StatusMessage statusMessage : statusMessages)
@@ -756,16 +869,39 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 		httpRequestURL = "/group/" + groupConversation.getMsisdn();
 
-		profileItems = new ArrayList<ProfileItem>();
-		setupGroupProfileList();
-
-		profileAdapter = new ProfileAdapter(this, profileItems, groupConversation, null, false);
-
-		profileContent = (ListView) findViewById(R.id.profile_content);
-		profileContent.setAdapter(profileAdapter);
+		initializeListviewAndAdapter();
 		profileContent.setDivider(null);
 
 		nameTxt = groupConversation.getLabel();
+	}
+
+	private void initializeListviewAndAdapter()
+	{
+		profileContent = (ListView) findViewById(R.id.profile_content);
+		headerView = null;
+		switch (profileType)
+		{
+		case CONTACT_INFO:
+			profileItems = new ArrayList<ProfileItem>();
+			setupContactProfileList();
+			profileAdapter = new ProfileAdapter(this, profileItems, null, contactInfo, false, ContactManager.getInstance().isBlocked(mLocalMSISDN));
+			addProfileHeaderView();
+			break;
+		case GROUP_INFO:
+			profileItems = new ArrayList<ProfileItem>();
+			setupGroupProfileList();
+			profileAdapter = new ProfileAdapter(this, profileItems, groupConversation, null, false);
+			addProfileHeaderView();
+			break;
+		case USER_PROFILE:
+			profileAdapter = new ProfileAdapter(this, profileItems, null, contactInfo, true);
+			profileContent.setOnItemLongClickListener(this);
+			profileContent.setOnScrollListener(this);
+			break;
+		default:
+			break;
+		}
+		profileContent.setAdapter(profileAdapter);
 	}
 
 	private void setupGroupProfileList()
@@ -773,13 +909,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		GroupParticipant userInfo = new GroupParticipant(Utils.getUserContactInfo(preferences, true));
 
 		profileItems.clear();
-		// Adding an item for the header
-		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.HEADER_ID_GROUP, null));
 		shouldAddSharedMedia();
 		profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT,getResources().getString(R.string.shared_cont_pa), sharedFileCount, sharedPinCount, null));
 		
 		List<PairModified<GroupParticipant, String>> participants = new ArrayList<PairModified<GroupParticipant, String>>();
-		
+
 		for (Entry<String, PairModified<GroupParticipant, String>> mapEntry : participantMap.entrySet())
 		{
 			participants.add(mapEntry.getValue());
@@ -807,12 +941,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		// TODO Auto-generated method stub
 		
 		HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-		if(sharedMediaCount < MAX_MEDIA_TO_SHOW )
+		if(sharedMediaCount < maxMediaToShow )
 		{	
 			sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, sharedMediaCount, -1, true);
 			return;
 		}
-		sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, MAX_MEDIA_TO_SHOW , -1, true);
+		sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, maxMediaToShow , -1, true);
 		return;
 	}
 
@@ -874,13 +1008,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			profileItems.add(new ProfileItem.ProfileStatusItem(getJoinedHikeStatus(contactInfo)));
 		}
 
-		profileAdapter = new ProfileAdapter(this, profileItems, null, contactInfo, true);
-
-		profileContent = (ListView) findViewById(R.id.profile_content);
-		profileContent.setAdapter(profileAdapter);
-		profileContent.setOnItemLongClickListener(this);
-		profileContent.setOnScrollListener(this);
-
+		initializeListviewAndAdapter();
 		if (contactInfo.isOnhike() && contactInfo.getHikeJoinTime() == 0)
 		{
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/profile/" + mLocalMSISDN, RequestType.HIKE_JOIN_TIME, new HikeHttpCallback()
@@ -987,7 +1115,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						{
 							profileItems.remove(profileItems.size() - 1);
 						}
-						addStatusMessageAsProfileItems(olderMessages);
+						
+						addStatusMessagesAsMyProfileItems(olderMessages);
 						profileAdapter.notifyDataSetChanged();
 						profileContent.setSelectionFromTop(firstVisibleItem, scrollOffset);
 					}
@@ -1338,11 +1467,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		super.onActivityResult(requestCode, resultCode, data);
-		setProfileImage(requestCode, resultCode, data);
-	}
-
-	protected void setProfileImage(int requestCode, int resultCode, Intent data)
-	{
 		String path = null;
 		if (resultCode != RESULT_OK)
 		{
@@ -1364,8 +1488,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 		switch (requestCode)
 		{
-			case HikeConstants.CAMERA_RESULT:
-				Logger.d("ProfileActivity", "The activity is " + this);
+		case HikeConstants.CAMERA_RESULT:
+			/* fall-through on purpose */
+		case HikeConstants.GALLERY_RESULT:
+			Logger.d("ProfileActivity", "The activity is " + this);
+			if (requestCode == HikeConstants.CAMERA_RESULT)
+			{
 				String filePath = preferences.getString(HikeMessengerApp.FILE_PATH, "");
 				selectedFileIcon = new File(filePath);
 
@@ -1375,108 +1503,99 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				Editor editor = preferences.edit();
 				editor.remove(HikeMessengerApp.FILE_PATH);
 				editor.commit();
-				if (!selectedFileIcon.exists())
-				{
-					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
-					return;
-				}
+			}
+			if (requestCode == HikeConstants.CAMERA_RESULT && !selectedFileIcon.exists())
+			{
+				Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
+				return;
+			}
+			boolean isPicasaImage = false;
+			Uri selectedFileUri = null;
+			if (requestCode == HikeConstants.CAMERA_RESULT)
+			{
 				path = selectedFileIcon.getAbsolutePath();
-				if (TextUtils.isEmpty(path))
-				{
-					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
-					return;
-				}
-				Utils.startCropActivity(this, path, destFilePath);
-				break;
-
-			case HikeConstants.GALLERY_RESULT:
-				Logger.d("ProfileActivity", "The activity is " + this);
-				boolean isPicasaImage = false;
-				Uri selectedFileUri = null;
+			}
+			else
+			{
 				if (data == null)
 				{
 					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
 					return;
 				}
 				selectedFileUri = data.getData();
-				if (null != selectedFileUri)
+				if (Utils.isPicasaUri(selectedFileUri.toString()))
 				{
-					if (Utils.isPicasaUri(selectedFileUri.toString()))
-					{
-						isPicasaImage = true;
-						File file = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, false);
-						if (null != file)
-							path = file.getAbsolutePath();
-					}
-					else
-					{
-						String fileUriStart = "file://";
-						String fileUriString = selectedFileUri.toString();
-						if (fileUriString.startsWith(fileUriStart))
-						{
-							selectedFileIcon = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
-							/*
-							 * Done to fix the issue in a few Sony devices.
-							 */
-							path = selectedFileIcon.getAbsolutePath();
-						}
-						else
-						{
-							path = Utils.getRealPathFromUri(selectedFileUri, this);
-						}
-					}
-				}
-				if (TextUtils.isEmpty(path))
-				{
-					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
-					return;
-				}
-				if (!isPicasaImage)
-				{
-					Utils.startCropActivity(this, path, destFilePath);
+					isPicasaImage = true;
+					path = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, false).getAbsolutePath();
 				}
 				else
 				{
-					final File destFile = new File(path);
-					mActivityState.downloadPicasaImageTask = new DownloadImageTask(getApplicationContext(), destFile, selectedFileUri, new ImageDownloadResult()
+					String fileUriStart = "file://";
+					String fileUriString = selectedFileUri.toString();
+					if (fileUriString.startsWith(fileUriStart))
 					{
+						selectedFileIcon = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
+						/*
+						 * Done to fix the issue in a few Sony devices.
+						 */
+						path = selectedFileIcon.getAbsolutePath();
+					}
+					else
+					{
+						path = Utils.getRealPathFromUri(selectedFileUri, this);
+					}
+				}
+			}
+			if (TextUtils.isEmpty(path))
+			{
+				Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
+				return;
+			}
+			if (!isPicasaImage)
+			{
+				Utils.startCropActivity(this, path, destFilePath);
+			}
+			else
+			{
+				final File destFile = new File(path);
+				mActivityState.downloadPicasaImageTask = new DownloadImageTask(getApplicationContext(), destFile, selectedFileUri, new ImageDownloadResult()
+				{
 
-						@Override
-						public void downloadFinished(boolean result)
+					@Override
+					public void downloadFinished(boolean result)
+					{
+						if (mDialog != null)
 						{
-							if (mDialog != null)
-							{
-								mDialog.dismiss();
-								mDialog = null;
-							}
-							mActivityState.downloadPicasaImageTask = null;
-							if (!result)
-							{
-								Toast.makeText(getApplicationContext(), R.string.error_download, Toast.LENGTH_SHORT).show();
-							}
-							else
-							{
-								Utils.startCropActivity(ProfileActivity.this, destFile.getAbsolutePath(), destFilePath);
-							}
+							mDialog.dismiss();
+							mDialog = null;
 						}
-					});
-					Utils.executeBoolResultAsyncTask(mActivityState.downloadPicasaImageTask);
-					mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.downloading_image));
-				}
-				break;
-
-			case HikeConstants.CROP_RESULT:
-				mActivityState.destFilePath = data.getStringExtra(MediaStore.EXTRA_OUTPUT);
-				if (mActivityState.destFilePath == null)
-				{
-					Toast.makeText(getApplicationContext(), R.string.error_setting_profile, Toast.LENGTH_SHORT).show();
-					return;
-				}
-				if ((this.profileType == ProfileType.USER_PROFILE) || (this.profileType == ProfileType.GROUP_INFO))
-				{
-					saveChanges();
-				}
-				break;
+						mActivityState.downloadPicasaImageTask = null;
+						if (!result)
+						{
+							Toast.makeText(getApplicationContext(), R.string.error_download, Toast.LENGTH_SHORT).show();
+						}
+						else
+						{
+							Utils.startCropActivity(ProfileActivity.this, destFile.getAbsolutePath(), destFilePath);
+						}
+					}
+				});
+				Utils.executeBoolResultAsyncTask(mActivityState.downloadPicasaImageTask);
+				mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.downloading_image));
+			}
+			break;
+		case HikeConstants.CROP_RESULT:
+			mActivityState.destFilePath = data.getStringExtra(MediaStore.EXTRA_OUTPUT);
+			if (mActivityState.destFilePath == null)
+			{
+				Toast.makeText(getApplicationContext(), R.string.error_setting_profile, Toast.LENGTH_SHORT).show();
+				return;
+			}
+			if ((this.profileType == ProfileType.USER_PROFILE) || (this.profileType == ProfileType.GROUP_INFO))
+			{
+				saveChanges();
+			}
+			break;
 		}
 	}
 
@@ -1531,7 +1650,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(contactInfo, favoriteType);
 		HikeMessengerApp.getPubSub().publish(accepted ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.REJECT_FRIEND_REQUEST, favoriteToggle);
 		int count = preferences.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
-		if (count > 0)
+		if(count > 0)
 		{
 			Utils.incrementOrDecrementHomeOverflowCount(preferences, -1);
 		}
@@ -1817,6 +1936,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					@Override
 					public void run()
 					{
+						updateProfileHeaderView();
 						profileAdapter.updateGroupConversation(groupConversation);
 					}
 				});
@@ -1831,6 +1951,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					@Override
 					public void run()
 					{
+						updateProfileImageInHeaderView();
 						profileAdapter.notifyDataSetChanged();
 					}
 				});
@@ -1852,6 +1973,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					public void run()
 					{
 						setupGroupProfileList();
+						updateProfileHeaderView();
 						profileAdapter.notifyDataSetChanged();
 					}
 				});
@@ -1863,9 +1985,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			{
 				final JSONObject obj = (JSONObject) object;
 				final JSONArray participants = obj.optJSONArray(HikeConstants.DATA);
-
 				List<String> msisdns = new ArrayList<String>();
-
+				
 				for (int i = 0; i < participants.length(); i++)
 				{
 					String msisdn = participants.optJSONObject(i).optString(HikeConstants.MSISDN);
@@ -1888,7 +2009,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						grpParticipant.setContactInfo(contactInfo);
 					}
 				}
-
+				
 				groupConversation.setGroupMemberAliveCount(participantMap.size());
 				runOnUiThread(new Runnable()
 				{
@@ -1896,6 +2017,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					public void run()
 					{
 						setupGroupProfileList();
+						updateProfileHeaderView();
 						profileAdapter.notifyDataSetChanged();
 					}
 				});
@@ -1952,17 +2074,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			{
 				PairModified<GroupParticipant, String> groupParticipantPair = groupConversation.getGroupParticipant(msisdn);
 				GroupParticipant groupParticipant = null;
-				if(null == groupParticipantPair)
+				if (groupParticipant == null)
 				{
 					return;
-				}
-				else
-				{
-					groupParticipant = groupParticipantPair.getFirst();
-					if (groupParticipant == null)
-					{
-						return;
-					}
 				}
 				groupParticipant.getContactInfo().setOnhike(HikePubSub.USER_JOINED.equals(type));
 			}
@@ -1980,6 +2094,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					{
 						setupContactProfileList();
 					}
+					updateProfileHeaderView();
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
@@ -2003,15 +2118,14 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				public void run()
 				{
 					if(profileType == ProfileType.CONTACT_INFO)
-					{	
-						ProfileItem.ProfileContactItem item =	(ProfileContactItem) profileItems.get(0);
-						item.setStatus(statusMessage);
-					}
-					else if(profileType == ProfileType.USER_PROFILE)
+ 					{	
+						updateProfileHeaderView();
+ 					}
+					else if (profileType == ProfileType.USER_PROFILE)
 					{
 						profileItems.add(1, new ProfileItem.ProfileStatusItem(statusMessage));
-					}	
-					profileAdapter.notifyDataSetChanged();
+						profileAdapter.notifyDataSetChanged();
+					}
 				}
 			});
 		}
@@ -2033,7 +2147,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				@Override
 				public void run()
 				{
+					invalidateOptionsMenu();
 					setupContactProfileList();
+					updateProfileHeaderView();
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
@@ -2059,6 +2175,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				{
 					if (showContactsUpdates(contactInfo))
 					{
+						invalidateOptionsMenu();
 						setupContactProfileList();
 						profileAdapter.notifyDataSetChanged();
 					}
@@ -2509,5 +2626,4 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		return isRemoved;
 	}
-	
 }

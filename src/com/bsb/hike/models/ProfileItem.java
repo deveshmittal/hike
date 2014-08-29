@@ -15,8 +15,6 @@ public abstract class ProfileItem
 
 	public static final int REQUEST_ID = -3;
 	
-	public static final int HEADER_ID_GROUP = -4;
-	
 	public static final int SHARED_MEDIA = -5;
 	
 	public static final int SHARED_CONTENT = -6;
@@ -26,9 +24,6 @@ public abstract class ProfileItem
 	public static final int ADD_MEMBERS = -8;
 	
 	public static final int GROUP_MEMBER = -9;
-	
-	public static final int HEADER_ID_PROFILE = -10;
-	
 	public static final int PHONE_NUMBER = -11;
 
 	private int itemId;
@@ -103,44 +98,56 @@ public abstract class ProfileItem
 		}
 	}
 
+	public static class ProfilePhoneNumberItem extends ProfileItem
+	{
+		public ProfilePhoneNumberItem(int itemId, Object text)
+		{
+			super(itemId, text);
+		}
+	}
+	
 	public static class ProfileContactItem extends ProfileItem
 	{
 		public static enum contactType
-		{ SHOW_CONTACTS_STATUS, NOT_A_FRIEND, UNKNOWN_ON_HIKE, REQUEST_RECEIVED, UNKNOWN_NOT_ON_HIKE }
-		
+		{
+			SHOW_CONTACTS_STATUS, NOT_A_FRIEND, UNKNOWN_ON_HIKE, REQUEST_RECEIVED, UNKNOWN_NOT_ON_HIKE
+		}
+
 		private int contact;
+
 		private StatusMessage status;
+
 		public ProfileContactItem(int itemId, contactType contact, StatusMessage status)
 		{
 			super(itemId, null);
 			this.contact = contact.ordinal();
 			this.status = status;
 		}
-		
+
 		public ProfileContactItem(int itemId, contactType contact)
 		{
 			// TODO Auto-generated constructor stub
 			super(itemId, null);
-			if(contact != null)
-			this.contact = contact.ordinal();
+			if (contact != null)
+				this.contact = contact.ordinal();
 		}
-		
+
 		public int getContactType()
 		{
 			return contact;
 		}
-		
+
 		public StatusMessage getContactStatus()
 		{
 			return status;
 		}
-		
+
 		public void setStatus(StatusMessage status)
 		{
 			this.status = status;
 		}
-	}
 	
+	}
 	public static class ProfileSharedMedia extends ProfileItem
 	{
 		public ProfileSharedMedia(int itemId, int sharedMediaCount,List<HikeSharedFile> sharedFilesList)

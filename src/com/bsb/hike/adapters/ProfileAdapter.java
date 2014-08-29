@@ -35,7 +35,6 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.ProfileItem;
-import com.bsb.hike.models.ProfileItem.ProfileContactItem;
 import com.bsb.hike.models.ProfileItem.ProfileGroupItem;
 import com.bsb.hike.models.ProfileItem.ProfileSharedContent;
 import com.bsb.hike.models.ProfileItem.ProfileSharedMedia;
@@ -68,7 +67,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	
 	private static enum ViewType
 	{
-		HEADER, HEADER_PROFILE, HEADER_GROUP, SHARED_MEDIA, SHARED_CONTENT, STATUS, PROFILE_PIC_UPDATE, GROUP_PARTICIPANT, EMPTY_STATUS, REQUEST, MEMBERS, ADD_MEMBERS, PHONE_NUMBER
+		HEADER, SHARED_MEDIA, SHARED_CONTENT, STATUS, PROFILE_PIC_UPDATE, GROUP_PARTICIPANT, EMPTY_STATUS, REQUEST, MEMBERS, ADD_MEMBERS, PHONE_NUMBER
 	}
 
 	private Context context;
@@ -150,10 +149,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		{
 			viewType = ViewType.HEADER;
 		}
-		else if (ProfileItem.HEADER_ID_GROUP == itemId)
-		{
-			viewType = ViewType.HEADER_GROUP;
-		}
 		else if (ProfileItem.SHARED_MEDIA == itemId)
 		{
 			viewType = ViewType.SHARED_MEDIA;
@@ -181,10 +176,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		else if (ProfileItem.REQUEST_ID == itemId)
 		{
 			viewType = ViewType.REQUEST;
-		}
-		else if (ProfileItem.HEADER_ID_PROFILE == itemId)
-		{
-			viewType = ViewType.HEADER_PROFILE;
 		}
 		else if (ProfileItem.PHONE_NUMBER == itemId)
 		{
@@ -254,25 +245,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 				viewHolder.image = (ImageView) v.findViewById(R.id.profile);
 				viewHolder.icon = (ImageView) v.findViewById(R.id.change_profile);
-				break;
-
-			case HEADER_PROFILE:
-				v = inflater.inflate(R.layout.profile_header_other, null);
-				viewHolder.text = (TextView) v.findViewById(R.id.name);
-				viewHolder.subText = (TextView) v.findViewById(R.id.subtext);
-				viewHolder.image = (ImageView) v.findViewById(R.id.profile_image);
-				viewHolder.parent = v.findViewById(R.id.profile_header);
-				viewHolder.extraInfo = (TextView) v.findViewById(R.id.add_fav_tv);
-				viewHolder.icon = (ImageView) v.findViewById(R.id.add_fav_star);
-				break;
-
-			case HEADER_GROUP:
-				v = inflater.inflate(R.layout.profile_header_group, null);
-				viewHolder.editName = (EditText) v.findViewById(R.id.name_edit);
-				viewHolder.text = (TextView) v.findViewById(R.id.name);
-				viewHolder.subText = (TextView) v.findViewById(R.id.subtext);
-				viewHolder.image = (ImageView) v.findViewById(R.id.group_profile_image);
-				viewHolder.iconFrame = (ImageView) v.findViewById(R.id.change_profile);
 				break;
 
 			case SHARED_MEDIA:
@@ -353,96 +325,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 		switch (viewType)
 		{
-		case HEADER_PROFILE:
-		case HEADER_GROUP:
-			if (groupProfile)
-				viewHolder.editName.setText(groupConversation.getLabel());
-
-			String msisdn;
-			String name;
-			StatusMessage status;
-			if (groupProfile)
-			{
-				msisdn = groupConversation.getMsisdn();
-				name = groupConversation.getLabel();
-				viewHolder.text.setText(name);
-				viewHolder.subText.setText(context.getString(R.string.num_people, (groupConversation.getGroupMemberAliveCount() + 1)));
-			}
-			else
-			{
-				msisdn = mContactInfo.getMsisdn();
-				name = TextUtils.isEmpty(mContactInfo.getName()) ? mContactInfo.getMsisdn() : mContactInfo.getName();
-				viewHolder.text.setText(name);
-
-			}
-
-			String mappedId = msisdn + PROFILE_ROUND_SUFFIX;
-			
-			if (profilePreview == null)
-			{
-				profileImageLoader.loadImage(mappedId, viewHolder.image, isListFlinging);
-			}
-			else
-			{
-				viewHolder.image.setImageBitmap(profilePreview);
-			}
-			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(msisdn + PROFILE_PIC_SUFFIX, null, false, !ContactManager.getInstance().hasIcon(msisdn));
-			viewHolder.image.setTag(imageViewerInfo);
-			if (mContactInfo != null)
-			{
-				int contactType = ((ProfileItem.ProfileContactItem) profileItem).getContactType();
-				switch (contactType)
-				{
-				
-				case REQUEST_RECEIVED:
-					LinearLayout req_layout = (LinearLayout) viewHolder.parent.findViewById(R.id.remove_fav);
-					req_layout.setVisibility(View.VISIBLE);
-					
-				case SHOW_CONTACTS_STATUS:
-					status = ((ProfileItem.ProfileContactItem) profileItem).getContactStatus();
-					if(contactType == SHOW_CONTACTS_STATUS)   //The layout wasn't becoming invisible, if the request was accepted from above case.
-					{	LinearLayout req_layout_fav = (LinearLayout) viewHolder.parent.findViewById(R.id.remove_fav);
-						req_layout_fav.setVisibility(View.GONE);
-					}
-					if (status.getStatusMessageType() == StatusMessageType.JOINED_HIKE)
-					{
-						if (status.getTimeStamp() == 0)
-							viewHolder.subText.setText(status.getText());
-						else
-							viewHolder.subText.setText(status.getText() + " " + status.getTimestampFormatted(true, context));
-					}
-					else
-					{
-						SmileyParser smileyParser = SmileyParser.getInstance();
-						viewHolder.subText.setText(smileyParser.addSmileySpans(status.getText(), true));
-					}
-					break;
-
-				case UNKNOWN_ON_HIKE:
-					viewHolder.subText.setText(context.getResources().getString(R.string.on_hike));
-					viewHolder.parent.findViewById(R.id.add_fav_view).setVisibility(View.GONE);
-					break;
-					
-				case NOT_A_FRIEND:
-					LinearLayout fav_layout = (LinearLayout) viewHolder.parent.findViewById(R.id.add_fav_view);
-					fav_layout.setVisibility(View.VISIBLE);
-					viewHolder.subText.setText(context.getResources().getString(R.string.on_hike));
-					viewHolder.extraInfo.setTextColor(context.getResources().getColor(R.color.add_fav));
-					viewHolder.extraInfo.setText(context.getResources().getString(R.string.add_fav));
-					viewHolder.icon.setImageResource(R.drawable.ic_add_friend);
-					break;
-					
-				case UNKNOWN_NOT_ON_HIKE:
-					LinearLayout invite_layout = (LinearLayout) viewHolder.parent.findViewById(R.id.add_fav_view);
-					invite_layout.setVisibility(View.VISIBLE);
-					viewHolder.subText.setText(context.getResources().getString(R.string.on_sms));
-					viewHolder.extraInfo.setTextColor(context.getResources().getColor(R.color.blue_hike));
-					viewHolder.extraInfo.setText(context.getResources().getString(R.string.ftue_add_prompt_invite_title));
-					viewHolder.icon.setImageResource(R.drawable.ic_invite_to_hike);
-					break;
-				}
-			}
-			break;
 		case HEADER:
 			
 			String contmsisdn = mContactInfo.getMsisdn();
@@ -592,12 +474,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		case GROUP_PARTICIPANT:
 			LinearLayout parentView = (LinearLayout) v;
 			parentView.removeAllViews();
-			//View groupParticipantParentView = inflater.inflate(R.layout.group_profile_item, parentView, false);
 			PairModified<GroupParticipant, String> groupParticipants = ((ProfileGroupItem) profileItem).getGroupParticipant();
 			parentView.setBackgroundColor(Color.WHITE);
-				GroupParticipant groupParticipant = groupParticipants.getFirst();
-				
-				
+			GroupParticipant groupParticipant = groupParticipants.getFirst();
 			TextView nameTextView = (TextView) viewHolder.infoContainer.findViewById(R.id.name);
 			TextView mainInfo = (TextView) viewHolder.infoContainer.findViewById(R.id.main_info);
 
