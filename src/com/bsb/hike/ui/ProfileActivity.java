@@ -222,7 +222,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private int actualSize;
 	
-	private int maxMediaToShow = 4;
+	private static final int maxMediaToShow = 4;
 	
 	private static final String PROFILE_ROUND_SUFFIX = "round";
 
