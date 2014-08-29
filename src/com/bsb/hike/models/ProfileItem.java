@@ -78,10 +78,12 @@ public abstract class ProfileItem
 	{
 
 		private List<PairModified<GroupParticipant, String>> groupParticipants;
-
-		public ProfileGroupItem(int itemId, Object text)
+		private int totalMembers;
+		
+		public ProfileGroupItem(int itemId, int totalMembers)
 		{
-			super(itemId, text);
+			super(itemId, null);
+			this.totalMembers = totalMembers;
 		}
 
 		public ProfileGroupItem(int itemId, List<PairModified<GroupParticipant, String>> groupParticipants)
@@ -93,6 +95,11 @@ public abstract class ProfileItem
 		public List<PairModified<GroupParticipant, String>> getGroupParticipants()
 		{
 			return groupParticipants;
+		}
+		
+		public int getTotalMembers()
+		{
+			return totalMembers;
 		}
 	}
 

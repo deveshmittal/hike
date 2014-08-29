@@ -786,7 +786,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{
 			participants.add(new PairModified<GroupParticipant, String>(userInfo, null));
 		}
-		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.MEMBERS, participants.size() + ""));		//Adding group member count
+		profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.MEMBERS, participants.size()));		//Adding group member count
 		Collections.sort(participants, GroupParticipant.lastSeenTimeComparator);
 
 		for (int i = 0; i < participants.size(); i++)
