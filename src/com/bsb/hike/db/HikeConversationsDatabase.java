@@ -4731,22 +4731,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		try
 		{
-			c = mDb.rawQuery("select count(*) from " + DBConstants.SHARED_MEDIA_TABLE + " where " + selection , new String[]{msisdn});
-			c.moveToFirst();
-			return c.getInt(0);
+			c = mDb.query(DBConstants.SHARED_MEDIA_TABLE, new String[] {DBConstants.MSISDN}, selection, new String[] {msisdn}, null, null, null);
+			return c.getCount();
 		}
 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			Logger.e(getClass().getSimpleName(), "Exception in getSharedMediaCount", e); 
-		}
 		finally
 		{
 			if(c!=null)
 				c.close();
 		}
-		return 0;
 	}
 	
 	public int getPinCount(String msisdn)
@@ -4754,20 +4747,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		String selection = DBConstants.MSISDN + " = ?" + " AND " + DBConstants.MESSAGE_TYPE + "==" + HikeConstants.MESSAGE_TYPE.TEXT_PIN;
 		Cursor c = null;
 		try
-		{		c = mDb.rawQuery("select count(*) from " + DBConstants.MESSAGES_TABLE + " where " + selection, new String[] {msisdn} );
-				c.moveToFirst();
-				return c.getInt(0);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			Logger.e(getClass().getSimpleName(), "Exception in getPinCount",e);
+		{		
+				c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MSISDN }, selection, new String[]{msisdn}, null, null, null);
+				return c.getCount();
 		}
 		finally{
 			if(c!=null)
 				c.close();
 		}
-		return 0;
 	}
 		
 	public void updateToNewSharedMediaTable()

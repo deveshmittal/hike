@@ -89,6 +89,10 @@ public class SharedMediaAdapter extends PagerAdapter implements OnClickListener
 			page.findViewById(R.id.progress_bar).setVisibility(View.GONE);
 			page.findViewById(R.id.play_media).setVisibility(View.VISIBLE);
 		}
+		else
+		{
+			page.findViewById(R.id.play_media).setVisibility(View.GONE);
+		}
 		
 		galleryImageView.setTag(sharedMediaItem);
 		galleryImageView.setOnClickListener(this);

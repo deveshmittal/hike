@@ -1424,7 +1424,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			optionsList.add(new OverFlowMenuItem(getString(R.string.pin_history), 8));
 		}
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.shared_media), 9));
 		dismissPopupWindow();
 
 		attachmentWindow = new PopupWindow(this);
@@ -1510,12 +1509,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					break;
 				case 4:
 					setupThemePicker(null);
-					break;
-				case 9:
-					if(!messages.isEmpty())
-					{
-						startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ChatThread.this, mConversation));
-					}
 					break;
 				}
 
@@ -2228,7 +2221,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * To handle the case when photo viewer is opened from chat thread and user forwards/share some item. In this case we should close the photo viewer.
 		 */
-		removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG);
+		if(savedInstanceState == null)
+		{
+			removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG);
+		}
 
 		// This prevent the activity from simply finishing and opens up the last
 		// screen.

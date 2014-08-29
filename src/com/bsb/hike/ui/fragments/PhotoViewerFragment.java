@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
@@ -123,8 +124,6 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		
 		intialiazeViewPager();
 		
-		setupActionBar();
-		
 		//Load media to the right and left of the view pager if this fragment is called from ChatThread.
 		if(fromChatThread)
 		{	Logger.d(TAG,  " MsgId : " + sharedMediaItems.get(0).getMsgId());
@@ -218,6 +217,20 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState)
 	{
+		/*
+		 * We post execute setupActionBar in ChatThread; So to handle action bar of media viewer on rotation we need to do its action bar setup after activity is created and post
+		 * UI this runnable
+		 */
+		(new Handler()).post(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				setupActionBar();
+			}
+		});
+		
 		super.onActivityCreated(savedInstanceState);
 	}
 

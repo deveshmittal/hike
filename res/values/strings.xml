@@ -562,7 +562,6 @@
     <string name="add">Add</string>
     <string name="tap_save_contact">Tap to save contact</string>
     <string name="no_updates">No updates from %1$s yet.</string>
-    <string name="add_people">ADD A MEMBER</string>
     <string name="email_conversation">Email Conversation</string>
     <string name="me_key">me</string>
     <string name="group_name_email">"Group "</string>
@@ -1159,6 +1158,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="user_back_on_hike">%1$s is now on hike, say hi</string>
     <string name="team_hike">hike</string>
     <string name="add_fav_msg">Is now sharing last seen and status updates. Would you like to do the same?</string>
+    <string name="add_people">ADD A MEMBER</string>
     <string name="stealth_info_tip_header">Hidden Mode</string>
     <string name="stealth_info_tip_subtext">Hide your chats. Tap on \'hi\' to get started.</string>
 </resources>

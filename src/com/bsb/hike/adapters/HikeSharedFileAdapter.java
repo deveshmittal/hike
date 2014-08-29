@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.HikeSharedFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.SharedFileImageLoader;
 
 public class HikeSharedFileAdapter extends BaseAdapter
@@ -105,12 +106,15 @@ public class HikeSharedFileAdapter extends BaseAdapter
 
 		holder.galleryName.setVisibility(View.GONE);
 		if (galleryItem != null)
-		{
+		{	View time_view = convertView.findViewById(R.id.vid_time_layout);
 			holder.galleryThumb.setImageDrawable(null);
-			if(!galleryItem.getFileTypeString().toString().contains(IMAGE_TAG))
+			if (galleryItem.getHikeFileType() == HikeFileType.VIDEO)
 			{
-				View time_view = convertView.findViewById(R.id.vid_time_layout);
 				time_view.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				time_view.setVisibility(View.GONE);
 			}
 			
 			
