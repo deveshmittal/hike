@@ -601,7 +601,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 
 		initializeListviewAndAdapter();
-		profileContent.setOnScrollListener(this);
 
 		/*
 		 * if the hike join time for a known hike contact is 0, we request the server for the hike join time.
