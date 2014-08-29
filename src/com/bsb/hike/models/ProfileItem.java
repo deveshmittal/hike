@@ -87,6 +87,15 @@ public abstract class ProfileItem
 		}
 	}
 
+	public static class ProfilePhoneNumberItem extends ProfileItem
+	{
+		public ProfilePhoneNumberItem(int itemId, Object text)
+		{
+			super(itemId, text);
+		}
+		
+	}
+	
 	public static class ProfileSharedMedia extends ProfileItem
 	{
 		public ProfileSharedMedia(int itemId, Object text)
