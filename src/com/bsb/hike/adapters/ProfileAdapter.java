@@ -94,6 +94,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	private TimelineImageLoader bigPicImageLoader;
 
 	private ProfilePicImageLoader profileImageLoader;
+	
+	private SharedFileImageLoader thumbnailLoader;
 
 	private int mIconImageSize;
 
@@ -126,9 +128,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		int mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
-
+		int thumbNailSize = context.getResources().getDimensionPixelSize(R.dimen.profile_shared_media_item_size);
 		this.bigPicImageLoader = new TimelineImageLoader(context, mBigImageSize);
-
+		thumbnailLoader = new SharedFileImageLoader(context, thumbNailSize);
 		this.profileImageLoader = new ProfilePicImageLoader(context, mBigImageSize);
 		profileImageLoader.setDefaultAvatarIfNoCustomIcon(true);
 		profileImageLoader.setHiResDefaultAvatar(true);
@@ -484,7 +486,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.text.setText(context.getString(R.string.shared_med));
 			viewHolder.subText.setText((String) profileItem.getText()); // Query for shared_media in the profileActivity itself
 			List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
-			int sizeOfImage = ((ProfileSharedMedia) profileItem).getSizeofImage();
 			LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
 			layout.removeAllViews();
 			LayoutParams layoutParams;
@@ -492,7 +493,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			int smSize = Integer.valueOf(profileItem.getText().toString());
 			if(sharedMedia != null && sharedMedia.size() < smSize )
 			{
-				SharedFileImageLoader thumbnailLoader = new SharedFileImageLoader(context, sizeOfImage);
 				for (HikeSharedFile galleryItem : sharedMedia)
 				{
 					View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
@@ -519,7 +519,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			
 			else if(sharedMedia != null && sharedMedia.size() >= smSize)
 			{
-				SharedFileImageLoader thumbnailLoader = new SharedFileImageLoader(context, sizeOfImage);
+				 
 				for (HikeSharedFile galleryItem : sharedMedia)
 				{
 					View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
