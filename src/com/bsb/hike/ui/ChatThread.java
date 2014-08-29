@@ -2227,7 +2227,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * To handle the case when photo viewer is opened from chat thread and user forwards/share some item. In this case we should close the photo viewer.
 		 */
-		removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG);
+		if(savedInstanceState == null)
+		{
+			removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG);
+		}
 
 		// This prevent the activity from simply finishing and opens up the last
 		// screen.
