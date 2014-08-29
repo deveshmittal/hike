@@ -19,6 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="12dp"
+            android:contentDescription="Message Icon"
             android:onClick="messageBtnClicked"
             android:scaleType="centerInside"
             android:src="@drawable/ic_hike_message" />
@@ -34,6 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="12dp"
+            android:contentDescription="Call Icon"
             android:onClick="callBtnClicked"
             android:scaleType="centerInside"
             android:src="@drawable/ic_call" />
@@ -53,6 +55,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
+            android:contentDescription="Phone Number"
             android:singleLine="true"
             android:textColor="#33312e"
             android:textSize="14sp"
@@ -62,6 +65,7 @@
             android:id="@+id/main_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:contentDescription="Phone type"
             android:textColor="#33312e"
             android:textSize="12sp" />
     </LinearLayout>
