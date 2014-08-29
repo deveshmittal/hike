@@ -807,7 +807,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{	
 			addSharedMedia();
 		}
-		profileItems.add(new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, "" + sharedMediaCount, actualSize, sharedMedia)); //Add shared media elements
+		profileItems.add(new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, sharedMediaCount, sharedMedia)); //Add shared media elements
 	}
 
 	private void addStatusMessagesAsMyProfileItems(List<StatusMessage> statusMessages)

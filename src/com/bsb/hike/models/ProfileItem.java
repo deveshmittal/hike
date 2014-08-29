@@ -93,45 +93,35 @@ public abstract class ProfileItem
 		{
 			super(itemId, text);
 		}
-		
 	}
 	
 	public static class ProfileSharedMedia extends ProfileItem
 	{
-		public ProfileSharedMedia(int itemId, Object text)
+		public ProfileSharedMedia(int itemId, int sharedMediaCount,List<HikeSharedFile> sharedFilesList)
 		{
-			super(itemId, text);
-			// TODO Auto-generated constructor stub
-		}
-		public ProfileSharedMedia(int itemId, Object text, int sizeOfImage,List<HikeSharedFile> sharedFilesList)
-		{
-			super(itemId,text);
+			super(itemId,null);
 			this.sharedFilesList = sharedFilesList;
-			this.sizeOfImage = sizeOfImage;
+			this.sharedMediaCount = sharedMediaCount;
 		}
 		
 		public List<HikeSharedFile> getSharedFileList()
 		{
 			return sharedFilesList;
 		}
-		public int getSizeofImage()
+		public int getSharedMediaCount()
 		{
-			return sizeOfImage;
+			return sharedMediaCount;
 		}
 		private List<HikeSharedFile> sharedFilesList;
-		private int sizeOfImage;
+		private int sharedMediaCount;
 	}
 	
 	public static class ProfileSharedContent extends ProfileItem
 	{
-		public ProfileSharedContent(int itemId, Object text)
+		public ProfileSharedContent(int itemId, String text, int sharedFiles, int sharedPins, List<HikeSharedFile> sharedFilesList)
 		{
-			super(itemId, text);
-			// TODO Auto-generated constructor stub
-		}
-		public ProfileSharedContent(int itemId, Object text, int sharedFiles, int sharedPins ,List<HikeSharedFile> sharedFilesList)
-		{
-			super(itemId,text);
+			super(itemId,null);
+			this.text = text;
 			this.sharedFilesList = sharedFilesList;
 			this.sharedFiles = sharedFiles;
 			this.sharedPins = sharedPins;
@@ -149,9 +139,14 @@ public abstract class ProfileItem
 		{
 			return sharedPins;
 		}
+		public String getText()
+		{
+			return text;
+		}
 		private List<HikeSharedFile> sharedFilesList;
 		private int sharedFiles;
 		private int sharedPins;
+		private String text;
 	}
 	
 }
