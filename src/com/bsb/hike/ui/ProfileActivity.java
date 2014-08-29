@@ -477,6 +477,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{
 			profileAdapter.getTimelineImageLoader().setExitTasksEarly(false);
 			profileAdapter.getIconImageLoader().setExitTasksEarly(false);
+			profileAdapter.getProfilePicImageLoader().setExitTasksEarly(false);
 			profileAdapter.notifyDataSetChanged();
 		}
 	}

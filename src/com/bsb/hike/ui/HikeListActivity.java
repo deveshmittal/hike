@@ -467,7 +467,18 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 			adapter.getIconLoader().setExitTasksEarly(true);
 		}
 	}
-
+	
+	@Override
+	protected void onResume()
+	{
+		// TODO Auto-generated method stub
+		super.onResume();
+		if(adapter != null)
+		{
+			adapter.getIconLoader().setExitTasksEarly(false);
+			adapter.notifyDataSetChanged();
+		}
+	}
 	@Override
 	protected void onDestroy()
 	{

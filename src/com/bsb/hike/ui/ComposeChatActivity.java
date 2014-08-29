@@ -301,6 +301,18 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	}
 	
 	@Override
+	protected void onResume()
+	{
+		// TODO Auto-generated method stub
+		super.onResume();
+		if(adapter != null)
+		{
+			adapter.getIconLoader().setExitTasksEarly(false);
+			adapter.notifyDataSetChanged();
+		}
+	}
+	
+	@Override
 	public void onDestroy()
 	{
 		if (progressDialog != null)
