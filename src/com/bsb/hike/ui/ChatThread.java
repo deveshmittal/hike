@@ -479,7 +479,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			// mAdapter.getStickerLoader().setExitTasksEarly(false);
 			mAdapter.getIconImageLoader().setExitTasksEarly(false);
+			mAdapter.getHighQualityThumbLoader().setExitTasksEarly(false);
 			mAdapter.notifyDataSetChanged();
+		}
+		if(stickerAdapter != null)
+		{
+			stickerAdapter.getStickerLoader().setExitTasksEarly(false);
+			stickerAdapter.notifyDataSetChanged();
 		}
 		/* mark any messages unread as read */
 		setMessagesRead();

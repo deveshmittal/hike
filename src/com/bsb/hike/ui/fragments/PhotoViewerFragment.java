@@ -565,6 +565,11 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		{
 			toggleViewsVisibility();
 		}
+		if(smAdapter != null)
+		{
+			smAdapter.getSharedFileImageLoader().setExitTasksEarly(false);
+			smAdapter.notifyDataSetChanged();
+		}
 		super.onResume();
 	}
 

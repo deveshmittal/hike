@@ -576,6 +576,18 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	}
 	
 	@Override
+	protected void onResume()
+	{
+		// TODO Auto-generated method stub
+		super.onResume();
+		if(adapter != null)
+		{
+			adapter.getSharedFileImageLoader().setExitTasksEarly(false);
+			adapter.notifyDataSetChanged();
+		}
+	}
+	
+	@Override
 	protected void onDestroy()
 	{
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);

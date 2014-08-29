@@ -609,6 +609,18 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 	}
 	
 	@Override
+	protected void onResume()
+	{
+		// TODO Auto-generated method stub
+		super.onResume();
+		if(adapter != null)
+		{
+			adapter.getSocialIconLoader().setExitTasksEarly(false);
+			adapter.notifyDataSetChanged();
+		}
+	}
+	
+	@Override
 	protected void onDestroy()
 	{
 		if (mDialog != null)

@@ -157,6 +157,23 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	}
 	
 	@Override
+	protected void onResume()
+	{
+		// TODO Auto-generated method stub
+		super.onResume();
+		if(gridAdapter != null)
+		{
+			gridAdapter.getGalleryImageLoader().setExitTasksEarly(false);
+			gridAdapter.notifyDataSetChanged();
+		}
+		if(pagerAdapter != null)
+		{
+			pagerAdapter.getGalleryImageLoader().setExitTasksEarly(false);
+			pagerAdapter.notifyDataSetChanged();
+		}
+	}
+	
+	@Override
 	protected void onDestroy()
 	{
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);

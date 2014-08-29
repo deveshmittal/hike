@@ -2257,6 +2257,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				Utils.executeConvAsyncTask(task, conv);
 			}
 		}
+		if(mAdapter != null)
+		{
+			mAdapter.getIconLoader().setExitTasksEarly(false);
+			mAdapter.notifyDataSetChanged();
+		}
 		super.onResume();
 	}
 
