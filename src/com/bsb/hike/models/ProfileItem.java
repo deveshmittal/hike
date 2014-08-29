@@ -77,7 +77,7 @@ public abstract class ProfileItem
 	public static class ProfileGroupItem extends ProfileItem
 	{
 
-		private List<PairModified<GroupParticipant, String>> groupParticipants;
+		private PairModified<GroupParticipant, String> groupParticipant;
 		private int totalMembers;
 		
 		public ProfileGroupItem(int itemId, int totalMembers)
@@ -86,15 +86,15 @@ public abstract class ProfileItem
 			this.totalMembers = totalMembers;
 		}
 
-		public ProfileGroupItem(int itemId, List<PairModified<GroupParticipant, String>> groupParticipants)
+		public ProfileGroupItem(int itemId, PairModified<GroupParticipant, String> groupParticipants)
 		{
 			super(itemId, null);
-			this.groupParticipants = groupParticipants;
+			this.groupParticipant = groupParticipants;
 		}
 
-		public List<PairModified<GroupParticipant, String>> getGroupParticipants()
+		public PairModified<GroupParticipant, String> getGroupParticipant()
 		{
-			return groupParticipants;
+			return groupParticipant;
 		}
 		
 		public int getTotalMembers()

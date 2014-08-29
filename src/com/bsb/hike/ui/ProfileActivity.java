@@ -791,9 +791,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 		for (int i = 0; i < participants.size(); i++)
 		{
-			List<PairModified<GroupParticipant, String>> groupParticipants = new ArrayList<PairModified<GroupParticipant, String>>(1);
-			groupParticipants.add(participants.get(i));
-			profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.GROUP_MEMBER, groupParticipants));
+			profileItems.add(new ProfileItem.ProfileGroupItem(ProfileItem.GROUP_MEMBER, participants.get(i)));
 		}
 		isGroupOwner = userInfo.getContactInfo().getMsisdn().equals(groupConversation.getGroupOwner());
 		//Add -> Add member tab
