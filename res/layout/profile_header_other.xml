@@ -16,6 +16,7 @@
             android:layout_width="65dp"
             android:layout_height="65dp"
             android:layout_centerVertical="true"
+            android:contentDescription="Profile Image"
             android:layout_marginLeft="25dp"
             android:onClick="onViewImageClicked"
             android:src="@drawable/ic_default_avatar_group" />
@@ -37,6 +38,7 @@
                 android:layout_marginBottom="6dp"
                 android:ellipsize="end"
                 android:maxLength="@integer/max_length_group_name"
+                android:contentDescription="Name"
                 android:singleLine="true"
                 android:textColor="@color/chat_color"
                 android:textSize="24sp" />
@@ -45,6 +47,7 @@
                 android:id="@+id/subtext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="Status"
                 android:textColor="@color/phone_entering_header"
                 android:ellipsize="end"
                 android:textSize="12sp" />
@@ -67,6 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/add_fav_msg"
+            android:contentDescription="Favourites Message"
             android:textColor="#aaaaaa"
             android:textSize="12sp" />
 
@@ -81,6 +85,7 @@
                 android:layout_height="30dp"
                 android:background="#babfc5"
                 android:onClick="onNoBtnClick"
+                android:contentDescription="No Button"
                 android:text="@string/not_now"
                 android:textColor="@color/other_list_selected"
                 android:textSize="12sp" />
@@ -92,6 +97,7 @@
                 android:layout_marginLeft="7dp"
                 android:layout_toRightOf="@id/no"
                 android:background="@color/blue_hike"
+                android:contentDescription="Yes Button"
                 android:onClick="onYesBtnClick"
                 android:text="@string/add_btn"
                 android:textColor="@color/other_list_selected"
@@ -119,6 +125,7 @@
                 android:id="@+id/add_fav_star"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="Add to Fav"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="12dp" />
 
@@ -126,6 +133,7 @@
                 android:id="@+id/add_fav_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="Add to fav text"
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@id/add_fav_star"
                 android:textSize="16sp" />
