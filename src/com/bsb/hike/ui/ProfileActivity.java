@@ -226,6 +226,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private View headerView;
 	
+	public SmileyParser smileyParser;
+	
 	private static final String PROFILE_ROUND_SUFFIX = "round";
 
 	/* store the task so we can keep keep the progress dialog going */
@@ -288,7 +290,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 
 		preferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-
+		smileyParser = SmileyParser.getInstance();
 		Object o = getLastCustomNonConfigurationInstance();
 		if (o instanceof ActivityState)
 		{
@@ -784,24 +786,15 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		if(statusMessages.size()>0)
 		{
 			status = statusMessages.get(statusMessages.size() - 1);
+			subText.setText(smileyParser.addSmileySpans(status.getText(), true));
 			return;
 		}
 		
 		status = getJoinedHikeStatus(contactInfo);
-		
-		if (status.getStatusMessageType() == StatusMessageType.JOINED_HIKE)
-		{
-			if (status.getTimeStamp() == 0)
-				subText.setText(status.getText());
-			else
-				subText.setText(status.getText() + " " + status.getTimestampFormatted(true, ProfileActivity.this));
-		}
+		if (status.getTimeStamp() == 0)
+			subText.setText(status.getText());
 		else
-		{
-			SmileyParser smileyParser = SmileyParser.getInstance();
-			subText.setText(smileyParser.addSmileySpans(status.getText(), true));
-		}
-		
+			subText.setText(status.getText() + " " + status.getTimestampFormatted(true, ProfileActivity.this));
 	}
 	
 
