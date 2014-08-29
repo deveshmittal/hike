@@ -340,7 +340,7 @@ public class HikePubSub implements Runnable
 
 	public static final String ATOMIC_POPUP_WITH_PUSH = "atomicPopupShowPush";
 
-	public static final String REMOVE_START_NEW_CHAT_TIP = "removeStartNewChatTip";
+	public static final String REMOVE_STEALTH_INFO_TIP = "removeStealthInfoTip";
 
 	public static final String REMOVE_STEALTH_UNREAD_TIP = "removeStealthUnreadTip";
 
@@ -354,8 +354,16 @@ public class HikePubSub implements Runnable
 	
 	public static final String UPDATE_PIN_METADATA = "pinUpdated";
 
+	public static final String HIKE_SHARED_FILE_DELETED = "hikeSharedFileDeleted";
+
+	public static final String ClOSE_PHOTO_VIEWER_FRAGMENT = "closePhotoViewerFragment";
+
 	public static String FRIEND_REQ_COUNT_RESET = "resetFriendRequest";
 	
+	public static final String CONTACT_SYNC_STARTED = "contactSyncStarted";
+
+	public static final String FAVORITE_COUNT_CHANGED = "favoriteCountChanged";
+
 	public static String HIKE_TO_OFFLINE_PUSH = "hikeToOfflinePush";
 
 	public static String PROFILE_UPDATE_FINISH = "profileUpdateFinish";

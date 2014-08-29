@@ -20,10 +20,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
@@ -51,10 +48,6 @@ public class HikeNotificationMsgStack implements Listener
 	private HikeConversationsDatabase mConvDb;
 
 	private ArrayList<String> mBigTextList;
-
-	private int mUnreadMessages;
-
-	private int mUnreadConversations;
 
 	private ConvMessage mLastInsertedConvMessage;
 
@@ -125,29 +118,10 @@ public class HikeNotificationMsgStack implements Listener
 
 			addPair(argConvMessage.getMsisdn(), convMessagePair.first);
 
-			if (mTickerText != null)
-			{
-				mTickerText.append("\n" + convMessagePair.second + " - " + convMessagePair.first);
-			}
-			else
-			{
-				mTickerText = new StringBuilder();
-				mTickerText.append(convMessagePair.second + " - " + convMessagePair.first);
-			}
-
 			mLastInsertedConvMessage = argConvMessage;
 		}
 
-		// Do not play sound in case of bg change
-		if ((argConvMessage.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
-				|| (argConvMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED))
-		{
-			forceBlockNotificationSound = true;
-		}
-		else
-		{
-			forceBlockNotificationSound = false;
-		}
+		forceBlockNotificationSound = argConvMessage.isSilent();
 
 	}
 
@@ -251,13 +225,13 @@ public class HikeNotificationMsgStack implements Listener
 
 		// If list size > MAX_LINES, remove messages starting from top.
 		// Skip if there is only 1 message exists from a particular msisdn
-		while (mMessageTitlePairList.size() > MAX_LINES && !sortedTillEnd)
+		while (mMessageTitlePairList.size() > (MAX_LINES > 7 ? 7 : MAX_LINES) && !sortedTillEnd)
 		{
 			trimMessagePairList();
 		}
 
 		// If this list is still > MAX_LINES, remove oldest message-msisdn pairs
-		if (mMessageTitlePairList.size() > MAX_LINES)
+		if (mMessageTitlePairList.size() > (MAX_LINES > 7 ? 7 : MAX_LINES))
 		{
 			int toBeTrimmed = mMessageTitlePairList.size() - MAX_LINES;
 
@@ -272,6 +246,16 @@ public class HikeNotificationMsgStack implements Listener
 		totalNewMessages++;
 
 		uniqueMsisdns.add(argMsisdn);
+
+		if (mTickerText != null)
+		{
+			mTickerText.append("\n" + HikeNotificationUtils.getNameForMsisdn(mContext, argMsisdn) + " - " + argMessage);
+		}
+		else
+		{
+			mTickerText = new StringBuilder();
+			mTickerText.append(HikeNotificationUtils.getNameForMsisdn(mContext, argMsisdn) + " - " + argMessage);
+		}
 	}
 
 	/**
@@ -310,12 +294,9 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		updateNotificationIntent();
 
-		updateMessagesCount();
-
 		mNotificationTextLines = mMessageTitlePairList.size();
 
 		mNotificationTextLines = mNotificationTextLines > MAX_LINES ? MAX_LINES : mNotificationTextLines;
-
 	}
 
 	/**
@@ -346,15 +327,24 @@ public class HikeNotificationMsgStack implements Listener
 		// users
 		else
 		{
-			mNotificationIntent = new Intent(mContext, ChatThread.class);
-			mNotificationIntent.putExtra(HikeConstants.Extras.MSISDN, lastAddedMsisdn);
-			mNotificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			if (lastAddedMsisdn.contains(mContext.getString(R.string.app_name)))
+			{
+				mNotificationIntent = new Intent(mContext, HomeActivity.class);
+				mNotificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			}
+			else
+			{
 
-			/*
-			 * notifications appear to be cached, and their .equals doesn't check 'Extra's. In order to prevent the wrong intent being fired, set a data field that's unique to the
-			 * conversation we want to open. http://groups .google.com/group/android-developers/browse_thread/thread /e61ec1e8d88ea94d/1fe953564bd11609?#1fe953564bd11609
-			 */
-			mNotificationIntent.setData((Uri.parse("custom://" + getNotificationId())));
+				mNotificationIntent = new Intent(mContext, ChatThread.class);
+				mNotificationIntent.putExtra(HikeConstants.Extras.MSISDN, lastAddedMsisdn);
+				mNotificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+				/*
+				 * notifications appear to be cached, and their .equals doesn't check 'Extra's. In order to prevent the wrong intent being fired, set a data field that's unique to
+				 * the conversation we want to open. http://groups .google.com/group/android-developers/browse_thread/thread /e61ec1e8d88ea94d/1fe953564bd11609?#1fe953564bd11609
+				 */
+				mNotificationIntent.setData((Uri.parse("custom://" + getNotificationId())));
+			}
 		}
 	}
 
@@ -417,7 +407,7 @@ public class HikeNotificationMsgStack implements Listener
 
 			String notificationMsgTitle = mContext.getString(R.string.app_name);
 
-			notificationMsgTitle = HikeNotificationUtils.getNameForMsisdn(mContext, mConvDb, convMsgPair.first);
+			notificationMsgTitle = HikeNotificationUtils.getNameForMsisdn(mContext, convMsgPair.first);
 
 			if (!isFromSingleMsisdn())
 			{
@@ -523,24 +513,6 @@ public class HikeNotificationMsgStack implements Listener
 		}
 	}
 
-	/**
-	 * Updates number of unread messages/conversations from conversations database
-	 */
-	private void updateMessagesCount()
-	{
-		mUnreadMessages = 0;
-		mUnreadConversations = 0;
-		List<Conversation> convList = mConvDb.getConversations();
-		for (Conversation conv : convList)
-		{
-			if (conv.getUnreadCount() > 0)
-			{
-				mUnreadMessages += conv.getUnreadCount();
-				mUnreadConversations++;
-			}
-		}
-	}
-
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
@@ -583,17 +555,7 @@ public class HikeNotificationMsgStack implements Listener
 	 */
 	public int getUnreadMessages()
 	{
-		return mUnreadMessages;
-	}
-
-	/**
-	 * Returns number of conversations containing unread messages from the conversations database
-	 * 
-	 * @return
-	 */
-	public int getUnreadConversations()
-	{
-		return mUnreadConversations;
+		return mConvDb.getTotalUnreadMessages();
 	}
 
 	/**
@@ -695,7 +657,7 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		if (isFromSingleMsisdn())
 		{
-			return HikeNotificationUtils.getNameForMsisdn(mContext, mConvDb, lastAddedMsisdn);
+			return HikeNotificationUtils.getNameForMsisdn(mContext, lastAddedMsisdn);
 		}
 
 		if (getNewMessages() <= 1)

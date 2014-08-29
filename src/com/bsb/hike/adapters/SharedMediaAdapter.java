@@ -9,17 +9,20 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView.ScaleType;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.HikeSharedFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.SharedFileImageLoader;
+import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.view.TouchImageView;
 
-public class SharedMediaAdapter extends PagerAdapter
+public class SharedMediaAdapter extends PagerAdapter implements OnClickListener
 {
 	private LayoutInflater layoutInflater;
 
@@ -33,12 +36,15 @@ public class SharedMediaAdapter extends PagerAdapter
 	
 	private String IMAGE_TAG = "image";
 	
-	public SharedMediaAdapter(Context context, int size_image, ArrayList<HikeSharedFile> sharedMediaItems, String msisdn, ViewPager viewPager)
+	private PhotoViewerFragment photoViewerFragment;
+	
+	public SharedMediaAdapter(Context context, int size_image, ArrayList<HikeSharedFile> sharedMediaItems, String msisdn, ViewPager viewPager, PhotoViewerFragment photoViewerFragment)
 	{
 		this.context = context;
 		this.layoutInflater = LayoutInflater.from(this.context);
 		this.sharedMediaLoader = new SharedFileImageLoader(context, size_image);
 		this.sharedMediaItems = sharedMediaItems;
+		this.photoViewerFragment = photoViewerFragment;
 	}
 
 	@Override
@@ -78,26 +84,34 @@ public class SharedMediaAdapter extends PagerAdapter
 		galleryImageView.setZoom(1.0f);
 		galleryImageView.setScaleType(ScaleType.FIT_CENTER);
 		sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(true), galleryImageView, false);
-		if (galleryImageView.getDrawable() != null && !sharedMediaItem.getFileTypeString().toString().contains(IMAGE_TAG))
+		if (sharedMediaItem.getHikeFileType() == HikeFileType.VIDEO)
 		{
-			Button playBtn = (Button) page.findViewById(R.id.play_media);
-			playBtn.setVisibility(View.VISIBLE);
-			playBtn.setOnClickListener(new View.OnClickListener()
-			{
-				@Override
-				public void onClick(View v)
-				{
-					// TODO Auto-generated method stub
-					Logger.d(TAG, "Opening video/other files");
-					Intent openFile = new Intent(Intent.ACTION_VIEW);
-					openFile.setDataAndType(Uri.fromFile(sharedMediaItem.getFile()), sharedMediaItem.getFileTypeString());
-					context.startActivity(openFile);
-				}
-			});
+			page.findViewById(R.id.progress_bar).setVisibility(View.GONE);
+			page.findViewById(R.id.play_media).setVisibility(View.VISIBLE);
 		}
 		
+		galleryImageView.setTag(sharedMediaItem);
+		galleryImageView.setOnClickListener(this);
 		((ViewPager) container).addView(page);
 		return page;
 	}
 
+	@Override
+	public void onClick(View v)
+	{
+		HikeSharedFile sharedMediaItem = (HikeSharedFile) v.getTag();
+		switch (sharedMediaItem.getHikeFileType())
+		{
+		case IMAGE:
+			photoViewerFragment.toggleViewsVisibility();
+			break;
+		case VIDEO:
+			Intent openFile = new Intent(Intent.ACTION_VIEW);
+			openFile.setDataAndType(Uri.fromFile(sharedMediaItem.getFile()), sharedMediaItem.getFileTypeString());
+			context.startActivity(openFile);
+			break;
+		default:
+			break;
+		}
+	}
 }

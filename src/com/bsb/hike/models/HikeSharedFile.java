@@ -17,8 +17,10 @@ public class HikeSharedFile extends HikeFile implements Parcelable
 	private long timeStamp;
 	
 	private JSONObject fileJSON;
+	
+	private String groupParticipantMsisdn;
 
-	public HikeSharedFile(JSONObject fileJSON, boolean isSent, long msgId, String msisdn, long timeStamp)
+	public HikeSharedFile(JSONObject fileJSON, boolean isSent, long msgId, String msisdn, long timeStamp, String groupParticipantMsisdn)
 	{
 		super(fileJSON, isSent);
 
@@ -29,6 +31,8 @@ public class HikeSharedFile extends HikeFile implements Parcelable
 		this.msisdn = msisdn;
 
 		this.timeStamp = timeStamp;
+		
+		this.groupParticipantMsisdn = groupParticipantMsisdn;
 	}
 
 	public long getMsgId()
@@ -71,6 +75,16 @@ public class HikeSharedFile extends HikeFile implements Parcelable
 		this.fileJSON = fileJSON;
 	}
 
+	public String getGroupParticipantMsisdn()
+	{
+		return groupParticipantMsisdn;
+	}
+
+	public void setGroupParticipantMsisdn(String groupParticipantMsisdn)
+	{
+		this.groupParticipantMsisdn = groupParticipantMsisdn;
+	}
+
 	public String  getImageLoaderKey(boolean large)
 	{
 		String key = this.getExactFilePath() + ""+"::" + this.getHikeFileType().ordinal();
@@ -90,6 +104,7 @@ public class HikeSharedFile extends HikeFile implements Parcelable
 		dest.writeString(msisdn);
 		dest.writeLong(timeStamp);
 		dest.writeInt(this.isSent() ? 1 : 0);
+		dest.writeString(groupParticipantMsisdn.toString());
 		dest.writeString(fileJSON.toString());
 	}
 	
@@ -110,11 +125,12 @@ public class HikeSharedFile extends HikeFile implements Parcelable
 			String msisdn = source.readString();
 			long timeStamp = source.readLong();
 			boolean isSent = source.readInt() == 1;
+			String groupParticipantMsisdn = source.readString();
 			String fileJsonString = source.readString();
 			try
 			{
 				JSONObject fileJSON = new JSONObject(fileJsonString);
-				return new HikeSharedFile(fileJSON, isSent, msgId, msisdn, timeStamp);
+				return new HikeSharedFile(fileJSON, isSent, msgId, msisdn, timeStamp, groupParticipantMsisdn);
 			}
 			catch (JSONException e)
 			{

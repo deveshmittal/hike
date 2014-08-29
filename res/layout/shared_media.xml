@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/shared_media"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical" >
+
+    <include
+        android:id="@+id/shared_media_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        layout="@layout/friends_group_view" >
+    </include>
+
+    <LinearLayout
+        android:id="@+id/shared_media_items"
+        android:layout_width="match_parent"
+        android:layout_height="81dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal" >
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/sm_emptystate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:text="@string/no_media"
+            android:textColor="#aaaaaa"
+            android:textSize="15sp"
+            android:visibility="gone" />
+    </LinearLayout>
+
+</LinearLayout>

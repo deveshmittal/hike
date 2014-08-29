@@ -440,6 +440,8 @@ public class HikeConstants
 	public static final String IMAGE_QUALITY = "imageQuality";
 	
 	public static final String REMEMBER_IMAGE_CHOICE = "rememberImageChoice";
+	
+	public static final String SHOW_IMAGE_QUALITY_TIP = "showImageQualityTip";
 
 	public static final String HIKEBOT = "TD-HIKE";
 
@@ -472,6 +474,10 @@ public class HikeConstants
 	public static final String HELP_FEEDBACK_PREF = "helpFeedback";
 
 	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
+	
+	public static final String NUJ_NOTIF_BOOLEAN_PREF = "hikeNUJNotificationPref";
+	
+	public static final String H2O_NOTIF_BOOLEAN_PREF = "hikeOfflineNotificationPref";
 
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
 
@@ -1238,6 +1244,14 @@ public class HikeConstants
 		public static final String SHARED_FILE_ITEMS = "sharedFileItems";
 		
 		public static final String IS_LAST_MESSAGE = "isLastMessage";
+
+		public static final String IS_GROUP_CONVERSATION = "isGroupCoversation";
+
+		public static final String PARTICIPANT_MSISDN_ARRAY = "participantMsisdnArray";
+
+		public static final String PARTICIPANT_NAME_ARRAY = "participantNameArray";
+
+		public static final String CONVERSATION_NAME = "conversationName";
 	}
 
 	public static final class LogEvent
@@ -1505,6 +1519,17 @@ public class HikeConstants
 		
 		public static final String PIN_HISTORY_VIA_PIN_CLICK = "pinHistoryViaPinClick";
 		
+		/*
+		 * Settings screen <screen> = settingsS <event> = notifNUJEnabled, notifH2OEnabled, notifNUJDisabled, notifH2ODisabled
+		 */
+		public static final String SETTINGS_NOTIFICATION_NUJ_ON = "settingsSNotifNUJEnabled";
+		
+		public static final String SETTINGS_NOTIFICATION_H2O_ON = "settingsSNotifH2OEnabled";
+		
+		public static final String SETTINGS_NOTIFICATION_NUJ_OFF = "settingsSNotifNUJDisabled";
+		
+		public static final String SETTINGS_NOTIFICATION_H2O_OFF = "settingsSNotifH2ODisabled";
+		
 	}
 
 	public static final class MqttMessageTypes
@@ -1753,4 +1778,16 @@ public class HikeConstants
 	public static final String FROM_CHAT_THREAD = "ct";
 
 	public static final String LARGE = "large";
+	
+	public static final int ATOMIC_APP_TIP_SETTINGS = 1;
+	public static final int ATOMIC_APP_TIP_SETTINGS_NOTIF = 2;
+	public static final int ATOMIC_APP_TIP_SETTINGS_MEDIA = 3;
+	public static final int ATOMIC_APP_TIP_SETTINGS_SMS = 4;
+	public static final int ATOMIC_APP_TIP_SETTINGS_PRIVACY = 5;
+	public static final int ATOMIC_APP_TIP_TIMELINE = 6;
+	public static final int ATOMIC_APP_TIP_INVITE_FREE_SMS = 8;
+	public static final int ATOMIC_APP_TIP_INVITE_WATSAPP = 9;
+	public static final int ATOMIC_APP_TIP_HIKE_EXTRA = 10;
+	public static final int ATOMIC_APP_TIP_HIKE_REWARDS = 11;
+	
 }
