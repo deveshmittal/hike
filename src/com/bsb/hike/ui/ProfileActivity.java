@@ -1504,10 +1504,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		ImageViewerInfo imageViewerInfo = (ImageViewerInfo) v.getTag();
 
 		String mappedId = imageViewerInfo.mappedId;
-		if(mappedId.contains(PROFILE_ROUND_SUFFIX))
-		{
-			mappedId = mappedId.replace(PROFILE_ROUND_SUFFIX, PROFILE_PIC_SUFFIX);
-		}
 		String url = imageViewerInfo.url;
 
 		Bundle arguments = new Bundle();

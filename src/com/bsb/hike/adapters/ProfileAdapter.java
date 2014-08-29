@@ -377,8 +377,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			}
 
 			String mappedId = msisdn + PROFILE_ROUND_SUFFIX;
-			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(mappedId, null, false, !ContactManager.getInstance().hasIcon(msisdn));
-			viewHolder.image.setTag(imageViewerInfo);
+			
 			if (profilePreview == null)
 			{
 				profileImageLoader.loadImage(mappedId, viewHolder.image, isListFlinging);
@@ -387,7 +386,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			{
 				viewHolder.image.setImageBitmap(profilePreview);
 			}
-
+			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(msisdn + PROFILE_PIC_SUFFIX, null, false, !ContactManager.getInstance().hasIcon(msisdn));
+			viewHolder.image.setTag(imageViewerInfo);
 			if (mContactInfo != null)
 			{
 				int contactType = ((ProfileItem.ProfileContactItem) profileItem).getContactType();
@@ -491,7 +491,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			LayoutParams layoutParams;
 			ImageView image;
 			int smSize = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
-			viewHolder.subText.setText("" + smSize);
+			viewHolder.subText.setText(Integer.toString(smSize));
 			if(sharedMedia != null && sharedMedia.size() < smSize )
 			{
 				for (HikeSharedFile galleryItem : sharedMedia)
@@ -548,10 +548,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.infoContainer.setVisibility(View.VISIBLE);
 			String heading = ((ProfileSharedContent)profileItem).getText();
 			viewHolder.text.setText(heading);
-			viewHolder.sharedFilesCount.setText(""+ ((ProfileSharedContent) profileItem).getSharedFilesCount());
-			viewHolder.extraInfo.setText(""+ ((ProfileSharedContent) profileItem).getSharedPinsCount()); //PinCount
+			viewHolder.sharedFilesCount.setText(Integer.toString(((ProfileSharedContent) profileItem).getSharedFilesCount()));
+			viewHolder.extraInfo.setText(Integer.toString(((ProfileSharedContent) profileItem).getSharedPinsCount())); //PinCount
 			int totalfiles = ((ProfileSharedContent) profileItem).getSharedFilesCount() + ((ProfileSharedContent) profileItem).getSharedPinsCount();
-			viewHolder.subText.setText("" +  totalfiles); 
+			viewHolder.subText.setText(Integer.toString(totalfiles)); 
 
 			if(groupProfile)
 			{	viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
@@ -586,7 +586,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 		case MEMBERS:
 			viewHolder.text.setText(context.getResources().getString(R.string.members));
-			viewHolder.subText.setText("" + ((ProfileGroupItem)profileItem).getTotalMembers());
+			viewHolder.subText.setText(Integer.toString(((ProfileGroupItem)profileItem).getTotalMembers()));
 			break;
 
 		case GROUP_PARTICIPANT:
