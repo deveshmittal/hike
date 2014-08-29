@@ -631,8 +631,23 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			Utils.executeHttpTask(mActivityState.getHikeJoinTimeTask, hikeHttpRequest);
 		}
 	}
-
+	
+	private void updateProfileHeaderView()
+	{
+		addProfileHeaderView(true, false);
+	}
+	
+	private void updateProfileImageInHeaderView()
+	{
+		addProfileHeaderView(true, true);
+	}
+	
 	private void addProfileHeaderView()
+	{
+		addProfileHeaderView(false, false);
+	}
+
+	private void addProfileHeaderView(boolean isUpdate, boolean profileImageUpdated)
 	{
 		TextView text;
 		TextView subText;
@@ -645,10 +660,15 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		
 		String msisdn;
 		String name;
+		boolean headerViewInitialized = false;
 		switch (profileType)
 		{
 		case CONTACT_INFO:
-			headerView = getLayoutInflater().inflate(R.layout.profile_header_other, null);
+			if(headerView == null)
+			{
+				headerViewInitialized = true;
+				headerView = getLayoutInflater().inflate(R.layout.profile_header_other, null);
+			}
 			text = (TextView) headerView.findViewById(R.id.name);
 			subText = (TextView) headerView.findViewById(R.id.subtext);
 			profileImage = (ImageView) headerView.findViewById(R.id.profile_image);
@@ -701,7 +721,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			break;
 		case GROUP_INFO:
-			headerView = getLayoutInflater().inflate(R.layout.profile_header_group, null);
+			if(headerView == null)
+			{
+				headerViewInitialized = true;
+				headerView = getLayoutInflater().inflate(R.layout.profile_header_group, null);
+			}
 			groupNameEditText = (EditText) headerView.findViewById(R.id.name_edit);
 			text = (TextView) headerView.findViewById(R.id.name);
 			subText = (TextView) headerView.findViewById(R.id.subtext);
@@ -720,12 +744,21 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		
 		String mappedId = msisdn + PROFILE_ROUND_SUFFIX;
-		ImageViewerInfo imageViewerInfo = new ImageViewerInfo(mappedId, null, false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
-		profileImage.setTag(imageViewerInfo);
-		int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
-		(new ProfilePicImageLoader(this, mBigImageSize)).loadImage(mappedId, profileImage, false);
+		if(!isUpdate)
+		{
+			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(mappedId, null, false, !HikeUserDatabase.getInstance().hasIcon(msisdn));
+			profileImage.setTag(imageViewerInfo);
+		}
+		if(headerViewInitialized || profileImageUpdated )
+		{
+			int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
+			(new ProfilePicImageLoader(this, mBigImageSize)).loadImage(mappedId, profileImage, false);
+		}
 
-		profileContent.addHeaderView(headerView);
+		if(headerViewInitialized)
+		{
+			profileContent.addHeaderView(headerView);
+		}
 	}
 	
 	private void addContactStatusInHeaderView(TextView subText)
@@ -828,6 +861,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private void initializeListviewAndAdapter()
 	{
 		profileContent = (ListView) findViewById(R.id.profile_content);
+		headerView = null;
 		switch (profileType)
 		{
 		case CONTACT_INFO:
@@ -1888,6 +1922,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					@Override
 					public void run()
 					{
+						updateProfileHeaderView();
 						profileAdapter.updateGroupConversation(groupConversation);
 					}
 				});
@@ -1902,6 +1937,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					@Override
 					public void run()
 					{
+						updateProfileImageInHeaderView();
 						profileAdapter.notifyDataSetChanged();
 					}
 				});
@@ -1923,6 +1959,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					public void run()
 					{
 						setupGroupProfileList();
+						updateProfileHeaderView();
 						profileAdapter.notifyDataSetChanged();
 					}
 				});
@@ -1956,6 +1993,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					public void run()
 					{
 						setupGroupProfileList();
+						updateProfileHeaderView();
 						profileAdapter.notifyDataSetChanged();
 					}
 				});
@@ -2031,6 +2069,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					{
 						setupContactProfileList();
 					}
+					updateProfileHeaderView();
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
@@ -2051,6 +2090,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				{
 					invalidateOptionsMenu();
 					setupContactProfileList();
+					updateProfileHeaderView();
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
@@ -2075,6 +2115,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				{
 					invalidateOptionsMenu();
 					setupContactProfileList();
+					updateProfileHeaderView();
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
