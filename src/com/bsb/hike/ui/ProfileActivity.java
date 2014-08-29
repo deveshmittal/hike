@@ -1998,9 +1998,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				@Override
 				public void run()
 				{
-					invalidateOptionsMenu();
-					setupContactProfileList();
-					profileAdapter.notifyDataSetChanged();
+					if(profileType == ProfileType.CONTACT_INFO)
+					{	
+						setupContactProfileList();
+						profileAdapter.notifyDataSetChanged();
+					}
 				}
 			});
 		}
@@ -2022,7 +2024,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				@Override
 				public void run()
 				{
-					invalidateOptionsMenu();
 					setupContactProfileList();
 					profileAdapter.notifyDataSetChanged();
 				}
@@ -2049,7 +2050,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				{
 					if (showContactsUpdates(contactInfo))
 					{
-						invalidateOptionsMenu();
 						setupContactProfileList();
 						profileAdapter.notifyDataSetChanged();
 					}
