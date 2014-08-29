@@ -526,10 +526,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.iconFrame.setImageDrawable(null);
 			}
 			setAvatar(contactInfo.getMsisdn(), viewHolder.icon);
-			viewHolder.infoContainer.setOnLongClickListener(profileActivity);
-			viewHolder.infoContainer.setTag(groupParticipant);
+			viewHolder.parent.setOnLongClickListener(profileActivity);
+			viewHolder.parent.setTag(groupParticipant);
 
-			viewHolder.infoContainer.setOnClickListener(profileActivity);
+			viewHolder.parent.setOnClickListener(profileActivity);
 
 			parentView.addView(viewHolder.parent);
 			
