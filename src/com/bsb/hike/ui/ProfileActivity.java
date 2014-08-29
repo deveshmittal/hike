@@ -2468,7 +2468,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			if(this.profileType == ProfileType.GROUP_INFO)
 				PhotoViewerFragment.openPhoto(R.id.parent_layout, ProfileActivity.this, hsf, true, groupConversation);
 			else
-				PhotoViewerFragment.openPhoto(R.id.parent_layout, ProfileActivity.this, hsf, true, 0, hsf.get(0).getMsisdn(), contactInfo.getName());
+				PhotoViewerFragment.openPhoto(R.id.parent_layout, ProfileActivity.this, hsf, true, 0, hsf.get(0).getMsisdn(), contactInfo.getFirstNameAndSurname());
 			return;
 		}
 		else if(v.getTag() instanceof String)  //Open entire gallery intent

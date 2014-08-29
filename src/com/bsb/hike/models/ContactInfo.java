@@ -76,7 +76,7 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
     
 	public String getFirstNameAndSurname()
 	{
-		if(TextUtils.isEmpty(name))
+		if(name==null || TextUtils.isEmpty(name))
 		{
 			return this.msisdn;
 		}
