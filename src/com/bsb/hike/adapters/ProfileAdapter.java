@@ -303,6 +303,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 			case GROUP_PARTICIPANT:
 				v = new LinearLayout(context);
+				viewHolder.infoContainer = inflater.inflate(R.layout.group_profile_item, (LinearLayout) v, false);
 				break;
 
 			case ADD_MEMBERS:
@@ -591,18 +592,18 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		case GROUP_PARTICIPANT:
 			LinearLayout parentView = (LinearLayout) v;
 			parentView.removeAllViews();
-			View groupParticipantParentView = inflater.inflate(R.layout.group_profile_item, parentView, false);
+			//View groupParticipantParentView = inflater.inflate(R.layout.group_profile_item, parentView, false);
 			PairModified<GroupParticipant, String> groupParticipants = ((ProfileGroupItem) profileItem).getGroupParticipant();
 			parentView.setBackgroundColor(Color.WHITE);
 				GroupParticipant groupParticipant = groupParticipants.getFirst();
 				
 				
-			TextView nameTextView = (TextView) groupParticipantParentView.findViewById(R.id.name);
-			TextView mainInfo = (TextView) groupParticipantParentView.findViewById(R.id.main_info);
+			TextView nameTextView = (TextView) viewHolder.infoContainer.findViewById(R.id.name);
+			TextView mainInfo = (TextView) viewHolder.infoContainer.findViewById(R.id.main_info);
 
-			ImageView avatar = (ImageView) groupParticipantParentView.findViewById(R.id.avatar);
-			ImageView avatarFrame = (ImageView) groupParticipantParentView.findViewById(R.id.avatar_frame);
-			View ownerIndicator = groupParticipantParentView.findViewById(R.id.owner_indicator);
+			ImageView avatar = (ImageView) viewHolder.infoContainer.findViewById(R.id.avatar);
+			ImageView avatarFrame = (ImageView) viewHolder.infoContainer.findViewById(R.id.avatar_frame);
+			View ownerIndicator = viewHolder.infoContainer.findViewById(R.id.owner_indicator);
 			ContactInfo contactInfo = groupParticipant.getContactInfo();
 			if (contactInfo.getMsisdn().equals(groupConversation.getGroupOwner()))
 			{
@@ -646,12 +647,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				avatarFrame.setImageDrawable(null);
 			}
 			setAvatar(contactInfo.getMsisdn(), avatar);
-			groupParticipantParentView.setOnLongClickListener(profileActivity);
-			groupParticipantParentView.setTag(groupParticipant);
+			viewHolder.infoContainer.setOnLongClickListener(profileActivity);
+			viewHolder.infoContainer.setTag(groupParticipant);
 
-			groupParticipantParentView.setOnClickListener(profileActivity);
+			viewHolder.infoContainer.setOnClickListener(profileActivity);
 
-			parentView.addView(groupParticipantParentView);
+			parentView.addView(viewHolder.infoContainer);
 			
 			break;
 
