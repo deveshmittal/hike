@@ -770,7 +770,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		if(headerViewInitialized || profileImageUpdated )
 		{
 			int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
-			(new ProfilePicImageLoader(this, mBigImageSize)).loadImage(mappedId, profileImage, false);
+			(new ProfilePicImageLoader(this, mBigImageSize)).loadImage(mappedId, profileImage, false, false, true);
 		}
 
 		if(headerViewInitialized)
