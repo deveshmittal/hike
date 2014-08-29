@@ -343,7 +343,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_WELCOME_HIKE_TIP = "shownWelcomeHikeTip";
 
-	public static final String SHOW_START_NEW_CHAT_TIP = "showStartNewChatTip";
+	public static final String SHOW_STEALTH_INFO_TIP = "showStealthInfoTip";
 
 	public static final String SHOW_STEALTH_UNREAD_TIP = "showStelathUnreadTip";
 

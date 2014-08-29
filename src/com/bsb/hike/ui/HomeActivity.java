@@ -381,11 +381,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		case R.id.new_conversation:
 			intent = new Intent(this, ComposeChatActivity.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
-
-			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.SHOW_START_NEW_CHAT_TIP, false))
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_START_NEW_CHAT_TIP, null);
-			}
 			Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
 			break;
 		case android.R.id.home:
@@ -1568,6 +1563,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false))
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_STEALTH_UNREAD_TIP, null);
+		}
+		if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false))
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_STEALTH_INFO_TIP, null);
 		}
 		if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, false))
 		{
