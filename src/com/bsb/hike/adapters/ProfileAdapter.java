@@ -275,7 +275,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 			case GROUP_PARTICIPANT:
 				v = new LinearLayout(context);
-				viewHolder.infoContainer = inflater.inflate(R.layout.group_profile_item, (LinearLayout) v, false);
+				viewHolder.parent = inflater.inflate(R.layout.group_profile_item, (LinearLayout) v, false);
+				viewHolder.text = (TextView) viewHolder.parent.findViewById(R.id.name);
+				viewHolder.extraInfo  = (TextView) viewHolder.parent.findViewById(R.id.main_info);
+				viewHolder.icon  = (ImageView) viewHolder.parent.findViewById(R.id.avatar);
+				viewHolder.iconFrame = (ImageView) viewHolder.parent.findViewById(R.id.avatar_frame);
+				viewHolder.infoContainer = viewHolder.parent.findViewById(R.id.owner_indicator);
 				break;
 
 			case ADD_MEMBERS:
@@ -477,20 +482,15 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			PairModified<GroupParticipant, String> groupParticipants = ((ProfileGroupItem) profileItem).getGroupParticipant();
 			parentView.setBackgroundColor(Color.WHITE);
 			GroupParticipant groupParticipant = groupParticipants.getFirst();
-			TextView nameTextView = (TextView) viewHolder.infoContainer.findViewById(R.id.name);
-			TextView mainInfo = (TextView) viewHolder.infoContainer.findViewById(R.id.main_info);
-
-			ImageView avatar = (ImageView) viewHolder.infoContainer.findViewById(R.id.avatar);
-			ImageView avatarFrame = (ImageView) viewHolder.infoContainer.findViewById(R.id.avatar_frame);
-			View ownerIndicator = viewHolder.infoContainer.findViewById(R.id.owner_indicator);
+			
 			ContactInfo contactInfo = groupParticipant.getContactInfo();
 			if (contactInfo.getMsisdn().equals(groupConversation.getGroupOwner()))
 			{
-				ownerIndicator.setVisibility(View.VISIBLE);
+				viewHolder.infoContainer.setVisibility(View.VISIBLE);
 			}
 			else
 			{
-				ownerIndicator.setVisibility(View.GONE);
+				viewHolder.infoContainer.setVisibility(View.GONE);
 			}
 
 			int offline = contactInfo.getOffline();
@@ -506,32 +506,32 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			{
 				groupParticipantName = contactInfo.getFirstNameAndSurname();
 			}
-			nameTextView.setText(groupParticipantName);
+			viewHolder.text.setText(groupParticipantName);
 			if (!showingLastSeen)
 			{
-				mainInfo.setText(contactInfo.isOnhike() ? R.string.on_hike : R.string.on_sms);
+				viewHolder.extraInfo.setText(contactInfo.isOnhike() ? R.string.on_hike : R.string.on_sms);
 			}
 			else
 			{
-				mainInfo.setText(lastSeenString);
+				viewHolder.extraInfo.setText(lastSeenString);
 			}
 			if (showingLastSeen && offline == 0)
 			{
-				mainInfo.setTextColor(context.getResources().getColor(R.color.unread_message));
-				avatarFrame.setImageResource(R.drawable.frame_avatar_highlight);
+				viewHolder.extraInfo.setTextColor(context.getResources().getColor(R.color.unread_message));
+				viewHolder.iconFrame.setImageResource(R.drawable.frame_avatar_highlight);
 			}
 			else
 			{
-				mainInfo.setTextColor(context.getResources().getColor(R.color.participant_last_seen));
-				avatarFrame.setImageDrawable(null);
+				viewHolder.extraInfo.setTextColor(context.getResources().getColor(R.color.participant_last_seen));
+				viewHolder.iconFrame.setImageDrawable(null);
 			}
-			setAvatar(contactInfo.getMsisdn(), avatar);
+			setAvatar(contactInfo.getMsisdn(), viewHolder.icon);
 			viewHolder.infoContainer.setOnLongClickListener(profileActivity);
 			viewHolder.infoContainer.setTag(groupParticipant);
 
 			viewHolder.infoContainer.setOnClickListener(profileActivity);
 
-			parentView.addView(viewHolder.infoContainer);
+			parentView.addView(viewHolder.parent);
 			
 			break;
 
