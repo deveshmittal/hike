@@ -222,7 +222,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private int actualSize;
 	
-	private static final int maxMediaToShow = 4;
+	private static final int MAX_MEDIA_TO_SHOW = 4;
 	
 	private static final String PROFILE_ROUND_SUFFIX = "round";
 
@@ -804,12 +804,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		// TODO Auto-generated method stub
 		
 		HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-		if(sharedMediaCount < maxMediaToShow )
+		if(sharedMediaCount < MAX_MEDIA_TO_SHOW )
 		{	
 			sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, sharedMediaCount, -1, true);
 			return;
 		}
-		sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, maxMediaToShow , -1, true);
+		sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, MAX_MEDIA_TO_SHOW , -1, true);
 		return;
 	}
 
