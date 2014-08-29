@@ -233,7 +233,19 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		Logger.d("ProfileActivity", "onRetainNonConfigurationinstance");
 		return mActivityState;
 	}
-
+	
+	@Override
+	protected void onPause()
+	{
+		super.onPause();
+		if (profileAdapter != null)
+		{
+			profileAdapter.getTimelineImageLoader().setExitTasksEarly(true);
+			profileAdapter.getIconImageLoader().setExitTasksEarly(true);
+			profileAdapter.getProfilePicImageLoader().setExitTasksEarly(true);
+		}
+	}
+	
 	@Override
 	protected void onDestroy()
 	{
@@ -466,17 +478,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			profileAdapter.getTimelineImageLoader().setExitTasksEarly(false);
 			profileAdapter.getIconImageLoader().setExitTasksEarly(false);
 			profileAdapter.notifyDataSetChanged();
-		}
-	}
-
-	@Override
-	protected void onPause()
-	{
-		super.onPause();
-		if (profileAdapter != null)
-		{
-			profileAdapter.getTimelineImageLoader().setExitTasksEarly(true);
-			profileAdapter.getIconImageLoader().setExitTasksEarly(true);
 		}
 	}
 

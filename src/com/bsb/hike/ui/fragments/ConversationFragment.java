@@ -358,7 +358,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 	}
-
+	
+	@Override
+	public void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(mAdapter != null)
+		{
+			mAdapter.getIconLoader().setExitTasksEarly(true);
+		}
+	}
+	
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id)
 	{

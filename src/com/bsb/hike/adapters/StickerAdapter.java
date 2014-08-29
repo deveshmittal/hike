@@ -56,6 +56,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	private Activity activity;
 
 	private Map<StickerCategoryId, StickerPageObjects> stickerObjMap;
+	
+	private StickerLoader worker;
 
 	private class StickerPageObjects
 	{
@@ -313,7 +315,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			return;
 		}
 
-		final StickerLoader worker = new StickerLoader(activity.getApplicationContext());
+		worker = new StickerLoader(activity.getApplicationContext());
 		spo.getDownloadingParent().setVisibility(View.GONE);
 		spo.getDownloadingFailedButton().setVisibility(View.GONE);
 		spo.getStickerListView().setVisibility(View.VISIBLE);
@@ -481,5 +483,10 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	public void unregisterListeners()
 	{
 		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);
+	}
+	
+	public StickerLoader getStickerLoader()
+	{
+		return worker;
 	}
 }

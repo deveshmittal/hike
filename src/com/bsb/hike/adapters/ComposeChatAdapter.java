@@ -570,4 +570,9 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			}
 		}
 	}
+	
+	public IconLoader getIconLoader()
+	{
+		return iconloader;
+	}
 }

@@ -134,7 +134,18 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 	private TextView multiSelectTitle;
 
 	private TextView subText;
-
+	
+	@Override
+	protected void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(listAdapter != null)
+		{
+			listAdapter.getFileImageLoader().setExitTasksEarly(true);
+		}
+	}
+	
 	@Override
 	public void onDestroy()
 	{

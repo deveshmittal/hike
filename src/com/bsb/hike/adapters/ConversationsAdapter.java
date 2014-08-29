@@ -951,4 +951,9 @@ public class ConversationsAdapter extends BaseAdapter
 			}
 		}
 	}
+	
+	public IconLoader getIconLoader()
+	{
+		return iconLoader;
+	}
 }

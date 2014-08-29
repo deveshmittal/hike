@@ -228,6 +228,17 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	}
 	
 	@Override
+	public void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(smAdapter != null)
+		{
+			smAdapter.getSharedFileImageLoader().setExitTasksEarly(true);
+		}
+	}
+
+	@Override
 	public void  onSaveInstanceState(Bundle outState)
 	{	
 		super.onSaveInstanceState(outState);

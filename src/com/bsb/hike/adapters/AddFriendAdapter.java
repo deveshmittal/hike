@@ -182,4 +182,9 @@ public class AddFriendAdapter extends SectionedBaseAdapter {
 	{
 		selectedFriends.add(contactInfo);
 	}
+	
+	public IconLoader getIconImageLoader()
+	{
+		return iconloader;
+	}
 }

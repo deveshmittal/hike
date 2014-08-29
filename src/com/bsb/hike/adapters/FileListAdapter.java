@@ -151,4 +151,9 @@ public class FileListAdapter extends BaseAdapter
 	{
 		selectedFileMap.clear();
 	}
+	
+	public FileImageLoader getFileImageLoader()
+	{
+		return fileImageLoader;
+	}
 }

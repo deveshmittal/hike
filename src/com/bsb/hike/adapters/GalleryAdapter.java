@@ -156,4 +156,9 @@ public class GalleryAdapter extends BaseAdapter
 		}
 
 	}
+	
+	public GalleryImageLoader getGalleryImageLoader()
+	{
+		return galleryImageLoader;
+	}
 }

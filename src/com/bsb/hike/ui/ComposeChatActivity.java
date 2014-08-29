@@ -288,7 +288,18 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		tagEditText.setMinCharChangeThresholdForTag(8);
 		tagEditText.setSeparator(TagEditText.SEPARATOR_SPACE);
 	}
-
+	
+	@Override
+	protected void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(adapter != null)
+		{
+			adapter.getIconLoader().setExitTasksEarly(true);
+		}
+	}
+	
 	@Override
 	public void onDestroy()
 	{

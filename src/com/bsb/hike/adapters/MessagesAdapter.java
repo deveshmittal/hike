@@ -3851,6 +3851,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		return iconLoader;
 	}
+	
+	public HighQualityThumbLoader getHighQualityThumbLoader()
+	{
+		return hqThumbLoader;
+	}
 
 	public void toggleSelection(ConvMessage convMsg)
 	{

@@ -179,6 +179,17 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	@Override
+	protected void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(adapter != null)
+		{
+			adapter.getGalleryImageLoader().setExitTasksEarly(true);
+		}
+	}
+
+	@Override
 	protected void onSaveInstanceState(Bundle outState)
 	{
 		outState.putAll(getIntent().getExtras());

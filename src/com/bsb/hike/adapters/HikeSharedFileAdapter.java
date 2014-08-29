@@ -157,4 +157,9 @@ public class HikeSharedFileAdapter extends BaseAdapter
 		}
 
 	}
+	
+	public SharedFileImageLoader getSharedFileImageLoader()
+	{
+		return thumbnailLoader;
+	}
 }

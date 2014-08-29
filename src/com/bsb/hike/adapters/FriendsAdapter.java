@@ -1487,4 +1487,9 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 			}
 		}
 	}
+	
+	public IconLoader getIconLoader()
+	{
+		return iconloader;
+	}
 }

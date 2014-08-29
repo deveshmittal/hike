@@ -828,6 +828,11 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	{
 		return iconLoader;
 	}
+	
+	public ProfilePicImageLoader getProfilePicImageLoader()
+	{
+		return profileImageLoader;
+	}
 
 	private boolean isListFlinging;
 
