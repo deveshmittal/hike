@@ -718,14 +718,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				subText.setText(getResources().getString(R.string.on_hike));
 				parentView.findViewById(R.id.add_fav_view).setVisibility(View.GONE);
 			}
-			// Request_Received --->> Show add/not now screen.
-			/*else if (contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
-			{
-				// Show add/not now screen.
-				LinearLayout req_layout = (LinearLayout) parentView.findViewById(R.id.remove_fav);
-				req_layout.setVisibility(View.VISIBLE);
-				subText.setVisibility(View.GONE);
-			}*/
 			else if (!contactInfo.isOnhike())
 			{
 				// UNKNOWN and on SMS
@@ -1945,7 +1937,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					public void run()
 					{
 						updateProfileImageInHeaderView();
-						//profileAdapter.notifyDataSetChanged();
 					}
 				});
 			}
@@ -2083,7 +2074,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					{
 						setupGroupProfileList();
 					}
-					else  //@all, why is this else in User_joined case here? 
+					else   
 					{
 						setupContactProfileList();
 					}
@@ -2140,10 +2131,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				@Override
 				public void run()
 				{
-					//invalidateOptionsMenu();
-					//setupContactProfileList();
 					updateProfileHeaderView();
-					//profileAdapter.notifyDataSetChanged();
 				}
 			});
 		}
@@ -2198,7 +2186,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				public void run()
 				{
 					updateProfileHeaderView();
-					//profileAdapter.updateContactInfo(contactInfo);
 				}
 
 			});
@@ -2484,7 +2471,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	@Override
 	public void onClick(View v)
 	{
-		//switch (profileType)
 		if(v.getTag() instanceof HikeSharedFile)
 		{	HikeSharedFile hikeFile = (HikeSharedFile) v.getTag();
 			Bundle arguments = new Bundle();
