@@ -1930,7 +1930,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					public void run()
 					{
 						updateProfileHeaderView();
-						profileAdapter.updateGroupConversation(groupConversation);
+						//profileAdapter.updateGroupConversation(groupConversation);
 					}
 				});
 			}
@@ -1945,7 +1945,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					public void run()
 					{
 						updateProfileImageInHeaderView();
-						profileAdapter.notifyDataSetChanged();
+						//profileAdapter.notifyDataSetChanged();
 					}
 				});
 			}
@@ -2083,7 +2083,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					{
 						setupGroupProfileList();
 					}
-					else
+					else  //@all, why is this else in User_joined case here? 
 					{
 						setupContactProfileList();
 					}
@@ -2140,10 +2140,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				@Override
 				public void run()
 				{
-					invalidateOptionsMenu();
-					setupContactProfileList();
+					//invalidateOptionsMenu();
+					//setupContactProfileList();
 					updateProfileHeaderView();
-					profileAdapter.notifyDataSetChanged();
+					//profileAdapter.notifyDataSetChanged();
 				}
 			});
 		}
@@ -2168,9 +2168,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				{
 					if (showContactsUpdates(contactInfo))
 					{
-						invalidateOptionsMenu();
-						setupContactProfileList();
-						profileAdapter.notifyDataSetChanged();
+						//invalidateOptionsMenu();
+						//setupContactProfileList();
+						//profileAdapter.notifyDataSetChanged();
+						updateProfileHeaderView();
 					}
 				}
 			});
@@ -2196,7 +2197,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				@Override
 				public void run()
 				{
-					profileAdapter.updateContactInfo(contactInfo);
+					updateProfileHeaderView();
+					//profileAdapter.updateContactInfo(contactInfo);
 				}
 
 			});
