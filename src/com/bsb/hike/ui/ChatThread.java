@@ -4956,8 +4956,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setBackgroundDrawable(getResources().getDrawable(chatTheme.headerBgResId()));
-		actionBar.setDisplayShowTitleEnabled(false);
+		/*
+		 *  Workaround to set actionbar background drawable multiple times. Refer SO.
+		 */
 		actionBar.setDisplayShowTitleEnabled(true);
+		actionBar.setDisplayShowTitleEnabled(false);
 	}
 
 	private TextView getNudgeTutorialView(ChatTheme chatTheme)
