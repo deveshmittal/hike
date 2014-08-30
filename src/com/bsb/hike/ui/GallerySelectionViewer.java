@@ -555,12 +555,13 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			arrowPointer.setImageResource(R.drawable.ftue_up_arrow);
 			((TextView) view.findViewById(R.id.tip_header)).setText("Image Settings");
 			((TextView) view.findViewById(R.id.tip_msg)).setText("Small. Medium. Original Size");
+			final View tipView = view;
 			view.findViewById(R.id.close_tip).setOnClickListener(new OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
 				{
-					v.setVisibility(View.GONE);
+					tipView.setVisibility(View.GONE);
 					pref.saveData(HikeConstants.SHOW_IMAGE_QUALITY_TIP, false);
 				}
 			});
