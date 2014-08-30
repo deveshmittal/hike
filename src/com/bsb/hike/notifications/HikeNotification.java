@@ -969,6 +969,7 @@ public class HikeNotification
 			}
 		}
 
+		setOnDeleteIntent(mBuilder, notificationId);
 		mBuilder.setNumber(hikeNotifMsgStack.getUnreadMessages());
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
