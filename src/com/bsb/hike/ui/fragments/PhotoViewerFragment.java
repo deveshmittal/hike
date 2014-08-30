@@ -160,9 +160,9 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	{
 		sharedMediaItems = getArguments().getParcelableArrayList(HikeConstants.Extras.SHARED_FILE_ITEMS);
 		initialPosition = getArguments().getInt(HikeConstants.MEDIA_POSITION);
-		msisdn = getArguments().getString(HikeConstants.Extras.MSISDN, null);
+		msisdn = getArguments().getString(HikeConstants.Extras.MSISDN);
 		isGroup = getArguments().getBoolean(HikeConstants.Extras.IS_GROUP_CONVERSATION, false);
-		conversationName = getArguments().getString(HikeConstants.Extras.CONVERSATION_NAME, null);
+		conversationName = getArguments().getString(HikeConstants.Extras.CONVERSATION_NAME);
 		
 		if(isGroup)
 		{
