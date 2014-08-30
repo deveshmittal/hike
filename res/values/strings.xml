@@ -1161,4 +1161,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="add_people">ADD A MEMBER</string>
     <string name="stealth_info_tip_header">Hidden Mode</string>
     <string name="stealth_info_tip_subtext">Hide your chats. Tap on \'hi\' to get started.</string>
+    <string name="file_missing_caps">FILE MISSING</string>
+    
 </resources>

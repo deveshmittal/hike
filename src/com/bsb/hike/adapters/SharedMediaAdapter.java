@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.ImageView.ScaleType;
 
 import com.bsb.hike.R;
@@ -81,17 +83,31 @@ public class SharedMediaAdapter extends PagerAdapter implements OnClickListener
 		final HikeSharedFile sharedMediaItem = sharedMediaItems.get(position);
 
 		TouchImageView galleryImageView = (TouchImageView) page.findViewById(R.id.album_image);
+		ImageView videPlayButton = (ImageView)  page.findViewById(R.id.play_media);
+		ProgressBar progressBar = (ProgressBar)  page.findViewById(R.id.progress_bar);
 		galleryImageView.setZoom(1.0f);
 		galleryImageView.setScaleType(ScaleType.FIT_CENTER);
-		sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(true), galleryImageView, false);
+		
 		if (sharedMediaItem.getHikeFileType() == HikeFileType.VIDEO)
 		{
-			page.findViewById(R.id.progress_bar).setVisibility(View.GONE);
-			page.findViewById(R.id.play_media).setVisibility(View.VISIBLE);
+			progressBar.setVisibility(View.GONE);
+			videPlayButton.setVisibility(View.VISIBLE);
 		}
 		else
 		{
-			page.findViewById(R.id.play_media).setVisibility(View.GONE);
+			videPlayButton.setVisibility(View.GONE);
+		}
+
+		if(sharedMediaItem.getFileFromExactFilePath().exists())
+		{
+			sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(true), galleryImageView, false);
+		}
+		else
+		{
+			progressBar.setVisibility(View.GONE);
+			videPlayButton.setVisibility(View.GONE);
+			galleryImageView.setVisibility(View.GONE);
+			page.findViewById(R.id.file_missing_layout).setVisibility(View.VISIBLE);
 		}
 		
 		galleryImageView.setTag(sharedMediaItem);
