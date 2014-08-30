@@ -599,7 +599,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		contactInfo = HikeMessengerApp.getContactManager().getContact(mLocalMSISDN, true, true);
 		sharedMediaCount = HikeConversationsDatabase.getInstance().getSharedMediaCount(mLocalMSISDN, true);
 		sharedPinCount = 0;  //Add a query here to get shared groups count. sharedPincount is to be treated as shared group count here.
-
+		sharedFileCount =  HikeConversationsDatabase.getInstance().getSharedMediaCount(mLocalMSISDN, false);
 		if (!contactInfo.isOnhike())
 		{
 			contactInfo.setOnhike(getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, false));
@@ -796,7 +796,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		profileItems.add(new ProfileItem.ProfilePhoneNumberItem(ProfileItem.PHONE_NUMBER, getResources().getString(R.string.phone_pa)));
 		if(contactInfo.isOnhike())
 		{	shouldAddSharedMedia();
-			profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT, getResources().getString(R.string.shared_cont_pa), 0, sharedPinCount, null));
+			profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT, getResources().getString(R.string.shared_cont_pa), sharedFileCount, sharedPinCount, null));
 		}
 	}
 
