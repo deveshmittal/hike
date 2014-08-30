@@ -31,6 +31,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.ProfileItem;
@@ -250,6 +251,29 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.subText = (TextView) v.findViewById(R.id.count);
 				viewHolder.infoContainer = v.findViewById(R.id.shared_media_items);
 				viewHolder.extraInfo = (TextView) v.findViewById(R.id.sm_emptystate);
+				
+				List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
+				LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
+				layout.removeAllViews();
+				int smSize = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
+				viewHolder.subText.setText(Integer.toString(smSize));
+				
+				if(sharedMedia != null)
+				{
+					for (HikeSharedFile galleryItem : sharedMedia)
+					{
+						View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
+						layout.addView(image_thumb);
+					}
+					
+					if(sharedMedia.size() < smSize )
+					{
+						// Add Arrow Icon
+						View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
+						layout.addView(image_thumb);
+					}
+				}
+				
 				break;
 
 			case SHARED_CONTENT:
@@ -365,18 +389,20 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.text.setText(context.getString(R.string.shared_med));
 			List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
 			LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
-			layout.removeAllViews();
 			LayoutParams layoutParams;
 			ImageView image;
 			int smSize = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
-			viewHolder.subText.setText("" + smSize);
-			if(sharedMedia != null && sharedMedia.size() < smSize )
+			viewHolder.subText.setText(Integer.toString(smSize));
+			
+			if(sharedMedia != null)
 			{
-				for (HikeSharedFile galleryItem : sharedMedia)
+				int i = 0;
+				for (i = 0; i < sharedMedia.size(); i++)
 				{
-					View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
+					HikeSharedFile galleryItem = sharedMedia.get(i);
+					View image_thumb = layout.getChildAt(i);
 					View image_duration = image_thumb.findViewById(R.id.vid_time_layout);
-					if(!galleryItem.getFileTypeString().toString().contains(IMAGE_TAG))
+					if(galleryItem.getHikeFileType() == HikeFileType.VIDEO)
 					{
 						image_duration.setVisibility(View.VISIBLE);
 					}
@@ -384,31 +410,18 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					image.setTag(galleryItem);
 					thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), image);
 					image.setOnClickListener(profileActivity);
-					layout.addView(image_thumb);
-				}
-				//Add Arrow Icon
-				View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
-				image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
-				image.setTag(OPEN_GALLERY);
-				image.setOnClickListener(profileActivity);
-				image.setImageDrawable((context.getResources().getDrawable(R.drawable.ic_arrow)));
-				image.setScaleType(ScaleType.CENTER);
-				layout.addView(image_thumb);
-			}
-			
-			else if(sharedMedia != null && sharedMedia.size() >= smSize)
-			{
-				 
-				for (HikeSharedFile galleryItem : sharedMedia)
-				{
-					View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
-					image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
-					image.setTag(galleryItem);
-					thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), image);
-					image.setOnClickListener(profileActivity);
-					layout.addView(image_thumb);
 				}
 				
+				if(sharedMedia.size() < smSize )
+				{
+					// Add Arrow Icon
+					View image_thumb = layout.getChildAt(i);
+					image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
+					image.setTag(OPEN_GALLERY);
+					image.setOnClickListener(profileActivity);
+					image.setImageDrawable((context.getResources().getDrawable(R.drawable.ic_arrow)));
+					image.setScaleType(ScaleType.CENTER);
+				}
 			}
 			else
 			{		//Empty State
