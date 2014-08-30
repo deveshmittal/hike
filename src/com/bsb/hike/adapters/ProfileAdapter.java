@@ -22,6 +22,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
@@ -478,11 +479,25 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.subText.setText(Integer.toString(totalfiles)); 
 
 			if(groupProfile)
-			{	viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
+			{	
+				/*
+				 * We will remove these two lines when we will be add groups for 1:1
+				 */
+				((LinearLayout) viewHolder.infoContainer).getChildAt(1).setVisibility(View.VISIBLE);
+				((LinearLayout) viewHolder.infoContainer).findViewById(R.id.shared_content_seprator).setVisibility(View.VISIBLE);
+				
+				viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
 				viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_pin_2));
 			}
 			else
 			{
+				/*
+				 * We will remove these two lines when we will be add groups for 1:1
+				 */
+				
+				((LinearLayout) viewHolder.infoContainer).getChildAt(1).setVisibility(View.GONE);
+				((LinearLayout) viewHolder.infoContainer).findViewById(R.id.shared_content_seprator).setVisibility(View.GONE);
+				
 				viewHolder.groupOrPins.setText(context.getResources().getString(R.string.groups));
 				viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_group_2));
 			}
