@@ -703,7 +703,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 				
 			}
-			else if (contactInfo.isOnhike() && (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED))
+			else if (contactInfo.isOnhike() && (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED || contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED))
 			{
 				LinearLayout fav_layout = (LinearLayout) parentView.findViewById(R.id.add_fav_view);
 				fav_layout.setVisibility(View.VISIBLE);
