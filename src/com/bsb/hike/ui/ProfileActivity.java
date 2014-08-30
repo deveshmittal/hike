@@ -371,10 +371,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		mNameEdit = (CustomFontEditText) parentView.findViewById(R.id.name_edit);
 		mNameEdit.setVisibility(View.VISIBLE);
 		mNameEdit.requestFocus();
-		mNameEdit.setSelection(mName.getText().toString().length());
+		mNameEdit.setText(groupConversation.getLabel());
+		mNameEdit.setSelection(mNameEdit.getText().toString().length());
 		Utils.showSoftKeyboard(getApplicationContext(), mNameEdit);
 		setupGroupNameEditActionBar();
-		invalidateOptionsMenu();
 	}
 
 	private void setupActionBar()
@@ -416,6 +416,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		
 		actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_header));
 		actionBar.setCustomView(actionBarView);
+		invalidateOptionsMenu();
 	}
 	
 	private void setupGroupNameEditActionBar()
@@ -427,7 +428,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		ViewGroup closeContainer = (ViewGroup) editGroupNameView.findViewById(R.id.close_container);
 		TextView multiSelectTitle = (TextView) editGroupNameView.findViewById(R.id.title);
 		multiSelectTitle.setText(R.string.edit_group_name);  //Add String to strings.xml
-		final String groupNamePreEdit = mNameEdit.getText().toString();
 		okBtn.setOnClickListener(new OnClickListener()
 		{
 			@Override
@@ -444,10 +444,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				saveChanges();
 				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
 				showingGroupEdit = false;
-				setupActionBar();
 				mName.setText(groupName);
 				mName.setVisibility(View.VISIBLE);
 				mNameEdit.setVisibility(View.GONE);
+				setupActionBar();
 			}
 		});
 
@@ -457,16 +457,17 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			@Override
 			public void onClick(View v)
 			{
-				setupActionBar();
 				showingGroupEdit = false;
 				mActivityState.edittedGroupName = null;
 				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
-				mName.setText(groupNamePreEdit);
+				mName.setText(groupConversation.getLabel());
 				mName.setVisibility(View.VISIBLE);
 				mNameEdit.setVisibility(View.GONE);
+				setupActionBar();
 			}
 		});
 		actionBar.setCustomView(editGroupNameView);
+		invalidateOptionsMenu();
 	}
 
 	@Override
@@ -599,7 +600,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		contactInfo = HikeMessengerApp.getContactManager().getContact(mLocalMSISDN, true, true);
 		sharedMediaCount = HikeConversationsDatabase.getInstance().getSharedMediaCount(mLocalMSISDN, true);
 		sharedPinCount = 0;  //Add a query here to get shared groups count. sharedPincount is to be treated as shared group count here.
-
+		sharedFileCount =  HikeConversationsDatabase.getInstance().getSharedMediaCount(mLocalMSISDN, false);
 		if (!contactInfo.isOnhike())
 		{
 			contactInfo.setOnhike(getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, false));
@@ -703,7 +704,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 				
 			}
-			else if (contactInfo.isOnhike() && (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED))
+			else if (contactInfo.isOnhike() && (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED || contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED))
 			{
 				LinearLayout fav_layout = (LinearLayout) parentView.findViewById(R.id.add_fav_view);
 				fav_layout.setVisibility(View.VISIBLE);
@@ -773,11 +774,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private void addContactStatusInHeaderView(TextView subText)
 	{
-		List<StatusMessage> statusMessages = HikeConversationsDatabase.getInstance().getStatusMessages(false,1, -1, mLocalMSISDN);
-		StatusMessage status;
-		if(statusMessages.size()>0)
+		StatusMessageType[] statusMessagesTypesToFetch = {StatusMessageType.TEXT};
+		StatusMessage status = HikeConversationsDatabase.getInstance().getLastStatusMessage(statusMessagesTypesToFetch, contactInfo);
+		if(status != null)
 		{
-			status = statusMessages.get(statusMessages.size() - 1);
 			subText.setText(smileyParser.addSmileySpans(status.getText(), true));
 			return;
 		}
@@ -796,7 +796,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		profileItems.add(new ProfileItem.ProfilePhoneNumberItem(ProfileItem.PHONE_NUMBER, getResources().getString(R.string.phone_pa)));
 		if(contactInfo.isOnhike())
 		{	shouldAddSharedMedia();
-			profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT, getResources().getString(R.string.shared_cont_pa), 0, sharedPinCount, null));
+			profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT, getResources().getString(R.string.shared_cont_pa), sharedFileCount, sharedPinCount, null));
 		}
 	}
 
@@ -1853,8 +1853,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public void onGroupNameEditClick(View v)
 	{
-		View parent = (View) v.getParent();
-		setGroupNameFields(parent);
+		if(!showingGroupEdit)
+		{
+			View parent = (View) v.getParent();
+			setGroupNameFields(parent);
+		}
 	}
 	
 	public void onBlockGroupOwnerClicked(View v)
