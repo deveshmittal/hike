@@ -402,14 +402,35 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					HikeSharedFile galleryItem = sharedMedia.get(i);
 					View image_thumb = layout.getChildAt(i);
 					View image_duration = image_thumb.findViewById(R.id.vid_time_layout);
+					View fileMissing = image_thumb.findViewById(R.id.file_missing_layout);
 					if(galleryItem.getHikeFileType() == HikeFileType.VIDEO)
 					{
 						image_duration.setVisibility(View.VISIBLE);
 					}
+					
 					image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
-					image.setTag(galleryItem);
-					thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), image);
-					image.setOnClickListener(profileActivity);
+					if(galleryItem.getFileFromExactFilePath().exists())
+					{
+						thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), image);
+						fileMissing.setVisibility(View.GONE);
+						
+						if (galleryItem.getHikeFileType() == HikeFileType.VIDEO)
+						{
+							image_duration.setVisibility(View.VISIBLE);
+						}
+						else
+						{
+							image_duration.setVisibility(View.GONE);
+						}
+					}
+					else
+					{
+						image_duration.setVisibility(View.GONE);
+						fileMissing.setVisibility(View.VISIBLE);
+					}
+					
+					image_thumb.setTag(galleryItem);
+					image_thumb.setOnClickListener(profileActivity);
 				}
 				
 				if(sharedMedia.size() < smSize )
