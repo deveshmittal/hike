@@ -454,6 +454,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			}
 			else
 			{		//Empty State
+				layout.removeAllViews();
 				viewHolder.extraInfo.setVisibility(View.VISIBLE);
 				layoutParams = (LayoutParams) viewHolder.extraInfo.getLayoutParams();
 				layoutParams.width = LayoutParams.MATCH_PARENT;
