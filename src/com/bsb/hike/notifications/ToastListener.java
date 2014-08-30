@@ -523,11 +523,10 @@ public class ToastListener implements Listener
 						}
 					}
 				}
-				if (!filteredMessageList.isEmpty())
-				{
-					this.toaster.notifySummaryMessage(filteredMessageList);
-				}
-			
+			}
+			if (!filteredMessageList.isEmpty())
+			{
+				this.toaster.notifySummaryMessage(filteredMessageList);
 			}
 			// Remove unused references
 			filteredMessageList.clear();
