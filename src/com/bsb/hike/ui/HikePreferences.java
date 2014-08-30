@@ -476,7 +476,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		else if (HikeConstants.HELP_FAQS_PREF.equals(preference.getKey()))
 		{
 			Logger.d(getClass().getSimpleName(), "FAQ preference selected");
-			Utils.startWebViewActivity(getApplicationContext(),HikeConstants.HELP_URL,getString(R.string.faq));
+			Utils.startWebViewActivity(HikePreferences.this,HikeConstants.HELP_URL,getString(R.string.faq));
 		}
 		else if (HikeConstants.HELP_FEEDBACK_PREF.equals(preference.getKey()))
 		{

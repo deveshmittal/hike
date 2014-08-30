@@ -1544,6 +1544,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				mAdapter.notifyDataSetChanged();
 				clearConfirmDialog.dismiss();
 				hidePinFromUI(true);
+				hideHikeToOfflineTip();
 
 				Utils.resetPinUnreadCount(mConversation);
 				updateOverflowMenuUnreadCount();
