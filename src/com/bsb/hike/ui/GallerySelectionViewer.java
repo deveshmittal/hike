@@ -140,7 +140,39 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 		startActivity(intent);
 	}
-
+	
+	@Override
+	protected void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(gridAdapter != null)
+		{
+			gridAdapter.getGalleryImageLoader().setExitTasksEarly(true);
+		}
+		if(pagerAdapter != null)
+		{
+			pagerAdapter.getGalleryImageLoader().setExitTasksEarly(true);
+		}
+	}
+	
+	@Override
+	protected void onResume()
+	{
+		// TODO Auto-generated method stub
+		super.onResume();
+		if(gridAdapter != null)
+		{
+			gridAdapter.getGalleryImageLoader().setExitTasksEarly(false);
+			gridAdapter.notifyDataSetChanged();
+		}
+		if(pagerAdapter != null)
+		{
+			pagerAdapter.getGalleryImageLoader().setExitTasksEarly(false);
+			pagerAdapter.notifyDataSetChanged();
+		}
+	}
+	
 	@Override
 	protected void onDestroy()
 	{
@@ -451,6 +483,11 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			LayoutParams layoutParams = (LayoutParams) removeImage.getLayoutParams();
 			layoutParams.leftMargin = imageWidth;
 			layoutParams.bottomMargin = imageHeight/2;
+		}
+		
+		public GalleryImageLoader getGalleryImageLoader()
+		{
+			return galleryImageLoader;
 		}
 	}
 

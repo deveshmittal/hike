@@ -80,6 +80,29 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 	}
 
 	@Override
+	public void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(friendsAdapter != null)
+		{
+			friendsAdapter.getIconLoader().setExitTasksEarly(true);
+		}
+	}
+	
+	@Override
+	public void onResume()
+	{
+		// TODO Auto-generated method stub
+		super.onResume();
+		if(friendsAdapter != null)
+		{
+			friendsAdapter.getIconLoader().setExitTasksEarly(false);
+			friendsAdapter.notifyDataSetChanged();
+		}
+	}
+
+	@Override
 	public void onActivityCreated(Bundle savedInstanceState)
 	{
 		super.onActivityCreated(savedInstanceState);

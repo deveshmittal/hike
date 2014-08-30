@@ -451,8 +451,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			// mAdapter.getStickerLoader().setPauseWork(false);
 			// mAdapter.getStickerLoader().setExitTasksEarly(true);
-			mAdapter.getIconImageLoader().setPauseWork(false);
 			mAdapter.getIconImageLoader().setExitTasksEarly(true);
+			mAdapter.getHighQualityThumbLoader().setExitTasksEarly(true);
+			
+		}
+		if(stickerAdapter != null)
+		{
+			stickerAdapter.getStickerLoader().setExitTasksEarly(true);
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
 		activityVisible = false;
@@ -474,7 +479,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			// mAdapter.getStickerLoader().setExitTasksEarly(false);
 			mAdapter.getIconImageLoader().setExitTasksEarly(false);
+			mAdapter.getHighQualityThumbLoader().setExitTasksEarly(false);
 			mAdapter.notifyDataSetChanged();
+		}
+		if(stickerAdapter != null)
+		{
+			stickerAdapter.getStickerLoader().setExitTasksEarly(false);
+			stickerAdapter.notifyDataSetChanged();
 		}
 		/* mark any messages unread as read */
 		setMessagesRead();
@@ -4977,8 +4988,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setBackgroundDrawable(getResources().getDrawable(chatTheme.headerBgResId()));
-		actionBar.setDisplayShowTitleEnabled(false);
+		/*
+		 *  Workaround to set actionbar background drawable multiple times. Refer SO.
+		 */
 		actionBar.setDisplayShowTitleEnabled(true);
+		actionBar.setDisplayShowTitleEnabled(false);
 	}
 
 	private void sendChatThemeMessage()

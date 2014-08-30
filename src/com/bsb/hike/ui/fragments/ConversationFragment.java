@@ -358,7 +358,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 	}
-
+	
+	@Override
+	public void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(mAdapter != null)
+		{
+			mAdapter.getIconLoader().setExitTasksEarly(true);
+		}
+	}
+	
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id)
 	{
@@ -2245,6 +2256,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
 				Utils.executeConvAsyncTask(task, conv);
 			}
+		}
+		if(mAdapter != null)
+		{
+			mAdapter.getIconLoader().setExitTasksEarly(false);
+			mAdapter.notifyDataSetChanged();
 		}
 		super.onResume();
 	}

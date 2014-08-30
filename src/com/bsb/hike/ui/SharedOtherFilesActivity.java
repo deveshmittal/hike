@@ -81,6 +81,17 @@ public class SharedOtherFilesActivity extends HikeAppStateBaseFragmentActivity i
 		setupActionBar();
 	}
 
+	@Override
+	protected void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(listAdapter != null)
+		{
+			listAdapter.getFileImageLoader().setExitTasksEarly(true);
+		}
+	}
+
 	private void setupActionBar()
 	{
 		ActionBar actionBar = getSupportActionBar();
@@ -118,6 +129,11 @@ public class SharedOtherFilesActivity extends HikeAppStateBaseFragmentActivity i
 	public void onResume()
 	{
 		super.onResume();
+		if(listAdapter != null)
+		{
+			listAdapter.getFileImageLoader().setExitTasksEarly(false);
+			listAdapter.notifyDataSetChanged();
+		}
 	}
 
 	@Override

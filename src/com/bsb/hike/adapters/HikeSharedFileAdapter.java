@@ -16,6 +16,7 @@ import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.SharedFileImageLoader;
@@ -41,8 +42,11 @@ public class HikeSharedFileAdapter extends BaseAdapter
 
 	public static String IMAGE_TAG = "image";
 	
+	private Context context;
+	
 	public HikeSharedFileAdapter(Context context, List<HikeSharedFile> sharedFilesList, int sizeOfImage, HashSet<Long> selectedItems, boolean selectedScreen)
 	{
+		this.context = context;
 		this.layoutInflater = LayoutInflater.from(context);
 		this.sharedFilesList = sharedFilesList;
 		this.sizeOfImage = sizeOfImage;
@@ -108,19 +112,26 @@ public class HikeSharedFileAdapter extends BaseAdapter
 		if (galleryItem != null)
 		{	View time_view = convertView.findViewById(R.id.vid_time_layout);
 			holder.galleryThumb.setImageDrawable(null);
-			if (galleryItem.getHikeFileType() == HikeFileType.VIDEO)
+			if(galleryItem.getFileFromExactFilePath().exists())
 			{
-				time_view.setVisibility(View.VISIBLE);
+				thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), holder.galleryThumb, isListFlinging);
+				holder.galleryThumb.setScaleType(ScaleType.CENTER_CROP);
+				
+				if (galleryItem.getHikeFileType() == HikeFileType.VIDEO)
+				{
+					time_view.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					time_view.setVisibility(View.GONE);
+				}
 			}
 			else
 			{
 				time_view.setVisibility(View.GONE);
+				holder.galleryThumb.setScaleType(ScaleType.CENTER_INSIDE);
+				holder.galleryThumb.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_file_missing));
 			}
-			
-			
-			thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), holder.galleryThumb, isListFlinging);
-
-			holder.galleryThumb.setScaleType(ScaleType.CENTER_CROP);
 		}
 		else
 		{
@@ -154,12 +165,16 @@ public class HikeSharedFileAdapter extends BaseAdapter
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		thumbnailLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{
 			notifyDataSetChanged();
 		}
 
+	}
+	
+	public SharedFileImageLoader getSharedFileImageLoader()
+	{
+		return thumbnailLoader;
 	}
 }

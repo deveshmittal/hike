@@ -134,7 +134,18 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 	private TextView multiSelectTitle;
 
 	private TextView subText;
-
+	
+	@Override
+	protected void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(listAdapter != null)
+		{
+			listAdapter.getFileImageLoader().setExitTasksEarly(true);
+		}
+	}
+	
 	@Override
 	public void onDestroy()
 	{
@@ -465,11 +476,17 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 	}
 
 	@Override
-	public void onResume()
+	protected void onResume()
 	{
+		// TODO Auto-generated method stub
 		super.onResume();
+		if(listAdapter != null)
+		{
+			listAdapter.getFileImageLoader().setExitTasksEarly(false);
+			listAdapter.notifyDataSetChanged();
+		}
 	}
-
+	
 	@Override
 	public void onBackPressed()
 	{
