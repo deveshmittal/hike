@@ -774,11 +774,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private void addContactStatusInHeaderView(TextView subText)
 	{
-		List<StatusMessage> statusMessages = HikeConversationsDatabase.getInstance().getStatusMessages(false,1, -1, mLocalMSISDN);
-		StatusMessage status;
-		if(statusMessages.size()>0)
+		StatusMessageType[] statusMessagesTypesToFetch = {StatusMessageType.TEXT};
+		StatusMessage status = HikeConversationsDatabase.getInstance().getLastStatusMessage(statusMessagesTypesToFetch, contactInfo);
+		if(status != null)
 		{
-			status = statusMessages.get(statusMessages.size() - 1);
 			subText.setText(smileyParser.addSmileySpans(status.getText(), true));
 			return;
 		}

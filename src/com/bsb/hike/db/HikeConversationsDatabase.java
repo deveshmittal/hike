@@ -3374,6 +3374,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	public StatusMessage getLastStatusMessage(StatusMessage.StatusMessageType[] smTypes, ContactInfo contactInfo)
+	{
+		ArrayList<ContactInfo> contactList = new ArrayList<ContactInfo>(1);
+		contactList.add(contactInfo);
+		Map<String, StatusMessage> lastSMMap = getLastStatusMessages(false, smTypes, contactList);
+		return lastSMMap.get(contactInfo.getMsisdn());
+	}
+	
 	public Map<String, StatusMessage> getLastStatusMessages(boolean timelineUpdatesOnly, StatusMessage.StatusMessageType[] smTypes, List<ContactInfo> contactList)
 	{
 		Map<String, StatusMessage> statusMessagesMap = new HashMap<String, StatusMessage>();
