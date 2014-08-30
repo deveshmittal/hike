@@ -357,7 +357,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		mNameEdit.setSelection(mName.getText().toString().length());
 		Utils.showSoftKeyboard(getApplicationContext(), mNameEdit);
 		setupGroupNameEditActionBar();
-		invalidateOptionsMenu();
 	}
 
 	private void setupActionBar()
@@ -399,6 +398,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		
 		actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_header));
 		actionBar.setCustomView(actionBarView);
+		invalidateOptionsMenu();
 	}
 	
 	private void setupGroupNameEditActionBar()
@@ -427,10 +427,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				saveChanges();
 				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
 				showingGroupEdit = false;
-				setupActionBar();
 				mName.setText(groupName);
 				mName.setVisibility(View.VISIBLE);
 				mNameEdit.setVisibility(View.GONE);
+				setupActionBar();
 			}
 		});
 
@@ -440,16 +440,17 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			@Override
 			public void onClick(View v)
 			{
-				setupActionBar();
 				showingGroupEdit = false;
 				mActivityState.edittedGroupName = null;
 				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
 				mName.setText(groupNamePreEdit);
 				mName.setVisibility(View.VISIBLE);
 				mNameEdit.setVisibility(View.GONE);
+				setupActionBar();
 			}
 		});
 		actionBar.setCustomView(editGroupNameView);
+		invalidateOptionsMenu();
 	}
 
 	@Override
