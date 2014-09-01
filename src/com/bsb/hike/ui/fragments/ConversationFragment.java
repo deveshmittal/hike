@@ -185,7 +185,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, 
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
-			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_START_NEW_CHAT_TIP,
+			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
 			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END };
 
 	private ConversationsAdapter mAdapter;
@@ -270,7 +270,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			addBottomPadding(ftueListView);
 		}
-		addFtueCards(ftueListItems);
+		if(HomeActivity.ftueContactsData.getHikeContacts().isEmpty())
+		{
+			addFtueCards(ftueListItems);
+		}
 		ftueListView.setAdapter(new EmptyConversationsAdapter(getActivity(), -1, ftueListItems));
 	}
 
@@ -355,7 +358,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 	}
-
+	
+	@Override
+	public void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(mAdapter != null)
+		{
+			mAdapter.getIconLoader().setExitTasksEarly(true);
+		}
+	}
+	
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id)
 	{
@@ -824,9 +838,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			showingWelcomeHikeConvTip = true;
 			displayedConversations.add(0, new ConversationTip(ConversationTip.WELCOME_HIKE_TIP));
 		}
-		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_START_NEW_CHAT_TIP, false) && !hasNoConversation)
+		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false) && !hasNoConversation)
 		{
-			displayedConversations.add(0, new ConversationTip(ConversationTip.START_NEW_CHAT_TIP));
+			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_INFO_TIP));
 		}
 		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false))
 		{
@@ -853,6 +867,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_INFO_TIP));
 		}else if(tip.equals(HikeMessengerApp.ATOMIC_POP_UP_HTTP)){
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_HTTP_TIP));
+		}else if(tip.equals(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC)){
 			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_HTTP_TIP));
 		}
 	}
@@ -1719,7 +1735,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 			});
 		}
-		else if (HikePubSub.REMOVE_START_NEW_CHAT_TIP.equals(type))
+		else if (HikePubSub.REMOVE_STEALTH_INFO_TIP.equals(type))
 		{
 			if (!isAdded())
 			{
@@ -1731,7 +1747,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void run()
 				{
-					removeTipIfExists(ConversationTip.START_NEW_CHAT_TIP);
+					removeTipIfExists(ConversationTip.STEALTH_INFO_TIP);
 				}
 			});
 		}
@@ -2130,9 +2146,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	public void movedFromEmptyToNonEmpty()
 	{
-		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_START_NEW_CHAT_TIP, false))
+		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false))
 		{
-			displayedConversations.add(0, new ConversationTip(ConversationTip.START_NEW_CHAT_TIP));
+			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_INFO_TIP));
 		}
 		if(!HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOWN_WELCOME_TO_HIKE_CARD, false))
 		{
@@ -2240,6 +2256,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask(getActivity());
 				Utils.executeConvAsyncTask(task, conv);
 			}
+		}
+		if(mAdapter != null)
+		{
+			mAdapter.getIconLoader().setExitTasksEarly(false);
+			mAdapter.notifyDataSetChanged();
 		}
 		super.onResume();
 	}
@@ -2361,37 +2382,42 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		Conversation conversation = mAdapter.getItem(0);
 
+		/*
+		 * Remove tip if already showing as the first element on the UI
+		 */
 		if(conversation instanceof ConversationTip && ((ConversationTip) conversation).getTipType() == tipType)
 		{
 			mAdapter.remove(conversation);
 			switch (tipType)
 			{
-			case ConversationTip.RESET_STEALTH_TIP:
-				mAdapter.resetCountDownSetter();
-				break;
-			case ConversationTip.WELCOME_HIKE_TIP:
-				showingWelcomeHikeConvTip = false;
-				break;	
-
-			default:
-				break;
+				case ConversationTip.RESET_STEALTH_TIP:
+					mAdapter.resetCountDownSetter();
+					break;
+				case ConversationTip.WELCOME_HIKE_TIP:
+					showingWelcomeHikeConvTip = false;
+					break;
+				default:
+					break;
 			}
 			notifyDataSetChanged();
 		}
-		
+
+		/*
+		 * Remove tip always: for cases when we want to remove the tip before it is actually shown on the UI
+		 */
 		switch (tipType)
 		{
-		case ConversationTip.WELCOME_HIKE_TIP:
-			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
-			break;	
-		case ConversationTip.START_NEW_CHAT_TIP:
-			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOW_START_NEW_CHAT_TIP, false);
-			break;
-		case ConversationTip.STEALTH_UNREAD_TIP:
-			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false);
-			break;
-		default:
-			break;
+			case ConversationTip.WELCOME_HIKE_TIP:
+				HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
+				break;
+			case ConversationTip.STEALTH_INFO_TIP:
+				HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false);
+				break;
+			case ConversationTip.STEALTH_UNREAD_TIP:
+				HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false);
+				break;
+			default:
+				break;
 		}
 
 		if (mAdapter.getCount() == 0)

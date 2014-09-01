@@ -155,6 +155,39 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
+	 * This method checks if contact is in {@link #groupContactsPersistence} and it is also 1-1 conversation contact then moves it in {@link #convsContactsPersistence} and also
+	 * vice versa
+	 * 
+	 * @param msisdn
+	 * @param ifOneToOneConversation
+	 */
+	void move(String msisdn, boolean ifOneToOneConversation)
+	{
+		if (ifOneToOneConversation)
+		{
+			if (!convsContactsPersistence.containsKey(msisdn))
+			{
+				ContactInfo contact = null;
+				PairModified<ContactInfo, Integer> contactPair = groupContactsPersistence.get(msisdn);
+				if (null != contactPair)
+				{
+					contact = contactPair.getFirst();
+				}
+				insertContact(contact);
+			}
+		}
+		else
+		{
+			if (!groupPersistence.containsKey(msisdn))
+			{
+				ContactInfo contact = convsContactsPersistence.get(msisdn);
+				insertContact(contact, ifOneToOneConversation);
+			}
+		}
+
+	}
+
+	/**
 	 * This method is not Thread safe , removes the contact for a particular msisdn from the cache - if it is one to one conversation removes from {@link #convsContactsPersistence}
 	 * otherwise decrements the reference count by one , if reference count becomes zero then remove it completely from {@link #groupContactsPersistence}
 	 * 
@@ -220,16 +253,12 @@ class PersistenceCache extends ContactsCache
 		try
 		{
 			if (convsContactsPersistence.containsKey(contact.getMsisdn()))
-			{
 				convsContactsPersistence.put(contact.getMsisdn(), contact);
-			}
-			else
+			
+			PairModified<ContactInfo, Integer> contactPair = groupContactsPersistence.get(contact.getMsisdn());
+			if (null != contactPair)
 			{
-				PairModified<ContactInfo, Integer> contactPair = groupContactsPersistence.get(contact.getMsisdn());
-				if (null != contactPair)
-				{
-					contactPair.setFirst(contact);
-				}
+				contactPair.setFirst(contact);
 			}
 		}
 		finally
@@ -534,18 +563,6 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * This method Updates the contact by setting the name to null for the contact that is deleted from address book
-	 * 
-	 * @param contact
-	 */
-	void contactDeleted(ContactInfo contact)
-	{
-		ContactInfo updatedContact = new ContactInfo(contact);
-		updatedContact.setName(null);
-		updateContact(updatedContact);
-	}
-
-	/**
 	 * This method is used for removing msisdns from the group persistence cache when last message in group is changed and their reference count is decremented in group contacts
 	 * map by one which is done by {@link #removeFromCache} method
 	 * 
@@ -627,9 +644,15 @@ class PersistenceCache extends ContactsCache
 				// lock is not needed here because grpMsisdns is concurrentLinkedQueue
 				grpMsisdns.clear();
 
+				Map<String, String> groupParticipantsNameMap = new HashMap<String, String>();
+				if (currentGroupMsisdns.size() > 0)
+				{
+					groupParticipantsNameMap = HikeConversationsDatabase.getInstance().getGroupParticipantNameMap(groupId, currentGroupMsisdns);
+				}
+
 				for (String ms : currentGroupMsisdns)
 				{
-					PairModified<String, String> msisdnNamePair = new PairModified<String, String>(ms, null); // TODO name for unsaved contact
+					PairModified<String, String> msisdnNamePair = new PairModified<String, String>(ms, groupParticipantsNameMap.get(ms));
 					grpMsisdns.add(msisdnNamePair);
 				}
 			}

@@ -51,5 +51,4 @@ abstract class ContactsCache
 
 	abstract void setUnknownContactName(String groupId, String msisdn, String name);
 
-	abstract void contactDeleted(ContactInfo contact);
 }

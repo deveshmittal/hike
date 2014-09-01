@@ -221,6 +221,19 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (mutePreference != null)
 		{
 			mutePreference.setOnPreferenceClickListener(this);
+			mutePreference.setOnPreferenceChangeListener(this);
+		}
+		
+		Preference h2oNotifPreference = getPreferenceScreen().findPreference(HikeConstants.H2O_NOTIF_BOOLEAN_PREF);
+		if (h2oNotifPreference != null)
+		{
+			h2oNotifPreference.setOnPreferenceChangeListener(this);
+		}
+		
+		Preference nujNotifPreference = getPreferenceScreen().findPreference(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF);
+		if (nujNotifPreference != null)
+		{
+			nujNotifPreference.setOnPreferenceChangeListener(this);
 		}
 
 		Preference muteChatBgPreference = getPreferenceScreen().findPreference(HikeConstants.CHAT_BG_NOTIFICATION_PREF);
@@ -463,7 +476,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		else if (HikeConstants.HELP_FAQS_PREF.equals(preference.getKey()))
 		{
 			Logger.d(getClass().getSimpleName(), "FAQ preference selected");
-			Utils.startWebViewActivity(getApplicationContext(),HikeConstants.HELP_URL,getString(R.string.faq));
+			Utils.startWebViewActivity(HikePreferences.this,HikeConstants.HELP_URL,getString(R.string.faq));
 		}
 		else if (HikeConstants.HELP_FEEDBACK_PREF.equals(preference.getKey()))
 		{
@@ -623,14 +636,14 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}, dialogStrings);
 			}
 		}
-		/*else if (HikeConstants.IMAGE_QUALITY.equals(preference.getKey()))		Not needed now
+		else if (HikeConstants.IMAGE_QUALITY.equals(preference.getKey()))
 		{	
 			HikeDialog.showDialog(HikePreferences.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
 			{
 				@Override
 				public void onSucess(Dialog dialog)
 				{
-					updateMedia();
+					updateImageQualityPrefView();
 					dialog.dismiss();
 				}
 
@@ -656,7 +669,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}
 			}, (Object[]) null);
 
-		}*/
+		}
 		else if(HikeConstants.CHANGE_STEALTH_PASSCODE.equals(preference.getKey()))
 		{
 			LockPattern.confirmPattern(HikePreferences.this, true);
@@ -756,6 +769,30 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			Utils.setupUri(this.getApplicationContext());
 			LocalBroadcastManager.getInstance(this.getApplicationContext()).sendBroadcast(new Intent(HikePubSub.SSL_PREFERENCE_CHANGED));
 		}
+		else if (HikeConstants.STATUS_BOOLEAN_PREF.equals(preference.getKey()))
+		{
+			//Handled in OnPreferenceClick
+		}
+		else if (HikeConstants.NUJ_NOTIF_BOOLEAN_PREF.equals(preference.getKey()))
+		{
+			if(isChecked)
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_ON);
+			}
+			else{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_OFF);
+			}
+		}
+		else if (HikeConstants.H2O_NOTIF_BOOLEAN_PREF.equals(preference.getKey()))
+		{
+			if(isChecked)
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_ON);
+			}
+			else{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_OFF);
+			}
+		}
 		return false;
 	}
 
@@ -771,11 +808,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			updateNotifPrefView();
 			break;
 		case R.xml.media_download_preferences:
-			//updateMedia();	//Not needed now.
+			updateImageQualityPrefView();
 		}
 	}
-	//This function is also not needed now
-	/*private void updateMedia()
+	
+	private void updateImageQualityPrefView()
 	{
 		Preference preference = getPreferenceScreen().findPreference(HikeConstants.IMAGE_QUALITY);
 		if (HikeSharedPreferenceUtil.getInstance(HikePreferences.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
@@ -803,7 +840,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			preference.setTitle(getResources().getString(R.string.image_quality_prefs));
 		}
-	}*/
+	}
 	
 	private void updateNotifPrefView()
 	{

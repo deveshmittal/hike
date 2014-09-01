@@ -298,7 +298,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		else
 			return b;
 	}
-
+	
 	public boolean deleteIconForMSISDN(String msisdn)
 	{
         boolean rowsDeleted = ContactManager.getInstance().removeIcon(msisdn);

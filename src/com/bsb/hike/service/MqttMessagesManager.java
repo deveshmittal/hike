@@ -461,6 +461,7 @@ public class MqttMessagesManager
 		 */
 		if (!ContactManager.getInstance().isConvExists(convMessage.getMsisdn()))
 		{
+			Logger.d(getClass().getSimpleName(), "conversation does not exist");
 			return;
 		}
 
@@ -724,8 +725,6 @@ public class MqttMessagesManager
 		JSONArray msgIds = jsonObj.optJSONArray(HikeConstants.DATA);
 		String id = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
 
-		String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.FROM) : "";
-
 		if (msgIds == null)
 		{
 			Logger.e(getClass().getSimpleName(), "Update Error : Message id Array is empty or null . Check problem");
@@ -745,6 +744,11 @@ public class MqttMessagesManager
 		}
 		else
 		{
+			String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.FROM) : "";
+			if(TextUtils.isEmpty(participantMsisdn))
+			{
+				return ;
+			}
 			ids = new long[msgIds.length()];
 			for (int i = 0; i < msgIds.length(); i++)
 			{
@@ -966,11 +970,9 @@ public class MqttMessagesManager
 			}
 			editor.putString(HikeMessengerApp.REWARDS_TOKEN, account.optString(HikeConstants.REWARDS_TOKEN));
 			editor.putBoolean(HikeMessengerApp.SHOW_REWARDS, account.optBoolean(HikeConstants.SHOW_REWARDS));
-			editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, !account.optBoolean(HikeConstants.SHOW_REWARDS));
 
 			editor.putString(HikeMessengerApp.GAMES_TOKEN, account.optString(HikeConstants.REWARDS_TOKEN));
 			editor.putBoolean(HikeMessengerApp.SHOW_GAMES, account.optBoolean(HikeConstants.SHOW_GAMES));
-			editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, !account.optBoolean(HikeConstants.SHOW_GAMES));
 
 			if (account.optBoolean(HikeConstants.SHOW_REWARDS))
 			{
@@ -1091,6 +1093,10 @@ public class MqttMessagesManager
 		FavoriteType currentType = contactInfo.getFavoriteType();
 		FavoriteType favoriteType = (currentType == FavoriteType.NOT_FRIEND || currentType == FavoriteType.REQUEST_RECEIVED_REJECTED || currentType == FavoriteType.REQUEST_RECEIVED) ? FavoriteType.REQUEST_RECEIVED
 				: FavoriteType.FRIEND;
+
+		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
+		this.pubSub.publish(favoriteType == FavoriteType.REQUEST_RECEIVED ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.FRIEND_REQUEST_ACCEPTED, favoriteToggle);
+
 		if (favoriteType == FavoriteType.REQUEST_RECEIVED)
 		{
 			int count = settings.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
@@ -1100,8 +1106,6 @@ public class MqttMessagesManager
 			}
 		}
 
-		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
-		this.pubSub.publish(favoriteType == FavoriteType.REQUEST_RECEIVED ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.FRIEND_REQUEST_ACCEPTED, favoriteToggle);
 		if (favoriteType == FavoriteType.FRIEND)
 		{
 			StatusMessage statusMessage = new StatusMessage(0, null, msisdn, contactInfo.getName(), context.getString(R.string.confirmed_friend),
@@ -2464,8 +2468,21 @@ public class MqttMessagesManager
 				pref.saveData(keys[1], body);
 				pref.saveData(keys[2], subType);
 				String url = data.optString(HikeConstants.URL);
+				// for http based generic URL
 				if(!TextUtils.isEmpty(url) && HikeMessengerApp.ATOMIC_POP_UP_HTTP.equals(subType)){
 				pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_HTTP_URL, url);
+				}else if(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC.equals(subType)){
+					// for app specific generic tip
+					String what = data.optString(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC_WHAT);
+					if(!TextUtils.isEmpty(what)){
+						try{
+						pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC_WHAT, Integer.parseInt(what));
+						}catch(NumberFormatException nf){
+							nf.printStackTrace();
+							// don know where to go on click, lets remove key so tip id not displayed
+							pref.saveData(keys[0], "");
+						}
+					}
 				}
 				Logger.i("tip", "writing to pref passed " + header + " -- " + body + " -- subtype " + subType);
 			}else{
@@ -2502,7 +2519,8 @@ public class MqttMessagesManager
 		Logger.i("tip", "subtype for main");
 		if (HikeMessengerApp.ATOMIC_POP_UP_FAVOURITES.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_INVITE.equals(subType)
 				|| HikeMessengerApp.ATOMIC_POP_UP_PROFILE_PIC.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_STATUS.equals(subType)
-				|| HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_HTTP.equals(subType))
+				|| HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_HTTP.equals(subType)
+				|| HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC.equals(subType))
 		{
 			// show notification
 			if (notificationTextIfApplicable != null)

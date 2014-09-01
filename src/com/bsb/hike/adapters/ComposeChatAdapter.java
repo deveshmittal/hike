@@ -543,7 +543,6 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		iconloader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{
@@ -570,5 +569,10 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 				updateViewsRelatedToAvatar(view, getItem(indexOfData));
 			}
 		}
+	}
+	
+	public IconLoader getIconLoader()
+	{
+		return iconloader;
 	}
 }

@@ -249,8 +249,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_WALKIE_TALKIE_TIP = "shownWalkieTalkieTip";
 
-	public static final String SHOWN_STATUS_TIP = "shownStatusTip";
-
 	public static final String SHOWN_LAST_SEEN_TIP = "shownLastSeenTip";
 
 	public static final String PROTIP_WAIT_TIME = "protipWaitTime";
@@ -266,8 +264,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String SHOWN_NATIVE_INFO_POPUP = "shownNativeInfoPopup";
 
 	public static final String INVITED_FACEBOOK_FRIENDS_IDS = "invitedFacebookFriendsIds";
-
-	public static final String NOTIFIED_NO_STATUS = "notifiedNoStatus";
 
 	public static final String SERVER_RECOMMENDED_CONTACTS = "serverRecommendedContacts";
 
@@ -347,7 +343,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_WELCOME_HIKE_TIP = "shownWelcomeHikeTip";
 
-	public static final String SHOW_START_NEW_CHAT_TIP = "showStartNewChatTip";
+	public static final String SHOW_STEALTH_INFO_TIP = "showStealthInfoTip";
 
 	public static final String SHOW_STEALTH_UNREAD_TIP = "showStelathUnreadTip";
 
@@ -384,6 +380,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String ATOMIC_POP_UP_STATUS = "stts";
 
 	public static final String ATOMIC_POP_UP_HTTP = "http";
+	
+	public static final String ATOMIC_POP_UP_APP_GENERIC = "app";
+	
+	public static final String ATOMIC_POP_UP_APP_GENERIC_WHAT = "appWhat";
 	
 	public static final String ATOMIC_POP_UP_HTTP_URL = "httpUrl";
 	
@@ -434,6 +434,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static HashMap<String, String> hikeBotNamesMap;
 
 	public static volatile boolean networkError;
+
+	public static volatile boolean syncingContacts = false;
 
 	public Handler appStateHandler;
 
@@ -770,24 +772,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		catch (NameNotFoundException e)
 		{
 			Logger.e(getClass().getSimpleName(), "Invalid package", e);
-		}
-
-		/*
-		 * We will increase the unseen status count by one if the user has not posted any updates and if we have never notified the user of this before.
-		 */
-		if (!settings.contains(NOTIFIED_NO_STATUS))
-		{
-			String lastStatus = settings.getString(HikeMessengerApp.LAST_STATUS, "");
-
-			Editor editor = settings.edit();
-			if (TextUtils.isEmpty(lastStatus))
-			{
-				int count = settings.getInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
-				count++;
-				editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, count);
-			}
-			editor.putBoolean(NOTIFIED_NO_STATUS, true);
-			editor.commit();
 		}
 
 		/*

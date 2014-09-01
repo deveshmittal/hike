@@ -150,5 +150,7 @@
 	<dimen name="logo_top_margin">90dp</dimen>
 	<dimen name="welcome_bottom_margin">25dp</dimen>
 	<dimen name="empty_tutorial_margin">20dp</dimen>
+	<dimen name="horizontal_page_margin">16dp</dimen>
+	<dimen name="profile_shared_media_item_size">72dp</dimen>
 	
 </resources>

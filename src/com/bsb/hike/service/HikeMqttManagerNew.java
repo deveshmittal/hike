@@ -1224,7 +1224,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			connectOnMqttThread(getConnRetryTime());
 			break;
 		}
-		Logger.e(TAG, "Default Exception : " + e.getMessage());
 		e.printStackTrace();
 	}
 

@@ -2,6 +2,7 @@ package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,7 +43,7 @@ public class PinHistoryAdapter extends BaseAdapter implements OnLongClickListene
 	private boolean addDateInBetween;
 
 	private boolean isDefaultTheme;
-	
+
 	private Set<Long> mSelectedPinIds;
 	
 	private boolean isActionModeOn = false;
@@ -127,7 +128,7 @@ public class PinHistoryAdapter extends BaseAdapter implements OnLongClickListene
 	@Override
 	public boolean isEnabled(int position)
 	{
-		return true;
+		return getItem(position) instanceof ConvMessage;
 	}
 
 	@Override
@@ -140,6 +141,7 @@ public class PinHistoryAdapter extends BaseAdapter implements OnLongClickListene
 		}
 		return ViewType.DATE_SEP.ordinal();
 	}
+
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
@@ -194,7 +196,7 @@ public class PinHistoryAdapter extends BaseAdapter implements OnLongClickListene
 					String number = null;
 					String name = gConv.getGroupParticipantFirstName(textPin.getGroupParticipantMsisdn());
 
-					if (((GroupConversation) mConversation).getGroupParticipant(textPin.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
+					if (((GroupConversation) mConversation).getGroupParticipant(textPin.getGroupParticipantMsisdn()).getFirst().getContactInfo().isUnknownContact())
 					{
 						number = textPin.getGroupParticipantMsisdn();
 					}
@@ -373,8 +375,44 @@ public class PinHistoryAdapter extends BaseAdapter implements OnLongClickListene
 		int index = textPins.lastIndexOf(pin);		
 		textPins.remove(index);
 					
-		index = listData.lastIndexOf(pin);		
+		index = listData.lastIndexOf(pin);
+		
+		boolean isPrevPin = false;
+		boolean isNextPin = false;
+		boolean isLastPin = false;		
+		
+		// check if previous item in list is a pin or date separator
+		if(listData.size() > 1)
+		{
+			if(listData.get(index-1) instanceof ConvMessage)
+			{
+				isPrevPin = true;
+			}
+		}
+		// index+1 should be within bounds		
+		if(index+1 <= listData.size()-1)
+		{
+			// check if next item in list is a pin or a date separator
+			if(listData.get(index+1) instanceof ConvMessage)
+			{
+				isNextPin = true;
+			}
+		}
+		// index+1 beyond list-size mean this is the last item in the list
+		else
+		{
+			isLastPin = true;
+		}
 		listData.remove(index);
+		
+		// remove the date separator as well
+		// date separator of a pin is eligible for deletion only if
+		// 1. previous and next items in the list w.r.t to current index are date separators
+		// 2. previous item w.r.t to current index is date separator and current index is the last item in the list
+		if((!isPrevPin && isLastPin) || (!isPrevPin && !isNextPin))
+		{
+			listData.remove(index-1);
+		}
 	}
 
 	@Override
@@ -427,5 +465,13 @@ public class PinHistoryAdapter extends BaseAdapter implements OnLongClickListene
 	public void setActionMode(boolean isOn)
 	{
 		isActionModeOn = isOn;
+	}
+	
+	public void addPins(List<ConvMessage> pins)
+	{
+		Collections.reverse(pins);
+		textPins.addAll(0, pins);		
+		addDateInBetween();
+		notifyDataSetChanged();
 	}
 }
