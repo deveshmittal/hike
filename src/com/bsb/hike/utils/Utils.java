@@ -2280,6 +2280,13 @@ public class Utils
 		return items;
 	}
 
+	/**
+	 * Get unseen status, user-status and friend request count
+	 * 
+	 * @param accountPrefs Account settings shared preference
+	 * @param countUsersStatus Whether to include user status count in the total
+	 * @return
+	 */
 	public static int getNotificationCount(SharedPreferences accountPrefs, boolean countUsersStatus)
 	{
 		int notificationCount = 0;
