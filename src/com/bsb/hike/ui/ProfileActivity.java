@@ -1219,26 +1219,31 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					return;
 				}
 				selectedFileUri = data.getData();
-				if (Utils.isPicasaUri(selectedFileUri.toString()))
+				if (null != selectedFileUri)
 				{
-					isPicasaImage = true;
-					path = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, false).getAbsolutePath();
-				}
-				else
-				{
-					String fileUriStart = "file://";
-					String fileUriString = selectedFileUri.toString();
-					if (fileUriString.startsWith(fileUriStart))
+					if (Utils.isPicasaUri(selectedFileUri.toString()))
 					{
-						selectedFileIcon = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
-						/*
-						 * Done to fix the issue in a few Sony devices.
-						 */
-						path = selectedFileIcon.getAbsolutePath();
+						isPicasaImage = true;
+						File file = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, false);
+						if (null != file)
+							path = file.getAbsolutePath();
 					}
 					else
 					{
-						path = Utils.getRealPathFromUri(selectedFileUri, this);
+						String fileUriStart = "file://";
+						String fileUriString = selectedFileUri.toString();
+						if (fileUriString.startsWith(fileUriStart))
+						{
+							selectedFileIcon = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
+							/*
+							 * Done to fix the issue in a few Sony devices.
+							 */
+							path = selectedFileIcon.getAbsolutePath();
+						}
+						else
+						{
+							path = Utils.getRealPathFromUri(selectedFileUri, this);
+						}
 					}
 				}
 			}
