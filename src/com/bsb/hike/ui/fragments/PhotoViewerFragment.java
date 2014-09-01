@@ -129,6 +129,7 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		{	Logger.d(TAG,  " MsgId : " + sharedMediaItems.get(0).getMsgId());
 			loadItems(false,sharedMediaItems.get(0).getMsgId(),HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY/2,false, true, initialPosition);  //Left
 			loadItems(false,sharedMediaItems.get(0).getMsgId(),HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY/2, true);         //Right
+			setSenderDetails(0);
 		}
 		else
 		{
@@ -288,6 +289,11 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 
 		}
 		
+		setSenderDetails(position);
+	}
+
+	private void setSenderDetails(int position)
+	{
 		senderName.setText(getSenderName(position));
 		long timeStamp = sharedMediaItems.get(position).getTimeStamp();
 		String date = Utils.getFormattedDate(getSherlockActivity(), timeStamp);
