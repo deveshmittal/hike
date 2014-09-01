@@ -22,10 +22,8 @@ import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
-import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Utils;
 
 public class SettingsActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener
@@ -190,38 +188,42 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		switch (position)
 		{
 		case 0:
-			IntentManager.openSettingNotification(this);
+			intent = new Intent(this, HikePreferences.class);
+			intent.putExtra(HikeConstants.Extras.PREF, R.xml.notification_preferences);
+			intent.putExtra(HikeConstants.Extras.TITLE, R.string.notifications);
 			break;
 
 		case 1:
-			IntentManager.openSettingMedia(this);
+			intent = new Intent(this, HikePreferences.class);
+			intent.putExtra(HikeConstants.Extras.PREF, R.xml.media_download_preferences);
+			intent.putExtra(HikeConstants.Extras.TITLE, R.string.auto_download_media);
 			break;
 		case 2:
-			IntentManager.openSettingSMS(this);
+			intent = new Intent(this, CreditsActivity.class);
 			break;
 		case 3:
-			IntentManager.openSettingAccount(this);
+			intent = new Intent(this, HikePreferences.class);
+			intent.putExtra(HikeConstants.Extras.PREF, R.xml.account_preferences);
+			intent.putExtra(HikeConstants.Extras.TITLE, R.string.account);
 			break;
 		case 4:
-			IntentManager.openSettingPrivacy(this);
+			intent = Utils.getIntentForPrivacyScreen(this);
 			break;
 		case 5:
-			if(HikeMessengerApp.syncingContacts)
-				return;
-			if(!Utils.isUserOnline(this))
-			{
-				Utils.showNetworkUnavailableDialog(this);
-				return;
-			}
 			Intent contactSyncIntent = new Intent(HikeService.MQTT_CONTACT_SYNC_ACTION);
 			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
 			sendBroadcast(contactSyncIntent);
 			Toast.makeText(getApplicationContext(), R.string.contacts_sync_started, Toast.LENGTH_SHORT).show();
 			break;
 		case 6:
-			HikeConversationsDatabase.getInstance().updateToNewSharedMediaTable();
-			IntentManager.openSettingHelp(this);
+			intent = new Intent(this, HikePreferences.class);
+			intent.putExtra(HikeConstants.Extras.PREF, R.xml.help_preferences);
+			intent.putExtra(HikeConstants.Extras.TITLE, R.string.help);
 			break;
+		}
+		if (intent != null)
+		{
+			startActivity(intent);
 		}
 	}
 }

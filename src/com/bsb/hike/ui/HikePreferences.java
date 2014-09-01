@@ -1,35 +1,26 @@
 package com.bsb.hike.ui;
 
-import java.util.ArrayList;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.database.Cursor;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -37,25 +28,29 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeConstants.ImageQuality;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
-import com.bsb.hike.tasks.DeleteAccountTask.DeleteAccountListener;
+import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.tasks.UnlinkTwitterTask;
+import com.bsb.hike.tasks.DeleteAccountTask.DeleteAccountListener;
 import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
 import com.facebook.Session;
 
 public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, OnPreferenceChangeListener, DeleteAccountListener
 {
+
 	private enum BlockingTaskType
 	{
 		NONE, DELETING_ACCOUNT, UNLINKING_ACCOUNT, UNLINKING_TWITTER
@@ -65,11 +60,9 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 
 	ProgressDialog mDialog;
 
+	private boolean isDeleting;
+
 	private BlockingTaskType blockingTaskType = BlockingTaskType.NONE;
-
-	private ArrayList<String> mRingtoneTitleList;
-
-	private ArrayList<String> mRingtoneUriList;
 
 	@Override
 	public Object onRetainNonConfigurationInstance()
@@ -89,17 +82,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 
 		Logger.d(getClass().getSimpleName(), preferences + " + " + titleRes);
 		addPreferencesFromResource(preferences);
-
-		// if we are on notification settings, start thread to gather Android default notification
-		// sounds uri list
-		if (preferences == R.xml.notification_preferences)
-		{
-			mRingtoneTitleList = new ArrayList<String>();
-
-			mRingtoneUriList = new ArrayList<String>();
-			
-			new Thread(ringtoneListComposeTask).start();
-		}
 
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof ActivityCallableTask)
@@ -127,7 +109,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			unlinkPreference.setOnPreferenceClickListener(this);
 		}
-
+		
 		Preference imageQuality = getPreferenceScreen().findPreference(HikeConstants.IMAGE_QUALITY);
 		if (imageQuality != null)
 		{
@@ -180,15 +162,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		final IconCheckBoxPreference sslPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.SSL_PREF);
 		if (sslPreference != null)
 		{
-			String countryCode = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.COUNTRY_CODE, "");
-			if (countryCode.equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE))
-			{
-				getPreferenceScreen().removePreference(sslPreference);
-			}
-			else
-			{
-				sslPreference.setOnPreferenceChangeListener(this);
-			}
+			sslPreference.setOnPreferenceChangeListener(this);
 		}
 
 		Preference blockedListPreference = getPreferenceScreen().findPreference(HikeConstants.BLOKED_LIST_PREF);
@@ -239,19 +213,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (mutePreference != null)
 		{
 			mutePreference.setOnPreferenceClickListener(this);
-			mutePreference.setOnPreferenceChangeListener(this);
-		}
-		
-		Preference h2oNotifPreference = getPreferenceScreen().findPreference(HikeConstants.H2O_NOTIF_BOOLEAN_PREF);
-		if (h2oNotifPreference != null)
-		{
-			h2oNotifPreference.setOnPreferenceChangeListener(this);
-		}
-		
-		Preference nujNotifPreference = getPreferenceScreen().findPreference(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF);
-		if (nujNotifPreference != null)
-		{
-			nujNotifPreference.setOnPreferenceChangeListener(this);
 		}
 
 		Preference muteChatBgPreference = getPreferenceScreen().findPreference(HikeConstants.CHAT_BG_NOTIFICATION_PREF);
@@ -265,7 +226,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 			{
-				if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 				{
 					resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
 					resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
@@ -283,7 +244,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 			{
-				if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 				{
 					resetStealthPassword.setTitle(R.string.change_stealth_password);
 					resetStealthPassword.setSummary(R.string.change_stealth_password_body);
@@ -494,7 +455,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		else if (HikeConstants.HELP_FAQS_PREF.equals(preference.getKey()))
 		{
 			Logger.d(getClass().getSimpleName(), "FAQ preference selected");
-			Utils.startWebViewActivity(getApplicationContext(),HikeConstants.HELP_URL,getString(R.string.faq));
+			Intent intent = new Intent(HikePreferences.this, WebViewActivity.class);
+			intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, HikeConstants.HELP_URL);
+			intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.faq));
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
 		}
 		else if (HikeConstants.HELP_FEEDBACK_PREF.equals(preference.getKey()))
 		{
@@ -654,14 +619,14 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}, dialogStrings);
 			}
 		}
-		else if (HikeConstants.IMAGE_QUALITY.equals(preference.getKey()))
+		/*else if (HikeConstants.IMAGE_QUALITY.equals(preference.getKey()))		Not needed now
 		{	
 			HikeDialog.showDialog(HikePreferences.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
 			{
 				@Override
 				public void onSucess(Dialog dialog)
 				{
-					updateImageQualityPrefView();
+					updateMedia();
 					dialog.dismiss();
 				}
 
@@ -687,7 +652,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}
 			}, (Object[]) null);
 
-		}
+		}*/
 		else if(HikeConstants.CHANGE_STEALTH_PASSCODE.equals(preference.getKey()))
 		{
 			LockPattern.confirmPattern(HikePreferences.this, true);
@@ -787,30 +752,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			Utils.setupUri(this.getApplicationContext());
 			LocalBroadcastManager.getInstance(this.getApplicationContext()).sendBroadcast(new Intent(HikePubSub.SSL_PREFERENCE_CHANGED));
 		}
-		else if (HikeConstants.STATUS_BOOLEAN_PREF.equals(preference.getKey()))
-		{
-			//Handled in OnPreferenceClick
-		}
-		else if (HikeConstants.NUJ_NOTIF_BOOLEAN_PREF.equals(preference.getKey()))
-		{
-			if(isChecked)
-			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_ON);
-			}
-			else{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_OFF);
-			}
-		}
-		else if (HikeConstants.H2O_NOTIF_BOOLEAN_PREF.equals(preference.getKey()))
-		{
-			if(isChecked)
-			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_ON);
-			}
-			else{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_OFF);
-			}
-		}
 		return false;
 	}
 
@@ -826,11 +767,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			updateNotifPrefView();
 			break;
 		case R.xml.media_download_preferences:
-			updateImageQualityPrefView();
+			//updateMedia();	//Not needed now.
 		}
 	}
-	
-	private void updateImageQualityPrefView()
+	//This function is also not needed now
+	/*private void updateMedia()
 	{
 		Preference preference = getPreferenceScreen().findPreference(HikeConstants.IMAGE_QUALITY);
 		if (HikeSharedPreferenceUtil.getInstance(HikePreferences.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
@@ -858,7 +799,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			preference.setTitle(getResources().getString(R.string.image_quality_prefs));
 		}
-	}
+	}*/
 	
 	private void updateNotifPrefView()
 	{
@@ -902,26 +843,19 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			@Override
 			public boolean onPreferenceChange(Preference preference, Object newValue)
 			{
-				preference.setTitle(getString(R.string.notificationSoundTitle) + " - " + (getSoundTitle(newValue.toString())));
-				if (!getString(R.string.notif_sound_off).equals(newValue.toString()))
+				preference.setTitle(getString(R.string.notificationSoundTitle) + " - " + (newValue.toString()));
+				if (getString(R.string.notif_sound_Hike).equals(newValue.toString()))
 				{
-					if (getString(R.string.notif_sound_Hike).equals(newValue.toString()))
-					{
-						Utils.playSoundFromRaw(getApplicationContext(), R.raw.hike_jingle_15);
-					}
-					else if (getString(R.string.notif_sound_default).equals(newValue.toString()))
-					{
-						Utils.playDefaultNotificationSound(getApplicationContext());
-					}
-					else if (!TextUtils.isEmpty(newValue.toString()))
-					{
-						Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), Uri.parse(newValue.toString()));
-						r.play();
-					}
+					Utils.playSoundFromRaw(getApplicationContext(), R.raw.hike_jingle_15);
+				}
+				else if (getString(R.string.notif_sound_default).equals(newValue.toString()))
+				{
+					Utils.playDefaultNotificationSound(getApplicationContext());
 				}
 				return true;
 			}
 		});
+		soundPref.setTitle(getString(R.string.notificationSoundTitle) + " - " + (soundPref.getValue()));
 	}
 
 	@Override
@@ -937,92 +871,16 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 
 	}
-
 	/**
-	 * Adding this to handle the onactivityresult callback for reset password
+	 * Adding this to handle the onactivityresult callback for reset password 
 	 */
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		// passing true here to denote that this is coming from the password reset operation
+		//passing true here to denote that this is coming from the password reset operation
 		data.putExtra(HikeConstants.Extras.STEALTH_PASS_RESET, true);
 		LockPattern.onLockActivityResult(this, requestCode, resultCode, data);
 		super.onActivityResult(requestCode, resultCode, data);
 	}
+	
 
-	/**
-	 * Query Android notification sounds and display in list. This is required because we need to include HikeJingle as an additional sound to the list.
-	 */
-	Runnable ringtoneListComposeTask = new Runnable()
-	{
-		public void run()
-		{
-			RingtoneManager ringtoneManager = new RingtoneManager(getApplicationContext());
-			ringtoneManager.setType(RingtoneManager.TYPE_NOTIFICATION);
-			Cursor ringtoneCursor = ringtoneManager.getCursor();
-
-			mRingtoneTitleList.add(getString(R.string.notif_sound_off));
-			mRingtoneUriList.add(getString(R.string.notif_sound_off));
-
-			mRingtoneTitleList.add(getString(R.string.notif_sound_default));
-			mRingtoneUriList.add(getString(R.string.notif_sound_default));
-
-			mRingtoneTitleList.add(getString(R.string.notif_sound_Hike));
-			mRingtoneUriList.add(getString(R.string.notif_sound_Hike));
-
-			int ringtoneTitleColId = ringtoneCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
-			if (ringtoneCursor.moveToFirst())
-			{
-				do
-				{
-					String title = ringtoneCursor.getString(ringtoneTitleColId);
-					String uri = getUriFromCursor(ringtoneCursor).toString();
-
-					mRingtoneTitleList.add(title);
-					mRingtoneUriList.add(uri);
-				}
-				while (ringtoneCursor.moveToNext());
-			}
-			
-			final ListPreference soundNotif = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.NOTIF_SOUND_PREF);
-			if (soundNotif != null)
-			{
-				ListPreference soundPreference = (ListPreference) soundNotif;
-				soundPreference.setEntries(mRingtoneTitleList.toArray(new CharSequence[mRingtoneTitleList.size()]));
-				soundPreference.setEntryValues(mRingtoneUriList.toArray(new CharSequence[mRingtoneTitleList.size()]));
-				soundNotif.setOnPreferenceClickListener(HikePreferences.this);
-				soundPreference = null;
-				HikePreferences.this.runOnUiThread(new Runnable()
-				{
-
-					@Override
-					public void run()
-					{
-						soundNotif.setTitle(getString(R.string.notificationSoundTitle) + " - " + getSoundTitle(soundNotif.getValue()));
-					}
-				});
-			}
-
-			ringtoneCursor.close();
-			ringtoneCursor = null;
-		}
-
-		private Uri getUriFromCursor(Cursor cursor)
-		{
-			return ContentUris.withAppendedId(Uri.parse(cursor.getString(RingtoneManager.URI_COLUMN_INDEX)), cursor.getLong(RingtoneManager.ID_COLUMN_INDEX));
-		}
-	};
-
-	private String getSoundTitle(String argUri)
-	{
-		int posn = mRingtoneUriList.indexOf(argUri);
-
-		if (posn == -1)
-		{
-			return "";
-		}
-		else
-		{
-			return mRingtoneTitleList.get(posn);
-		}
-	}
 }
