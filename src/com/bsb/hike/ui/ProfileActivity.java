@@ -99,6 +99,7 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.CustomAlertDialog;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
@@ -663,6 +664,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		ImageView smallIcon;
 		EditText groupNameEditText;
 		ImageView smallIconFrame;
+		ImageView statusMood;
 		
 		String msisdn;
 		String name;
@@ -681,7 +683,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			parentView = headerView.findViewById(R.id.profile_header);
 			extraInfo = (TextView) headerView.findViewById(R.id.add_fav_tv);
 			smallIcon = (ImageView) headerView.findViewById(R.id.add_fav_star);
-			
+			statusMood = (ImageView) headerView.findViewById(R.id.status_mood);
 			msisdn = contactInfo.getMsisdn();
 			name = TextUtils.isEmpty(contactInfo.getName()) ? contactInfo.getMsisdn() : contactInfo.getName();
 			text.setText(name);
@@ -689,7 +691,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			if (showContactsUpdates(contactInfo)) // Favourite case
 			{
-				addContactStatusInHeaderView(subText);
+				addContactStatusInHeaderView(subText, statusMood);
 				// Request_Received --->> Show add/not now screen.
 				if (contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
 				{
@@ -772,12 +774,22 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 	}
 	
-	private void addContactStatusInHeaderView(TextView subText)
+	private void addContactStatusInHeaderView(TextView subText, ImageView statusMood)
 	{
 		StatusMessageType[] statusMessagesTypesToFetch = {StatusMessageType.TEXT};
 		StatusMessage status = HikeConversationsDatabase.getInstance().getLastStatusMessage(statusMessagesTypesToFetch, contactInfo);
 		if(status != null)
 		{
+			if (status.hasMood())  //Adding mood image for status
+			{
+				statusMood.setVisibility(View.VISIBLE);
+				statusMood.setImageResource(EmoticonConstants.moodMapping.get(status.getMoodId()));
+			}
+			else
+			{
+				statusMood.setVisibility(View.GONE);
+			}
+			
 			subText.setText(smileyParser.addSmileySpans(status.getText(), true));
 			return;
 		}
