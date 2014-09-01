@@ -2604,8 +2604,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		fileThumb.getLayoutParams().width = pixels;
 		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg))
 		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);
-		;
-		fileThumb.setImageResource(0);
+		/*
+		 * When setting default media thumb to image view, need to remove the previous drawable of that view in case of view is re-used by adapter.
+		 * Fogbugz Id : 37212
+		 */
+		fileThumb.setImageDrawable(null);
 	}
 
 	View.OnClickListener contactClick = new OnClickListener()
