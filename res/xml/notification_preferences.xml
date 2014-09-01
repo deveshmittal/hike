@@ -31,6 +31,8 @@
 
     <com.bsb.hike.view.IconListPreference
         android:defaultValue="@string/notif_sound_Hike"
+        android:entries="@array/notificationSoundPrefKeys"
+        android:entryValues="@array/notificationSoundPrefValues"
         icon="ic_hike_jingle"
         android:key="notifSoundPref"
         android:layout="@layout/list_preference"
@@ -52,16 +54,7 @@
         android:key="hikeOfflineNotificationPref"
         android:layout="@layout/icon_preference"
         android:summary="@string/h2o_notifications_setting_summary"
-        android:title="@string/hike_offline_notifications"
-        android:widgetLayout="@layout/checkbox_widget" />
-    
-    <com.bsb.hike.view.IconCheckBoxPreference
-        icon="ic_nujrujicon"
-        android:defaultValue="true"
-        android:key="hikeNUJNotificationPref"
-        android:layout="@layout/icon_preference"
-        android:summary="@string/notifications_contact_join_summary"
-        android:title="@string/notifications_contact_join_title"
+        android:title="@@string/hike_offline_notifications"
         android:widgetLayout="@layout/checkbox_widget" />
 	
 	<!-- this is the chat theme notification setting. commented out for now -->
