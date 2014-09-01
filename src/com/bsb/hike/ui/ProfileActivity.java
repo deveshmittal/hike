@@ -486,10 +486,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if (showingGroupEdit)
-		{
-			return false;
-		}
 		switch (profileType)
 		{
 		case CONTACT_INFO:
@@ -502,7 +498,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			}
 			return true;
 		case GROUP_INFO:
-			getSupportMenuInflater().inflate(R.menu.group_profile_menu, menu);
+			if (!showingGroupEdit)
+			{
+				getSupportMenuInflater().inflate(R.menu.group_profile_menu, menu);
+			}
 			mMenu = menu;
 			return true;
 		case USER_PROFILE:
