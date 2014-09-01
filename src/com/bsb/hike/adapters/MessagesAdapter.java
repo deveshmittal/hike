@@ -2890,16 +2890,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			messageInfo.setVisibility(View.VISIBLE);
 			messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
 			setReadByForGroup(message, messageInfo);
-			updateViewWindowForReadBy(message);
-		}
-	}
-
-	private void updateViewWindowForReadBy(ConvMessage message)
-	{
-		ConvMessage lastMessage = getItem(getCount() - 1);
-		if (lastMessage.getMsgID() == message.getMsgID())
-		{
-			chatThread.updateViewWindowForReadBy();
 		}
 	}
 
