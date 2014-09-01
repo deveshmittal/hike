@@ -674,4 +674,9 @@ public class HikeNotificationMsgStack implements Listener
 	{
 		return forceBlockNotificationSound;
 	}
+	
+	public void setTickerText(StringBuilder mTickerText)
+	{
+		this.mTickerText = mTickerText;
+	}
 }

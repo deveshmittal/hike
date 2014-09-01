@@ -1018,6 +1018,9 @@ public class HikeNotification
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
 				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setPriority(Notification.PRIORITY_DEFAULT);
 
+		//Reset ticker text since we dont want to tick older messages
+		hikeNotifMsgStack.setTickerText(null);
+		
 		AudioManager manager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 		
 		if (!forceNotPlaySound && !manager.isMusicActive())
