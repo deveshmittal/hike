@@ -4434,6 +4434,11 @@ public class Utils
 		StringBuilder sb = new StringBuilder("(");
 		if (null != msisdnList)
 		{
+			if (msisdnList.isEmpty())
+			{
+				return null;
+			}
+			
 			for (String msisdn : msisdnList)
 			{
 				sb.append(DatabaseUtils.sqlEscapeString(msisdn));
