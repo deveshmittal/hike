@@ -125,7 +125,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 
 		msisdn = data.getString(HikeConstants.Extras.MSISDN);
 		isGroup = data.getBoolean(HikeConstants.Extras.IS_GROUP_CONVERSATION, false);
-		conversationName = data.getString(HikeConstants.Extras.CONVERSATION_NAME, null);
+		conversationName = data.getString(HikeConstants.Extras.CONVERSATION_NAME);
 		if(isGroup)
 		{
 			msisdnArray = data.getStringArray(HikeConstants.Extras.PARTICIPANT_MSISDN_ARRAY);
