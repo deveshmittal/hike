@@ -244,7 +244,8 @@ public class DownloadFileTask extends FileTransferBase
 						incrementBytesTransferred(byteRead);
 						progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
 						// showButton();
-						sendProgress();
+						if(_state != FTState.PAUSED)
+							sendProgress();
 					}
 					while (_state == FTState.IN_PROGRESS);
 
@@ -295,7 +296,7 @@ public class DownloadFileTask extends FileTransferBase
 							retry = false;
 						}
 						break;
-					case PAUSING:
+					case PAUSED:
 						_state = FTState.PAUSED;
 						Logger.d(getClass().getSimpleName(), "FT PAUSED");
 						saveFileState();
@@ -465,6 +466,8 @@ public class DownloadFileTask extends FileTransferBase
 			}
 		}
 		// showButton();
-		sendProgress();
+		this.pausedProgress = -1;
+		if(_state != FTState.PAUSED)
+			sendProgress();
 	}
 }

@@ -1437,7 +1437,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	{
 		if (emptyView != null)
 		{
-
+			if(loadingView != null)
+				loadingView.setVisibility(View.GONE);
 			listView.setEmptyView(emptyView);
 		}
 	}
@@ -1459,7 +1460,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		iconloader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{
@@ -1486,5 +1486,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				updateViewsRelatedToAvatar(view, getItem(indexOfData));
 			}
 		}
+	}
+	
+	public IconLoader getIconLoader()
+	{
+		return iconloader;
 	}
 }

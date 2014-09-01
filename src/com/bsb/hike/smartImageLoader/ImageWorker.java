@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -62,15 +64,13 @@ public abstract class ImageWorker
 
 	private AtomicBoolean mExitTasksEarly = new AtomicBoolean(false);
 
-	protected boolean mPauseWork = false;
-
-	private final Object mPauseWorkLock = new Object();
-
 	protected Resources mResources;
 
 	private boolean setDefaultAvatarIfNoCustomIcon = false;
 
 	private boolean setHiResDefaultAvatar = false;
+	
+	private boolean setDefaultDrawableNull = true;
 
 	protected ImageWorker()
 	{
@@ -134,8 +134,10 @@ public abstract class ImageWorker
 		}
 		else
 		{
-			imageView.setImageDrawable(null);
-			imageView.setBackgroundDrawable(null);
+			if(setDefaultDrawableNull){
+				imageView.setImageDrawable(null);
+				imageView.setBackgroundDrawable(null);
+			}
 		}
 		if (mImageCache != null)
 		{
@@ -248,6 +250,16 @@ public abstract class ImageWorker
 	{
 		mLoadingBitmap = bitmap;
 	}
+	
+	/**
+	 * Set placeholder bitmap that shows when the the background thread is running.
+	 * 
+	 * @param bitmap
+	 */
+	public void setLoadingImage(Drawable bitmap)
+	{
+		mLoadingBitmap = drawableToBitmap(bitmap);
+	}
 
 	/**
 	 * Set placeholder bitmap that shows when the the background thread is running.
@@ -282,7 +294,6 @@ public abstract class ImageWorker
 	public void setExitTasksEarly(boolean exitTasksEarly)
 	{
 		mExitTasksEarly.set(exitTasksEarly);
-		setPauseWork(false);
 	}
 
 	public void setDefaultAvatarIfNoCustomIcon(boolean b)
@@ -295,6 +306,11 @@ public abstract class ImageWorker
 		this.setHiResDefaultAvatar = b;
 	}
 
+	public void setDefaultDrawableNull(boolean b)
+	{
+		this.setDefaultDrawableNull = b;
+	}
+	
 	/**
 	 * Subclasses should override this to define any processing or work that must happen to produce the final bitmap. This will be executed in a background thread and be long
 	 * running. For example, you could resize a large bitmap here, or pull down an image from the network.
@@ -409,21 +425,6 @@ public abstract class ImageWorker
 			Bitmap bitmap = null;
 			BitmapDrawable drawable = null;
 
-			// Wait here if work is paused and the task is not cancelled
-			synchronized (mPauseWorkLock)
-			{
-				while (mPauseWork && !isCancelled())
-				{
-					try
-					{
-						mPauseWorkLock.wait();
-					}
-					catch (InterruptedException e)
-					{
-					}
-				}
-			}
-
 			// If the bitmap was not found in the cache and this task has not been cancelled by
 			// another thread and the ImageView that was originally bound to this task is still
 			// bound back to this task and our "exit early" flag is not set, then call the main
@@ -479,10 +480,6 @@ public abstract class ImageWorker
 		protected void onCancelled(BitmapDrawable value)
 		{
 			super.onCancelled(value);
-			synchronized (mPauseWorkLock)
-			{
-				mPauseWorkLock.notifyAll();
-			}
 		}
 
 		/**
@@ -561,27 +558,21 @@ public abstract class ImageWorker
 		}
 	}
 
-	/**
-	 * Pause any ongoing background work. This can be used as a temporary measure to improve performance. For example background work could be paused when a ListView or GridView is
-	 * being scrolled using a {@link android.widget.AbsListView.OnScrollListener} to keep scrolling smooth.
-	 * <p>
-	 * If work is paused, be sure setPauseWork(false) is called again before your fragment or activity is destroyed (for example during {@link android.app.Activity#onPause()}), or
-	 * there is a risk the background thread will never finish.
-	 */
-	public void setPauseWork(boolean pauseWork)
-	{
-		synchronized (mPauseWorkLock)
-		{
-			mPauseWork = pauseWork;
-			if (!mPauseWork)
-			{
-				mPauseWorkLock.notifyAll();
-			}
-		}
-	}
-
 	public HikeLruCache getLruCache()
 	{
 		return this.mImageCache;
+	}
+	
+	public static Bitmap drawableToBitmap (Drawable drawable) {
+	    if (drawable instanceof BitmapDrawable) {
+	        return ((BitmapDrawable)drawable).getBitmap();
+	    }
+
+	    Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Config.ARGB_8888);
+	    Canvas canvas = new Canvas(bitmap); 
+	    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+	    drawable.draw(canvas);
+
+	    return bitmap;
 	}
 }

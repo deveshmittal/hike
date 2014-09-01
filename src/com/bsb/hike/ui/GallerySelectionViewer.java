@@ -25,6 +25,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout.LayoutParams;
@@ -65,6 +66,8 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 	private ProgressDialog progressDialog;
 	
+	private View closeSMLtipView = null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -114,6 +117,8 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		setupActionBar();
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MULTI_FILE_TASK_FINISHED, this);
+		
+		showTipIfRequired();
 	}
 
 	@Override
@@ -137,7 +142,39 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 		startActivity(intent);
 	}
-
+	
+	@Override
+	protected void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(gridAdapter != null)
+		{
+			gridAdapter.getGalleryImageLoader().setExitTasksEarly(true);
+		}
+		if(pagerAdapter != null)
+		{
+			pagerAdapter.getGalleryImageLoader().setExitTasksEarly(true);
+		}
+	}
+	
+	@Override
+	protected void onResume()
+	{
+		// TODO Auto-generated method stub
+		super.onResume();
+		if(gridAdapter != null)
+		{
+			gridAdapter.getGalleryImageLoader().setExitTasksEarly(false);
+			gridAdapter.notifyDataSetChanged();
+		}
+		if(pagerAdapter != null)
+		{
+			pagerAdapter.getGalleryImageLoader().setExitTasksEarly(false);
+			pagerAdapter.notifyDataSetChanged();
+		}
+	}
+	
 	@Override
 	protected void onDestroy()
 	{
@@ -185,18 +222,58 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			public void onClick(View v)
 			{
 				final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
+				long sizeOriginal = 0;
 				for (GalleryItem galleryItem : galleryItems)
 				{
 					fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
+					File file = new File(galleryItem.getFilePath());
+					sizeOriginal += file.length();
 				}
 				
 				final String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
 				final boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
 				
-				fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
-				Utils.executeAsyncTask(fileTransferTask);
+				if (!HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
+				{
+					HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
+					{
+						@Override
+						public void onSucess(Dialog dialog)
+						{
+							fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+							Utils.executeAsyncTask(fileTransferTask);
+							progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+							dialog.dismiss();
+						}
 
-				progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+						@Override
+						public void negativeClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void positiveClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void neutralClicked(Dialog dialog)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+					}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
+				}
+				else
+				{
+					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+					Utils.executeAsyncTask(fileTransferTask);
+					progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
+				}
 			}
 		});
 		
@@ -208,6 +285,10 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 					// TODO Auto-generated method stub
 					final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
 					long sizeOriginal = 0;
+					if (closeSMLtipView != null)
+					{
+						closeSMLtipView.performClick();
+					}
 					for (GalleryItem galleryItem : galleryItems)
 					{
 						fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
@@ -245,7 +326,6 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 					}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
 				}
 		});
-
 		actionBar.setCustomView(actionBarView);
 	}
 
@@ -410,6 +490,11 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			layoutParams.leftMargin = imageWidth;
 			layoutParams.bottomMargin = imageHeight/2;
 		}
+		
+		public GalleryImageLoader getGalleryImageLoader()
+		{
+			return galleryImageLoader;
+		}
 	}
 
 	OnClickListener removeSelectionClickListener = new OnClickListener()
@@ -461,6 +546,33 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 					}
 				}
 			});
+		}
+	}
+	
+	private void showTipIfRequired()
+	{
+		final HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this);
+		if(pref.getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false) && pref.getData(HikeConstants.SHOW_IMAGE_QUALITY_TIP, true))
+		{
+			View view = LayoutInflater.from(this).inflate(R.layout.tip_right_arrow, null);
+			ImageView arrowPointer = (ImageView) (view.findViewById(R.id.arrow_pointer));
+			arrowPointer.getLayoutParams().width = (int) (78 * Utils.densityMultiplier);
+			arrowPointer.requestLayout();
+			arrowPointer.setImageResource(R.drawable.ftue_up_arrow);
+			((TextView) view.findViewById(R.id.tip_header)).setText("Image Settings");
+			((TextView) view.findViewById(R.id.tip_msg)).setText("Small. Medium. Original Size");
+			final View tipView = view;
+			closeSMLtipView = view.findViewById(R.id.close_tip);
+			closeSMLtipView.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					tipView.setVisibility(View.GONE);
+					pref.saveData(HikeConstants.SHOW_IMAGE_QUALITY_TIP, false);
+				}
+			});
+			((LinearLayout) findViewById(R.id.tipContainerTop)).addView(view, 0);
 		}
 	}
 }

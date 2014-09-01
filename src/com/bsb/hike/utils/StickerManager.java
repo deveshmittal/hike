@@ -57,7 +57,9 @@ public class StickerManager
 	public static final String REMOVE_HUMANOID_STICKERS = "removeHumanoiStickers";
 
 	public static final String SHOWN_STICKERS_TUTORIAL = "shownStickersTutorial";
-
+	
+	public static final String REMOVE_DEFAULT_CAT_STICKERS = "removeDefaultCatStickers";
+	
 	public static final String STICKERS_DOWNLOADED = "st_downloaded";
 
 	public static final String STICKERS_FAILED = "st_failed";
@@ -65,6 +67,8 @@ public class StickerManager
 	public static final String STICKER_DOWNLOAD_TYPE = "stDownloadType";
 
 	public static final String STICKER_DATA_BUNDLE = "stickerDataBundle";
+	
+	public static final String STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE = "stickerDownloadFailedTooLarge";
 
 	public static final String STICKER_CATEGORY = "stickerCategory";
 
@@ -98,27 +102,28 @@ public class StickerManager
 
 	public final int[] LOCAL_STICKER_RES_IDS_HUMANOID = { R.drawable.sticker_9_love1, R.drawable.sticker_10_love2, R.drawable.sticker_11_teasing, R.drawable.sticker_12_rofl,
 			R.drawable.sticker_13_bored, R.drawable.sticker_14_angry, R.drawable.sticker_15_strangle, R.drawable.sticker_16_shocked, R.drawable.sticker_17_hurray,
-			R.drawable.sticker_18_yawning };
+			R.drawable.sticker_18_yawning,R.drawable.sticker_069_hi};
 
 	public final int[] LOCAL_STICKER_SMALL_RES_IDS_HUMANOID = { R.drawable.sticker_9_love1_small, R.drawable.sticker_10_love2_small, R.drawable.sticker_11_teasing_small,
 			R.drawable.sticker_12_rofl_small, R.drawable.sticker_13_bored_small, R.drawable.sticker_14_angry_small, R.drawable.sticker_15_strangle_small,
-			R.drawable.sticker_16_shocked_small, R.drawable.sticker_17_hurray_small, R.drawable.sticker_18_yawning_small };
+			R.drawable.sticker_16_shocked_small, R.drawable.sticker_17_hurray_small, R.drawable.sticker_18_yawning_small, R.drawable.sticker_069_hi_small};
 
 	public final String[] LOCAL_STICKER_IDS_HUMANOID = { "001_love1.png", "002_love2.png", "003_teasing.png", "004_rofl.png", "005_bored.png", "006_angry.png", "007_strangle.png",
-			"008_shocked.png", "009_hurray.png", "010_yawning.png" };
+			"008_shocked.png", "009_hurray.png", "010_yawning.png", "069_hi.png" };
 
 	public final int[] LOCAL_STICKER_RES_IDS_EXPRESSIONS = { R.drawable.sticker_1_gn, R.drawable.sticker_2_lol, R.drawable.sticker_3_rofl, R.drawable.sticker_4_lmao,
-			R.drawable.sticker_5_omg, R.drawable.sticker_6_brb, R.drawable.sticker_7_gtg, R.drawable.sticker_8_xoxo, };
+			R.drawable.sticker_5_omg, R.drawable.sticker_6_brb, R.drawable.sticker_7_gtg, R.drawable.sticker_8_xoxo,R.drawable.sticker_113_whereareyou,R.drawable.sticker_112_watchadoing,R.drawable.sticker_092_yo };
 
 	public final int[] LOCAL_STICKER_SMALL_RES_IDS_EXPRESSIONS = { R.drawable.sticker_1_gn_small, R.drawable.sticker_2_lol_small, R.drawable.sticker_3_rofl_small,
-			R.drawable.sticker_4_lmao_small, R.drawable.sticker_5_omg_small, R.drawable.sticker_6_brb_small, R.drawable.sticker_7_gtg_small, R.drawable.sticker_8_xoxo_small, };
+			R.drawable.sticker_4_lmao_small, R.drawable.sticker_5_omg_small, R.drawable.sticker_6_brb_small, R.drawable.sticker_7_gtg_small, R.drawable.sticker_8_xoxo_small,R.drawable.sticker_113_whereareyou_small,R.drawable.sticker_112_watchadoing_small,R.drawable.sticker_092_yo_small };
 
 	public final String[] LOCAL_STICKER_IDS_EXPRESSIONS = { "001_gn.png", "002_lol.png", "003_rofl.png", "004_lmao.png", "005_omg.png", "006_brb.png", "007_gtg.png",
-			"008_xoxo.png", };
+			"008_xoxo.png","113_whereareyou.png","112_watchadoing.png","092_yo.png"};
 
 	public final String[] OLD_HARDCODED_STICKER_IDS_DOGGY = { "001_hi.png", "002_thumbsup.png", "003_drooling.png", "004_devilsmile.png", "005_sorry.png", "006_urgh.png",
 			"007_confused.png", "008_dreaming.png", };
-
+	
+	
 	public enum StickerCategoryId
 	{
 		recent
@@ -225,6 +230,26 @@ public class StickerManager
 				return "bollywoodDownloadShown";
 			}
 		},
+		indian
+		{
+			@Override
+			public int resId()
+			{
+				return R.drawable.indian;
+			}
+
+			@Override
+			public int previewResId()
+			{
+				return R.drawable.preview_indian;
+			}
+
+			@Override
+			public String downloadPref()
+			{
+				return "indianDownloadShown";
+			}
+		},
 		doggy
 		{
 			@Override
@@ -263,26 +288,6 @@ public class StickerManager
 			public String downloadPref()
 			{
 				return "rfDownloadShown";
-			}
-		},
-		indian
-		{
-			@Override
-			public int resId()
-			{
-				return R.drawable.indian;
-			}
-
-			@Override
-			public int previewResId()
-			{
-				return R.drawable.preview_indian;
-			}
-
-			@Override
-			public String downloadPref()
-			{
-				return "indianDownloadShown";
 			}
 		},
 		jelly
@@ -495,12 +500,16 @@ public class StickerManager
 	{
 		context = ctx;
 		preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
-		loadRecentStickers();
+
 	}
 
 	public void loadRecentStickers()
 	{
 		recentStickers = getSortedListForCategory(StickerCategoryId.recent, getInternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name()));
+		if(recentStickers.isEmpty())
+		{
+			addDefaultRecentSticker();
+		}
 	}
 
 	public List<StickerCategory> getStickerCategoryList()
@@ -647,7 +656,7 @@ public class StickerManager
 			editor.commit();
 		}
 	}
-
+	
 	public void addNoMediaFilesToStickerDirectories()
 	{
 		File dir = context.getExternalFilesDir(null);
@@ -734,6 +743,22 @@ public class StickerManager
 		{
 			recentStickers.add(st);
 		}
+	}
+	
+	public void addDefaultRecentSticker()
+	{
+	    String[] recentSticker = { "002_lol.png","003_teasing.png","112_watchadoing.png", "113_whereareyou.png","092_yo.png","069_hi.png" };
+	    String[] recentCat = {  "expressions","humanoid", "expressions", "expressions","expressions", "humanoid" };
+		
+		int count = recentSticker.length;
+		for (int i = 0; i < count; i++)
+		{
+			synchronized (recentStickers)
+			{
+				recentStickers.add(new Sticker(recentCat[i], recentSticker[i]));
+			}	
+		}
+				
 	}
 
 	public void removeStickerFromRecents(Sticker st)

@@ -22,8 +22,10 @@ import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Utils;
 
 public class SettingsActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener
@@ -62,7 +64,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		final ArrayList<String> itemsSummary = new ArrayList<String>();
 
 		itemsSummary.add(getString(R.string.notifications_hintext));
-		itemsSummary.add(getString(R.string.auto_download_media_hinttext_new));
+		itemsSummary.add(getString(R.string.media_settings_hinttext));
 		itemsSummary.add(getString(R.string.sms_setting_hinttext));
 		itemsSummary.add(getString(R.string.account_hintttext));
 		itemsSummary.add(getString(R.string.privacy_setting_hinttext));
@@ -188,42 +190,38 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		switch (position)
 		{
 		case 0:
-			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.notification_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.notifications);
+			IntentManager.openSettingNotification(this);
 			break;
 
 		case 1:
-			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.media_download_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.auto_download_media);
+			IntentManager.openSettingMedia(this);
 			break;
 		case 2:
-			intent = new Intent(this, CreditsActivity.class);
+			IntentManager.openSettingSMS(this);
 			break;
 		case 3:
-			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.account_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.account);
+			IntentManager.openSettingAccount(this);
 			break;
 		case 4:
-			intent = Utils.getIntentForPrivacyScreen(this);
+			IntentManager.openSettingPrivacy(this);
 			break;
 		case 5:
+			if(HikeMessengerApp.syncingContacts)
+				return;
+			if(!Utils.isUserOnline(this))
+			{
+				Utils.showNetworkUnavailableDialog(this);
+				return;
+			}
 			Intent contactSyncIntent = new Intent(HikeService.MQTT_CONTACT_SYNC_ACTION);
 			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
 			sendBroadcast(contactSyncIntent);
 			Toast.makeText(getApplicationContext(), R.string.contacts_sync_started, Toast.LENGTH_SHORT).show();
 			break;
 		case 6:
-			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.help_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.help);
+			HikeConversationsDatabase.getInstance().updateToNewSharedMediaTable();
+			IntentManager.openSettingHelp(this);
 			break;
-		}
-		if (intent != null)
-		{
-			startActivity(intent);
 		}
 	}
 }

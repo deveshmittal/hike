@@ -1,6 +1,7 @@
 package com.bsb.hike.tasks;
 
 import java.io.File;
+
 import java.util.List;
 import java.util.Map;
 
@@ -30,13 +31,12 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -411,12 +411,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		if (!ab_scanned)
 		{
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
-			List<ContactInfo> contactinfos = ContactUtils.getContacts(this.context);
-			ContactUtils.setGreenBlueStatus(this.context, contactinfos);
-			HikeUserDatabase db = null;
+			ContactManager conMgr = ContactManager.getInstance();
+			List<ContactInfo> contactinfos = conMgr.getContacts(this.context);
+			conMgr.setGreenBlueStatus(this.context, contactinfos);
+			
 			try
 			{
-				Map<String, List<ContactInfo>> contacts = ContactUtils.convertToMap(contactinfos);
+				Map<String, List<ContactInfo>> contacts = conMgr.convertToMap(contactinfos);
 				JSONObject jsonForAddressBookAndBlockList = AccountUtils.postAddressBook(token, contacts);
 
 				List<ContactInfo> addressbook = AccountUtils.getContactList(jsonForAddressBookAndBlockList, contacts);
@@ -442,8 +443,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					return Boolean.FALSE;
 				}
 				Logger.d("SignupTask", "about to insert addressbook");
-				db = HikeUserDatabase.getInstance();
-				db.setAddressBookAndBlockList(addressbook, blockList);
+				ContactManager.getInstance().setAddressBookAndBlockList(addressbook, blockList);
 
 			}
 			catch (Exception e)
@@ -532,8 +532,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		if (profilePicSmall != null)
 		{
 				byte[] bytes = BitmapUtils.bitmapToBytes(profilePicSmall, Bitmap.CompressFormat.JPEG, 100);
-				HikeUserDatabase db = HikeUserDatabase.getInstance();
-				db.setIcon(msisdn, bytes, false);
+				ContactManager.getInstance().setIcon(msisdn, bytes, false);
 		}
 		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
@@ -551,7 +550,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		/*
 		 * We show this tip only to new signup users
 		 */
-		settings.edit().putBoolean(HikeMessengerApp.SHOW_START_NEW_CHAT_TIP, true).commit();
+		settings.edit().putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true).commit();
 		return Boolean.TRUE;
 	}
 

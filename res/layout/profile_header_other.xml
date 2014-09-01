@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/profile_header"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#f1f2f3"
+    android:minHeight="100dp"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp" >
+
+        <com.bsb.hike.ui.utils.RecyclingImageView
+            android:id="@+id/profile_image"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:layout_centerVertical="true"
+            android:contentDescription="Profile Image"
+            android:layout_marginLeft="25dp"
+            android:onClick="onViewImageClicked"
+            android:src="@drawable/ic_default_avatar_group" />
+
+        <LinearLayout
+            android:id="@+id/name_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:layout_toRightOf="@id/profile_image"
+            android:layout_marginRight="10dp"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:ellipsize="end"
+                android:maxLength="@integer/max_length_group_name"
+                android:contentDescription="Name"
+                android:singleLine="true"
+                android:textColor="@color/chat_color"
+                android:textSize="24sp" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/subtext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="Status"
+                android:textColor="@color/phone_entering_header"
+                android:ellipsize="end"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/remove_fav"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="22dp"
+        android:layout_marginLeft="105dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/update_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_fav_msg"
+            android:contentDescription="Favourites Message"
+            android:textColor="#aaaaaa"
+            android:textSize="12sp" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="19dp" >
+
+            <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/no"
+                android:layout_width="80dp"
+                android:layout_height="30dp"
+                android:background="#babfc5"
+                android:onClick="onNoBtnClick"
+                android:contentDescription="No Button"
+                android:text="@string/not_now"
+                android:textColor="@color/other_list_selected"
+                android:textSize="12sp" />
+
+            <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/yes"
+                android:layout_width="80dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="7dp"
+                android:layout_toRightOf="@id/no"
+                android:background="@color/blue_hike"
+                android:contentDescription="Yes Button"
+                android:onClick="onYesBtnClick"
+                android:text="@string/add_btn"
+                android:textColor="@color/other_list_selected"
+                android:textSize="12sp" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/add_fav_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="15dp"
+            android:gravity="center_horizontal"
+            android:onClick="onTextButtonClick" >
+
+            <ImageView
+                android:id="@+id/add_fav_star"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="Add to Fav"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="12dp" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/add_fav_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="Add to fav text"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/add_fav_star"
+                android:textSize="16sp" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@color/list_divider" />
+    </LinearLayout>
+
+</LinearLayout>

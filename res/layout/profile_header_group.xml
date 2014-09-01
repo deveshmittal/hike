@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#f1f2f3"
+    android:minHeight="100dp" >
+
+    <com.bsb.hike.ui.utils.RecyclingImageView
+        android:id="@+id/group_profile_image"
+        android:contentDescription="Profile Image"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="25dp"
+        android:onClick="onViewImageClicked"
+        android:src="@drawable/ic_default_avatar_group" />
+
+    <RelativeLayout
+        android:id="@+id/divider_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="8dp"
+        android:background="@drawable/list_item"
+        android:onClick="onGroupNameEditClick"
+        android:paddingRight="20dp" >
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="1.5dp"
+            android:layout_height="32dp"
+            android:layout_centerVertical="true"
+            android:background="#d9dbdc" />
+
+        <ImageView
+            android:id="@+id/change_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+           	android:contentDescription="Edit Grp Name"
+            android:layout_marginLeft="13dp"
+            android:layout_toRightOf="@id/divider"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_edit" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/name_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="18dp"
+        android:layout_toLeftOf="@id/divider_view"
+        android:layout_toRightOf="@id/group_profile_image"
+        android:orientation="vertical" >
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLength="@integer/max_length_group_name"
+                android:contentDescription="Group Name"
+                android:singleLine="true"
+                android:textColor="@color/chat_color"
+                android:textSize="24sp" />
+
+            <com.bsb.hike.view.CustomFontEditText
+                android:id="@+id/name_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#00000000"
+                android:maxLength="@integer/max_length_group_name"
+                android:contentDescription="Edit Group Name"
+                android:singleLine="true"
+                android:textColor="@color/chat_color"
+                android:textSize="24sp"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/subtext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/phone_entering_header"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+</RelativeLayout>

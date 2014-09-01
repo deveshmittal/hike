@@ -52,14 +52,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	@Override
 	public void onBackPressed()
 	{
-		Fragment fragment = getSupportFragmentManager().findFragmentByTag(HikeConstants.IMAGE_FRAGMENT_TAG);
-		if (fragment != null && fragment.isVisible())
-		{
-			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-			fragmentTransaction.remove(fragment);
-			fragmentTransaction.commitAllowingStateLoss();
-		}
-		else
+		if (!removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
 		{
 			HikeAppStateUtils.onBackPressed();
 			super.onBackPressed();
@@ -139,5 +132,24 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 				}
 			});
 		}
+	}
+	
+	public boolean removeFragment(String tag)
+	{
+		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+		Fragment fragment = getSupportFragmentManager().findFragmentByTag(tag);
+
+		if (fragment != null)
+		{	
+			fragmentTransaction.remove(fragment);
+			fragmentTransaction.commitAllowingStateLoss();
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean isFragmentAdded(String tag)
+	{
+		return getSupportFragmentManager().findFragmentByTag(tag) != null;
 	}
 }
