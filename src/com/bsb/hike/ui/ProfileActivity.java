@@ -741,15 +741,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			}
 			groupNameEditText = (EditText) headerView.findViewById(R.id.name_edit);
 			text = (TextView) headerView.findViewById(R.id.name);
-			subText = (TextView) headerView.findViewById(R.id.subtext);
 			profileImage = (ImageView) headerView.findViewById(R.id.group_profile_image);
 			smallIconFrame = (ImageView) headerView.findViewById(R.id.change_profile);
-			
 			groupNameEditText.setText(groupConversation.getLabel());
 			msisdn = groupConversation.getMsisdn();
 			name = groupConversation.getLabel();
 			text.setText(name);
-			subText.setText(getString(R.string.num_people, (groupConversation.getGroupMemberAliveCount() + 1)));
 			break;
 			
 		default:
