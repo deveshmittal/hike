@@ -254,7 +254,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.text = (TextView) v.findViewById(R.id.name);
 				viewHolder.subText = (TextView) v.findViewById(R.id.count);
 				viewHolder.infoContainer = v.findViewById(R.id.shared_media_items);
-				viewHolder.extraInfo = (TextView) v.findViewById(R.id.sm_emptystate);
+				viewHolder.parent =  v.findViewById(R.id.sm_emptystate);
 				
 				List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
 				LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
@@ -459,12 +459,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			else
 			{		//Empty State
 				layout.removeAllViews();
-				viewHolder.extraInfo.setVisibility(View.VISIBLE);
-				layoutParams = (LayoutParams) viewHolder.extraInfo.getLayoutParams();
-				layoutParams.width = LayoutParams.MATCH_PARENT;
-				layoutParams.height = LayoutParams.WRAP_CONTENT;
-				layout.addView(viewHolder.extraInfo);
-				layout.setLayoutParams(layoutParams);
+				viewHolder.parent.setVisibility(View.VISIBLE);
+				layout.addView(viewHolder.parent);
 			}
 			
 			break;

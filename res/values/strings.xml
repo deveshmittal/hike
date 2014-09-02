@@ -1148,7 +1148,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="members">MEMBERS</string>
     <string name="phone_pa">PHONE</string>
     <string name="shared_cont_pa">SHARED CONTENT</string>
-    <string name="no_media">no media yet :(</string>
+    <string name="no_media">No media shared</string>
     <string name="no_internet_try_again">No internet connection. Please try again later.</string>
     <string name="refresh">Refresh</string>
     <string name="user_back_on_hike">%1$s is now on hike, say hi</string>
