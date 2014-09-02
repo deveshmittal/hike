@@ -453,6 +453,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
 					image.setTag(OPEN_GALLERY);
 					image.setOnClickListener(profileActivity);
+					RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams) image.getLayoutParams();
+					rl.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+					image.setLayoutParams(rl);
 					image.setImageDrawable((context.getResources().getDrawable(R.drawable.ic_arrow)));
 					image.setScaleType(ScaleType.CENTER);
 				}
