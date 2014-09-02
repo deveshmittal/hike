@@ -7271,7 +7271,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
-		Logger.d("ChatThread", "Message Adapter Scrolled State: " + scrollState);
+		Logger.d("scroll", "Message Adapter Scrolled State: " + scrollState);
 		if (bottomFastScrollIndicator.getVisibility() == View.VISIBLE)
 		{
 			if (view.getLastVisiblePosition() >= messages.size() - HikeConstants.MAX_FAST_SCROLL_VISIBLE_POSITION)

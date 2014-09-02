@@ -4242,8 +4242,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	public void setIsListFlinging(boolean isFling)
 	{
+		Logger.d("scroll", "Message Adapter set list flinging " + isFling);
 		boolean notify = isFling != isListFlinging;
-
+		Logger.d("scroll", "Message Adapter notify " + notify);
 		isListFlinging = isFling;
 		
 		if(notify && !isListFlinging){
