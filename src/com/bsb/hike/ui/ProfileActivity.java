@@ -698,6 +698,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					// Show add/not now screen.
 					LinearLayout req_layout = (LinearLayout) parentView.findViewById(R.id.remove_fav);
 					req_layout.setVisibility(View.VISIBLE);
+					LinearLayout fav_layout = (LinearLayout) parentView.findViewById(R.id.add_fav_view);
+					fav_layout.setVisibility(View.GONE);
 				}
 				else
 				{
