@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -4910,8 +4911,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 */
 	public List<?> getSharedMedia(String msisdn, int limit, long givenMsgId, boolean onlyMedia, boolean itemsToRight)
 	{
-		String limitStr = (limit == -1) ? null : new Integer(limit).toString();
-		
 		String msgIdSelection = DBConstants.MESSAGE_ID + (itemsToRight ? "<" : ">") + givenMsgId;
 		String hfTypeSelection = getSharedMediaSelection(onlyMedia);
 
@@ -4922,49 +4921,38 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		try
 		{
 			c = mDb.query(DBConstants.SHARED_MEDIA_TABLE, new String[] { DBConstants.MESSAGE_ID, DBConstants.GROUP_PARTICIPANT, DBConstants.TIMESTAMP, DBConstants.IS_SENT,
-					DBConstants.MESSAGE_METADATA }, selection, new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + (itemsToRight ? " DESC" : " ASC"), limitStr);
+					DBConstants.MESSAGE_METADATA }, selection, new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + (itemsToRight ? " DESC" : " ASC"), null);
 
-
-			final int msgIdIndex = c.getColumnIndex(DBConstants.MESSAGE_ID);
-			final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
-			final int tsIndex = c.getColumnIndex(DBConstants.TIMESTAMP);
-			final int isSentIndex = c.getColumnIndex(DBConstants.IS_SENT);
-			final int metadataIndex = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
-			
 			List<?> sharedFilesList;
 			if(onlyMedia)
 			{
-				sharedFilesList = new ArrayList<HikeSharedFile>(c.getCount());
+				sharedFilesList = new ArrayList<HikeSharedFile>(limit);
 			}
 			else
 			{
-				sharedFilesList = new ArrayList<FileListItem>(c.getCount());
+				sharedFilesList = new ArrayList<FileListItem>(limit);
 			}
 			
-			while (c.moveToNext())
+			SharedMediaCursorIterator cursorIterator = new SharedMediaCursorIterator(c, msisdn);
+			while (cursorIterator.hasNext() && limit>0)
 			{
-				long msgId = c.getLong(msgIdIndex);
-				long ts = c.getLong(tsIndex);
-				boolean isSent = c.getInt(isSentIndex) != 0;
-				String messageMetadata = c.getString(metadataIndex);
-				String groupParticipantMsisdn = c.getString(groupParticipantColumn);
-				
-				HikeSharedFile hikeSharedFile = new HikeSharedFile(new JSONObject(messageMetadata), isSent, msgId, msisdn, ts, groupParticipantMsisdn);
-				if(onlyMedia)
+				HikeSharedFile hikeSharedFile = cursorIterator.next();
+				if(hikeSharedFile.getFileFromExactFilePath().exists())
 				{
-					((List<HikeSharedFile>) sharedFilesList).add(hikeSharedFile);
-				}
-				else
-				{
-					((List<FileListItem>) sharedFilesList).add(new FileListItem(hikeSharedFile));
+					limit--;
+
+					if (onlyMedia)
+					{
+						((List<HikeSharedFile>) sharedFilesList).add(hikeSharedFile);
+					}
+					else
+					{
+						((List<FileListItem>) sharedFilesList).add(new FileListItem(hikeSharedFile));
+					}
 				}
 			}
 			
 			return sharedFilesList;
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
 		}
 		finally
 		{
@@ -4973,8 +4961,69 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				c.close();
 			}
 		}
-		return null;
 	}
+	
+	private class SharedMediaCursorIterator implements Iterator<HikeSharedFile>
+	{
+
+		Cursor cursor;
+		String msisdn;
+		int msgIdIndex;
+		int groupParticipantColumn;
+		int tsIndex;
+		int isSentIndex;
+		int metadataIndex;
+
+		public SharedMediaCursorIterator(Cursor c, String msisdn)
+		{
+			this.cursor = c;
+			msgIdIndex = cursor.getColumnIndex(DBConstants.MESSAGE_ID);
+			groupParticipantColumn = cursor.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
+			tsIndex = cursor.getColumnIndex(DBConstants.TIMESTAMP);
+			isSentIndex = cursor.getColumnIndex(DBConstants.IS_SENT);
+			metadataIndex = cursor.getColumnIndex(DBConstants.MESSAGE_METADATA);
+
+			this.msisdn = msisdn;
+		}
+
+		@Override
+		public boolean hasNext()
+		{
+			return cursor.getPosition() != cursor.getCount()-1;
+		}
+
+		@Override
+		public HikeSharedFile next()
+		{
+			if (cursor.moveToNext())
+			{
+				long msgId = cursor.getLong(msgIdIndex);
+				long ts = cursor.getLong(tsIndex);
+				boolean isSent = cursor.getInt(isSentIndex) != 0;
+				String messageMetadata = cursor.getString(metadataIndex);
+				String groupParticipantMsisdn = cursor.getString(groupParticipantColumn);
+
+				HikeSharedFile hikeSharedFile;
+				try
+				{
+					hikeSharedFile = new HikeSharedFile(new JSONObject(messageMetadata), isSent, msgId, msisdn, ts, groupParticipantMsisdn);
+					return hikeSharedFile;
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+					return null;
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public void remove()
+		{
+
+		}
+	};
 
 	public void deleteEmptyConversations(SQLiteDatabase mDb)
 	{
