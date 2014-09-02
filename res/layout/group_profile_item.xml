@@ -54,7 +54,7 @@
             android:singleLine="true"
             android:text="Rishabh Sharma"
             android:textColor="@color/updates_text"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:textStyle="bold|italic" />
         
         <LinearLayout 
@@ -62,12 +62,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="14dp"
-            android:visibility="gone" >
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:visibility="gone">
         
              <View
                 android:id="@+id/divider"
                 android:layout_width="0.5dp"
-                android:layout_height="12dp"
+                android:layout_height="14dp"
                 android:layout_centerVertical="true"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="6dp"
