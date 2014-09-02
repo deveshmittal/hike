@@ -22,9 +22,9 @@
             android:id="@+id/sm_emptystate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="27dp"
             android:layout_marginRight="16dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="18dp"
             android:contentDescription="Empty State"
             android:orientation="horizontal" 
@@ -88,12 +88,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="16dp"
+                    android:layout_marginLeft="6dp"
                     android:layout_marginRight="5dp"
                     android:layout_toRightOf="@id/shared_files_icon"
                     android:text="@string/shared_files"
                     android:textColor="@color/chat_color"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:textStyle="bold|italic" />
 
                 <View
@@ -140,12 +140,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="16dp"
+                    android:layout_marginLeft="6dp"
                     android:layout_marginRight="5dp"
                     android:layout_toRightOf="@id/shared_pin_icon"
                     android:contentDescription="Shared Pins"
                     android:textColor="@color/chat_color"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:textStyle="bold|italic" />
             </RelativeLayout>
         </LinearLayout>
