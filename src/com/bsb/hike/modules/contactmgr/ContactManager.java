@@ -439,8 +439,8 @@ public class ContactManager implements ITransientCache
 			List<String> last = mapEntry.getValue();
 			for (String ms : last)
 			{
-				ContactInfo contact = getContact(ms);
-				if (null != contact.getName())
+				ContactInfo contact = getContact(ms, false, false);
+				if (null != contact && null != contact.getName())
 				{
 					setGroupParticipantContactName(groupId, ms, contact.getName());
 				}
