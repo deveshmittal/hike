@@ -3977,7 +3977,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			Pair<String, Pair<Long,String>> pair = (Pair<String, Pair<Long, String>>) object;
 			// If the msisdn don't match we simply return
-			if (!mConversation.getMsisdn().equals(pair.first))
+			if (!mConversation.getMsisdn().equals(pair.first) || messages == null || messages.isEmpty())
 			{
 				return;
 			}
@@ -4099,6 +4099,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
 		{
+			if(messages == null || messages.isEmpty())
+			{
+				return;
+			}
 			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
 			PairModified<PairModified<Long, Set<String>>, Long> pair = messageStatusMap.get(mConversation.getMsisdn());
 			if (pair != null)

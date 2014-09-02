@@ -3815,19 +3815,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			try
 			{
+				int duration = mediaPlayer.getDuration();
+				
 				switch (playerState)
 				{
 				case PLAYING:
 				case PAUSED:
 					int progress = 0;
-					if (mediaPlayer.getDuration() > 0)
-						progress = (mediaPlayer.getCurrentPosition() * 100) / mediaPlayer.getDuration();
+					if (duration > 0)
+						progress = (mediaPlayer.getCurrentPosition() * 100) / duration;
 					((HoloCircularProgress) durationProgress).setProgress(progress * 0.01f);
 					Utils.setupFormattedTime(durationTxt, mediaPlayer.getCurrentPosition() / 1000);
 					break;
 				case STOPPED:
 					((HoloCircularProgress) durationProgress).setProgress(0.00f);
-					Utils.setupFormattedTime(durationTxt, mediaPlayer.getDuration() / 1000);
+					Utils.setupFormattedTime(durationTxt, duration / 1000);
 					break;
 
 				}
