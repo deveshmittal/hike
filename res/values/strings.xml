@@ -1136,7 +1136,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="confirm_delete_pins_header">Delete pins</string>
     <string name="confirm_delete_pins">Are you sure you want to delete these %1$s pins?</string>    
     <string name="shared_media">Shared Media</string>
-    <string name="group_admin">ADMIN</string>
     <string name="shared_files">Shared Files</string>
     <string name="add_btn">ADD</string>
     <string name="not_now">NOT NOW</string>
@@ -1159,6 +1158,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="stealth_info_tip_subtext">Hide your chats. Tap on \'hi\' to get started.</string>
     <string name="file_missing_caps">FILE MISSING</string>
     <string name="status_profile_pic_notification">changed profile picture</string>
+    <string name="group_admin">Admin</string>
+    <string name="total_mem_count">100</string>
     <string name="no_file">No files or pins shared</string>
     <string name="no_file_profile">No files shared</string>
 </resources>

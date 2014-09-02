@@ -304,10 +304,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				v = new LinearLayout(context);
 				viewHolder.parent = inflater.inflate(R.layout.group_profile_item, (LinearLayout) v, false);
 				viewHolder.text = (TextView) viewHolder.parent.findViewById(R.id.name);
-				viewHolder.extraInfo  = (TextView) viewHolder.parent.findViewById(R.id.main_info);
 				viewHolder.icon  = (ImageView) viewHolder.parent.findViewById(R.id.avatar);
 				viewHolder.iconFrame = (ImageView) viewHolder.parent.findViewById(R.id.avatar_frame);
 				viewHolder.infoContainer = viewHolder.parent.findViewById(R.id.owner_indicator);
+				viewHolder.phoneNumView = viewHolder.parent.findViewById(R.id.unsaved_cont_layout);
+				viewHolder.extraInfo = (TextView) viewHolder.parent.findViewById(R.id.telephone);
+				
 				break;
 
 			case ADD_MEMBERS:
@@ -552,7 +554,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 		case MEMBERS:
 			viewHolder.text.setText(context.getResources().getString(R.string.members));
-			viewHolder.subText.setText(Integer.toString(((ProfileGroupItem)profileItem).getTotalMembers()));
+			viewHolder.subText.setText(Integer.toString(((ProfileGroupItem)profileItem).getTotalMembers()) + "/" +context.getResources().getString(R.string.total_mem_count));
 			break;
 
 		case GROUP_PARTICIPANT:
@@ -585,25 +587,17 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			{
 				groupParticipantName = contactInfo.getFirstNameAndSurname();
 			}
-			viewHolder.text.setText(groupParticipantName);
-			if (!showingLastSeen)
-			{
-				viewHolder.extraInfo.setText(contactInfo.isOnhike() ? R.string.on_hike : R.string.on_sms);
+			if(!contactInfo.isUnknownContact())
+			{	viewHolder.text.setText(groupParticipantName);
+				viewHolder.phoneNumView.setVisibility(View.GONE);
 			}
 			else
 			{
-				viewHolder.extraInfo.setText(lastSeenString);
+				viewHolder.phoneNumView.setVisibility(View.VISIBLE);
+				viewHolder.text.setText(contactInfo.getMsisdn());
+				viewHolder.extraInfo.setText(groupParticipantName);
 			}
-			if (showingLastSeen && offline == 0)
-			{
-				viewHolder.extraInfo.setTextColor(context.getResources().getColor(R.color.unread_message));
-				viewHolder.iconFrame.setImageResource(R.drawable.frame_avatar_highlight);
-			}
-			else
-			{
-				viewHolder.extraInfo.setTextColor(context.getResources().getColor(R.color.participant_last_seen));
-				viewHolder.iconFrame.setImageDrawable(null);
-			}
+				
 			setAvatar(contactInfo.getMsisdn(), viewHolder.icon);
 			viewHolder.parent.setOnLongClickListener(profileActivity);
 			viewHolder.parent.setTag(groupParticipant);
@@ -621,12 +615,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			View avatarContainer = groupParticipantParentView_mem.findViewById(R.id.avatar_container);
 			avatarContainer.setVisibility(View.GONE);
 			TextView nameTextView_mem = (TextView) groupParticipantParentView_mem.findViewById(R.id.name);
-			TextView mainInfo_mem = (TextView) groupParticipantParentView_mem.findViewById(R.id.main_info);
 			ImageView avatar_mem = (ImageView) groupParticipantParentView_mem.findViewById(R.id.add_participant);
 			avatar_mem.setVisibility(View.VISIBLE);
 			nameTextView_mem.setText(R.string.add_people);
 			nameTextView_mem.setTextColor(context.getResources().getColor(R.color.blue_hike));
-			mainInfo_mem.setVisibility(View.GONE);
 			groupParticipantParentView_mem.setTag(null);
 			groupParticipantParentView_mem.setOnClickListener(profileActivity);
 			addMemberLayout.addView(groupParticipantParentView_mem);
