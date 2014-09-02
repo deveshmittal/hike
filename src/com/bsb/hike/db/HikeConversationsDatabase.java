@@ -4729,28 +4729,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 	
-	public int getSharedMediaCount(String msisdn, boolean onlyMedia)
-	{
-		String hfTypeSelection = getSharedMediaSelection(onlyMedia);
-		
-		Cursor c = null;
-		
-		String selection =  DBConstants.MSISDN + " = ?"  + " AND "
-				+ (DBConstants.HIKE_FILE_TYPE + " IN " + hfTypeSelection);
-
-		try
-		{
-			c = mDb.query(DBConstants.SHARED_MEDIA_TABLE, new String[] {DBConstants.MSISDN}, selection, new String[] {msisdn}, null, null, null);
-			return c.getCount();
-		}
-
-		finally
-		{
-			if(c!=null)
-				c.close();
-		}
-	}
-	
 	public int getPinCount(String msisdn)
 	{
 		String selection = DBConstants.MSISDN + " = ?" + " AND " + DBConstants.MESSAGE_TYPE + "==" + HikeConstants.MESSAGE_TYPE.TEXT_PIN;
@@ -5024,6 +5002,39 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		}
 	};
+
+	public int getSharedMediaCount(String msisdn, boolean onlyMedia)
+	{
+		int count = 0;
+		String hfTypeSelection = getSharedMediaSelection(onlyMedia);
+		
+		Cursor c = null;
+		
+		String selection =  DBConstants.MSISDN + " = ?"  + " AND "
+				+ (DBConstants.HIKE_FILE_TYPE + " IN " + hfTypeSelection);
+
+		try
+		{
+			c = mDb.query(DBConstants.SHARED_MEDIA_TABLE, new String[] { DBConstants.MESSAGE_ID, DBConstants.GROUP_PARTICIPANT, DBConstants.TIMESTAMP, DBConstants.IS_SENT,
+					DBConstants.MESSAGE_METADATA }, selection, new String[] { msisdn }, null, null, null, null);
+
+			SharedMediaCursorIterator cursorIterator = new SharedMediaCursorIterator(c, msisdn);
+			while (cursorIterator.hasNext())
+			{
+				HikeSharedFile hikeSharedFile = cursorIterator.next();
+				if(hikeSharedFile.getFileFromExactFilePath().exists())
+				{
+					count++;
+				}
+			}
+			return count;
+		}
+		finally
+		{
+			if(c!=null)
+				c.close();
+		}
+	}
 
 	public void deleteEmptyConversations(SQLiteDatabase mDb)
 	{
