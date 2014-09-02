@@ -28,8 +28,11 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.filetransfer.FileTransferManager;
+import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -292,7 +295,7 @@ public class HikeNotification
 
 		final String msisdn = convMsg.getMsisdn();
 		// we are using the MSISDN now to group the notifications
-		final int notificationId = msisdn.hashCode();
+		final int notificationId = HIKE_SUMMARY_NOTIFICATION_ID;
 
 		String message = (!convMsg.isFileTransferMessage()) ? convMsg.getMessage() : HikeFileType.getFileTypeMessage(context, convMsg.getMetadata().getHikeFiles().get(0)
 				.getHikeFileType(), convMsg.isSent());
@@ -410,7 +413,7 @@ public class HikeNotification
 			}
 
 			// big picture messages ! intercept !
-			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, !convMsg.isStickerMessage(), isPin, false, null,
+			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, !convMsg.isStickerMessage(), isPin, false, hikeNotifMsgStack.getNotificationSubText(),
 					null, forceBlockNotificationSound);
 		}
 		else
@@ -492,7 +495,30 @@ public class HikeNotification
 			{
 				return;
 			}
-			else if (convMessage.isStickerMessage() || convMessage.isFileTransferMessage())
+			else if (convMessage.isFileTransferMessage())
+			{
+				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+				NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
+				SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE
+						&& ((networkType == NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_IMAGE_PREF, true)) || (networkType != NetworkType.WIFI && appPrefs
+								.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_IMAGE_PREF, true))))
+				{
+					// image download already in progress, return
+					hikeNotifMsgStack.resetMsgStack();
+					return;
+				}
+
+				// Bitmap bigPictureImage = ToastListener.returnBigPicture(convMessage, context);
+				// if (bigPictureImage != null)
+				// {
+				// showNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
+				// hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
+				// hikeNotifMsgStack.getNotificationBigText(), convMessage.getMsisdn(), bigPictureImage, !convMessage.isStickerMessage(), false, false,
+				// hikeNotifMsgStack.getNotificationSubText(), null, false);
+				// }
+			}
+			else if (convMessage.isStickerMessage())
 			{
 				Bitmap bigPictureImage = ToastListener.returnBigPicture(convMessage, context);
 				if (bigPictureImage != null)

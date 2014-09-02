@@ -213,13 +213,7 @@ public class ToastListener implements Listener
 					contactInfo = HikeMessengerApp.getContactManager().getContact(message.getMsisdn(), true, true);
 				}
 
-				// TODO : Commented this because for FT messages we get 2 packets from PubSub,
-				// 1. Message received (with the thumbnail)
-				// 2. Push file downloaded
-				// The above two results in duplicate notifications being displayed
-				// X - Sent you a Photo
-				// X - Sent you a Photo
-				// toaster.notifyMessage(contactInfo, message, true, bigPicture);
+				 toaster.notifyMessage(contactInfo, message, true, bigPicture);
 			}
 		}
 		else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type))
