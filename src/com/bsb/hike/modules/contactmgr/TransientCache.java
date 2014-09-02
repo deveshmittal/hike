@@ -228,6 +228,24 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
+	 * This method removes the group entry given by the parameter <code>groupId</code> from the {@link #groupParticipants} map
+	 * 
+	 * @param groupId
+	 */
+	void removeGroup(String groupId)
+	{
+		writeLock.lock();
+		try
+		{
+			groupParticipants.remove(groupId);
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	/**
 	 * updates the contact in memory and if not found in memory inserts the contact in {@link #transientContacts}
 	 * 
 	 * @param contact
