@@ -283,13 +283,15 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			case SHARED_CONTENT:
 				v = inflater.inflate(R.layout.shared_content, null);
 				viewHolder.parent = v.findViewById(R.id.shared_content);
+				viewHolder.sharedFiles = v.findViewById(R.id.shared_content_layout);
 				viewHolder.text = (TextView) viewHolder.parent.findViewById(R.id.name);
 				viewHolder.subText = (TextView) viewHolder.parent.findViewById(R.id.count);
 				viewHolder.extraInfo = (TextView) v.findViewById(R.id.count_pin);
-				viewHolder.infoContainer = v.findViewById(R.id.shared_content_layout);
 				viewHolder.groupOrPins = (TextView) v.findViewById(R.id.shared_pins);
 				viewHolder.sharedFilesCount = (TextView) v.findViewById(R.id.count_sf);
 				viewHolder.icon = (ImageView) v.findViewById(R.id.shared_pin_icon);
+				viewHolder.phoneNumView =  v.findViewById(R.id.sm_emptystate);
+				viewHolder.timeStamp = (TextView) v.findViewById(R.id.sm_emptystate_tv);
 				break;
 
 			case MEMBERS:
@@ -466,7 +468,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			break;
 
 		case SHARED_CONTENT:
-			viewHolder.infoContainer.setVisibility(View.VISIBLE);
 			String heading = ((ProfileSharedContent)profileItem).getText();
 			viewHolder.text.setText(heading);
 			viewHolder.sharedFilesCount.setText(Integer.toString(((ProfileSharedContent) profileItem).getSharedFilesCount()));
@@ -479,23 +480,56 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				/*
 				 * We will remove these two lines when we will be add groups for 1:1
 				 */
-				((LinearLayout) viewHolder.infoContainer).getChildAt(1).setVisibility(View.VISIBLE);
-				((LinearLayout) viewHolder.infoContainer).findViewById(R.id.shared_content_seprator).setVisibility(View.VISIBLE);
 				
-				viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
-				viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_pin_2));
+				if(totalfiles>0)
+				{
+					viewHolder.sharedFiles.setVisibility(View.VISIBLE);
+					((LinearLayout) viewHolder.sharedFiles).getChildAt(1).setVisibility(View.VISIBLE);
+					((LinearLayout) viewHolder.sharedFiles).findViewById(R.id.shared_content_seprator).setVisibility(View.VISIBLE);
+				
+					viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
+					viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_pin_2));
+					viewHolder.phoneNumView.setVisibility(View.GONE);
+				}
+				else
+				{
+					viewHolder.sharedFiles.setVisibility(View.GONE);
+					viewHolder.phoneNumView.setVisibility(View.VISIBLE);
+					viewHolder.timeStamp.setText(context.getResources().getString(R.string.no_file));
+				}
 			}
 			else
 			{
 				/*
 				 * We will remove these two lines when we will be add groups for 1:1
 				 */
+				LayoutParams ll;
 				
-				((LinearLayout) viewHolder.infoContainer).getChildAt(1).setVisibility(View.GONE);
-				((LinearLayout) viewHolder.infoContainer).findViewById(R.id.shared_content_seprator).setVisibility(View.GONE);
-				
-				viewHolder.groupOrPins.setText(context.getResources().getString(R.string.groups));
-				viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_group_2));
+				/*
+				 * The top margins in this case gets screwed up. Can't find out the reason why. The top margins come out
+				 * to be x + 12 for the views which are being made visible below. Hence this hacky margin fix.
+				 * */
+				if(totalfiles > 0)			
+				{	
+					ll = (LayoutParams) viewHolder.sharedFiles.getLayoutParams();
+					ll.topMargin = -12;
+					viewHolder.sharedFiles.setLayoutParams(ll);
+					viewHolder.sharedFiles.setVisibility(View.VISIBLE);
+					((LinearLayout) viewHolder.sharedFiles).getChildAt(1).setVisibility(View.GONE);
+					((LinearLayout) viewHolder.sharedFiles).findViewById(R.id.shared_content_seprator).setVisibility(View.GONE);
+					viewHolder.groupOrPins.setText(context.getResources().getString(R.string.groups));
+					viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_group_2));
+					viewHolder.phoneNumView.setVisibility(View.GONE);
+				}
+				else
+				{	
+					viewHolder.sharedFiles.setVisibility(View.GONE);
+					ll = (LayoutParams) viewHolder.phoneNumView.getLayoutParams();
+					ll.topMargin = 12;
+					viewHolder.phoneNumView.setLayoutParams(ll);
+					viewHolder.phoneNumView.setVisibility(View.VISIBLE);
+					viewHolder.timeStamp.setText(context.getResources().getString(R.string.no_file_profile));
+				}
 			}
 			break;
 
@@ -714,6 +748,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		View parent;
 		
 		View phoneNumView;
+		
+		View sharedFiles;
 	}
 
 	public void setProfilePreview(Bitmap preview)
