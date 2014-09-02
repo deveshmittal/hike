@@ -459,17 +459,25 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			@Override
 			public void onClick(View v)
 			{
-				showingGroupEdit = false;
-				mActivityState.edittedGroupName = null;
-				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
-				mName.setText(groupConversation.getLabel());
-				mName.setVisibility(View.VISIBLE);
-				mNameEdit.setVisibility(View.GONE);
-				setupActionBar();
+				closeGroupNameEdit();
 			}
 		});
 		actionBar.setCustomView(editGroupNameView);
 		invalidateOptionsMenu();
+	}
+
+	public void closeGroupNameEdit()
+	{
+		if(showingGroupEdit)
+		{
+			showingGroupEdit = false;
+			mActivityState.edittedGroupName = null;
+			Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
+			mName.setText(groupConversation.getLabel());
+			mName.setVisibility(View.VISIBLE);
+			mNameEdit.setVisibility(View.GONE);
+			setupActionBar();
+		}
 	}
 
 	@Override
@@ -1153,6 +1161,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public void onBackPressed()
 	{
+		if(showingGroupEdit)
+		{
+			closeGroupNameEdit();
+			return;
+		}
 		if(removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
 		{
 			return;
@@ -2488,6 +2501,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	@Override
 	public void onClick(View v)
 	{
+		if(showingGroupEdit)
+		{
+			return;
+		}
+		
+		//switch (profileType)
 		if(v.getTag() instanceof HikeSharedFile)
 		{	HikeSharedFile hikeFile = (HikeSharedFile) v.getTag();
 			Bundle arguments = new Bundle();
@@ -2585,6 +2604,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public void openPinHistory(View v)
 	{
+		if(showingGroupEdit)
+		{
+			return;
+		}
+		
 		if(groupConversation!=null)
 		{
 			Intent intent = new Intent();
@@ -2599,6 +2623,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public void onSharedFilesClick(View v)
 	{
+		if(showingGroupEdit)
+		{
+			return;
+		}
+		
 		Intent intent = new Intent(this, SharedOtherFilesActivity.class);
 		intent.putExtra(HikeConstants.Extras.MSISDN, mLocalMSISDN);
 		startActivity(intent);
