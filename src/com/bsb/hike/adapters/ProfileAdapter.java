@@ -342,14 +342,11 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				break;
 
 			case PHONE_NUMBER:
-				v = inflater.inflate(R.layout.shared_content, null);
-				viewHolder.infoContainer = v.findViewById(R.id.shared_content);
-				viewHolder.text = (TextView) viewHolder.infoContainer.findViewById(R.id.name);
-				viewHolder.subText = (TextView) viewHolder.infoContainer.findViewById(R.id.count);
-				viewHolder.parent = v.findViewById(R.id.phone_num);
-				viewHolder.phoneNumView = inflater.inflate(R.layout.phone_num_layout, (ViewGroup) viewHolder.parent, false);
-				viewHolder.extraInfo = (TextView) viewHolder.phoneNumView.findViewById(R.id.name);
-				viewHolder.groupOrPins = (TextView) viewHolder.phoneNumView.findViewById(R.id.main_info);
+				v = inflater.inflate(R.layout.phone_num_layout, null);
+				viewHolder.parent = v.findViewById(R.id.phone_numbers);
+				viewHolder.text = (TextView) viewHolder.parent.findViewById(R.id.name);
+				viewHolder.extraInfo = (TextView) v.findViewById(R.id.phone_number);
+				viewHolder.subText = (TextView) v.findViewById(R.id.main_info);
 				break;
 			}
 
@@ -536,19 +533,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			break;
 
 		case PHONE_NUMBER:
-			LinearLayout parentll = (LinearLayout) viewHolder.parent;
-			parentll.removeAllViews();
-			parentll.setVisibility(View.VISIBLE);
 			String head = context.getResources().getString(R.string.phone_pa);
 			viewHolder.text.setText(head);
-			viewHolder.subText.setVisibility(View.GONE);
 			viewHolder.extraInfo.setText(mContactInfo.getMsisdn());
-			if(mContactInfo.getMsisdnType().length()>0)
-				viewHolder.groupOrPins.setText(mContactInfo.getMsisdnType());
-			else
-				viewHolder.groupOrPins.setVisibility(View.GONE);
 			
-			parentll.addView(viewHolder.phoneNumView);
+			if(mContactInfo.getMsisdnType().length()>0)
+				viewHolder.subText.setText(mContactInfo.getMsisdnType());
+			else
+				viewHolder.subText.setVisibility(View.GONE);
 			
 			break;
 

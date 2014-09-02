@@ -1,8 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="54dp"
+    android:layout_height="wrap_content"
     android:background="@color/white" >
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:orientation="vertical"
+        android:layout_marginBottom="-12dp" >
+
+        <include
+            android:id="@+id/phone_numbers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/friends_group_view" />
+        
+<RelativeLayout 
+    android:layout_width="match_parent"
+    android:layout_marginTop="2dp"
+    android:layout_height="54dp">
 
     <LinearLayout
         android:id="@+id/divider_view"
@@ -15,8 +33,8 @@
         android:orientation="horizontal" >
         
         <LinearLayout
-            android:layout_width="50dp"
-            android:layout_height="50dp" 
+            android:layout_width="36dp"
+            android:layout_height="36dp" 
             android:contentDescription="Message Icon"
             android:onClick="messageBtnClicked"
             android:background="@drawable/list_item"
@@ -39,8 +57,8 @@
             android:background="#d9dbdc" />
 
          <LinearLayout 
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:contentDescription="Call Icon"
             android:onClick="callBtnClicked"
             android:background="@drawable/list_item"
@@ -69,7 +87,7 @@
         android:orientation="vertical" >
 
         <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/name"
+            android:id="@+id/phone_number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
@@ -94,3 +112,5 @@
         android:visibility="gone" />
 
 </RelativeLayout>
+</LinearLayout>
+</LinearLayout>
