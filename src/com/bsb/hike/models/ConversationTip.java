@@ -9,9 +9,9 @@ public class ConversationTip extends Conversation
 	public static final int RESET_STEALTH_TIP = 3;
 
 	public static final int WELCOME_HIKE_TIP = 4;
-	
-	public static final int START_NEW_CHAT_TIP = 5;
-	
+
+	public static final int STEALTH_INFO_TIP = 5;
+
 	public static final int STEALTH_UNREAD_TIP = 6;
 
 	public static final int ATOMIC_PROFILE_PIC_TIP = 7;
@@ -23,12 +23,16 @@ public class ConversationTip extends Conversation
 	public static final int ATOMIC_STATUS_TIP = 10;
 
 	public static final int ATOMIC_INFO_TIP = 11;
+	
+	public static final int ATOMIC_HTTP_TIP = 12;
+	
+	public static final int ATOMIC_APP_GENERIC_TIP = 13;
 
 	private int tipType;
 
 	public ConversationTip(int tipType)
 	{
-		super(null, -1);
+		super(null);
 		this.tipType = tipType;
 	}
 
@@ -62,11 +66,11 @@ public class ConversationTip extends Conversation
 		return tipType == WELCOME_HIKE_TIP;
 	}
 	
-	public boolean isStartNewChatTip()
+	public boolean isStealthInfoTip()
 	{
-		return tipType == START_NEW_CHAT_TIP;
+		return tipType == STEALTH_INFO_TIP;
 	}
-	
+
 	public boolean isStealthUnreadTip()
 	{
 		return tipType == STEALTH_UNREAD_TIP;

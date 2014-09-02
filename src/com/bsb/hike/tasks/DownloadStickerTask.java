@@ -226,6 +226,10 @@ public class DownloadStickerTask extends StickerTaskBase
 			Bundle b = new Bundle();
 			b.putSerializable(StickerManager.STICKER_CATEGORY, category);
 			b.putSerializable(StickerManager.STICKER_DOWNLOAD_TYPE, downloadType);
+			if(result == FTResult.FILE_TOO_LARGE)
+			{
+				b.putBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE,true);
+			}
 			i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
 			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 		}

@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="72dp"
-    android:layout_weight="1"
-    android:background="@drawable/updates_bg_selector"
-    android:paddingLeft="8dp"
-    android:paddingRight="8dp" >
+    android:layout_height="55dp"
+    android:background="@drawable/list_item" >
 
     <LinearLayout
         android:id="@+id/image_container"
         android:layout_width="@dimen/medium_avatar"
         android:layout_height="@dimen/medium_avatar"
         android:layout_centerVertical="true"
-        android:gravity="center"
-        android:layout_marginRight="5dp" >
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="14dp"
+        android:gravity="center" >
 
         <RelativeLayout
             android:id="@+id/avatar_container"
@@ -33,9 +31,9 @@
             android:id="@+id/add_participant"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="5dp"
-            android:src="@drawable/ic_add_participant"
+            android:layout_gravity="center"
+            android:layout_marginLeft="9dp"
+            android:src="@drawable/ic_invite_to_hike"
             android:visibility="gone" />
     </LinearLayout>
 
@@ -44,7 +42,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginRight="6dp"
+        android:layout_marginRight="50dp"
         android:layout_toRightOf="@id/image_container"
         android:orientation="vertical" >
 
@@ -68,13 +66,21 @@
             android:textSize="12sp" />
     </LinearLayout>
 
-    <ImageView 
+    <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/owner_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:src="@drawable/ic_group_owner"
-        android:paddingTop="8dp"
-        android:visibility="gone"/>
+        android:layout_centerVertical="true"
+        android:layout_marginRight="15dp"
+        android:text="@string/group_admin"
+        android:textColor="@color/blue_hike"
+        android:textSize="13sp"
+        android:textStyle="bold|italic"
+        android:visibility="gone" />
+
+    <View
+        style="@style/Divider"
+        android:layout_alignParentBottom="true" />
+
 </RelativeLayout>

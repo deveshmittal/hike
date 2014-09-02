@@ -176,8 +176,12 @@ public class UploadFileTask extends FileTransferBase
 				String quality = null;
 				if (hikeFileType == HikeFileType.IMAGE)
 				{
+					Bitmap.Config config = Bitmap.Config.RGB_565;
+					if(Utils.hasJellyBeanMR1()){
+						config = Bitmap.Config.ARGB_8888;
+					}
 					thumbnail = HikeBitmapFactory.scaleDownBitmap(destinationFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
-							Bitmap.Config.RGB_565, false, false);
+							config, false, false);
 					thumbnail = Utils.getRotatedBitmap(destinationFile.getPath(), thumbnail);
 					if (thumbnail == null && !TextUtils.isEmpty(fileKey))
 					{
@@ -199,10 +203,24 @@ public class UploadFileTask extends FileTransferBase
 				}
 				if (thumbnail != null)
 				{
-					thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
+					int compressQuality;
+					if (hikeFileType == HikeFileType.IMAGE)
+					{
+						Bitmap bluredThumb = Utils.createBlurredImage(thumbnail, context);
+						if(bluredThumb != null){
+							compressQuality = 60;
+							thumbnail = bluredThumb;
+						}else
+							compressQuality = 5;
+					}else{
+						compressQuality = 75;
+					}
+					byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, compressQuality);
+					thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+					thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
 					// thumbnail.recycle();
+					Logger.d(getClass().getSimpleName(), "Sent Thumbnail Size : " + thumbnailString.length());
 				}
-				
 				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, recordingDuration, mFile.getPath(), (int) mFile.length(), quality);
 			}
 			else
@@ -332,8 +350,12 @@ public class UploadFileTask extends FileTransferBase
 			String thumbnailString = null;
 			if (hikeFileType == HikeFileType.IMAGE)
 			{
+				Bitmap.Config config = Bitmap.Config.RGB_565;
+				if(Utils.hasJellyBeanMR1()){
+					config = Bitmap.Config.ARGB_8888;
+				}
 				thumbnail = HikeBitmapFactory.scaleDownBitmap(selectedFile.getPath(), HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX,
-						Bitmap.Config.RGB_565, true, false);
+						config, true, false);
 				thumbnail = Utils.getRotatedBitmap(selectedFile.getPath(), thumbnail);
 			}
 			else if (hikeFileType == HikeFileType.VIDEO)
@@ -342,7 +364,22 @@ public class UploadFileTask extends FileTransferBase
 			}
 			if (thumbnail != null)
 			{
-				thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
+				int compressQuality;
+				if (hikeFileType == HikeFileType.IMAGE)
+				{
+					Bitmap bluredThumb = Utils.createBlurredImage(thumbnail, context);
+					if(bluredThumb != null){
+						compressQuality = 60;
+						thumbnail = bluredThumb;
+					}else
+						compressQuality = 5;
+				}else{
+					compressQuality = 75;
+				}
+				byte [] tBytes = BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG, compressQuality);
+				thumbnail = HikeBitmapFactory.decodeByteArray(tBytes, 0, tBytes.length);
+				thumbnailString = Base64.encodeToString(tBytes, Base64.DEFAULT);
+				
 				// thumbnail.recycle();
 			}
 			else
@@ -504,7 +541,6 @@ public class UploadFileTask extends FileTransferBase
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, ((ConvMessage) userContext));
 			_state = FTState.COMPLETED;
 			deleteStateFile();
-
 		}
 		catch (MalformedURLException e)
 		{
@@ -685,6 +721,7 @@ public class UploadFileTask extends FileTransferBase
 				{
 					start += chunkSize;
 					incrementBytesTransferred(chunkSize);
+					saveFileState(X_SESSION_ID);
 					resetAndUpdate = true; // To reset retry logic and update UI
 
 					end = (int) length;
@@ -714,7 +751,8 @@ public class UploadFileTask extends FileTransferBase
 				temp *= 100;
 				temp /= _totalSize;
 				progressPercentage = (int) temp;
-				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+				if(_state != FTState.PAUSED)
+					LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 			}
 		}
 
@@ -729,7 +767,7 @@ public class UploadFileTask extends FileTransferBase
 			_state = FTState.COMPLETED;
 			deleteStateFile();
 			break;
-		case PAUSING:
+		case PAUSED:
 			_state = FTState.PAUSED;
 			Logger.d(getClass().getSimpleName(), "FT PAUSED");
 			// In case upload was complete response JSON is to be saved not the Session_ID
@@ -1018,7 +1056,9 @@ public class UploadFileTask extends FileTransferBase
 		if (userContext != null)
 		{
 			FileTransferManager.getInstance(context).removeTask(((ConvMessage) userContext).getMsgID());
-			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+			this.pausedProgress = -1;
+			if(result != FTResult.PAUSED)
+				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 		}
 
 		if (result != FTResult.PAUSED && result != FTResult.SUCCESS)

@@ -12,8 +12,8 @@ import android.widget.Toast;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
@@ -49,7 +49,6 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	protected Boolean doInBackground(Void... unused)
 	{
 		FileTransferManager.getInstance(ctx).shutDownAll();
-		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		HikeConversationsDatabase convDb = HikeConversationsDatabase.getInstance();
 		Editor editor = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
 		Editor appPrefEditor = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
@@ -67,9 +66,10 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			app.disconnectFromService();
 			ctx.stopService(new Intent(ctx, HikeService.class));
 
-			db.deleteAll();
+			ContactManager.getInstance().deleteAll();
 			convDb.deleteAll();
 			HikeMessengerApp.getLruCache().clearIconCache();
+			HikeMessengerApp.getContactManager().clearCache();
 			// IconCacheManager.getInstance().clearIconCache();
 			editor.clear();
 			appPrefEditor.clear();

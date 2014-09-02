@@ -30,7 +30,7 @@
     <string name="image_quality_small">Small</string>
     <string name="image_quality_medium">Medium</string>
 	<string name="image_quality_original">Original</string>    
-     <string name="auto_download_media_hinttext_new">Settings for photos, videos, audio</string>
+    <string name="media_settings_hinttext">Settings for photos, videos, audio</string>
     <string name="image_quality_send">Send</string>
 	<string name="image_quality_files_as">files as</string>
 	<string name="image_quality_popup_header">Choose image quality</string>
@@ -243,7 +243,6 @@
     <string name="group_name">Group Name</string>
     <string name="participants">Participants</string>
     <string name="group_owner">Group Owner</string>
-    <string name="members">Members</string>
     <string name="add_participants">+ Add Participants</string>
     <string name="me">Me</string>
     <string name="phone">Phone</string>
@@ -353,7 +352,6 @@
     <string name="owner">Owner</string>
     <string name="on_sms">on SMS</string>
     <string name="contacts_on_hike">CONTACTS ON HIKE (%1$d)</string>
-    <string name="team_hike">team hike</string>
     <string name="hey_name">Hey %1$s!</string>
     <string name="confirm">Confirm</string>
     <string name="recent_updates">Recent Updates</string>
@@ -399,7 +397,6 @@
     <string name="call_not_free_head">Operator Rates Apply</string>
     <string name="call_not_free_body">Your telecom operator may charge you for this call.</string>
     <string name="no_credits_gc">You\'ve run out of free SMS.  SMS users will no longer receive your messages.</string>
-    <string name="not_now">Not now</string>
     <string name="delete_status">Delete update</string>
     <string name="delete_status_confirmation">Are you sure you want to delete this update?</string>
     <string name="delete_status_error">Could not delete your status update. Please check your network connection and try again later.</string>
@@ -409,7 +406,6 @@
     <string name="user_added_contact_as_friend">Added as a friend</string>
     <string name="tap_here_block">Tap here to block this number</string>
     <string name="status_text_notification">wrote %1$s</string>
-    <string name="status_profile_pic_notification">Changed profile picture</string>
     <string name="status_updates">Status updates</string>
     <string name="default_status">Tap here to update your status.</string>
     <string name="tap_here">Tap here</string>
@@ -478,7 +474,6 @@
     <string name="emoticons_stickers_tip">Tap here to share stickers :)</string>
     <string name="stickers_tip">New stickers!</string>
     <string name="moods_tip">Tap here to attach a wonderful mood :)</string>
-    <string name="status_tip">This is a status update posted by %1$s</string>
     <string name="walkie_talkie_tip">Tap here to use hike\'s new Walkie Talkie!</string>
     <string name="last_seen_tip">Only your Circle of Friends can see when you were last seen</string>
     <string name="dismiss">Dismiss</string>
@@ -527,7 +522,6 @@
     <string name="sms_with_hike_info">You can now send and receive regular SMS with hike. To do so, you\'ll need to make hike your primary SMS inbox.</string>
     <string name="last_seen_header">Show Last Seen</string>
     <string name="last_seen_info">Turning off last seen will hide your friends\' status from you as well</string>
-    <string name="user_back_on_hike">%1$s is back on hike. Say hi :)</string>
     <string name="sticker">Sticker</string>
     <string name="fun_free_messaging">Fun, free messaging for life</string>
     <string name="invite_sms">Invite via SMS</string>
@@ -560,12 +554,10 @@
     <string name="sent_friend_request">Sent a friend request</string>
     <string name="xyz_posted_update">%1$s posted an update</string>
     <string name="sent_you_friend_request">Sent you a friend request</string>
-    <string name="on_hike">On hike</string>
     <string name="num_people">%1$d people</string>
     <string name="add">Add</string>
     <string name="tap_save_contact">Tap to save contact</string>
     <string name="no_updates">No updates from %1$s yet.</string>
-    <string name="add_people">Add people</string>
     <string name="email_conversation">Email Conversation</string>
     <string name="me_key">me</string>
     <string name="group_name_email">"Group "</string>
@@ -643,8 +635,6 @@
     <string name="help_hinttext">Hike FAQs, system status and contact</string>
     <string name="system_health_hinttext">See hike system status</string>
     <string name="sms_setting_hinttext">SMS settings</string>
-    <string name="mute_status_notification_header">Status update notifications</string>
-    <string name="mute_status_notification_subtext">Show notifications for status updates posted by your friends</string>
     <string name="app_version">Version %1$s</string>
     <string name="tap_plus_add_friends">Tap + to add some friends</string>
     <string name="work_in_progress">Updating Hike</string>
@@ -749,6 +739,7 @@
     <string name="forward_to">Forward to %1$s?</string>
     <string name="no_internet_connection">No Internet Connection</string>
     <string name="num_new_messages">%1$s new messages</string>
+    <string name="num_new_conversations">Total %1$s conversations</string>
     <string name="one_new_message">1 new message</string>
     <string name="terms">Terms</string>
     <string name="tutorial1_header_title">Welcome to\nHike Messenger</string>
@@ -768,7 +759,7 @@
     <string name="i_am_a_girl">I am a girl</string>
     <string name="about_you">About you</string>
     <string name="tell_us_more">Tell us more</string>
-    <string name="add_friend_popup_msg">You can message anyone but only your friends can see your status updates and last seen. Choose them wisely!</string>
+    <string name="add_friend_popup_msg">You can message anyone but only your friends can see your status updates and last seen. Choose them wisely!</string>
     <string name="start_adding">Start adding friends</string>
     <string name="how_young_are_you">How young are you?</string>
     <string name="your_name">Your name</string>
@@ -855,7 +846,7 @@
 	<string name="add_as_favorite_notification">%1$s added you as a favorite</string>
     <string name="add_as_favorite_notification_line">Added you as a favorite</string>
     <string name="favorite_confirmed_notification">You can now see %1$s\'s Last Seen and Status Updates</string>
-    <string name="add_favorites_popup_msg">You can message anyone but only your favorites can see your status updates and last seen. Choose them wisely!</string>
+    <string name="add_favorites_popup_msg">You can message anyone but only your favorites can see your status updates and last seen. Choose them wisely!</string>
     <string name="favorites_on_hike_tut">Favorites on hike</string>
     <string name="start_adding_favorites">Start adding favorites</string>
     <string name="favorites_upper_case">FAVORITES</string>
@@ -890,10 +881,10 @@
     <string name="alp_42447968_msg_release_finger_when_done">Release finger when done</string>
     <string name="alp_42447968_msg_try_again">Your patterns don’t match. Try again.</string>
     <string name="alp_42447968_msg_your_new_unlock_pattern">Your new unlock pattern</string>
-	<string name="alp_42447968_msg_draw_pattern_to_unlock_in_reset">Draw existing pattern</string>
+    <string name="alp_42447968_msg_draw_pattern_to_unlock_in_reset">Draw existing pattern</string>
     <string name="alp_42447968_msg_draw_new_pattern">Draw your new pattern</string>
-	<string name="alp_42447968_msg_redraw_new_pattern_confirm">Redraw new pattern to confirm</string>
-    
+    <string name="alp_42447968_msg_redraw_new_pattern_confirm">Redraw new pattern to confirm</string>
+
     <plurals name="alp_42447968_pmsg_connect_x_dots">
         <item quantity="one">Connect at least %1$d dot. Try again</item>
         <item quantity="other">Connect at least %1$d dots. Try again</item>
@@ -901,6 +892,7 @@
 
     <string name="stealth_enter_pass_tip">Setup is complete! Tap on \'hi\' to access your hidden chats.</string>
     <string name="stealth_notification_message">You have a new notification</string>
+    <string name="stealth_notification_messages">You have new notifications</string>
     <string name="retry">Retry</string>
     <string name="reset_complete_stealth_header">Reset Hidden Mode</string>
     <string name="reset_complete_stealth_info">Forgot your password? Reset Hidden Mode. All hidden chats will be deleted.</string>
@@ -939,7 +931,7 @@
     <string name="notificationSoundSummary">Select a sound to play for a new notification message</string>
     <string name="status">Status</string>
     <string name="getting_started">Getting Started..</string>
-    <string name="viewcontact">View contact</string>
+    <string name="viewcontact">View profile</string>
     <string name="add_to_contacts_existing">Add to existing contact</string>
     <string name="delete_chat">Delete chat</string>
     <string name="clear_whole_conversation">Clear whole conversation</string>
@@ -986,12 +978,12 @@
     <string name="start_exploring">START EXPLORING</string>
     <string name="hidden_mode">Hidden mode</string>
     <string name="ftue_hidden_mode_card_msg">Mark your private chats as hidden and access them with passcode.</string>
-    <string name="hike_offline">Hike offline</string>
+    <string name="hike_offline">Hike Offline</string>
     <string name="attachments">Attachments</string>
     <string name="ftue_sticker_card_msg">When words can\'t express, say it with a sticker. You\'ll love them!</string>
     <string name="ftue_attachment_card_msg"> Send photos, videos, pdfs, docs and a lot more up to 100MB each.</string>
     <string name="ftue_hike_offline_card_msg">Send messages to friends even when they are offline.</string>
-    <!-- <string name="ftue_favorites_card_msg">Only favorites can see your status update and last seen.</string> -->
+    <string name="ftue_favorites_card_msg">Only favorites can see your status update and last seen.</string>
     <string name="ftue_themes_card_msg">Make your conversations colorful with our beautiful chat themes.</string>
     <string name="themes">Themes</string>
     <string name="ftue_updates_are_fun_with_favorites">Only favorites can see your status update and last seen. Choose them wisely!</string>
@@ -1019,6 +1011,12 @@
     <string name="native_sms_invite_4">Hey, check out hike messenger. It let\'s you show your \'Last Seen\' only to select friends! Download - http://hike.in and Hike up your life!</string>
     <string name="native_sms_invite_5">Hey, check out hike messenger. You can now hide your private chats from others. Download - http://hike.in and Hike up your life!</string>
     <string name="native_sms_invite_6">Hey, check out hike messenger. You can chat with even those friends who are offline. Download - http://hike.in and Hike up your life!</string>
+    <string name="new_chat_tip_msg">tap to compose</string>
+    <string name="ftue_status_update_card_header">Express yourself</string>
+    <string name="ftue_status_update_card_msg">Tap here to post a status update. Only your favorites can see them.</string>
+    <string name="earn_free_sms">Earn free SMS</string>
+    <string name="email_body">I just downloaded the new hike messenger. What a big change from WhatsApp!\n\nIt\'s got amazing Stickers, the ability to choose who sees my Last Seen and some really cool Chat Themes. \n\nThe best part? Hike has thing called Hidden Mode that lets you hide your private chats, from the world! Awesome!\n\nDownload it like asap from http://hike.in!</string>
+    <string name="email_subject">hike up your life</string>
     <string name="ftue_card_header_last_seen">Last seen</string>
     <string name="ftue_card_body_last_seen">Only favorites can see your last seen &amp; status updates</string>
     <string name="ftue_card_click_text_last_seen">Tap here to choose them!</string>
@@ -1039,12 +1037,6 @@
      <string name="invite_sent">Invite sent</string>
      <string name="send_invite">Invite (%1$d)</string>
      <string name="hike_to_offline_tip_msg">Tap here to send free SMS</string>
-     <string name="new_chat_tip_msg">tap to compose</string>
-     <string name="ftue_status_update_card_header">Express yourself</string>
-     <string name="ftue_status_update_card_msg">Tap here to post a status update. Only your favorites can see them.</string>
-     <string name="earn_free_sms">Earn free SMS</string>
-     <string name="email_body">I just downloaded the new hike messenger. What a big change from WhatsApp!\n\nIt\'s got amazing Stickers, the ability to choose who sees my Last Seen and some really cool Chat Themes. \n\nThe best part? Hike has thing called Hidden Mode that lets you hide your private chats, from the world! Awesome!\n\nDownload it like asap from http://hike.in!</string>
-     <string name="email_subject">hike up your life</string>
      <string name="reciever_is_offline">%1$s is offline</string>
      <string name="send_uppercase">SEND</string>
      <string name="hike_offline_mode_msg">will be sent as %1$d SMS</string>
@@ -1080,7 +1072,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
      <string name="tap_plus_add_favorites">Only favorites can see your last seen and status update. Choose them wisely!</string>
      <string name="add_as_favorite_menu">Add Favorite</string>
 	 <string name="remove_from_favorites">Remove Favorite</string>
-	 <string name="file_attachment_info">Share media &amp; files up to 100 MB</string>
+	 <string name="file_attachment_info">Share docs, pdfs &amp; media upto 100 MB</string>
 	 <string name="ftue_sms_contact_card_header">You have no contacts on hike</string>
 	 <string name="ftue_sms_contact_card_subtext">Invite them and earn Rs20 talk-time for each friend that joins :)</string>
      <string name="send_free_sms">Send free SMS</string>
@@ -1133,5 +1125,38 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="pin_notif_text">has posted a pin</string>
     <string name="delete_my_account">DELETE MY ACCOUNT</string>
     <string name="hike_extras">Hike Extras</string>
-    
+    <string name="mute_status_notification_header">Status and profile picture</string>
+    <string name="mute_status_notification_subtext">Show notifications for status &amp; profile picture updates from favourites</string>
+    <string name="notifications_contact_join_title">Contact joining notification</string>
+    <string name="notifications_contact_join_summary">Notify when a contact joins hike</string>
+    <string name="sticker_download_failed_large_file">Download failed due to insufficient space. Please free some space and try again.</string>
+	<string name="set_profile_pic">hike profile picture</string>
+    <string name="confirm_delete_pin_header">Delete pin</string>
+    <string name="confirm_delete_pin">Are you sure you want to delete this pin?</string>
+    <string name="confirm_delete_pins_header">Delete pins</string>
+    <string name="confirm_delete_pins">Are you sure you want to delete these %1$s pins?</string>    
+    <string name="shared_media">Shared Media</string>
+    <string name="group_admin">ADMIN</string>
+    <string name="shared_files">Shared Files</string>
+    <string name="add_btn">ADD</string>
+    <string name="not_now">NOT NOW</string>
+    <string name="on_hike">on hike</string>
+    <string name="add_fav">add to favorites</string>
+    <string name="shared_med">SHARED MEDIA</string>
+    <string name="pins">Pins</string>
+    <string name="groups">Groups</string>
+    <string name="members">MEMBERS</string>
+    <string name="phone_pa">PHONE</string>
+    <string name="shared_cont_pa">SHARED CONTENT</string>
+    <string name="no_media">no media yet :(</string>
+    <string name="no_internet_try_again">No internet connection. Please try again later.</string>
+    <string name="refresh">Refresh</string>
+    <string name="user_back_on_hike">%1$s is now on hike, say hi</string>
+    <string name="team_hike">hike</string>
+    <string name="add_fav_msg">Is now sharing last seen and status updates. Would you like to do the same?</string>
+    <string name="add_people">ADD A MEMBER</string>
+    <string name="stealth_info_tip_header">Hidden Mode</string>
+    <string name="stealth_info_tip_subtext">Hide your chats. Tap on \'hi\' to get started.</string>
+    <string name="file_missing_caps">FILE MISSING</string>
+    <string name="status_profile_pic_notification">changed profile picture</string>
 </resources>

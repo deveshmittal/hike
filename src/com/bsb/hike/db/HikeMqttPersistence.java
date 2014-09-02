@@ -158,6 +158,23 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 		int numRows = mDb.delete(MQTT_DATABASE_TABLE, MQTT_MESSAGE_ID + "=?", bindArgs);
 		Logger.d("HikeMqttPersistence", "Removed " + numRows + " Rows from " + MQTT_DATABASE_TABLE + " with Msg ID: " + msgId);
 	}
+	
+	public void removeMessages(ArrayList<Long> msgIds)
+	{
+		if(msgIds.isEmpty())
+		{
+			return;
+		}
+		StringBuilder inSelection = new StringBuilder("("+msgIds.get(0));
+		for (int i=0; i<msgIds.size(); i++)
+		{
+			inSelection.append("," + Long.toString(msgIds.get(i)));
+		}
+		inSelection.append(")");
+		
+		mDb.execSQL("DELETE FROM " + MQTT_DATABASE_TABLE + " WHERE " + MQTT_MESSAGE_ID + " IN "+ inSelection.toString());
+		Logger.d("HikeMqttPersistence", "Removed "+" Rows from " + MQTT_DATABASE_TABLE + " with Msgs ID: " + inSelection.toString());
+	}
 
 	public void removeMessageForPacketId(long packetId)
 	{

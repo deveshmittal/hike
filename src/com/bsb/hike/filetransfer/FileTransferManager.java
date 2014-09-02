@@ -29,11 +29,13 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.models.ConvMessage;
@@ -289,8 +291,10 @@ public class FileTransferManager extends BroadcastReceiver
 
 	public void downloadFile(File destinationFile, String fileKey, long msgId, HikeFileType hikeFileType, Object userContext, boolean showToast)
 	{
-		if (isFileTaskExist(msgId))
+		if (isFileTaskExist(msgId)){
+			validateFilePauseState(msgId);
 			return;
+		}
 		if(taskOverflowLimitAchieved())
 			return;
 		
@@ -330,8 +334,10 @@ public class FileTransferManager extends BroadcastReceiver
 
 	public void uploadFile(ConvMessage convMessage, boolean isRecipientOnHike)
 	{
-		if (isFileTaskExist(convMessage.getMsgID()))
+		if (isFileTaskExist(convMessage.getMsgID())){
+			validateFilePauseState(convMessage.getMsgID());
 			return;
+		}
 		if(taskOverflowLimitAchieved())
 			return;
 		
@@ -400,8 +406,10 @@ public class FileTransferManager extends BroadcastReceiver
 
 	public void uploadContactOrLocation(ConvMessage convMessage, boolean uploadingContact, boolean isRecipientOnhike)
 	{
-		if (isFileTaskExist(convMessage.getMsgID()))
+		if (isFileTaskExist(convMessage.getMsgID())){
+			validateFilePauseState(convMessage.getMsgID());
 			return;
+		}
 		if(taskOverflowLimitAchieved())
 			return;
 		
@@ -463,7 +471,10 @@ public class FileTransferManager extends BroadcastReceiver
 		FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 		if (obj != null)
 		{
-			((MyFutureTask) obj).getTask().setState(FTState.PAUSING);
+			FileTransferBase task = ((MyFutureTask) obj).getTask();
+			task.setPausedProgress(task._bytesTransferred);
+			task.setState(FTState.PAUSED);
+			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 			Logger.d(getClass().getSimpleName(), "pausing the task....");
 		}
 	}
@@ -480,7 +491,7 @@ public class FileTransferManager extends BroadcastReceiver
 	// this will be used when user deletes account or unlink account
 	public void deleteAllFTRFiles()
 	{
-		if (HIKE_TEMP_DIR != null)
+		if (HIKE_TEMP_DIR != null && HIKE_TEMP_DIR.listFiles() != null)
 			for (File f : HIKE_TEMP_DIR.listFiles())
 			{
 				if (f != null)
@@ -729,7 +740,7 @@ public class FileTransferManager extends BroadcastReceiver
 		else
 			fss = getDownloadFileState(mFile, msgId);
 
-		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSING || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
+		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
 		{
 			if (fss.getTotalSize() > 0)
 			{
@@ -798,5 +809,17 @@ public class FileTransferManager extends BroadcastReceiver
 			return true;
 		else
 			return false;
+	}
+	
+	private void validateFilePauseState(long msgId){
+		FutureTask<FTResult> obj = fileTaskMap.get(msgId);
+		if (obj != null)
+		{
+			FileTransferBase task = ((MyFutureTask) obj).getTask();
+			if(task.getPausedProgress() == task._bytesTransferred && task._state == FTState.PAUSED){
+				task.setState(FTState.IN_PROGRESS);
+				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+			}
+		}
 	}
 }

@@ -1,17 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parent_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="@dimen/st__action_bar_default_height"
     android:background="@color/black"
     android:orientation="vertical" >
 
-    <GridView
-        android:id="@+id/gallery"
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:horizontalSpacing="@dimen/gallery_grid_spacing"
-        android:listSelector="@android:color/transparent"
-        android:numColumns="2"
-        android:verticalSpacing="@dimen/gallery_grid_spacing" />
+        android:layout_height="match_parent"
+        android:background="@color/black"
+        android:orientation="vertical" >
 
-</LinearLayout>
+        <GridView
+            android:id="@+id/gallery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:horizontalSpacing="@dimen/gallery_grid_spacing"
+            android:listSelector="@android:color/transparent"
+            android:numColumns="2"
+            android:verticalSpacing="@dimen/gallery_grid_spacing" />
+    </LinearLayout>
+
+</FrameLayout>

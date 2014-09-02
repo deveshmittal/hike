@@ -1,7 +1,9 @@
 package com.bsb.hike.models;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -11,10 +13,13 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
 public class GroupConversation extends Conversation
@@ -28,7 +33,7 @@ public class GroupConversation extends Conversation
 
 	private boolean hasSmsUser;
 
-	private Map<String, GroupParticipant> groupParticipantList;
+	private Map<String, PairModified<GroupParticipant, String>> groupParticipantList;
 	
 	private long lastSentMsgId = -1;
 	
@@ -36,33 +41,45 @@ public class GroupConversation extends Conversation
 
 	private int groupMemberAliveCount;
 
-	public GroupConversation(String msisdn, long convId, String contactName, String groupOwner, boolean isGroupAlive)
+	public GroupConversation(String msisdn, String contactName, String groupOwner, boolean isGroupAlive)
 	{
-		super(msisdn, convId, contactName, true);
+		super(msisdn, contactName, true);
 		this.groupOwner = groupOwner;
 		this.isGroupAlive = isGroupAlive;
 	}
 
 	public GroupConversation(JSONObject jsonObject, Context context) throws JSONException
 	{
-		super(jsonObject.getString(HikeConstants.TO), 0, null, true);
+		super(jsonObject.getString(HikeConstants.TO), null, true);
 		this.groupOwner = jsonObject.getString(HikeConstants.FROM);
-		this.groupParticipantList = new HashMap<String, GroupParticipant>();
+		this.groupParticipantList = new HashMap<String, PairModified<GroupParticipant, String>>();
 		JSONArray array = jsonObject.getJSONArray(HikeConstants.DATA);
+		List<String> msisdns = new ArrayList<String>();
 		for (int i = 0; i < array.length(); i++)
 		{
 			JSONObject nameMsisdn = array.getJSONObject(i);
 			String contactNum = nameMsisdn.getString(HikeConstants.MSISDN);
+			msisdns.add(contactNum);
 			String contactName = nameMsisdn.getString(HikeConstants.NAME);
 			boolean onHike = nameMsisdn.optBoolean(HikeConstants.ON_HIKE);
 			boolean onDnd = nameMsisdn.optBoolean(HikeConstants.DND);
 			GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(contactNum, contactNum, contactName, contactNum, onHike), false, onDnd);
 			Logger.d(getClass().getSimpleName(), "Parsing JSON and adding contact to conversation: " + contactNum);
-			this.groupParticipantList.put(contactNum, groupParticipant);
+			this.groupParticipantList.put(contactNum, new PairModified<GroupParticipant, String>(groupParticipant, contactName));
 		}
 
-		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
-		setContactName(db.getGroupName(getMsisdn()));
+		List<ContactInfo> contacts = ContactManager.getInstance().getContact(msisdns, true, false);
+		for (ContactInfo contact : contacts)
+		{
+			PairModified<GroupParticipant, String> grpPair = this.groupParticipantList.get(contact.getMsisdn());
+			if (null != grpPair)
+			{
+				grpPair.getFirst().setContactInfo(contact);
+			}
+		}
+
+		String groupName = ContactManager.getInstance().getName(getMsisdn());
+		setContactName(groupName);
 	}
 
 	public String getGroupOwner()
@@ -80,34 +97,56 @@ public class GroupConversation extends Conversation
 		this.isGroupAlive = isAlive;
 	}
 
-	public void setGroupParticipantList(Map<String, GroupParticipant> groupParticipantList)
+	public void setGroupParticipantList(Map<String, PairModified<GroupParticipant, String>> groupParticipantList)
 	{
 		this.groupParticipantList = groupParticipantList;
 	}
 
-	public Map<String, GroupParticipant> getGroupParticipantList()
+	public void setGroupParticipantList(List<PairModified<GroupParticipant, String>> groupParticipantList)
+	{
+		this.groupParticipantList = new HashMap<String, PairModified<GroupParticipant, String>>();
+		for (PairModified<GroupParticipant, String> grpParticipant : groupParticipantList)
+		{
+			String msisdn = grpParticipant.getFirst().getContactInfo().getMsisdn();
+			this.groupParticipantList.put(msisdn, grpParticipant);
+		}
+	}
+
+	public Map<String, PairModified<GroupParticipant, String>> getGroupParticipantList()
 	{
 		return groupParticipantList;
 	}
 
-	public GroupParticipant getGroupParticipant(String msisdn)
+	public PairModified<GroupParticipant, String> getGroupParticipant(String msisdn)
 	{
-		return groupParticipantList.containsKey(msisdn) ? groupParticipantList.get(msisdn) : new GroupParticipant(new ContactInfo(msisdn, msisdn, msisdn, msisdn));
+		return groupParticipantList.containsKey(msisdn) ? groupParticipantList.get(msisdn) : new PairModified<GroupParticipant, String>(new GroupParticipant(new ContactInfo(
+				msisdn, msisdn, msisdn, msisdn)), msisdn);
 	}
 
 	public String getGroupParticipantFirstName(String msisdn)
 	{
-		return getGroupParticipant(msisdn).getContactInfo().getFirstName();
+		ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn, true, false);
+		String name = HikeMessengerApp.getContactManager().getName(getMsisdn(), contact.getMsisdn());
+		return Utils.getFirstName(name);
 	}
-	
+
 	public String getGroupParticipantFirstNameAndSurname(String msisdn)
 	{
-		return getGroupParticipant(msisdn).getContactInfo().getFirstNameAndSurname();
+		return getGroupParticipant(msisdn).getSecond();
 	}
 
 	public String getLabel()
 	{
-		return !TextUtils.isEmpty(getContactName()) ? getContactName() : Utils.defaultGroupName(groupParticipantList);
+		if (!TextUtils.isEmpty(getContactName()))
+			return getContactName();
+		else
+		{
+			setGroupParticipantList(ContactManager.getInstance().getGroupParticipants(getMsisdn(), false, false));
+			// Before contact manager we were adding all the group participants to conversation object initially when getConversations of HikeConversationDatabase is called
+			// But now we do lazy loading, we don't have group participants when we are on home screen
+			// In case of empty group name, group Participants are needed so setting it here.
+			return Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(groupParticipantList.values()));
+		}
 	}
 
 	public void setIsMuted(boolean isMuted)
@@ -150,16 +189,16 @@ public class GroupConversation extends Conversation
 			if (type.equals(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN))
 			{
 				JSONArray array = new JSONArray();
-				for (Entry<String, GroupParticipant> participant : groupParticipantList.entrySet())
+				for (Entry<String, PairModified<GroupParticipant, String>> participant : groupParticipantList.entrySet())
 				{
 					JSONObject nameMsisdn = new JSONObject();
-					nameMsisdn.put(HikeConstants.NAME, participant.getValue().getContactInfo().getName());
+					nameMsisdn.put(HikeConstants.NAME, participant.getValue().getSecond());
 					nameMsisdn.put(HikeConstants.MSISDN, participant.getKey());
 					array.put(nameMsisdn);
 				}
 				object.put(HikeConstants.DATA, array);
 			}
-			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
+			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 		}
 		catch (JSONException e)
 		{
