@@ -1435,9 +1435,26 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
 		{
 			LinkedList<ConvMessage> list = entry.getValue();
-			if (!list.isEmpty())
+			
+			if(list != null && !list.isEmpty())		// check for empty or null lists
 			{
-				incrementUnreadCounter(entry.getKey(), list.size());
+				int unreadCount = 0;
+				for(ConvMessage conv : list)
+				{
+					/*
+					 * We don't increment unreadcount if message is status message
+					 */
+					if(Utils.shouldIncrementCounter(conv))
+					{
+						unreadCount ++;
+					}
+				}
+
+				// update DB
+				if(unreadCount != 0)
+				{
+					incrementUnreadCounter(entry.getKey(), unreadCount);
+				}
 			}
 		}
 	}
