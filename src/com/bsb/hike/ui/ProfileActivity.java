@@ -802,6 +802,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private void setupContactProfileList()
 	{
 		profileItems.clear();
+		if(!HikeMessengerApp.hikeBotNamesMap.containsKey(contactInfo.getMsisdn()))  //The HikeBot's numbers wont be shown
 		profileItems.add(new ProfileItem.ProfilePhoneNumberItem(ProfileItem.PHONE_NUMBER, getResources().getString(R.string.phone_pa)));
 		if(contactInfo.isOnhike())
 		{	shouldAddSharedMedia();
