@@ -4250,4 +4250,28 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			notifyDataSetChanged();
 		}
 	}
+	
+	public boolean containsMediaMessage(ArrayList<Long> msgIds)
+	{
+		/*
+		 * Iterating in reverse order since its more likely the user wants to know about latest messages.
+		 */
+		int lastIndex = msgIds.size() - 1;
+		for (int i = lastIndex; i >= 0; i--)
+		{
+			long msgId = msgIds.get(i);
+			for (ConvMessage convMessage : convMessages)
+			{
+				if (convMessage.getMsgID() == msgId && convMessage.isFileTransferMessage())
+				{
+					HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+					if(hikeFile.getHikeFileType() == HikeFileType.IMAGE || hikeFile.getHikeFileType() == HikeFileType.VIDEO)
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 }

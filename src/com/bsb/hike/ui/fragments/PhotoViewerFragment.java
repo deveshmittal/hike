@@ -531,6 +531,11 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 					ArrayList<Long> msgIds = new ArrayList<Long>(1);
 					msgIds.add(getCurrentSelectedItem().getMsgId());
 					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, msgIds);
+					// if delete media from phone is checked
+					if(deleteConfirmDialog.isChecked() && getCurrentSelectedItem().getFileFromExactFilePath().exists())
+					{
+						getCurrentSelectedItem().getFileFromExactFilePath().delete();
+					}
 					if(!fromChatThread)
 					{
 						HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_SHARED_FILE_DELETED, getCurrentSelectedItem());
@@ -540,6 +545,7 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 				}
 			};
 
+			deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
 			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
 			deleteConfirmDialog.setCancelButton(R.string.cancel);
 			deleteConfirmDialog.show();
