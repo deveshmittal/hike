@@ -9,7 +9,7 @@
         android:layout_width="@dimen/medium_avatar"
         android:layout_height="@dimen/medium_avatar"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="20dp"
+        android:layout_marginLeft="16dp"
         android:layout_marginRight="14dp"
         android:gravity="center" >
 
