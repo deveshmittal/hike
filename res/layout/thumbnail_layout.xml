@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/thumbnail_group"
-    android:layout_width="72dp"
-    android:layout_height="match_parent"
-    android:padding="2dp" >
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="1dp" >
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
 
         <ImageView
             android:id="@+id/thumbnail"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:scaleType="centerCrop" />
 
         <RelativeLayout
@@ -40,9 +40,9 @@
 
     <LinearLayout
         android:id="@+id/file_missing_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/dialog_header_bg"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:background="#aaaaaa"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone" >
@@ -51,8 +51,7 @@
             android:id="@+id/file_missing_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/dialog_header_bg"
-            android:src="@drawable/ic_file_missing" />
+            android:src="@drawable/ic_file_error" />
 
     </LinearLayout>
 
