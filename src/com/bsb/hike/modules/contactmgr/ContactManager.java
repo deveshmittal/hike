@@ -134,6 +134,7 @@ public class ContactManager implements ITransientCache
 			if (Utils.isGroupConversation(ms))
 			{
 				persistenceCache.removeGroup(ms);
+				transientCache.removeGroup(ms);
 			}
 			else
 			{

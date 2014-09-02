@@ -188,13 +188,20 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			PairModified<ContactInfo, Integer> contactPair = transientContacts.get(msisdn);
-			if (null != contactPair)
+			if (Utils.isGroupConversation(msisdn))
 			{
-				contactPair.setSecond(contactPair.getSecond() - 1);
-				if (contactPair.getSecond() == 0)
+				removeGroup(msisdn);
+			}
+			else
+			{
+				PairModified<ContactInfo, Integer> contactPair = transientContacts.get(msisdn);
+				if (null != contactPair)
 				{
-					transientContacts.remove(msisdn);
+					contactPair.setSecond(contactPair.getSecond() - 1);
+					if (contactPair.getSecond() == 0)
+					{
+						transientContacts.remove(msisdn);
+					}
 				}
 			}
 		}
