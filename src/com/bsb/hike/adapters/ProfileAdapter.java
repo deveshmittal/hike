@@ -407,9 +407,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			ImageView image;
 			int smSize = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
 			viewHolder.subText.setText(Integer.toString(smSize));
-			
 			if(sharedMedia != null)
-			{
+			{	viewHolder.infoContainer.setVisibility(View.VISIBLE);
+				viewHolder.parent.setVisibility(View.GONE);  //Empty state
 				int i = 0;
 				for (i = 0; i < sharedMedia.size(); i++)
 				{
@@ -459,9 +459,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			}
 			else
 			{		//Empty State
-				layout.removeAllViews();
 				viewHolder.parent.setVisibility(View.VISIBLE);
-				layout.addView(viewHolder.parent);
+				viewHolder.infoContainer.setVisibility(View.GONE);
 			}
 			
 			break;
