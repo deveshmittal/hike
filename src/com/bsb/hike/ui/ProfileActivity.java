@@ -684,7 +684,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			parentView = headerView.findViewById(R.id.profile_header);
 			extraInfo = (TextView) headerView.findViewById(R.id.add_fav_tv);
 			smallIcon = (ImageView) headerView.findViewById(R.id.add_fav_star);
-			statusMood = (ImageView) headerView.findViewById(R.id.status_mood);
 			smallIconFrame = (ImageView) headerView.findViewById(R.id.add_fav_star_2);
 			dualText = (TextView) headerView.findViewById(R.id.add_fav_tv_2);
 			msisdn = contactInfo.getMsisdn();
@@ -699,7 +698,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			
 			if (showContactsUpdates(contactInfo)) // Favourite case
 			{
-				addContactStatusInHeaderView(subText, statusMood);
+				addContactStatusInHeaderView(subText);
 				// Request_Received --->> Show add/not now screen.
 				if (contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
 				{
@@ -815,7 +814,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 	}
 	
-	private void addContactStatusInHeaderView(TextView subText, ImageView statusMood)
+	private void addContactStatusInHeaderView(TextView subText)
 	{
 		StatusMessageType[] statusMessagesTypesToFetch = {StatusMessageType.TEXT};
 		StatusMessage status = HikeConversationsDatabase.getInstance().getLastStatusMessage(statusMessagesTypesToFetch, contactInfo);
@@ -823,12 +822,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{
 			if (status.hasMood())  //Adding mood image for status
 			{
-				statusMood.setVisibility(View.VISIBLE);
-				statusMood.setImageResource(EmoticonConstants.moodMapping.get(status.getMoodId()));
-			}
-			else
-			{
-				statusMood.setVisibility(View.GONE);
+				subText.setCompoundDrawablesWithIntrinsicBounds(EmoticonConstants.moodMapping.get(status.getMoodId()), 0, 0, 0);
 			}
 			
 			subText.setText(smileyParser.addSmileySpans(status.getText(), true));
