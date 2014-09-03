@@ -233,7 +233,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			emptyView = LayoutInflater.from(getActivity()).inflate(R.layout.conversation_empty_view, emptyHolder);
 			// emptyHolder.addView(emptyView);
 			ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
-			setupEmptyView();
 			friendsList.setEmptyView(emptyView);
 		}
 	}
