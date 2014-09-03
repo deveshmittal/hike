@@ -2,10 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#f1f2f3" >
+    android:orientation="vertical" >
 
     <RelativeLayout
         android:layout_width="match_parent"
+        android:background="@drawable/repeating_header_bg"
         android:layout_height="100dp" >
 
         <FrameLayout
@@ -106,5 +107,13 @@
 
         </LinearLayout>
     </RelativeLayout>
+    
+    <ImageView
+        android:id="@+id/shadow"
+        android:contentDescription="shadow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        android:src="@drawable/profile_header_shadow" />
 
 </LinearLayout>
