@@ -134,6 +134,7 @@ public class ContactManager implements ITransientCache
 			if (Utils.isGroupConversation(ms))
 			{
 				persistenceCache.removeGroup(ms);
+				transientCache.removeGroup(ms);
 			}
 			else
 			{
@@ -439,8 +440,8 @@ public class ContactManager implements ITransientCache
 			List<String> last = mapEntry.getValue();
 			for (String ms : last)
 			{
-				ContactInfo contact = getContact(ms);
-				if (null != contact.getName())
+				ContactInfo contact = getContact(ms, false, false);
+				if (null != contact && null != contact.getName())
 				{
 					setGroupParticipantContactName(groupId, ms, contact.getName());
 				}
@@ -1197,6 +1198,10 @@ public class ContactManager implements ITransientCache
 		transientCache.removeGroupParticipants(groupId, msisdn);
 	}
 
+	public void removeGroup(String groupId)
+	{
+		transientCache.removeGroup(groupId);
+	}
 	/**
 	 * Sets the group name in persistence cache , should be called when group name is changed
 	 * 
