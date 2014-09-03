@@ -8,8 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="18dp"
-        android:orientation="vertical"
-        android:layout_marginBottom="-12dp" >
+        android:orientation="vertical">
 
         <include
             android:id="@+id/phone_numbers"
@@ -19,22 +18,20 @@
         
 <RelativeLayout 
     android:layout_width="match_parent"
-    android:layout_marginTop="2dp"
     android:layout_height="54dp">
 
     <LinearLayout
         android:id="@+id/divider_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
         android:layout_marginLeft="6dp"
-        android:layout_marginRight="7dp"
         android:orientation="horizontal" >
         
         <LinearLayout
-            android:layout_width="36dp"
-            android:layout_height="36dp" 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" 
             android:contentDescription="Message Icon"
             android:onClick="messageBtnClicked"
             android:background="@drawable/list_item"
@@ -43,9 +40,11 @@
         <ImageView
             android:id="@+id/message_icon"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="36dp"
             android:scaleType="centerInside"
-            android:layout_gravity="center"
+            android:layout_marginRight="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_gravity="center_vertical"
             android:src="@drawable/ic_hike_message" />
         </LinearLayout>
 
@@ -57,7 +56,7 @@
             android:background="#d9dbdc" />
 
          <LinearLayout 
-            android:layout_width="36dp"
+            android:layout_width="46dp"
             android:layout_height="36dp"
             android:contentDescription="Call Icon"
             android:onClick="callBtnClicked"
@@ -84,7 +83,8 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_marginLeft="18dp"
-        android:orientation="vertical" >
+        android:layout_marginRight="5dp"
+        android:orientation="horizontal" >
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/phone_number"
@@ -93,17 +93,40 @@
             android:ellipsize="end"
             android:contentDescription="Phone Number"
             android:singleLine="true"
+            android:text="dsfakjkfjsa"
             android:textColor="#33312e"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:textStyle="bold|italic" />
-
+        
+		<LinearLayout 
+            android:id="@+id/phone_type_ll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:gravity="center">
+        	
+        	<View
+                android:id="@+id/divider"
+                android:layout_width="0.5dp"
+                android:layout_height="14dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="6dp"
+                android:background="@color/updates_text" />
+             
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/main_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="Phone type"
-            android:textColor="#33312e"
-            android:textSize="12sp" />
+            android:textColor="@color/updates_text"
+            android:text="djsfjasljf"
+            android:textStyle="italic"
+            android:layout_marginRight="5dp"
+            android:textSize="14sp" />
+        </LinearLayout>
+       
     </LinearLayout>
 
     <View
@@ -111,6 +134,6 @@
         android:layout_alignParentBottom="true"
         android:visibility="gone" />
 
-</RelativeLayout>
-</LinearLayout>
+		</RelativeLayout>
+	</LinearLayout>
 </LinearLayout>

@@ -77,8 +77,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="6dp" >
+                android:layout_height="wrap_content">
 
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/name"

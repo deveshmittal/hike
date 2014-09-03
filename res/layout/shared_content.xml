@@ -9,13 +9,13 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
         android:orientation="vertical" >
 
         <include
             android:id="@+id/shared_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
             layout="@layout/friends_group_view" />
 
         <LinearLayout
