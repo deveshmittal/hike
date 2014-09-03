@@ -90,7 +90,6 @@
     <string name="call">Call</string>
     <string name="we_have_gc">Tap the menu to start a Group Chat.</string>
     <string name="upload_failed">Could not upload file. Check network settings.</string>
-    <string name="joined_hike">%1$s just joined hike!</string>
     <string name="opt_in">%1$s just opted in!</string>
     <string name="dnd_msg_gc">Waiting for %1$s to reply to join in</string>
     <string name="earned_credits">You\'ve just earned %1$s free SMS</string>
@@ -402,7 +401,6 @@
     <string name="delete_status_error">Could not delete your status update. Please check your network connection and try again later.</string>
     <string name="deleting_status">Deleting update...</string>
     <string name="on_hike_since">on hike since %1$s</string>
-    <string name="joined_hike_new">%1$s just joined hike, say \'Hi\' :)</string>
     <string name="user_added_contact_as_friend">Added as a friend</string>
     <string name="tap_here_block">Tap here to block this number</string>
     <string name="status_text_notification">wrote %1$s</string>
@@ -1154,6 +1152,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="no_internet_try_again">No internet connection. Please try again later.</string>
     <string name="refresh">Refresh</string>
     <string name="user_back_on_hike">%1$s is now on hike, say hi</string>
+    <string name="joined_hike_new">%1$s is now on hike, say hi</string>
+    <string name="joined_hike">%1$s is now on hike, say hi</string>
     <string name="team_hike">hike</string>
     <string name="add_fav_msg">Is now sharing last seen and status updates. Would you like to do the same?</string>
     <string name="add_people">ADD A MEMBER</string>
