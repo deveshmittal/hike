@@ -255,7 +255,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.subText = (TextView) v.findViewById(R.id.count);
 				viewHolder.infoContainer = v.findViewById(R.id.shared_media_items);
 				viewHolder.parent =  v.findViewById(R.id.sm_emptystate);
-				
+				viewHolder.sharedFiles = v.findViewById(R.id.shared_media);
 				List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
 				LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
 				layout.removeAllViews();
@@ -347,6 +347,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.text = (TextView) viewHolder.parent.findViewById(R.id.name);
 				viewHolder.extraInfo = (TextView) v.findViewById(R.id.phone_number);
 				viewHolder.subText = (TextView) v.findViewById(R.id.main_info);
+				viewHolder.phoneNumView = v.findViewById(R.id.phone_type_ll);
 				break;
 			}
 
@@ -403,10 +404,16 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.text.setText(context.getString(R.string.shared_med));
 			List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
 			LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
-			LayoutParams layoutParams;
 			ImageView image;
 			int smSize = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
 			viewHolder.subText.setText(Integer.toString(smSize));
+			if(!groupProfile)
+			{
+				LinearLayout.LayoutParams ll = (LayoutParams) viewHolder.sharedFiles.getLayoutParams();
+				ll.topMargin = 0;
+				viewHolder.sharedFiles.setLayoutParams(ll);   //Hack to get the top margin right in one to one profile case
+			}
+			
 			if(sharedMedia != null)
 			{	viewHolder.infoContainer.setVisibility(View.VISIBLE);
 				viewHolder.parent.setVisibility(View.GONE);  //Empty state
@@ -504,17 +511,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				/*
 				 * We will remove these two lines when we will be add groups for 1:1
 				 */
-				LayoutParams ll;
-				
-				/*
-				 * The top margins in this case gets screwed up. Can't find out the reason why. The top margins come out
-				 * to be x + 12 for the views which are being made visible below. Hence this hacky margin fix.
-				 * */
+				android.widget.LinearLayout.LayoutParams ll;
 				if(totalfiles > 0)			
 				{	
-					ll = (LayoutParams) viewHolder.sharedFiles.getLayoutParams();
-					ll.topMargin = -12;
-					viewHolder.sharedFiles.setLayoutParams(ll);
 					viewHolder.sharedFiles.setVisibility(View.VISIBLE);
 					((LinearLayout) viewHolder.sharedFiles).getChildAt(1).setVisibility(View.GONE);
 					((LinearLayout) viewHolder.sharedFiles).findViewById(R.id.shared_content_seprator).setVisibility(View.GONE);
@@ -525,10 +524,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				else
 				{	
 					viewHolder.sharedFiles.setVisibility(View.GONE);
-					ll = (LayoutParams) viewHolder.phoneNumView.getLayoutParams();
-					ll.topMargin = 12;
-					viewHolder.phoneNumView.setLayoutParams(ll);
 					viewHolder.phoneNumView.setVisibility(View.VISIBLE);
+					ll = (LayoutParams) viewHolder.phoneNumView.getLayoutParams();
+					ll.topMargin = 0;   //Hack to get margin right in one to one profile case r
+					viewHolder.phoneNumView.setLayoutParams(ll);
 					viewHolder.timeStamp.setText(context.getResources().getString(R.string.no_file_profile));
 				}
 			}
@@ -542,7 +541,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			if(mContactInfo.getMsisdnType().length()>0)
 				viewHolder.subText.setText(mContactInfo.getMsisdnType());
 			else
-				viewHolder.subText.setVisibility(View.GONE);
+				viewHolder.phoneNumView.setVisibility(View.GONE);
 			
 			break;
 
