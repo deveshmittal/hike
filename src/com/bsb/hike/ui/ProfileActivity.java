@@ -60,6 +60,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
@@ -665,7 +666,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		EditText groupNameEditText;
 		ImageView smallIconFrame;
 		ImageView statusMood;
-		
+		TextView dualText;
 		String msisdn;
 		String name;
 		boolean headerViewInitialized = false;
@@ -684,11 +685,18 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			extraInfo = (TextView) headerView.findViewById(R.id.add_fav_tv);
 			smallIcon = (ImageView) headerView.findViewById(R.id.add_fav_star);
 			statusMood = (ImageView) headerView.findViewById(R.id.status_mood);
+			smallIconFrame = (ImageView) headerView.findViewById(R.id.add_fav_star_2);
+			dualText = (TextView) headerView.findViewById(R.id.add_fav_tv_2);
 			msisdn = contactInfo.getMsisdn();
 			name = TextUtils.isEmpty(contactInfo.getName()) ? contactInfo.getMsisdn() : contactInfo.getName();
 			text.setText(name);
+			LinearLayout fav_layout = (LinearLayout) parentView.findViewById(R.id.add_fav_view);
+			LinearLayout req_layout = (LinearLayout) parentView.findViewById(R.id.remove_fav);
+			RelativeLayout dual_layout = (RelativeLayout) parentView.findViewById(R.id.add_fav_view_2);
+			fav_layout.setVisibility(View.GONE);
+			req_layout.setVisibility(View.GONE);
+			dual_layout.setVisibility(View.GONE);
 			
-
 			if (showContactsUpdates(contactInfo)) // Favourite case
 			{
 				addContactStatusInHeaderView(subText, statusMood);
@@ -696,42 +704,76 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				if (contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
 				{
 					// Show add/not now screen.
-					LinearLayout req_layout = (LinearLayout) parentView.findViewById(R.id.remove_fav);
 					req_layout.setVisibility(View.VISIBLE);
-					LinearLayout fav_layout = (LinearLayout) parentView.findViewById(R.id.add_fav_view);
-					fav_layout.setVisibility(View.GONE);
+				}
+				else if(contactInfo.isUnknownContact())
+				{		
+						fav_layout.setVisibility(View.VISIBLE);
+						fav_layout.setTag(getResources().getString(R.string.tap_to_save));
+						extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
+						extraInfo.setText(getResources().getString(R.string.tap_to_save));
+						smallIcon.setImageResource(R.drawable.ic_add_friend);
 				}
 				else
 				{
-					LinearLayout req_layout = (LinearLayout) parentView.findViewById(R.id.remove_fav);
+					fav_layout.setVisibility(View.GONE);
+					fav_layout.setTag(null);
 					req_layout.setVisibility(View.GONE);
 				}
 				
 			}
 			else if (contactInfo.isOnhike() && (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED || contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED))
 			{
-				LinearLayout fav_layout = (LinearLayout) parentView.findViewById(R.id.add_fav_view);
-				fav_layout.setVisibility(View.VISIBLE);
-				subText.setText(getResources().getString(R.string.on_hike));
-				extraInfo.setTextColor(getResources().getColor(R.color.add_fav));
-				extraInfo.setText(getResources().getString(R.string.add_fav));
-				smallIcon.setImageResource(R.drawable.ic_add_friend);
+				subText.setText(getJoinedHikeStatus(contactInfo).getText().toString());
+				if(contactInfo.isUnknownContact())
+				{
+					//Show dual layout
+					dual_layout.setVisibility(View.VISIBLE);
+				}
+				else
+				{	dual_layout.setVisibility(View.GONE);
+					fav_layout.setVisibility(View.VISIBLE);
+					extraInfo.setTextColor(getResources().getColor(R.color.add_fav));
+					extraInfo.setText(getResources().getString(R.string.add_fav));
+					smallIcon.setImageResource(R.drawable.ic_add_friend);
+				}
 			}
 
 			else if (contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT)
 			{
-				subText.setText(getResources().getString(R.string.on_hike));
-				parentView.findViewById(R.id.add_fav_view).setVisibility(View.GONE);
+				subText.setText(getJoinedHikeStatus(contactInfo).getText().toString());
+				if(contactInfo.isUnknownContact())  //Tap to save
+				{ 	
+					fav_layout.setVisibility(View.VISIBLE);
+					fav_layout.setTag(getResources().getString(R.string.tap_to_save));
+					extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
+					extraInfo.setText(getResources().getString(R.string.tap_to_save));
+					smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
+				}
+				else
+				{
+					fav_layout.setTag(null);
+					fav_layout.setVisibility(View.GONE);
+				}
 			}
 			else if (!contactInfo.isOnhike())
 			{
 				// UNKNOWN and on SMS
-				LinearLayout invite_layout = (LinearLayout) parentView.findViewById(R.id.add_fav_view);
-				invite_layout.setVisibility(View.VISIBLE);
-				subText.setText(getResources().getString(R.string.on_sms));
-				extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
-				extraInfo.setText(getResources().getString(R.string.ftue_add_prompt_invite_title));
-				smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
+				if(contactInfo.isUnknownContact())
+				{
+					dual_layout.setVisibility(View.VISIBLE);
+					dualText.setTextColor(getResources().getColor(R.color.blue_hike));
+					dualText.setText(getResources().getString(R.string.ftue_add_prompt_invite_title));
+					smallIconFrame.setImageResource(R.drawable.ic_invite_to_hike_small);
+				}
+				else
+				{	dual_layout.setVisibility(View.GONE);
+					fav_layout.setVisibility(View.VISIBLE);
+					subText.setText(getResources().getString(R.string.on_sms));
+					extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
+					extraInfo.setText(getResources().getString(R.string.ftue_add_prompt_invite_title));
+					smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
+				}
 			}
 
 			break;
@@ -1655,6 +1697,13 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public void onTextButtonClick(View v)
 	{
+		if(v.getTag()!=null &&      
+				((String) v.getTag()).equals(getResources().getString(R.string.tap_save_contact)))  //Only in this case, the the view will have a tag else tag will be null
+		{
+			onAddToContactClicked(v);
+			return;
+		}
+		
 		if (contactInfo.isOnhike())
 		{
 			Utils.addFavorite(this, contactInfo, false);
