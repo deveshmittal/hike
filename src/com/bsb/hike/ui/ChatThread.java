@@ -3975,6 +3975,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
+					saveDraft();
 					finish();
 				}
 			});
