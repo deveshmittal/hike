@@ -1159,7 +1159,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="file_missing_caps">FILE MISSING</string>
     <string name="status_profile_pic_notification">changed profile picture</string>
     <string name="group_admin">Admin</string>
-    <string name="total_mem_count">100</string>
     <string name="no_file">No files or pins shared</string>
     <string name="no_file_profile">No files shared</string>
 </resources>

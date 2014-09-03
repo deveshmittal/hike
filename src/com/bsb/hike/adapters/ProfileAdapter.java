@@ -547,7 +547,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 
 		case MEMBERS:
 			viewHolder.text.setText(context.getResources().getString(R.string.members));
-			viewHolder.subText.setText(Integer.toString(((ProfileGroupItem)profileItem).getTotalMembers()) + "/" +context.getResources().getString(R.string.total_mem_count));
+			viewHolder.subText.setText(Integer.toString(((ProfileGroupItem)profileItem).getTotalMembers()) + "/" + HikeConstants.MAX_CONTACTS_IN_GROUP);
 			break;
 
 		case GROUP_PARTICIPANT:
