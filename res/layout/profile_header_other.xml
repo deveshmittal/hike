@@ -4,22 +4,34 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#f1f2f3"
-    android:minHeight="100dp"
     android:orientation="vertical" >
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="100dp" >
+        
+        <FrameLayout
+            android:id="@+id/avatar_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp" >
+            
+            <ImageView 
+                android:layout_width="68dp"
+                android:layout_height="68dp"
+                android:src="@drawable/avatar_stroke"/>
 
         <com.bsb.hike.ui.utils.RecyclingImageView
             android:id="@+id/profile_image"
-            android:layout_width="65dp"
-            android:layout_height="65dp"
+            android:layout_width="66dp"
+            android:layout_height="66dp"
             android:layout_centerVertical="true"
             android:contentDescription="Profile Image"
-            android:layout_marginLeft="25dp"
+            android:layout_gravity="center"
             android:onClick="onViewImageClicked"
             android:src="@drawable/ic_default_avatar_group" />
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/name_layout"
@@ -27,8 +39,8 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="16dp"
-            android:layout_toRightOf="@id/profile_image"
-            android:layout_marginRight="10dp"
+            android:layout_toRightOf="@id/avatar_container"
+            android:layout_marginRight="16dp"
             android:orientation="vertical" >
 
             <com.bsb.hike.view.CustomFontTextView
@@ -41,7 +53,7 @@
                 android:contentDescription="Name"
                 android:singleLine="true"
                 android:textColor="@color/chat_color"
-                android:textSize="24sp" />
+                android:textSize="18sp" />
             
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -62,7 +74,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="Status"
-                android:textColor="@color/phone_entering_header"
+                android:textColor="#999999"
+                android:textStyle="normal"
+                android:maxLines="2"
                 android:ellipsize="end"
                 android:textSize="12sp" />
             </LinearLayout>
