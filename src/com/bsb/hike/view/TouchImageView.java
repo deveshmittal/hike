@@ -31,6 +31,7 @@ import android.widget.OverScroller;
 import android.widget.Scroller;
 
 import com.bsb.hike.ui.utils.RecyclingImageView;
+import com.bsb.hike.utils.Logger;
 
 public class TouchImageView extends RecyclingImageView
 {
@@ -1083,13 +1084,22 @@ public class TouchImageView extends RecyclingImageView
 	     */
 	    private PointF transformCoordBitmapToTouch(float bx, float by) {
 	        matrix.getValues(m);
-	        float origW = getDrawable().getIntrinsicWidth();
-	        float origH = getDrawable().getIntrinsicHeight();
-	        float px = bx / origW;
-	        float py = by / origH;
-	        float finalX = m[Matrix.MTRANS_X] + getImageWidth() * px;
-	        float finalY = m[Matrix.MTRANS_Y] + getImageHeight() * py;
-	        return new PointF(finalX , finalY);
+	        try
+	        {	
+	        	float origW = getDrawable().getIntrinsicWidth();  //GetDrawable was giving an NPE on a random repro here.
+	        	float origH = getDrawable().getIntrinsicHeight();
+	        	float px = bx / origW;
+	        	float py = by / origH;
+	        	float finalX = m[Matrix.MTRANS_X] + getImageWidth() * px;
+	        	float finalY = m[Matrix.MTRANS_Y] + getImageHeight() * py;
+	        	return new PointF(finalX , finalY);
+	        }
+	        catch (NullPointerException ex)
+	        {
+	        	Logger.d(DEBUG, "Caught a null pointer in TouchImageView's transformCoordBitmapToTouch");
+	        	ex.printStackTrace();
+	        }
+	        return new PointF(m[Matrix.MTRANS_X], m[Matrix.MTRANS_Y]);  //HackyFix --> returning the old matrix values.
 	    }
 
 	    /**
