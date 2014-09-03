@@ -1374,6 +1374,11 @@ public class HikeConstants
 		public static final String SIGNUP_ERROR = "signupSerroR";
 
 		/*
+		 *  Compose screen <screen> = compS <event> = refContcts
+		 */
+		public static final String COMPOSE_REFRESH_CONTACTS = "compSrefContcts";
+
+		/*
 		 * Drawer screen <screen> = drS <event> = homE, gC, inV, reW, creD, proF, settinG
 		 */
 		public static final String DRAWER_HOME = "drShomE";
