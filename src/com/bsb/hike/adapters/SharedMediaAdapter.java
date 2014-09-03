@@ -98,7 +98,7 @@ public class SharedMediaAdapter extends PagerAdapter implements OnClickListener
 			videPlayButton.setVisibility(View.GONE);
 		}
 
-		if(sharedMediaItem.getFileFromExactFilePath().exists())
+		if(sharedMediaItem.exactFilePathFileExists())
 		{
 			sharedMediaLoader.loadImage(sharedMediaItem.getImageLoaderKey(true), galleryImageView, false);
 		}

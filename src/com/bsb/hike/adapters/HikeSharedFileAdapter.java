@@ -112,7 +112,7 @@ public class HikeSharedFileAdapter extends BaseAdapter
 		if (galleryItem != null)
 		{	View time_view = convertView.findViewById(R.id.vid_time_layout);
 			holder.galleryThumb.setImageDrawable(null);
-			if(galleryItem.getFileFromExactFilePath().exists())
+			if(galleryItem.exactFilePathFileExists())
 			{
 				thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), holder.galleryThumb, isListFlinging);
 				holder.galleryThumb.setScaleType(ScaleType.CENTER_CROP);

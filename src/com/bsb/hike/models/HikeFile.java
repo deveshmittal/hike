@@ -513,14 +513,28 @@ public class HikeFile
 		this.isSent = isSent;
 	}
 	
+	/*
+	 * this method might return null file object in some cases. So, We always need to use exactFilePathFileExists() method to check weather
+	 * actually file exists or not.
+	 */
 	public File getFileFromExactFilePath()
 	{
 		String exactFilePath = getExactFilePath();
-		if(file == null || !file.getAbsolutePath().equals(exactFilePath))
+		/*
+		 * Added empty check for exact file path because if file path is empty then application get crashed on creating new file. Cases where exact file path can be empty are : 1)
+		 * ExternalStorageState is None. (2) Source file path is null Fogbugz Id : 37242
+		 */
+		if (!TextUtils.isEmpty(exactFilePath) && (file == null || !file.getAbsolutePath().equals(exactFilePath)))
 		{
 			file = new File(exactFilePath);
 		}
 		return file;
+	}
+	
+	public boolean exactFilePathFileExists()
+	{
+		File file = getFileFromExactFilePath();
+		return file != null && file.exists();
 	}
 
 	public void shareFile(Context context)

@@ -4694,7 +4694,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// @GM cancelTask has been changed
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			File file = hikeFile.getFile();
-			if(deleteMediaFromPhone)
+			if(deleteMediaFromPhone && hikeFile.exactFilePathFileExists())
 			{
 				hikeFile.getFileFromExactFilePath().delete();
 			}

@@ -4915,7 +4915,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			while (cursorIterator.hasNext() && limit>0)
 			{
 				HikeSharedFile hikeSharedFile = cursorIterator.next();
-				if(hikeSharedFile.getFileFromExactFilePath().exists())
+				if(hikeSharedFile.exactFilePathFileExists())
 				{
 					limit--;
 
@@ -5022,7 +5022,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			while (cursorIterator.hasNext())
 			{
 				HikeSharedFile hikeSharedFile = cursorIterator.next();
-				if(hikeSharedFile.getFileFromExactFilePath().exists())
+				if(hikeSharedFile.exactFilePathFileExists())
 				{
 					count++;
 				}

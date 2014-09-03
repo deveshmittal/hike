@@ -470,7 +470,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 						if(selectedSharedFileItems.contains(hsf.getMsgId()))
 						{
 							// if delete media from phone is checked
-							if(deleteConfirmDialog.isChecked() && hsf.getFileFromExactFilePath().exists())
+							if(deleteConfirmDialog.isChecked() && hsf.exactFilePathFileExists())
 							{
 								hsf.getFileFromExactFilePath().delete();
 							}
