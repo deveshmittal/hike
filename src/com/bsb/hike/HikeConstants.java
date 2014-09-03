@@ -1532,6 +1532,8 @@ public class HikeConstants
 		
 		public static final String SETTINGS_NOTIFICATION_H2O_OFF = "settingsSNotifH2ODisabled";
 		
+		public static final String SETTINGS_REFRESH_CONTACTS = "settingsSrefContcts";
+
 	}
 
 	public static final class MqttMessageTypes
