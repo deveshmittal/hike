@@ -50,7 +50,7 @@
                 android:layout_width="47dp"
                 android:layout_height="match_parent"
                 android:layout_toRightOf="@id/divider"
-                android:onClick="onGroupNameEditClick"
+                android:onClick="onEditGroupNameClick"
                 android:gravity="center"
                 android:background="@drawable/list_item"
                 android:layout_centerVertical="true">
