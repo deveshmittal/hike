@@ -1089,6 +1089,8 @@ public class HikeConstants
 
 		public static final String CONTACT_INFO = "contactInfo";
 
+		public static final String CONTACT_ID = "contactId";
+
 		public static final String ON_HIKE = "onHike";
 
 		public static final String SHOWING_SECOND_LOADING_TXT = "showingSecondLoadingTxt";

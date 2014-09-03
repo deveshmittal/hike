@@ -14,9 +14,11 @@ import org.json.JSONObject;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract.Data;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -794,54 +796,72 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else if (type != null && presentIntent.hasExtra(Intent.EXTRA_STREAM))
 		{
+			Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
 			if (type.startsWith(HikeConstants.SHARE_CONTACT_CONTENT_TYPE))
 			{
-				// TODO need to handle this case of contact sharing
-				Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
-			Logger.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
-			fileUri = Utils.makePicasaUri(fileUri);
-			String fileUriStart = "file:";
-			String fileUriString = fileUri.toString();
-			String filePath;
-			if (Utils.isPicasaUri(fileUriString))
-			{
-				filePath = fileUriString;
-			}
-			else if (fileUriString.startsWith(fileUriStart))
-			{
-				File selectedFile = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
-				/*
-				 * Done to fix the issue in a few Sony devices.
-				 */
-				filePath = selectedFile.getAbsolutePath();
+				String lookupKey = fileUri.getLastPathSegment();
+
+        		String[] projection = new String[] { Data.CONTACT_ID };
+        		String selection = Data.LOOKUP_KEY + " =?";
+        		String[] selectionArgs = new String[] { lookupKey };
+
+        		Cursor c = getContentResolver().query(Data.CONTENT_URI, projection, selection, selectionArgs, null);
+
+        		int contactIdIdx = c.getColumnIndex(Data.CONTACT_ID);
+        		String contactId = null;
+        		while(c.moveToNext())
+        		{
+        			contactId = c.getString(contactIdIdx);
+        			if(!TextUtils.isEmpty(contactId))
+        				break;
+        		}
+        		intent.putExtra(HikeConstants.Extras.CONTACT_ID, contactId);
+        		intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
 			}
 			else
 			{
-				filePath = Utils.getRealPathFromUri(fileUri, this);
+				Logger.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
+				fileUri = Utils.makePicasaUri(fileUri);
+				String fileUriStart = "file:";
+				String fileUriString = fileUri.toString();
+				String filePath;
+				if (Utils.isPicasaUri(fileUriString))
+				{
+					filePath = fileUriString;
+				}
+				else if (fileUriString.startsWith(fileUriStart))
+				{
+					File selectedFile = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
+					/*
+					 * Done to fix the issue in a few Sony devices.
+					 */
+					filePath = selectedFile.getAbsolutePath();
+				}
+				else
+				{
+					filePath = Utils.getRealPathFromUri(fileUri, this);
+				}
+	
+				if (TextUtils.isEmpty(filePath))
+				{
+					Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+					return;
+				}
+	
+				File file = new File(filePath);
+				if (file.length() > HikeConstants.MAX_FILE_SIZE)
+				{
+					Toast.makeText(ComposeChatActivity.this, R.string.max_file_size, Toast.LENGTH_SHORT).show();
+					return;
+				}
+	
+				type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Utils.getFileExtension(filePath));
+				if (type == null)
+					type = presentIntent.getType();
+	
+				intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
+				intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
 			}
-
-			if (TextUtils.isEmpty(filePath))
-			{
-				Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
-				return;
-			}
-
-			File file = new File(filePath);
-			if (file.length() > HikeConstants.MAX_FILE_SIZE)
-			{
-				Toast.makeText(ComposeChatActivity.this, R.string.max_file_size, Toast.LENGTH_SHORT).show();
-				return;
-			}
-
-			type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Utils.getFileExtension(filePath));
-			if (type == null)
-				type = presentIntent.getType();
-
-			intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
-			intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
 		}
 		else if (presentIntent.hasExtra(Intent.EXTRA_TEXT) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
 		{
