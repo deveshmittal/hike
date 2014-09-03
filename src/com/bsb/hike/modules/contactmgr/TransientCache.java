@@ -672,7 +672,7 @@ public class TransientCache extends ContactsCache
 					String msisdn = mapEntry.getKey();
 					ContactInfo contactInfo = mapEntry.getValue().getFirst();
 					if (null != msisdnsIn && msisdnsIn.contains(msisdn) && (null != msisdnsNotIn && !msisdnsNotIn.contains(msisdn))
-							&& (null != myMsisdn && !msisdn.equals(myMsisdn)) && contactInfo.isOnhike())
+							&& (null != myMsisdn && !msisdn.equals(myMsisdn)) && contactInfo.isOnhike() && !contactInfo.isUnknownContact())
 					{
 						contacts.add(contactInfo);
 						limit--;
