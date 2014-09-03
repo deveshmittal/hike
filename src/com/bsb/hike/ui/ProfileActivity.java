@@ -142,11 +142,13 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private SharedPreferences preferences;
 
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.PARTICIPANT_JOINED_GROUP,
-			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
+			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT };
 
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST,
-			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
+			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT };
 
 	private String[] profilePubSubListeners = { HikePubSub.USER_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.STATUS_MESSAGE_RECEIVED,
 			HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
@@ -2228,6 +2230,19 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				public void run()
 				{
 					finishEditing();
+				}
+			});
+		}
+		else if (HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT.equals(type))
+		{
+
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG);
 				}
 			});
 		}
