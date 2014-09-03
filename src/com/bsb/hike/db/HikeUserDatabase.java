@@ -250,33 +250,34 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	public void addContacts(List<ContactInfo> contacts, boolean isFirstSync) throws DbException
 	{
 		SQLiteDatabase db = mDb;
-		db.beginTransaction();
+		InsertHelper ih = null;
+		
 
 		Map<String, String> msisdnTypeMap = new HashMap<String, String>();
 		/*
 		 * Since this is the first sync, we just run one query and pickup all the extra info required. For all subsequent syncs we run the query for each contact separately.
 		 */
-		if (isFirstSync)
-		{
-			// Adding the last contacted and phone type info
-			Cursor extraInfo = this.mContext.getContentResolver().query(Phone.CONTENT_URI, new String[] { Phone.NUMBER, Phone.TYPE, Phone.LABEL }, null, null, null);
-
-			int msisdnIdx = extraInfo.getColumnIndex(Phone.NUMBER);
-			int typeIdx = extraInfo.getColumnIndex(Phone.TYPE);
-			int labelIdx = extraInfo.getColumnIndex(Phone.LABEL);
-
-			while (extraInfo.moveToNext())
-			{
-				String msisdnType = Phone.getTypeLabel(this.mContext.getResources(), extraInfo.getInt(typeIdx), extraInfo.getString(labelIdx)).toString();
-
-				msisdnTypeMap.put(extraInfo.getString(msisdnIdx), msisdnType);
-			}
-			extraInfo.close();
-		}
-
-		InsertHelper ih = null;
 		try
 		{
+			db.beginTransaction();
+			if (isFirstSync)
+			{
+				// Adding the last contacted and phone type info
+				Cursor extraInfo = this.mContext.getContentResolver().query(Phone.CONTENT_URI, new String[] { Phone.NUMBER, Phone.TYPE, Phone.LABEL }, null, null, null);
+
+				int msisdnIdx = extraInfo.getColumnIndex(Phone.NUMBER);
+				int typeIdx = extraInfo.getColumnIndex(Phone.TYPE);
+				int labelIdx = extraInfo.getColumnIndex(Phone.LABEL);
+
+				while (extraInfo.moveToNext())
+				{
+					String msisdnType = Phone.getTypeLabel(this.mContext.getResources(), extraInfo.getInt(typeIdx), extraInfo.getString(labelIdx)).toString();
+
+					msisdnTypeMap.put(extraInfo.getString(msisdnIdx), msisdnType);
+				}
+				extraInfo.close();
+			}
+
 			ih = new InsertHelper(db, DBConstants.USERS_TABLE);
 			final int msisdnColumn = ih.getColumnIndex(DBConstants.MSISDN);
 			final int idColumn = ih.getColumnIndex(DBConstants.ID);
@@ -370,11 +371,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 
 		SQLiteDatabase db = mDb;
-		db.beginTransaction();
+		
 
 		InsertHelper ih = null;
 		try
 		{
+			db.beginTransaction();
 			ih = new InsertHelper(db, DBConstants.BLOCK_TABLE);
 			final int msisdnColumn = ih.getColumnIndex(DBConstants.MSISDN);
 			for (String msisdn : msisdns)
@@ -1516,13 +1518,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		try
 		{
+			mDb.beginTransaction();
 			extraInfo = this.mContext.getContentResolver().query(Phone.CONTENT_URI, new String[] { Phone.NUMBER, Phone.TYPE, Phone.LABEL }, null, null, null);
 
 			int msisdnIdx = extraInfo.getColumnIndex(Phone.NUMBER);
 			int typeIdx = extraInfo.getColumnIndex(Phone.TYPE);
 			int labelIdx = extraInfo.getColumnIndex(Phone.LABEL);
-
-			mDb.beginTransaction();
 
 			while (extraInfo.moveToNext())
 			{
@@ -1562,10 +1563,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		InsertHelper ih = null;
 		try
 		{
+			mDb.beginTransaction();
 			ih = new InsertHelper(mDb, DBConstants.FAVORITES_TABLE);
 			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO " + DBConstants.FAVORITES_TABLE + " ( " + DBConstants.MSISDN + ", " + DBConstants.FAVORITE_TYPE + " ) "
 					+ " VALUES (?, ?)");
-			mDb.beginTransaction();
 			insertStatement.bindString(ih.getColumnIndex(DBConstants.MSISDN), msisdn);
 			insertStatement.bindLong(ih.getColumnIndex(DBConstants.FAVORITE_TYPE), favoriteType.ordinal());
 

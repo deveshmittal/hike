@@ -3757,13 +3757,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
+			mDb.beginTransaction();
 			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.CONV_ID, DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA }, null, null, null, null, null);
 
 			final int convIdIdx = c.getColumnIndex(DBConstants.CONV_ID);
 			final int msgIdIdx = c.getColumnIndex(DBConstants.MESSAGE_ID);
 			final int metatdataIdx = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
-
-			mDb.beginTransaction();
 
 			while (c.moveToNext())
 			{
