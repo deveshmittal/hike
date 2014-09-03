@@ -412,8 +412,11 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		}
 		else
 		{
-			PhotoViewerFragment.openPhoto(R.id.parent_layout, HikeSharedFilesActivity.this, (ArrayList<HikeSharedFile>) sharedFilesList, 
-					false, position, msisdn, conversationName, isGroup, msisdnArray, nameArray);
+			ArrayList<HikeSharedFile> sharedMediaItems = new ArrayList<HikeSharedFile>(sharedFilesList.size());
+			sharedMediaItems.addAll(sharedFilesList);
+			Collections.reverse(sharedMediaItems);
+			PhotoViewerFragment.openPhoto(R.id.parent_layout, HikeSharedFilesActivity.this, sharedMediaItems, 
+					false, sharedMediaItems.size()-position-1, msisdn, conversationName, isGroup, msisdnArray, nameArray);
 		}
 	}
 

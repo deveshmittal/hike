@@ -4854,7 +4854,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public List<?> getSharedMedia(String msisdn, int limit, long maxMsgId, boolean onlyMedia)
 	{
-		return getSharedMedia(msisdn, limit, maxMsgId, onlyMedia, true);
+		return getSharedMedia(msisdn, limit, maxMsgId, onlyMedia, false);
 	}
 
 	
@@ -4889,7 +4889,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 */
 	public List<?> getSharedMedia(String msisdn, int limit, long givenMsgId, boolean onlyMedia, boolean itemsToRight)
 	{
-		String msgIdSelection = DBConstants.MESSAGE_ID + (itemsToRight ? "<" : ">") + givenMsgId;
+		String msgIdSelection = DBConstants.MESSAGE_ID + (itemsToRight ? ">" : "<") + givenMsgId;
 		String hfTypeSelection = getSharedMediaSelection(onlyMedia);
 
 		String selection =  DBConstants.MSISDN + " = ?" + (givenMsgId == -1 ? "" : " AND " + msgIdSelection) + " AND "
@@ -4899,7 +4899,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		try
 		{
 			c = mDb.query(DBConstants.SHARED_MEDIA_TABLE, new String[] { DBConstants.MESSAGE_ID, DBConstants.GROUP_PARTICIPANT, DBConstants.TIMESTAMP, DBConstants.IS_SENT,
-					DBConstants.MESSAGE_METADATA }, selection, new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + (itemsToRight ? " DESC" : " ASC"), null);
+					DBConstants.MESSAGE_METADATA }, selection, new String[] { msisdn }, null, null, DBConstants.MESSAGE_ID + (itemsToRight ? " ASC" : " DESC"), null);
 
 			List<?> sharedFilesList;
 			if(onlyMedia)
