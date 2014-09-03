@@ -1322,6 +1322,8 @@ public class HikeConstants
 
 		public static final String PRIVACY_SCREEN = "profSprivS";
 
+		public static final String SET_PROFILE_PIC_GALLERY = "profSpicGallery";
+
 		/*
 		 * Invite screen events <screen> = invS <event> = credB, creDtiPN, creDtiPY
 		 */
