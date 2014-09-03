@@ -217,6 +217,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
 			sendBroadcast(contactSyncIntent);
 			Toast.makeText(getApplicationContext(), R.string.contacts_sync_started, Toast.LENGTH_SHORT).show();
+			Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_REFRESH_CONTACTS);
 			break;
 		case 6:
 			HikeConversationsDatabase.getInstance().updateToNewSharedMediaTable();

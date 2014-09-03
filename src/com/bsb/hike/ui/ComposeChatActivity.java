@@ -194,6 +194,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			Intent contactSyncIntent = new Intent(HikeService.MQTT_CONTACT_SYNC_ACTION);
 			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
 			sendBroadcast(contactSyncIntent);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.COMPOSE_REFRESH_CONTACTS);
 		}
 		return super.onOptionsItemSelected(item);
 	}
