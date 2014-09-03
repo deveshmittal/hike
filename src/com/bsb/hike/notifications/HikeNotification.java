@@ -486,7 +486,7 @@ public class HikeNotification
 			avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
 		}
 
-		if (hikeNotifMsgStack.getNotificationTextLines() == 1)
+		if (hikeNotifMsgStack.getSize() == 1)
 		{
 			// Possibility to show big picture message
 			ConvMessage convMessage = hikeNotifMsgStack.getLastInsertedConvMessage();
@@ -509,14 +509,6 @@ public class HikeNotification
 					return;
 				}
 
-				// Bitmap bigPictureImage = ToastListener.returnBigPicture(convMessage, context);
-				// if (bigPictureImage != null)
-				// {
-				// showNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
-				// hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
-				// hikeNotifMsgStack.getNotificationBigText(), convMessage.getMsisdn(), bigPictureImage, !convMessage.isStickerMessage(), false, false,
-				// hikeNotifMsgStack.getNotificationSubText(), null, false);
-				// }
 			}
 			else if (convMessage.isStickerMessage())
 			{
@@ -532,7 +524,7 @@ public class HikeNotification
 			}
 		}
 
-		if (hikeNotifMsgStack.getNotificationTextLines() == 1)
+		if (hikeNotifMsgStack.getSize() == 1)
 		{
 			showBigTextStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
