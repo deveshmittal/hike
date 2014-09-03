@@ -1538,8 +1538,6 @@ public class HikeConstants
 		public static final String SETTINGS_NOTIFICATION_NUJ_OFF = "settingsSNotifNUJDisabled";
 		
 		public static final String SETTINGS_NOTIFICATION_H2O_OFF = "settingsSNotifH2ODisabled";
-		
-		public static final String SETTINGS_REFRESH_CONTACTS = "settingsSrefContcts";
 
 	}
 
