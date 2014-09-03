@@ -67,7 +67,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_marginLeft="27dp"
-                    android:layout_marginRight="24dp"
+                    android:layout_marginRight="23dp"
                     android:contentDescription="Shared File icon"
                     android:src="@drawable/ic_file" />
 
@@ -119,7 +119,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_marginLeft="26dp"
-                    android:layout_marginRight="22dp"
+                    android:layout_marginRight="21dp"
                     android:contentDescription="Shared Pins"
                     android:src="@drawable/ic_pin_2" />
 
