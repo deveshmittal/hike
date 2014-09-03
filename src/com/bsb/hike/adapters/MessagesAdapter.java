@@ -3211,9 +3211,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return;
 		case IMAGE:
 		case VIDEO:
-			ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
-			hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn() , convMessage.getTimestamp(), convMessage.getGroupParticipantMsisdn()));
-			PhotoViewerFragment.openPhoto(R.id.chatThreadParentLayout, context, hsf, true, conversation);
+			if(hikeFile.exactFilePathFileExists())
+			{
+				ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
+				hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn(), convMessage.getTimestamp(), convMessage
+						.getGroupParticipantMsisdn()));
+				PhotoViewerFragment.openPhoto(R.id.chatThreadParentLayout, context, hsf, true, conversation);
+			}
+			else
+			{
+				Toast.makeText(context, R.string.unable_to_open, Toast.LENGTH_SHORT).show();
+			}
 			return;
 		
 		

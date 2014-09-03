@@ -1160,4 +1160,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="file_missing_caps">FILE MISSING</string>
     <string name="status_profile_pic_notification">changed profile picture</string>
     <string name="delete_media_from_sdcard">Delete media from phone</string>
+    <string name="unable_to_open">Sorry, this file does not exist</string>
 </resources>
