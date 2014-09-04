@@ -59,6 +59,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="54dp"
                 android:background="@drawable/list_item"
+                android:contentDescription="Shared Files"
                 android:onClick="onSharedFilesClick" >
 
                 <ImageView
@@ -111,6 +112,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="54dp"
                 android:background="@drawable/list_item"
+                android:contentDescription="Shared Pins"
                 android:onClick="openPinHistory" >
 
                 <ImageView
