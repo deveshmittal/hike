@@ -3946,6 +3946,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
+					saveDraft();
 					finish();
 				}
 			});
@@ -4019,7 +4020,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// TODO we could keep a map of msgId -> conversation objects
 			// somewhere to make this faster
 			((GroupConversation)mConversation).updateReadByList(participant,mrMsgId);
-			runOnUiThread(mUpdateAdapter);
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					if (messages.isEmpty())
+					{
+						return;
+					}
+
+					mAdapter.notifyDataSetChanged();
+					/*
+					 * We are doing this based on the assumption that if the last message is sent, we probably received an mr for that message.
+					 * Now we'll scroll to the bottom as long as the bottom message is visible.
+					 */
+					if (messages.get(messages.size() - 1).isSent())
+					{
+						updateViewWindowForReadBy();
+					}
+				}
+			});
 		}
 		/*
 		 * The list of messages is processed.
@@ -8246,7 +8267,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		});
 	}
 
-	public void updateLastSeen()
+	private void updateLastSeen()
 	{
 		updateLastSeen(contactInfo.getMsisdn(), contactInfo.getOffline(), contactInfo.getLastSeenTime());
 	}
