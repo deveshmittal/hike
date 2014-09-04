@@ -1193,8 +1193,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			optionsList.add(new OverFlowMenuItem(getString(R.string.rewards), 4));
 		}
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.my_profile), 0));
-
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
 		
 		optionsList.add(new OverFlowMenuItem(getString(R.string.status), 8));
@@ -1295,9 +1293,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 				switch (item.getKey())
 				{
-				case 0:
-					intent = new Intent(HomeActivity.this, ProfileActivity.class);
-					break;
 				case 1:
 					intent = new Intent(HomeActivity.this, CreditsActivity.class);
 					break;
