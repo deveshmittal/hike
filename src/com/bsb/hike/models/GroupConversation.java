@@ -74,7 +74,13 @@ public class GroupConversation extends Conversation
 			PairModified<GroupParticipant, String> grpPair = this.groupParticipantList.get(contact.getMsisdn());
 			if (null != grpPair)
 			{
-				grpPair.getFirst().setContactInfo(contact);
+				GroupParticipant grpParticipant = grpPair.getFirst();
+				contact.setOnhike(grpParticipant.getContactInfo().isOnhike());
+				grpParticipant.setContactInfo(contact);
+				if(null != contact.getName())
+				{
+					grpPair.setSecond(contact.getName());
+				}
 			}
 		}
 
