@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
@@ -29,6 +30,7 @@ import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.service.HikeService;
 import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
@@ -134,10 +136,10 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 				case SETTINGS:
 					TextView header = (TextView) convertView.findViewById(R.id.item);
 					TextView summary = (TextView) convertView.findViewById(R.id.summary);
+					summary.setVisibility(View.GONE);
 					ImageView iconImage = (ImageView) convertView.findViewById(R.id.icon);
 
 					header.setText(getItem(position));
-					summary.setText(itemsSummary.get(position));
 					iconImage.setImageResource(itemIcons.get(position));
 					break;
 
