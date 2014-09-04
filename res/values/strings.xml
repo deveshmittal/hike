@@ -834,7 +834,6 @@
 	    ]]>
     </string>
 	<string name="contacts_upper_case">CONTACTS</string>
-	<string name="favorite_request_pending">Added as a favorite</string>
 	<string name="ftue_favorite_subtext">Add as a favorite</string>
 	<string name="sent_you_favorite_request">Added you as favorite</string>
 	<string name="sent_you_favorite_request_detailed">Is sharing Last Seen and Status Updates with you. Would you like to do the same?\nAdd %1$s to your Favorites List.</string>
@@ -1161,4 +1160,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="group_admin">Admin</string>
     <string name="no_file">No files or pins shared</string>
     <string name="no_file_profile">No files shared</string>
+    <string name="favorite_request_pending">Added as favorite</string>
 </resources>
