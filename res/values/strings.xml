@@ -831,7 +831,6 @@
 	    ]]>
     </string>
 	<string name="contacts_upper_case">CONTACTS</string>
-	<string name="favorite_request_pending">Added as a favorite</string>
 	<string name="ftue_favorite_subtext">Add as a favorite</string>
 	<string name="sent_you_favorite_request">Added you as favorite</string>
 	<string name="sent_you_favorite_request_detailed">Is sharing Last Seen and Status Updates with you. Would you like to do the same?\nAdd %1$s to your Favorites List.</string>
@@ -1127,7 +1126,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="confirm_delete_pins_header">Delete pins</string>
     <string name="confirm_delete_pins">Are you sure you want to delete these %1$s pins?</string>    
     <string name="shared_media">Shared Media</string>
-    <string name="group_admin">ADMIN</string>
     <string name="shared_files">Shared Files</string>
     <string name="add_btn">ADD</string>
     <string name="not_now">NOT NOW</string>
@@ -1139,7 +1137,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="members">MEMBERS</string>
     <string name="phone_pa">PHONE</string>
     <string name="shared_cont_pa">SHARED CONTENT</string>
-    <string name="no_media">no media yet :(</string>
+    <string name="no_media">No media shared</string>
     <string name="no_internet_try_again">No internet connection. Please try again later.</string>
     <string name="refresh">Refresh</string>
     <string name="user_back_on_hike">%1$s is now on hike, say hi</string>
@@ -1151,6 +1149,10 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="stealth_info_tip_header">Hidden Mode</string>
     <string name="file_missing_caps">FILE MISSING</string>
     <string name="status_profile_pic_notification">changed profile picture</string>
+    <string name="group_admin">Admin</string>
+    <string name="no_file">No files or pins shared</string>
+    <string name="no_file_profile">No files shared</string>
+    <string name="favorite_request_pending">Added as favorite</string>
     <string name="delete_media_from_sdcard">Delete media from phone</string>
     <string name="unable_to_open">Sorry, this file does not exist</string>
     <string name="notificationSoundSummary">Select a sound to play for a new notification</string>

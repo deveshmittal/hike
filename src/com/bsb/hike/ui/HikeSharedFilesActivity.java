@@ -412,6 +412,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		}
 		else
 		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.OPEN_THUMBNAIL_VIA_GALLERY);
 			ArrayList<HikeSharedFile> sharedMediaItems = new ArrayList<HikeSharedFile>(sharedFilesList.size());
 			sharedMediaItems.addAll(sharedFilesList);
 			Collections.reverse(sharedMediaItems);
