@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/thumbnail_group"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginRight="@dimen/thumbnail_margin_right"
-    android:background="@drawable/bg_fav">
-
+    android:layout_marginRight="@dimen/thumbnail_margin_right">
+    
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:id="@+id/thumbnail_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
 
         <ImageView
             android:id="@+id/thumbnail"
@@ -48,11 +48,16 @@
         </FrameLayout>
     </RelativeLayout>
 
+    
     <LinearLayout
         android:id="@+id/file_missing_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/missing_thumbnail"
+        android:layout_alignLeft="@id/thumbnail_view"
+		android:layout_alignTop="@id/thumbnail_view"
+		android:layout_alignRight="@id/thumbnail_view"
+		android:layout_alignBottom="@id/thumbnail_view"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone" >
@@ -64,5 +69,14 @@
             android:src="@drawable/ic_file_error" />
 
     </LinearLayout>
-
-</FrameLayout>
+    
+     <View 
+        android:id="@+id/selected_view"
+    	android:layout_alignLeft="@id/thumbnail_view"
+		android:layout_alignTop="@id/thumbnail_view"
+		android:layout_alignRight="@id/thumbnail_view"
+		android:layout_alignBottom="@id/thumbnail_view"
+		android:background="@drawable/gallery_item_selector"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"/>
+</RelativeLayout>

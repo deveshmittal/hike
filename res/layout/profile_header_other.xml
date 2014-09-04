@@ -5,10 +5,14 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+		android:background="@drawable/repeating_header_bg"
+		android:orientation="vertical">        
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:background="@drawable/repeating_header_bg">
+        android:layout_height="96dp">
         
         <FrameLayout
             android:id="@+id/avatar_container"
@@ -89,11 +93,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="22dp"
-        android:layout_marginLeft="105dp"
-        android:layout_marginRight="15dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginLeft="95dp"
+        android:layout_marginRight="26dp"
         android:orientation="vertical"
-        android:visibility="gone" >
+        android:visibility="visible">
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/update_text"
@@ -101,13 +104,13 @@
             android:layout_height="wrap_content"
             android:text="@string/add_fav_msg"
             android:contentDescription="Favourites Message"
-            android:textColor="#aaaaaa"
+            android:textColor="#666666"
             android:textSize="12sp" />
 
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="19dp" >
+            android:layout_marginTop="14dp" >
 
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/no"
@@ -133,6 +136,7 @@
                 android:textColor="@color/other_list_selected"
                 android:textSize="12sp" />
         </RelativeLayout>
+    </LinearLayout>
     </LinearLayout>
 
     <ImageView
