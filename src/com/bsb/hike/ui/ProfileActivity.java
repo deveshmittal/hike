@@ -1216,6 +1216,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		if(removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
 		{
+			if(mNameEdit!=null && mName!=null)
+				{
+					mNameEdit.setVisibility(View.GONE);
+					mName.setVisibility(View.VISIBLE);
+				}
 			return;
 		}
 		
@@ -1922,11 +1927,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public void onGroupNameEditClick(View v)
 	{
-		if(!showingGroupEdit)
-		{
 			View parent = (View) v.getParent();
 			setGroupNameFields(parent);
-		}
 	}
 	
 	public void onBlockGroupOwnerClicked(View v)
