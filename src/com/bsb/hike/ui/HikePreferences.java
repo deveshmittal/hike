@@ -162,15 +162,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		final IconCheckBoxPreference sslPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.SSL_PREF);
 		if (sslPreference != null)
 		{
-			String countryCode = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.COUNTRY_CODE, "");
-			if(countryCode.equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE))
-			{
-				getPreferenceScreen().removePreference(sslPreference);
-			}
-			else
-			{
-				sslPreference.setOnPreferenceChangeListener(this);
-			}
+			sslPreference.setOnPreferenceChangeListener(this);
 		}
 
 		Preference blockedListPreference = getPreferenceScreen().findPreference(HikeConstants.BLOKED_LIST_PREF);
@@ -221,19 +213,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (mutePreference != null)
 		{
 			mutePreference.setOnPreferenceClickListener(this);
-			mutePreference.setOnPreferenceChangeListener(this);
-		}
-		
-		Preference h2oNotifPreference = getPreferenceScreen().findPreference(HikeConstants.H2O_NOTIF_BOOLEAN_PREF);
-		if (h2oNotifPreference != null)
-		{
-			h2oNotifPreference.setOnPreferenceChangeListener(this);
-		}
-		
-		Preference nujNotifPreference = getPreferenceScreen().findPreference(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF);
-		if (nujNotifPreference != null)
-		{
-			nujNotifPreference.setOnPreferenceChangeListener(this);
 		}
 
 		Preference muteChatBgPreference = getPreferenceScreen().findPreference(HikeConstants.CHAT_BG_NOTIFICATION_PREF);
@@ -247,7 +226,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 			{
-				if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 				{
 					resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
 					resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
@@ -636,14 +615,14 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}, dialogStrings);
 			}
 		}
-		else if (HikeConstants.IMAGE_QUALITY.equals(preference.getKey()))
+		/*else if (HikeConstants.IMAGE_QUALITY.equals(preference.getKey()))		Not needed now
 		{	
 			HikeDialog.showDialog(HikePreferences.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
 			{
 				@Override
 				public void onSucess(Dialog dialog)
 				{
-					updateImageQualityPrefView();
+					updateMedia();
 					dialog.dismiss();
 				}
 
@@ -669,7 +648,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}
 			}, (Object[]) null);
 
-		}
+		}*/
 		else if(HikeConstants.CHANGE_STEALTH_PASSCODE.equals(preference.getKey()))
 		{
 			LockPattern.confirmPattern(HikePreferences.this, true);
@@ -808,11 +787,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			updateNotifPrefView();
 			break;
 		case R.xml.media_download_preferences:
-			updateImageQualityPrefView();
+			//updateMedia();	//Not needed now.
 		}
 	}
-	
-	private void updateImageQualityPrefView()
+	//This function is also not needed now
+	/*private void updateMedia()
 	{
 		Preference preference = getPreferenceScreen().findPreference(HikeConstants.IMAGE_QUALITY);
 		if (HikeSharedPreferenceUtil.getInstance(HikePreferences.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
@@ -840,7 +819,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			preference.setTitle(getResources().getString(R.string.image_quality_prefs));
 		}
-	}
+	}*/
 	
 	private void updateNotifPrefView()
 	{

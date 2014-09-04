@@ -340,6 +340,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			httpRequestURL = "/account";
 			fetchPersistentData();
 
+			if(Intent.ACTION_ATTACH_DATA.equals(getIntent().getAction()))
+			{
+				setProfileImage(HikeConstants.GALLERY_RESULT, RESULT_OK, getIntent());
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SET_PROFILE_PIC_GALLERY);
+			}
 			if (getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false))
 			{
 				// set pubsub listeners
@@ -1453,6 +1458,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		super.onActivityResult(requestCode, resultCode, data);
+		setProfileImage(requestCode, resultCode, data);
+	}
+
+	protected void setProfileImage(int requestCode, int resultCode, Intent data)
+	{
 		String path = null;
 		if (resultCode != RESULT_OK)
 		{
@@ -1474,12 +1484,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 		switch (requestCode)
 		{
-		case HikeConstants.CAMERA_RESULT:
-			/* fall-through on purpose */
-		case HikeConstants.GALLERY_RESULT:
-			Logger.d("ProfileActivity", "The activity is " + this);
-			if (requestCode == HikeConstants.CAMERA_RESULT)
-			{
+			case HikeConstants.CAMERA_RESULT:
+				Logger.d("ProfileActivity", "The activity is " + this);
 				String filePath = preferences.getString(HikeMessengerApp.FILE_PATH, "");
 				selectedFileIcon = new File(filePath);
 
@@ -1489,20 +1495,24 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				Editor editor = preferences.edit();
 				editor.remove(HikeMessengerApp.FILE_PATH);
 				editor.commit();
-			}
-			if (requestCode == HikeConstants.CAMERA_RESULT && !selectedFileIcon.exists())
-			{
-				Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			boolean isPicasaImage = false;
-			Uri selectedFileUri = null;
-			if (requestCode == HikeConstants.CAMERA_RESULT)
-			{
+				if (!selectedFileIcon.exists())
+				{
+					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
+					return;
+				}
 				path = selectedFileIcon.getAbsolutePath();
-			}
-			else
-			{
+				if (TextUtils.isEmpty(path))
+				{
+					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
+					return;
+				}
+				Utils.startCropActivity(this, path, destFilePath);
+				break;
+
+			case HikeConstants.GALLERY_RESULT:
+				Logger.d("ProfileActivity", "The activity is " + this);
+				boolean isPicasaImage = false;
+				Uri selectedFileUri = null;
 				if (data == null)
 				{
 					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
@@ -1531,57 +1541,57 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						path = Utils.getRealPathFromUri(selectedFileUri, this);
 					}
 				}
-			}
-			if (TextUtils.isEmpty(path))
-			{
-				Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			if (!isPicasaImage)
-			{
-				Utils.startCropActivity(this, path, destFilePath);
-			}
-			else
-			{
-				final File destFile = new File(path);
-				mActivityState.downloadPicasaImageTask = new DownloadImageTask(getApplicationContext(), destFile, selectedFileUri, new ImageDownloadResult()
+				if (TextUtils.isEmpty(path))
 				{
-
-					@Override
-					public void downloadFinished(boolean result)
+					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
+					return;
+				}
+				if (!isPicasaImage)
+				{
+					Utils.startCropActivity(this, path, destFilePath);
+				}
+				else
+				{
+					final File destFile = new File(path);
+					mActivityState.downloadPicasaImageTask = new DownloadImageTask(getApplicationContext(), destFile, selectedFileUri, new ImageDownloadResult()
 					{
-						if (mDialog != null)
+
+						@Override
+						public void downloadFinished(boolean result)
 						{
-							mDialog.dismiss();
-							mDialog = null;
+							if (mDialog != null)
+							{
+								mDialog.dismiss();
+								mDialog = null;
+							}
+							mActivityState.downloadPicasaImageTask = null;
+							if (!result)
+							{
+								Toast.makeText(getApplicationContext(), R.string.error_download, Toast.LENGTH_SHORT).show();
+							}
+							else
+							{
+								Utils.startCropActivity(ProfileActivity.this, destFile.getAbsolutePath(), destFilePath);
+							}
 						}
-						mActivityState.downloadPicasaImageTask = null;
-						if (!result)
-						{
-							Toast.makeText(getApplicationContext(), R.string.error_download, Toast.LENGTH_SHORT).show();
-						}
-						else
-						{
-							Utils.startCropActivity(ProfileActivity.this, destFile.getAbsolutePath(), destFilePath);
-						}
-					}
-				});
-				Utils.executeBoolResultAsyncTask(mActivityState.downloadPicasaImageTask);
-				mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.downloading_image));
-			}
-			break;
-		case HikeConstants.CROP_RESULT:
-			mActivityState.destFilePath = data.getStringExtra(MediaStore.EXTRA_OUTPUT);
-			if (mActivityState.destFilePath == null)
-			{
-				Toast.makeText(getApplicationContext(), R.string.error_setting_profile, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			if ((this.profileType == ProfileType.USER_PROFILE) || (this.profileType == ProfileType.GROUP_INFO))
-			{
-				saveChanges();
-			}
-			break;
+					});
+					Utils.executeBoolResultAsyncTask(mActivityState.downloadPicasaImageTask);
+					mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.downloading_image));
+				}
+				break;
+
+			case HikeConstants.CROP_RESULT:
+				mActivityState.destFilePath = data.getStringExtra(MediaStore.EXTRA_OUTPUT);
+				if (mActivityState.destFilePath == null)
+				{
+					Toast.makeText(getApplicationContext(), R.string.error_setting_profile, Toast.LENGTH_SHORT).show();
+					return;
+				}
+				if ((this.profileType == ProfileType.USER_PROFILE) || (this.profileType == ProfileType.GROUP_INFO))
+				{
+					saveChanges();
+				}
+				break;
 		}
 	}
 

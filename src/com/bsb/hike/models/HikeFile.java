@@ -158,6 +158,8 @@ public class HikeFile
 	private boolean isSent;
 	
 	private String img_quality;
+	
+	private String downloadURL;
 
 	public HikeFile(JSONObject fileJSON, boolean isSent)
 	{
@@ -190,6 +192,10 @@ public class HikeFile
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
 		this.isSent = isSent;
 		this.img_quality = fileJSON.optString(HikeConstants.FILE_IMAGE_QUALITY, null);
+		if(!isSent)
+		{
+			this.downloadURL = fileJSON.optString(HikeConstants.DOWNLOAD_FILE_URL_KEY);
+		}
 		// this.file = TextUtils.isEmpty(this.fileKey) ? null : Utils
 		// .getOutputMediaFile(hikeFileType, fileName);
 	}
@@ -501,6 +507,14 @@ public class HikeFile
 	public void setFileName(String fName)
 	{
 		fileName = fName;
+	}
+	/*
+	 * Get server configured download url 
+	 */
+	public String getDownloadURL()
+	{
+		Logger.d("HikeDownloadURL", "DowloadURL = " + downloadURL);
+		return downloadURL;
 	}
 
 	public boolean isSent()

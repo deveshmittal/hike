@@ -188,13 +188,20 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			PairModified<ContactInfo, Integer> contactPair = transientContacts.get(msisdn);
-			if (null != contactPair)
+			if (Utils.isGroupConversation(msisdn))
 			{
-				contactPair.setSecond(contactPair.getSecond() - 1);
-				if (contactPair.getSecond() == 0)
+				removeGroup(msisdn);
+			}
+			else
+			{
+				PairModified<ContactInfo, Integer> contactPair = transientContacts.get(msisdn);
+				if (null != contactPair)
 				{
-					transientContacts.remove(msisdn);
+					contactPair.setSecond(contactPair.getSecond() - 1);
+					if (contactPair.getSecond() == 0)
+					{
+						transientContacts.remove(msisdn);
+					}
 				}
 			}
 		}
@@ -220,6 +227,24 @@ public class TransientCache extends ContactsCache
 			{
 				groupParticipantsList.remove(msisdn);
 			}
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	/**
+	 * This method removes the group entry given by the parameter <code>groupId</code> from the {@link #groupParticipants} map
+	 * 
+	 * @param groupId
+	 */
+	void removeGroup(String groupId)
+	{
+		writeLock.lock();
+		try
+		{
+			groupParticipants.remove(groupId);
 		}
 		finally
 		{

@@ -355,6 +355,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		});
 		
 		timelineTopBarIndicator = (TextView) menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.top_bar_indicator);
+		menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.overflow_icon_image).setContentDescription("Timeline");
 		((ImageView)menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_show_timeline);
 		updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 1000);
 		menu.findItem(R.id.show_timeline).getActionView().setOnClickListener(new View.OnClickListener()
