@@ -55,6 +55,7 @@
                 android:onClick="onEditGroupNameClick"
                 android:layout_centerVertical="true"
                 android:contentDescription="Edit Grp Name"
+                android:background="@drawable/list_item"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_edit" />
         </RelativeLayout>
