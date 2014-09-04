@@ -192,7 +192,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
-		title.setText(getString(R.string.shared_media));
+		title.setText(conversationName);
 
 		TextView subText = (TextView) actionBarView.findViewById(R.id.subtext);
 		subText.setVisibility(View.GONE);
