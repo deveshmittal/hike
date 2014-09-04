@@ -349,6 +349,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			else
 			{
 				setContentView(R.layout.profile);
+				View parent = findViewById(R.id.parent_layout);
+				parent.setBackgroundColor(getResources().getColor(R.color.standerd_background)); //Changing background color form white for self profile
 				this.profileType = ProfileType.USER_PROFILE;
 				HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
 				setupProfileScreen(savedInstanceState);
