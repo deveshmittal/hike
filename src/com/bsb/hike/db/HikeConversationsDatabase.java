@@ -344,7 +344,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					+ DBConstants.STATUS_MAPPED_ID + " TEXT UNIQUE, " + DBConstants.MSISDN + " TEXT, " + DBConstants.STATUS_TEXT + " TEXT, " + DBConstants.STATUS_TYPE
 					+ " INTEGER, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0, " + DBConstants.SHOW_IN_TIMELINE + " INTEGER, "
 					+ DBConstants.MOOD_ID + " INTEGER, " + DBConstants.TIME_OF_DAY + " INTEGER" + " )";
-			db.execSQL(create);
 
 			String alter1 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.MESSAGE + " STRING";
 			String alter2 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.MSG_STATUS + " INTEGER";
@@ -355,6 +354,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			String alter7 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.GROUP_PARTICIPANT + " TEXT";
 			String alter8 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.IS_STATUS_MSG + " INTEGER DEFAULT 0";
 
+			db.execSQL(drop);
 			db.execSQL(create);
 			db.execSQL(alter1);
 			db.execSQL(alter2);
