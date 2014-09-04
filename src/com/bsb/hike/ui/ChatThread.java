@@ -1397,8 +1397,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (!(mConversation instanceof GroupConversation))
 		{
 			optionsList.add(new OverFlowMenuItem(getString(R.string.call), 1));
-
-			optionsList.add(new OverFlowMenuItem(getString(R.string.block_title), 6));
+			if(mUserIsBlocked)
+			{
+				optionsList.add(new OverFlowMenuItem(getString(R.string.unblock_title), 6));
+			}
+			else
+			{
+				optionsList.add(new OverFlowMenuItem(getString(R.string.block_title), 6));
+			}
 		}
 
 		if (mConversation instanceof GroupConversation)
@@ -1505,7 +1511,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					clearConversation();
 					break;
 				case 6:
-					HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, mContactNumber);
+					if(mUserIsBlocked)
+					{
+						HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, mContactNumber);
+						unblockUser();
+					}
+					else
+					{
+						HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, mContactNumber);
+					}
 					break;
 				case 7:
 					FavoriteType favoriteType = FavoriteType.REQUEST_SENT;
