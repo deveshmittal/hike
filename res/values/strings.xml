@@ -1070,7 +1070,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
      <string name="tap_plus_add_favorites">Only favorites can see your last seen and status update. Choose them wisely!</string>
      <string name="add_as_favorite_menu">Add Favorite</string>
 	 <string name="remove_from_favorites">Remove Favorite</string>
-	 <string name="file_attachment_info">Share docs, pdfs &amp; media upto 100 MB</string>
 	 <string name="ftue_sms_contact_card_header">You have no contacts on hike</string>
 	 <string name="ftue_sms_contact_card_subtext">Invite them and earn Rs20 talk-time for each friend that joins :)</string>
      <string name="send_free_sms">Send free SMS</string>
@@ -1154,7 +1153,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="add_fav_msg">Is now sharing last seen and status updates. Would you like to do the same?</string>
     <string name="add_people">ADD A MEMBER</string>
     <string name="stealth_info_tip_header">Hidden Mode</string>
-    <string name="stealth_info_tip_subtext">Hide your chats. Tap on \'hi\' to get started.</string>
     <string name="file_missing_caps">FILE MISSING</string>
     <string name="status_profile_pic_notification">changed profile picture</string>
+    <string name="stealth_info_tip_subtext">Tap on \'hi\' to hide your chats.</string>
+    <string name="file_attachment_info">Share doc, pdf &amp; media up to 100 MB</string>
 </resources>
