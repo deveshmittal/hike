@@ -2436,23 +2436,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	public ConvMessage getLastPinForConversation(Conversation conversation)
 	{
 		Cursor c = null;
-
-		try
-		{
-
-			long msgId = conversation.getMetaData().getLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
-
+		
+			long msgId;
+			try
+			{
+				msgId = conversation.getMetaData().getLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+			
 			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE, DBConstants.MSG_STATUS, DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID,
 					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT, DBConstants.IS_HIKE_MESSAGE, DBConstants.READ_BY,
 					DBConstants.MESSAGE_TYPE }, DBConstants.MESSAGE_ID + " =?", new String[] { Long.toString(msgId) }, null, null, null, null);
 			List<ConvMessage> elements = getMessagesFromDB(c, conversation);
-			return elements.get(elements.size() - 1);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			return null;
-		}
+			return elements.size() > 0 ? elements.get(elements.size() - 1) : null;
+			}
+			catch (JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		finally
 		{
 			if (c != null)
@@ -2460,6 +2461,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				c.close();
 			}
 		}
+			return null;
 
 	}
 	
