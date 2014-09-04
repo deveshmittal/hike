@@ -766,7 +766,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				else
 				{	dual_layout.setVisibility(View.GONE);
 					fav_layout.setVisibility(View.VISIBLE);
-					subText.setText(getResources().getString(R.string.on_sms));
 					extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
 					extraInfo.setText(getResources().getString(R.string.ftue_add_prompt_invite_title));
 					smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
@@ -2198,7 +2197,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 				@Override
 				public void run()
-				{
+				{	invalidateOptionsMenu();
 					updateProfileHeaderView();
 				}
 			});
