@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -148,7 +149,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST,
-			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
+			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED, HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD };
 
 	private String[] profilePubSubListeners = { HikePubSub.USER_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.STATUS_MESSAGE_RECEIVED,
 			HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
@@ -172,6 +173,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	public static final String ORIENTATION_FLAG = "of";
 	
 	public static final String PROFILE_PIC_SUFFIX = "pp";
+
+	private ProfileItem.ProfileSharedMedia sharedMediaItem;
 
 	private static enum ProfileType
 	{
@@ -219,6 +222,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private int sharedPinCount = 0;
 	
 	private int sharedFileCount = 0;
+	
+	private static final int MULTIPLIER = 3;  //multiplication factor for 3X loading media items initially
 	
 	private List<HikeSharedFile> sharedMedia;
 	
@@ -861,7 +866,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{	
 			addSharedMedia();
 		}
-		profileItems.add(new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, sharedMediaCount, maxMediaToShow,sharedMedia));
+		sharedMediaItem = new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, sharedMediaCount, maxMediaToShow,sharedMedia);
+		profileItems.add(sharedMediaItem);
 	}
 
 	private void addStatusMessagesAsMyProfileItems(List<StatusMessage> statusMessages)
@@ -996,7 +1002,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, sharedMediaCount, -1, true);
 			return;
 		}
-		sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, maxMediaToShow, -1, true);
+		sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, maxMediaToShow * MULTIPLIER , -1, true);
 		return;
 	}
 
@@ -2306,6 +2312,44 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				public void run()
 				{
 					finishEditing();
+				}
+			});
+		}
+		else if (HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD.equals(type))
+		{
+			if(!(object instanceof ArrayList<?>))
+			{
+				return;
+			}
+			
+			final ArrayList<Long> msgIds = (ArrayList<Long>) object;
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					Iterator<HikeSharedFile> it = sharedMedia.iterator();
+						while (it.hasNext())
+						{
+							HikeSharedFile file = it.next();
+							if(msgIds.contains(file.getMsgId()))
+							{
+								it.remove();
+							}
+						}
+						
+					sharedMediaItem.setSharedMediaCount(sharedMediaItem.getSharedMediaCount() - msgIds.size());
+					sharedMediaCount = sharedMediaItem.getSharedMediaCount();
+					if(sharedMedia.size() < maxMediaToShow)			//If somehow all the elements which were laoded initially are deleted, we need to fetch more stuff from db.
+					{
+						sharedMedia = null;
+						if(profileType == ProfileType.CONTACT_INFO)
+							setupContactProfileList();
+						else
+							setupGroupProfileList();
+					}
+					
+					profileAdapter.notifyDataSetChanged();
 				}
 			});
 		}

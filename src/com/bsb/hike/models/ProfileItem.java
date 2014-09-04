@@ -171,6 +171,12 @@ public abstract class ProfileItem
 		{
 			return maxMedia;
 		}
+
+		public void setSharedMediaCount(int newCount)
+		{
+			this.sharedMediaCount = newCount;
+		}
+
 		private List<HikeSharedFile> sharedFilesList;
 		private int sharedMediaCount;
 		private int maxMedia;
