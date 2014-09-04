@@ -1955,6 +1955,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				mComposeView.setSelection(mComposeView.length());
 				SmileyParser.getInstance().addSmileyToEditable(mComposeView.getText(), false);
 			}
+			else if (intent.hasExtra(HikeConstants.Extras.CONTACT_ID))
+			{
+				String contactId = intent.getStringExtra(HikeConstants.Extras.CONTACT_ID);
+				if (TextUtils.isEmpty(contactId))
+				{
+					Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+				}
+				else
+				{
+					getContactData(contactId);
+				}
+			}
 			else if (intent.hasExtra(HikeConstants.Extras.FILE_PATH))
 			{
 
@@ -3977,7 +3989,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			Pair<String, Pair<Long,String>> pair = (Pair<String, Pair<Long, String>>) object;
 			// If the msisdn don't match we simply return
-			if (!mConversation.getMsisdn().equals(pair.first))
+			if (!mConversation.getMsisdn().equals(pair.first) || messages == null || messages.isEmpty())
 			{
 				return;
 			}
@@ -4099,6 +4111,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
 		{
+			if(messages == null || messages.isEmpty())
+			{
+				return;
+			}
 			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
 			PairModified<PairModified<Long, Set<String>>, Long> pair = messageStatusMap.get(mConversation.getMsisdn());
 			if (pair != null)
@@ -4629,6 +4645,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void removeMessages(ArrayList<Long> msgIds)
 	{
+		removeMessages(msgIds, false);
+	}
+	
+	private void removeMessages(ArrayList<Long> msgIds, boolean deleteMediaFromPhone)
+	{
 		Collections.sort(msgIds);
 		//TODO if last message is typing notification we will get wrong result here
 		boolean isLastMessage = (msgIds.get(msgIds.size()-1) == messages.get(messages.size() - 1).getMsgID());
@@ -4636,11 +4657,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, isLastMessage);
 		bundle.putString(HikeConstants.Extras.MSISDN, mContactNumber);
 		mPubSub.publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
-		deleteMessages(msgIds);
+		deleteMessages(msgIds, deleteMediaFromPhone);
 		mAdapter.notifyDataSetChanged();
 	}
 	
-	private void deleteMessages(ArrayList<Long> msgIds)
+	private void deleteMessages(ArrayList<Long> msgIds, boolean deleteMediaFromPhone)
 	{
 		/*
 		 * Iterating in reverse order since its more likely the user wants to delete one of his/her latest messages.
@@ -4660,7 +4681,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				if (convMessage.getMsgID() == msgId)
 				{
-					deleteMessage(convMessage);
+					deleteMessage(convMessage, deleteMediaFromPhone);
 					break;
 				}
 			}
@@ -4672,7 +4693,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	 * 2. remove message from offline messages set of messagesAdapter
 	 * 3. if ongoing file transfer message than cancel the task
 	 */
-	private void deleteMessage(ConvMessage convMessage)
+	private void deleteMessage(ConvMessage convMessage, boolean deleteMediaFromPhone)
 	{
 		mAdapter.removeMessage(convMessage);
 		if (!convMessage.isSMS() && convMessage.getState() == State.SENT_CONFIRMED)
@@ -4689,6 +4710,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// @GM cancelTask has been changed
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			File file = hikeFile.getFile();
+			if(deleteMediaFromPhone && hikeFile.exactFilePathFileExists())
+			{
+				hikeFile.getFileFromExactFilePath().delete();
+			}
 			FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent());
 			mAdapter.notifyDataSetChanged();
 		}
@@ -5963,8 +5988,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (requestCode == HikeConstants.SHARE_CONTACT_CODE && resultCode == RESULT_OK)
 		{
-			String id = data.getData().getLastPathSegment();
-			getContactData(id);
+			String contactId = data.getData().getLastPathSegment();
+			getContactData(contactId);
 		}
 		else if (resultCode == RESULT_CANCELED)
 		{
@@ -5974,7 +5999,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
-	private void getContactData(String id)
+	private void getContactData(String contactId)
 	{
 		StringBuilder mimeTypes = new StringBuilder("(");
 		mimeTypes.append(DatabaseUtils.sqlEscapeString(Phone.CONTENT_ITEM_TYPE) + ",");
@@ -5987,7 +6012,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		String[] projection = new String[] { Data.DATA1, Data.DATA2, Data.DATA3, Data.MIMETYPE, Data.DISPLAY_NAME };
 
-		Cursor c = getContentResolver().query(Data.CONTENT_URI, projection, selection, new String[] { id }, null);
+		Cursor c = getContentResolver().query(Data.CONTENT_URI, projection, selection, new String[] { contactId }, null);
 
 		int data1Idx = c.getColumnIndex(Data.DATA1);
 		int data2Idx = c.getColumnIndex(Data.DATA2);
@@ -7397,8 +7422,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				/*
 				 * For some reason the activity randomly catches this event in the background and we get an NPE when that happens with mMenu. Adding an NPE guard for that.
+				 * if media viewer is open don't do anything
 				 */
-				if (mMenu == null)
+				if (mMenu == null || isFragmentAdded(HikeConstants.IMAGE_FRAGMENT_TAG))
 				{
 					return super.onKeyUp(keyCode, event);
 				}
@@ -7690,12 +7716,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void onClick(View v)
 				{
-					removeMessages(selectedMsgIdsToDelete);
+					removeMessages(selectedMsgIdsToDelete, deleteConfirmDialog.isChecked());
 					destroyActionMode();
 					deleteConfirmDialog.dismiss();
 				}
 			};
 
+			if(mAdapter.containsMediaMessage(selectedMsgIdsToDelete))
+			{
+				deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
+			}
 			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
 			deleteConfirmDialog.setCancelButton(R.string.cancel);
 			deleteConfirmDialog.show();
@@ -7984,6 +8014,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					isKeyboardOpen = true;
 					if (isEmoticonPalleteVisible())
 					{
+						resizeMainheight(0, false);
 						attachmentWindow.update(-1, temp);
 					}
 				}

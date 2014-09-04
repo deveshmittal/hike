@@ -110,6 +110,8 @@ public class HikeConstants
 	public static final String FILE_KEY = "fk";
 
 	public static final String FILE_PATH = "fp";
+	
+	public static final String DOWNLOAD_FILE_URL_KEY = "url";
 
 	public static final String CREDITS = "credits";
 
@@ -1089,6 +1091,8 @@ public class HikeConstants
 
 		public static final String CONTACT_INFO = "contactInfo";
 
+		public static final String CONTACT_ID = "contactId";
+
 		public static final String ON_HIKE = "onHike";
 
 		public static final String SHOWING_SECOND_LOADING_TXT = "showingSecondLoadingTxt";
@@ -1346,6 +1350,8 @@ public class HikeConstants
 		
 		public static final String INVITE_TO_HIKE_VIA_PROFILE = "profSinvite";
 
+		public static final String SET_PROFILE_PIC_GALLERY = "profSpicGallery";
+
 		/*
 		 * Invite screen events <screen> = invS <event> = credB, creDtiPN, creDtiPY
 		 */
@@ -1394,6 +1400,11 @@ public class HikeConstants
 		 * SignUp screen <screen> = signupS <event> = erroR
 		 */
 		public static final String SIGNUP_ERROR = "signupSerroR";
+
+		/*
+		 *  Compose screen <screen> = compS <event> = refContcts
+		 */
+		public static final String COMPOSE_REFRESH_CONTACTS = "compSrefContcts";
 
 		/*
 		 * Drawer screen <screen> = drS <event> = homE, gC, inV, reW, creD, proF, settinG
@@ -1560,7 +1571,6 @@ public class HikeConstants
 		 * HikeSharedFiles Activity Screen = sharedMediaS<event>
 		 * */
 		public static final String OPEN_THUMBNAIL_VIA_GALLERY = "sharedMediaSthumbnailClick";
-		
 	}
 
 	public static final class MqttMessageTypes

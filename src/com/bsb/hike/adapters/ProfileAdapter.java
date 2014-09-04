@@ -437,7 +437,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					}
 					
 					image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
-					if(galleryItem.getFileFromExactFilePath().exists())
+					if(galleryItem.exactFilePathFileExists())
 					{
 						thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), image);
 						fileMissing.setVisibility(View.GONE);

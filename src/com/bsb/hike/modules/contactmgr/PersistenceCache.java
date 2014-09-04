@@ -11,10 +11,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import android.database.DatabaseUtils;
+import android.text.TextUtils;
 import android.util.Pair;
 
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
@@ -310,7 +312,13 @@ class PersistenceCache extends ContactsCache
 				GroupDetails grpDetails = groupPersistence.get(msisdn);
 				if (null == grpDetails)
 					return null;
-				return grpDetails.getGroupName();
+				if (!TextUtils.isEmpty(grpDetails.getGroupName()))
+					return grpDetails.getGroupName();
+				else
+				{
+					List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(msisdn, false, false);
+					return Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+				}
 			}
 			finally
 			{

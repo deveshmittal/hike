@@ -721,7 +721,7 @@ public class UploadFileTask extends FileTransferBase
 				{
 					start += chunkSize;
 					incrementBytesTransferred(chunkSize);
-					saveFileState(X_SESSION_ID);
+					saveIntermediateProgress(X_SESSION_ID);
 					resetAndUpdate = true; // To reset retry logic and update UI
 
 					end = (int) length;
@@ -772,7 +772,7 @@ public class UploadFileTask extends FileTransferBase
 			Logger.d(getClass().getSimpleName(), "FT PAUSED");
 			// In case upload was complete response JSON is to be saved not the Session_ID
 			if (responseJson != null)
-				saveFileState(responseJson);
+				saveFileState(X_SESSION_ID,responseJson);
 			else
 				saveFileState(X_SESSION_ID);
 			break;
