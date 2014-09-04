@@ -186,7 +186,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, 
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
-			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END };
+			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
+			HikePubSub.CONTACT_DELETED };
 
 	private ConversationsAdapter mAdapter;
 
@@ -1449,7 +1450,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 			});
 		}
-		else if (HikePubSub.CONTACT_ADDED.equals(type))
+		else if (HikePubSub.CONTACT_ADDED.equals(type) || HikePubSub.CONTACT_DELETED.equals(type))
 		{
 			ContactInfo contactInfo = (ContactInfo) object;
 
@@ -1461,12 +1462,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			final Conversation conversation = this.mConversationsByMSISDN.get(contactInfo.getMsisdn());
 			if (conversation != null)
 			{
-				conversation.setContactName(contactInfo.getName());
+				if(HikePubSub.CONTACT_DELETED.equals(type))
+					conversation.setContactName(contactInfo.getMsisdn());
+				else
+					conversation.setContactName(contactInfo.getName());
 
 				if (!isAdded())
 				{
 					return;
 				}
+				final String mType = type;
 				getActivity().runOnUiThread(new Runnable()
 				{
 					
@@ -1474,6 +1479,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					public void run()
 					{
 						updateViewForNameChange(conversation);
+						if(HikePubSub.CONTACT_DELETED.equals(mType))
+							updateViewForAvatarChange(conversation);
 					}
 				});
 			}
@@ -2097,6 +2104,24 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 		mAdapter.updateViewsRelatedToName(parentView, conversation);
+	}
+	
+	private void updateViewForAvatarChange(Conversation conversation)
+	{
+		if (!wasViewSetup())
+		{
+			return;
+		}
+
+		View parentView = getParenViewForConversation(conversation);
+
+		if (parentView == null)
+		{
+			notifyDataSetChanged();
+			return;
+		}
+
+		mAdapter.updateViewsRelatedToAvatar(parentView, conversation);
 	}
 
 	private void updateViewForMessageStateChange(Conversation conversation, ConvMessage convMessage)
