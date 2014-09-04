@@ -763,7 +763,6 @@
     <string name="start_adding">Start adding friends</string>
     <string name="how_young_are_you">How young are you?</string>
     <string name="your_name">Your name</string>
-    <string name="sync_contacts_hinttext">Tap to start a manual sync of contacts</string>
     <string name="contacts_synced">Contacts synced</string>
     <string name="contacts_sync_started">"Contacts sync started"</string>
     <string name="add_friends_listview_header">"You have got %1$s contacts \n on hike. Nice!"</string>
@@ -953,7 +952,6 @@
     <string name="photo">GALLERY</string>
     <string name="video">VIDEOS</string>
     <string name="location_option">LOCATION</string>
-    <string name="sync_contacts">Refresh contacts</string>
     <string name="confirm_delete_chat_msg">Delete chat with \"%1$s\"? </string>
     <string name="confirm_delete_group_msg">Delete and exit \"%1$s\" group?</string>
     <string name="email_chat">Email Chat</string>

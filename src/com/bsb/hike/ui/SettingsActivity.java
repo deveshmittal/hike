@@ -57,7 +57,6 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		}
 		items.add(getString(R.string.manage_account));
 		items.add(getString(R.string.privacy));
-		items.add(getString(R.string.sync_contacts));
 		items.add(getString(R.string.help));
 		items.add(null);
 
@@ -68,7 +67,6 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		itemsSummary.add(getString(R.string.sms_setting_hinttext));
 		itemsSummary.add(getString(R.string.account_hintttext));
 		itemsSummary.add(getString(R.string.privacy_setting_hinttext));
-		itemsSummary.add(getString(R.string.sync_contacts_hinttext));
 		itemsSummary.add(getString(R.string.help_hinttext));
 
 		final ArrayList<Integer> itemIcons = new ArrayList<Integer>();
@@ -78,7 +76,6 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		itemIcons.add(R.drawable.ic_sms_settings);
 		itemIcons.add(R.drawable.ic_account_settings);
 		itemIcons.add(R.drawable.ic_privacy_settings);
-		itemIcons.add(R.drawable.ic_sync_contacts);
 		itemIcons.add(R.drawable.ic_help_settings);
 
 		ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(this, R.layout.setting_item, R.id.item, items)
@@ -206,20 +203,6 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			IntentManager.openSettingPrivacy(this);
 			break;
 		case 5:
-			if(HikeMessengerApp.syncingContacts)
-				return;
-			if(!Utils.isUserOnline(this))
-			{
-				Utils.showNetworkUnavailableDialog(this);
-				return;
-			}
-			Intent contactSyncIntent = new Intent(HikeService.MQTT_CONTACT_SYNC_ACTION);
-			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
-			sendBroadcast(contactSyncIntent);
-			Toast.makeText(getApplicationContext(), R.string.contacts_sync_started, Toast.LENGTH_SHORT).show();
-			Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_REFRESH_CONTACTS);
-			break;
-		case 6:
 			HikeConversationsDatabase.getInstance().updateToNewSharedMediaTable();
 			IntentManager.openSettingHelp(this);
 			break;
