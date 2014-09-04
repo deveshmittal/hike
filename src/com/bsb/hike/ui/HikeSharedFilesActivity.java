@@ -412,6 +412,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		}
 		else
 		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.OPEN_THUMBNAIL_VIA_GALLERY);
 			PhotoViewerFragment.openPhoto(R.id.parent_layout, HikeSharedFilesActivity.this, (ArrayList<HikeSharedFile>) sharedFilesList, 
 					false, position, msisdn, conversationName, isGroup, msisdnArray, nameArray);
 		}
