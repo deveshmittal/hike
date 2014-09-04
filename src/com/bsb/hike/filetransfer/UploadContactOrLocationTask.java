@@ -213,6 +213,9 @@ public class UploadContactOrLocationTask extends FileTransferBase
 
 		httpPut.setEntity(entity);
 		HttpClient httpClient = AccountUtils.getClient(httpPut);
+		if(httpClient==null){
+			throw new NetworkErrorException("Unable to perform request");
+		}
 		HttpResponse response = httpClient.execute(httpPut, httpContext);
 		String serverResponse = EntityUtils.toString(response.getEntity());
 
