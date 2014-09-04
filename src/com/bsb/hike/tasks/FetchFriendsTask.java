@@ -158,7 +158,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		for (ContactInfo contactInfo : allContacts)
 		{
 			String msisdn = contactInfo.getMsisdn();
-			if (msisdn.equals(myMsisdn))
+			if (msisdn.equals(myMsisdn) || HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn))
 			{
 				continue;
 			}

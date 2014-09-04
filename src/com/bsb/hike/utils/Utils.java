@@ -2280,6 +2280,13 @@ public class Utils
 		return items;
 	}
 
+	/**
+	 * Get unseen status, user-status and friend request count
+	 * 
+	 * @param accountPrefs Account settings shared preference
+	 * @param countUsersStatus Whether to include user status count in the total
+	 * @return
+	 */
 	public static int getNotificationCount(SharedPreferences accountPrefs, boolean countUsersStatus)
 	{
 		int notificationCount = 0;
@@ -4453,23 +4460,29 @@ public class Utils
 	// added for db query
 	public static String getMsisdnStatement(Collection<String> msisdnList)
 	{
-		StringBuilder sb = new StringBuilder("(");
-		if (null != msisdnList)
+		if (null == msisdnList)
 		{
+			return null;
+		}
+		else
+		{
+			if (msisdnList.isEmpty())
+			{
+				return null;
+			}
+			StringBuilder sb = new StringBuilder("(");
 			for (String msisdn : msisdnList)
 			{
 				sb.append(DatabaseUtils.sqlEscapeString(msisdn));
 				sb.append(",");
 			}
+			int idx = sb.lastIndexOf(",");
+			if (idx >= 0)
+				sb.replace(idx, sb.length(), ")");
+			else
+				sb.append(")");
+			return sb.toString();
 		}
-
-		int idx = sb.lastIndexOf(",");
-		if (idx >= 0)
-			sb.replace(idx, sb.length(), ")");
-		else
-			sb.append(")");
-
-		return sb.toString();
 	}
 
 	public static void startWebViewActivity(Context context, String url, String title)
