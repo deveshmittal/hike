@@ -710,7 +710,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						fav_layout.setTag(getResources().getString(R.string.tap_to_save));
 						extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
 						extraInfo.setText(getResources().getString(R.string.tap_to_save));
-						smallIcon.setImageResource(R.drawable.ic_add_friend);
+						smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
 				}
 				else
 				{

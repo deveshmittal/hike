@@ -153,18 +153,18 @@
             android:id="@+id/tap_to_save_contact"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginRight="4dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginLeft="15dp"
             android:orientation="horizontal"
             android:background="@drawable/bg_fav"
             android:onClick="onAddToContactClicked"
             android:layout_toLeftOf="@+id/div_fav"
-            android:layout_centerVertical="true">
+            android:layout_centerVertical="true" >
 
             <ImageView
                 android:id="@+id/tap_save_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
                 android:contentDescription="Add to Contact"
                 android:src="@drawable/ic_invite_to_hike_small"
                 android:layout_gravity="center_vertical"
@@ -198,6 +198,8 @@
             android:layout_height="match_parent"
             android:layout_toRightOf="@id/div_fav"
             android:orientation="horizontal"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:onClick="onTextButtonClick"
             android:layout_centerVertical="true">
 
@@ -208,7 +210,6 @@
                 android:contentDescription="Add to Fav"
                 android:src="@drawable/ic_add_friend"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="15dp"
                 android:layout_marginRight="8dp" />
 
             <com.bsb.hike.view.CustomFontTextView
