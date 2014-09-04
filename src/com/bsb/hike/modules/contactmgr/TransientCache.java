@@ -262,6 +262,18 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
+			for(Map<String, PairModified<GroupParticipant, String>> groupParticipantMap : groupParticipants.values())
+			{
+				if(groupParticipantMap.containsKey(contact.getMsisdn()))
+				{
+					PairModified<GroupParticipant, String> grpParticipant = groupParticipantMap.get(contact.getMsisdn());
+					grpParticipant.getFirst().setContactInfo(contact);
+					if(null != contact.getName())
+					{
+						grpParticipant.setSecond(contact.getName());
+					}
+				}
+			}
 			if (transientContacts.containsKey(contact.getMsisdn()))
 			{
 				PairModified<ContactInfo, Integer> contactPair = transientContacts.get(contact.getMsisdn());
@@ -660,7 +672,7 @@ public class TransientCache extends ContactsCache
 					String msisdn = mapEntry.getKey();
 					ContactInfo contactInfo = mapEntry.getValue().getFirst();
 					if (null != msisdnsIn && msisdnsIn.contains(msisdn) && (null != msisdnsNotIn && !msisdnsNotIn.contains(msisdn))
-							&& (null != myMsisdn && !msisdn.equals(myMsisdn)) && contactInfo.isOnhike())
+							&& (null != myMsisdn && !msisdn.equals(myMsisdn)) && contactInfo.isOnhike() && !contactInfo.isUnknownContact())
 					{
 						contacts.add(contactInfo);
 						limit--;
