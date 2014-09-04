@@ -52,11 +52,14 @@
 
         <ImageView
             android:id="@+id/gallary_button"
-            android:layout_width="wrap_content"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/item_time_stamp"
             android:contentDescription="Gallery"
             android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:scaleType="center"
+            android:background="@drawable/list_item"
             android:layout_alignTop="@id/sender_name"
             android:src="@drawable/ic_gallary_view" />
     </RelativeLayout>
