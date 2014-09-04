@@ -761,7 +761,6 @@
     <string name="start_adding">Start adding friends</string>
     <string name="how_young_are_you">How young are you?</string>
     <string name="your_name">Your name</string>
-    <string name="sync_contacts_hinttext">Tap to start a manual sync of contacts</string>
     <string name="contacts_synced">Contacts synced</string>
     <string name="contacts_sync_started">"Contacts sync started"</string>
     <string name="add_friends_listview_header">"You have got %1$s contacts \n on hike. Nice!"</string>
@@ -950,7 +949,6 @@
     <string name="photo">GALLERY</string>
     <string name="video">VIDEOS</string>
     <string name="location_option">LOCATION</string>
-    <string name="sync_contacts">Refresh contacts</string>
     <string name="confirm_delete_chat_msg">Delete chat with \"%1$s\"? </string>
     <string name="confirm_delete_group_msg">Delete and exit \"%1$s\" group?</string>
     <string name="email_chat">Email Chat</string>
@@ -1069,7 +1067,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
      <string name="tap_plus_add_favorites">Only favorites can see your last seen and status update. Choose them wisely!</string>
      <string name="add_as_favorite_menu">Add Favorite</string>
 	 <string name="remove_from_favorites">Remove Favorite</string>
-	 <string name="file_attachment_info">Share docs, pdfs &amp; media upto 100 MB</string>
 	 <string name="ftue_sms_contact_card_header">You have no contacts on hike</string>
 	 <string name="ftue_sms_contact_card_subtext">Invite them and earn Rs20 talk-time for each friend that joins :)</string>
      <string name="send_free_sms">Send free SMS</string>
@@ -1152,12 +1149,12 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="add_fav_msg">Is now sharing last seen and status updates. Would you like to do the same?</string>
     <string name="add_people">ADD A MEMBER</string>
     <string name="stealth_info_tip_header">Hidden Mode</string>
-    <string name="stealth_info_tip_subtext">Hide your chats. Tap on \'hi\' to get started.</string>
     <string name="file_missing_caps">FILE MISSING</string>
     <string name="status_profile_pic_notification">changed profile picture</string>
     <string name="notificationSoundSummary">Select a sound to play for a new notification</string>
     <string name="hike_offline_notifications">Hike offline</string>
     <string name="h2o_notifications_setting_summary">Notify to send SMS for offline contact</string>
     <string name="notifications_contact_join_title">Contact joining Hike</string>
-     
+    <string name="stealth_info_tip_subtext">Tap on \'hi\' to hide your chats.</string>
+    <string name="file_attachment_info">Share doc, pdf &amp; media up to 100 MB</string>
 </resources>

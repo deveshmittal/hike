@@ -2518,6 +2518,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 			showTransferInitialization(holder, hikeFile);
 			break;
+		case ERROR:
 		case PAUSED:
 			holder.ftAction.setImageResource(retryImage);
 			holder.ftAction.setVisibility(View.VISIBLE);
@@ -2525,7 +2526,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			showTransferProgress(holder, fss, msgId, hikeFile, isSent);
 			break;
 		case CANCELLED:
-		case ERROR:
 			holder.ftAction.setImageResource(retryImage);
 			holder.ftAction.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
@@ -2556,8 +2556,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		if (fss.getTotalSize() <= 0 && isSent)
 		{
 			showTransferInitialization(holder, hikeFile);
-		}else if((fss.getTransferredSize() == 0 && fss.getFTState() == FTState.IN_PROGRESS)){
-			holder.circularProgress.setProgress(5 * 0.01f);
+		}
+		else if(fss.getFTState() == FTState.IN_PROGRESS && fss.getTransferredSize() == 0 && fss.getTotalSize() > 0)
+		{
+			float fakeProgress = (float) chunkSize;
+			fakeProgress /= fss.getTotalSize();
+			if (fakeProgress > 5 * 0.01f)
+			{
+				fakeProgress = 5 * 0.01f;
+			}
+			holder.circularProgress.setProgress(fakeProgress);
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}
@@ -2604,8 +2612,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		fileThumb.getLayoutParams().width = pixels;
 		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg))
 		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);
-		;
-		fileThumb.setImageResource(0);
+		/*
+		 * When setting default media thumb to image view, need to remove the previous drawable of that view in case of view is re-used by adapter.
+		 * Fogbugz Id : 37212
+		 */
+		fileThumb.setImageDrawable(null);
 	}
 
 	View.OnClickListener contactClick = new OnClickListener()
@@ -3815,19 +3826,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			try
 			{
+				int duration = mediaPlayer.getDuration();
+				
 				switch (playerState)
 				{
 				case PLAYING:
 				case PAUSED:
 					int progress = 0;
-					if (mediaPlayer.getDuration() > 0)
-						progress = (mediaPlayer.getCurrentPosition() * 100) / mediaPlayer.getDuration();
+					if (duration > 0)
+						progress = (mediaPlayer.getCurrentPosition() * 100) / duration;
 					((HoloCircularProgress) durationProgress).setProgress(progress * 0.01f);
 					Utils.setupFormattedTime(durationTxt, mediaPlayer.getCurrentPosition() / 1000);
 					break;
 				case STOPPED:
 					((HoloCircularProgress) durationProgress).setProgress(0.00f);
-					Utils.setupFormattedTime(durationTxt, mediaPlayer.getDuration() / 1000);
+					Utils.setupFormattedTime(durationTxt, duration / 1000);
 					break;
 
 				}

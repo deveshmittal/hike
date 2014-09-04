@@ -4460,23 +4460,29 @@ public class Utils
 	// added for db query
 	public static String getMsisdnStatement(Collection<String> msisdnList)
 	{
-		StringBuilder sb = new StringBuilder("(");
-		if (null != msisdnList)
+		if (null == msisdnList)
 		{
+			return null;
+		}
+		else
+		{
+			if (msisdnList.isEmpty())
+			{
+				return null;
+			}
+			StringBuilder sb = new StringBuilder("(");
 			for (String msisdn : msisdnList)
 			{
 				sb.append(DatabaseUtils.sqlEscapeString(msisdn));
 				sb.append(",");
 			}
+			int idx = sb.lastIndexOf(",");
+			if (idx >= 0)
+				sb.replace(idx, sb.length(), ")");
+			else
+				sb.append(")");
+			return sb.toString();
 		}
-
-		int idx = sb.lastIndexOf(",");
-		if (idx >= 0)
-			sb.replace(idx, sb.length(), ")");
-		else
-			sb.append(")");
-
-		return sb.toString();
 	}
 
 	public static void startWebViewActivity(Context context, String url, String title)

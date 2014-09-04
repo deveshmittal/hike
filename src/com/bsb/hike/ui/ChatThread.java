@@ -1544,6 +1544,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				mAdapter.notifyDataSetChanged();
 				clearConfirmDialog.dismiss();
 				hidePinFromUI(true);
+				hideHikeToOfflineTip();
 
 				Utils.resetPinUnreadCount(mConversation);
 				updateOverflowMenuUnreadCount();
@@ -1953,6 +1954,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				mComposeView.setText(msg);
 				mComposeView.setSelection(mComposeView.length());
 				SmileyParser.getInstance().addSmileyToEditable(mComposeView.getText(), false);
+			}
+			else if (intent.hasExtra(HikeConstants.Extras.CONTACT_ID))
+			{
+				String contactId = intent.getStringExtra(HikeConstants.Extras.CONTACT_ID);
+				if (TextUtils.isEmpty(contactId))
+				{
+					Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+				}
+				else
+				{
+					getContactData(contactId);
+				}
 			}
 			else if (intent.hasExtra(HikeConstants.Extras.FILE_PATH))
 			{
@@ -3976,7 +3989,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			Pair<String, Pair<Long,String>> pair = (Pair<String, Pair<Long, String>>) object;
 			// If the msisdn don't match we simply return
-			if (!mConversation.getMsisdn().equals(pair.first))
+			if (!mConversation.getMsisdn().equals(pair.first) || messages == null || messages.isEmpty())
 			{
 				return;
 			}
@@ -4098,6 +4111,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		else if (HikePubSub.BULK_MESSAGE_DELIVERED_READ.equals(type))
 		{
+			if(messages == null || messages.isEmpty())
+			{
+				return;
+			}
 			Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap = (Map<String, PairModified<PairModified<Long, Set<String>>, Long>>) object;
 			PairModified<PairModified<Long, Set<String>>, Long> pair = messageStatusMap.get(mConversation.getMsisdn());
 			if (pair != null)
@@ -5962,8 +5979,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (requestCode == HikeConstants.SHARE_CONTACT_CODE && resultCode == RESULT_OK)
 		{
-			String id = data.getData().getLastPathSegment();
-			getContactData(id);
+			String contactId = data.getData().getLastPathSegment();
+			getContactData(contactId);
 		}
 		else if (resultCode == RESULT_CANCELED)
 		{
@@ -5973,7 +5990,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
-	private void getContactData(String id)
+	private void getContactData(String contactId)
 	{
 		StringBuilder mimeTypes = new StringBuilder("(");
 		mimeTypes.append(DatabaseUtils.sqlEscapeString(Phone.CONTENT_ITEM_TYPE) + ",");
@@ -5986,7 +6003,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		String[] projection = new String[] { Data.DATA1, Data.DATA2, Data.DATA3, Data.MIMETYPE, Data.DISPLAY_NAME };
 
-		Cursor c = getContentResolver().query(Data.CONTENT_URI, projection, selection, new String[] { id }, null);
+		Cursor c = getContentResolver().query(Data.CONTENT_URI, projection, selection, new String[] { contactId }, null);
 
 		int data1Idx = c.getColumnIndex(Data.DATA1);
 		int data2Idx = c.getColumnIndex(Data.DATA2);
@@ -7983,6 +8000,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					isKeyboardOpen = true;
 					if (isEmoticonPalleteVisible())
 					{
+						resizeMainheight(0, false);
 						attachmentWindow.update(-1, temp);
 					}
 				}

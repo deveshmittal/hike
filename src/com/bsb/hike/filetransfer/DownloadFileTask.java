@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.FTResult;
@@ -27,6 +28,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
@@ -74,7 +76,12 @@ public class DownloadFileTask extends FileTransferBase
 		RandomAccessFile raf = null;
 		try
 		{
-			mUrl = new URL(AccountUtils.fileTransferBaseDownloadUrl + fileKey);
+			HikeFile hikeFile = ((ConvMessage)userContext).getMetadata().getHikeFiles().get(0);
+			String downLoadUrl = hikeFile.getDownloadURL();
+			if(TextUtils.isEmpty(downLoadUrl))
+				downLoadUrl = (AccountUtils.fileTransferBaseDownloadUrl + fileKey);
+				
+			mUrl = new URL(downLoadUrl);
 
 			FileSavedState fst = FileTransferManager.getInstance(context).getDownloadFileState(mFile, msgId);
 			/* represents this file is either not started or unrecovered error has happened */
@@ -242,6 +249,7 @@ public class DownloadFileTask extends FileTransferBase
 						mStart += byteRead;
 						// increase the downloaded size
 						incrementBytesTransferred(byteRead);
+						saveIntermediateProgress(null);
 						progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
 						// showButton();
 						if(_state != FTState.PAUSED)
@@ -299,7 +307,7 @@ public class DownloadFileTask extends FileTransferBase
 					case PAUSED:
 						_state = FTState.PAUSED;
 						Logger.d(getClass().getSimpleName(), "FT PAUSED");
-						saveFileState();
+						saveFileState(null);
 						retry = false;
 						break;
 					default:
@@ -413,7 +421,7 @@ public class DownloadFileTask extends FileTransferBase
 	private void error()
 	{
 		_state = FTState.ERROR;
-		saveFileState();
+		saveFileState(null);
 	}
 
 	private void deleteTempFile()

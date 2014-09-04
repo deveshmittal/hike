@@ -22,6 +22,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
@@ -342,6 +343,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.text = (TextView) viewHolder.infoContainer.findViewById(R.id.name);
 				viewHolder.subText = (TextView) viewHolder.infoContainer.findViewById(R.id.count);
 				viewHolder.parent = v.findViewById(R.id.phone_num);
+				viewHolder.phoneNumView = inflater.inflate(R.layout.phone_num_layout, (ViewGroup) viewHolder.parent, false);
+				viewHolder.extraInfo = (TextView) viewHolder.phoneNumView.findViewById(R.id.name);
+				viewHolder.groupOrPins = (TextView) viewHolder.phoneNumView.findViewById(R.id.main_info);
 				break;
 			}
 
@@ -454,6 +458,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			}
 			else
 			{		//Empty State
+				layout.removeAllViews();
 				viewHolder.extraInfo.setVisibility(View.VISIBLE);
 				layoutParams = (LayoutParams) viewHolder.extraInfo.getLayoutParams();
 				layoutParams.width = LayoutParams.MATCH_PARENT;
@@ -474,11 +479,25 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.subText.setText(Integer.toString(totalfiles)); 
 
 			if(groupProfile)
-			{	viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
+			{	
+				/*
+				 * We will remove these two lines when we will be add groups for 1:1
+				 */
+				((LinearLayout) viewHolder.infoContainer).getChildAt(1).setVisibility(View.VISIBLE);
+				((LinearLayout) viewHolder.infoContainer).findViewById(R.id.shared_content_seprator).setVisibility(View.VISIBLE);
+				
+				viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
 				viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_pin_2));
 			}
 			else
 			{
+				/*
+				 * We will remove these two lines when we will be add groups for 1:1
+				 */
+				
+				((LinearLayout) viewHolder.infoContainer).getChildAt(1).setVisibility(View.GONE);
+				((LinearLayout) viewHolder.infoContainer).findViewById(R.id.shared_content_seprator).setVisibility(View.GONE);
+				
 				viewHolder.groupOrPins.setText(context.getResources().getString(R.string.groups));
 				viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_group_2));
 			}
@@ -491,16 +510,13 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			String head = context.getResources().getString(R.string.phone_pa);
 			viewHolder.text.setText(head);
 			viewHolder.subText.setVisibility(View.GONE);
-			View phoneNumberView = inflater.inflate(R.layout.phone_num_layout, parentll, false);
-			TextView phoneNum = (TextView) phoneNumberView.findViewById(R.id.name);
-			phoneNum.setText(mContactInfo.getMsisdn());
-			TextView phoneType = (TextView) phoneNumberView.findViewById(R.id.main_info);
+			viewHolder.extraInfo.setText(mContactInfo.getMsisdn());
 			if(mContactInfo.getMsisdnType().length()>0)
-				phoneType.setText(mContactInfo.getMsisdnType());
+				viewHolder.groupOrPins.setText(mContactInfo.getMsisdnType());
 			else
-				phoneType.setVisibility(View.GONE);
+				viewHolder.groupOrPins.setVisibility(View.GONE);
 			
-			parentll.addView(phoneNumberView);
+			parentll.addView(viewHolder.phoneNumView);
 			
 			break;
 
@@ -700,6 +716,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		View infoContainer;
 
 		View parent;
+		
+		View phoneNumView;
 	}
 
 	public void setProfilePreview(Bitmap preview)

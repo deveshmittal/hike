@@ -455,11 +455,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		else if (HikeConstants.HELP_FAQS_PREF.equals(preference.getKey()))
 		{
 			Logger.d(getClass().getSimpleName(), "FAQ preference selected");
-			Intent intent = new Intent(HikePreferences.this, WebViewActivity.class);
-			intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, HikeConstants.HELP_URL);
-			intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.faq));
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
+			Utils.startWebViewActivity(HikePreferences.this,HikeConstants.HELP_URL,getString(R.string.faq));
 		}
 		else if (HikeConstants.HELP_FEEDBACK_PREF.equals(preference.getKey()))
 		{
