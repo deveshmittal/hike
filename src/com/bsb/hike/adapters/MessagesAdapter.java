@@ -2612,8 +2612,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		fileThumb.getLayoutParams().width = pixels;
 		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg))
 		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);
-		;
-		fileThumb.setImageResource(0);
+		/*
+		 * When setting default media thumb to image view, need to remove the previous drawable of that view in case of view is re-used by adapter.
+		 * Fogbugz Id : 37212
+		 */
+		fileThumb.setImageDrawable(null);
 	}
 
 	View.OnClickListener contactClick = new OnClickListener()
@@ -2938,16 +2941,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			messageInfo.setVisibility(View.VISIBLE);
 			messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
 			setReadByForGroup(message, messageInfo);
-			updateViewWindowForReadBy(message);
-		}
-	}
-
-	private void updateViewWindowForReadBy(ConvMessage message)
-	{
-		ConvMessage lastMessage = getItem(getCount() - 1);
-		if (lastMessage.getMsgID() == message.getMsgID())
-		{
-			chatThread.updateViewWindowForReadBy();
 		}
 	}
 
@@ -3219,9 +3212,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return;
 		case IMAGE:
 		case VIDEO:
-			ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
-			hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn() , convMessage.getTimestamp(), convMessage.getGroupParticipantMsisdn()));
-			PhotoViewerFragment.openPhoto(R.id.chatThreadParentLayout, context, hsf, true, conversation);
+			if(hikeFile.exactFilePathFileExists())
+			{
+				ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
+				hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn(), convMessage.getTimestamp(), convMessage
+						.getGroupParticipantMsisdn()));
+				PhotoViewerFragment.openPhoto(R.id.chatThreadParentLayout, context, hsf, true, conversation);
+			}
+			else
+			{
+				Toast.makeText(context, R.string.unable_to_open, Toast.LENGTH_SHORT).show();
+			}
 			return;
 		
 		
@@ -3823,19 +3824,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			try
 			{
+				int duration = mediaPlayer.getDuration();
+				
 				switch (playerState)
 				{
 				case PLAYING:
 				case PAUSED:
 					int progress = 0;
-					if (mediaPlayer.getDuration() > 0)
-						progress = (mediaPlayer.getCurrentPosition() * 100) / mediaPlayer.getDuration();
+					if (duration > 0)
+						progress = (mediaPlayer.getCurrentPosition() * 100) / duration;
 					((HoloCircularProgress) durationProgress).setProgress(progress * 0.01f);
 					Utils.setupFormattedTime(durationTxt, mediaPlayer.getCurrentPosition() / 1000);
 					break;
 				case STOPPED:
 					((HoloCircularProgress) durationProgress).setProgress(0.00f);
-					Utils.setupFormattedTime(durationTxt, mediaPlayer.getDuration() / 1000);
+					Utils.setupFormattedTime(durationTxt, duration / 1000);
 					break;
 
 				}
@@ -4129,7 +4132,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				chatThread.shouldRunTimerForHikeOfflineTip = true;
 				chatThread.hideHikeToOfflineTip();
 				updateFirstPendingConvMessage();
-				chatThread.updateLastSeen();
 			}
 		});
 	}
@@ -4257,5 +4259,29 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		if(notify && !isListFlinging){
 			notifyDataSetChanged();
 		}
+	}
+	
+	public boolean containsMediaMessage(ArrayList<Long> msgIds)
+	{
+		/*
+		 * Iterating in reverse order since its more likely the user wants to know about latest messages.
+		 */
+		int lastIndex = msgIds.size() - 1;
+		for (int i = lastIndex; i >= 0; i--)
+		{
+			long msgId = msgIds.get(i);
+			for (ConvMessage convMessage : convMessages)
+			{
+				if (convMessage.getMsgID() == msgId && convMessage.isFileTransferMessage())
+				{
+					HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+					if(hikeFile.getHikeFileType() == HikeFileType.IMAGE || hikeFile.getHikeFileType() == HikeFileType.VIDEO)
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 }
