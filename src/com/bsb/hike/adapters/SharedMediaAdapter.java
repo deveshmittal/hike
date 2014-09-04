@@ -126,9 +126,7 @@ public class SharedMediaAdapter extends PagerAdapter implements OnClickListener
 			photoViewerFragment.toggleViewsVisibility();
 			break;
 		case VIDEO:
-			Intent openFile = new Intent(Intent.ACTION_VIEW);
-			openFile.setDataAndType(Uri.fromFile(sharedMediaItem.getFile()), sharedMediaItem.getFileTypeString());
-			context.startActivity(openFile);
+			HikeSharedFile.openFile(sharedMediaItem, context);
 			break;
 		default:
 			break;
