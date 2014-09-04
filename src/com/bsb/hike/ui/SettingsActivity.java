@@ -168,7 +168,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 	private void addProfileHeaderView(ListView settingsList)
 	{
 		View header = getLayoutInflater().inflate(R.layout.profile_header_other, null);
-		
+		header.findViewById(R.id.remove_fav).setVisibility(View.GONE);
 		ImageView profileImgView = (ImageView)header.findViewById(R.id.profile_image);
 		TextView nameView = (TextView)header.findViewById(R.id.name);
 		TextView statusView = (TextView)header.findViewById(R.id.subtext);
