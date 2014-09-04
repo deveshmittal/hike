@@ -27,6 +27,7 @@
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_marginLeft="6dp"
+        android:contentDescription="Message Icon"
         android:orientation="horizontal" >
         
         <LinearLayout
