@@ -142,11 +142,13 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private SharedPreferences preferences;
 
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.PARTICIPANT_JOINED_GROUP,
-			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
+			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT };
 
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST,
-			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
+			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT };
 
 	private String[] profilePubSubListeners = { HikePubSub.USER_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.STATUS_MESSAGE_RECEIVED,
 			HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
@@ -491,10 +493,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if (showingGroupEdit)
-		{
-			return false;
-		}
 		switch (profileType)
 		{
 		case CONTACT_INFO:
@@ -507,7 +505,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			}
 			return true;
 		case GROUP_INFO:
-			getSupportMenuInflater().inflate(R.menu.group_profile_menu, menu);
+			if (!showingGroupEdit)
+			{
+				getSupportMenuInflater().inflate(R.menu.group_profile_menu, menu);
+			}
 			mMenu = menu;
 			return true;
 		case USER_PROFILE:
@@ -2242,6 +2243,19 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 			});
 		}
+		else if (HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT.equals(type))
+		{
+
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG);
+				}
+			});
+		}
 	}
 
 	private StatusMessage getJoinedHikeStatus(ContactInfo contactInfo)
@@ -2566,8 +2580,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			{
 				/*
 				 * For some reason the activity randomly catches this event in the background and we get an NPE when that happens with mMenu. Adding an NPE guard for that.
+				 * if media viewer is open don't do anything
 				 */
-				if (mMenu == null)
+				if (mMenu == null  || isFragmentAdded(HikeConstants.IMAGE_FRAGMENT_TAG))
 				{
 					return super.onKeyUp(keyCode, event);
 				}

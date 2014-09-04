@@ -4645,6 +4645,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void removeMessages(ArrayList<Long> msgIds)
 	{
+		removeMessages(msgIds, false);
+	}
+	
+	private void removeMessages(ArrayList<Long> msgIds, boolean deleteMediaFromPhone)
+	{
 		Collections.sort(msgIds);
 		//TODO if last message is typing notification we will get wrong result here
 		boolean isLastMessage = (msgIds.get(msgIds.size()-1) == messages.get(messages.size() - 1).getMsgID());
@@ -4652,11 +4657,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, isLastMessage);
 		bundle.putString(HikeConstants.Extras.MSISDN, mContactNumber);
 		mPubSub.publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
-		deleteMessages(msgIds);
+		deleteMessages(msgIds, deleteMediaFromPhone);
 		mAdapter.notifyDataSetChanged();
 	}
 	
-	private void deleteMessages(ArrayList<Long> msgIds)
+	private void deleteMessages(ArrayList<Long> msgIds, boolean deleteMediaFromPhone)
 	{
 		/*
 		 * Iterating in reverse order since its more likely the user wants to delete one of his/her latest messages.
@@ -4676,7 +4681,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				if (convMessage.getMsgID() == msgId)
 				{
-					deleteMessage(convMessage);
+					deleteMessage(convMessage, deleteMediaFromPhone);
 					break;
 				}
 			}
@@ -4688,7 +4693,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	 * 2. remove message from offline messages set of messagesAdapter
 	 * 3. if ongoing file transfer message than cancel the task
 	 */
-	private void deleteMessage(ConvMessage convMessage)
+	private void deleteMessage(ConvMessage convMessage, boolean deleteMediaFromPhone)
 	{
 		mAdapter.removeMessage(convMessage);
 		if (!convMessage.isSMS() && convMessage.getState() == State.SENT_CONFIRMED)
@@ -4705,6 +4710,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// @GM cancelTask has been changed
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			File file = hikeFile.getFile();
+			if(deleteMediaFromPhone && hikeFile.exactFilePathFileExists())
+			{
+				hikeFile.getFileFromExactFilePath().delete();
+			}
 			FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent());
 			mAdapter.notifyDataSetChanged();
 		}
@@ -7413,8 +7422,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				/*
 				 * For some reason the activity randomly catches this event in the background and we get an NPE when that happens with mMenu. Adding an NPE guard for that.
+				 * if media viewer is open don't do anything
 				 */
-				if (mMenu == null)
+				if (mMenu == null || isFragmentAdded(HikeConstants.IMAGE_FRAGMENT_TAG))
 				{
 					return super.onKeyUp(keyCode, event);
 				}
@@ -7706,12 +7716,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void onClick(View v)
 				{
-					removeMessages(selectedMsgIdsToDelete);
+					removeMessages(selectedMsgIdsToDelete, deleteConfirmDialog.isChecked());
 					destroyActionMode();
 					deleteConfirmDialog.dismiss();
 				}
 			};
 
+			if(mAdapter.containsMediaMessage(selectedMsgIdsToDelete))
+			{
+				deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
+			}
 			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
 			deleteConfirmDialog.setCancelButton(R.string.cancel);
 			deleteConfirmDialog.show();
