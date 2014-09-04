@@ -1180,7 +1180,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 
-		saveDraft();
 		super.onBackPressed();
 	}
 
@@ -1874,7 +1873,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	protected void onNewIntent(Intent intent)
 	{
 		Logger.d(getClass().getSimpleName(), "Intent: " + intent.toString());
-
+		mComposeView.setText("");
 		String prevContactNumber = null;
 
 		if (mComposeViewWatcher != null)
@@ -2913,7 +2912,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				Utils.hideSoftKeyboard(ChatThread.this, mComposeView);
 
-				saveDraft();
 
 				Intent intent = new Intent(ChatThread.this, HomeActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -3091,6 +3089,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mConversation.getMsisdn());
 			startActivity(intent);
 		}
+	}
+	
+	@Override
+	protected void onStop()
+	{
+		super.onStop();
 		saveDraft();
 	}
 
