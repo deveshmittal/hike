@@ -228,7 +228,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public SmileyParser smileyParser;
 	
-	private static final String PROFILE_ROUND_SUFFIX = "round";
+	public static final String PROFILE_ROUND_SUFFIX = "round";
 
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
