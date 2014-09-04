@@ -1084,7 +1084,7 @@ public class TouchImageView extends RecyclingImageView
 	     */
 	    private PointF transformCoordBitmapToTouch(float bx, float by) {
 	        matrix.getValues(m);
-	        try
+	        if(getDrawable()!=null)
 	        {	
 	        	float origW = getDrawable().getIntrinsicWidth();  //GetDrawable was giving an NPE on a random repro here.
 	        	float origH = getDrawable().getIntrinsicHeight();
@@ -1094,11 +1094,7 @@ public class TouchImageView extends RecyclingImageView
 	        	float finalY = m[Matrix.MTRANS_Y] + getImageHeight() * py;
 	        	return new PointF(finalX , finalY);
 	        }
-	        catch (NullPointerException ex)
-	        {
-	        	Logger.d(DEBUG, "Caught a null pointer in TouchImageView's transformCoordBitmapToTouch");
-	        	ex.printStackTrace();
-	        }
+	        Logger.d(DEBUG, "Caught a null pointer in TouchImageView's transformCoordBitmapToTouch");
 	        return new PointF(m[Matrix.MTRANS_X], m[Matrix.MTRANS_Y]);  //HackyFix --> returning the old matrix values.
 	    }
 
