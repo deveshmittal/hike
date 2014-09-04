@@ -926,7 +926,6 @@
     <string name="notif_sound_default_key">Default</string>
     <string name="notif_sound_Hike_key">HikeJingle</string>
     <string name="notificationSoundTitle">Notification tones</string>
-    <string name="notificationSoundSummary">Select a sound to play for a new notification message</string>
     <string name="status">Status</string>
     <string name="getting_started">Getting Started..</string>
     <string name="viewcontact">View profile</string>
@@ -1102,10 +1101,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
         <item>If only there was a way to start a chat. Oh wait...</item>
         <item>@string/chatThreadNudgeTutorialText</item>
     </string-array>
-    <string name="hike_offline_notifications">Hike offline notifications</string>
-    <string name="h2o_notifications_setting_summary">Enable hike offline notifications for contacts </string>
-    <string name="notifications_contact_join_title">Contact joining notification</string>
-    <string name="notifications_contact_join_summary">Notify when a contact joins hike</string>
     <string name="pin_header">Pathik</string>
     <string name="pin_detail">Mass bunk tomorrow! Let\'s all go for a movie at DT Mall</string>
     <string name="postAnonymously">Post Anonymously</string>
@@ -1127,7 +1122,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="hike_extras">Hike Extras</string>
     <string name="mute_status_notification_header">Status and profile picture</string>
     <string name="mute_status_notification_subtext">Show notifications for status &amp; profile picture updates from favourites</string>
-    <string name="notifications_contact_join_title">Contact joining notification</string>
     <string name="notifications_contact_join_summary">Notify when a contact joins hike</string>
     <string name="sticker_download_failed_large_file">Download failed due to insufficient space. Please free some space and try again.</string>
 	<string name="set_profile_pic">hike profile picture</string>
@@ -1161,4 +1155,9 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="stealth_info_tip_subtext">Hide your chats. Tap on \'hi\' to get started.</string>
     <string name="file_missing_caps">FILE MISSING</string>
     <string name="status_profile_pic_notification">changed profile picture</string>
+    <string name="notificationSoundSummary">Select a sound to play for a new notification</string>
+    <string name="hike_offline_notifications">Hike offline</string>
+    <string name="h2o_notifications_setting_summary">Notify to send SMS for offline contact</string>
+    <string name="notifications_contact_join_title">Contact joining Hike</string>
+     
 </resources>
