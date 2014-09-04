@@ -1663,6 +1663,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				return;
 			}
+			
+			/*
+			 * If the stealth mode is already setup than we should return;
+			 */
+			if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
+			{
+				return ;
+			}
 
 			getActivity().runOnUiThread(new Runnable()
 			{

@@ -34,6 +34,15 @@ public class LockPattern
 		switch (requestCode)
 		{
 		case HikeConstants.ResultCodes.CREATE_LOCK_PATTERN:
+			/*
+			 * Check for case where intent is null
+			 */
+			if(null == data)
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_FTUE_STEALTH_CONV, null);
+				break;
+			}
+			
 			boolean isReset = data.getBooleanExtra(HikeConstants.Extras.STEALTH_PASS_RESET, false);
 			if (resultCode == activity.RESULT_OK)
 			{
