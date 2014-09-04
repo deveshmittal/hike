@@ -352,5 +352,6 @@
     <color name="add_fav">#ffa201</color>
     <color name="missing_thumbnail">#aaaaaa</color>
     <color name="header_bg">#f1f2f3</color>
+    <color name="status_text_color">#888888</color>
 </resources>
 	
