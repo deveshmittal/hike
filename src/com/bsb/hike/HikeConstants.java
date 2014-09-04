@@ -1322,6 +1322,8 @@ public class HikeConstants
 
 		public static final String PRIVACY_SCREEN = "profSprivS";
 
+		public static final String SET_PROFILE_PIC_GALLERY = "profSpicGallery";
+
 		/*
 		 * Invite screen events <screen> = invS <event> = credB, creDtiPN, creDtiPY
 		 */
@@ -1370,6 +1372,11 @@ public class HikeConstants
 		 * SignUp screen <screen> = signupS <event> = erroR
 		 */
 		public static final String SIGNUP_ERROR = "signupSerroR";
+
+		/*
+		 *  Compose screen <screen> = compS <event> = refContcts
+		 */
+		public static final String COMPOSE_REFRESH_CONTACTS = "compSrefContcts";
 
 		/*
 		 * Drawer screen <screen> = drS <event> = homE, gC, inV, reW, creD, proF, settinG
@@ -1532,6 +1539,8 @@ public class HikeConstants
 		
 		public static final String SETTINGS_NOTIFICATION_H2O_OFF = "settingsSNotifH2ODisabled";
 		
+		public static final String SETTINGS_REFRESH_CONTACTS = "settingsSrefContcts";
+
 	}
 
 	public static final class MqttMessageTypes

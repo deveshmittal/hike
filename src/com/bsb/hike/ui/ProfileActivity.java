@@ -341,6 +341,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			if(Intent.ACTION_ATTACH_DATA.equals(getIntent().getAction()))
 			{
 				setProfileImage(HikeConstants.GALLERY_RESULT, RESULT_OK, getIntent());
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SET_PROFILE_PIC_GALLERY);
 			}
 			if (getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false))
 			{
