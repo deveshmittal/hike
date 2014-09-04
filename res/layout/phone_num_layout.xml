@@ -45,7 +45,7 @@
             android:layout_marginRight="16dp"
             android:layout_marginLeft="16dp"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/ic_hike_message" />
+            android:src="@drawable/ic_message_selector" />
         </LinearLayout>
 
         <View
@@ -71,7 +71,7 @@
             android:contentDescription="Call Icon"
             android:scaleType="centerInside"
             android:layout_gravity="center"
-            android:src="@drawable/ic_call" />
+            android:src="@drawable/ic_telephone_selected" />
         </LinearLayout>
         
     </LinearLayout>
@@ -93,7 +93,6 @@
             android:ellipsize="end"
             android:contentDescription="Phone Number"
             android:singleLine="true"
-            android:text="dsfakjkfjsa"
             android:textColor="#33312e"
             android:textSize="16sp"
             android:textStyle="bold|italic" />
@@ -121,7 +120,6 @@
             android:layout_height="wrap_content"
             android:contentDescription="Phone type"
             android:textColor="@color/updates_text"
-            android:text="djsfjasljf"
             android:textStyle="italic"
             android:layout_marginRight="5dp"
             android:textSize="14sp" />
