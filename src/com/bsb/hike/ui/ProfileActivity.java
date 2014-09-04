@@ -222,9 +222,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private List<HikeSharedFile> sharedMedia;
 	
-	private int actualSize;
-	
-	private static final int maxMediaToShow = 4;
+	private int maxMediaToShow = 0;
 
 	private View headerView;
 	
@@ -756,7 +754,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 			}
 			else if (!contactInfo.isOnhike())
-			{
+			{  	subText.setText(getResources().getString(R.string.on_sms));
 				// UNKNOWN and on SMS
 				if(contactInfo.isUnknownContact())
 				{
@@ -851,12 +849,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private void shouldAddSharedMedia()
 	{
 		// TODO Auto-generated method stub
-		actualSize = getResources().getDimensionPixelSize(R.dimen.profile_shared_media_item_size);
+		
 		if(sharedMediaCount>0)
 		{	
 			addSharedMedia();
 		}
-		profileItems.add(new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, sharedMediaCount, sharedMedia));
+		profileItems.add(new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, sharedMediaCount, maxMediaToShow,sharedMedia));
 	}
 
 	private void addStatusMessagesAsMyProfileItems(List<StatusMessage> statusMessages)
@@ -912,18 +910,19 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		profileContent = (ListView) findViewById(R.id.profile_content);
 		headerView = null;
+		int sizeOfImage = calculateDimens();
 		switch (profileType)
 		{
 		case CONTACT_INFO:
 			profileItems = new ArrayList<ProfileItem>();
 			setupContactProfileList();
-			profileAdapter = new ProfileAdapter(this, profileItems, null, contactInfo, false, ContactManager.getInstance().isBlocked(mLocalMSISDN));
+			profileAdapter = new ProfileAdapter(this, profileItems, null, contactInfo, false, ContactManager.getInstance().isBlocked(mLocalMSISDN), sizeOfImage);
 			addProfileHeaderView();
 			break;
 		case GROUP_INFO:
 			profileItems = new ArrayList<ProfileItem>();
 			setupGroupProfileList();
-			profileAdapter = new ProfileAdapter(this, profileItems, groupConversation, null, false);
+			profileAdapter = new ProfileAdapter(this, profileItems, groupConversation, null, false, false, sizeOfImage);
 			addProfileHeaderView();
 			break;
 		case USER_PROFILE:
@@ -935,6 +934,17 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			break;
 		}
 		profileContent.setAdapter(profileAdapter);
+	}
+
+	private int calculateDimens()
+	{
+		// TODO Auto-generated method stub
+		int sizeOfImage = getResources().getDimensionPixelSize(R.dimen.profile_shared_media_item_size);
+		int screenWidth = getResources().getDisplayMetrics().widthPixels - getResources().getDimensionPixelSize(R.dimen.sm_leftmargin) - getResources().getDimensionPixelSize(R.dimen.sm_rightmargin);
+		int numColumns = screenWidth/sizeOfImage;
+		int remainder = screenWidth - (numColumns * getResources().getDimensionPixelSize(R.dimen.thumbnail_margin_right)) - numColumns * sizeOfImage;
+		maxMediaToShow = numColumns;
+		return sizeOfImage + (remainder/numColumns);
 	}
 
 	private void setupGroupProfileList()
@@ -979,7 +989,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, sharedMediaCount, -1, true);
 			return;
 		}
-		sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, maxMediaToShow , -1, true);
+		sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, maxMediaToShow, -1, true);
 		return;
 	}
 

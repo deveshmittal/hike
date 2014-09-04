@@ -154,5 +154,5 @@
 	<dimen name="profile_shared_media_item_size">72dp</dimen>
 	<dimen name="thumbnail_margin_right">2dp</dimen>
 	<dimen name="sm_leftmargin">16dp</dimen>
-	<dimen name="sm_rightmargin">14dp</dimen>
+	<dimen name="sm_rightmargin">53dp</dimen>
 </resources>

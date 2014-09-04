@@ -109,12 +109,21 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	private static final int REQUEST_RECEIVED = 3;
 
 	private static final int UNKNOWN_NOT_ON_HIKE = 4;
+	
+	private int sizeOfThumbnail;
 
 	public ProfileAdapter(ProfileActivity profileActivity, List<ProfileItem> itemList, GroupConversation groupConversation, ContactInfo contactInfo, boolean myProfile)
 	{
 		this(profileActivity, itemList, groupConversation, contactInfo, myProfile, false);
 	}
-
+	
+	public ProfileAdapter(ProfileActivity profileActivity, List<ProfileItem> itemList, GroupConversation groupConversation, ContactInfo contactInfo, boolean myProfile, boolean isContactBlocked, int sizeOfThumbNail)
+	{
+		this(profileActivity, itemList, groupConversation, contactInfo, myProfile, false);
+		this.sizeOfThumbnail = sizeOfThumbNail;
+		thumbnailLoader = new SharedFileImageLoader(context, sizeOfThumbnail);
+	}
+	
 	public ProfileAdapter(ProfileActivity profileActivity, List<ProfileItem> itemList, GroupConversation groupConversation, ContactInfo contactInfo, boolean myProfile,
 			boolean isContactBlocked)
 	{
@@ -129,13 +138,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		int mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
-		int thumbNailSize = context.getResources().getDimensionPixelSize(R.dimen.profile_shared_media_item_size);
 		this.bigPicImageLoader = new TimelineImageLoader(context, mBigImageSize);
-		thumbnailLoader = new SharedFileImageLoader(context, thumbNailSize);
 		this.profileImageLoader = new ProfilePicImageLoader(context, mBigImageSize);
 		profileImageLoader.setDefaultAvatarIfNoCustomIcon(true);
 		profileImageLoader.setHiResDefaultAvatar(true);
-
 		this.iconLoader = new IconLoader(context, mIconImageSize);
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 	}
@@ -256,24 +262,25 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.infoContainer = v.findViewById(R.id.shared_media_items);
 				viewHolder.parent =  v.findViewById(R.id.sm_emptystate);
 				viewHolder.sharedFiles = v.findViewById(R.id.shared_media);
+				viewHolder.icon = (ImageView) v.findViewById(R.id.arrow_icon);
 				List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
 				LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
 				layout.removeAllViews();
 				int smSize = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
+				int maxMediaToShow = ((ProfileSharedMedia) profileItem).getMaxMediaToShow();
 				viewHolder.subText.setText(Integer.toString(smSize));
-				
 				if(sharedMedia != null)
 				{
+					LinearLayout.LayoutParams lp;
+					
 					for (HikeSharedFile galleryItem : sharedMedia)
 					{
 						View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
-						layout.addView(image_thumb);
-					}
-					
-					if(sharedMedia.size() < smSize )
-					{
-						// Add Arrow Icon
-						View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
+						lp = (LinearLayout.LayoutParams) image_thumb.getLayoutParams();
+						lp.width = sizeOfThumbnail;
+						lp.height = sizeOfThumbnail;
+						lp.weight = 1.0f;
+						image_thumb.setLayoutParams(lp);
 						layout.addView(image_thumb);
 					}
 				}
@@ -456,15 +463,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				if(sharedMedia.size() < smSize )
 				{
 					// Add Arrow Icon
-					View image_thumb = layout.getChildAt(i);
-					image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
-					image.setTag(OPEN_GALLERY);
-					image.setOnClickListener(profileActivity);
-					RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams) image.getLayoutParams();
-					rl.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-					image.setLayoutParams(rl);
-					image.setImageDrawable((context.getResources().getDrawable(R.drawable.ic_arrow)));
-					image.setScaleType(ScaleType.CENTER);
+					viewHolder.icon.setVisibility(View.VISIBLE);
+					viewHolder.icon.setTag(OPEN_GALLERY);
+					viewHolder.icon.setOnClickListener(profileActivity);
 				}
 			}
 			else
