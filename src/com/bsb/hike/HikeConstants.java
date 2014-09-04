@@ -923,7 +923,12 @@ public class HikeConstants
 	public static final String PIN_DISPLAYED = "displayed";
 	
 	public static final int MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY = 51;
-
+	
+	
+	public static final String TOTAL_SELECTIONS = "t";
+	
+	public static final String SUCCESSFUL_SELECTIONS = "s";
+	
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
@@ -1571,6 +1576,11 @@ public class HikeConstants
 		 * HikeSharedFiles Activity Screen = sharedMediaS<event>
 		 * */
 		public static final String OPEN_THUMBNAIL_VIA_GALLERY = "sharedMediaSthumbnailClick";
+
+		/*
+		 * Image selection from gallery event.
+		 */
+		public static final String GALLERY_SELECTION = "gallery";
 	}
 
 	public static final class MqttMessageTypes
