@@ -249,6 +249,7 @@ public class DownloadFileTask extends FileTransferBase
 						mStart += byteRead;
 						// increase the downloaded size
 						incrementBytesTransferred(byteRead);
+						saveIntermediateProgress(null);
 						progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
 						// showButton();
 						if(_state != FTState.PAUSED)
@@ -306,7 +307,7 @@ public class DownloadFileTask extends FileTransferBase
 					case PAUSED:
 						_state = FTState.PAUSED;
 						Logger.d(getClass().getSimpleName(), "FT PAUSED");
-						saveFileState();
+						saveFileState(null);
 						retry = false;
 						break;
 					default:
@@ -420,7 +421,7 @@ public class DownloadFileTask extends FileTransferBase
 	private void error()
 	{
 		_state = FTState.ERROR;
-		saveFileState();
+		saveFileState(null);
 	}
 
 	private void deleteTempFile()

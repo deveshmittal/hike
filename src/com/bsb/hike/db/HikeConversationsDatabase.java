@@ -338,6 +338,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		 */
 		if (oldVersion < 12)
 		{
+			// Drop table is required for user upgrading from build numbers: 8, 9, 10 or 11
+			String drop = "DROP TABLE " + DBConstants.STATUS_TABLE;
 			String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.STATUS_TABLE + " (" + DBConstants.STATUS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
 					+ DBConstants.STATUS_MAPPED_ID + " TEXT UNIQUE, " + DBConstants.MSISDN + " TEXT, " + DBConstants.STATUS_TEXT + " TEXT, " + DBConstants.STATUS_TYPE
 					+ " INTEGER, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0, " + DBConstants.SHOW_IN_TIMELINE + " INTEGER, "

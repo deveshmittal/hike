@@ -2518,6 +2518,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 			showTransferInitialization(holder, hikeFile);
 			break;
+		case ERROR:
 		case PAUSED:
 			holder.ftAction.setImageResource(retryImage);
 			holder.ftAction.setVisibility(View.VISIBLE);
@@ -2525,7 +2526,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			showTransferProgress(holder, fss, msgId, hikeFile, isSent);
 			break;
 		case CANCELLED:
-		case ERROR:
 			holder.ftAction.setImageResource(retryImage);
 			holder.ftAction.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
@@ -2556,8 +2556,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		if (fss.getTotalSize() <= 0 && isSent)
 		{
 			showTransferInitialization(holder, hikeFile);
-		}else if((fss.getTransferredSize() == 0 && fss.getFTState() == FTState.IN_PROGRESS)){
-			holder.circularProgress.setProgress(5 * 0.01f);
+		}
+		else if(fss.getFTState() == FTState.IN_PROGRESS && fss.getTransferredSize() == 0 && fss.getTotalSize() > 0)
+		{
+			float fakeProgress = (float) chunkSize;
+			fakeProgress /= fss.getTotalSize();
+			if (fakeProgress > 5 * 0.01f)
+			{
+				fakeProgress = 5 * 0.01f;
+			}
+			holder.circularProgress.setProgress(fakeProgress);
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}
