@@ -107,7 +107,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);  //Making the action bar overlay on top of the current view
+		requestWindowFeature(com.actionbarsherlock.view.Window.FEATURE_ACTION_BAR_OVERLAY);
 		setContentView(R.layout.gallery);
 
 		selectedSharedFileItems = new HashSet<Long>();

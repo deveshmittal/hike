@@ -65,7 +65,7 @@ public class GalleryActivity extends HikeAppStateBaseFragmentActivity implements
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+		requestWindowFeature(com.actionbarsherlock.view.Window.FEATURE_ACTION_BAR_OVERLAY);
 		setContentView(R.layout.gallery);
 
 		selectedGalleryItems = new HashMap<Long, GalleryItem>();
