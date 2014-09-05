@@ -8186,6 +8186,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			return;
 		}
+		
+		/*
+		 * Fix for case where server and client values are out of sync
+		 */
+		if(offline == 1 && lastSeenTime <= 0)
+		{
+			return;
+		}
 
 		/*
 		 * Updating the class's contactinfo object
