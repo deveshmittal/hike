@@ -186,6 +186,7 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -2257,6 +2258,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		
 		if (mConversation == null)
 		{
+			if(mContactNumber.equals(HikeNotification.HIKE_STEALTH_MESSAGE_KEY))
+			{
+				onBackPressed();
+				return false;
+			}
 			if (Utils.isGroupConversation(mContactNumber))
 			{
 				/* the user must have deleted the chat. */
