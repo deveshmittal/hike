@@ -145,8 +145,12 @@ public class FileListItem
 	
 	public void setListItemAttributesFromFile(FileListItem item, File file)
 	{
-		item.setTitle(file.getName());
 		item.setFile(file);
+		if(file == null)
+		{
+			return;
+		}
+		item.setTitle(file.getName());
 		if (file.isDirectory())
 		{
 			item.setIcon(R.drawable.ic_folder);

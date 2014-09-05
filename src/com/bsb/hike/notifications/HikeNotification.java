@@ -15,6 +15,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
@@ -27,8 +28,11 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.filetransfer.FileTransferManager;
+import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -291,7 +295,7 @@ public class HikeNotification
 
 		final String msisdn = convMsg.getMsisdn();
 		// we are using the MSISDN now to group the notifications
-		final int notificationId = msisdn.hashCode();
+		final int notificationId = HIKE_SUMMARY_NOTIFICATION_ID;
 
 		String message = (!convMsg.isFileTransferMessage()) ? convMsg.getMessage() : HikeFileType.getFileTypeMessage(context, convMsg.getMetadata().getHikeFiles().get(0)
 				.getHikeFileType(), convMsg.isSent());
@@ -396,6 +400,25 @@ public class HikeNotification
 			else
 				message = messageString;
 
+			// if big picture exists in the new message, check notification stack if we are showing clubbed messages
+			// if we are, discard big picture since a message for it "..sent you a photo" already exists in stack
+			if (!hikeNotifMsgStack.isEmpty())
+			{
+				if (!hikeNotifMsgStack.isFromSingleMsisdn() || hikeNotifMsgStack.getSize() > 1)
+				{
+					return;
+				}
+				else
+				{
+					if (hikeNotifMsgStack.getSize() == 1)
+					{
+						// The only message added was the one for which we now have a big picture
+						// Hence remove it and proceed showing the big pic notification
+						hikeNotifMsgStack.resetMsgStack();
+					}
+				}
+			}
+
 			// if notification message stack is empty, add to it and proceed with single notification display
 			// else add to stack and notify clubbed messages
 			if (hikeNotifMsgStack.isEmpty())
@@ -409,7 +432,7 @@ public class HikeNotification
 			}
 
 			// big picture messages ! intercept !
-			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, !convMsg.isStickerMessage(), isPin, false, null,
+			showNotification(notificationIntent, icon, timestamp, notificationId, text, key, message, msisdn, bigPictureImage, !convMsg.isStickerMessage(), isPin, false, hikeNotifMsgStack.getNotificationSubText(),
 					null, forceBlockNotificationSound);
 		}
 		else
@@ -482,7 +505,7 @@ public class HikeNotification
 			avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
 		}
 
-		if (hikeNotifMsgStack.getNotificationTextLines() == 1)
+		if (hikeNotifMsgStack.getSize() == 1)
 		{
 			// Possibility to show big picture message
 			ConvMessage convMessage = hikeNotifMsgStack.getLastInsertedConvMessage();
@@ -491,7 +514,7 @@ public class HikeNotification
 			{
 				return;
 			}
-			else if (convMessage.isStickerMessage() || convMessage.isFileTransferMessage())
+			else if (convMessage.isFileTransferMessage() || convMessage.isStickerMessage())
 			{
 				Bitmap bigPictureImage = ToastListener.returnBigPicture(convMessage, context);
 				if (bigPictureImage != null)
@@ -505,7 +528,7 @@ public class HikeNotification
 			}
 		}
 
-		if (hikeNotifMsgStack.getNotificationTextLines() == 1)
+		if (hikeNotifMsgStack.getSize() == 1)
 		{
 			showBigTextStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
@@ -550,17 +573,16 @@ public class HikeNotification
 				.isStealthMsisdn(firstMsisdn) ? context.getString(R.string.stealth_notification_message) : context.getString(R.string.hike_to_offline_push_title_single,
 				nameMap.get(firstMsisdn)));
 		String message = context.getString(R.string.hike_to_offline_text);
-		
 
 		// if notification message stack is empty, add to it and proceed with single notification display
 		// else add to stack and notify clubbed messages
 		if (hikeNotifMsgStack.isEmpty())
 		{
-			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), title);
+			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), title + ": " + message);
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), title, false);
+			notifyStringMessage(context.getString(R.string.app_name), title + ": " + message, false);
 			return;
 		}
 
@@ -703,12 +725,8 @@ public class HikeNotification
 		}
 		else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
 		{
-			// message = context.getString(R.string.status_profile_pic_notification, key);
-			// text = key + " " + message;
-
-			// If it is a profile pic change, return since we can display big picture notification using notify
-			// BigPictureStatusNotification() triggered by HikePubSub.PUSH_AVATAR_DOWNLOADED
-			return;
+			message = context.getString(R.string.status_profile_pic_notification, key);
+			text = key + " " + message;
 		}
 		else
 		{
@@ -753,6 +771,25 @@ public class HikeNotification
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn.toString());
 
+		// if big picture exists in the new message, check notification stack if we are showing clubbed messages
+		// if we are, discard big picture since a message for it "..sent you a photo" already exists in stack
+		if (!hikeNotifMsgStack.isEmpty())
+		{
+			if (!hikeNotifMsgStack.isFromSingleMsisdn() || hikeNotifMsgStack.getSize() > 1)
+			{
+				return;
+			}
+			else
+			{
+				if (hikeNotifMsgStack.getSize() == 1)
+				{
+					// The only message added was the one for which we now have a big picture
+					// Hence remove it and proceed showing the big pic notification
+					hikeNotifMsgStack.resetMsgStack();
+				}
+			}
+		}
+		
 		// if notification message stack is empty, add to it and proceed with single notification display
 		// else add to stack and notify clubbed messages
 		if (hikeNotifMsgStack.isEmpty())
@@ -1018,22 +1055,31 @@ public class HikeNotification
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
 				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setPriority(Notification.PRIORITY_DEFAULT);
 
-		if (!forceNotPlaySound)
+		//Reset ticker text since we dont want to tick older messages
+		hikeNotifMsgStack.setTickerText(null);
+		
+		AudioManager manager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+		
+		if (!forceNotPlaySound && !manager.isMusicActive())
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-			String notifSond = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
+			String notifSound = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
 			if (!shouldNotPlayNotification)
 			{
-				Logger.i("notif", "sound " + notifSond);
-				if (!NOTIF_SOUND_OFF.equals(notifSond))
+				Logger.i("notif", "sound " + notifSound);
+				if (!NOTIF_SOUND_OFF.equals(notifSound))
 				{
-					if (NOTIF_SOUND_HIKE.equals(notifSond))
+					if (NOTIF_SOUND_HIKE.equals(notifSound))
 					{
 						mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
 					}
-					else
+					else if (NOTIF_SOUND_DEFAULT.equals(notifSound))
 					{
 						mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
+					}
+					else
+					{
+						mBuilder.setSound(Uri.parse(notifSound));
 					}
 				}
 

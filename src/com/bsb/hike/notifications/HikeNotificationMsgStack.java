@@ -317,7 +317,7 @@ public class HikeNotificationMsgStack implements Listener
 
 		// If new messages belong to different users/groups, redirect the user
 		// to conversations list
-		if (!isFromSingleMsisdn())
+		if (!isFromSingleMsisdn() || containsStealthMessage())
 		{
 			mNotificationIntent = new Intent(mContext, HomeActivity.class);
 			mNotificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -673,5 +673,22 @@ public class HikeNotificationMsgStack implements Listener
 	public boolean forceBlockNotificationSound()
 	{
 		return forceBlockNotificationSound;
+	}
+
+	public void setTickerText(StringBuilder mTickerText)
+	{
+		this.mTickerText = mTickerText;
+	}
+
+	private boolean containsStealthMessage()
+	{
+		if (uniqueMsisdns.contains(HikeNotification.HIKE_STEALTH_MESSAGE_KEY))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

@@ -141,48 +141,25 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	{
 		_bytesTransferred = value;
 	}
-
-	protected void saveFileState()
+	
+	protected void saveIntermediateProgress(String uuid)
 	{
-		if (_totalSize <= 0)
-			return;
-		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred);
-		try
-		{
-			FileOutputStream fileOut = new FileOutputStream(stateFile);
-			ObjectOutputStream out = new ObjectOutputStream(fileOut);
-			out.writeObject(fss);
-			out.close();
-			fileOut.close();
-		}
-		catch (IOException i)
-		{
-			i.printStackTrace();
-		}
+		saveFileState(FTState.ERROR, uuid, null);
 	}
 
 	protected void saveFileState(String uuid)
 	{
-		if (_totalSize <= 0)
-			return;
-		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, uuid);
-		try
-		{
-			FileOutputStream fileOut = new FileOutputStream(stateFile);
-			ObjectOutputStream out = new ObjectOutputStream(fileOut);
-			out.writeObject(fss);
-			out.close();
-			fileOut.close();
-		}
-		catch (IOException i)
-		{
-			i.printStackTrace();
-		}
+		saveFileState(uuid, null);
 	}
 
-	protected void saveFileState(JSONObject response)
+	protected void saveFileState(String uuid, JSONObject response)
 	{
-		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, response);
+		saveFileState(_state, uuid, response);
+	}
+	
+	private void saveFileState(FTState state, String uuid, JSONObject response)
+	{
+		FileSavedState fss = new FileSavedState(state, _totalSize, _bytesTransferred, uuid, response);
 		try
 		{
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
