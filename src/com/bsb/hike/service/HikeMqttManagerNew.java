@@ -800,27 +800,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			if (mqtt != null)
 			{
 				forceDisconnect = true;
-				IMqttToken t = mqtt.disconnect(quiesceTime, null, new IMqttActionListener()
-				{
-					@Override
-					public void onSuccess(IMqttToken arg0)
-					{
-						Logger.d(TAG, "Explicit Disconnection success");
-						handleDisconnect(reconnect);
-					}
-
-					@Override
-					public void onFailure(IMqttToken arg0, Throwable arg1)
-					{
-						Logger.e(TAG, "Explicit Disconnection failed", arg1);
-						// dont care about failure and move on as you have to connect anyways
-						handleDisconnect(reconnect);
-					}
-				});
 				/*
-				 * blocking the mqtt thread, so that no other operation takes place till disconnects completes or timeout This will wait for max 5 secs
+				 * blocking the mqtt thread, so that no other operation takes place till disconnects completes or timeout This will wait for max 1 secs
 				 */
-				t.waitForCompletion(2 * quiesceTime);
+				mqtt.disconnectForcibly(quiesceTime, 2 * quiesceTime);
+				handleDisconnect(reconnect);
 			}
 		}
 		catch (MqttException e)
@@ -843,7 +827,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		ipConnectCount = 0;
 		try
 		{
-			mqtt.close();
+			if(null != mqtt)
+			{
+				mqtt.close();
+			}
 		}
 		catch (Exception e)
 		{
