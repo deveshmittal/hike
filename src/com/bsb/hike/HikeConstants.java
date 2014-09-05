@@ -46,6 +46,8 @@ public class HikeConstants
 	public static final String DATA = "d";
 
 	public static final String TO = "to";
+	
+	public static final String VOIP_PAYLOAD = "vpl";
 
 	public static final String FROM = "f";
 
@@ -1730,6 +1732,14 @@ public class HikeConstants
 		public static final String REMOVE_PIC = "icr";
 		
 		public static final String MULTIPLE_FORWARD = "mm";
+
+		public static final String VOIP_HANDSHAKE = "vhs";
+		
+		public static final String VOIP_CALL = "vcall";
+		
+		public static final String VOIP_END_CALL = "vendcall";
+		
+		public static final String VOIP_CALL_DECLINE = "vdecline";
 
 	}
 

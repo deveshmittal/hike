@@ -361,6 +361,12 @@ public class HikePubSub implements Runnable
 	public static final String BULK_MESSAGE_NOTIFICATION = "bulkMessageNotification";
 	
 	public static final String UPDATE_PIN_METADATA = "pinUpdated";
+	
+	public static final String VOIP_HANDSHAKE = "VoIPHandshake";
+	
+	public static final String VOIP_INIT = "VoIPInit";
+	
+	public static final String VOIP_HANDSHAKE_SENT = "VoIPsent";
 
 	public static final String HIKE_SHARED_FILE_DELETED = "hikeSharedFileDeleted";
 

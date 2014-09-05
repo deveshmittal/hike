@@ -17,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -27,6 +28,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -507,6 +509,12 @@ public class MqttMessagesManager
 		}
 	}
 
+	
+	private void saveVOIPHandshake(JSONObject jsonObj)
+	{
+		this.pubSub.publish(HikePubSub.VOIP_HANDSHAKE, jsonObj);
+	}
+	
 	/**
 	 * This function pre-process on message of type "m" like make convMessage object , set metadata and timestamp
 	 * 
@@ -1909,6 +1917,7 @@ public class MqttMessagesManager
 	public void saveMqttMessage(JSONObject jsonObj) throws JSONException
 	{
 		String type = jsonObj.optString(HikeConstants.TYPE);
+		Log.d("VOIP", type+" received");
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{
 			saveIcon(jsonObj);
@@ -1962,7 +1971,21 @@ public class MqttMessagesManager
 		// from
 		// server
 		{
-			if (isBulkMessage)
+
+			if(jsonObj.has(HikeConstants.SUB_TYPE) ){
+				String subtype = jsonObj.getString(HikeConstants.SUB_TYPE);  
+				if(HikeConstants.MqttMessageTypes.VOIP_CALL.equals(subtype))
+				{
+					// DONE: Start VOIP APP
+					startVOIP(jsonObj);
+				}
+				else if(HikeConstants.MqttMessageTypes.VOIP_HANDSHAKE.equals(subtype))
+				{
+					//TODO: PASS MESSAGE TO VOIP APP
+					saveVOIPHandshake(jsonObj);
+				}
+			}
+			else if(isBulkMessage)
 			{
 				saveMessageBulk(jsonObj);
 			}
@@ -2106,6 +2129,30 @@ public class MqttMessagesManager
 		else if (HikeConstants.MqttMessageTypes.BULK_MESSAGE.equals(type))
 		{
 			saveBulkMessage(jsonObj);
+		}
+		
+	}
+	
+	private void startVOIP( JSONObject jsonObj )
+	{
+		try {
+			String callerID = jsonObj.getString(HikeConstants.FROM);
+//			Context context = .getApplicationContext();
+			Intent intent = new Intent(HikeService.getContext(),com.bsb.hike.VOIP.RTCActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			intent.putExtra("callerID", callerID);
+			final Intent i = intent;
+			HikeService.runOnUiThread(new Runnable(){
+				Intent voipIntent = i;
+				public void run()
+				{
+					HikeService.getContext().startActivity(voipIntent);
+				}
+			});
+			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

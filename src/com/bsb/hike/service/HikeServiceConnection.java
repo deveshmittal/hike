@@ -130,7 +130,7 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 			/*
 			 * if this is a message, then grab the messageId out of the json object so we can get confirmation of success/failure
 			 */
-			if (HikeConstants.MqttMessageTypes.MESSAGE.equals(o.optString(HikeConstants.TYPE)) || (HikeConstants.MqttMessageTypes.INVITE.equals(o.optString(HikeConstants.TYPE))))
+			if ((HikeConstants.MqttMessageTypes.MESSAGE.equals(o.optString(HikeConstants.TYPE)) || (HikeConstants.MqttMessageTypes.INVITE.equals(o.optString(HikeConstants.TYPE)))) /*&& (!( (HikeConstants.MqttMessageTypes.VOIP_HANDSHAKE.equals(o.optString(HikeConstants.SUB_TYPE))) || (HikeConstants.MqttMessageTypes.VOIP_CALL.equals(o.optString(HikeConstants.SUB_TYPE)))))*/)
 			{
 				JSONObject json = o.optJSONObject(HikeConstants.DATA);
 				long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));

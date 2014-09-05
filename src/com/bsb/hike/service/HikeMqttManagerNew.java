@@ -362,7 +362,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		context.registerReceiver(this, filter);
 		LocalBroadcastManager.getInstance(context).registerReceiver(this, filter);
 		setServerUris();
-		// mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
+		 mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
 	}
 
 	private boolean isNetworkAvailable()
@@ -1403,7 +1403,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				@Override
 				public void run()
 				{
-					testUj();
+					testVoIP();
 				}
 			});
 			t.setName("Test Thread");
@@ -1467,6 +1467,39 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 		}
 
+		private void testVoIP()
+		{
+			String msMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+			String msisdn = "+919582974797";
+			String data = "{ \"f\": "+msisdn+",\"t\": \"vcall\",\"d\":{\"ts\": "+System.currentTimeMillis()+"}}";
+			Message msg = Message.obtain();
+			msg.what = 12341;
+			Bundle bundle = new Bundle();
+			bundle.putString(HikeConstants.MESSAGE, data);
+			msg.setData(bundle);
+			msg.replyTo = mMessenger;
+			try
+			{
+				mMessenger.send(msg);
+				Thread.sleep(20);
+			}
+			catch (RemoteException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch (InterruptedException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch (Exception e)
+			{
+
+			}
+			
+		}
+		
 		private void testMsg()
 		{
 			int count = 0;

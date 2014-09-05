@@ -157,12 +157,16 @@ public class HikeService extends Service
 	private ContactListChangeIntentReceiver contactsReceived;
 
 	private Handler mContactsChangedHandler;
+	
+	private static Handler voipHandler;
 
 	private ContactsChanged mContactsChanged;
 
 	private Looper mContactHandlerLooper;
 
 	private StickerManager sm;
+	
+	private static Context context;
 
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
@@ -215,6 +219,7 @@ public class HikeService extends Service
 		mContactHandlerLooper = contactHandlerThread.getLooper();
 		mContactsChangedHandler = new Handler(mContactHandlerLooper);
 		mContactsChanged = new ContactsChanged(this);
+		voipHandler = new Handler();
 
 		/*
 		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of
@@ -274,6 +279,7 @@ public class HikeService extends Service
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
 		setupStickers();
+		context = getApplicationContext();
 	}
 
 	private void setupStickers()
@@ -958,6 +964,16 @@ public class HikeService extends Service
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
 			Utils.executeHttpTask(hikeHTTPTask, profilePicRequest);
 		}
+	}
+	
+	public static Context getContext()
+	{
+		return context;
+	}
+
+	public static void runOnUiThread(Runnable runnable) {
+		voipHandler.post(runnable);
+		
 	}
 
 }
