@@ -28,6 +28,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -418,7 +419,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			if(!groupProfile)
 			{
 				LinearLayout.LayoutParams ll = (LayoutParams) viewHolder.sharedFiles.getLayoutParams();
-				ll.topMargin = 0;
+				if(!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactInfo.getMsisdn()))
+					ll.topMargin = 0;
 				viewHolder.sharedFiles.setLayoutParams(ll);   //Hack to get the top margin right in one to one profile case
 			}
 			

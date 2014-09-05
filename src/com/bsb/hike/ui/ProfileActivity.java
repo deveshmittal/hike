@@ -700,8 +700,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			fav_layout.setVisibility(View.GONE);
 			req_layout.setVisibility(View.GONE);
 			dual_layout.setVisibility(View.GONE);
-			
+			if(!HikeMessengerApp.hikeBotNamesMap.containsKey(contactInfo.getMsisdn()))  //The HikeBot's numbers wont be shown
+			{
 			if (showContactsUpdates(contactInfo)) // Favourite case
+			
 			{
 				addContactStatusInHeaderView(subText, statusMood);
 				// Request_Received --->> Show add/not now screen.
@@ -778,7 +780,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
 				}
 			}
-
+			}
+			else
+			{
+				subText.setVisibility(View.GONE);
+			}
+			
 			break;
 		case GROUP_INFO:
 			if(headerView == null)
