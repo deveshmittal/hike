@@ -317,7 +317,7 @@ public class MqttMessagesManager
 
 		boolean groupRevived = false;
 
-		if (!this.convDb.isGroupAlive(groupConversation.getMsisdn()))
+		if (!ContactManager.getInstance().isGroupAlive(groupConversation.getMsisdn()))
 		{
 
 			Logger.d(getClass().getSimpleName(), "Group is not alive");

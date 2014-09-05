@@ -1,5 +1,6 @@
 package com.bsb.hike.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.bsb.hike.utils.PairModified;
@@ -150,18 +151,29 @@ public abstract class ProfileItem
 	}
 	public static class ProfileSharedMedia extends ProfileItem
 	{
-		public ProfileSharedMedia(int itemId, int sharedMediaCount, int maxMedia ,List<HikeSharedFile> sharedFilesList)
+		public ProfileSharedMedia(int itemId, int sharedMediaCount, int maxMedia)
 		{
 			super(itemId,null);
-			this.sharedFilesList = sharedFilesList;
+			this.sharedFilesList = new ArrayList<HikeSharedFile>();
 			this.sharedMediaCount = sharedMediaCount;
 			this.maxMedia = maxMedia;
 		}
 		
-		public List<HikeSharedFile> getSharedFileList()
+		public List<HikeSharedFile> getSharedFilesList()
 		{
 			return sharedFilesList;
 		}
+
+		public void setSharedFilesList(List<HikeSharedFile> sharedFilesList)
+		{
+			this.sharedFilesList = sharedFilesList;
+		}
+		
+		public void addSharedMediaFiles(List<HikeSharedFile> sharedFilesList)
+		{
+			this.sharedFilesList.addAll(sharedFilesList);
+		}
+
 		public int getSharedMediaCount()
 		{
 			return sharedMediaCount;
@@ -175,6 +187,11 @@ public abstract class ProfileItem
 		public void setSharedMediaCount(int newCount)
 		{
 			this.sharedMediaCount = newCount;
+		}
+		
+		public void clearMediaList()
+		{
+			this.sharedFilesList.clear();
 		}
 
 		private List<HikeSharedFile> sharedFilesList;

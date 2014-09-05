@@ -400,6 +400,25 @@ public class HikeNotification
 			else
 				message = messageString;
 
+			// if big picture exists in the new message, check notification stack if we are showing clubbed messages
+			// if we are, discard big picture since a message for it "..sent you a photo" already exists in stack
+			if (!hikeNotifMsgStack.isEmpty())
+			{
+				if (!hikeNotifMsgStack.isFromSingleMsisdn() || hikeNotifMsgStack.getSize() > 1)
+				{
+					return;
+				}
+				else
+				{
+					if (hikeNotifMsgStack.getSize() == 1)
+					{
+						// The only message added was the one for which we now have a big picture
+						// Hence remove it and proceed showing the big pic notification
+						hikeNotifMsgStack.resetMsgStack();
+					}
+				}
+			}
+
 			// if notification message stack is empty, add to it and proceed with single notification display
 			// else add to stack and notify clubbed messages
 			if (hikeNotifMsgStack.isEmpty())
@@ -495,22 +514,7 @@ public class HikeNotification
 			{
 				return;
 			}
-			else if (convMessage.isFileTransferMessage())
-			{
-				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-				NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
-				SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE
-						&& ((networkType == NetworkType.WIFI && appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_IMAGE_PREF, true)) || (networkType != NetworkType.WIFI && appPrefs
-								.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_IMAGE_PREF, true))))
-				{
-					// image download already in progress, return
-					hikeNotifMsgStack.resetMsgStack();
-					return;
-				}
-
-			}
-			else if (convMessage.isStickerMessage())
+			else if (convMessage.isFileTransferMessage() || convMessage.isStickerMessage())
 			{
 				Bitmap bigPictureImage = ToastListener.returnBigPicture(convMessage, context);
 				if (bigPictureImage != null)
@@ -721,12 +725,8 @@ public class HikeNotification
 		}
 		else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
 		{
-			// message = context.getString(R.string.status_profile_pic_notification, key);
-			// text = key + " " + message;
-
-			// If it is a profile pic change, return since we can display big picture notification using notify
-			// BigPictureStatusNotification() triggered by HikePubSub.PUSH_AVATAR_DOWNLOADED
-			return;
+			message = context.getString(R.string.status_profile_pic_notification, key);
+			text = key + " " + message;
 		}
 		else
 		{
@@ -771,6 +771,25 @@ public class HikeNotification
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn.toString());
 
+		// if big picture exists in the new message, check notification stack if we are showing clubbed messages
+		// if we are, discard big picture since a message for it "..sent you a photo" already exists in stack
+		if (!hikeNotifMsgStack.isEmpty())
+		{
+			if (!hikeNotifMsgStack.isFromSingleMsisdn() || hikeNotifMsgStack.getSize() > 1)
+			{
+				return;
+			}
+			else
+			{
+				if (hikeNotifMsgStack.getSize() == 1)
+				{
+					// The only message added was the one for which we now have a big picture
+					// Hence remove it and proceed showing the big pic notification
+					hikeNotifMsgStack.resetMsgStack();
+				}
+			}
+		}
+		
 		// if notification message stack is empty, add to it and proceed with single notification display
 		// else add to stack and notify clubbed messages
 		if (hikeNotifMsgStack.isEmpty())

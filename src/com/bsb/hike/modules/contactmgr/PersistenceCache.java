@@ -413,7 +413,7 @@ class PersistenceCache extends ContactsCache
 		List<String> oneToOneMsisdns = allmsisdns.first;
 		Map<String, List<String>> groupLastMsisdnsMap = allmsisdns.second;
 
-		Map<String, String> groupNamesMap = HikeConversationsDatabase.getInstance().getGroupNames();
+		Map<String, Pair<String, Boolean>> groupNamesMap = HikeConversationsDatabase.getInstance().getGroupNamesAndAliveStatus();
 
 		HashSet<String> grouplastMsisdns = new HashSet<String>();
 
@@ -421,10 +421,11 @@ class PersistenceCache extends ContactsCache
 		 * groupPersistence is now populated using groupNamesMap(for group name) and groupLastMsisdnsMap(msisdns in last message of a group) , these are needed so that if last
 		 * message in a group changes then previous contact Info objects can be removed from persistence cache otherwise after some time all contacts will be loaded in cache
 		 */
-		for (Entry<String, String> mapEntry : groupNamesMap.entrySet())
+		for (Entry<String, Pair<String, Boolean>> mapEntry : groupNamesMap.entrySet())
 		{
 			String grpId = mapEntry.getKey();
-			String name = mapEntry.getValue();
+			String name = mapEntry.getValue().first;
+			boolean groupAlive = mapEntry.getValue().second;
 			List<String> lastMsisdns = groupLastMsisdnsMap.get(grpId);
 			ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdnsConcurrentLinkedQueue = new ConcurrentLinkedQueue<PairModified<String, String>>();
 			if (null != lastMsisdns)
@@ -436,7 +437,7 @@ class PersistenceCache extends ContactsCache
 					// name for unsaved contact will be set later because at this point we don't know which msisdns are saved and which are not.
 				}
 			}
-			GroupDetails grpDetails = new GroupDetails(name, lastMsisdnsConcurrentLinkedQueue);
+			GroupDetails grpDetails = new GroupDetails(name, groupAlive, lastMsisdnsConcurrentLinkedQueue);
 			groupPersistence.put(grpId, grpDetails);
 		}
 
@@ -740,19 +741,53 @@ class PersistenceCache extends ContactsCache
 		}
 	}
 
+	boolean isGroupAlive(String groupId)
+	{
+		readLock.lock();
+		try
+		{
+			GroupDetails grpDetails = groupPersistence.get(groupId);
+			if (null == grpDetails)
+				return false;
+			return grpDetails.isGroupAlive();
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
+
+	void setGroupAlive(String groupId, boolean alive)
+	{
+		writeLock.lock();
+		try
+		{
+			GroupDetails grpDetails = groupPersistence.get(groupId);
+			if (null != grpDetails)
+			{
+				grpDetails.setIsGroupAlive(alive);
+			}
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+
+	}
+
 	/**
 	 * Inserts the group with group id and groupName in the {@link #groupPersistence}
 	 * 
 	 * @param grpId
 	 * @param groupName
 	 */
-	public void insertGroup(String grpId, String groupName)
+	public void insertGroup(String grpId, String groupName, boolean alive)
 	{
 		writeLock.lock();
 		try
 		{
 			ConcurrentLinkedQueue<PairModified<String, String>> clq = new ConcurrentLinkedQueue<PairModified<String, String>>();
-			GroupDetails grpDetails = new GroupDetails(groupName, clq);
+			GroupDetails grpDetails = new GroupDetails(groupName, alive, clq);
 			groupPersistence.put(grpId, grpDetails);
 		}
 		finally

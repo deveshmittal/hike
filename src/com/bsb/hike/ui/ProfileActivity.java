@@ -146,12 +146,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.PARTICIPANT_JOINED_GROUP,
 			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
-			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT };
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD };
 
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST,
 			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
-			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.CONTACT_DELETED };
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.CONTACT_DELETED, HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD };
 
 	private String[] profilePubSubListeners = { HikePubSub.USER_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.STATUS_MESSAGE_RECEIVED,
 			HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
@@ -227,8 +227,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private static final int MULTIPLIER = 3;  //multiplication factor for 3X loading media items initially
 	
-	private List<HikeSharedFile> sharedMedia;
-	
 	private int maxMediaToShow = 0;
 
 	private View headerView;
@@ -237,6 +235,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public static final String PROFILE_ROUND_SUFFIX = "round";
 
+	private static final String TAG = "Profile_Activity";
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
 	public Object onRetainCustomNonConfigurationInstance()
@@ -301,7 +300,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+		requestWindowFeature(com.actionbarsherlock.view.Window.FEATURE_ACTION_BAR_OVERLAY);
 
 		if (Utils.requireAuth(this))
 		{
@@ -600,7 +599,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			onEditProfileClicked(null);
 			break;
 		case R.id.add_people:
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ADD_MEMBER_TOP);
 			openAddToGroup();
 			break;
 		}
@@ -868,11 +866,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		// TODO Auto-generated method stub
 		
+		sharedMediaItem = new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, sharedMediaCount, maxMediaToShow);
 		if(sharedMediaCount>0)
 		{	
 			addSharedMedia();
 		}
-		sharedMediaItem = new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, sharedMediaCount, maxMediaToShow,sharedMedia);
 		profileItems.add(sharedMediaItem);
 	}
 
@@ -1004,12 +1002,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		
 		HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 		if(sharedMediaCount < maxMediaToShow )
-		{	
-			sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, sharedMediaCount, -1, true);
-			return;
-		}
-		sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, maxMediaToShow * MULTIPLIER , -1, true);
-		return;
+			sharedMediaItem.addSharedMediaFiles((List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, sharedMediaCount, -1, true));
+
+		else
+			sharedMediaItem.addSharedMediaFiles((List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, maxMediaToShow * MULTIPLIER , -1, true));
 	}
 
 	private void setupEditScreen()
@@ -1744,7 +1740,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		else
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_TO_HIKE_VIA_PROFILE);
 			inviteToHike(contactInfo);
 		}
 	}
@@ -1793,7 +1788,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					HikePubSub hikePubSub = HikeMessengerApp.getPubSub();
 					hikePubSub.publish(HikePubSub.MQTT_PUBLISH, groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
 					hikePubSub.publish(HikePubSub.GROUP_LEFT, groupConversation.getMsisdn());
-					Utils.sendUILogEvent(HikeConstants.LogEvent.DELETE_GROUP_LEAVE_GROUP_VIA_PROFILE);
 					Intent intent = new Intent(ProfileActivity.this, HomeActivity.class);
 					intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mLocalMSISDN);
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -1949,7 +1943,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public void onGroupNameEditClick(View v)
 	{
-		Utils.sendUILogEvent(HikeConstants.LogEvent.EDIT_GROUP_NAME_PENCIL);
 		View parent = (View) v.getParent();
 		setGroupNameFields(parent);
 	}
@@ -2329,38 +2322,41 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		else if (HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD.equals(type))
 		{
-			if(!(object instanceof ArrayList<?>))
+			if (!(object instanceof ArrayList<?>))
 			{
+				Logger.d(TAG, "Object not an instance of ArrayList in PubSub Event : Remove message from Chat Thread");
 				return;
 			}
-			
+
 			final ArrayList<Long> msgIds = (ArrayList<Long>) object;
 			runOnUiThread(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					Iterator<HikeSharedFile> it = sharedMedia.iterator();
-						while (it.hasNext())
-						{
-							HikeSharedFile file = it.next();
-							if(msgIds.contains(file.getMsgId()))
-							{
-								it.remove();
-							}
-						}
-						
-					sharedMediaItem.setSharedMediaCount(sharedMediaItem.getSharedMediaCount() - msgIds.size());
-					sharedMediaCount = sharedMediaItem.getSharedMediaCount();
-					if(sharedMedia.size() < maxMediaToShow)			//If somehow all the elements which were laoded initially are deleted, we need to fetch more stuff from db.
+					Iterator<HikeSharedFile> it = sharedMediaItem.getSharedFilesList().iterator();
+					while (it.hasNext())
 					{
-						sharedMedia = null;
-						if(profileType == ProfileType.CONTACT_INFO)
-							setupContactProfileList();
-						else
-							setupGroupProfileList();
+						HikeSharedFile file = it.next();
+						if (msgIds.contains(file.getMsgId()))
+						{
+							it.remove();
+						}
 					}
-					
+					sharedMediaCount -= msgIds.size();
+					sharedMediaItem.setSharedMediaCount(sharedMediaCount);
+					if (sharedMediaCount == 0)
+					{
+						sharedMediaItem.clearMediaList();
+					}
+
+					if (sharedMediaItem.getSharedFilesList() != null && sharedMediaItem.getSharedFilesList().size() < maxMediaToShow
+							&& sharedMediaCount != sharedMediaItem.getSharedFilesList().size()) // If somehow all the elements which were laoded initially are deleted, we need to
+																								// fetch more stuff from db.
+					{
+						addSharedMedia();
+					}
+
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
@@ -2653,12 +2649,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		
 		if (groupParticipant == null)
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ADD_MEMBER_BOTTOM);
 			openAddToGroup();  //Add to member bottom
 		}
 		else if(groupParticipant!=null)
 		{	
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ACCESS_USER_PROFILE_VIA_GROUP_PROFILE);
 			ContactInfo contactInfo = groupParticipant.getContactInfo();
 
 			if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
@@ -2723,7 +2717,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		if(groupConversation!=null)
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.SHARED_PINS_VIA_PROFILE);
 			Intent intent = new Intent();
 			intent.setClass(ProfileActivity.this, PinHistoryActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -2743,13 +2736,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public void messageBtnClicked(View v)
 	{
-		Utils.sendUILogEvent(HikeConstants.LogEvent.COMPOSE_VIA_PROFILE);
 		openChatThread(contactInfo);
 	}
 	
 	public void callBtnClicked(View v)
 	{
-		Utils.sendUILogEvent(HikeConstants.LogEvent.CALL_VIA_PROFILE);
 		Utils.onCallClicked(ProfileActivity.this, mLocalMSISDN);
 	}
 	
