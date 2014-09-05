@@ -32,7 +32,7 @@
 
         </FrameLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/divider_view"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -45,6 +45,7 @@
                 android:layout_width="1.5dp"
                 android:layout_height="32dp"
                 android:layout_centerVertical="true"
+                android:layout_gravity="center"
                 android:background="#d9dbdc" />
 
             <ImageView
@@ -58,7 +59,7 @@
                 android:background="@drawable/group_edit_selector"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_edit" />
-        </RelativeLayout>
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/name_layout"
