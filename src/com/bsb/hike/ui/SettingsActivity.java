@@ -286,6 +286,9 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			IntentManager.openSettingAccount(this);
 			break;
 		case 5:
+			IntentManager.openSettingPrivacy(this);
+			break;
+		case 6:
 			HikeConversationsDatabase.getInstance().updateToNewSharedMediaTable();
 			IntentManager.openSettingHelp(this);
 			break;
