@@ -451,6 +451,28 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
+	 * Returns true if group is alive otherwise false
+	 * 
+	 * @param groupId
+	 * @return
+	 */
+	public boolean isGroupAlive(String groupId)
+	{
+		return persistenceCache.isGroupAlive(groupId);
+	}
+
+	/**
+	 * Sets the group alive status in {@link #persistenceCache}
+	 * 
+	 * @param groupId
+	 * @param alive
+	 */
+	public void setGroupAlive(String groupId, boolean alive)
+	{
+		persistenceCache.setGroupAlive(groupId, alive);
+	}
+
+	/**
 	 * This method returns a list {@link ContactInfo} objects of a particular favorite type and if parameter <code>onHike</code> is one then these are hike contacts otherwise non
 	 * hike contacts. This list should not contain contact whose msisdn is same as parameter <code>myMsisdn</code>. Unsaved contacts are also included in these.
 	 * 
@@ -696,14 +718,27 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * This method inserts a group with <code>grpId</code> and <code>groupName</code> in the {@link PersistenceCache}. Should be called when new group is created.
+	 * This method inserts a group with <code>grpId</code> and <code>groupName</code> in the {@link PersistenceCache}. Should be called when new group is created. Group alive
+	 * status is set as true in this method
 	 * 
 	 * @param grpId
 	 * @param groupName
 	 */
 	public void insertGroup(String grpId, String groupName)
 	{
-		persistenceCache.insertGroup(grpId, groupName);
+		persistenceCache.insertGroup(grpId, groupName, true);
+	}
+
+	/**
+	 * This method inserts a group with <code>grpId</code> and <code>groupName</code> in the {@link PersistenceCache}. Group alive status is passed as a parameter
+	 * 
+	 * @param grpId
+	 * @param groupName
+	 * @param alive
+	 */
+	public void insertGroup(String grpId, String groupName, boolean alive)
+	{
+		persistenceCache.insertGroup(grpId, groupName, alive);
 	}
 
 	/**
@@ -1064,14 +1099,15 @@ public class ContactManager implements ITransientCache
 	 * @param grpIds
 	 * @return
 	 */
-	public Map<String, String> getGroupNames(List<String> grpIds)
+	public Map<String, Pair<String, Boolean>> getGroupNamesAndAliveStatus(List<String> grpIds)
 	{
-		Map<String, String> groupNames = HikeConversationsDatabase.getInstance().getGroupNames(grpIds);
-		for (Entry<String, String> mapEntry : groupNames.entrySet())
+		Map<String, Pair<String, Boolean>> groupNames = HikeConversationsDatabase.getInstance().getGroupNamesAndAliveStatus(grpIds);
+		for (Entry<String, Pair<String, Boolean>> mapEntry : groupNames.entrySet())
 		{
 			String groupId = mapEntry.getKey();
-			String groupName = mapEntry.getValue();
-			persistenceCache.insertGroup(groupId, groupName);
+			String groupName = mapEntry.getValue().first;
+			boolean groupAlive = mapEntry.getValue().second;
+			persistenceCache.insertGroup(groupId, groupName, groupAlive);
 		}
 		return groupNames;
 	}
@@ -1203,6 +1239,7 @@ public class ContactManager implements ITransientCache
 	{
 		transientCache.removeGroup(groupId);
 	}
+
 	/**
 	 * Sets the group name in persistence cache , should be called when group name is changed
 	 * 
