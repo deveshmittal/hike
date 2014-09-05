@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.DbException;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -1338,6 +1339,14 @@ public class ContactManager implements ITransientCache
 			{
 				List<ContactInfo> contacts = mapEntry.getValue();
 				contactsToDelete.addAll(contacts);
+				// Update conversation fragement for deleted ids
+				for (ContactInfo c : contacts)
+				{
+					c.setName(null);
+					c.setId(c.getMsisdn());
+					HikeMessengerApp.getLruCache().deleteIconForMSISDN(c.getMsisdn());
+					HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_DELETED, c);
+				}
 			}
 
 			deleteContacts(contactsToDelete);

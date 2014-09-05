@@ -150,11 +150,12 @@ public abstract class ProfileItem
 	}
 	public static class ProfileSharedMedia extends ProfileItem
 	{
-		public ProfileSharedMedia(int itemId, int sharedMediaCount,List<HikeSharedFile> sharedFilesList)
+		public ProfileSharedMedia(int itemId, int sharedMediaCount, int maxMedia ,List<HikeSharedFile> sharedFilesList)
 		{
 			super(itemId,null);
 			this.sharedFilesList = sharedFilesList;
 			this.sharedMediaCount = sharedMediaCount;
+			this.maxMedia = maxMedia;
 		}
 		
 		public List<HikeSharedFile> getSharedFileList()
@@ -165,8 +166,20 @@ public abstract class ProfileItem
 		{
 			return sharedMediaCount;
 		}
+		
+		public int getMaxMediaToShow()
+		{
+			return maxMedia;
+		}
+
+		public void setSharedMediaCount(int newCount)
+		{
+			this.sharedMediaCount = newCount;
+		}
+
 		private List<HikeSharedFile> sharedFilesList;
 		private int sharedMediaCount;
+		private int maxMedia;
 	}
 	
 	public static class ProfileSharedContent extends ProfileItem

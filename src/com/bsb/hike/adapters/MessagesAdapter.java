@@ -2941,16 +2941,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			messageInfo.setVisibility(View.VISIBLE);
 			messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
 			setReadByForGroup(message, messageInfo);
-			updateViewWindowForReadBy(message);
-		}
-	}
-
-	private void updateViewWindowForReadBy(ConvMessage message)
-	{
-		ConvMessage lastMessage = getItem(getCount() - 1);
-		if (lastMessage.getMsgID() == message.getMsgID())
-		{
-			chatThread.updateViewWindowForReadBy();
 		}
 	}
 
@@ -3222,9 +3212,17 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			return;
 		case IMAGE:
 		case VIDEO:
-			ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
-			hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn() , convMessage.getTimestamp(), convMessage.getGroupParticipantMsisdn()));
-			PhotoViewerFragment.openPhoto(R.id.chatThreadParentLayout, context, hsf, true, conversation);
+			if(hikeFile.exactFilePathFileExists())
+			{
+				ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
+				hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn(), convMessage.getTimestamp(), convMessage
+						.getGroupParticipantMsisdn()));
+				PhotoViewerFragment.openPhoto(R.id.chatThreadParentLayout, context, hsf, true, conversation);
+			}
+			else
+			{
+				Toast.makeText(context, R.string.unable_to_open, Toast.LENGTH_SHORT).show();
+			}
 			return;
 		
 		
@@ -4134,7 +4132,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				chatThread.shouldRunTimerForHikeOfflineTip = true;
 				chatThread.hideHikeToOfflineTip();
 				updateFirstPendingConvMessage();
-				chatThread.updateLastSeen();
 			}
 		});
 	}
@@ -4255,12 +4252,37 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	public void setIsListFlinging(boolean isFling)
 	{
+		Logger.d("scroll", "Message Adapter set list flinging " + isFling);
 		boolean notify = isFling != isListFlinging;
-
+		Logger.d("scroll", "Message Adapter notify " + notify);
 		isListFlinging = isFling;
 		
 		if(notify && !isListFlinging){
 			notifyDataSetChanged();
 		}
+	}
+	
+	public boolean containsMediaMessage(ArrayList<Long> msgIds)
+	{
+		/*
+		 * Iterating in reverse order since its more likely the user wants to know about latest messages.
+		 */
+		int lastIndex = msgIds.size() - 1;
+		for (int i = lastIndex; i >= 0; i--)
+		{
+			long msgId = msgIds.get(i);
+			for (ConvMessage convMessage : convMessages)
+			{
+				if (convMessage.getMsgID() == msgId && convMessage.isFileTransferMessage())
+				{
+					HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+					if(hikeFile.getHikeFileType() == HikeFileType.IMAGE || hikeFile.getHikeFileType() == HikeFileType.VIDEO)
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 }

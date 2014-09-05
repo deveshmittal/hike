@@ -238,6 +238,8 @@ public class HikeConstants
 	public static final String RESOLUTION_ID = "resId";
 
 	public static final String NUMBER_OF_STICKERS = "nos";
+	
+	public static final String TOTAL_STICKERS = "totalStickers";
 
 	public static final String DATA_2 = "data";
 
@@ -923,7 +925,12 @@ public class HikeConstants
 	public static final String PIN_DISPLAYED = "displayed";
 	
 	public static final int MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY = 51;
-
+	
+	
+	public static final String TOTAL_SELECTIONS = "t";
+	
+	public static final String SUCCESSFUL_SELECTIONS = "s";
+	
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
@@ -1323,6 +1330,32 @@ public class HikeConstants
 		public static final String NOTIFICATION_SCREEN = "profSnotyS";
 
 		public static final String PRIVACY_SCREEN = "profSprivS";
+		
+		public static final String MEDIA_THUMBNAIL_VIA_PROFILE = "profSthumb";
+		
+		public static final String OPEN_GALLERY_VIA_PROFILE = "profSopenGallery";
+		
+		public static final String SHARED_FILES_VIA_PROFILE = "profSsharedFiles";
+		
+		public static final String DELETE_GROUP_LEAVE_GROUP_VIA_PROFILE = "profSdeleteAndExitGroup";
+		
+		public static final String ADD_MEMBER_BOTTOM = "profSAddMemberBotttom";
+		
+		public static final String ADD_MEMBER_TOP = "profSAddMemberTop";
+		
+		public static final String EDIT_GROUP_NAME_PENCIL = "profSEditNamePencil";
+		
+		public static final String SHARED_PINS_VIA_PROFILE = "profSsharedPins";
+		
+		public static final String ACCESS_USER_PROFILE_VIA_GROUP_PROFILE = "profSUserClicked";
+		
+		public static final String COMPOSE_VIA_PROFILE = "profScompose";
+		
+		public static final String CALL_VIA_PROFILE = "profScall";
+		
+		public static final String ADD_TO_FAVOURITE = "profSAddToFav";
+		
+		public static final String INVITE_TO_HIKE_VIA_PROFILE = "profSinvite";
 
 		public static final String SET_PROFILE_PIC_GALLERY = "profSpicGallery";
 
@@ -1540,7 +1573,16 @@ public class HikeConstants
 		public static final String SETTINGS_NOTIFICATION_NUJ_OFF = "settingsSNotifNUJDisabled";
 		
 		public static final String SETTINGS_NOTIFICATION_H2O_OFF = "settingsSNotifH2ODisabled";
+		
+		/*
+		 * HikeSharedFiles Activity Screen = sharedMediaS<event>
+		 * */
+		public static final String OPEN_THUMBNAIL_VIA_GALLERY = "sharedMediaSthumbnailClick";
 
+		/*
+		 * Image selection from gallery event.
+		 */
+		public static final String GALLERY_SELECTION = "gallery";
 	}
 
 	public static final class MqttMessageTypes

@@ -125,7 +125,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 
 		msisdn = data.getString(HikeConstants.Extras.MSISDN);
 		isGroup = data.getBoolean(HikeConstants.Extras.IS_GROUP_CONVERSATION, false);
-		conversationName = data.getString(HikeConstants.Extras.CONVERSATION_NAME, null);
+		conversationName = data.getString(HikeConstants.Extras.CONVERSATION_NAME);
 		if(isGroup)
 		{
 			msisdnArray = data.getStringArray(HikeConstants.Extras.PARTICIPANT_MSISDN_ARRAY);
@@ -192,7 +192,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		View backContainer = actionBarView.findViewById(R.id.back);
 
 		TextView title = (TextView) actionBarView.findViewById(R.id.title);
-		title.setText(getString(R.string.shared_media));
+		title.setText(conversationName);
 
 		TextView subText = (TextView) actionBarView.findViewById(R.id.subtext);
 		subText.setVisibility(View.GONE);
@@ -412,8 +412,12 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		}
 		else
 		{
-			PhotoViewerFragment.openPhoto(R.id.parent_layout, HikeSharedFilesActivity.this, (ArrayList<HikeSharedFile>) sharedFilesList, 
-					false, position, msisdn, conversationName, isGroup, msisdnArray, nameArray);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.OPEN_THUMBNAIL_VIA_GALLERY);
+			ArrayList<HikeSharedFile> sharedMediaItems = new ArrayList<HikeSharedFile>(sharedFilesList.size());
+			sharedMediaItems.addAll(sharedFilesList);
+			Collections.reverse(sharedMediaItems);
+			PhotoViewerFragment.openPhoto(R.id.parent_layout, HikeSharedFilesActivity.this, sharedMediaItems, 
+					false, sharedMediaItems.size()-position-1, msisdn, conversationName, isGroup, msisdnArray, nameArray);
 		}
 	}
 
@@ -466,6 +470,11 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 						HikeSharedFile hsf = iterator.next();
 						if(selectedSharedFileItems.contains(hsf.getMsgId()))
 						{
+							// if delete media from phone is checked
+							if(deleteConfirmDialog.isChecked() && hsf.exactFilePathFileExists())
+							{
+								hsf.getFileFromExactFilePath().delete();
+							}
 							iterator.remove();
 						}
 					}
@@ -475,6 +484,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 				}
 			};
 
+			deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
 			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
 			deleteConfirmDialog.setCancelButton(R.string.cancel);
 			deleteConfirmDialog.show();
