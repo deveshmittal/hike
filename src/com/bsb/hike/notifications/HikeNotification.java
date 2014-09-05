@@ -721,12 +721,20 @@ public class HikeNotification
 		}
 		else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
 		{
-			// message = context.getString(R.string.status_profile_pic_notification, key);
-			// text = key + " " + message;
-
+			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 			// If it is a profile pic change, return since we can display big picture notification using notify
 			// BigPictureStatusNotification() triggered by HikePubSub.PUSH_AVATAR_DOWNLOADED
-			return;
+			if ((FileTransferManager.getInstance(context).getNetworkType() == NetworkType.WIFI && !appPrefs.getBoolean(HikeConstants.WF_AUTO_DOWNLOAD_IMAGE_PREF, true))
+					|| (FileTransferManager.getInstance(context).getNetworkType() != NetworkType.WIFI && !appPrefs.getBoolean(HikeConstants.MD_AUTO_DOWNLOAD_IMAGE_PREF, true)))
+			{
+				// Not being downloaded
+				 message = context.getString(R.string.status_profile_pic_notification, key);
+				 text = key + " " + message;
+			}
+			else
+			{
+				return;
+			}
 		}
 		else
 		{
