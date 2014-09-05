@@ -263,7 +263,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.parent =  v.findViewById(R.id.sm_emptystate);
 				viewHolder.sharedFiles = v.findViewById(R.id.shared_media);
 				viewHolder.icon = (ImageView) v.findViewById(R.id.arrow_icon);
-				List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
+				List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFilesList();
 				LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
 				layout.removeAllViews();
 				int smSize = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
@@ -410,7 +410,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			break;
 		case SHARED_MEDIA:
 			viewHolder.text.setText(context.getString(R.string.shared_med));
-			List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
+			List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFilesList();
 			LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
 			int smSizeDb = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
 			int maxMediaToShow = ((ProfileSharedMedia) profileItem).getMaxMediaToShow();
@@ -425,18 +425,21 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			if(sharedMedia!= null && !sharedMedia.isEmpty())
 			{	viewHolder.infoContainer.setVisibility(View.VISIBLE);
 				viewHolder.parent.setVisibility(View.GONE);  //Empty state
-				int i = 0;
 				if(sharedMedia.size() < maxMediaToShow)
 				{
 					loadMediaInProfile(sharedMedia.size(), layout, sharedMedia);
 					
-					while(i< maxMediaToShow)  //Cleaning up previous items if any
+					int i = layout.getChildCount()-1;
+					if(i>smSizeDb)   //Safety check
 					{
-						if(layout.getChildAt(i)!=null)
+						while(i != smSizeDb - 1)  //Cleaning up previous items if any
+						{
+						if(layout.getChildAt(i) != null)
 						{
 							layout.removeViewAt(i);
 						}
-						i++;
+							i--;
+						}
 					}
 					viewHolder.icon.setVisibility(View.GONE);
 				}
