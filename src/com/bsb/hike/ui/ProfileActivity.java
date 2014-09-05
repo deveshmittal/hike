@@ -593,7 +593,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			onEditProfileClicked(null);
 			break;
 		case R.id.add_people:
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ADD_MEMBER_TOP);
 			openAddToGroup();
 			break;
 		}
@@ -1730,7 +1729,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		else
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_TO_HIKE_VIA_PROFILE);
 			inviteToHike(contactInfo);
 		}
 	}
@@ -1779,7 +1777,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					HikePubSub hikePubSub = HikeMessengerApp.getPubSub();
 					hikePubSub.publish(HikePubSub.MQTT_PUBLISH, groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
 					hikePubSub.publish(HikePubSub.GROUP_LEFT, groupConversation.getMsisdn());
-					Utils.sendUILogEvent(HikeConstants.LogEvent.DELETE_GROUP_LEAVE_GROUP_VIA_PROFILE);
 					Intent intent = new Intent(ProfileActivity.this, HomeActivity.class);
 					intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mLocalMSISDN);
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -1935,7 +1932,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public void onGroupNameEditClick(View v)
 	{
-		Utils.sendUILogEvent(HikeConstants.LogEvent.EDIT_GROUP_NAME_PENCIL);
 		View parent = (View) v.getParent();
 		setGroupNameFields(parent);
 	}
@@ -2628,12 +2624,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		
 		if (groupParticipant == null)
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ADD_MEMBER_BOTTOM);
 			openAddToGroup();  //Add to member bottom
 		}
 		else if(groupParticipant!=null)
 		{	
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ACCESS_USER_PROFILE_VIA_GROUP_PROFILE);
 			ContactInfo contactInfo = groupParticipant.getContactInfo();
 
 			if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
@@ -2697,7 +2691,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		if(groupConversation!=null)
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.SHARED_PINS_VIA_PROFILE);
 			Intent intent = new Intent();
 			intent.setClass(ProfileActivity.this, PinHistoryActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -2717,13 +2710,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public void messageBtnClicked(View v)
 	{
-		Utils.sendUILogEvent(HikeConstants.LogEvent.COMPOSE_VIA_PROFILE);
 		openChatThread(contactInfo);
 	}
 	
 	public void callBtnClicked(View v)
 	{
-		Utils.sendUILogEvent(HikeConstants.LogEvent.CALL_VIA_PROFILE);
 		Utils.onCallClicked(ProfileActivity.this, mLocalMSISDN);
 	}
 	

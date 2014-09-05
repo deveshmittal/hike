@@ -1326,26 +1326,8 @@ public class HikeConstants
 		
 		public static final String SHARED_FILES_VIA_PROFILE = "profSsharedFiles";
 		
-		public static final String DELETE_GROUP_LEAVE_GROUP_VIA_PROFILE = "profSdeleteAndExitGroup";
-		
-		public static final String ADD_MEMBER_BOTTOM = "profSAddMemberBotttom";
-		
-		public static final String ADD_MEMBER_TOP = "profSAddMemberTop";
-		
-		public static final String EDIT_GROUP_NAME_PENCIL = "profSEditNamePencil";
-		
-		public static final String SHARED_PINS_VIA_PROFILE = "profSsharedPins";
-		
-		public static final String ACCESS_USER_PROFILE_VIA_GROUP_PROFILE = "profSUserClicked";
-		
-		public static final String COMPOSE_VIA_PROFILE = "profScompose";
-		
-		public static final String CALL_VIA_PROFILE = "profScall";
-		
 		public static final String ADD_TO_FAVOURITE = "profSAddToFav";
 		
-		public static final String INVITE_TO_HIKE_VIA_PROFILE = "profSinvite";
-
 		/*
 		 * Invite screen events <screen> = invS <event> = credB, creDtiPN, creDtiPY
 		 */
