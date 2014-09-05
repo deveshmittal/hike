@@ -225,8 +225,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private static final int MULTIPLIER = 3;  //multiplication factor for 3X loading media items initially
 	
-	private List<HikeSharedFile> sharedMedia;
-	
 	private int maxMediaToShow = 0;
 
 	private View headerView;
@@ -235,6 +233,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private static final String PROFILE_ROUND_SUFFIX = "round";
 
+	private static final String TAG = "Profile_Activity";
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
 	public Object onRetainCustomNonConfigurationInstance()
@@ -862,11 +861,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		// TODO Auto-generated method stub
 		
+		sharedMediaItem = new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, sharedMediaCount, maxMediaToShow);
 		if(sharedMediaCount>0)
 		{	
 			addSharedMedia();
 		}
-		sharedMediaItem = new ProfileItem.ProfileSharedMedia(ProfileItem.SHARED_MEDIA, sharedMediaCount, maxMediaToShow,sharedMedia);
 		profileItems.add(sharedMediaItem);
 	}
 
@@ -998,12 +997,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		
 		HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 		if(sharedMediaCount < maxMediaToShow )
-		{	
-			sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, sharedMediaCount, -1, true);
-			return;
-		}
-		sharedMedia = (List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, maxMediaToShow * MULTIPLIER , -1, true);
-		return;
+			sharedMediaItem.addSharedMediaFiles((List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, sharedMediaCount, -1, true));
+
+		else
+			sharedMediaItem.addSharedMediaFiles((List<HikeSharedFile>) hCDB.getSharedMedia(mLocalMSISDN, maxMediaToShow * MULTIPLIER , -1, true));
 	}
 
 	private void setupEditScreen()
@@ -2317,38 +2314,41 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		else if (HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD.equals(type))
 		{
-			if(!(object instanceof ArrayList<?>))
+			if (!(object instanceof ArrayList<?>))
 			{
+				Logger.d(TAG, "Object not an instance of ArrayList in PubSub Event : Remove message from Chat Thread");
 				return;
 			}
-			
+
 			final ArrayList<Long> msgIds = (ArrayList<Long>) object;
 			runOnUiThread(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					Iterator<HikeSharedFile> it = sharedMedia.iterator();
-						while (it.hasNext())
-						{
-							HikeSharedFile file = it.next();
-							if(msgIds.contains(file.getMsgId()))
-							{
-								it.remove();
-							}
-						}
-						
-					sharedMediaItem.setSharedMediaCount(sharedMediaItem.getSharedMediaCount() - msgIds.size());
-					sharedMediaCount = sharedMediaItem.getSharedMediaCount();
-					if(sharedMedia.size() < maxMediaToShow)			//If somehow all the elements which were laoded initially are deleted, we need to fetch more stuff from db.
+					Iterator<HikeSharedFile> it = sharedMediaItem.getSharedFilesList().iterator();
+					while (it.hasNext())
 					{
-						sharedMedia = null;
-						if(profileType == ProfileType.CONTACT_INFO)
-							setupContactProfileList();
-						else
-							setupGroupProfileList();
+						HikeSharedFile file = it.next();
+						if (msgIds.contains(file.getMsgId()))
+						{
+							it.remove();
+						}
 					}
-					
+					sharedMediaCount -= msgIds.size();
+					sharedMediaItem.setSharedMediaCount(sharedMediaCount);
+					if (sharedMediaCount == 0)
+					{
+						sharedMediaItem.clearMediaList();
+					}
+
+					if (sharedMediaItem.getSharedFilesList() != null && sharedMediaItem.getSharedFilesList().size() < maxMediaToShow
+							&& sharedMediaCount != sharedMediaItem.getSharedFilesList().size()) // If somehow all the elements which were laoded initially are deleted, we need to
+																								// fetch more stuff from db.
+					{
+						addSharedMedia();
+					}
+
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
