@@ -32,6 +32,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.SmileyParser;
@@ -170,6 +171,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		View header = getLayoutInflater().inflate(R.layout.profile_header_other, null);
 		header.findViewById(R.id.remove_fav).setVisibility(View.GONE);
 		ImageView profileImgView = (ImageView)header.findViewById(R.id.profile_image);
+		ImageView statusMood = (ImageView)header.findViewById(R.id.status_mood);
 		TextView nameView = (TextView)header.findViewById(R.id.name);
 		TextView statusView = (TextView)header.findViewById(R.id.subtext);
 		ImageView arrowView = (ImageView)header.findViewById(R.id.view_profile);
@@ -207,6 +209,15 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		
 		if(status != null)
 		{
+			if (status.hasMood()) 
+			{
+				statusMood.setVisibility(View.VISIBLE);
+				statusMood.setImageResource(EmoticonConstants.moodMapping.get(status.getMoodId()));
+			}
+			else
+			{
+				statusMood.setVisibility(View.GONE);
+			}
 			statusView.setText(SmileyParser.getInstance().addSmileySpans(status.getText(), true));			
 		}
 		else
@@ -286,6 +297,9 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			IntentManager.openSettingAccount(this);
 			break;
 		case 5:
+			IntentManager.openSettingPrivacy(this);
+			break;
+		case 6:
 			HikeConversationsDatabase.getInstance().updateToNewSharedMediaTable();
 			IntentManager.openSettingHelp(this);
 			break;
