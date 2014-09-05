@@ -119,8 +119,6 @@ public class HikeNotificationUtils
 	 */
 	public static String getNameForMsisdn(Context context, String argMsisdn)
 	{
-
-		// TODO: Use new contact manager class here instead of querying from db.
 		if (HikeNotification.HIKE_STEALTH_MESSAGE_KEY.equals(argMsisdn))
 		{
 			return context.getString(R.string.app_name);
