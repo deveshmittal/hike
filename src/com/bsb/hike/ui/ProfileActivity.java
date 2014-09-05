@@ -2698,21 +2698,35 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	{
 		if(groupConversation!=null)
 		{
-			Intent intent = new Intent();
-			intent.setClass(ProfileActivity.this, PinHistoryActivity.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.putExtra(HikeConstants.TEXT_PINS, mLocalMSISDN);
-			startActivity(intent);
-			return;
+			if (sharedPinCount == 0)
+			{
+				Toast.makeText(ProfileActivity.this, getResources().getString(R.string.pinHistoryTutorialText), Toast.LENGTH_SHORT).show();
+			}
+			else
+			{
+				Intent intent = new Intent();
+				intent.setClass(ProfileActivity.this, PinHistoryActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				intent.putExtra(HikeConstants.TEXT_PINS, mLocalMSISDN);
+				startActivity(intent);
+				return;
+			}
 		}
 	}
 	
 	public void onSharedFilesClick(View v)
 	{
-		Utils.sendUILogEvent(HikeConstants.LogEvent.SHARED_FILES_VIA_PROFILE);
-		Intent intent = new Intent(this, SharedOtherFilesActivity.class);
-		intent.putExtra(HikeConstants.Extras.MSISDN, mLocalMSISDN);
-		startActivity(intent);
+		if (sharedFileCount == 0)
+		{
+			Toast.makeText(ProfileActivity.this, R.string.no_file_profile, Toast.LENGTH_SHORT).show();
+		}
+		else
+		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.SHARED_FILES_VIA_PROFILE);
+			Intent intent = new Intent(this, SharedOtherFilesActivity.class);
+			intent.putExtra(HikeConstants.Extras.MSISDN, mLocalMSISDN);
+			startActivity(intent);
+		}
 	}
 	
 	public void messageBtnClicked(View v)

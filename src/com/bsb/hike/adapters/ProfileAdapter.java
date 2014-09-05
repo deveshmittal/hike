@@ -296,11 +296,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.text = (TextView) viewHolder.parent.findViewById(R.id.name);
 				viewHolder.subText = (TextView) viewHolder.parent.findViewById(R.id.count);
 				viewHolder.extraInfo = (TextView) v.findViewById(R.id.count_pin);
+				viewHolder.sharedFilesText = (TextView) v.findViewById(R.id.shared_files);
 				viewHolder.groupOrPins = (TextView) v.findViewById(R.id.shared_pins);
 				viewHolder.sharedFilesCount = (TextView) v.findViewById(R.id.count_sf);
 				viewHolder.icon = (ImageView) v.findViewById(R.id.shared_pin_icon);
 				viewHolder.phoneNumView =  v.findViewById(R.id.sm_emptystate);
 				viewHolder.timeStamp = (TextView) v.findViewById(R.id.sm_emptystate_tv);
+				viewHolder.files = v.findViewById(R.id.shared_files_rl);
+				viewHolder.pins = v.findViewById(R.id.shared_pins_rl);
 				break;
 
 			case MEMBERS:
@@ -473,6 +476,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.sharedFilesCount.setText(Integer.toString(((ProfileSharedContent) profileItem).getSharedFilesCount()));
 			viewHolder.extraInfo.setText(Integer.toString(((ProfileSharedContent) profileItem).getSharedPinsCount())); //PinCount
 			int totalfiles = ((ProfileSharedContent) profileItem).getSharedFilesCount() + ((ProfileSharedContent) profileItem).getSharedPinsCount();
+			int filesCount = ((ProfileSharedContent) profileItem).getSharedFilesCount();
+			int pinsCount = ((ProfileSharedContent) profileItem).getSharedPinsCount();
 			viewHolder.subText.setText(Integer.toString(totalfiles)); 
 
 			if(groupProfile)
@@ -490,6 +495,11 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
 					viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_pin_2));
 					viewHolder.phoneNumView.setVisibility(View.GONE);
+					if(filesCount == 0)
+						disableView(viewHolder.sharedFilesText, viewHolder.sharedFilesCount,viewHolder.files);
+					if(pinsCount == 0)
+						disableView(viewHolder.groupOrPins, viewHolder.extraInfo,viewHolder.pins);
+					
 				}
 				else
 				{
@@ -509,13 +519,16 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					viewHolder.sharedFiles.setVisibility(View.VISIBLE);
 					ll = (LayoutParams) viewHolder.sharedFiles.getLayoutParams();
 					ll.topMargin = context.getResources().getDimensionPixelSize(R.dimen.top_margin_shared_content) * -1;  
-					viewHolder.sharedFiles.setLayoutParams(ll);  //Hack for top margin
+					viewHolder.sharedFiles.setLayoutParams(ll);   //Hack for top margin
 					
 					((LinearLayout) viewHolder.sharedFiles).getChildAt(1).setVisibility(View.GONE);
 					((LinearLayout) viewHolder.sharedFiles).findViewById(R.id.shared_content_seprator).setVisibility(View.GONE);
 					viewHolder.groupOrPins.setText(context.getResources().getString(R.string.groups));
 					viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_group_2));
 					viewHolder.phoneNumView.setVisibility(View.GONE);
+					if(filesCount == 0)
+						disableView(viewHolder.sharedFilesText, viewHolder.sharedFilesCount,viewHolder.files);
+						
 				}
 				else
 				{	
@@ -689,6 +702,14 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		return v;
 	}
 
+	private void disableView(TextView text, TextView count, View background)
+	{
+		// TODO Auto-generated method stub
+		text.setTextColor(context.getResources().getColor(R.color.files_disabled));
+		count.setTextColor(context.getResources().getColor(R.color.files_disabled));
+		background.setBackground(null);   //Removing the pressed state
+	}
+
 	private void loadMediaInProfile(int size, LinearLayout layout, List<HikeSharedFile> sharedMedia)
 	{
 		// TODO Auto-generated method stub
@@ -749,6 +770,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		TextView sharedFilesCount;
 		
 		TextView groupOrPins;
+		
+		TextView sharedFilesText;
 
 		ImageView image;
 
@@ -773,6 +796,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		View phoneNumView;
 		
 		View sharedFiles;
+		
+		View files;
+		
+		View pins;
 	}
 
 	public void setProfilePreview(Bitmap preview)
