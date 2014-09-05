@@ -2175,7 +2175,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return grpLastMsisdns;
 	}
 
-	public Map<String, String> getGroupNames(List<String> grpIds)
+	public Map<String, Pair<String, Boolean>> getGroupNamesAndAliveStatus(List<String> grpIds)
 	{
 		StringBuilder groupIds = new StringBuilder("(");
 		for (String grpId : grpIds)
@@ -2191,16 +2191,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor groupInfoCursor = null;
 		try
 		{
-			groupInfoCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.GROUP_ID, DBConstants.GROUP_NAME }, DBConstants.GROUP_ID + "IN" + groupIds, null,
-					null, null, null);
-			Map<String, String> map = new HashMap<String, String>();
+			groupInfoCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.GROUP_ID, DBConstants.GROUP_NAME, DBConstants.GROUP_ALIVE }, DBConstants.GROUP_ID
+					+ "IN" + groupIds, null, null, null, null);
+			Map<String, Pair<String, Boolean>> map = new HashMap<String, Pair<String, Boolean>>();
 			final int groupIdIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ID);
 			final int groupNameIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_NAME);
+			final int groupAliveIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ALIVE);
 			while (groupInfoCursor.moveToNext())
 			{
 				String groupId = groupInfoCursor.getString(groupIdIdx);
 				String groupName = groupInfoCursor.getString(groupNameIdx);
-				map.put(groupId, groupName);
+				boolean groupAlive = groupInfoCursor.getInt(groupAliveIdx) != 0;
+				map.put(groupId, new Pair<String, Boolean>(groupName, groupAlive));
 			}
 			return map;
 		}
@@ -2219,23 +2221,26 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * 
 	 * @return
 	 */
-	public Map<String, String> getGroupNames()
+	public Map<String, Pair<String, Boolean>> getGroupNamesAndAliveStatus()
 	{
 		Cursor groupInfoCursor = null;
 		try
 		{
-			groupInfoCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.GROUP_ID, DBConstants.GROUP_NAME }, null, null, null, null, null);
+			groupInfoCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.GROUP_ID, DBConstants.GROUP_NAME, DBConstants.GROUP_ALIVE }, null, null, null,
+					null, null);
 
-			Map<String, String> map = new HashMap<String, String>();
+			Map<String, Pair<String, Boolean>> map = new HashMap<String, Pair<String, Boolean>>();
 
 			final int groupIdIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ID);
 			final int groupNameIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_NAME);
+			final int groupAliveIdx = groupInfoCursor.getColumnIndex(DBConstants.GROUP_ALIVE);
 
 			while (groupInfoCursor.moveToNext())
 			{
 				String groupId = groupInfoCursor.getString(groupIdIdx);
 				String groupName = groupInfoCursor.getString(groupNameIdx);
-				map.put(groupId, groupName);
+				Boolean groupAlive = groupInfoCursor.getInt(groupAliveIdx) != 0;
+				map.put(groupId, new Pair<String, Boolean>(groupName, groupAlive));
 			}
 			return map;
 		}
@@ -2302,11 +2307,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				if (Utils.isGroupConversation(msisdn))
 				{
 					String name = ContactManager.getInstance().getName(msisdn);
+					boolean groupAlive = ContactManager.getInstance().isGroupAlive(msisdn);
 					if (null == name)
 					{
 						groupIds.add(msisdn);
 					}
-					conv = new GroupConversation(msisdn, name, null, true);
+					conv = new GroupConversation(msisdn, name, null, groupAlive);
 				}
 				else
 				{
@@ -2371,11 +2377,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			if (groupIds.size() > 0)
 			{
-				Map<String, String> groupNames = ContactManager.getInstance().getGroupNames(groupIds);
-				for (Entry<String, String> mapEntry : groupNames.entrySet())
+				Map<String, Pair<String, Boolean>> groupNames = ContactManager.getInstance().getGroupNamesAndAliveStatus(groupIds);
+				for (Entry<String, Pair<String, Boolean>> mapEntry : groupNames.entrySet())
 				{
 					Conversation conv = conversations.get(mapEntry.getKey());
-					conv.setContactName(mapEntry.getValue());
+					conv.setContactName(mapEntry.getValue().first);
+					((GroupConversation) conv).setGroupAlive(mapEntry.getValue().second);
 				}
 			}
 		}
@@ -2977,28 +2984,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public boolean isGroupAlive(String groupId)
-	{
-		Cursor c = null;
-		try
-		{
-			c = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] { DBConstants.GROUP_ALIVE }, DBConstants.GROUP_ID + "=?", new String[] { groupId }, null, null, null);
-
-			if (!c.moveToFirst())
-			{
-				return false;
-			}
-			return c.getInt(c.getColumnIndex(DBConstants.GROUP_ALIVE)) == 1;
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
-	}
-
 	public boolean isGroupMuted(String groupId)
 	{
 		Cursor c = null;
@@ -3140,6 +3125,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			return 0;
 		}
+		ContactManager.getInstance().setGroupAlive(groupId, alive);
 		ContentValues values = new ContentValues(1);
 		values.put(DBConstants.GROUP_ALIVE, alive);
 		return mDb.update(DBConstants.GROUP_INFO_TABLE, values, DBConstants.GROUP_ID + " = ?", new String[] { groupId });
