@@ -1135,7 +1135,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="confirm_delete_pins_header">Delete pins</string>
     <string name="confirm_delete_pins">Are you sure you want to delete these %1$s pins?</string>    
     <string name="shared_media">Shared Media</string>
-    <string name="shared_files">Shared Files</string>
     <string name="add_btn">ADD</string>
     <string name="not_now">NOT NOW</string>
     <string name="on_hike">on hike</string>
@@ -1161,4 +1160,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="no_file">No files or pins shared</string>
     <string name="no_file_profile">No files shared</string>
     <string name="favorite_request_pending">Added as favorite</string>
+    <string name="shared_files">Files</string>
 </resources>
