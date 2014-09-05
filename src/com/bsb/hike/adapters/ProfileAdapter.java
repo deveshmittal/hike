@@ -272,17 +272,18 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				if(sharedMedia != null)
 				{
 					LinearLayout.LayoutParams lp;
+						for(int i=0;i<Math.min(smSize, maxMediaToShow);i++)
+						{
+							
+							View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
+							lp = (LinearLayout.LayoutParams) image_thumb.getLayoutParams();
+							lp.width = sizeOfThumbnail;
+							lp.height = sizeOfThumbnail;
+							lp.weight = 1.0f;
+							image_thumb.setLayoutParams(lp);
+							layout.addView(image_thumb);
+						}
 					
-					for (HikeSharedFile galleryItem : sharedMedia)
-					{
-						View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
-						lp = (LinearLayout.LayoutParams) image_thumb.getLayoutParams();
-						lp.width = sizeOfThumbnail;
-						lp.height = sizeOfThumbnail;
-						lp.weight = 1.0f;
-						image_thumb.setLayoutParams(lp);
-						layout.addView(image_thumb);
-					}
 				}
 				
 				break;
@@ -411,9 +412,9 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.text.setText(context.getString(R.string.shared_med));
 			List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
 			LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
-			ImageView image;
-			int smSize = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
-			viewHolder.subText.setText(Integer.toString(smSize));
+			int smSizeDb = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
+			int maxMediaToShow = ((ProfileSharedMedia) profileItem).getMaxMediaToShow();
+			viewHolder.subText.setText(Integer.toString(smSizeDb));
 			if(!groupProfile)
 			{
 				LinearLayout.LayoutParams ll = (LayoutParams) viewHolder.sharedFiles.getLayoutParams();
@@ -421,46 +422,30 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.sharedFiles.setLayoutParams(ll);   //Hack to get the top margin right in one to one profile case
 			}
 			
-			if(sharedMedia != null)
+			if(sharedMedia!= null && !sharedMedia.isEmpty())
 			{	viewHolder.infoContainer.setVisibility(View.VISIBLE);
 				viewHolder.parent.setVisibility(View.GONE);  //Empty state
 				int i = 0;
-				for (i = 0; i < sharedMedia.size(); i++)
+				if(sharedMedia.size() < maxMediaToShow)
 				{
-					HikeSharedFile galleryItem = sharedMedia.get(i);
-					View image_thumb = layout.getChildAt(i);
-					View image_duration = image_thumb.findViewById(R.id.vid_time_layout);
-					View fileMissing = image_thumb.findViewById(R.id.file_missing_layout);
-					if(galleryItem.getHikeFileType() == HikeFileType.VIDEO)
-					{
-						image_duration.setVisibility(View.VISIBLE);
-					}
+					loadMediaInProfile(sharedMedia.size(), layout, sharedMedia);
 					
-					image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
-					if(galleryItem.exactFilePathFileExists())
+					while(i< maxMediaToShow)  //Cleaning up previous items if any
 					{
-						thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), image);
-						fileMissing.setVisibility(View.GONE);
-						
-						if (galleryItem.getHikeFileType() == HikeFileType.VIDEO)
+						if(layout.getChildAt(i)!=null)
 						{
-							image_duration.setVisibility(View.VISIBLE);
+							layout.removeViewAt(i);
 						}
-						else
-						{
-							image_duration.setVisibility(View.GONE);
-						}
+						i++;
 					}
-					else
-					{
-						image_duration.setVisibility(View.GONE);
-						fileMissing.setVisibility(View.VISIBLE);
-					}
-					
-					image_thumb.setTag(galleryItem);
-					image_thumb.setOnClickListener(profileActivity);
+					viewHolder.icon.setVisibility(View.GONE);
 				}
-				if(sharedMedia.size() < smSize )
+				else
+				{
+					loadMediaInProfile(maxMediaToShow, layout, sharedMedia);
+				}
+				
+				if(maxMediaToShow < smSizeDb )
 				{
 					// Add Arrow Icon
 					viewHolder.icon.setVisibility(View.VISIBLE);
@@ -470,6 +455,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			}
 			else
 			{		//Empty State
+				layout.removeAllViews();
 				viewHolder.parent.setVisibility(View.VISIBLE);
 				viewHolder.infoContainer.setVisibility(View.GONE);
 			}
@@ -692,6 +678,48 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		}
 
 		return v;
+	}
+
+	private void loadMediaInProfile(int size, LinearLayout layout, List<HikeSharedFile> sharedMedia)
+	{
+		// TODO Auto-generated method stub
+		int i = 0;
+		while(i<size)
+		{
+			HikeSharedFile galleryItem = sharedMedia.get(i);
+			View image_thumb = layout.getChildAt(i);
+			View image_duration = image_thumb.findViewById(R.id.vid_time_layout);
+			View fileMissing = image_thumb.findViewById(R.id.file_missing_layout);
+			if(galleryItem.getHikeFileType() == HikeFileType.VIDEO)
+			{
+				image_duration.setVisibility(View.VISIBLE);
+			}
+			
+			ImageView image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
+			if(galleryItem.getFileFromExactFilePath().exists())
+			{
+				thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), image);
+				fileMissing.setVisibility(View.GONE);
+				
+				if (galleryItem.getHikeFileType() == HikeFileType.VIDEO)
+				{
+					image_duration.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					image_duration.setVisibility(View.GONE);
+				}
+			}
+			else
+			{
+				image_duration.setVisibility(View.GONE);
+				fileMissing.setVisibility(View.VISIBLE);
+			}
+			
+			image_thumb.setTag(galleryItem);
+			image_thumb.setOnClickListener(profileActivity);
+			i++;
+		}
 	}
 
 	private void setAvatar(String msisdn, ImageView avatarView)

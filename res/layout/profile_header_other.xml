@@ -17,6 +17,7 @@
         <FrameLayout
             android:id="@+id/avatar_container"
             android:layout_width="wrap_content"
+            android:contentDescription="ProfileImage"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="16dp" >
@@ -194,6 +195,7 @@
             android:layout_marginRight="15dp"
             android:layout_marginLeft="15dp"
             android:orientation="horizontal"
+            android:contentDescription="Tap to save contact"
             android:background="@drawable/bg_fav"
             android:onClick="onAddToContactClicked"
             android:layout_toLeftOf="@+id/div_fav"
@@ -238,6 +240,7 @@
             android:orientation="horizontal"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
+            android:contentDescription="Add to Favorites"
             android:onClick="onTextButtonClick"
             android:layout_centerVertical="true">
 
