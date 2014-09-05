@@ -507,6 +507,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				if(totalfiles > 0)			
 				{	
 					viewHolder.sharedFiles.setVisibility(View.VISIBLE);
+					ll = (LayoutParams) viewHolder.sharedFiles.getLayoutParams();
+					ll.topMargin = context.getResources().getDimensionPixelSize(R.dimen.top_margin_shared_content) * -1;  
+					viewHolder.sharedFiles.setLayoutParams(ll);  //Hack for top margin
+					
 					((LinearLayout) viewHolder.sharedFiles).getChildAt(1).setVisibility(View.GONE);
 					((LinearLayout) viewHolder.sharedFiles).findViewById(R.id.shared_content_seprator).setVisibility(View.GONE);
 					viewHolder.groupOrPins.setText(context.getResources().getString(R.string.groups));
