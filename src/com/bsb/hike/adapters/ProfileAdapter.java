@@ -435,7 +435,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					loadMediaInProfile(sharedMedia.size(), layout, sharedMedia);
 					
 					int i = layout.getChildCount()-1;
-					if(i>smSizeDb)   //Safety check
+					if(i >= smSizeDb)   //Safety check. This was failing in one case, hence the equality sign
 					{
 						while(i != smSizeDb - 1)  //Cleaning up previous items if any
 						{
