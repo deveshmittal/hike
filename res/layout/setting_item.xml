@@ -5,7 +5,7 @@
     android:background="@drawable/list_item"
     android:gravity="center"
     android:minHeight="?android:attr/listPreferredItemHeight"
-    android:paddingLeft="15dp"
+    android:paddingLeft="24dp"
     android:paddingRight="15dp" >
 
     <RelativeLayout
