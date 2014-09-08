@@ -768,7 +768,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 		if (connectUsingIp)
 		{
-			return getIp() + ":" + FALLBACK_BROKER_PORT_NUMBER;
+			return getIp() + ":" + (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : FALLBACK_BROKER_PORT_NUMBER);
 		}
 		else
 		{

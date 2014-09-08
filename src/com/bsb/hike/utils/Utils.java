@@ -166,6 +166,7 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
@@ -3687,6 +3688,11 @@ public class Utils
 
 	public static Drawable getAvatarDrawableForNotificationOrShortcut(Context context, String msisdn, boolean isPin)
 	{
+		if(msisdn.equals(context.getString(R.string.app_name)) || msisdn.equals(HikeNotification.HIKE_STEALTH_MESSAGE_KEY))
+		{
+			return context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		}
+		
 		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
 
 		if (isPin || drawable == null)
@@ -4460,23 +4466,29 @@ public class Utils
 	// added for db query
 	public static String getMsisdnStatement(Collection<String> msisdnList)
 	{
-		StringBuilder sb = new StringBuilder("(");
-		if (null != msisdnList)
+		if (null == msisdnList)
 		{
+			return null;
+		}
+		else
+		{
+			if (msisdnList.isEmpty())
+			{
+				return null;
+			}
+			StringBuilder sb = new StringBuilder("(");
 			for (String msisdn : msisdnList)
 			{
 				sb.append(DatabaseUtils.sqlEscapeString(msisdn));
 				sb.append(",");
 			}
+			int idx = sb.lastIndexOf(",");
+			if (idx >= 0)
+				sb.replace(idx, sb.length(), ")");
+			else
+				sb.append(")");
+			return sb.toString();
 		}
-
-		int idx = sb.lastIndexOf(",");
-		if (idx >= 0)
-			sb.replace(idx, sb.length(), ")");
-		else
-			sb.append(")");
-
-		return sb.toString();
 	}
 
 	public static void startWebViewActivity(Context context, String url, String title)

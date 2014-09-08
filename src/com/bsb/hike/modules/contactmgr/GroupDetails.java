@@ -9,11 +9,14 @@ public class GroupDetails
 
 	private String groupName;
 
+	private boolean isGroupAlive;
+
 	private ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns;
 
-	GroupDetails(String grpName, ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns)
+	GroupDetails(String grpName, boolean alive, ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns)
 	{
 		this.groupName = grpName;
+		this.isGroupAlive = alive;
 		this.lastMsisdns = lastMsisdns;
 	}
 
@@ -25,6 +28,16 @@ public class GroupDetails
 	void setGroupName(String grpName)
 	{
 		groupName = grpName;
+	}
+
+	boolean isGroupAlive()
+	{
+		return isGroupAlive;
+	}
+
+	void setIsGroupAlive(boolean alive)
+	{
+		isGroupAlive = alive;
 	}
 
 	ConcurrentLinkedQueue<PairModified<String, String>> getLastMsisdns()

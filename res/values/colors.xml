@@ -350,5 +350,9 @@
     <color name="red_empty_field">#ef554e</color>
     <color name="pin_color">#fff38f</color>    
     <color name="add_fav">#ffa201</color>
+    <color name="missing_thumbnail">#aaaaaa</color>
+    <color name="header_bg">#f1f2f3</color>
+    <color name="status_text_color">#888888</color>
+    <color name="group_edit_pressed">#33888888</color>
 </resources>
 	

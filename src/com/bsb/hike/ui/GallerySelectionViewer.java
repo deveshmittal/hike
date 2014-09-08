@@ -42,6 +42,7 @@ import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.GalleryImageLoader;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -67,6 +68,8 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	private ProgressDialog progressDialog;
 	
 	private View closeSMLtipView = null;
+	
+	private int totalSelections;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -83,6 +86,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		}
 
 		galleryItems = getIntent().getParcelableArrayListExtra(HikeConstants.Extras.GALLERY_SELECTIONS);
+		totalSelections = galleryItems.size();
 
 		/*
 		 * Added one for the extra null item.
@@ -175,6 +179,15 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		}
 	}
 	
+	
+	@Override
+	protected void onStop()
+	{
+		int successfulSelections = galleryItems.size();
+		HikeAnalyticsEvent.sendGallerySelectionEvent(totalSelections, successfulSelections);
+		super.onStop();
+	}
+
 	@Override
 	protected void onDestroy()
 	{
