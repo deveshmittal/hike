@@ -741,11 +741,11 @@ public class HikeNotification
 		// else add to stack and notify clubbed messages
 		if (hikeNotifMsgStack.isEmpty())
 		{
-			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), text);
+			hikeNotifMsgStack.addMessage(statusMessage.getMsisdn(), message);
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), text, true);
+			notifyStringMessage(statusMessage.getMsisdn(), message, true);
 			return;
 		}
 
