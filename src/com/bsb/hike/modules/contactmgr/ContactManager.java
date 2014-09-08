@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.DbException;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -48,7 +49,7 @@ import com.bsb.hike.utils.Utils;
  * @author Gautam & Sidharth
  * 
  */
-public class ContactManager implements ITransientCache
+public class ContactManager implements ITransientCache, HikePubSub.Listener
 {
 	// This should always be present so making it loading on class loading itself
 	private volatile static ContactManager _instance = new ContactManager();
@@ -61,8 +62,11 @@ public class ContactManager implements ITransientCache
 
 	private Context context;
 
+	private String[] pubSubListeners = { HikePubSub.APP_BACKGROUNDED };
+
 	private ContactManager()
 	{
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
 	public static ContactManager getInstance()
@@ -99,6 +103,7 @@ public class ContactManager implements ITransientCache
 	@Override
 	public void unload()
 	{
+		Logger.i(getClass().getSimpleName(), "clearing transient cache ");
 		transientCache.clearMemory();
 	}
 
@@ -1907,5 +1912,18 @@ public class ContactManager implements ITransientCache
 				contact.setOnGreenBlue(true);
 			}
 		}
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		if (HikePubSub.APP_BACKGROUNDED.equals(type))
+		{
+			/*
+			 * Clearing transient cache when app is backgroubded
+			 */
+			unload();
+		}
+
 	}
 }

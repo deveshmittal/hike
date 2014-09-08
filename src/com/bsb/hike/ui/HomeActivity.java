@@ -298,7 +298,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if (overFlowWindow != null && overFlowWindow.isShowing())
 			overFlowWindow.dismiss();
 		HikeMessengerApp.getPubSub().removeListeners(this, homePubSubListeners);
-		HikeMessengerApp.getContactManager().unload();
 		super.onDestroy();
 	}
 
