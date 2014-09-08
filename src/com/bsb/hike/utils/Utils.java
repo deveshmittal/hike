@@ -2590,6 +2590,7 @@ public class Utils
 			else if (!dueToConnect)
 			{
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_BACKGROUNDED, null);
 			}
 			else
 			{

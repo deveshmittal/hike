@@ -49,7 +49,7 @@ import com.bsb.hike.utils.Utils;
  * @author Gautam & Sidharth
  * 
  */
-public class ContactManager implements ITransientCache
+public class ContactManager implements ITransientCache, HikePubSub.Listener
 {
 	// This should always be present so making it loading on class loading itself
 	private volatile static ContactManager _instance = new ContactManager();
@@ -62,8 +62,11 @@ public class ContactManager implements ITransientCache
 
 	private Context context;
 
+	private String[] pubSubListeners = { HikePubSub.APP_BACKGROUNDED };
+
 	private ContactManager()
 	{
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
 	public static ContactManager getInstance()
@@ -100,6 +103,7 @@ public class ContactManager implements ITransientCache
 	@Override
 	public void unload()
 	{
+		Logger.i(getClass().getSimpleName(), "clearing transient cache ");
 		transientCache.clearMemory();
 	}
 
@@ -181,6 +185,17 @@ public class ContactManager implements ITransientCache
 		{
 			updateContacts(contact);
 		}
+	}
+
+	/**
+	 * This method is called while syncing contacts if some changes have been made to contacts in address book
+	 * 
+	 * @param contacts
+	 */
+	private void syncContacts(List<ContactInfo> contacts)
+	{
+		updateContacts(contacts);
+		transientCache.allContactsLoaded = false;
 	}
 
 	public String getName(String msisdn)
@@ -1331,8 +1346,6 @@ public class ContactManager implements ITransientCache
 			Logger.d("ContactUtils", "New contacts:" + new_contacts_by_id.size() + " DELETED contacts: " + ids_json.length());
 			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
 
-			updateContacts(updatedContacts);
-
 			List<ContactInfo> contactsToDelete = new ArrayList<ContactInfo>();
 
 			for (Entry<String, List<ContactInfo>> mapEntry : hike_contacts_by_id.entrySet())
@@ -1354,6 +1367,7 @@ public class ContactManager implements ITransientCache
 			/* Delete ids from hike user DB */
 			deleteMultipleContactInDB(hike_contacts_by_id.keySet());
 			updateContactsinDB(updatedContacts);
+			syncContacts(updatedContacts);
 
 		}
 		catch (Exception e)
@@ -1901,5 +1915,18 @@ public class ContactManager implements ITransientCache
 				contact.setOnGreenBlue(true);
 			}
 		}
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		if (HikePubSub.APP_BACKGROUNDED.equals(type))
+		{
+			/*
+			 * Clearing transient cache when app is backgroubded
+			 */
+			unload();
+		}
+
 	}
 }
