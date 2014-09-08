@@ -162,7 +162,15 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		final IconCheckBoxPreference sslPreference = (IconCheckBoxPreference) getPreferenceScreen().findPreference(HikeConstants.SSL_PREF);
 		if (sslPreference != null)
 		{
-			sslPreference.setOnPreferenceChangeListener(this);
+			String countryCode = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.COUNTRY_CODE, "");
+			if(countryCode.equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE))
+			{
+				getPreferenceScreen().removePreference(sslPreference);
+			}
+			else
+			{
+				sslPreference.setOnPreferenceChangeListener(this);
+			}
 		}
 
 		Preference blockedListPreference = getPreferenceScreen().findPreference(HikeConstants.BLOKED_LIST_PREF);
