@@ -1567,6 +1567,39 @@ public class HikeConstants
 		 * Image selection from gallery event.
 		 */
 		public static final String GALLERY_SELECTION = "gallery";
+
+		/*
+		 * Atomic tips click events
+		 */
+		public static final String ATOMIC_FAVOURITES_TIP_CLICKED = "atomicFavTClick";
+
+		public static final String ATOMIC_INVITE_TIP_CLICKED = "atomicInviteTClick";
+
+		public static final String ATOMIC_PROFILE_PIC_TIP_CLICKED = "atomicProPicTClick";
+
+		public static final String ATOMIC_STATUS_TIP_CLICKED = "atomicStatusTClick";
+
+		public static final String ATOMIC_HTTP_TIP_CLICKED = "atomicHttpTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_CLICKED = "atomicAppSttngsTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_NOTIF_CLICKED = "atomicAppSttngsNotifTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_PRIVACY_CLICKED = "atomicAppSttngsPrivTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_SMS_CLICKED = "atomicAppSttngsSmsTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_MEDIA_CLICKED = "atomicAppSttngsMediaTClick";
+
+		public static final String ATOMIC_APP_TIP_INVITE_FREE_SMS_CLICKED = "atomicAppInvFreeSmsTClick";
+
+		public static final String ATOMIC_APP_TIP_INVITE_WHATSAPP_CLICKED = "atomicAppInvWaTClick";
+
+		public static final String ATOMIC_APP_TIP_TIMELINE_CLICKED = "atomicAppTmlineTClick";
+
+		public static final String ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED = "atomicAppSttngsTClick";
+
+		public static final String ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED = "atomicAppHikeRewardsClick";
 	}
 
 	public static final class MqttMessageTypes
