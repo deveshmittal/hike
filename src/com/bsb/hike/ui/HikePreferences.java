@@ -223,6 +223,18 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			mutePreference.setOnPreferenceClickListener(this);
 		}
 
+		Preference h2oNotifPreference = getPreferenceScreen().findPreference(HikeConstants.H2O_NOTIF_BOOLEAN_PREF);
+		if (h2oNotifPreference != null)
+		{
+			h2oNotifPreference.setOnPreferenceChangeListener(this);
+		}
+		
+		Preference nujNotifPreference = getPreferenceScreen().findPreference(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF);
+		if (nujNotifPreference != null)
+		{
+			nujNotifPreference.setOnPreferenceChangeListener(this);
+ 		}
+		
 		Preference muteChatBgPreference = getPreferenceScreen().findPreference(HikeConstants.CHAT_BG_NOTIFICATION_PREF);
 		if (muteChatBgPreference != null)
 		{
