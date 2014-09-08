@@ -194,8 +194,11 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	 */
 	private void syncContacts(List<ContactInfo> contacts)
 	{
-		updateContacts(contacts);
-		transientCache.allContactsLoaded = false;
+		if (null != contacts)
+		{
+			updateContacts(contacts);
+			transientCache.allContactsLoaded = false;
+		}
 	}
 
 	public String getName(String msisdn)
