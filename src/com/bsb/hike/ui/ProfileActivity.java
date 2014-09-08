@@ -47,6 +47,7 @@ import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.Animation.AnimationListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -705,7 +706,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			if (showContactsUpdates(contactInfo)) // Favourite case
 			
 			{
-				addContactStatusInHeaderView(subText, statusMood);
+				addContactStatusInHeaderView(text, subText, statusMood);
 				// Request_Received --->> Show add/not now screen.
 				if (contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
 				{
@@ -730,7 +731,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			}
 			else if (contactInfo.isOnhike()) 
 				{
-					setStatusText(getJoinedHikeStatus(contactInfo), subText);
+					setStatusText(getJoinedHikeStatus(contactInfo), subText, text);
 					if ((contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED || contactInfo
 							.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED))
 					{
@@ -830,7 +831,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 	}
 	
-	private void addContactStatusInHeaderView(TextView subText, ImageView statusMood)
+	private void addContactStatusInHeaderView(TextView name, TextView subText, ImageView statusMood)
 	{
 		StatusMessageType[] statusMessagesTypesToFetch = {StatusMessageType.TEXT};
 		StatusMessage status = HikeConversationsDatabase.getInstance().getLastStatusMessage(statusMessagesTypesToFetch, contactInfo);
@@ -850,17 +851,37 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		
 		status = getJoinedHikeStatus(contactInfo);
-		setStatusText(status, subText);
+		setStatusText(status, subText, name);
 	}
 	
-	private void setStatusText(StatusMessage status,TextView subText)
+	private void setStatusText(StatusMessage status,final TextView subText, TextView name)
 	{
 		if (status.getTimeStamp() == 0)
 			subText.setVisibility(View.GONE);
 		else
 		{
 			subText.setText(status.getText() + " " + status.getTimestampFormatted(true, ProfileActivity.this));
-			subText.setVisibility(View.VISIBLE);
+			subText.setVisibility(View.INVISIBLE);
+			Animation animation = AnimationUtils.loadAnimation(this, R.anim.slide_up_hike_joined);
+			name.startAnimation(animation);
+			animation.setAnimationListener(new AnimationListener()
+			{
+				@Override
+				public void onAnimationStart(Animation animation)
+				{
+				}
+
+				@Override
+				public void onAnimationRepeat(Animation animation)
+				{
+				}
+
+				@Override
+				public void onAnimationEnd(Animation animation)
+				{
+					subText.setVisibility(View.VISIBLE);
+				}
+			});
 		}
 	}
 
