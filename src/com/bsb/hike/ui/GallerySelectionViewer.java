@@ -42,6 +42,7 @@ import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.GalleryImageLoader;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
+import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -66,6 +67,10 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 
 	private ProgressDialog progressDialog;
 	
+	private View closeSMLtipView = null;
+	
+	private int totalSelections;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -81,6 +86,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		}
 
 		galleryItems = getIntent().getParcelableArrayListExtra(HikeConstants.Extras.GALLERY_SELECTIONS);
+		totalSelections = galleryItems.size();
 
 		/*
 		 * Added one for the extra null item.
@@ -173,6 +179,15 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		}
 	}
 	
+	
+	@Override
+	protected void onStop()
+	{
+		int successfulSelections = galleryItems.size();
+		HikeAnalyticsEvent.sendGallerySelectionEvent(totalSelections, successfulSelections);
+		super.onStop();
+	}
+
 	@Override
 	protected void onDestroy()
 	{
@@ -283,6 +298,10 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 					// TODO Auto-generated method stub
 					final ArrayList<Pair<String, String>> fileDetails = new ArrayList<Pair<String, String>>(galleryItems.size());
 					long sizeOriginal = 0;
+					if (closeSMLtipView != null)
+					{
+						closeSMLtipView.performClick();
+					}
 					for (GalleryItem galleryItem : galleryItems)
 					{
 						fileDetails.add(new Pair<String, String> (galleryItem.getFilePath(), HikeFileType.toString(HikeFileType.IMAGE)));
@@ -555,12 +574,14 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			arrowPointer.setImageResource(R.drawable.ftue_up_arrow);
 			((TextView) view.findViewById(R.id.tip_header)).setText("Image Settings");
 			((TextView) view.findViewById(R.id.tip_msg)).setText("Small. Medium. Original Size");
-			view.findViewById(R.id.close_tip).setOnClickListener(new OnClickListener()
+			final View tipView = view;
+			closeSMLtipView = view.findViewById(R.id.close_tip);
+			closeSMLtipView.setOnClickListener(new OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
 				{
-					v.setVisibility(View.GONE);
+					tipView.setVisibility(View.GONE);
 					pref.saveData(HikeConstants.SHOW_IMAGE_QUALITY_TIP, false);
 				}
 			});

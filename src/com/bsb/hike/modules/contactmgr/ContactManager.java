@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.DbException;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -134,6 +135,7 @@ public class ContactManager implements ITransientCache
 			if (Utils.isGroupConversation(ms))
 			{
 				persistenceCache.removeGroup(ms);
+				transientCache.removeGroup(ms);
 			}
 			else
 			{
@@ -439,13 +441,35 @@ public class ContactManager implements ITransientCache
 			List<String> last = mapEntry.getValue();
 			for (String ms : last)
 			{
-				ContactInfo contact = getContact(ms);
-				if (null != contact.getName())
+				ContactInfo contact = getContact(ms, false, false);
+				if (null != contact && null != contact.getName())
 				{
 					setGroupParticipantContactName(groupId, ms, contact.getName());
 				}
 			}
 		}
+	}
+
+	/**
+	 * Returns true if group is alive otherwise false
+	 * 
+	 * @param groupId
+	 * @return
+	 */
+	public boolean isGroupAlive(String groupId)
+	{
+		return persistenceCache.isGroupAlive(groupId);
+	}
+
+	/**
+	 * Sets the group alive status in {@link #persistenceCache}
+	 * 
+	 * @param groupId
+	 * @param alive
+	 */
+	public void setGroupAlive(String groupId, boolean alive)
+	{
+		persistenceCache.setGroupAlive(groupId, alive);
 	}
 
 	/**
@@ -694,14 +718,27 @@ public class ContactManager implements ITransientCache
 	}
 
 	/**
-	 * This method inserts a group with <code>grpId</code> and <code>groupName</code> in the {@link PersistenceCache}. Should be called when new group is created.
+	 * This method inserts a group with <code>grpId</code> and <code>groupName</code> in the {@link PersistenceCache}. Should be called when new group is created. Group alive
+	 * status is set as true in this method
 	 * 
 	 * @param grpId
 	 * @param groupName
 	 */
 	public void insertGroup(String grpId, String groupName)
 	{
-		persistenceCache.insertGroup(grpId, groupName);
+		persistenceCache.insertGroup(grpId, groupName, true);
+	}
+
+	/**
+	 * This method inserts a group with <code>grpId</code> and <code>groupName</code> in the {@link PersistenceCache}. Group alive status is passed as a parameter
+	 * 
+	 * @param grpId
+	 * @param groupName
+	 * @param alive
+	 */
+	public void insertGroup(String grpId, String groupName, boolean alive)
+	{
+		persistenceCache.insertGroup(grpId, groupName, alive);
 	}
 
 	/**
@@ -1062,14 +1099,15 @@ public class ContactManager implements ITransientCache
 	 * @param grpIds
 	 * @return
 	 */
-	public Map<String, String> getGroupNames(List<String> grpIds)
+	public Map<String, Pair<String, Boolean>> getGroupNamesAndAliveStatus(List<String> grpIds)
 	{
-		Map<String, String> groupNames = HikeConversationsDatabase.getInstance().getGroupNames(grpIds);
-		for (Entry<String, String> mapEntry : groupNames.entrySet())
+		Map<String, Pair<String, Boolean>> groupNames = HikeConversationsDatabase.getInstance().getGroupNamesAndAliveStatus(grpIds);
+		for (Entry<String, Pair<String, Boolean>> mapEntry : groupNames.entrySet())
 		{
 			String groupId = mapEntry.getKey();
-			String groupName = mapEntry.getValue();
-			persistenceCache.insertGroup(groupId, groupName);
+			String groupName = mapEntry.getValue().first;
+			boolean groupAlive = mapEntry.getValue().second;
+			persistenceCache.insertGroup(groupId, groupName, groupAlive);
 		}
 		return groupNames;
 	}
@@ -1197,6 +1235,11 @@ public class ContactManager implements ITransientCache
 		transientCache.removeGroupParticipants(groupId, msisdn);
 	}
 
+	public void removeGroup(String groupId)
+	{
+		transientCache.removeGroup(groupId);
+	}
+
 	/**
 	 * Sets the group name in persistence cache , should be called when group name is changed
 	 * 
@@ -1296,6 +1339,14 @@ public class ContactManager implements ITransientCache
 			{
 				List<ContactInfo> contacts = mapEntry.getValue();
 				contactsToDelete.addAll(contacts);
+				// Update conversation fragement for deleted ids
+				for (ContactInfo c : contacts)
+				{
+					c.setName(null);
+					c.setId(c.getMsisdn());
+					HikeMessengerApp.getLruCache().deleteIconForMSISDN(c.getMsisdn());
+					HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_DELETED, c);
+				}
 			}
 
 			deleteContacts(contactsToDelete);

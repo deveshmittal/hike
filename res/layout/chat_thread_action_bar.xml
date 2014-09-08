@@ -54,6 +54,7 @@
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/contact_name"
+            android:contentDescription="Contact/group name"
             style="@style/ActionBarText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -61,6 +62,7 @@
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/contact_status"
+            android:contentDescription="hike status/last seen time"
             style="@style/ActionBarText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

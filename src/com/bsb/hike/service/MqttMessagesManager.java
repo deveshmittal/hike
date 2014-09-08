@@ -317,7 +317,7 @@ public class MqttMessagesManager
 
 		boolean groupRevived = false;
 
-		if (!this.convDb.isGroupAlive(groupConversation.getMsisdn()))
+		if (!ContactManager.getInstance().isGroupAlive(groupConversation.getMsisdn()))
 		{
 
 			Logger.d(getClass().getSimpleName(), "Group is not alive");
@@ -613,7 +613,8 @@ public class MqttMessagesManager
 		/*
 		 * Start auto download for media files
 		 */
-		if (convMessage.isFileTransferMessage() && (manager.isConvExists(msisdn)) && (!TextUtils.isEmpty(manager.getName(msisdn))))
+		String name = Utils.isGroupConversation(msisdn) ? manager.getName(msisdn) : manager.getContact(msisdn, false, true).getName();
+		if (convMessage.isFileTransferMessage() && (!TextUtils.isEmpty(name)) && (manager.isConvExists(msisdn)))
 		{
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();

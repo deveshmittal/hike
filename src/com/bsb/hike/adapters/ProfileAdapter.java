@@ -22,6 +22,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
@@ -108,12 +109,21 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	private static final int REQUEST_RECEIVED = 3;
 
 	private static final int UNKNOWN_NOT_ON_HIKE = 4;
+	
+	private int sizeOfThumbnail;
 
 	public ProfileAdapter(ProfileActivity profileActivity, List<ProfileItem> itemList, GroupConversation groupConversation, ContactInfo contactInfo, boolean myProfile)
 	{
 		this(profileActivity, itemList, groupConversation, contactInfo, myProfile, false);
 	}
-
+	
+	public ProfileAdapter(ProfileActivity profileActivity, List<ProfileItem> itemList, GroupConversation groupConversation, ContactInfo contactInfo, boolean myProfile, boolean isContactBlocked, int sizeOfThumbNail)
+	{
+		this(profileActivity, itemList, groupConversation, contactInfo, myProfile, false);
+		this.sizeOfThumbnail = sizeOfThumbNail;
+		thumbnailLoader = new SharedFileImageLoader(context, sizeOfThumbnail);
+	}
+	
 	public ProfileAdapter(ProfileActivity profileActivity, List<ProfileItem> itemList, GroupConversation groupConversation, ContactInfo contactInfo, boolean myProfile,
 			boolean isContactBlocked)
 	{
@@ -128,13 +138,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		int mBigImageSize = context.getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
-		int thumbNailSize = context.getResources().getDimensionPixelSize(R.dimen.profile_shared_media_item_size);
 		this.bigPicImageLoader = new TimelineImageLoader(context, mBigImageSize);
-		thumbnailLoader = new SharedFileImageLoader(context, thumbNailSize);
 		this.profileImageLoader = new ProfilePicImageLoader(context, mBigImageSize);
 		profileImageLoader.setDefaultAvatarIfNoCustomIcon(true);
 		profileImageLoader.setHiResDefaultAvatar(true);
-
 		this.iconLoader = new IconLoader(context, mIconImageSize);
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 	}
@@ -253,28 +260,30 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.text = (TextView) v.findViewById(R.id.name);
 				viewHolder.subText = (TextView) v.findViewById(R.id.count);
 				viewHolder.infoContainer = v.findViewById(R.id.shared_media_items);
-				viewHolder.extraInfo = (TextView) v.findViewById(R.id.sm_emptystate);
-				
-				List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
+				viewHolder.parent =  v.findViewById(R.id.sm_emptystate);
+				viewHolder.sharedFiles = v.findViewById(R.id.shared_media);
+				viewHolder.icon = (ImageView) v.findViewById(R.id.arrow_icon);
+				List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFilesList();
 				LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
 				layout.removeAllViews();
 				int smSize = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
+				int maxMediaToShow = ((ProfileSharedMedia) profileItem).getMaxMediaToShow();
 				viewHolder.subText.setText(Integer.toString(smSize));
-				
 				if(sharedMedia != null)
 				{
-					for (HikeSharedFile galleryItem : sharedMedia)
-					{
-						View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
-						layout.addView(image_thumb);
-					}
+					LinearLayout.LayoutParams lp;
+						for(int i=0;i<Math.min(smSize, maxMediaToShow);i++)
+						{
+							
+							View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
+							lp = (LinearLayout.LayoutParams) image_thumb.getLayoutParams();
+							lp.width = sizeOfThumbnail;
+							lp.height = sizeOfThumbnail;
+							lp.weight = 1.0f;
+							image_thumb.setLayoutParams(lp);
+							layout.addView(image_thumb);
+						}
 					
-					if(sharedMedia.size() < smSize )
-					{
-						// Add Arrow Icon
-						View image_thumb = inflater.inflate(R.layout.thumbnail_layout, layout, false);
-						layout.addView(image_thumb);
-					}
 				}
 				
 				break;
@@ -282,13 +291,15 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			case SHARED_CONTENT:
 				v = inflater.inflate(R.layout.shared_content, null);
 				viewHolder.parent = v.findViewById(R.id.shared_content);
+				viewHolder.sharedFiles = v.findViewById(R.id.shared_content_layout);
 				viewHolder.text = (TextView) viewHolder.parent.findViewById(R.id.name);
 				viewHolder.subText = (TextView) viewHolder.parent.findViewById(R.id.count);
 				viewHolder.extraInfo = (TextView) v.findViewById(R.id.count_pin);
-				viewHolder.infoContainer = v.findViewById(R.id.shared_content_layout);
 				viewHolder.groupOrPins = (TextView) v.findViewById(R.id.shared_pins);
 				viewHolder.sharedFilesCount = (TextView) v.findViewById(R.id.count_sf);
 				viewHolder.icon = (ImageView) v.findViewById(R.id.shared_pin_icon);
+				viewHolder.phoneNumView =  v.findViewById(R.id.sm_emptystate);
+				viewHolder.timeStamp = (TextView) v.findViewById(R.id.sm_emptystate_tv);
 				break;
 
 			case MEMBERS:
@@ -301,10 +312,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				v = new LinearLayout(context);
 				viewHolder.parent = inflater.inflate(R.layout.group_profile_item, (LinearLayout) v, false);
 				viewHolder.text = (TextView) viewHolder.parent.findViewById(R.id.name);
-				viewHolder.extraInfo  = (TextView) viewHolder.parent.findViewById(R.id.main_info);
 				viewHolder.icon  = (ImageView) viewHolder.parent.findViewById(R.id.avatar);
 				viewHolder.iconFrame = (ImageView) viewHolder.parent.findViewById(R.id.avatar_frame);
 				viewHolder.infoContainer = viewHolder.parent.findViewById(R.id.owner_indicator);
+				viewHolder.phoneNumView = viewHolder.parent.findViewById(R.id.unsaved_cont_layout);
+				viewHolder.extraInfo = (TextView) viewHolder.parent.findViewById(R.id.telephone);
+				
 				break;
 
 			case ADD_MEMBERS:
@@ -337,11 +350,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				break;
 
 			case PHONE_NUMBER:
-				v = inflater.inflate(R.layout.shared_content, null);
-				viewHolder.infoContainer = v.findViewById(R.id.shared_content);
-				viewHolder.text = (TextView) viewHolder.infoContainer.findViewById(R.id.name);
-				viewHolder.subText = (TextView) viewHolder.infoContainer.findViewById(R.id.count);
-				viewHolder.parent = v.findViewById(R.id.phone_num);
+				v = inflater.inflate(R.layout.phone_num_layout, null);
+				viewHolder.parent = v.findViewById(R.id.phone_numbers);
+				viewHolder.text = (TextView) viewHolder.parent.findViewById(R.id.name);
+				viewHolder.extraInfo = (TextView) v.findViewById(R.id.phone_number);
+				viewHolder.subText = (TextView) v.findViewById(R.id.main_info);
+				viewHolder.phoneNumView = v.findViewById(R.id.phone_type_ll);
 				break;
 			}
 
@@ -396,76 +410,62 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			break;
 		case SHARED_MEDIA:
 			viewHolder.text.setText(context.getString(R.string.shared_med));
-			List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFileList();
+			List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFilesList();
 			LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
-			LayoutParams layoutParams;
-			ImageView image;
-			int smSize = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
-			viewHolder.subText.setText(Integer.toString(smSize));
-			
-			if(sharedMedia != null)
+			int smSizeDb = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
+			int maxMediaToShow = ((ProfileSharedMedia) profileItem).getMaxMediaToShow();
+			viewHolder.subText.setText(Integer.toString(smSizeDb));
+			if(!groupProfile)
 			{
-				int i = 0;
-				for (i = 0; i < sharedMedia.size(); i++)
+				LinearLayout.LayoutParams ll = (LayoutParams) viewHolder.sharedFiles.getLayoutParams();
+				ll.topMargin = 0;
+				viewHolder.sharedFiles.setLayoutParams(ll);   //Hack to get the top margin right in one to one profile case
+			}
+			
+			if(sharedMedia!= null && !sharedMedia.isEmpty())
+			{	viewHolder.infoContainer.setVisibility(View.VISIBLE);
+				viewHolder.parent.setVisibility(View.GONE);  //Empty state
+				if(sharedMedia.size() < maxMediaToShow)
 				{
-					HikeSharedFile galleryItem = sharedMedia.get(i);
-					View image_thumb = layout.getChildAt(i);
-					View image_duration = image_thumb.findViewById(R.id.vid_time_layout);
-					View fileMissing = image_thumb.findViewById(R.id.file_missing_layout);
-					if(galleryItem.getHikeFileType() == HikeFileType.VIDEO)
-					{
-						image_duration.setVisibility(View.VISIBLE);
-					}
+					loadMediaInProfile(sharedMedia.size(), layout, sharedMedia);
 					
-					image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
-					if(galleryItem.getFileFromExactFilePath().exists())
+					int i = layout.getChildCount()-1;
+					if(i>smSizeDb)   //Safety check
 					{
-						thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), image);
-						fileMissing.setVisibility(View.GONE);
-						
-						if (galleryItem.getHikeFileType() == HikeFileType.VIDEO)
+						while(i != smSizeDb - 1)  //Cleaning up previous items if any
 						{
-							image_duration.setVisibility(View.VISIBLE);
+						if(layout.getChildAt(i) != null)
+						{
+							layout.removeViewAt(i);
 						}
-						else
-						{
-							image_duration.setVisibility(View.GONE);
+							i--;
 						}
 					}
-					else
-					{
-						image_duration.setVisibility(View.GONE);
-						fileMissing.setVisibility(View.VISIBLE);
-					}
-					
-					image_thumb.setTag(galleryItem);
-					image_thumb.setOnClickListener(profileActivity);
+					viewHolder.icon.setVisibility(View.GONE);
 				}
-				if(sharedMedia.size() < smSize )
+				else
+				{
+					loadMediaInProfile(maxMediaToShow, layout, sharedMedia);
+				}
+				
+				if(maxMediaToShow < smSizeDb )
 				{
 					// Add Arrow Icon
-					View image_thumb = layout.getChildAt(i);
-					image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
-					image.setTag(OPEN_GALLERY);
-					image.setOnClickListener(profileActivity);
-					image.setImageDrawable((context.getResources().getDrawable(R.drawable.ic_arrow)));
-					image.setScaleType(ScaleType.CENTER);
+					viewHolder.icon.setVisibility(View.VISIBLE);
+					viewHolder.icon.setTag(OPEN_GALLERY);
+					viewHolder.icon.setOnClickListener(profileActivity);
 				}
 			}
 			else
 			{		//Empty State
-				viewHolder.extraInfo.setVisibility(View.VISIBLE);
-				layoutParams = (LayoutParams) viewHolder.extraInfo.getLayoutParams();
-				layoutParams.width = LayoutParams.MATCH_PARENT;
-				layoutParams.height = LayoutParams.WRAP_CONTENT;
-				layout.addView(viewHolder.extraInfo);
-				layout.setLayoutParams(layoutParams);
+				layout.removeAllViews();
+				viewHolder.parent.setVisibility(View.VISIBLE);
+				viewHolder.infoContainer.setVisibility(View.GONE);
 			}
 			
 			break;
 
 		case SHARED_CONTENT:
-			viewHolder.infoContainer.setVisibility(View.VISIBLE);
 			String heading = ((ProfileSharedContent)profileItem).getText();
 			viewHolder.text.setText(heading);
 			viewHolder.sharedFilesCount.setText(Integer.toString(((ProfileSharedContent) profileItem).getSharedFilesCount()));
@@ -474,39 +474,70 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.subText.setText(Integer.toString(totalfiles)); 
 
 			if(groupProfile)
-			{	viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
-				viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_pin_2));
+			{	
+				/*
+				 * We will remove these two lines when we will be add groups for 1:1
+				 */
+				
+				if(totalfiles>0)
+				{
+					viewHolder.sharedFiles.setVisibility(View.VISIBLE);
+					((LinearLayout) viewHolder.sharedFiles).getChildAt(1).setVisibility(View.VISIBLE);
+					((LinearLayout) viewHolder.sharedFiles).findViewById(R.id.shared_content_seprator).setVisibility(View.VISIBLE);
+				
+					viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
+					viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_pin_2));
+					viewHolder.phoneNumView.setVisibility(View.GONE);
+				}
+				else
+				{
+					viewHolder.sharedFiles.setVisibility(View.GONE);
+					viewHolder.phoneNumView.setVisibility(View.VISIBLE);
+					viewHolder.timeStamp.setText(context.getResources().getString(R.string.no_file));
+				}
 			}
 			else
 			{
-				viewHolder.groupOrPins.setText(context.getResources().getString(R.string.groups));
-				viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_group_2));
+				/*
+				 * We will remove these two lines when we will be add groups for 1:1
+				 */
+				android.widget.LinearLayout.LayoutParams ll;
+				if(totalfiles > 0)			
+				{	
+					viewHolder.sharedFiles.setVisibility(View.VISIBLE);
+					((LinearLayout) viewHolder.sharedFiles).getChildAt(1).setVisibility(View.GONE);
+					((LinearLayout) viewHolder.sharedFiles).findViewById(R.id.shared_content_seprator).setVisibility(View.GONE);
+					viewHolder.groupOrPins.setText(context.getResources().getString(R.string.groups));
+					viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_group_2));
+					viewHolder.phoneNumView.setVisibility(View.GONE);
+				}
+				else
+				{	
+					viewHolder.sharedFiles.setVisibility(View.GONE);
+					viewHolder.phoneNumView.setVisibility(View.VISIBLE);
+					ll = (LayoutParams) viewHolder.phoneNumView.getLayoutParams();
+					ll.topMargin = 0;   //Hack to get margin right in one to one profile case r
+					viewHolder.phoneNumView.setLayoutParams(ll);
+					viewHolder.timeStamp.setText(context.getResources().getString(R.string.no_file_profile));
+				}
 			}
 			break;
 
 		case PHONE_NUMBER:
-			LinearLayout parentll = (LinearLayout) viewHolder.parent;
-			parentll.removeAllViews();
-			parentll.setVisibility(View.VISIBLE);
 			String head = context.getResources().getString(R.string.phone_pa);
 			viewHolder.text.setText(head);
-			viewHolder.subText.setVisibility(View.GONE);
-			View phoneNumberView = inflater.inflate(R.layout.phone_num_layout, parentll, false);
-			TextView phoneNum = (TextView) phoneNumberView.findViewById(R.id.name);
-			phoneNum.setText(mContactInfo.getMsisdn());
-			TextView phoneType = (TextView) phoneNumberView.findViewById(R.id.main_info);
-			if(mContactInfo.getMsisdnType().length()>0)
-				phoneType.setText(mContactInfo.getMsisdnType());
-			else
-				phoneType.setVisibility(View.GONE);
+			viewHolder.extraInfo.setText(mContactInfo.getMsisdn());
 			
-			parentll.addView(phoneNumberView);
+			if(mContactInfo.getMsisdnType().length()>0)
+				viewHolder.subText.setText(mContactInfo.getMsisdnType());
+			else
+				viewHolder.phoneNumView.setVisibility(View.GONE);
 			
 			break;
 
 		case MEMBERS:
 			viewHolder.text.setText(context.getResources().getString(R.string.members));
-			viewHolder.subText.setText(Integer.toString(((ProfileGroupItem)profileItem).getTotalMembers()));
+			viewHolder.subText.setText(Integer.toString(((ProfileGroupItem)profileItem).getTotalMembers()) + "/" + HikeConstants.MAX_CONTACTS_IN_GROUP);
 			break;
 
 		case GROUP_PARTICIPANT:
@@ -539,25 +570,17 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			{
 				groupParticipantName = contactInfo.getFirstNameAndSurname();
 			}
-			viewHolder.text.setText(groupParticipantName);
-			if (!showingLastSeen)
-			{
-				viewHolder.extraInfo.setText(contactInfo.isOnhike() ? R.string.on_hike : R.string.on_sms);
+			if(!contactInfo.isUnknownContact())
+			{	viewHolder.text.setText(groupParticipantName);
+				viewHolder.phoneNumView.setVisibility(View.GONE);
 			}
 			else
 			{
-				viewHolder.extraInfo.setText(lastSeenString);
+				viewHolder.phoneNumView.setVisibility(View.VISIBLE);
+				viewHolder.text.setText(contactInfo.getMsisdn());
+				viewHolder.extraInfo.setText(groupParticipantName);
 			}
-			if (showingLastSeen && offline == 0)
-			{
-				viewHolder.extraInfo.setTextColor(context.getResources().getColor(R.color.unread_message));
-				viewHolder.iconFrame.setImageResource(R.drawable.frame_avatar_highlight);
-			}
-			else
-			{
-				viewHolder.extraInfo.setTextColor(context.getResources().getColor(R.color.participant_last_seen));
-				viewHolder.iconFrame.setImageDrawable(null);
-			}
+				
 			setAvatar(contactInfo.getMsisdn(), viewHolder.icon);
 			viewHolder.parent.setOnLongClickListener(profileActivity);
 			viewHolder.parent.setTag(groupParticipant);
@@ -575,12 +598,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			View avatarContainer = groupParticipantParentView_mem.findViewById(R.id.avatar_container);
 			avatarContainer.setVisibility(View.GONE);
 			TextView nameTextView_mem = (TextView) groupParticipantParentView_mem.findViewById(R.id.name);
-			TextView mainInfo_mem = (TextView) groupParticipantParentView_mem.findViewById(R.id.main_info);
 			ImageView avatar_mem = (ImageView) groupParticipantParentView_mem.findViewById(R.id.add_participant);
 			avatar_mem.setVisibility(View.VISIBLE);
 			nameTextView_mem.setText(R.string.add_people);
 			nameTextView_mem.setTextColor(context.getResources().getColor(R.color.blue_hike));
-			mainInfo_mem.setVisibility(View.GONE);
 			groupParticipantParentView_mem.setTag(null);
 			groupParticipantParentView_mem.setOnClickListener(profileActivity);
 			addMemberLayout.addView(groupParticipantParentView_mem);
@@ -662,6 +683,48 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		return v;
 	}
 
+	private void loadMediaInProfile(int size, LinearLayout layout, List<HikeSharedFile> sharedMedia)
+	{
+		// TODO Auto-generated method stub
+		int i = 0;
+		while(i<size)
+		{
+			HikeSharedFile galleryItem = sharedMedia.get(i);
+			View image_thumb = layout.getChildAt(i);
+			View image_duration = image_thumb.findViewById(R.id.vid_time_layout);
+			View fileMissing = image_thumb.findViewById(R.id.file_missing_layout);
+			if(galleryItem.getHikeFileType() == HikeFileType.VIDEO)
+			{
+				image_duration.setVisibility(View.VISIBLE);
+			}
+			
+			ImageView image = (ImageView) image_thumb.findViewById(R.id.thumbnail);
+			if(galleryItem.getFileFromExactFilePath().exists())
+			{
+				thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), image);
+				fileMissing.setVisibility(View.GONE);
+				
+				if (galleryItem.getHikeFileType() == HikeFileType.VIDEO)
+				{
+					image_duration.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					image_duration.setVisibility(View.GONE);
+				}
+			}
+			else
+			{
+				image_duration.setVisibility(View.GONE);
+				fileMissing.setVisibility(View.VISIBLE);
+			}
+			
+			image_thumb.setTag(galleryItem);
+			image_thumb.setOnClickListener(profileActivity);
+			i++;
+		}
+	}
+
 	private void setAvatar(String msisdn, ImageView avatarView)
 	{
 		iconLoader.loadImage(msisdn, true, avatarView, true);
@@ -700,6 +763,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		View infoContainer;
 
 		View parent;
+		
+		View phoneNumView;
+		
+		View sharedFiles;
 	}
 
 	public void setProfilePreview(Bitmap preview)

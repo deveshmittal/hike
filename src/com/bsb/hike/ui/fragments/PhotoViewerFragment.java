@@ -129,6 +129,7 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		{	Logger.d(TAG,  " MsgId : " + sharedMediaItems.get(0).getMsgId());
 			loadItems(false,sharedMediaItems.get(0).getMsgId(),HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY/2,false, true, initialPosition);  //Left
 			loadItems(false,sharedMediaItems.get(0).getMsgId(),HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY/2, true);         //Right
+			setSenderDetails(0);
 		}
 		else
 		{
@@ -160,9 +161,9 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	{
 		sharedMediaItems = getArguments().getParcelableArrayList(HikeConstants.Extras.SHARED_FILE_ITEMS);
 		initialPosition = getArguments().getInt(HikeConstants.MEDIA_POSITION);
-		msisdn = getArguments().getString(HikeConstants.Extras.MSISDN, null);
+		msisdn = getArguments().getString(HikeConstants.Extras.MSISDN);
 		isGroup = getArguments().getBoolean(HikeConstants.Extras.IS_GROUP_CONVERSATION, false);
-		conversationName = getArguments().getString(HikeConstants.Extras.CONVERSATION_NAME, null);
+		conversationName = getArguments().getString(HikeConstants.Extras.CONVERSATION_NAME);
 		
 		if(isGroup)
 		{
@@ -288,6 +289,11 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 
 		}
 		
+		setSenderDetails(position);
+	}
+
+	private void setSenderDetails(int position)
+	{
 		senderName.setText(getSenderName(position));
 		long timeStamp = sharedMediaItems.get(position).getTimeStamp();
 		String date = Utils.getFormattedDate(getSherlockActivity(), timeStamp);
@@ -525,6 +531,11 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 					ArrayList<Long> msgIds = new ArrayList<Long>(1);
 					msgIds.add(getCurrentSelectedItem().getMsgId());
 					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, msgIds);
+					// if delete media from phone is checked
+					if(deleteConfirmDialog.isChecked() && getCurrentSelectedItem().exactFilePathFileExists())
+					{
+						getCurrentSelectedItem().getFileFromExactFilePath().delete();
+					}
 					if(!fromChatThread)
 					{
 						HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_SHARED_FILE_DELETED, getCurrentSelectedItem());
@@ -534,6 +545,7 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 				}
 			};
 
+			deleteConfirmDialog.setCheckBox(R.string.delete_media_from_sdcard);
 			deleteConfirmDialog.setOkButton(R.string.delete, dialogOkClickListener);
 			deleteConfirmDialog.setCancelButton(R.string.cancel);
 			deleteConfirmDialog.show();
