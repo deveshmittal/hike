@@ -153,19 +153,26 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:visibility="gone">
+    
+         <View
+            android:id="@+id/div_fav"
+            android:layout_width="1dp"
+            android:layout_height="16dp"
+            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
+            android:background="@color/list_divider" />
 
         <LinearLayout
             android:id="@+id/tap_to_save_contact"
-            android:layout_width="wrap_content"
+            android:layout_width="180dp"
             android:layout_height="match_parent"
-            android:layout_marginRight="15dp"
-            android:layout_marginLeft="15dp"
             android:orientation="horizontal"
             android:contentDescription="Tap to save contact"
+            android:layout_toLeftOf="@id/div_fav"
+            android:gravity="center"
+            android:layout_marginRight="8dp"
             android:background="@drawable/bg_fav"
-            android:onClick="onAddToContactClicked"
-            android:layout_toLeftOf="@+id/div_fav"
-            android:layout_centerVertical="true" >
+            android:onClick="onAddToContactClicked">
 
             <ImageView
                 android:id="@+id/tap_save_iv"
@@ -190,13 +197,6 @@
 
             </LinearLayout>
             
-            <View
-            android:id="@+id/div_fav"
-            android:layout_width="1dp"
-            android:layout_height="16dp"
-            android:layout_centerInParent="true"
-            android:layout_centerVertical="true"
-            android:background="@color/list_divider" />
             
           <LinearLayout
             android:id="@+id/fav_ll"
@@ -204,9 +204,10 @@
             android:layout_height="match_parent"
             android:layout_toRightOf="@id/div_fav"
             android:orientation="horizontal"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
+            android:gravity="center"
+            android:layout_marginLeft="8dp"
             android:contentDescription="Add to Favorites"
+            android:background="@drawable/bg_fav"
             android:onClick="onTextButtonClick"
             android:layout_centerVertical="true">
 
@@ -215,7 +216,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="Add to Fav"
-                android:src="@drawable/ic_add_friend"
+                android:src="@drawable/ic_add_friend_small"
                 android:layout_gravity="center_vertical"
                 android:layout_marginRight="8dp" />
 
