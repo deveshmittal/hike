@@ -118,6 +118,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -1459,6 +1460,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void showOverFlowMenu()
 	{
+		if(this.getCurrentFocus() != null && this.getCurrentFocus() instanceof EditText)
+		{
+			Utils.hideSoftKeyboard(ChatThread.this, this.getCurrentFocus());
+		}  //Hiding the soft keyboard when the keyboard was visible and overflow menu was pressed.
 
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
