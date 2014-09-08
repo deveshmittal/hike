@@ -3213,6 +3213,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		case VIDEO:
 			if(hikeFile.exactFilePathFileExists())
 			{
+				chatThread.hideKeyBoardIfVisible();
 				ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
 				hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn(), convMessage.getTimestamp(), convMessage
 						.getGroupParticipantMsisdn()));
