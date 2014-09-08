@@ -21,6 +21,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.Html;
+import android.text.SpannableString;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
@@ -871,7 +872,7 @@ public class HikeNotification
 	}
 
 	private void showInboxStyleNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text,
-			final String key, final String message, final String msisdn, String subMessage, Drawable argAvatarDrawable, List<String> inboxLines, boolean shouldNotPlaySound)
+			final String key, final String message, final String msisdn, String subMessage, Drawable argAvatarDrawable, List<SpannableString> inboxLines, boolean shouldNotPlaySound)
 	{
 
 		final boolean shouldNotPlayNotification = shouldNotPlaySound ? shouldNotPlaySound : (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
@@ -898,7 +899,7 @@ public class HikeNotification
 		// Moves events into the big view
 		for (int i = 0; i < inboxLines.size(); i++)
 		{
-			inBoxStyle.addLine(Html.fromHtml(inboxLines.get(i)));
+			inBoxStyle.addLine(inboxLines.get(i));
 		}
 
 		// Moves the big view style object into the notification object.
