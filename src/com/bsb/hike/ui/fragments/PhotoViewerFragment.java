@@ -600,21 +600,24 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 
 	public void toggleViewsVisibility()
 	{
-		ActionBar actionbar = getSherlockActivity().getSupportActionBar();
-		Animation animation;
-		if(!actionbar.isShowing())
+		if (getSherlockActivity() != null)
 		{
-			actionbar.show();
-			animation = AnimationUtils.loadAnimation(getSherlockActivity(), R.anim.fade_in_animation);
+			ActionBar actionbar = getSherlockActivity().getSupportActionBar();
+			Animation animation;
+			if (!actionbar.isShowing())
+			{
+				actionbar.show();
+				animation = AnimationUtils.loadAnimation(getSherlockActivity(), R.anim.fade_in_animation);
+			}
+			else
+			{
+				actionbar.hide();
+				animation = AnimationUtils.loadAnimation(getSherlockActivity(), R.anim.fade_out_animation);
+			}
+			animation.setDuration(300);
+			animation.setFillAfter(true);
+			mParent.findViewById(R.id.info_group).startAnimation(animation);
+			mParent.findViewById(R.id.gradient).startAnimation(animation);
 		}
-		else
-		{
-			actionbar.hide();
-			animation = AnimationUtils.loadAnimation(getSherlockActivity(), R.anim.fade_out_animation);
-		}
-		animation.setDuration(300);
-		animation.setFillAfter(true);
-		mParent.findViewById(R.id.info_group).startAnimation(animation);
-		mParent.findViewById(R.id.gradient).startAnimation(animation);
 	}
 }

@@ -8762,5 +8762,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		return isRemoved;
 	}
-	
+
+	public void hideKeyBoardIfVisible()
+	{
+		if(isKeyboardOpen)
+		{
+			Utils.hideSoftKeyboard(ChatThread.this, mComposeView);
+		}
+	}
 }
