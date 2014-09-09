@@ -116,6 +116,7 @@ import android.text.TextWatcher;
 import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -3234,10 +3235,28 @@ public class Utils
 		Toast.makeText(activity, R.string.shortcut_created, Toast.LENGTH_SHORT).show();
 	}
 
+
 	public static void onCallClicked(Activity activity, final String mContactNumber)
 	{
 		final Activity mActivity = activity;
 		final SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		
+		final JSONObject json = new JSONObject();
+		final JSONObject data = new JSONObject();
+		
+		try {
+			json.put(HikeConstants.TO, mContactNumber);
+			Random random = new Random();
+			int index = random.nextInt(10000);
+			data.put(HikeConstants.MESSAGE_ID, ++index);
+			json.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE);
+			json.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.VOIP_CALL);
+			json.put(HikeConstants.DATA, data);
+			Log.d("VOIP CALL JSON", json.toString());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		if (!settings.getBoolean(HikeConstants.NO_CALL_ALERT_CHECKED, false))
 		{
@@ -3272,13 +3291,15 @@ public class Utils
 
 			btnOk.setOnClickListener(new OnClickListener()
 			{
-
+//			TODO: Aaryaman: Launch rtcActivity instead
 				@Override
 				public void onClick(View v)
 				{
 					Utils.logEvent(mActivity, HikeConstants.LogEvent.MENU_CALL);
-					Intent callIntent = new Intent(Intent.ACTION_CALL);
-					callIntent.setData(Uri.parse("tel:" + mContactNumber));
+					Intent callIntent = new Intent(mActivity,com.bsb.hike.VOIP.RTCActivity.class);
+					callIntent.putExtra("dialedID", mContactNumber);
+//					callIntent.setData(Uri.parse("tel:" + mContactNumber));
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, json);
 					mActivity.startActivity(callIntent);
 					dialog.dismiss();
 				}
@@ -3298,10 +3319,13 @@ public class Utils
 		}
 		else
 		{
-			Utils.logEvent(activity, HikeConstants.LogEvent.MENU_CALL);
-			Intent callIntent = new Intent(Intent.ACTION_CALL);
-			callIntent.setData(Uri.parse("tel:" + mContactNumber));
-			activity.startActivity(callIntent);
+			Utils.logEvent(mActivity, HikeConstants.LogEvent.MENU_CALL);
+			Intent callIntent = new Intent(mActivity.getApplicationContext(),com.bsb.hike.VOIP.RTCActivity.class);
+			callIntent.putExtra("dialedID", mContactNumber);
+//			callIntent.setData(Uri.parse("tel:" + mContactNumber));
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, json);
+			mActivity.startActivity(callIntent);
+//			dialog.dismiss();
 		}
 	}
 

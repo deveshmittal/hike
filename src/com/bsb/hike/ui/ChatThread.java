@@ -141,8 +141,9 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.*;
 import com.actionbarsherlock.view.Menu;
+//import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;

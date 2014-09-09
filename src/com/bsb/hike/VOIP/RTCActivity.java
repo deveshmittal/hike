@@ -1,6 +1,9 @@
 package com.bsb.hike.VOIP;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.support.v4.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -9,6 +12,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,6 +31,8 @@ import org.webrtc.voiceengine.*;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.view.CustomFontEditText;
+import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 
 import java.util.List;
 import android.media.AudioFormat;
@@ -34,7 +40,7 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 
 // DONE: Impement pubsublistener
-public class RTCActivity extends Activity implements WebRtcClient.RTCListener,Runnable{
+public class RTCActivity extends Activity implements WebRtcClient.RTCListener{
   private final static int VIDEO_CALL_SENT = 666;
 //  private VideoStreamsView vsv;
   private WebRtcClient client;
@@ -49,9 +55,12 @@ public class RTCActivity extends Activity implements WebRtcClient.RTCListener,Ru
   private Button acceptCall;
   private Button declineCall;
   private String dialedId;
+  private int notifId = 0;
+  NotificationManager mNotificationManager;
   
   private TextView callNo;
   //  private WebRTCAudioDevice aud1;
+  
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -97,6 +106,43 @@ public class RTCActivity extends Activity implements WebRtcClient.RTCListener,Ru
   public void startUp()
   {
     mContext=getApplicationContext();
+    NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+    
+    mBuilder.setSmallIcon(R.drawable.ic_hike_user);
+    mBuilder.setContentTitle("In Call!");
+    mBuilder.setOngoing(true);
+/*    Intent resultIntent = new Intent(this, RTCActivity.class);
+    TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+    stackBuilder.addParentStack(RTCActivity.class);
+    stackBuilder.addNextIntent(resultIntent);
+    PendingIntent resultPendingIntent =
+            stackBuilder.getPendingIntent(
+                0,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            );
+    mBuilder.setContentIntent(resultPendingIntent);
+    NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);*/
+    
+    Intent resultIntent = new Intent(this, RTCActivity.class);
+    TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+    // Adds the back stack
+    stackBuilder.addParentStack(RTCActivity.class);
+    // Adds the Intent to the top of the stack
+    stackBuilder.addNextIntent(resultIntent);
+    // Gets a PendingIntent containing the entire back stack
+    PendingIntent resultPendingIntent =
+            stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+//    NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+    mBuilder.setContentIntent(resultPendingIntent);
+    mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+	mNotificationManager.notify(notifId, mBuilder.build());
+    
+
+
+
+
+    
     
     manufacturer = Build.MANUFACTURER;
     mContext = getApplicationContext();
@@ -134,6 +180,7 @@ public class RTCActivity extends Activity implements WebRtcClient.RTCListener,Ru
       Bundle extras = getIntent().getExtras();
       if (this.getIntent().hasExtra("callerID")) {
         callerId = extras.getString("callerID");
+        mBuilder.setContentText(callerId);
         try {
         	Log.d("VOIP STARTUP", "CALLERID:" + callerId);
 			answer(callerId);
@@ -147,7 +194,8 @@ public class RTCActivity extends Activity implements WebRtcClient.RTCListener,Ru
       else{
     	  dialedId = extras.getString("dialedID");
     	  Log.d("VOIP STARTUP", "NO CALLERID");
-    	  call();
+    	  mBuilder.setContentText(dialedId);
+    	  call();    
       }
   }
 
@@ -202,7 +250,7 @@ public class RTCActivity extends Activity implements WebRtcClient.RTCListener,Ru
   
   public void setInCallLayout()
   {
-	  setContentView(R.layout.buttonwaala);
+	  setContentView(R.layout.incall_layout);
 	  endCall = (Button)this.findViewById(R.id.endCallButton);
 	  endCall.setBackgroundColor(Color.RED);
 	  endCall.setOnClickListener(new OnClickListener() {
@@ -255,6 +303,7 @@ public class RTCActivity extends Activity implements WebRtcClient.RTCListener,Ru
   @Override
   public void endCall()
   {
+	mNotificationManager.cancel(notifId);
 	declineCall();
 	closeActivity();
   }
@@ -297,7 +346,7 @@ public void declineCall()
       acceptCall.setTextColor(Color.WHITE);
       
       declineCall = (Button)this.findViewById(R.id.declineButton);
-      declineCall.setBackgroundColor(Color.MAGENTA);
+      declineCall.setBackgroundColor(Color.RED);
       declineCall.setTextColor(Color.WHITE);
       acceptCall.setOnClickListener(new OnClickListener(){
 
@@ -325,5 +374,12 @@ public void declineCall()
     	  
       });
   }
+  
+  @Override
+  public void onBackPressed()
+  {
+	  super.onBackPressed();
+  }
+
 
 } 

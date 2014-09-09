@@ -51,6 +51,9 @@ class WebRtcClient {
 	private Random random = new Random();
 	private int index = random.nextInt(10000);
 	public boolean answerpressed = false;
+	private Boolean callReceived = false;
+	private Handler mHandler = new Handler();
+
 
 //	DONE: Removed arg "String:callId" from method onCallReady
 	public interface RTCListener {
@@ -79,12 +82,14 @@ class WebRtcClient {
 //			Log.d(TAG, "CreateOfferCommand");
 			Peer peer = peers.get(peerId);
 			peer.pc.createOffer(peer, pcConstraints);
+			callReceived = true;
 		}
 	}
 
 	private class CreateAnswerCommand implements Command {
 		public void execute(String peerId, JSONObject payload)
 				throws JSONException {
+			callReceived = true;
 //			Log.d(TAG, "CreateAnswerCommand");
 //			while(!answerpressed );
 			Peer peer = peers.get(peerId);
@@ -338,6 +343,30 @@ class WebRtcClient {
 	public WebRtcClient(RTCListener listener) {
 		mListener = listener;
 		factory = new PeerConnectionFactory();
+		long sysTime = System.currentTimeMillis();
+		
+		Runnable checkCallReceived = new Runnable(){
+
+			@Override
+			public void run() {
+				if (callReceived == false){
+					try {
+						sendMessage(storedId, HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE, null);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					mListener.closeActivity();
+				}
+				
+			}
+			
+		};
+		
+		mHandler.removeCallbacks(checkCallReceived);
+        mHandler.postDelayed(checkCallReceived, 30000);
+
+		
 
 		/* SocketIOClient.connect(host, new ConnectCallback() {
 

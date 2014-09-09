@@ -302,7 +302,11 @@
         
          <activity 
              android:name="com.bsb.hike.VOIP.RTCActivity"
-             android:launchMode="singleInstance">             
+             android:launchMode="singleInstance"
+             android:parentActivityName=".HomeActivity">
+    <meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value=".ui.HomeActivity"/>
         </activity>
                      
             <activity
