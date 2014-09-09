@@ -26,16 +26,6 @@
     <string name="image_failed">Unable to open image</string>
     <string name="block_title">Block</string>
     <string name="unblock_title">Unblock</string>
-    <string name="settings_media">Media</string>
-    <string name="image_quality_small">Small</string>
-    <string name="image_quality_medium">Medium</string>
-	<string name="image_quality_original">Original</string>    
-    <string name="media_settings_hinttext">Settings for photos, videos, audio</string>
-    <string name="image_quality_send">Send</string>
-	<string name="image_quality_files_as">files as</string>
-	<string name="image_quality_popup_header">Choose image quality</string>
-	<string name="image_quality_prefs">Image Quality</string>
-	<string name="image_quality_file_as">file as</string>
     <string name="feedback">Feedback</string>
     <string name="sending_feedback">Sending Feedback</string>
     <string name="sending_feedback_failed">Unable to send feedback</string>
@@ -1159,4 +1149,16 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="stealth_info_tip_subtext">Hide your chats. Tap on \'hi\' to get started.</string>
     <string name="file_missing_caps">FILE MISSING</string>
     <string name="status_profile_pic_notification">changed profile picture</string>
+    <string name="image_settings_tip_text">Image Settings</string>
+    <string name="image_settings_tip_subtext">Small. Medium. Original Size</string>
+    <string name="settings_media">Media</string>
+    <string name="media_settings_hinttext">Settings for photos, videos, audio</string>
+    <string name="image_quality_small">Small</string>
+    <string name="image_quality_medium">Medium</string>
+	<string name="image_quality_original">Original</string>    
+    <string name="image_quality_send">Send</string>
+	<string name="image_quality_files_as">files as</string>
+	<string name="image_quality_popup_header">Choose image quality</string>
+	<string name="image_quality_prefs">Image Quality</string>
+	<string name="image_quality_file_as">file as</string>
 </resources>
