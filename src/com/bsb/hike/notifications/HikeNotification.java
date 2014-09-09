@@ -670,11 +670,11 @@ public class HikeNotification
 		// else add to stack and notify clubbed messages
 		if (hikeNotifMsgStack.isEmpty())
 		{
-			hikeNotifMsgStack.addMessage(contactInfo.getMsisdn(), text);
+			hikeNotifMsgStack.addMessage(contactInfo.getMsisdn(), message);
 		}
 		else
 		{
-			notifyStringMessage(contactInfo.getMsisdn(), text, false);
+			notifyStringMessage(contactInfo.getMsisdn(), message, false);
 			return;
 		}
 
@@ -795,11 +795,11 @@ public class HikeNotification
 		// else add to stack and notify clubbed messages
 		if (hikeNotifMsgStack.isEmpty())
 		{
-			hikeNotifMsgStack.addMessage(msisdn, text);
+			hikeNotifMsgStack.addMessage(msisdn, message);
 		}
 		else
 		{
-			notifyStringMessage(msisdn, text, true);
+			notifyStringMessage(msisdn, message, true);
 			return;
 		}
 
