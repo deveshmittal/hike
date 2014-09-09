@@ -707,7 +707,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		// TODO Auto-generated method stub
 		text.setTextColor(context.getResources().getColor(R.color.files_disabled));
 		count.setTextColor(context.getResources().getColor(R.color.files_disabled));
-		background.setBackground(null);   //Removing the pressed state
+		background.setBackgroundDrawable(null);   //Removing the pressed state
 	}
 
 	private void loadMediaInProfile(int size, LinearLayout layout, List<HikeSharedFile> sharedMedia)
