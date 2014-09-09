@@ -572,8 +572,8 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 			arrowPointer.getLayoutParams().width = (int) (78 * Utils.densityMultiplier);
 			arrowPointer.requestLayout();
 			arrowPointer.setImageResource(R.drawable.ftue_up_arrow);
-			((TextView) view.findViewById(R.id.tip_header)).setText("Image Settings");
-			((TextView) view.findViewById(R.id.tip_msg)).setText("Small. Medium. Original Size");
+			((TextView) view.findViewById(R.id.tip_header)).setText(R.string.image_settings_tip_text);
+			((TextView) view.findViewById(R.id.tip_msg)).setText(R.string.image_settings_tip_subtext);
 			final View tipView = view;
 			closeSMLtipView = view.findViewById(R.id.close_tip);
 			closeSMLtipView.setOnClickListener(new OnClickListener()
