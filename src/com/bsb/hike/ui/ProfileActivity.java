@@ -719,9 +719,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				else if(contactInfo.isUnknownContact())
 				{		
 						fav_layout.setVisibility(View.VISIBLE);
-						fav_layout.setTag(getResources().getString(R.string.tap_to_save));
+						fav_layout.setTag(getResources().getString(R.string.tap_save_contact));
 						extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
-						extraInfo.setText(getResources().getString(R.string.tap_to_save));
+						extraInfo.setText(getResources().getString(R.string.tap_save_contact));
 						smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
 				}
 				else
@@ -758,9 +758,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						if (contactInfo.isUnknownContact()) // Tap to save
 						{
 							fav_layout.setVisibility(View.VISIBLE);
-							fav_layout.setTag(getResources().getString(R.string.tap_to_save));
+							fav_layout.setTag(getResources().getString(R.string.tap_save_contact));
 							extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
-							extraInfo.setText(getResources().getString(R.string.tap_to_save));
+							extraInfo.setText(getResources().getString(R.string.tap_save_contact));
 							smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
 						}
 						else
@@ -1759,7 +1759,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	public void onTextButtonClick(View v)
 	{
 		if(v.getTag()!=null &&      
-				((String) v.getTag()).equals(getResources().getString(R.string.tap_save_contact)))  //Only in this case, the the view will have a tag else tag will be null
+				((String) v.getTag()).equals(getResources().getString(R.string.tap_save_contact))) //Only in this case, the the view will have a tag else tag will be null
 		{
 			onAddToContactClicked(v);
 			return;
