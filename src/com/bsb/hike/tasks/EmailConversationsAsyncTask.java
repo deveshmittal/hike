@@ -26,6 +26,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
@@ -67,6 +68,10 @@ public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, C
 			{
 				sBuilder.append(R.string.group_name_email);
 				GroupConversation gConv = ((GroupConversation) convs[k]);
+				if (null == gConv.getGroupParticipantList())
+				{
+					gConv.setGroupParticipantList(ContactManager.getInstance().getGroupParticipants(gConv.getMsisdn(), false, false));
+				}
 				participantMap = gConv.getGroupParticipantList();
 			}
 			// initialize with a label
