@@ -220,7 +220,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/list_item"
-                android:text="Always"
+                android:text="@string/always"
                 android:textColor="@color/image_quality_popup_text_color"
                 android:textSize="15sp" />
 
@@ -236,7 +236,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/list_item"
-                android:text="Just Once"
+                android:text="@string/just_once"
                 android:textColor="@color/image_quality_popup_text_color"
                 android:textSize="15sp" />
         </LinearLayout>

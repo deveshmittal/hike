@@ -670,11 +670,11 @@ public class HikeNotification
 		// else add to stack and notify clubbed messages
 		if (hikeNotifMsgStack.isEmpty())
 		{
-			hikeNotifMsgStack.addMessage(contactInfo.getMsisdn(), text);
+			hikeNotifMsgStack.addMessage(contactInfo.getMsisdn(), message);
 		}
 		else
 		{
-			notifyStringMessage(contactInfo.getMsisdn(), text, false);
+			notifyStringMessage(contactInfo.getMsisdn(), message, false);
 			return;
 		}
 
@@ -795,11 +795,11 @@ public class HikeNotification
 		// else add to stack and notify clubbed messages
 		if (hikeNotifMsgStack.isEmpty())
 		{
-			hikeNotifMsgStack.addMessage(msisdn, text);
+			hikeNotifMsgStack.addMessage(msisdn, message);
 		}
 		else
 		{
-			notifyStringMessage(msisdn, text, true);
+			notifyStringMessage(msisdn, message, true);
 			return;
 		}
 
@@ -1049,7 +1049,7 @@ public class HikeNotification
 		final Bitmap avatarBitmap = HikeBitmapFactory.returnScaledBitmap((HikeBitmapFactory.drawableToBitmap(avatarDrawable, Bitmap.Config.RGB_565)), context);
 
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context).setContentTitle(contentTitle).setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
-				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setPriority(Notification.PRIORITY_DEFAULT);
+				.setContentText(contentText).setAutoCancel(true).setTicker(tickerText).setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
 		//Reset ticker text since we dont want to tick older messages
 		hikeNotifMsgStack.setTickerText(null);
