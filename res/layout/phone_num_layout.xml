@@ -23,31 +23,24 @@
     <LinearLayout
         android:id="@+id/divider_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_marginLeft="6dp"
+        android:layout_marginRight="2dp"
         android:contentDescription="Message Icon"
         android:orientation="horizontal" >
         
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" 
+
+       <ImageView
+            android:id="@+id/message_icon"
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
             android:contentDescription="Message Icon"
             android:onClick="messageBtnClicked"
-            android:background="@drawable/list_item"
-            android:gravity="center">
-
-        <ImageView
-            android:id="@+id/message_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:scaleType="centerInside"
-            android:layout_marginRight="16dp"
-            android:layout_marginLeft="16dp"
             android:layout_gravity="center_vertical"
             android:src="@drawable/ic_message_selector" />
-        </LinearLayout>
 
         <View
             android:id="@+id/divider"
@@ -56,24 +49,16 @@
             android:layout_gravity="center"
             android:background="#d9dbdc" />
 
-         <LinearLayout 
-            android:layout_width="46dp"
-            android:layout_height="36dp"
-            android:contentDescription="Call Icon"
-            android:onClick="callBtnClicked"
-            android:background="@drawable/list_item"
-            android:gravity="center">
-            
         
-        <ImageView
+       <ImageView
             android:id="@+id/call"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="Call Icon"
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
             android:scaleType="centerInside"
             android:layout_gravity="center"
+            android:contentDescription="Call Icon"
+            android:onClick="callBtnClicked"
             android:src="@drawable/ic_telephone_selected" />
-        </LinearLayout>
         
     </LinearLayout>
 
