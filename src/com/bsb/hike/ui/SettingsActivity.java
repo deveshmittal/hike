@@ -3,6 +3,7 @@ package com.bsb.hike.ui;
 import java.util.ArrayList;
 
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -54,7 +55,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 	
 	private ProfilePicImageLoader profileImageLoader;
 	
-	private String[] profilePubSubListeners = { HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.ICON_CHANGED };
+	private String[] profilePubSubListeners = { HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_UPDATE_FINISH };
 	
 	private enum ViewType
 	{
@@ -207,11 +208,8 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		contactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 		msisdn = contactInfo.getMsisdn();
 		
-		// get name
-		profileName = contactInfo.getNameOrMsisdn();
-		
 		// set name and status
-		nameView.setText(profileName);
+		setNameInHeader(nameView);
 
 		addProfileImgInHeader();
 		
@@ -220,6 +218,12 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		settingsList.addHeaderView(header, null, false);
 	}
 	
+	private void setNameInHeader(TextView nameTextView)
+	{
+		// TODO Auto-generated method stub
+		nameTextView.setText(contactInfo.getNameOrMsisdn());
+	}
+
 	public void onViewImageClicked(View v)
 	{
 		ImageViewerInfo imageViewerInfo = (ImageViewerInfo) v.getTag();
@@ -397,7 +401,21 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 					}
 				});
 			}
-		}				
+		}
+		else if (HikePubSub.PROFILE_UPDATE_FINISH.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					String name = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.NAME_SETTING, contactInfo.getNameOrMsisdn());
+					contactInfo.setName(name);
+					setNameInHeader(nameView);
+				}
+			});
+		}
 	}
 	
 	@Override
