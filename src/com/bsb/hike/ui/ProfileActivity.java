@@ -533,7 +533,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			if (friendItem != null)
 			{
-					if (contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED_REJECTED)
+					if (contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED_REJECTED && contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)
 					{
 						friendItem.setVisible(true);
 						friendItem.setTitle(R.string.remove_from_favorites);
