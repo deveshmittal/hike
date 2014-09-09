@@ -416,7 +416,7 @@ public class ConversationsAdapter extends BaseAdapter
 			{
 				viewHolder.avatar.setImageResource(R.drawable.ic_information);
 			}else if(viewType == ViewType.ATOMIC_APP_GENERIC_TIP){
-				viewHolder.avatar.setImageResource(R.drawable.ic_information);
+				viewHolder.avatar.setImageDrawable(null);
 			}
 			viewHolder.closeTip.setOnClickListener(new OnClickListener()
 			{
