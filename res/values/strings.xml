@@ -553,7 +553,6 @@
     <string name="sent_you_friend_request">Sent you a friend request</string>
     <string name="num_people">%1$d people</string>
     <string name="add">Add</string>
-    <string name="tap_save_contact">Tap to save contact</string>
     <string name="no_updates">No updates from %1$s yet.</string>
     <string name="email_conversation">Email Conversation</string>
     <string name="me_key">me</string>
@@ -1125,7 +1124,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="confirm_delete_pins_header">Delete pins</string>
     <string name="confirm_delete_pins">Are you sure you want to delete these %1$s pins?</string>    
     <string name="shared_media">Shared Media</string>
-    <string name="shared_files">Shared Files</string>
     <string name="add_btn">ADD</string>
     <string name="not_now">NOT NOW</string>
     <string name="on_hike">on hike</string>
@@ -1161,4 +1159,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="stealth_info_tip_subtext">Tap on \'hi\' to hide your chats.</string>
     <string name="file_attachment_info">Share doc, pdf &amp; media up to 100 MB</string>
     <string name="status_text_notification">posted an update %1$s</string>
+    <string name="shared_files">Files</string>
+    <string name="tap_save_contact">Save contact</string>
 </resources>

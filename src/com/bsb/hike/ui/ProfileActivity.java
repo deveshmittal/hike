@@ -47,6 +47,7 @@ import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.Animation.AnimationListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -253,6 +254,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			profileAdapter.getTimelineImageLoader().setExitTasksEarly(true);
 			profileAdapter.getIconImageLoader().setExitTasksEarly(true);
 			profileAdapter.getProfilePicImageLoader().setExitTasksEarly(true);
+			profileAdapter.getSharedFileImageLoader().setExitTasksEarly(true);
 		}
 	}
 	
@@ -500,6 +502,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			profileAdapter.getTimelineImageLoader().setExitTasksEarly(false);
 			profileAdapter.getIconImageLoader().setExitTasksEarly(false);
 			profileAdapter.getProfilePicImageLoader().setExitTasksEarly(false);
+			profileAdapter.getSharedFileImageLoader().setExitTasksEarly(false);
 			profileAdapter.notifyDataSetChanged();
 		}
 	}
@@ -544,7 +547,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			if (friendItem != null)
 			{
-					if (contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED_REJECTED)
+					if (contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED_REJECTED && contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)
 					{
 						friendItem.setVisible(true);
 						friendItem.setTitle(R.string.remove_from_favorites);
@@ -714,10 +717,13 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			fav_layout.setVisibility(View.GONE);
 			req_layout.setVisibility(View.GONE);
 			dual_layout.setVisibility(View.GONE);
-			
-			if (showContactsUpdates(contactInfo)) // Favourite case
+			statusMood.setVisibility(View.GONE);
+			if(!HikeMessengerApp.hikeBotNamesMap.containsKey(contactInfo.getMsisdn()))  //The HikeBot's numbers wont be shown
 			{
-				addContactStatusInHeaderView(subText, statusMood);
+			if (showContactsUpdates(contactInfo)) // Favourite case
+			
+			{
+				addContactStatusInHeaderView(text, subText, statusMood);
 				// Request_Received --->> Show add/not now screen.
 				if (contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
 				{
@@ -740,40 +746,45 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 				
 			}
-			else if (contactInfo.isOnhike() && (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED || contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED))
-			{
-				subText.setText(getJoinedHikeStatus(contactInfo).getText().toString());
-				if(contactInfo.isUnknownContact())
+			else if (contactInfo.isOnhike()) 
 				{
-					//Show dual layout
-					dual_layout.setVisibility(View.VISIBLE);
-				}
-				else
-				{	dual_layout.setVisibility(View.GONE);
-					fav_layout.setVisibility(View.VISIBLE);
-					extraInfo.setTextColor(getResources().getColor(R.color.add_fav));
-					extraInfo.setText(getResources().getString(R.string.add_fav));
-					smallIcon.setImageResource(R.drawable.ic_add_friend);
-				}
+					setStatusText(getJoinedHikeStatus(contactInfo), subText, text);
+					if ((contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED || contactInfo
+							.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED))
+					{
+
+						if (contactInfo.isUnknownContact())
+						{
+							// Show dual layout
+							dual_layout.setVisibility(View.VISIBLE);
+						}
+						else
+						{
+							dual_layout.setVisibility(View.GONE);
+							fav_layout.setVisibility(View.VISIBLE);
+							extraInfo.setTextColor(getResources().getColor(R.color.add_fav));
+							extraInfo.setText(getResources().getString(R.string.add_fav));
+							smallIcon.setImageResource(R.drawable.ic_add_friend);
+						}
+					}
+					else if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT)
+					{
+						if (contactInfo.isUnknownContact()) // Tap to save
+						{
+							fav_layout.setVisibility(View.VISIBLE);
+							fav_layout.setTag(getResources().getString(R.string.tap_to_save));
+							extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
+							extraInfo.setText(getResources().getString(R.string.tap_to_save));
+							smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
+						}
+						else
+						{
+							fav_layout.setTag(null);
+							fav_layout.setVisibility(View.GONE);
+						}
+					}
 			}
 
-			else if (contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT)
-			{
-				subText.setText(getJoinedHikeStatus(contactInfo).getText().toString());
-				if(contactInfo.isUnknownContact())  //Tap to save
-				{ 	
-					fav_layout.setVisibility(View.VISIBLE);
-					fav_layout.setTag(getResources().getString(R.string.tap_to_save));
-					extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
-					extraInfo.setText(getResources().getString(R.string.tap_to_save));
-					smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
-				}
-				else
-				{
-					fav_layout.setTag(null);
-					fav_layout.setVisibility(View.GONE);
-				}
-			}
 			else if (!contactInfo.isOnhike())
 			{  	subText.setText(getResources().getString(R.string.on_sms));
 				// UNKNOWN and on SMS
@@ -791,8 +802,13 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					extraInfo.setText(getResources().getString(R.string.ftue_add_prompt_invite_title));
 					smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
 				}
+			 }
 			}
-
+			else  //Hike Bot. Don't show the status subtext bar
+			{
+				subText.setVisibility(View.GONE);
+			}
+			
 			break;
 		case GROUP_INFO:
 			if(headerView == null)
@@ -832,7 +848,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 	}
 	
-	private void addContactStatusInHeaderView(TextView subText, ImageView statusMood)
+	private void addContactStatusInHeaderView(TextView name, TextView subText, ImageView statusMood)
 	{
 		StatusMessageType[] statusMessagesTypesToFetch = {StatusMessageType.TEXT};
 		StatusMessage status = HikeConversationsDatabase.getInstance().getLastStatusMessage(statusMessagesTypesToFetch, contactInfo);
@@ -852,12 +868,39 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		
 		status = getJoinedHikeStatus(contactInfo);
-		if (status.getTimeStamp() == 0)
-			subText.setText(status.getText());
-		else
-			subText.setText(status.getText() + " " + status.getTimestampFormatted(true, ProfileActivity.this));
+		setStatusText(status, subText, name);
 	}
 	
+	private void setStatusText(StatusMessage status,final TextView subText, TextView name)
+	{
+		if (status.getTimeStamp() == 0)
+			subText.setVisibility(View.GONE);
+		else
+		{
+			subText.setText(status.getText() + " " + status.getTimestampFormatted(true, ProfileActivity.this));
+			subText.setVisibility(View.INVISIBLE);
+			Animation animation = AnimationUtils.loadAnimation(this, R.anim.slide_up_hike_joined);
+			name.startAnimation(animation);
+			animation.setAnimationListener(new AnimationListener()
+			{
+				@Override
+				public void onAnimationStart(Animation animation)
+				{
+				}
+
+				@Override
+				public void onAnimationRepeat(Animation animation)
+				{
+				}
+
+				@Override
+				public void onAnimationEnd(Animation animation)
+				{
+					subText.setVisibility(View.VISIBLE);
+				}
+			});
+		}
+	}
 
 	private void setupContactProfileList()
 	{
@@ -2258,13 +2301,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				@Override
 				public void run()
 				{
-					if (showContactsUpdates(contactInfo))
-					{
 						//invalidateOptionsMenu();
 						//setupContactProfileList();
 						//profileAdapter.notifyDataSetChanged();
 						updateProfileHeaderView();
-					}
 				}
 			});
 		}
@@ -2741,12 +2781,19 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		
 		if(groupConversation!=null)
 		{
-			Intent intent = new Intent();
-			intent.setClass(ProfileActivity.this, PinHistoryActivity.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.putExtra(HikeConstants.TEXT_PINS, mLocalMSISDN);
-			startActivity(intent);
-			return;
+			if (sharedPinCount == 0)
+			{
+				Toast.makeText(ProfileActivity.this, getResources().getString(R.string.pinHistoryTutorialText), Toast.LENGTH_SHORT).show();
+			}
+			else
+			{
+				Intent intent = new Intent();
+				intent.setClass(ProfileActivity.this, PinHistoryActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				intent.putExtra(HikeConstants.TEXT_PINS, mLocalMSISDN);
+				startActivity(intent);
+				return;
+			}
 		}
 	}
 	
@@ -2756,11 +2803,17 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{
 			return;
 		}
-		Utils.sendUILogEvent(HikeConstants.LogEvent.SHARED_FILES_VIA_PROFILE);
-		
-		Intent intent = new Intent(this, SharedOtherFilesActivity.class);
-		intent.putExtra(HikeConstants.Extras.MSISDN, mLocalMSISDN);
-		startActivity(intent);
+		if (sharedFileCount == 0)
+		{
+			Toast.makeText(ProfileActivity.this, R.string.no_file_profile, Toast.LENGTH_SHORT).show();
+		}
+		else
+		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.SHARED_FILES_VIA_PROFILE);
+			Intent intent = new Intent(this, SharedOtherFilesActivity.class);
+			intent.putExtra(HikeConstants.Extras.MSISDN, mLocalMSISDN);
+			startActivity(intent);
+		}
 	}
 	
 	public void messageBtnClicked(View v)

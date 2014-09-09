@@ -36,14 +36,38 @@
             android:src="@drawable/ic_invite_to_hike"
             android:visibility="gone" />
     </LinearLayout>
+    
+    <LinearLayout 
+        android:background="@drawable/bg_compose_tag"
+        android:layout_width="48dp"
+        android:layout_height="24dp"
+		android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="8dp"   
+        android:visibility="gone"
+        android:id="@+id/owner_indicator" >
+        
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/owner_indicator_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/group_admin"
+        android:textColor="@color/blue_hike"
+        android:textSize="11sp"
+        android:paddingLeft="6dp"
+        android:paddingRight="6dp"
+        android:layout_gravity="center"
+        android:textStyle="normal"/>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/details_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginRight="14dp"
+        android:layout_marginRight="6dp"
         android:layout_toRightOf="@id/image_container"
+        android:layout_toLeftOf="@id/owner_indicator"
         android:orientation="horizontal" >
 
         <com.bsb.hike.view.CustomFontTextView
@@ -61,7 +85,6 @@
             android:id="@+id/unsaved_cont_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="14dp"
             android:layout_marginTop="2dp"
             android:layout_marginBottom="2dp"
             android:visibility="gone"
@@ -92,28 +115,6 @@
 
     </LinearLayout>
 
-    <LinearLayout 
-        android:background="@drawable/bg_compose_tag"
-        android:layout_width="48dp"
-        android:layout_height="24dp"
-		android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="8dp"   
-        android:visibility="gone"
-        android:id="@+id/owner_indicator" >
-        
-    <com.bsb.hike.view.CustomFontTextView
-        android:id="@+id/owner_indicator_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/group_admin"
-        android:textColor="@color/blue_hike"
-        android:textSize="11sp"
-        android:paddingLeft="6dp"
-        android:paddingRight="6dp"
-        android:layout_gravity="center"
-        android:textStyle="normal"/>
-    </LinearLayout>
 
     <View
         style="@style/Divider"
