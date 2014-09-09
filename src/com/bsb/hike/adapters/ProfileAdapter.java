@@ -844,6 +844,11 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	{
 		return profileImageLoader;
 	}
+	
+	public SharedFileImageLoader getSharedFileImageLoader()
+	{
+		return thumbnailLoader; 
+	}
 
 	private boolean isListFlinging;
 
