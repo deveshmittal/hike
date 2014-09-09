@@ -704,6 +704,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			req_layout.setVisibility(View.GONE);
 			dual_layout.setVisibility(View.GONE);
 			statusMood.setVisibility(View.GONE);
+			fav_layout.setTag(null);  //Resetting the tag, incase we need to add to favorites again.
 			if(!HikeMessengerApp.hikeBotNamesMap.containsKey(contactInfo.getMsisdn()))  //The HikeBot's numbers wont be shown
 			{
 			if (showContactsUpdates(contactInfo)) // Favourite case
