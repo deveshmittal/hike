@@ -7,18 +7,25 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import android.R.color;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.R;
 import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.modules.contactmgr.ContactManager;
@@ -47,7 +54,7 @@ public class HikeNotificationMsgStack implements Listener
 
 	private HikeConversationsDatabase mConvDb;
 
-	private ArrayList<String> mBigTextList;
+	private ArrayList<SpannableString> mBigTextList;
 
 	private ConvMessage mLastInsertedConvMessage;
 
@@ -398,7 +405,7 @@ public class HikeNotificationMsgStack implements Listener
 	public String getNotificationBigText()
 	{
 		int addedNotifications = 0;
-		setBigTextList(new ArrayList<String>());
+		setBigTextList(new ArrayList<SpannableString>());
 		StringBuilder bigText = new StringBuilder();
 
 		for (Pair<String, String> convMsgPair : mMessageTitlePairList)
@@ -411,11 +418,13 @@ public class HikeNotificationMsgStack implements Listener
 
 			if (!isFromSingleMsisdn())
 			{
-				bigText.append("<strong>" + notificationMsgTitle + "</strong>:  " + convMsgPair.second);
-			}
+				bigText.append("<strong>" + notificationMsgTitle + "</strong>  " + convMsgPair.second);
+				getBigTextList().add(HikeNotificationUtils.makeNotificationLine(notificationMsgTitle, convMsgPair.second));
+			} 
 			else
 			{
 				bigText.append(convMsgPair.second);
+				getBigTextList().add(HikeNotificationUtils.makeNotificationLine(null, convMsgPair.second));
 			}
 
 			if (!(addedNotifications == 0))
@@ -425,8 +434,6 @@ public class HikeNotificationMsgStack implements Listener
 
 			addedNotifications++;
 
-			getBigTextList().add(bigText.toString());
-
 			if (addedNotifications == mNotificationTextLines)
 			{
 				break;
@@ -435,7 +442,7 @@ public class HikeNotificationMsgStack implements Listener
 
 		Collections.reverse(getBigTextList());
 		bigText = new StringBuilder();
-		for (String text : getBigTextList())
+		for (SpannableString text : getBigTextList())
 		{
 			bigText.append(text);
 		}
@@ -538,12 +545,12 @@ public class HikeNotificationMsgStack implements Listener
 	 * 
 	 * @return
 	 */
-	public ArrayList<String> getBigTextList()
+	public ArrayList<SpannableString> getBigTextList()
 	{
 		return mBigTextList;
 	}
 
-	private void setBigTextList(ArrayList<String> bigTextList)
+	private void setBigTextList(ArrayList<SpannableString> bigTextList)
 	{
 		this.mBigTextList = bigTextList;
 	}

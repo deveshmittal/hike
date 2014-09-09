@@ -403,7 +403,6 @@
     <string name="on_hike_since">on hike since %1$s</string>
     <string name="user_added_contact_as_friend">Added as a friend</string>
     <string name="tap_here_block">Tap here to block this number</string>
-    <string name="status_text_notification">wrote %1$s</string>
     <string name="status_updates">Status updates</string>
     <string name="default_status">Tap here to update your status.</string>
     <string name="tap_here">Tap here</string>
@@ -1161,4 +1160,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="notifications_contact_join_title">Contact joining Hike</string>
     <string name="stealth_info_tip_subtext">Tap on \'hi\' to hide your chats.</string>
     <string name="file_attachment_info">Share doc, pdf &amp; media up to 100 MB</string>
+    <string name="status_text_notification">posted an update %1$s</string>
 </resources>
