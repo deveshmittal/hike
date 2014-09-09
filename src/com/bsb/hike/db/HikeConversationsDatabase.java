@@ -2037,17 +2037,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 							grpMsisdns = getGroupLastMsgMsisdn(new JSONObject(metadata));
 							if (null != grpMsisdns)
 							{
-								if (grpMsisdns.size() == 0)
+								if (grpMsisdns.isEmpty())
 								{
 									if (null != groupParticipant && !groupParticipant.equals(""))
 									{
 										grpMsisdns.add(groupParticipant);
 									}
 								}
-								else
-								{
-									grpLastMsisdns.put(msisdn, grpMsisdns);
-								}
+								grpLastMsisdns.put(msisdn, grpMsisdns);
 							}
 						}
 					}
@@ -2841,7 +2838,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		try
 		{
 			c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.NAME, DBConstants.GROUP_ID }, DBConstants.MSISDN + " IN " + msisdns,
-					null, DBConstants.MSISDN, null, null);
+					null, null, null, null);
 			final int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
 			final int nameIdx = c.getColumnIndex(DBConstants.NAME);
 			final int groupidIdx = c.getColumnIndex(DBConstants.GROUP_ID);
