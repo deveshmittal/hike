@@ -71,6 +71,8 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	
 	private int totalSelections;
 
+	private boolean smlDialogShown = false;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -246,7 +248,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 				final String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
 				final boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
 				
-				if (!HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
+				if (!HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false) && !smlDialogShown)
 				{
 					HikeDialog.showDialog(GallerySelectionViewer.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
 					{
@@ -337,6 +339,8 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 							
 						}
 					}, (Object[]) new Long[]{(long)fileDetails.size(), sizeOriginal});
+
+					smlDialogShown = true;
 				}
 		});
 		actionBar.setCustomView(actionBarView);
