@@ -279,9 +279,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			@Override
 			public void onClick(View v)
 			{
-				Intent intent = new Intent(HikePreferences.this, SettingsActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
+				onBackPressed();
 			}
 		});
 
