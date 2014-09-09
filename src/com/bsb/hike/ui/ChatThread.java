@@ -2290,11 +2290,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		
 		if (mConversation == null)
 		{
-			if(mContactNumber.equals(HikeNotification.HIKE_STEALTH_MESSAGE_KEY))
-			{
-				onBackPressed();
-				return false;
-			}
 			if (Utils.isGroupConversation(mContactNumber))
 			{
 				/* the user must have deleted the chat. */
