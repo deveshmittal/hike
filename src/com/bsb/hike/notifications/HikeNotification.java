@@ -21,6 +21,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.Html;
+import android.text.SpannableString;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
@@ -669,11 +670,11 @@ public class HikeNotification
 		// else add to stack and notify clubbed messages
 		if (hikeNotifMsgStack.isEmpty())
 		{
-			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), text);
+			hikeNotifMsgStack.addMessage(contactInfo.getMsisdn(), text);
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), text, false);
+			notifyStringMessage(contactInfo.getMsisdn(), text, false);
 			return;
 		}
 
@@ -740,11 +741,11 @@ public class HikeNotification
 		// else add to stack and notify clubbed messages
 		if (hikeNotifMsgStack.isEmpty())
 		{
-			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), text);
+			hikeNotifMsgStack.addMessage(statusMessage.getMsisdn(), message);
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), text, true);
+			notifyStringMessage(statusMessage.getMsisdn(), message, true);
 			return;
 		}
 
@@ -794,11 +795,11 @@ public class HikeNotification
 		// else add to stack and notify clubbed messages
 		if (hikeNotifMsgStack.isEmpty())
 		{
-			hikeNotifMsgStack.addMessage(context.getString(R.string.app_name), text);
+			hikeNotifMsgStack.addMessage(msisdn, text);
 		}
 		else
 		{
-			notifyStringMessage(context.getString(R.string.app_name), text, true);
+			notifyStringMessage(msisdn, text, true);
 			return;
 		}
 
@@ -871,7 +872,7 @@ public class HikeNotification
 	}
 
 	private void showInboxStyleNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text,
-			final String key, final String message, final String msisdn, String subMessage, Drawable argAvatarDrawable, List<String> inboxLines, boolean shouldNotPlaySound)
+			final String key, final String message, final String msisdn, String subMessage, Drawable argAvatarDrawable, List<SpannableString> inboxLines, boolean shouldNotPlaySound)
 	{
 
 		final boolean shouldNotPlayNotification = shouldNotPlaySound ? shouldNotPlaySound : (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
@@ -898,7 +899,7 @@ public class HikeNotification
 		// Moves events into the big view
 		for (int i = 0; i < inboxLines.size(); i++)
 		{
-			inBoxStyle.addLine(Html.fromHtml(inboxLines.get(i)));
+			inBoxStyle.addLine(inboxLines.get(i));
 		}
 
 		// Moves the big view style object into the notification object.
@@ -907,8 +908,6 @@ public class HikeNotification
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 
 		setOnDeleteIntent(mBuilder, notificationId);
-
-		mBuilder.setNumber(hikeNotifMsgStack.getUnreadMessages());
 
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
 		{
@@ -949,8 +948,6 @@ public class HikeNotification
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 
 		setOnDeleteIntent(mBuilder, notificationId);
-
-		mBuilder.setNumber(hikeNotifMsgStack.getUnreadMessages());
 
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
 		{
@@ -1007,7 +1004,6 @@ public class HikeNotification
 		}
 
 		setOnDeleteIntent(mBuilder, notificationId);
-		mBuilder.setNumber(hikeNotifMsgStack.getUnreadMessages());
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
 		{

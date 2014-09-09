@@ -122,6 +122,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -186,6 +187,7 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -1389,6 +1391,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void showOverFlowMenu()
 	{
+		if(this.getCurrentFocus() != null && this.getCurrentFocus() instanceof EditText)
+		{
+			Utils.hideSoftKeyboard(ChatThread.this, this.getCurrentFocus());
+		}  //Hiding the soft keyboard when the keyboard was visible and overflow menu was pressed.
 
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
@@ -2284,6 +2290,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		
 		if (mConversation == null)
 		{
+			if(mContactNumber.equals(HikeNotification.HIKE_STEALTH_MESSAGE_KEY))
+			{
+				onBackPressed();
+				return false;
+			}
 			if (Utils.isGroupConversation(mContactNumber))
 			{
 				/* the user must have deleted the chat. */
@@ -8757,5 +8768,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		return isRemoved;
 	}
-	
+
+	public void hideKeyBoardIfVisible()
+	{
+		if(isKeyboardOpen)
+		{
+			Utils.hideSoftKeyboard(ChatThread.this, mComposeView);
+		}
+	}
 }

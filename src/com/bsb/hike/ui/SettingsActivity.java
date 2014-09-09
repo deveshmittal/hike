@@ -3,10 +3,10 @@ package com.bsb.hike.ui;
 import java.util.ArrayList;
 
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,7 +17,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
@@ -30,17 +29,33 @@ import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.service.HikeService;
 import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
 public class SettingsActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener
 {
 	private ContactInfo contactInfo;
+	
+	private String msisdn;
+	
+	private ImageView profileImgView;
+	
+	private ImageView statusMood;
+	
+	private TextView nameView;
+	
+	private TextView statusView;
+
+	private String profileName;
+	
+	private ProfilePicImageLoader profileImageLoader;
+	
+	private String[] profilePubSubListeners = { HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_UPDATE_FINISH };
 	
 	private enum ViewType
 	{
@@ -52,7 +67,10 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.settings);
-
+		profileImageLoader = new ProfilePicImageLoader(this, getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size));
+		
+		HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
+		
 		ArrayList<String> items = new ArrayList<String>();
 
 		items.add(getString(R.string.notifications));
@@ -170,10 +188,10 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		View header = getLayoutInflater().inflate(R.layout.profile_header_other, null);
 		header.findViewById(R.id.remove_fav).setVisibility(View.GONE);
-		ImageView profileImgView = (ImageView)header.findViewById(R.id.profile_image);
-		ImageView statusMood = (ImageView)header.findViewById(R.id.status_mood);
-		TextView nameView = (TextView)header.findViewById(R.id.name);
-		TextView statusView = (TextView)header.findViewById(R.id.subtext);
+		profileImgView = (ImageView)header.findViewById(R.id.profile_image);
+		statusMood = (ImageView)header.findViewById(R.id.status_mood);
+		nameView = (TextView)header.findViewById(R.id.name);
+		statusView = (TextView)header.findViewById(R.id.subtext);
 		ImageView arrowView = (ImageView)header.findViewById(R.id.view_profile);
 		header.findViewById(R.id.divider_view).setVisibility(View.VISIBLE);
 		arrowView.setImageDrawable(getResources().getDrawable(R.drawable.ic_arrow));
@@ -188,56 +206,24 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		});
 
 		contactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
-		String mappedId = contactInfo.getMsisdn() + ProfileActivity.PROFILE_ROUND_SUFFIX;
-		
-		// get name
-		String name = contactInfo.getNameOrMsisdn();
-		
-		// set profile picture
-		int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
-		(new ProfilePicImageLoader(this, mBigImageSize)).loadImage(mappedId, profileImgView, false, false, true);
-
-		ImageViewerInfo imageViewerInfo = new ImageViewerInfo(contactInfo.getMsisdn() + ProfileActivity.PROFILE_PIC_SUFFIX, null, false, !ContactManager.getInstance().hasIcon(contactInfo.getMsisdn()));
-		profileImgView.setTag(imageViewerInfo);
-
-		// get hike status
-		StatusMessageType[] statusMessagesTypesToFetch = {StatusMessageType.TEXT};
-		StatusMessage status = HikeConversationsDatabase.getInstance().getLastStatusMessage(statusMessagesTypesToFetch, contactInfo);
+		msisdn = contactInfo.getMsisdn();
 		
 		// set name and status
-		nameView.setText(name);
+		setNameInHeader(nameView);
+
+		addProfileImgInHeader();
 		
-		if(status != null)
-		{
-			if (status.hasMood()) 
-			{
-				statusMood.setVisibility(View.VISIBLE);
-				statusMood.setImageResource(EmoticonConstants.moodMapping.get(status.getMoodId()));
-			}
-			else
-			{
-				statusMood.setVisibility(View.GONE);
-			}
-			statusView.setText(SmileyParser.getInstance().addSmileySpans(status.getText(), true));			
-		}
-		else
-		{
-			status = new StatusMessage(HikeConstants.JOINED_HIKE_STATUS_ID, null, contactInfo.getMsisdn(), contactInfo.getName(),
-				getString(R.string.joined_hike_update), StatusMessageType.JOINED_HIKE, contactInfo.getHikeJoinTime());
-		
-			if (status.getTimeStamp() == 0)
-			{
-				statusView.setText(status.getText());
-			}
-			else
-			{
-				statusView.setText(status.getText() + " " + status.getTimestampFormatted(true, SettingsActivity.this));
-			}
-		}
+		addStatusInHeader();
 		
 		settingsList.addHeaderView(header, null, false);
 	}
 	
+	private void setNameInHeader(TextView nameTextView)
+	{
+		// TODO Auto-generated method stub
+		nameTextView.setText(contactInfo.getNameOrMsisdn());
+	}
+
 	public void onViewImageClicked(View v)
 	{
 		ImageViewerInfo imageViewerInfo = (ImageViewerInfo) v.getTag();
@@ -324,5 +310,119 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			setupActionBar();
 		}
 		return isRemoved;
+	}
+	
+	private void addProfileImgInHeader()
+	{
+		String mappedId = contactInfo.getMsisdn() + ProfileActivity.PROFILE_ROUND_SUFFIX;
+
+		// set profile picture
+		profileImageLoader.loadImage(mappedId, profileImgView, false, false, true);
+
+		ImageViewerInfo imageViewerInfo = new ImageViewerInfo(contactInfo.getMsisdn() + ProfileActivity.PROFILE_PIC_SUFFIX, null, false, !ContactManager.getInstance().hasIcon(contactInfo.getMsisdn()));
+		profileImgView.setTag(imageViewerInfo);
+	}
+	
+	private void addStatusInHeader()
+	{
+		// get hike status
+		StatusMessageType[] statusMessagesTypesToFetch = {StatusMessageType.TEXT};
+		StatusMessage status = HikeConversationsDatabase.getInstance().getLastStatusMessage(statusMessagesTypesToFetch, contactInfo);
+				
+		if(status != null)
+		{
+			if (status.hasMood()) 
+			{
+				statusMood.setVisibility(View.VISIBLE);
+				statusMood.setImageResource(EmoticonConstants.moodMapping.get(status.getMoodId()));
+			}
+			else
+			{
+				statusMood.setVisibility(View.GONE);
+			}
+			statusView.setText(SmileyParser.getInstance().addSmileySpans(status.getText(), true));			
+		}
+		else
+		{
+			status = new StatusMessage(HikeConstants.JOINED_HIKE_STATUS_ID, null, contactInfo.getMsisdn(), contactInfo.getName(),
+				getString(R.string.joined_hike_update), StatusMessageType.JOINED_HIKE, contactInfo.getHikeJoinTime());
+		
+			if (status.getTimeStamp() == 0)
+			{
+				statusView.setText(status.getText());
+			}
+			else
+			{
+				statusView.setText(status.getText() + " " + status.getTimestampFormatted(true, SettingsActivity.this));
+			}
+		}
+	}
+	
+	@Override
+	public void onEventReceived(final String type, Object object)
+	{
+		super.onEventReceived(type, object);
+
+		if (contactInfo.getMsisdn() == null)
+		{
+			return;
+		}
+		else if (HikePubSub.ICON_CHANGED.equals(type))
+		{
+			if (msisdn.equals((String) object))
+			{
+				runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						addProfileImgInHeader();
+					}
+				});
+			}
+		}
+		else if (HikePubSub.STATUS_MESSAGE_RECEIVED.equals(type))
+		{
+			StatusMessage status = (StatusMessage)object;
+			
+			if(status.getStatusMessageType()==StatusMessageType.PROFILE_PIC)
+			{
+				return;
+			}
+			
+			if(status.getMsisdn().equals(msisdn))
+			{
+				runOnUiThread(new Runnable() 
+				{				
+					@Override
+					public void run() 
+					{
+						addStatusInHeader();					
+					}
+				});
+			}
+		}
+		else if (HikePubSub.PROFILE_UPDATE_FINISH.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					String name = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.NAME_SETTING, contactInfo.getNameOrMsisdn());
+					contactInfo.setName(name);
+					setNameInHeader(nameView);
+				}
+			});
+		}
+	}
+	
+	@Override
+	protected void onDestroy() 
+	{
+		HikeMessengerApp.getPubSub().removeListeners(this, profilePubSubListeners);
+		
+		super.onDestroy();
 	}
 }

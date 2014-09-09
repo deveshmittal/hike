@@ -5103,7 +5103,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 
-		unreadMessages += Utils.getNotificationCount(mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0), true);
+		unreadMessages += Utils.getNotificationCount(mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0), false);
 
 		return unreadMessages;
 	}
