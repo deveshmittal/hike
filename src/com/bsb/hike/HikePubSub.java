@@ -335,6 +335,8 @@ public class HikePubSub implements Runnable
 	public static final String CLOSE_CURRENT_STEALTH_CHAT = "closeCurrentStealthChat";
 
 	public static final String APP_FOREGROUNDED = "appForegrounded";
+	
+	public static final String APP_BACKGROUNDED = "appBackgrounded";
 
 	public static final String REMOVE_WELCOME_HIKE_TIP = "removeWelcomeHikeTip";
 
