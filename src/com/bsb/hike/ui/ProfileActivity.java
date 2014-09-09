@@ -254,7 +254,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			profileAdapter.getTimelineImageLoader().setExitTasksEarly(true);
 			profileAdapter.getIconImageLoader().setExitTasksEarly(true);
 			profileAdapter.getProfilePicImageLoader().setExitTasksEarly(true);
-			profileAdapter.getSharedFileImageLoader().setExitTasksEarly(true);
+			
+			if(profileAdapter.getSharedFileImageLoader()!=null)
+			{
+				profileAdapter.getSharedFileImageLoader().setExitTasksEarly(true);
+			}
 		}
 	}
 	
@@ -502,7 +506,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			profileAdapter.getTimelineImageLoader().setExitTasksEarly(false);
 			profileAdapter.getIconImageLoader().setExitTasksEarly(false);
 			profileAdapter.getProfilePicImageLoader().setExitTasksEarly(false);
-			profileAdapter.getSharedFileImageLoader().setExitTasksEarly(false);
+						
+			if(profileAdapter.getSharedFileImageLoader()!=null)
+			{
+				profileAdapter.getSharedFileImageLoader().setExitTasksEarly(false);
+			}
 			profileAdapter.notifyDataSetChanged();
 		}
 	}
