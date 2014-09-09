@@ -703,6 +703,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			fav_layout.setVisibility(View.GONE);
 			req_layout.setVisibility(View.GONE);
 			dual_layout.setVisibility(View.GONE);
+			statusMood.setVisibility(View.GONE);
 			if(!HikeMessengerApp.hikeBotNamesMap.containsKey(contactInfo.getMsisdn()))  //The HikeBot's numbers wont be shown
 			{
 			if (showContactsUpdates(contactInfo)) // Favourite case
