@@ -147,12 +147,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.PARTICIPANT_JOINED_GROUP,
 			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
-			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD };
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT };
 
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST,
 			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
-			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.CONTACT_DELETED, HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD };
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.CONTACT_DELETED };
 
 	private String[] profilePubSubListeners = { HikePubSub.USER_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.STATUS_MESSAGE_RECEIVED,
 			HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
@@ -2378,47 +2378,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				public void run()
 				{
 					finishEditing();
-				}
-			});
-		}
-		else if (HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD.equals(type))
-		{
-			if (!(object instanceof ArrayList<?>))
-			{
-				Logger.d(TAG, "Object not an instance of ArrayList in PubSub Event : Remove message from Chat Thread");
-				return;
-			}
-
-			final ArrayList<Long> msgIds = (ArrayList<Long>) object;
-			runOnUiThread(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					Iterator<HikeSharedFile> it = sharedMediaItem.getSharedFilesList().iterator();
-					while (it.hasNext())
-					{
-						HikeSharedFile file = it.next();
-						if (msgIds.contains(file.getMsgId()))
-						{
-							it.remove();
-						}
-					}
-					sharedMediaCount -= msgIds.size();
-					sharedMediaItem.setSharedMediaCount(sharedMediaCount);
-					if (sharedMediaCount == 0)
-					{
-						sharedMediaItem.clearMediaList();
-					}
-
-					if (sharedMediaItem.getSharedFilesList() != null && sharedMediaItem.getSharedFilesList().size() < maxMediaToShow
-							&& sharedMediaCount != sharedMediaItem.getSharedFilesList().size()) // If somehow all the elements which were laoded initially are deleted, we need to
-																								// fetch more stuff from db.
-					{
-						addSharedMedia();
-					}
-
-					profileAdapter.notifyDataSetChanged();
 				}
 			});
 		}
