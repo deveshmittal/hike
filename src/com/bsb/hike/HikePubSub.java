@@ -166,8 +166,6 @@ public class HikePubSub implements Runnable
 
 	public static final String AUTO_RECOMMENDED_FAVORITES_ADDED = "autoRecommendedFavoritesAdded";
 
-	public static final String REMOVE_MESSAGE_FROM_CHAT_THREAD = "removeMessageFromChatThread";
-
 	public static final String SOCIAL_AUTH_COMPLETED = "socialAuthCompleted";
 
 	public static final String SOCIAL_AUTH_FAILED = "socialAuthFailed";

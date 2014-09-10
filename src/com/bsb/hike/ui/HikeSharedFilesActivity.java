@@ -463,7 +463,9 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 				public void onClick(View v)
 				{
 					ArrayList<Long> msgIds = new ArrayList<Long>(selectedSharedFileItems);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, msgIds);
+					Bundle bundle = new Bundle();
+					bundle.putString(HikeConstants.Extras.MSISDN, msisdn);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
 					Iterator<HikeSharedFile> iterator= sharedFilesList.iterator();
 					while (iterator.hasNext())
 					{

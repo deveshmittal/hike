@@ -1263,6 +1263,8 @@ public class HikeConstants
 		public static final String PARTICIPANT_NAME_ARRAY = "participantNameArray";
 
 		public static final String CONVERSATION_NAME = "conversationName";
+
+		public static final String DELETE_MEDIA_FROM_PHONE = "deleteMediaFromPhone";
 	}
 
 	public static final class LogEvent
