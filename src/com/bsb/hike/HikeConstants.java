@@ -1267,6 +1267,8 @@ public class HikeConstants
 		public static final String DELETE_MEDIA_FROM_PHONE = "deleteMediaFromPhone";
 
 		public static final String DELETED_MESSAGE_TYPE = "deletedMessageType";
+
+		public static final String CURRENT_POSITION = "currentPosition";
 	}
 
 	public static final class LogEvent

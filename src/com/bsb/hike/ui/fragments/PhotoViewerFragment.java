@@ -124,6 +124,11 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		
 		intialiazeViewPager();
 		
+		if(savedInstanceState != null)
+		{
+			initialPosition = savedInstanceState.getInt(HikeConstants.Extras.CURRENT_POSITION, initialPosition);
+		}
+		
 		//Load media to the right and left of the view pager if this fragment is called from ChatThread.
 		if(fromChatThread)
 		{	Logger.d(TAG,  " MsgId : " + sharedMediaItems.get(0).getMsgId());
@@ -255,6 +260,7 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	@Override
 	public void  onSaveInstanceState(Bundle outState)
 	{	
+		outState.putInt(HikeConstants.Extras.CURRENT_POSITION, selectedPager.getCurrentItem());
 		super.onSaveInstanceState(outState);
 	}
 
