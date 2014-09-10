@@ -569,11 +569,12 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	private void showTipIfRequired()
 	{
 		final HikeSharedPreferenceUtil pref = HikeSharedPreferenceUtil.getInstance(GallerySelectionViewer.this);
-		if(pref.getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false) && pref.getData(HikeConstants.SHOW_IMAGE_QUALITY_TIP, true))
+		//if(pref.getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false) && pref.getData(HikeConstants.SHOW_IMAGE_QUALITY_TIP, true))
+		if(true)
 		{
 			View view = LayoutInflater.from(this).inflate(R.layout.tip_right_arrow, null);
 			ImageView arrowPointer = (ImageView) (view.findViewById(R.id.arrow_pointer));
-			arrowPointer.getLayoutParams().width = (int) (78 * Utils.densityMultiplier);
+			arrowPointer.getLayoutParams().width = (int) (74 * Utils.densityMultiplier);
 			arrowPointer.requestLayout();
 			arrowPointer.setImageResource(R.drawable.ftue_up_arrow);
 			((TextView) view.findViewById(R.id.tip_header)).setText(R.string.image_settings_tip_text);
