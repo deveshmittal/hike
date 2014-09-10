@@ -1650,7 +1650,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				Logger.d("ProfileActivity", "The activity is " + this);
 				boolean isPicasaImage = false;
 				Uri selectedFileUri = null;
-				if (data == null)
+				if (data == null || data.getData() == null)
 				{
 					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
 					return;
