@@ -430,7 +430,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			if(sharedMedia!= null && !sharedMedia.isEmpty())
 			{	viewHolder.infoContainer.setVisibility(View.VISIBLE);
 				viewHolder.parent.setVisibility(View.GONE);  //Empty state
-				if(sharedMedia.size() < maxMediaToShow)
+				if(sharedMedia.size() <= maxMediaToShow)
 				{
 					loadMediaInProfile(sharedMedia.size(), layout, sharedMedia);
 					
