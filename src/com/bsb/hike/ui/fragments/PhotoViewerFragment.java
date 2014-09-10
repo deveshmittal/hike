@@ -533,6 +533,7 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 					
 					Bundle bundle = new Bundle();
 					bundle.putString(HikeConstants.Extras.MSISDN, msisdn);
+					bundle.putInt(HikeConstants.Extras.DELETED_MESSAGE_TYPE, HikeConstants.SHARED_MEDIA_TYPE);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
 					
 					// if delete media from phone is checked

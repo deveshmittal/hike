@@ -147,12 +147,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.PARTICIPANT_JOINED_GROUP,
 			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
-			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT };
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.DELETE_MESSAGE };
 
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST,
 			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
-			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.CONTACT_DELETED };
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.CONTACT_DELETED, HikePubSub.DELETE_MESSAGE };
 
 	private String[] profilePubSubListeners = { HikePubSub.USER_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.STATUS_MESSAGE_RECEIVED,
 			HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
@@ -2378,6 +2378,58 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				public void run()
 				{
 					finishEditing();
+				}
+			});
+		}
+		else if (HikePubSub.DELETE_MESSAGE.equals(type))
+		{
+			Pair<ArrayList<Long>, Bundle> deleteMessage = (Pair<ArrayList<Long>, Bundle>) object;
+			Bundle bundle = deleteMessage.second;
+			String msisdn = bundle.getString(HikeConstants.Extras.MSISDN);
+			/*
+			 * if message type is not set return;
+			 */
+			if(!bundle.containsKey(HikeConstants.Extras.DELETED_MESSAGE_TYPE))
+			{
+				return;
+			}
+			final int deletedMessageType = bundle.getInt(HikeConstants.Extras.DELETED_MESSAGE_TYPE);
+			
+			final ArrayList<Long> msgIds = deleteMessage.first;
+			
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					if(deletedMessageType == HikeConstants.SHARED_MEDIA_TYPE)
+					{
+						Iterator<HikeSharedFile> it = sharedMediaItem.getSharedFilesList().iterator();
+						while (it.hasNext())
+						{
+							HikeSharedFile file = it.next();
+							if (msgIds.contains(file.getMsgId()))
+							{
+								it.remove();
+							}
+						}
+						sharedMediaCount -= msgIds.size();
+						sharedMediaItem.setSharedMediaCount(sharedMediaCount);
+						if (sharedMediaCount == 0)
+						{
+							sharedMediaItem.clearMediaList();
+						}
+
+						if (sharedMediaItem.getSharedFilesList() != null && sharedMediaItem.getSharedFilesList().size() < maxMediaToShow
+								&& sharedMediaCount != sharedMediaItem.getSharedFilesList().size()) // If somehow all the elements which were laoded initially are deleted, we need
+																									// to
+																									// fetch more stuff from db.
+						{
+							addSharedMedia();
+						}
+					}
+
+					profileAdapter.notifyDataSetChanged();
 				}
 			});
 		}

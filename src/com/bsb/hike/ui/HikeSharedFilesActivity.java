@@ -465,6 +465,7 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 					ArrayList<Long> msgIds = new ArrayList<Long>(selectedSharedFileItems);
 					Bundle bundle = new Bundle();
 					bundle.putString(HikeConstants.Extras.MSISDN, msisdn);
+					bundle.putInt(HikeConstants.Extras.DELETED_MESSAGE_TYPE, HikeConstants.SHARED_MEDIA_TYPE);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
 					Iterator<HikeSharedFile> iterator= sharedFilesList.iterator();
 					while (iterator.hasNext())
