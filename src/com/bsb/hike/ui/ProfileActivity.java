@@ -533,7 +533,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 			if (friendItem != null)
 			{
-					if (contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED_REJECTED && contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)
+					if (contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED && contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED_REJECTED )
 					{
 						friendItem.setVisible(true);
 						friendItem.setTitle(R.string.remove_from_favorites);
@@ -712,34 +712,42 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			{
 				addContactStatusInHeaderView(text, subText, statusMood);
 				// Request_Received --->> Show add/not now screen.
-				if (contactInfo.isOnhike() && contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
-				{
+				if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
+				{	
 					// Show add/not now screen.
 					req_layout.setVisibility(View.VISIBLE);
 				}
-				else if(contactInfo.isUnknownContact())
-				{		
-						fav_layout.setVisibility(View.VISIBLE);
-						fav_layout.setTag(getResources().getString(R.string.tap_save_contact));
-						extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
-						extraInfo.setText(getResources().getString(R.string.tap_save_contact));
-						smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
+				
+				else if(contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED && !contactInfo.isUnknownContact())
+				{	
+					fav_layout.setVisibility(View.VISIBLE);  //Simply show add to fav view if contact is unsaved
+					extraInfo.setTextColor(getResources().getColor(R.color.add_fav));
+					extraInfo.setText(getResources().getString(R.string.add_fav));
+					smallIcon.setImageResource(R.drawable.ic_add_friend);
 				}
-				else
-				{
-					fav_layout.setVisibility(View.GONE);
-					fav_layout.setTag(null);
-					req_layout.setVisibility(View.GONE);
+				
+				if (contactInfo.isUnknownContact())
+				{		
+						if(contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED)
+						{
+							dual_layout.setVisibility(View.VISIBLE);
+						}
+						else
+						{
+							fav_layout.setVisibility(View.VISIBLE);
+							fav_layout.setTag(getResources().getString(R.string.tap_save_contact));
+							extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
+							extraInfo.setText(getResources().getString(R.string.tap_save_contact));
+							smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
+						}
 				}
 				
 			}
 			else if (contactInfo.isOnhike()) 
 				{
 					setStatusText(getJoinedHikeStatus(contactInfo), subText, text);
-					if ((contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED || contactInfo
-							.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED))
+					if ((contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND  || contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED))
 					{
-
 						if (contactInfo.isUnknownContact())
 						{
 							// Show dual layout
@@ -754,7 +762,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 							smallIcon.setImageResource(R.drawable.ic_add_friend);
 						}
 					}
-					else if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT)
+					else if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT || contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT_REJECTED)
 					{
 						if (contactInfo.isUnknownContact()) // Tap to save
 						{
@@ -2244,6 +2252,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			FavoriteType favoriteType = favoriteToggle.second;
 
 			if (!mLocalMSISDN.equals(contactInfo.getMsisdn()))
+			{
+				return;
+			}
+			if(favoriteType == FavoriteType.REQUEST_SENT_REJECTED)
 			{
 				return;
 			}
