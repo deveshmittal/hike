@@ -456,13 +456,6 @@ public class HikeNotification
 
 	public void notifyStringMessage(String msisdn, String message, boolean forceNotPlaySound)
 	{
-		boolean isSingleMsisdn = hikeNotifMsgStack.isFromSingleMsisdn();
-
-		Drawable avatarDrawable = null;
-		if (!isSingleMsisdn)
-		{
-			avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
-		}
 		try
 		{
 			hikeNotifMsgStack.addMessage(msisdn, message);
@@ -474,6 +467,14 @@ public class HikeNotification
 		}
 
 		hikeNotifMsgStack.invalidateConvMsgList();
+		
+		boolean isSingleMsisdn = hikeNotifMsgStack.isFromSingleMsisdn();
+
+		Drawable avatarDrawable = null;
+		if (!isSingleMsisdn)
+		{
+			avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		}
 
 		if (hikeNotifMsgStack.getNotificationTextLines() == 1)
 		{
