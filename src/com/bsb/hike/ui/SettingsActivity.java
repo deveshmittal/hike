@@ -37,7 +37,7 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
-public class SettingsActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener
+public class SettingsActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, OnClickListener
 {
 	private ContactInfo contactInfo;
 	
@@ -195,16 +195,9 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		ImageView arrowView = (ImageView)header.findViewById(R.id.view_profile);
 		header.findViewById(R.id.divider_view).setVisibility(View.VISIBLE);
 		arrowView.setImageDrawable(getResources().getDrawable(R.drawable.ic_arrow));
-		arrowView.setOnClickListener(new OnClickListener() 
-		{			
-			@Override
-			public void onClick(View v) 
-			{
-				Intent intent = new Intent(SettingsActivity.this, ProfileActivity.class);
-				startActivity(intent);
-			}
-		});
-
+		arrowView.setOnClickListener(this);
+		View headerView = header.findViewById(R.id.profile_head);
+		headerView.setOnClickListener(this);
 		contactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 		msisdn = contactInfo.getMsisdn();
 		
@@ -424,5 +417,13 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		HikeMessengerApp.getPubSub().removeListeners(this, profilePubSubListeners);
 		
 		super.onDestroy();
+	}
+	
+
+	@Override
+	public void onClick(View v) 
+	{
+		Intent intent = new Intent(SettingsActivity.this, ProfileActivity.class);
+		startActivity(intent);
 	}
 }
