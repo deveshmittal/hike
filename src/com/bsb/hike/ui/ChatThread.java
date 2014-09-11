@@ -4213,8 +4213,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				runOnUiThread(mUpdateAdapter);
 			}
-		}else if(HikePubSub.CONV_META_DATA_UPDATED.equals(type)){
+		}else if(HikePubSub.CONV_META_DATA_UPDATED.equals(type))
+		{			
+			if(mConversation.getMsisdn().equals(((MetaData)object).getGroupId()))
+			{
 				mConversation.setMetaData((MetaData) object);
+			}
 		}
 		else if (HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT.equals(type))
 		{
