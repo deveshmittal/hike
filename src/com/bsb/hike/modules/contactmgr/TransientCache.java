@@ -1009,10 +1009,21 @@ public class TransientCache extends ContactsCache
 		readLock.lock();
 		try
 		{
-			Map<String, PairModified<GroupParticipant, String>> g = groupParticipants.get(groupId);
-			if (null != g)
+			int size = 0;
+			Map<String, PairModified<GroupParticipant, String>> grpParticipantsMap = groupParticipants.get(groupId);
+			if (null != grpParticipantsMap)
 			{
-				return g.size();
+				for (Entry<String, PairModified<GroupParticipant, String>> mapEntry : grpParticipantsMap.entrySet())
+				{
+					PairModified<GroupParticipant, String> grpPair = mapEntry.getValue();
+					if (null != grpPair)
+					{
+						GroupParticipant grp = grpPair.getFirst();
+						if (!grp.hasLeft())
+							size++;
+					}
+				}
+				return size;
 			}
 		}
 		finally
