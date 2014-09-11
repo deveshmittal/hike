@@ -1,8 +1,12 @@
 package com.bsb.hike.notifications;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Build;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -119,8 +123,6 @@ public class HikeNotificationUtils
 	 */
 	public static String getNameForMsisdn(Context context, String argMsisdn)
 	{
-
-		// TODO: Use new contact manager class here instead of querying from db.
 		if (HikeNotification.HIKE_STEALTH_MESSAGE_KEY.equals(argMsisdn))
 		{
 			return context.getString(R.string.app_name);
@@ -134,5 +136,32 @@ public class HikeNotificationUtils
 		}
 
 		return name;
+	}
+
+	/**
+	 * Keep this instantiated since makeNotificationLine() will be called repeatedly on receiving notification messages
+	 */
+	private static final ForegroundColorSpan mBoldSpan = new ForegroundColorSpan(Color.LTGRAY);
+
+	/**
+	 * Creates SpannableString of pattern <code>title text</code> with title in a light gray color
+	 * 
+	 * @param title
+	 * @param text
+	 * @return
+	 */
+	public static SpannableString makeNotificationLine(String title, String text)
+	{
+		final SpannableString spannableString;
+		if (title != null && title.length() > 0)
+		{
+			spannableString = new SpannableString(String.format("%s  %s", title, text));
+			spannableString.setSpan(mBoldSpan, 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
+		else
+		{
+			spannableString = new SpannableString(text);
+		}
+		return spannableString;
 	}
 }

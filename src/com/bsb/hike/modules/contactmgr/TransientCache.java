@@ -188,13 +188,20 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			PairModified<ContactInfo, Integer> contactPair = transientContacts.get(msisdn);
-			if (null != contactPair)
+			if (Utils.isGroupConversation(msisdn))
 			{
-				contactPair.setSecond(contactPair.getSecond() - 1);
-				if (contactPair.getSecond() == 0)
+				removeGroup(msisdn);
+			}
+			else
+			{
+				PairModified<ContactInfo, Integer> contactPair = transientContacts.get(msisdn);
+				if (null != contactPair)
 				{
-					transientContacts.remove(msisdn);
+					contactPair.setSecond(contactPair.getSecond() - 1);
+					if (contactPair.getSecond() == 0)
+					{
+						transientContacts.remove(msisdn);
+					}
 				}
 			}
 		}
@@ -228,6 +235,24 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
+	 * This method removes the group entry given by the parameter <code>groupId</code> from the {@link #groupParticipants} map
+	 * 
+	 * @param groupId
+	 */
+	void removeGroup(String groupId)
+	{
+		writeLock.lock();
+		try
+		{
+			groupParticipants.remove(groupId);
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	/**
 	 * updates the contact in memory and if not found in memory inserts the contact in {@link #transientContacts}
 	 * 
 	 * @param contact
@@ -237,6 +262,18 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
+			for(Map<String, PairModified<GroupParticipant, String>> groupParticipantMap : groupParticipants.values())
+			{
+				if(groupParticipantMap.containsKey(contact.getMsisdn()))
+				{
+					PairModified<GroupParticipant, String> grpParticipant = groupParticipantMap.get(contact.getMsisdn());
+					grpParticipant.getFirst().setContactInfo(contact);
+					if(null != contact.getName())
+					{
+						grpParticipant.setSecond(contact.getName());
+					}
+				}
+			}
 			if (transientContacts.containsKey(contact.getMsisdn()))
 			{
 				PairModified<ContactInfo, Integer> contactPair = transientContacts.get(contact.getMsisdn());
@@ -247,7 +284,6 @@ public class TransientCache extends ContactsCache
 				// if contact not found to be updated then add in the transient cache and we should set allContactsLoaded to false because if all contacts are loaded even then we
 				// can't find some contacts in cache that means some new contacts have been added in addressbook
 				insertContact(contact);
-				allContactsLoaded = false;
 			}
 		}
 		finally
@@ -635,7 +671,7 @@ public class TransientCache extends ContactsCache
 					String msisdn = mapEntry.getKey();
 					ContactInfo contactInfo = mapEntry.getValue().getFirst();
 					if (null != msisdnsIn && msisdnsIn.contains(msisdn) && (null != msisdnsNotIn && !msisdnsNotIn.contains(msisdn))
-							&& (null != myMsisdn && !msisdn.equals(myMsisdn)) && contactInfo.isOnhike())
+							&& (null != myMsisdn && !msisdn.equals(myMsisdn)) && contactInfo.isOnhike() && !contactInfo.isUnknownContact())
 					{
 						contacts.add(contactInfo);
 						limit--;

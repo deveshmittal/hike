@@ -41,7 +41,7 @@ public class IntentManager
 	{
 		Intent intent = new Intent(context, HikePreferences.class);
 		intent.putExtra(HikeConstants.Extras.PREF, R.xml.media_download_preferences);
-		intent.putExtra(HikeConstants.Extras.TITLE, R.string.auto_download_media);
+		intent.putExtra(HikeConstants.Extras.TITLE, R.string.settings_media);
 		context.startActivity(intent);
 	}
 

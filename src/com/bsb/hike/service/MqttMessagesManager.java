@@ -266,7 +266,10 @@ public class MqttMessagesManager
 				ContactManager.getInstance().setHikeJoinTime(msisdn, joinTime);
 			}
 
-			saveStatusMsg(jsonObj, msisdn);
+			if(appPrefs.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true))
+			{
+				saveStatusMsg(jsonObj, msisdn);
+			}
 		}
 		else
 		{
@@ -314,7 +317,7 @@ public class MqttMessagesManager
 
 		boolean groupRevived = false;
 
-		if (!this.convDb.isGroupAlive(groupConversation.getMsisdn()))
+		if (!ContactManager.getInstance().isGroupAlive(groupConversation.getMsisdn()))
 		{
 
 			Logger.d(getClass().getSimpleName(), "Group is not alive");
@@ -610,7 +613,8 @@ public class MqttMessagesManager
 		/*
 		 * Start auto download for media files
 		 */
-		if (convMessage.isFileTransferMessage() && (manager.isConvExists(msisdn)) && (!TextUtils.isEmpty(manager.getName(msisdn))))
+		String name = Utils.isGroupConversation(msisdn) ? manager.getName(msisdn) : manager.getContact(msisdn, false, true).getName();
+		if (convMessage.isFileTransferMessage() && (!TextUtils.isEmpty(name)) && (manager.isConvExists(msisdn)))
 		{
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
@@ -1097,7 +1101,7 @@ public class MqttMessagesManager
 		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
 		this.pubSub.publish(favoriteType == FavoriteType.REQUEST_RECEIVED ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.FRIEND_REQUEST_ACCEPTED, favoriteToggle);
 
-		if (favoriteType == FavoriteType.REQUEST_RECEIVED)
+		if (favoriteType == FavoriteType.REQUEST_RECEIVED || favoriteType == FavoriteType.FRIEND)
 		{
 			int count = settings.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 			if (count >= 0)

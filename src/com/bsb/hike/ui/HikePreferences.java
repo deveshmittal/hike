@@ -221,9 +221,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (mutePreference != null)
 		{
 			mutePreference.setOnPreferenceClickListener(this);
-			mutePreference.setOnPreferenceChangeListener(this);
 		}
-		
+
 		Preference h2oNotifPreference = getPreferenceScreen().findPreference(HikeConstants.H2O_NOTIF_BOOLEAN_PREF);
 		if (h2oNotifPreference != null)
 		{
@@ -234,8 +233,8 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (nujNotifPreference != null)
 		{
 			nujNotifPreference.setOnPreferenceChangeListener(this);
-		}
-
+ 		}
+		
 		Preference muteChatBgPreference = getPreferenceScreen().findPreference(HikeConstants.CHAT_BG_NOTIFICATION_PREF);
 		if (muteChatBgPreference != null)
 		{
@@ -247,7 +246,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false))
 			{
-				if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
+				if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME, 0l) > 0)
 				{
 					resetStealthPreference.setTitle(R.string.resetting_complete_stealth_header);
 					resetStealthPreference.setSummary(R.string.resetting_complete_stealth_info);
@@ -300,9 +299,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			@Override
 			public void onClick(View v)
 			{
-				Intent intent = new Intent(HikePreferences.this, SettingsActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
+				onBackPressed();
 			}
 		});
 

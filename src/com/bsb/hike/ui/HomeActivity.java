@@ -299,7 +299,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if (overFlowWindow != null && overFlowWindow.isShowing())
 			overFlowWindow.dismiss();
 		HikeMessengerApp.getPubSub().removeListeners(this, homePubSubListeners);
-		HikeMessengerApp.getContactManager().unload();
 		super.onDestroy();
 	}
 
@@ -355,6 +354,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		});
 		
 		timelineTopBarIndicator = (TextView) menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.top_bar_indicator);
+		menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.overflow_icon_image).setContentDescription("Timeline");
 		((ImageView)menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_show_timeline);
 		updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 1000);
 		menu.findItem(R.id.show_timeline).getActionView().setOnClickListener(new View.OnClickListener()
@@ -1193,8 +1193,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			optionsList.add(new OverFlowMenuItem(getString(R.string.rewards), 4));
 		}
 
-		optionsList.add(new OverFlowMenuItem(getString(R.string.my_profile), 0));
-
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
 		
 		optionsList.add(new OverFlowMenuItem(getString(R.string.status), 8));
@@ -1295,9 +1293,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 				switch (item.getKey())
 				{
-				case 0:
-					intent = new Intent(HomeActivity.this, ProfileActivity.class);
-					break;
 				case 1:
 					intent = new Intent(HomeActivity.this, CreditsActivity.class);
 					break;

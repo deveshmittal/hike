@@ -110,6 +110,8 @@ public class HikeConstants
 	public static final String FILE_KEY = "fk";
 
 	public static final String FILE_PATH = "fp";
+	
+	public static final String DOWNLOAD_FILE_URL_KEY = "url";
 
 	public static final String CREDITS = "credits";
 
@@ -236,6 +238,8 @@ public class HikeConstants
 	public static final String RESOLUTION_ID = "resId";
 
 	public static final String NUMBER_OF_STICKERS = "nos";
+	
+	public static final String TOTAL_STICKERS = "totalStickers";
 
 	public static final String DATA_2 = "data";
 
@@ -921,7 +925,12 @@ public class HikeConstants
 	public static final String PIN_DISPLAYED = "displayed";
 	
 	public static final int MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY = 51;
-
+	
+	
+	public static final String TOTAL_SELECTIONS = "t";
+	
+	public static final String SUCCESSFUL_SELECTIONS = "s";
+	
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
@@ -1088,6 +1097,8 @@ public class HikeConstants
 		public static final String ZOOM_LEVEL = "zoomLevel";
 
 		public static final String CONTACT_INFO = "contactInfo";
+
+		public static final String CONTACT_ID = "contactId";
 
 		public static final String ON_HIKE = "onHike";
 
@@ -1328,6 +1339,10 @@ public class HikeConstants
 		
 		public static final String ADD_TO_FAVOURITE = "profSAddToFav";
 		
+		public static final String INVITE_TO_HIKE_VIA_PROFILE = "profSinvite";
+
+		public static final String SET_PROFILE_PIC_GALLERY = "profSpicGallery";
+
 		/*
 		 * Invite screen events <screen> = invS <event> = credB, creDtiPN, creDtiPY
 		 */
@@ -1376,6 +1391,11 @@ public class HikeConstants
 		 * SignUp screen <screen> = signupS <event> = erroR
 		 */
 		public static final String SIGNUP_ERROR = "signupSerroR";
+
+		/*
+		 *  Compose screen <screen> = compS <event> = refContcts
+		 */
+		public static final String COMPOSE_REFRESH_CONTACTS = "compSrefContcts";
 
 		/*
 		 * Drawer screen <screen> = drS <event> = homE, gC, inV, reW, creD, proF, settinG
@@ -1542,7 +1562,44 @@ public class HikeConstants
 		 * HikeSharedFiles Activity Screen = sharedMediaS<event>
 		 * */
 		public static final String OPEN_THUMBNAIL_VIA_GALLERY = "sharedMediaSthumbnailClick";
-		
+
+		/*
+		 * Image selection from gallery event.
+		 */
+		public static final String GALLERY_SELECTION = "gallery";
+
+		/*
+		 * Atomic tips click events
+		 */
+		public static final String ATOMIC_FAVOURITES_TIP_CLICKED = "atomicFavTClick";
+
+		public static final String ATOMIC_INVITE_TIP_CLICKED = "atomicInviteTClick";
+
+		public static final String ATOMIC_PROFILE_PIC_TIP_CLICKED = "atomicProPicTClick";
+
+		public static final String ATOMIC_STATUS_TIP_CLICKED = "atomicStatusTClick";
+
+		public static final String ATOMIC_HTTP_TIP_CLICKED = "atomicHttpTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_CLICKED = "atomicAppSttngsTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_NOTIF_CLICKED = "atomicAppSttngsNotifTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_PRIVACY_CLICKED = "atomicAppSttngsPrivTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_SMS_CLICKED = "atomicAppSttngsSmsTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_MEDIA_CLICKED = "atomicAppSttngsMediaTClick";
+
+		public static final String ATOMIC_APP_TIP_INVITE_FREE_SMS_CLICKED = "atomicAppInvFreeSmsTClick";
+
+		public static final String ATOMIC_APP_TIP_INVITE_WHATSAPP_CLICKED = "atomicAppInvWaTClick";
+
+		public static final String ATOMIC_APP_TIP_TIMELINE_CLICKED = "atomicAppTmlineTClick";
+
+		public static final String ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED = "atomicAppSttngsTClick";
+
+		public static final String ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED = "atomicAppHikeRewardsClick";
 	}
 
 	public static final class MqttMessageTypes

@@ -146,11 +146,13 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private SharedPreferences preferences;
 
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.PARTICIPANT_JOINED_GROUP,
-			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
+			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT };
 
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST,
-			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED, HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD };
+			HikePubSub.HIKE_JOIN_TIME_OBTAINED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.CONTACT_DELETED };
 
 	private String[] profilePubSubListeners = { HikePubSub.USER_JOIN_TIME_OBTAINED, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.STATUS_MESSAGE_RECEIVED,
 			HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_IMAGE_DOWNLOADED };
@@ -232,7 +234,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public SmileyParser smileyParser;
 	
-	private static final String PROFILE_ROUND_SUFFIX = "round";
+	public static final String PROFILE_ROUND_SUFFIX = "round";
 
 	private static final String TAG = "Profile_Activity";
 	/* store the task so we can keep keep the progress dialog going */
@@ -252,7 +254,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			profileAdapter.getTimelineImageLoader().setExitTasksEarly(true);
 			profileAdapter.getIconImageLoader().setExitTasksEarly(true);
 			profileAdapter.getProfilePicImageLoader().setExitTasksEarly(true);
-			profileAdapter.getSharedFileImageLoader().setExitTasksEarly(true);
+			
+			if(profileAdapter.getSharedFileImageLoader()!=null)
+			{
+				profileAdapter.getSharedFileImageLoader().setExitTasksEarly(true);
+			}
 		}
 	}
 	
@@ -344,6 +350,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			httpRequestURL = "/account";
 			fetchPersistentData();
 
+			if(Intent.ACTION_ATTACH_DATA.equals(getIntent().getAction()))
+			{
+				setProfileImage(HikeConstants.GALLERY_RESULT, RESULT_OK, getIntent());
+				Utils.sendUILogEvent(HikeConstants.LogEvent.SET_PROFILE_PIC_GALLERY);
+			}
 			if (getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false))
 			{
 				// set pubsub listeners
@@ -465,17 +476,25 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			@Override
 			public void onClick(View v)
 			{
-				showingGroupEdit = false;
-				mActivityState.edittedGroupName = null;
-				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
-				mName.setText(groupConversation.getLabel());
-				mName.setVisibility(View.VISIBLE);
-				mNameEdit.setVisibility(View.GONE);
-				setupActionBar();
+				closeGroupNameEdit();
 			}
 		});
 		actionBar.setCustomView(editGroupNameView);
 		invalidateOptionsMenu();
+	}
+
+	public void closeGroupNameEdit()
+	{
+		if(showingGroupEdit)
+		{
+			showingGroupEdit = false;
+			mActivityState.edittedGroupName = null;
+			Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
+			mName.setText(groupConversation.getLabel());
+			mName.setVisibility(View.VISIBLE);
+			mNameEdit.setVisibility(View.GONE);
+			setupActionBar();
+		}
 	}
 
 	@Override
@@ -487,7 +506,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			profileAdapter.getTimelineImageLoader().setExitTasksEarly(false);
 			profileAdapter.getIconImageLoader().setExitTasksEarly(false);
 			profileAdapter.getProfilePicImageLoader().setExitTasksEarly(false);
-			profileAdapter.getSharedFileImageLoader().setExitTasksEarly(false);
+						
+			if(profileAdapter.getSharedFileImageLoader()!=null)
+			{
+				profileAdapter.getSharedFileImageLoader().setExitTasksEarly(false);
+			}
 			profileAdapter.notifyDataSetChanged();
 		}
 	}
@@ -495,10 +518,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if (showingGroupEdit)
-		{
-			return false;
-		}
 		switch (profileType)
 		{
 		case CONTACT_INFO:
@@ -511,7 +530,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			}
 			return true;
 		case GROUP_INFO:
-			getSupportMenuInflater().inflate(R.menu.group_profile_menu, menu);
+			if (!showingGroupEdit)
+			{
+				getSupportMenuInflater().inflate(R.menu.group_profile_menu, menu);
+			}
 			mMenu = menu;
 			return true;
 		case USER_PROFILE:
@@ -1271,6 +1293,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	public void onBackPressed()
 	{
+		if(showingGroupEdit)
+		{
+			closeGroupNameEdit();
+			return;
+		}
 		if(removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
 		{
 			if(mNameEdit!=null && mName!=null)
@@ -1576,6 +1603,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		super.onActivityResult(requestCode, resultCode, data);
+		setProfileImage(requestCode, resultCode, data);
+	}
+
+	protected void setProfileImage(int requestCode, int resultCode, Intent data)
+	{
 		String path = null;
 		if (resultCode != RESULT_OK)
 		{
@@ -1597,12 +1629,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 		switch (requestCode)
 		{
-		case HikeConstants.CAMERA_RESULT:
-			/* fall-through on purpose */
-		case HikeConstants.GALLERY_RESULT:
-			Logger.d("ProfileActivity", "The activity is " + this);
-			if (requestCode == HikeConstants.CAMERA_RESULT)
-			{
+			case HikeConstants.CAMERA_RESULT:
+				Logger.d("ProfileActivity", "The activity is " + this);
 				String filePath = preferences.getString(HikeMessengerApp.FILE_PATH, "");
 				selectedFileIcon = new File(filePath);
 
@@ -1612,20 +1640,24 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				Editor editor = preferences.edit();
 				editor.remove(HikeMessengerApp.FILE_PATH);
 				editor.commit();
-			}
-			if (requestCode == HikeConstants.CAMERA_RESULT && !selectedFileIcon.exists())
-			{
-				Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			boolean isPicasaImage = false;
-			Uri selectedFileUri = null;
-			if (requestCode == HikeConstants.CAMERA_RESULT)
-			{
+				if (!selectedFileIcon.exists())
+				{
+					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
+					return;
+				}
 				path = selectedFileIcon.getAbsolutePath();
-			}
-			else
-			{
+				if (TextUtils.isEmpty(path))
+				{
+					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
+					return;
+				}
+				Utils.startCropActivity(this, path, destFilePath);
+				break;
+
+			case HikeConstants.GALLERY_RESULT:
+				Logger.d("ProfileActivity", "The activity is " + this);
+				boolean isPicasaImage = false;
+				Uri selectedFileUri = null;
 				if (data == null)
 				{
 					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
@@ -1654,57 +1686,57 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						path = Utils.getRealPathFromUri(selectedFileUri, this);
 					}
 				}
-			}
-			if (TextUtils.isEmpty(path))
-			{
-				Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			if (!isPicasaImage)
-			{
-				Utils.startCropActivity(this, path, destFilePath);
-			}
-			else
-			{
-				final File destFile = new File(path);
-				mActivityState.downloadPicasaImageTask = new DownloadImageTask(getApplicationContext(), destFile, selectedFileUri, new ImageDownloadResult()
+				if (TextUtils.isEmpty(path))
 				{
-
-					@Override
-					public void downloadFinished(boolean result)
+					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
+					return;
+				}
+				if (!isPicasaImage)
+				{
+					Utils.startCropActivity(this, path, destFilePath);
+				}
+				else
+				{
+					final File destFile = new File(path);
+					mActivityState.downloadPicasaImageTask = new DownloadImageTask(getApplicationContext(), destFile, selectedFileUri, new ImageDownloadResult()
 					{
-						if (mDialog != null)
+
+						@Override
+						public void downloadFinished(boolean result)
 						{
-							mDialog.dismiss();
-							mDialog = null;
+							if (mDialog != null)
+							{
+								mDialog.dismiss();
+								mDialog = null;
+							}
+							mActivityState.downloadPicasaImageTask = null;
+							if (!result)
+							{
+								Toast.makeText(getApplicationContext(), R.string.error_download, Toast.LENGTH_SHORT).show();
+							}
+							else
+							{
+								Utils.startCropActivity(ProfileActivity.this, destFile.getAbsolutePath(), destFilePath);
+							}
 						}
-						mActivityState.downloadPicasaImageTask = null;
-						if (!result)
-						{
-							Toast.makeText(getApplicationContext(), R.string.error_download, Toast.LENGTH_SHORT).show();
-						}
-						else
-						{
-							Utils.startCropActivity(ProfileActivity.this, destFile.getAbsolutePath(), destFilePath);
-						}
-					}
-				});
-				Utils.executeBoolResultAsyncTask(mActivityState.downloadPicasaImageTask);
-				mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.downloading_image));
-			}
-			break;
-		case HikeConstants.CROP_RESULT:
-			mActivityState.destFilePath = data.getStringExtra(MediaStore.EXTRA_OUTPUT);
-			if (mActivityState.destFilePath == null)
-			{
-				Toast.makeText(getApplicationContext(), R.string.error_setting_profile, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			if ((this.profileType == ProfileType.USER_PROFILE) || (this.profileType == ProfileType.GROUP_INFO))
-			{
-				saveChanges();
-			}
-			break;
+					});
+					Utils.executeBoolResultAsyncTask(mActivityState.downloadPicasaImageTask);
+					mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.downloading_image));
+				}
+				break;
+
+			case HikeConstants.CROP_RESULT:
+				mActivityState.destFilePath = data.getStringExtra(MediaStore.EXTRA_OUTPUT);
+				if (mActivityState.destFilePath == null)
+				{
+					Toast.makeText(getApplicationContext(), R.string.error_setting_profile, Toast.LENGTH_SHORT).show();
+					return;
+				}
+				if ((this.profileType == ProfileType.USER_PROFILE) || (this.profileType == ProfileType.GROUP_INFO))
+				{
+					saveChanges();
+				}
+				break;
 		}
 	}
 
@@ -2152,7 +2184,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				});
 			}
 		}
-		else if (HikePubSub.CONTACT_ADDED.equals(type))
+		else if (HikePubSub.CONTACT_ADDED.equals(type) || HikePubSub.CONTACT_DELETED.equals(type))
 		{
 			final ContactInfo contact = (ContactInfo) object;
 			if (contactInfo == null)
@@ -2170,6 +2202,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				@Override
 				public void run()
 				{
+					updateProfileImageInHeaderView();
 					profileAdapter.updateContactInfo(contactInfo);
 					if (topBarBtn != null)
 					{
@@ -2361,44 +2394,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 			});
 		}
-		else if (HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD.equals(type))
+		else if (HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT.equals(type))
 		{
-			if (!(object instanceof ArrayList<?>))
-			{
-				Logger.d(TAG, "Object not an instance of ArrayList in PubSub Event : Remove message from Chat Thread");
-				return;
-			}
 
-			final ArrayList<Long> msgIds = (ArrayList<Long>) object;
 			runOnUiThread(new Runnable()
 			{
+
 				@Override
 				public void run()
 				{
-					Iterator<HikeSharedFile> it = sharedMediaItem.getSharedFilesList().iterator();
-					while (it.hasNext())
-					{
-						HikeSharedFile file = it.next();
-						if (msgIds.contains(file.getMsgId()))
-						{
-							it.remove();
-						}
-					}
-					sharedMediaCount -= msgIds.size();
-					sharedMediaItem.setSharedMediaCount(sharedMediaCount);
-					if (sharedMediaCount == 0)
-					{
-						sharedMediaItem.clearMediaList();
-					}
-
-					if (sharedMediaItem.getSharedFilesList() != null && sharedMediaItem.getSharedFilesList().size() < maxMediaToShow
-							&& sharedMediaCount != sharedMediaItem.getSharedFilesList().size()) // If somehow all the elements which were laoded initially are deleted, we need to
-																								// fetch more stuff from db.
-					{
-						addSharedMedia();
-					}
-
-					profileAdapter.notifyDataSetChanged();
+					removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG);
 				}
 			});
 		}
@@ -2644,6 +2649,12 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	@Override
 	public void onClick(View v)
 	{
+		if(showingGroupEdit)
+		{
+			return;
+		}
+		
+		//switch (profileType)
 		if(v.getTag() instanceof HikeSharedFile)
 		{	HikeSharedFile hikeFile = (HikeSharedFile) v.getTag();
 			Bundle arguments = new Bundle();
@@ -2667,7 +2678,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			if(this.profileType == ProfileType.GROUP_INFO)
 				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ProfileActivity.this, groupConversation));
 			else
-				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ProfileActivity.this, contactInfo.getName(), contactInfo.getMsisdn()));
+				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ProfileActivity.this, contactInfo.getNameOrMsisdn(), contactInfo.getMsisdn()));
 			return;
 		}
 		
@@ -2728,8 +2739,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			{
 				/*
 				 * For some reason the activity randomly catches this event in the background and we get an NPE when that happens with mMenu. Adding an NPE guard for that.
+				 * if media viewer is open don't do anything
 				 */
-				if (mMenu == null)
+				if (mMenu == null  || isFragmentAdded(HikeConstants.IMAGE_FRAGMENT_TAG))
 				{
 					return super.onKeyUp(keyCode, event);
 				}
@@ -2742,6 +2754,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public void openPinHistory(View v)
 	{
+		if(showingGroupEdit)
+		{
+			return;
+		}
+		
 		if(groupConversation!=null)
 		{
 			if (sharedPinCount == 0)
@@ -2762,6 +2779,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public void onSharedFilesClick(View v)
 	{
+		if(showingGroupEdit)
+		{
+			return;
+		}
 		if (sharedFileCount == 0)
 		{
 			Toast.makeText(ProfileActivity.this, R.string.no_file_profile, Toast.LENGTH_SHORT).show();
