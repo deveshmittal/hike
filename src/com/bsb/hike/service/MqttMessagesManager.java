@@ -1101,7 +1101,11 @@ public class MqttMessagesManager
 		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
 		this.pubSub.publish(favoriteType == FavoriteType.REQUEST_RECEIVED ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.FRIEND_REQUEST_ACCEPTED, favoriteToggle);
 
-		if (favoriteType == FavoriteType.REQUEST_RECEIVED || favoriteType == FavoriteType.FRIEND)
+		if(currentType == favoriteType.REQUEST_SENT_REJECTED)
+		{
+			incrementUnseenStatusCount();
+		}
+		else
 		{
 			int count = settings.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 			if (count >= 0)
