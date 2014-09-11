@@ -264,6 +264,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.parent =  v.findViewById(R.id.sm_emptystate);
 				viewHolder.sharedFiles = v.findViewById(R.id.shared_media);
 				viewHolder.icon = (ImageView) v.findViewById(R.id.arrow_icon);
+				viewHolder.mediaLayout = v.findViewById(R.id.media_layout);
 				List<HikeSharedFile> sharedMedia = (List<HikeSharedFile>) ((ProfileSharedMedia) profileItem).getSharedFilesList();
 				LinearLayout layout = (LinearLayout) viewHolder.infoContainer;
 				layout.removeAllViews();
@@ -304,6 +305,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.timeStamp = (TextView) v.findViewById(R.id.sm_emptystate_tv);
 				viewHolder.files = v.findViewById(R.id.shared_files_rl);
 				viewHolder.pins = v.findViewById(R.id.shared_pins_rl);
+				if(!groupProfile)
+				{
+					LayoutParams ll = (LayoutParams) viewHolder.phoneNumView.getLayoutParams();
+					ll.topMargin -= context.getResources().getDimensionPixelSize(R.dimen.top_margin_shared_content);
+					viewHolder.phoneNumView.setLayoutParams(ll); // Hack for top margin in case of one to one profile for empty state of content
+				}
 				break;
 
 			case MEMBERS:
@@ -359,7 +366,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.text = (TextView) viewHolder.parent.findViewById(R.id.name);
 				viewHolder.extraInfo = (TextView) v.findViewById(R.id.phone_number);
 				viewHolder.subText = (TextView) v.findViewById(R.id.main_info);
-				viewHolder.phoneNumView = v.findViewById(R.id.phone_type_ll);
 				break;
 			}
 
@@ -419,12 +425,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			int smSizeDb = ((ProfileSharedMedia) profileItem).getSharedMediaCount();
 			int maxMediaToShow = ((ProfileSharedMedia) profileItem).getMaxMediaToShow();
 			viewHolder.subText.setText(Integer.toString(smSizeDb));
-			if(!groupProfile)
+			viewHolder.mediaLayout.setVisibility(View.VISIBLE);
+			if(groupProfile || HikeMessengerApp.hikeBotNamesMap.containsKey(mContactInfo.getMsisdn()))
 			{
 				LinearLayout.LayoutParams ll = (LayoutParams) viewHolder.sharedFiles.getLayoutParams();
-				if(!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactInfo.getMsisdn()))
-					ll.topMargin = 0;
-				viewHolder.sharedFiles.setLayoutParams(ll);   //Hack to get the top margin right in one to one profile case
+				ll.topMargin = context.getResources().getDimensionPixelSize(R.dimen.shared_media_top_margin_hike_bot);
+				viewHolder.sharedFiles.setLayoutParams(ll);  
 			}
 			
 			if(sharedMedia!= null && !sharedMedia.isEmpty())
@@ -464,6 +470,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			else
 			{		//Empty State
 				layout.removeAllViews();
+				viewHolder.mediaLayout.setVisibility(View.GONE);
 				viewHolder.parent.setVisibility(View.VISIBLE);
 				viewHolder.infoContainer.setVisibility(View.GONE);
 			}
@@ -534,9 +541,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				{	
 					viewHolder.sharedFiles.setVisibility(View.GONE);
 					viewHolder.phoneNumView.setVisibility(View.VISIBLE);
-					ll = (LayoutParams) viewHolder.phoneNumView.getLayoutParams();
-					ll.topMargin = 0;   //Hack to get margin right in one to one profile case r
-					viewHolder.phoneNumView.setLayoutParams(ll);
+					
 					viewHolder.timeStamp.setText(context.getResources().getString(R.string.no_file_profile));
 				}
 			}
@@ -548,9 +553,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.extraInfo.setText(mContactInfo.getMsisdn());
 			
 			if(mContactInfo.getMsisdnType().length()>0)
-				viewHolder.subText.setText(mContactInfo.getMsisdnType());
-			else
-				viewHolder.phoneNumView.setVisibility(View.GONE);
+				viewHolder.subText.setText(" (" + mContactInfo.getMsisdnType().toLowerCase() + ")");
 			
 			break;
 
@@ -800,6 +803,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 		View files;
 		
 		View pins;
+		
+		View mediaLayout;
 	}
 
 	public void setProfilePreview(Bitmap preview)
