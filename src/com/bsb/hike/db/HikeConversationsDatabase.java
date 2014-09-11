@@ -1471,6 +1471,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 */
 	public void addLastConversations(List<ConvMessage> convMessages, HashMap<String, PairModified<ConvMessage, Integer>> lastPinMap)
 	{
+		Map<String, List<String>> map = new HashMap<String, List<String>>();
+
 		for (ConvMessage conv : convMessages)
 		{
 			String msisdn = conv.getMsisdn();
@@ -1481,8 +1483,22 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() - 1);
 			}
-		}
+			
+			if (Utils.isGroupConversation(conv.getMsisdn()))
+			{
+				List<String> lastMsisdns = new ArrayList<String>();
+				if (conv.getMetadata() != null)
+					lastMsisdns = getGroupLastMsgMsisdn(conv.getMetadata().getJSON());
 
+				if (lastMsisdns.size() == 0 && null != conv.getGroupParticipantMsisdn())
+				{
+					lastMsisdns.add(conv.getGroupParticipantMsisdn());
+				}
+				map.put(conv.getMsisdn(), lastMsisdns);
+			}
+		}
+		ContactManager.getInstance().removeOlderLastGroupMsisdns(map);
+		
 		for (Entry<String, PairModified<ConvMessage, Integer>> entry : lastPinMap.entrySet())
 		{
 			PairModified<ConvMessage, Integer> pair = entry.getValue();
