@@ -1110,7 +1110,7 @@ public class MqttMessagesManager
 			int count = settings.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 			if (count >= 0)
 			{
-				Utils.incrementOrDecrementHomeOverflowCount(settings, 1);
+				Utils.incrementOrDecrementFriendRequestCount(settings, 1);
 			}
 		}
 

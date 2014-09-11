@@ -4076,7 +4076,7 @@ public class Utils
 		return overallCount;
 	}
 
-	public static void incrementOrDecrementHomeOverflowCount(SharedPreferences accountPref, int count)
+	public static void incrementOrDecrementFriendRequestCount(SharedPreferences accountPref, int count)
 	{
 		int currentCount = accountPref.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 

@@ -1785,7 +1785,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		int count = preferences.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 		if(count > 0)
 		{
-			Utils.incrementOrDecrementHomeOverflowCount(preferences, -1);
+			Utils.incrementOrDecrementFriendRequestCount(preferences, -1);
 		}
 	}
 
