@@ -1582,6 +1582,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				@Override
 				public void run()
 				{
+					setEmptyState();
 					setupEmptyView();
 				}
 			});
