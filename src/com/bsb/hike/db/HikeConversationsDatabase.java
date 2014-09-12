@@ -1568,11 +1568,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					Conversation.MetaData convMetaData = null;
 					if (metadata != null)
 					{
-						convMetaData = new Conversation.MetaData(metadata);
+						convMetaData = new Conversation.MetaData(metadata, conv.getMsisdn());
 					}
 					else
 					{
-						convMetaData = new Conversation.MetaData(null);
+						convMetaData = new Conversation.MetaData(null, null);
 						convMetaData.setLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN, conv.getMsgID());
 					}
 					long preTimeStamp = convMetaData.getLastPinTimeStamp(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
@@ -1622,7 +1622,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				try
 				{
 					Conversation.MetaData convMetaData = null;
-					convMetaData = new Conversation.MetaData(metadata);
+					convMetaData = new Conversation.MetaData(metadata, conv.getMsisdn());
 
 					convMetaData = updatePinMetadata(conv, convMetaData, unreadCount);
 					contentValues.put(DBConstants.CONVERSATION_METADATA, convMetaData.toString());
@@ -1893,7 +1893,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				metadata = c.getString(c.getColumnIndex(DBConstants.CONVERSATION_METADATA));
 				try
 				{
-					conv.setMetaData(new Conversation.MetaData(metadata));
+					conv.setMetaData(new Conversation.MetaData(metadata, msisdn));
 				}
 				catch (JSONException e)
 				{

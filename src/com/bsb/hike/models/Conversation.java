@@ -278,12 +278,16 @@ public class Conversation implements Comparable<Conversation>
 		 * sample json : {'pin':{'id':'1','unreadCount':'1','toShow':'true','timestamp':'XXX','displayed':'false'} }
 		 */
 		JSONObject jsonObject;
+		
+		String groupId;
 
-		public MetaData(String jsonString) throws JSONException
+		public MetaData(String jsonString, String groupId) throws JSONException
 		{
 			if (jsonString != null)
 			{
 				jsonObject = new JSONObject(jsonString);
+				
+				this.groupId = groupId;
 			}
 			else
 			{
@@ -406,5 +410,9 @@ public class Conversation implements Comparable<Conversation>
 			return jsonObject.toString();
 		}
 
+		public String getGroupId()
+		{
+			return groupId;
+		}
 	}
 }
