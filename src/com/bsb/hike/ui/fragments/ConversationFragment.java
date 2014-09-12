@@ -869,7 +869,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}else if(tip.equals(HikeMessengerApp.ATOMIC_POP_UP_HTTP)){
 			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_HTTP_TIP));
 		}else if(tip.equals(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC)){
-			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_HTTP_TIP));
+			displayedConversations.add(0, new ConversationTip(ConversationTip.ATOMIC_APP_GENERIC_TIP));
 		}
 	}
 
