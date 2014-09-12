@@ -4,6 +4,7 @@
 package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1251,6 +1252,16 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	public void removeGroupParticipant(String groupId, String msisdn)
 	{
 		transientCache.removeGroupParticipants(groupId, msisdn);
+	}
+
+	/**
+	 * This method removes multiple group participants from {@link TransientCache}
+	 * @param groupId
+	 * @param msisdns
+	 */
+	public void removeGroupParticipant(String groupId, Collection<String> msisdns)
+	{
+		transientCache.removeGroupParticipants(groupId, msisdns);
 	}
 
 	public void removeGroup(String groupId)

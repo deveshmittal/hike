@@ -539,7 +539,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		Logger.d(getClass().getSimpleName(), "Creating group: " + groupId);
 		HikeConversationsDatabase mConversationDb = HikeConversationsDatabase.getInstance();
-		mConversationDb.addGroupParticipants(groupId, groupConversation.getGroupParticipantList());
+		mConversationDb.addRemoveGroupParticipants(groupId, groupConversation.getGroupParticipantList());
 		if (newGroup)
 		{
 			mConversationDb.addConversation(groupConversation.getMsisdn(), false, groupName, groupConversation.getGroupOwner());

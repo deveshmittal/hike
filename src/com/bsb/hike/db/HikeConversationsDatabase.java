@@ -2775,14 +2775,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	}
 
 	/**
-	 * Add a new participants to a group
+	 * Add or remove participants from a group members table based on participants map that is passed as parameter
 	 * 
 	 * @param groupId
 	 *            The id of the group to which the participants are to be added
 	 * @param participantList
 	 *            A list of the participants to be added
 	 */
-	public int addGroupParticipants(String groupId, Map<String, PairModified<GroupParticipant, String>> participantList)
+	public int addRemoveGroupParticipants(String groupId, Map<String, PairModified<GroupParticipant, String>> participantList)
 	{
 		boolean participantsAlreadyAdded = true;
 		boolean infoChangeOnly = false;
@@ -2819,9 +2819,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					participantsAlreadyAdded = false;
 					infoChangeOnly = true;
 				}
+				currentParticipants.remove(newParticipantEntry.getKey());
 			}
 		}
-		if (participantsAlreadyAdded)
+
+		if (currentParticipants.isEmpty() && participantsAlreadyAdded)
 		{
 			return HikeConstants.NO_CHANGE;
 		}
@@ -2831,11 +2833,20 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		InsertHelper ih = null;
 		try
 		{
+			mDb.beginTransaction();
+
+			if (!currentParticipants.isEmpty())
+			{
+				String removeMsisdns = Utils.getMsisdnStatement(currentParticipants.keySet());
+				Logger.d(getClass().getSimpleName(), " remove these from group members table GroupId : " + groupId + " removed msisdns : " + removeMsisdns);
+				mDb.delete(DBConstants.GROUP_MEMBERS_TABLE, DBConstants.GROUP_ID + " = ? " + " AND " + DBConstants.MSISDN + " IN " + removeMsisdns, new String[] { groupId });
+				ContactManager.getInstance().removeGroupParticipant(groupId, currentParticipants.keySet());
+			}
+
 			ih = new InsertHelper(mDb, DBConstants.GROUP_MEMBERS_TABLE);
 			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO " + DBConstants.GROUP_MEMBERS_TABLE + " ( " + DBConstants.GROUP_ID + ", " + DBConstants.MSISDN + ", "
 					+ DBConstants.NAME + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_LEFT + ", " + DBConstants.ON_DND + ", " + DBConstants.SHOWN_STATUS + " ) "
 					+ " VALUES (?, ?, ?, ?, ?, ?, ?)");
-			mDb.beginTransaction();
 			for (Entry<String, PairModified<GroupParticipant, String>> participant : participantList.entrySet())
 			{
 				GroupParticipant groupParticipant = participant.getValue().getFirst();
