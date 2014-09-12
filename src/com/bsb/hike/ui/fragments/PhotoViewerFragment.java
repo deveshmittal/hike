@@ -122,23 +122,9 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		
 		readArguments();
 		
-		intialiazeViewPager();
-		
 		if(savedInstanceState != null)
 		{
 			initialPosition = savedInstanceState.getInt(HikeConstants.Extras.CURRENT_POSITION, initialPosition);
-		}
-		
-		//Load media to the right and left of the view pager if this fragment is called from ChatThread.
-		if(fromChatThread)
-		{	Logger.d(TAG,  " MsgId : " + sharedMediaItems.get(0).getMsgId());
-			loadItems(false,sharedMediaItems.get(0).getMsgId(),HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY/2,false, true, initialPosition);  //Left
-			loadItems(false,sharedMediaItems.get(0).getMsgId(),HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY/2, true);         //Right
-			setSenderDetails(0);
-		}
-		else
-		{
-			setSelection(initialPosition);  //Opened from the gallery perhaps, hence set the view pager to the required position
 		}
 		
 		return mParent;
@@ -150,16 +136,6 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		senderName = (TextView) parent.findViewById(R.id.sender_name);
 		itemTimeStamp = (TextView) parent.findViewById(R.id.item_time_stamp);
 		gallaryButton  = (ImageView) parent.findViewById(R.id.gallary_button);
-		
-		gallaryButton.setOnClickListener(new OnClickListener()
-		{
-			
-			@Override
-			public void onClick(View v)
-			{
-				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(getSherlockActivity(), isGroup, conversationName, msisdnArray, nameArray, msisdn));
-			}
-		});
 	}
 
 	private void readArguments()
@@ -234,6 +210,31 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 			public void run()
 			{
 				setupActionBar();
+			}
+		});
+		
+		intialiazeViewPager();
+		
+		// Load media to the right and left of the view pager if this fragment is called from ChatThread.
+		if (fromChatThread)
+		{
+			Logger.d(TAG, " MsgId : " + sharedMediaItems.get(0).getMsgId());
+			loadItems(false, sharedMediaItems.get(0).getMsgId(), HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY / 2, false, true, initialPosition); // Left
+			loadItems(false, sharedMediaItems.get(0).getMsgId(), HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY / 2, true); // Right
+			setSenderDetails(0);
+		}
+		else
+		{
+			setSelection(initialPosition); // Opened from the gallery perhaps, hence set the view pager to the required position
+		}
+		
+		gallaryButton.setOnClickListener(new OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(getSherlockActivity(), isGroup, conversationName, msisdnArray, nameArray, msisdn));
 			}
 		});
 		
