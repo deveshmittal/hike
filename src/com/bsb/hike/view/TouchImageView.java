@@ -186,6 +186,10 @@ public class TouchImageView extends RecyclingImageView
 	        if (type == ScaleType.MATRIX) {
 	            super.setScaleType(ScaleType.MATRIX);
 
+	        }
+	        else if (type == ScaleType.CENTER_INSIDE) {
+	            super.setScaleType(ScaleType.CENTER_INSIDE);
+
 	        } else {
 	            mScaleType = type;
 	            if (onDrawReady) {

@@ -71,6 +71,12 @@ public abstract class ImageWorker
 	private boolean setHiResDefaultAvatar = false;
 	
 	private boolean setDefaultDrawableNull = true;
+	
+	/*
+	 * This case is currently being used in very specific scenerio of
+	 * media viewer files for which we could not create thumbnails(ex. tif images)
+	 */
+	private Drawable defaultDrawable = null;
 
 	protected ImageWorker()
 	{
@@ -311,6 +317,11 @@ public abstract class ImageWorker
 		this.setDefaultDrawableNull = b;
 	}
 	
+	public void setDefaultDrawable(Drawable d)
+	{
+		this.defaultDrawable = d;
+	}
+	
 	/**
 	 * Subclasses should override this to define any processing or work that must happen to produce the final bitmap. This will be executed in a background thread and be long
 	 * running. For example, you could resize a large bitmap here, or pull down an image from the network.
@@ -466,13 +477,26 @@ public abstract class ImageWorker
 			}
 
 			final ImageView imageView = getAttachedImageView();
-			if (value != null && imageView != null)
+			if(imageView != null)
 			{
-				setImageDrawable(imageView, value);
-			}
-			else if (value == null && imageView != null && setDefaultAvatarIfNoCustomIcon)
-			{
-				setDefaultAvatar(imageView, data);
+				if (value != null)
+				{
+					setImageDrawable(imageView, value);
+				}
+				else if (setDefaultAvatarIfNoCustomIcon)
+				{
+					setDefaultAvatar(imageView, data);
+				}
+				else if (defaultDrawable != null)
+				{
+					/*
+					 * This case is currently being used in very specific scenerio of
+					 * media viewer files for which we could not create thumbnails(ex. tif images)
+					 */
+					setImageDrawable(imageView, defaultDrawable);
+					imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+				}
+
 			}
 		}
 
