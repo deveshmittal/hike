@@ -497,7 +497,8 @@ public class HikeNotificationMsgStack implements Listener
 	}
 
 	/**
-	 * Returns the summary view of messages present in the stack
+	 * Returns the summary of messages present in the stack. Returns null in-case of 1 new message since
+	 * then we do not want to show the message count summary at all.
 	 * 
 	 * @return
 	 */
@@ -507,7 +508,7 @@ public class HikeNotificationMsgStack implements Listener
 		{
 			if (getNewMessages() <= 1)
 			{
-				return mContext.getString(R.string.one_new_message);
+				return null;
 			}
 			else
 			{

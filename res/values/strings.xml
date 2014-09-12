@@ -725,7 +725,6 @@
     <string name="forward_to">Forward to %1$s?</string>
     <string name="no_internet_connection">No Internet Connection</string>
     <string name="num_new_messages">%1$s new messages</string>
-    <string name="num_new_conversations">Total %1$s conversations</string>
     <string name="one_new_message">1 new message</string>
     <string name="terms">Terms</string>
     <string name="tutorial1_header_title">Welcome to\nHike Messenger</string>
@@ -1145,7 +1144,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="notificationSoundSummary">Select a sound to play for a new notification</string>
     <string name="hike_offline_notifications">Hike offline</string>
     <string name="h2o_notifications_setting_summary">Notify to send SMS for offline contact</string>
-    <string name="notifications_contact_join_title">Contact joining Hike</string>
     <string name="stealth_info_tip_subtext">Tap on \'hi\' to hide your chats.</string>
     <string name="file_attachment_info">Share doc, pdf &amp; media up to 100 MB</string>
     <string name="status_text_notification">posted an update %1$s</string>
@@ -1163,4 +1161,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
 	<string name="image_quality_popup_header">Choose image quality</string>
 	<string name="image_quality_prefs">Image Quality</string>
 	<string name="image_quality_file_as">file as</string>
+    <string name="num_new_conversations">%1$s conversations</string>
+    <string name="notifications_contact_join_title">Contact joining hike</string>
 </resources>
