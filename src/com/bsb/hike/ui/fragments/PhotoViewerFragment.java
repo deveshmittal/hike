@@ -456,6 +456,10 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		@Override
 		protected void onPostExecute(List<HikeSharedFile> result)
 		{
+			if(getSherlockActivity() == null)
+			{
+				return ;
+			}
 			if (!result.isEmpty())
 			{  
 				if (itemsToRight)    //Loading items to the right of the viewpager
