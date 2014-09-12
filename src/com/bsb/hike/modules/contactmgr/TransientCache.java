@@ -1,6 +1,7 @@
 package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -21,7 +22,6 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
@@ -211,6 +211,15 @@ public class TransientCache extends ContactsCache
 		}
 	}
 
+	private void removeGroupParticipantFromCache(String groupId, String msisdn)
+	{
+		Map<String, PairModified<GroupParticipant, String>> groupParticipantsList = groupParticipants.get(groupId);
+		if (null != groupParticipantsList)
+		{
+			groupParticipantsList.remove(msisdn);
+		}
+	}
+
 	/**
 	 * Removes the group participant from {@link #groupParticipants} , should be called when user leaves a group chat.
 	 * 
@@ -222,16 +231,35 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			Map<String, PairModified<GroupParticipant, String>> groupParticipantsList = groupParticipants.get(groupId);
-			if (null != groupParticipantsList)
+			removeGroupParticipantFromCache(groupId, msisdn);
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	/**
+	 * Removes multiple from group participants from the {@link #groupParticipants} map
+	 * 
+	 * @param groupId
+	 * @param msisdns
+	 */
+	void removeGroupParticipants(String groupId, Collection<String> msisdns)
+	{
+		writeLock.lock();
+		try
+		{
+			for (String msisdn : msisdns)
 			{
-				groupParticipantsList.remove(msisdn);
+				removeGroupParticipantFromCache(groupId, msisdn);
 			}
 		}
 		finally
 		{
 			writeLock.unlock();
 		}
+
 	}
 
 	/**
