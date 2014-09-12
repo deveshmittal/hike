@@ -1116,14 +1116,12 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="add_btn">ADD</string>
     <string name="not_now">NOT NOW</string>
     <string name="on_hike">on hike</string>
-    <string name="add_fav">add to favorites</string>
     <string name="shared_med">SHARED MEDIA</string>
     <string name="pins">Pins</string>
     <string name="groups">Groups</string>
     <string name="members">MEMBERS</string>
     <string name="phone_pa">PHONE</string>
     <string name="shared_cont_pa">SHARED CONTENT</string>
-    <string name="no_media">No media shared</string>
     <string name="no_internet_try_again">No internet connection. Please try again later.</string>
     <string name="refresh">Refresh</string>
     <string name="user_back_on_hike">%1$s is now on hike, say hi</string>
@@ -1136,8 +1134,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="file_missing_caps">FILE MISSING</string>
     <string name="status_profile_pic_notification">changed profile picture</string>
     <string name="group_admin">Admin</string>
-    <string name="no_file">No files or pins shared</string>
-    <string name="no_file_profile">No files shared</string>
     <string name="favorite_request_pending">Added as favorite</string>
     <string name="delete_media_from_sdcard">Delete media from phone</string>
     <string name="unable_to_open">Sorry, this file does not exist</string>
@@ -1161,6 +1157,10 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
 	<string name="image_quality_popup_header">Choose image quality</string>
 	<string name="image_quality_prefs">Image Quality</string>
 	<string name="image_quality_file_as">file as</string>
+	<string name="no_media">Photos and videos are shown here</string>
+    <string name="add_fav">Add to favorites</string>
+    <string name="no_file">Files and pins are shown here</string>
+    <string name="no_file_profile">Files are shown here</string>
     <string name="num_new_conversations">%1$s conversations</string>
     <string name="notifications_contact_join_title">Contact joining hike</string>
 </resources>

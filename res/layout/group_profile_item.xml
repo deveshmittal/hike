@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="55dp"
+    android:layout_height="53dp"
     android:background="@drawable/list_item" >
 
     <LinearLayout
         android:id="@+id/image_container"
-        android:layout_width="@dimen/medium_avatar"
-        android:layout_height="@dimen/medium_avatar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="14dp"
@@ -15,8 +15,8 @@
 
         <RelativeLayout
             android:id="@+id/avatar_container"
-            android:layout_width="@dimen/medium_avatar"
-            android:layout_height="@dimen/medium_avatar" >
+            android:layout_width="36dp"
+            android:layout_height="36dp" >
 
             <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/avatar"
@@ -32,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginLeft="9dp"
+            android:layout_marginLeft="11dp"
             android:src="@drawable/ic_invite_to_hike"
             android:visibility="gone" />
     </LinearLayout>
