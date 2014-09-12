@@ -143,10 +143,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 		{	
 			fragmentTransaction.remove(fragment);
 			fragmentTransaction.commitAllowingStateLoss();
-			if(!getSupportActionBar().isShowing())
-			{
-				getSupportActionBar().show();
-			}
+			getSupportActionBar().show();
 			return true;
 		}
 		return false;
