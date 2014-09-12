@@ -1658,7 +1658,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				Logger.d("ProfileActivity", "The activity is " + this);
 				boolean isPicasaImage = false;
 				Uri selectedFileUri = null;
-				if (data == null)
+				if (data == null || data.getData() == null)
 				{
 					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
 					return;
@@ -1793,7 +1793,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		int count = preferences.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 		if(count > 0)
 		{
-			Utils.incrementOrDecrementHomeOverflowCount(preferences, -1);
+			Utils.incrementOrDecrementFriendRequestCount(preferences, -1);
 		}
 	}
 

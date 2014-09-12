@@ -456,13 +456,6 @@ public class HikeNotification
 
 	public void notifyStringMessage(String msisdn, String message, boolean forceNotPlaySound)
 	{
-		boolean isSingleMsisdn = hikeNotifMsgStack.isFromSingleMsisdn();
-
-		Drawable avatarDrawable = null;
-		if (!isSingleMsisdn)
-		{
-			avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
-		}
 		try
 		{
 			hikeNotifMsgStack.addMessage(msisdn, message);
@@ -474,6 +467,14 @@ public class HikeNotification
 		}
 
 		hikeNotifMsgStack.invalidateConvMsgList();
+		
+		boolean isSingleMsisdn = hikeNotifMsgStack.isFromSingleMsisdn();
+
+		Drawable avatarDrawable = null;
+		if (!isSingleMsisdn)
+		{
+			avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		}
 
 		if (hikeNotifMsgStack.getNotificationTextLines() == 1)
 		{
@@ -936,10 +937,13 @@ public class HikeNotification
 
 		NotificationCompat.Builder mBuilder;
 		mBuilder = null;
-		mBuilder = getNotificationBuilder(key, subMessage, text.toString(), avatarDrawable, smallIconId, shouldNotPlaySound);
+		mBuilder = getNotificationBuilder(key, message, text.toString(), avatarDrawable, smallIconId, shouldNotPlaySound);
 		NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
 		bigTextStyle.setBigContentTitle(key);
-		bigTextStyle.setSummaryText(subMessage);
+		if(!TextUtils.isEmpty(subMessage))
+		{
+			bigTextStyle.setSummaryText(subMessage);
+		}
 		bigTextStyle.bigText(message);
 
 		// Moves the big view style object into the notification object.
@@ -980,7 +984,12 @@ public class HikeNotification
 			mBuilder = getNotificationBuilder(key, message, text.toString(), avatarDrawable, smallIconId, forceNotPlaySound);
 			final NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
 			bigPicStyle.setBigContentTitle(key);
-			bigPicStyle.setSummaryText(subMessage);
+			if(!TextUtils.isEmpty(subMessage))
+			{
+				bigPicStyle.setSummaryText(subMessage);
+			}else{
+				bigPicStyle.setSummaryText(message);
+			}
 			bigPicStyle.bigPicture(bigPictureImage);
 			mBuilder.setSubText(subMessage);
 			mBuilder.setStyle(bigPicStyle);
@@ -990,11 +999,14 @@ public class HikeNotification
 			mBuilder = null;
 			if (isBigText)
 			{
-				mBuilder = getNotificationBuilder(key, subMessage, text.toString(), avatarDrawable, smallIconId, forceNotPlaySound);
+				mBuilder = getNotificationBuilder(key, message, text.toString(), avatarDrawable, smallIconId, forceNotPlaySound);
 				NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
 				bigTextStyle.setBigContentTitle(key);
 				bigTextStyle.bigText(message);
-				bigTextStyle.setSummaryText(subMessage);
+				if(!TextUtils.isEmpty(subMessage))
+				{
+					bigTextStyle.setSummaryText(subMessage);
+				}
 				mBuilder.setStyle(bigTextStyle);
 			}
 			else
