@@ -726,6 +726,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			req_layout.setVisibility(View.GONE);
 			dual_layout.setVisibility(View.GONE);
 			statusMood.setVisibility(View.GONE);
+			fav_layout.setTag(null);  //Resetting the tag, incase we need to add to favorites again.
 			if(!HikeMessengerApp.hikeBotNamesMap.containsKey(contactInfo.getMsisdn()))  //The HikeBot's numbers wont be shown
 			{
 			if (showContactsUpdates(contactInfo)) // Favourite case
@@ -741,9 +742,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				else if(contactInfo.isUnknownContact())
 				{		
 						fav_layout.setVisibility(View.VISIBLE);
-						fav_layout.setTag(getResources().getString(R.string.tap_to_save));
+						fav_layout.setTag(getResources().getString(R.string.tap_save_contact));
 						extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
-						extraInfo.setText(getResources().getString(R.string.tap_to_save));
+						extraInfo.setText(getResources().getString(R.string.tap_save_contact));
 						smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
 				}
 				else
@@ -780,9 +781,9 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						if (contactInfo.isUnknownContact()) // Tap to save
 						{
 							fav_layout.setVisibility(View.VISIBLE);
-							fav_layout.setTag(getResources().getString(R.string.tap_to_save));
+							fav_layout.setTag(getResources().getString(R.string.tap_save_contact));
 							extraInfo.setTextColor(getResources().getColor(R.color.blue_hike));
-							extraInfo.setText(getResources().getString(R.string.tap_to_save));
+							extraInfo.setText(getResources().getString(R.string.tap_save_contact));
 							smallIcon.setImageResource(R.drawable.ic_invite_to_hike);
 						}
 						else
@@ -1649,7 +1650,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				Logger.d("ProfileActivity", "The activity is " + this);
 				boolean isPicasaImage = false;
 				Uri selectedFileUri = null;
-				if (data == null)
+				if (data == null || data.getData() == null)
 				{
 					Toast.makeText(getApplicationContext(), R.string.error_capture, Toast.LENGTH_SHORT).show();
 					return;
@@ -1784,14 +1785,14 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		int count = preferences.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 		if(count > 0)
 		{
-			Utils.incrementOrDecrementHomeOverflowCount(preferences, -1);
+			Utils.incrementOrDecrementFriendRequestCount(preferences, -1);
 		}
 	}
 
 	public void onTextButtonClick(View v)
 	{
 		if(v.getTag()!=null &&      
-				((String) v.getTag()).equals(getResources().getString(R.string.tap_save_contact)))  //Only in this case, the the view will have a tag else tag will be null
+				((String) v.getTag()).equals(getResources().getString(R.string.tap_save_contact))) //Only in this case, the the view will have a tag else tag will be null
 		{
 			onAddToContactClicked(v);
 			return;
@@ -2665,7 +2666,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			if(this.profileType == ProfileType.GROUP_INFO)
 				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ProfileActivity.this, groupConversation));
 			else
-				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ProfileActivity.this, contactInfo.getName(), contactInfo.getMsisdn()));
+				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ProfileActivity.this, contactInfo.getNameOrMsisdn(), contactInfo.getMsisdn()));
 			return;
 		}
 		
