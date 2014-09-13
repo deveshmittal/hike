@@ -353,7 +353,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_FAILED, HikePubSub.ICON_CHANGED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.CONTACT_ADDED, HikePubSub.UPLOAD_FINISHED,
 			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER,
-			HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, HikePubSub.GROUP_REVIVED, HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE,
+			HikePubSub.DELETE_MESSAGE, HikePubSub.GROUP_REVIVED, HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE,
 			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START, HikePubSub.STICKER_DOWNLOADED, HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED,
 			HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.STICKER_CATEGORY_DOWNLOADED, HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
@@ -3770,13 +3770,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 		}
-		else if (HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD.equals(type))
+		else if (HikePubSub.DELETE_MESSAGE.equals(type))
 		{
-			if(!(object instanceof ArrayList<?>))
+			Pair<ArrayList<Long>, Bundle> deleteMessage = (Pair<ArrayList<Long>, Bundle>) object;
+			Bundle bundle = deleteMessage.second;
+			String msisdn = bundle.getString(HikeConstants.Extras.MSISDN);
+			if(!msisdn.equals(mContactNumber))
 			{
 				return;
 			}
-			final ArrayList<Long> msgIds = (ArrayList<Long>) object;
+			
+			final ArrayList<Long> msgIds = deleteMessage.first;
+			final boolean deleteMediaFromPhone = bundle.getBoolean(HikeConstants.Extras.DELETE_MEDIA_FROM_PHONE);
+			
 			runOnUiThread(new Runnable()
 			{
 
@@ -3787,7 +3793,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						return;
 					}
-					removeMessages(msgIds);
+					deleteMessages(msgIds, deleteMediaFromPhone);
 				}
 			});
 		}
@@ -4213,8 +4219,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				runOnUiThread(mUpdateAdapter);
 			}
-		}else if(HikePubSub.CONV_META_DATA_UPDATED.equals(type)){
+		}else if(HikePubSub.CONV_META_DATA_UPDATED.equals(type))
+		{			
+			if(mConversation.getMsisdn().equals(((MetaData)object).getGroupId()))
+			{
 				mConversation.setMetaData((MetaData) object);
+			}
 		}
 		else if (HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT.equals(type))
 		{
@@ -4694,40 +4704,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
-	private void removeMessages(ArrayList<Long> msgIds)
+	private void deleteMessagesFromDb(ArrayList<Long> msgIds, boolean deleteMediaFromPhone)
 	{
-		removeMessages(msgIds, false);
-	}
-	
-	private void removeMessages(ArrayList<Long> msgIds, boolean deleteMediaFromPhone)
-	{
-		Collections.sort(msgIds);
 		//TODO if last message is typing notification we will get wrong result here
-		boolean isLastMessage = (msgIds.get(msgIds.size()-1) == messages.get(messages.size() - 1).getMsgID());
+		boolean isLastMessage = (msgIds.contains(messages.get(messages.size() - 1).getMsgID()));
 		Bundle bundle = new Bundle();
 		bundle.putBoolean(HikeConstants.Extras.IS_LAST_MESSAGE, isLastMessage);
 		bundle.putString(HikeConstants.Extras.MSISDN, mContactNumber);
+		bundle.putBoolean(HikeConstants.Extras.DELETE_MEDIA_FROM_PHONE, deleteMediaFromPhone);
 		mPubSub.publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
-		deleteMessages(msgIds, deleteMediaFromPhone);
-		mAdapter.notifyDataSetChanged();
 	}
 	
 	private void deleteMessages(ArrayList<Long> msgIds, boolean deleteMediaFromPhone)
 	{
-		/*
-		 * Iterating in reverse order since its more likely the user wants to delete one of his/her latest messages.
-		 */
-		int lastIndex = msgIds.size() - 1;
-		for (int i = lastIndex; i >= 0; i--)
+		for (long msgId : msgIds)
 		{
-			/*
-			 * break if we have reached first message which is not in UI.
-			 */
-			long msgId = msgIds.get(i);
-			if (msgId < messages.get(0).getMsgID())
-			{
-				break;
-			}
 			for (ConvMessage convMessage : messages)
 			{
 				if (convMessage.getMsgID() == msgId)
@@ -4737,6 +4728,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			}
 		}
+		mAdapter.notifyDataSetChanged();
 	}
 	
 	/*
@@ -7767,7 +7759,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void onClick(View v)
 				{
-					removeMessages(selectedMsgIdsToDelete, deleteConfirmDialog.isChecked());
+					deleteMessagesFromDb(selectedMsgIdsToDelete, deleteConfirmDialog.isChecked());
 					destroyActionMode();
 					deleteConfirmDialog.dismiss();
 				}

@@ -1471,6 +1471,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 */
 	public void addLastConversations(List<ConvMessage> convMessages, HashMap<String, PairModified<ConvMessage, Integer>> lastPinMap)
 	{
+		Map<String, List<String>> map = new HashMap<String, List<String>>();
+
 		for (ConvMessage conv : convMessages)
 		{
 			String msisdn = conv.getMsisdn();
@@ -1481,8 +1483,22 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() - 1);
 			}
-		}
+			
+			if (Utils.isGroupConversation(conv.getMsisdn()))
+			{
+				List<String> lastMsisdns = new ArrayList<String>();
+				if (conv.getMetadata() != null)
+					lastMsisdns = getGroupLastMsgMsisdn(conv.getMetadata().getJSON());
 
+				if (lastMsisdns.size() == 0 && null != conv.getGroupParticipantMsisdn())
+				{
+					lastMsisdns.add(conv.getGroupParticipantMsisdn());
+				}
+				map.put(conv.getMsisdn(), lastMsisdns);
+			}
+		}
+		ContactManager.getInstance().removeOlderLastGroupMsisdns(map);
+		
 		for (Entry<String, PairModified<ConvMessage, Integer>> entry : lastPinMap.entrySet())
 		{
 			PairModified<ConvMessage, Integer> pair = entry.getValue();
@@ -1552,11 +1568,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					Conversation.MetaData convMetaData = null;
 					if (metadata != null)
 					{
-						convMetaData = new Conversation.MetaData(metadata);
+						convMetaData = new Conversation.MetaData(metadata, conv.getMsisdn());
 					}
 					else
 					{
-						convMetaData = new Conversation.MetaData(null);
+						convMetaData = new Conversation.MetaData(null, null);
 						convMetaData.setLastPinId(HikeConstants.MESSAGE_TYPE.TEXT_PIN, conv.getMsgID());
 					}
 					long preTimeStamp = convMetaData.getLastPinTimeStamp(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
@@ -1606,7 +1622,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				try
 				{
 					Conversation.MetaData convMetaData = null;
-					convMetaData = new Conversation.MetaData(metadata);
+					convMetaData = new Conversation.MetaData(metadata, conv.getMsisdn());
 
 					convMetaData = updatePinMetadata(conv, convMetaData, unreadCount);
 					contentValues.put(DBConstants.CONVERSATION_METADATA, convMetaData.toString());
@@ -1877,7 +1893,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				metadata = c.getString(c.getColumnIndex(DBConstants.CONVERSATION_METADATA));
 				try
 				{
-					conv.setMetaData(new Conversation.MetaData(metadata));
+					conv.setMetaData(new Conversation.MetaData(metadata, msisdn));
 				}
 				catch (JSONException e)
 				{
@@ -2565,11 +2581,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	/* deletes a multiple messages */
-	public void deleteMessages(ArrayList<Long> msgIds, String msisdn, boolean isLastMessage)
+	/**
+	 * deletes multiple messages corresponding to give msgId
+	 * 
+	 * @param msgIds
+	 * @param msisdn
+	 * @param containsLastMessage
+	 *            null if its value is not known. In this case we need to fetch this value from db. value true implies that given msgIds set contains a messageId of a message which
+	 *            is currently last message of that conversation. false implies it does not contains last message's id.
+	 */
+	public void deleteMessages(ArrayList<Long> msgIds, String msisdn, Boolean containsLastMessage)
 	{
-		StringBuilder inSelection = new StringBuilder("("+msgIds.get(0));
-		for (int i=0; i<msgIds.size(); i++)
+		StringBuilder inSelection = new StringBuilder("(" + msgIds.get(0));
+		for (int i = 0; i < msgIds.size(); i++)
 		{
 			inSelection.append("," + Long.toString(msgIds.get(i)));
 		}
@@ -2577,11 +2601,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		try
 		{
 			mDb.beginTransaction();
-			mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.MESSAGE_ID + " IN "+ inSelection.toString());
-			
-			mDb.execSQL("DELETE FROM " + DBConstants.SHARED_MEDIA_TABLE + " WHERE " + DBConstants.MESSAGE_ID + " IN "+ inSelection.toString());
+			if (containsLastMessage == null)
+			{
+				ConvMessage convMessage = getLastMessageForConversation(msisdn);
+				if (msgIds.contains(convMessage.getMsgID()))
+				{
+					containsLastMessage = true;
+				}
+				else
+				{
+					containsLastMessage = false;
+				}
+			}
 
-			if (isLastMessage)
+			mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE " + DBConstants.MESSAGE_ID + " IN " + inSelection.toString());
+
+			mDb.execSQL("DELETE FROM " + DBConstants.SHARED_MEDIA_TABLE + " WHERE " + DBConstants.MESSAGE_ID + " IN " + inSelection.toString());
+
+			if (containsLastMessage)
 			{
 				deleteMessageFromConversation(msisdn);
 			}

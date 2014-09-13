@@ -122,18 +122,9 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		
 		readArguments();
 		
-		intialiazeViewPager();
-		
-		//Load media to the right and left of the view pager if this fragment is called from ChatThread.
-		if(fromChatThread)
-		{	Logger.d(TAG,  " MsgId : " + sharedMediaItems.get(0).getMsgId());
-			loadItems(false,sharedMediaItems.get(0).getMsgId(),HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY/2,false, true, initialPosition);  //Left
-			loadItems(false,sharedMediaItems.get(0).getMsgId(),HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY/2, true);         //Right
-			setSenderDetails(0);
-		}
-		else
+		if(savedInstanceState != null)
 		{
-			setSelection(initialPosition);  //Opened from the gallery perhaps, hence set the view pager to the required position
+			initialPosition = savedInstanceState.getInt(HikeConstants.Extras.CURRENT_POSITION, initialPosition);
 		}
 		
 		return mParent;
@@ -145,16 +136,6 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		senderName = (TextView) parent.findViewById(R.id.sender_name);
 		itemTimeStamp = (TextView) parent.findViewById(R.id.item_time_stamp);
 		gallaryButton  = (ImageView) parent.findViewById(R.id.gallary_button);
-		
-		gallaryButton.setOnClickListener(new OnClickListener()
-		{
-			
-			@Override
-			public void onClick(View v)
-			{
-				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(getSherlockActivity(), isGroup, conversationName, msisdnArray, nameArray, msisdn));
-			}
-		});
 	}
 
 	private void readArguments()
@@ -232,6 +213,31 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 			}
 		});
 		
+		intialiazeViewPager();
+		
+		// Load media to the right and left of the view pager if this fragment is called from ChatThread.
+		if (fromChatThread)
+		{
+			Logger.d(TAG, " MsgId : " + sharedMediaItems.get(0).getMsgId());
+			loadItems(false, sharedMediaItems.get(0).getMsgId(), HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY / 2, false, true, initialPosition); // Left
+			loadItems(false, sharedMediaItems.get(0).getMsgId(), HikeConstants.MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY / 2, true); // Right
+			setSenderDetails(0);
+		}
+		else
+		{
+			setSelection(initialPosition); // Opened from the gallery perhaps, hence set the view pager to the required position
+		}
+		
+		gallaryButton.setOnClickListener(new OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(getSherlockActivity(), isGroup, conversationName, msisdnArray, nameArray, msisdn));
+			}
+		});
+		
 		super.onActivityCreated(savedInstanceState);
 	}
 
@@ -255,6 +261,7 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	@Override
 	public void  onSaveInstanceState(Bundle outState)
 	{	
+		outState.putInt(HikeConstants.Extras.CURRENT_POSITION, selectedPager.getCurrentItem());
 		super.onSaveInstanceState(outState);
 	}
 
@@ -449,6 +456,10 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 		@Override
 		protected void onPostExecute(List<HikeSharedFile> result)
 		{
+			if(getSherlockActivity() == null)
+			{
+				return ;
+			}
 			if (!result.isEmpty())
 			{  
 				if (itemsToRight)    //Loading items to the right of the viewpager
@@ -530,7 +541,12 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 				{
 					ArrayList<Long> msgIds = new ArrayList<Long>(1);
 					msgIds.add(getCurrentSelectedItem().getMsgId());
-					HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, msgIds);
+					
+					Bundle bundle = new Bundle();
+					bundle.putString(HikeConstants.Extras.MSISDN, msisdn);
+					bundle.putInt(HikeConstants.Extras.DELETED_MESSAGE_TYPE, HikeConstants.SHARED_MEDIA_TYPE);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
+					
 					// if delete media from phone is checked
 					if(deleteConfirmDialog.isChecked() && getCurrentSelectedItem().exactFilePathFileExists())
 					{

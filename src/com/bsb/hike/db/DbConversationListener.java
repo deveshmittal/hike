@@ -139,10 +139,14 @@ public class DbConversationListener implements Listener
 			Pair<ArrayList<Long>, Bundle> deleteMessage = (Pair<ArrayList<Long>, Bundle>) object;
 			ArrayList<Long> msgIds = deleteMessage.first;
 			Bundle bundle = deleteMessage.second;
-			boolean isLastMessage = bundle.getBoolean(HikeConstants.Extras.IS_LAST_MESSAGE);
+			Boolean containsLastMessage = null;
+			if(bundle.containsKey(HikeConstants.Extras.IS_LAST_MESSAGE))
+			{
+				containsLastMessage = bundle.getBoolean(HikeConstants.Extras.IS_LAST_MESSAGE);
+			}
 			String msisdn = bundle.getString(HikeConstants.Extras.MSISDN);
 			
-			mConversationDb.deleteMessages(msgIds, msisdn, isLastMessage);
+			mConversationDb.deleteMessages(msgIds, msisdn, containsLastMessage);
 			persistence.removeMessages(msgIds);
 		}
 		else if (HikePubSub.MESSAGE_FAILED.equals(type)) // server got msg

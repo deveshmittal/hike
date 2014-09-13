@@ -1263,6 +1263,12 @@ public class HikeConstants
 		public static final String PARTICIPANT_NAME_ARRAY = "participantNameArray";
 
 		public static final String CONVERSATION_NAME = "conversationName";
+
+		public static final String DELETE_MEDIA_FROM_PHONE = "deleteMediaFromPhone";
+
+		public static final String DELETED_MESSAGE_TYPE = "deletedMessageType";
+
+		public static final String CURRENT_POSITION = "currentPosition";
 	}
 
 	public static final class LogEvent
@@ -1859,5 +1865,7 @@ public class HikeConstants
 	public static final int ATOMIC_APP_TIP_INVITE_WATSAPP = 9;
 	public static final int ATOMIC_APP_TIP_HIKE_EXTRA = 10;
 	public static final int ATOMIC_APP_TIP_HIKE_REWARDS = 11;
+
+	public static final int SHARED_MEDIA_TYPE = 1;
 	
 }

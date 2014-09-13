@@ -2139,7 +2139,7 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		if (limit > 0)
 		{
 			List<ContactInfo> friendList = getDuplicateContactsForFtue(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.FRIEND,
-					HikeConstants.ON_HIKE_VALUE, myMsisdn));
+					HikeConstants.ON_HIKE_VALUE, myMsisdn, false, true));
 			for (ContactInfo contactInfo : friendList)
 			{
 				if (!Utils.isListContainsMsisdn(ftueContactsData.getHikeContacts(), contactInfo.getMsisdn()))

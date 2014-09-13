@@ -1,12 +1,14 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -497,7 +499,10 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 	 */
 	private void removeMessage(ArrayList<Long> selectedPinIds)
 	{
-		HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, selectedPinIds);
+		Bundle bundle = new Bundle();
+		bundle.putString(HikeConstants.Extras.MSISDN, msisdn);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(selectedPinIds, bundle));
+		
 		
 		final HashMap<Long, ConvMessage> selectedMessagesMap = pinAdapter.getSelectedPinsMap();
 
