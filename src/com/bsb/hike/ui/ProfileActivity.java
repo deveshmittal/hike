@@ -147,7 +147,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.PARTICIPANT_JOINED_GROUP,
 			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
-			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.DELETE_MESSAGE };
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.DELETE_MESSAGE, HikePubSub.CONTACT_ADDED };
 
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST,
@@ -2187,26 +2187,49 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		else if (HikePubSub.CONTACT_ADDED.equals(type) || HikePubSub.CONTACT_DELETED.equals(type))
 		{
 			final ContactInfo contact = (ContactInfo) object;
-			if (contactInfo == null)
+			if (contact == null)
 			{
 				return;
+			}
+			if(profileType == ProfileType.GROUP_INFO)
+			{
+				if(participantMap.containsKey(contact.getMsisdn()))
+				{
+					PairModified<GroupParticipant, String> groupParticipantPair = participantMap.get(contact.getMsisdn());
+					groupParticipantPair.getFirst().setContactInfo(contact);
+				}
+				else
+				{
+					return;
+				}
 			}
 
-			if (!this.mLocalMSISDN.equals(contact.getMsisdn()))
+			else if (profileType == ProfileType.CONTACT_INFO)
 			{
-				return;
+				if (!this.mLocalMSISDN.equals(contact.getMsisdn()))
+				{
+					return;
+				}
+				this.contactInfo = contact;
 			}
-			this.contactInfo = contact;
+			
 			runOnUiThread(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					updateProfileImageInHeaderView();
-					profileAdapter.updateContactInfo(contactInfo);
-					if (topBarBtn != null)
+					if(profileType == ProfileType.CONTACT_INFO)
 					{
-						topBarBtn.setImageResource(R.drawable.ic_call_top);
+						updateProfileImageInHeaderView();
+						profileAdapter.updateContactInfo(contactInfo);
+						if (topBarBtn != null)
+						{
+							topBarBtn.setImageResource(R.drawable.ic_call_top);
+						}
+					}
+					else if(profileType == ProfileType.GROUP_INFO)
+					{
+						profileAdapter.updateGroupConversation(groupConversation);
 					}
 				}
 			});
