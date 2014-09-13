@@ -2745,7 +2745,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * @param participantList
 	 *            A list of the participants to be added
 	 */
-	public int addRemoveGroupParticipants(String groupId, Map<String, PairModified<GroupParticipant, String>> participantList)
+	public int addRemoveGroupParticipants(String groupId, Map<String, PairModified<GroupParticipant, String>> participantList, boolean groupRevived)
 	{
 		boolean participantsAlreadyAdded = true;
 		boolean infoChangeOnly = false;
@@ -2786,9 +2786,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 
-		if (currentParticipants.isEmpty() && participantsAlreadyAdded)
+		if (groupRevived)
 		{
-			return HikeConstants.NO_CHANGE;
+			/*
+			 * if group is revived then we have to check whether some members are added or removed from the group and update that in the db
+			 */
+			if (currentParticipants.isEmpty() && participantsAlreadyAdded)
+			{
+				return HikeConstants.NO_CHANGE;
+			}
+		}
+		else
+		{
+			/*
+			 * if group is not revived that means we have added some members into the group or gcj was already received when adding members the parameter participantList contains
+			 * only members which are added and not all the group participants
+			 */
+			if (participantsAlreadyAdded)
+				return HikeConstants.NO_CHANGE;
 		}
 
 		Map<String, PairModified<GroupParticipant, String>> newParticipants = new HashMap<String, PairModified<GroupParticipant, String>>();
@@ -2798,7 +2813,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			mDb.beginTransaction();
 
-			if (!currentParticipants.isEmpty())
+			if (groupRevived && !currentParticipants.isEmpty())
 			{
 				String removeMsisdns = Utils.getMsisdnStatement(currentParticipants.keySet());
 				Logger.d(getClass().getSimpleName(), " remove these from group members table GroupId : " + groupId + " removed msisdns : " + removeMsisdns);
@@ -2806,25 +2821,28 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				ContactManager.getInstance().removeGroupParticipant(groupId, currentParticipants.keySet());
 			}
 
-			ih = new InsertHelper(mDb, DBConstants.GROUP_MEMBERS_TABLE);
-			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO " + DBConstants.GROUP_MEMBERS_TABLE + " ( " + DBConstants.GROUP_ID + ", " + DBConstants.MSISDN + ", "
-					+ DBConstants.NAME + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_LEFT + ", " + DBConstants.ON_DND + ", " + DBConstants.SHOWN_STATUS + " ) "
-					+ " VALUES (?, ?, ?, ?, ?, ?, ?)");
-			for (Entry<String, PairModified<GroupParticipant, String>> participant : participantList.entrySet())
+			if(!participantsAlreadyAdded)
 			{
-				GroupParticipant groupParticipant = participant.getValue().getFirst();
-				insertStatement.bindString(ih.getColumnIndex(DBConstants.GROUP_ID), groupId);
-				insertStatement.bindString(ih.getColumnIndex(DBConstants.MSISDN), participant.getKey());
-				insertStatement.bindString(ih.getColumnIndex(DBConstants.NAME), participant.getValue().getSecond());
-				insertStatement.bindLong(ih.getColumnIndex(DBConstants.ONHIKE), groupParticipant.getContactInfo().isOnhike() ? 1 : 0);
-				insertStatement.bindLong(ih.getColumnIndex(DBConstants.HAS_LEFT), 0);
-				insertStatement.bindLong(ih.getColumnIndex(DBConstants.ON_DND), groupParticipant.onDnd() ? 1 : 0);
-				insertStatement.bindLong(ih.getColumnIndex(DBConstants.SHOWN_STATUS), groupParticipant.getContactInfo().isOnhike() ? 1 : 0);
-				insertStatement.executeInsert();
+				ih = new InsertHelper(mDb, DBConstants.GROUP_MEMBERS_TABLE);
+				insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO " + DBConstants.GROUP_MEMBERS_TABLE + " ( " + DBConstants.GROUP_ID + ", " + DBConstants.MSISDN
+						+ ", " + DBConstants.NAME + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_LEFT + ", " + DBConstants.ON_DND + ", " + DBConstants.SHOWN_STATUS + " ) "
+						+ " VALUES (?, ?, ?, ?, ?, ?, ?)");
+				for (Entry<String, PairModified<GroupParticipant, String>> participant : participantList.entrySet())
+				{
+					GroupParticipant groupParticipant = participant.getValue().getFirst();
+					insertStatement.bindString(ih.getColumnIndex(DBConstants.GROUP_ID), groupId);
+					insertStatement.bindString(ih.getColumnIndex(DBConstants.MSISDN), participant.getKey());
+					insertStatement.bindString(ih.getColumnIndex(DBConstants.NAME), participant.getValue().getSecond());
+					insertStatement.bindLong(ih.getColumnIndex(DBConstants.ONHIKE), groupParticipant.getContactInfo().isOnhike() ? 1 : 0);
+					insertStatement.bindLong(ih.getColumnIndex(DBConstants.HAS_LEFT), 0);
+					insertStatement.bindLong(ih.getColumnIndex(DBConstants.ON_DND), groupParticipant.onDnd() ? 1 : 0);
+					insertStatement.bindLong(ih.getColumnIndex(DBConstants.SHOWN_STATUS), groupParticipant.getContactInfo().isOnhike() ? 1 : 0);
+					insertStatement.executeInsert();
 
-				newParticipants.put(participant.getKey(), new PairModified<GroupParticipant, String>(groupParticipant, participant.getValue().getSecond()));
+					newParticipants.put(participant.getKey(), new PairModified<GroupParticipant, String>(groupParticipant, participant.getValue().getSecond()));
+				}
+				ContactManager.getInstance().addGroupParticipants(groupId, newParticipants);
 			}
-			ContactManager.getInstance().addGroupParticipants(groupId, newParticipants);
 			mDb.setTransactionSuccessful();
 			return infoChangeOnly ? HikeConstants.PARTICIPANT_STATUS_CHANGE : HikeConstants.NEW_PARTICIPANT;
 		}
