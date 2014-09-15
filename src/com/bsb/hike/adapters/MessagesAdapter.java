@@ -2553,7 +2553,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		int progress = FileTransferManager.getInstance(context).getFTProgress(msgId, hikeFile.getFile(), isSent);
 		int chunkSize = FileTransferManager.getInstance(context).getChunkSize(msgId);
-		if (fss.getTotalSize() <= 0 && isSent)
+		if (fss.getTotalSize() <= 0 && isSent && fss.getFTState() != FTState.ERROR)
 		{
 			showTransferInitialization(holder, hikeFile);
 		}
