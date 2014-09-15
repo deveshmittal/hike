@@ -128,6 +128,14 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 				@Override
 				public void run()
 				{
+					/*
+					 * Making sure we don't add the fragment if the activity is finishing.
+					 */
+					if (isFinishing())
+					{
+						return;
+					}
+
 					Bundle arguments = (Bundle) object;
 
 					ImageViewerFragment imageViewerFragment = new ImageViewerFragment();
