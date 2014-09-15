@@ -1920,6 +1920,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			// Intent received externally
 			String phoneNumber = dataURI.getSchemeSpecificPart();
+			
+			/*
+			 *  If phone number is empty or null finish activity and return 
+			 */
+			if(TextUtils.isEmpty(phoneNumber))
+			{
+				finish();
+				return ;
+			}
 			// We were getting msisdns with spaces in them. Replacing all spaces
 			// so that lookup is correct
 			phoneNumber = phoneNumber.replaceAll(" ", "");
