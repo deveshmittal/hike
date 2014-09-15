@@ -3834,6 +3834,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					public void run()
 					{
 						toggleGroupLife(true);
+						((GroupConversation) mConversation).setGroupMemberAliveCount(0);
 					}
 				});
 			}
