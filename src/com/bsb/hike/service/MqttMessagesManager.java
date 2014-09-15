@@ -332,7 +332,7 @@ public class MqttMessagesManager
 			}
 
 		}
-		int gcjAdd = this.convDb.addRemoveGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList());
+		int gcjAdd = this.convDb.addRemoveGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList(), groupRevived);
 		if (!groupRevived && gcjAdd != HikeConstants.NEW_PARTICIPANT)
 		{
 			Logger.d(getClass().getSimpleName(), "GCJ Message was already received");
