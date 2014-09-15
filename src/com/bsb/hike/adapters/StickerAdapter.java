@@ -116,6 +116,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		this.activity = activity;
 		stickerCategoryList = StickerManager.getInstance().getStickerCategoryList();
 		stickerObjMap = Collections.synchronizedMap(new EnumMap<StickerCategoryId, StickerAdapter.StickerPageObjects>(StickerCategoryId.class));
+		worker = new StickerLoader(activity.getApplicationContext());
+
 		registerListener();
 		Logger.d(getClass().getSimpleName(), "Sticker Adapter instantiated ....");
 	}
@@ -315,7 +317,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			return;
 		}
 
-		worker = new StickerLoader(activity.getApplicationContext());
 		spo.getDownloadingParent().setVisibility(View.GONE);
 		spo.getDownloadingFailedButton().setVisibility(View.GONE);
 		spo.getStickerListView().setVisibility(View.VISIBLE);
