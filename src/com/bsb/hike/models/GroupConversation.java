@@ -131,8 +131,25 @@ public class GroupConversation extends Conversation
 
 	public String getGroupParticipantFirstName(String msisdn)
 	{
-		ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn, true, false);
-		String name = HikeMessengerApp.getContactManager().getName(getMsisdn(), contact.getMsisdn());
+		String name = null;
+
+		if (null != groupParticipantList)
+		{
+			PairModified<GroupParticipant, String> grpPair = groupParticipantList.get(msisdn);
+			if (null != grpPair)
+			{
+				name = grpPair.getSecond();
+			}
+		}
+		
+		/*
+		 * If groupParticipantsList is not loaded(in case of conversation screen as we load group members when we enter into GC) then we get name from contact manager
+		 */
+		if (null == name)
+		{
+			HikeMessengerApp.getContactManager().getContact(msisdn, true, false);
+			name = HikeMessengerApp.getContactManager().getName(getMsisdn(), msisdn);
+		}
 		return Utils.getFirstName(name);
 	}
 

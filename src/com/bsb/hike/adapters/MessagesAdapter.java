@@ -2553,17 +2553,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		int progress = FileTransferManager.getInstance(context).getFTProgress(msgId, hikeFile.getFile(), isSent);
 		int chunkSize = FileTransferManager.getInstance(context).getChunkSize(msgId);
-		if (fss.getTotalSize() <= 0 && isSent)
+		if (fss.getTotalSize() <= 0 && isSent && fss.getFTState() != FTState.ERROR)
 		{
 			showTransferInitialization(holder, hikeFile);
 		}
-		else if(fss.getFTState() == FTState.IN_PROGRESS && fss.getTransferredSize() == 0 && fss.getTotalSize() > 0)
+		else if(fss.getFTState() == FTState.IN_PROGRESS && fss.getTransferredSize() == 0)
 		{
-			float fakeProgress = (float) chunkSize;
-			fakeProgress /= fss.getTotalSize();
-			if (fakeProgress > 5 * 0.01f)
+			float fakeProgress = 5 * 0.01f;
+			
+			if (fss.getTotalSize() > 0)
 			{
-				fakeProgress = 5 * 0.01f;
+				fakeProgress = (float) chunkSize;
+				fakeProgress /= fss.getTotalSize();
+				if (fakeProgress > 5 * 0.01f)
+				{
+					fakeProgress = 5 * 0.01f;
+				}
 			}
 			holder.circularProgress.setProgress(fakeProgress);
 			holder.circularProgress.setVisibility(View.VISIBLE);

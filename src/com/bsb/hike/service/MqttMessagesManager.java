@@ -332,7 +332,7 @@ public class MqttMessagesManager
 			}
 
 		}
-		int gcjAdd = this.convDb.addRemoveGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList());
+		int gcjAdd = this.convDb.addRemoveGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList(), groupRevived);
 		if (!groupRevived && gcjAdd != HikeConstants.NEW_PARTICIPANT)
 		{
 			Logger.d(getClass().getSimpleName(), "GCJ Message was already received");
@@ -1101,11 +1101,11 @@ public class MqttMessagesManager
 		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
 		this.pubSub.publish(favoriteType == FavoriteType.REQUEST_RECEIVED ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.FRIEND_REQUEST_ACCEPTED, favoriteToggle);
 
-		if(currentType == favoriteType.REQUEST_SENT_REJECTED)
+		if(favoriteType == favoriteType.FRIEND)
 		{
 			incrementUnseenStatusCount();
 		}
-		else
+		else if(favoriteType == favoriteType.REQUEST_RECEIVED && currentType != favoriteType.REQUEST_RECEIVED)
 		{
 			int count = settings.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 			if (count >= 0)
