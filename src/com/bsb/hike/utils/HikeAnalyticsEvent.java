@@ -1,6 +1,6 @@
 package com.bsb.hike.utils;
 
-import java.util.Set;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,7 +14,7 @@ public class HikeAnalyticsEvent
 	/*
 	 * We send this event every time user mark some chats as stealth
 	 */
-	public static void sendStealthMsisdns(Set<String> enabledMsisdn, Set<String> disabledMsisnd)
+	public static void sendStealthMsisdns(List<String> enabledMsisdn, List<String> disabledMsisdn)
 	{
 		// TODO use array instead of sets here.
 		JSONObject object = new JSONObject();
@@ -23,8 +23,14 @@ public class HikeAnalyticsEvent
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.STEALTH);
 
 			JSONObject dataJson = new JSONObject();
-			dataJson.put(HikeConstants.ENABLED_STEALTH, new JSONArray(enabledMsisdn));
-			dataJson.put(HikeConstants.DISABLED_STEALTH, new JSONArray(disabledMsisnd));
+			if (enabledMsisdn != null)
+			{
+				dataJson.put(HikeConstants.ENABLED_STEALTH, new JSONArray(enabledMsisdn));
+			}
+			if (disabledMsisdn != null)
+			{
+				dataJson.put(HikeConstants.DISABLED_STEALTH, new JSONArray(disabledMsisdn));
+			}
 			object.put(HikeConstants.DATA, dataJson);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
 		}

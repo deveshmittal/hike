@@ -701,18 +701,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					}
 					if (getString(R.string.mark_stealth).equals(option))
 					{
-						Set<String> enabledConvs = new HashSet<String>();
+						List<String> enabledConvs = new ArrayList<String>(1);
 						enabledConvs.add(conv.getMsisdn());
-						HikeAnalyticsEvent.sendStealthMsisdns(enabledConvs, new HashSet<String>());
+						HikeAnalyticsEvent.sendStealthMsisdns(enabledConvs, null);
 
 						stealthConversations.add(conv);
 						HikeMessengerApp.addNewStealthMsisdn(conv.getMsisdn());
 					}
 					else
 					{
-						Set<String> disabledConvs = new HashSet<String>();
+						List<String> disabledConvs = new ArrayList<String>(1);
 						disabledConvs.add(conv.getMsisdn());
-						HikeAnalyticsEvent.sendStealthMsisdns(new HashSet<String>(), disabledConvs);
+						HikeAnalyticsEvent.sendStealthMsisdns(null, disabledConvs);
 
 						stealthConversations.remove(conv);
 						HikeMessengerApp.removeStealthMsisdn(conv.getMsisdn());
