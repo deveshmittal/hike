@@ -1984,6 +1984,14 @@ public class MqttMessagesManager
 					//TODO: PASS MESSAGE TO VOIP APP
 					saveVOIPHandshake(jsonObj);
 				}
+				else if(isBulkMessage)	
+				{
+					saveMessageBulk(jsonObj);
+				}
+				else
+				{
+					saveMessage(jsonObj);
+				}
 			}
 			else if(isBulkMessage)
 			{
@@ -2138,7 +2146,7 @@ public class MqttMessagesManager
 		try {
 			String callerID = jsonObj.getString(HikeConstants.FROM);
 //			Context context = .getApplicationContext();
-			Intent intent = new Intent(HikeService.getContext(),com.bsb.hike.VOIP.RTCActivity.class);
+			Intent intent = new Intent(HikeService.getContext(),com.bsb.hike.ui.VoIPActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			intent.putExtra("callerID", callerID);
 			final Intent i = intent;

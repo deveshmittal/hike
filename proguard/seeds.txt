@@ -5951,8 +5951,6 @@ com.actionbarsherlock.widget.SuggestionsAdapter$ChildViewCache: android.widget.I
 com.actionbarsherlock.widget.SuggestionsAdapter$ChildViewCache: android.widget.ImageView mIcon2
 com.actionbarsherlock.widget.SuggestionsAdapter$ChildViewCache: android.widget.ImageView mIconRefine
 com.actionbarsherlock.widget.SuggestionsAdapter$ChildViewCache: SuggestionsAdapter$ChildViewCache(android.view.View)
-com.bsb.hike.AndroidRTC.RTCActivity
-com.bsb.hike.AndroidRTC.RTCActivity$1: void onClick(android.view.View)
 com.bsb.hike.GCMIntentService
 com.bsb.hike.GCMIntentService: GCMIntentService()
 com.bsb.hike.HikeConstants$EmoticonType: com.bsb.hike.HikeConstants$EmoticonType[] values()
@@ -7070,6 +7068,7 @@ com.bsb.hike.R$drawable: int bollywood
 com.bsb.hike.R$drawable: int bollywood_btn
 com.bsb.hike.R$drawable: int btn_fb
 com.bsb.hike.R$drawable: int button_divider
+com.bsb.hike.R$drawable: int call_accept_decline
 com.bsb.hike.R$drawable: int camera_crop_indicator
 com.bsb.hike.R$drawable: int cb_selector
 com.bsb.hike.R$drawable: int change_password_setting_text_selector
@@ -8879,6 +8878,7 @@ com.bsb.hike.R$drawable: int webview_progress
 com.bsb.hike.R$drawable: int welcome_bckg
 com.bsb.hike.R$drawable: int wicked_jellies
 com.bsb.hike.R$drawable: int with_love
+com.bsb.hike.R$id: int CallerId
 com.bsb.hike.R$id: int abs__action_bar
 com.bsb.hike.R$id: int abs__action_bar_container
 com.bsb.hike.R$id: int abs__action_bar_subtitle
@@ -8919,6 +8919,7 @@ com.bsb.hike.R$id: int abs__textButton
 com.bsb.hike.R$id: int abs__title
 com.bsb.hike.R$id: int abs__up
 com.bsb.hike.R$id: int accept
+com.bsb.hike.R$id: int acceptButton
 com.bsb.hike.R$id: int accountIcon
 com.bsb.hike.R$id: int account_container
 com.bsb.hike.R$id: int account_info
@@ -8989,7 +8990,6 @@ com.bsb.hike.R$id: int btn_ok
 com.bsb.hike.R$id: int btn_record
 com.bsb.hike.R$id: int btn_separator
 com.bsb.hike.R$id: int bubble_container
-com.bsb.hike.R$id: int button1
 com.bsb.hike.R$id: int button_container
 com.bsb.hike.R$id: int button_divider
 com.bsb.hike.R$id: int call
@@ -9086,6 +9086,7 @@ com.bsb.hike.R$id: int day_container
 com.bsb.hike.R$id: int day_left
 com.bsb.hike.R$id: int day_right
 com.bsb.hike.R$id: int day_stub
+com.bsb.hike.R$id: int declineButton
 com.bsb.hike.R$id: int del_acc_descr
 com.bsb.hike.R$id: int del_acc_heading
 com.bsb.hike.R$id: int del_acc_heading_right
@@ -9127,6 +9128,7 @@ com.bsb.hike.R$id: int empty_icon
 com.bsb.hike.R$id: int empty_text
 com.bsb.hike.R$id: int empty_updates
 com.bsb.hike.R$id: int empty_view
+com.bsb.hike.R$id: int endCallButton
 com.bsb.hike.R$id: int erase_key
 com.bsb.hike.R$id: int et_enter_name
 com.bsb.hike.R$id: int et_enter_num
@@ -9487,6 +9489,7 @@ com.bsb.hike.R$id: int tc_continue_layout
 com.bsb.hike.R$id: int terms_and_conditions
 com.bsb.hike.R$id: int terrain
 com.bsb.hike.R$id: int text
+com.bsb.hike.R$id: int textView1
 com.bsb.hike.R$id: int text_btn
 com.bsb.hike.R$id: int text_left
 com.bsb.hike.R$id: int text_right
@@ -9588,7 +9591,7 @@ com.bsb.hike.R$layout: int attachment_item
 com.bsb.hike.R$layout: int attachments
 com.bsb.hike.R$layout: int back_action_bar
 com.bsb.hike.R$layout: int block_add_unknown_contact
-com.bsb.hike.R$layout: int buttonwaala
+com.bsb.hike.R$layout: int call_accept_decline
 com.bsb.hike.R$layout: int call_aleart_checkbox
 com.bsb.hike.R$layout: int chat_backgrounds
 com.bsb.hike.R$layout: int chat_bg_item
@@ -9680,6 +9683,7 @@ com.bsb.hike.R$layout: int image_viewer
 com.bsb.hike.R$layout: int imp_message_pin_pop_up
 com.bsb.hike.R$layout: int imp_message_text_pin
 com.bsb.hike.R$layout: int in_thread_status_update
+com.bsb.hike.R$layout: int incall_layout
 com.bsb.hike.R$layout: int invite_list_item
 com.bsb.hike.R$layout: int item_details_view
 com.bsb.hike.R$layout: int last_read_line
@@ -11445,6 +11449,9 @@ com.bsb.hike.R$xml: int privacy_preferences
 com.bsb.hike.R$xml: int sms_preferences
 com.bsb.hike.VOIP.RTCActivity
 com.bsb.hike.VOIP.RTCActivity: RTCActivity()
+com.bsb.hike.VOIP.RTCActivity$1: void onClick(android.view.View)
+com.bsb.hike.VOIP.RTCActivity$3: void onClick(android.view.View)
+com.bsb.hike.VOIP.RTCActivity$4: void onClick(android.view.View)
 com.bsb.hike.adapters.CentralTimelineAdapter$1: void onClick(android.view.View)
 com.bsb.hike.adapters.CentralTimelineAdapter$2: void onClick(android.view.View)
 com.bsb.hike.adapters.CentralTimelineAdapter$3: void onClick(android.view.View)

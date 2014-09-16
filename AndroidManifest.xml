@@ -72,6 +72,12 @@
             android:name="com.bsb.hike.service.HikeService"
             android:enabled="true" >
         </service>
+        
+        <service 
+            android:name="com.bsb.hike.service.VOIPService"
+            android:enabled="true" >            
+        </service>        
+        
         <service android:name="com.bsb.hike.service.UpgradeIntentService" />
         <service android:name="com.bsb.hike.GCMIntentService" />
 
@@ -301,12 +307,14 @@
         </activity>
         
          <activity 
-             android:name="com.bsb.hike.VOIP.RTCActivity"
-             android:launchMode="singleInstance"
-             android:parentActivityName=".HomeActivity">
+             android:name="com.bsb.hike.ui.VoIPActivity"
+             android:launchMode="singleTask"
+    		 android:taskAffinity=""
+    		 android:excludeFromRecents="true">
+<!--              android:parentActivityName="com.bsb.hike.ui.HomeActivity">
     <meta-data
         android:name="android.support.PARENT_ACTIVITY"
-        android:value=".ui.HomeActivity"/>
+        android:value=".ui.HomeActivity"/> -->
         </activity>
                      
             <activity

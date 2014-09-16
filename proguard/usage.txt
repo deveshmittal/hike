@@ -675,15 +675,6 @@ android.support.v4.widget.ViewDragHelper:
     483:483:public int getActivePointerId()
     690:701:public void flingCapturedView(int,int,int,int)
     908:927:protected boolean canScroll(android.view.View,boolean,int,int,int,int)
-com.bsb.hike.AndroidRTC.RTCActivity:
-    private static final int VIDEO_CALL_SENT
-    private android.media.AudioManager am1
-com.bsb.hike.AndroidRTC.WebRtcClient:
-    private static final int MAX_PEER
-    418:431:private org.webrtc.VideoCapturer getVideoCapturer(java.lang.String)
-com.bsb.hike.AndroidRTC.WebRtcClient$Peer:
-    255:255:public org.webrtc.SessionDescription getSDP()
-    338:338:public void onRenegotiationNeeded()
 com.bsb.hike.BitmapModule.BitmapUtils:
     15:15:public BitmapUtils()
     19:19:public static boolean isThumbnailSquare(android.graphics.Bitmap)
@@ -1162,7 +1153,7 @@ com.bsb.hike.HikeConstants$SMSNative:
     public static final java.lang.String DATE
     public static final java.lang.String MESSAGE
     public static final java.lang.String READ
-    1622:1622:public HikeConstants$SMSNative()
+    1626:1626:public HikeConstants$SMSNative()
 com.bsb.hike.HikeConstants$SocialPostResponse
 com.bsb.hike.HikeMessengerApp:
     public static final java.lang.String ACCOUNT_SETTINGS
@@ -1490,20 +1481,21 @@ com.bsb.hike.R$raw
 com.bsb.hike.R$string
 com.bsb.hike.R$style
 com.bsb.hike.R$styleable:
-    6624:6624:public R$styleable()
+    6630:6630:public R$styleable()
 com.bsb.hike.R$xml
 com.bsb.hike.VOIP.RTCActivity:
     private static final int VIDEO_CALL_SENT
     private android.media.AudioManager am1
-    75:84:public void onCallReady()
+    93:104:public void onCallReady()
+    300:301:public void run()
 com.bsb.hike.VOIP.WebRtcClient:
     private static final int MAX_PEER
-    400:401:public void destroyPeer()
 com.bsb.hike.VOIP.WebRtcClient$Peer:
-    237:237:public org.webrtc.SessionDescription getSDP()
-    318:318:public void onRenegotiationNeeded()
+    257:257:public org.webrtc.SessionDescription getSDP()
+    338:338:public void onRenegotiationNeeded()
 com.bsb.hike.VOIP.WebRtcClient$RTCListener:
     public abstract void onCallReady()
+    public abstract void endCall()
 com.bsb.hike.adapters.BaseFragmentAdapter:
     11:11:public void onFragmentCreate()
     15:15:public void onFragmentDestroy()
@@ -1993,7 +1985,7 @@ com.bsb.hike.service.HikeService:
     832:832:public boolean appIsConnected()
 com.bsb.hike.service.MqttMessagesManager:
     private static final java.lang.String UJFile
-    2283:2284:private void updateDbBatch(long[],com.bsb.hike.models.ConvMessage$State,java.lang.String)
+    2291:2292:private void updateDbBatch(long[],com.bsb.hike.models.ConvMessage$State,java.lang.String)
 com.bsb.hike.service.UpgradeIntentService:
     private static final java.lang.String TAG
 com.bsb.hike.smartImageLoader.FTUECardImageLoader
@@ -2279,10 +2271,10 @@ com.bsb.hike.utils.Utils:
     2592:2592:public static java.lang.String getLastSeenTimeAsString(android.content.Context,long,int)
     3008:3016:public static void executeIntProgFtResultAsyncTask(android.os.AsyncTask)
     3056:3064:public static void executeLongResultTask(android.os.AsyncTask)
-    3482:3482:public static boolean hasFroyo()
-    3497:3497:public static boolean hasJellyBean()
-    3647:3659:public static boolean shouldShowAddFriendsFTUE(int,int)
-    3968:3968:public static int getFreeSMSCount(android.content.Context)
+    3484:3484:public static boolean hasFroyo()
+    3499:3499:public static boolean hasJellyBean()
+    3649:3661:public static boolean shouldShowAddFriendsFTUE(int,int)
+    3970:3970:public static int getFreeSMSCount(android.content.Context)
 com.bsb.hike.utils.customClasses.AsyncTask.ArrayDeque:
     private static final int MIN_INITIAL_CAPACITY
     private static final long serialVersionUID
@@ -2402,31 +2394,14 @@ com.bsb.hike.view.TagEditText:
     168:168:public varargs void replaceTags(java.lang.String[])
     177:177:public varargs void appendTags(java.lang.String[])
     197:197:private java.lang.String generateOrigUniqueNess(java.lang.String)
-com.codebutler.android_websockets.HybiParser:
-    private static final java.lang.String TAG
-    private static final int BYTE
-    private static final int FIN
-    private static final int MASK
-    private static final int RSV1
-    private static final int RSV2
-    private static final int RSV3
-    private static final int OPCODE
-    private static final int LENGTH
-    private static final int MODE_TEXT
-    private static final int MODE_BINARY
-    private static final int OP_CONTINUATION
-    private static final int OP_TEXT
-    private static final int OP_BINARY
-    private static final int OP_CLOSE
-    private static final int OP_PING
-    private static final int OP_PONG
-    181:181:public byte[] frame(byte[])
-    244:245:public void ping(java.lang.String)
-    248:251:public void close(int,java.lang.String)
-com.codebutler.android_websockets.WebSocketClient:
-    private static final java.lang.String TAG
-    46:47:public static void setTrustManagers(javax.net.ssl.TrustManager[])
-    173:174:public void send(byte[])
+com.codebutler.android_websockets.HybiParser
+com.codebutler.android_websockets.HybiParser$HappyDataInputStream
+com.codebutler.android_websockets.HybiParser$ProtocolError
+com.codebutler.android_websockets.WebSocketClient
+com.codebutler.android_websockets.WebSocketClient$1
+com.codebutler.android_websockets.WebSocketClient$2
+com.codebutler.android_websockets.WebSocketClient$3
+com.codebutler.android_websockets.WebSocketClient$Listener
 com.google.ads.AdRequest:
     public static final java.lang.String VERSION
     public static final java.lang.String LOGTAG
@@ -4178,32 +4153,45 @@ com.haibison.android.lockpattern.widget.LockPatternView$Cell:
     223:223:public int getId()
 com.haibison.android.lockpattern.widget.ViewCompat_v16:
     32:33:private ViewCompat_v16()
-com.koushikdutta.async.http.socketio.EventEmitter:
-    37:43:public void once(java.lang.String,com.koushikdutta.async.http.socketio.EventCallback)
-    50:54:public void removeListener(java.lang.String,com.koushikdutta.async.http.socketio.EventCallback)
+com.koushikdutta.async.http.socketio.Acknowledge
+com.koushikdutta.async.http.socketio.ConnectCallback
+com.koushikdutta.async.http.socketio.DisconnectCallback
+com.koushikdutta.async.http.socketio.ErrorCallback
+com.koushikdutta.async.http.socketio.EventCallback
+com.koushikdutta.async.http.socketio.EventEmitter
 com.koushikdutta.async.http.socketio.EventEmitter$1
-com.koushikdutta.async.http.socketio.SocketIOClient:
-    28:29:public void emit(java.lang.String)
-    32:33:public void emit(org.json.JSONObject)
-    46:47:public void emit(java.lang.String,com.koushikdutta.async.http.socketio.Acknowledge)
-    50:51:public void emit(org.json.JSONObject,com.koushikdutta.async.http.socketio.Acknowledge)
-    99:100:public void setErrorCallback(com.koushikdutta.async.http.socketio.ErrorCallback)
-    103:103:public com.koushikdutta.async.http.socketio.ErrorCallback getErrorCallback()
-    109:110:public void setDisconnectCallback(com.koushikdutta.async.http.socketio.DisconnectCallback)
-    119:120:public void setReconnectCallback(com.koushikdutta.async.http.socketio.ReconnectCallback)
-    123:123:public com.koushikdutta.async.http.socketio.ReconnectCallback getReconnectCallback()
-    129:130:public void setJSONCallback(com.koushikdutta.async.http.socketio.JSONCallback)
-    133:133:public com.koushikdutta.async.http.socketio.JSONCallback getJSONCallback()
-    139:140:public void setStringCallback(com.koushikdutta.async.http.socketio.StringCallback)
-    143:143:public com.koushikdutta.async.http.socketio.StringCallback getStringCallback()
-    161:174:public void disconnect()
-    181:181:public com.codebutler.android_websockets.WebSocketClient getWebSocket()
+com.koushikdutta.async.http.socketio.EventEmitter$OnceCallback
+com.koushikdutta.async.http.socketio.JSONCallback
+com.koushikdutta.async.http.socketio.ReconnectCallback
+com.koushikdutta.async.http.socketio.SocketIOClient
+com.koushikdutta.async.http.socketio.SocketIOClient$1
+com.koushikdutta.async.http.socketio.SocketIOClient$1$1
 com.koushikdutta.async.http.socketio.SocketIOClient$2
-com.koushikdutta.async.http.socketio.SocketIOConnection:
-    63:87:public void disconnect(com.koushikdutta.async.http.socketio.SocketIOClient)
-com.koushikdutta.async.util.HashList:
-    private static final long serialVersionUID
-    17:18:public boolean contains(java.lang.String)
+com.koushikdutta.async.http.socketio.SocketIOConnection
+com.koushikdutta.async.http.socketio.SocketIOConnection$1
+com.koushikdutta.async.http.socketio.SocketIOConnection$1$1
+com.koushikdutta.async.http.socketio.SocketIOConnection$10
+com.koushikdutta.async.http.socketio.SocketIOConnection$2
+com.koushikdutta.async.http.socketio.SocketIOConnection$3
+com.koushikdutta.async.http.socketio.SocketIOConnection$4
+com.koushikdutta.async.http.socketio.SocketIOConnection$4$1
+com.koushikdutta.async.http.socketio.SocketIOConnection$4$2
+com.koushikdutta.async.http.socketio.SocketIOConnection$5
+com.koushikdutta.async.http.socketio.SocketIOConnection$6
+com.koushikdutta.async.http.socketio.SocketIOConnection$6$1
+com.koushikdutta.async.http.socketio.SocketIOConnection$7
+com.koushikdutta.async.http.socketio.SocketIOConnection$7$1
+com.koushikdutta.async.http.socketio.SocketIOConnection$8
+com.koushikdutta.async.http.socketio.SocketIOConnection$8$1
+com.koushikdutta.async.http.socketio.SocketIOConnection$9
+com.koushikdutta.async.http.socketio.SocketIOConnection$9$1
+com.koushikdutta.async.http.socketio.SocketIOConnection$SelectCallback
+com.koushikdutta.async.http.socketio.StringCallback
+com.koushikdutta.async.util.HashList
+com.koushikdutta.http.AsyncHttpClient
+com.koushikdutta.http.AsyncHttpClient$1
+com.koushikdutta.http.AsyncHttpClient$SocketIORequest
+com.koushikdutta.http.AsyncHttpClient$StringCallback
 com.koushikdutta.http.AsyncHttpClient$WebSocketConnectCallback
 com.mobileapptracker.BuildConfig
 com.mobileapptracker.Encryption:

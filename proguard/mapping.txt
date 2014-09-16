@@ -6957,118 +6957,6 @@ com.actionbarsherlock.widget.SuggestionsAdapter$ChildViewCache -> com.actionbars
     android.widget.ImageView mIcon1 -> mIcon1
     android.widget.ImageView mIcon2 -> mIcon2
     android.widget.ImageView mIconRefine -> mIconRefine
-com.bsb.hike.AndroidRTC.RTCActivity -> com.bsb.hike.AndroidRTC.RTCActivity:
-    com.bsb.hike.AndroidRTC.WebRtcClient client -> c
-    java.lang.String mSocketAddress -> d
-    java.lang.String callerId -> e
-    int minbuf -> f
-    android.media.AudioTrack aud1 -> g
-    java.lang.String manufacturer -> a
-    android.content.Context mContext -> h
-    android.widget.Button b1 -> i
-    org.webrtc.MediaStream medi -> b
-    50:87:void onCreate(android.os.Bundle) -> onCreate
-    91:93:void onConfigurationChanged(android.content.res.Configuration) -> onConfigurationChanged
-    97:99:void onPause() -> onPause
-    103:105:void onResume() -> onResume
-    110:119:void onCallReady(java.lang.String) -> a
-    124:127:void answer(java.lang.String) -> b
-    130:146:void call(java.lang.String) -> c
-    150:157:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    161:178:void startCam() -> a
-    182:188:void onStatusChanged(java.lang.String) -> d
-    193:198:void onLocalStream(org.webrtc.MediaStream) -> a
-    205:210:void onAddRemoteStream(org.webrtc.MediaStream,int) -> a
-    215:219:void onRemoveRemoteStream(org.webrtc.MediaStream,int) -> b
-    38:38:com.bsb.hike.AndroidRTC.WebRtcClient access$0(com.bsb.hike.AndroidRTC.RTCActivity) -> a
-    42:42:android.media.AudioTrack access$1(com.bsb.hike.AndroidRTC.RTCActivity) -> b
-com.bsb.hike.AndroidRTC.RTCActivity$1 -> com.bsb.hike.AndroidRTC.a:
-    com.bsb.hike.AndroidRTC.RTCActivity this$0 -> a
-    167:172:void onClick(android.view.View) -> onClick
-com.bsb.hike.AndroidRTC.RTCActivity$2 -> com.bsb.hike.AndroidRTC.b:
-    com.bsb.hike.AndroidRTC.RTCActivity this$0 -> a
-    java.lang.String val$newStatus -> b
-    185:186:void run() -> run
-com.bsb.hike.AndroidRTC.WebRtcClient -> com.bsb.hike.AndroidRTC.c:
-    boolean[] endPoints -> a
-    org.webrtc.PeerConnectionFactory factory -> b
-    java.util.HashMap peers -> c
-    java.util.LinkedList iceServers -> d
-    org.webrtc.MediaConstraints pcConstraints -> e
-    org.webrtc.MediaStream lMS -> f
-    com.bsb.hike.AndroidRTC.WebRtcClient$RTCListener mListener -> g
-    com.koushikdutta.async.http.socketio.SocketIOClient client -> h
-    com.bsb.hike.AndroidRTC.WebRtcClient$MessageHandler messageHandler -> i
-    java.lang.String TAG -> j
-    java.lang.String storedId -> k
-    121:128:void sendMessage(java.lang.String,java.lang.String,org.json.JSONObject) -> a
-    389:394:void setCamera(java.lang.String,java.lang.String,java.lang.String) -> a
-    397:401:int findEndPoint() -> b
-    411:411:void start(java.lang.String,boolean) -> a
-    435:439:void addPeer(java.lang.String,int) -> a
-    442:451:void removePeer(java.lang.String) -> a
-    454:455:void destroyPeer() -> a
-    41:41:java.util.HashMap access$0(com.bsb.hike.AndroidRTC.WebRtcClient) -> a
-    43:43:org.webrtc.MediaConstraints access$1(com.bsb.hike.AndroidRTC.WebRtcClient) -> b
-    45:45:com.bsb.hike.AndroidRTC.WebRtcClient$RTCListener access$2(com.bsb.hike.AndroidRTC.WebRtcClient) -> c
-    396:396:int access$3(com.bsb.hike.AndroidRTC.WebRtcClient) -> d
-    49:49:void access$4(com.bsb.hike.AndroidRTC.WebRtcClient,java.lang.String) -> a
-    434:434:void access$5(com.bsb.hike.AndroidRTC.WebRtcClient,java.lang.String,int) -> a
-    441:441:void access$6(com.bsb.hike.AndroidRTC.WebRtcClient,java.lang.String) -> b
-    40:40:org.webrtc.PeerConnectionFactory access$7(com.bsb.hike.AndroidRTC.WebRtcClient) -> e
-    42:42:java.util.LinkedList access$8(com.bsb.hike.AndroidRTC.WebRtcClient) -> f
-    44:44:org.webrtc.MediaStream access$9(com.bsb.hike.AndroidRTC.WebRtcClient) -> g
-    46:46:void access$10(com.bsb.hike.AndroidRTC.WebRtcClient,com.koushikdutta.async.http.socketio.SocketIOClient) -> a
-    46:46:com.koushikdutta.async.http.socketio.SocketIOClient access$11(com.bsb.hike.AndroidRTC.WebRtcClient) -> h
-    47:47:com.bsb.hike.AndroidRTC.WebRtcClient$MessageHandler access$12(com.bsb.hike.AndroidRTC.WebRtcClient) -> i
-com.bsb.hike.AndroidRTC.WebRtcClient$1 -> com.bsb.hike.AndroidRTC.d:
-    com.bsb.hike.AndroidRTC.WebRtcClient this$0 -> a
-    349:360:void onConnectCompleted(java.lang.Exception,com.koushikdutta.async.http.socketio.SocketIOClient) -> a
-com.bsb.hike.AndroidRTC.WebRtcClient$AddIceCandidateCommand -> com.bsb.hike.AndroidRTC.e:
-    com.bsb.hike.AndroidRTC.WebRtcClient this$0 -> a
-    106:116:void execute(java.lang.String,org.json.JSONObject) -> a
-com.bsb.hike.AndroidRTC.WebRtcClient$Command -> com.bsb.hike.AndroidRTC.f:
-    void execute(java.lang.String,org.json.JSONObject) -> a
-com.bsb.hike.AndroidRTC.WebRtcClient$CreateAnswerCommand -> com.bsb.hike.AndroidRTC.g:
-    com.bsb.hike.AndroidRTC.WebRtcClient this$0 -> a
-    80:87:void execute(java.lang.String,org.json.JSONObject) -> a
-com.bsb.hike.AndroidRTC.WebRtcClient$CreateOfferCommand -> com.bsb.hike.AndroidRTC.h:
-    com.bsb.hike.AndroidRTC.WebRtcClient this$0 -> a
-    71:73:void execute(java.lang.String,org.json.JSONObject) -> a
-com.bsb.hike.AndroidRTC.WebRtcClient$MessageHandler -> com.bsb.hike.AndroidRTC.i:
-    java.util.HashMap commandMap -> b
-    com.bsb.hike.AndroidRTC.WebRtcClient this$0 -> a
-    147:226:void onEvent(java.lang.String,org.json.JSONArray,com.koushikdutta.async.http.socketio.Acknowledge) -> a
-com.bsb.hike.AndroidRTC.WebRtcClient$Peer -> com.bsb.hike.AndroidRTC.j:
-    org.webrtc.PeerConnection pc -> b
-    java.lang.String id -> c
-    int endPoint -> d
-    org.webrtc.SessionDescription sdown -> e
-    com.bsb.hike.AndroidRTC.WebRtcClient this$0 -> a
-    238:248:void onCreateSuccess(org.webrtc.SessionDescription) -> onCreateSuccess
-    252:252:void onSetSuccess() -> onSetSuccess
-    260:260:void onCreateFailure(java.lang.String) -> onCreateFailure
-    264:264:void onSetFailure(java.lang.String) -> onSetFailure
-    269:269:void onSignalingChange(org.webrtc.PeerConnection$SignalingState) -> onSignalingChange
-    274:278:void onIceConnectionChange(org.webrtc.PeerConnection$IceConnectionState) -> onIceConnectionChange
-    283:283:void onIceGatheringChange(org.webrtc.PeerConnection$IceGatheringState) -> onIceGatheringChange
-    288:297:void onIceCandidate(org.webrtc.IceCandidate) -> onIceCandidate
-    301:301:void onError() -> onError
-    309:310:void onAddStream(org.webrtc.MediaStream) -> onAddStream
-    314:317:void onRemoveStream(org.webrtc.MediaStream) -> onRemoveStream
-    321:321:void onDataChannel(org.webrtc.DataChannel) -> onDataChannel
-    230:230:org.webrtc.PeerConnection access$0(com.bsb.hike.AndroidRTC.WebRtcClient$Peer) -> a
-    231:231:java.lang.String access$1(com.bsb.hike.AndroidRTC.WebRtcClient$Peer) -> b
-    232:232:int access$2(com.bsb.hike.AndroidRTC.WebRtcClient$Peer) -> c
-com.bsb.hike.AndroidRTC.WebRtcClient$RTCListener -> com.bsb.hike.AndroidRTC.k:
-    void onCallReady(java.lang.String) -> a
-    void onStatusChanged(java.lang.String) -> d
-    void onLocalStream(org.webrtc.MediaStream) -> a
-    void onAddRemoteStream(org.webrtc.MediaStream,int) -> a
-    void onRemoveRemoteStream(org.webrtc.MediaStream,int) -> b
-com.bsb.hike.AndroidRTC.WebRtcClient$SetRemoteSDPCommand -> com.bsb.hike.AndroidRTC.l:
-    com.bsb.hike.AndroidRTC.WebRtcClient this$0 -> a
-    94:99:void execute(java.lang.String,org.json.JSONObject) -> a
 com.bsb.hike.BitmapModule.BitmapUtils -> com.bsb.hike.a.a:
     24:24:byte[] bitmapToBytes(android.graphics.Bitmap,android.graphics.Bitmap$CompressFormat) -> a
     29:36:byte[] bitmapToBytes(android.graphics.Bitmap,android.graphics.Bitmap$CompressFormat,int) -> a
@@ -7517,110 +7405,147 @@ com.bsb.hike.R$styleable -> com.bsb.hike.o:
     int com_facebook_profile_picture_view_is_cropped -> com_facebook_profile_picture_view_is_cropped
     int com_facebook_profile_picture_view_preset_size -> com_facebook_profile_picture_view_preset_size
 com.bsb.hike.VOIP.RTCActivity -> com.bsb.hike.VOIP.RTCActivity:
-    com.bsb.hike.VOIP.WebRtcClient client -> c
-    java.lang.String mSocketAddress -> d
-    java.lang.String callerId -> e
-    int minbuf -> f
-    android.media.AudioTrack aud1 -> g
+    com.bsb.hike.VOIP.WebRtcClient client -> d
+    java.lang.String mSocketAddress -> e
+    java.lang.String callerId -> f
+    int minbuf -> g
+    android.media.AudioTrack aud1 -> h
     java.lang.String manufacturer -> a
-    android.content.Context mContext -> h
-    org.webrtc.MediaStream medi -> b
-    48:50:void onCreate(android.os.Bundle) -> onCreate
-    54:56:void onConfigurationChanged(android.content.res.Configuration) -> onConfigurationChanged
-    60:62:void onPause() -> onPause
-    66:68:void onResume() -> onResume
-    88:139:void startUp() -> a
-    148:152:void answer(java.lang.String) -> a
-    166:168:void call() -> b
-    172:179:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    196:199:void startCam() -> c
-    203:209:void onStatusChanged(java.lang.String) -> b
-    214:216:void onLocalStream(org.webrtc.MediaStream) -> a
-    221:224:void onAddRemoteStream(org.webrtc.MediaStream,int) -> a
-    229:232:void onRemoveRemoteStream(org.webrtc.MediaStream,int) -> b
-    236:237:void run() -> run
+    android.content.Context mContext -> i
+    android.widget.Button endCall -> j
+    android.widget.Button acceptCall -> k
+    android.widget.Button declineCall -> l
+    java.lang.String dialedId -> m
+    int notifId -> n
+    android.app.NotificationManager mNotificationManager -> b
+    android.widget.TextView callNo -> o
+    org.webrtc.MediaStream medi -> c
+    66:68:void onCreate(android.os.Bundle) -> onCreate
+    72:74:void onConfigurationChanged(android.content.res.Configuration) -> onConfigurationChanged
+    78:80:void onPause() -> onPause
+    84:86:void onResume() -> onResume
+    108:200:void startUp() -> a
+    209:212:void answer(java.lang.String) -> a
+    226:228:void call() -> b
+    232:239:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    242:249:void startCam() -> c
+    253:263:void setInCallLayout() -> d
+    267:273:void onStatusChanged(java.lang.String) -> b
+    278:280:void onLocalStream(org.webrtc.MediaStream) -> a
+    285:288:void onAddRemoteStream(org.webrtc.MediaStream,int) -> a
+    293:296:void onRemoveRemoteStream(org.webrtc.MediaStream,int) -> b
+    306:309:void endCall() -> e
+    313:319:void closeActivity() -> f
+    323:337:void declineCall() -> g
+    341:376:void setAnswerLayout() -> h
+    381:382:void onBackPressed() -> onBackPressed
+    46:46:com.bsb.hike.VOIP.WebRtcClient access$0(com.bsb.hike.VOIP.RTCActivity) -> a
+    48:48:java.lang.String access$1(com.bsb.hike.VOIP.RTCActivity) -> b
 com.bsb.hike.VOIP.RTCActivity$1 -> com.bsb.hike.VOIP.a:
     com.bsb.hike.VOIP.RTCActivity this$0 -> a
+    259:260:void onClick(android.view.View) -> onClick
+com.bsb.hike.VOIP.RTCActivity$2 -> com.bsb.hike.VOIP.b:
+    com.bsb.hike.VOIP.RTCActivity this$0 -> a
     java.lang.String val$newStatus -> b
-    206:207:void run() -> run
-com.bsb.hike.VOIP.WebRtcClient -> com.bsb.hike.VOIP.b:
-    boolean[] endPoints -> a
-    org.webrtc.PeerConnectionFactory factory -> b
-    java.util.HashMap peers -> c
-    java.util.LinkedList iceServers -> d
-    org.webrtc.MediaConstraints pcConstraints -> e
-    org.webrtc.MediaStream lMS -> f
-    com.bsb.hike.VOIP.WebRtcClient$RTCListener mListener -> g
-    com.bsb.hike.VOIP.WebRtcClient$MessageHandler messageHandler -> h
-    java.lang.String TAG -> i
-    java.lang.String storedId -> j
-    com.bsb.hike.HikePubSub mPubSub -> k
-    java.util.Random random -> l
-    int index -> m
-    125:149:void sendMessage(java.lang.String,java.lang.String,org.json.JSONObject) -> a
-    363:367:void setCamera(java.lang.String,java.lang.String,java.lang.String) -> a
-    370:374:int findEndPoint() -> b
-    378:378:void start(java.lang.String,boolean) -> a
-    381:385:void addPeer(java.lang.String,int) -> a
-    388:397:void removePeer(java.lang.String) -> a
-    404:404:com.bsb.hike.VOIP.WebRtcClient$MessageHandler getMessageHandler() -> a
+    270:271:void run() -> run
+com.bsb.hike.VOIP.RTCActivity$3 -> com.bsb.hike.VOIP.c:
+    com.bsb.hike.VOIP.RTCActivity this$0 -> a
+    355:363:void onClick(android.view.View) -> onClick
+com.bsb.hike.VOIP.RTCActivity$4 -> com.bsb.hike.VOIP.d:
+    com.bsb.hike.VOIP.RTCActivity this$0 -> a
+    371:373:void onClick(android.view.View) -> onClick
+com.bsb.hike.VOIP.WebRtcClient -> com.bsb.hike.VOIP.e:
+    boolean[] endPoints -> b
+    org.webrtc.PeerConnectionFactory factory -> c
+    java.util.HashMap peers -> d
+    java.util.LinkedList iceServers -> e
+    org.webrtc.MediaConstraints pcConstraints -> f
+    org.webrtc.MediaStream lMS -> g
+    com.bsb.hike.VOIP.WebRtcClient$RTCListener mListener -> h
+    com.bsb.hike.VOIP.WebRtcClient$MessageHandler messageHandler -> i
+    java.lang.String TAG -> j
+    java.lang.String storedId -> k
+    com.bsb.hike.HikePubSub mPubSub -> l
+    java.util.Random random -> m
+    int index -> n
+    boolean answerpressed -> a
+    java.lang.Boolean callReceived -> o
+    android.os.Handler mHandler -> p
+    143:167:void sendMessage(java.lang.String,java.lang.String,org.json.JSONObject) -> a
+    407:411:void setCamera(java.lang.String,java.lang.String,java.lang.String) -> a
+    414:418:int findEndPoint() -> c
+    422:422:void start(java.lang.String,boolean) -> a
+    425:429:void addPeer(java.lang.String,int) -> a
+    432:441:void removePeer(java.lang.String) -> a
+    444:445:void destroyPeer() -> a
+    448:448:com.bsb.hike.VOIP.WebRtcClient$MessageHandler getMessageHandler() -> b
     41:41:java.util.HashMap access$0(com.bsb.hike.VOIP.WebRtcClient) -> a
     43:43:org.webrtc.MediaConstraints access$1(com.bsb.hike.VOIP.WebRtcClient) -> b
-    50:50:void access$2(com.bsb.hike.VOIP.WebRtcClient,com.bsb.hike.HikePubSub) -> a
-    50:50:com.bsb.hike.HikePubSub access$3(com.bsb.hike.VOIP.WebRtcClient) -> c
-    369:369:int access$4(com.bsb.hike.VOIP.WebRtcClient) -> d
-    49:49:void access$5(com.bsb.hike.VOIP.WebRtcClient,java.lang.String) -> a
-    380:380:void access$6(com.bsb.hike.VOIP.WebRtcClient,java.lang.String,int) -> a
-    387:387:void access$7(com.bsb.hike.VOIP.WebRtcClient,java.lang.String) -> b
-    45:45:com.bsb.hike.VOIP.WebRtcClient$RTCListener access$8(com.bsb.hike.VOIP.WebRtcClient) -> e
-    40:40:org.webrtc.PeerConnectionFactory access$9(com.bsb.hike.VOIP.WebRtcClient) -> f
-    42:42:java.util.LinkedList access$10(com.bsb.hike.VOIP.WebRtcClient) -> g
-    44:44:org.webrtc.MediaStream access$11(com.bsb.hike.VOIP.WebRtcClient) -> h
-com.bsb.hike.VOIP.WebRtcClient$AddIceCandidateCommand -> com.bsb.hike.VOIP.c:
+    54:54:void access$2(com.bsb.hike.VOIP.WebRtcClient,java.lang.Boolean) -> a
+    45:45:com.bsb.hike.VOIP.WebRtcClient$RTCListener access$3(com.bsb.hike.VOIP.WebRtcClient) -> c
+    50:50:void access$4(com.bsb.hike.VOIP.WebRtcClient,com.bsb.hike.HikePubSub) -> a
+    50:50:com.bsb.hike.HikePubSub access$5(com.bsb.hike.VOIP.WebRtcClient) -> d
+    413:413:int access$6(com.bsb.hike.VOIP.WebRtcClient) -> e
+    49:49:void access$7(com.bsb.hike.VOIP.WebRtcClient,java.lang.String) -> a
+    424:424:void access$8(com.bsb.hike.VOIP.WebRtcClient,java.lang.String,int) -> a
+    431:431:void access$9(com.bsb.hike.VOIP.WebRtcClient,java.lang.String) -> b
+    40:40:org.webrtc.PeerConnectionFactory access$10(com.bsb.hike.VOIP.WebRtcClient) -> f
+    42:42:java.util.LinkedList access$11(com.bsb.hike.VOIP.WebRtcClient) -> g
+    44:44:org.webrtc.MediaStream access$12(com.bsb.hike.VOIP.WebRtcClient) -> h
+    54:54:java.lang.Boolean access$13(com.bsb.hike.VOIP.WebRtcClient) -> i
+    49:49:java.lang.String access$14(com.bsb.hike.VOIP.WebRtcClient) -> j
+com.bsb.hike.VOIP.WebRtcClient$1 -> com.bsb.hike.VOIP.f:
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    110:120:void execute(java.lang.String,org.json.JSONObject) -> a
-com.bsb.hike.VOIP.WebRtcClient$Command -> com.bsb.hike.VOIP.d:
+    352:362:void run() -> run
+com.bsb.hike.VOIP.WebRtcClient$AddIceCandidateCommand -> com.bsb.hike.VOIP.g:
+    com.bsb.hike.VOIP.WebRtcClient this$0 -> a
+    121:131:void execute(java.lang.String,org.json.JSONObject) -> a
+com.bsb.hike.VOIP.WebRtcClient$Command -> com.bsb.hike.VOIP.h:
     void execute(java.lang.String,org.json.JSONObject) -> a
-com.bsb.hike.VOIP.WebRtcClient$CreateAnswerCommand -> com.bsb.hike.VOIP.e:
+com.bsb.hike.VOIP.WebRtcClient$CreateAnswerCommand -> com.bsb.hike.VOIP.i:
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    84:91:void execute(java.lang.String,org.json.JSONObject) -> a
-com.bsb.hike.VOIP.WebRtcClient$CreateOfferCommand -> com.bsb.hike.VOIP.f:
+    92:102:void execute(java.lang.String,org.json.JSONObject) -> a
+com.bsb.hike.VOIP.WebRtcClient$CreateOfferCommand -> com.bsb.hike.VOIP.j:
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    75:77:void execute(java.lang.String,org.json.JSONObject) -> a
-com.bsb.hike.VOIP.WebRtcClient$MessageHandler -> com.bsb.hike.VOIP.g:
+    83:86:void execute(java.lang.String,org.json.JSONObject) -> a
+com.bsb.hike.VOIP.WebRtcClient$EndCallCommand -> com.bsb.hike.VOIP.k:
+    com.bsb.hike.VOIP.WebRtcClient this$0 -> a
+    136:138:void execute(java.lang.String,org.json.JSONObject) -> a
+com.bsb.hike.VOIP.WebRtcClient$MessageHandler -> com.bsb.hike.VOIP.l:
     java.util.HashMap commandMap -> b
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    171:191:void onEventReceived(java.lang.String,java.lang.Object) -> a
-    196:208:void executeCommand(java.lang.String,java.lang.String,org.json.JSONObject) -> a
-com.bsb.hike.VOIP.WebRtcClient$Peer -> com.bsb.hike.VOIP.h:
+    191:211:void onEventReceived(java.lang.String,java.lang.Object) -> a
+    216:228:void executeCommand(java.lang.String,java.lang.String,org.json.JSONObject) -> a
+com.bsb.hike.VOIP.WebRtcClient$Peer -> com.bsb.hike.VOIP.m:
     org.webrtc.PeerConnection pc -> b
     java.lang.String id -> c
     int endPoint -> d
     org.webrtc.SessionDescription sdown -> e
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    220:230:void onCreateSuccess(org.webrtc.SessionDescription) -> onCreateSuccess
-    234:234:void onSetSuccess() -> onSetSuccess
-    242:242:void onCreateFailure(java.lang.String) -> onCreateFailure
-    246:246:void onSetFailure(java.lang.String) -> onSetFailure
-    251:251:void onSignalingChange(org.webrtc.PeerConnection$SignalingState) -> onSignalingChange
-    256:260:void onIceConnectionChange(org.webrtc.PeerConnection$IceConnectionState) -> onIceConnectionChange
-    265:265:void onIceGatheringChange(org.webrtc.PeerConnection$IceGatheringState) -> onIceGatheringChange
-    270:279:void onIceCandidate(org.webrtc.IceCandidate) -> onIceCandidate
-    283:283:void onError() -> onError
-    291:292:void onAddStream(org.webrtc.MediaStream) -> onAddStream
-    296:299:void onRemoveStream(org.webrtc.MediaStream) -> onRemoveStream
-    303:303:void onDataChannel(org.webrtc.DataChannel) -> onDataChannel
-    212:212:org.webrtc.PeerConnection access$0(com.bsb.hike.VOIP.WebRtcClient$Peer) -> a
-    213:213:java.lang.String access$1(com.bsb.hike.VOIP.WebRtcClient$Peer) -> b
-    214:214:int access$2(com.bsb.hike.VOIP.WebRtcClient$Peer) -> c
-com.bsb.hike.VOIP.WebRtcClient$RTCListener -> com.bsb.hike.VOIP.i:
+    240:250:void onCreateSuccess(org.webrtc.SessionDescription) -> onCreateSuccess
+    254:254:void onSetSuccess() -> onSetSuccess
+    262:262:void onCreateFailure(java.lang.String) -> onCreateFailure
+    266:266:void onSetFailure(java.lang.String) -> onSetFailure
+    271:271:void onSignalingChange(org.webrtc.PeerConnection$SignalingState) -> onSignalingChange
+    276:280:void onIceConnectionChange(org.webrtc.PeerConnection$IceConnectionState) -> onIceConnectionChange
+    285:285:void onIceGatheringChange(org.webrtc.PeerConnection$IceGatheringState) -> onIceGatheringChange
+    290:299:void onIceCandidate(org.webrtc.IceCandidate) -> onIceCandidate
+    303:303:void onError() -> onError
+    311:312:void onAddStream(org.webrtc.MediaStream) -> onAddStream
+    316:319:void onRemoveStream(org.webrtc.MediaStream) -> onRemoveStream
+    323:323:void onDataChannel(org.webrtc.DataChannel) -> onDataChannel
+    232:232:org.webrtc.PeerConnection access$0(com.bsb.hike.VOIP.WebRtcClient$Peer) -> a
+    233:233:java.lang.String access$1(com.bsb.hike.VOIP.WebRtcClient$Peer) -> b
+    234:234:int access$2(com.bsb.hike.VOIP.WebRtcClient$Peer) -> c
+com.bsb.hike.VOIP.WebRtcClient$RTCListener -> com.bsb.hike.VOIP.n:
     void onStatusChanged(java.lang.String) -> b
     void onLocalStream(org.webrtc.MediaStream) -> a
     void onAddRemoteStream(org.webrtc.MediaStream,int) -> a
     void onRemoveRemoteStream(org.webrtc.MediaStream,int) -> b
-com.bsb.hike.VOIP.WebRtcClient$SetRemoteSDPCommand -> com.bsb.hike.VOIP.j:
+    void closeActivity() -> f
+com.bsb.hike.VOIP.WebRtcClient$SetRemoteSDPCommand -> com.bsb.hike.VOIP.o:
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    98:103:void execute(java.lang.String,org.json.JSONObject) -> a
+    109:114:void execute(java.lang.String,org.json.JSONObject) -> a
 com.bsb.hike.adapters.AccountAdapter -> com.bsb.hike.adapters.a:
     android.view.LayoutInflater layoutInflater -> a
     35:53:android.view.View getDropDownView(int,android.view.View,android.view.ViewGroup) -> getDropDownView
@@ -10580,37 +10505,37 @@ com.bsb.hike.service.MqttMessagesManager -> com.bsb.hike.service.ah:
     1715:1793:void saveBulkMessage(org.json.JSONObject) -> a
     1803:1886:void finalProcessing() -> b
     1890:1891:void addToLists(java.lang.String,com.bsb.hike.models.ConvMessage) -> a
-    1895:2109:void saveMqttMessage(org.json.JSONObject) -> b
-    2114:2132:void startVOIP(org.json.JSONObject) -> S
-    2136:2172:void uploadGroupProfileImage(java.lang.String,boolean) -> a
-    2176:2205:void handleSendNativeInviteKey(boolean,boolean,java.lang.String,java.lang.String,android.content.SharedPreferences$Editor) -> a
-    2209:2219:void autoDownloadProfileImage(com.bsb.hike.models.StatusMessage,boolean) -> a
-    2223:2231:void autoDownloadGroupImage(java.lang.String) -> a
-    2235:2239:void autoDownloadProtipImage(com.bsb.hike.models.StatusMessage,boolean) -> b
-    2246:2254:void setDefaultSMSClientTutorialSetting() -> c
-    2258:2268:void removeOrPostponeFriendType(java.lang.String) -> b
-    2272:2279:void incrementUnseenStatusCount() -> d
-    2288:2292:int updateDB(java.lang.Object,com.bsb.hike.models.ConvMessage$State,java.lang.String) -> a
-    2297:2316:com.bsb.hike.models.ConvMessage saveStatusMsg(org.json.JSONObject,java.lang.String) -> a
-    2322:2333:com.bsb.hike.models.ConvMessage saveStatusMsgBulk(org.json.JSONObject,java.lang.String) -> b
-    2338:2360:com.bsb.hike.models.ConvMessage statusMessagePreProcess(org.json.JSONObject,java.lang.String) -> c
-    2365:2372:void statusMessagePostProcess(com.bsb.hike.models.ConvMessage,org.json.JSONObject) -> a
-    2377:2423:void addTypingNotification(java.lang.String,java.lang.String) -> a
-    2428:2460:void removeTypingNotification(java.lang.String,java.lang.String) -> b
-    2472:2500:void updateAtomicPopUpData(org.json.JSONObject) -> c
-    2515:2542:java.lang.String[] getPopUpTypeAndShowNotification(java.lang.String,java.lang.String) -> c
-    2547:2548:boolean isDuplicateOrWrongPacket(java.lang.String,org.json.JSONObject) -> a
-    2134:2134:void access$0(com.bsb.hike.service.MqttMessagesManager,java.lang.String,boolean) -> a
+    1895:2117:void saveMqttMessage(org.json.JSONObject) -> b
+    2122:2140:void startVOIP(org.json.JSONObject) -> S
+    2144:2180:void uploadGroupProfileImage(java.lang.String,boolean) -> a
+    2184:2213:void handleSendNativeInviteKey(boolean,boolean,java.lang.String,java.lang.String,android.content.SharedPreferences$Editor) -> a
+    2217:2227:void autoDownloadProfileImage(com.bsb.hike.models.StatusMessage,boolean) -> a
+    2231:2239:void autoDownloadGroupImage(java.lang.String) -> a
+    2243:2247:void autoDownloadProtipImage(com.bsb.hike.models.StatusMessage,boolean) -> b
+    2254:2262:void setDefaultSMSClientTutorialSetting() -> c
+    2266:2276:void removeOrPostponeFriendType(java.lang.String) -> b
+    2280:2287:void incrementUnseenStatusCount() -> d
+    2296:2300:int updateDB(java.lang.Object,com.bsb.hike.models.ConvMessage$State,java.lang.String) -> a
+    2305:2324:com.bsb.hike.models.ConvMessage saveStatusMsg(org.json.JSONObject,java.lang.String) -> a
+    2330:2341:com.bsb.hike.models.ConvMessage saveStatusMsgBulk(org.json.JSONObject,java.lang.String) -> b
+    2346:2368:com.bsb.hike.models.ConvMessage statusMessagePreProcess(org.json.JSONObject,java.lang.String) -> c
+    2373:2380:void statusMessagePostProcess(com.bsb.hike.models.ConvMessage,org.json.JSONObject) -> a
+    2385:2431:void addTypingNotification(java.lang.String,java.lang.String) -> a
+    2436:2468:void removeTypingNotification(java.lang.String,java.lang.String) -> b
+    2480:2508:void updateAtomicPopUpData(org.json.JSONObject) -> c
+    2523:2550:java.lang.String[] getPopUpTypeAndShowNotification(java.lang.String,java.lang.String) -> c
+    2555:2556:boolean isDuplicateOrWrongPacket(java.lang.String,org.json.JSONObject) -> a
+    2142:2142:void access$0(com.bsb.hike.service.MqttMessagesManager,java.lang.String,boolean) -> a
 com.bsb.hike.service.MqttMessagesManager$1 -> com.bsb.hike.service.ai:
     android.content.Intent voipIntent -> a
     com.bsb.hike.service.MqttMessagesManager this$0 -> b
-    2124:2125:void run() -> run
+    2132:2133:void run() -> run
 com.bsb.hike.service.MqttMessagesManager$2 -> com.bsb.hike.service.aj:
     com.bsb.hike.service.MqttMessagesManager this$0 -> a
     boolean val$retryOnce -> b
     java.lang.String val$groupId -> c
-    2151:2161:void onFailure() -> a
-    2165:2166:void onSuccess(org.json.JSONObject) -> a
+    2159:2169:void onFailure() -> a
+    2173:2174:void onSuccess(org.json.JSONObject) -> a
 com.bsb.hike.service.ReferralReceiver -> com.bsb.hike.service.ReferralReceiver:
     33:58:void onReceive(android.content.Context,android.content.Intent) -> onReceive
 com.bsb.hike.service.SMSBroadcastReceiver -> com.bsb.hike.service.SMSBroadcastReceiver:
@@ -15813,62 +15738,62 @@ com.bsb.hike.utils.Utils -> com.bsb.hike.utils.cx:
     3163:3163:boolean shouldIncrementCounter(com.bsb.hike.models.ConvMessage) -> a
     3168:3175:android.content.Intent createIntentForConversation(android.content.Context,com.bsb.hike.models.Conversation) -> a
     3180:3197:void createShortcut(android.app.Activity,com.bsb.hike.models.Conversation) -> a
-    3202:3289:void onCallClicked(android.app.Activity,java.lang.String) -> a
-    3293:3297:java.lang.String getFormattedDateTimeFromTimestamp(long,java.util.Locale) -> a
-    3302:3303:void sendUILogEvent(java.lang.String) -> t
-    3309:3332:void sendUILogEvent(java.lang.String,java.lang.String) -> d
-    3338:3356:void sendMd5MismatchEvent(java.lang.String,java.lang.String,java.lang.String,int,boolean) -> a
-    3360:3364:void resetUpdateParams(android.content.SharedPreferences) -> c
-    3368:3400:java.lang.String fileToMD5(java.lang.String) -> u
-    3405:3410:java.lang.String convertHashToString(byte[]) -> d
-    3415:3418:android.content.Intent getHomeActivityIntent(android.content.Context) -> p
-    3423:3427:android.content.Intent getPeopleActivityIntent(android.content.Context) -> q
-    3432:3436:android.content.Intent getTimelineActivityIntent(android.content.Context) -> r
-    3441:3455:void addCommonDeviceDetails(org.json.JSONObject,android.content.Context) -> a
-    3459:3459:com.bsb.hike.models.ConvMessage makeConvMessage(com.bsb.hike.models.Conversation,java.lang.String,java.lang.String,boolean) -> a
-    3464:3469:com.bsb.hike.models.ConvMessage makeConvMessage(com.bsb.hike.models.Conversation,java.lang.String,java.lang.String,boolean,com.bsb.hike.models.ConvMessage$State) -> a
-    3474:3474:boolean canInBitmap() -> g
-    3487:3487:boolean hasGingerbread() -> h
-    3492:3492:boolean hasHoneycombMR1() -> i
-    3502:3502:boolean hasKitKat() -> j
-    3507:3508:boolean hasEnoughFreeSpaceForProfilePic() -> k
-    3513:3564:void addToContacts(java.util.List,java.lang.String,android.content.Context) -> addToContacts
-    3568:3568:int getNumColumnsForGallery(android.content.res.Resources,int) -> a
-    3573:3574:int getActualSizeForGallery(android.content.res.Resources,int,int) -> a
-    3579:3600:void makeNoMediaFile(java.io.File) -> b
-    3604:3638:java.lang.String getServerRecommendedContactsSelection(java.lang.String,java.lang.String) -> e
-    3664:3673:void startChatThread(android.content.Context,com.bsb.hike.models.ContactInfo) -> a
-    3677:3680:void toggleActionBarElementsEnable(android.view.View,android.widget.ImageView,android.widget.TextView,boolean) -> a
-    3684:3702:android.graphics.drawable.Drawable getAvatarDrawableForNotificationOrShortcut(android.content.Context,java.lang.String,boolean) -> a
-    3707:3727:void getRecommendedAndHikeContacts(android.content.Context,java.util.List,java.util.List,java.util.List) -> a
-    3731:3766:void addFavorite(android.content.Context,com.bsb.hike.models.ContactInfo,boolean) -> a
-    3771:3797:void toggleFavorite(android.content.Context,com.bsb.hike.models.ContactInfo,boolean) -> b
-    3801:3805:void addToContacts(android.app.Activity,java.lang.String) -> addToContacts
-    3809:3811:boolean isPlayTickSound(android.content.Context) -> s
-    3824:3864:void playSoundFromRaw(android.content.Context,int) -> b
-    3870:3878:void playDefaultNotificationSound(android.content.Context) -> t
-    3882:3883:void cancelScheduledStealthReset(android.content.Context) -> u
-    3887:3890:long getOldTimestamp(int) -> a
-    3895:3907:boolean isAppForeground(android.content.Context) -> v
-    3918:3918:java.lang.String replaceUrlSpaces(java.lang.String) -> v
-    3926:3937:java.lang.String getOldVibratePref(android.content.Context) -> w
-    3946:3962:java.lang.String getOldSoundPref(android.content.Context) -> x
-    3976:4012:void handleBulkLastSeenPacket(android.content.Context,org.json.JSONObject) -> a
-    4016:4035:void updateLastSeenTimeInBulk(java.util.List) -> a
-    4039:4047:boolean isListContainsMsisdn(java.util.List,java.lang.String) -> a
-    4058:4073:int updateHomeOverflowToggleCount(android.content.SharedPreferences) -> d
-    4078:4088:void incrementOrDecrementHomeOverflowCount(android.content.SharedPreferences,int) -> a
-    4092:4102:boolean isPackageInstalled(android.content.Context,java.lang.String) -> c
-    4107:4157:void clearJar(android.content.Context) -> y
-    4161:4196:java.lang.String combineInOneSmsString(android.content.Context,boolean,java.util.Collection,boolean) -> a
-    4203:4229:java.lang.String getSizeForDisplay(int) -> b
-    4234:4237:android.content.Intent getIntentForPrivacyScreen(android.content.Context) -> z
-    4244:4255:boolean isCompressed(byte[]) -> a
-    4262:4311:byte[] uncompressByteArray(byte[]) -> b
-    4315:4323:void emoticonClicked(android.content.Context,int,android.widget.EditText) -> a
-    4327:4366:android.view.animation.Animation getNotificationIndicatorAnim() -> l
-    4374:4448:void setupCountryCodeData(android.content.Context,java.lang.String,android.widget.EditText,android.widget.TextView,java.util.ArrayList,java.util.HashMap,java.util.HashMap,java.util.HashMap) -> a
-    4453:4460:boolean selectCountry(java.lang.String,java.util.HashMap,java.util.ArrayList,java.lang.String,android.widget.TextView,android.widget.TextView) -> a
+    3202:3291:void onCallClicked(android.app.Activity,java.lang.String) -> a
+    3295:3299:java.lang.String getFormattedDateTimeFromTimestamp(long,java.util.Locale) -> a
+    3304:3305:void sendUILogEvent(java.lang.String) -> t
+    3311:3334:void sendUILogEvent(java.lang.String,java.lang.String) -> d
+    3340:3358:void sendMd5MismatchEvent(java.lang.String,java.lang.String,java.lang.String,int,boolean) -> a
+    3362:3366:void resetUpdateParams(android.content.SharedPreferences) -> c
+    3370:3402:java.lang.String fileToMD5(java.lang.String) -> u
+    3407:3412:java.lang.String convertHashToString(byte[]) -> d
+    3417:3420:android.content.Intent getHomeActivityIntent(android.content.Context) -> p
+    3425:3429:android.content.Intent getPeopleActivityIntent(android.content.Context) -> q
+    3434:3438:android.content.Intent getTimelineActivityIntent(android.content.Context) -> r
+    3443:3457:void addCommonDeviceDetails(org.json.JSONObject,android.content.Context) -> a
+    3461:3461:com.bsb.hike.models.ConvMessage makeConvMessage(com.bsb.hike.models.Conversation,java.lang.String,java.lang.String,boolean) -> a
+    3466:3471:com.bsb.hike.models.ConvMessage makeConvMessage(com.bsb.hike.models.Conversation,java.lang.String,java.lang.String,boolean,com.bsb.hike.models.ConvMessage$State) -> a
+    3476:3476:boolean canInBitmap() -> g
+    3489:3489:boolean hasGingerbread() -> h
+    3494:3494:boolean hasHoneycombMR1() -> i
+    3504:3504:boolean hasKitKat() -> j
+    3509:3510:boolean hasEnoughFreeSpaceForProfilePic() -> k
+    3515:3566:void addToContacts(java.util.List,java.lang.String,android.content.Context) -> addToContacts
+    3570:3570:int getNumColumnsForGallery(android.content.res.Resources,int) -> a
+    3575:3576:int getActualSizeForGallery(android.content.res.Resources,int,int) -> a
+    3581:3602:void makeNoMediaFile(java.io.File) -> b
+    3606:3640:java.lang.String getServerRecommendedContactsSelection(java.lang.String,java.lang.String) -> e
+    3666:3675:void startChatThread(android.content.Context,com.bsb.hike.models.ContactInfo) -> a
+    3679:3682:void toggleActionBarElementsEnable(android.view.View,android.widget.ImageView,android.widget.TextView,boolean) -> a
+    3686:3704:android.graphics.drawable.Drawable getAvatarDrawableForNotificationOrShortcut(android.content.Context,java.lang.String,boolean) -> a
+    3709:3729:void getRecommendedAndHikeContacts(android.content.Context,java.util.List,java.util.List,java.util.List) -> a
+    3733:3768:void addFavorite(android.content.Context,com.bsb.hike.models.ContactInfo,boolean) -> a
+    3773:3799:void toggleFavorite(android.content.Context,com.bsb.hike.models.ContactInfo,boolean) -> b
+    3803:3807:void addToContacts(android.app.Activity,java.lang.String) -> addToContacts
+    3811:3813:boolean isPlayTickSound(android.content.Context) -> s
+    3826:3866:void playSoundFromRaw(android.content.Context,int) -> b
+    3872:3880:void playDefaultNotificationSound(android.content.Context) -> t
+    3884:3885:void cancelScheduledStealthReset(android.content.Context) -> u
+    3889:3892:long getOldTimestamp(int) -> a
+    3897:3909:boolean isAppForeground(android.content.Context) -> v
+    3920:3920:java.lang.String replaceUrlSpaces(java.lang.String) -> v
+    3928:3939:java.lang.String getOldVibratePref(android.content.Context) -> w
+    3948:3964:java.lang.String getOldSoundPref(android.content.Context) -> x
+    3978:4014:void handleBulkLastSeenPacket(android.content.Context,org.json.JSONObject) -> a
+    4018:4037:void updateLastSeenTimeInBulk(java.util.List) -> a
+    4041:4049:boolean isListContainsMsisdn(java.util.List,java.lang.String) -> a
+    4060:4075:int updateHomeOverflowToggleCount(android.content.SharedPreferences) -> d
+    4080:4090:void incrementOrDecrementHomeOverflowCount(android.content.SharedPreferences,int) -> a
+    4094:4104:boolean isPackageInstalled(android.content.Context,java.lang.String) -> c
+    4109:4159:void clearJar(android.content.Context) -> y
+    4163:4198:java.lang.String combineInOneSmsString(android.content.Context,boolean,java.util.Collection,boolean) -> a
+    4205:4231:java.lang.String getSizeForDisplay(int) -> b
+    4236:4239:android.content.Intent getIntentForPrivacyScreen(android.content.Context) -> z
+    4246:4257:boolean isCompressed(byte[]) -> a
+    4264:4313:byte[] uncompressByteArray(byte[]) -> b
+    4317:4325:void emoticonClicked(android.content.Context,int,android.widget.EditText) -> a
+    4329:4368:android.view.animation.Animation getNotificationIndicatorAnim() -> l
+    4376:4450:void setupCountryCodeData(android.content.Context,java.lang.String,android.widget.EditText,android.widget.TextView,java.util.ArrayList,java.util.HashMap,java.util.HashMap,java.util.HashMap) -> a
+    4455:4462:boolean selectCountry(java.lang.String,java.util.HashMap,java.util.ArrayList,java.lang.String,android.widget.TextView,android.widget.TextView) -> a
     176:176:int[] $SWITCH_TABLE$com$bsb$hike$models$HikeFile$HikeFileType() -> m
     1713:1713:void access$1(android.content.Context,com.bsb.hike.models.ContactInfo,com.bsb.hike.utils.Utils$WhichScreen) -> a
     176:176:int[] $SWITCH_TABLE$com$bsb$hike$utils$Utils$WhichScreen() -> n
@@ -15879,26 +15804,26 @@ com.bsb.hike.utils.Utils$1 -> com.bsb.hike.utils.cy:
     846:850:boolean onTouch(android.view.View,android.view.MotionEvent) -> onTouch
 com.bsb.hike.utils.Utils$10 -> com.bsb.hike.utils.cz:
     android.app.Dialog val$dialog -> a
-    3274:3275:void onClick(android.view.View) -> onClick
+    3275:3276:void onClick(android.view.View) -> onClick
 com.bsb.hike.utils.Utils$11 -> com.bsb.hike.utils.da:
     android.content.Context val$context -> a
-    3743:3745:void positiveClicked(android.app.Dialog) -> a
-    3750:3750:void neutralClicked(android.app.Dialog) -> b
-    3755:3757:void negativeClicked(android.app.Dialog) -> c
-    3764:3764:void onSucess(android.app.Dialog) -> d
+    3745:3747:void positiveClicked(android.app.Dialog) -> a
+    3752:3752:void neutralClicked(android.app.Dialog) -> b
+    3757:3759:void negativeClicked(android.app.Dialog) -> c
+    3766:3766:void onSucess(android.app.Dialog) -> d
 com.bsb.hike.utils.Utils$12 -> com.bsb.hike.utils.db:
-    3841:3843:void onCompletion(android.media.MediaPlayer) -> onCompletion
+    3843:3845:void onCompletion(android.media.MediaPlayer) -> onCompletion
 com.bsb.hike.utils.Utils$13 -> com.bsb.hike.utils.dc:
-    4395:4395:int compare(java.lang.String,java.lang.String) -> a
+    4397:4397:int compare(java.lang.String,java.lang.String) -> a
     1:1:int compare(java.lang.Object,java.lang.Object) -> compare
 com.bsb.hike.utils.Utils$14 -> com.bsb.hike.utils.dd:
     android.widget.EditText val$countryCodeEditor -> a
     java.util.HashMap val$codesMap -> b
     java.util.ArrayList val$countriesArray -> c
     android.widget.TextView val$countryNameEditor -> d
-    4418:4418:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
-    4423:4423:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
-    4428:4446:void afterTextChanged(android.text.Editable) -> afterTextChanged
+    4420:4420:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
+    4425:4425:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
+    4430:4448:void afterTextChanged(android.text.Editable) -> afterTextChanged
 com.bsb.hike.utils.Utils$2 -> com.bsb.hike.utils.de:
     android.content.SharedPreferences val$settings -> a
     java.lang.String val$checkPref -> b
@@ -15930,9 +15855,10 @@ com.bsb.hike.utils.Utils$8 -> com.bsb.hike.utils.dk:
     3246:3249:void onCheckedChanged(android.widget.CompoundButton,boolean) -> onCheckedChanged
 com.bsb.hike.utils.Utils$9 -> com.bsb.hike.utils.dl:
     android.app.Activity val$mActivity -> a
-    org.json.JSONObject val$json -> b
-    android.app.Dialog val$dialog -> c
-    3259:3265:void onClick(android.view.View) -> onClick
+    java.lang.String val$mContactNumber -> b
+    org.json.JSONObject val$json -> c
+    android.app.Dialog val$dialog -> d
+    3259:3266:void onClick(android.view.View) -> onClick
 com.bsb.hike.utils.Utils$ExternalStorageState -> com.bsb.hike.utils.dm:
     com.bsb.hike.utils.Utils$ExternalStorageState WRITEABLE -> a
     com.bsb.hike.utils.Utils$ExternalStorageState READ_ONLY -> b
@@ -16336,94 +16262,6 @@ com.bsb.hike.view.TwitterOAuthView$TwitterOAuthTask$LocalWebViewClient -> com.bs
     397:398:void onReceivedSslError(android.webkit.WebView,android.webkit.SslErrorHandler,android.net.http.SslError) -> onReceivedSslError
     403:426:void onPageStarted(android.webkit.WebView,java.lang.String,android.graphics.Bitmap) -> onPageStarted
     431:459:boolean shouldOverrideUrlLoading(android.webkit.WebView,java.lang.String) -> shouldOverrideUrlLoading
-com.codebutler.android_websockets.HybiParser -> com.a.a.a:
-    com.codebutler.android_websockets.WebSocketClient mClient -> a
-    boolean mMasking -> b
-    int mStage -> c
-    boolean mFinal -> d
-    boolean mMasked -> e
-    int mOpcode -> f
-    int mLengthSize -> g
-    int mLength -> h
-    int mMode -> i
-    byte[] mMask -> j
-    byte[] mPayload -> k
-    boolean mClosed -> l
-    java.io.ByteArrayOutputStream mBuffer -> m
-    java.util.List OPCODES -> n
-    java.util.List FRAGMENTED_OPCODES -> o
-    99:104:byte[] mask(byte[],byte[],int) -> a
-    109:132:void start(com.codebutler.android_websockets.HybiParser$HappyDataInputStream) -> a
-    135:157:void parseOpcode(byte) -> a
-    160:169:void parseLength(byte) -> b
-    172:174:void parseExtendedLength(byte[]) -> a
-    177:177:byte[] frame(java.lang.String) -> a
-    185:185:byte[] frame(byte[],int,int) -> a
-    189:189:byte[] frame(java.lang.String,int,int) -> a
-    193:240:byte[] frame(java.lang.Object,int,int) -> a
-    254:305:void emitFrame() -> a
-    308:310:void reset() -> b
-    314:316:java.lang.String encode(byte[]) -> b
-    322:324:byte[] decode(java.lang.String) -> b
-    329:333:int getInteger(byte[]) -> c
-    355:366:byte[] copyOfRange(byte[],int,int) -> b
-    370:370:byte[] slice(byte[],int) -> a
-    380:388:long byteArrayToLong(byte[],int,int) -> c
-com.codebutler.android_websockets.HybiParser$HappyDataInputStream -> com.a.a.b:
-    397:413:byte[] readBytes(int) -> a
-com.codebutler.android_websockets.HybiParser$ProtocolError -> com.a.a.c:
-com.codebutler.android_websockets.WebSocketClient -> com.a.a.d:
-    java.net.URI mURI -> a
-    com.codebutler.android_websockets.WebSocketClient$Listener mListener -> b
-    java.net.Socket mSocket -> c
-    java.lang.Thread mThread -> d
-    android.os.HandlerThread mHandlerThread -> e
-    android.os.Handler mHandler -> f
-    java.util.List mExtraHeaders -> g
-    com.codebutler.android_websockets.HybiParser mParser -> h
-    boolean mConnected -> i
-    java.lang.Object mSendLock -> j
-    javax.net.ssl.TrustManager[] sTrustManagers -> k
-    62:62:com.codebutler.android_websockets.WebSocketClient$Listener getListener() -> a
-    66:146:void connect() -> b
-    149:166:void disconnect() -> c
-    169:170:void send(java.lang.String) -> a
-    177:177:boolean isConnected() -> d
-    181:184:org.apache.http.StatusLine parseStatusLine(java.lang.String) -> b
-    188:188:org.apache.http.Header parseHeader(java.lang.String) -> c
-    193:208:java.lang.String readLine(com.codebutler.android_websockets.HybiParser$HappyDataInputStream) -> a
-    212:216:java.lang.String createSecret() -> e
-    220:234:void sendFrame(byte[]) -> a
-    245:247:javax.net.ssl.SSLSocketFactory getSSLSocketFactory() -> f
-    28:28:java.net.URI access$000(com.codebutler.android_websockets.WebSocketClient) -> a
-    28:28:javax.net.ssl.SSLSocketFactory access$100(com.codebutler.android_websockets.WebSocketClient) -> b
-    28:28:java.net.Socket access$202(com.codebutler.android_websockets.WebSocketClient,java.net.Socket) -> a
-    28:28:java.net.Socket access$200(com.codebutler.android_websockets.WebSocketClient) -> c
-    28:28:java.lang.String access$300(com.codebutler.android_websockets.WebSocketClient) -> d
-    28:28:java.util.List access$400(com.codebutler.android_websockets.WebSocketClient) -> e
-    28:28:java.lang.String access$500(com.codebutler.android_websockets.WebSocketClient,com.codebutler.android_websockets.HybiParser$HappyDataInputStream) -> a
-    28:28:org.apache.http.StatusLine access$600(com.codebutler.android_websockets.WebSocketClient,java.lang.String) -> a
-    28:28:org.apache.http.Header access$700(com.codebutler.android_websockets.WebSocketClient,java.lang.String) -> b
-    28:28:com.codebutler.android_websockets.WebSocketClient$Listener access$800(com.codebutler.android_websockets.WebSocketClient) -> f
-    28:28:boolean access$902(com.codebutler.android_websockets.WebSocketClient,boolean) -> a
-    28:28:com.codebutler.android_websockets.HybiParser access$1000(com.codebutler.android_websockets.WebSocketClient) -> g
-    28:28:java.lang.Object access$1100(com.codebutler.android_websockets.WebSocketClient) -> h
-com.codebutler.android_websockets.WebSocketClient$1 -> com.a.a.e:
-    com.codebutler.android_websockets.WebSocketClient this$0 -> a
-    74:143:void run() -> run
-com.codebutler.android_websockets.WebSocketClient$2 -> com.a.a.f:
-    com.codebutler.android_websockets.WebSocketClient this$0 -> a
-    153:163:void run() -> run
-com.codebutler.android_websockets.WebSocketClient$3 -> com.a.a.g:
-    byte[] val$frame -> a
-    com.codebutler.android_websockets.WebSocketClient this$0 -> b
-    224:232:void run() -> run
-com.codebutler.android_websockets.WebSocketClient$Listener -> com.a.a.h:
-    void onConnect() -> a
-    void onMessage(java.lang.String) -> a
-    void onMessage(byte[]) -> a
-    void onDisconnect(int,java.lang.String) -> a
-    void onError(java.lang.Exception) -> a
 com.facebook.AccessToken -> com.facebook.AccessToken:
     long serialVersionUID -> serialVersionUID
     java.lang.String ACCESS_TOKEN_KEY -> ACCESS_TOKEN_KEY
@@ -17780,7 +17618,7 @@ com.facebook.Settings -> com.facebook.Settings:
     161:171:java.util.concurrent.Executor getExecutor() -> getExecutor
     181:185:void setExecutor(java.util.concurrent.Executor) -> setExecutor
     194:194:java.lang.String getFacebookDomain() -> getFacebookDomain
-    206:210:void setFacebookDomain(java.lang.String) -> setFacebookDomain
+    209:210:void setFacebookDomain(java.lang.String) -> setFacebookDomain
     213:235:java.util.concurrent.Executor getAsyncTaskExecutor() -> getAsyncTaskExecutor
     248:249:void publishInstallAsync(android.content.Context,java.lang.String) -> publishInstallAsync
     264:281:void publishInstallAsync(android.content.Context,java.lang.String,com.facebook.Request$Callback) -> publishInstallAsync
@@ -18749,8 +18587,8 @@ com.facebook.internal.Utility -> com.facebook.internal.Utility:
     278:290:boolean stringsEqualOrEmpty(java.lang.String,java.lang.String) -> stringsEqualOrEmpty
     296:315:void clearCookiesForDomain(android.content.Context,java.lang.String) -> clearCookiesForDomain
     320:324:void clearFacebookCookies(android.content.Context) -> clearFacebookCookies
-    330:330:void logd(java.lang.String,java.lang.Exception) -> logd
-    336:336:void logd(java.lang.String,java.lang.String) -> logd
+    327:330:void logd(java.lang.String,java.lang.Exception) -> logd
+    333:336:void logd(java.lang.String,java.lang.String) -> logd
     339:342:boolean areObjectsEqual(java.lang.Object,java.lang.Object) -> areObjectsEqual
     349:366:com.facebook.internal.Utility$FetchedAppSettings queryAppSettings(java.lang.String,boolean) -> queryAppSettings
     370:377:boolean safeGetBooleanFromResponse(com.facebook.model.GraphObject,java.lang.String) -> safeGetBooleanFromResponse
@@ -24697,184 +24535,6 @@ com.haibison.android.lockpattern.widget.LockPatternView_v14 -> com.haibison.andr
     51:69:boolean onHoverEvent(android.view.MotionEvent) -> onHoverEvent
 com.haibison.android.lockpattern.widget.ViewCompat_v16 -> com.haibison.android.lockpattern.widget.f:
     45:46:void announceForAccessibility(android.view.View,java.lang.CharSequence) -> a
-com.koushikdutta.async.http.socketio.Acknowledge -> com.b.a.a.a.a:
-    void acknowledge(org.json.JSONArray) -> a
-com.koushikdutta.async.http.socketio.ConnectCallback -> com.b.a.a.a.b:
-    void onConnectCompleted(java.lang.Exception,com.koushikdutta.async.http.socketio.SocketIOClient) -> a
-com.koushikdutta.async.http.socketio.DisconnectCallback -> com.b.a.a.a.c:
-    void onDisconnect(java.lang.Exception) -> a
-com.koushikdutta.async.http.socketio.ErrorCallback -> com.b.a.a.a.d:
-    void onError(java.lang.String) -> a
-com.koushikdutta.async.http.socketio.EventCallback -> com.b.a.a.a.e:
-    void onEvent(java.lang.String,org.json.JSONArray,com.koushikdutta.async.http.socketio.Acknowledge) -> a
-com.koushikdutta.async.http.socketio.EventEmitter -> com.b.a.a.a.f:
-    com.koushikdutta.async.util.HashList callbacks -> a
-    20:30:void onEvent(java.lang.String,org.json.JSONArray,com.koushikdutta.async.http.socketio.Acknowledge) -> a
-    33:34:void addListener(java.lang.String,com.koushikdutta.async.http.socketio.EventCallback) -> a
-    46:47:void on(java.lang.String,com.koushikdutta.async.http.socketio.EventCallback) -> b
-com.koushikdutta.async.http.socketio.EventEmitter$OnceCallback -> com.b.a.a.a.g:
-com.koushikdutta.async.http.socketio.JSONCallback -> com.b.a.a.a.h:
-    void onJSON(org.json.JSONObject,com.koushikdutta.async.http.socketio.Acknowledge) -> a
-com.koushikdutta.async.http.socketio.ReconnectCallback -> com.b.a.a.a.i:
-    void onReconnect() -> a
-com.koushikdutta.async.http.socketio.SocketIOClient -> com.b.a.a.a.j:
-    boolean connected -> b
-    boolean disconnected -> c
-    android.os.Handler handler -> d
-    com.koushikdutta.async.http.socketio.ConnectCallback connectCallback -> e
-    com.koushikdutta.async.http.socketio.ErrorCallback errorCallback -> f
-    com.koushikdutta.async.http.socketio.DisconnectCallback disconnectCallback -> g
-    com.koushikdutta.async.http.socketio.ReconnectCallback reconnectCallback -> h
-    com.koushikdutta.async.http.socketio.JSONCallback jsonCallback -> i
-    com.koushikdutta.async.http.socketio.StringCallback stringCallback -> j
-    com.koushikdutta.async.http.socketio.SocketIOConnection connection -> k
-    java.lang.String endpoint -> l
-    20:21:void emitRaw(int,java.lang.String,com.koushikdutta.async.http.socketio.Acknowledge) -> a
-    24:25:void emit(java.lang.String,org.json.JSONArray) -> a
-    36:43:void emit(java.lang.String,org.json.JSONArray,com.koushikdutta.async.http.socketio.Acknowledge) -> b
-    54:55:void connect(java.lang.String,com.koushikdutta.async.http.socketio.ConnectCallback,android.os.Handler) -> a
-    61:94:void connect(com.koushikdutta.http.AsyncHttpClient$SocketIORequest,com.koushikdutta.async.http.socketio.ConnectCallback,android.os.Handler) -> a
-    113:113:com.koushikdutta.async.http.socketio.DisconnectCallback getDisconnectCallback() -> a
-    157:157:boolean isConnected() -> b
-    177:178:void of(java.lang.String,com.koushikdutta.async.http.socketio.ConnectCallback) -> a
-com.koushikdutta.async.http.socketio.SocketIOClient$1 -> com.b.a.a.a.k:
-    com.koushikdutta.http.AsyncHttpClient$SocketIORequest val$request -> a
-    android.os.Handler val$handler -> b
-    com.koushikdutta.async.http.socketio.ConnectCallback val$callback -> c
-    com.koushikdutta.async.http.socketio.SocketIOConnection val$connection -> d
-    66:88:void onConnectCompleted(java.lang.Exception,com.koushikdutta.async.http.socketio.SocketIOClient) -> a
-com.koushikdutta.async.http.socketio.SocketIOClient$1$1 -> com.b.a.a.a.l:
-    com.koushikdutta.async.http.socketio.SocketIOClient$1 this$0 -> a
-    83:86:void onConnectCompleted(java.lang.Exception,com.koushikdutta.async.http.socketio.SocketIOClient) -> a
-com.koushikdutta.async.http.socketio.SocketIOConnection -> com.b.a.a.a.m:
-    android.os.Handler mHandler -> i
-    com.koushikdutta.http.AsyncHttpClient httpClient -> a
-    int heartbeat -> b
-    java.util.ArrayList clients -> c
-    com.codebutler.android_websockets.WebSocketClient webSocketClient -> d
-    com.koushikdutta.http.AsyncHttpClient$SocketIORequest request -> e
-    java.util.Hashtable acknowledges -> f
-    int ackCount -> g
-    long reconnectDelay -> h
-    41:41:boolean isConnected() -> a
-    48:55:void emitRaw(int,com.koushikdutta.async.http.socketio.SocketIOClient,java.lang.String,com.koushikdutta.async.http.socketio.Acknowledge) -> a
-    58:60:void connect(com.koushikdutta.async.http.socketio.SocketIOClient) -> a
-    90:224:void reconnect() -> b
-    227:240:void setupHeartbeat() -> c
-    247:252:void select(java.lang.String,com.koushikdutta.async.http.socketio.SocketIOConnection$SelectCallback) -> a
-    255:278:void delayReconnect() -> d
-    283:320:void reportDisconnect(java.lang.Exception) -> a
-    323:346:void reportConnect(java.lang.String) -> a
-    349:366:void reportJson(java.lang.String,org.json.JSONObject,com.koushikdutta.async.http.socketio.Acknowledge) -> a
-    369:386:void reportString(java.lang.String,java.lang.String,com.koushikdutta.async.http.socketio.Acknowledge) -> a
-    389:403:void reportEvent(java.lang.String,java.lang.String,org.json.JSONArray,com.koushikdutta.async.http.socketio.Acknowledge) -> a
-    406:424:void reportError(java.lang.String,java.lang.String) -> a
-    427:430:com.koushikdutta.async.http.socketio.Acknowledge acknowledge(java.lang.String) -> b
-    24:24:void access$000(com.koushikdutta.async.http.socketio.SocketIOConnection,java.lang.Exception) -> a
-    24:24:void access$100(com.koushikdutta.async.http.socketio.SocketIOConnection,java.lang.String) -> a
-    24:24:com.koushikdutta.async.http.socketio.Acknowledge access$200(com.koushikdutta.async.http.socketio.SocketIOConnection,java.lang.String) -> b
-    24:24:void access$300(com.koushikdutta.async.http.socketio.SocketIOConnection,java.lang.String,java.lang.String,com.koushikdutta.async.http.socketio.Acknowledge) -> a
-    24:24:void access$400(com.koushikdutta.async.http.socketio.SocketIOConnection,java.lang.String,org.json.JSONObject,com.koushikdutta.async.http.socketio.Acknowledge) -> a
-    24:24:void access$500(com.koushikdutta.async.http.socketio.SocketIOConnection,java.lang.String,java.lang.String,org.json.JSONArray,com.koushikdutta.async.http.socketio.Acknowledge) -> a
-    24:24:void access$600(com.koushikdutta.async.http.socketio.SocketIOConnection,java.lang.String,java.lang.String) -> a
-    24:24:android.os.Handler access$700(com.koushikdutta.async.http.socketio.SocketIOConnection) -> a
-com.koushikdutta.async.http.socketio.SocketIOConnection$1 -> com.b.a.a.a.n:
-    com.koushikdutta.async.http.socketio.SocketIOConnection this$0 -> a
-    98:221:void onCompleted(java.lang.Exception,java.lang.String) -> a
-com.koushikdutta.async.http.socketio.SocketIOConnection$1$1 -> com.b.a.a.a.o:
-    com.koushikdutta.async.http.socketio.SocketIOConnection$1 this$1 -> a
-    126:126:void onMessage(byte[]) -> a
-    132:196:void onMessage(java.lang.String) -> a
-    200:201:void onError(java.lang.Exception) -> a
-    206:207:void onDisconnect(int,java.lang.String) -> a
-    211:214:void onConnect() -> a
-com.koushikdutta.async.http.socketio.SocketIOConnection$10 -> com.b.a.a.a.p:
-    java.lang.String val$messageId -> a
-    com.koushikdutta.async.http.socketio.SocketIOConnection this$0 -> b
-    433:437:void acknowledge(org.json.JSONArray) -> a
-com.koushikdutta.async.http.socketio.SocketIOConnection$2 -> com.b.a.a.a.q:
-    com.codebutler.android_websockets.WebSocketClient val$ws -> a
-    com.koushikdutta.async.http.socketio.SocketIOConnection this$0 -> b
-    231:237:void run() -> run
-com.koushikdutta.async.http.socketio.SocketIOConnection$3 -> com.b.a.a.a.r:
-    com.koushikdutta.async.http.socketio.SocketIOConnection this$0 -> a
-    274:275:void run() -> run
-com.koushikdutta.async.http.socketio.SocketIOConnection$4 -> com.b.a.a.a.s:
-    java.lang.Exception val$ex -> a
-    com.koushikdutta.async.http.socketio.SocketIOConnection this$0 -> b
-    286:316:void onSelect(com.koushikdutta.async.http.socketio.SocketIOClient) -> a
-com.koushikdutta.async.http.socketio.SocketIOConnection$4$1 -> com.b.a.a.a.t:
-    com.koushikdutta.async.http.socketio.DisconnectCallback val$closed -> a
-    com.koushikdutta.async.http.socketio.SocketIOConnection$4 this$1 -> b
-    294:296:void run() -> run
-com.koushikdutta.async.http.socketio.SocketIOConnection$4$2 -> com.b.a.a.a.u:
-    com.koushikdutta.async.http.socketio.ConnectCallback val$callback -> a
-    com.koushikdutta.async.http.socketio.SocketIOClient val$client -> b
-    com.koushikdutta.async.http.socketio.SocketIOConnection$4 this$1 -> c
-    309:311:void run() -> run
-com.koushikdutta.async.http.socketio.SocketIOConnection$5 -> com.b.a.a.a.v:
-    com.koushikdutta.async.http.socketio.SocketIOConnection this$0 -> a
-    326:344:void onSelect(com.koushikdutta.async.http.socketio.SocketIOClient) -> a
-com.koushikdutta.async.http.socketio.SocketIOConnection$6 -> com.b.a.a.a.w:
-    org.json.JSONObject val$jsonMessage -> a
-    com.koushikdutta.async.http.socketio.Acknowledge val$acknowledge -> b
-    com.koushikdutta.async.http.socketio.SocketIOConnection this$0 -> c
-    352:364:void onSelect(com.koushikdutta.async.http.socketio.SocketIOClient) -> a
-com.koushikdutta.async.http.socketio.SocketIOConnection$6$1 -> com.b.a.a.a.x:
-    com.koushikdutta.async.http.socketio.JSONCallback val$callback -> a
-    com.koushikdutta.async.http.socketio.SocketIOConnection$6 this$1 -> b
-    358:360:void run() -> run
-com.koushikdutta.async.http.socketio.SocketIOConnection$7 -> com.b.a.a.a.y:
-    java.lang.String val$string -> a
-    com.koushikdutta.async.http.socketio.Acknowledge val$acknowledge -> b
-    com.koushikdutta.async.http.socketio.SocketIOConnection this$0 -> c
-    372:384:void onSelect(com.koushikdutta.async.http.socketio.SocketIOClient) -> a
-com.koushikdutta.async.http.socketio.SocketIOConnection$7$1 -> com.b.a.a.a.z:
-    com.koushikdutta.async.http.socketio.StringCallback val$callback -> a
-    com.koushikdutta.async.http.socketio.SocketIOConnection$7 this$1 -> b
-    378:380:void run() -> run
-com.koushikdutta.async.http.socketio.SocketIOConnection$8 -> com.b.a.a.a.aa:
-    java.lang.String val$event -> a
-    org.json.JSONArray val$arguments -> b
-    com.koushikdutta.async.http.socketio.Acknowledge val$acknowledge -> c
-    com.koushikdutta.async.http.socketio.SocketIOConnection this$0 -> d
-    392:401:void onSelect(com.koushikdutta.async.http.socketio.SocketIOClient) -> a
-com.koushikdutta.async.http.socketio.SocketIOConnection$8$1 -> com.b.a.a.a.ab:
-    com.koushikdutta.async.http.socketio.SocketIOClient val$client -> a
-    com.koushikdutta.async.http.socketio.SocketIOConnection$8 this$1 -> b
-    396:398:void run() -> run
-com.koushikdutta.async.http.socketio.SocketIOConnection$9 -> com.b.a.a.a.ac:
-    java.lang.String val$error -> a
-    com.koushikdutta.async.http.socketio.SocketIOConnection this$0 -> b
-    409:422:void onSelect(com.koushikdutta.async.http.socketio.SocketIOClient) -> a
-com.koushikdutta.async.http.socketio.SocketIOConnection$9$1 -> com.b.a.a.a.ad:
-    com.koushikdutta.async.http.socketio.ErrorCallback val$callback -> a
-    com.koushikdutta.async.http.socketio.SocketIOConnection$9 this$1 -> b
-    416:418:void run() -> run
-com.koushikdutta.async.http.socketio.SocketIOConnection$SelectCallback -> com.b.a.a.a.ae:
-    void onSelect(com.koushikdutta.async.http.socketio.SocketIOClient) -> a
-com.koushikdutta.async.http.socketio.StringCallback -> com.b.a.a.a.af:
-    void onString(java.lang.String,com.koushikdutta.async.http.socketio.Acknowledge) -> a
-com.koushikdutta.async.util.HashList -> com.b.a.b.a:
-    22:28:void add(java.lang.String,java.lang.Object) -> a
-com.koushikdutta.http.AsyncHttpClient -> com.b.b.a:
-    63:91:void executeString(com.koushikdutta.http.AsyncHttpClient$SocketIORequest,com.koushikdutta.http.AsyncHttpClient$StringCallback) -> a
-    94:102:byte[] readToEndAsArray(java.io.InputStream) -> a
-    106:106:java.lang.String readToEnd(java.io.InputStream) -> b
-    21:21:java.lang.String access$000(com.koushikdutta.http.AsyncHttpClient,java.io.InputStream) -> a
-com.koushikdutta.http.AsyncHttpClient$1 -> com.b.b.b:
-    com.koushikdutta.http.AsyncHttpClient$SocketIORequest val$socketIORequest -> a
-    com.koushikdutta.http.AsyncHttpClient$StringCallback val$stringCallback -> b
-    com.koushikdutta.http.AsyncHttpClient this$0 -> c
-    68:88:java.lang.Void doInBackground(java.lang.Void[]) -> a
-    63:63:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
-com.koushikdutta.http.AsyncHttpClient$SocketIORequest -> com.b.b.c:
-    java.lang.String mUri -> a
-    java.lang.String mEndpoint -> b
-    44:44:java.lang.String getUri() -> a
-    49:49:java.lang.String getEndpoint() -> b
-com.koushikdutta.http.AsyncHttpClient$StringCallback -> com.b.b.d:
-    void onCompleted(java.lang.Exception,java.lang.String) -> a
 com.mobileapptracker.Encryption -> com.mobileapptracker.a:
     javax.crypto.spec.IvParameterSpec a -> a
     javax.crypto.spec.SecretKeySpec b -> b

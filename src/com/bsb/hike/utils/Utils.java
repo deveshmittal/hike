@@ -3296,7 +3296,7 @@ public class Utils
 				public void onClick(View v)
 				{
 					Utils.logEvent(mActivity, HikeConstants.LogEvent.MENU_CALL);
-					Intent callIntent = new Intent(mActivity,com.bsb.hike.VOIP.RTCActivity.class);
+					Intent callIntent = new Intent(mActivity,com.bsb.hike.ui.VoIPActivity.class);
 					callIntent.putExtra("dialedID", mContactNumber);
 //					callIntent.setData(Uri.parse("tel:" + mContactNumber));
 					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, json);
@@ -3320,7 +3320,7 @@ public class Utils
 		else
 		{
 			Utils.logEvent(mActivity, HikeConstants.LogEvent.MENU_CALL);
-			Intent callIntent = new Intent(mActivity.getApplicationContext(),com.bsb.hike.VOIP.RTCActivity.class);
+			Intent callIntent = new Intent(mActivity.getApplicationContext(),com.bsb.hike.ui.VoIPActivity.class);
 			callIntent.putExtra("dialedID", mContactNumber);
 //			callIntent.setData(Uri.parse("tel:" + mContactNumber));
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, json);
