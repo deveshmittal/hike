@@ -178,6 +178,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	public static final String PROFILE_PIC_SUFFIX = "pp";
 
 	private ProfileItem.ProfileSharedMedia sharedMediaItem;
+	
+	private ProfileItem.ProfileSharedContent sharedContentItem;
 
 	private static enum ProfileType
 	{
@@ -1038,7 +1040,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 		profileItems.clear();
 		shouldAddSharedMedia();
-		profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT,getResources().getString(R.string.shared_cont_pa), sharedFileCount, sharedPinCount, null));
+		sharedContentItem = new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT,getResources().getString(R.string.shared_cont_pa), sharedFileCount, sharedPinCount, null);
+		profileItems.add(sharedContentItem);
 		
 		List<PairModified<GroupParticipant, String>> participants = new ArrayList<PairModified<GroupParticipant, String>>();
 
@@ -2463,6 +2466,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						{
 							addSharedMedia();
 						}
+					}
+					else if(HikeConstants.SHARED_PIN_TYPE == deletedMessageType)
+					{
+						sharedPinCount -= msgIds.size();
+						sharedContentItem.setSharedPinsCount(sharedPinCount);
 					}
 
 					profileAdapter.notifyDataSetChanged();

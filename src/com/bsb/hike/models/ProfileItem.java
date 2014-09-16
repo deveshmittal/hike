@@ -226,6 +226,11 @@ public abstract class ProfileItem
 		{
 			return text;
 		}
+		
+		public void setSharedPinsCount(int pinCount)
+		{
+			this.sharedPins = pinCount;
+		}
 		private List<HikeSharedFile> sharedFilesList;
 		private int sharedFiles;
 		private int sharedPins;
