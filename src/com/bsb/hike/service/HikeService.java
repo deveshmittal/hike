@@ -282,13 +282,6 @@ public class HikeService extends Service
 		// move stickers from external to internal if not done
 		sm.init(getApplicationContext());
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if (settings.getBoolean(StickerManager.STICKERS_MOVED_EXTERNAL_TO_INTERNAL, false))
-		{
-			sm.moveRecentStickerFileToInternal(getApplicationContext());
-			Editor edit = settings.edit();
-			edit.putBoolean(StickerManager.STICKERS_MOVED_EXTERNAL_TO_INTERNAL, true);
-			edit.commit();
-		}
 		if(!settings.getBoolean(StickerManager.RECENT_STICKER_SERIALIZATION_LOGIC_CORRECTED, false)){
 			sm.updateRecentStickerFile(settings);
 		}
