@@ -516,7 +516,7 @@ public class HikeNotification
 			{
 				return;
 			}
-			else if (convMessage.isFileTransferMessage() || convMessage.isStickerMessage())
+			else if (convMessage.isStickerMessage())
 			{
 				Bitmap bigPictureImage = ToastListener.returnBigPicture(convMessage, context);
 				if (bigPictureImage != null)
