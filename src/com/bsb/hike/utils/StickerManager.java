@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -799,7 +800,7 @@ public class StickerManager
 		return dir.getPath() + HikeConstants.STICKERS_ROOT + "/" + catId;
 	}
 
-	private String getInternalStickerDirectoryForCategoryId(Context context, String catId)
+	public String getInternalStickerDirectoryForCategoryId(Context context, String catId)
 	{
 		return context.getFilesDir().getPath() + HikeConstants.STICKERS_ROOT + "/" + catId;
 	}
@@ -1181,5 +1182,107 @@ public class StickerManager
 				}
 			}
 		}
+	}
+	
+	private String getStickerRootDirectory(Context context) {
+		boolean externalAvailable = false;
+		ExternalStorageState st = Utils.getExternalStorageState();
+		if (st == ExternalStorageState.WRITEABLE) {
+			externalAvailable = true;
+			String stickerDirPath = getExternalStickerRootDirectory(context);
+			if (stickerDirPath == null) {
+				return null;
+			}
+
+			File stickerDir = new File(stickerDirPath);
+
+			if (stickerDir.exists()) {
+				return stickerDir.getPath();
+			}
+		}
+		File stickerDir = new File(getInternalStickerRootDirectory(context));
+		if (stickerDir.exists()) {
+			return stickerDir.getPath();
+		}
+		if (externalAvailable) {
+			return getExternalStickerRootDirectory(context);
+		}
+		return getInternalStickerRootDirectory(context);
+	}
+
+	private String getExternalStickerRootDirectory(Context context) {
+		File dir = context.getExternalFilesDir(null);
+		if (dir == null) {
+			return null;
+		}
+		return dir.getPath() + HikeConstants.STICKERS_ROOT;
+	}
+
+	private String getInternalStickerRootDirectory(Context context) {
+		return context.getFilesDir().getPath() + HikeConstants.STICKERS_ROOT;
+	}
+
+	public Map<String, StickerCategoryId> getStickerToCategoryMapping(
+			Context context) {
+		String stickerRootDirectoryString = getStickerRootDirectory(context);
+
+		/*
+		 * Return null if the the path is null or empty
+		 */
+		if (TextUtils.isEmpty(stickerRootDirectoryString)) {
+			return null;
+		}
+
+		File stickerRootDirectory = new File(stickerRootDirectoryString);
+
+		/*
+		 * Return null if the directory is null or does not exist
+		 */
+		if (stickerRootDirectory == null || !stickerRootDirectory.exists()) {
+			return null;
+		}
+
+		Map<String, StickerCategoryId> stickerToCategoryMap = new HashMap<String, StickerManager.StickerCategoryId>();
+
+		for (File stickerCategoryDirectory : stickerRootDirectory.listFiles()) {
+			/*
+			 * If this is not a directory we have no need for this file.
+			 */
+			if (!stickerCategoryDirectory.isDirectory()) {
+				continue;
+			}
+
+			File stickerCategorySmallDirectory = new File(
+					stickerCategoryDirectory.getAbsolutePath()
+							+ HikeConstants.SMALL_STICKER_ROOT);
+
+			/*
+			 * We also don't want to do anything if the category does not have a
+			 * small folder.
+			 */
+			if (stickerCategorySmallDirectory == null
+					|| !stickerCategorySmallDirectory.exists()) {
+				continue;
+			}
+			StickerCategoryId categoryId = null;
+			try{
+			categoryId = StickerCategoryId
+					.valueOf(stickerCategoryDirectory.getName());
+			}catch(IllegalArgumentException ie){
+				continue;
+			}
+
+			for (File stickerFile : stickerCategorySmallDirectory.listFiles()) {
+				stickerToCategoryMap.put(stickerFile.getName(), categoryId);
+			}
+		}
+		for (String stickerId : LOCAL_STICKER_IDS_HUMANOID) {
+			stickerToCategoryMap.put(stickerId, StickerCategoryId.humanoid);
+		}
+
+		for (String stickerId : LOCAL_STICKER_IDS_EXPRESSIONS) {
+			stickerToCategoryMap.put(stickerId, StickerCategoryId.expressions);
+		}
+		return stickerToCategoryMap;
 	}
 }
