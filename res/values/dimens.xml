@@ -157,4 +157,5 @@
 	<dimen name="sm_rightmargin">53dp</dimen>
 	<dimen name="top_margin_shared_content">8dp</dimen>
 	<dimen name="shared_media_top_margin_hike_bot">3dp</dimen>
+	<dimen name="avatar_profile_size">66dp</dimen>
 </resources>
