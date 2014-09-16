@@ -1299,6 +1299,7 @@ public class StickerManager
 	 * fix is : we read file , make recent sticker file as per new name and proguard has been changed so it will not obfuscate file name of Sticker
 	 */
 	public final void updateRecentStickerFile(SharedPreferences settings){
+		Logger.i("recent", "Recent Sticker Save Mechanism started");
 		// save to preference as we want to try correction logic only once
 		Editor edit = settings.edit();
 		edit.putBoolean(StickerManager.RECENT_STICKER_SERIALIZATION_LOGIC_CORRECTED, true);
@@ -1359,5 +1360,6 @@ public class StickerManager
 				}
 			}
 		}
+		
 	}
 }
