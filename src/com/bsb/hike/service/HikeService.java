@@ -1,10 +1,13 @@
 package com.bsb.hike.service;
 
 import java.io.File;
-
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.util.Calendar;
-
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,6 +41,8 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.Sticker;
+import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -275,6 +280,7 @@ public class HikeService extends Service
 	{
 		sm = StickerManager.getInstance();
 		// move stickers from external to internal if not done
+		sm.init(getApplicationContext());
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		if (settings.getBoolean(StickerManager.STICKERS_MOVED_EXTERNAL_TO_INTERNAL, false))
 		{
@@ -283,7 +289,10 @@ public class HikeService extends Service
 			edit.putBoolean(StickerManager.STICKERS_MOVED_EXTERNAL_TO_INTERNAL, true);
 			edit.commit();
 		}
-		sm.init(getApplicationContext());
+		if(!settings.getBoolean(StickerManager.RECENT_STICKER_SERIALIZATION_LOGIC_CORRECTED, false)){
+			sm.updateRecentStickerFile(settings);
+		}
+		
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
 		/*
 		 * If we had earlier removed bollywood stickers we need to display them again.
@@ -369,7 +378,7 @@ public class HikeService extends Service
 			StickerManager.getInstance().removeStickersFromRecents(StickerCategoryId.doggy.name(), sm.OLD_HARDCODED_STICKER_IDS_DOGGY);
 		}
 	}
-
+	
 	@Override
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{

@@ -242,6 +242,12 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		setupIndexForSwapedCategories();
 	}
 
+	public void setStickerData(int stickerIndex,String stickerId,StickerCategory category){
+		this.stickerIndex = stickerIndex;
+		this.stickerId = stickerId;
+		this.category = category;
+		setupIndexForSwapedCategories();
+	}
 	/*
 	 * We save sticker index -1 for all non-hardcoded stickers in message metadata. So when moving doggy to non-hardcoded and expressions to hardcoded. all doggy sticker will now
 	 * be stickerIndex -1 and all hardcoded expressions will have a non negetive index value
