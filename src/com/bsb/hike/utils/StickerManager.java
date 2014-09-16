@@ -1,8 +1,10 @@
 package com.bsb.hike.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -17,6 +19,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,6 +29,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -37,6 +42,8 @@ import com.bsb.hike.utils.Utils.ExternalStorageState;
 public class StickerManager
 {
 	public static final String STICKERS_MOVED_EXTERNAL_TO_INTERNAL = "movedStickersExtToInt";
+	
+	public static final String RECENT_STICKER_SERIALIZATION_LOGIC_CORRECTED = "recentStickerSerializationCorrected";
 
 	public static final String SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP = "shownDefaultStickerCategoryPopup";
 
@@ -799,7 +806,7 @@ public class StickerManager
 		return dir.getPath() + HikeConstants.STICKERS_ROOT + "/" + catId;
 	}
 
-	private String getInternalStickerDirectoryForCategoryId(Context context, String catId)
+	public String getInternalStickerDirectoryForCategoryId(Context context, String catId)
 	{
 		return context.getFilesDir().getPath() + HikeConstants.STICKERS_ROOT + "/" + catId;
 	}
@@ -1181,5 +1188,178 @@ public class StickerManager
 				}
 			}
 		}
+	}
+	
+	private String getStickerRootDirectory(Context context) {
+		boolean externalAvailable = false;
+		ExternalStorageState st = Utils.getExternalStorageState();
+		if (st == ExternalStorageState.WRITEABLE) {
+			externalAvailable = true;
+			String stickerDirPath = getExternalStickerRootDirectory(context);
+			if (stickerDirPath == null) {
+				return null;
+			}
+
+			File stickerDir = new File(stickerDirPath);
+
+			if (stickerDir.exists()) {
+				return stickerDir.getPath();
+			}
+		}
+		File stickerDir = new File(getInternalStickerRootDirectory(context));
+		if (stickerDir.exists()) {
+			return stickerDir.getPath();
+		}
+		if (externalAvailable) {
+			return getExternalStickerRootDirectory(context);
+		}
+		return getInternalStickerRootDirectory(context);
+	}
+
+	private String getExternalStickerRootDirectory(Context context) {
+		File dir = context.getExternalFilesDir(null);
+		if (dir == null) {
+			return null;
+		}
+		return dir.getPath() + HikeConstants.STICKERS_ROOT;
+	}
+
+	private String getInternalStickerRootDirectory(Context context) {
+		return context.getFilesDir().getPath() + HikeConstants.STICKERS_ROOT;
+	}
+
+	public Map<String, StickerCategoryId> getStickerToCategoryMapping(
+			Context context) {
+		String stickerRootDirectoryString = getStickerRootDirectory(context);
+
+		/*
+		 * Return null if the the path is null or empty
+		 */
+		if (TextUtils.isEmpty(stickerRootDirectoryString)) {
+			return null;
+		}
+
+		File stickerRootDirectory = new File(stickerRootDirectoryString);
+
+		/*
+		 * Return null if the directory is null or does not exist
+		 */
+		if (stickerRootDirectory == null || !stickerRootDirectory.exists()) {
+			return null;
+		}
+
+		Map<String, StickerCategoryId> stickerToCategoryMap = new HashMap<String, StickerManager.StickerCategoryId>();
+
+		for (File stickerCategoryDirectory : stickerRootDirectory.listFiles()) {
+			/*
+			 * If this is not a directory we have no need for this file.
+			 */
+			if (!stickerCategoryDirectory.isDirectory()) {
+				continue;
+			}
+
+			File stickerCategorySmallDirectory = new File(
+					stickerCategoryDirectory.getAbsolutePath()
+							+ HikeConstants.SMALL_STICKER_ROOT);
+
+			/*
+			 * We also don't want to do anything if the category does not have a
+			 * small folder.
+			 */
+			if (stickerCategorySmallDirectory == null
+					|| !stickerCategorySmallDirectory.exists()) {
+				continue;
+			}
+			StickerCategoryId categoryId = null;
+			try{
+			categoryId = StickerCategoryId
+					.valueOf(stickerCategoryDirectory.getName());
+			}catch(IllegalArgumentException ie){
+				continue;
+			}
+
+			for (File stickerFile : stickerCategorySmallDirectory.listFiles()) {
+				stickerToCategoryMap.put(stickerFile.getName(), categoryId);
+			}
+		}
+		for (String stickerId : LOCAL_STICKER_IDS_HUMANOID) {
+			stickerToCategoryMap.put(stickerId, StickerCategoryId.humanoid);
+		}
+
+		for (String stickerId : LOCAL_STICKER_IDS_EXPRESSIONS) {
+			stickerToCategoryMap.put(stickerId, StickerCategoryId.expressions);
+		}
+		return stickerToCategoryMap;
+	}
+	
+	/**
+	 * solves recent sticker proguard issue , we serialize stickers , but proguard is changing file name sometime and recent sticker deserialize fails , 
+	 * and we loose recent sticker file
+	 * 
+	 * fix is : we read file , make recent sticker file as per new name and proguard has been changed so it will not obfuscate file name of Sticker
+	 */
+	public final void updateRecentStickerFile(SharedPreferences settings){
+		Logger.i("recent", "Recent Sticker Save Mechanism started");
+		// save to preference as we want to try correction logic only once
+		Editor edit = settings.edit();
+		edit.putBoolean(StickerManager.RECENT_STICKER_SERIALIZATION_LOGIC_CORRECTED, true);
+		edit.commit();
+		Map<String, StickerCategoryId> stickerCategoryMapping = getStickerToCategoryMapping(context);
+		// we do not want to try more than once, any failure , lets ignore this process there after
+		if(stickerCategoryMapping ==null){
+			return;
+		}
+		BufferedReader bufferedReader = null;
+		try{
+			String filePath = getInternalStickerDirectoryForCategoryId(context, StickerCategoryId.recent.name());
+			File dir = new File(filePath);
+			if(!dir.exists()){
+				return;
+			}
+			File file = new File(dir,StickerCategoryId.recent.name() + ".bin");
+			if(file.exists()){
+				bufferedReader = new BufferedReader(new FileReader(file));
+				String line = "";
+				StringBuilder str = new StringBuilder();
+				while((line = bufferedReader.readLine())!=null){
+					str.append(line);
+				}
+				Set<Sticker> recent = new HashSet<Sticker>();
+				
+				Pattern p = Pattern.compile("(\\d{3}_.*?\\.png.*?)");
+				Matcher m = p.matcher(str);
+				
+				while(m.find()){
+					String stickerId = m.group();
+					Logger.i("recent", "Sticker id found is "+stickerId);
+					Sticker st = new Sticker();
+					StickerCategory category = new StickerCategory();
+					category.categoryId = stickerCategoryMapping.get(stickerId);
+					if(category.categoryId==null){
+						continue;
+					}
+					category.updateAvailable =false;
+					category.setReachedEnd(true);
+					st.setStickerData(-1, stickerId, category);
+					recent.add(st);
+				}
+				
+				recentStickers = new HashSet<Sticker>();
+				saveSortedListForCategory(StickerCategoryId.recent, recent);
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+			Logger.i("recent", "Recent Sticker Save Mechanism finished");
+			if(bufferedReader!=null){
+				try{
+				bufferedReader.close();
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}
+		}
+		
 	}
 }
