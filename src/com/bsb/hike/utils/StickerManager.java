@@ -1324,7 +1324,7 @@ public class StickerManager
 				while((line = bufferedReader.readLine())!=null){
 					str.append(line);
 				}
-				Set<Sticker> recent = new HashSet<Sticker>();
+				recentStickers = Collections.synchronizedSet(new LinkedHashSet<Sticker>());
 				
 				Pattern p = Pattern.compile("(\\d{3}_.*?\\.png.*?)");
 				Matcher m = p.matcher(str);
@@ -1341,11 +1341,11 @@ public class StickerManager
 					category.updateAvailable =false;
 					category.setReachedEnd(true);
 					st.setStickerData(-1, stickerId, category);
-					recent.add(st);
+					recentStickers.add(st);
 				}
 				
-				recentStickers = new HashSet<Sticker>();
-				saveSortedListForCategory(StickerCategoryId.recent, recent);
+				
+				saveSortedListForCategory(StickerCategoryId.recent, recentStickers);
 			}
 			
 		}catch(Exception e){
