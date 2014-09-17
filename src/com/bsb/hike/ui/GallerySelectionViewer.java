@@ -78,7 +78,6 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gallery_selection_viewer);
-		Utils.resetImageQuality(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));  //Reset the image quality to Default
 		Object object = getLastCustomNonConfigurationInstance();
 
 		if (object instanceof InitiateMultiFileTransferTask)
