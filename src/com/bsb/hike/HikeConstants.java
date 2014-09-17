@@ -1597,7 +1597,7 @@ public class HikeConstants
 
 		public static final String ATOMIC_APP_TIP_TIMELINE_CLICKED = "atomicAppTmlineTClick";
 
-		public static final String ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED = "atomicAppSttngsTClick";
+		public static final String ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED = "atomicAppHikeExtraClick";
 
 		public static final String ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED = "atomicAppHikeRewardsClick";
 	}
