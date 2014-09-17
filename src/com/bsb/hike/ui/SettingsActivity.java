@@ -29,7 +29,7 @@ import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
+import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
@@ -53,7 +53,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 	private String profileName;
 	
-	private ProfilePicImageLoader profileImageLoader;
+	private IconLoader profileImageLoader;
 	
 	private String[] profilePubSubListeners = { HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_UPDATE_FINISH };
 	
@@ -67,7 +67,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.settings);
-		profileImageLoader = new ProfilePicImageLoader(this, getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size));
+		profileImageLoader = new IconLoader(this, getResources().getDimensionPixelSize(R.dimen.avatar_profile_size));
 		
 		HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
 		

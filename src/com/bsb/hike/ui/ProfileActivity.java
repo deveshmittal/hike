@@ -94,7 +94,7 @@ import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
+import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -857,8 +857,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		if(headerViewInitialized || profileImageUpdated )
 		{
-			int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.timeine_big_picture_size);
-			(new ProfilePicImageLoader(this, mBigImageSize)).loadImage(mappedId, profileImage, false, false, true);
+			int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.avatar_profile_size);
+			(new IconLoader(this, mBigImageSize)).loadImage(mappedId, profileImage, false, false, true);
 		}
 
 		if(headerViewInitialized)
