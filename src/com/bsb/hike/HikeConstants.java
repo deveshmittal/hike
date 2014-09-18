@@ -1097,6 +1097,8 @@ public class HikeConstants
 		public static final String ZOOM_LEVEL = "zoomLevel";
 
 		public static final String CONTACT_INFO = "contactInfo";
+		
+		public static final String CONTACT_INFO_TIMELINE = "contactInfoTimeline";
 
 		public static final String CONTACT_ID = "contactId";
 
