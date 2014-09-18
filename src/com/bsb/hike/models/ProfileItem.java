@@ -5,8 +5,6 @@ import java.util.List;
 
 import com.bsb.hike.utils.PairModified;
 
-import android.util.Pair;
-
 public abstract class ProfileItem
 {
 
@@ -201,13 +199,14 @@ public abstract class ProfileItem
 	
 	public static class ProfileSharedContent extends ProfileItem
 	{
-		public ProfileSharedContent(int itemId, String text, int sharedFiles, int sharedPins, List<HikeSharedFile> sharedFilesList)
+		public ProfileSharedContent(int itemId, String text, int sharedFiles, int sharedPins, int unreadPinCount, List<HikeSharedFile> sharedFilesList)
 		{
 			super(itemId,null);
 			this.text = text;
 			this.sharedFilesList = sharedFilesList;
 			this.sharedFiles = sharedFiles;
 			this.sharedPins = sharedPins;
+			this.unreadPinCount = unreadPinCount;
 		}
 		
 		public List<HikeSharedFile> getSharedFileList()
@@ -231,10 +230,33 @@ public abstract class ProfileItem
 		{
 			this.sharedPins = pinCount;
 		}
+		
+		public void setUnreadPinCount(int count)
+		{
+			this.unreadPinCount = count;
+		}
+		
+		public int getUnreadPinCount()
+		{
+			return unreadPinCount;
+		}
+		
+		public boolean getPinAnimation()
+		{
+			return this.shouldAnimatePin;
+		}
+		
+		public void setPinAnimation(boolean val)
+		{
+			this.shouldAnimatePin = val;
+		}
+
 		private List<HikeSharedFile> sharedFilesList;
 		private int sharedFiles;
 		private int sharedPins;
+		private int unreadPinCount; 
 		private String text;
+		private boolean shouldAnimatePin;
 	}
 	
 }
