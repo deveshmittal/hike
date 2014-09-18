@@ -1105,7 +1105,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			ll.addView(v, 0);
 
 		}
-		else if (key.equals(HikeMessengerApp.ATOMIC_POP_UP_THEME))
+		else if (key.equals(HikeMessengerApp.ATOMIC_POP_UP_THEME) && !(mConversation instanceof GroupConversation))
 		{
 			Logger.i("chatthread", "theme tip");
 			LinearLayout ll = ((LinearLayout) findViewById(R.id.tipContainerTop));
