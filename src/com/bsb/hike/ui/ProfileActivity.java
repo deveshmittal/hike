@@ -1103,7 +1103,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		int maxLength = getResources().getInteger(R.integer.max_length_name);
 		if (nameTxt.length() > maxLength)
 		{
-			nameTxt = nameTxt.substring(0, maxLength);
+			nameTxt = new String(nameTxt.substring(0, maxLength));
 		}
 
 		mNameEdit.setText(nameTxt);

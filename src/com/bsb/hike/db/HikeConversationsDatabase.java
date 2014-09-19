@@ -5132,7 +5132,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		String deleteSelectionString = deleteSelection.toString();
 		if (!"(".equals(deleteSelectionString))
 		{
-			deleteSelectionString = deleteSelectionString.substring(0, deleteSelectionString.length() - 1) + ")";
+			deleteSelectionString = new String(deleteSelectionString.substring(0, deleteSelectionString.length() - 1) + ")");
 			mDb.delete(DBConstants.CONVERSATIONS_TABLE, DBConstants.MSISDN + " IN " + deleteSelectionString, null);
 		}
 	}
