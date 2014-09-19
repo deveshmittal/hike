@@ -5,7 +5,7 @@
     android:background="@drawable/list_item"
     android:gravity="center"
     android:minHeight="?android:attr/listPreferredItemHeight"
-    android:paddingLeft="15dp"
+    android:paddingLeft="24dp"
     android:paddingRight="15dp" >
 
     <RelativeLayout
@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:text="Send a message"
                 android:textColor="@color/list_item_header"
-                android:textSize="18sp"
+                android:textSize="17sp"
                 android:textStyle="bold|italic" />
 
             <com.bsb.hike.view.CustomFontTextView

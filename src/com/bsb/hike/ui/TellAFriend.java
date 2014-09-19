@@ -36,6 +36,7 @@ import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.facebook.Session;
@@ -438,7 +439,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 		case SMS:
 			Utils.logEvent(this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_SMS_SCREEN_FROM_INVITE);
-			startActivity(new Intent(this, HikeListActivity.class));
+			IntentManager.openInviteSMS(this);
 			break;
 		case WATSAPP:
 			Utils.sendUILogEvent(HikeConstants.LogEvent.WATS_APP_INVITE);
@@ -478,20 +479,6 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 
 	private void sendInviteViaWatsApp()
 	{
-		Intent whatsappIntent = new Intent(Intent.ACTION_SEND);
-		whatsappIntent.setType("text/plain");
-		whatsappIntent.setPackage(HikeConstants.PACKAGE_WATSAPP);
-		String inviteText = HikeSharedPreferenceUtil.getInstance(getApplicationContext()).getData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, getString(R.string.watsapp_invitation));
-		String inviteToken = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeConstants.INVITE_TOKEN, "");
-		inviteText = inviteText + inviteToken;
-		whatsappIntent.putExtra(Intent.EXTRA_TEXT, inviteText);
-		try
-		{
-			startActivity(whatsappIntent);
-		}
-		catch (android.content.ActivityNotFoundException ex)
-		{
-			Toast.makeText(getApplicationContext(), "Could not find WatsApp in System", Toast.LENGTH_SHORT).show();
-		}
+		IntentManager.openInviteWatsApp(this);
 	}
 }
