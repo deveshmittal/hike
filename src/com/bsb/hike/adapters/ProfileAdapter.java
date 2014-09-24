@@ -553,7 +553,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.text.setText(head);
 			viewHolder.extraInfo.setText(mContactInfo.getMsisdn());
 			
-			if(mContactInfo.getMsisdnType().length()>0)
+			if (!TextUtils.isEmpty(mContactInfo.getMsisdnType()))
 				viewHolder.subText.setText(" (" + mContactInfo.getMsisdnType().toLowerCase() + ")");
 			
 			break;
