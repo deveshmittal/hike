@@ -216,15 +216,17 @@ public class VoIPActivity extends Activity implements HikePubSub.Listener {
 				intent.putExtra("decline", true);
 //				declineCall();
 //				getApplicationContext().startService(intent);
-				startService(i);
+//				startService(i);
 				 if(!mBound){
 					  bindService(i, vsc, serviceId);
 					  mBound = true;
 				  }
+				 
 //				vService = ((VOIPService)(vsc.voipService));
 				if(vService == null)
 					  Log.d("vService", "GGWP");
 //				unbindService(vsc);
+//				vService.closeActivity();
 				finish();
 			}
 	    	  
@@ -257,7 +259,7 @@ public class VoIPActivity extends Activity implements HikePubSub.Listener {
 		JSONObject data = (JSONObject) json.get(HikeConstants.DATA);
 		JSONObject metadata = (JSONObject) data.get(HikeConstants.METADATA);
 		String mdType = metadata.getString("type");
-		if (mdType.equals(HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE) && !callConnected){
+		if (mdType.equals(HikeConstants.MqttMessageTypes.VOIP_END_CALL) ){
 //			if(vsc.voipService != null){
 				finish();
 //				unbindService(vsc);

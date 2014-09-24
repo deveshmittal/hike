@@ -2,8 +2,10 @@ package com.bsb.hike.VOIP;
 
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,6 +27,7 @@ import android.util.Log;
 import android.content.Context;
 import android.media.AudioManager;
 
+import com.haibison.android.lockpattern.util.Sys;
 import com.koushikdutta.async.http.socketio.Acknowledge;
 import com.koushikdutta.async.http.socketio.ConnectCallback;
 import com.koushikdutta.async.http.socketio.EventCallback;
@@ -33,6 +36,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.service.VoIPServiceNew;
+import com.bsb.hike.utils.Logger;
 
 public class WebRtcClient {
 	private final static int MAX_PEER = 4;
@@ -45,7 +50,7 @@ public class WebRtcClient {
 	private RTCListener mListener;
 //	private SocketIOClient client;
 	private final MessageHandler messageHandler = new MessageHandler();
-	private final static String TAG = WebRtcClient.class.getCanonicalName();
+	private final static String TAG = WebRtcClient.class.getSimpleName();
 	private String storedId;
 	private HikePubSub mPubSub;
 	private Random random = new Random();
@@ -70,6 +75,10 @@ public class WebRtcClient {
 		void endCall();
 
 		void closeActivity();
+		
+		Boolean isConnected();
+
+		void onRemoveRemoteStream(MediaStream lMS);
 	}
 
 	private interface Command {
@@ -90,14 +99,20 @@ public class WebRtcClient {
 		public void execute(String peerId, JSONObject payload)
 				throws JSONException {
 			callReceived = true;
-//			Log.d(TAG, "CreateAnswerCommand");
+			Log.d(TAG, "CreateAnswerCommand");
 //			while(!answerpressed );
+			Log.d(TAG, "CreateAnswerCommand");
 			Peer peer = peers.get(peerId);
+			Log.d(TAG, "CreateAnswerCommand");
 			SessionDescription sdp = new SessionDescription(
 					SessionDescription.Type.fromCanonicalForm(payload
 							.getString("type")), payload.getString("sdp"));
+			Log.d(TAG, "CreateAnswerCommand");
 			peer.pc.setRemoteDescription(peer, sdp);
+			Log.d(TAG, "CreateAnswerCommand");
 			peer.pc.createAnswer(peer, pcConstraints);
+			Log.d(TAG, "CreateAnswerCommand");
+//			((VoIPServiceNew)(mListener)).callConnected = true;
 
 		}
 	}
@@ -134,6 +149,14 @@ public class WebRtcClient {
 	private class EndCallCommand implements Command{
 		public void execute(String peerId, JSONObject payload) throws JSONException{
 			Log.d("ENDING CALL", "?????");
+//			lMS.removeTrack(lMS.audioTracks.get(0));
+//			Log.d("lMS","Disposed");
+//			lMS.dispose();
+//			destroyPeer();
+//			factory.dispose();
+//			factory = null;
+			System.gc();
+//			addPeer("EndCall", MAX_PEER);
 			mListener.closeActivity();
 		}
 	}
@@ -177,6 +200,7 @@ public class WebRtcClient {
 			commandMap.put("answer", new SetRemoteSDPCommand());
 			commandMap.put("candidate", new AddIceCandidateCommand());
 			commandMap.put(HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE, new EndCallCommand());
+			commandMap.put(HikeConstants.MqttMessageTypes.VOIP_END_CALL, new EndCallCommand());
 			
 		//	DONE: change HikePubSub.MESSAGE_SENT to correct PubSubHandler
 			mPubSub.addListener(HikePubSub.VOIP_HANDSHAKE, this);
@@ -187,24 +211,35 @@ public class WebRtcClient {
 		@Override
 		public void onEventReceived(String type, Object object) {
 			//if(HikePubSub.VOIP_HANDSHAKE.equals(type)) {
+			Log.d("HELLO", "1");
 				try {
+					Log.d("HELLO", "1");
 					JSONObject payload = (JSONObject) object;
 				/* if (s.equals("id")) {
 					mListener.onCallReady(jsonArray.getString(0));
 				} else { */
 //					JSONObject json = payload.getJSONObject(0);
 //					Log.d("Writer", json.toString());
-				//	DONE: Correct JSON TAGS 
+				//	DONE: Correct JSON TAGS
+					Log.d("HELLO", "2");
 					String from = payload.getString(HikeConstants.FROM);
+					Log.d("HELLO", "3");
 					JSONObject data = payload.getJSONObject(HikeConstants.DATA);
+					Log.d("HELLO", "4");
 					JSONObject metadata=data.getJSONObject(HikeConstants.METADATA);
+					Log.d("HELLO", "5");
 					JSONObject voipPayload = metadata.getJSONObject(HikeConstants.VOIP_PAYLOAD);
+					Log.d("HELLO", "6");
 					String payload_type = metadata.getString("type");
+					Log.d("HELLO", "7");
 					JSONObject voipSubPayload = null;
+					Log.d("HELLO", "8");
 					if (!((payload_type.equals("init") || (payload_type.equals(HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE))) )) {
 						voipSubPayload = voipPayload.getJSONObject("payload");
+						Log.d("HELLO", "9");
 					}
 					executeCommand(from,payload_type,voipSubPayload);
+					Log.d("HELLO", "10");
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
@@ -213,16 +248,24 @@ public class WebRtcClient {
 		public void executeCommand(String from, String payloadType, JSONObject voipSubPayload) throws JSONException
 		{
 			// if peer is unknown, try to add him
+			Log.d("Hii", "1");
 			if (!peers.containsKey(from)) {
 				// if MAX_PEER is reach, ignore the call
+				Log.d("Hii", "2");
 				int endPoint = findEndPoint();
+				Log.d("Hii", "3");
 				if (endPoint != MAX_PEER) {
+					Log.d("Hii", "4");
 					storedId = from;
+					Log.d("Hii", "5");
 					addPeer(from, endPoint);
+					Log.d("Hii", "6");
 
 					commandMap.get(payloadType).execute(from, voipSubPayload);
+					Log.d("Hii", "7");
 				}
 			} else {
+				Log.d("Hii", "8");
 				commandMap.get(payloadType).execute(from, voipSubPayload);
 			}
 		}
@@ -259,6 +302,7 @@ public class WebRtcClient {
 
 		@Override
 		public void onCreateFailure(String s) {
+			Logger.d(TAG, "create failure");
 		}
 
 		@Override
@@ -273,7 +317,10 @@ public class WebRtcClient {
 		@Override
 		public void onIceConnectionChange(
 				PeerConnection.IceConnectionState iceConnectionState) {
+			Logger.d(TAG, "on ice connection  changed above");
+			Logger.d(TAG, "on ice connection chnaged state : " + iceConnectionState.toString());
 			if (iceConnectionState == PeerConnection.IceConnectionState.DISCONNECTED) {
+				Logger.d(TAG, "on ice connection  changed");
 				removePeer(id);
 				mListener.onStatusChanged("DISCONNECTED");
 			}
@@ -300,6 +347,7 @@ public class WebRtcClient {
 
 		@Override
 		public void onError() {
+			Logger.d(TAG, "error ocuured");
 		}
 
 		@Override
@@ -314,7 +362,7 @@ public class WebRtcClient {
 		@Override
 		public void onRemoveStream(MediaStream mediaStream) {
 			mListener.onRemoveRemoteStream(mediaStream, endPoint);
-
+			Logger.d(TAG, "removed stream");
 			removePeer(id);
 		}
 
@@ -323,15 +371,50 @@ public class WebRtcClient {
 		}
 
 		public Peer(String id, int endPoint) {
-//			Log.d(TAG, "new Peer: " + id + " " + endPoint);
-			this.pc = factory.createPeerConnection(iceServers, pcConstraints,
+			Log.d(TAG, "new Peer: " + id + " " + endPoint);
+			Log.d("NewPeer", "1");
+			if(factory == null)
+			{
+				Logger.d("NewPeer", "factoey is null");
+				factory = new PeerConnectionFactory();
+			}
+			if(iceServers == null)
+			{
+				Logger.d("NewPeer", "iceservers is null");
+			}
+			if(pcConstraints == null)
+			{
+				Logger.d("NewPeer", "pcconstrations is null");
+			}
+			pc = factory.createPeerConnection(iceServers, pcConstraints,
 					this);
+			Log.d("NewPeer", "2");
 			this.id = id;
+			Log.d("NewPeer", "3");
 			this.endPoint = endPoint;
-
-			pc.addStream(lMS, new MediaConstraints());
-
+			Log.d("NewPeer", "4");
+			if(lMS==null)
+				Log.d("NewPeer", "lmsNul");
+			MediaConstraints mediaConstraints = new MediaConstraints();
+			Log.d("NewPeer", "lms=" + " pc=" );
+			try
+			{
+				if(!pc.addStream(lMS, mediaConstraints))
+				{
+					Logger.d("NewPeer", "addstream to peer failed");
+				}
+				else
+				{
+					Logger.d("NewPeer", "addstream to peer sucessful");
+				}
+			}
+			catch(Exception e)
+			{
+				Logger.e("NewPeer","exception occured : ", e);
+			}
+			Log.d("CrashLine","asd");
 			mListener.onStatusChanged("CONNECTING");
+			Log.d("NewPeer", "6");
 		}
 
 		public void onRenegotiationNeeded() {			
@@ -341,6 +424,7 @@ public class WebRtcClient {
 
 //	DONE: dont need to connect to host. Only add the ice candidates. Removed arg "String:host"
 	public WebRtcClient(RTCListener listener) {
+		Logger.d("NewPeer", "initialising webtc client");
 		mListener = listener;
 		factory = new PeerConnectionFactory();
 		long sysTime = System.currentTimeMillis();
@@ -366,7 +450,6 @@ public class WebRtcClient {
 		mHandler.removeCallbacks(checkCallReceived);
         mHandler.postDelayed(checkCallReceived, 30000);
 
-		
 
 		/* SocketIOClient.connect(host, new ConnectCallback() {
 
@@ -403,9 +486,10 @@ public class WebRtcClient {
 				"OfferToReceiveVideo", "false"));
 	}
 
-	public void setCamera(String cameraFacing, String height, String width) {
+	public void setAudio(String cameraFacing, String height, String width) {
 		lMS = factory.createLocalMediaStream("ARDAMS");
 		lMS.addTrack(factory.createAudioTrack("ARDAMSa0"/*, factory.createAudioSource(new MediaConstraints())*/));
+		Log.d("camera added", "cameraadded");
 		
 		mListener.onLocalStream(lMS);
 	}
@@ -422,26 +506,64 @@ public class WebRtcClient {
 	}
 
 	private void addPeer(String id, int endPoint) {
+		Log.d("PEER","1");
 		Peer peer = new Peer(id, endPoint);
+		Log.d("PEER","2");
 		peers.put(id, peer);
+		Log.d("PEER","3");
 
 		endPoints[endPoint] = true;
+		Log.d("PEER","4");
 	}
 
 	private void removePeer(String id) {
+		Log.d("NewPeer", "remove peer caled");
 		if(peers.get(id) != null)
 		{
 		Peer peer = peers.get(id);
+//		mListener.onRemoveRemoteStream(lMS);
+//		onRemoveStream(lMS);
+		peer.pc.removeStream(lMS);
 		peer.pc.close();
 		peer.pc.dispose();
+		lMS.dispose();
+		MediaConstraints videoConstraints = new MediaConstraints();
+
+		
+//		VideoCapturer vd =		getVideoCapturer("front");
+//		vd.dispose();
 		peers.remove(peer.id);
+		peer.pc = null;
+		Log.d("NewPeer","disposing video");
 
 		endPoints[peer.endPoint] = false;
 		}
 	}
+	
+	private VideoCapturer getVideoCapturer(String cameraFacing) {
+		int[] cameraIndex = { 0, 1 };
+		int[] cameraOrientation = { 90, 180, 270, 0 };
+		for (int index : cameraIndex) {
+			for (int orientation : cameraOrientation) {
+				String name = "Camera " + index + ", Facing " + cameraFacing
+						+ ", Orientation " + orientation;
+				VideoCapturer capturer = VideoCapturer.create(name);
+				Log.d("Camera",name);
+				if (capturer != null) {
+					return capturer;
+				}
+			}
+		}
+		throw new RuntimeException("Failed to open capturer");
+	}
+
 	public void destroyPeer()
 	{
-		removePeer(storedId);
+		Set<String>keys= peers.keySet();
+		Iterator<String> itr = keys.iterator();
+		while(itr.hasNext()){			
+			removePeer(itr.next());
+		}
 	}
 
 	public MessageHandler getMessageHandler() {

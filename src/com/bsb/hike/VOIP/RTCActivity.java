@@ -243,7 +243,7 @@ public class RTCActivity extends Activity implements WebRtcClient.RTCListener{
 		setInCallLayout();
 	else
 		setAnswerLayout();
-    client.setCamera("front", "1600", "700");
+    client.setAudio("front", "1600", "700");
     client.start("android_test3", true);
     Log.d("DEBUG", "CamStarted");
   }
@@ -380,6 +380,18 @@ public void declineCall()
   {
 	  super.onBackPressed();
   }
+
+@Override
+public Boolean isConnected() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public void onRemoveRemoteStream(MediaStream lMS) {
+	// TODO Auto-generated method stub
+	
+}
 
 
 } 

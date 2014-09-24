@@ -59,6 +59,8 @@ public class VOIPService extends Service implements com.bsb.hike.VOIP.WebRtcClie
 	private TextView callNo;
 	private final VoIPBinder binder = new VoIPBinder();
 	private MessageHandler mHandler = VoIPActivity.serviceHandler ;
+	
+	public Boolean callConnected = false;
   //  private WebRTCAudioDevice aud1;
   
   public void onCreate() {
@@ -149,7 +151,7 @@ public class VOIPService extends Service implements com.bsb.hike.VOIP.WebRtcClie
 			if (!rejectCall)
 				answer(callerId);
 			else
-				declineCall();
+				endCall();
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -204,6 +206,7 @@ public class VOIPService extends Service implements com.bsb.hike.VOIP.WebRtcClie
 	client.answerpressed = true;
 	try {
 		client.getMessageHandler().executeCommand(callerId,"init",null);
+		callConnected=true;
 	} catch (JSONException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
@@ -224,7 +227,7 @@ public class VOIPService extends Service implements com.bsb.hike.VOIP.WebRtcClie
 
   public void startCam() {
 
-    client.setCamera("front", "1600", "700");
+    client.setAudio("front", "1600", "700");
     client.start("android_test3", true);
     Log.d("DEBUG", "CamStarted");
   }
@@ -282,10 +285,11 @@ public class VOIPService extends Service implements com.bsb.hike.VOIP.WebRtcClie
   	msg.what = 0;
 	mHandler.sendMessage(msg);
 	stopForeground(true);
-	mNotificationManager.cancelAll();
+	if (mNotificationManager != null)
+		mNotificationManager.cancelAll();
 	stopSelf();
 	onDestroy();
-	android.os.Process.killProcess(android.os.Process.myPid());
+//	android.os.Process.killProcess(android.os.Process.myPid());
 //	  finish();
 //	  android.os.Process.killProcess(android.os.Process.myPid());
 	
@@ -293,6 +297,7 @@ public class VOIPService extends Service implements com.bsb.hike.VOIP.WebRtcClie
 
 public void declineCall()
   {
+	if ( callConnected ){
 	  Log.d("VOIPService", "declinceCall");
 	  if(callerId != null)
 		try {
@@ -301,13 +306,30 @@ public void declineCall()
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	else
+	  else
 		try {
 			client.sendMessage(dialedId, HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE, null);
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	else{
+		if(callerId != null)
+			try {
+				client.sendMessage(callerId, HikeConstants.MqttMessageTypes.VOIP_END_CALL, null);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		  else
+			try {
+				client.sendMessage(dialedId, HikeConstants.MqttMessageTypes.VOIP_END_CALL, null);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	}
   }
 
 	
@@ -348,5 +370,18 @@ public void declineCall()
 		}
 		
 	}
+
+	@Override
+	public Boolean isConnected() {
+		// TODO Auto-generated method stub
+		return callConnected;
+	}
+	
+	public void onRemoveRemoteStream(MediaStream remoteStream) {
+
+		  remoteStream.audioTracks.get(0).dispose();
+		  aud1.stop();
+		  aud1.release();
+	  }
 
 }

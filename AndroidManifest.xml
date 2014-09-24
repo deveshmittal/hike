@@ -74,7 +74,7 @@
         </service>
         
         <service 
-            android:name="com.bsb.hike.service.VOIPService"
+            android:name="com.bsb.hike.service.VoIPServiceNew"
             android:enabled="true" >            
         </service>        
         
@@ -307,14 +307,10 @@
         </activity>
         
          <activity 
-             android:name="com.bsb.hike.ui.VoIPActivity"
+             android:name="com.bsb.hike.ui.VoIPActivityNew"
              android:launchMode="singleTask"
     		 android:taskAffinity=""
     		 android:excludeFromRecents="true">
-<!--              android:parentActivityName="com.bsb.hike.ui.HomeActivity">
-    <meta-data
-        android:name="android.support.PARENT_ACTIVITY"
-        android:value=".ui.HomeActivity"/> -->
         </activity>
                      
             <activity
