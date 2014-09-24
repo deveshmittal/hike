@@ -536,14 +536,21 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		case CONTACT_INFO_TIMELINE:
 			/*Falling onto contact info intentionally*/
 		case CONTACT_INFO:
-			getSupportMenuInflater().inflate(R.menu.contact_profile_menu, menu);
-			mMenu = menu;
-			MenuItem callItem = menu.findItem(R.id.call);
-			if (callItem != null)
+			if(HikeMessengerApp.hikeBotNamesMap.containsKey(contactInfo.getMsisdn()))
 			{
-				callItem.setVisible(getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY));
+				return false;  /*No need to show menu for HikeBots.*/
 			}
-			return true;
+			else
+			{
+				getSupportMenuInflater().inflate(R.menu.contact_profile_menu, menu);
+				mMenu = menu;
+				MenuItem callItem = menu.findItem(R.id.call);
+				if (callItem != null)
+				{
+					callItem.setVisible(getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY));
+				}
+				return true;
+			}
 		case GROUP_INFO:
 			if (!showingGroupEdit)
 			{
@@ -859,9 +866,11 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				}
 			 }
 			}
-			else  //Hike Bot. Don't show the status subtext bar
+			else  //Hike Bot. Don't show the status subtext bar. No need to take the user to Bot's timeline as well
 			{
 				subText.setVisibility(View.GONE);
+				headerView.findViewById(R.id.divider_view).setVisibility(View.GONE);
+				headerView.findViewById(R.id.profile_head).setEnabled(false);
 			}
 			
 			break;
