@@ -889,7 +889,15 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				{
 					endTimeConnect = System.currentTimeMillis();
 					long startTimeConnect = (Long) arg0.getUserContext();
-					mTestUtil.writeConnLogsToFile("APP," + "CONN-ACK(SUCCESS)" + "," + Long.toString(endTimeConnect - startTimeConnect) + "," + HikeTestUtil.getCurrentTimeInMilliseconds());
+					try 
+					{
+						mTestUtil.writeConnLogsToFile("APP," + "CONN-ACK(SUCCESS)" + "," + Long.toString(endTimeConnect - startTimeConnect) + "," +
+						HikeTestUtil.getCurrentTimeInMilliseconds() + "," + Utils.getCellLocation(context));
+					}
+					catch (RemoteException e1) 
+					{
+						e1.printStackTrace();
+					}
 
 					try
 					{
@@ -928,7 +936,15 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				{
 					endTimeConnect = System.currentTimeMillis();
 					long startTimeConnect = (Long) arg0.getUserContext();
-					mTestUtil.writeConnLogsToFile("\n\n" + "APP," +  "CONN-ACK(FAILURE)" + "," + Long.toString(endTimeConnect - startTimeConnect) + "," + HikeTestUtil.getCurrentTimeInMilliseconds());
+					try 
+					{
+						mTestUtil.writeConnLogsToFile("\n\n" + "APP," +  "CONN-ACK(FAILURE)" + "," +
+						Long.toString(endTimeConnect - startTimeConnect) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + Utils.getCellLocation(context));
+					}					
+					catch (RemoteException e1) 
+					{
+						e1.printStackTrace();
+					}
 
 					try
 					{
@@ -980,7 +996,16 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				long Stime = retVal.longValue();
 				mTestUtil.setMsgidTimestampPair(msgID, currTime);
 				Log.d("HikeMqttManagerNew", "Time taken to deliver the message(S->D)[" + Long.toString(msgID) + "]" + Long.toString(currTime-Stime));
-				mTestUtil.writeDataToFile("APP," +  msgID + "," + "S-D" + "," + Long.toString(System.currentTimeMillis()-Stime) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay());
+				
+				try 
+				{
+					mTestUtil.writeDataToFile("APP," +  msgID + "," + "S-D" + "," + Long.toString(System.currentTimeMillis()-Stime) + "," + 
+					HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
+				}
+				catch (RemoteException e) 
+				{
+					e.printStackTrace();
+				}
 			}
 			else
 			{
@@ -1000,7 +1025,15 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					Log.d("HikeMqttManagerNew", "read msgIds :"+ msgIds.optLong(p));
 					long timestamp = mTestUtil.getTimestampForMsgid(msgIds.optLong(p));
 					Log.d("HikeMqttManagerNew", "Time taken to read the message[" + Long.toString(msgIds.optLong(p)) + "]" + Long.toString(currTime - timestamp));
-					mTestUtil.writeDataToFile("APP," + Long.toString(msgIds.optLong(p)) + "," + "D-R" + "," + Long.toString(currTime - timestamp) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay());
+					try 
+					{
+						mTestUtil.writeDataToFile("APP," + Long.toString(msgIds.optLong(p)) + "," + "D-R" + "," + Long.toString(currTime - timestamp) + "," +
+						HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
+					}
+					catch (RemoteException e) 
+					{
+						e.printStackTrace();
+					}
 					mTestUtil.getMsgIdTimeMap().remove(msgIds.optLong(p));
 				}
 			}
@@ -1129,7 +1162,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 								long timestamp = mTestUtil.getTimestampForMsgid(msgId);
 								Log.d(TAG, "Recieved S status for msg with id : " + msgId);
 								Log.d(TAG, "Time taken to send msg with msgId " + msgId + " to hike-server in ms(Clock to S) : " + Long.toString(msgTimeToS-timestamp));
-								mTestUtil.writeDataToFile("APP," +  msgId + "," + "CLOCK-S" + "," + Long.toString(msgTimeToS-timestamp) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay());
+								mTestUtil.writeDataToFile("APP," +  msgId + "," + "CLOCK-S" + "," + Long.toString(msgTimeToS-timestamp) + "," + 
+								HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
 								mTestUtil.setMsgidTimestampPair(msgId, msgTimeToS);
 
 								Logger.d(TAG, "Recieved S status for msg with id : " + msgId);

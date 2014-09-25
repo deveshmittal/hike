@@ -31,6 +31,7 @@ import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
 import com.bsb.hike.utils.HikeTestUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 public class CommsSender implements Runnable
 {
@@ -136,7 +137,8 @@ public class CommsSender implements Runnable
 					{
 						out.write(message);
 						out.flush();
-						mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent MqttAck at :" + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay());
+						mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent MqttAck at :" +
+						HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(null));
 					}
 					else
 					{
@@ -178,16 +180,19 @@ public class CommsSender implements Runnable
 								}
 								if (message instanceof MqttPingReq)
 								{
-									mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent mqtt ping-request at :" + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay());
+									mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent mqtt ping-request at :" +
+									HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(null));
 								}
 								else if (message instanceof MqttConnect)
 								{
-									mTestUtil.writeConnLogsToFile("\n\n" + "MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent MqttConnect at :" + HikeTestUtil.getCurrentTimeInMilliseconds());
+									mTestUtil.writeConnLogsToFile("\n\n" + "MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent MqttConnect at :" +
+									HikeTestUtil.getCurrentTimeInMilliseconds() + "," + Utils.getCellLocation(null));
 								}
 								else
 								{
 									String payload = new String(message.getPayload(), "UTF-8");
-									mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent message at :" + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + payload + "," + mTestUtil.getMessageDelay());									
+									mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent message at :" +
+									HikeTestUtil.getCurrentTimeInMilliseconds() + "," + payload + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(null));									
 								}
 
 								clientState.notifySent(message);

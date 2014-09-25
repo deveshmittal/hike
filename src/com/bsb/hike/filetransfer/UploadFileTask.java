@@ -37,6 +37,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.MediaStore.MediaColumns;
@@ -475,7 +476,16 @@ public class UploadFileTask extends FileTransferBase
 		long currTime = System.currentTimeMillis();
 		mTestUtil.setMsgidTimestampPair(msgId, currTime);
 		long diffTime = System.currentTimeMillis() - initTime;
-		mTestUtil.writeDataToFile("APP," +  msgId + "," + "UPLOAD-PREP-TIME" + "," + Long.toString(diffTime) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mFile.getName() + "," + mTestUtil.getMessageDelay());		
+		
+		try 
+		{
+			mTestUtil.writeDataToFile("APP," +  msgId + "," + "UPLOAD-PREP-TIME" + "," + Long.toString(diffTime) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() +
+					"," + mFile.getName() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
+		}
+		catch (RemoteException e1) 
+		{
+			e1.printStackTrace();
+		}		
 
 		try
 		{
@@ -532,7 +542,8 @@ public class UploadFileTask extends FileTransferBase
 			long lastTime = mTestUtil.getTimestampForMsgid(msgId);
 			long _currTime = System.currentTimeMillis();
 			long difTime = _currTime - lastTime;
-			mTestUtil.writeDataToFile("APP," +  msgId + "," + "UPLOAD-TIME" + "," + Long.toString(difTime) + "," + Long.toString(_currTime) + "," + mFile.getName() + "," + fileKey + "," + mTestUtil.getMessageDelay());		
+			mTestUtil.writeDataToFile("APP," +  msgId + "," + "UPLOAD-TIME" + "," + Long.toString(difTime) +
+			"," + Long.toString(_currTime) + "," + mFile.getName() + "," + fileKey + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));		
 
 			JSONObject metadata = new JSONObject();
 			JSONArray filesArray = new JSONArray();

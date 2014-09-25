@@ -28,10 +28,12 @@ import org.eclipse.paho.client.mqttv3.internal.wire.MqttPingResp;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
+import android.os.RemoteException;
 import android.util.Log;
 
 import com.bsb.hike.utils.HikeTestUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 /**
  * Receives MQTT packets from the server.
@@ -177,17 +179,41 @@ public class CommsReceiver implements Runnable
 					}
 					if (message instanceof MqttPingResp)
 					{
-						mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received MqttPingResponse at :" + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay());
+						try 
+						{
+							mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received MqttPingResponse at :" + 
+							HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(null));
+						}
+						catch (RemoteException e) 
+						{
+							e.printStackTrace();
+						}
 
 					}
 					else if(message instanceof MqttConnack)
 					{
-						mTestUtil.writeConnLogsToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received MqttConnack at :" + HikeTestUtil.getCurrentTimeInMilliseconds());
+						try 
+						{
+							mTestUtil.writeConnLogsToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received MqttConnack at :" +
+							HikeTestUtil.getCurrentTimeInMilliseconds() + "," + Utils.getCellLocation(null));
+						}
+						catch (RemoteException e) 
+						{
+							e.printStackTrace();
+						}
 
 					}
 					else
 					{
-						mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received MqttAck at :" + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay());
+						try 
+						{
+							mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received MqttAck at :" + 
+							HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(null));
+						}
+						catch (RemoteException e) 
+						{
+							e.printStackTrace();
+						}
 					}									
 				}
 				else
@@ -195,7 +221,15 @@ public class CommsReceiver implements Runnable
 					// A new message has arrived
 					clientState.notifyReceivedMsg(message);
 					String payload = new String(message.getPayload(), "UTF-8");
-					mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received message at :" + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + payload + "," + mTestUtil.getMessageDelay());
+					try 
+					{
+						mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received message at :" + HikeTestUtil.getCurrentTimeInMilliseconds() +
+						"," + payload + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(null));
+					}
+					catch (RemoteException e) 
+					{
+						e.printStackTrace();
+					}
 				}
 			}
 			catch (MqttException ex)
