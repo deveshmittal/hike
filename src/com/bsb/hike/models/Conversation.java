@@ -48,20 +48,13 @@ public class Conversation implements Comparable<Conversation>
 		return msisdn;
 	}
 
-	public long getConvId()
-	{
-		return convId;
-	}
-
 	@Override
 	public String toString()
 	{
-		return "Conversation [msisdn=" + msisdn + ", convId=" + convId + ", messages=" + messages.size() + ", contactName=" + contactName + ", onhike=" + onhike + "]";
+		return "Conversation [msisdn=" + msisdn + ", messages=" + messages.size() + ", contactName=" + contactName + ", onhike=" + onhike + "]";
 	}
 
 	private String msisdn;
-
-	private long convId;
 
 	private List<ConvMessage> messages;
 
@@ -118,20 +111,19 @@ public class Conversation implements Comparable<Conversation>
 		return TextUtils.isEmpty(contactName) ? msisdn : contactName;
 	}
 
-	public Conversation(String msisdn, long convId)
+	public Conversation(String msisdn)
 	{
-		this(msisdn, convId, null, false);
+		this(msisdn, null, false);
 	}
 
-	public Conversation(String msisdn, long convId, String contactName, boolean onhike)
+	public Conversation(String msisdn, String contactName, boolean onhike)
 	{
-		this(msisdn, convId, contactName, onhike, false);
+		this(msisdn, contactName, onhike, false);
 	}
 
-	public Conversation(String msisdn, long convId, String contactName, boolean onhike, boolean isStealth)
+	public Conversation(String msisdn, String contactName, boolean onhike, boolean isStealth)
 	{
 		this.msisdn = msisdn;
-		this.convId = convId;
 		this.contactName = contactName;
 		this.onhike = onhike;
 		this.isStealth = isStealth;
@@ -191,11 +183,6 @@ public class Conversation implements Comparable<Conversation>
 			return ret;
 		}
 
-		if (convId != rhs.convId)
-		{
-			return (convId < rhs.convId) ? -1 : 1;
-		}
-
 		return 0;
 	}
 
@@ -220,7 +207,6 @@ public class Conversation implements Comparable<Conversation>
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((contactName == null) ? 0 : contactName.hashCode());
-		result = prime * result + (int) (convId ^ (convId >>> 32));
 		result = prime * result + ((msisdn == null) ? 0 : msisdn.hashCode());
 		result = prime * result + (onhike ? 1231 : 1237);
 		return result;
@@ -242,8 +228,6 @@ public class Conversation implements Comparable<Conversation>
 				return false;
 		}
 		else if (!contactName.equals(other.contactName))
-			return false;
-		if (convId != other.convId)
 			return false;
 		if (msisdn == null)
 		{
@@ -294,12 +278,16 @@ public class Conversation implements Comparable<Conversation>
 		 * sample json : {'pin':{'id':'1','unreadCount':'1','toShow':'true','timestamp':'XXX','displayed':'false'} }
 		 */
 		JSONObject jsonObject;
+		
+		String groupId;
 
-		public MetaData(String jsonString) throws JSONException
+		public MetaData(String jsonString, String groupId) throws JSONException
 		{
 			if (jsonString != null)
 			{
 				jsonObject = new JSONObject(jsonString);
+				
+				this.groupId = groupId;
 			}
 			else
 			{
@@ -422,5 +410,9 @@ public class Conversation implements Comparable<Conversation>
 			return jsonObject.toString();
 		}
 
+		public String getGroupId()
+		{
+			return groupId;
+		}
 	}
 }

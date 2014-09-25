@@ -62,11 +62,11 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.db.DBBackupRestore;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.tasks.SendLogsTask;
@@ -78,6 +78,7 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -145,7 +146,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
-			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FRIEND_REQ_COUNT_RESET, HikePubSub.STEALTH_UNREAD_TIP_CLICKED };
+			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FAVORITE_COUNT_CHANGED, HikePubSub.STEALTH_UNREAD_TIP_CLICKED };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -354,6 +355,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		});
 		
 		timelineTopBarIndicator = (TextView) menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.top_bar_indicator);
+		menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.overflow_icon_image).setContentDescription("Timeline");
 		((ImageView)menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_show_timeline);
 		updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 1000);
 		menu.findItem(R.id.show_timeline).getActionView().setOnClickListener(new View.OnClickListener()
@@ -380,11 +382,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		case R.id.new_conversation:
 			intent = new Intent(this, ComposeChatActivity.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
-
-			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.SHOW_START_NEW_CHAT_TIP, false))
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_START_NEW_CHAT_TIP, null);
-			}
 			Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
 			break;
 		case android.R.id.home:
@@ -403,28 +400,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 	}
 
-	private Intent getGamingIntent()
-	{
 
-		SharedPreferences prefs = this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		Intent intent = new Intent(this.getApplicationContext(), WebViewActivity.class);
-		intent.putExtra(HikeConstants.Extras.GAMES_PAGE, true);
-		/*
-		 * using the same token as rewards token, as per DK sir's mail
-		 */
-		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.gamesUrl + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
-		intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.hike_extras));
-		return intent;
-	}
-
-	private Intent getRewardsIntent()
-	{
-		SharedPreferences prefs = this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		Intent intent = new Intent(this.getApplicationContext(), WebViewActivity.class);
-		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.rewardsUrl + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
-		intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.rewards));
-		return intent;
-	}
+	
 
 	private void showSMSClientDialog()
 	{
@@ -859,10 +836,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		else if (HikePubSub.FAVORITE_TOGGLED.equals(type) || HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type) || HikePubSub.REJECT_FRIEND_REQUEST.equals(type))
 		{
 			Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
-			if (HikePubSub.REJECT_FRIEND_REQUEST.equals(type)|| (HikePubSub.FAVORITE_TOGGLED.equals(type) && (favoriteToggle.second.equals(FavoriteType.REQUEST_RECEIVED) || favoriteToggle.second.equals(FavoriteType.FRIEND))))
-			{
-				updateOverFlowMenuNotification();
-			}
 
 			if (ftueContactsData.isEmpty())
 			{
@@ -982,12 +955,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		else if (HikePubSub.CONTACT_SYNCED.equals(type))
 		{
+			Boolean[] ret = (Boolean[]) object;
+			final boolean manualSync = ret[0];
 			runOnUiThread(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					Toast.makeText(getApplicationContext(), R.string.contacts_synced, Toast.LENGTH_SHORT).show();
+					if(manualSync)
+						Toast.makeText(getApplicationContext(), R.string.contacts_synced, Toast.LENGTH_SHORT).show();
 				}
 			});
 		}
@@ -1034,16 +1010,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 		}
-		else if(HikePubSub.FRIEND_REQ_COUNT_RESET.equals(type))
+		else if(HikePubSub.FAVORITE_COUNT_CHANGED.equals(type))
 		{
-			runOnUiThread( new Runnable() {
-			@Override
-			public void run()
+			runOnUiThread( new Runnable()
 			{
-
-				
-					topBarIndicator.setVisibility(View.INVISIBLE);
-
+				@Override
+				public void run()
+				{
+					updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 0);
 				}
 			});
 		}
@@ -1099,7 +1073,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		@Override
 		protected FtueContactsData doInBackground(Void... params)
 		{
-			FtueContactsData ftueContactsDataResult = HikeUserDatabase.getInstance().getFTUEContacts(accountPrefs);
+			FtueContactsData ftueContactsDataResult = ContactManager.getInstance().getFTUEContacts(accountPrefs);
 			/*
 			 * This msisdn type will be the identifier for ftue contacts in the friends tab.
 			 */
@@ -1209,8 +1183,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 */
 		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
 		
-		optionsList.add(new OverFlowMenuItem(getString(R.string.favorites), 10));
-		
 		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
 
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
@@ -1221,8 +1193,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			optionsList.add(new OverFlowMenuItem(getString(R.string.rewards), 4));
 		}
-
-		optionsList.add(new OverFlowMenuItem(getString(R.string.my_profile), 0));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
 		
@@ -1288,21 +1258,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 					freeSmsCount.setVisibility(View.GONE);
 				}
-				
-				TextView friendRequestCount = (TextView) convertView.findViewById(R.id.friend_req_count);
-				int frCount = accountPrefs.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
-				if(frCount>0 && item.getKey() == 10)
-				{
-					friendRequestCount.setText(Integer.toString(frCount));
-					friendRequestCount.setVisibility(View.VISIBLE);
-
-				}
-				else
-					friendRequestCount.setVisibility(View.GONE);
 
 				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
 				newGamesIndicator.setText("1");
-								
+
+				/*
+				 * Rewards & Games indicator bubble are by default shown even if the keys are not stored in shared pref. 
+				 */
 				boolean isGamesClicked = accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, false);
 				boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
 				if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked))
@@ -1332,9 +1294,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 				switch (item.getKey())
 				{
-				case 0:
-					intent = new Intent(HomeActivity.this, ProfileActivity.class);
-					break;
 				case 1:
 					intent = new Intent(HomeActivity.this, CreditsActivity.class);
 					break;
@@ -1345,13 +1304,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true);
 					editor.commit();
 					updateOverFlowMenuNotification();
-					intent = getGamingIntent();
+					intent = IntentManager.getGamingIntent(HomeActivity.this);
 					break;
 				case 4:
 					editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true);
 					editor.commit();
 					updateOverFlowMenuNotification();
-					intent = getRewardsIntent();
+					intent = IntentManager.getRewardsIntent(HomeActivity.this);
 					break;
 				case 5:
 					intent = new Intent(HomeActivity.this, SettingsActivity.class);
@@ -1366,10 +1325,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 9:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
-					break;
-				case 10:
-					Utils.sendUILogEvent(HikeConstants.LogEvent.FAVOURITE_FROM_OVERFLOW);
-					intent = new Intent(HomeActivity.this, PeopleActivity.class);
 					break;
 				case 21:
 					DBBackupRestore.getInstance().backupDB();
@@ -1612,6 +1567,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOW_STEALTH_UNREAD_TIP, false))
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_STEALTH_UNREAD_TIP, null);
+		}
+		if (HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false))
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_STEALTH_INFO_TIP, null);
 		}
 		if (!HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, false))
 		{

@@ -184,14 +184,14 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 		/*
 		 * Ensuring we reset when leaving the activity as well, since we might receive a request when we were in this activity.
 		 */
-		Utils.resetOverflowCountHomeScreen(this);
+		Utils.resetUnseenFriendRequestCount(this);
 		super.onStop();
 	}
 
 	@Override
 	protected void onResume()
 	{
-		Utils.resetOverflowCountHomeScreen(this);
+		Utils.resetUnseenFriendRequestCount(this);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 		super.onResume();
 	}

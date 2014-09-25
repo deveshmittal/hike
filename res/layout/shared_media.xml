@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical" >
+
+    <LinearLayout 
+        android:id="@+id/shared_media"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:orientation="vertical" >
+    
+    
+    <include
+        android:id="@+id/shared_media_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/friends_group_view" >
+    </include>
+
+     <LinearLayout
+            android:id="@+id/sm_emptystate"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:contentDescription="Empty State"
+            android:layout_marginLeft="24dp"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+
+            <ImageView
+                android:id="@+id/sm_emptystate_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginRight="22dp"
+                android:src="@drawable/ic_info_2" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/sm_emptystate_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/no_media"
+                android:textColor="#aaaaaa"
+                android:textSize="16sp" />
+        </LinearLayout>
+    
+     <LinearLayout 
+         android:id="@+id/media_layout"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:layout_marginLeft="@dimen/sm_leftmargin"
+         android:layout_marginTop="12dp"
+         android:layout_marginBottom="14dp"
+		 android:orientation="horizontal"
+		 android:visibility="gone" >
+                     
+    <LinearLayout
+        android:id="@+id/shared_media_items"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" 
+        android:visibility="gone">
+        </LinearLayout>
+        
+       <ImageView 
+           android:id="@+id/arrow_icon"
+           android:layout_width="53dp"
+           android:layout_height="match_parent"
+           android:src="@drawable/ic_arrow"
+           android:background="@drawable/bg_fav"
+           android:scaleType="center"
+           android:visibility="gone"/>
+    </LinearLayout>
+</LinearLayout>
+</LinearLayout>

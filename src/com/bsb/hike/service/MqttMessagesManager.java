@@ -1,6 +1,7 @@
 package com.bsb.hike.service;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +34,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -54,6 +54,7 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HikePreferences;
@@ -62,7 +63,6 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
-import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
@@ -81,8 +81,6 @@ public class MqttMessagesManager
 
 	private HikeConversationsDatabase convDb;
 
-	private HikeUserDatabase userDb;
-
 	private SharedPreferences settings;
 
 	private SharedPreferences appPrefs;
@@ -98,25 +96,24 @@ public class MqttMessagesManager
 	private static MqttMessagesManager instance;
 
 	private String userMsisdn;
-	
+
 	private boolean isBulkMessage = false;
-	
+
 	private SQLiteDatabase convWriteDb;
-	
+
 	private SQLiteDatabase userWriteDb;
-	
+
 	private LinkedList<ConvMessage> messageList;
 
 	private Map<String, LinkedList<ConvMessage>> messageListMap;
-	
+
 	private Map<String, PairModified<PairModified<Long, Set<String>>, Long>> messageStatusMap;
 
 	private MqttMessagesManager(Context context)
 	{
 		this.convDb = HikeConversationsDatabase.getInstance();
-		this.userDb = HikeUserDatabase.getInstance();
+		this.userWriteDb = ContactManager.getInstance().getWritableDatabase();
 		this.convWriteDb = convDb.getWritableDatabase();
-		this.userWriteDb = userDb.getWritableDatabase();
 		this.settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.context = context;
 		this.pubSub = HikeMessengerApp.getPubSub();
@@ -157,7 +154,7 @@ public class MqttMessagesManager
 			return;
 		}
 		String iconBase64 = jsonObj.getString(HikeConstants.DATA);
-		this.userDb.setIcon(msisdn, Base64.decode(iconBase64, Base64.DEFAULT), false);
+		ContactManager.getInstance().setIcon(msisdn, Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 		HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
@@ -168,7 +165,7 @@ public class MqttMessagesManager
 		 */
 		if (!HikeConstants.SIGNUP_IC.equals(jsonObj.optString(HikeConstants.SUB_TYPE)))
 		{
-			FavoriteType favType = HikeUserDatabase.getInstance().getFriendshipStatus(msisdn);
+			FavoriteType favType = ContactManager.getInstance().getFriendshipStatus(msisdn);
 			if (favType == FavoriteType.FRIEND || favType == FavoriteType.REQUEST_SENT || favType == FavoriteType.REQUEST_SENT_REJECTED)
 			{
 				autoDownloadGroupImage(msisdn);
@@ -181,7 +178,7 @@ public class MqttMessagesManager
 		String groupId = jsonObj.getString(HikeConstants.TO);
 		String iconBase64 = jsonObj.getString(HikeConstants.DATA);
 		String newIconIdentifier = null;
-
+		ContactManager conMgr = ContactManager.getInstance();
 		if (iconBase64.length() < 6)
 		{
 			newIconIdentifier = iconBase64;
@@ -191,7 +188,7 @@ public class MqttMessagesManager
 			newIconIdentifier = iconBase64.substring(0, 5) + iconBase64.substring(iconBase64.length() - 6);
 		}
 
-		String oldIconIdentifier = this.userDb.getIconIdentifierString(groupId);
+		String oldIconIdentifier = conMgr.getIconIdentifierString(groupId);
 
 		/*
 		 * Same Icon
@@ -201,7 +198,7 @@ public class MqttMessagesManager
 			return;
 		}
 
-		this.userDb.setIcon(groupId, Base64.decode(iconBase64, Base64.DEFAULT), false);
+		conMgr.setIcon(groupId, Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 		HikeMessengerApp.getLruCache().clearIconForMSISDN(groupId);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, groupId);
@@ -256,8 +253,8 @@ public class MqttMessagesManager
 			// if user left Hike simply remove the value from pref
 			settings.edit().remove(msisdn).commit();
 		}
-		
-		ContactUtils.updateHikeStatus(this.context, msisdn, joined);
+
+		ContactManager.getInstance().updateHikeStatus(this.context, msisdn, joined);
 		this.convDb.updateOnHikeStatus(msisdn, joined);
 
 		if (joined)
@@ -266,10 +263,13 @@ public class MqttMessagesManager
 			if (joinTime > 0)
 			{
 				joinTime = Utils.applyServerTimeOffset(context, joinTime);
-				userDb.setHikeJoinTime(msisdn, joinTime);
+				ContactManager.getInstance().setHikeJoinTime(msisdn, joinTime);
 			}
 
-			saveStatusMsg(jsonObj, msisdn);
+			if(appPrefs.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true))
+			{
+				saveStatusMsg(jsonObj, msisdn);
+			}
 		}
 		else
 		{
@@ -317,7 +317,7 @@ public class MqttMessagesManager
 
 		boolean groupRevived = false;
 
-		if (!this.convDb.isGroupAlive(groupConversation.getMsisdn()))
+		if (!ContactManager.getInstance().isGroupAlive(groupConversation.getMsisdn()))
 		{
 
 			Logger.d(getClass().getSimpleName(), "Group is not alive");
@@ -332,9 +332,9 @@ public class MqttMessagesManager
 			}
 
 		}
-		if (!groupRevived && this.convDb.addGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList()) != HikeConstants.NEW_PARTICIPANT)
+		int gcjAdd = this.convDb.addRemoveGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList(), groupRevived);
+		if (!groupRevived && gcjAdd != HikeConstants.NEW_PARTICIPANT)
 		{
-
 			Logger.d(getClass().getSimpleName(), "GCJ Message was already received");
 			return;
 		}
@@ -342,20 +342,31 @@ public class MqttMessagesManager
 
 		JSONObject metadata = jsonObj.optJSONObject(HikeConstants.METADATA);
 
-		if (!groupRevived && !this.convDb.doesConversationExist(groupConversation.getMsisdn()))
+		/*
+		 * 
+		 * if (!groupRevived && !ContactManager.getInstance().isGroupExist(groupConversation.getMsisdn())) { Logger.d(getClass().getSimpleName(),
+		 * "The group conversation does not exists"); if (metadata != null) {
+		 * 
+		 * String groupName = metadata.optString(HikeConstants.NAME); groupConversation = (GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false,
+		 * groupName, groupConversation.getGroupOwner()); groupConversation.setContactName(groupName);
+		 * ContactManager.getInstance().insertGroup(groupConversation.getMsisdn(),groupName); }
+		 */
+		// Adding a key to the json signify that this was the GCJ
+		// received for group creation
+		// jsonObj.put(HikeConstants.NEW_GROUP, true);
+		if (!groupRevived && !ContactManager.getInstance().isGroupExist(groupConversation.getMsisdn()))
 		{
 			Logger.d(getClass().getSimpleName(), "The group conversation does not exists");
-			groupConversation = (GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, "", groupConversation.getGroupOwner());
 
+			String groupName = "";
 			if (metadata != null)
 			{
-				String groupName = metadata.optString(HikeConstants.NAME);
-				if (!TextUtils.isEmpty(groupName))
-				{
-					convDb.setGroupName(groupConversation.getMsisdn(), groupName);
-					groupConversation.setContactName(groupName);
-				}
+				// Earlier there were 2 queries, one to make the group conv and second to set the name. I have combined the both
+				groupName = metadata.optString(HikeConstants.NAME);
 			}
+			groupConversation = (GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, groupName, groupConversation.getGroupOwner());
+			ContactManager.getInstance().insertGroup(groupConversation.getMsisdn(), groupName);
+
 			// Adding a key to the json signify that this was the GCJ
 			// received for group creation
 			jsonObj.put(HikeConstants.NEW_GROUP, true);
@@ -399,6 +410,7 @@ public class MqttMessagesManager
 		String msisdn = jsonObj.optString(HikeConstants.DATA);
 		if (this.convDb.setParticipantLeft(groupId, msisdn) > 0)
 		{
+			ContactManager.getInstance().removeGroupParticipant(groupId, msisdn);
 			saveStatusMsg(jsonObj, jsonObj.getString(HikeConstants.TO));
 		}
 	}
@@ -410,6 +422,7 @@ public class MqttMessagesManager
 
 		if (this.convDb.setGroupName(groupId, groupname) > 0)
 		{
+			ContactManager.getInstance().setGroupName(groupId, groupname);
 			this.pubSub.publish(HikePubSub.GROUP_NAME_CHANGED, groupId);
 
 			boolean showPush = true;
@@ -438,53 +451,52 @@ public class MqttMessagesManager
 	{
 		ConvMessage convMessage = messagePreProcess(jsonObj);
 
-		
 		/*
 		 * adding message in db if not duplicate. In case of duplicate message we don't do further processing and return
 		 */
-		if(!convDb.addConversationMessages(convMessage))
-		{
-			return ;
-		}
-
-
-		/*
-		 * Return if there is no conversation mapped to this message
-		 */
-		if (convMessage.getConversation() == null)
+		if (!convDb.addConversationMessages(convMessage))
 		{
 			return;
 		}
-		
+
+		/*
+		 * Return if there is no conversation for this msisdn.
+		 */
+		if (!ContactManager.getInstance().isConvExists(convMessage.getMsisdn()))
+		{
+			Logger.d(getClass().getSimpleName(), "conversation does not exist");
+			return;
+		}
+
 		// We have to do publish this here since we are adding the message
 		// to the db here, and the id is set after inserting into the db.
 		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
-		
+
 		messageProcessVibrate(convMessage);
 		messageProcessFT(convMessage);
-		
+
 		if (convMessage.isGroupChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
 			ConvMessage convMessageNew = convDb.showParticipantStatusMessage(convMessage.getMsisdn());
 			if (convMessageNew != null)
 			{
-				if(convDb.addConversationMessages(convMessageNew))
+				if (convDb.addConversationMessages(convMessageNew))
 				{
 					this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessageNew);
 				}
-				
+
 			}
 		}
-		
+
 		removeTypingNotification(convMessage.getMsisdn(), convMessage.getGroupParticipantMsisdn());
-		
+
 	}
-	
+
 	private void saveMessageBulk(JSONObject jsonObj) throws JSONException
 	{
 		ConvMessage convMessage = messagePreProcess(jsonObj);
 		addToLists(convMessage.getMsisdn(), convMessage);
-		
+
 		if (convMessage.isGroupChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
 			ConvMessage convMessageNew = convDb.showParticipantStatusMessage(convMessage.getMsisdn());
@@ -494,12 +506,12 @@ public class MqttMessagesManager
 			}
 		}
 	}
-	
+
 	/**
 	 * This function pre-process on message of type "m" like make convMessage object , set metadata and timestamp
 	 * 
 	 * @param jsonObj
-	 * 			the JsonObject of type "m"
+	 *            the JsonObject of type "m"
 	 * 
 	 * @return ConvMessage object
 	 */
@@ -517,7 +529,6 @@ public class MqttMessagesManager
 		{
 			MessageMetadata messageMetadata = convMessage.getMetadata();
 			HikeFile hikeFile = messageMetadata.getHikeFiles().get(0);
-
 			JSONObject metadataJson = messageMetadata.getJSON();
 			// this value indicates that file is not downloaded yet
 			JSONArray fileArray = metadataJson.optJSONArray(HikeConstants.FILES);
@@ -538,10 +549,10 @@ public class MqttMessagesManager
 		 * Applying the offset.
 		 */
 		convMessage.setTimestamp(Utils.applyServerTimeOffset(context, convMessage.getTimestamp()));
-		
+
 		return convMessage;
 	}
-	
+
 	/**
 	 * This function decides whether to vibrate or not for a given message
 	 */
@@ -551,13 +562,13 @@ public class MqttMessagesManager
 		{
 			if (convMessage.getMetadata().isPokeMessage())
 			{
-				Conversation conversation = convMessage.getConversation();
 				boolean vibrate = false;
-				if (conversation != null)
+				String msisdn = convMessage.getMsisdn();
+				if (ContactManager.getInstance().isConvExists(msisdn))
 				{
-					if (conversation instanceof GroupConversation)
+					if (Utils.isGroupConversation(msisdn))
 					{
-						if (!((GroupConversation) conversation).isMuted())
+						if (!HikeConversationsDatabase.getInstance().isGroupMuted(msisdn))
 						{
 							vibrate = true;
 						}
@@ -575,14 +586,14 @@ public class MqttMessagesManager
 		}
 		Logger.d(getClass().getSimpleName(), "Receiver received Message : " + convMessage.getMessage() + "		;	Receiver Msg ID : " + convMessage.getMsgID() + "	; Mapped msgID : "
 				+ convMessage.getMappedMsgID());
-		
+
 	}
-	
+
 	/**
 	 * This function does processing on file transfer message
 	 * 
 	 * @param convMessage
-	 * 			the ConvMessage object with message id and conversation object initialized
+	 *            the ConvMessage object with message id and conversation object initialized
 	 */
 	private void messageProcessFT(ConvMessage convMessage)
 	{
@@ -596,11 +607,14 @@ public class MqttMessagesManager
 			Logger.d(getClass().getSimpleName(), "FT MESSAGE: " + " NAME: " + hikeFile.getFileName() + " KEY: " + hikeFile.getFileKey());
 			Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
 		}
-		
+
+		ContactManager manager = ContactManager.getInstance();
+		String msisdn = convMessage.getMsisdn();
 		/*
 		 * Start auto download for media files
 		 */
-		if (convMessage.isFileTransferMessage() && (convMessage.getConversation() != null) && (!TextUtils.isEmpty(convMessage.getConversation().getContactName())))
+		String name = Utils.isGroupConversation(msisdn) ? manager.getName(msisdn) : manager.getContact(msisdn, false, true).getName();
+		if (convMessage.isFileTransferMessage() && (!TextUtils.isEmpty(name)) && (manager.isConvExists(msisdn)))
 		{
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			NetworkType networkType = FileTransferManager.getInstance(context).getNetworkType();
@@ -637,7 +651,7 @@ public class MqttMessagesManager
 
 	private void saveDeliveryReport(JSONObject jsonObj) throws JSONException
 	{
-		
+
 		String id = jsonObj.optString(HikeConstants.DATA);
 		String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
 		long msgID;
@@ -651,7 +665,7 @@ public class MqttMessagesManager
 			msgID = -1;
 		}
 		Logger.d(getClass().getSimpleName(), "Delivery report received for msgid : " + msgID + "	;	REPORT : DELIVERED");
-		
+
 		int rowsUpdated = updateDB(msgID, ConvMessage.State.SENT_DELIVERED, msisdn);
 
 		if (rowsUpdated == 0)
@@ -663,14 +677,15 @@ public class MqttMessagesManager
 		Pair<String, Long> pair = new Pair<String, Long>(msisdn, msgID);
 
 		this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, pair);
-		
+
 	}
-	
+
 	/**
-	 * <li>This function does specific "dr" processing for bulk.</li>
-	 * <li> adds message id to {@link #messageStatusMap} second field if this id is grater than that present in second field
+	 * <li>This function does specific "dr" processing for bulk.</li> <li>adds message id to {@link #messageStatusMap} second field if this id is grater than that present in second
+	 * field
+	 * 
 	 * @param jsonObj
-	 * 			JsonObject of type "dr"
+	 *            JsonObject of type "dr"
 	 * @throws JSONException
 	 */
 	private void saveDeliveryReportBulk(JSONObject jsonObj) throws JSONException
@@ -688,22 +703,22 @@ public class MqttMessagesManager
 			msgID = -1;
 		}
 		Logger.d(getClass().getSimpleName(), "Delivery report received for msgid : " + msgID + "	;	REPORT : DELIVERED");
-		
+
 		/*
 		 * update message status map with max dr msgId corresponding to its msisdn
 		 */
-		
-		if(messageStatusMap.get(msisdn) == null)
+
+		if (messageStatusMap.get(msisdn) == null)
 		{
 			messageStatusMap.put(msisdn, new PairModified<PairModified<Long, Set<String>>, Long>(null, (long) -1));
 		}
-		if(null == messageStatusMap.get(msisdn).getFirst())
+		if (null == messageStatusMap.get(msisdn).getFirst())
 		{
 			Set<String> msisdnSet = new HashSet<String>();
 			PairModified<Long, Set<String>> pair = new PairModified<Long, Set<String>>((long) -1, msisdnSet);
 			messageStatusMap.get(msisdn).setFirst(pair);
 		}
-		if(msgID > messageStatusMap.get(msisdn).getSecond())
+		if (msgID > messageStatusMap.get(msisdn).getSecond())
 		{
 			messageStatusMap.get(msisdn).setSecond(msgID);
 		}
@@ -714,14 +729,12 @@ public class MqttMessagesManager
 		JSONArray msgIds = jsonObj.optJSONArray(HikeConstants.DATA);
 		String id = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
 
-		String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.FROM) : "";
-
 		if (msgIds == null)
 		{
 			Logger.e(getClass().getSimpleName(), "Update Error : Message id Array is empty or null . Check problem");
 			return;
 		}
-		
+
 		long[] ids;
 		if (!Utils.isGroupConversation(id))
 		{
@@ -735,37 +748,43 @@ public class MqttMessagesManager
 		}
 		else
 		{
+			String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.FROM) : "";
+			if(TextUtils.isEmpty(participantMsisdn))
+			{
+				return ;
+			}
 			ids = new long[msgIds.length()];
 			for (int i = 0; i < msgIds.length(); i++)
 			{
 				ids[i] = msgIds.optLong(i);
 			}
 			long maxMsgId = convDb.setReadByForGroup(id, ids, participantMsisdn);
-			
-			if(maxMsgId > 0)
+
+			if (maxMsgId > 0)
 			{
-				Pair<Long,String> pair = new Pair<Long,String>(maxMsgId,participantMsisdn);
-				Pair<String , Pair<Long,String>> groupPair = new Pair<String, Pair<Long,String>>(id, pair);
+				Pair<Long, String> pair = new Pair<Long, String>(maxMsgId, participantMsisdn);
+				Pair<String, Pair<Long, String>> groupPair = new Pair<String, Pair<Long, String>>(id, pair);
 				this.pubSub.publish(HikePubSub.GROUP_MESSAGE_DELIVERED_READ, groupPair);
 			}
 		}
 	}
-	
+
 	/**
 	 * <li>This function does specific "mr" processing for bulk.</li>
-	 * <p> In 1-1 conversation it adds max message id from ids list to {@link #messageStatusMap} first field if 
-	 * this id is greater than that present in first field</p>
+	 * <p>
+	 * In 1-1 conversation it adds max message id from ids list to {@link #messageStatusMap} first field if this id is greater than that present in first field
+	 * </p>
 	 * 
-	 * <p> In group conversation since we receive mr for messages sent by others also
-	 * we have to first check whether the list of ids present in mr belongs to our conversation or not.
-	 * <br>We call {@link HikeConversationsDatabase#getMrIdForGroup(String, long[])} passing groupId and ids as arguments.</br> It will return max id from list
-	 * if it belongs to this conversation else it will return -1. 
+	 * <p>
+	 * In group conversation since we receive mr for messages sent by others also we have to first check whether the list of ids present in mr belongs to our conversation or not. <br>
+	 * We call {@link HikeConversationsDatabase#getMrIdForGroup(String, long[])} passing groupId and ids as arguments.</br> It will return max id from list if it belongs to this
+	 * conversation else it will return -1.
 	 * <li>if id returned is less than that already present in first field we simply return</li>
 	 * <li>if equals we have to participant msisdn to set</li>
 	 * <li>if greater than we have clear set and update update both set and msgid fields in pair</li>
 	 * 
 	 * @param jsonObj
-	 * 			-- mr json containing list of ids 
+	 *            -- mr json containing list of ids
 	 * @throws JSONException
 	 */
 	private void saveMessageReadBulk(JSONObject jsonObj) throws JSONException
@@ -781,23 +800,22 @@ public class MqttMessagesManager
 			Logger.e(getClass().getSimpleName(), "Update Error : Message id Array is empty or null . Check problem");
 			return;
 		}
-		
 
-		if(messageStatusMap.get(id) == null)
+		if (messageStatusMap.get(id) == null)
 		{
 			messageStatusMap.put(id, new PairModified<PairModified<Long, Set<String>>, Long>(null, (long) -1));
 		}
-		
-		if(null == messageStatusMap.get(id).getFirst())
+
+		if (null == messageStatusMap.get(id).getFirst())
 		{
 			Set<String> msisdnSet = new HashSet<String>();
 			PairModified<Long, Set<String>> pair = new PairModified<Long, Set<String>>((long) -1, msisdnSet);
 			messageStatusMap.get(id).setFirst(pair);
 		}
-		
+
 		PairModified<Long, Set<String>> pair = messageStatusMap.get(id).getFirst();
 		long msgID = -1;
-		
+
 		if (Utils.isGroupConversation(id))
 		{
 			long[] ids = new long[msgIds.length()];
@@ -805,14 +823,14 @@ public class MqttMessagesManager
 			{
 				ids[i] = msgIds.optLong(i);
 			}
-			
+
 			msgID = convDb.getMrIdForGroup(id, ids);
-			if(pair.getFirst() > msgID)
+			if (pair.getFirst() > msgID)
 			{
-				return ;
+				return;
 			}
-			
-			if(pair.getFirst() < msgID)
+
+			if (pair.getFirst() < msgID)
 			{
 				pair.setFirst(msgID);
 				pair.getSecond().clear();
@@ -821,15 +839,15 @@ public class MqttMessagesManager
 		}
 		else
 		{
-			
+
 			for (int i = 0; i < msgIds.length(); i++)
 			{
 				long tempId = msgIds.optLong(i);
-				if(tempId > msgID)
+				if (tempId > msgID)
 				{
 					msgID = tempId;
 				}
-				if(msgID > pair.getFirst())
+				if (msgID > pair.getFirst())
 				{
 					pair.setFirst(msgID);
 				}
@@ -951,22 +969,20 @@ public class MqttMessagesManager
 
 				if (favorites.length() > 0)
 				{
-					userDb.setMultipleContactsToFavorites(favorites);
+					ContactManager.getInstance().setMultipleContactsToFavorites(favorites);
 				}
 			}
 			editor.putString(HikeMessengerApp.REWARDS_TOKEN, account.optString(HikeConstants.REWARDS_TOKEN));
 			editor.putBoolean(HikeMessengerApp.SHOW_REWARDS, account.optBoolean(HikeConstants.SHOW_REWARDS));
-			editor.putBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, !account.optBoolean(HikeConstants.SHOW_REWARDS));
 
 			editor.putString(HikeMessengerApp.GAMES_TOKEN, account.optString(HikeConstants.REWARDS_TOKEN));
 			editor.putBoolean(HikeMessengerApp.SHOW_GAMES, account.optBoolean(HikeConstants.SHOW_GAMES));
-			editor.putBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, !account.optBoolean(HikeConstants.SHOW_GAMES));
 
 			if (account.optBoolean(HikeConstants.SHOW_REWARDS))
 			{
 				showNewRewards = true;
 			}
-			
+
 			if (account.optBoolean(HikeConstants.SHOW_GAMES))
 			{
 				showNewGames = true;
@@ -1003,17 +1019,17 @@ public class MqttMessagesManager
 				settingEditor.putBoolean(HikeConstants.CHAT_BG_NOTIFICATION_PREF, showNotification);
 				settingEditor.commit();
 			}
-			if(account.has(HikeConstants.AVATAR))
+			if (account.has(HikeConstants.AVATAR))
 			{
 				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 				Editor settingEditor = settings.edit();
-				int dpSetting =  account.optInt(HikeConstants.AVATAR,1);
+				int dpSetting = account.optInt(HikeConstants.AVATAR, 1);
 				boolean defaultSetting = false;
-				if(dpSetting==2)
+				if (dpSetting == 2)
 				{
-					defaultSetting = true;	
+					defaultSetting = true;
 				}
-				settingEditor.putBoolean(HikeConstants.PROFILE_PIC_PREF,defaultSetting);
+				settingEditor.putBoolean(HikeConstants.PROFILE_PIC_PREF, defaultSetting);
 				settingEditor.commit();
 			}
 		}
@@ -1064,15 +1080,16 @@ public class MqttMessagesManager
 	{
 		String msisdn = jsonObj.getString(HikeConstants.FROM);
 
+		ContactManager conMgr = ContactManager.getInstance();
 		/*
 		 * Ignore if contact is blocked.
 		 */
-		if (userDb.isBlocked(msisdn))
+		if (conMgr.isBlocked(msisdn))
 		{
 			return;
 		}
 
-		ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn, false);
+		ContactInfo contactInfo = conMgr.getContact(msisdn, true, false);
 		if (contactInfo.getFavoriteType() == FavoriteType.FRIEND)
 		{
 			return;
@@ -1080,17 +1097,23 @@ public class MqttMessagesManager
 		FavoriteType currentType = contactInfo.getFavoriteType();
 		FavoriteType favoriteType = (currentType == FavoriteType.NOT_FRIEND || currentType == FavoriteType.REQUEST_RECEIVED_REJECTED || currentType == FavoriteType.REQUEST_RECEIVED) ? FavoriteType.REQUEST_RECEIVED
 				: FavoriteType.FRIEND;
-		if (favoriteType == FavoriteType.REQUEST_RECEIVED)
+
+		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
+		this.pubSub.publish(favoriteType == FavoriteType.REQUEST_RECEIVED ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.FRIEND_REQUEST_ACCEPTED, favoriteToggle);
+
+		if(favoriteType == favoriteType.FRIEND)
+		{
+			incrementUnseenStatusCount();
+		}
+		else if(favoriteType == favoriteType.REQUEST_RECEIVED && currentType != favoriteType.REQUEST_RECEIVED)
 		{
 			int count = settings.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 			if (count >= 0)
 			{
-				Utils.incrementOrDecrementHomeOverflowCount(settings, 1);
+				Utils.incrementOrDecrementFriendRequestCount(settings, 1);
 			}
 		}
 
-		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
-		this.pubSub.publish(favoriteType == FavoriteType.REQUEST_RECEIVED ? HikePubSub.FAVORITE_TOGGLED : HikePubSub.FRIEND_REQUEST_ACCEPTED, favoriteToggle);
 		if (favoriteType == FavoriteType.FRIEND)
 		{
 			StatusMessage statusMessage = new StatusMessage(0, null, msisdn, contactInfo.getName(), context.getString(R.string.confirmed_friend),
@@ -1213,8 +1236,8 @@ public class MqttMessagesManager
 		if (data.optBoolean(HikeConstants.POST_AB))
 		{
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
-			List<ContactInfo> contactinfos = ContactUtils.getContacts(this.context);
-			Map<String, List<ContactInfo>> contacts = ContactUtils.convertToMap(contactinfos);
+			List<ContactInfo> contactinfos = ContactManager.getInstance().getContacts(this.context);
+			Map<String, List<ContactInfo>> contacts = ContactManager.getInstance().convertToMap(contactinfos);
 			try
 			{
 				AccountUtils.postAddressBook(token, contacts);
@@ -1251,12 +1274,13 @@ public class MqttMessagesManager
 	private void saveStatusUpdate(JSONObject jsonObj) throws JSONException
 	{
 		StatusMessage statusMessage = new StatusMessage(jsonObj);
+		ContactManager conMgr = ContactManager.getInstance();
 		/*
 		 * This would be true for unsupported status message types. We should not be doing anything if we get one.
 		 * 
 		 * Also if the user is blocked, we ignore the message.
 		 */
-		if (statusMessage.getStatusMessageType() == null || userDb.isBlocked(statusMessage.getMsisdn()))
+		if (statusMessage.getStatusMessageType() == null || conMgr.isBlocked(statusMessage.getMsisdn()))
 		{
 			return;
 		}
@@ -1265,7 +1289,7 @@ public class MqttMessagesManager
 		 */
 		statusMessage.setTimeStamp(Utils.applyServerTimeOffset(context, statusMessage.getTimeStamp()));
 
-		ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(statusMessage.getMsisdn(), false);
+		ContactInfo contactInfo = conMgr.getContact(statusMessage.getMsisdn(), true, false);
 		FavoriteType favoriteType = contactInfo.getFavoriteType();
 		/*
 		 * Only add updates to timeline for contacts that have a 2-way relationship with the user.
@@ -1281,7 +1305,7 @@ public class MqttMessagesManager
 		if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
 		{
 			String iconBase64 = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.THUMBNAIL);
-			this.userDb.setIcon(statusMessage.getMappedId(), Base64.decode(iconBase64, Base64.DEFAULT), false);
+			conMgr.setIcon(statusMessage.getMappedId(), Base64.decode(iconBase64, Base64.DEFAULT), false);
 			/*
 			 * Removing the thumbnail string from the JSON, since we've already saved it.
 			 */
@@ -1300,7 +1324,7 @@ public class MqttMessagesManager
 				/*
 				 * Start auto download of the profile image.
 				 */
-				if(!isBulkMessage)  // do not autodownload in case of bulkmessage
+				if (!isBulkMessage) // do not autodownload in case of bulkmessage
 				{
 					autoDownloadProfileImage(statusMessage, true);
 				}
@@ -1429,14 +1453,11 @@ public class MqttMessagesManager
 			isOffline = (int) lastSeenTime;
 			lastSeenTime = System.currentTimeMillis() / 1000;
 		}
-		userDb.updateLastSeenTime(msisdn, lastSeenTime);
-		userDb.updateIsOffline(msisdn, (int) isOffline);
 
-		ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn, false);
-		contactInfo.setLastSeenTime(lastSeenTime);
-		contactInfo.setOffline(isOffline);
-
-		pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED, contactInfo);
+		ContactManager.getInstance().updateLastSeenTime(msisdn, lastSeenTime);
+		ContactManager.getInstance().updateIsOffline(msisdn, (int) isOffline);
+		ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, true);
+		pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED, contact);
 	}
 
 	private void saveServerTimestamp(JSONObject jsonObj) throws JSONException
@@ -1491,7 +1512,7 @@ public class MqttMessagesManager
 			String iconBase64 = jsonObj.getJSONObject(HikeConstants.DATA).optString(HikeConstants.THUMBNAIL);
 			if (!TextUtils.isEmpty(iconBase64))
 			{
-				this.userDb.setIcon(protip.getMappedId(), Base64.decode(iconBase64, Base64.DEFAULT), false);
+				ContactManager.getInstance().setIcon(protip.getMappedId(), Base64.decode(iconBase64, Base64.DEFAULT), false);
 			}
 			// increment the unseen status count straight away.
 			// we've got a new pro tip.
@@ -1695,15 +1716,17 @@ public class MqttMessagesManager
 			updateAtomicPopUpData(jsonObj);
 		}
 	}
+
 	/**
-	 * <br>This function handles bulk packet</br>
+	 * <br>
+	 * This function handles bulk packet</br>
 	 * 
 	 * @param bulkObj
-	 * 			- bulk json object of type "bm"
+	 *            - bulk json object of type "bm"
 	 * @throws JSONException
 	 */
-	
-	public void saveBulkMessage(JSONObject bulkObj) throws JSONException 
+
+	public void saveBulkMessage(JSONObject bulkObj) throws JSONException
 	{
 		boolean shouldFallBackToNormal = false;
 		JSONObject bulkMessages = bulkObj.optJSONObject(HikeConstants.DATA);
@@ -1720,14 +1743,16 @@ public class MqttMessagesManager
 
 				Logger.d("BulkProcess", "started");
 				long time1 = System.currentTimeMillis();
-				
+
 				/*
 				 * Initialize all the datastructures used for bulk packet processing
 				 */
 				messageList = new LinkedList<ConvMessage>(); // it will store all the convMessage object that can be added to list in one transaction
 				messageListMap = new HashMap<String, LinkedList<ConvMessage>>(); // it will store list of conversation objects based on msisdn
-				messageStatusMap = new HashMap<String, PairModified<PairModified<Long, Set<String>>, Long>>(); // it will store pair mapping to msisdn. pair first value is a pair which contains max "mr" msgid and msisdns of participants that read it.																									   // pair second value is max "dr" message id
-				
+				messageStatusMap = new HashMap<String, PairModified<PairModified<Long, Set<String>>, Long>>(); // it will store pair mapping to msisdn. pair first value is a pair
+																												// which contains max "mr" msgid and msisdns of participants that
+																												// read it. // pair second value is max "dr" message id
+
 				try
 				{
 					userWriteDb.beginTransaction();
@@ -1753,7 +1778,7 @@ public class MqttMessagesManager
 				catch (Exception e)
 				{
 					Logger.e("BulkProcessor", "Exception during processing ", e);
-					shouldFallBackToNormal = true;   // fallback to one message processing
+					shouldFallBackToNormal = true; // fallback to one message processing
 				}
 				finally
 				{
@@ -1764,11 +1789,11 @@ public class MqttMessagesManager
 					isBulkMessage = false;
 					Logger.d("bulkPacket", "total time : " + (System.currentTimeMillis() - time1));
 				}
-				
+
 				/*
 				 * If there is some exception processing bulk packet we fallback to normal single message processing of bulk packet messages
 				 */
-				if(shouldFallBackToNormal)
+				if (shouldFallBackToNormal)
 				{
 					i = 0;
 					while (i < length)
@@ -1784,100 +1809,98 @@ public class MqttMessagesManager
 			}
 		}
 	}
-	
+
 	private void finalProcessing() throws JSONException
 	{
-		
+
 		/*
-		 * The list returned by {@link HikeConversationsDatabase#addConversationsBulk(List<ConvMessages>)} contains non duplicate messages
-		 * This list is used for further processing
+		 * The list returned by {@link HikeConversationsDatabase#addConversationsBulk(List<ConvMessages>)} contains non duplicate messages This list is used for further processing
 		 */
-		
-		if(messageList.size() > 0)
+
+		if (messageList.size() > 0)
 		{
 			messageList = convDb.addConversationsBulk(messageList);
 		}
-		
+
 		/*
-		 * lastPinMap is map of msisdn to a pair containing last pin message for a conversation 
-		 * and count of total number of pin messages in bulk packet for that conversation
+		 * lastPinMap is map of msisdn to a pair containing last pin message for a conversation and count of total number of pin messages in bulk packet for that conversation
 		 */
-		HashMap<String, PairModified<ConvMessage, Integer>> lastPinMap = new HashMap<String, PairModified<ConvMessage,Integer>>();
-		
+		HashMap<String, PairModified<ConvMessage, Integer>> lastPinMap = new HashMap<String, PairModified<ConvMessage, Integer>>();
+
 		for (ConvMessage convMessage : messageList)
 		{
 			String msisdn = convMessage.getMsisdn();
-			if(messageListMap.get(msisdn) == null)
+			if (messageListMap.get(msisdn) == null)
 			{
 				messageListMap.put(msisdn, new LinkedList<ConvMessage>());
 			}
-			messageListMap.get(msisdn).add(convMessage);  // adds each message into messageListMap according to msisdn
-			
-			if(convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			messageListMap.get(msisdn).add(convMessage); // adds each message into messageListMap according to msisdn
+
+			if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 			{
-				if(lastPinMap.get(msisdn) == null)
+				if (lastPinMap.get(msisdn) == null)
 				{
 					lastPinMap.put(msisdn, new PairModified<ConvMessage, Integer>(null, 0));
 				}
-				lastPinMap.get(msisdn).setFirst(convMessage);						      // update last pin message for a msisdn
+				lastPinMap.get(msisdn).setFirst(convMessage); // update last pin message for a msisdn
 				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() + 1); // increment pin unread count for a msisdn
 			}
 		}
-		
+
 		/*
 		 * Increment unread count for each msisdn/groupId
 		 */
-		if(messageListMap.size() > 0)
+		if (messageListMap.size() > 0)
 		{
 			convDb.incrementUnreadCountBulk(messageListMap);
 		}
-		
+
 		/*
 		 * contains last message for each conversation to be added to conversation table
 		 */
 		ArrayList<ConvMessage> lastMessageList = new ArrayList<ConvMessage>(messageListMap.keySet().size());
 		for (Entry<String, LinkedList<ConvMessage>> entry : messageListMap.entrySet())
 		{
-			LinkedList<ConvMessage> list= entry.getValue();
+			LinkedList<ConvMessage> list = entry.getValue();
 			if (list.size() > 0)
 			{
-				lastMessageList.add(list.get(list.size() -1));
+				lastMessageList.add(list.get(list.size() - 1));
 			}
 		}
-		
+
 		/*
 		 * add last message and last pin and unread pin count to conversation table
 		 */
-		if(lastMessageList.size() > 0)
+		if (lastMessageList.size() > 0)
 		{
 			convDb.addLastConversations(lastMessageList, lastPinMap);
 		}
-		
+
 		/*
 		 * update status of messages and also update readByString in group info table for each group
 		 */
-		if(messageStatusMap.size() > 0)
+		if (messageStatusMap.size() > 0)
 		{
 			convDb.updateStatusBulk(messageStatusMap);
 			convDb.setReadByForGroupBulk(messageStatusMap);
 		}
-		
+
 		/*
 		 * Since now messages contains message id and conversation object we can process ft messages
 		 */
-		for(ConvMessage convMessage : messageList)
+		for (ConvMessage convMessage : messageList)
 		{
 			messageProcessFT(convMessage);
 		}
-		
+
 		/*
 		 * publish the events for updating chat thread and conversation table
 		 */
 		this.pubSub.publish(HikePubSub.BULK_MESSAGE_RECEIVED, messageListMap);
 		this.pubSub.publish(HikePubSub.BULK_MESSAGE_DELIVERED_READ, messageStatusMap);
-		this.pubSub.publish(HikePubSub.BULK_MESSAGE_NOTIFICATION,lastMessageList);
+		this.pubSub.publish(HikePubSub.BULK_MESSAGE_NOTIFICATION,messageListMap);
 	}
-	
+
 	private void addToLists(String msisdn, ConvMessage convMessage)
 	{
 		messageList.add(convMessage);
@@ -1939,7 +1962,7 @@ public class MqttMessagesManager
 		// from
 		// server
 		{
-			if(isBulkMessage)	
+			if (isBulkMessage)
 			{
 				saveMessageBulk(jsonObj);
 			}
@@ -1953,7 +1976,7 @@ public class MqttMessagesManager
 		// to
 		// receiver
 		{
-			if(isBulkMessage)
+			if (isBulkMessage)
 			{
 				saveDeliveryReportBulk(jsonObj);
 			}
@@ -1967,7 +1990,7 @@ public class MqttMessagesManager
 		// been
 		// read
 		{
-			if(isBulkMessage)
+			if (isBulkMessage)
 			{
 				saveMessageReadBulk(jsonObj);
 			}
@@ -2072,7 +2095,7 @@ public class MqttMessagesManager
 		{
 			savePopup(jsonObj);
 		}
-		else if(HikeConstants.MqttMessageTypes.REMOVE_PIC.equals(type))
+		else if (HikeConstants.MqttMessageTypes.REMOVE_PIC.equals(type))
 		{
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			if (HikeMessengerApp.getLruCache().deleteIconForMSISDN(msisdn))
@@ -2080,7 +2103,7 @@ public class MqttMessagesManager
 				HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
 			}
 		}
-		else if(HikeConstants.MqttMessageTypes.BULK_MESSAGE.equals(type))
+		else if (HikeConstants.MqttMessageTypes.BULK_MESSAGE.equals(type))
 		{
 			saveBulkMessage(jsonObj);
 		}
@@ -2210,7 +2233,7 @@ public class MqttMessagesManager
 
 	private void removeOrPostponeFriendType(String msisdn)
 	{
-		ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn, false);
+		ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
 		if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND)
 		{
 			return;
@@ -2218,7 +2241,14 @@ public class MqttMessagesManager
 		FavoriteType currentFavoriteType = contactInfo.getFavoriteType();
 		FavoriteType favoriteType = (currentFavoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED || currentFavoriteType == FavoriteType.REQUEST_RECEIVED) ? FavoriteType.NOT_FRIEND
 				: FavoriteType.REQUEST_SENT_REJECTED;
-		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(contactInfo, favoriteType);
+
+		ContactInfo contact = new ContactInfo(contactInfo);
+
+		ContactInfo updatedContact = new ContactInfo(contactInfo);
+		updatedContact.setFavoriteType(favoriteType);
+		ContactManager.getInstance().updateContacts(updatedContact);
+
+		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(contact, favoriteType);
 		this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 	}
 
@@ -2249,19 +2279,19 @@ public class MqttMessagesManager
 
 	private ConvMessage saveStatusMsg(JSONObject jsonObj, String msisdn) throws JSONException
 	{
-		if(isBulkMessage)
+		if (isBulkMessage)
 		{
 			ConvMessage convMessage = saveStatusMsgBulk(jsonObj, msisdn);
 			return convMessage;
 		}
-		
+
 		ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
-		
-		if(convMessage == null)
+
+		if (convMessage == null)
 		{
 			return null;
 		}
-	
+
 		convDb.addConversationMessages(convMessage);
 
 		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
@@ -2269,25 +2299,25 @@ public class MqttMessagesManager
 		statusMessagePostProcess(convMessage, jsonObj);
 
 		return convMessage;
-		
+
 	}
-	
+
 	private ConvMessage saveStatusMsgBulk(JSONObject jsonObj, String msisdn) throws JSONException
 	{
 		ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
-		
-		if(convMessage == null)
+
+		if (convMessage == null)
 		{
 			return null;
 		}
-		
+
 		addToLists(msisdn, convMessage);
-		
+
 		statusMessagePostProcess(convMessage, jsonObj);
-		
+
 		return convMessage;
 	}
-	
+
 	private ConvMessage statusMessagePreProcess(JSONObject jsonObj, String msisdn) throws JSONException
 	{
 		Conversation conversation = convDb.getConversationWithLastMessage(msisdn);
@@ -2305,7 +2335,7 @@ public class MqttMessagesManager
 		 */
 		if (!isChatBgMsg)
 		{
-			if ((conversation == null && (!isUJMsg || !userDb.doesContactExist(msisdn)))
+			if ((conversation == null && (!isUJMsg || !ContactManager.getInstance().doesContactExist(msisdn)))
 					|| (conversation != null && TextUtils.isEmpty(conversation.getContactName()) && isUJMsg && !isGettingCredits && !(conversation instanceof GroupConversation)))
 			{
 				return null;
@@ -2314,7 +2344,7 @@ public class MqttMessagesManager
 		ConvMessage convMessage = new ConvMessage(jsonObj, conversation, context, false);
 		return convMessage;
 	}
-	
+
 	private void statusMessagePostProcess(ConvMessage convMessage, JSONObject jsonObj) throws JSONException
 	{
 		if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED || convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT
@@ -2325,6 +2355,7 @@ public class MqttMessagesManager
 							: convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT ? HikePubSub.PARTICIPANT_LEFT_GROUP : HikePubSub.GROUP_END, jsonObj);
 		}
 	}
+
 	private void addTypingNotification(String id, String participant)
 	{
 		TypingNotification typingNotification;
@@ -2414,7 +2445,6 @@ public class MqttMessagesManager
 		}
 	}
 
-
 	/**
 	 * We call it atomic pop up , as we discard old if any when new comes --gauravKhanna
 	 * 
@@ -2445,7 +2475,26 @@ public class MqttMessagesManager
 				pref.saveData(keys[0], header);
 				pref.saveData(keys[1], body);
 				pref.saveData(keys[2], subType);
+				String url = data.optString(HikeConstants.URL);
+				// for http based generic URL
+				if(!TextUtils.isEmpty(url) && HikeMessengerApp.ATOMIC_POP_UP_HTTP.equals(subType)){
+				pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_HTTP_URL, url);
+				}else if(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC.equals(subType)){
+					// for app specific generic tip
+					String what = data.optString(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC_WHAT);
+					if(!TextUtils.isEmpty(what)){
+						try{
+						pref.saveData(HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC_WHAT, Integer.parseInt(what));
+						}catch(NumberFormatException nf){
+							nf.printStackTrace();
+							// don know where to go on click, lets remove key so tip id not displayed
+							pref.saveData(keys[0], "");
+						}
+					}
+				}
 				Logger.i("tip", "writing to pref passed " + header + " -- " + body + " -- subtype " + subType);
+			}else{
+				Logger.i("tip", "writing to pref failed , could not find keys  " );
 			}
 		}
 		else
@@ -2478,7 +2527,8 @@ public class MqttMessagesManager
 		Logger.i("tip", "subtype for main");
 		if (HikeMessengerApp.ATOMIC_POP_UP_FAVOURITES.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_INVITE.equals(subType)
 				|| HikeMessengerApp.ATOMIC_POP_UP_PROFILE_PIC.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_STATUS.equals(subType)
-				|| HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL.equals(subType))
+				|| HikeMessengerApp.ATOMIC_POP_UP_INFORMATIONAL.equals(subType) || HikeMessengerApp.ATOMIC_POP_UP_HTTP.equals(subType)
+				|| HikeMessengerApp.ATOMIC_POP_UP_APP_GENERIC.equals(subType))
 		{
 			// show notification
 			if (notificationTextIfApplicable != null)
