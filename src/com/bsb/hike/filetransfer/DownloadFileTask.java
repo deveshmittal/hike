@@ -31,7 +31,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.HikeTestUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -42,6 +42,8 @@ public class DownloadFileTask extends FileTransferBase
 	private boolean showToast;
 
 	private int num = 0;
+	
+	private HikeTestUtil mTestUtil = null;
 
 	protected DownloadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, String fileKey, long msgId,
 			HikeFileType hikeFileType, Object userContext, boolean showToast, String token, String uId)
@@ -51,6 +53,7 @@ public class DownloadFileTask extends FileTransferBase
 		this.showToast = showToast;
 		this.userContext = userContext;
 		_state = FTState.INITIALIZED;
+		mTestUtil = HikeTestUtil.getInstance(context);
 	}
 
 	@Override
@@ -65,6 +68,7 @@ public class DownloadFileTask extends FileTransferBase
 		{
 			tempDownloadedFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), mFile.getName() + ".part");
 			stateFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), mFile.getName() + ".bin." + msgId);
+			mTestUtil.setMsgidTimestampPair(msgId, System.currentTimeMillis());
 		}
 		catch(NullPointerException e)
 		{
@@ -297,6 +301,11 @@ public class DownloadFileTask extends FileTransferBase
 						}
 						else
 						{
+							long startTime = mTestUtil.getTimestampForMsgid(msgId);
+							long endTime = System.currentTimeMillis(); 
+							long ftDwnldTime = endTime - startTime;
+							mTestUtil.writeDataToFile("APP" + "," +  msgId + "," + "DOWNLOAD-TIME" + "," + Long.toString(ftDwnldTime) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mFile.getName() + "," + fileKey + "," + mTestUtil.getMessageDelay());
+
 							Logger.d(getClass().getSimpleName(), "FT Completed");
 							// temp file is already deleted
 							_state = FTState.COMPLETED;
