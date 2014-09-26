@@ -4690,22 +4690,24 @@ public class Utils
 		return null;
 	}
 	
-	public static int getCellLocation(Context context) throws RemoteException 
+	public static String getCellLocation(Context context) throws RemoteException 
 	{
 		if(context == null)
 		{
-			return -1;
+			return null;
 		}
 		TelephonyManager telMgr =  (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
 				
 		CellLocation location = telMgr.getCellLocation();
 		
-		int cellid = 0;
+		String cellid = null;
 		
 		if(location instanceof GsmCellLocation)
 		{
 			// Cell Id
-		    cellid = ((GsmCellLocation)location).getCid();
+		    int cid = ((GsmCellLocation)location).getCid();
+		    
+		    cellid = String.valueOf(cid);
 		    
 		    // LAC-id
 //		    lacid = ((GsmCellLocation)location).getLac();
@@ -4721,7 +4723,9 @@ public class Utils
 		{
 			int baseStnLat = ((CdmaCellLocation)location).getBaseStationLatitude();
 			
-			int baseStnLong = ((CdmaCellLocation)location).getBaseStationLongitude();				
+			int baseStnLong = ((CdmaCellLocation)location).getBaseStationLongitude();	
+
+			cellid = String.valueOf(baseStnLat) + "_" + String.valueOf(baseStnLong);
 		}
 	    return cellid;
 	}
