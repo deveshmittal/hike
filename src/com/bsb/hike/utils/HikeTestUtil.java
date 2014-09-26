@@ -421,4 +421,9 @@ public class HikeTestUtil
              
          }
        }
+	
+		public Context getContext()
+		{
+			return context;
+		}
 	}

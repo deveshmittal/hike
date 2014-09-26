@@ -182,7 +182,7 @@ public class CommsReceiver implements Runnable
 						try 
 						{
 							mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received MqttPingResponse at :" + 
-							HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(null));
+							HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(mTestUtil.getContext()));
 						}
 						catch (RemoteException e) 
 						{
@@ -195,7 +195,7 @@ public class CommsReceiver implements Runnable
 						try 
 						{
 							mTestUtil.writeConnLogsToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received MqttConnack at :" +
-							HikeTestUtil.getCurrentTimeInMilliseconds() + "," + Utils.getCellLocation(null));
+							HikeTestUtil.getCurrentTimeInMilliseconds() + "," + Utils.getCellLocation(mTestUtil.getContext()));
 						}
 						catch (RemoteException e) 
 						{
@@ -208,7 +208,7 @@ public class CommsReceiver implements Runnable
 						try 
 						{
 							mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received MqttAck at :" + 
-							HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(null));
+							HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(mTestUtil.getContext()));
 						}
 						catch (RemoteException e) 
 						{
@@ -224,7 +224,7 @@ public class CommsReceiver implements Runnable
 					try 
 					{
 						mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received message at :" + HikeTestUtil.getCurrentTimeInMilliseconds() +
-						"," + payload + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(null));
+						"," + payload + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(mTestUtil.getContext()));
 					}
 					catch (RemoteException e) 
 					{

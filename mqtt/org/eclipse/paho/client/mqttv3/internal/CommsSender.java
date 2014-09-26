@@ -138,7 +138,7 @@ public class CommsSender implements Runnable
 						out.write(message);
 						out.flush();
 						mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent MqttAck at :" +
-						HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(null));
+						HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(mTestUtil.getContext()));
 					}
 					else
 					{
@@ -181,18 +181,18 @@ public class CommsSender implements Runnable
 								if (message instanceof MqttPingReq)
 								{
 									mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent mqtt ping-request at :" +
-									HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(null));
+									HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(mTestUtil.getContext()));
 								}
 								else if (message instanceof MqttConnect)
 								{
 									mTestUtil.writeConnLogsToFile("\n\n" + "MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent MqttConnect at :" +
-									HikeTestUtil.getCurrentTimeInMilliseconds() + "," + Utils.getCellLocation(null));
+									HikeTestUtil.getCurrentTimeInMilliseconds() + "," + Utils.getCellLocation(mTestUtil.getContext()));
 								}
 								else
 								{
 									String payload = new String(message.getPayload(), "UTF-8");
 									mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent message at :" +
-									HikeTestUtil.getCurrentTimeInMilliseconds() + "," + payload + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(null));									
+									HikeTestUtil.getCurrentTimeInMilliseconds() + "," + payload + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(mTestUtil.getContext()));									
 								}
 
 								clientState.notifySent(message);
