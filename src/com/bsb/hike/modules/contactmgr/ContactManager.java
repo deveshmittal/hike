@@ -1361,7 +1361,8 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
 
 			List<ContactInfo> contactsToDelete = new ArrayList<ContactInfo>();
-
+			String myMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
+			
 			for (Entry<String, List<ContactInfo>> mapEntry : hike_contacts_by_id.entrySet())
 			{
 				List<ContactInfo> contacts = mapEntry.getValue();
@@ -1371,7 +1372,17 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 				{
 					c.setName(null);
 					c.setId(c.getMsisdn());
-					HikeMessengerApp.getLruCache().deleteIconForMSISDN(c.getMsisdn());
+					/*
+					 * not deleting profile icon in case of contact to be deleted 
+					 * 1. is self contact
+					 * 2. has favorite state : friends
+					 * 3. has favorite state : request received
+					 * 4. has favorite state : request received rejected
+					 */
+					if(Utils.shouldDeleteIcon(c, myMsisdn))
+					{
+						HikeMessengerApp.getLruCache().deleteIconForMSISDN(c.getMsisdn());
+					}
 					HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_DELETED, c);
 				}
 			}
