@@ -955,6 +955,7 @@ public class HikeConstants
 		public static final String INVITE = "invite";
 
 		public static final String MSG = "msg";
+		public static final String POKE = "poke";
 
 		public static final String PREF = "pref";
 
@@ -1719,6 +1720,8 @@ public class HikeConstants
 		public static final String BULK_MESSAGE = "bm";
 
 		public static final String REMOVE_PIC = "icr";
+		
+		public static final String MULTIPLE_FORWARD = "mm";
 
 	}
 

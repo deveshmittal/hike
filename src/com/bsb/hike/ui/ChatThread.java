@@ -1733,7 +1733,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			// Poke message can only be deleted
 			selectedNonTextMsg(isMsgSelected);
-			selectedNonForwadableMsg(isMsgSelected);
+			//selectedNonForwadableMsg(isMsgSelected);
 		}
 		else if (message.isStickerMessage())
 		{
@@ -2310,6 +2310,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(mContactNumber, false, true);
 			mConversation = new Conversation(mContactNumber, (contactInfo != null) ? contactInfo.getName() : null, contactInfo.isOnhike());
+			mConversation.setMessages(HikeConversationsDatabase.getInstance().getConversationThread(mContactNumber, toLoad, mConversation, -1));
 		}
 		/*
 		 * Setting a flag which tells us whether the group contains sms users or not.
@@ -7813,6 +7814,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
 						multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_ID, sticker.getStickerId());
 						multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_INDEX, sticker.getStickerIndex());
+					}else if(message.getMetadata()!=null && message.getMetadata().isPokeMessage()){
+						multiMsgFwdObject.put(HikeConstants.Extras.POKE, true);
 					}
 					else
 					{
