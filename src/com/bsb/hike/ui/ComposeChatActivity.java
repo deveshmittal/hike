@@ -36,6 +36,8 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -540,9 +542,33 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.removeFilter();
 			adapter.clearAllSelection(true);
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
+			// select all bottom text
+			setupForSelectAll();
 			break;
 		}
 		setTitle();
+	}
+	private void setupForSelectAll(){
+		View selectAllCont = findViewById(R.id.select_all_container);
+		selectAllCont.setVisibility(View.VISIBLE);
+		final TextView tv = (TextView) selectAllCont.findViewById(R.id.select_all_text);
+		tv.setText(getString(R.string.select_all_hike));
+		CheckBox cb = (CheckBox) selectAllCont.findViewById(R.id.select_all_cb);
+		cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if(isChecked){
+					// call adapter select all
+					tv.setText(getString(R.string.unselect_all_hike));
+				}else{
+					// call adapter unselect all
+					tv.setText(getString(R.string.select_all_hike));
+				}
+				
+			}
+		});
+		
 	}
 
 	private void createGroup(ArrayList<ContactInfo> selectedContactList)
