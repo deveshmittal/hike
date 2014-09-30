@@ -36,12 +36,13 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	private String mSocketAddress;
 	private String callerId;
 	private int minbuf=AudioTrack.getMinBufferSize(16000,AudioFormat.CHANNEL_OUT_MONO,AudioFormat.ENCODING_PCM_16BIT);
-	private AudioTrack aud1=new AudioTrack(AudioManager.STREAM_VOICE_CALL,16000,AudioFormat.CHANNEL_OUT_MONO,AudioFormat.ENCODING_PCM_16BIT,(int) (1*minbuf),AudioTrack.MODE_STREAM);
+//	private AudioTrack aud1=new AudioTrack(AudioManager.STREAM_VOICE_CALL,16000,AudioFormat.CHANNEL_OUT_MONO,AudioFormat.ENCODING_PCM_16BIT,(int) (1*minbuf),AudioTrack.MODE_STREAM);
+//	private AudioTrack aud2=new AudioTrack(AudioManager.STREAM_VOICE_CALL,16000,AudioFormat.CHANNEL_OUT_MONO,AudioFormat.ENCODING_PCM_16BIT,(int) (1*minbuf),AudioTrack.MODE_STREAM);
 	private AudioManager am1;
 	private String manufacturer;
 	private Context mContext;
 	private Button endCall;
-	private Button acceptCall;
+	private Button acceptCall; 
 	private Button declineCall;
 	private String dialedId;
 	private int notifId = 10000;
@@ -52,6 +53,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	private MessageHandler mHandler = VoIPActivity.serviceHandler ;
 	public static boolean serviceStarted = false;
 	private static boolean factoryStaticInitialized=false;
+	public static int blah = 1;
 	
 	public Boolean callConnected = false;
 	private boolean run = true;
@@ -123,23 +125,38 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	  @Override
 	  public void onLocalStream(MediaStream localStream){
 		  localStream.audioTracks.get(0);
+		  Log.d("Local Stream","got audio track");
 	  }
 	  
 	  @Override
 	  public void onAddRemoteStream(MediaStream remoteStream, int endPoint){
-		  aud1.play();
-		  aud1.write(remoteStream.audioTracks.get(0).toString().getBytes(), 0, 2*minbuf);
+//		  if ( blah == 1){
+//		  aud1.play();
+//		  aud1.write(remoteStream.audioTracks.get(0).toString().getBytes(), 0, 2*minbuf);
+//		  }
+//		  else{
+//			  aud2.play();
+//			  aud2.write(remoteStream.audioTracks.get(0).toString().getBytes(), 0, 2*minbuf);
+//		  }
+//		  
 	  }
 	  
 	  @Override
 	  public void onRemoveRemoteStream(MediaStream remoteStream, int endPoint){
 		  remoteStream.audioTracks.get(0).dispose();
-		  aud1.stop();
-		  aud1.release();
+		  if ( blah == 1){
+//		  aud1.stop();
+//		  aud1.release();
+//		  }
+//		  else{
+//			  aud2.stop();
+//			  aud2.release();
+		  }
 	  }
 	  
 	  public void endCall(){
 		  declineCall();
+		  blah = 2;
 		  stopService();		  
 	  }
 	  
@@ -147,9 +164,15 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		  Log.d("VOIPSERVICE","1");
 		  client.destroyPeer();
 		  Log.d("VOIPSERVICE","2");
-		  aud1.stop();
+		  if (blah == 1){
+//		  aud1.stop();
+//		  aud1.release();}
+//		  else {
+//			  aud2.stop();
+//			  aud2.release();
+		  }
 		  Log.d("VOIPSERVICE","3");
-		  aud1.release();
+		  
 		  Log.d("VOIPSERVICE","4");
 		  stopForeground(true);
 		  if (mNotificationManager != null){
@@ -217,8 +240,8 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		  client = new WebRtcClient(this);
 		  Intent resultIntent = new Intent(this, com.bsb.hike.ui.VoIPActivityNew.class);
 		  if(intent.getExtras() != null){
-			  if(intent.hasExtra("calerID")){
-				  callerId = intent.getStringExtra("CallerID");
+			  if(intent.hasExtra("callerID")){
+				  callerId = intent.getStringExtra("callerID");
 				  rejectCall = intent.getBooleanExtra("decline", false);
 				  mBuilder.setContentText(callerId);
 				  resultIntent.putExtra("resumeID", callerId);
@@ -255,6 +278,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 
 	@Override
 	public void closeActivity() {
+		blah = 2;
 		stopService();		
 	}
 

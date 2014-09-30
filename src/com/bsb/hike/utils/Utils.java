@@ -3301,6 +3301,7 @@ public class Utils
 //					callIntent.setData(Uri.parse("tel:" + mContactNumber));
 					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, json);
 					Intent serviceIntent = new Intent(mActivity,com.bsb.hike.service.VoIPServiceNew.class);
+					System.gc();
 					mActivity.startService(serviceIntent);
 					mActivity.startActivity(callIntent);
 					dialog.dismiss();
@@ -3327,6 +3328,7 @@ public class Utils
 //			callIntent.setData(Uri.parse("tel:" + mContactNumber));
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, json);
 			Intent serviceIntent = new Intent(mActivity,com.bsb.hike.service.VoIPServiceNew.class);
+			System.gc();
 			mActivity.startService(serviceIntent);
 			mActivity.startActivity(callIntent);
 //			dialog.dismiss();

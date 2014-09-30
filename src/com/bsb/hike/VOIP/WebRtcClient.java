@@ -24,6 +24,7 @@ import org.webrtc.voiceengine.*;
 
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 import android.content.Context;
 import android.media.AudioManager;
 
@@ -155,7 +156,8 @@ public class WebRtcClient {
 //			destroyPeer();
 //			factory.dispose();
 //			factory = null;
-			System.gc();
+//			System.gc();
+//			Toast.makeText(getApplicationContext(), "ENDING CALL PLEASE WAIT", TOAT)
 //			addPeer("EndCall", MAX_PEER);
 			mListener.closeActivity();
 		}
@@ -352,7 +354,7 @@ public class WebRtcClient {
 
 		@Override
 		public void onAddStream(MediaStream mediaStream) {
-//			Log.d(TAG,"onAddStream " + mediaStream.label());
+			Log.d(TAG,"onAddStream " + mediaStream.label());
 
 			// remote streams are displayed from 1 to MAX_PEER (0 is
 			// localStream)
@@ -487,9 +489,13 @@ public class WebRtcClient {
 	}
 
 	public void setAudio(String cameraFacing, String height, String width) {
-		lMS = factory.createLocalMediaStream("ARDAMS");
-		lMS.addTrack(factory.createAudioTrack("ARDAMSa0"/*, factory.createAudioSource(new MediaConstraints())*/));
+		Random rand = new Random();
+		Integer x = rand.nextInt();
+		lMS = factory.createLocalMediaStream("ARDAMS"+x);
+		Log.d("libjingle StreamName",lMS.label());
+		lMS.addTrack(factory.createAudioTrack("ARDAMS"+x+"a0"/*, factory.createAudioSource(new MediaConstraints())*/));
 		Log.d("camera added", "cameraadded");
+//		lMS.label();
 		
 		mListener.onLocalStream(lMS);
 	}
@@ -510,9 +516,10 @@ public class WebRtcClient {
 		Peer peer = new Peer(id, endPoint);
 		Log.d("PEER","2");
 		peers.put(id, peer);
+		endPoints[endPoint] = true;
 		Log.d("PEER","3");
 
-		endPoints[endPoint] = true;
+		
 		Log.d("PEER","4");
 	}
 
@@ -523,17 +530,25 @@ public class WebRtcClient {
 		Peer peer = peers.get(id);
 //		mListener.onRemoveRemoteStream(lMS);
 //		onRemoveStream(lMS);
-		peer.pc.removeStream(lMS);
-		peer.pc.close();
-		peer.pc.dispose();
-		lMS.dispose();
-		MediaConstraints videoConstraints = new MediaConstraints();
+		try {
+			peer.pc.removeStream(lMS);
+			peer.pc.close();
+			peer.pc.dispose();
+			peer.pc = null; 
+			lMS.dispose();
+			lMS = null;
+		} catch (NullPointerException e) {
+			// TODO Auto-generated catch block
+			Log.d("WebRTCClient", "THIS SHOULD NEVER HAPPEN!");
+			e.printStackTrace();
+		}
+//		MediaConstraints videoConstraints = new MediaConstraints();
 
 		
 //		VideoCapturer vd =		getVideoCapturer("front");
 //		vd.dispose();
 		peers.remove(peer.id);
-		peer.pc = null;
+//		peer.pc = null;
 		Log.d("NewPeer","disposing video");
 
 		endPoints[peer.endPoint] = false;

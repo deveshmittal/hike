@@ -72,8 +72,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 			public void onClick(View v) {
 				Intent intent = i;
 				intent.putExtra("decline", false);
-				callConnected = true;
-				startService(intent);
+				callConnected = true;				
 				vService = VoIPServiceNew.getVoIPSerivceInstance();
 				vService.startCall(intent);
 				drawInCall();
@@ -91,7 +90,6 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 				Intent intent = i;
 				intent.putExtra("decline", true);
 				callConnected = true;
-				startService(intent);
 				vService = VoIPServiceNew.getVoIPSerivceInstance();
 				vService.startCall(intent);
 				finish();
@@ -105,25 +103,6 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 		i.putExtras(getIntent().getExtras());
 		callConnected = true;
 		vActivity = this;
-		/*class CallStarter implements Runnable{
-
-			@Override
-			public void run() {
-				startService(i);
-//				while(!VoIPServiceNew.serviceStarted);
-				
-				
-			}
-			
-		}
-		Thread t = new Thread(new CallStarter(),"VoIPServiceThread");
-		t.run();
-		try {
-			t.join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
 		vService = VoIPServiceNew.getVoIPSerivceInstance();
 		if (VoIPServiceNew.vService == null)
 			Log.d("vService", "NULL HAI!!!");
