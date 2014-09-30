@@ -848,4 +848,8 @@ public class ConvMessage
 	{
 		return !(msgState==State.RECEIVED_READ || msgState == State.RECEIVED_UNREAD);
 	}
+	
+	public void setMsisdn(String msisdn){
+		this.mMsisdn = msisdn;
+	}
 }

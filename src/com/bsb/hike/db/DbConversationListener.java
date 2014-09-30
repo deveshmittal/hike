@@ -33,6 +33,7 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.FtueContactInfo;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
@@ -82,6 +83,7 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.GAMING_PROTIP_DOWNLOADED, this);
 		mPubSub.addListener(HikePubSub.CLEAR_CONVERSATION, this);
 		mPubSub.addListener(HikePubSub.UPDATE_PIN_METADATA, this);
+		mPubSub.addListener(HikePubSub.MULTI_MESSAGE_SENT, this);
 	}
 
 	@Override
@@ -133,6 +135,16 @@ public class DbConversationListener implements Listener
 					}
 				}
 			}
+		}
+		else if (HikePubSub.MULTI_MESSAGE_SENT.equals(type))
+		{
+			MultipleConvMessage multiConvMessages = (MultipleConvMessage) object;
+
+			mConversationDb.addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),false);
+			ArrayList<ConvMessage> convMessages = multiConvMessages.getMessageList();
+			multiConvMessages.setMsgID(((ConvMessage)convMessages.get(0)).getMsgID());	
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
+			
 		}
 		else if (HikePubSub.DELETE_MESSAGE.equals(type))
 		{
