@@ -1276,11 +1276,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			int unreadPinMessageCount = 0;
 
 			Map<String, List<String>> map = new HashMap<String, List<String>>();
-
+			long timeStamp = System.currentTimeMillis() / 1000;
+			int totalMessage = convMessages.size()-1;
 			for (ContactInfo contact : contacts)
 			{
-				for (ConvMessage conv : convMessages)
+				for (int i=0;i<=totalMessage;i++)
 				{
+					ConvMessage conv  = convMessages.get(i);
 					conv.setSMS(!contact.isOnhike());
 					conv.setMsisdn(contact.getMsisdn());
 					String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
@@ -1340,11 +1342,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						unreadMessageCount++;
 					}
 					/*
-					 * Updating the conversations table
+					 * Updating the conversations table only for last message for each contact
 					 */
-					ContentValues contentValues = getContentValueForConversationMessage(conv);
+					if(i==totalMessage){
+					// incrementing timestamp to save different timestamp for each conversation so that we can fetch in order
+					ContentValues contentValues = getContentValueForConversationMessage(conv,timeStamp++);
 					mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { conv.getMsisdn() });
-
+					}
 					// upgrade groupInfoTable
 					updateReadBy(conv);
 					if (Utils.isGroupConversation(conv.getMsisdn()))
@@ -1504,7 +1508,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		for (ConvMessage conv : convMessages)
 		{
 			String msisdn = conv.getMsisdn();
-			ContentValues contentValues = getContentValueForConversationMessage(conv);
+			ContentValues contentValues = getContentValueForConversationMessage(conv,conv.getTimestamp());
 			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
 
 			if (lastPinMap.get(conv.getMsisdn()) != null)
@@ -1553,7 +1557,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { Long.toString(id) });
 	}
 
-	private ContentValues getContentValueForConversationMessage(ConvMessage conv)
+	private ContentValues getContentValueForConversationMessage(ConvMessage conv,long timeStampForMessage)
 	{
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.MESSAGE, conv.getMessage());
@@ -1568,7 +1572,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			contentValues.put(DBConstants.MESSAGE_ID, conv.getMsgID());
 			contentValues.put(DBConstants.MAPPED_MSG_ID, conv.getMappedMsgID());
 			contentValues.put(DBConstants.MSG_STATUS, conv.getState().ordinal());
-			contentValues.put(DBConstants.TIMESTAMP, conv.getTimestamp());
+			contentValues.put(DBConstants.TIMESTAMP, timeStampForMessage);
 		}
 		if (conv.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
@@ -2726,7 +2730,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				{
 					Logger.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
 				}
-				ContentValues contentValues = getContentValueForConversationMessage(message);
+				ContentValues contentValues = getContentValueForConversationMessage(message,message.getTimestamp());
 				if (Utils.isGroupConversation(msisdn))
 				{
 					HikeMessengerApp.getContactManager().removeContact(c.getString(groupParticipantColumn), false);
