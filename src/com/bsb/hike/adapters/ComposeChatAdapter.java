@@ -55,6 +55,8 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	private boolean isCreatingOrEditingGroup;
 
 	private boolean lastSeenPref;
+	
+	private boolean selectAll = false;
 
 	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, String existingGroupId, FriendsListFetchedCallback friendsListFetchedCallback)
 	{
@@ -255,9 +257,8 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			if (showCheckbox)
 			{
 				holder.checkbox.setVisibility(View.VISIBLE);
-				if (selectedPeople.containsKey(contactInfo.getMsisdn()))
+				if ((selectAll && contactInfo.isOnhike()) || selectedPeople.containsKey(contactInfo.getMsisdn()))
 				{
-
 					holder.checkbox.setChecked(true);
 				}
 				else
@@ -574,5 +575,18 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	public IconLoader getIconLoader()
 	{
 		return iconloader;
+	}
+	
+	public void selectAllContacts(boolean select)
+	{
+		if(select)
+		{
+			selectAll = true;
+		}
+		else
+		{
+			selectAll = false;
+		}
+		notifyDataSetChanged();
 	}
 }
