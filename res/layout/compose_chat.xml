@@ -29,6 +29,8 @@
     </com.bsb.hike.view.TagEditText>
 
     <com.bsb.hike.view.PinnedSectionListView
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:id="@+id/list"
         style="@style/HomeList" >
     </com.bsb.hike.view.PinnedSectionListView>
@@ -38,5 +40,5 @@
         layout="@layout/list_empty_view"
         android:visibility="gone" >
     </include>
-
+<include layout="@layout/select_all_bottom_bar"/>
 </LinearLayout>
