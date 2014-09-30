@@ -1137,7 +1137,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		HikeMessengerApp.getPubSub().publish(HikePubSub.CONV_META_DATA_UPDATED, metadata);
 	}
 
-	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv)
+	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv,boolean bindForConvId)
 	{
 		final int messageColumn = 1;
 		final int msgStatusColumn = 2;
@@ -1158,7 +1158,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		insertStatement.bindLong(msgStatusColumn, conv.getState().ordinal());
 		insertStatement.bindLong(timestampColumn, conv.getTimestamp());
 		insertStatement.bindLong(mappedMsgIdColumn, conv.getMappedMsgID());
+		if(bindForConvId){
 		insertStatement.bindString(msisdnColumn, conv.getMsisdn());
+		}
 		insertStatement.bindString(messageMetadataColumn, conv.getMetadata() != null ? conv.getMetadata().serialize() : "");
 		insertStatement.bindLong(isHikeMessageColumn, conv.isSMS() ? 0 : 1);
 		insertStatement.bindString(groupParticipant, conv.getGroupParticipantMsisdn() != null ? conv.getGroupParticipantMsisdn() : "");
@@ -1229,6 +1231,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Logger.d(getClass().getSimpleName(), "Message hash: " + msgHash);
 		return msgHash;
 	}
+	
+	public boolean addConversations(List<ConvMessage> convMessages)
+	{
+		if(convMessages.isEmpty())
+		{
+			return false;
+		}
+		ArrayList<ContactInfo> contacts= new ArrayList<ContactInfo>(1);
+		String msisdn = convMessages.get(0).getMsisdn();
+		contacts.add(new ContactInfo(msisdn, msisdn, null, null,!convMessages.get(0).isSMS()));
+		
+		return addConversations(convMessages, contacts,true);
+	}
 
 	/**
 	 * 
@@ -1236,13 +1251,21 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 *            -- list of messages to be added to database
 	 * @return <li><b>true</b> if messages successfully added to database</li> <li><b>false</b> if messages are not inserted to database possibly due to duplicate</li>
 	 */
-	public boolean addConversations(List<ConvMessage> convMessages)
+	public boolean addConversations(List<ConvMessage> convMessages, ArrayList<ContactInfo> contacts,boolean createConvIfNotExist)
 	{
-		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
-				+ DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
-				+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MSISDN + " ) "
-				+ " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ?, ?, ? FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "."
-				+ DBConstants.MSISDN + "=?");
+		SQLiteStatement insertStatement = null;
+		if(createConvIfNotExist){
+			insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
+					+ DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
+					+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MSISDN + " ) "
+					+ " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ?, ?, ? FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "."
+					+ DBConstants.MSISDN + "=?");	
+		}else{
+			insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
+					+ DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT 
+					+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MSISDN + " ) values (?,?,?,?,?,?,?,?,?,?)");
+		}
+		
 		try
 		{
 			mDb.beginTransaction();
@@ -1254,37 +1277,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			Map<String, List<String>> map = new HashMap<String, List<String>>();
 
-			for (ConvMessage conv : convMessages)
+			for (ContactInfo contact : contacts)
 			{
-
-				String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
-
-				bindConversationInsert(insertStatement, conv);
-
-				/*
-				 * In case message is duplicate insert statement will throw exception . It will catch that exception and will return false denoting duplicate message case
-				 */
-				try
+				for (ConvMessage conv : convMessages)
 				{
-					msgId = insertStatement.executeInsert();
-				}
-				catch (Exception e)
-				{
-					// duplicate message return false
-					Logger.e(getClass().getSimpleName(), "Duplicate value ", e);
-					return false;
-				}
+					conv.setSMS(!contact.isOnhike());
+					conv.setMsisdn(contact.getMsisdn());
+					String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
 
-				addThumbnailStringToMetadata(conv.getMetadata(), thumbnailString);
-				/*
-				 * Represents we dont have any conversation made for this msisdn. Here we are also checking whether the message is a group message, If it is and the conversation
-				 * does not exist we do not add a conversation.
-				 */
-				if (msgId <= 0 && !Utils.isGroupConversation(conv.getMsisdn()))
-				{
-					addConversation(conv.getMsisdn(), !conv.isSMS(), null, null, conv);
+					bindConversationInsert(insertStatement, conv,createConvIfNotExist);
 
-					bindConversationInsert(insertStatement, conv);
+					/*
+					 * In case message is duplicate insert statement will throw exception . It will catch that exception and will return false denoting duplicate message case
+					 */
 					try
 					{
 						msgId = insertStatement.executeInsert();
@@ -1296,46 +1301,69 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						return false;
 					}
 
-					assert (msgId >= 0);
-				}
-
-				conv.setMsgID(msgId);
-				ChatThread.addtoMessageMap(conv);
-
-				/*
-				 * msdId > 0 means that the conversation exists.
-				 */
-				if (conv.isFileTransferMessage() && msgId > 0)
-				{
-					addSharedMedia(conv);
-				}
-				if (Utils.shouldIncrementCounter(conv))
-				{
-					unreadMessageCount++;
-				}
-				/*
-				 * Updating the conversations table
-				 */
-				ContentValues contentValues = getContentValueForConversationMessage(conv);
-				mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { conv.getMsisdn() });
-
-				// upgrade groupInfoTable
-				updateReadBy(conv);
-				if (Utils.isGroupConversation(conv.getMsisdn()))
-				{
-					List<String> lastMsisdns = new ArrayList<String>();
-					if (conv.getMetadata() != null)
-						lastMsisdns = getGroupLastMsgMsisdn(conv.getMetadata().getJSON());
-
-					if (lastMsisdns.size() == 0 && null != conv.getGroupParticipantMsisdn())
+					addThumbnailStringToMetadata(conv.getMetadata(), thumbnailString);
+					/*
+					 * Represents we dont have any conversation made for this msisdn. Here we are also checking whether the message is a group message, If it is and the
+					 * conversation does not exist we do not add a conversation.
+					 */
+					if (msgId <= 0 && !Utils.isGroupConversation(conv.getMsisdn()))
 					{
-						lastMsisdns.add(conv.getGroupParticipantMsisdn());
-					}
-					map.put(conv.getMsisdn(), lastMsisdns);
-				}
-			}
+						
+						addConversation(conv.getMsisdn(), !conv.isSMS(), null, null, conv);
+						bindConversationInsert(insertStatement, conv,createConvIfNotExist);
+						try
+						{
+							msgId = insertStatement.executeInsert();
+						}
+						catch (Exception e)
+						{
+							// duplicate message return false
+							Logger.e(getClass().getSimpleName(), "Duplicate value ", e);
+							return false;
+						}
 
-			incrementUnreadCounter(convMessages.get(0).getMsisdn(), unreadMessageCount);
+						assert (msgId >= 0);
+					}
+
+					conv.setMsgID(msgId);
+					ChatThread.addtoMessageMap(conv);
+
+					/*
+					 * msdId > 0 means that the conversation exists.
+					 */
+					if (conv.isFileTransferMessage() && msgId > 0)
+					{
+						addSharedMedia(conv);
+					}
+					if (Utils.shouldIncrementCounter(conv))
+					{
+						unreadMessageCount++;
+					}
+					/*
+					 * Updating the conversations table
+					 */
+					ContentValues contentValues = getContentValueForConversationMessage(conv);
+					mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { conv.getMsisdn() });
+
+					// upgrade groupInfoTable
+					updateReadBy(conv);
+					if (Utils.isGroupConversation(conv.getMsisdn()))
+					{
+						List<String> lastMsisdns = new ArrayList<String>();
+						if (conv.getMetadata() != null)
+							lastMsisdns = getGroupLastMsgMsisdn(conv.getMetadata().getJSON());
+
+						if (lastMsisdns.size() == 0 && null != conv.getGroupParticipantMsisdn())
+						{
+							lastMsisdns.add(conv.getGroupParticipantMsisdn());
+						}
+						map.put(conv.getMsisdn(), lastMsisdns);
+					}
+				}
+
+				incrementUnreadCounter(contact.getMsisdn(), unreadMessageCount);
+			}
+			
 			mDb.setTransactionSuccessful();
 			ContactManager.getInstance().removeOlderLastGroupMsisdns(map);
 			return true;
@@ -1371,7 +1399,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 
 				String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
-				bindConversationInsert(insertStatement, conv);
+				bindConversationInsert(insertStatement, conv,true);
 
 				try
 				{
@@ -1392,7 +1420,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				{
 					addConversation(conv.getMsisdn(), !conv.isSMS(), null, null, conv);
 
-					bindConversationInsert(insertStatement, conv);
+					bindConversationInsert(insertStatement, conv,true);
 					try
 					{
 						msgId = insertStatement.executeInsert();
