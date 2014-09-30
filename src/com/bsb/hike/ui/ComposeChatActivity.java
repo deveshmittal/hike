@@ -42,6 +42,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
@@ -84,6 +85,8 @@ import com.google.android.gms.internal.ar;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener, OnScrollListener
 {
+	private static final String SELECT_ALL_MSISDN="all";
+	
 	private static int MIN_MEMBERS_GROUP_CHAT = 2;
 
 	private static final int CREATE_GROUP_MODE = 1;
@@ -134,6 +137,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private HikePubSub mPubSub;
 
 	private boolean showingMultiSelectActionBar = false;
+	
+	private List<ContactInfo> recentContacts;
+	
+	private boolean selectAllMode;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -422,8 +429,19 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				{
 					contactInfo.setName(contactInfo.getMsisdn());
 				}
+				
+				if(selectAllMode){
+					tagEditText.clear(false);
+					if(adapter.isContactAdded(contactInfo)){
+						adapter.removeContact(contactInfo);
+					}else{
+						adapter.addContact(contactInfo);
+					}
+					tagEditText.toggleTag(getString(R.string.selected_count,adapter.getSelectedContactCount()), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
+				}else{
 				String name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
 				tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
+				}
 				
 				// if(contactInfo == null)
 				// {
@@ -495,12 +513,20 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	@Override
 	public void tagAdded(Object data, String uniqueNess)
 	{
+		String dataString = null;
+		if(data instanceof ContactInfo){
 		adapter.addContact((ContactInfo) data);
-		int selectedCount = adapter.getCurrentSelection();
+		}else if(data instanceof String)
+		{
+			dataString = (String) data;
+		}
+
 		setupMultiSelectActionBar();
 		invalidateOptionsMenu();
-
+		
+		int selectedCount = adapter.getCurrentSelection();
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, selectedCount));
+		
 	}
 
 	@Override
@@ -560,10 +586,22 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				if(isChecked){
 					// call adapter select all
+					selectAllMode = true;
 					tv.setText(getString(R.string.unselect_all_hike));
+					adapter.clearAllSelection(true);
+					adapter.selectAllContacts(true);
+					tagEditText.clear(false);
+					tagEditText.toggleTag(getString(R.string.selected_count,adapter.getSelectedContactCount()), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
+					
 				}else{
 					// call adapter unselect all
+					selectAllMode = false;
 					tv.setText(getString(R.string.select_all_hike));
+					adapter.selectAllContacts(false);
+					tagEditText.clear(true);
+					setActionBar();
+					invalidateOptionsMenu();
+					
 				}
 				
 			}
