@@ -35,6 +35,8 @@ public class HikePubSub implements Runnable
 	 * broadcast when the sender sends the message (click the send button in chat thread view)
 	 */
 	public static final String MESSAGE_SENT = "messagesent";
+	
+	public static final String MULTI_MESSAGE_SENT = "multimessagesent";
 
 	public static final String MESSAGE_DELIVERED = "messageDelivered"; // represents
 																		// that
