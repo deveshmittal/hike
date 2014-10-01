@@ -2095,10 +2095,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				if (Utils.isGroupConversation(msisdn))
 				{
-					List<String> grpMsisdns;
+					List<String> grpMsisdns = null;
 					try
 					{
-						if (null != metadata)
+						if (TextUtils.isEmpty(metadata))
 						{
 							grpMsisdns = getGroupLastMsgMsisdn(new JSONObject(metadata));
 							if (null != grpMsisdns)
@@ -2110,9 +2110,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 										grpMsisdns.add(groupParticipant);
 									}
 								}
-								grpLastMsisdns.put(msisdn, new Pair<List<String>, Long>(grpMsisdns,timestamp));
 							}
 						}
+						grpLastMsisdns.put(msisdn, new Pair<List<String>, Long>(grpMsisdns,timestamp));
 					}
 					catch (JSONException e)
 					{
