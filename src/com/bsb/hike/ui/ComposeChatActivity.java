@@ -552,8 +552,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			// if its a new group
 			JSONObject gcjPacket = groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
 			gcjPacket.put(HikeConstants.NEW_GROUP, newGroup);
-
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, new ConvMessage(gcjPacket, groupConversation, this, true));
+			ConvMessage msg = new ConvMessage(gcjPacket, groupConversation, this, true);
+			ContactManager.getInstance().updateGroupRecency(groupId, msg.getTimestamp());
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, msg);
 		}
 		catch (JSONException e)
 		{
