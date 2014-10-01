@@ -1821,7 +1821,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		{
 			if(group.isGroupAlive())
 			{
-				ContactInfo groupContact = new ContactInfo(group.getGroupId(), "3", group.getGroupName(), group.getGroupId(), true);
+				ContactInfo groupContact = new ContactInfo(group.getGroupId(), group.getGroupId(), group.getGroupName(), "participant count", true);
 				groupContact.setLastMessaged(group.getTimestamp());
 				allContacts.add(groupContact);
 			}
