@@ -118,6 +118,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private long previousEventTime;
 
 	private boolean showingMultiSelectActionBar = false;
+	
+	private List<ContactInfo> recentContacts;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -260,7 +262,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		listView = (ListView) findViewById(R.id.list);
 
-		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, existingGroupId, friendsListFetchedCallback);
+		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, (isForwardingMessage && !isSharingFile), existingGroupId, friendsListFetchedCallback);
 		adapter.setEmptyView(findViewById(android.R.id.empty));
 		adapter.setLoadingView(findViewById(R.id.spinner));
 		listView.setAdapter(adapter);
@@ -1076,5 +1078,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
+	}
+	
+	List<ContactInfo> getRecentContacts()
+	{
+		if(recentContacts == null)
+		{
+			recentContacts = HikeMessengerApp.getContactManager().getAllConversationContactsSorted();
+		}
+		return recentContacts;
 	}
 }
