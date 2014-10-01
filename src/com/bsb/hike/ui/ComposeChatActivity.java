@@ -867,6 +867,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	
 	private String getForwardConfirmationText(ArrayList<ContactInfo> arrayList, boolean forwarding)
 	{
+		if(forwarding)
+		{
+			return getResources().getString(R.string.forward_to, arrayList.size());
+		}
 		StringBuilder sb = new StringBuilder();
 
 		int lastIndex = arrayList.size()-1;
@@ -911,22 +915,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		String readByString = sb.toString();
 		if (moreNamesThanMaxCount)
 		{
-			if(forwarding)
-			{
-				return getResources().getString(R.string.forward_to_names_numbers, readByString, lastIndex);
-			}else{
+			
 				return getResources().getString(R.string.share_with_names_numbers, readByString, lastIndex);
-			}
 			
 		}
 		else
 		{
-			if(forwarding)
-			{
-				return getResources().getString(R.string.forward_to, readByString);
-			}else{
+			
 				return getResources().getString(R.string.share_with, readByString);
-			}
+			
 			
 		}
 	}
