@@ -501,7 +501,13 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	@Override
 	public void tagRemoved(Object data, String uniqueNess)
 	{
-		adapter.removeContact((ContactInfo) data);
+		if(selectAllMode){
+		((CheckBox) findViewById(R.id.select_all_cb)).setChecked(false);;
+		}else{
+			if(data instanceof ContactInfo){
+				adapter.removeContact((ContactInfo) data);
+			}
+		}
 		if (adapter.getCurrentSelection() == 0)
 		{
 			setActionBar();
