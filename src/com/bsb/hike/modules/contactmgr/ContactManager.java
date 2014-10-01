@@ -1822,7 +1822,6 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 			if(group.isGroupAlive())
 			{
 				ContactInfo groupContact = new ContactInfo(group.getGroupId(), "3", group.getGroupName(), group.getGroupId(), true);
-				Logger.d("deepanshu","group---"+group.getGroupName()+"---"+group.getTimestamp());
 				groupContact.setLastMessaged(group.getTimestamp());
 				allContacts.add(groupContact);
 			}
@@ -1832,7 +1831,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 			@Override
 			public int compare(ContactInfo lhs, ContactInfo  rhs)
 			{
-				return Long.compare(lhs.getLastMessaged(), rhs.getLastMessaged());
+				return ((Long)rhs.getLastMessaged()).compareTo(lhs.getLastMessaged());
 			}
 		});
 		return allContacts;
