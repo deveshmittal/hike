@@ -927,8 +927,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			Intent presentIntent = getIntent();
 			String id = getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN);
-			final ContactInfo contactInfo = ContactManager.getInstance().getContact(id);
-			Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
+			Intent intent = Utils.createIntentFromMsisdn(id, true);
 			intent.setClass(this, ChatThread.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			forwardMessageAsPerType(presentIntent, intent,arrayList);

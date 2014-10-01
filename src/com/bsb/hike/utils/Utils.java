@@ -350,6 +350,17 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
 	}
+	
+	public static Intent createIntentFromMsisdn(String msisdnOrGroupId, boolean openKeyBoard)
+	{
+		Intent intent = new Intent();
+
+		// If the contact info was made using a group conversation, then the
+		// Group ID is in the contact ID
+		intent.putExtra(HikeConstants.Extras.MSISDN, msisdnOrGroupId);
+		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
+		return intent;
+	}
 
 	/** Create a File for saving an image or video */
 	public static File getOutputMediaFile(HikeFileType type, String orgFileName, boolean isSent)
