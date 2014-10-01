@@ -1164,8 +1164,9 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="notifications_contact_join_title">Contact joining hike</string>
     <string name="share_with_names_numbers">Share with %1$s and %2$d others?</string>
     <string name="forward_to_names_numbers">Send message to %1$s and %2$d others?</string>
-    <string name="forward_to">Send message to %1$s?</string>
+    <string name="forward_to">Send message to %1$s? Contacts</string>
 	<string name="select_all_hike">Select All Hike Contacts</string>
 	<string name="unselect_all_hike">Unselect All Hike Contacts</string>
-    <string name="recent_chats">Recent Chats</string>
+    <string name="recent_chats">RECENT CHATS</string>
+    <string name="messages_sent_succees">Messages Sent</string>
 </resources>
