@@ -407,11 +407,11 @@ class PersistenceCache extends ContactsCache
 	 */
 	void loadMemory()
 	{
-		Pair<List<String>, Map<String, List<String>>> allmsisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
+		ConversationMsisdns allmsisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
 		// oneToOneMsisdns contains list of msisdns with whom one to one conversation currently exists
 		// groupLastMsisdnsMap is map between group Id and list of last msisdns (msisdns of last message) in a group
-		List<String> oneToOneMsisdns = allmsisdns.first;
-		Map<String, List<String>> groupLastMsisdnsMap = allmsisdns.second;
+		List<String> oneToOneMsisdns = allmsisdns.getOneToOneMsisdns();
+		Map<String, Pair<List<String>, Long>> groupLastMsisdnsMap = allmsisdns.getGroupLastMsisdnsWithTimestamp();
 
 		Map<String, Pair<String, Boolean>> groupNamesMap = HikeConversationsDatabase.getInstance().getGroupNamesAndAliveStatus();
 

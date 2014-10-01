@@ -56,6 +56,7 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.contactmgr.ConversationMsisdns;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
@@ -2063,7 +2064,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public Pair<List<String>, Map<String, List<String>>> getConversationMsisdns()
+	public ConversationMsisdns getConversationMsisdns()
 	{
 		Cursor c = null;
 		List<String> convsMsisdns = new ArrayList<String>();
@@ -2112,11 +2113,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				else
 				{
-					convsMsisdns.add(msisdn);
+					oneToOneMsisdns.add(msisdn);
 				}
 			}
-			Pair<List<String>, Map<String, List<String>>> allmsisdns = new Pair<List<String>, Map<String, List<String>>>(convsMsisdns, grpLastMsisdns);
-			return allmsisdns;
+			ConversationMsisdns convsMsisdns = new ConversationMsisdns(oneToOneMsisdns, grpLastMsisdns);
+			return convsMsisdns;
 		}
 		finally
 		{
