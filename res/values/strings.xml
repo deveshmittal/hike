@@ -1163,4 +1163,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="no_file_profile">Files are shown here</string>
     <string name="num_new_conversations">%1$s conversations</string>
     <string name="notifications_contact_join_title">Contact joining hike</string>
+    <string name="recent_chats">Recent Chats</string>
 </resources>
