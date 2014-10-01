@@ -70,6 +70,7 @@ import com.bsb.hike.models.EmptyConversationContactItem;
 import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
@@ -187,7 +188,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
 			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
-			HikePubSub.CONTACT_DELETED };
+			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_SENT };
 
 	private ConversationsAdapter mAdapter;
 
@@ -1969,6 +1970,46 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					return;
 				}
 				((GroupConversation) conv).setGroupAlive(false);
+			}
+		}else if(HikePubSub.MULTI_MESSAGE_SENT.equals(type)){
+			if (!isAdded())
+			{
+				return;
+			}
+			Logger.d(getClass().getSimpleName(), "New msg event sent or received.");
+			MultipleConvMessage multiConvMessage = (MultipleConvMessage) object;
+			List<ContactInfo> allContacts = multiConvMessage.getContactList();
+			for(ContactInfo contactInfo: allContacts){
+			/* find the conversation corresponding to this message */
+			String msisdn = contactInfo.getMsisdn();
+			final Conversation conv = mConversationsByMSISDN.get(msisdn);
+			// possible few conversation does not exist ,as we can forward to any contact
+			if (conv == null)
+			{
+				continue;
+			}
+
+			
+			for(ConvMessage message : multiConvMessage.getMessageList()){
+			final ConvMessage finalMessage = message;
+
+			if (conv.getMessages().size() > 0)
+			{
+				if (finalMessage.getMsgID() < conv.getMessages().get(conv.getMessages().size() - 1).getMsgID())
+				{
+					continue;
+				}
+			}
+			
+			getActivity().runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					addMessage(conv, finalMessage, true);
+				}
+			});
+			}
 			}
 		}
 	}
