@@ -12,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.FutureTask;
@@ -58,8 +59,11 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.filetransfer.FileTransferBase.FTState;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
@@ -95,12 +99,35 @@ public class UploadFileTask extends FileTransferBase
 	private int bufferSize = 1;
 
 	private boolean freshStart;
+	
+	private ArrayList<ContactInfo> contactList;
+	
+	private ArrayList<ConvMessage> messageList;
+	
+	private boolean isMultiMsg;
 
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile,
 			String fileKey, String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
 	{
 		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType, token, uId);
 		this.msisdn = msisdn;
+		this.fileType = fileType;
+		this.isRecipientOnhike = isRecipientOnHike;
+		this.recordingDuration = recordingDuration;
+		this.isRecording = isRecording;
+		this.isForwardMsg = isForwardMsg;
+		this.isRecipientOnhike = isRecipientOnHike;
+		this.fileKey = fileKey;
+		_state = FTState.INITIALIZED;
+		createConvMessage();
+	}
+	
+	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, ArrayList<ContactInfo> contactList, File sourceFile,
+			String fileKey, String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
+	{
+		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType, token, uId);
+		this.contactList = contactList;
+		this.isMultiMsg = true;
 		this.fileType = fileType;
 		this.isRecipientOnhike = isRecipientOnHike;
 		this.recordingDuration = recordingDuration;
@@ -153,7 +180,17 @@ public class UploadFileTask extends FileTransferBase
 	protected void setFutureTask(FutureTask<FTResult> fuTask)
 	{
 		futureTask = fuTask;
-		fileTaskMap.put(((ConvMessage) userContext).getMsgID(), futureTask);
+		if (isMultiMsg)
+		{
+			for (ConvMessage msg : messageList)
+			{
+				fileTaskMap.put(msg.getMsgID(),futureTask);
+			}
+		}
+		else
+		{
+			fileTaskMap.put(((ConvMessage) userContext).getMsgID(), futureTask);
+		}
 	}
 
 	// private ConvMessage createConvMessage(Uri picasaUri, File mFile, HikeFileType hikeFileType, String msisdn, boolean isRecipientOnhike, String fileType, long
@@ -246,8 +283,21 @@ public class UploadFileTask extends FileTransferBase
 				}
 				metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, null, null, recordingDuration, HikeConstants.PICASA_PREFIX + picasaUri.toString(), 0, ImageQuality.IMAGE_QUALITY_ORIGINAL);
 			}
-			userContext = createConvMessage(fileName, metadata, msisdn, isRecipientOnhike);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);
+			if (isMultiMsg)
+			{
+				for (ContactInfo contact : contactList)
+				{
+					messageList = new ArrayList<ConvMessage>();
+					messageList.add(createConvMessage(fileName, metadata, contact.getMsisdn(), isRecipientOnhike));
+				}
+				userContext = messageList.get(0);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_SENT, new MultipleConvMessage(messageList, contactList));
+			}
+			else
+			{
+				userContext = createConvMessage(fileName, metadata, msisdn, isRecipientOnhike);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);
+			}
 		}
 		catch (Exception e)
 		{
@@ -397,7 +447,7 @@ public class UploadFileTask extends FileTransferBase
 		fileType = hikeFile.getFileTypeString();
 		hikeFileType = hikeFile.getHikeFileType();
 
-		stateFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), fileName + ".bin." + ((ConvMessage) userContext).getMsgID());
+		stateFile = getStateFile((ConvMessage) userContext);
 		Logger.d(getClass().getSimpleName(), "Upload state bin file :: " + fileName + ".bin." + ((ConvMessage) userContext).getMsgID());
 	}
 
@@ -422,7 +472,7 @@ public class UploadFileTask extends FileTransferBase
 			Logger.e(getClass().getSimpleName(), "Exception", e);
 			_state = FTState.ERROR;
 			HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
-			stateFile = new File(FileTransferManager.getInstance(context).getHikeTempDir(), hikeFile.getFileName() + ".bin." + ((ConvMessage) userContext).getMsgID());
+			stateFile = getStateFile((ConvMessage) userContext);
 			saveFileKeyState(fileKey);
 			fileKey = null;
 			return FTResult.UPLOAD_FAILED;
@@ -530,17 +580,34 @@ public class UploadFileTask extends FileTransferBase
 			filesArray.put(hikeFile.serialize());
 			metadata.put(HikeConstants.FILES, filesArray);
 
-			((ConvMessage) userContext).setMetadata(metadata);
-
-			// The file was just uploaded to the servers, we want to publish
-			// this event
-			((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, ((ConvMessage) userContext));
-
+			if (isMultiMsg)
+			{
+				long ts = System.currentTimeMillis() / 1000;
+				for (ConvMessage msg : messageList)
+				{
+					msg.setMetadata(metadata);
+					msg.setTimestamp(ts);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, ((ConvMessage) userContext));
+					Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
+				}
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_SENT, new MultipleConvMessage(messageList, contactList, ts));
+				
+			}
+			else
+			{
+					
+				((ConvMessage) userContext).setMetadata(metadata);
+	
+				// The file was just uploaded to the servers, we want to publish
+				// this event
+				((ConvMessage) userContext).setTimestamp(System.currentTimeMillis() / 1000);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, ((ConvMessage) userContext));
+	
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, ((ConvMessage) userContext));
+				deleteStateFile();
+			}
 			Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, ((ConvMessage) userContext));
 			_state = FTState.COMPLETED;
-			deleteStateFile();
 		}
 		catch (MalformedURLException e)
 		{
@@ -830,6 +897,60 @@ public class UploadFileTask extends FileTransferBase
 				.append(sendingFileType).append("\r\n\r\n");
 		return res.toString();
 	}
+	
+	private File getStateFile(ConvMessage msg)
+	{
+		HikeFile file = msg.getMetadata().getHikeFiles().get(0);
+		return new File(FileTransferManager.getInstance(context).getHikeTempDir(), file.getFileName() + ".bin." + msg.getMsgID());
+	}
+	
+	@Override
+	protected void deleteStateFile()
+	{
+		if (isMultiMsg)
+		{
+			for (ConvMessage msg:messageList)
+			{
+				super.deleteStateFile(getStateFile(msg));
+			}
+		}
+		else
+		{
+			super.deleteStateFile();
+		}
+	}
+	
+	@Override
+	protected void saveFileState(String sessionId)
+	{
+		if (isMultiMsg)
+		{
+			for (ConvMessage msg:messageList)
+			{
+				super.saveFileState(getStateFile(msg), _state, sessionId, null);
+			}
+		}
+		else
+		{
+			super.saveFileState(sessionId);
+		}
+	}
+	
+	@Override
+	protected void saveFileKeyState(String fileKey)
+	{
+		if (isMultiMsg)
+		{
+			for (ConvMessage msg:messageList)
+			{
+				super.saveFileKeyState(getStateFile(msg), fileKey);
+			}
+		}
+		else
+		{
+			super.saveFileKeyState(fileKey);
+		}
+	}
 
 	private boolean isFileKeyValid() throws Exception
 	{
@@ -1055,7 +1176,7 @@ public class UploadFileTask extends FileTransferBase
 		Logger.d(getClass().getSimpleName(), result.toString());
 		if (userContext != null)
 		{
-			FileTransferManager.getInstance(context).removeTask(((ConvMessage) userContext).getMsgID());
+			removeTask();
 			this.pausedProgress = -1;
 			if(result != FTResult.PAUSED)
 				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
@@ -1079,6 +1200,21 @@ public class UploadFileTask extends FileTransferBase
 		if (selectedFile != null && hikeFileType != HikeFileType.AUDIO_RECORDING)
 		{
 			context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(selectedFile)));
+		}
+	}
+	
+	private void removeTask()
+	{
+		if (isMultiMsg)
+		{
+			for (ConvMessage msg: messageList)
+			{
+				FileTransferManager.getInstance(context).removeTask(msg.getMsgID());
+			}
+		}
+		else
+		{
+			FileTransferManager.getInstance(context).removeTask(((ConvMessage) userContext).getMsgID());
 		}
 	}
 	
