@@ -285,13 +285,14 @@ public class UploadFileTask extends FileTransferBase
 			}
 			if (isMultiMsg)
 			{
+				messageList = new ArrayList<ConvMessage>();
 				for (ContactInfo contact : contactList)
 				{
-					messageList = new ArrayList<ConvMessage>();
-					messageList.add(createConvMessage(fileName, metadata, contact.getMsisdn(), isRecipientOnhike));
+					ConvMessage msg = createConvMessage(fileName, metadata, contact.getMsisdn(), isRecipientOnhike);
+					messageList.add(msg);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, msg);
 				}
 				userContext = messageList.get(0);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_SENT, new MultipleConvMessage(messageList, contactList));
 			}
 			else
 			{
@@ -587,11 +588,10 @@ public class UploadFileTask extends FileTransferBase
 				{
 					msg.setMetadata(metadata);
 					msg.setTimestamp(ts);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, ((ConvMessage) userContext));
-					Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
+					HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, msg);
+					Logger.d("gaurav","message sent event firing for id: " + msg.getMsgID());
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, msg);
 				}
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_SENT, new MultipleConvMessage(messageList, contactList, ts));
-				
 			}
 			else
 			{
@@ -604,8 +604,8 @@ public class UploadFileTask extends FileTransferBase
 				HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, ((ConvMessage) userContext));
 	
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, ((ConvMessage) userContext));
-				deleteStateFile();
 			}
+			deleteStateFile();
 			Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
 			_state = FTState.COMPLETED;
 		}
