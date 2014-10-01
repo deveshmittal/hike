@@ -77,6 +77,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private static final int CREATE_GROUP_MODE = 1;
 
 	private static final int START_CHAT_MODE = 2;
+	
+	private static final int FORWARD_MODE = 3;
 
 	private View multiSelectActionBar, groupChatActionBar;
 
@@ -118,6 +120,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private long previousEventTime;
 
 	private boolean showingMultiSelectActionBar = false;
+	
+	private List<ContactInfo> recentContacts;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -129,7 +133,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			return;
 		}
-
 		// TODO this is being called everytime this activity is created. Way too
 		// often
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
@@ -260,7 +263,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		listView = (ListView) findViewById(R.id.list);
 
-		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, existingGroupId, friendsListFetchedCallback);
+		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, (isForwardingMessage && !isSharingFile), existingGroupId, friendsListFetchedCallback);
 		adapter.setEmptyView(findViewById(android.R.id.empty));
 		adapter.setLoadingView(findViewById(R.id.spinner));
 		listView.setAdapter(adapter);
@@ -275,7 +278,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			MIN_MEMBERS_GROUP_CHAT = 1;
 		}
-		setMode(getIntent().hasExtra(HikeConstants.Extras.GROUP_ID) || existingGroupId != null ? CREATE_GROUP_MODE : START_CHAT_MODE);
+
+		if(isForwardingMessage && !isSharingFile)
+		{
+			setMode(FORWARD_MODE);
+		}
+		else
+		{
+			setMode(getIntent().hasExtra(HikeConstants.Extras.GROUP_ID) || existingGroupId != null ? CREATE_GROUP_MODE : START_CHAT_MODE);
+		}
 
 		adapter.setIsCreatingOrEditingGroup(this.composeMode == CREATE_GROUP_MODE);
 
@@ -383,6 +394,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			String name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
 			tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
 		}
+		else if(composeMode == FORWARD_MODE)
+		{
+			// for SMS users, append SMS text with name
+			int viewtype = adapter.getItemViewType(arg2);
+			if (contactInfo.getName() == null)
+			{
+				contactInfo.setName(contactInfo.getMsisdn());
+			}			
+			String name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
+			tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
+		}
 		else
 		{
 			Logger.i("composeactivity", contactInfo.getId() + " - id of clicked");
@@ -390,40 +412,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			{
 				return;
 			}
-
-			if (isForwardingMessage)
+			if(isSharingFile)
 			{
-				// if(contactInfo == null)
-				// {
-				// String msisdn = getNormalisedMsisdn();
-				// contactInfo = new ContactInfo(msisdn, msisdn, msisdn, msisdn);
-				// }
-
-				final CustomAlertDialog forwardConfirmDialog = new CustomAlertDialog(this);
-				if (isSharingFile)
-				{
-					forwardConfirmDialog.setHeader(R.string.share);
-					forwardConfirmDialog.setBody(getString(R.string.share_with, contactInfo.getNameOrMsisdn()));
-				}
-				else
-				{
-					forwardConfirmDialog.setHeader(R.string.forward);
-					forwardConfirmDialog.setBody(getString(R.string.forward_to, contactInfo.getNameOrMsisdn()));
-				}
-				View.OnClickListener dialogOkClickListener = new View.OnClickListener()
-				{
-
-					@Override
-					public void onClick(View v)
-					{
-						forwardConfirmDialog.dismiss();
-						forwardMessageTo(contactInfo);
-					}
-				};
-
-				forwardConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
-				forwardConfirmDialog.setCancelButton(R.string.cancel);
-				forwardConfirmDialog.show();
+				showForwardConfirmDialog(true, contactInfo);
 			}
 			else
 			{
@@ -438,11 +429,39 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						return;
 					}
 				}
-
 				Utils.startChatThread(this, contactInfo);
 				finish();
 			}
 		}
+	}
+	
+	public void showForwardConfirmDialog(boolean sharingFile, final ContactInfo contactInfo)
+	{
+		final CustomAlertDialog forwardConfirmDialog = new CustomAlertDialog(this);
+		if (sharingFile)
+		{
+			forwardConfirmDialog.setHeader(R.string.share);
+			forwardConfirmDialog.setBody(getString(R.string.share_with, contactInfo.getNameOrMsisdn()));
+		}
+		else
+		{
+			forwardConfirmDialog.setHeader(R.string.forward);
+//			forwardConfirmDialog.setBody(getString(R.string.forward_to, contactInfo.getNameOrMsisdn()));
+		}
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				forwardConfirmDialog.dismiss();
+				forwardMessageTo(contactInfo);
+			}
+		};
+
+		forwardConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
+		forwardConfirmDialog.setCancelButton(R.string.cancel);
+		forwardConfirmDialog.show();
 	}
 
 	@Override
@@ -488,6 +507,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		this.composeMode = mode;
 		switch (composeMode)
 		{
+		case FORWARD_MODE:
 		case CREATE_GROUP_MODE:
 			// createGroupHeader.setVisibility(View.GONE);
 			adapter.showCheckBoxAgainstItems(true);
@@ -680,13 +700,21 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				int selected = adapter.getCurrentSelection();
-				if (selected < MIN_MEMBERS_GROUP_CHAT)
+				if(composeMode == FORWARD_MODE)
 				{
-					Toast.makeText(getApplicationContext(), "Select Min " + MIN_MEMBERS_GROUP_CHAT + " member(s) to start group chat", Toast.LENGTH_SHORT).show();
-					return;
+					// TODO: pass list of msisdns
+					showForwardConfirmDialog(false, null);
 				}
-				createGroup(adapter.getAllSelectedContacts());
+				else
+				{
+					int selected = adapter.getCurrentSelection();
+					if (selected < MIN_MEMBERS_GROUP_CHAT)
+					{
+						Toast.makeText(getApplicationContext(), "Select Min " + MIN_MEMBERS_GROUP_CHAT + " member(s) to start group chat", Toast.LENGTH_SHORT).show();
+						return;
+					}
+					createGroup(adapter.getAllSelectedContacts());
+				}
 			}
 		});
 
@@ -696,7 +724,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				setMode(CREATE_GROUP_MODE);
+				// TODO: changed from CREATE_GROUP_MODE
+				setMode(composeMode);
 				setActionBar();
 				invalidateOptionsMenu();
 			}
@@ -1075,5 +1104,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
+	}
+	
+	List<ContactInfo> getRecentContacts()
+	{
+		if(recentContacts == null)
+		{
+			recentContacts = HikeMessengerApp.getContactManager().getAllConversationContactsSorted();
+		}
+		return recentContacts;
 	}
 }

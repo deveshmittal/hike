@@ -788,7 +788,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 		displayedConversations = new ArrayList<Conversation>();
 		List<Conversation> conversationList = db.getConversations();
-
 		stealthConversations = new HashSet<Conversation>();
 
 
