@@ -1167,4 +1167,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="forward_to">Send message to %1$s?</string>
 	<string name="select_all_hike">Select All Hike Contacts</string>
 	<string name="unselect_all_hike">Unselect All Hike Contacts</string>
+    <string name="recent_chats">Recent Chats</string>
 </resources>
