@@ -72,6 +72,13 @@ public class MultipleConvMessage
 	{
 		this.timeStamp = timeStamp;
 	}
+	
+	public MultipleConvMessage(ArrayList<ConvMessage> messageList, ArrayList<ContactInfo> contactList)
+	{
+		this.messageList = messageList;
+		this.timeStamp = System.currentTimeMillis()/1000;
+		this.contactList = contactList;
+	}
 
 	public MultipleConvMessage(ArrayList<ConvMessage> messageList, ArrayList<ContactInfo> contactList, long timeStamp)
 	{
