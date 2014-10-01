@@ -6,6 +6,7 @@ import com.bsb.hike.utils.PairModified;
 
 public class GroupDetails
 {
+	private String groupId;
 
 	private String groupName;
 
@@ -13,14 +14,33 @@ public class GroupDetails
 
 	private ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns;
 
-	GroupDetails(String grpName, boolean alive, ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns)
+	private long timestamp;
+
+	GroupDetails(String groupId, String grpName, boolean alive, ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns)
 	{
+		this(groupId, grpName, alive, lastMsisdns, 0);
+	}
+
+	GroupDetails(String groupId, String grpName, boolean alive, ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns, long timestamp)
+	{
+		this.groupId = groupId;
 		this.groupName = grpName;
 		this.isGroupAlive = alive;
 		this.lastMsisdns = lastMsisdns;
+		this.timestamp = timestamp;
 	}
 
-	String getGroupName()
+	public String getGroupId()
+	{
+		return groupId;
+	}
+
+	void setGroupId(String groupId)
+	{
+		this.groupId = groupId;
+	}
+
+	public String getGroupName()
 	{
 		return groupName;
 	}
@@ -30,7 +50,7 @@ public class GroupDetails
 		groupName = grpName;
 	}
 
-	boolean isGroupAlive()
+	public boolean isGroupAlive()
 	{
 		return isGroupAlive;
 	}
@@ -40,7 +60,7 @@ public class GroupDetails
 		isGroupAlive = alive;
 	}
 
-	ConcurrentLinkedQueue<PairModified<String, String>> getLastMsisdns()
+	public ConcurrentLinkedQueue<PairModified<String, String>> getLastMsisdns()
 	{
 		return lastMsisdns;
 	}
@@ -48,6 +68,16 @@ public class GroupDetails
 	void setLastMsisdns(ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns)
 	{
 		this.lastMsisdns = lastMsisdns;
+	}
+
+	public long getTimestamp()
+	{
+		return timestamp;
+	}
+
+	void setTimestamp(long timestamp)
+	{
+		this.timestamp = timestamp;
 	}
 
 	void setName(String msisdn, String name)
@@ -64,7 +94,7 @@ public class GroupDetails
 		}
 	}
 
-	String getName(String msisdn)
+	public String getName(String msisdn)
 	{
 		if (null != lastMsisdns)
 		{

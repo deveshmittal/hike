@@ -426,18 +426,24 @@ class PersistenceCache extends ContactsCache
 			String grpId = mapEntry.getKey();
 			String name = mapEntry.getValue().first;
 			boolean groupAlive = mapEntry.getValue().second;
-			List<String> lastMsisdns = groupLastMsisdnsMap.get(grpId);
+			Pair<List<String>, Long> lastMsisdnsAndTimestamp = groupLastMsisdnsMap.get(grpId);
+			long timestamp = 0;
 			ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdnsConcurrentLinkedQueue = new ConcurrentLinkedQueue<PairModified<String, String>>();
-			if (null != lastMsisdns)
+			if (null != lastMsisdnsAndTimestamp)
 			{
-				grouplastMsisdns.addAll(lastMsisdns);
-				for (String ms : lastMsisdns)
+				List<String> lastMsisdns = lastMsisdnsAndTimestamp.first;
+				timestamp = lastMsisdnsAndTimestamp.second;
+				if (null != lastMsisdns)
 				{
-					lastMsisdnsConcurrentLinkedQueue.add(new PairModified<String, String>(ms, null));
-					// name for unsaved contact will be set later because at this point we don't know which msisdns are saved and which are not.
+					grouplastMsisdns.addAll(lastMsisdns);
+					for (String ms : lastMsisdns)
+					{
+						lastMsisdnsConcurrentLinkedQueue.add(new PairModified<String, String>(ms, null));
+						// name for unsaved contact will be set later because at this point we don't know which msisdns are saved and which are not.
+					}
 				}
 			}
-			GroupDetails grpDetails = new GroupDetails(name, groupAlive, lastMsisdnsConcurrentLinkedQueue);
+			GroupDetails grpDetails = new GroupDetails(grpId, name, groupAlive, lastMsisdnsConcurrentLinkedQueue, timestamp);
 			groupPersistence.put(grpId, grpDetails);
 		}
 
@@ -787,7 +793,7 @@ class PersistenceCache extends ContactsCache
 		try
 		{
 			ConcurrentLinkedQueue<PairModified<String, String>> clq = new ConcurrentLinkedQueue<PairModified<String, String>>();
-			GroupDetails grpDetails = new GroupDetails(groupName, alive, clq);
+			GroupDetails grpDetails = new GroupDetails(grpId, groupName, alive, clq);
 			groupPersistence.put(grpId, grpDetails);
 		}
 		finally
