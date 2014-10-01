@@ -92,6 +92,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	protected List<ContactInfo> hikeContactsList;
 
 	protected List<ContactInfo> smsContactsList;
+	
+	protected List<ContactInfo> recentContactsList;
 
 	protected List<ContactInfo> friendsStealthList;
 
@@ -110,6 +112,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	protected List<ContactInfo> groupsStealthList;
 
 	protected List<ContactInfo> filteredGroupsList;
+	
+	protected List<ContactInfo> filteredRecentsList;
 
 	protected Context context;
 
@@ -173,7 +177,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		friendsList = new ArrayList<ContactInfo>(0);
 		hikeContactsList = new ArrayList<ContactInfo>(0);
 		smsContactsList = new ArrayList<ContactInfo>(0);
-
+		recentContactsList = new ArrayList<ContactInfo>(0);
+		
 		friendsStealthList = new ArrayList<ContactInfo>(0);
 		hikeStealthContactsList = new ArrayList<ContactInfo>(0);
 		smsStealthContactsList = new ArrayList<ContactInfo>(0);
@@ -190,8 +195,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	public void executeFetchTask()
 	{
 		setLoadingView();
-		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, friendsStealthList, hikeStealthContactsList,
-				smsStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, false, true);
+		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, friendsStealthList, hikeStealthContactsList,
+				smsStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, false, true, false);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
@@ -227,13 +232,20 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				List<ContactInfo> filteredHikeContactsList = new ArrayList<ContactInfo>();
 				List<ContactInfo> filteredSmsContactsList = new ArrayList<ContactInfo>();
 				List<ContactInfo> filteredGroupList = new ArrayList<ContactInfo>();
+				List<ContactInfo> filteredRecentsList = new ArrayList<ContactInfo>();
 
 				filterList(friendsList, filteredFriendsList, textToBeFiltered);
 				filterList(hikeContactsList, filteredHikeContactsList, textToBeFiltered);
 				filterList(smsContactsList, filteredSmsContactsList, textToBeFiltered);
+
 				if (groupsList != null && !groupsList.isEmpty())
 				{
 					filterList(groupsList, filteredGroupList, textToBeFiltered);
+				}
+				
+				if (recentContactsList != null && !recentContactsList.isEmpty())
+				{
+					filterList(recentContactsList, filteredRecentsList, textToBeFiltered);
 				}
 
 				List<List<ContactInfo>> resultList = new ArrayList<List<ContactInfo>>(3);
@@ -243,6 +255,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				if (groupsList != null && !groupsList.isEmpty())
 				{
 					resultList.add(filteredGroupList);
+				}
+				if (recentContactsList != null && !recentContactsList.isEmpty())
+				{
+					resultList.add(filteredRecentsList);
 				}
 
 				results.values = resultList;
@@ -313,6 +329,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				filteredGroupsList.clear();
 				filteredGroupsList.addAll(resultList.get(3));
 			}
+			
+			if (recentContactsList != null && !recentContactsList.isEmpty())
+			{
+				filteredRecentsList.clear();
+				filteredRecentsList.addAll(resultList.get(4));
+			}
 
 			makeCompleteList(true);
 		}
@@ -327,6 +349,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		if (groupsList != null && !groupsList.isEmpty())
 		{
 			resultList.add(groupsList);
+		}
+		if (recentContactsList != null && !recentContactsList.isEmpty())
+		{
+			resultList.add(recentContactsList);
 		}
 
 		return resultList;

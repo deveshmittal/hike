@@ -5,6 +5,8 @@ package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,6 +41,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.modules.iface.ITransientCache;
 import com.bsb.hike.utils.AccountUtils;
@@ -429,16 +432,21 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	 * 
 	 * @param map
 	 */
-	public void removeOlderLastGroupMsisdns(Map<String, List<String>> map)
+	public void removeOlderLastGroupMsisdns(Map<String, Pair<List<String>, Long>> map)
 	{
 		List<String> msisdns = new ArrayList<String>();
 		List<String> msisdnsDB = new ArrayList<String>();
 
-		for (Entry<String, List<String>> mapEntry : map.entrySet())
+		for (Entry<String, Pair<List<String>, Long>> mapEntry : map.entrySet())
 		{
 			String groupId = mapEntry.getKey();
-			List<String> lastMsisdns = mapEntry.getValue();
-			msisdns.addAll(persistenceCache.removeOlderLastGroupMsisdn(groupId, lastMsisdns));
+			Pair<List<String>, Long> lastMsisdnspair = mapEntry.getValue();
+			if (null != lastMsisdnspair)
+			{
+				List<String> lastMsisdns = lastMsisdnspair.first;
+				updateGroupRecency(groupId, lastMsisdnspair.second);
+				msisdns.addAll(persistenceCache.removeOlderLastGroupMsisdn(groupId, lastMsisdns));
+			}
 		}
 
 		for (String ms : msisdns)
@@ -454,16 +462,20 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 			}
 		}
 		persistenceCache.putInCache(msisdnsDB, false);
-		for (Entry<String, List<String>> mapEntry : map.entrySet())
+		for (Entry<String, Pair<List<String>, Long>> mapEntry : map.entrySet())
 		{
 			String groupId = mapEntry.getKey();
-			List<String> last = mapEntry.getValue();
-			for (String ms : last)
+			Pair<List<String>, Long> lastPair = mapEntry.getValue();
+			if (null != lastPair)
 			{
-				ContactInfo contact = getContact(ms, false, false);
-				if (null != contact && null != contact.getName())
+				List<String> last = lastPair.first;
+				for (String ms : last)
 				{
-					setGroupParticipantContactName(groupId, ms, contact.getName());
+					ContactInfo contact = getContact(ms, false, false);
+					if (null != contact && null != contact.getName())
+					{
+						setGroupParticipantContactName(groupId, ms, contact.getName());
+					}
 				}
 			}
 		}
@@ -1280,6 +1292,11 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		persistenceCache.setGroupName(groupId, name);
 	}
 
+	public void updateGroupRecency(String groupId, long timestamp)
+	{
+		persistenceCache.updateGroupRecency(groupId, timestamp);
+	}
+
 	/**
 	 * Returns the number of participants in a particular group.
 	 * 
@@ -1791,6 +1808,34 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 				otherContactsCursor.close();
 			}
 		}
+	}
+
+	public List<ContactInfo> getAllConversationContactsSorted()
+	{
+		List<ContactInfo> oneToOneContacts = persistenceCache.getConversationOneToOneContacts();
+		List<ContactInfo> allContacts = new ArrayList<ContactInfo>();
+		allContacts.addAll(oneToOneContacts);
+		
+		List<GroupDetails> groupDetails = persistenceCache.getGroupDetails();
+		for(GroupDetails group : groupDetails)
+		{
+			if(group.isGroupAlive())
+			{
+				ContactInfo groupContact = new ContactInfo(group.getGroupId(), "3", group.getGroupName(), group.getGroupId(), true);
+				Logger.d("deepanshu","group---"+group.getGroupName()+"---"+group.getTimestamp());
+				groupContact.setLastMessaged(group.getTimestamp());
+				allContacts.add(groupContact);
+			}
+		}
+		Collections.sort(allContacts, new Comparator<ContactInfo>()
+		{
+			@Override
+			public int compare(ContactInfo lhs, ContactInfo  rhs)
+			{
+				return Long.compare(lhs.getLastMessaged(), rhs.getLastMessaged());
+			}
+		});
+		return allContacts;
 	}
 
 	public boolean isIndianMobileNumber(String number)

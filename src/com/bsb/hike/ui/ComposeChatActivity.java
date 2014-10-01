@@ -5,8 +5,10 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -81,6 +83,7 @@ import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.view.CustomTypeFace;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
+import com.google.android.gms.internal.ad;
 import com.google.android.gms.internal.ar;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener, OnScrollListener
@@ -283,7 +286,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		listView = (ListView) findViewById(R.id.list);
 
-		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, existingGroupId, friendsListFetchedCallback);
+		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, (isForwardingMessage && !isSharingFile), existingGroupId, friendsListFetchedCallback);
 		adapter.setEmptyView(findViewById(android.R.id.empty));
 		adapter.setLoadingView(findViewById(R.id.spinner));
 		listView.setAdapter(adapter);
@@ -654,8 +657,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			// if its a new group
 			JSONObject gcjPacket = groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
 			gcjPacket.put(HikeConstants.NEW_GROUP, newGroup);
-
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, new ConvMessage(gcjPacket, groupConversation, this, true));
+			ConvMessage msg = new ConvMessage(gcjPacket, groupConversation, this, true);
+			ContactManager.getInstance().updateGroupRecency(groupId, msg.getTimestamp());
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, msg);
 		}
 		catch (JSONException e)
 		{
@@ -938,6 +942,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private void forwardMessageAsPerType(Intent presentIntent, Intent intent, ArrayList<ContactInfo> arrayList)
 	{
+		// update contact info sequence as per conversation ordering
+		arrayList = updateContactInfoOrdering(arrayList);
 		String type = presentIntent.getType();
 
 		if (Intent.ACTION_SEND_MULTIPLE.equals(presentIntent.getAction()))
@@ -1119,8 +1125,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 				if(multipleMessageList.size()==0){
 					return;
-				}else if(multipleMessageList.size()==1){
-					sendMessage((ConvMessage)multipleMessageList.get(0));
 				}else{
 					sendMultiMessages(multipleMessageList,arrayList);
 				}
@@ -1220,6 +1224,26 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			
 		}
 	}
+	
+	private ArrayList<ContactInfo> updateContactInfoOrdering(ArrayList<ContactInfo> arrayList){
+		Set<ContactInfo> set = new HashSet<ContactInfo>(arrayList);
+		ArrayList<ContactInfo> toReturn = new ArrayList<ContactInfo>();
+		List<ContactInfo> conversations = getRecentContacts();
+		int total = conversations.size();
+		// we want to maintain ordering, conversations on home screen must appear in same order they were before multi forward
+		// we are adding from last to first , so that when db entry is made timestamp for last is less than first
+		for(int i=0;i<total;i++){
+			ContactInfo contactInfo = conversations.get(i);
+			if(set.contains(contactInfo)){
+				toReturn.add(contactInfo);
+				set.remove(contactInfo);
+			}
+		}
+		toReturn.addAll(set);
+		return toReturn;
+	}
+	
+	
 	private void sendMultiMessages(ArrayList<ConvMessage> multipleMessageList, ArrayList<ContactInfo> arrayList)
 	{
 		MultipleConvMessage multiMessages = new MultipleConvMessage(multipleMessageList, arrayList, System.currentTimeMillis() / 1000);
@@ -1503,4 +1527,13 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		FileTransferManager.getInstance(getApplicationContext()).uploadContact(((ContactInfo)arrayList.get(0)).getMsisdn(), contactJson, (((ContactInfo)arrayList.get(0)).isOnhike()));
 	}
 
+	
+	List<ContactInfo> getRecentContacts()
+	{
+		if(recentContacts == null)
+		{
+			recentContacts = HikeMessengerApp.getContactManager().getAllConversationContactsSorted();
+		}
+		return recentContacts;
+	}
 }
