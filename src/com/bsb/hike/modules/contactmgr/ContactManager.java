@@ -1280,6 +1280,11 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		persistenceCache.setGroupName(groupId, name);
 	}
 
+	public void updateGroupRecency(String groupId, long timestamp)
+	{
+		persistenceCache.updateGroupRecency(groupId, timestamp);
+	}
+
 	/**
 	 * Returns the number of participants in a particular group.
 	 * 
