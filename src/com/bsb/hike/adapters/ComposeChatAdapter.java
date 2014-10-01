@@ -203,7 +203,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			else
 			{
 				holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
-				holder.status.setText(contactInfo.getMsisdn());
+				holder.status.setText(Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo.getPhoneNum():contactInfo.getMsisdn());
 				holder.statusMood.setVisibility(View.GONE);
 				holder.onlineIndicator.setVisibility(View.GONE);
 				if (viewType != ViewType.FRIEND && viewType != ViewType.FRIEND_REQUEST)
