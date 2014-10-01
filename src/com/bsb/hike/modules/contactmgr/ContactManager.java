@@ -429,16 +429,21 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	 * 
 	 * @param map
 	 */
-	public void removeOlderLastGroupMsisdns(Map<String, List<String>> map)
+	public void removeOlderLastGroupMsisdns(Map<String, Pair<List<String>, Long>> map)
 	{
 		List<String> msisdns = new ArrayList<String>();
 		List<String> msisdnsDB = new ArrayList<String>();
 
-		for (Entry<String, List<String>> mapEntry : map.entrySet())
+		for (Entry<String, Pair<List<String>, Long>> mapEntry : map.entrySet())
 		{
 			String groupId = mapEntry.getKey();
-			List<String> lastMsisdns = mapEntry.getValue();
-			msisdns.addAll(persistenceCache.removeOlderLastGroupMsisdn(groupId, lastMsisdns));
+			Pair<List<String>, Long> lastMsisdnspair = mapEntry.getValue();
+			if (null != lastMsisdnspair)
+			{
+				List<String> lastMsisdns = lastMsisdnspair.first;
+				updateGroupRecency(groupId, lastMsisdnspair.second);
+				msisdns.addAll(persistenceCache.removeOlderLastGroupMsisdn(groupId, lastMsisdns));
+			}
 		}
 
 		for (String ms : msisdns)
@@ -454,16 +459,20 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 			}
 		}
 		persistenceCache.putInCache(msisdnsDB, false);
-		for (Entry<String, List<String>> mapEntry : map.entrySet())
+		for (Entry<String, Pair<List<String>, Long>> mapEntry : map.entrySet())
 		{
 			String groupId = mapEntry.getKey();
-			List<String> last = mapEntry.getValue();
-			for (String ms : last)
+			Pair<List<String>, Long> lastPair = mapEntry.getValue();
+			if (null != lastPair)
 			{
-				ContactInfo contact = getContact(ms, false, false);
-				if (null != contact && null != contact.getName())
+				List<String> last = lastPair.first;
+				for (String ms : last)
 				{
-					setGroupParticipantContactName(groupId, ms, contact.getName());
+					ContactInfo contact = getContact(ms, false, false);
+					if (null != contact && null != contact.getName())
+					{
+						setGroupParticipantContactName(groupId, ms, contact.getName());
+					}
 				}
 			}
 		}
