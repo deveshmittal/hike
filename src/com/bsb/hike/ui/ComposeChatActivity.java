@@ -1483,7 +1483,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			Toast.makeText(getApplicationContext(), R.string.max_file_size, Toast.LENGTH_SHORT).show();
 			return;
 		}
-		FileTransferManager.getInstance(getApplicationContext()).uploadFile(((ContactInfo)arrayList.get(0)).getMsisdn(), file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile,
+		FileTransferManager.getInstance(getApplicationContext()).uploadFile(arrayList, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile,
 				((ContactInfo)arrayList.get(0)).isOnhike(), recordingDuration);
 	}
 	private void clearTempData()
