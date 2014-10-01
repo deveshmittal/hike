@@ -1,6 +1,8 @@
 package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -882,6 +884,38 @@ class PersistenceCache extends ContactsCache
 			}
 
 			return contact;
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
+
+	/**
+	 * Returns contacts from {@link #convsContactsPersistence} sorted by lastMessaged time.
+	 *
+	 * @param
+	 * @return List of convContacts
+	 */
+	List<ContactInfo> getConversationOneToOneContacts()
+	{
+		List<ContactInfo> convContacts = new ArrayList<ContactInfo>();
+		readLock.lock();
+		try
+		{
+			for(Map.Entry<String, ContactInfo> entry : convsContactsPersistence.entrySet())
+			{
+				convContacts.add(entry.getValue());
+			}
+			Collections.sort(convContacts, new Comparator<ContactInfo>()
+			{
+				@Override
+				public int compare(ContactInfo lhs, ContactInfo  rhs)
+				{
+					return Long.compare(lhs.getLastMessaged(), rhs.getLastMessaged());
+				}
+			});
+			return convContacts;
 		}
 		finally
 		{

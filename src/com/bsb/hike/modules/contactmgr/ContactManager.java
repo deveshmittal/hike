@@ -1793,6 +1793,11 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		}
 	}
 
+	public List<ContactInfo> getAllConversationContactsSorted()
+	{
+		return persistenceCache.getConversationOneToOneContacts();
+	}
+
 	public boolean isIndianMobileNumber(String number)
 	{
 		if (HikeMessengerApp.isIndianUser())
