@@ -2130,7 +2130,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					List<String> grpMsisdns = null;
 					try
 					{
-						if (TextUtils.isEmpty(metadata))
+						if (!TextUtils.isEmpty(metadata))
 						{
 							grpMsisdns = getGroupLastMsgMsisdn(new JSONObject(metadata));
 							if (null != grpMsisdns)
