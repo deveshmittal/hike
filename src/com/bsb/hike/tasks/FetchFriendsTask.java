@@ -173,6 +173,14 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			    	iter.remove();
 			    }
 			}
+			if(recentTaskList.size() > HikeConstants.MAX_RECENTS_TO_SHOW)
+			{
+				recentTaskList = recentTaskList.subList(0, HikeConstants.MAX_RECENTS_TO_SHOW);
+			}
+			if(fetchGroups)
+			{
+				removeItemsFromListOnMsisdn(groupTaskList, recentTaskList);
+			}
 		}
 		Logger.d("TestQuery", "qeury time: " + (System.currentTimeMillis() - queryTime));
 
@@ -281,6 +289,22 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		}
 
 		return true;
+	}
+
+	private void removeItemsFromListOnMsisdn(List<ContactInfo> list, List<ContactInfo> removeList)
+	{
+		Iterator<ContactInfo> iter = list.iterator();
+		while(iter.hasNext())
+		{
+			ContactInfo groupContact = iter.next();
+			for(ContactInfo removeContact : removeList)
+			{
+				if(removeContact.getMsisdn().equals(groupContact.getMsisdn()))
+				{
+					iter.remove();
+				}
+			}
+		}
 	}
 
 	private void addToStealthList(List<ContactInfo> contactList, List<ContactInfo> stealthList, boolean isGroupTask)

@@ -647,6 +647,8 @@ public class HikeConstants
 	public static final int NEW_PARTICIPANT = 2;
 
 	public static final String MAIL = "support@hike.in";
+	
+	public static final int MAX_RECENTS_TO_SHOW = 10;
 
 	// Had to add this constant since its only available in the android API for
 	// Honeycomb and higher.
