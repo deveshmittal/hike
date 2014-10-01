@@ -3283,7 +3283,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				// displayed in the list view when forwarding the message
 				String numberMembers = context.getString(R.string.num_people, (numMembers + 1));
 
-				ContactInfo group = new ContactInfo(groupId, numberMembers, groupName, groupId, true);
+				ContactInfo group = new ContactInfo(groupId, groupId, groupName, numberMembers, true);
 				groups.add(group);
 			}
 
