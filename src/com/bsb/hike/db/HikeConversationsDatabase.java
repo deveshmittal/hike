@@ -56,6 +56,7 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.contactmgr.ConversationMsisdns;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
@@ -1252,7 +1253,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			int unreadMessageCount = 0;
 			int unreadPinMessageCount = 0;
 
-			Map<String, List<String>> map = new HashMap<String, List<String>>();
+			Map<String, Pair<List<String>, Long>> map = new HashMap<String, Pair<List<String>, Long>>();
 
 			for (ConvMessage conv : convMessages)
 			{
@@ -1323,15 +1324,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				updateReadBy(conv);
 				if (Utils.isGroupConversation(conv.getMsisdn()))
 				{
+					long timestamp = 0;
+					Pair<List<String>, Long> pair = map.get(conv.getMsisdn());
+					if (pair != null)
+						timestamp = pair.second;
+					if (conv.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE)
+					{
+						timestamp = conv.getTimestamp();
+					}
 					List<String> lastMsisdns = new ArrayList<String>();
 					if (conv.getMetadata() != null)
 						lastMsisdns = getGroupLastMsgMsisdn(conv.getMetadata().getJSON());
-
-					if (lastMsisdns.size() == 0 && null != conv.getGroupParticipantMsisdn())
-					{
-						lastMsisdns.add(conv.getGroupParticipantMsisdn());
-					}
-					map.put(conv.getMsisdn(), lastMsisdns);
+					map.put(conv.getMsisdn(), new Pair<List<String>, Long>(lastMsisdns, timestamp));
 				}
 			}
 
@@ -1471,7 +1475,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 */
 	public void addLastConversations(List<ConvMessage> convMessages, HashMap<String, PairModified<ConvMessage, Integer>> lastPinMap)
 	{
-		Map<String, List<String>> map = new HashMap<String, List<String>>();
+		Map<String, Pair<List<String>, Long>> map = new HashMap<String, Pair<List<String>, Long>>();
 
 		for (ConvMessage conv : convMessages)
 		{
@@ -1483,22 +1487,25 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() - 1);
 			}
-			
+
 			if (Utils.isGroupConversation(conv.getMsisdn()))
 			{
+				long timestamp = 0;
+				Pair<List<String>, Long> pair = map.get(conv.getMsisdn());
+				if (pair != null)
+					timestamp = pair.second;
+				if (conv.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE)
+				{
+					timestamp = conv.getTimestamp();
+				}
 				List<String> lastMsisdns = new ArrayList<String>();
 				if (conv.getMetadata() != null)
 					lastMsisdns = getGroupLastMsgMsisdn(conv.getMetadata().getJSON());
-
-				if (lastMsisdns.size() == 0 && null != conv.getGroupParticipantMsisdn())
-				{
-					lastMsisdns.add(conv.getGroupParticipantMsisdn());
-				}
-				map.put(conv.getMsisdn(), lastMsisdns);
+				map.put(conv.getMsisdn(), new Pair<List<String>, Long>(lastMsisdns, timestamp));
 			}
 		}
 		ContactManager.getInstance().removeOlderLastGroupMsisdns(map);
-		
+
 		for (Entry<String, PairModified<ConvMessage, Integer>> entry : lastPinMap.entrySet())
 		{
 			PairModified<ConvMessage, Integer> pair = entry.getValue();
@@ -2063,26 +2070,28 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public Pair<List<String>, Map<String, List<String>>> getConversationMsisdns()
+	public ConversationMsisdns getConversationMsisdns()
 	{
 		Cursor c = null;
-		List<String> convsMsisdns = new ArrayList<String>();
-		Map<String, List<String>> grpLastMsisdns = new HashMap<String, List<String>>();
+		List<String> oneToOneMsisdns = new ArrayList<String>();
+		Map<String, Pair<List<String>, Long>> grpLastMsisdns = new HashMap<String, Pair<List<String>, Long>>();
 
 		try
 		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.GROUP_PARTICIPANT, DBConstants.MESSAGE_METADATA }, null, null, null,
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.GROUP_PARTICIPANT, DBConstants.MESSAGE_METADATA ,DBConstants.TIMESTAMP}, null, null, null,
 					null, null);
 
 			final int msisdnColumn = c.getColumnIndex(DBConstants.MSISDN);
 			final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
 			final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
+			final int timestampColumn = c.getColumnIndex(DBConstants.TIMESTAMP);
 
 			while (c.moveToNext())
 			{
 				String msisdn = c.getString(msisdnColumn);
 				String groupParticipant = c.getString(groupParticipantColumn);
 				String metadata = c.getString(metadataColumn);
+				long timestamp = c.getLong(timestampColumn);
 
 				if (Utils.isGroupConversation(msisdn))
 				{
@@ -2101,7 +2110,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 										grpMsisdns.add(groupParticipant);
 									}
 								}
-								grpLastMsisdns.put(msisdn, grpMsisdns);
+								grpLastMsisdns.put(msisdn, new Pair<List<String>, Long>(grpMsisdns,timestamp));
 							}
 						}
 					}
@@ -2112,11 +2121,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				else
 				{
-					convsMsisdns.add(msisdn);
+					oneToOneMsisdns.add(msisdn);
 				}
 			}
-			Pair<List<String>, Map<String, List<String>>> allmsisdns = new Pair<List<String>, Map<String, List<String>>>(convsMsisdns, grpLastMsisdns);
-			return allmsisdns;
+			ConversationMsisdns convsMsisdns = new ConversationMsisdns(oneToOneMsisdns, grpLastMsisdns);
+			return convsMsisdns;
 		}
 		finally
 		{
@@ -2318,6 +2327,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String msisdn = c.getString(msisdnIdx);
 				String messageString = c.getString(msgColumn);
 				String metadata = c.getString(metadataColumn);
+				long timestamp = c.getLong(tsColumn);
 
 				if (Utils.isGroupConversation(msisdn))
 				{
@@ -2333,6 +2343,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				{
 					conv = new Conversation(msisdn);
 					ContactInfo contact = ContactManager.getInstance().getContact(conv.getMsisdn());
+					ContactManager.getInstance().updateContactRecency(msisdn, timestamp);
 					if (null == contact)
 					{
 						msisdns.add(msisdn);
@@ -2701,6 +2712,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				ContentValues contentValues = getContentValueForConversationMessage(message);
 				if (Utils.isGroupConversation(msisdn))
 				{
+					updateGroupRecency(message);
 					HikeMessengerApp.getContactManager().removeContact(c.getString(groupParticipantColumn), false);
 				}
 				mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
@@ -2734,6 +2746,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			if (c != null)
 			{
 				c.close();
+			}
+		}
+	}
+
+	private void updateGroupRecency(ConvMessage conv)
+	{
+		if (Utils.isGroupConversation(conv.getMsisdn()))
+		{
+			if (conv.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE)
+			{
+				ContactManager.getInstance().updateGroupRecency(conv.getMsisdn(), conv.getTimestamp());
 			}
 		}
 	}

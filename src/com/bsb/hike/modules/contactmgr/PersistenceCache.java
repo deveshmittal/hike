@@ -294,6 +294,23 @@ class PersistenceCache extends ContactsCache
 		}
 	}
 
+	void updateGroupRecency(String groupId, long timestamp)
+	{
+		writeLock.lock();
+		try
+		{
+			GroupDetails grpDetails = groupPersistence.get(groupId);
+			if (null != grpDetails)
+			{
+				grpDetails.setTimestamp(timestamp);
+			}
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
 	/**
 	 * Returns name of group if msisdn is group ID else contact name - if contact is unsaved then this method returns null as for unsaved contact we need groupId to get name. This
 	 * implementation is thread safe.
@@ -409,11 +426,11 @@ class PersistenceCache extends ContactsCache
 	 */
 	void loadMemory()
 	{
-		Pair<List<String>, Map<String, List<String>>> allmsisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
+		ConversationMsisdns allmsisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
 		// oneToOneMsisdns contains list of msisdns with whom one to one conversation currently exists
 		// groupLastMsisdnsMap is map between group Id and list of last msisdns (msisdns of last message) in a group
-		List<String> oneToOneMsisdns = allmsisdns.first;
-		Map<String, List<String>> groupLastMsisdnsMap = allmsisdns.second;
+		List<String> oneToOneMsisdns = allmsisdns.getOneToOneMsisdns();
+		Map<String, Pair<List<String>, Long>> groupLastMsisdnsMap = allmsisdns.getGroupLastMsisdnsWithTimestamp();
 
 		Map<String, Pair<String, Boolean>> groupNamesMap = HikeConversationsDatabase.getInstance().getGroupNamesAndAliveStatus();
 
@@ -428,18 +445,24 @@ class PersistenceCache extends ContactsCache
 			String grpId = mapEntry.getKey();
 			String name = mapEntry.getValue().first;
 			boolean groupAlive = mapEntry.getValue().second;
-			List<String> lastMsisdns = groupLastMsisdnsMap.get(grpId);
+			Pair<List<String>, Long> lastMsisdnsAndTimestamp = groupLastMsisdnsMap.get(grpId);
+			long timestamp = 0;
 			ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdnsConcurrentLinkedQueue = new ConcurrentLinkedQueue<PairModified<String, String>>();
-			if (null != lastMsisdns)
+			if (null != lastMsisdnsAndTimestamp)
 			{
-				grouplastMsisdns.addAll(lastMsisdns);
-				for (String ms : lastMsisdns)
+				List<String> lastMsisdns = lastMsisdnsAndTimestamp.first;
+				timestamp = lastMsisdnsAndTimestamp.second;
+				if (null != lastMsisdns)
 				{
-					lastMsisdnsConcurrentLinkedQueue.add(new PairModified<String, String>(ms, null));
-					// name for unsaved contact will be set later because at this point we don't know which msisdns are saved and which are not.
+					grouplastMsisdns.addAll(lastMsisdns);
+					for (String ms : lastMsisdns)
+					{
+						lastMsisdnsConcurrentLinkedQueue.add(new PairModified<String, String>(ms, null));
+						// name for unsaved contact will be set later because at this point we don't know which msisdns are saved and which are not.
+					}
 				}
 			}
-			GroupDetails grpDetails = new GroupDetails(name, groupAlive, lastMsisdnsConcurrentLinkedQueue);
+			GroupDetails grpDetails = new GroupDetails(grpId, name, groupAlive, lastMsisdnsConcurrentLinkedQueue, timestamp);
 			groupPersistence.put(grpId, grpDetails);
 		}
 
@@ -789,7 +812,7 @@ class PersistenceCache extends ContactsCache
 		try
 		{
 			ConcurrentLinkedQueue<PairModified<String, String>> clq = new ConcurrentLinkedQueue<PairModified<String, String>>();
-			GroupDetails grpDetails = new GroupDetails(groupName, alive, clq);
+			GroupDetails grpDetails = new GroupDetails(grpId, groupName, alive, clq);
 			groupPersistence.put(grpId, grpDetails);
 		}
 		finally
@@ -891,6 +914,7 @@ class PersistenceCache extends ContactsCache
 		}
 	}
 
+
 	/**
 	 * Returns contacts from {@link #convsContactsPersistence} sorted by lastMessaged time.
 	 *
@@ -916,6 +940,26 @@ class PersistenceCache extends ContactsCache
 				}
 			});
 			return convContacts;
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
+
+	List<GroupDetails> getGroupDetails()
+	{
+		// traverse through groupPersistence
+		readLock.lock();
+		try
+		{
+			List<GroupDetails> groupsList = new ArrayList<GroupDetails>();
+			for (Entry<String, GroupDetails> mapEntry : groupPersistence.entrySet())
+			{
+				GroupDetails grpDetails = mapEntry.getValue();
+				groupsList.add(grpDetails);
+			}
+			return groupsList;
 		}
 		finally
 		{
