@@ -5,6 +5,8 @@ package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,6 +41,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.modules.iface.ITransientCache;
 import com.bsb.hike.utils.AccountUtils;
@@ -1809,7 +1812,30 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 
 	public List<ContactInfo> getAllConversationContactsSorted()
 	{
-		return persistenceCache.getConversationOneToOneContacts();
+		List<ContactInfo> oneToOneContacts = persistenceCache.getConversationOneToOneContacts();
+		List<ContactInfo> allContacts = new ArrayList<ContactInfo>();
+		allContacts.addAll(oneToOneContacts);
+		
+		List<GroupDetails> groupDetails = persistenceCache.getGroupDetails();
+		for(GroupDetails group : groupDetails)
+		{
+			if(group.isGroupAlive())
+			{
+				ContactInfo groupContact = new ContactInfo(group.getGroupId(), "3", group.getGroupName(), group.getGroupId(), true);
+				Logger.d("deepanshu","group---"+group.getGroupName()+"---"+group.getTimestamp());
+				groupContact.setLastMessaged(group.getTimestamp());
+				allContacts.add(groupContact);
+			}
+		}
+		Collections.sort(allContacts, new Comparator<ContactInfo>()
+		{
+			@Override
+			public int compare(ContactInfo lhs, ContactInfo  rhs)
+			{
+				return Long.compare(lhs.getLastMessaged(), rhs.getLastMessaged());
+			}
+		});
+		return allContacts;
 	}
 
 	public boolean isIndianMobileNumber(String number)

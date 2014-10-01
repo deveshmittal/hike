@@ -931,14 +931,6 @@ class PersistenceCache extends ContactsCache
 			{
 				convContacts.add(entry.getValue());
 			}
-			Collections.sort(convContacts, new Comparator<ContactInfo>()
-			{
-				@Override
-				public int compare(ContactInfo lhs, ContactInfo  rhs)
-				{
-					return Long.compare(lhs.getLastMessaged(), rhs.getLastMessaged());
-				}
-			});
 			return convContacts;
 		}
 		finally
