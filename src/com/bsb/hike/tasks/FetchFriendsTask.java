@@ -153,16 +153,12 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 		if (fetchGroups)
 		{
-			groupTaskList = HikeConversationsDatabase.getInstance().getGroupNameAndParticipantsAsContacts(context);
+			groupTaskList = HikeMessengerApp.getContactManager().getConversationGroupsAsContacts();
 			addToStealthList(groupTaskList, groupsStealthList, true);
 		}
 
 		long queryTime = System.currentTimeMillis();
 		List<ContactInfo> allContacts = HikeMessengerApp.getContactManager().getAllContacts();
-		if(fetchRecents)
-		{
-			recentTaskList = HikeMessengerApp.getContactManager().getAllConversationContactsSorted();
-		}
 		Set<String> blockSet = ContactManager.getInstance().getBlockedMsisdnSet();
 		if(fetchRecents)
 		{
@@ -198,16 +194,10 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			String msisdn = contactInfo.getMsisdn();
 			if (msisdn.equals(myMsisdn) || HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn))
 			{
-				Logger.d("deepanshu","remove-"+contactInfo.toString());
-				if(fetchRecents)
-					recentTaskList.remove(contactInfo);
 				continue;
 			}
 			if (blockSet.contains(msisdn))
 			{
-				Logger.d("deepanshu","removed-"+contactInfo.toString());
-				if(fetchRecents)
-					recentTaskList.remove(contactInfo);
 				continue;
 			}
 			if(fetchRecents && recentTaskList.contains(contactInfo))
