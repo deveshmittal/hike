@@ -78,6 +78,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	public static final String CONTACT_PHONE_NUM = "--126";
 
+	public static final String RECENT_PHONE_NUM = "-128";
+
 	public enum ViewType
 	{
 		SECTION, FRIEND, NOT_FRIEND_HIKE, NOT_FRIEND_SMS, FRIEND_REQUEST, EXTRA, EMPTY, FTUE_CONTACT, REMOVE_SUGGESTIONS, NEW_CONTACT
@@ -100,6 +102,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	protected List<ContactInfo> hikeStealthContactsList;
 
 	protected List<ContactInfo> smsStealthContactsList;
+
+	protected List<ContactInfo> recentStealthContactsList;
 
 	protected List<ContactInfo> filteredFriendsList;
 
@@ -177,7 +181,6 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		friendsList = new ArrayList<ContactInfo>(0);
 		hikeContactsList = new ArrayList<ContactInfo>(0);
 		smsContactsList = new ArrayList<ContactInfo>(0);
-		recentContactsList = new ArrayList<ContactInfo>(0);
 		
 		friendsStealthList = new ArrayList<ContactInfo>(0);
 		hikeStealthContactsList = new ArrayList<ContactInfo>(0);
@@ -196,7 +199,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	{
 		setLoadingView();
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, friendsStealthList, hikeStealthContactsList,
-				smsStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, false, true, false);
+				smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, false, true, false);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 

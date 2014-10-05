@@ -76,7 +76,11 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		groupsList = new ArrayList<ContactInfo>(0);
 		groupsStealthList = new ArrayList<ContactInfo>(0);
 		filteredGroupsList = new ArrayList<ContactInfo>(0);
+
+		recentContactsList = new ArrayList<ContactInfo>(0);
+		recentStealthContactsList = new ArrayList<ContactInfo>(0);
 		filteredRecentsList = new ArrayList<ContactInfo>(0);
+
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		/*
 		 * We should show sms contacts section in new compose
@@ -94,7 +98,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	{
 		setLoadingView();
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, friendsStealthList, hikeStealthContactsList,
-				smsStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, filteredGroupsList, filteredRecentsList, 
+				smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, filteredGroupsList, filteredRecentsList,
 				existingParticipants, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true, false, fetchRecents);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
@@ -385,7 +389,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		// hack for header, as we are using pinnedSectionListView
 		if(fetchRecents && !recentContactsList.isEmpty())
 		{
-			ContactInfo recentsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredRecentsList.size()), context.getString(R.string.recent_chats), "-128");
+			ContactInfo recentsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredRecentsList.size()), context.getString(R.string.recent_chats), RECENT_PHONE_NUM);
 			if (filteredRecentsList.size() > 0)
 			{
 				completeList.add(recentsSection);
