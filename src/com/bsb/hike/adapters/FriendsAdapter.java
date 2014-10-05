@@ -252,14 +252,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				resultList.add(filteredFriendsList);
 				resultList.add(filteredHikeContactsList);
 				resultList.add(filteredSmsContactsList);
-				if (groupsList != null && !groupsList.isEmpty())
-				{
-					resultList.add(filteredGroupList);
-				}
-				if (recentContactsList != null && !recentContactsList.isEmpty())
-				{
-					resultList.add(filteredRecentsList);
-				}
+				resultList.add(filteredGroupList);
+				resultList.add(filteredRecentsList);
 
 				results.values = resultList;
 				isFiltered = true;
@@ -346,14 +340,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		resultList.add(friendsList);
 		resultList.add(hikeContactsList);
 		resultList.add(smsContactsList);
-		if (groupsList != null && !groupsList.isEmpty())
-		{
-			resultList.add(groupsList);
-		}
-		if (recentContactsList != null && !recentContactsList.isEmpty())
-		{
-			resultList.add(recentContactsList);
-		}
+		resultList.add(groupsList);
+		resultList.add(recentContactsList);
 
 		return resultList;
 	}
