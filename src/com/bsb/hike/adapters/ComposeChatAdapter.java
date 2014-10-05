@@ -386,7 +386,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		if(fetchRecents && !recentContactsList.isEmpty())
 		{
 			ContactInfo recentsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredRecentsList.size()), context.getString(R.string.recent_chats), "-128");
-			if (recentContactsList.size() > 0)
+			if (filteredRecentsList.size() > 0)
 			{
 				completeList.add(recentsSection);
 				completeList.addAll(filteredRecentsList);
