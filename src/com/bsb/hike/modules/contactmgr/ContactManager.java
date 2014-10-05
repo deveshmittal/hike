@@ -36,6 +36,7 @@ import android.util.Pair;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.db.DbException;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -1812,20 +1813,10 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 
 	public List<ContactInfo> getAllConversationContactsSorted()
 	{
-		List<ContactInfo> oneToOneContacts = persistenceCache.getConversationOneToOneContacts();
 		List<ContactInfo> allContacts = new ArrayList<ContactInfo>();
-		allContacts.addAll(oneToOneContacts);
-		
-		List<GroupDetails> groupDetails = persistenceCache.getGroupDetails();
-		for(GroupDetails group : groupDetails)
-		{
-			if(group.isGroupAlive())
-			{
-				ContactInfo groupContact = new ContactInfo(group.getGroupId(), group.getGroupId(), group.getGroupName(), "participant count", true);
-				groupContact.setLastMessaged(group.getTimestamp());
-				allContacts.add(groupContact);
-			}
-		}
+		allContacts.addAll(persistenceCache.getConversationOneToOneContacts());
+		allContacts.addAll(getConversationGroupsAsContacts());
+
 		Collections.sort(allContacts, new Comparator<ContactInfo>()
 		{
 			@Override
@@ -1835,6 +1826,27 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 			}
 		});
 		return allContacts;
+	}
+
+	public List<ContactInfo> getConversationGroupsAsContacts()
+	{
+		List<GroupDetails> groupDetails = persistenceCache.getGroupDetails();
+		List<ContactInfo> groupContacts = new ArrayList<ContactInfo>();
+		Map<String, Integer> groupCountMap = HikeConversationsDatabase.getInstance().getAllGroupsActiveParticipantCount();
+		for(GroupDetails group : groupDetails)
+		{
+			if(group.isGroupAlive())
+			{
+				int numMembers = groupCountMap.get(group.getGroupId());
+				String numberMembers = context.getString(R.string.num_people, (numMembers + 1));
+
+				ContactInfo groupContact = new ContactInfo(group.getGroupId(), group.getGroupId(), group.getGroupName(), numberMembers, true);
+				groupContact.setLastMessaged(group.getTimestamp());
+
+				groupContacts.add(groupContact);
+			}
+		}
+		return groupContacts;
 	}
 
 	public boolean isIndianMobileNumber(String number)
