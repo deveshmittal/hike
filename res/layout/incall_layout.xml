@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="@color/black" >
 
     <Button
         android:id="@+id/endCallButton"
@@ -11,5 +12,29 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:text="End Call" />
+
+    <ImageButton
+        android:id="@+id/muteButton1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/SpeakerButton1"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="14dp"
+        android:background="@color/red_color_span"
+        android:minHeight="75px"
+        android:minWidth="100px"
+        android:scaleType="center"
+        android:src="@drawable/ic_default_audio_r" />
+
+    <ImageButton
+        android:id="@+id/SpeakerButton1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/endCallButton"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="14dp"
+        android:minHeight="75px"
+        android:minWidth="110px"
+        android:src="@drawable/ic_sound_checked" />
 
 </RelativeLayout>

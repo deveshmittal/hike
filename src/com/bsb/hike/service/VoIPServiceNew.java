@@ -56,6 +56,8 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	public static int blah = 1;
 	
 	public Boolean callConnected = false;
+	private boolean onSpeakers = false;
+	private boolean onMute = false;
 	private boolean run = true;
 	
 	public void onCreate() {
@@ -278,7 +280,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 
 	@Override
 	public void closeActivity() {
-		blah = 2;
+//		blah = 2;
 		stopService();		
 	}
 
@@ -304,6 +306,26 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	public VoIPServiceNew getInstance(){
 		Log.d("VSercice", "getinstance called");
 		return this;
+	}
+	
+	public void muteClicked(){
+		if (onMute){
+			((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setMicrophoneMute(false);
+			onMute = false;
+		} else {
+			((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setMicrophoneMute(true);
+			onMute = true;
+		}
+	}
+	
+	public void speakerClicked(){
+		if (onSpeakers){
+			((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setSpeakerphoneOn(false);
+			onSpeakers = false;
+		} else {
+			((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setSpeakerphoneOn(true);
+			onSpeakers = true;
+		}
 	}
 
 	@Override

@@ -6,6 +6,8 @@ import org.json.JSONException;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -29,6 +32,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 	private Button endCall;
 	private Button acceptCall;
 	private Button declineCall;
+	private ImageButton speakerButton;
+	private ImageButton muteButton;
 	private TextView callNo;
 	private int serviceId = BIND_AUTO_CREATE;	
 	private HikePubSub mPubSub = HikeMessengerApp.getPubSub();
@@ -38,6 +43,10 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 	private VoIPServiceNew vService;
 	private static VoIPActivityNew vActivity;
 	public boolean callConnected = false;
+	public boolean isMute = false;
+	public boolean isSpeakerOn = false;
+	MediaPlayer mMediaPlayer = new MediaPlayer();
+//	final MediaPlayer player = mMediaPlayer ;
 	
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -59,6 +68,13 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 	public void prepareAnswer(){
 		final Intent i = new Intent(this,com.bsb.hike.service.VoIPServiceNew.class);
 		i.putExtras(getIntent().getExtras());
+//		mMediaPlayer = new MediaPlayer();
+		mMediaPlayer = MediaPlayer.create(this, R.raw.hike_jingle_15);
+		mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+		mMediaPlayer.setLooping(true);
+		final MediaPlayer player = mMediaPlayer; 
+		player.start();
+		mMediaPlayer = player;
 		setContentView(R.layout.call_accept_decline);
 		vActivity = this;
 		callNo = (TextView)this.findViewById(R.id.CallerId);
@@ -70,6 +86,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 
 			@Override
 			public void onClick(View v) {
+				player.stop();
 				Intent intent = i;
 				intent.putExtra("decline", false);
 				callConnected = true;				
@@ -87,6 +104,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 
 			@Override
 			public void onClick(View v) {
+				player.stop();
 				Intent intent = i;
 				intent.putExtra("decline", true);
 				callConnected = true;
@@ -99,7 +117,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 	}
 	
 	public void prepareInCall(){
-		final Intent i = new Intent(this, com.bsb.hike.service.VoIPServiceNew.class);
+		final Intent i = new Intent(this, com.bsb.hike.service.VoIPServiceNew.class);		
 		i.putExtras(getIntent().getExtras());
 		callConnected = true;
 		vActivity = this;
@@ -125,6 +143,25 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 	
 	public void drawInCall(){
 		setContentView(R.layout.incall_layout);
+		muteButton =(ImageButton)this.findViewById(R.id.muteButton1);
+		muteButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v){
+				VoIPServiceNew.getVoIPSerivceInstance().muteClicked();
+				changeMuteButton();
+			}
+			
+		});
+		speakerButton = (ImageButton)this.findViewById(R.id.SpeakerButton1);
+		speakerButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				VoIPServiceNew.getVoIPSerivceInstance().speakerClicked();	
+				changeSpeakerButton();
+			}
+		});
 		endCall = (Button)this.findViewById(R.id.endCallButton);
 		endCall.setBackgroundColor(Color.RED);
 		endCall.setOnClickListener(new OnClickListener() {
@@ -152,8 +189,36 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 		}
 	}
 	
+	public void onDestroy(){
+		if(mMediaPlayer.isPlaying())
+			mMediaPlayer.stop();
+		super.onDestroy();
+	}
+	
 	public static VoIPActivityNew getVoIPActivityInstance(){
 		return vActivity;
+	}
+	
+	private void changeMuteButton() {
+		if(isMute){
+			muteButton.setBackgroundColor(Color.RED);
+			isMute = false;
+		} else {
+			muteButton.setBackgroundColor(Color.GREEN);
+			isMute = true;
+		}
+		
+	}
+	
+	private void changeSpeakerButton(){
+		if(!isSpeakerOn){
+			speakerButton.setImageResource(R.drawable.ic_sound_unchecked);
+			isSpeakerOn = true;
+		} else {
+			speakerButton.setImageResource(R.drawable.ic_sound_checked);
+			isSpeakerOn = false;
+		}
+		
 	}
 	
 }
