@@ -4,7 +4,9 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,23 +18,17 @@ import org.json.JSONObject;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.Gravity;
@@ -43,16 +39,13 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -65,7 +58,6 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewSwitcher;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
@@ -84,12 +76,15 @@ import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.ProfileItem;
+import com.bsb.hike.models.ProfileItem.ProfileSharedContent;
 import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
@@ -147,7 +142,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.PARTICIPANT_JOINED_GROUP,
 			HikePubSub.PARTICIPANT_LEFT_GROUP, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.LARGER_IMAGE_DOWNLOADED, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
-			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.DELETE_MESSAGE, HikePubSub.CONTACT_ADDED };
+			HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.DELETE_MESSAGE, HikePubSub.CONTACT_ADDED, HikePubSub.UNREAD_PIN_COUNT_RESET, HikePubSub.MESSAGE_RECEIVED, HikePubSub.BULK_MESSAGE_RECEIVED };
 
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED, HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST,
@@ -178,6 +173,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	public static final String PROFILE_PIC_SUFFIX = "pp";
 
 	private ProfileItem.ProfileSharedMedia sharedMediaItem;
+	
+	private ProfileItem.ProfileSharedContent sharedContentItem;
 
 	private static enum ProfileType
 	{
@@ -225,6 +222,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	private int sharedPinCount = 0;
 	
 	private int sharedFileCount = 0;
+	
+	private int unreadPinCount = 0;
+	
+	private int currUnreadCount = 0;
 	
 	private static final int MULTIPLIER = 3;  //multiplication factor for 3X loading media items initially
 	
@@ -631,6 +632,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		contactInfo = HikeMessengerApp.getContactManager().getContact(mLocalMSISDN, true, true);
 		sharedMediaCount = HikeConversationsDatabase.getInstance().getSharedMediaCount(mLocalMSISDN, true);
 		sharedPinCount = 0;  //Add a query here to get shared groups count. sharedPincount is to be treated as shared group count here.
+		unreadPinCount = 0;
 		sharedFileCount =  HikeConversationsDatabase.getInstance().getSharedMediaCount(mLocalMSISDN, false);
 		if (!contactInfo.isOnhike())
 		{
@@ -926,7 +928,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		profileItems.add(new ProfileItem.ProfilePhoneNumberItem(ProfileItem.PHONE_NUMBER, getResources().getString(R.string.phone_pa)));
 		if(contactInfo.isOnhike())
 		{	shouldAddSharedMedia();
-			profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT, getResources().getString(R.string.shared_cont_pa), sharedFileCount, sharedPinCount, null));
+			profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT, getResources().getString(R.string.shared_cont_pa), sharedFileCount, sharedPinCount, unreadPinCount, null));
 		}
 	}
 
@@ -961,9 +963,18 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
 		HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-		groupConversation = (GroupConversation) hCDB.getConversation(mLocalMSISDN, 0);
+		groupConversation = (GroupConversation) hCDB.getConversation(mLocalMSISDN, 0, true);
 		sharedMediaCount = hCDB.getSharedMediaCount(mLocalMSISDN,true);
 		sharedPinCount = hCDB.getPinCount(mLocalMSISDN);
+		
+		try 
+		{
+			unreadPinCount = groupConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);			
+		}
+		catch (JSONException e) 
+		{
+			e.printStackTrace();
+		}
 		sharedFileCount = hCDB.getSharedMediaCount(mLocalMSISDN, false);
 		participantMap = groupConversation.getGroupParticipantList();
 		List<String> inactiveMsisdns = new ArrayList<String>();
@@ -986,6 +997,14 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		httpRequestURL = "/group/" + groupConversation.getMsisdn();
 
 		initializeListviewAndAdapter();
+		
+		if(unreadPinCount > 0)
+		{
+			currUnreadCount = unreadPinCount;
+			
+			sharedContentItem.setPinAnimation(true);
+		}
+
 		profileContent.setDivider(null);
 
 		nameTxt = groupConversation.getLabel();
@@ -1038,7 +1057,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 
 		profileItems.clear();
 		shouldAddSharedMedia();
-		profileItems.add(new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT,getResources().getString(R.string.shared_cont_pa), sharedFileCount, sharedPinCount, null));
+		sharedContentItem = new ProfileItem.ProfileSharedContent(ProfileItem.SHARED_CONTENT,getResources().getString(R.string.shared_cont_pa), sharedFileCount, sharedPinCount, unreadPinCount, null);
+		profileItems.add(sharedContentItem);
 		
 		List<PairModified<GroupParticipant, String>> participants = new ArrayList<PairModified<GroupParticipant, String>>();
 
@@ -2464,10 +2484,104 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 							addSharedMedia();
 						}
 					}
+					else if(HikeConstants.SHARED_PIN_TYPE == deletedMessageType)
+					{
+						sharedPinCount -= msgIds.size();
+						sharedContentItem.setSharedPinsCount(sharedPinCount);
+					}
 
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
+		}
+		else if(HikePubSub.UNREAD_PIN_COUNT_RESET.equals(type))
+		{
+			if(groupConversation.getMsisdn().equals(((Conversation)object).getMetaData().getGroupId()))
+			{
+				sharedContentItem.setUnreadPinCount(0);	
+				
+				currUnreadCount = 0;
+				
+				runOnUiThread(new Runnable() 
+				{					
+					@Override
+					public void run() 
+					{
+						profileAdapter.notifyDataSetChanged();	
+					}
+				});
+			}
+		}
+		else if(HikePubSub.MESSAGE_RECEIVED.equals(type))
+		{
+			if(groupConversation.getMsisdn().equals(((ConvMessage)object).getMsisdn()))
+			{							
+				if(((ConvMessage)object).getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+				{
+					sharedContentItem.setUnreadPinCount(++currUnreadCount);
+	
+					sharedContentItem.setSharedPinsCount(sharedContentItem.getSharedPinsCount() + 1);
+					
+					sharedPinCount += 1;
+					
+					if(sharedContentItem.getPinAnimation() == false)
+					{
+						sharedContentItem.setPinAnimation(true);
+					}
+					
+					runOnUiThread(new Runnable() 
+					{					
+						@Override
+						public void run() 
+						{
+							profileAdapter.notifyDataSetChanged();
+						}
+					});
+				}
+			}			
+		}
+		else if(HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
+		{			
+			boolean isUnreadCountChanged = false;
+			
+			HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
+			final LinkedList<ConvMessage> messageList = messageListMap.get(mLocalMSISDN);
+
+			if(messageList != null)
+			{										
+				for (final ConvMessage message : messageList)
+				{
+					if(message.getMsisdn().equals(groupConversation.getMsisdn()))
+					{
+						if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+						{
+							currUnreadCount++;
+							isUnreadCountChanged = true;
+						}
+					}
+				}					
+			}
+			
+			if(isUnreadCountChanged)
+			{
+				sharedContentItem.setUnreadPinCount(currUnreadCount);
+				
+				sharedContentItem.setSharedPinsCount(sharedContentItem.getSharedPinsCount() + 1);
+				
+				if(sharedContentItem.getPinAnimation() == false)
+				{
+					sharedContentItem.setPinAnimation(true);
+				}
+				
+				runOnUiThread(new Runnable()
+				{					
+					@Override
+					public void run() 
+					{
+						profileAdapter.notifyDataSetChanged();
+					}
+				});
+			}
 		}
 		else if (HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT.equals(type))
 		{

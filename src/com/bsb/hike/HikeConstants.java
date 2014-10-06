@@ -1868,4 +1868,6 @@ public class HikeConstants
 
 	public static final int SHARED_MEDIA_TYPE = 1;
 	
+	public static final int SHARED_PIN_TYPE = 2;
+	
 }
