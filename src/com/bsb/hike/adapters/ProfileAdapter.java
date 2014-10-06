@@ -222,7 +222,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 	public boolean isEnabled(int position)
 	{
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
-		if (viewType == ViewType.HEADER)
+		if (viewType == ViewType.HEADER || viewType == ViewType.SHARED_MEDIA || viewType == ViewType.PHONE_NUMBER)
 		{
 			return false;
 		}
@@ -553,7 +553,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			viewHolder.text.setText(head);
 			viewHolder.extraInfo.setText(mContactInfo.getMsisdn());
 			
-			if(mContactInfo.getMsisdnType().length()>0)
+			if (!TextUtils.isEmpty(mContactInfo.getMsisdnType()))
 				viewHolder.subText.setText(" (" + mContactInfo.getMsisdnType().toLowerCase() + ")");
 			
 			break;
