@@ -290,13 +290,16 @@ public class UploadFileTask extends FileTransferBase
 				{
 					ConvMessage msg = createConvMessage(fileName, metadata, contact.getMsisdn(), isRecipientOnhike);
 					messageList.add(msg);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, msg);
 				}
 				userContext = messageList.get(0);
+				ArrayList<ConvMessage> pubsubMsgList = new ArrayList<ConvMessage>();
+				pubsubMsgList.add((ConvMessage) userContext);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_FILE_SENT, new MultipleConvMessage(pubsubMsgList, contactList));
 			}
 			else
 			{
 				userContext = createConvMessage(fileName, metadata, msisdn, isRecipientOnhike);
+				HikeConversationsDatabase.getInstance().addConversationMessages((ConvMessage)userContext);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, (ConvMessage) userContext);
 			}
 		}
@@ -314,7 +317,6 @@ public class UploadFileTask extends FileTransferBase
 		ConvMessage convMessage = new ConvMessage(fileName, msisdn, time, ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setMetadata(metadata);
 		convMessage.setSMS(!isRecipientOnhike);
-		HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_MESSAGE_CREATED, convMessage);
 		return convMessage;
 	}
@@ -340,6 +342,13 @@ public class UploadFileTask extends FileTransferBase
 	private void initFileUpload() throws FileTransferCancelledException, Exception
 	{
 		msgId = ((ConvMessage) userContext).getMsgID();
+		if (isMultiMsg)
+		{
+			for (int i=1 ; i < messageList.size() ; i++)
+			{
+				messageList.get(i).setMsgID(msgId + i);
+			}
+		}
 		HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
 		hikeFileType = hikeFile.getHikeFileType();
 
@@ -441,9 +450,19 @@ public class UploadFileTask extends FileTransferBase
 			JSONObject metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail, ImageQuality.IMAGE_QUALITY_ORIGINAL);
 			hikeFile.removeSourceFile();
 			((ConvMessage) userContext).setMetadata(metadata);
-			HikeConversationsDatabase.getInstance().updateMessageMetadata(((ConvMessage) userContext).getMsgID(), ((ConvMessage) userContext).getMetadata());
 		}
 
+		if (isMultiMsg)
+		{
+			for (ConvMessage msg : messageList)
+			{
+				HikeConversationsDatabase.getInstance().updateMessageMetadata(msg.getMsgID(), msg.getMetadata());
+			}
+		}
+		else
+		{
+			HikeConversationsDatabase.getInstance().updateMessageMetadata(((ConvMessage) userContext).getMsgID(), ((ConvMessage) userContext).getMetadata());
+		}
 		fileName = hikeFile.getFileName();
 		fileType = hikeFile.getFileTypeString();
 		hikeFileType = hikeFile.getHikeFileType();
@@ -588,14 +607,15 @@ public class UploadFileTask extends FileTransferBase
 				{
 					msg.setMetadata(metadata);
 					msg.setTimestamp(ts);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, msg);
-					Logger.d("gaurav","message sent event firing for id: " + msg.getMsgID());
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, msg);
+					HikeConversationsDatabase.getInstance().updateMessageMetadata(msg.getMsgID(), msg.getMetadata());
+					//HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, msg);
 				}
+				ArrayList<ConvMessage> pubsubMsgList = new ArrayList<ConvMessage>();
+				pubsubMsgList.add((ConvMessage) userContext);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_FILE_UPLOADED, new MultipleConvMessage(pubsubMsgList, contactList));
 			}
 			else
 			{
-					
 				((ConvMessage) userContext).setMetadata(metadata);
 	
 				// The file was just uploaded to the servers, we want to publish

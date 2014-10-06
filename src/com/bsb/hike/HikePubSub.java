@@ -38,6 +38,10 @@ public class HikePubSub implements Runnable
 	
 	public static final String MULTI_MESSAGE_SENT = "multimessagesent";
 
+	public static final String MULTI_FILE_SENT = "multiFileSent";
+
+	public static final String MULTI_FILE_UPLOADED = "multiFileUploaded";
+
 	public static final String MESSAGE_DELIVERED = "messageDelivered"; // represents
 																		// that
 																		// msg
