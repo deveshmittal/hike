@@ -332,6 +332,13 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	
 	public void setupActionBar()
 	{
+		if (getSherlockActivity() == null)
+		{
+			return;
+		}
+		/*
+		 * else part
+		 * */
 		ActionBar actionBar = getSherlockActivity().getSupportActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
