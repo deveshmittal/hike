@@ -61,9 +61,10 @@ import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
+
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.FtueContactsData;
@@ -72,9 +73,11 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.models.OverFlowMenuItem;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
-import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.tasks.SendLogsTask;
+import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.AccountUtils;
@@ -86,8 +89,11 @@ import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.HikeTip.TipType;
 
 public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Listener
 {

@@ -15,9 +15,9 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.SMSSyncState;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikeConstants.SMSSyncState;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;

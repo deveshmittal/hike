@@ -31,9 +31,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.EmoticonType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeConstants.EmoticonType;
 import com.bsb.hike.adapters.StickerPageAdapter.ViewType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
@@ -43,8 +43,8 @@ import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
 
 public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconPagerAdapter

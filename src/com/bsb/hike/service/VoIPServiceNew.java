@@ -5,12 +5,12 @@ import org.webrtc.MediaStream;
 import org.webrtc.PeerConnectionFactory;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.VOIP.WebRtcClient;
 import com.bsb.hike.service.VOIPService.VoIPBinder;
 import com.bsb.hike.ui.VoIPActivity;
 import com.bsb.hike.ui.VoIPActivityNew;
 import com.bsb.hike.ui.VoIPActivity.MessageHandler;
-import com.bsb.hike.R;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -181,8 +181,8 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		  Log.d("VOIPSERVICE","5");
 		  VoIPActivityNew.getVoIPActivityInstance().finish();
 		  Log.d("VOIPSERVICE","6");
-		  while(run)
-			  Log.d("Oh", "Look at it go");
+//		  while(run)
+//			  Log.d("Oh", "Look at it go");
 		  stopSelf();
 		  Log.d("VOIPSERVICE","7");
 //		  android.os.Process.killProcess(android.os.Process.myPid());
@@ -194,13 +194,13 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 				  if (callerId != null){
 					  client.sendMessage(callerId, HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE, null);
 				  }
-				  else
+				  else if (dialedId != null)
 					  client.sendMessage(dialedId, HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE, null);
 			  } else {
 				  if (callerId != null){
 					  client.sendMessage(callerId, HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE, null);
 				  }
-				  else
+				  else if (dialedId != null)
 					  client.sendMessage(dialedId, HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE, null);
 			  }
 		  } catch (JSONException e) {

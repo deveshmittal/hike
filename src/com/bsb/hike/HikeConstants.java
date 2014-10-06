@@ -1,5 +1,6 @@
 package com.bsb.hike;
 
+import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 
 import android.net.Uri;

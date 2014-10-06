@@ -33,7 +33,6 @@ import com.bsb.hike.VOIP.RTCActivity;
 import com.bsb.hike.VOIP.WebRtcClient;
 import com.bsb.hike.ui.VoIPActivity;
 import com.bsb.hike.ui.VoIPActivity.MessageHandler;
-//import com.bsb.hike.utils.VoIPBinder;
 
 
 

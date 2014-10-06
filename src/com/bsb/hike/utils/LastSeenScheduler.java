@@ -7,8 +7,8 @@ import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.tasks.FetchBulkLastSeenTask;
-import com.bsb.hike.tasks.FetchBulkLastSeenTask.FetchBulkLastSeenCallback;
 import com.bsb.hike.tasks.FetchLastSeenTask;
+import com.bsb.hike.tasks.FetchBulkLastSeenTask.FetchBulkLastSeenCallback;
 import com.bsb.hike.tasks.FetchLastSeenTask.FetchLastSeenCallback;
 import com.bsb.hike.utils.customClasses.AsyncTask.MyAsyncTask;
 

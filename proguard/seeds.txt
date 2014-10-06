@@ -11448,7 +11448,6 @@ com.bsb.hike.R$xml: int notification_preferences
 com.bsb.hike.R$xml: int privacy_preferences
 com.bsb.hike.R$xml: int sms_preferences
 com.bsb.hike.VOIP.RTCActivity
-com.bsb.hike.VOIP.RTCActivity: RTCActivity()
 com.bsb.hike.VOIP.RTCActivity$1: void onClick(android.view.View)
 com.bsb.hike.VOIP.RTCActivity$3: void onClick(android.view.View)
 com.bsb.hike.VOIP.RTCActivity$4: void onClick(android.view.View)
@@ -11583,6 +11582,9 @@ com.bsb.hike.service.TimeChangedReceiver
 com.bsb.hike.service.TimeChangedReceiver: TimeChangedReceiver()
 com.bsb.hike.service.UpgradeIntentService
 com.bsb.hike.service.UpgradeIntentService: UpgradeIntentService()
+com.bsb.hike.service.VOIPService
+com.bsb.hike.service.VoIPServiceNew
+com.bsb.hike.service.VoIPServiceNew: VoIPServiceNew()
 com.bsb.hike.tasks.DownloadStickerTask$DownloadType: com.bsb.hike.tasks.DownloadStickerTask$DownloadType[] values()
 com.bsb.hike.tasks.DownloadStickerTask$DownloadType: com.bsb.hike.tasks.DownloadStickerTask$DownloadType valueOf(java.lang.String)
 com.bsb.hike.tasks.SignupTask$State: com.bsb.hike.tasks.SignupTask$State[] values()
@@ -11811,6 +11813,16 @@ com.bsb.hike.ui.Tutorial: Tutorial()
 com.bsb.hike.ui.Tutorial: void onClick(android.view.View)
 com.bsb.hike.ui.TwitterAuthActivity
 com.bsb.hike.ui.TwitterAuthActivity: TwitterAuthActivity()
+com.bsb.hike.ui.VoIPActivity
+com.bsb.hike.ui.VoIPActivity$2: void onClick(android.view.View)
+com.bsb.hike.ui.VoIPActivity$3: void onClick(android.view.View)
+com.bsb.hike.ui.VoIPActivity$4: void onClick(android.view.View)
+com.bsb.hike.ui.VoIPActivity$5: void onClick(android.view.View)
+com.bsb.hike.ui.VoIPActivityNew
+com.bsb.hike.ui.VoIPActivityNew: VoIPActivityNew()
+com.bsb.hike.ui.VoIPActivityNew$1: void onClick(android.view.View)
+com.bsb.hike.ui.VoIPActivityNew$2: void onClick(android.view.View)
+com.bsb.hike.ui.VoIPActivityNew$3: void onClick(android.view.View)
 com.bsb.hike.ui.WebViewActivity
 com.bsb.hike.ui.WebViewActivity: WebViewActivity()
 com.bsb.hike.ui.WebViewActivity$1
@@ -13919,6 +13931,13 @@ com.facebook.android.FbDialog$1: void onComplete(android.os.Bundle,com.facebook.
 com.facebook.android.R
 com.facebook.android.R: R()
 com.facebook.android.R$attr
+com.facebook.android.R$attr: int adSize
+com.facebook.android.R$attr: int adUnitId
+com.facebook.android.R$attr: int cameraBearing
+com.facebook.android.R$attr: int cameraTargetLat
+com.facebook.android.R$attr: int cameraTargetLng
+com.facebook.android.R$attr: int cameraTilt
+com.facebook.android.R$attr: int cameraZoom
 com.facebook.android.R$attr: int confirm_logout
 com.facebook.android.R$attr: int done_button_background
 com.facebook.android.R$attr: int done_button_text
@@ -13927,6 +13946,7 @@ com.facebook.android.R$attr: int fetch_user_info
 com.facebook.android.R$attr: int is_cropped
 com.facebook.android.R$attr: int login_text
 com.facebook.android.R$attr: int logout_text
+com.facebook.android.R$attr: int mapType
 com.facebook.android.R$attr: int multi_select
 com.facebook.android.R$attr: int preset_size
 com.facebook.android.R$attr: int radius_in_meters
@@ -13937,6 +13957,14 @@ com.facebook.android.R$attr: int show_search_box
 com.facebook.android.R$attr: int show_title_bar
 com.facebook.android.R$attr: int title_bar_background
 com.facebook.android.R$attr: int title_text
+com.facebook.android.R$attr: int uiCompass
+com.facebook.android.R$attr: int uiRotateGestures
+com.facebook.android.R$attr: int uiScrollGestures
+com.facebook.android.R$attr: int uiTiltGestures
+com.facebook.android.R$attr: int uiZoomControls
+com.facebook.android.R$attr: int uiZoomGestures
+com.facebook.android.R$attr: int useViewLifecycle
+com.facebook.android.R$attr: int zOrderOnTop
 com.facebook.android.R$attr: R$attr()
 com.facebook.android.R$color
 com.facebook.android.R$color: int com_facebook_blue
@@ -13946,6 +13974,18 @@ com.facebook.android.R$color: int com_facebook_picker_search_bar_text
 com.facebook.android.R$color: int com_facebook_usersettingsfragment_connected_shadow_color
 com.facebook.android.R$color: int com_facebook_usersettingsfragment_connected_text_color
 com.facebook.android.R$color: int com_facebook_usersettingsfragment_not_connected_text_color
+com.facebook.android.R$color: int common_action_bar_splitter
+com.facebook.android.R$color: int common_signin_btn_dark_text_default
+com.facebook.android.R$color: int common_signin_btn_dark_text_disabled
+com.facebook.android.R$color: int common_signin_btn_dark_text_focused
+com.facebook.android.R$color: int common_signin_btn_dark_text_pressed
+com.facebook.android.R$color: int common_signin_btn_default_background
+com.facebook.android.R$color: int common_signin_btn_light_text_default
+com.facebook.android.R$color: int common_signin_btn_light_text_disabled
+com.facebook.android.R$color: int common_signin_btn_light_text_focused
+com.facebook.android.R$color: int common_signin_btn_light_text_pressed
+com.facebook.android.R$color: int common_signin_btn_text_dark
+com.facebook.android.R$color: int common_signin_btn_text_light
 com.facebook.android.R$color: R$color()
 com.facebook.android.R$dimen
 com.facebook.android.R$dimen: int com_facebook_loginview_compound_drawable_padding
@@ -13996,6 +14036,34 @@ com.facebook.android.R$drawable: int com_facebook_profile_picture_blank_square
 com.facebook.android.R$drawable: int com_facebook_top_background
 com.facebook.android.R$drawable: int com_facebook_top_button
 com.facebook.android.R$drawable: int com_facebook_usersettingsfragment_background_gradient
+com.facebook.android.R$drawable: int common_signin_btn_icon_dark
+com.facebook.android.R$drawable: int common_signin_btn_icon_disabled_dark
+com.facebook.android.R$drawable: int common_signin_btn_icon_disabled_focus_dark
+com.facebook.android.R$drawable: int common_signin_btn_icon_disabled_focus_light
+com.facebook.android.R$drawable: int common_signin_btn_icon_disabled_light
+com.facebook.android.R$drawable: int common_signin_btn_icon_focus_dark
+com.facebook.android.R$drawable: int common_signin_btn_icon_focus_light
+com.facebook.android.R$drawable: int common_signin_btn_icon_light
+com.facebook.android.R$drawable: int common_signin_btn_icon_normal_dark
+com.facebook.android.R$drawable: int common_signin_btn_icon_normal_light
+com.facebook.android.R$drawable: int common_signin_btn_icon_pressed_dark
+com.facebook.android.R$drawable: int common_signin_btn_icon_pressed_light
+com.facebook.android.R$drawable: int common_signin_btn_text_dark
+com.facebook.android.R$drawable: int common_signin_btn_text_disabled_dark
+com.facebook.android.R$drawable: int common_signin_btn_text_disabled_focus_dark
+com.facebook.android.R$drawable: int common_signin_btn_text_disabled_focus_light
+com.facebook.android.R$drawable: int common_signin_btn_text_disabled_light
+com.facebook.android.R$drawable: int common_signin_btn_text_focus_dark
+com.facebook.android.R$drawable: int common_signin_btn_text_focus_light
+com.facebook.android.R$drawable: int common_signin_btn_text_light
+com.facebook.android.R$drawable: int common_signin_btn_text_normal_dark
+com.facebook.android.R$drawable: int common_signin_btn_text_normal_light
+com.facebook.android.R$drawable: int common_signin_btn_text_pressed_dark
+com.facebook.android.R$drawable: int common_signin_btn_text_pressed_light
+com.facebook.android.R$drawable: int ic_plusone_medium_off_client
+com.facebook.android.R$drawable: int ic_plusone_small_off_client
+com.facebook.android.R$drawable: int ic_plusone_standard_off_client
+com.facebook.android.R$drawable: int ic_plusone_tall_off_client
 com.facebook.android.R$drawable: R$drawable()
 com.facebook.android.R$id
 com.facebook.android.R$id: int com_facebook_login_activity_progress_bar
@@ -14018,11 +14086,18 @@ com.facebook.android.R$id: int com_facebook_search_bar_view
 com.facebook.android.R$id: int com_facebook_usersettingsfragment_login_button
 com.facebook.android.R$id: int com_facebook_usersettingsfragment_logo_image
 com.facebook.android.R$id: int com_facebook_usersettingsfragment_profile_name
+com.facebook.android.R$id: int hybrid
 com.facebook.android.R$id: int large
+com.facebook.android.R$id: int none
 com.facebook.android.R$id: int normal
 com.facebook.android.R$id: int picker_subtitle
+com.facebook.android.R$id: int satellite
 com.facebook.android.R$id: int small
+com.facebook.android.R$id: int terrain
 com.facebook.android.R$id: R$id()
+com.facebook.android.R$integer
+com.facebook.android.R$integer: int google_play_services_version
+com.facebook.android.R$integer: R$integer()
 com.facebook.android.R$layout
 com.facebook.android.R$layout: int com_facebook_friendpickerfragment
 com.facebook.android.R$layout: int com_facebook_login_activity_layout
@@ -14040,6 +14115,12 @@ com.facebook.android.R$layout: int com_facebook_search_bar_layout
 com.facebook.android.R$layout: int com_facebook_usersettingsfragment
 com.facebook.android.R$layout: R$layout()
 com.facebook.android.R$string
+com.facebook.android.R$string: int auth_client_needs_enabling_title
+com.facebook.android.R$string: int auth_client_needs_installation_title
+com.facebook.android.R$string: int auth_client_needs_update_title
+com.facebook.android.R$string: int auth_client_play_services_err_notification_msg
+com.facebook.android.R$string: int auth_client_requested_by_msg
+com.facebook.android.R$string: int auth_client_using_bad_version_title
 com.facebook.android.R$string: int com_facebook_choose_friends
 com.facebook.android.R$string: int com_facebook_dialogloginactivity_ok_button
 com.facebook.android.R$string: int com_facebook_internet_permission_error_message
@@ -14065,12 +14146,50 @@ com.facebook.android.R$string: int com_facebook_requesterror_web_login
 com.facebook.android.R$string: int com_facebook_usersettingsfragment_log_in_button
 com.facebook.android.R$string: int com_facebook_usersettingsfragment_logged_in
 com.facebook.android.R$string: int com_facebook_usersettingsfragment_not_logged_in
+com.facebook.android.R$string: int common_google_play_services_enable_button
+com.facebook.android.R$string: int common_google_play_services_enable_text
+com.facebook.android.R$string: int common_google_play_services_enable_title
+com.facebook.android.R$string: int common_google_play_services_install_button
+com.facebook.android.R$string: int common_google_play_services_install_text_phone
+com.facebook.android.R$string: int common_google_play_services_install_text_tablet
+com.facebook.android.R$string: int common_google_play_services_install_title
+com.facebook.android.R$string: int common_google_play_services_invalid_account_text
+com.facebook.android.R$string: int common_google_play_services_invalid_account_title
+com.facebook.android.R$string: int common_google_play_services_network_error_text
+com.facebook.android.R$string: int common_google_play_services_network_error_title
+com.facebook.android.R$string: int common_google_play_services_unknown_issue
+com.facebook.android.R$string: int common_google_play_services_unsupported_date_text
+com.facebook.android.R$string: int common_google_play_services_unsupported_text
+com.facebook.android.R$string: int common_google_play_services_unsupported_title
+com.facebook.android.R$string: int common_google_play_services_update_button
+com.facebook.android.R$string: int common_google_play_services_update_text
+com.facebook.android.R$string: int common_google_play_services_update_title
+com.facebook.android.R$string: int common_signin_button_text
+com.facebook.android.R$string: int common_signin_button_text_long
 com.facebook.android.R$string: R$string()
 com.facebook.android.R$style
 com.facebook.android.R$style: int com_facebook_loginview_default_style
 com.facebook.android.R$style: int com_facebook_loginview_silver_style
 com.facebook.android.R$style: R$style()
 com.facebook.android.R$styleable
+com.facebook.android.R$styleable: int[] AdsAttrs
+com.facebook.android.R$styleable: int AdsAttrs_adSize
+com.facebook.android.R$styleable: int AdsAttrs_adUnitId
+com.facebook.android.R$styleable: int[] MapAttrs
+com.facebook.android.R$styleable: int MapAttrs_cameraBearing
+com.facebook.android.R$styleable: int MapAttrs_cameraTargetLat
+com.facebook.android.R$styleable: int MapAttrs_cameraTargetLng
+com.facebook.android.R$styleable: int MapAttrs_cameraTilt
+com.facebook.android.R$styleable: int MapAttrs_cameraZoom
+com.facebook.android.R$styleable: int MapAttrs_mapType
+com.facebook.android.R$styleable: int MapAttrs_uiCompass
+com.facebook.android.R$styleable: int MapAttrs_uiRotateGestures
+com.facebook.android.R$styleable: int MapAttrs_uiScrollGestures
+com.facebook.android.R$styleable: int MapAttrs_uiTiltGestures
+com.facebook.android.R$styleable: int MapAttrs_uiZoomControls
+com.facebook.android.R$styleable: int MapAttrs_uiZoomGestures
+com.facebook.android.R$styleable: int MapAttrs_useViewLifecycle
+com.facebook.android.R$styleable: int MapAttrs_zOrderOnTop
 com.facebook.android.R$styleable: int[] com_facebook_friend_picker_fragment
 com.facebook.android.R$styleable: int com_facebook_friend_picker_fragment_multi_select
 com.facebook.android.R$styleable: int[] com_facebook_login_view

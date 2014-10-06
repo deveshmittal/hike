@@ -20,8 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;

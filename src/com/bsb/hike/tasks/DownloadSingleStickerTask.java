@@ -16,11 +16,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;

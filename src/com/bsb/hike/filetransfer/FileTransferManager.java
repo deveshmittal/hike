@@ -34,10 +34,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
-import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;

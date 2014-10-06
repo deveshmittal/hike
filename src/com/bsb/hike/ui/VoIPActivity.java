@@ -26,8 +26,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.service.VOIPService.VoIPBinder;
 import com.bsb.hike.service.VOIPService;
+import com.bsb.hike.service.VOIPService.VoIPBinder;
 
 public class VoIPActivity extends Activity implements HikePubSub.Listener {
 	

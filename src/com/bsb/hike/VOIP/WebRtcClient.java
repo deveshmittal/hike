@@ -181,6 +181,7 @@ public class WebRtcClient {
 		
 		metadata.put(HikeConstants.VOIP_PAYLOAD, voipSubPayload);
 		data.put("md", metadata);
+		data.put("hm", "you shouldn't see it as call. catch aaryaman@hike.in");
 		message.put(HikeConstants.DATA, data);
 		
 //		mPubSub.publish(HikePubSub.VOIP_HANDSHAKE_SENT, message);
@@ -286,7 +287,7 @@ public class WebRtcClient {
 				payload.put("type", sdp.type.canonicalForm());
 				payload.put("sdp", sdp.description);
 				sendMessage(id, sdp.type.canonicalForm(), payload);
-				Log.d("Sent", payload.toString());
+				Log.d("PeerSent", payload.toString());
 				pc.setLocalDescription(Peer.this, sdp);
 				sdown = sdp;
 			} catch (JSONException e) {
@@ -341,7 +342,7 @@ public class WebRtcClient {
 				payload.put("id", candidate.sdpMid);
 				payload.put("candidate", candidate.sdp);
 				sendMessage(id, "candidate", payload);
-				Log.d("Sent", payload.toString());
+				Log.d("IceCandidateSent", payload.toString());
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -436,13 +437,13 @@ public class WebRtcClient {
 			@Override
 			public void run() {
 				if (callReceived == false){
-					try {
-						sendMessage(storedId, HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE, null);
-					} catch (JSONException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					mListener.closeActivity();
+//					try {
+//						sendMessage(storedId, HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE, null);
+//					} catch (JSONException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//					mListener.closeActivity();
 				}
 				
 			}

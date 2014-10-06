@@ -1163,9 +1163,9 @@ android.support.v4.app.TaskStackBuilderJellybean -> android.support.v4.app.TaskS
 android.support.v4.app.Watson -> android.support.v4.app.Watson:
     java.lang.String TAG -> TAG
     java.util.ArrayList mCreatedMenus -> mCreatedMenus
-    43:81:boolean onCreatePanelMenu(int,com.actionbarsherlock.view.Menu) -> onCreatePanelMenu
-    88:110:boolean onPreparePanel(int,android.view.View,com.actionbarsherlock.view.Menu) -> onPreparePanel
-    117:133:boolean onMenuItemSelected(int,com.actionbarsherlock.view.MenuItem) -> onMenuItemSelected
+    41:81:boolean onCreatePanelMenu(int,com.actionbarsherlock.view.Menu) -> onCreatePanelMenu
+    86:110:boolean onPreparePanel(int,android.view.View,com.actionbarsherlock.view.Menu) -> onPreparePanel
+    115:133:boolean onMenuItemSelected(int,com.actionbarsherlock.view.MenuItem) -> onMenuItemSelected
     boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> onCreateOptionsMenu
     boolean onPrepareOptionsMenu(com.actionbarsherlock.view.Menu) -> onPrepareOptionsMenu
     boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> onOptionsItemSelected
@@ -2798,25 +2798,25 @@ com.actionbarsherlock.ActionBarSherlock -> com.actionbarsherlock.ActionBarSherlo
     538:538:void dispatchDestroy() -> dispatchDestroy
     540:540:void dispatchSaveInstanceState(android.os.Bundle) -> dispatchSaveInstanceState
     542:542:void dispatchRestoreInstanceState(android.os.Bundle) -> dispatchRestoreInstanceState
-    556:566:boolean callbackCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> callbackCreateOptionsMenu
-    577:587:boolean callbackPrepareOptionsMenu(com.actionbarsherlock.view.Menu) -> callbackPrepareOptionsMenu
-    600:610:boolean callbackOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> callbackOptionsItemSelected
+    554:566:boolean callbackCreateOptionsMenu(com.actionbarsherlock.view.Menu) -> callbackCreateOptionsMenu
+    575:587:boolean callbackPrepareOptionsMenu(com.actionbarsherlock.view.Menu) -> callbackPrepareOptionsMenu
+    598:610:boolean callbackOptionsItemSelected(com.actionbarsherlock.view.MenuItem) -> callbackOptionsItemSelected
     boolean hasFeature(int) -> hasFeature
     boolean requestFeature(int) -> requestFeature
     void setUiOptions(int) -> setUiOptions
     void setUiOptions(int,int) -> setUiOptions
     void setContentView(int) -> setContentView
-    671:672:void setContentView(android.view.View) -> setContentView
+    669:672:void setContentView(android.view.View) -> setContentView
     void setContentView(android.view.View,android.view.ViewGroup$LayoutParams) -> setContentView
     void addContentView(android.view.View,android.view.ViewGroup$LayoutParams) -> addContentView
     void setTitle(java.lang.CharSequence) -> setTitle
-    703:704:void setTitle(int) -> setTitle
+    701:704:void setTitle(int) -> setTitle
     void setProgressBarVisibility(boolean) -> setProgressBarVisibility
     void setProgressBarIndeterminateVisibility(boolean) -> setProgressBarIndeterminateVisibility
     void setProgressBarIndeterminate(boolean) -> setProgressBarIndeterminate
     void setProgress(int) -> setProgress
     void setSecondaryProgress(int) -> setSecondaryProgress
-    773:780:com.actionbarsherlock.view.MenuInflater getMenuInflater() -> getMenuInflater
+    770:780:com.actionbarsherlock.view.MenuInflater getMenuInflater() -> getMenuInflater
     android.content.Context getThemedContext() -> getThemedContext
     com.actionbarsherlock.view.ActionMode startActionMode(com.actionbarsherlock.view.ActionMode$Callback) -> startActionMode
     798:798:void ensureActionBar() -> ensureActionBar
@@ -3642,14 +3642,14 @@ com.actionbarsherlock.app.SherlockFragmentActivity -> com.actionbarsherlock.app.
     119:122:boolean dispatchKeyEvent(android.view.KeyEvent) -> dispatchKeyEvent
     127:129:void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
     133:135:void onRestoreInstanceState(android.os.Bundle) -> onRestoreInstanceState
-    144:144:com.actionbarsherlock.view.MenuInflater getSupportMenuInflater() -> getSupportMenuInflater
-    150:151:void invalidateOptionsMenu() -> invalidateOptionsMenu
-    156:157:void supportInvalidateOptionsMenu() -> supportInvalidateOptionsMenu
-    163:171:boolean onCreatePanelMenu(int,android.view.Menu) -> onCreatePanelMenu
+    142:144:com.actionbarsherlock.view.MenuInflater getSupportMenuInflater() -> getSupportMenuInflater
+    148:151:void invalidateOptionsMenu() -> invalidateOptionsMenu
+    154:157:void supportInvalidateOptionsMenu() -> supportInvalidateOptionsMenu
+    161:171:boolean onCreatePanelMenu(int,android.view.Menu) -> onCreatePanelMenu
     176:176:boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
-    183:191:boolean onPreparePanel(int,android.view.View,android.view.Menu) -> onPreparePanel
+    181:191:boolean onPreparePanel(int,android.view.View,android.view.Menu) -> onPreparePanel
     196:196:boolean onPrepareOptionsMenu(android.view.Menu) -> onPrepareOptionsMenu
-    203:211:boolean onMenuItemSelected(int,android.view.MenuItem) -> onMenuItemSelected
+    201:211:boolean onMenuItemSelected(int,android.view.MenuItem) -> onMenuItemSelected
     216:216:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
     221:224:void openOptionsMenu() -> openOptionsMenu
     228:231:void closeOptionsMenu() -> closeOptionsMenu
@@ -3789,26 +3789,26 @@ com.actionbarsherlock.internal.ActionBarSherlockCompat -> com.actionbarsherlock.
     com.actionbarsherlock.internal.widget.IcsProgressBar mHorizontalProgressBar -> mHorizontalProgressBar
     com.actionbarsherlock.view.ActionMode mActionMode -> mActionMode
     com.actionbarsherlock.internal.widget.ActionBarContextView mActionModeView -> mActionModeView
-    121:122:com.actionbarsherlock.app.ActionBar getActionBar() -> getActionBar
-    130:144:void initActionBar() -> initActionBar
+    119:122:com.actionbarsherlock.app.ActionBar getActionBar() -> getActionBar
+    126:144:void initActionBar() -> initActionBar
     148:148:android.content.Context getThemedContext() -> getThemedContext
-    155:156:void setTitle(java.lang.CharSequence) -> setTitle
-    162:201:com.actionbarsherlock.view.ActionMode startActionMode(com.actionbarsherlock.view.ActionMode$Callback) -> startActionMode
-    213:216:void dispatchConfigurationChanged(android.content.res.Configuration) -> dispatchConfigurationChanged
-    222:225:void dispatchPostResume() -> dispatchPostResume
-    231:234:void dispatchPause() -> dispatchPause
-    240:243:void dispatchStop() -> dispatchStop
-    249:267:void dispatchInvalidateOptionsMenu() -> dispatchInvalidateOptionsMenu
-    273:277:boolean dispatchOpenOptionsMenu() -> dispatchOpenOptionsMenu
-    284:291:boolean dispatchCloseOptionsMenu() -> dispatchCloseOptionsMenu
-    298:305:void dispatchPostCreate(android.os.Bundle) -> dispatchPostCreate
-    313:313:boolean dispatchCreateOptionsMenu(android.view.Menu) -> dispatchCreateOptionsMenu
-    320:345:boolean dispatchPrepareOptionsMenu(android.view.Menu) -> dispatchPrepareOptionsMenu
+    153:156:void setTitle(java.lang.CharSequence) -> setTitle
+    160:201:com.actionbarsherlock.view.ActionMode startActionMode(com.actionbarsherlock.view.ActionMode$Callback) -> startActionMode
+    211:216:void dispatchConfigurationChanged(android.content.res.Configuration) -> dispatchConfigurationChanged
+    220:225:void dispatchPostResume() -> dispatchPostResume
+    229:234:void dispatchPause() -> dispatchPause
+    238:243:void dispatchStop() -> dispatchStop
+    247:267:void dispatchInvalidateOptionsMenu() -> dispatchInvalidateOptionsMenu
+    271:277:boolean dispatchOpenOptionsMenu() -> dispatchOpenOptionsMenu
+    282:291:boolean dispatchCloseOptionsMenu() -> dispatchCloseOptionsMenu
+    296:305:void dispatchPostCreate(android.os.Bundle) -> dispatchPostCreate
+    310:313:boolean dispatchCreateOptionsMenu(android.view.Menu) -> dispatchCreateOptionsMenu
+    318:345:boolean dispatchPrepareOptionsMenu(android.view.Menu) -> dispatchPrepareOptionsMenu
     350:350:boolean dispatchOptionsItemSelected(android.view.MenuItem) -> dispatchOptionsItemSelected
-    357:364:boolean dispatchMenuOpened(int,android.view.Menu) -> dispatchMenuOpened
-    371:376:void dispatchPanelClosed(int,android.view.Menu) -> dispatchPanelClosed
-    382:385:void dispatchTitleChanged(java.lang.CharSequence,int) -> dispatchTitleChanged
-    391:417:boolean dispatchKeyEvent(android.view.KeyEvent) -> dispatchKeyEvent
+    355:364:boolean dispatchMenuOpened(int,android.view.Menu) -> dispatchMenuOpened
+    369:376:void dispatchPanelClosed(int,android.view.Menu) -> dispatchPanelClosed
+    380:385:void dispatchTitleChanged(java.lang.CharSequence,int) -> dispatchTitleChanged
+    389:417:boolean dispatchKeyEvent(android.view.KeyEvent) -> dispatchKeyEvent
     422:423:void dispatchDestroy() -> dispatchDestroy
     427:432:void dispatchSaveInstanceState(android.os.Bundle) -> dispatchSaveInstanceState
     436:437:void dispatchRestoreInstanceState(android.os.Bundle) -> dispatchRestoreInstanceState
@@ -3820,13 +3820,13 @@ com.actionbarsherlock.internal.ActionBarSherlockCompat -> com.actionbarsherlock.
     561:572:void checkCloseActionMenu(com.actionbarsherlock.view.Menu) -> checkCloseActionMenu
     576:576:boolean onOpenSubMenu(com.actionbarsherlock.internal.view.menu.MenuBuilder) -> onOpenSubMenu
     581:582:void onCloseMenu(com.actionbarsherlock.internal.view.menu.MenuBuilder,boolean) -> onCloseMenu
-    588:595:boolean onMenuItemClick(android.view.MenuItem) -> onMenuItemClick
+    586:595:boolean onMenuItemClick(android.view.MenuItem) -> onMenuItemClick
     600:600:boolean onMenuItemSelected(int,com.actionbarsherlock.view.MenuItem) -> onMenuItemSelected
-    612:614:void setProgressBarVisibility(boolean) -> setProgressBarVisibility
-    620:622:void setProgressBarIndeterminateVisibility(boolean) -> setProgressBarIndeterminateVisibility
-    628:630:void setProgressBarIndeterminate(boolean) -> setProgressBarIndeterminate
-    636:637:void setProgress(int) -> setProgress
-    643:645:void setSecondaryProgress(int) -> setSecondaryProgress
+    610:614:void setProgressBarVisibility(boolean) -> setProgressBarVisibility
+    618:622:void setProgressBarIndeterminateVisibility(boolean) -> setProgressBarIndeterminateVisibility
+    626:630:void setProgressBarIndeterminate(boolean) -> setProgressBarIndeterminate
+    634:637:void setProgress(int) -> setProgress
+    641:645:void setSecondaryProgress(int) -> setSecondaryProgress
     648:649:void setFeatureInt(int,int) -> setFeatureInt
     654:665:void updateInt(int,int,boolean) -> updateInt
     668:671:void onIntChanged(int,int) -> onIntChanged
@@ -3835,20 +3835,20 @@ com.actionbarsherlock.internal.ActionBarSherlockCompat -> com.actionbarsherlock.
     731:744:void hideProgressBars(com.actionbarsherlock.internal.widget.IcsProgressBar,com.actionbarsherlock.internal.widget.IcsProgressBar) -> hideProgressBars
     747:757:com.actionbarsherlock.internal.widget.IcsProgressBar getCircularProgressBar(boolean) -> getCircularProgressBar
     761:771:com.actionbarsherlock.internal.widget.IcsProgressBar getHorizontalProgressBar(boolean) -> getHorizontalProgressBar
-    782:782:int getFeatures() -> getFeatures
-    789:791:boolean hasFeature(int) -> hasFeature
-    798:813:boolean requestFeature(int) -> requestFeature
-    821:822:void setUiOptions(int) -> setUiOptions
-    828:829:void setUiOptions(int,int) -> setUiOptions
-    835:848:void setContentView(int) -> setContentView
-    854:867:void setContentView(android.view.View,android.view.ViewGroup$LayoutParams) -> setContentView
-    873:879:void addContentView(android.view.View,android.view.ViewGroup$LayoutParams) -> addContentView
-    884:966:void installDecor() -> installDecor
-    973:1029:android.view.ViewGroup generateLayout() -> generateLayout
+    780:782:int getFeatures() -> getFeatures
+    787:791:boolean hasFeature(int) -> hasFeature
+    796:813:boolean requestFeature(int) -> requestFeature
+    819:822:void setUiOptions(int) -> setUiOptions
+    826:829:void setUiOptions(int,int) -> setUiOptions
+    833:848:void setContentView(int) -> setContentView
+    852:867:void setContentView(android.view.View,android.view.ViewGroup$LayoutParams) -> setContentView
+    871:879:void addContentView(android.view.View,android.view.ViewGroup$LayoutParams) -> addContentView
+    882:966:void installDecor() -> installDecor
+    969:1029:android.view.ViewGroup generateLayout() -> generateLayout
     1043:1047:boolean isReservingOverflow() -> isReservingOverflow
     1051:1118:int loadUiOptionsFromManifest(android.app.Activity) -> loadUiOptionsFromManifest
     1122:1131:java.lang.String cleanActivityName(java.lang.String,java.lang.String) -> cleanActivityName
-    1173:1176:void ensureActionBar() -> ensureActionBar
+    1171:1176:void ensureActionBar() -> ensureActionBar
     109:109:com.actionbarsherlock.internal.widget.ActionBarContextView access$0(com.actionbarsherlock.internal.ActionBarSherlockCompat) -> access$0
     51:51:android.app.Activity access$1(com.actionbarsherlock.internal.ActionBarSherlockCompat) -> access$1
     107:107:com.actionbarsherlock.view.ActionMode access$2(com.actionbarsherlock.internal.ActionBarSherlockCompat) -> access$2
@@ -3869,27 +3869,27 @@ com.actionbarsherlock.internal.ActionBarSherlockNative -> com.actionbarsherlock.
     com.actionbarsherlock.internal.app.ActionBarWrapper mActionBar -> mActionBar
     com.actionbarsherlock.internal.ActionBarSherlockNative$ActionModeWrapper mActionMode -> mActionMode
     com.actionbarsherlock.internal.view.menu.MenuWrapper mMenu -> mMenu
-    36:37:com.actionbarsherlock.app.ActionBar getActionBar() -> getActionBar
+    34:37:com.actionbarsherlock.app.ActionBar getActionBar() -> getActionBar
     41:46:void initActionBar() -> initActionBar
-    52:55:void dispatchInvalidateOptionsMenu() -> dispatchInvalidateOptionsMenu
-    61:67:boolean dispatchCreateOptionsMenu(android.view.Menu) -> dispatchCreateOptionsMenu
-    74:76:boolean dispatchPrepareOptionsMenu(android.view.Menu) -> dispatchPrepareOptionsMenu
-    84:95:boolean dispatchOptionsItemSelected(android.view.MenuItem) -> dispatchOptionsItemSelected
-    102:104:boolean hasFeature(int) -> hasFeature
-    111:113:boolean requestFeature(int) -> requestFeature
-    120:121:void setUiOptions(int) -> setUiOptions
-    127:128:void setUiOptions(int,int) -> setUiOptions
-    134:136:void setContentView(int) -> setContentView
-    142:144:void setContentView(android.view.View,android.view.ViewGroup$LayoutParams) -> setContentView
-    150:152:void addContentView(android.view.View,android.view.ViewGroup$LayoutParams) -> addContentView
-    158:159:void setTitle(java.lang.CharSequence) -> setTitle
-    165:166:void setProgressBarVisibility(boolean) -> setProgressBarVisibility
-    172:173:void setProgressBarIndeterminateVisibility(boolean) -> setProgressBarIndeterminateVisibility
-    179:180:void setProgressBarIndeterminate(boolean) -> setProgressBarIndeterminate
-    186:187:void setProgress(int) -> setProgress
-    193:194:void setSecondaryProgress(int) -> setSecondaryProgress
+    50:55:void dispatchInvalidateOptionsMenu() -> dispatchInvalidateOptionsMenu
+    59:67:boolean dispatchCreateOptionsMenu(android.view.Menu) -> dispatchCreateOptionsMenu
+    72:76:boolean dispatchPrepareOptionsMenu(android.view.Menu) -> dispatchPrepareOptionsMenu
+    81:95:boolean dispatchOptionsItemSelected(android.view.MenuItem) -> dispatchOptionsItemSelected
+    100:104:boolean hasFeature(int) -> hasFeature
+    109:113:boolean requestFeature(int) -> requestFeature
+    118:121:void setUiOptions(int) -> setUiOptions
+    125:128:void setUiOptions(int,int) -> setUiOptions
+    132:136:void setContentView(int) -> setContentView
+    140:144:void setContentView(android.view.View,android.view.ViewGroup$LayoutParams) -> setContentView
+    148:152:void addContentView(android.view.View,android.view.ViewGroup$LayoutParams) -> addContentView
+    156:159:void setTitle(java.lang.CharSequence) -> setTitle
+    163:166:void setProgressBarVisibility(boolean) -> setProgressBarVisibility
+    170:173:void setProgressBarIndeterminateVisibility(boolean) -> setProgressBarIndeterminateVisibility
+    177:180:void setProgressBarIndeterminate(boolean) -> setProgressBarIndeterminate
+    184:187:void setProgress(int) -> setProgress
+    191:194:void setSecondaryProgress(int) -> setSecondaryProgress
     198:207:android.content.Context getThemedContext() -> getThemedContext
-    214:233:com.actionbarsherlock.view.ActionMode startActionMode(com.actionbarsherlock.view.ActionMode$Callback) -> startActionMode
+    212:233:com.actionbarsherlock.view.ActionMode startActionMode(com.actionbarsherlock.view.ActionMode$Callback) -> startActionMode
     24:24:void access$0(com.actionbarsherlock.internal.ActionBarSherlockNative,com.actionbarsherlock.internal.ActionBarSherlockNative$ActionModeWrapper) -> access$0
     24:24:com.actionbarsherlock.internal.ActionBarSherlockNative$ActionModeWrapper access$1(com.actionbarsherlock.internal.ActionBarSherlockNative) -> access$1
     22:22:android.app.Activity access$2(com.actionbarsherlock.internal.ActionBarSherlockNative) -> access$2
@@ -7471,72 +7471,74 @@ com.bsb.hike.VOIP.WebRtcClient -> com.bsb.hike.VOIP.e:
     boolean answerpressed -> a
     java.lang.Boolean callReceived -> o
     android.os.Handler mHandler -> p
-    143:167:void sendMessage(java.lang.String,java.lang.String,org.json.JSONObject) -> a
-    407:411:void setCamera(java.lang.String,java.lang.String,java.lang.String) -> a
-    414:418:int findEndPoint() -> c
-    422:422:void start(java.lang.String,boolean) -> a
-    425:429:void addPeer(java.lang.String,int) -> a
-    432:441:void removePeer(java.lang.String) -> a
-    444:445:void destroyPeer() -> a
-    448:448:com.bsb.hike.VOIP.WebRtcClient$MessageHandler getMessageHandler() -> b
-    41:41:java.util.HashMap access$0(com.bsb.hike.VOIP.WebRtcClient) -> a
-    43:43:org.webrtc.MediaConstraints access$1(com.bsb.hike.VOIP.WebRtcClient) -> b
-    54:54:void access$2(com.bsb.hike.VOIP.WebRtcClient,java.lang.Boolean) -> a
-    45:45:com.bsb.hike.VOIP.WebRtcClient$RTCListener access$3(com.bsb.hike.VOIP.WebRtcClient) -> c
-    50:50:void access$4(com.bsb.hike.VOIP.WebRtcClient,com.bsb.hike.HikePubSub) -> a
-    50:50:com.bsb.hike.HikePubSub access$5(com.bsb.hike.VOIP.WebRtcClient) -> d
-    413:413:int access$6(com.bsb.hike.VOIP.WebRtcClient) -> e
-    49:49:void access$7(com.bsb.hike.VOIP.WebRtcClient,java.lang.String) -> a
-    424:424:void access$8(com.bsb.hike.VOIP.WebRtcClient,java.lang.String,int) -> a
-    431:431:void access$9(com.bsb.hike.VOIP.WebRtcClient,java.lang.String) -> b
-    40:40:org.webrtc.PeerConnectionFactory access$10(com.bsb.hike.VOIP.WebRtcClient) -> f
-    42:42:java.util.LinkedList access$11(com.bsb.hike.VOIP.WebRtcClient) -> g
-    44:44:org.webrtc.MediaStream access$12(com.bsb.hike.VOIP.WebRtcClient) -> h
-    54:54:java.lang.Boolean access$13(com.bsb.hike.VOIP.WebRtcClient) -> i
-    49:49:java.lang.String access$14(com.bsb.hike.VOIP.WebRtcClient) -> j
+    168:193:void sendMessage(java.lang.String,java.lang.String,org.json.JSONObject) -> a
+    493:502:void setAudio(java.lang.String,java.lang.String,java.lang.String) -> a
+    505:509:int findEndPoint() -> d
+    513:513:void start(java.lang.String,boolean) -> a
+    516:525:void addPeer(java.lang.String,int) -> a
+    528:557:void removePeer(java.lang.String) -> a
+    578:583:void destroyPeer() -> a
+    586:586:com.bsb.hike.VOIP.WebRtcClient$MessageHandler getMessageHandler() -> b
+    47:47:java.util.HashMap access$0(com.bsb.hike.VOIP.WebRtcClient) -> a
+    49:49:org.webrtc.MediaConstraints access$1(com.bsb.hike.VOIP.WebRtcClient) -> b
+    60:60:void access$2(com.bsb.hike.VOIP.WebRtcClient,java.lang.Boolean) -> a
+    54:54:java.lang.String access$3() -> c
+    51:51:com.bsb.hike.VOIP.WebRtcClient$RTCListener access$4(com.bsb.hike.VOIP.WebRtcClient) -> c
+    56:56:void access$5(com.bsb.hike.VOIP.WebRtcClient,com.bsb.hike.HikePubSub) -> a
+    56:56:com.bsb.hike.HikePubSub access$6(com.bsb.hike.VOIP.WebRtcClient) -> d
+    504:504:int access$7(com.bsb.hike.VOIP.WebRtcClient) -> e
+    55:55:void access$8(com.bsb.hike.VOIP.WebRtcClient,java.lang.String) -> a
+    515:515:void access$9(com.bsb.hike.VOIP.WebRtcClient,java.lang.String,int) -> a
+    527:527:void access$10(com.bsb.hike.VOIP.WebRtcClient,java.lang.String) -> b
+    46:46:org.webrtc.PeerConnectionFactory access$11(com.bsb.hike.VOIP.WebRtcClient) -> f
+    46:46:void access$12(com.bsb.hike.VOIP.WebRtcClient,org.webrtc.PeerConnectionFactory) -> a
+    48:48:java.util.LinkedList access$13(com.bsb.hike.VOIP.WebRtcClient) -> g
+    50:50:org.webrtc.MediaStream access$14(com.bsb.hike.VOIP.WebRtcClient) -> h
+    60:60:java.lang.Boolean access$15(com.bsb.hike.VOIP.WebRtcClient) -> i
 com.bsb.hike.VOIP.WebRtcClient$1 -> com.bsb.hike.VOIP.f:
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    352:362:void run() -> run
+    439:449:void run() -> run
 com.bsb.hike.VOIP.WebRtcClient$AddIceCandidateCommand -> com.bsb.hike.VOIP.g:
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    121:131:void execute(java.lang.String,org.json.JSONObject) -> a
+    137:147:void execute(java.lang.String,org.json.JSONObject) -> a
 com.bsb.hike.VOIP.WebRtcClient$Command -> com.bsb.hike.VOIP.h:
     void execute(java.lang.String,org.json.JSONObject) -> a
 com.bsb.hike.VOIP.WebRtcClient$CreateAnswerCommand -> com.bsb.hike.VOIP.i:
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    92:102:void execute(java.lang.String,org.json.JSONObject) -> a
+    102:118:void execute(java.lang.String,org.json.JSONObject) -> a
 com.bsb.hike.VOIP.WebRtcClient$CreateOfferCommand -> com.bsb.hike.VOIP.j:
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    83:86:void execute(java.lang.String,org.json.JSONObject) -> a
+    93:96:void execute(java.lang.String,org.json.JSONObject) -> a
 com.bsb.hike.VOIP.WebRtcClient$EndCallCommand -> com.bsb.hike.VOIP.k:
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    136:138:void execute(java.lang.String,org.json.JSONObject) -> a
+    152:163:void execute(java.lang.String,org.json.JSONObject) -> a
 com.bsb.hike.VOIP.WebRtcClient$MessageHandler -> com.bsb.hike.VOIP.l:
     java.util.HashMap commandMap -> b
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    191:211:void onEventReceived(java.lang.String,java.lang.Object) -> a
-    216:228:void executeCommand(java.lang.String,java.lang.String,org.json.JSONObject) -> a
+    217:249:void onEventReceived(java.lang.String,java.lang.Object) -> a
+    254:274:void executeCommand(java.lang.String,java.lang.String,org.json.JSONObject) -> a
 com.bsb.hike.VOIP.WebRtcClient$Peer -> com.bsb.hike.VOIP.m:
     org.webrtc.PeerConnection pc -> b
     java.lang.String id -> c
     int endPoint -> d
     org.webrtc.SessionDescription sdown -> e
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    240:250:void onCreateSuccess(org.webrtc.SessionDescription) -> onCreateSuccess
-    254:254:void onSetSuccess() -> onSetSuccess
-    262:262:void onCreateFailure(java.lang.String) -> onCreateFailure
-    266:266:void onSetFailure(java.lang.String) -> onSetFailure
-    271:271:void onSignalingChange(org.webrtc.PeerConnection$SignalingState) -> onSignalingChange
-    276:280:void onIceConnectionChange(org.webrtc.PeerConnection$IceConnectionState) -> onIceConnectionChange
-    285:285:void onIceGatheringChange(org.webrtc.PeerConnection$IceGatheringState) -> onIceGatheringChange
-    290:299:void onIceCandidate(org.webrtc.IceCandidate) -> onIceCandidate
-    303:303:void onError() -> onError
-    311:312:void onAddStream(org.webrtc.MediaStream) -> onAddStream
-    316:319:void onRemoveStream(org.webrtc.MediaStream) -> onRemoveStream
-    323:323:void onDataChannel(org.webrtc.DataChannel) -> onDataChannel
-    232:232:org.webrtc.PeerConnection access$0(com.bsb.hike.VOIP.WebRtcClient$Peer) -> a
-    233:233:java.lang.String access$1(com.bsb.hike.VOIP.WebRtcClient$Peer) -> b
-    234:234:int access$2(com.bsb.hike.VOIP.WebRtcClient$Peer) -> c
+    286:296:void onCreateSuccess(org.webrtc.SessionDescription) -> onCreateSuccess
+    300:300:void onSetSuccess() -> onSetSuccess
+    308:309:void onCreateFailure(java.lang.String) -> onCreateFailure
+    313:313:void onSetFailure(java.lang.String) -> onSetFailure
+    318:318:void onSignalingChange(org.webrtc.PeerConnection$SignalingState) -> onSignalingChange
+    323:330:void onIceConnectionChange(org.webrtc.PeerConnection$IceConnectionState) -> onIceConnectionChange
+    335:335:void onIceGatheringChange(org.webrtc.PeerConnection$IceGatheringState) -> onIceGatheringChange
+    340:349:void onIceCandidate(org.webrtc.IceCandidate) -> onIceCandidate
+    353:354:void onError() -> onError
+    358:363:void onAddStream(org.webrtc.MediaStream) -> onAddStream
+    367:370:void onRemoveStream(org.webrtc.MediaStream) -> onRemoveStream
+    374:374:void onDataChannel(org.webrtc.DataChannel) -> onDataChannel
+    278:278:org.webrtc.PeerConnection access$0(com.bsb.hike.VOIP.WebRtcClient$Peer) -> a
+    278:278:void access$1(com.bsb.hike.VOIP.WebRtcClient$Peer,org.webrtc.PeerConnection) -> a
+    279:279:java.lang.String access$2(com.bsb.hike.VOIP.WebRtcClient$Peer) -> b
+    280:280:int access$3(com.bsb.hike.VOIP.WebRtcClient$Peer) -> c
 com.bsb.hike.VOIP.WebRtcClient$RTCListener -> com.bsb.hike.VOIP.n:
     void onStatusChanged(java.lang.String) -> b
     void onLocalStream(org.webrtc.MediaStream) -> a
@@ -7545,7 +7547,7 @@ com.bsb.hike.VOIP.WebRtcClient$RTCListener -> com.bsb.hike.VOIP.n:
     void closeActivity() -> f
 com.bsb.hike.VOIP.WebRtcClient$SetRemoteSDPCommand -> com.bsb.hike.VOIP.o:
     com.bsb.hike.VOIP.WebRtcClient this$0 -> a
-    109:114:void execute(java.lang.String,org.json.JSONObject) -> a
+    125:130:void execute(java.lang.String,org.json.JSONObject) -> a
 com.bsb.hike.adapters.AccountAdapter -> com.bsb.hike.adapters.a:
     android.view.LayoutInflater layoutInflater -> a
     35:53:android.view.View getDropDownView(int,android.view.View,android.view.ViewGroup) -> getDropDownView
@@ -10235,23 +10237,21 @@ com.bsb.hike.service.HikeMqttManagerNew -> com.bsb.hike.service.HikeMqttManagerN
     792:792:void access$4(com.bsb.hike.service.HikeMqttManagerNew,boolean) -> a
     112:112:com.bsb.hike.db.HikeMqttPersistence access$5(com.bsb.hike.service.HikeMqttManagerNew) -> e
     90:90:java.util.concurrent.atomic.AtomicBoolean access$6(com.bsb.hike.service.HikeMqttManagerNew) -> f
-    74:74:android.content.SharedPreferences access$7(com.bsb.hike.service.HikeMqttManagerNew) -> g
-    102:102:com.bsb.hike.service.MqttMessagesManager access$8(com.bsb.hike.service.HikeMqttManagerNew) -> h
-    120:120:android.os.Messenger access$9(com.bsb.hike.service.HikeMqttManagerNew) -> i
+    102:102:com.bsb.hike.service.MqttMessagesManager access$8(com.bsb.hike.service.HikeMqttManagerNew) -> g
     835:835:void access$10(com.bsb.hike.service.HikeMqttManagerNew,boolean) -> b
-    493:493:void access$11(com.bsb.hike.service.HikeMqttManagerNew) -> j
+    493:493:void access$11(com.bsb.hike.service.HikeMqttManagerNew) -> h
     80:80:void access$12(com.bsb.hike.service.HikeMqttManagerNew,boolean) -> c
     169:169:void access$13(com.bsb.hike.service.HikeMqttManagerNew,int) -> a
     154:154:void access$14(com.bsb.hike.service.HikeMqttManagerNew,short) -> a
     92:92:void access$15(com.bsb.hike.service.HikeMqttManagerNew,int) -> b
     118:118:void access$16(com.bsb.hike.service.HikeMqttManagerNew,com.bsb.hike.service.HikeMqttManagerNew$MQTTConnectionStatus) -> a
-    600:600:void access$17(com.bsb.hike.service.HikeMqttManagerNew) -> k
-    96:96:android.os.Handler access$18(com.bsb.hike.service.HikeMqttManagerNew) -> l
+    600:600:void access$17(com.bsb.hike.service.HikeMqttManagerNew) -> i
+    96:96:android.os.Handler access$18(com.bsb.hike.service.HikeMqttManagerNew) -> j
     152:152:void access$19(com.bsb.hike.service.HikeMqttManagerNew,boolean) -> d
     150:150:void access$20(com.bsb.hike.service.HikeMqttManagerNew,int) -> c
-    515:515:void access$21(com.bsb.hike.service.HikeMqttManagerNew) -> m
+    515:515:void access$21(com.bsb.hike.service.HikeMqttManagerNew) -> k
     1097:1097:void access$22(com.bsb.hike.service.HikeMqttManagerNew,org.eclipse.paho.client.mqttv3.MqttException,boolean) -> a
-    586:586:void access$23(com.bsb.hike.service.HikeMqttManagerNew) -> n
+    586:586:void access$23(com.bsb.hike.service.HikeMqttManagerNew) -> l
 com.bsb.hike.service.HikeMqttManagerNew$1 -> com.bsb.hike.service.a:
     com.bsb.hike.service.HikeMqttManagerNew this$0 -> a
     boolean val$reconnect -> b
@@ -10302,14 +10302,6 @@ com.bsb.hike.service.HikeMqttManagerNew$MQTTConnectionStatus -> com.bsb.hike.ser
 com.bsb.hike.service.HikeMqttManagerNew$RetryFailedMessages -> com.bsb.hike.service.k:
     com.bsb.hike.service.HikeMqttManagerNew this$0 -> a
     265:284:void run() -> run
-com.bsb.hike.service.HikeMqttManagerNew$TestOutmsgs -> com.bsb.hike.service.l:
-    com.bsb.hike.service.HikeMqttManagerNew this$0 -> a
-    1356:1367:void run() -> run
-    1428:1457:void testVoIP() -> a
-    1426:1426:void access$0(com.bsb.hike.service.HikeMqttManagerNew$TestOutmsgs) -> a
-com.bsb.hike.service.HikeMqttManagerNew$TestOutmsgs$1 -> com.bsb.hike.service.m:
-    com.bsb.hike.service.HikeMqttManagerNew$TestOutmsgs this$1 -> a
-    1362:1363:void run() -> run
 com.bsb.hike.service.HikeService -> com.bsb.hike.service.HikeService:
     com.bsb.hike.service.HikeService$ManualContactSyncTrigger manualContactSyncTrigger -> a
     com.bsb.hike.service.HikeService$RegisterToGCMTrigger registerToGCMTrigger -> b
@@ -10355,44 +10347,44 @@ com.bsb.hike.service.HikeService -> com.bsb.hike.service.HikeService:
     748:748:java.lang.Runnable access$7(com.bsb.hike.service.HikeService) -> g
     757:757:java.lang.Runnable access$8(com.bsb.hike.service.HikeService) -> h
     766:766:java.lang.Runnable access$9(com.bsb.hike.service.HikeService) -> i
-com.bsb.hike.service.HikeService$1 -> com.bsb.hike.service.n:
+com.bsb.hike.service.HikeService$1 -> com.bsb.hike.service.l:
     com.bsb.hike.service.HikeService this$0 -> a
     744:745:void run() -> run
-com.bsb.hike.service.HikeService$2 -> com.bsb.hike.service.o:
+com.bsb.hike.service.HikeService$2 -> com.bsb.hike.service.m:
     com.bsb.hike.service.HikeService this$0 -> a
     753:754:void run() -> run
-com.bsb.hike.service.HikeService$3 -> com.bsb.hike.service.p:
+com.bsb.hike.service.HikeService$3 -> com.bsb.hike.service.n:
     com.bsb.hike.service.HikeService this$0 -> a
     762:763:void run() -> run
-com.bsb.hike.service.HikeService$4 -> com.bsb.hike.service.q:
+com.bsb.hike.service.HikeService$4 -> com.bsb.hike.service.o:
     com.bsb.hike.service.HikeService this$0 -> a
     771:772:void run() -> run
-com.bsb.hike.service.HikeService$5 -> com.bsb.hike.service.r:
+com.bsb.hike.service.HikeService$5 -> com.bsb.hike.service.p:
     com.bsb.hike.service.HikeService this$0 -> a
     790:791:void run() -> run
-com.bsb.hike.service.HikeService$6 -> com.bsb.hike.service.s:
+com.bsb.hike.service.HikeService$6 -> com.bsb.hike.service.q:
     com.bsb.hike.service.HikeService this$0 -> a
     810:816:void run() -> run
-com.bsb.hike.service.HikeService$7 -> com.bsb.hike.service.t:
+com.bsb.hike.service.HikeService$7 -> com.bsb.hike.service.r:
     com.bsb.hike.service.HikeService this$0 -> a
     825:827:void run() -> run
-com.bsb.hike.service.HikeService$ContactListChangeIntentReceiver -> com.bsb.hike.service.u:
+com.bsb.hike.service.HikeService$ContactListChangeIntentReceiver -> com.bsb.hike.service.s:
     boolean manualSync -> a
     com.bsb.hike.service.HikeService this$0 -> b
     489:499:void onChange(boolean) -> onChange
-com.bsb.hike.service.HikeService$ContactsChanged -> com.bsb.hike.service.v:
+com.bsb.hike.service.HikeService$ContactsChanged -> com.bsb.hike.service.t:
     android.content.Context context -> c
     boolean manualSync -> a
     com.bsb.hike.service.HikeService this$0 -> b
     68:74:void run() -> run
-com.bsb.hike.service.HikeService$ManualContactSyncTrigger -> com.bsb.hike.service.w:
+com.bsb.hike.service.HikeService$ManualContactSyncTrigger -> com.bsb.hike.service.u:
     com.bsb.hike.service.HikeService this$0 -> a
     518:521:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.bsb.hike.service.HikeService$PostDeviceDetails -> com.bsb.hike.service.x:
+com.bsb.hike.service.HikeService$PostDeviceDetails -> com.bsb.hike.service.v:
     com.bsb.hike.service.HikeService this$0 -> a
     621:686:void onReceive(android.content.Context,android.content.Intent) -> onReceive
     615:615:com.bsb.hike.service.HikeService access$1(com.bsb.hike.service.HikeService$PostDeviceDetails) -> a
-com.bsb.hike.service.HikeService$PostDeviceDetails$1 -> com.bsb.hike.service.y:
+com.bsb.hike.service.HikeService$PostDeviceDetails$1 -> com.bsb.hike.service.w:
     com.bsb.hike.service.HikeService$PostDeviceDetails this$1 -> a
     668:673:void onSuccess(org.json.JSONObject) -> a
     677:680:void onFailure() -> a
@@ -10400,36 +10392,36 @@ com.bsb.hike.service.HikeService$PostGreenBlueDetails -> com.bsb.hike.service.Hi
     com.bsb.hike.service.HikeService this$0 -> a
     841:872:void onReceive(android.content.Context,android.content.Intent) -> onReceive
     835:835:com.bsb.hike.service.HikeService access$0(com.bsb.hike.service.HikeService$PostGreenBlueDetails) -> a
-com.bsb.hike.service.HikeService$PostGreenBlueDetails$1 -> com.bsb.hike.service.z:
+com.bsb.hike.service.HikeService$PostGreenBlueDetails$1 -> com.bsb.hike.service.x:
     com.bsb.hike.service.HikeService$PostGreenBlueDetails this$1 -> a
     855:860:void onSuccess(org.json.JSONObject) -> a
     864:866:void onFailure() -> a
-com.bsb.hike.service.HikeService$PostSignupProfilePic -> com.bsb.hike.service.aa:
+com.bsb.hike.service.HikeService$PostSignupProfilePic -> com.bsb.hike.service.y:
     com.bsb.hike.service.HikeService this$0 -> a
     880:931:void onReceive(android.content.Context,android.content.Intent) -> onReceive
     875:875:com.bsb.hike.service.HikeService access$0(com.bsb.hike.service.HikeService$PostSignupProfilePic) -> a
-com.bsb.hike.service.HikeService$PostSignupProfilePic$1 -> com.bsb.hike.service.ab:
+com.bsb.hike.service.HikeService$PostSignupProfilePic$1 -> com.bsb.hike.service.z:
     com.bsb.hike.service.HikeService$PostSignupProfilePic this$1 -> a
     android.content.Context val$context -> b
     java.io.File val$f -> c
     904:910:void onSuccess(org.json.JSONObject) -> a
     914:924:void onFailure() -> a
-com.bsb.hike.service.HikeService$RegisterToGCMTrigger -> com.bsb.hike.service.ac:
+com.bsb.hike.service.HikeService$RegisterToGCMTrigger -> com.bsb.hike.service.aa:
     com.bsb.hike.service.HikeService this$0 -> a
     529:557:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.bsb.hike.service.HikeService$SendGCMIdToServerTrigger -> com.bsb.hike.service.ad:
+com.bsb.hike.service.HikeService$SendGCMIdToServerTrigger -> com.bsb.hike.service.ab:
     com.bsb.hike.service.HikeService this$0 -> a
     565:612:void onReceive(android.content.Context,android.content.Intent) -> onReceive
     560:560:com.bsb.hike.service.HikeService access$1(com.bsb.hike.service.HikeService$SendGCMIdToServerTrigger) -> a
-com.bsb.hike.service.HikeService$SendGCMIdToServerTrigger$1 -> com.bsb.hike.service.ae:
+com.bsb.hike.service.HikeService$SendGCMIdToServerTrigger$1 -> com.bsb.hike.service.ac:
     com.bsb.hike.service.HikeService$SendGCMIdToServerTrigger this$1 -> a
     android.content.SharedPreferences val$prefs -> b
     586:590:void onSuccess(org.json.JSONObject) -> a
     594:596:void onFailure() -> a
-com.bsb.hike.service.HikeService$SendRai -> com.bsb.hike.service.af:
+com.bsb.hike.service.HikeService$SendRai -> com.bsb.hike.service.ad:
     com.bsb.hike.service.HikeService this$0 -> a
     695:717:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.bsb.hike.service.HikeServiceConnection -> com.bsb.hike.service.ag:
+com.bsb.hike.service.HikeServiceConnection -> com.bsb.hike.service.ae:
     android.os.Messenger mService -> a
     com.bsb.hike.HikeMessengerApp mApp -> b
     android.os.Messenger mMessenger -> c
@@ -10440,7 +10432,7 @@ com.bsb.hike.service.HikeServiceConnection -> com.bsb.hike.service.ag:
     105:153:void onEventReceived(java.lang.String,java.lang.Object) -> a
 com.bsb.hike.service.LocaleChangeReceiver -> com.bsb.hike.service.LocaleChangeReceiver:
     18:29:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.bsb.hike.service.MqttMessagesManager -> com.bsb.hike.service.ah:
+com.bsb.hike.service.MqttMessagesManager -> com.bsb.hike.service.af:
     com.bsb.hike.db.HikeConversationsDatabase convDb -> a
     com.bsb.hike.db.HikeUserDatabase userDb -> b
     android.content.SharedPreferences settings -> c
@@ -10506,36 +10498,40 @@ com.bsb.hike.service.MqttMessagesManager -> com.bsb.hike.service.ah:
     1803:1886:void finalProcessing() -> b
     1890:1891:void addToLists(java.lang.String,com.bsb.hike.models.ConvMessage) -> a
     1895:2117:void saveMqttMessage(org.json.JSONObject) -> b
-    2122:2140:void startVOIP(org.json.JSONObject) -> S
-    2144:2180:void uploadGroupProfileImage(java.lang.String,boolean) -> a
-    2184:2213:void handleSendNativeInviteKey(boolean,boolean,java.lang.String,java.lang.String,android.content.SharedPreferences$Editor) -> a
-    2217:2227:void autoDownloadProfileImage(com.bsb.hike.models.StatusMessage,boolean) -> a
-    2231:2239:void autoDownloadGroupImage(java.lang.String) -> a
-    2243:2247:void autoDownloadProtipImage(com.bsb.hike.models.StatusMessage,boolean) -> b
-    2254:2262:void setDefaultSMSClientTutorialSetting() -> c
-    2266:2276:void removeOrPostponeFriendType(java.lang.String) -> b
-    2280:2287:void incrementUnseenStatusCount() -> d
-    2296:2300:int updateDB(java.lang.Object,com.bsb.hike.models.ConvMessage$State,java.lang.String) -> a
-    2305:2324:com.bsb.hike.models.ConvMessage saveStatusMsg(org.json.JSONObject,java.lang.String) -> a
-    2330:2341:com.bsb.hike.models.ConvMessage saveStatusMsgBulk(org.json.JSONObject,java.lang.String) -> b
-    2346:2368:com.bsb.hike.models.ConvMessage statusMessagePreProcess(org.json.JSONObject,java.lang.String) -> c
-    2373:2380:void statusMessagePostProcess(com.bsb.hike.models.ConvMessage,org.json.JSONObject) -> a
-    2385:2431:void addTypingNotification(java.lang.String,java.lang.String) -> a
-    2436:2468:void removeTypingNotification(java.lang.String,java.lang.String) -> b
-    2480:2508:void updateAtomicPopUpData(org.json.JSONObject) -> c
-    2523:2550:java.lang.String[] getPopUpTypeAndShowNotification(java.lang.String,java.lang.String) -> c
-    2555:2556:boolean isDuplicateOrWrongPacket(java.lang.String,org.json.JSONObject) -> a
-    2142:2142:void access$0(com.bsb.hike.service.MqttMessagesManager,java.lang.String,boolean) -> a
-com.bsb.hike.service.MqttMessagesManager$1 -> com.bsb.hike.service.ai:
+    2122:2148:void startVOIP(org.json.JSONObject) -> S
+    2152:2188:void uploadGroupProfileImage(java.lang.String,boolean) -> a
+    2192:2221:void handleSendNativeInviteKey(boolean,boolean,java.lang.String,java.lang.String,android.content.SharedPreferences$Editor) -> a
+    2225:2235:void autoDownloadProfileImage(com.bsb.hike.models.StatusMessage,boolean) -> a
+    2239:2247:void autoDownloadGroupImage(java.lang.String) -> a
+    2251:2255:void autoDownloadProtipImage(com.bsb.hike.models.StatusMessage,boolean) -> b
+    2262:2270:void setDefaultSMSClientTutorialSetting() -> c
+    2274:2284:void removeOrPostponeFriendType(java.lang.String) -> b
+    2288:2295:void incrementUnseenStatusCount() -> d
+    2304:2308:int updateDB(java.lang.Object,com.bsb.hike.models.ConvMessage$State,java.lang.String) -> a
+    2313:2332:com.bsb.hike.models.ConvMessage saveStatusMsg(org.json.JSONObject,java.lang.String) -> a
+    2338:2349:com.bsb.hike.models.ConvMessage saveStatusMsgBulk(org.json.JSONObject,java.lang.String) -> b
+    2354:2376:com.bsb.hike.models.ConvMessage statusMessagePreProcess(org.json.JSONObject,java.lang.String) -> c
+    2381:2388:void statusMessagePostProcess(com.bsb.hike.models.ConvMessage,org.json.JSONObject) -> a
+    2393:2439:void addTypingNotification(java.lang.String,java.lang.String) -> a
+    2444:2476:void removeTypingNotification(java.lang.String,java.lang.String) -> b
+    2488:2516:void updateAtomicPopUpData(org.json.JSONObject) -> c
+    2531:2558:java.lang.String[] getPopUpTypeAndShowNotification(java.lang.String,java.lang.String) -> c
+    2563:2564:boolean isDuplicateOrWrongPacket(java.lang.String,org.json.JSONObject) -> a
+    2150:2150:void access$0(com.bsb.hike.service.MqttMessagesManager,java.lang.String,boolean) -> a
+com.bsb.hike.service.MqttMessagesManager$1 -> com.bsb.hike.service.ag:
+    com.bsb.hike.service.MqttMessagesManager this$0 -> a
+    android.content.Intent val$serviceIntent -> b
+    2133:2134:void run() -> run
+com.bsb.hike.service.MqttMessagesManager$2 -> com.bsb.hike.service.ah:
     android.content.Intent voipIntent -> a
     com.bsb.hike.service.MqttMessagesManager this$0 -> b
-    2132:2133:void run() -> run
-com.bsb.hike.service.MqttMessagesManager$2 -> com.bsb.hike.service.aj:
+    2140:2141:void run() -> run
+com.bsb.hike.service.MqttMessagesManager$3 -> com.bsb.hike.service.ai:
     com.bsb.hike.service.MqttMessagesManager this$0 -> a
     boolean val$retryOnce -> b
     java.lang.String val$groupId -> c
-    2159:2169:void onFailure() -> a
-    2173:2174:void onSuccess(org.json.JSONObject) -> a
+    2167:2177:void onFailure() -> a
+    2181:2182:void onSuccess(org.json.JSONObject) -> a
 com.bsb.hike.service.ReferralReceiver -> com.bsb.hike.service.ReferralReceiver:
     33:58:void onReceive(android.content.Context,android.content.Intent) -> onReceive
 com.bsb.hike.service.SMSBroadcastReceiver -> com.bsb.hike.service.SMSBroadcastReceiver:
@@ -10555,6 +10551,82 @@ com.bsb.hike.service.UpgradeIntentService -> com.bsb.hike.service.UpgradeIntentS
     86:87:void initialiseSharedMediaAndFileThumbnailTable() -> b
     91:92:void addMessageHashNMsisdnNReadByForGroup() -> c
     96:97:void upgradeForDatabaseVersion28() -> d
+com.bsb.hike.service.VOIPService -> com.bsb.hike.service.VOIPService:
+    com.bsb.hike.VOIP.WebRtcClient client -> c
+    java.lang.String mSocketAddress -> d
+    java.lang.String callerId -> e
+    int minbuf -> f
+    android.media.AudioTrack aud1 -> g
+    java.lang.String manufacturer -> h
+    android.content.Context mContext -> i
+    java.lang.String dialedId -> j
+    int notifId -> k
+    android.app.NotificationManager mNotificationManager -> l
+    java.lang.Boolean rejectCall -> m
+    com.bsb.hike.service.VOIPService$VoIPBinder binder -> n
+    com.bsb.hike.ui.VoIPActivity$MessageHandler mHandler -> o
+    java.lang.Boolean callConnected -> a
+    org.webrtc.MediaStream medi -> b
+    66:67:void onCreate() -> onCreate
+    71:73:void onConfigurationChanged(android.content.res.Configuration) -> onConfigurationChanged
+    105:197:void startUp(android.content.Intent) -> a
+    204:215:void answer(java.lang.String) -> a
+    221:223:void call() -> a
+    229:232:void startCam() -> b
+    244:244:void onStatusChanged(java.lang.String) -> b
+    249:251:void onLocalStream(org.webrtc.MediaStream) -> a
+    256:259:void onAddRemoteStream(org.webrtc.MediaStream,int) -> a
+    264:267:void onRemoveRemoteStream(org.webrtc.MediaStream,int) -> b
+    272:276:void endCall() -> c
+    280:295:void closeActivity() -> f
+    299:332:void declineCall() -> d
+    338:338:android.os.IBinder onBind(android.content.Intent) -> onBind
+    343:357:int onStartCommand(android.content.Intent,int,int) -> onStartCommand
+    362:364:void onDestroy() -> onDestroy
+com.bsb.hike.service.VOIPService$1worker -> com.bsb.hike.service.aj:
+    com.bsb.hike.service.VOIPService this$0 -> a
+    android.content.Intent val$i -> b
+    349:351:void run() -> run
+com.bsb.hike.service.VOIPService$VoIPBinder -> com.bsb.hike.service.ak:
+    com.bsb.hike.service.VOIPService this$0 -> a
+    368:368:com.bsb.hike.service.VOIPService getService() -> a
+com.bsb.hike.service.VoIPServiceNew -> com.bsb.hike.service.VoIPServiceNew:
+    com.bsb.hike.VOIP.WebRtcClient client -> e
+    java.lang.String callerId -> f
+    int minbuf -> g
+    java.lang.String manufacturer -> h
+    android.content.Context mContext -> i
+    java.lang.String dialedId -> j
+    int notifId -> k
+    android.app.NotificationManager mNotificationManager -> l
+    java.lang.Boolean rejectCall -> m
+    com.bsb.hike.service.VoIPServiceNew vService -> a
+    com.bsb.hike.ui.VoIPActivity$MessageHandler mHandler -> n
+    boolean serviceStarted -> b
+    boolean factoryStaticInitialized -> o
+    int blah -> c
+    java.lang.Boolean callConnected -> d
+    boolean run -> p
+    62:65:void onCreate() -> onCreate
+    68:69:void onConfigurationChanged(android.content.res.Configuration) -> onConfigurationChanged
+    88:97:void answer(java.lang.String) -> a
+    100:101:void call() -> a
+    104:106:void startCam() -> b
+    109:111:com.bsb.hike.service.VoIPServiceNew getVoIPSerivceInstance() -> c
+    123:123:void onStatusChanged(java.lang.String) -> b
+    127:129:void onLocalStream(org.webrtc.MediaStream) -> a
+    142:142:void onAddRemoteStream(org.webrtc.MediaStream,int) -> a
+    146:155:void onRemoveRemoteStream(org.webrtc.MediaStream,int) -> b
+    158:161:void endCall() -> d
+    164:189:void stopService() -> e
+    193:209:void declineCall() -> g
+    214:219:int onStartCommand(android.content.Intent,int,int) -> onStartCommand
+    223:273:void startUp(android.content.Intent) -> a
+    281:283:void closeActivity() -> f
+    288:288:android.os.IBinder onBind(android.content.Intent) -> onBind
+    293:295:void onDestroy() -> onDestroy
+    298:302:void startCall(android.content.Intent) -> b
+    305:306:com.bsb.hike.service.VoIPServiceNew getInstance() -> h
 com.bsb.hike.smartImageLoader.FileImageLoader -> com.bsb.hike.d.a:
     int reqWidth -> d
     int reqHeight -> e
@@ -13858,6 +13930,87 @@ com.bsb.hike.ui.TwitterAuthActivity -> com.bsb.hike.ui.TwitterAuthActivity:
 com.bsb.hike.ui.TwitterAuthActivity$1 -> com.bsb.hike.ui.ms:
     com.bsb.hike.ui.TwitterAuthActivity this$0 -> a
     49:50:void run() -> run
+com.bsb.hike.ui.VoIPActivity -> com.bsb.hike.ui.VoIPActivity:
+    java.lang.String callerId -> e
+    java.lang.String dialedId -> f
+    android.widget.Button endCall -> g
+    android.widget.Button acceptCall -> h
+    android.widget.Button declineCall -> i
+    android.widget.TextView callNo -> j
+    int serviceId -> k
+    com.bsb.hike.HikePubSub mPubSub -> l
+    android.os.Handler messageHandler -> a
+    com.bsb.hike.ui.VoIPActivity$MessageHandler serviceHandler -> b
+    java.lang.String resumeId -> m
+    com.bsb.hike.service.VOIPService vService -> n
+    com.bsb.hike.ui.VoIPActivity vActivity -> o
+    boolean mBound -> c
+    boolean callConnected -> d
+    android.content.ServiceConnection vsc -> p
+    92:110:void onCreate(android.os.Bundle) -> onCreate
+    114:153:void setInCallLayout() -> a
+    156:174:void drawInCallLayout() -> b
+    178:234:void setAnswerLayout() -> c
+    258:273:void onEventReceived(java.lang.String,java.lang.Object) -> a
+    47:47:void access$0(com.bsb.hike.service.VOIPService) -> a
+    48:48:com.bsb.hike.ui.VoIPActivity access$1() -> d
+    69:69:android.content.ServiceConnection access$2() -> e
+    47:47:com.bsb.hike.service.VOIPService access$3() -> f
+    40:40:int access$4(com.bsb.hike.ui.VoIPActivity) -> a
+com.bsb.hike.ui.VoIPActivity$1 -> com.bsb.hike.ui.mt:
+    76:81:void onServiceConnected(android.content.ComponentName,android.os.IBinder) -> onServiceConnected
+    87:87:void onServiceDisconnected(android.content.ComponentName) -> onServiceDisconnected
+com.bsb.hike.ui.VoIPActivity$2 -> com.bsb.hike.ui.mu:
+    com.bsb.hike.ui.VoIPActivity this$0 -> a
+    143:150:void onClick(android.view.View) -> onClick
+com.bsb.hike.ui.VoIPActivity$3 -> com.bsb.hike.ui.mv:
+    com.bsb.hike.ui.VoIPActivity this$0 -> a
+    164:171:void onClick(android.view.View) -> onClick
+com.bsb.hike.ui.VoIPActivity$4 -> com.bsb.hike.ui.mw:
+    com.bsb.hike.ui.VoIPActivity this$0 -> a
+    android.content.Intent val$i -> b
+    191:203:void onClick(android.view.View) -> onClick
+com.bsb.hike.ui.VoIPActivity$5 -> com.bsb.hike.ui.mx:
+    com.bsb.hike.ui.VoIPActivity this$0 -> a
+    android.content.Intent val$i -> b
+    215:231:void onClick(android.view.View) -> onClick
+com.bsb.hike.ui.VoIPActivity$MessageHandler -> com.bsb.hike.ui.my:
+    55:65:void handleMessage(android.os.Message) -> handleMessage
+com.bsb.hike.ui.VoIPActivityNew -> com.bsb.hike.ui.VoIPActivityNew:
+    java.lang.String callerId -> d
+    java.lang.String dialedId -> e
+    android.widget.Button endCall -> f
+    android.widget.Button acceptCall -> g
+    android.widget.Button declineCall -> h
+    android.widget.TextView callNo -> i
+    int serviceId -> j
+    com.bsb.hike.HikePubSub mPubSub -> k
+    android.os.Handler messageHandler -> a
+    com.bsb.hike.ui.VoIPActivity$MessageHandler serviceHandler -> b
+    java.lang.String resumeId -> l
+    com.bsb.hike.service.VoIPServiceNew vService -> m
+    com.bsb.hike.ui.VoIPActivityNew vActivity -> n
+    boolean callConnected -> c
+    43:57:void onCreate(android.os.Bundle) -> onCreate
+    60:99:void prepareAnswer() -> a
+    102:119:void prepareInCall() -> b
+    122:124:void prepareResume() -> c
+    127:138:void drawInCall() -> d
+    143:153:void onEventReceived(java.lang.String,java.lang.Object) -> a
+    156:156:com.bsb.hike.ui.VoIPActivityNew getVoIPActivityInstance() -> e
+    38:38:void access$0(com.bsb.hike.ui.VoIPActivityNew,com.bsb.hike.service.VoIPServiceNew) -> a
+    38:38:com.bsb.hike.service.VoIPServiceNew access$1(com.bsb.hike.ui.VoIPActivityNew) -> a
+com.bsb.hike.ui.VoIPActivityNew$1 -> com.bsb.hike.ui.mz:
+    com.bsb.hike.ui.VoIPActivityNew this$0 -> a
+    android.content.Intent val$i -> b
+    73:79:void onClick(android.view.View) -> onClick
+com.bsb.hike.ui.VoIPActivityNew$2 -> com.bsb.hike.ui.na:
+    com.bsb.hike.ui.VoIPActivityNew this$0 -> a
+    android.content.Intent val$i -> b
+    90:96:void onClick(android.view.View) -> onClick
+com.bsb.hike.ui.VoIPActivityNew$3 -> com.bsb.hike.ui.nb:
+    com.bsb.hike.ui.VoIPActivityNew this$0 -> a
+    134:136:void onClick(android.view.View) -> onClick
 com.bsb.hike.ui.WebViewActivity -> com.bsb.hike.ui.WebViewActivity:
     android.webkit.WebView webView -> a
     33:111:void onCreate(android.os.Bundle) -> onCreate
@@ -13870,11 +14023,11 @@ com.bsb.hike.ui.WebViewActivity$1 -> com.bsb.hike.ui.WebViewActivity$1:
     47:49:void onPageFinished(android.webkit.WebView,java.lang.String) -> onPageFinished
     54:57:void onPageStarted(android.webkit.WebView,java.lang.String,android.graphics.Bitmap) -> onPageStarted
     62:94:boolean shouldOverrideUrlLoading(android.webkit.WebView,java.lang.String) -> shouldOverrideUrlLoading
-com.bsb.hike.ui.WebViewActivity$2 -> com.bsb.hike.ui.mt:
+com.bsb.hike.ui.WebViewActivity$2 -> com.bsb.hike.ui.nc:
     com.bsb.hike.ui.WebViewActivity this$0 -> a
     android.widget.ProgressBar val$bar -> b
     106:108:void onProgressChanged(android.webkit.WebView,int) -> onProgressChanged
-com.bsb.hike.ui.WebViewActivity$3 -> com.bsb.hike.ui.mu:
+com.bsb.hike.ui.WebViewActivity$3 -> com.bsb.hike.ui.nd:
     com.bsb.hike.ui.WebViewActivity this$0 -> a
     141:142:void onClick(android.view.View) -> onClick
 com.bsb.hike.ui.WelcomeActivity -> com.bsb.hike.ui.WelcomeActivity:
@@ -13898,15 +14051,15 @@ com.bsb.hike.ui.WelcomeActivity -> com.bsb.hike.ui.WelcomeActivity:
     242:260:void showNetworkErrorPopup() -> c
     31:31:android.widget.Button access$0(com.bsb.hike.ui.WelcomeActivity) -> a
     41:41:android.app.Dialog access$1(com.bsb.hike.ui.WelcomeActivity) -> b
-com.bsb.hike.ui.WelcomeActivity$1 -> com.bsb.hike.ui.mv:
+com.bsb.hike.ui.WelcomeActivity$1 -> com.bsb.hike.ui.ne:
     com.bsb.hike.ui.WelcomeActivity this$0 -> a
     199:224:void onPageSelected(int) -> a
     230:230:void onPageScrolled(int,float,int) -> a
     236:236:void onPageScrollStateChanged(int) -> b
-com.bsb.hike.ui.WelcomeActivity$2 -> com.bsb.hike.ui.mw:
+com.bsb.hike.ui.WelcomeActivity$2 -> com.bsb.hike.ui.nf:
     com.bsb.hike.ui.WelcomeActivity this$0 -> a
     93:97:void onClick(android.view.View) -> onClick
-com.bsb.hike.ui.WelcomeActivity$3 -> com.bsb.hike.ui.mx:
+com.bsb.hike.ui.WelcomeActivity$3 -> com.bsb.hike.ui.ng:
     com.bsb.hike.ui.WelcomeActivity this$0 -> a
     252:254:void onClick(android.view.View) -> onClick
 com.bsb.hike.ui.fragments.ConversationFragment -> com.bsb.hike.ui.fragments.ConversationFragment:
@@ -15168,9 +15321,9 @@ com.bsb.hike.utils.FilePath -> com.bsb.hike.utils.bb:
     172:172:boolean isGooglePhotosUri(android.net.Uri) -> d
 com.bsb.hike.utils.FileTransferCancelledException -> com.bsb.hike.utils.bc:
 com.bsb.hike.utils.HikeAnalyticsEvent -> com.bsb.hike.utils.bd:
-    20:36:void sendStealthMsisdns(java.util.Set,java.util.Set) -> a
-    43:57:void sendStealthReset() -> a
-    64:78:void sendStealthEnabled(boolean) -> a
+    21:37:void sendStealthMsisdns(java.util.Set,java.util.Set) -> a
+    44:58:void sendStealthReset() -> a
+    65:79:void sendStealthEnabled(boolean) -> a
 com.bsb.hike.utils.HikeAppStateBaseActivity -> com.bsb.hike.utils.HikeAppStateBaseActivity:
     18:21:void onCreate(android.os.Bundle) -> onCreate
     26:28:void onResume() -> onResume
@@ -15738,62 +15891,62 @@ com.bsb.hike.utils.Utils -> com.bsb.hike.utils.cx:
     3163:3163:boolean shouldIncrementCounter(com.bsb.hike.models.ConvMessage) -> a
     3168:3175:android.content.Intent createIntentForConversation(android.content.Context,com.bsb.hike.models.Conversation) -> a
     3180:3197:void createShortcut(android.app.Activity,com.bsb.hike.models.Conversation) -> a
-    3202:3291:void onCallClicked(android.app.Activity,java.lang.String) -> a
-    3295:3299:java.lang.String getFormattedDateTimeFromTimestamp(long,java.util.Locale) -> a
-    3304:3305:void sendUILogEvent(java.lang.String) -> t
-    3311:3334:void sendUILogEvent(java.lang.String,java.lang.String) -> d
-    3340:3358:void sendMd5MismatchEvent(java.lang.String,java.lang.String,java.lang.String,int,boolean) -> a
-    3362:3366:void resetUpdateParams(android.content.SharedPreferences) -> c
-    3370:3402:java.lang.String fileToMD5(java.lang.String) -> u
-    3407:3412:java.lang.String convertHashToString(byte[]) -> d
-    3417:3420:android.content.Intent getHomeActivityIntent(android.content.Context) -> p
-    3425:3429:android.content.Intent getPeopleActivityIntent(android.content.Context) -> q
-    3434:3438:android.content.Intent getTimelineActivityIntent(android.content.Context) -> r
-    3443:3457:void addCommonDeviceDetails(org.json.JSONObject,android.content.Context) -> a
-    3461:3461:com.bsb.hike.models.ConvMessage makeConvMessage(com.bsb.hike.models.Conversation,java.lang.String,java.lang.String,boolean) -> a
-    3466:3471:com.bsb.hike.models.ConvMessage makeConvMessage(com.bsb.hike.models.Conversation,java.lang.String,java.lang.String,boolean,com.bsb.hike.models.ConvMessage$State) -> a
-    3476:3476:boolean canInBitmap() -> g
-    3489:3489:boolean hasGingerbread() -> h
-    3494:3494:boolean hasHoneycombMR1() -> i
-    3504:3504:boolean hasKitKat() -> j
-    3509:3510:boolean hasEnoughFreeSpaceForProfilePic() -> k
-    3515:3566:void addToContacts(java.util.List,java.lang.String,android.content.Context) -> addToContacts
-    3570:3570:int getNumColumnsForGallery(android.content.res.Resources,int) -> a
-    3575:3576:int getActualSizeForGallery(android.content.res.Resources,int,int) -> a
-    3581:3602:void makeNoMediaFile(java.io.File) -> b
-    3606:3640:java.lang.String getServerRecommendedContactsSelection(java.lang.String,java.lang.String) -> e
-    3666:3675:void startChatThread(android.content.Context,com.bsb.hike.models.ContactInfo) -> a
-    3679:3682:void toggleActionBarElementsEnable(android.view.View,android.widget.ImageView,android.widget.TextView,boolean) -> a
-    3686:3704:android.graphics.drawable.Drawable getAvatarDrawableForNotificationOrShortcut(android.content.Context,java.lang.String,boolean) -> a
-    3709:3729:void getRecommendedAndHikeContacts(android.content.Context,java.util.List,java.util.List,java.util.List) -> a
-    3733:3768:void addFavorite(android.content.Context,com.bsb.hike.models.ContactInfo,boolean) -> a
-    3773:3799:void toggleFavorite(android.content.Context,com.bsb.hike.models.ContactInfo,boolean) -> b
-    3803:3807:void addToContacts(android.app.Activity,java.lang.String) -> addToContacts
-    3811:3813:boolean isPlayTickSound(android.content.Context) -> s
-    3826:3866:void playSoundFromRaw(android.content.Context,int) -> b
-    3872:3880:void playDefaultNotificationSound(android.content.Context) -> t
-    3884:3885:void cancelScheduledStealthReset(android.content.Context) -> u
-    3889:3892:long getOldTimestamp(int) -> a
-    3897:3909:boolean isAppForeground(android.content.Context) -> v
-    3920:3920:java.lang.String replaceUrlSpaces(java.lang.String) -> v
-    3928:3939:java.lang.String getOldVibratePref(android.content.Context) -> w
-    3948:3964:java.lang.String getOldSoundPref(android.content.Context) -> x
-    3978:4014:void handleBulkLastSeenPacket(android.content.Context,org.json.JSONObject) -> a
-    4018:4037:void updateLastSeenTimeInBulk(java.util.List) -> a
-    4041:4049:boolean isListContainsMsisdn(java.util.List,java.lang.String) -> a
-    4060:4075:int updateHomeOverflowToggleCount(android.content.SharedPreferences) -> d
-    4080:4090:void incrementOrDecrementHomeOverflowCount(android.content.SharedPreferences,int) -> a
-    4094:4104:boolean isPackageInstalled(android.content.Context,java.lang.String) -> c
-    4109:4159:void clearJar(android.content.Context) -> y
-    4163:4198:java.lang.String combineInOneSmsString(android.content.Context,boolean,java.util.Collection,boolean) -> a
-    4205:4231:java.lang.String getSizeForDisplay(int) -> b
-    4236:4239:android.content.Intent getIntentForPrivacyScreen(android.content.Context) -> z
-    4246:4257:boolean isCompressed(byte[]) -> a
-    4264:4313:byte[] uncompressByteArray(byte[]) -> b
-    4317:4325:void emoticonClicked(android.content.Context,int,android.widget.EditText) -> a
-    4329:4368:android.view.animation.Animation getNotificationIndicatorAnim() -> l
-    4376:4450:void setupCountryCodeData(android.content.Context,java.lang.String,android.widget.EditText,android.widget.TextView,java.util.ArrayList,java.util.HashMap,java.util.HashMap,java.util.HashMap) -> a
-    4455:4462:boolean selectCountry(java.lang.String,java.util.HashMap,java.util.ArrayList,java.lang.String,android.widget.TextView,android.widget.TextView) -> a
+    3202:3298:void onCallClicked(android.app.Activity,java.lang.String) -> a
+    3302:3306:java.lang.String getFormattedDateTimeFromTimestamp(long,java.util.Locale) -> a
+    3311:3312:void sendUILogEvent(java.lang.String) -> t
+    3318:3341:void sendUILogEvent(java.lang.String,java.lang.String) -> d
+    3347:3365:void sendMd5MismatchEvent(java.lang.String,java.lang.String,java.lang.String,int,boolean) -> a
+    3369:3373:void resetUpdateParams(android.content.SharedPreferences) -> c
+    3377:3409:java.lang.String fileToMD5(java.lang.String) -> u
+    3414:3419:java.lang.String convertHashToString(byte[]) -> d
+    3424:3427:android.content.Intent getHomeActivityIntent(android.content.Context) -> p
+    3432:3436:android.content.Intent getPeopleActivityIntent(android.content.Context) -> q
+    3441:3445:android.content.Intent getTimelineActivityIntent(android.content.Context) -> r
+    3450:3464:void addCommonDeviceDetails(org.json.JSONObject,android.content.Context) -> a
+    3468:3468:com.bsb.hike.models.ConvMessage makeConvMessage(com.bsb.hike.models.Conversation,java.lang.String,java.lang.String,boolean) -> a
+    3473:3478:com.bsb.hike.models.ConvMessage makeConvMessage(com.bsb.hike.models.Conversation,java.lang.String,java.lang.String,boolean,com.bsb.hike.models.ConvMessage$State) -> a
+    3483:3483:boolean canInBitmap() -> g
+    3496:3496:boolean hasGingerbread() -> h
+    3501:3501:boolean hasHoneycombMR1() -> i
+    3511:3511:boolean hasKitKat() -> j
+    3516:3517:boolean hasEnoughFreeSpaceForProfilePic() -> k
+    3522:3573:void addToContacts(java.util.List,java.lang.String,android.content.Context) -> addToContacts
+    3577:3577:int getNumColumnsForGallery(android.content.res.Resources,int) -> a
+    3582:3583:int getActualSizeForGallery(android.content.res.Resources,int,int) -> a
+    3588:3609:void makeNoMediaFile(java.io.File) -> b
+    3613:3647:java.lang.String getServerRecommendedContactsSelection(java.lang.String,java.lang.String) -> e
+    3673:3682:void startChatThread(android.content.Context,com.bsb.hike.models.ContactInfo) -> a
+    3686:3689:void toggleActionBarElementsEnable(android.view.View,android.widget.ImageView,android.widget.TextView,boolean) -> a
+    3693:3711:android.graphics.drawable.Drawable getAvatarDrawableForNotificationOrShortcut(android.content.Context,java.lang.String,boolean) -> a
+    3716:3736:void getRecommendedAndHikeContacts(android.content.Context,java.util.List,java.util.List,java.util.List) -> a
+    3740:3775:void addFavorite(android.content.Context,com.bsb.hike.models.ContactInfo,boolean) -> a
+    3780:3806:void toggleFavorite(android.content.Context,com.bsb.hike.models.ContactInfo,boolean) -> b
+    3810:3814:void addToContacts(android.app.Activity,java.lang.String) -> addToContacts
+    3818:3820:boolean isPlayTickSound(android.content.Context) -> s
+    3833:3873:void playSoundFromRaw(android.content.Context,int) -> b
+    3879:3887:void playDefaultNotificationSound(android.content.Context) -> t
+    3891:3892:void cancelScheduledStealthReset(android.content.Context) -> u
+    3896:3899:long getOldTimestamp(int) -> a
+    3904:3916:boolean isAppForeground(android.content.Context) -> v
+    3927:3927:java.lang.String replaceUrlSpaces(java.lang.String) -> v
+    3935:3946:java.lang.String getOldVibratePref(android.content.Context) -> w
+    3955:3971:java.lang.String getOldSoundPref(android.content.Context) -> x
+    3985:4021:void handleBulkLastSeenPacket(android.content.Context,org.json.JSONObject) -> a
+    4025:4044:void updateLastSeenTimeInBulk(java.util.List) -> a
+    4048:4056:boolean isListContainsMsisdn(java.util.List,java.lang.String) -> a
+    4067:4082:int updateHomeOverflowToggleCount(android.content.SharedPreferences) -> d
+    4087:4097:void incrementOrDecrementHomeOverflowCount(android.content.SharedPreferences,int) -> a
+    4101:4111:boolean isPackageInstalled(android.content.Context,java.lang.String) -> c
+    4116:4166:void clearJar(android.content.Context) -> y
+    4170:4205:java.lang.String combineInOneSmsString(android.content.Context,boolean,java.util.Collection,boolean) -> a
+    4212:4238:java.lang.String getSizeForDisplay(int) -> b
+    4243:4246:android.content.Intent getIntentForPrivacyScreen(android.content.Context) -> z
+    4253:4264:boolean isCompressed(byte[]) -> a
+    4271:4320:byte[] uncompressByteArray(byte[]) -> b
+    4324:4332:void emoticonClicked(android.content.Context,int,android.widget.EditText) -> a
+    4336:4375:android.view.animation.Animation getNotificationIndicatorAnim() -> l
+    4383:4457:void setupCountryCodeData(android.content.Context,java.lang.String,android.widget.EditText,android.widget.TextView,java.util.ArrayList,java.util.HashMap,java.util.HashMap,java.util.HashMap) -> a
+    4462:4469:boolean selectCountry(java.lang.String,java.util.HashMap,java.util.ArrayList,java.lang.String,android.widget.TextView,android.widget.TextView) -> a
     176:176:int[] $SWITCH_TABLE$com$bsb$hike$models$HikeFile$HikeFileType() -> m
     1713:1713:void access$1(android.content.Context,com.bsb.hike.models.ContactInfo,com.bsb.hike.utils.Utils$WhichScreen) -> a
     176:176:int[] $SWITCH_TABLE$com$bsb$hike$utils$Utils$WhichScreen() -> n
@@ -15804,26 +15957,26 @@ com.bsb.hike.utils.Utils$1 -> com.bsb.hike.utils.cy:
     846:850:boolean onTouch(android.view.View,android.view.MotionEvent) -> onTouch
 com.bsb.hike.utils.Utils$10 -> com.bsb.hike.utils.cz:
     android.app.Dialog val$dialog -> a
-    3275:3276:void onClick(android.view.View) -> onClick
+    3279:3280:void onClick(android.view.View) -> onClick
 com.bsb.hike.utils.Utils$11 -> com.bsb.hike.utils.da:
     android.content.Context val$context -> a
-    3745:3747:void positiveClicked(android.app.Dialog) -> a
-    3752:3752:void neutralClicked(android.app.Dialog) -> b
-    3757:3759:void negativeClicked(android.app.Dialog) -> c
-    3766:3766:void onSucess(android.app.Dialog) -> d
+    3752:3754:void positiveClicked(android.app.Dialog) -> a
+    3759:3759:void neutralClicked(android.app.Dialog) -> b
+    3764:3766:void negativeClicked(android.app.Dialog) -> c
+    3773:3773:void onSucess(android.app.Dialog) -> d
 com.bsb.hike.utils.Utils$12 -> com.bsb.hike.utils.db:
-    3843:3845:void onCompletion(android.media.MediaPlayer) -> onCompletion
+    3850:3852:void onCompletion(android.media.MediaPlayer) -> onCompletion
 com.bsb.hike.utils.Utils$13 -> com.bsb.hike.utils.dc:
-    4397:4397:int compare(java.lang.String,java.lang.String) -> a
+    4404:4404:int compare(java.lang.String,java.lang.String) -> a
     1:1:int compare(java.lang.Object,java.lang.Object) -> compare
 com.bsb.hike.utils.Utils$14 -> com.bsb.hike.utils.dd:
     android.widget.EditText val$countryCodeEditor -> a
     java.util.HashMap val$codesMap -> b
     java.util.ArrayList val$countriesArray -> c
     android.widget.TextView val$countryNameEditor -> d
-    4420:4420:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
-    4425:4425:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
-    4430:4448:void afterTextChanged(android.text.Editable) -> afterTextChanged
+    4427:4427:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
+    4432:4432:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
+    4437:4455:void afterTextChanged(android.text.Editable) -> afterTextChanged
 com.bsb.hike.utils.Utils$2 -> com.bsb.hike.utils.de:
     android.content.SharedPreferences val$settings -> a
     java.lang.String val$checkPref -> b
@@ -15852,13 +16005,13 @@ com.bsb.hike.utils.Utils$7 -> com.bsb.hike.utils.dj:
     2414:2417:void onDismiss(android.content.DialogInterface) -> onDismiss
 com.bsb.hike.utils.Utils$8 -> com.bsb.hike.utils.dk:
     android.content.SharedPreferences val$settings -> a
-    3246:3249:void onCheckedChanged(android.widget.CompoundButton,boolean) -> onCheckedChanged
+    3247:3250:void onCheckedChanged(android.widget.CompoundButton,boolean) -> onCheckedChanged
 com.bsb.hike.utils.Utils$9 -> com.bsb.hike.utils.dl:
     android.app.Activity val$mActivity -> a
     java.lang.String val$mContactNumber -> b
     org.json.JSONObject val$json -> c
     android.app.Dialog val$dialog -> d
-    3259:3266:void onClick(android.view.View) -> onClick
+    3260:3270:void onClick(android.view.View) -> onClick
 com.bsb.hike.utils.Utils$ExternalStorageState -> com.bsb.hike.utils.dm:
     com.bsb.hike.utils.Utils$ExternalStorageState WRITEABLE -> a
     com.bsb.hike.utils.Utils$ExternalStorageState READ_ONLY -> b
@@ -17963,6 +18116,13 @@ com.facebook.android.FbDialog$1 -> com.facebook.android.FbDialog$1:
     57:58:void onComplete(android.os.Bundle,com.facebook.FacebookException) -> onComplete
 com.facebook.android.R -> com.facebook.android.R:
 com.facebook.android.R$attr -> com.facebook.android.R$attr:
+    int adSize -> adSize
+    int adUnitId -> adUnitId
+    int cameraBearing -> cameraBearing
+    int cameraTargetLat -> cameraTargetLat
+    int cameraTargetLng -> cameraTargetLng
+    int cameraTilt -> cameraTilt
+    int cameraZoom -> cameraZoom
     int confirm_logout -> confirm_logout
     int done_button_background -> done_button_background
     int done_button_text -> done_button_text
@@ -17971,6 +18131,7 @@ com.facebook.android.R$attr -> com.facebook.android.R$attr:
     int is_cropped -> is_cropped
     int login_text -> login_text
     int logout_text -> logout_text
+    int mapType -> mapType
     int multi_select -> multi_select
     int preset_size -> preset_size
     int radius_in_meters -> radius_in_meters
@@ -17981,6 +18142,14 @@ com.facebook.android.R$attr -> com.facebook.android.R$attr:
     int show_title_bar -> show_title_bar
     int title_bar_background -> title_bar_background
     int title_text -> title_text
+    int uiCompass -> uiCompass
+    int uiRotateGestures -> uiRotateGestures
+    int uiScrollGestures -> uiScrollGestures
+    int uiTiltGestures -> uiTiltGestures
+    int uiZoomControls -> uiZoomControls
+    int uiZoomGestures -> uiZoomGestures
+    int useViewLifecycle -> useViewLifecycle
+    int zOrderOnTop -> zOrderOnTop
 com.facebook.android.R$color -> com.facebook.android.R$color:
     int com_facebook_blue -> com_facebook_blue
     int com_facebook_loginview_text_color -> com_facebook_loginview_text_color
@@ -17989,6 +18158,18 @@ com.facebook.android.R$color -> com.facebook.android.R$color:
     int com_facebook_usersettingsfragment_connected_shadow_color -> com_facebook_usersettingsfragment_connected_shadow_color
     int com_facebook_usersettingsfragment_connected_text_color -> com_facebook_usersettingsfragment_connected_text_color
     int com_facebook_usersettingsfragment_not_connected_text_color -> com_facebook_usersettingsfragment_not_connected_text_color
+    int common_action_bar_splitter -> common_action_bar_splitter
+    int common_signin_btn_dark_text_default -> common_signin_btn_dark_text_default
+    int common_signin_btn_dark_text_disabled -> common_signin_btn_dark_text_disabled
+    int common_signin_btn_dark_text_focused -> common_signin_btn_dark_text_focused
+    int common_signin_btn_dark_text_pressed -> common_signin_btn_dark_text_pressed
+    int common_signin_btn_default_background -> common_signin_btn_default_background
+    int common_signin_btn_light_text_default -> common_signin_btn_light_text_default
+    int common_signin_btn_light_text_disabled -> common_signin_btn_light_text_disabled
+    int common_signin_btn_light_text_focused -> common_signin_btn_light_text_focused
+    int common_signin_btn_light_text_pressed -> common_signin_btn_light_text_pressed
+    int common_signin_btn_text_dark -> common_signin_btn_text_dark
+    int common_signin_btn_text_light -> common_signin_btn_text_light
 com.facebook.android.R$dimen -> com.facebook.android.R$dimen:
     int com_facebook_loginview_compound_drawable_padding -> com_facebook_loginview_compound_drawable_padding
     int com_facebook_loginview_padding_bottom -> com_facebook_loginview_padding_bottom
@@ -18037,6 +18218,34 @@ com.facebook.android.R$drawable -> com.facebook.android.R$drawable:
     int com_facebook_top_background -> com_facebook_top_background
     int com_facebook_top_button -> com_facebook_top_button
     int com_facebook_usersettingsfragment_background_gradient -> com_facebook_usersettingsfragment_background_gradient
+    int common_signin_btn_icon_dark -> common_signin_btn_icon_dark
+    int common_signin_btn_icon_disabled_dark -> common_signin_btn_icon_disabled_dark
+    int common_signin_btn_icon_disabled_focus_dark -> common_signin_btn_icon_disabled_focus_dark
+    int common_signin_btn_icon_disabled_focus_light -> common_signin_btn_icon_disabled_focus_light
+    int common_signin_btn_icon_disabled_light -> common_signin_btn_icon_disabled_light
+    int common_signin_btn_icon_focus_dark -> common_signin_btn_icon_focus_dark
+    int common_signin_btn_icon_focus_light -> common_signin_btn_icon_focus_light
+    int common_signin_btn_icon_light -> common_signin_btn_icon_light
+    int common_signin_btn_icon_normal_dark -> common_signin_btn_icon_normal_dark
+    int common_signin_btn_icon_normal_light -> common_signin_btn_icon_normal_light
+    int common_signin_btn_icon_pressed_dark -> common_signin_btn_icon_pressed_dark
+    int common_signin_btn_icon_pressed_light -> common_signin_btn_icon_pressed_light
+    int common_signin_btn_text_dark -> common_signin_btn_text_dark
+    int common_signin_btn_text_disabled_dark -> common_signin_btn_text_disabled_dark
+    int common_signin_btn_text_disabled_focus_dark -> common_signin_btn_text_disabled_focus_dark
+    int common_signin_btn_text_disabled_focus_light -> common_signin_btn_text_disabled_focus_light
+    int common_signin_btn_text_disabled_light -> common_signin_btn_text_disabled_light
+    int common_signin_btn_text_focus_dark -> common_signin_btn_text_focus_dark
+    int common_signin_btn_text_focus_light -> common_signin_btn_text_focus_light
+    int common_signin_btn_text_light -> common_signin_btn_text_light
+    int common_signin_btn_text_normal_dark -> common_signin_btn_text_normal_dark
+    int common_signin_btn_text_normal_light -> common_signin_btn_text_normal_light
+    int common_signin_btn_text_pressed_dark -> common_signin_btn_text_pressed_dark
+    int common_signin_btn_text_pressed_light -> common_signin_btn_text_pressed_light
+    int ic_plusone_medium_off_client -> ic_plusone_medium_off_client
+    int ic_plusone_small_off_client -> ic_plusone_small_off_client
+    int ic_plusone_standard_off_client -> ic_plusone_standard_off_client
+    int ic_plusone_tall_off_client -> ic_plusone_tall_off_client
 com.facebook.android.R$id -> com.facebook.android.R$id:
     int com_facebook_login_activity_progress_bar -> com_facebook_login_activity_progress_bar
     int com_facebook_picker_activity_circle -> com_facebook_picker_activity_circle
@@ -18058,10 +18267,16 @@ com.facebook.android.R$id -> com.facebook.android.R$id:
     int com_facebook_usersettingsfragment_login_button -> com_facebook_usersettingsfragment_login_button
     int com_facebook_usersettingsfragment_logo_image -> com_facebook_usersettingsfragment_logo_image
     int com_facebook_usersettingsfragment_profile_name -> com_facebook_usersettingsfragment_profile_name
+    int hybrid -> hybrid
     int large -> large
+    int none -> none
     int normal -> normal
     int picker_subtitle -> picker_subtitle
+    int satellite -> satellite
     int small -> small
+    int terrain -> terrain
+com.facebook.android.R$integer -> com.facebook.android.R$integer:
+    int google_play_services_version -> google_play_services_version
 com.facebook.android.R$layout -> com.facebook.android.R$layout:
     int com_facebook_friendpickerfragment -> com_facebook_friendpickerfragment
     int com_facebook_login_activity_layout -> com_facebook_login_activity_layout
@@ -18078,6 +18293,12 @@ com.facebook.android.R$layout -> com.facebook.android.R$layout:
     int com_facebook_search_bar_layout -> com_facebook_search_bar_layout
     int com_facebook_usersettingsfragment -> com_facebook_usersettingsfragment
 com.facebook.android.R$string -> com.facebook.android.R$string:
+    int auth_client_needs_enabling_title -> auth_client_needs_enabling_title
+    int auth_client_needs_installation_title -> auth_client_needs_installation_title
+    int auth_client_needs_update_title -> auth_client_needs_update_title
+    int auth_client_play_services_err_notification_msg -> auth_client_play_services_err_notification_msg
+    int auth_client_requested_by_msg -> auth_client_requested_by_msg
+    int auth_client_using_bad_version_title -> auth_client_using_bad_version_title
     int com_facebook_choose_friends -> com_facebook_choose_friends
     int com_facebook_dialogloginactivity_ok_button -> com_facebook_dialogloginactivity_ok_button
     int com_facebook_internet_permission_error_message -> com_facebook_internet_permission_error_message
@@ -18103,10 +18324,48 @@ com.facebook.android.R$string -> com.facebook.android.R$string:
     int com_facebook_usersettingsfragment_log_in_button -> com_facebook_usersettingsfragment_log_in_button
     int com_facebook_usersettingsfragment_logged_in -> com_facebook_usersettingsfragment_logged_in
     int com_facebook_usersettingsfragment_not_logged_in -> com_facebook_usersettingsfragment_not_logged_in
+    int common_google_play_services_enable_button -> common_google_play_services_enable_button
+    int common_google_play_services_enable_text -> common_google_play_services_enable_text
+    int common_google_play_services_enable_title -> common_google_play_services_enable_title
+    int common_google_play_services_install_button -> common_google_play_services_install_button
+    int common_google_play_services_install_text_phone -> common_google_play_services_install_text_phone
+    int common_google_play_services_install_text_tablet -> common_google_play_services_install_text_tablet
+    int common_google_play_services_install_title -> common_google_play_services_install_title
+    int common_google_play_services_invalid_account_text -> common_google_play_services_invalid_account_text
+    int common_google_play_services_invalid_account_title -> common_google_play_services_invalid_account_title
+    int common_google_play_services_network_error_text -> common_google_play_services_network_error_text
+    int common_google_play_services_network_error_title -> common_google_play_services_network_error_title
+    int common_google_play_services_unknown_issue -> common_google_play_services_unknown_issue
+    int common_google_play_services_unsupported_date_text -> common_google_play_services_unsupported_date_text
+    int common_google_play_services_unsupported_text -> common_google_play_services_unsupported_text
+    int common_google_play_services_unsupported_title -> common_google_play_services_unsupported_title
+    int common_google_play_services_update_button -> common_google_play_services_update_button
+    int common_google_play_services_update_text -> common_google_play_services_update_text
+    int common_google_play_services_update_title -> common_google_play_services_update_title
+    int common_signin_button_text -> common_signin_button_text
+    int common_signin_button_text_long -> common_signin_button_text_long
 com.facebook.android.R$style -> com.facebook.android.R$style:
     int com_facebook_loginview_default_style -> com_facebook_loginview_default_style
     int com_facebook_loginview_silver_style -> com_facebook_loginview_silver_style
 com.facebook.android.R$styleable -> com.facebook.android.R$styleable:
+    int[] AdsAttrs -> AdsAttrs
+    int AdsAttrs_adSize -> AdsAttrs_adSize
+    int AdsAttrs_adUnitId -> AdsAttrs_adUnitId
+    int[] MapAttrs -> MapAttrs
+    int MapAttrs_cameraBearing -> MapAttrs_cameraBearing
+    int MapAttrs_cameraTargetLat -> MapAttrs_cameraTargetLat
+    int MapAttrs_cameraTargetLng -> MapAttrs_cameraTargetLng
+    int MapAttrs_cameraTilt -> MapAttrs_cameraTilt
+    int MapAttrs_cameraZoom -> MapAttrs_cameraZoom
+    int MapAttrs_mapType -> MapAttrs_mapType
+    int MapAttrs_uiCompass -> MapAttrs_uiCompass
+    int MapAttrs_uiRotateGestures -> MapAttrs_uiRotateGestures
+    int MapAttrs_uiScrollGestures -> MapAttrs_uiScrollGestures
+    int MapAttrs_uiTiltGestures -> MapAttrs_uiTiltGestures
+    int MapAttrs_uiZoomControls -> MapAttrs_uiZoomControls
+    int MapAttrs_uiZoomGestures -> MapAttrs_uiZoomGestures
+    int MapAttrs_useViewLifecycle -> MapAttrs_useViewLifecycle
+    int MapAttrs_zOrderOnTop -> MapAttrs_zOrderOnTop
     int[] com_facebook_friend_picker_fragment -> com_facebook_friend_picker_fragment
     int com_facebook_friend_picker_fragment_multi_select -> com_facebook_friend_picker_fragment_multi_select
     int[] com_facebook_login_view -> com_facebook_login_view

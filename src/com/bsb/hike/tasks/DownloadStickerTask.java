@@ -20,9 +20,9 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.adapters.StickerPageAdapter;
 import com.bsb.hike.adapters.StickerPageAdapter.ViewType;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -31,9 +31,9 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
 public class DownloadStickerTask extends StickerTaskBase
 {

@@ -66,8 +66,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.http.CustomSSLSocketFactory;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
-import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.http.HttpPatch;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
 

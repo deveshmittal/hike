@@ -51,8 +51,8 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.google.android.gcm.GCMRegistrar;
 
 public class HikeService extends Service

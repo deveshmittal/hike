@@ -18,9 +18,9 @@ import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.service.VoIPServiceNew;
 import com.bsb.hike.ui.VoIPActivity.MessageHandler;
-import com.bsb.hike.R;
 
 public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 

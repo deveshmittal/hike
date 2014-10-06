@@ -54,17 +54,20 @@ import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
-import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.contactmgr.ConversationMsisdns;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
 public class HikeConversationsDatabase extends SQLiteOpenHelper
 {
