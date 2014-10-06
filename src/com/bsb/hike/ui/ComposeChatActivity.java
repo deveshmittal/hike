@@ -445,38 +445,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				String name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
 				tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
 				}
-				
-				// if(contactInfo == null)
-				// {
-				// String msisdn = getNormalisedMsisdn();
-				// contactInfo = new ContactInfo(msisdn, msisdn, msisdn, msisdn);
-				// }
-
-//				final CustomAlertDialog forwardConfirmDialog = new CustomAlertDialog(this);
-//				if (isSharingFile)
-//				{
-//					forwardConfirmDialog.setHeader(R.string.share);
-//					forwardConfirmDialog.setBody(getString(R.string.share_with, contactInfo.getNameOrMsisdn()));
-//				}
-//				else
-//				{
-//					forwardConfirmDialog.setHeader(R.string.forward);
-//					forwardConfirmDialog.setBody(getString(R.string.forward_to, contactInfo.getNameOrMsisdn()));
-//				}
-//				View.OnClickListener dialogOkClickListener = new View.OnClickListener()
-//				{
-//
-//					@Override
-//					public void onClick(View v)
-//					{
-//						forwardConfirmDialog.dismiss();
-//						forwardMessageTo(contactInfo);
-//					}
-//				};
-//
-//				forwardConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
-//				forwardConfirmDialog.setCancelButton(R.string.cancel);
-//				forwardConfirmDialog.show();
 			}
 			else
 			{
