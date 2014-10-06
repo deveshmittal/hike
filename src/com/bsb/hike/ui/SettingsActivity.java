@@ -68,9 +68,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.settings);
 		profileImageLoader = new IconLoader(this, getResources().getDimensionPixelSize(R.dimen.avatar_profile_size));
-		
-		HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
-		
+				
 		ArrayList<String> items = new ArrayList<String>();
 
 		items.add(getString(R.string.notifications));
@@ -182,6 +180,8 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		settingsList.setAdapter(listAdapter);
 		settingsList.setOnItemClickListener(this);
 		setupActionBar();
+		
+		HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
 	}
 
 	private void addProfileHeaderView(ListView settingsList)
