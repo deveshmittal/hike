@@ -287,6 +287,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{
 			mActivityState.task.setActivity(null);
 		}
+		if ((mActivityState != null) && (mActivityState.getHikeJoinTimeTask != null))
+		{
+			mActivityState.getHikeJoinTimeTask.cancel(true);
+		}
 		if (profileType == ProfileType.GROUP_INFO)
 		{
 			HikeMessengerApp.getPubSub().removeListeners(this, groupInfoPubSubListeners);
@@ -693,7 +697,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	private void getHikeJoinedTimeFromServer()
 	{
-		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/profile/" + mLocalMSISDN, RequestType.HIKE_JOIN_TIME, new HikeHttpCallback()
+		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(HikeConstants.REQUEST_BASE_URLS.HTTP_REQUEST_PROFILE_BASE_URL + mLocalMSISDN, RequestType.HIKE_JOIN_TIME, new HikeHttpCallback()
 		{
 			@Override
 			public void onSuccess(JSONObject response)

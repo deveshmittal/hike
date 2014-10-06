@@ -1844,6 +1844,10 @@ public class HikeConstants
 		public static final int HASH_PIN_MESSAGE = 1;
 	}
 	
+	public static class REQUEST_BASE_URLS
+	{
+		public static final String HTTP_REQUEST_PROFILE_BASE_URL = "/account/profile/";
+	}
 	public static final String TEXT_PINS = "text_pins";
 
 	public static final String EXTRA_CONV_ID = "conv_id";
