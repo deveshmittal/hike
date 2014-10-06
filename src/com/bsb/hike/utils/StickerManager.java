@@ -87,13 +87,9 @@ public class StickerManager
 
 	public static final String CATEGORY_ID = "catId";
 
-	public static final String STICKER_INDEX = "stIdx";
-
 	public static final String FWD_STICKER_ID = "fwdStickerId";
 
 	public static final String FWD_CATEGORY_ID = "fwdCategoryId";
-
-	public static final String FWD_STICKER_INDEX = "fwdStickerIdx";
 
 	public static final String STICKERS_UPDATED = "stickersUpdated";
 
@@ -585,20 +581,6 @@ public class StickerManager
 
 	private void removeCategoryFromRecents(StickerCategory category)
 	{
-		if (category.categoryId.equals(StickerCategoryId.expressions))
-		{
-			for (int i = 0; i < LOCAL_STICKER_IDS_EXPRESSIONS.length; i++)
-			{
-				removeStickerFromRecents(new Sticker(category, LOCAL_STICKER_IDS_EXPRESSIONS[i], i));
-			}
-		}
-		else if (category.categoryId.equals(StickerCategoryId.humanoid))
-		{
-			for (int i = 0; i < LOCAL_STICKER_IDS_HUMANOID.length; i++)
-			{
-				removeStickerFromRecents(new Sticker(category, LOCAL_STICKER_IDS_HUMANOID[i], i));
-			}
-		}
 		String categoryDirPath = getStickerDirectoryForCategoryId(context, category.categoryId.name());
 		if (categoryDirPath != null)
 		{

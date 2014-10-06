@@ -756,73 +756,42 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			stickerHolder.loader.setVisibility(View.GONE);
 			Sticker sticker = metadata.getSticker();
 			setSenderDetails(convMessage, position, stickerHolder, true);
+			String categoryId;
 			/*
-			 * If this is the default category, then the sticker are part of the app bundle itself
+			 * If the category is an unknown one, we have the category id stored in the metadata.
 			 */
-			if (sticker.getStickerIndex() != -1)
+			if (sticker.getCategory().categoryId == StickerCategoryId.unknown)
 			{
-				stickerHolder.image.setVisibility(View.VISIBLE);
-				if (StickerCategoryId.expressions.equals(sticker.getCategory().categoryId))
-				{
-					// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
-					int idx = sticker.getStickerIndex();
-					if (idx >= 0)
-						setDefaultSticker(stickerHolder.image, StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS[idx]);
-				}
-				else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
-				{
-					// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
-					int idx = sticker.getStickerIndex();
-					if (idx >= 0)
-						setDefaultSticker(stickerHolder.image, StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
-				}
+				categoryId = metadata.getUnknownStickerCategory();
 			}
 			else
 			{
-				String categoryId;
-				/*
-				 * If the category is an unknown one, we have the category id stored in the metadata.
-				 */
-				if (sticker.getCategory().categoryId == StickerCategoryId.unknown)
-				{
-					categoryId = metadata.getUnknownStickerCategory();
-				}
-				else
-				{
-					categoryId = sticker.getCategory().categoryId.name();
-				}
-				String stickerId = sticker.getStickerId();
+				categoryId = sticker.getCategory().categoryId.name();
+			}
+			String stickerId = sticker.getStickerId();
 
-				String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId) + HikeConstants.LARGE_STICKER_ROOT;
-				File stickerImage = null;
-				if (categoryDirPath != null)
-				{
-					stickerImage = new File(categoryDirPath, stickerId);
-				}
+			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId) + HikeConstants.LARGE_STICKER_ROOT;
+			File stickerImage = null;
+			if (categoryDirPath != null)
+			{
+				stickerImage = new File(categoryDirPath, stickerId);
+			}
 
-				String key = categoryId + stickerId;
-				boolean downloadingSticker = StickerManager.getInstance().isStickerDownloading(key);
+			String key = categoryId + stickerId;
+			boolean downloadingSticker = StickerManager.getInstance().isStickerDownloading(key);
 
-				if (stickerImage != null && stickerImage.exists() && !downloadingSticker)
+			if (stickerImage != null && stickerImage.exists() && !downloadingSticker)
+			{
+				Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
+				if (stickerDrawable != null)
 				{
-					Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
-					if (stickerDrawable != null)
-					{
-						stickerHolder.placeHolder.setBackgroundResource(0);
-						stickerHolder.image.setVisibility(View.VISIBLE);
-						// largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
-						stickerHolder.image.setImageDrawable(stickerDrawable);
-						// holder.stickerImage.setImageDrawable(IconCacheManager
-						// .getInstance().getSticker(context,
-						// stickerImage.getPath()));
-					}
-					else
-					{
-						stickerHolder.loader.setVisibility(View.VISIBLE);
-						stickerHolder.placeHolder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
-						stickerHolder.image.setVisibility(View.GONE);
-						stickerHolder.image.setImageDrawable(null);
-					}
+					stickerHolder.placeHolder.setBackgroundResource(0);
+					stickerHolder.image.setVisibility(View.VISIBLE);
+					// largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
+					stickerHolder.image.setImageDrawable(stickerDrawable);
+					// holder.stickerImage.setImageDrawable(IconCacheManager
+					// .getInstance().getSticker(context,
+					// stickerImage.getPath()));
 				}
 				else
 				{
@@ -830,16 +799,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					stickerHolder.placeHolder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
 					stickerHolder.image.setVisibility(View.GONE);
 					stickerHolder.image.setImageDrawable(null);
+				}
+			}
+			else
+			{
+				stickerHolder.loader.setVisibility(View.VISIBLE);
+				stickerHolder.placeHolder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+				stickerHolder.image.setVisibility(View.GONE);
+				stickerHolder.image.setImageDrawable(null);
 
-					/*
-					 * Download the sticker if not already downloading.
-					 */
-					if (!downloadingSticker)
-					{
-						DownloadSingleStickerTask downloadSingleStickerTask = new DownloadSingleStickerTask(context, categoryId, stickerId);
-						StickerManager.getInstance().insertTask(key, downloadSingleStickerTask);
-						Utils.executeFtResultAsyncTask(downloadSingleStickerTask);
-					}
+				/*
+				 * Download the sticker if not already downloading.
+				 */
+				if (!downloadingSticker)
+				{
+					DownloadSingleStickerTask downloadSingleStickerTask = new DownloadSingleStickerTask(context, categoryId, stickerId);
+					StickerManager.getInstance().insertTask(key, downloadSingleStickerTask);
+					Utils.executeFtResultAsyncTask(downloadSingleStickerTask);
 				}
 			}
 			setTimeNStatus(position, stickerHolder, true, stickerHolder.placeHolder);

@@ -229,21 +229,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				}
 
 				Sticker sticker = stickerList.get(index);
-				if (sticker.getStickerIndex() >= 0) // for already copied stickers this will be > -1
-				{
-					if (StickerCategoryId.expressions.equals(sticker.getCategory().categoryId))
-					{
-						stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_EXPRESSIONS[sticker.getStickerIndex()], imageView, isListFlinging);
-					}
-					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
-					{
-						stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()], imageView, isListFlinging);
-					}
-				}
-				else
-				{
-					stickerLoader.loadImage(sticker.getSmallStickerPath(activity), imageView, isListFlinging);
-				}
+				stickerLoader.loadImage(sticker.getSmallStickerPath(activity), imageView, isListFlinging);
 				imageView.setTag(sticker);
 				imageView.setOnClickListener(this);
 			}

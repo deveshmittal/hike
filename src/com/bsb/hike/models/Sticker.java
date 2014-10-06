@@ -17,35 +17,20 @@ import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 public class Sticker implements Serializable, Comparable<Sticker>
 {
 
-	/*
-	 * Used for the local stickers. Will be -1 for non local stickers
-	 */
-	private int stickerIndex = -1; 
-
 	private String stickerId;
 
 	private StickerCategory category;
-
-	public Sticker(StickerCategory category, String stickerId, int stickerIndex)
-	{
-		this.stickerId = stickerId;
-		this.stickerIndex = stickerIndex;
-		this.category = category;
-		setupIndexForSwapedCategories();
-	}
 
 	public Sticker(StickerCategory category, String stickerId)
 	{
 		this.category = category;
 		this.stickerId = stickerId;
-		setupStickerindex(category, stickerId);
 	}
 
 	public Sticker(String categoryName, String stickerId)
 	{
 		this.stickerId = stickerId;
 		this.category = StickerManager.getInstance().getCategoryForName(categoryName);
-		setupStickerindex(category, stickerId);
 	}
 
 	public Sticker()
@@ -53,52 +38,9 @@ public class Sticker implements Serializable, Comparable<Sticker>
 
 	}
 
-	public Sticker(String categoryName, String stickerId, int stickerIdx)
-	{
-		this.stickerId = stickerId;
-		this.category = StickerManager.getInstance().getCategoryForName(categoryName);
-		this.stickerIndex = stickerIdx;
-		setupIndexForSwapedCategories();
-	}
-
 	public boolean isUnknownSticker()
 	{
 		return category == null || (category.categoryId == StickerCategoryId.unknown);
-	}
-
-	private void setupStickerindex(StickerCategory category2, String stickerId2)
-
-	{
-		/*
-		 * 
-		 * Only set sticker index if the category is a local one
-		 */
-		String[] cat = null;
-
-		if (category.categoryId == StickerCategoryId.humanoid)
-		{
-			cat = StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID;
-		}
-		else if (category.categoryId == StickerCategoryId.expressions)
-		{
-			cat = StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS;
-		}
-
-		if (cat != null)
-		{
-			int count = cat.length;
-			for (int i = 0; i < count; i++)
-
-			{
-				if (cat[i].equals(stickerId))
-
-				{
-					this.stickerIndex = i;
-					break;
-
-				}
-			}
-		}
 	}
 
 	public boolean isDefaultSticker()
@@ -142,11 +84,6 @@ public class Sticker implements Serializable, Comparable<Sticker>
 			return false;
 		File f = new File(sticker.getSmallStickerPath(ctx));
 		return !f.exists();
-	}
-
-	public int getStickerIndex()
-	{
-		return stickerIndex;
 	}
 
 	public String getStickerId()
@@ -228,54 +165,24 @@ public class Sticker implements Serializable, Comparable<Sticker>
 
 	public void serializeObj(ObjectOutputStream out) throws IOException
 	{
-		out.writeInt(stickerIndex);
 		out.writeUTF(stickerId);
 		category.serializeObj(out);
 	}
 
 	public void deSerializeObj(ObjectInputStream in) throws IOException, ClassNotFoundException
 	{
-		stickerIndex = in.readInt();
 		stickerId = in.readUTF();
 		category = new StickerCategory();
 		category.deSerializeObj(in);
-		setupIndexForSwapedCategories();
 	}
 
 	public void setStickerData(int stickerIndex,String stickerId,StickerCategory category){
-		this.stickerIndex = stickerIndex;
 		this.stickerId = stickerId;
 		this.category = category;
-		setupIndexForSwapedCategories();
-	}
-	/*
-	 * We save sticker index -1 for all non-hardcoded stickers in message metadata. So when moving doggy to non-hardcoded and expressions to hardcoded. all doggy sticker will now
-	 * be stickerIndex -1 and all hardcoded expressions will have a non negetive index value
-	 */
-	private void setupIndexForSwapedCategories()
-	{
-		if (category != null)
-		{
-			if (category.categoryId.equals(StickerCategoryId.doggy))
-			{
-				this.stickerIndex = -1;
-				return;
-			}
-			if (category.categoryId.equals(StickerCategoryId.expressions)||category.categoryId.equals(StickerCategoryId.humanoid) && stickerIndex == -1)
-			{
-				setupStickerindex(category, stickerId);
-				return;
-			}
-		}
 	}
 
 	public boolean isInAppSticker()
 	{
-		if(category != null)
-		{
-			if((category.categoryId == StickerCategoryId.humanoid || category.categoryId == StickerCategoryId.expressions) && stickerIndex >= 0)
-				return true;
-		}
-		return false;
+		return isDefaultSticker();
 	}
 }

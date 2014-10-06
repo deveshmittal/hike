@@ -465,7 +465,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		int count = stickerIds.length;
 		for (int i = 0; i < count; i++)
 		{
-			stickerList.add(new Sticker(cat, stickerIds[i], i));
+			stickerList.add(new Sticker(cat, stickerIds[i]));
 		}
 	}
 
