@@ -915,7 +915,7 @@ class PersistenceCache extends ContactsCache
 	}
 
 	/**
-	 * Returns contacts from {@link #convsContactsPersistence} sorted by lastMessaged time.
+	 * Returns one to one contacts from {@link #convsContactsPersistence}.
 	 *
 	 * @param
 	 * @return List of convContacts
