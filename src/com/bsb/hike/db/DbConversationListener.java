@@ -84,6 +84,8 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.CLEAR_CONVERSATION, this);
 		mPubSub.addListener(HikePubSub.UPDATE_PIN_METADATA, this);
 		mPubSub.addListener(HikePubSub.MULTI_MESSAGE_SENT, this);
+		mPubSub.addListener(HikePubSub.MULTI_FILE_SENT, this);
+		mPubSub.addListener(HikePubSub.MULTI_FILE_UPLOADED, this);
 	}
 
 	@Override
@@ -161,6 +163,19 @@ public class DbConversationListener implements Listener
 				allPairs.add(pair);
 			}
 			mPubSub.publish(HikePubSub.MULTI_MESSAGE_DB_INSERTED, allPairs);
+		}
+		else if (HikePubSub.MULTI_FILE_SENT.equals(type))
+		{
+			MultipleConvMessage multiConvMessages = (MultipleConvMessage) object;
+
+			mConversationDb.addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),false);
+			ArrayList<ConvMessage> convMessages = multiConvMessages.getMessageList();
+			multiConvMessages.setMsgID(((ConvMessage)convMessages.get(0)).getMsgID());
+		}
+		else if (HikePubSub.MULTI_FILE_UPLOADED.equals(type))
+		{
+			MultipleConvMessage multiConvMessages = (MultipleConvMessage) object;
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
 		}
 		else if (HikePubSub.DELETE_MESSAGE.equals(type))
 		{
