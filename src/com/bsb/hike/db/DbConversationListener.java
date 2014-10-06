@@ -142,9 +142,25 @@ public class DbConversationListener implements Listener
 
 			mConversationDb.addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),false);
 			ArrayList<ConvMessage> convMessages = multiConvMessages.getMessageList();
-			multiConvMessages.setMsgID(((ConvMessage)convMessages.get(0)).getMsgID());	
+			long baseId = ((ConvMessage)convMessages.get(0)).getMsgID();
+			multiConvMessages.setMsgID(baseId);
+			// publishing mqtt packet
 			mPubSub.publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
-			
+			// after DB insertion, we need to update conversation UI , so sending event which contains all contacts and last message for each contact
+			int totalMessages = convMessages.size();
+			ConvMessage lastMessage = convMessages.get(totalMessages-1);
+			List<ContactInfo> recipient = multiConvMessages.getContactList();
+			int totalRecipient = recipient.size();
+			List<Pair<ContactInfo, ConvMessage>> allPairs = new ArrayList<Pair<ContactInfo,ConvMessage>>(totalRecipient);
+			for(int i=0;i<totalRecipient;i++){
+				ConvMessage message = new ConvMessage(lastMessage);
+				message.setMsgID(lastMessage.getMsgID()+(i*totalMessages));
+				ContactInfo contactInfo = recipient.get(i);
+				message.setMsisdn(contactInfo.getMsisdn());
+				Pair<ContactInfo, ConvMessage> pair = new Pair<ContactInfo, ConvMessage>(contactInfo, message);
+				allPairs.add(pair);
+			}
+			mPubSub.publish(HikePubSub.MULTI_MESSAGE_DB_INSERTED, allPairs);
 		}
 		else if (HikePubSub.DELETE_MESSAGE.equals(type))
 		{

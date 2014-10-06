@@ -188,7 +188,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
 			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
-			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_SENT };
+			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED };
 
 	private ConversationsAdapter mAdapter;
 
@@ -1971,46 +1971,46 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				((GroupConversation) conv).setGroupAlive(false);
 			}
-		}else if(HikePubSub.MULTI_MESSAGE_SENT.equals(type)){
+		}else if(HikePubSub.MULTI_MESSAGE_DB_INSERTED.equals(type)){
 			if (!isAdded())
 			{
 				return;
 			}
 			Logger.d(getClass().getSimpleName(), "New msg event sent or received.");
-			MultipleConvMessage multiConvMessage = (MultipleConvMessage) object;
-			List<ContactInfo> allContacts = multiConvMessage.getContactList();
-			for(ContactInfo contactInfo: allContacts){
-			/* find the conversation corresponding to this message */
-			String msisdn = contactInfo.getMsisdn();
-			final Conversation conv = mConversationsByMSISDN.get(msisdn);
-			// possible few conversation does not exist ,as we can forward to any contact
-			if (conv == null)
-			{
-				continue;
-			}
-
-			
-			for(ConvMessage message : multiConvMessage.getMessageList()){
-			final ConvMessage finalMessage = message;
-
-			if (conv.getMessages().size() > 0)
-			{
-				if (finalMessage.getMsgID() < conv.getMessages().get(conv.getMessages().size() - 1).getMsgID())
+			List<Pair<ContactInfo, ConvMessage>> allPairs = (List<Pair<ContactInfo, ConvMessage>>) object;
+			for(Pair<ContactInfo, ConvMessage> contactMessagePair: allPairs){
+				/* find the conversation corresponding to this message */
+				ContactInfo contactInfo = contactMessagePair.first;
+				String msisdn = contactInfo.getMsisdn();
+				final Conversation conv = mConversationsByMSISDN.get(msisdn);
+				// possible few conversation does not exist ,as we can forward to any contact
+				if (conv == null)
 				{
 					continue;
 				}
+
+				ConvMessage message = contactMessagePair.second;
+
+				if (conv.getMessages().size() > 0) {
+					if (message.getMsgID() < conv.getMessages()
+							.get(conv.getMessages().size() - 1).getMsgID()) {
+						continue;
+					}
+				}
+
+				// for multi messages , if conversation exists then only we need
+				// to update messages . No new conversation will be created
+					conv.addMessage(message);
+				
 			}
-			
+			// messages added , update UI
 			getActivity().runOnUiThread(new Runnable()
 			{
-				@Override
-				public void run()
-				{
-					addMessage(conv, finalMessage, true);
-				}
+				public void run() {
+					Collections.sort(displayedConversations, mConversationsComparator);
+					notifyDataSetChanged();
+				};
 			});
-			}
-			}
 		}
 	}
 
