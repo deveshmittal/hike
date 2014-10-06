@@ -392,6 +392,11 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			{
 				viewHolder.icon.setImageResource(R.drawable.ic_change_profile_pic);
 			}
+			
+			else
+			{
+				viewHolder.icon.setImageResource(R.drawable.ic_new_conversation);
+			}
 
 			if (mContactInfo != null)
 			{
