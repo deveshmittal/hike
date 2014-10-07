@@ -100,6 +100,8 @@ public class HikePubSub implements Runnable
 	 * broadcast when the server receives the message and replies with a confirmation
 	 */
 	public static final String SERVER_RECEIVED_MSG = "serverReceivedMsg";
+	
+	public static final String SERVER_RECEIVED_MULTI_MSG = "serverReceivedMultiMsg";
 
 	/*
 	 * broadcast when a message is received from the sender but before it's been written our DB
