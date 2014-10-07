@@ -42,6 +42,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -1079,7 +1080,20 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						Logger.d(TAG, "Socket written success for msg with id : " + msgId);
 						if(packet.getPacketType() == HikeConstants.MULTI_FORWARD_MESSAGE_TYPE)
 						{
-							HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MULTI_MSG, new String(packet.getMessage()));
+							try
+							{
+								JSONObject jsonObj = new JSONObject(new String(packet.getMessage()));
+
+								JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+								long baseId = data.optLong(HikeConstants.MESSAGE_ID);
+								JSONArray messages = data.optJSONArray(HikeConstants.MESSAGES);
+								JSONArray contacts = data.optJSONArray(HikeConstants.LIST);
+
+								int count = messages.length() * contacts.length();
+								HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MULTI_MSG, new Pair<Long, Integer>(baseId, count));
+							} catch (JSONException e) {
+								// Do nothing
+							}
 						}
 						else
 						{
