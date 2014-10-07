@@ -306,13 +306,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					Bundle bundle = msg.getData();
 					String message = bundle.getString(HikeConstants.MESSAGE);
 					long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
-					send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis()), msg.arg1);
+					send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
 				case 12341: // just for testing
 					Bundle b = msg.getData();
 					String m = b.getString(HikeConstants.MESSAGE);
 					long mId = b.getLong(HikeConstants.MESSAGE_ID, -1);
-					send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis()), msg.arg1);
+					send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
 				}
 			}
