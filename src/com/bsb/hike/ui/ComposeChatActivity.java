@@ -784,6 +784,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
+				setMode(composeMode);
 				setActionBar();
 				invalidateOptionsMenu();
 			}
