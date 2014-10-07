@@ -634,6 +634,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return executeUpdateMessageStatusStatement(query, val, msisdn);
 	}
 
+	public int updateMsgStatusBetween(long startMsgId, long endMsgId, int val, String msisdn)
+	{
+		String initialWhereClause = DBConstants.MESSAGE_ID + " BETWEEN " + startMsgId + " AND " + endMsgId;
+
+		String query = initialWhereClause;
+
+		return executeUpdateMessageStatusStatement(query, val, msisdn);
+	}
+
 	public long[] setAllDeliveredMessagesReadForMsisdn(String msisdn, JSONArray msgIds)
 	{
 		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] { DBConstants.MESSAGE_ID }, DBConstants.MSISDN + "=? AND " + DBConstants.MSG_STATUS + "<"
