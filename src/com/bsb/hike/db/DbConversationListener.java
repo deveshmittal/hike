@@ -71,6 +71,7 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.BLOCK_USER, this);
 		mPubSub.addListener(HikePubSub.UNBLOCK_USER, this);
 		mPubSub.addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
+		mPubSub.addListener(HikePubSub.SERVER_RECEIVED_MULTI_MSG, this);
 		mPubSub.addListener(HikePubSub.FAVORITE_TOGGLED, this);
 		mPubSub.addListener(HikePubSub.MUTE_CONVERSATION_TOGGLED, this);
 		mPubSub.addListener(HikePubSub.FRIEND_REQUEST_ACCEPTED, this);
@@ -220,6 +221,14 @@ public class DbConversationListener implements Listener
 		{
 			Logger.d("DBCONVERSATION LISTENER", "(Sender) Message sent confirmed for msgID -> " + (Long) object);
 			updateDB(object, ConvMessage.State.SENT_CONFIRMED.ordinal());
+		}
+		else if(HikePubSub.SERVER_RECEIVED_MULTI_MSG.equals(type))
+		{
+			Pair<Long, Integer> p  = (Pair<Long, Integer>) object;
+			long baseId = p.first;
+			long endId = (p.first + p.second) - 1;
+			Logger.d("DBCONVERSATION LISTENER", "(Sender) Message sent confirmed for msgID between " + baseId + "and "+ endId);
+			mConversationDb.updateMsgStatusBetween(baseId, endId, ConvMessage.State.SENT_CONFIRMED.ordinal(), null);
 		}
 		else if (HikePubSub.FAVORITE_TOGGLED.equals(type) || HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type) || HikePubSub.REJECT_FRIEND_REQUEST.equals(type))
 		{
