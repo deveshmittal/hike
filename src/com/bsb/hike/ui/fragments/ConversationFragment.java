@@ -188,7 +188,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
 			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
-			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED };
+			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG };
 
 	private ConversationsAdapter mAdapter;
 
@@ -1289,6 +1289,36 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						updateViewForMessageStateChange(conversation, msg);
 					}
 				});
+			}
+		}
+		else if (HikePubSub.SERVER_RECEIVED_MULTI_MSG.equals(type))
+		{
+			Pair<Long, Integer> p  = (Pair<Long, Integer>) object;
+			long baseId = p.first;
+			int count = p.second;
+			for(long msgId=baseId; msgId<(baseId+count) ; msgId++)
+			{
+				final ConvMessage msg = findMessageById(msgId);
+				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
+				{
+					msg.setState(ConvMessage.State.SENT_CONFIRMED);
+
+					if (!isAdded())
+					{
+						return;
+					}
+					getActivity().runOnUiThread(new Runnable()
+					{
+
+						@Override
+						public void run()
+						{
+							Conversation conversation = mConversationsByMSISDN.get(msg.getMsisdn());
+
+							updateViewForMessageStateChange(conversation, msg);
+						}
+					});
+				}
 			}
 		}
 		/*
