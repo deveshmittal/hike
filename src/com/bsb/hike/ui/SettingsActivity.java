@@ -68,9 +68,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.settings);
 		profileImageLoader = new IconLoader(this, getResources().getDimensionPixelSize(R.dimen.avatar_profile_size));
-		
-		HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
-		
+				
 		ArrayList<String> items = new ArrayList<String>();
 
 		items.add(getString(R.string.notifications));
@@ -182,6 +180,8 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		settingsList.setAdapter(listAdapter);
 		settingsList.setOnItemClickListener(this);
 		setupActionBar();
+		
+		HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
 	}
 
 	private void addProfileHeaderView(ListView settingsList)
@@ -192,12 +192,6 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		statusMood = (ImageView)header.findViewById(R.id.status_mood);
 		nameView = (TextView)header.findViewById(R.id.name);
 		statusView = (TextView)header.findViewById(R.id.subtext);
-		ImageView arrowView = (ImageView)header.findViewById(R.id.view_profile);
-		header.findViewById(R.id.divider_view).setVisibility(View.VISIBLE);
-		arrowView.setImageDrawable(getResources().getDrawable(R.drawable.ic_arrow));
-		arrowView.setOnClickListener(this);
-		View headerView = header.findViewById(R.id.profile_head);
-		headerView.setOnClickListener(this);
 		contactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 		msisdn = contactInfo.getMsisdn();
 		
@@ -424,6 +418,14 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 	public void onClick(View v) 
 	{
 		Intent intent = new Intent(SettingsActivity.this, ProfileActivity.class);
+		startActivity(intent);
+	}
+	
+	public void openTimeline(View v)
+	{
+		Intent intent = new Intent();
+		intent.setClass(SettingsActivity.this, ProfileActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 	}
 }

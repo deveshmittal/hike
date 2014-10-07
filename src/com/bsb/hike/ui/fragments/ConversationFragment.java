@@ -228,7 +228,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void setEmptyState()
 	{
-		if (emptyView == null)
+		if (wasViewSetup() && emptyView == null)  /*Adding wasViewSetup() safety check for an NPE here*/
 		{
 			ViewGroup emptyHolder = (ViewGroup) getView().findViewById(R.id.emptyViewHolder);
 			emptyView = LayoutInflater.from(getActivity()).inflate(R.layout.conversation_empty_view, emptyHolder);
@@ -2168,7 +2168,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				movedFromEmptyToNonEmpty();
 			}
 		}
-		conv.addMessage(convMessage);
+		conv.clearMessageListAndAddMessage(convMessage);
 		Logger.d(getClass().getSimpleName(), "new message is " + convMessage);
 
 		if (sortAndUpdateView)
