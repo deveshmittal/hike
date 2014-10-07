@@ -350,7 +350,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private StickerEmoticonIconPageIndicator iconPageIndicator;
 
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.SMS_CREDIT_CHANGED,
-			HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_FAILED, HikePubSub.ICON_CHANGED,
+			HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED, HikePubSub.SERVER_RECEIVED_MSG,HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.MESSAGE_FAILED, HikePubSub.ICON_CHANGED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.CONTACT_ADDED, HikePubSub.UPLOAD_FINISHED,
 			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER,
 			HikePubSub.DELETE_MESSAGE, HikePubSub.GROUP_REVIVED, HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE,
@@ -3559,6 +3559,33 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				runOnUiThread(mUpdateAdapter);
 			}
+		}
+		else if (HikePubSub.SERVER_RECEIVED_MULTI_MSG.equals(type))
+		{
+			Pair<Long, Integer> p  = (Pair<Long, Integer>) object;
+			long baseId = p.first;
+			int count = p.second;
+			for(long msgId=baseId; msgId<(baseId+count) ; msgId++)
+			{
+				ConvMessage msg = findMessageById(msgId);
+				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
+				{
+					if (activityVisible && (!msg.isTickSoundPlayed()) && Utils.isPlayTickSound(getApplicationContext()))
+					{
+						Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
+					}
+					msg.setTickSoundPlayed(true);
+					msg.setState(ConvMessage.State.SENT_CONFIRMED);
+					if (!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
+					{
+						if (!msg.isSMS())
+						{
+							mAdapter.addToUndeliverdMessage(msg);
+						}
+					}
+				}
+			}
+			runOnUiThread(mUpdateAdapter);
 		}
 		else if (HikePubSub.ICON_CHANGED.equals(type))
 		{
