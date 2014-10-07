@@ -1077,7 +1077,14 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					{
 						Long msgId = packet.getMsgId();
 						Logger.d(TAG, "Socket written success for msg with id : " + msgId);
-						HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
+						if(packet.getPacketType() == HikeConstants.MULTI_FORWARD_MESSAGE_TYPE)
+						{
+							HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MULTI_MSG, new String(packet.getMessage()));
+						}
+						else
+						{
+							HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
+						}
 					}
 				}
 			});
