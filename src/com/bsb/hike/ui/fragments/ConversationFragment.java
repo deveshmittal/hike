@@ -1269,27 +1269,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))
 		{
 			long msgId = ((Long) object).longValue();
-			final ConvMessage msg = findMessageById(msgId);
-			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
-			{
-				msg.setState(ConvMessage.State.SENT_CONFIRMED);
-
-				if (!isAdded())
-				{
-					return;
-				}
-				getActivity().runOnUiThread(new Runnable()
-				{
-					
-					@Override
-					public void run()
-					{
-						Conversation conversation = mConversationsByMSISDN.get(msg.getMsisdn());
-						
-						updateViewForMessageStateChange(conversation, msg);
-					}
-				});
-			}
+			setStateAndUpdateView(msgId);
 		}
 		else if (HikePubSub.SERVER_RECEIVED_MULTI_MSG.equals(type))
 		{
@@ -1298,27 +1278,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			int count = p.second;
 			for(long msgId=baseId; msgId<(baseId+count) ; msgId++)
 			{
-				final ConvMessage msg = findMessageById(msgId);
-				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
-				{
-					msg.setState(ConvMessage.State.SENT_CONFIRMED);
-
-					if (!isAdded())
-					{
-						return;
-					}
-					getActivity().runOnUiThread(new Runnable()
-					{
-
-						@Override
-						public void run()
-						{
-							Conversation conversation = mConversationsByMSISDN.get(msg.getMsisdn());
-
-							updateViewForMessageStateChange(conversation, msg);
-						}
-					});
-				}
+				setStateAndUpdateView(msgId);
 			}
 		}
 		/*
@@ -2153,6 +2113,31 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 		return null;
+	}
+
+	private void setStateAndUpdateView(long msgId)
+	{
+		final ConvMessage msg = findMessageById(msgId);
+		if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
+		{
+			msg.setState(ConvMessage.State.SENT_CONFIRMED);
+
+			if (!isAdded())
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					Conversation conversation = mConversationsByMSISDN.get(msg.getMsisdn());
+
+					updateViewForMessageStateChange(conversation, msg);
+				}
+			});
+		}
 	}
 
 	private View getParenViewForConversation(Conversation conversation)
