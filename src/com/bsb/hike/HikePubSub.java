@@ -373,6 +373,8 @@ public class HikePubSub implements Runnable
 	public static final String CONV_META_DATA_UPDATED = "convMetaDataUpdated";
 	
 	public static final String LATEST_PIN_DELETED = "lastPinDeleted";
+	
+	public static final String UNREAD_PIN_COUNT_RESET = "pinCountReset";
 
 	private final Thread mThread;
 
