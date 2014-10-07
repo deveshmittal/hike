@@ -1169,4 +1169,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
 	<string name="unselect_all_hike">Unselect All Hike Contacts</string>
     <string name="recent_chats">RECENT CHATS</string>
     <string name="messages_sent_succees">Messages Sent</string>
+    <string name="welcome_to">Welcome to</string>
 </resources>

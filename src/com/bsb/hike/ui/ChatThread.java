@@ -1437,11 +1437,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 
-		if (mConversation instanceof GroupConversation)
-		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.pin_history), 8));
-		}
-
 		dismissPopupWindow();
 
 		attachmentWindow = new PopupWindow(this);
@@ -1509,9 +1504,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 3:
 					EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(ChatThread.this, null);
 					Utils.executeConvAsyncTask(emailTask, mConversation);
-					break;
-				case 8:
-					showPinHistory(true);
 					break;
 				case 5:
 					clearConversation();
@@ -4790,9 +4782,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// @GM cancelTask has been changed
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			File file = hikeFile.getFile();
-			if(deleteMediaFromPhone && hikeFile.exactFilePathFileExists())
+			if(deleteMediaFromPhone && hikeFile != null)
 			{
-				hikeFile.getFileFromExactFilePath().delete();
+				hikeFile.delete(getApplicationContext());
 			}
 			FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent());
 			mAdapter.notifyDataSetChanged();
@@ -7961,34 +7953,35 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				TextView pin_unread = (TextView) convertView.findViewById(R.id.new_games_indicator);
 
-				if (item.getKey() == 8)
+				if (item.getKey() == 0)
 				{
-					pin_unread.setVisibility(View.VISIBLE);
-					int pin_unread_count = 0;
-					try
+					if(mConversation instanceof GroupConversation && ((GroupConversation)mConversation).getIsGroupAlive())
 					{
-						// -1 because most recent pin will be at stick at top
-						pin_unread_count = mConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
-					}
-					catch (JSONException e)
-					{
-						e.printStackTrace();
-					}
-					if (pin_unread_count > 0)
-					{
-						if (pin_unread_count >= HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY)
+						pin_unread.setVisibility(View.VISIBLE);
+						int pin_unread_count = 0;
+						try
 						{
-							pin_unread.setText(R.string.max_pin_unread_counter);
-							pin_unread.startAnimation(Utils.getNotificationIndicatorAnim());
+							// -1 because most recent pin will be at stick at top
+							pin_unread_count = mConversation.getMetaData().getUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+						}
+						catch (JSONException e)
+						{
+							e.printStackTrace();
+						}
+						if (pin_unread_count > 0)
+						{
+							if (pin_unread_count >= HikeConstants.MAX_PIN_CONTENT_LINES_IN_HISTORY)
+							{
+								pin_unread.setText(R.string.max_pin_unread_counter);
+							}
+							else
+							{
+								pin_unread.setText(Integer.toString(pin_unread_count));
+							}
 						}
 						else
-						{
-							pin_unread.setText(Integer.toString(pin_unread_count));
-							pin_unread.startAnimation(Utils.getNotificationIndicatorAnim());
-						}
+							pin_unread.setVisibility(View.GONE);
 					}
-					else
-						pin_unread.setVisibility(View.GONE);
 				}
 				else
 				{

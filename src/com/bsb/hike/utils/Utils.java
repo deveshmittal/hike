@@ -4550,6 +4550,7 @@ public class Utils
 				e.printStackTrace();
 			}
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, conv);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.UNREAD_PIN_COUNT_RESET, conv);
 		}
 	}	
 	
@@ -4695,5 +4696,31 @@ public class Utils
 		    return output;
 		}
 		return null;
+	}
+	
+	/**
+	 * 
+	 * @param c
+	 * 	 - contact info object
+	 * @param myMsisdn
+	 * 	 - self msisdn
+	 * @return
+	 * 	<br>false if</br>
+	 * 
+	 * 	   <li> contact msisdn equals myMsisdn</li>
+	 * 	   <li> contact favorite state is FRIENDS</li>
+	 *     <li> contact favorite state is REQUEST_RECIEVED</li>
+	 *     <li> contact favorite state is REQUEST_RECIEVED_REJECTED</li>
+	 *     
+	 *  <p>true otherwise</p>
+	 */
+	public static boolean shouldDeleteIcon(ContactInfo c, String myMsisdn)
+	{
+		String msisdn = c.getMsisdn();
+		if(msisdn.equalsIgnoreCase(myMsisdn) || c.getFavoriteType().equals(FavoriteType.FRIEND) || c.getFavoriteType().equals(FavoriteType.REQUEST_RECEIVED) || c.getFavoriteType().equals(FavoriteType.REQUEST_RECEIVED_REJECTED))
+		{
+			return false;
+		}
+		return true;
 	}
 }

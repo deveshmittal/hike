@@ -355,5 +355,6 @@
     <color name="status_text_color">#888888</color>
     <color name="group_edit_pressed">#33888888</color>
     <color name="files_disabled">#bbbbbb</color>
+    <color name="welcome_blue">#008fe1</color>
 </resources>
 	
