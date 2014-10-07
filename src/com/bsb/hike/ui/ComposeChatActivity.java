@@ -301,7 +301,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			MIN_MEMBERS_GROUP_CHAT = 1;
 		}
-		if (isForwardingMessage)
+		if (isForwardingMessage && !isSharingFile)
 		{
 			setMode(MULTIPLE_FWD);
 		}
@@ -815,7 +815,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				setMode(CREATE_GROUP_MODE);
 				setActionBar();
 				invalidateOptionsMenu();
 			}
@@ -1415,6 +1414,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				return;
 			}
 			setMode(START_CHAT_MODE);
+			return;
+		}
+		else if(composeMode == MULTIPLE_FWD)
+		{
+			ComposeChatActivity.this.finish();
 			return;
 		}
 		super.onBackPressed();
