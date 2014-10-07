@@ -317,7 +317,17 @@ class PersistenceCache extends ContactsCache
 				else
 				{
 					List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(msisdn, false, false);
-					return Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+					String grpName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+					writeLock.lock();
+					try
+					{
+						grpDetails.setGroupName(grpName);
+						return grpName;
+					}
+					finally
+					{
+						writeLock.unlock();
+					}
 				}
 			}
 			finally
