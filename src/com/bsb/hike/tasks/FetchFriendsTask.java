@@ -170,13 +170,13 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			while (iter.hasNext()) 
 			{
 			    ContactInfo recentContact = iter.next();
-			    String msisdn = recentContact.getMsisdn();			
-			    if (blockSet.contains(msisdn) || HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn) || myMsisdn.equals(msisdn))
+			    String msisdn = recentContact.getMsisdn();
+			    boolean hideStealthMsisdn = HikeMessengerApp.isStealthMsisdn(msisdn) && stealthMode != HikeConstants.STEALTH_ON;
+			    if (blockSet.contains(msisdn) || HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn) || myMsisdn.equals(msisdn) || hideStealthMsisdn)
 			    {
 			    	iter.remove();
 			    }
 			}
-			addToStealthList(recentTaskList, recentsStealthList, false);
 			if(recentTaskList.size() > HikeConstants.MAX_RECENTS_TO_SHOW)
 			{
 				recentTaskList = recentTaskList.subList(0, HikeConstants.MAX_RECENTS_TO_SHOW);
