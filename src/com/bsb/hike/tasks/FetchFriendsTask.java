@@ -167,22 +167,20 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		Set<String> blockSet = ContactManager.getInstance().getBlockedMsisdnSet();
 		if(fetchRecents)
 		{
-			recentTaskList = HikeMessengerApp.getContactManager().getAllConversationContactsSorted();
-			Iterator<ContactInfo> iter = recentTaskList.iterator();
-			while (iter.hasNext()) 
+			List<ContactInfo> convContacts = HikeMessengerApp.getContactManager().getAllConversationContactsSorted();
+			recentTaskList = new ArrayList<ContactInfo>();
+			for(ContactInfo recentContact : convContacts)
 			{
-			    ContactInfo recentContact = iter.next();
+				if(recentTaskList.size() >= HikeConstants.MAX_RECENTS_TO_SHOW)
+					break;
 			    String msisdn = recentContact.getMsisdn();
 			    boolean hideStealthMsisdn = HikeMessengerApp.isStealthMsisdn(msisdn) && stealthMode != HikeConstants.STEALTH_ON;
 			    boolean removeSendingMsisdn = (sendingMsisdn!=null && sendingMsisdn.equals(msisdn));
 			    if (blockSet.contains(msisdn) || HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn) || myMsisdn.equals(msisdn) || hideStealthMsisdn || removeSendingMsisdn)
 			    {
-			    	iter.remove();
+			    	continue;
 			    }
-			}
-			if(recentTaskList.size() > HikeConstants.MAX_RECENTS_TO_SHOW)
-			{
-				recentTaskList = recentTaskList.subList(0, HikeConstants.MAX_RECENTS_TO_SHOW);
+			    recentTaskList.add(recentContact);
 			}
 			if(fetchGroups)
 			{
