@@ -426,6 +426,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 			if (isForwardingMessage)
 			{
+				// share
+				if(isSharingFile){
+					ArrayList<ContactInfo> list = new ArrayList<ContactInfo>();list.add(contactInfo);
+					forwardConfirmation(list);
+					return;
+				}
 				// for SMS users, append SMS text with name
 				int viewtype = adapter.getItemViewType(arg2);
 				if (contactInfo.getName() == null)
@@ -897,7 +903,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private void forwardMultipleMessages(ArrayList<ContactInfo> arrayList)
 	{
-		if (getIntent().hasExtra(HikeConstants.Extras.PREV_MSISDN))
+		if(isSharingFile){
+			Intent presentIntent = getIntent();
+	        Intent intent = Utils.createIntentFromContactInfo(arrayList.get(0), true);
+	        intent.setClass(this, ChatThread.class);
+	        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	        String type = presentIntent.getType();
+	        forwardMessageAsPerType(presentIntent, intent,arrayList);
+			startActivity(intent);
+			finish();
+		}else if (getIntent().hasExtra(HikeConstants.Extras.PREV_MSISDN))
 		{
 			Intent presentIntent = getIntent();
 			String id = getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN);
@@ -1095,6 +1110,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 				if(multipleMessageList.size()==0){
 					return;
+				}else if(isSharingFile){
+					sendMessage(multipleMessageList.get(0));
 				}else{
 					sendMultiMessages(multipleMessageList,arrayList);
 				}
