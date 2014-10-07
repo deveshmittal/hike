@@ -657,7 +657,7 @@ public class Utils
 
 	public static boolean isGroupConversation(String msisdn)
 	{
-		return !msisdn.startsWith("+");
+		return msisdn!=null && !msisdn.startsWith("+");
 	}
 
 	public static String defaultGroupName(List<PairModified<GroupParticipant, String>> participantList)

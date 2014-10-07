@@ -1279,6 +1279,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
             Map<String, Pair<List<String>, Long>> map = new HashMap<String, Pair<List<String>, Long>>();
 			long timeStamp = System.currentTimeMillis() / 1000;
 			int totalMessage = convMessages.size()-1;
+			long baseId = -1;
 			for (ContactInfo contact : contacts)
 			{
 				for (int i=0;i<=totalMessage;i++)
@@ -1327,7 +1328,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 						assert (msgId >= 0);
 					}
-
+					if(baseId==-1){
+						baseId = msgId;
+					}
+					
 					conv.setMsgID(msgId);
 					ChatThread.addtoMessageMap(conv);
 
@@ -1371,7 +1375,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				incrementUnreadCounter(contact.getMsisdn(), unreadMessageCount);
 			}
-			
+			// setting base DB id as whole packet logic for multi forward depends on base ID, i.e : first contact -> first message 
+			convMessages.get(0).setMsgID(baseId);			
 			mDb.setTransactionSuccessful();
 			ContactManager.getInstance().removeOlderLastGroupMsisdns(map);
 			return true;

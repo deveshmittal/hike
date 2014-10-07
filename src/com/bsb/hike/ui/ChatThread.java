@@ -1733,7 +1733,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			// Poke message can only be deleted
 			selectedNonTextMsg(isMsgSelected);
-			//selectedNonForwadableMsg(isMsgSelected);
 		}
 		else if (message.isStickerMessage())
 		{
