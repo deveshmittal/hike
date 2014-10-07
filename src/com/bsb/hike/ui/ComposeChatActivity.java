@@ -285,8 +285,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private void init()
 	{
 		listView = (ListView) findViewById(R.id.list);
+		String sendingMsisdn = getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN);
 
-		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, (isForwardingMessage && !isSharingFile), existingGroupId, friendsListFetchedCallback);
+		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, (isForwardingMessage && !isSharingFile), existingGroupId, sendingMsisdn, friendsListFetchedCallback);
 		adapter.setEmptyView(findViewById(android.R.id.empty));
 		adapter.setLoadingView(findViewById(R.id.spinner));
 		listView.setAdapter(adapter);
@@ -789,6 +790,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
+				setMode(composeMode);
 				setActionBar();
 				invalidateOptionsMenu();
 			}
