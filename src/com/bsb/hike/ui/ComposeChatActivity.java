@@ -447,7 +447,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					}else{
 						adapter.addContact(contactInfo);
 					}
-					tagEditText.toggleTag(getString(R.string.selected_count,adapter.getSelectedContactCount()), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
+					tagEditText.toggleTag(getString(R.string.selected_contacts_count,adapter.getSelectedContactCount()), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
 				}else{
 				String name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
 				tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
