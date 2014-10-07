@@ -3533,24 +3533,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))
 		{
 			long msgId = ((Long) object).longValue();
-			ConvMessage msg = findMessageById(msgId);
-			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
-			{
-				if (activityVisible && (!msg.isTickSoundPlayed()) && Utils.isPlayTickSound(getApplicationContext()))
-				{
-					Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
-				}
-				msg.setTickSoundPlayed(true);
-				msg.setState(ConvMessage.State.SENT_CONFIRMED);
-				if (!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
-				{
-					if (!msg.isSMS())
-					{
-						mAdapter.addToUndeliverdMessage(msg);
-					}
-				}
-				runOnUiThread(mUpdateAdapter);
-			}
+			setStateAndUpdateView(msgId, true);
 		}
 		else if (HikePubSub.SERVER_RECEIVED_MULTI_MSG.equals(type))
 		{
@@ -3559,23 +3542,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			int count = p.second;
 			for(long msgId=baseId; msgId<(baseId+count) ; msgId++)
 			{
-				ConvMessage msg = findMessageById(msgId);
-				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
-				{
-					if (activityVisible && (!msg.isTickSoundPlayed()) && Utils.isPlayTickSound(getApplicationContext()))
-					{
-						Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
-					}
-					msg.setTickSoundPlayed(true);
-					msg.setState(ConvMessage.State.SENT_CONFIRMED);
-					if (!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
-					{
-						if (!msg.isSMS())
-						{
-							mAdapter.addToUndeliverdMessage(msg);
-						}
-					}
-				}
+				setStateAndUpdateView(msgId, false);
 			}
 			runOnUiThread(mUpdateAdapter);
 		}
@@ -4267,6 +4234,31 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true);
 				}
 			});
+		}
+	}
+
+	private void setStateAndUpdateView(long msgId, boolean updateView)
+	{
+		ConvMessage msg = findMessageById(msgId);
+		if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
+		{
+			if (activityVisible && (!msg.isTickSoundPlayed()) && Utils.isPlayTickSound(getApplicationContext()))
+			{
+				Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
+			}
+			msg.setTickSoundPlayed(true);
+			msg.setState(ConvMessage.State.SENT_CONFIRMED);
+			if (!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
+			{
+				if (!msg.isSMS())
+				{
+					mAdapter.addToUndeliverdMessage(msg);
+				}
+			}
+			if(updateView)
+			{
+				runOnUiThread(mUpdateAdapter);
+			}
 		}
 	}
 
