@@ -17,30 +17,7 @@ public class MultipleConvMessage
 	private ArrayList<ConvMessage> messageList;
 	private ArrayList<ContactInfo> contactList;
 	
-	public long getMsgID()
-	{
-		return msgID;
-	}
 
-	public void setMsgID(long msgID)
-	{
-		this.msgID = msgID;
-	}
-
-	public long getMappedMsgId()
-	{
-		return mappedMsgId;
-	}
-
-	public void setMappedMsgId(long mappedMsgId)
-	{
-		this.mappedMsgId = mappedMsgId;
-	}
-
-	private long msgID; // this corresponds to msgID stored in sender's DB
-
-	private long mappedMsgId; // this corresponds to msgID stored in receiver's
-								// DB
 	public ArrayList<ConvMessage> getMessageList()
 	{
 		return messageList;
@@ -97,7 +74,7 @@ public class MultipleConvMessage
 			object.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.MULTIPLE_FORWARD);
 		
 			data.put(HikeConstants.TIMESTAMP, timeStamp);
-			data.put(HikeConstants.MESSAGE_ID, msgID);
+			data.put(HikeConstants.MESSAGE_ID, messageList.get(0).getMsgID());
 			
 			JSONArray msgArray = new JSONArray();
 			for (int i=0; i<messageList.size();i++)
