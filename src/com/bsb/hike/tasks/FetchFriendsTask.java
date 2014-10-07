@@ -78,6 +78,8 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 	private String existingGroupId;
 
+	private String sendingMsisdn;
+
 	private boolean fetchGroups = false;
 
 	private boolean creatingOrEditingGroup = false;
@@ -99,13 +101,13 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, boolean fetchSmsContacts, boolean checkFavTypeInComparision, boolean fetchRecents)
 	{
 		this(friendsAdapter, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, friendsStealthList, hikeStealthContactsList, smsStealthContactsList, recentsStealthList, filteredFriendsList,
-				filteredHikeContactsList, filteredSmsContactsList, null, null, null, null, null, false, null, false, fetchSmsContacts, checkFavTypeInComparision, fetchRecents);
+				filteredHikeContactsList, filteredSmsContactsList, null, null, null, null, null, null, false, null, false, fetchSmsContacts, checkFavTypeInComparision, fetchRecents);
 	}
 
 	public FetchFriendsTask(FriendsAdapter friendsAdapter, Context context, List<ContactInfo> friendsList, List<ContactInfo> hikeContactsList, List<ContactInfo> smsContactsList, List<ContactInfo> recentContactsList, 
 			List<ContactInfo> friendsStealthList, List<ContactInfo> hikeStealthContactsList, List<ContactInfo> smsStealthContactsList, List<ContactInfo> recentsStealthList, List<ContactInfo> filteredFriendsList,
 			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, List<ContactInfo> groupsList, List<ContactInfo> groupsStealthList,
-			List<ContactInfo> filteredGroupsList, List<ContactInfo> filteredRecentsList, Map<String, ContactInfo> selectedPeople, boolean fetchGroups, String existingGroupId, boolean creatingOrEditingGrou,
+			List<ContactInfo> filteredGroupsList, List<ContactInfo> filteredRecentsList, Map<String, ContactInfo> selectedPeople, String sendingMsisdn, boolean fetchGroups, String existingGroupId, boolean creatingOrEditingGrou,
 			boolean fetchSmsContacts, boolean checkFavTypeInComparision, boolean fetchRecents)
 	{
 		this.friendsAdapter = friendsAdapter;
@@ -134,6 +136,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 		this.fetchGroups = fetchGroups;
 		this.existingGroupId = existingGroupId;
+		this.sendingMsisdn = sendingMsisdn;
 
 		this.creatingOrEditingGroup = creatingOrEditingGroup;
 
@@ -153,11 +156,10 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		String myMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 		boolean removeExistingParticipants = !TextUtils.isEmpty(existingGroupId);
-
 		if (fetchGroups)
 		{
 			groupTaskList = HikeMessengerApp.getContactManager().getConversationGroupsAsContacts();
-			addToStealthList(groupTaskList, groupsStealthList, true);
+			removeSendingMsisdnAndStealthContacts(groupTaskList, groupsStealthList, true);
 		}
 
 		long queryTime = System.currentTimeMillis();
@@ -172,7 +174,8 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			    ContactInfo recentContact = iter.next();
 			    String msisdn = recentContact.getMsisdn();
 			    boolean hideStealthMsisdn = HikeMessengerApp.isStealthMsisdn(msisdn) && stealthMode != HikeConstants.STEALTH_ON;
-			    if (blockSet.contains(msisdn) || HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn) || myMsisdn.equals(msisdn) || hideStealthMsisdn)
+			    boolean removeSendingMsisdn = (sendingMsisdn!=null && sendingMsisdn.equals(msisdn));
+			    if (blockSet.contains(msisdn) || HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn) || myMsisdn.equals(msisdn) || hideStealthMsisdn || removeSendingMsisdn)
 			    {
 			    	iter.remove();
 			    }
@@ -200,7 +203,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			{
 				continue;
 			}
-			if (blockSet.contains(msisdn))
+			if (blockSet.contains(msisdn) || (sendingMsisdn!=null && sendingMsisdn.equals(msisdn)))
 			{
 				continue;
 			}
@@ -346,6 +349,34 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		{
 			ContactInfo contactInfo = iter.next();
 			if (groupParticipants.containsKey(contactInfo.getMsisdn()))
+			{
+				iter.remove();
+			}
+		}
+	}
+
+	private void removeSendingMsisdnAndStealthContacts(List<ContactInfo> contactList, List<ContactInfo> stealthList, boolean isGroupTask)
+	{
+		for (Iterator<ContactInfo> iter = contactList.iterator(); iter.hasNext();)
+		{
+			ContactInfo contactInfo = iter.next();
+			/*
+			 * if case of group contactInfo.getId() will retrun groupId, which is treated as msisdn for groups.
+			 */
+			String msisdn = isGroupTask ? contactInfo.getId() : contactInfo.getMsisdn();
+			if (HikeMessengerApp.isStealthMsisdn(msisdn) && !creatingOrEditingGroup)
+			{
+				stealthList.add(contactInfo);
+
+				/*
+				 * If stealth mode is currently off, we should remove these contacts from the list.
+				 */
+				if (stealthMode != HikeConstants.STEALTH_ON)
+				{
+					iter.remove();
+				}
+			}
+			if(sendingMsisdn!=null && sendingMsisdn.equals(msisdn))
 			{
 				iter.remove();
 			}
