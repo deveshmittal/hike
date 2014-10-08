@@ -1811,11 +1811,14 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		}
 	}
 
-	public List<ContactInfo> getAllConversationContactsSorted()
+	public List<ContactInfo> getAllConversationContactsSorted(boolean fetchGroups)
 	{
 		List<ContactInfo> allContacts = new ArrayList<ContactInfo>();
 		allContacts.addAll(persistenceCache.getConversationOneToOneContacts());
-		allContacts.addAll(getConversationGroupsAsContacts());
+		if(fetchGroups)
+		{
+			allContacts.addAll(getConversationGroupsAsContacts());
+		}
 
 		Collections.sort(allContacts, new Comparator<ContactInfo>()
 		{
