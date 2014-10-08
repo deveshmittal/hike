@@ -5,7 +5,7 @@
     android:background="@color/avtars_bg" >
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/PhoneNumberView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -18,7 +18,7 @@
         android:id="@+id/CallerId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView1"
+        android:layout_below="@+id/PhoneNumberView1"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="32dp"
         android:text="Large Text"

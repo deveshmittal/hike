@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import org.json.JSONObject;
 import org.json.JSONException;
+import org.webrtc.PeerConnection;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -35,7 +37,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 	private ImageButton speakerButton;
 	private ImageButton muteButton;
 	private TextView callNo;
-	private int serviceId = BIND_AUTO_CREATE;	
+	private TextView inCallCallNo;
+	private TextView inCallTimer;	
 	private HikePubSub mPubSub = HikeMessengerApp.getPubSub();
 	public static Handler messageHandler = new MessageHandler();
 	public static MessageHandler serviceHandler = new MessageHandler();
@@ -46,21 +49,44 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 	public boolean isMute = false;
 	public boolean isSpeakerOn = false;
 	MediaPlayer mMediaPlayer = new MediaPlayer();
-//	final MediaPlayer player = mMediaPlayer ;
+	private String storedId;
+	private Handler displayHandler = new Handler();
+	private long startTime = 0;
+	private long callLength = 0;
+	
+	class CallLengthManager implements Runnable{
+
+		@Override
+		public void run() {
+			callLength = System.currentTimeMillis() - startTime;
+			int seconds = (int) (callLength / 1000);
+		    int minutes = seconds / 60;
+		    int hours = minutes/60;
+		    seconds = seconds % 60;
+		    inCallTimer.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
+		    displayHandler.postDelayed(new CallLengthManager(), 500);
+			
+		}
+		
+	};
 	
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		vActivity = this;
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		mPubSub.addListener(HikePubSub.VOIP_HANDSHAKE, this);
+		mPubSub.addListener(HikePubSub.VOIP_CALL_STATUS_CHANGED, this);
 		if(getIntent().hasExtra("callerID")){
 			callerId = getIntent().getStringExtra("callerID");
+			storedId = callerId;
 			prepareAnswer();
 		} else if (getIntent().hasExtra("dialedID")){
 			dialedId = getIntent().getStringExtra("dialedID");
+			storedId = dialedId;
 			prepareInCall();
 		} else {
 			resumeId = getIntent().getStringExtra("resumeId");
+			storedId = resumeId;
 			prepareResume();			
 		}
 	}
@@ -126,13 +152,6 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 			Log.d("vService", "NULL HAI!!!");
 		vService.startCall(i);
 
-//		try {
-//			wait(500);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		vService = VoIPServiceNew.getVoIPSerivceInstance();
 		drawInCall();
 	}
 	
@@ -168,30 +187,50 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 			
 			@Override
 			public void onClick(View v) {
+				raiseEndCallToast();
 				VoIPServiceNew.getVoIPSerivceInstance().endCall();
 				finish();
 			}
 		});
+		
+		inCallCallNo = (TextView)this.findViewById(R.id.PhoneNumberView1);
+		inCallCallNo.setText(storedId);
+		
+		inCallTimer = (TextView)this.findViewById(R.id.timerView1);
+		if (VoIPServiceNew.getVoIPSerivceInstance().client.connectionState != "CONNECTED")
+			inCallTimer.setText(VoIPServiceNew.getVoIPSerivceInstance().client.connectionState);
+		else
+			inCallTimer.setText(callerId);
 	}
 
 	@Override
 	public void onEventReceived(String type, Object object) {
-		try {
-			JSONObject json = (JSONObject) object;
-			JSONObject data = (JSONObject) json.get(HikeConstants.DATA);
-			JSONObject metadata = (JSONObject) data.get(HikeConstants.METADATA);
-			String mdType = metadata.getString("type");
-			if (mdType.equals(HikeConstants.MqttMessageTypes.VOIP_END_CALL))
-				finish();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(type == HikePubSub.VOIP_HANDSHAKE){
+			try {
+				JSONObject json = (JSONObject) object;
+				JSONObject data = (JSONObject) json.get(HikeConstants.DATA);
+				JSONObject metadata = (JSONObject) data.get(HikeConstants.METADATA);
+				String mdType = metadata.getString("type");
+				if (mdType.equals(HikeConstants.MqttMessageTypes.VOIP_END_CALL))
+					finish();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else if (type == HikePubSub.VOIP_CALL_STATUS_CHANGED){
+			String state = (String) object;
+			if(state == PeerConnection.IceConnectionState.CONNECTED.toString()){
+				startTime = System.currentTimeMillis();
+				displayHandler.post(new CallLengthManager() );
+			}
 		}
 	}
 	
 	public void onDestroy(){
 		if(mMediaPlayer.isPlaying())
 			mMediaPlayer.stop();
+		mPubSub.removeListener(HikePubSub.VOIP_HANDSHAKE, this);
+		mPubSub.removeListener(HikePubSub.VOIP_CALL_STATUS_CHANGED, this);
 		super.onDestroy();
 	}
 	
@@ -219,6 +258,10 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener {
 			isSpeakerOn = false;
 		}
 		
+	}
+	
+	public void raiseEndCallToast(){
+		Toast.makeText(getApplicationContext(), "CALL ENDED", Toast.LENGTH_LONG).show();
 	}
 	
 }

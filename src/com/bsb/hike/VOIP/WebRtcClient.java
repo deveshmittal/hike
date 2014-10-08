@@ -6,8 +6,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.DataChannel;
@@ -18,21 +19,14 @@ import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
 import org.webrtc.SdpObserver;
 import org.webrtc.SessionDescription;
-import org.webrtc.VideoCapturer;
-import org.webrtc.VideoSource;
-import org.webrtc.voiceengine.*;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
-import android.widget.Toast;
-import android.content.Context;
-import android.media.AudioManager;
+
 
 import com.haibison.android.lockpattern.util.Sys;
-import com.koushikdutta.async.http.socketio.Acknowledge;
-import com.koushikdutta.async.http.socketio.ConnectCallback;
-import com.koushikdutta.async.http.socketio.EventCallback;
-import com.koushikdutta.async.http.socketio.SocketIOClient;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -59,6 +53,52 @@ public class WebRtcClient {
 	public boolean answerpressed = false;
 	private Boolean callReceived = false;
 	private Handler mHandler = new Handler();
+	private long startTime = 0;
+	private Handler heartBeatHandler = new Handler();
+	private Handler timerHandler = new Handler();
+	public String connectionState = "CHECKING";
+	private Timer timer = new Timer();
+	private boolean answering = true;
+	public static long callLength = 0;
+	private Handler callTimeHandler = new Handler();
+	
+	
+	
+	class HeartBeat implements Runnable{
+		@Override
+		public void run() {
+//			HeartBeat.cancel();
+//			timer.cancel();
+//			Looper.myLooper().quitSafely();
+			if (connectionState != "CONNECTED" ){
+				((VoIPServiceNew)mListener).onStatusChanged("DISCONNECTED");				
+			}
+		}		
+	};
+	
+	class HeartBeater implements Runnable{
+
+		@Override
+		public void run() {
+			Looper.prepare();
+			heartBeatHandler.postDelayed(new HeartBeat(), 30000);
+		}
+		
+	}
+	
+	class CallLengthCalculator implements Runnable{
+
+		@Override
+		public void run() {
+			callLength = System.currentTimeMillis() - startTime;
+			int seconds = (int) (callLength / 1000);
+		    int minutes = seconds / 60;
+		    seconds     = seconds % 60;
+		    HikeMessengerApp.getPubSub().publish("", callLength);
+
+		}
+		
+	}
 
 
 //	DONE: Removed arg "String:callId" from method onCallReady
@@ -92,7 +132,13 @@ public class WebRtcClient {
 //			Log.d(TAG, "CreateOfferCommand");
 			Peer peer = peers.get(peerId);
 			peer.pc.createOffer(peer, pcConstraints);
+//			timer.schedule(HeartBeat, 10000);
+			Thread handThread = new Thread(new HeartBeater());
+			handThread.start();
+//			Looper.prepare();
+//			heartBeatHandler.postDelayed(HeartBeat , 10000);
 			callReceived = true;
+			answering = false;
 		}
 	}
 
@@ -100,8 +146,12 @@ public class WebRtcClient {
 		public void execute(String peerId, JSONObject payload)
 				throws JSONException {
 			callReceived = true;
+//			timer.schedule(HeartBeat, 10000);
+//			Looper.prepare();			
+//			heartBeatHandler.postDelayed(HeartBeat , 10000);
+			Thread handThread = new Thread(new HeartBeater());
+			handThread.start();
 			Log.d(TAG, "CreateAnswerCommand");
-//			while(!answerpressed );
 			Log.d(TAG, "CreateAnswerCommand");
 			Peer peer = peers.get(peerId);
 			Log.d(TAG, "CreateAnswerCommand");
@@ -113,8 +163,6 @@ public class WebRtcClient {
 			Log.d(TAG, "CreateAnswerCommand");
 			peer.pc.createAnswer(peer, pcConstraints);
 			Log.d(TAG, "CreateAnswerCommand");
-//			((VoIPServiceNew)(mListener)).callConnected = true;
-
 		}
 	}
 
@@ -185,7 +233,8 @@ public class WebRtcClient {
 		message.put(HikeConstants.DATA, data);
 		
 //		mPubSub.publish(HikePubSub.VOIP_HANDSHAKE_SENT, message);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
+		if( !(message.toString().contains("recvonly")) )
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
 		
 		Log.d("Sent", message.toString());
 		// client.emit("message", new JSONArray().put(message));
@@ -320,12 +369,18 @@ public class WebRtcClient {
 		@Override
 		public void onIceConnectionChange(
 				PeerConnection.IceConnectionState iceConnectionState) {
+			connectionState = iceConnectionState.toString();
 			Logger.d(TAG, "on ice connection  changed above");
 			Logger.d(TAG, "on ice connection chnaged state : " + iceConnectionState.toString());
+			HikeMessengerApp.getPubSub().publish(HikePubSub.VOIP_CALL_STATUS_CHANGED, iceConnectionState.toString());
 			if (iceConnectionState == PeerConnection.IceConnectionState.DISCONNECTED) {
 				Logger.d(TAG, "on ice connection  changed");
 				removePeer(id);
 				mListener.onStatusChanged("DISCONNECTED");
+				
+			}
+			if (iceConnectionState == PeerConnection.IceConnectionState.CONNECTED){
+				startTime = System.currentTimeMillis();
 			}
 		}
 
@@ -453,26 +508,7 @@ public class WebRtcClient {
 		mHandler.removeCallbacks(checkCallReceived);
         mHandler.postDelayed(checkCallReceived, 30000);
 
-
-		/* SocketIOClient.connect(host, new ConnectCallback() {
-
-			@Override
-			public void onConnectCompleted(Exception ex, SocketIOClient socket) {
-				if (ex != null) {
-//					Log.e(TAG,
-//							"WebRtcClient connect failed: " + ex.getMessage());
-					return;
-				}
-//				Log.d(TAG, "WebRtcClient connected.");
-				client = socket;
-
-				// specify which events you are interested in receiving
-				client.addListener("id", messageHandler);
-				client.addListener("message", messageHandler);
-			}
-		}, new Handler()); */
-
-		//iceServers.add(new PeerConnection.IceServer("stun:23.21.150.121"));	
+	
 		iceServers.add(new PeerConnection.IceServer(
 				"stun:stun.l.google.com:19302"));
 		iceServers.add(new PeerConnection.IceServer(
@@ -543,34 +579,12 @@ public class WebRtcClient {
 			Log.d("WebRTCClient", "THIS SHOULD NEVER HAPPEN!");
 			e.printStackTrace();
 		}
-//		MediaConstraints videoConstraints = new MediaConstraints();
-
-		
-//		VideoCapturer vd =		getVideoCapturer("front");
-//		vd.dispose();
 		peers.remove(peer.id);
 //		peer.pc = null;
 		Log.d("NewPeer","disposing video");
 
 		endPoints[peer.endPoint] = false;
 		}
-	}
-	
-	private VideoCapturer getVideoCapturer(String cameraFacing) {
-		int[] cameraIndex = { 0, 1 };
-		int[] cameraOrientation = { 90, 180, 270, 0 };
-		for (int index : cameraIndex) {
-			for (int orientation : cameraOrientation) {
-				String name = "Camera " + index + ", Facing " + cameraFacing
-						+ ", Orientation " + orientation;
-				VideoCapturer capturer = VideoCapturer.create(name);
-				Log.d("Camera",name);
-				if (capturer != null) {
-					return capturer;
-				}
-			}
-		}
-		throw new RuntimeException("Failed to open capturer");
 	}
 
 	public void destroyPeer()

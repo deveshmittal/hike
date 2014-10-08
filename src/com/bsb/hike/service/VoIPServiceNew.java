@@ -32,13 +32,8 @@ import android.widget.TextView;
 
 public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcClient.RTCListener {
 	
-	private WebRtcClient client;
-	private String mSocketAddress;
+	public WebRtcClient client;
 	private String callerId;
-	private int minbuf=AudioTrack.getMinBufferSize(16000,AudioFormat.CHANNEL_OUT_MONO,AudioFormat.ENCODING_PCM_16BIT);
-//	private AudioTrack aud1=new AudioTrack(AudioManager.STREAM_VOICE_CALL,16000,AudioFormat.CHANNEL_OUT_MONO,AudioFormat.ENCODING_PCM_16BIT,(int) (1*minbuf),AudioTrack.MODE_STREAM);
-//	private AudioTrack aud2=new AudioTrack(AudioManager.STREAM_VOICE_CALL,16000,AudioFormat.CHANNEL_OUT_MONO,AudioFormat.ENCODING_PCM_16BIT,(int) (1*minbuf),AudioTrack.MODE_STREAM);
-	private AudioManager am1;
 	private String manufacturer;
 	private Context mContext;
 	private Button endCall;
@@ -79,7 +74,6 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 			  } catch (JSONException e) {
 				  e.printStackTrace();
 			  }
-	//	      setAnswerLayout();
 	      
 		  } else {
 			  call();
@@ -115,13 +109,15 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	  
 	  @Override
 	  public void onStatusChanged(final String newStatus){
-//		  runOnUiThread(new Runnable() {
-//			  @Override
-//			  public void run() {
-//				  Toast.makeText(getApplicationContext(), newStatus, Toast.LENGTH_SHORT).show();
-//			  }
-//			});
-//		  
+		  if (newStatus == "DISCONNECTED"){
+			  stopForeground(true);
+			  if (mNotificationManager != null){
+				  mNotificationManager.cancel(notifId);
+			  }
+//		  	VoIPActivityNew.getVoIPActivityInstance().raiseEndCallToast();
+			  VoIPActivityNew.getVoIPActivityInstance().finish();
+			  stopSelf();
+		  }
 	  }
 	  
 	  @Override
@@ -132,33 +128,17 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	  
 	  @Override
 	  public void onAddRemoteStream(MediaStream remoteStream, int endPoint){
-//		  if ( blah == 1){
-//		  aud1.play();
-//		  aud1.write(remoteStream.audioTracks.get(0).toString().getBytes(), 0, 2*minbuf);
-//		  }
-//		  else{
-//			  aud2.play();
-//			  aud2.write(remoteStream.audioTracks.get(0).toString().getBytes(), 0, 2*minbuf);
-//		  }
-//		  
+
 	  }
 	  
 	  @Override
 	  public void onRemoveRemoteStream(MediaStream remoteStream, int endPoint){
 		  remoteStream.audioTracks.get(0).dispose();
-		  if ( blah == 1){
-//		  aud1.stop();
-//		  aud1.release();
-//		  }
-//		  else{
-//			  aud2.stop();
-//			  aud2.release();
-		  }
+
 	  }
 	  
 	  public void endCall(){
 		  declineCall();
-		  blah = 2;
 		  stopService();		  
 	  }
 	  
@@ -166,13 +146,6 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		  Log.d("VOIPSERVICE","1");
 		  client.destroyPeer();
 		  Log.d("VOIPSERVICE","2");
-		  if (blah == 1){
-//		  aud1.stop();
-//		  aud1.release();}
-//		  else {
-//			  aud2.stop();
-//			  aud2.release();
-		  }
 		  Log.d("VOIPSERVICE","3");
 		  
 		  Log.d("VOIPSERVICE","4");
@@ -180,14 +153,13 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		  if (mNotificationManager != null){
 			  mNotificationManager.cancel(notifId);
 		  }
-		  Log.d("VOIPSERVICE","5");
+		  Log.d("VOIPSERVICE","5");			
+//		  VoIPActivityNew.getVoIPActivityInstance().raiseEndCallToast();
 		  VoIPActivityNew.getVoIPActivityInstance().finish();
 		  Log.d("VOIPSERVICE","6");
-//		  while(run)
-//			  Log.d("Oh", "Look at it go");
 		  stopSelf();
 		  Log.d("VOIPSERVICE","7");
-//		  android.os.Process.killProcess(android.os.Process.myPid());
+
 	  }
 	  
 	  public void declineCall(){

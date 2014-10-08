@@ -1736,6 +1736,8 @@ public class HikeConstants
 
 		public static final String VOIP_HANDSHAKE = "vhs";
 		
+		public static final String VOIP_HEARTBEAT = "vhbeat";
+		
 		public static final String VOIP_CALL = "vcall";
 		
 		public static final String VOIP_END_CALL = "vendcall";

@@ -37,4 +37,26 @@
         android:minWidth="110px"
         android:src="@drawable/ic_sound_checked" />
 
+    <TextView
+        android:id="@+id/PhoneNumberView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="26dp"
+        android:text="Large Text"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/bubble_beach_2" />
+
+    <TextView
+        android:id="@+id/timerView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/PhoneNumberView1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="17dp"
+        android:text="CONNECTING"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/bubble_beach_2" />
+
 </RelativeLayout>
