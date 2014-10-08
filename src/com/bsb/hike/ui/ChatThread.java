@@ -7826,13 +7826,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		case R.id.copy_msgs:
 			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			Collections.sort(selectedMsgIds);
-			String msgStr = selectedMessagesMap.get(selectedMsgIds.get(0)).getMessage();
-			for (int i = 1; i < selectedMsgIds.size(); i++)
+			StringBuilder msgStr = new StringBuilder();
+			int size = selectedMsgIds.size();
+			
+			for (int i = 0; i < size; i++)
 			{
-				msgStr += "\n" + selectedMessagesMap.get(selectedMsgIds.get(i)).getMessage();
+				msgStr.append(selectedMessagesMap.get(selectedMsgIds.get(i)).getMessage());
+				msgStr.append("\n");				
 			}
-			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-			clipboard.setText(msgStr);
+			Utils.setClipboardText(msgStr.toString(), getApplicationContext());
 			Toast.makeText(ChatThread.this, R.string.copied, Toast.LENGTH_SHORT).show();
 			destroyActionMode();
 			return true;
