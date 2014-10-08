@@ -77,7 +77,7 @@ public class IconLoader extends ImageWorker
 		boolean rounded = false;
 		if (idx > 0)
 		{
-			id = id.substring(0, idx);
+			id = new String(id.substring(0, idx));
 			rounded = true;
 		}
 		byte[] icondata = ContactManager.getInstance().getIconByteArray(id, rounded);
