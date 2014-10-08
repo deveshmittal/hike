@@ -171,8 +171,6 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			recentTaskList = new ArrayList<ContactInfo>();
 			for(ContactInfo recentContact : convContacts)
 			{
-				if(recentTaskList.size() >= HikeConstants.MAX_RECENTS_TO_SHOW)
-					break;
 			    String msisdn = recentContact.getMsisdn();
 			    boolean hideStealthMsisdn = HikeMessengerApp.isStealthMsisdn(msisdn) && stealthMode != HikeConstants.STEALTH_ON;
 			    boolean removeSendingMsisdn = (sendingMsisdn!=null && sendingMsisdn.equals(msisdn));
