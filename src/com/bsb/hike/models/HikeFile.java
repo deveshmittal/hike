@@ -455,7 +455,10 @@ public class HikeFile
 		{
 			file = Utils.getOutputMediaFile(hikeFileType, fileName, isSent);
 		}
-		return file.getPath();
+		if(file != null)
+			return file.getPath();
+		else
+			return null;
 	}
 
 	public File getFile()

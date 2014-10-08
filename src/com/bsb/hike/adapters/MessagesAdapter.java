@@ -1164,7 +1164,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				RelativeLayout.LayoutParams fileThumbParams = (RelativeLayout.LayoutParams) videoHolder.fileThumb.getLayoutParams();
 
-				if (showThumbnail)
+				if (showThumbnail && thumbnail != null)
 				{
 					videoHolder.fileThumb.setScaleType(ScaleType.CENTER);
 					fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
@@ -1324,7 +1324,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				
 				RelativeLayout.LayoutParams fileThumbParams = (RelativeLayout.LayoutParams) imageHolder.fileThumb.getLayoutParams();
 
-				if (showThumbnail)
+				if (showThumbnail && thumbnail != null)
 				{
 					imageHolder.fileThumb.setScaleType(ScaleType.CENTER_CROP);
 					fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
