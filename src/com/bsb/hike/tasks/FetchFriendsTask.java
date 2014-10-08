@@ -181,6 +181,9 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			    }
 			    recentTaskList.add(recentContact);
 			}
+
+			List<String> newUserMsisdns = HikeConversationsDatabase.getInstance().getNewOrReturningUserMsisdns();
+			removeItemsFromListOnMsisdn(recentTaskList, newUserMsisdns);
 		}
 		Logger.d("TestQuery", "query time: " + (System.currentTimeMillis() - queryTime));
 
@@ -291,15 +294,15 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		return true;
 	}
 
-	private void removeItemsFromListOnMsisdn(List<ContactInfo> list, List<ContactInfo> removeList)
+	private void removeItemsFromListOnMsisdn(List<ContactInfo> list, List<String> removeList)
 	{
 		Iterator<ContactInfo> iter = list.iterator();
 		while(iter.hasNext())
 		{
-			ContactInfo groupContact = iter.next();
-			for(ContactInfo removeContact : removeList)
+			ContactInfo contact = iter.next();
+			for(String removeMsisdn : removeList)
 			{
-				if(removeContact.getMsisdn().equals(groupContact.getMsisdn()))
+				if(removeMsisdn.equals(contact.getMsisdn()))
 				{
 					iter.remove();
 				}
