@@ -35,4 +35,6 @@
 	<dimen name="ftue_contact_card_text_size">22dp</dimen>
 	<dimen name="logo_top_margin">80dp</dimen>
 	<dimen name="welcome_bottom_margin">25dp</dimen>
+	<dimen name="welcome_artwork_padding">10dp</dimen>
+	<dimen name="welcome_with_love_top">30dp</dimen>
 </resources>
