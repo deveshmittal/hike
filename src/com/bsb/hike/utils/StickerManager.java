@@ -505,6 +505,101 @@ public class StickerManager
 		preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
 
 	}
+	
+	public void doInitialSetup(Context applicationContext)
+	{
+		// move stickers from external to internal if not done
+		init(applicationContext);
+		SharedPreferences settings = applicationContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if(!settings.getBoolean(StickerManager.RECENT_STICKER_SERIALIZATION_LOGIC_CORRECTED, false)){
+			updateRecentStickerFile(settings);
+		}
+		
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(applicationContext);
+		/*
+		 * If we had earlier removed bollywood stickers we need to display them again.
+		 */
+		if (settings.contains(StickerManager.SHOW_BOLLYWOOD_STICKERS))
+		{
+			setupBollywoodCategoryVisibility(settings);
+		}
+
+		setupStickerCategoryList(settings);
+		/*
+		* This preference has been used here because of a prepopulated recent sticker enhancement
+		* it will delete all the default stickers as we are adding some more default stickers 
+		*/
+		if (!preferenceManager.contains(StickerManager.REMOVE_DEFAULT_CAT_STICKERS))
+		{
+			deleteDefaultDownloadedExpressionsStickers();
+			deleteDefaultDownloadedStickers();
+			
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(StickerManager.REMOVE_DEFAULT_CAT_STICKERS, true);
+			editor.commit();
+		}
+		loadRecentStickers();
+
+		/*
+		 * This preference has been used here because of a bug where we were inserting this key in the settings preference
+		 */
+		if (!preferenceManager.contains(StickerManager.REMOVE_HUMANOID_STICKERS))
+		{
+			removeHumanoidSticker();
+		}
+		
+		if (!preferenceManager.getBoolean(StickerManager.EXPRESSIONS_CATEGORY_INSERT_TO_DB, false))
+		{
+			insertExpressionsCategory();
+		}
+
+		if (!preferenceManager.getBoolean(StickerManager.HUMANOID_CATEGORY_INSERT_TO_DB, false))
+		{
+			insertHumanoidCategory();
+		}
+
+		if (!settings.getBoolean(StickerManager.RESET_REACHED_END_FOR_DEFAULT_STICKERS, false))
+		{
+			resetReachedEndForDefaultStickers();
+		}
+
+		if (!settings.getBoolean(StickerManager.ADD_NO_MEDIA_FILE_FOR_STICKERS, false))
+		{
+			addNoMediaFilesToStickerDirectories();
+		}
+		/*
+		 * Adding these preferences since they are used in the load more stickers logic.
+		 */
+		if (!settings.getBoolean(StickerManager.CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES, false))
+		{
+			setDialoguePref();
+		}
+
+		if (!settings.getBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, false))
+		{
+			deleteDefaultDownloadedStickers();
+			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, true).commit();
+		}
+		/*
+		 * this code path will be for users upgrading to the build where we make expressions a default loaded category
+		 */
+		if (!settings.getBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, false))
+		{
+			deleteDefaultDownloadedExpressionsStickers();
+			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, true).commit();
+
+			if (checkIfStickerCategoryExists(StickerCategoryId.doggy.name()))
+			{
+				HikeConversationsDatabase.getInstance().stickerUpdateAvailable(StickerCategoryId.doggy.name());
+				StickerManager.getInstance().setStickerUpdateAvailable(StickerCategoryId.doggy.name(), true);
+			}
+			else
+			{
+				HikeConversationsDatabase.getInstance().removeStickerCategory(StickerCategoryId.doggy.name());
+			}
+			StickerManager.getInstance().removeStickersFromRecents(StickerCategoryId.doggy.name(), OLD_HARDCODED_STICKER_IDS_DOGGY);
+		}
+	}
 
 	public void loadRecentStickers()
 	{

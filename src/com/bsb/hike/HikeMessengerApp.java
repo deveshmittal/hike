@@ -58,6 +58,7 @@ import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
 
@@ -438,6 +439,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static volatile boolean syncingContacts = false;
 
 	public Handler appStateHandler;
+	
+	private StickerManager sm;
 
 	class IncomingHandler extends Handler
 	{
@@ -800,6 +803,14 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		appStateHandler = new Handler();
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
+		
+		setupStickers();
+	}
+	
+	private void setupStickers()
+	{
+		sm = StickerManager.getInstance();
+		sm.doInitialSetup(getApplicationContext());
 	}
 
 	private void replaceGBKeys()
