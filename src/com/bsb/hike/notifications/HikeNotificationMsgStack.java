@@ -58,7 +58,7 @@ public class HikeNotificationMsgStack implements Listener
 
 	private long latestAddedTimestamp;
 
-	private final int MAX_LINES = 8;
+	private final int MAX_LINES = 7;
 
 	private int totalNewMessages;
 
