@@ -167,12 +167,11 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		Set<String> blockSet = ContactManager.getInstance().getBlockedMsisdnSet();
 		if(fetchRecents)
 		{
-			List<ContactInfo> convContacts = HikeMessengerApp.getContactManager().getAllConversationContactsSorted();
+			List<ContactInfo> convContacts = HikeMessengerApp.getContactManager().getAllConversationContactsSorted(false);
 			recentTaskList = new ArrayList<ContactInfo>();
+
 			for(ContactInfo recentContact : convContacts)
 			{
-				if(recentTaskList.size() >= HikeConstants.MAX_RECENTS_TO_SHOW)
-					break;
 			    String msisdn = recentContact.getMsisdn();
 			    boolean hideStealthMsisdn = HikeMessengerApp.isStealthMsisdn(msisdn) && stealthMode != HikeConstants.STEALTH_ON;
 			    boolean removeSendingMsisdn = (sendingMsisdn!=null && sendingMsisdn.equals(msisdn));
@@ -182,10 +181,9 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			    }
 			    recentTaskList.add(recentContact);
 			}
-			if(fetchGroups)
-			{
-				removeItemsFromListOnMsisdn(groupTaskList, recentTaskList);
-			}
+
+			List<String> newUserMsisdns = HikeConversationsDatabase.getInstance().getNewOrReturningUserMsisdns();
+			removeItemsFromListOnMsisdn(recentTaskList, newUserMsisdns);
 		}
 		Logger.d("TestQuery", "query time: " + (System.currentTimeMillis() - queryTime));
 
@@ -296,15 +294,15 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		return true;
 	}
 
-	private void removeItemsFromListOnMsisdn(List<ContactInfo> list, List<ContactInfo> removeList)
+	private void removeItemsFromListOnMsisdn(List<ContactInfo> list, List<String> removeList)
 	{
 		Iterator<ContactInfo> iter = list.iterator();
 		while(iter.hasNext())
 		{
-			ContactInfo groupContact = iter.next();
-			for(ContactInfo removeContact : removeList)
+			ContactInfo contact = iter.next();
+			for(String removeMsisdn : removeList)
 			{
-				if(removeContact.getMsisdn().equals(groupContact.getMsisdn()))
+				if(removeMsisdn.equals(contact.getMsisdn()))
 				{
 					iter.remove();
 				}
