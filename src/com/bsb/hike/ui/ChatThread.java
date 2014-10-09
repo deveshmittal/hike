@@ -3223,7 +3223,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 
 			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(mConversation.getMsisdn());
-			mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT, mConversation.getMsisdn());
 			mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
 			Logger.d("UnreadBug", "Unread count event triggered");
@@ -3371,7 +3370,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					// return to
 					// sender
 
-					mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT, mConversation.getMsisdn());
 					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 				}
 
@@ -4159,7 +4157,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					// TODO make the calls here.
 					mPubSub.publish(HikePubSub.MQTT_PUBLISH, jsonObject);
-					mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT, mConversation.getMsisdn());
 					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 				}
 			}
