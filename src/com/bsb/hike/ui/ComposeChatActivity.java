@@ -341,8 +341,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						@Override
 						public void onInflate(ViewStub stub, final View inflated) {
 							// TODO : set text and icon
-							View icon = inflated.findViewById(R.id.arrow_pointer);
-							icon.setVisibility(View.INVISIBLE);
 							TextView heading = (TextView) inflated.findViewById(R.id.tip_header);
 							heading.setText(R.string.forward_tip_heading);
 							TextView description = (TextView) inflated.findViewById(R.id.tip_msg);
@@ -1575,7 +1573,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		if(recentContacts == null)
 		{
-			recentContacts = HikeMessengerApp.getContactManager().getAllConversationContactsSorted(false);
+			recentContacts = ContactManager.getInstance().getAllConversationContactsSorted(true);
 		}
 		return recentContacts;
 	}
