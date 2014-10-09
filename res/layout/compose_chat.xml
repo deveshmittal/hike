@@ -10,6 +10,10 @@
         layout="@layout/spinner_center_screen"
         android:visibility="gone" />
 
+    <ViewStub android:id="@+id/tipLayoutViewStub" 
+	    android:layout_width="wrap_content" android:layout_height="wrap_content"
+	    android:layout="@layout/welcome_hike_tip" android:inflatedId="@+id/tipMultiForward"/>
+
     <com.bsb.hike.view.TagEditText
         android:id="@+id/composeChatNewGroupTagET"
         android:layout_width="match_parent"
@@ -27,9 +31,7 @@
         android:paddingRight="10dp"
         android:paddingTop="8dp" >
     </com.bsb.hike.view.TagEditText>
-	<ViewStub android:id="@+id/tipLayoutViewStub" 
-	    android:layout_width="wrap_content" android:layout_height="wrap_content"
-	    android:layout="@layout/tip_left_arrow" android:inflatedId="@+id/tipMultiForward"/>
+
     <com.bsb.hike.view.PinnedSectionListView
         android:layout_height="0dp"
         android:layout_weight="1"
