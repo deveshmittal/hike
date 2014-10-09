@@ -1331,6 +1331,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		 * 'new' map as items to add, and send the 'hike' map as IDs to remove
 		 */
 		Map.Entry<String, List<ContactInfo>> entry = null;
+		Set<String> msisdns = new HashSet<String>();
 		for (Iterator<Map.Entry<String, List<ContactInfo>>> iterator = new_contacts_by_id.entrySet().iterator(); iterator.hasNext();)
 		{
 			entry = iterator.next();
@@ -1351,9 +1352,17 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 				/* hike db is up to date, so don't send update */
 				iterator.remove();
 				hike_contacts_by_id.remove(id);
+				for (ContactInfo con : hike_contacts_for_id)
+				{
+					msisdns.add(con.getMsisdn());
+				}
 				continue;
 			}
 			/* item is different than our db, so send an update */
+			for (ContactInfo con : hike_contacts_for_id)
+			{
+				msisdns.add(con.getMsisdn());
+			}
 			hike_contacts_by_id.remove(id);
 		}
 
@@ -1379,6 +1388,19 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
 
 			List<ContactInfo> contactsToDelete = new ArrayList<ContactInfo>();
+			String myMsisdn = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
+			
+			if (!hike_contacts_by_id.isEmpty())
+			{
+				for (Entry<String, List<ContactInfo>> mapEntry : new_contacts_by_id.entrySet())
+				{
+					List<ContactInfo> contacts = mapEntry.getValue();
+					for (ContactInfo con : contacts)
+					{
+						msisdns.add(con.getMsisdn());
+					}
+				}
+			}
 
 			for (Entry<String, List<ContactInfo>> mapEntry : hike_contacts_by_id.entrySet())
 			{
@@ -1389,7 +1411,19 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 				{
 					c.setName(null);
 					c.setId(c.getMsisdn());
-					HikeMessengerApp.getLruCache().deleteIconForMSISDN(c.getMsisdn());
+					/*
+					 * not deleting profile icon in case of contact to be deleted 
+					 * 1. is self contact
+					 * 2. has favorite state : friends
+					 * 3. has favorite state : request received
+					 * 4. has favorite state : request received rejected
+					 * 
+					 * Also if one msisdn is saved with more than one name in address book
+					 */
+					if (Utils.shouldDeleteIcon(c, myMsisdn) && !msisdns.contains(c.getMsisdn()))
+					{
+						HikeMessengerApp.getLruCache().deleteIconForMSISDN(c.getMsisdn());
+					}
 					HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_DELETED, c);
 				}
 			}

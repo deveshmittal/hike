@@ -42,6 +42,7 @@ import com.bsb.hike.adapters.SharedMediaAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeSharedFilesActivity;
@@ -332,6 +333,13 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 	
 	public void setupActionBar()
 	{
+		if (getSherlockActivity() == null)
+		{
+			return;
+		}
+		/*
+		 * else part
+		 * */
 		ActionBar actionBar = getSherlockActivity().getSupportActionBar();
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
@@ -548,9 +556,9 @@ public class PhotoViewerFragment extends SherlockFragment implements OnPageChang
 					HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(msgIds, bundle));
 					
 					// if delete media from phone is checked
-					if(deleteConfirmDialog.isChecked() && getCurrentSelectedItem().exactFilePathFileExists())
+					if(deleteConfirmDialog.isChecked() && getCurrentSelectedItem() != null)
 					{
-						getCurrentSelectedItem().getFileFromExactFilePath().delete();
+						getCurrentSelectedItem().delete(getActivity().getApplicationContext());
 					}
 					if(!fromChatThread)
 					{

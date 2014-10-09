@@ -1237,7 +1237,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			break;
 		case MqttException.REASON_CODE_UNEXPECTED_ERROR:
 			// This could happen while reading or writing error on a socket, hence disconnection happens
-			connectOnMqttThread(MQTT_WAIT_BEFORE_RECONNECT_TIME);
+			scheduleNextConnectionCheck(getConnRetryTime());
 			break;
 		default:
 			Logger.e(TAG, "In Default : " + e.getMessage());

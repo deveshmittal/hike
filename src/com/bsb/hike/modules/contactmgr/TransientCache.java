@@ -1102,11 +1102,17 @@ public class TransientCache extends ContactsCache
 			if ((blockedMsisdns.contains(contact.getMsisdn())))
 			{
 				blockedUserList.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(true), contact));
+				blockedMsisdns.remove(contact.getMsisdn());
 			}
 			else
 			{
 				allUserList.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(false), contact));
 			}
+		}
+
+		for (String ms : blockedMsisdns)
+		{
+			blockedUserList.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(true), new ContactInfo(ms, ms, ms, ms)));
 		}
 		blockedUserList.addAll(allUserList);
 		return blockedUserList;

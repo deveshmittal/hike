@@ -1098,6 +1098,8 @@ public class HikeConstants
 		public static final String ZOOM_LEVEL = "zoomLevel";
 
 		public static final String CONTACT_INFO = "contactInfo";
+		
+		public static final String CONTACT_INFO_TIMELINE = "contactInfoTimeline";
 
 		public static final String CONTACT_ID = "contactId";
 
@@ -1849,6 +1851,10 @@ public class HikeConstants
 		public static final int HASH_PIN_MESSAGE = 1;
 	}
 	
+	public static class REQUEST_BASE_URLS
+	{
+		public static final String HTTP_REQUEST_PROFILE_BASE_URL = "/account/profile/";
+	}
 	public static final String TEXT_PINS = "text_pins";
 
 	public static final String EXTRA_CONV_ID = "conv_id";
@@ -1877,5 +1883,6 @@ public class HikeConstants
 	
 	public static final int NORMAL_MESSAGE_TYPE = 0;
 	public static final int MULTI_FORWARD_MESSAGE_TYPE = 1;
+	public static final int SHARED_PIN_TYPE = 2;
 	
 }
