@@ -558,13 +558,28 @@ public class UploadFileTask extends FileTransferBase
 				return FTResult.CANCELLED;
 
 			_state = FTState.IN_PROGRESS;
-			boolean fileWasAlreadyUploaded = true;
-
-			// If we don't have a file key, that means we haven't uploaded the
-			// file to the server yet
-			if (TextUtils.isEmpty(fileKey))
+			JSONObject responseMd5 = null;
+			if(!isValidKey)
 			{
-				fileWasAlreadyUploaded = false;
+				try
+				{
+					responseMd5 = verifyMD5(selectedFile);
+				}
+				catch (Exception e)
+				{
+					Logger.e(getClass().getSimpleName(), "Exception", e);
+					return FTResult.UPLOAD_FAILED;
+				}
+			}
+			
+			if(responseMd5 != null)
+			{
+				fileKey = responseMd5.optString(HikeConstants.FILE_KEY);
+				fileType = responseMd5.optString(HikeConstants.CONTENT_TYPE);
+				fileSize = responseMd5.optInt(HikeConstants.FILE_SIZE);
+			}
+			else if (TextUtils.isEmpty(fileKey))
+			{
 
 				JSONObject response = null;
 				freshStart = true;
@@ -584,24 +599,6 @@ public class UploadFileTask extends FileTransferBase
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 				fileType = fileJSON.optString(HikeConstants.CONTENT_TYPE);
 				fileSize = fileJSON.optInt(HikeConstants.FILE_SIZE);
-				String md5Hash = fileJSON.optString("md5_original");
-				Logger.d(getClass().getSimpleName(), "Server md5 : " + md5Hash);
-				if (md5Hash != null)
-				{
-					String file_md5Hash = Utils.fileToMD5(selectedFile.getPath());
-					Logger.d(getClass().getSimpleName(), "Phone's md5 : " + file_md5Hash);
-					// if (!md5Hash.equals(file_md5Hash))
-					// {
-					// Logger.d(getClass().getSimpleName(), "The md5's are not equal...Deleting the files...");
-					// deleteStateFile();
-					// return FTResult.FAILED_UNRECOVERABLE;
-					// }
-				}
-				// else
-				// {
-				// deleteStateFile();
-				// return FTResult.FAILED_UNRECOVERABLE;
-				// }
 			}
 
 			JSONObject metadata = new JSONObject();
@@ -1272,5 +1269,60 @@ public class UploadFileTask extends FileTransferBase
 			break;
 		}
 		return imageQuality;
+	}
+	
+	private JSONObject verifyMD5(File mfile) throws Exception
+	{
+		String fileMD5 = Utils.fileToMD5(mfile.getAbsolutePath());
+
+		// If we are not able to verify the md5 validity from the server, fall back to uploading the file
+		final int MAX_RETRY = 3;
+		int retry = 0;
+		while (retry < MAX_RETRY)
+		{
+			try
+			{
+				mUrl = new URL(AccountUtils.fastFileUploadUrl + fileMD5);
+				HttpClient client = new DefaultHttpClient();
+				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
+				HttpHead head = new HttpHead(mUrl.toString());
+
+				HttpResponse resp = client.execute(head);
+				int resCode = resp.getStatusLine().getStatusCode();
+				// Make sure the response code is 200.
+				JSONObject responseJson;
+				
+				if (resCode == RESPONSE_OK)
+				{
+					try
+					{
+						responseJson = new JSONObject();
+						responseJson.put(HikeConstants.FILE_KEY, resp.getFirstHeader(HikeConstants.FILE_KEY).getValue());
+						responseJson.put(HikeConstants.CONTENT_TYPE, resp.getFirstHeader(HikeConstants.CONTENT_TYPE).getValue());
+						responseJson.put(HikeConstants.FILE_SIZE, resp.getFirstHeader(HikeConstants.FILE_SIZE).getValue());
+						responseJson.put(HikeConstants.FILE_NAME, resp.getFirstHeader(HikeConstants.FILE_NAME).getValue());
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+						responseJson = null;
+					}
+					return responseJson;
+				}
+				else
+				{
+					return null;
+				}
+			}
+			catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				retry++;
+				if (retry == (MAX_RETRY - 1))
+					throw e;
+			}
+		}
+		throw new Exception("Network error.");
 	}
 }
