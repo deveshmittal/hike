@@ -4712,4 +4712,26 @@ public class Utils
 		}
 		return true;
 	}
+	
+	/**
+	 * This method is used to remove a contact as a favorite based on existing favorite type. It returns either FavoriteType.REQUEST_RECEIVED_REJECTED or FavoriteType.NOT_FRIEND
+	 * @param contactInfo
+	 */
+	
+	public static FavoriteType checkAndUnfriendContact(ContactInfo contactInfo)
+	{
+		FavoriteType favoriteType;
+		if (contactInfo.getFavoriteType() == FavoriteType.FRIEND)
+		{
+			favoriteType = FavoriteType.REQUEST_RECEIVED_REJECTED;
+		}
+		else
+		{
+			favoriteType = FavoriteType.NOT_FRIEND;
+		}
+		
+		Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteRemoved);
+		return favoriteType;
+	}
 }
