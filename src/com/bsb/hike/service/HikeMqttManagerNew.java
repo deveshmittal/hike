@@ -957,7 +957,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					{
 						Logger.e(TAG, "invalid JSON message", e);
 					}
-					catch (Exception e)
+					catch (Throwable e)
 					{
 						Logger.e(TAG, "Exception when msg arrived : ", e);
 					}
