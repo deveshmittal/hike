@@ -2254,6 +2254,50 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	}
 
+	public List<String> getNewOrReturningUserMsisdns()
+	{
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE_METADATA}, null, null, null,
+					null, null);
+
+			final int msisdnColumn = c.getColumnIndex(DBConstants.MSISDN);
+			final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
+
+			List<String> newMsisdns = new ArrayList<String>();
+			while(c.moveToNext())
+			{
+				String msisdn = c.getString(msisdnColumn);
+				String metadata = c.getString(metadataColumn);
+
+				if (!TextUtils.isEmpty(metadata))
+				{
+					try
+					{
+						JSONObject md = new JSONObject(metadata);
+						if(md.optString(HikeConstants.TYPE).equals(HikeConstants.MqttMessageTypes.USER_JOINED))
+						{
+							newMsisdns.add(msisdn);
+						}
+					}
+					catch (JSONException e)
+					{
+						Logger.e("HikeConversationsDatabase", "Exception while parsing metadata for fetching new users msisdn : " + e);
+					}
+				}
+			}
+			return newMsisdns;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
 	public List<String> getGroupLastMsgMsisdn(JSONObject metadata)
 	{
 		List<String> grpLastMsisdns = new ArrayList<String>();

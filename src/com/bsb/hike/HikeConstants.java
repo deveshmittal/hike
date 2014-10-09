@@ -648,8 +648,6 @@ public class HikeConstants
 
 	public static final String MAIL = "support@hike.in";
 	
-	public static final int MAX_RECENTS_TO_SHOW = 10;
-
 	// Had to add this constant since its only available in the android API for
 	// Honeycomb and higher.
 	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
