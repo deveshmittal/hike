@@ -264,7 +264,8 @@ public abstract class ImageWorker
 	 */
 	public void setLoadingImage(Drawable bitmap)
 	{
-		mLoadingBitmap = drawableToBitmap(bitmap);
+		if(bitmap != null)
+			mLoadingBitmap = drawableToBitmap(bitmap);
 	}
 
 	/**

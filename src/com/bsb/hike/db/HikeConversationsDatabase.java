@@ -26,6 +26,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
@@ -181,20 +182,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		db.execSQL(sql);
 		sql = "CREATE UNIQUE INDEX IF NOT EXISTS " + DBConstants.EMOTICON_INDEX + " ON " + DBConstants.EMOTICON_TABLE + " ( " + DBConstants.EMOTICON_NUM + " ) ";
 		db.execSQL(sql);
-		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STATUS_TABLE
-				+ " ("
-				+ DBConstants.STATUS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " // Status id
-				+ DBConstants.STATUS_MAPPED_ID + " TEXT UNIQUE, " // Status id sent by the server
-				+ DBConstants.MSISDN + " TEXT, " // Msisdn of the person who generated the status
-				+ DBConstants.STATUS_TEXT + " TEXT, " // Text of the status
-				+ DBConstants.STATUS_TYPE + " INTEGER, " // Type of status
-				+ DBConstants.TIMESTAMP + " INTEGER, " // Time stamp of status
-				+ DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0, " // Message id of the message this status generated in the messages table. Only valid if status is received when a one to one conversation exists.
-				+ DBConstants.SHOW_IN_TIMELINE + " INTEGER, " // Whether this status should be shown in the timeline or not.
-				+ DBConstants.MOOD_ID + " INTEGER, " // The mood id of the status
-				+ DBConstants.TIME_OF_DAY + " INTEGER" // Deprecated.
-				+ " )";
+
+		sql = getStatusTableCreationStatement();
 		db.execSQL(sql);
+
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.STATUS_INDEX + " ON " + DBConstants.STATUS_TABLE + " ( " + DBConstants.MSISDN + " ) ";
 		db.execSQL(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STICKERS_TABLE
@@ -413,10 +404,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			// Drop table is required for user upgrading from build numbers: 8, 9, 10 or 11
 			String drop = "DROP TABLE IF EXISTS " + DBConstants.STATUS_TABLE;
-			String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.STATUS_TABLE + " (" + DBConstants.STATUS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-					+ DBConstants.STATUS_MAPPED_ID + " TEXT UNIQUE, " + DBConstants.MSISDN + " TEXT, " + DBConstants.STATUS_TEXT + " TEXT, " + DBConstants.STATUS_TYPE
-					+ " INTEGER, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0, " + DBConstants.SHOW_IN_TIMELINE + " INTEGER, "
-					+ DBConstants.MOOD_ID + " INTEGER, " + DBConstants.TIME_OF_DAY + " INTEGER" + " )";
+			String create = getStatusTableCreationStatement();
 
 			String alter1 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.MESSAGE + " STRING";
 			String alter2 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.MSG_STATUS + " INTEGER";
@@ -624,6 +612,73 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			deleteEmptyConversations(db);
 		}
+
+		/*
+		 * Version 30 fixes a Play Store crash where some DBs did not have a moodId column.
+		 * We will first query the table and check if this column exists, if not we will drop
+		 * the table and create a new one
+		 */
+		if (oldVersion < 30)
+		{
+			if (!checkIfStatusTableIsValid(db))
+			{
+				dropAndRecreateStatusTable(db);
+			}
+		}
+	}
+
+	private String getStatusTableCreationStatement()
+	{
+		return "CREATE TABLE IF NOT EXISTS " + DBConstants.STATUS_TABLE
+				+ " ("
+				+ DBConstants.STATUS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " // Status id
+				+ DBConstants.STATUS_MAPPED_ID + " TEXT UNIQUE, " // Status id sent by the server
+				+ DBConstants.MSISDN + " TEXT, " // Msisdn of the person who generated the status
+				+ DBConstants.STATUS_TEXT + " TEXT, " // Text of the status
+				+ DBConstants.STATUS_TYPE + " INTEGER, " // Type of status
+				+ DBConstants.TIMESTAMP + " INTEGER, " // Time stamp of status
+				+ DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0, " // Message id of the message this status generated in the messages table. Only valid if status is received when a one to one conversation exists.
+				+ DBConstants.SHOW_IN_TIMELINE + " INTEGER, " // Whether this status should be shown in the timeline or not.
+				+ DBConstants.MOOD_ID + " INTEGER, " // The mood id of the status
+				+ DBConstants.TIME_OF_DAY + " INTEGER" // Deprecated.
+				+ " )";
+	}
+
+	/**
+	 * This method checks if the status table has a mood id column. We had to add this to fix a bug
+	 * where this column did not exist for a few users.
+	 * @param db
+	 * @return
+	 */
+	private boolean checkIfStatusTableIsValid(SQLiteDatabase db)
+	{
+		Cursor c = null;
+		try
+		{
+			c = db.query(DBConstants.STATUS_TABLE, new String[] { DBConstants.MOOD_ID }, null, null, null, null, null);
+			return true;
+		}
+		catch (SQLiteException e)
+		{
+			Logger.w(getClass().getSimpleName(), "Mood id column does not exist");
+			return false;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
+	private void dropAndRecreateStatusTable(SQLiteDatabase db)
+	{
+		String drop = "DROP TABLE IF EXISTS " + DBConstants.STATUS_TABLE;
+		String create = getStatusTableCreationStatement();
+
+		db.execSQL(drop);
+		db.execSQL(create);
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike)
