@@ -943,7 +943,6 @@
     <string name="add_favorites_upper_case">ADD FAVORITES</string>
     <string name="status_update_tip_header">Post your status</string>
     <string name="status_update_tip_msg">status is visible to favorites only</string>
-    <string name="new_chat_compose_hint">Search by name or number</string>
     <string name="new_ui_welcome_tip_header">Welcome to new hike</string>
     <string name="new_ui_welcome_tip_msg">easier to use and faster than ever</string>
     <string name="camera">Camera</string>
@@ -1165,10 +1164,11 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="share_with_names_numbers">Share with %1$s and %2$d others?</string>
     <string name="forward_to_names_numbers">Send message to %1$s and %2$d others?</string>
     <string name="forward_to">Send message to %1$s Contact(s)?</string>
-	<string name="select_all_hike">Select all Hike Contacts</string>
-	<string name="unselect_all_hike">Unselect All Hike Contacts</string>
+	<string name="select_all_hike">Select all Hike contacts</string>
+	<string name="unselect_all_hike">Unselect all Hike contacts</string>
     <string name="recent_chats">RECENT CHATS</string>
     <string name="messages_sent_succees">Messages Sent</string>
     <string name="welcome_to">Welcome to</string>
     <string name="selected_contacts_count">%1$s Contacts</string>
+    <string name="new_chat_compose_hint">Search by name, group name or number</string>
 </resources>
