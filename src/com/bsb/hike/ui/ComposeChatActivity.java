@@ -614,7 +614,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					adapter.selectAllContacts(true);
 					tagEditText.clear(false);
 					tagEditText.toggleTag(getString(R.string.selected_contacts_count,adapter.getSelectedContactCount()), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
-					
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SELECT_ALL_HIKE_CONTACTS);
 				}else{
 					// call adapter unselect all
 					selectAllMode = false;
@@ -832,6 +832,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			public void onClick(View v)
 			{
 				setMode(composeMode);
+				if(selectAllMode)
+				{
+					View selectAllCont = findViewById(R.id.select_all_container);
+					CheckBox cb = (CheckBox) selectAllCont.findViewById(R.id.select_all_cb);
+					cb.setChecked(false);
+				}
 				setActionBar();
 				invalidateOptionsMenu();
 			}
@@ -871,6 +877,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.CONFIRM_FORWARD);
 				forwardConfirmDialog.dismiss();
 				forwardMultipleMessages(arrayList);
 			}
