@@ -181,7 +181,7 @@ public class EmoticonConstants {
 			"\uD83C\uDDEE\uD83C\uDDF9", "\uD83C\uDDEC\uD83C\uDDE7",
 			"\uD83C\uDDFA\uD83C\uDDF8", "\uD83C\uDDF7\uD83C\uDDFA",
 			"\uD83C\uDDEB\uD83C\uDDF7", "\uD83C\uDDE8\uD83C\uDDF3",
-			"\uD83C\uDDF0\uD83C\uDDF7", "\uD83C\uDDEF\uD83C\uDDF5",
+			"\uD83C\uDDF0\uD83C\uDDF7", "\uD83C\uDDEF\uD83C\uDDF5", "\ud83c\uddee\ud83c\uddf3",
 
 			/* symbols */
 
@@ -588,7 +588,7 @@ public class EmoticonConstants {
 			R.drawable.places091, R.drawable.places093, R.drawable.places096,
 			R.drawable.places097, R.drawable.places098, R.drawable.places103,
 			R.drawable.places106, R.drawable.places118, R.drawable.places122,
-			R.drawable.places123, R.drawable.places124,
+			R.drawable.places123, R.drawable.places124, R.drawable.places125,
 
 			/* emoji_symbols */
 			R.drawable.symbols001, R.drawable.symbols002,
