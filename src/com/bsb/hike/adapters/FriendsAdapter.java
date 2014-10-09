@@ -283,7 +283,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					}
 
 					String msisdn = info.getMsisdn();
-					if (msisdn != null)
+					if (msisdn != null && !Utils.isGroupConversation(msisdn))
 					{
 						// word boundary is not working because of +91 , resolve later --gauravKhanna
 						if (msisdn.contains(textToBeFiltered))
