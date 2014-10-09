@@ -1882,5 +1882,5 @@ public class HikeConstants
 	public static final int NORMAL_MESSAGE_TYPE = 0;
 	public static final int MULTI_FORWARD_MESSAGE_TYPE = 1;
 	public static final int SHARED_PIN_TYPE = 2;
-	
+	public static final String SHOWN_MULTI_FORWARD_TIP = "shownMultiForwardTip";
 }
