@@ -785,6 +785,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			public void onClick(View v)
 			{
 				setMode(composeMode);
+				if(selectAllMode)
+				{
+					View selectAllCont = findViewById(R.id.select_all_container);
+					CheckBox cb = (CheckBox) selectAllCont.findViewById(R.id.select_all_cb);
+					cb.setChecked(false);
+				}
 				setActionBar();
 				invalidateOptionsMenu();
 			}
