@@ -28,6 +28,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewStub;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -297,7 +298,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		originalAdapterLength = adapter.getCount();
 
 		initTagEditText();
-
+		initTips();
 		if (existingGroupId != null)
 		{
 			MIN_MEMBERS_GROUP_CHAT = 1;
@@ -324,6 +325,43 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		// need to confirm with rishabh --gauravKhanna
 		tagEditText.setMinCharChangeThresholdForTag(8);
 		tagEditText.setSeparator(TagEditText.SEPARATOR_SPACE);
+	}
+	
+	private void initTips(){
+		initMultiForwardTip();
+	}
+	
+	private void initMultiForwardTip() {
+		// multi forward
+		if (isForwardingMessage && !isSharingFile && !HikeSharedPreferenceUtil.getInstance(getApplicationContext()).getData(HikeConstants.SHOWN_MULTI_FORWARD_TIP, false)) {
+			ViewStub forwardTipViewStub = (ViewStub) findViewById(R.id.tipLayoutViewStub);
+			forwardTipViewStub
+					.setOnInflateListener(new ViewStub.OnInflateListener() {
+
+						@Override
+						public void onInflate(ViewStub stub, final View inflated) {
+							// TODO : set text and icon
+							View icon = inflated.findViewById(R.id.arrow_pointer);
+							icon.setVisibility(View.INVISIBLE);
+							TextView heading = (TextView) inflated.findViewById(R.id.tip_header);
+							heading.setText(R.string.forward_tip_heading);
+							TextView description = (TextView) inflated.findViewById(R.id.tip_msg);
+							description.setText(R.string.forward_tip_description);
+							
+							inflated.findViewById(R.id.close_tip)
+									.setOnClickListener(new OnClickListener() {
+
+										@Override
+										public void onClick(View v) {
+											inflated.setVisibility(View.GONE);
+											HikeSharedPreferenceUtil.getInstance(getApplicationContext()).saveData(HikeConstants.SHOWN_MULTI_FORWARD_TIP, true);
+										}
+									});
+
+						}
+					});
+			forwardTipViewStub.inflate();
+		}
 	}
 	
 	@Override
@@ -575,7 +613,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					adapter.clearAllSelection(true);
 					adapter.selectAllContacts(true);
 					tagEditText.clear(false);
-					tagEditText.toggleTag(getString(R.string.selected_count,adapter.getSelectedContactCount()), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
+					tagEditText.toggleTag(getString(R.string.selected_contacts_count,adapter.getSelectedContactCount()), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
 					Utils.sendUILogEvent(HikeConstants.LogEvent.SELECT_ALL_HIKE_CONTACTS);
 				}else{
 					// call adapter unselect all
@@ -761,7 +799,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		multiSelectTitle = (TextView) multiSelectActionBar.findViewById(R.id.title);
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, 1));
-
+		if(isForwardingMessage){
+			TextView send = (TextView) multiSelectActionBar.findViewById(R.id.save);
+			send.setText(R.string.send);
+		}
 		sendBtn.setOnClickListener(new OnClickListener()
 		{
 			@Override
