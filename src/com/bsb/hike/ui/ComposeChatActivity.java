@@ -575,7 +575,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					adapter.clearAllSelection(true);
 					adapter.selectAllContacts(true);
 					tagEditText.clear(false);
-					tagEditText.toggleTag(getString(R.string.selected_count,adapter.getSelectedContactCount()), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
+					tagEditText.toggleTag(getString(R.string.selected_contacts_count,adapter.getSelectedContactCount()), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
 					
 				}else{
 					// call adapter unselect all
@@ -761,7 +761,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		multiSelectTitle = (TextView) multiSelectActionBar.findViewById(R.id.title);
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, 1));
-
+		if(isForwardingMessage){
+			TextView send = (TextView) multiSelectActionBar.findViewById(R.id.save);
+			send.setText(R.string.send);
+		}
 		sendBtn.setOnClickListener(new OnClickListener()
 		{
 			@Override
