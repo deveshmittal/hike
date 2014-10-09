@@ -1404,6 +1404,10 @@ public class HikeConstants
 		 */
 		public static final String COMPOSE_REFRESH_CONTACTS = "compSrefContcts";
 
+		public static final String SELECT_ALL_HIKE_CONTACTS = "compSslctAllFwd";
+
+		public static final String CONFIRM_FORWARD = "compSconfFwd";
+
 		/*
 		 * Drawer screen <screen> = drS <event> = homE, gC, inV, reW, creD, proF, settinG
 		 */
