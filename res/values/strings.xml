@@ -1169,8 +1169,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="recent_chats">RECENT CHATS</string>
     <string name="messages_sent_succees">Messages Sent</string>
     <string name="welcome_to">Welcome to</string>
-    <string name="selected_contacts_count">%1$s Contacts</string>
-    <string name="new_chat_compose_hint">Search by name, group name or number</string>
+    <string name="selected_contacts_count">%1$s contacts</string>
+    <string name="new_chat_compose_hint">Search by name or number</string>
     <string name="forward_tip_heading">Sharing made easy</string>
     <string name="forward_tip_description">Now forward to multiple contacts at once</string>
 </resources>
