@@ -615,20 +615,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			Utils.onCallClicked(ProfileActivity.this, mLocalMSISDN);
 			break;
 		case R.id.unfriend:
-			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND)
-			{
-				contactInfo.setFavoriteType(FavoriteType.REQUEST_SENT);
-
-				Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, contactInfo.getFavoriteType());
-				HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
-			}
-			else
-			{
-				contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
-
-				Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, contactInfo.getFavoriteType());
-				HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
-			}
+			FavoriteType fav = Utils.checkAndUnfriendContact(contactInfo);
+			contactInfo.setFavoriteType(fav);
 			invalidateOptionsMenu();
 			break;
 		case R.id.edit_group_picture:
