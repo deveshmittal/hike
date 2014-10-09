@@ -18,6 +18,7 @@ import android.database.DatabaseUtils;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -1112,7 +1113,10 @@ public class TransientCache extends ContactsCache
 
 		for (String ms : blockedMsisdns)
 		{
-			blockedUserList.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(true), new ContactInfo(ms, ms, ms, ms)));
+			String name = ms;
+			if (HikeMessengerApp.hikeBotNamesMap.containsKey(ms))
+				name = HikeMessengerApp.hikeBotNamesMap.get(ms);
+			blockedUserList.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(true), new ContactInfo(ms, ms, name, ms)));
 		}
 		blockedUserList.addAll(allUserList);
 		return blockedUserList;

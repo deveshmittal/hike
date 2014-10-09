@@ -264,8 +264,6 @@ public class HikePubSub implements Runnable
 
 	public static final String SHOW_IMAGE = "showImage";
 
-	public static final String RESET_UNREAD_COUNT = "resetUnreadCount";
-
 	public static final String PUSH_FILE_DOWNLOADED = "pushFileDownloaded";
 
 	public static final String PUSH_AVATAR_DOWNLOADED = "pushAvtarDownloaded";

@@ -58,7 +58,7 @@ public class HikeNotificationMsgStack implements Listener
 
 	private long latestAddedTimestamp;
 
-	private final int MAX_LINES = 8;
+	private final int MAX_LINES = 7;
 
 	private int totalNewMessages;
 
@@ -281,7 +281,7 @@ public class HikeNotificationMsgStack implements Listener
 		// users
 		else
 		{
-			if (lastAddedMsisdn.contains(mContext.getString(R.string.app_name)))
+			if (lastAddedMsisdn.equals(mContext.getString(R.string.app_name)))
 			{
 				mNotificationIntent = new Intent(mContext, HomeActivity.class);
 				mNotificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
