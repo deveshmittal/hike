@@ -530,7 +530,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				
 					viewHolder.groupOrPins.setText(context.getResources().getString(R.string.pins));
 					viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_pin_2));
-					viewHolder.phoneNumView.setVisibility(View.GONE);
+					viewHolder.timeStamp.setVisibility(View.GONE);
 					if(filesCount == 0)
 						disableView(viewHolder.sharedFilesText, viewHolder.sharedFilesCount,viewHolder.files);
 					if(pinsCount == 0)
@@ -561,7 +561,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 					((LinearLayout) viewHolder.sharedFiles).findViewById(R.id.shared_content_seprator).setVisibility(View.GONE);
 					viewHolder.groupOrPins.setText(context.getResources().getString(R.string.groups));
 					viewHolder.icon.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.ic_group_2));
-					viewHolder.phoneNumView.setVisibility(View.GONE);
+					viewHolder.timeStamp.setVisibility(View.GONE);
 					if(filesCount == 0)
 						disableView(viewHolder.sharedFilesText, viewHolder.sharedFilesCount,viewHolder.files);
 						
