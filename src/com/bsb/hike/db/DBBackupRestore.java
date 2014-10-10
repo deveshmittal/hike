@@ -14,7 +14,7 @@ import com.bsb.hike.utils.Logger;
 
 public class DBBackupRestore
 {
-	public static DBBackupRestore _instance = null;
+	private static DBBackupRestore _instance = null;
 
 	private static final String HIKE_PACKAGE_NAME = "com.bsb.hike";
 
