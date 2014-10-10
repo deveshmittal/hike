@@ -7,15 +7,17 @@
     <com.bsb.hike.view.MyViewFlipper
         android:id="@+id/signup_viewflipper"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent" >
 
         <include layout="@layout/number_signup_item" />
 
         <include layout="@layout/pin_signup_item" />
 
         <include layout="@layout/name_signup_item" />
-        
+
         <include layout="@layout/scanning_contacts_item" />
+
+        <include layout="@layout/restoring_backup" />
     </com.bsb.hike.view.MyViewFlipper>
 
 </RelativeLayout>

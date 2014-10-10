@@ -50,7 +50,14 @@ import android.view.View.OnFocusChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.OvershootInterpolator;
+import android.view.animation.ScaleAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -107,6 +114,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private ViewGroup scanningContactsLayout;
 
+	private ViewGroup restoringBackupLayout;
+
 	private TextView infoTxt;
 
 	private TextView loadingText;
@@ -132,6 +141,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	private boolean addressBookError = false;
 
 	private boolean msisdnErrorDuringSignup = false;
+
+	public static final int RESTORE_BACKUP = 4;
 
 	public static final int SCANNING_CONTACTS = 3;
 
@@ -222,6 +233,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
 		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
 		scanningContactsLayout = (ViewGroup) findViewById(R.id.scanning_contacts_layout);
+		restoringBackupLayout = (ViewGroup) findViewById(R.id.restoring_backup_layout);
 
 		Object o = getLastCustomNonConfigurationInstance();
 		if (o instanceof ActivityState)
@@ -368,6 +380,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		else if (displayedChild == SCANNING_CONTACTS)
 		{
 			mActionBarTitle.setText("");
+		}
+		else if (displayedChild == RESTORE_BACKUP)
+		{
+			mActionBarTitle.setText("Restore Account");
 		}
 	}
 
@@ -918,6 +934,130 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		nextBtnContainer.setVisibility(View.GONE);
 		setupActionBarTitle();
 	}
+	
+	private void prepareLayoutForRestoring(Bundle savedInstanceState)
+	{
+		nextBtnContainer.setVisibility(View.GONE);
+		setupActionBarTitle();
+		preRestoreAnimation();
+	}
+	
+	private void preRestoreAnimation()
+	{
+		long smileyOffset = 1000;
+		long smileyDuration = 400;
+		long convOffset = smileyOffset + smileyDuration;
+		long convDuration = smileyDuration;
+		long profileOffset = convOffset + convDuration;
+		long profileDuration = smileyDuration;
+		long restoreOffset = profileOffset + profileDuration;
+		long restoreDuration = 200;
+		
+		ImageView artProfile = (ImageView) restoringBackupLayout.findViewById(R.id.art_profile);
+		ImageView artConv = (ImageView) restoringBackupLayout.findViewById(R.id.art_conversation);
+		ImageView artSmiley = (ImageView) restoringBackupLayout.findViewById(R.id.art_smiley);
+		Button btnRestore = (Button) restoringBackupLayout.findViewById(R.id.btn_restore);
+		Button btnSkip = (Button) restoringBackupLayout.findViewById(R.id.btn_skip);
+		
+		btnRestore.setOnClickListener(btnRestoreClick);
+		btnSkip.setOnClickListener(btnRestoreSkipClick);
+		
+		
+		// Animation Setup for smiley image
+		ScaleAnimation smileyScaleAnimation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 0.0f,Animation.RELATIVE_TO_SELF, 1.0f);
+		smileyScaleAnimation.setInterpolator(new OvershootInterpolator());
+		
+		AlphaAnimation smileyAlphaAnimation = new AlphaAnimation(0.1f, 1.0f);
+		
+		AnimationSet smileyAnimSet = new AnimationSet(false);
+		smileyAnimSet.addAnimation(smileyScaleAnimation);
+		smileyAnimSet.addAnimation(smileyAlphaAnimation);
+		smileyAnimSet.setDuration(smileyDuration);
+		smileyAnimSet.setFillAfter(true);
+		smileyAnimSet.setStartOffset(smileyOffset);
+		
+		Logger.d("gaurav","starting animation");
+		artSmiley.setVisibility(View.INVISIBLE);
+		artSmiley.startAnimation(smileyAnimSet);
+		
+		// Animation setup for conv image
+		ScaleAnimation convScaleAnimation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f,Animation.RELATIVE_TO_SELF, 1.8f);
+		convScaleAnimation.setInterpolator(new OvershootInterpolator());
+		
+		AlphaAnimation convAlphaAnimation = new AlphaAnimation(0.1f, 1.0f);
+		
+		AnimationSet convAnimSet = new AnimationSet(false);
+		convAnimSet.addAnimation(convScaleAnimation);
+		convAnimSet.addAnimation(convAlphaAnimation);
+		convAnimSet.setDuration(convDuration);
+		convAnimSet.setFillAfter(true);
+		convAnimSet.setStartOffset(convOffset);
+		
+		Logger.d("gaurav","starting animation");
+		artConv.setVisibility(View.INVISIBLE);
+		artConv.startAnimation(convAnimSet);
+
+		// Animation setup for profile image
+		ScaleAnimation profileScaleAnimation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 0.0f,Animation.RELATIVE_TO_SELF, 2.2f);
+		profileScaleAnimation.setInterpolator(new OvershootInterpolator());
+		
+		AlphaAnimation profileAlphaAnimation = new AlphaAnimation(0.1f, 1.0f);
+		
+		AnimationSet profileAnimSet = new AnimationSet(false);
+		profileAnimSet.addAnimation(profileScaleAnimation);
+		profileAnimSet.addAnimation(profileAlphaAnimation);
+		profileAnimSet.setDuration(profileDuration);
+		profileAnimSet.setFillAfter(true);
+		profileAnimSet.setStartOffset(profileOffset);
+		
+		Logger.d("gaurav","starting animation");
+		artProfile.setVisibility(View.INVISIBLE);
+		artProfile.startAnimation(profileAnimSet);
+		
+		// Animation setup for restore and skip buttons
+		AlphaAnimation restoreAlphaAnimation = new AlphaAnimation(0.0f, 1.0f);
+		restoreAlphaAnimation.setDuration(restoreDuration);
+		restoreAlphaAnimation.setFillAfter(true);
+		restoreAlphaAnimation.setStartOffset(restoreOffset);
+		
+		Logger.d("gaurav","starting animation");
+		btnRestore.setVisibility(View.INVISIBLE);
+		btnRestore.startAnimation(restoreAlphaAnimation);
+		btnSkip.setVisibility(View.VISIBLE);
+		btnSkip.startAnimation(restoreAlphaAnimation);
+	}
+	
+	private void restoreAnimation()
+	{
+		
+	}
+	
+	public class ReverseInterpolator implements Interpolator {
+	    @Override
+	    public float getInterpolation(float paramFloat) {
+	        return Math.abs(paramFloat -1f);
+	    }
+	}
+	
+	private OnClickListener btnRestoreClick = new OnClickListener()
+	{
+		@Override
+		public void onClick(View v)
+		{
+			// TODO Auto-generated method stub
+			mTask.addUserInput("true");
+		}
+	};
+	
+	private OnClickListener btnRestoreSkipClick = new OnClickListener()
+	{
+		@Override
+		public void onClick(View v)
+		{
+			// TODO Auto-generated method stub
+			mTask.addUserInput(null);
+		}
+	};
 
 	private void resetViewFlipper()
 	{
@@ -1240,6 +1380,12 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			else if (value == null || !value.equals(HikeConstants.CHANGE_NUMBER))
 			{
 				showErrorMsg();
+			}
+		case BACKUP_AVAILABLE:
+			if (viewFlipper.getDisplayedChild() != RESTORE_BACKUP)
+			{
+				viewFlipper.setDisplayedChild(RESTORE_BACKUP);
+				prepareLayoutForRestoring(null);
 			}
 			break;
 		}

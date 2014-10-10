@@ -1,7 +1,6 @@
 package com.bsb.hike.tasks;
 
 import java.io.File;
-
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +30,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
@@ -87,7 +87,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, SCANNING_CONTACTS, PIN_VERIFIED
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, SCANNING_CONTACTS, PIN_VERIFIED, BACKUP_AVAILABLE, RESTORED_BACKUP
 	};
 
 	public class StateValue
@@ -95,11 +95,19 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		public State state;
 
 		public String value;
+		
+		public boolean status;
 
 		public StateValue(State state, String value)
 		{
 			this.state = state;
 			this.value = value;
+		}
+		
+		public StateValue(State state, boolean status)
+		{
+			this.state = state;
+			this.status = status;
 		}
 	};
 
@@ -130,7 +138,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	public static final String START_UPLOAD_PROFILE = "start";
 
 	public static final String FINISHED_UPLOAD_PROFILE = "finish";
-
+	
 	public boolean isRunning()
 	{
 		return isRunning;
@@ -537,6 +545,30 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
+		if (DBBackupRestore.getInstance().isBackupAvailable())
+		{
+			publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
+			synchronized (this)
+			{
+				try
+				{
+					this.wait();
+				}
+				catch (InterruptedException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					Logger.d("backup","Interrupted while waiting for user's choice on restore.");
+				}
+			}
+		}
+
+		Logger.d("backup","performRestore data: " + this.data);
+		if (!TextUtils.isEmpty(this.data));
+		{
+			boolean status = DBBackupRestore.getInstance().restoreDB();
+			publishProgress(new StateValue(State.RESTORED_BACKUP,status));
+		}
 		Logger.d("SignupTask", "Publishing Token_Created");
 
 		/* tell the service to start listening for new messages */
