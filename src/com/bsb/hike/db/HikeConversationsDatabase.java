@@ -1504,6 +1504,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					List<String> lastMsisdns = new ArrayList<String>();
 					if (conv.getMetadata() != null)
 						lastMsisdns = getGroupLastMsgMsisdn(conv.getMetadata().getJSON());
+					if (lastMsisdns.size() == 0 && null != conv.getGroupParticipantMsisdn())
+					{
+						lastMsisdns.add(conv.getGroupParticipantMsisdn());
+					}
 					map.put(conv.getMsisdn(), new Pair<List<String>, Long>(lastMsisdns, timestamp));
 				}
 				}
@@ -1673,6 +1677,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				List<String> lastMsisdns = new ArrayList<String>();
 				if (conv.getMetadata() != null)
 					lastMsisdns = getGroupLastMsgMsisdn(conv.getMetadata().getJSON());
+				if (lastMsisdns.size() == 0 && null != conv.getGroupParticipantMsisdn())
+				{
+					lastMsisdns.add(conv.getGroupParticipantMsisdn());
+				}
 				map.put(conv.getMsisdn(), new Pair<List<String>, Long>(lastMsisdns, timestamp));
 			}
 		}
