@@ -258,6 +258,38 @@ public class ConvMessage
 		}
 		this.participantInfoState = participantInfoState;
 	}
+	
+	public ConvMessage(ConvMessage other) {
+		this.mappedMsgId = other.mappedMsgId;
+		this.groupParticipantMsisdn = other.groupParticipantMsisdn;
+		this.hashMessage = other.hashMessage;
+		this.isBlockAddHeader = other.isBlockAddHeader;
+		this.isFileTransferMessage = other.isFileTransferMessage;
+		this.isStickerMessage = other.isStickerMessage;
+		this.isTickSoundPlayed = other.isTickSoundPlayed;
+		this.messageType = other.messageType;
+		this.mInvite = other.mInvite;
+		this.mIsSent = other.mIsSent;
+		this.mIsSMS = other.mIsSMS;
+		this.mMessage = other.mMessage;
+		this.msgID = other.msgID;
+		this.mState = other.mState;
+		this.mTimestamp = other.mTimestamp;
+		this.participantInfoState = other.participantInfoState;
+		this.shouldShowPush = other.shouldShowPush;
+		this.unreadCount = other.unreadCount;
+		if(other.metadata!=null){try {
+			setMetadata(other.metadata.serialize());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}}
+		try {
+			this.readByArray = other.readByArray !=null? new JSONArray(other.readByArray.toString()) : null;
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+				
+	}
 
 	public ConvMessage(JSONObject obj) throws JSONException
 	{
@@ -847,5 +879,9 @@ public class ConvMessage
 	public static boolean isMessageSent(State msgState)
 	{
 		return !(msgState==State.RECEIVED_READ || msgState == State.RECEIVED_UNREAD);
+	}
+	
+	public void setMsisdn(String msisdn){
+		this.mMsisdn = msisdn;
 	}
 }

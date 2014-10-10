@@ -350,6 +350,17 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
 	}
+	
+	public static Intent createIntentFromMsisdn(String msisdnOrGroupId, boolean openKeyBoard)
+	{
+		Intent intent = new Intent();
+
+		// If the contact info was made using a group conversation, then the
+		// Group ID is in the contact ID
+		intent.putExtra(HikeConstants.Extras.MSISDN, msisdnOrGroupId);
+		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
+		return intent;
+	}
 
 	/** Create a File for saving an image or video */
 	public static File getOutputMediaFile(HikeFileType type, String orgFileName, boolean isSent)
@@ -646,7 +657,7 @@ public class Utils
 
 	public static boolean isGroupConversation(String msisdn)
 	{
-		return !msisdn.startsWith("+");
+		return msisdn!=null && !msisdn.startsWith("+");
 	}
 
 	public static String defaultGroupName(List<PairModified<GroupParticipant, String>> participantList)
@@ -4711,5 +4722,27 @@ public class Utils
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * This method is used to remove a contact as a favorite based on existing favorite type. It returns either FavoriteType.REQUEST_RECEIVED_REJECTED or FavoriteType.NOT_FRIEND
+	 * @param contactInfo
+	 */
+	
+	public static FavoriteType checkAndUnfriendContact(ContactInfo contactInfo)
+	{
+		FavoriteType favoriteType;
+		if (contactInfo.getFavoriteType() == FavoriteType.FRIEND)
+		{
+			favoriteType = FavoriteType.REQUEST_RECEIVED_REJECTED;
+		}
+		else
+		{
+			favoriteType = FavoriteType.NOT_FRIEND;
+		}
+		
+		Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteRemoved);
+		return favoriteType;
 	}
 }
