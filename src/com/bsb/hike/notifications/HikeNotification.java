@@ -476,7 +476,7 @@ public class HikeNotification
 			avatarDrawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);
 		}
 
-		if (hikeNotifMsgStack.getNotificationTextLines() == 1)
+		if (hikeNotifMsgStack.getSize() == 1)
 		{
 			showBigTextStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),

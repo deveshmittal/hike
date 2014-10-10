@@ -98,7 +98,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		{
 			int idx = key.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
 			if (idx > 0)
-				key = key.substring(0, idx);
+				key = new String(key.substring(0, idx));
 			hasCustomImage = ContactManager.getInstance().hasIcon(key);
 		}
 

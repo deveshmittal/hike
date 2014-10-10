@@ -33,6 +33,7 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.FtueContactInfo;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
@@ -70,6 +71,7 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.BLOCK_USER, this);
 		mPubSub.addListener(HikePubSub.UNBLOCK_USER, this);
 		mPubSub.addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
+		mPubSub.addListener(HikePubSub.SERVER_RECEIVED_MULTI_MSG, this);
 		mPubSub.addListener(HikePubSub.FAVORITE_TOGGLED, this);
 		mPubSub.addListener(HikePubSub.MUTE_CONVERSATION_TOGGLED, this);
 		mPubSub.addListener(HikePubSub.FRIEND_REQUEST_ACCEPTED, this);
@@ -82,6 +84,9 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.GAMING_PROTIP_DOWNLOADED, this);
 		mPubSub.addListener(HikePubSub.CLEAR_CONVERSATION, this);
 		mPubSub.addListener(HikePubSub.UPDATE_PIN_METADATA, this);
+		mPubSub.addListener(HikePubSub.MULTI_MESSAGE_SENT, this);
+		mPubSub.addListener(HikePubSub.MULTI_FILE_SENT, this);
+		mPubSub.addListener(HikePubSub.MULTI_FILE_UPLOADED, this);
 	}
 
 	@Override
@@ -133,6 +138,31 @@ public class DbConversationListener implements Listener
 					}
 				}
 			}
+		}
+		else if (HikePubSub.MULTI_MESSAGE_SENT.equals(type))
+		{
+			MultipleConvMessage multiConvMessages = (MultipleConvMessage) object;
+
+			mConversationDb.addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),false);
+			// after DB insertion, we need to update conversation UI , so sending event which contains all contacts and last message for each contact
+			sendPubSubForConvScreenMultiMessage(multiConvMessages);
+			// publishing mqtt packet
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
+
+		
+		}
+		else if (HikePubSub.MULTI_FILE_SENT.equals(type))
+		{
+			MultipleConvMessage multiConvMessages = (MultipleConvMessage) object;
+
+			mConversationDb.addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),false);
+			sendPubSubForConvScreenMultiMessage(multiConvMessages);
+			
+		}
+		else if (HikePubSub.MULTI_FILE_UPLOADED.equals(type))
+		{
+			MultipleConvMessage multiConvMessages = (MultipleConvMessage) object;
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
 		}
 		else if (HikePubSub.DELETE_MESSAGE.equals(type))
 		{
@@ -191,6 +221,14 @@ public class DbConversationListener implements Listener
 		{
 			Logger.d("DBCONVERSATION LISTENER", "(Sender) Message sent confirmed for msgID -> " + (Long) object);
 			updateDB(object, ConvMessage.State.SENT_CONFIRMED.ordinal());
+		}
+		else if(HikePubSub.SERVER_RECEIVED_MULTI_MSG.equals(type))
+		{
+			Pair<Long, Integer> p  = (Pair<Long, Integer>) object;
+			long baseId = p.first;
+			long endId = (p.first + p.second) - 1;
+			Logger.d("DBCONVERSATION LISTENER", "(Sender) Message sent confirmed for msgID between " + baseId + "and "+ endId);
+			mConversationDb.updateMsgStatusBetween(baseId, endId, ConvMessage.State.SENT_CONFIRMED.ordinal(), null);
 		}
 		else if (HikePubSub.FAVORITE_TOGGLED.equals(type) || HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type) || HikePubSub.REJECT_FRIEND_REQUEST.equals(type))
 		{
@@ -374,6 +412,25 @@ public class DbConversationListener implements Listener
 		}
 	}
 
+	private void sendPubSubForConvScreenMultiMessage(MultipleConvMessage multiConvMessages){
+		ArrayList<ConvMessage> convMessages = multiConvMessages.getMessageList();
+		long baseId = ((ConvMessage)convMessages.get(0)).getMsgID();
+		int totalMessages = convMessages.size();
+		ConvMessage lastMessage = convMessages.get(totalMessages-1);
+		long lastMessageId = baseId + totalMessages-1;
+		List<ContactInfo> recipient = multiConvMessages.getContactList();
+		int totalRecipient = recipient.size();
+		List<Pair<ContactInfo, ConvMessage>> allPairs = new ArrayList<Pair<ContactInfo,ConvMessage>>(totalRecipient);
+		for(int i=0;i<totalRecipient;i++){
+			ConvMessage message = new ConvMessage(lastMessage);
+			message.setMsgID(lastMessageId+(i*totalMessages));
+			ContactInfo contactInfo = recipient.get(i);
+			message.setMsisdn(contactInfo.getMsisdn());
+			Pair<ContactInfo, ConvMessage> pair = new Pair<ContactInfo, ConvMessage>(contactInfo, message);
+			allPairs.add(pair);
+		}
+		mPubSub.publish(HikePubSub.MULTI_MESSAGE_DB_INSERTED, allPairs);
+	}
 	private void sendNativeSMSFallbackLogEvent(boolean onHike, boolean userOnline, int numMessages)
 	{
 		JSONObject data = new JSONObject();

@@ -58,11 +58,22 @@ class HikeUserDatabase extends SQLiteOpenHelper
 	@Override
 	public void onCreate(SQLiteDatabase db)
 	{
-		String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.USERS_TABLE + " ( " + DBConstants.ID + " STRING , " + DBConstants.NAME + " TEXT, " + DBConstants.MSISDN
-				+ " TEXT COLLATE nocase, " + DBConstants.ONHIKE + " INTEGER, " + DBConstants.PHONE + " TEXT, " + DBConstants.HAS_CUSTOM_PHOTO + " INTEGER, "
-				+ DBConstants.OVERLAY_DISMISSED + " INTEGER, " + DBConstants.MSISDN_TYPE + " STRING, " + DBConstants.LAST_MESSAGED + " INTEGER, " + DBConstants.HIKE_JOIN_TIME
-				+ " INTEGER DEFAULT 0, " + DBConstants.LAST_SEEN + " INTEGER DEFAULT -1, " + DBConstants.IS_OFFLINE + " INTEGER DEFAULT 1, " + DBConstants.INVITE_TIMESTAMP
-				+ " INTEGER DEFAULT 0" + " )";
+		String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.USERS_TABLE
+				+ " ( "
+				+ DBConstants.ID + " STRING , " // Contact ID. Not used.
+				+ DBConstants.NAME + " TEXT, " // Contact name
+				+ DBConstants.MSISDN + " TEXT COLLATE nocase, " // Contact normalised msisdn
+				+ DBConstants.ONHIKE + " INTEGER, " // Contact's on hike status
+				+ DBConstants.PHONE + " TEXT, " // Contact's phone number in the user's contacts DB
+				+ DBConstants.HAS_CUSTOM_PHOTO + " INTEGER, " // Whether the contact has a custom avatar or not. Not used
+				+ DBConstants.OVERLAY_DISMISSED + " INTEGER, "
+				+ DBConstants.MSISDN_TYPE + " STRING, " // The msisdn type
+				+ DBConstants.LAST_MESSAGED + " INTEGER, " // When this user was last messaged
+				+ DBConstants.HIKE_JOIN_TIME + " INTEGER DEFAULT 0, " // When this user joined hike
+				+ DBConstants.LAST_SEEN + " INTEGER DEFAULT -1, " // When this user was last seen on hike
+				+ DBConstants.IS_OFFLINE + " INTEGER DEFAULT 1, " // Whether this user is online or not
+				+ DBConstants.INVITE_TIMESTAMP + " INTEGER DEFAULT 0" // When this user was last invited.
+				+ " )";
 
 		db.execSQL(create);
 

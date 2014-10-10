@@ -174,6 +174,40 @@ public abstract class FileTransferBase implements Callable<FTResult>
 		}
 	}
 	
+	protected void saveFileState(File stateFile, FTState state, String uuid, JSONObject response)
+	{
+		FileSavedState fss = new FileSavedState(state, _totalSize, _bytesTransferred, uuid, response);
+		try
+		{
+			FileOutputStream fileOut = new FileOutputStream(stateFile);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(fss);
+			out.close();
+			fileOut.close();
+		}
+		catch (IOException i)
+		{
+			i.printStackTrace();
+		}
+	}
+	
+	protected void saveFileKeyState(File stateFile, String mFileKey)
+	{
+		FileSavedState fss = new FileSavedState(_state, mFileKey);
+		try
+		{
+			FileOutputStream fileOut = new FileOutputStream(stateFile);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(fss);
+			out.close();
+			fileOut.close();
+		}
+		catch (IOException i)
+		{
+			i.printStackTrace();
+		}
+	}
+	
 	protected void saveFileKeyState(String mFileKey)
 	{
 		FileSavedState fss = new FileSavedState(_state, mFileKey);
@@ -193,8 +227,13 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected void deleteStateFile()
 	{
-		if (stateFile != null && stateFile.exists())
-			stateFile.delete();
+		deleteStateFile(stateFile);
+	}
+	
+	protected void deleteStateFile(File file)
+	{
+		if (file != null && file.exists())
+			file.delete();
 	}
 
 	protected void setState(FTState mState)
