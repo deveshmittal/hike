@@ -325,35 +325,42 @@ class PersistenceCache extends ContactsCache
 		 */
 		if (Utils.isGroupConversation(msisdn))
 		{
+			GroupDetails grpDetails = null;
 			readLock.lock();
 			try
 			{
-				GroupDetails grpDetails = groupPersistence.get(msisdn);
+				grpDetails = groupPersistence.get(msisdn);
 				if (null == grpDetails)
 					return null;
 				if (!TextUtils.isEmpty(grpDetails.getGroupName()))
 					return grpDetails.getGroupName();
-				else
-				{
-					List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(msisdn, false, false);
-					String grpName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
-					writeLock.lock();
-					try
-					{
-						grpDetails.setGroupName(grpName);
-						return grpName;
-					}
-					finally
-					{
-						writeLock.unlock();
-					}
-				}
 			}
 			finally
 			{
 				readLock.unlock();
 			}
+			/*
+			 * most of cases will return before only-- below case is for groups which are created by ios and dont have name , so we create one using group participants and set in our
+			 * cache
+			 */
+
+			writeLock.lock();
+			try
+			{
+				List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(msisdn, false, false);
+				String grpName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+				grpDetails.setGroupName(grpName);
+				return grpName;
+			}
+			finally
+			{
+				writeLock.unlock();
+			}
 		}
+
+		/*
+		 * This is for getting name of an normal contact
+		 */
 		readLock.lock();
 		try
 		{
