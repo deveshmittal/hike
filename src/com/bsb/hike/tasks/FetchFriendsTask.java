@@ -158,7 +158,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		boolean removeExistingParticipants = !TextUtils.isEmpty(existingGroupId);
 		if (fetchGroups)
 		{
-			groupTaskList = HikeMessengerApp.getContactManager().getConversationGroupsAsContacts();
+			groupTaskList = HikeMessengerApp.getContactManager().getConversationGroupsAsContacts(true);
 			removeSendingMsisdnAndStealthContacts(groupTaskList, groupsStealthList, true);
 		}
 

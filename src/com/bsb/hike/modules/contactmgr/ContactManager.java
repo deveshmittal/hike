@@ -1851,7 +1851,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		allContacts.addAll(persistenceCache.getConversationOneToOneContacts());
 		if(fetchGroups)
 		{
-			allContacts.addAll(getConversationGroupsAsContacts());
+			allContacts.addAll(getConversationGroupsAsContacts(false));
 		}
 
 		Collections.sort(allContacts, new Comparator<ContactInfo>()
@@ -1865,7 +1865,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		return allContacts;
 	}
 
-	public List<ContactInfo> getConversationGroupsAsContacts()
+	public List<ContactInfo> getConversationGroupsAsContacts(boolean shouldSort)
 	{
 		List<GroupDetails> groupDetails = persistenceCache.getGroupDetails();
 		List<ContactInfo> groupContacts = new ArrayList<ContactInfo>();
@@ -1887,6 +1887,18 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 				groupContacts.add(groupContact);
 			}
 		}
+		if(shouldSort)
+		{
+			Collections.sort(groupContacts, new Comparator<ContactInfo>()
+			{
+				@Override
+				public int compare(ContactInfo lhs, ContactInfo  rhs)
+				{
+					return ((Long)rhs.getLastMessaged()).compareTo(lhs.getLastMessaged());
+				}
+			});
+		}
+
 		return groupContacts;
 	}
 
