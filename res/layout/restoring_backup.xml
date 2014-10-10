@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/restoring_backup_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginBottom="50dp"
+    android:gravity="center"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="94dp"
+        android:layout_height="85dp" >
+
+        <ImageView
+            android:id="@+id/art_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="39dp"
+            android:layout_marginTop="18dp"
+            android:src="@drawable/art_profile" />
+
+        <ImageView
+            android:id="@+id/art_conversation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/art_profile"
+            android:layout_marginBottom="19dp"
+            android:layout_marginLeft="14dp"
+            android:src="@drawable/art_conversation" />
+
+        <ImageView
+            android:id="@+id/art_smiley"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="12dp"
+            android:src="@drawable/art_smiley" />
+
+        <View
+            android:id="@+id/dot_left"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="33dp" />
+
+        <View
+            android:id="@+id/dot_top"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="47dp" />
+
+        <View
+            android:id="@+id/dot_right"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="39dp" />
+    </RelativeLayout>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:src="@drawable/art_sdcard" />
+
+    <Button
+        android:id="@+id/btn_restore"
+        android:layout_width="212dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="50dp"
+        android:background="@color/blue_hike"
+        android:text="RESTORE"
+        android:textColor="@color/white" />
+    
+    <Button
+        android:id="@+id/btn_skip"
+        android:layout_width="212dp"
+        android:layout_height="48dp"
+        android:background="@color/white"
+        android:text="Skip>>"
+        android:textColor="@color/black_25" />
+
+</LinearLayout>
