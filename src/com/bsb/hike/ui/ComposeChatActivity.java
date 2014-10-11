@@ -1290,7 +1290,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		MultipleConvMessage multiMessages = new MultipleConvMessage(multipleMessageList, arrayList, System.currentTimeMillis() / 1000);
 		mPubSub.publish(HikePubSub.MULTI_MESSAGE_SENT, multiMessages);
-		Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_SHORT).show();
+		Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_LONG).show();
 	}
 
 	private void sendMessage(ConvMessage convMessage)
