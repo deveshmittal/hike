@@ -483,7 +483,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					}else{
 						adapter.addContact(contactInfo);
 					}
-					tagEditText.toggleTag(getString(R.string.selected_contacts_count,adapter.getSelectedContactCount()), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
+					int selected = adapter.getSelectedContactCount();
+					if(selected>0){
+					tagEditText.toggleTag(getString(selected==1 ? R.string.selected_contacts_count_singular : R.string.selected_contacts_count_plural,selected), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
+					}else{
+						((CheckBox)findViewById(R.id.select_all_cb)).setChecked(false); // very rare case
+					}
 				}else{
 				String name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
 				tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
@@ -611,7 +616,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					adapter.clearAllSelection(true);
 					adapter.selectAllContacts(true);
 					tagEditText.clear(false);
-					tagEditText.toggleTag(getString(R.string.selected_contacts_count,adapter.getSelectedContactCount()), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
+					int selected = adapter.getSelectedContactCount();
+					tagEditText.toggleTag( getString(selected <=1 ? R.string.selected_contacts_count_singular : R.string.selected_contacts_count_plural,selected), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
 					Utils.sendUILogEvent(HikeConstants.LogEvent.SELECT_ALL_HIKE_CONTACTS);
 				}else{
 					// call adapter unselect all
@@ -888,9 +894,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	
 	private String getForwardConfirmationText(ArrayList<ContactInfo> arrayList, boolean forwarding)
 	{
+		// multi forward case
 		if(forwarding)
 		{
-			return getResources().getString(R.string.forward_to, arrayList.size());
+			return arrayList.size() ==1 ? getResources().getString(R.string.forward_to_singular):getResources().getString(R.string.forward_to_plural, arrayList.size());
 		}
 		StringBuilder sb = new StringBuilder();
 
@@ -1273,7 +1280,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		MultipleConvMessage multiMessages = new MultipleConvMessage(multipleMessageList, arrayList, System.currentTimeMillis() / 1000);
 		mPubSub.publish(HikePubSub.MULTI_MESSAGE_SENT, multiMessages);
-		Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_SHORT).show();
+		Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_LONG).show();
 	}
 
 	private void sendMessage(ConvMessage convMessage)
