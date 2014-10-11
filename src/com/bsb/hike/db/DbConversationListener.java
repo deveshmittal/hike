@@ -421,8 +421,10 @@ public class DbConversationListener implements Listener
 		List<ContactInfo> recipient = multiConvMessages.getContactList();
 		int totalRecipient = recipient.size();
 		List<Pair<ContactInfo, ConvMessage>> allPairs = new ArrayList<Pair<ContactInfo,ConvMessage>>(totalRecipient);
+		long timestamp = multiConvMessages.getTimeStamp();
 		for(int i=0;i<totalRecipient;i++){
 			ConvMessage message = new ConvMessage(lastMessage);
+			message.setTimestamp(timestamp++);
 			message.setMsgID(lastMessageId+(i*totalMessages));
 			ContactInfo contactInfo = recipient.get(i);
 			message.setMsisdn(contactInfo.getMsisdn());

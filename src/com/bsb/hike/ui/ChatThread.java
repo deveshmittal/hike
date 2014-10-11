@@ -1782,7 +1782,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		String message = mComposeView.getText().toString();
 
 
-		ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, message, isConversationOnHike());
+		ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, message, isConversationOnHike());
 		if (showingImpMessagePinCreate)
 		{
 			convMessage.setMessageType((Integer) v.getTag());
@@ -2034,7 +2034,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						if (msgExtrasJson.has(HikeConstants.Extras.MSG))
 						{
 							String msg = msgExtrasJson.getString(HikeConstants.Extras.MSG);
-							ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, msg, isConversationOnHike());
+							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, msg, isConversationOnHike());
 							sendMessage(convMessage);
 						}
 						else if (msgExtrasJson.has(HikeConstants.Extras.FILE_PATH))
@@ -7131,7 +7131,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void sendPoke()
 	{
-		ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, getString(R.string.poke_msg), isConversationOnHike());
+		ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, getString(R.string.poke_msg), isConversationOnHike());
 
 		JSONObject metadata = new JSONObject();
 		try
@@ -7174,7 +7174,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void sendSticker(Sticker sticker, String categoryIdIfUnknown)
 	{
-		ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, "Sticker", isConversationOnHike());
+		ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, "Sticker", isConversationOnHike());
 
 		JSONObject metadata = new JSONObject();
 		try
