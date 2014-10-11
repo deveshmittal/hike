@@ -1064,12 +1064,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					{
 						String msg = msgExtrasJson.getString(HikeConstants.Extras.MSG);
 						// as we will be changing msisdn and hike status while inserting in DB
-						ConvMessage convMessage = Utils.makeConvMessage(null,null, msg, true);
+						ConvMessage convMessage = Utils.makeConvMessage(null, msg, true);
 						//sendMessage(convMessage);
 						multipleMessageList.add(convMessage);
 					}else if(msgExtrasJson.has(HikeConstants.Extras.POKE)){
 						// as we will be changing msisdn and hike status while inserting in DB
-						ConvMessage convMessage = Utils.makeConvMessage(null, null, getString(R.string.poke_msg), true);
+						ConvMessage convMessage = Utils.makeConvMessage(null, getString(R.string.poke_msg), true);
 						JSONObject metadata = new JSONObject();
 						try
 						{
@@ -1503,7 +1503,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	}
 	public ConvMessage sendSticker(Sticker sticker, String categoryIdIfUnknown, ArrayList<ContactInfo> arrayList)
 	{
-		ConvMessage convMessage = Utils.makeConvMessage(new Conversation(((ContactInfo) arrayList.get(0)).getMsisdn()),((ContactInfo) arrayList.get(0)).getMsisdn(), "Sticker", ((ContactInfo) arrayList.get(0)).isOnhike());
+		ConvMessage convMessage = Utils.makeConvMessage(((ContactInfo) arrayList.get(0)).getMsisdn(), "Sticker", ((ContactInfo) arrayList.get(0)).isOnhike());
 	
 		JSONObject metadata = new JSONObject();
 		try

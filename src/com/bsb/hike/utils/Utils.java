@@ -3471,12 +3471,12 @@ public class Utils
 		jsonObject.put(HikeConstants.PIXEL_DENSITY_MULTIPLIER, pdm);
 	}
 
-	public static ConvMessage makeConvMessage(Conversation mConversation, String msisdn, String message, boolean isOnhike)
+	public static ConvMessage makeConvMessage(String msisdn, String message, boolean isOnhike)
 	{
-		return makeConvMessage(mConversation, msisdn, message, isOnhike, State.SENT_UNCONFIRMED);
+		return makeConvMessage(msisdn, message, isOnhike, State.SENT_UNCONFIRMED);
 	}
 
-	public static ConvMessage makeConvMessage(Conversation mConversation, String msisdn, String message, boolean isOnhike, State state)
+	public static ConvMessage makeConvMessage(String msisdn, String message, boolean isOnhike, State state)
 	{
 		long time = (long) System.currentTimeMillis() / 1000;
 		ConvMessage convMessage = new ConvMessage(message, msisdn, time, state);
