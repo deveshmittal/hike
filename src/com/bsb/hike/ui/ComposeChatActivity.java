@@ -964,7 +964,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			Intent presentIntent = getIntent();
 			String id = getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN);
-			Intent intent = Utils.createIntentFromMsisdn(id, true);
+			Intent intent = Utils.createIntentFromMsisdn(id, false);
 			intent.setClass(this, ChatThread.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			forwardMessageAsPerType(presentIntent, intent,arrayList);
@@ -1064,12 +1064,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					{
 						String msg = msgExtrasJson.getString(HikeConstants.Extras.MSG);
 						// as we will be changing msisdn and hike status while inserting in DB
-						ConvMessage convMessage = Utils.makeConvMessage(null,null, msg, true);
+						ConvMessage convMessage = Utils.makeConvMessage(null, msg, true);
 						//sendMessage(convMessage);
 						multipleMessageList.add(convMessage);
 					}else if(msgExtrasJson.has(HikeConstants.Extras.POKE)){
 						// as we will be changing msisdn and hike status while inserting in DB
-						ConvMessage convMessage = Utils.makeConvMessage(null, null, getString(R.string.poke_msg), true);
+						ConvMessage convMessage = Utils.makeConvMessage(null, getString(R.string.poke_msg), true);
 						JSONObject metadata = new JSONObject();
 						try
 						{
@@ -1244,19 +1244,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
 			Logger.d(getClass().getSimpleName(), "Contained a message: " + msg);
-			//intent.putExtra(HikeConstants.Extras.MSG, msg);
-			ConvMessage convMessage;
-			try
-			{
-				convMessage = new ConvMessage(new JSONObject(msg));
-				sendMessage(convMessage);
-			}
-			catch (JSONException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
+			ContactInfo contact = (ContactInfo) arrayList.get(0);
+			ConvMessage convMessage = Utils.makeConvMessage(contact.getMsisdn(), msg, contact.isOnhike());
+			sendMessage(convMessage);
 		}
 	}
 	
@@ -1503,7 +1493,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	}
 	public ConvMessage sendSticker(Sticker sticker, String categoryIdIfUnknown, ArrayList<ContactInfo> arrayList)
 	{
-		ConvMessage convMessage = Utils.makeConvMessage(new Conversation(((ContactInfo) arrayList.get(0)).getMsisdn()),((ContactInfo) arrayList.get(0)).getMsisdn(), "Sticker", ((ContactInfo) arrayList.get(0)).isOnhike());
+		ConvMessage convMessage = Utils.makeConvMessage(((ContactInfo) arrayList.get(0)).getMsisdn(), "Sticker", ((ContactInfo) arrayList.get(0)).isOnhike());
 	
 		JSONObject metadata = new JSONObject();
 		try
@@ -1574,6 +1564,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		if(recentContacts == null)
 		{
 			recentContacts = ContactManager.getInstance().getAllConversationContactsSorted(true);
+			Collections.reverse(recentContacts);
 		}
 		return recentContacts;
 	}
