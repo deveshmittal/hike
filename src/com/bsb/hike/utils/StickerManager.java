@@ -102,8 +102,6 @@ public class StickerManager
 
 
 
-	public final String[] OLD_HARDCODED_STICKER_IDS_DOGGY = { "001_hi.png", "002_thumbsup.png", "003_drooling.png", "004_devilsmile.png", "005_sorry.png", "006_urgh.png",
-			"007_confused.png", "008_dreaming.png", };
 	
 	
 	public enum StickerCategoryId
@@ -557,7 +555,6 @@ public class StickerManager
 			{
 				HikeConversationsDatabase.getInstance().removeStickerCategory(StickerCategoryId.doggy.name());
 			}
-			StickerManager.getInstance().removeStickersFromRecents(StickerCategoryId.doggy.name(), OLD_HARDCODED_STICKER_IDS_DOGGY);
 		}
 	}
 
