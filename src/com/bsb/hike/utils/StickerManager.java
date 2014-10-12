@@ -24,16 +24,21 @@ import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
@@ -95,14 +100,19 @@ public class StickerManager
 
 	public static final String DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER = "delDefaultDownloadedExpressionsStickers";
 	
+	public static final String HARCODED_STICKERS = "harcodedStickers";
+	
+	public static final String STICKER_IDS = "stickerIds";
+	
+	public static final String RESOURCE_IDS = "resourceIds";
+	
+	public static final String MOVED_HARDCODED_STICKERS_TO_SDCARD = "movedHardCodedStickersToSdcard";
+
 	private static final String TAG = "StickerManager";
 
 	public static int RECENT_STICKERS_COUNT = 30;
-
-
-
-
 	
+	public static final int SIZE_IMAGE = (int) (80 * Utils.densityMultiplier);
 	
 	public enum StickerCategoryId
 	{
@@ -1337,5 +1347,116 @@ public class StickerManager
 			}
 		}
 		
+	}
+	
+	public File saveLargeStickers(File stickerDir, String stickerId, String stickerData) throws IOException
+	{
+		File f = new File(stickerDir, stickerId);
+		Utils.saveBase64StringToFile(f, stickerData);
+		return f;
+	}
+
+	/*
+	 * TODO this logic is temporary we yet need to change it
+	 */
+	public File saveLargeStickers(File largeStickerDir, String stickerId, Bitmap largeStickerBitmap) throws IOException
+	{
+		Bitmap stickerImage = HikeBitmapFactory.createScaledBitmap(largeStickerBitmap, SIZE_IMAGE, SIZE_IMAGE, Bitmap.Config.ARGB_8888, true, true, false);
+		
+		if (stickerImage != null)
+		{
+			File largeImage = new File(largeStickerDir, stickerId);
+			BitmapUtils.saveBitmapToFile(largeImage, stickerImage);
+			stickerImage.recycle();
+			return largeImage;
+		}
+		return null;
+	}
+	
+	public void saveSmallStickers(File smallStickerDir, String stickerId, File f) throws IOException
+	{
+		Bitmap small = HikeBitmapFactory.scaleDownBitmap(f.getAbsolutePath(), SIZE_IMAGE, SIZE_IMAGE, true, false);
+
+		if (small != null)
+		{
+			File smallImage = new File(smallStickerDir, stickerId);
+			BitmapUtils.saveBitmapToFile(smallImage, small);
+			small.recycle();
+		}
+	}
+
+	public static boolean moveHardcodedStickersToSdcard(Context context)
+	{
+		if(Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
+		{
+			return false;
+		}
+		
+		try
+		{
+			JSONObject jsonObj = new JSONObject(Utils.loadJSONFromAsset(context, "stickers_data"));
+			JSONArray harcodedStickers = jsonObj.optJSONArray(HARCODED_STICKERS);
+			for (int i=0; i<harcodedStickers.length(); i++)
+			{
+				JSONObject obj = harcodedStickers.optJSONObject(i);
+				String categoryId = obj.getString(CATEGORY_ID);
+				
+				String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId);
+				if (directoryPath == null)
+				{
+					return false;
+				}
+
+				Resources mResources = context.getResources();
+				File largeStickerDir = new File(directoryPath + HikeConstants.LARGE_STICKER_ROOT);
+				File smallStickerDir = new File(directoryPath + HikeConstants.SMALL_STICKER_ROOT);
+
+				if (!smallStickerDir.exists())
+				{
+					smallStickerDir.mkdirs();
+				}
+				if (!largeStickerDir.exists())
+				{
+					largeStickerDir.mkdirs();
+				}
+				
+				Utils.makeNoMediaFile(largeStickerDir);
+				Utils.makeNoMediaFile(smallStickerDir);
+				
+				JSONArray stickerIds = obj.getJSONArray(STICKER_IDS);
+				JSONArray resourceIds = obj.getJSONArray(RESOURCE_IDS);
+				for (int j=0; j<stickerIds.length(); j++)
+				{
+					String stickerId = stickerIds.optString(j);
+					String resName = resourceIds.optString(j);
+					int resourceId = mResources.getIdentifier(resName, "drawable", 
+							   context.getPackageName());
+					Bitmap stickerBitmap = HikeBitmapFactory.decodeBitmapFromResource(mResources, resourceId, Bitmap.Config.ARGB_8888);
+					File f = StickerManager.getInstance().saveLargeStickers(largeStickerDir, stickerId, stickerBitmap);
+					if(f != null)
+					{
+						StickerManager.getInstance().saveSmallStickers(smallStickerDir, stickerId, f);
+					}
+					else
+					{
+						return false;
+					}
+				}	
+			}
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+		
+		return true;
 	}
 }

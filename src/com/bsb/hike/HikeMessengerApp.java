@@ -675,10 +675,12 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		// onUpgrade() calls being triggered in the respective databases.
 		HikeConversationsDatabase.init(this);
 
+		setupStickers();
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
 		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || 
-				settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1 || settings.getInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, -1) == 1 || TEST)
+				settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1 || settings.getInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, -1) == 1 || 
+				settings.getInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, -1) == 1 || TEST)
 		{
 			// turn off future push notifications as soon as the app has
 			// started.
@@ -803,8 +805,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		appStateHandler = new Handler();
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
-		
-		setupStickers();
 	}
 	
 	private void setupStickers()

@@ -51,8 +51,6 @@ public class DownloadStickerTask extends StickerTaskBase
 
 	private StickerPageAdapter stickerPageAdapter;
 
-	public static final int SIZE_IMAGE = (int) (80 * Utils.densityMultiplier);
-
 	public DownloadStickerTask(Context context, StickerCategory cat, DownloadType downloadType, StickerPageAdapter st)
 	{
 		this.context = context;
@@ -142,8 +140,8 @@ public class DownloadStickerTask extends StickerTaskBase
 					// some hack : seems server was sending stickers which already exist so it was leading to duplicate issue
 					// so we save small sticker , if not present already
 
-					File f = saveLargeStickers(largeStickerDir, stickerId, stickerData);
-						saveSmallStickers(smallStickerDir, stickerId, f);
+					File f = StickerManager.getInstance().saveLargeStickers(largeStickerDir, stickerId, stickerData);
+						StickerManager.getInstance().saveSmallStickers(smallStickerDir, stickerId, f);
 				}
 				catch (FileNotFoundException e)
 				{
@@ -175,25 +173,6 @@ public class DownloadStickerTask extends StickerTaskBase
 		category.setReachedEnd(reachedEnd);
 		HikeConversationsDatabase.getInstance().addOrUpdateStickerCategory(category.categoryId.name(), totalNumber, reachedEnd);
 		return FTResult.SUCCESS;
-	}
-
-	private File saveLargeStickers(File stickerDir, String stickerId, String stickerData) throws IOException
-	{
-		File f = new File(stickerDir, stickerId);
-		Utils.saveBase64StringToFile(f, stickerData);
-		return f;
-	}
-
-	private void saveSmallStickers(File smallStickerDir, String stickerId, File f) throws IOException
-	{
-		Bitmap small = HikeBitmapFactory.scaleDownBitmap(f.getAbsolutePath(), SIZE_IMAGE, SIZE_IMAGE, true, false);
-
-		if (small != null)
-		{
-			File smallImage = new File(smallStickerDir, stickerId);
-			BitmapUtils.saveBitmapToFile(smallImage, small);
-			small.recycle();
-		}
 	}
 
 	@Override

@@ -1,0 +1,62 @@
+{
+    "harcodedStickers": [
+        {
+            "catId": "humanoid",
+            "stickerIds": [
+                "001_love1.png",
+                "002_love2.png",
+                "003_teasing.png",
+                "004_rofl.png",
+                "005_bored.png",
+                "006_angry.png",
+                "007_strangle.png",
+                "008_shocked.png",
+                "009_hurray.png",
+                "010_yawning.png",
+                "069_hi.png"
+            ],
+            "resourceIds": [
+                "sticker_001_love1",
+                "sticker_002_love2",
+                "sticker_003_teasing",
+                "sticker_004_rofl",
+                "sticker_005_bored",
+                "sticker_006_angry",
+                "sticker_007_strangle",
+                "sticker_008_shocked",
+                "sticker_009_hurray",
+                "sticker_010_yawning",
+                "sticker_069_hi"
+            ]
+        },
+        {
+            "catId": "expressions",
+            "stickerIds": [
+                "001_gn.png",
+                "002_lol.png",
+                "003_rofl.png",
+                "004_lmao.png",
+                "005_omg.png",
+                "006_brb.png",
+                "007_gtg.png",
+                "008_xoxo.png",
+                "113_whereareyou.png",
+                "112_watchadoing.png",
+                "092_yo.png"
+            ],
+            "resourceIds": [
+                "sticker_001_gn",
+                "sticker_002_lol",
+                "sticker_003_rofl",
+                "sticker_004_lmao",
+                "sticker_005_omg",
+                "sticker_006_brb",
+                "sticker_007_gtg",
+                "sticker_008_xoxo",
+                "sticker_113_whereareyou",
+                "sticker_112_watchadoing",
+                "sticker_092_yo"
+            ]
+        }
+    ]
+}
