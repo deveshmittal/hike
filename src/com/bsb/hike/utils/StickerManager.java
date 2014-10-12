@@ -99,17 +99,8 @@ public class StickerManager
 
 	public static int RECENT_STICKERS_COUNT = 30;
 
-	public final int[] LOCAL_STICKER_RES_IDS_HUMANOID = {};
 
-	public final int[] LOCAL_STICKER_SMALL_RES_IDS_HUMANOID = {};
 
-	public final String[] LOCAL_STICKER_IDS_HUMANOID = {};
-
-	public final int[] LOCAL_STICKER_RES_IDS_EXPRESSIONS = {};
-
-	public final int[] LOCAL_STICKER_SMALL_RES_IDS_EXPRESSIONS = {};
-
-	public final String[] LOCAL_STICKER_IDS_EXPRESSIONS = {};
 
 	public final String[] OLD_HARDCODED_STICKER_IDS_DOGGY = { "001_hi.png", "002_thumbsup.png", "003_drooling.png", "004_devilsmile.png", "005_sorry.png", "006_urgh.png",
 			"007_confused.png", "008_dreaming.png", };
@@ -1276,13 +1267,7 @@ public class StickerManager
 				stickerToCategoryMap.put(stickerFile.getName(), categoryId);
 			}
 		}
-		for (String stickerId : LOCAL_STICKER_IDS_HUMANOID) {
-			stickerToCategoryMap.put(stickerId, StickerCategoryId.humanoid);
-		}
 
-		for (String stickerId : LOCAL_STICKER_IDS_EXPRESSIONS) {
-			stickerToCategoryMap.put(stickerId, StickerCategoryId.expressions);
-		}
 		return stickerToCategoryMap;
 	}
 	

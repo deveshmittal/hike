@@ -43,45 +43,14 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		return category == null || (category.categoryId == StickerCategoryId.unknown);
 	}
 
-	public boolean isDefaultSticker()
-	{
-		// TODO : change this logic to make it much more robust as searching in array is not good
-
-		if (category != null)
-		{
-			if (category.categoryId == StickerCategoryId.humanoid)
-			{
-				int count = StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID.length;
-				for (int i = 0; i < count; i++)
-				{
-					if (StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID[i].equals(stickerId))
-						return true;
-				}
-			}
-			else if (category.categoryId == StickerCategoryId.expressions)
-			{
-				int count = StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS.length;
-				for (int i = 0; i < count; i++)
-				{
-					if (StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS[i].equals(stickerId))
-						return true;
-				}
-			}
-			return false;
-		}
-		return false;
-	}
-
 	/**
-	 * If sticker is default sticker then its not disabled Else if sticker small image does'nt exist then also its disabled
+	 * if sticker small image does'nt exist then its disabled
 	 * 
 	 * @param sticker
 	 * @return
 	 */
 	public boolean isDisabled(Sticker sticker, Context ctx)
 	{
-		if (sticker.isDefaultSticker())
-			return false;
 		File f = new File(sticker.getSmallStickerPath(ctx));
 		return !f.exists();
 	}
@@ -179,10 +148,5 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	public void setStickerData(int stickerIndex,String stickerId,StickerCategory category){
 		this.stickerId = stickerId;
 		this.category = category;
-	}
-
-	public boolean isInAppSticker()
-	{
-		return isDefaultSticker();
 	}
 }

@@ -349,14 +349,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 			long t1 = System.currentTimeMillis();
 			stickersList = new ArrayList<Sticker>();
-			if (category.categoryId.equals(StickerCategoryId.expressions))
-			{
-				addDefaultStickers(stickersList, category, StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS);
-			}
-			else if (category.categoryId.equals(StickerCategoryId.humanoid))
-			{
-				addDefaultStickers(stickersList, category, StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID);
-			}
 
 			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(activity, category.categoryId.name());
 
@@ -370,9 +362,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 					for (String stickerId : stickerIds)
 					{
 						Sticker s = new Sticker(category, stickerId);
-						// if the sticker is in app sticker, ignore it
-						if(s.isInAppSticker())
-							continue;
 						stickersList.add(s);
 					}
 				}

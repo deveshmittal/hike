@@ -84,23 +84,6 @@ public class DownloadStickerTask extends StickerTaskBase
 		boolean reachedEnd = false;
 
 		JSONArray existingStickerIds = new JSONArray();
-		/*
-		 * If the category is the default one, we should add the default stickers as well.
-		 */
-		if (category.categoryId.equals(StickerCategoryId.humanoid))
-		{
-			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID)
-			{
-				existingStickerIds.put(stickerId);
-			}
-		}
-		else if (category.categoryId.equals(StickerCategoryId.expressions))
-		{
-			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS)
-			{
-				existingStickerIds.put(stickerId);
-			}
-		}
 
 		if (smallStickerDir.exists())
 		{
@@ -154,15 +137,12 @@ public class DownloadStickerTask extends StickerTaskBase
 					Sticker s = new Sticker(category, stickerId);
 					if (downloadType.equals(DownloadType.MORE_STICKERS) || downloadType.equals(DownloadType.UPDATE) && stickerPageAdapter != null)
 					{
-						// if this sticker is not in app sticker, add it to list
-						if(!s.isInAppSticker())
-							stickerPageAdapter.getStickerList().add(s);
+						stickerPageAdapter.getStickerList().add(s);
 					}
 					// some hack : seems server was sending stickers which already exist so it was leading to duplicate issue
 					// so we save small sticker , if not present already
 
 					File f = saveLargeStickers(largeStickerDir, stickerId, stickerData);
-					if(!s.isInAppSticker())
 						saveSmallStickers(smallStickerDir, stickerId, f);
 				}
 				catch (FileNotFoundException e)

@@ -3823,12 +3823,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public void insertExpressionsStickerCategory()
 	{
-		addOrUpdateStickerCategory(StickerCategoryId.expressions.name(), StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS.length, false);
+		addOrUpdateStickerCategory(StickerCategoryId.expressions.name(), 0, false);
 	}
 
 	public void insertHumanoidStickerCategory()
 	{
-		addOrUpdateStickerCategory(StickerCategoryId.humanoid.name(), StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID.length, false);
+		addOrUpdateStickerCategory(StickerCategoryId.humanoid.name(), 0, false);
 	}
 
 	public long addProtip(Protip protip)
