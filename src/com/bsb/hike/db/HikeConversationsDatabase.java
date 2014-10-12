@@ -491,19 +491,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			db.execSQL(alter);
 		}
 
-		// to delete duplicate stickers
-		if (oldVersion < 26)
-		{
-			try
-			{
-				StickerManager st = StickerManager.getInstance();
-				st.deleteDuplicateStickers();
-			}
-			catch (Exception e)
-			{
-			}
-		}
-
 		/*
 		 * Version 27 adds the message hash column to the messages table Version 27 adds READ_BY and MESSAGE_ID column in groupInfo table
 		 */

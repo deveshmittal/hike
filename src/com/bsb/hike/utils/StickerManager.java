@@ -65,8 +65,6 @@ public class StickerManager
 
 	public static final String SHOWN_STICKERS_TUTORIAL = "shownStickersTutorial";
 	
-	public static final String REMOVE_DEFAULT_CAT_STICKERS = "removeDefaultCatStickers";
-	
 	public static final String STICKERS_DOWNLOADED = "st_downloaded";
 
 	public static final String STICKERS_FAILED = "st_failed";
@@ -94,8 +92,6 @@ public class StickerManager
 	public static final String STICKERS_UPDATED = "stickersUpdated";
 
 	public static final String ADD_NO_MEDIA_FILE_FOR_STICKERS = "addNoMediaFileForStickers";
-
-	public static final String DELETE_DEFAULT_DOWNLOADED_STICKER = "delDefaultDownloadedStickers";
 
 	public static final String DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER = "delDefaultDownloadedExpressionsStickers";
 	
@@ -517,19 +513,6 @@ public class StickerManager
 		}
 
 		setupStickerCategoryList(settings);
-		/*
-		* This preference has been used here because of a prepopulated recent sticker enhancement
-		* it will delete all the default stickers as we are adding some more default stickers 
-		*/
-		if (!preferenceManager.contains(StickerManager.REMOVE_DEFAULT_CAT_STICKERS))
-		{
-			deleteDefaultDownloadedExpressionsStickers();
-			deleteDefaultDownloadedStickers();
-			
-			Editor editor = preferenceManager.edit();
-			editor.putBoolean(StickerManager.REMOVE_DEFAULT_CAT_STICKERS, true);
-			editor.commit();
-		}
 		loadRecentStickers();
 
 		/*
@@ -567,17 +550,11 @@ public class StickerManager
 			setDialoguePref();
 		}
 
-		if (!settings.getBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, false))
-		{
-			deleteDefaultDownloadedStickers();
-			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, true).commit();
-		}
 		/*
 		 * this code path will be for users upgrading to the build where we make expressions a default loaded category
 		 */
 		if (!settings.getBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, false))
 		{
-			deleteDefaultDownloadedExpressionsStickers();
 			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, true).commit();
 
 			if (checkIfStickerCategoryExists(StickerCategoryId.doggy.name()))
@@ -1138,48 +1115,6 @@ public class StickerManager
 			Utils.deleteFile(rDir);
 	}
 
-	public void deleteDefaultDownloadedStickers()
-	{
-		try
-		{
-			String dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.humanoid.name());
-			File largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
-			File smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
-			for (String stId : LOCAL_STICKER_IDS_HUMANOID)
-			{
-				File st = new File(largeStickerDir, stId);
-				Utils.deleteFile(st);
-				st = new File(smallStickerDir, stId);
-				Utils.deleteFile(st);
-			}
-		}
-		catch (Exception e)
-		{
-
-		}
-	}
-
-	public void deleteDefaultDownloadedExpressionsStickers()
-	{
-		try
-		{
-			String dirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.expressions.name());
-			File largeStickerDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
-			File smallStickerDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
-			for (String stId : LOCAL_STICKER_IDS_EXPRESSIONS)
-			{
-				File st = new File(largeStickerDir, stId);
-				Utils.deleteFile(st);
-				st = new File(smallStickerDir, stId);
-				Utils.deleteFile(st);
-			}
-		}
-		catch (Exception e)
-		{
-
-		}
-	}
-
 	public void removeStickersFromRecents(String categoryName, String[] stickerIds)
 	{
 		for (String stickerId : stickerIds)
@@ -1208,16 +1143,6 @@ public class StickerManager
 		{
 			e.printStackTrace();
 		}
-	}
-
-	public void deleteDuplicateStickers()
-	{
-		// for humanoid
-		String humanoidDir = getStickerDirectoryForCategoryId(context, StickerManager.StickerCategoryId.humanoid.name());
-		deleteDuplicateStickers(humanoidDir, LOCAL_STICKER_IDS_HUMANOID);
-		// for expressions
-		String expressionDir = getStickerDirectoryForCategoryId(context, StickerManager.StickerCategoryId.expressions.name());
-		deleteDuplicateStickers(expressionDir, LOCAL_STICKER_IDS_EXPRESSIONS);
 	}
 
 	public void deleteDuplicateStickers(String parentDir, String[] bundledFileNames)
