@@ -973,8 +973,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			String id = getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN);
 			Intent intent = Utils.createIntentFromMsisdn(id, false);
 			intent.setClass(this, ChatThread.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			// forwarding to 1 is special case , we want to create conversation if does not exist and land to recipient
+			if(arrayList.size()==1){
+			intent.putExtra(HikeConstants.Extras.MSISDN, arrayList.get(0).getMsisdn());
+			intent.putExtras(presentIntent);
+			}else{
 			forwardMessageAsPerType(presentIntent, intent,arrayList);
+			}
 			startActivity(intent);
 			finish();
 		}
@@ -1166,12 +1172,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				if(multipleMessageList.size() ==0 || arrayList.size()==0){
 					return;
 				}else if(isSharingFile){
-					ConvMessage convMessage = multipleMessageList.get(0);
-					convMessage.setMsisdn(arrayList.get(0).getMsisdn());
-					intent.putExtra(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
-					sendMessage(convMessage);
-				}else if(arrayList.size()==1){
-					// when forwarding to one contact , then we want to create conversation and land to recipient
 					ConvMessage convMessage = multipleMessageList.get(0);
 					convMessage.setMsisdn(arrayList.get(0).getMsisdn());
 					intent.putExtra(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
