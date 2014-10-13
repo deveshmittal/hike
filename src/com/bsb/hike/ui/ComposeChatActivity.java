@@ -1170,6 +1170,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					convMessage.setMsisdn(arrayList.get(0).getMsisdn());
 					intent.putExtra(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
 					sendMessage(convMessage);
+				}else if(arrayList.size()==1){
+					// when forwarding to one contact , then we want to create conversation and land to recipient
+					ConvMessage convMessage = multipleMessageList.get(0);
+					convMessage.setMsisdn(arrayList.get(0).getMsisdn());
+					intent.putExtra(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
+					sendMessage(convMessage);
 				}else{
 					sendMultiMessages(multipleMessageList,arrayList);
 				}
