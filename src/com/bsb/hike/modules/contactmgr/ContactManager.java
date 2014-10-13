@@ -1860,15 +1860,19 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		}
 	}
 
-	public List<ContactInfo> getAllConversationContactsSorted(boolean fetchGroups)
+	public List<ContactInfo> getAllConversationContactsSorted(boolean removeNewOrReturningUsers, boolean fetchGroups)
 	{
 		List<ContactInfo> allContacts = new ArrayList<ContactInfo>();
-		allContacts.addAll(persistenceCache.getConversationOneToOneContacts());
+		List<ContactInfo> oneToOneContacts = HikeConversationsDatabase.getInstance().getOneToOneContacts(removeNewOrReturningUsers);
+		allContacts.addAll(oneToOneContacts);
 		if(fetchGroups)
 		{
 			allContacts.addAll(getConversationGroupsAsContacts(false));
 		}
 
+		/*
+		 * Sort in descending order of timestamp.
+		 */
 		Collections.sort(allContacts, new Comparator<ContactInfo>()
 		{
 			@Override

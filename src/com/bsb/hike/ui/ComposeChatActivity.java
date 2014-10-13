@@ -1579,7 +1579,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		if(recentContacts == null)
 		{
-			recentContacts = ContactManager.getInstance().getAllConversationContactsSorted(true);
+			recentContacts = ContactManager.getInstance().getAllConversationContactsSorted(false, true);
 			Collections.reverse(recentContacts);
 		}
 		return recentContacts;

@@ -2317,40 +2317,55 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	}
 
-	public List<String> getNewOrReturningUserMsisdns()
+	/*
+	 * This method returns a list of ContactInfo for all 1-1 conversations with timestamp set.
+	 */
+	public List<ContactInfo> getOneToOneContacts(boolean removeNewOrReturningUsers)
 	{
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.MESSAGE_METADATA}, null, null, null,
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.TIMESTAMP, DBConstants.MESSAGE_METADATA}, null, null, null,
 					null, null);
 
 			final int msisdnColumn = c.getColumnIndex(DBConstants.MSISDN);
 			final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
+			final int timestampColumn = c.getColumnIndex(DBConstants.TIMESTAMP);
 
-			List<String> newMsisdns = new ArrayList<String>();
+			List<ContactInfo> oneToOneContacts = new ArrayList<ContactInfo>();
 			while(c.moveToNext())
 			{
 				String msisdn = c.getString(msisdnColumn);
 				String metadata = c.getString(metadataColumn);
+				long timestamp = c.getLong(timestampColumn);
 
-				if (!TextUtils.isEmpty(metadata))
+				if(!Utils.isGroupConversation(msisdn))
 				{
-					try
+					if (!TextUtils.isEmpty(metadata) && removeNewOrReturningUsers)
 					{
-						JSONObject md = new JSONObject(metadata);
-						if(md.optString(HikeConstants.TYPE).equals(HikeConstants.MqttMessageTypes.USER_JOINED))
+						try
 						{
-							newMsisdns.add(msisdn);
+							JSONObject md = new JSONObject(metadata);
+							if(md.optString(HikeConstants.TYPE).equals(HikeConstants.MqttMessageTypes.USER_JOINED))
+							{
+								continue;
+							}
+						}
+						catch (JSONException e)
+						{
+							Logger.e("HikeConversationsDatabase", "Exception while parsing metadata for fetching new users msisdn : " + e);
 						}
 					}
-					catch (JSONException e)
-					{
-						Logger.e("HikeConversationsDatabase", "Exception while parsing metadata for fetching new users msisdn : " + e);
-					}
+					/*
+					 * It is assumed that the contact would be in persistence cache since we have a conversation going on for this msisdn.
+					 * If not, it makes a db query and loads into persistence cache.
+					 */
+					ContactInfo contact = ContactManager.getInstance().getContact(msisdn, false, true);
+					contact.setLastMessaged(timestamp);
+					oneToOneContacts.add(contact);
 				}
 			}
-			return newMsisdns;
+			return oneToOneContacts;
 		}
 		finally
 		{

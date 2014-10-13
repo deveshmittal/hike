@@ -167,7 +167,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		Set<String> blockSet = ContactManager.getInstance().getBlockedMsisdnSet();
 		if(fetchRecents)
 		{
-			List<ContactInfo> convContacts = HikeMessengerApp.getContactManager().getAllConversationContactsSorted(false);
+			List<ContactInfo> convContacts = HikeMessengerApp.getContactManager().getAllConversationContactsSorted(true, false);
 			recentTaskList = new ArrayList<ContactInfo>();
 
 			for(ContactInfo recentContact : convContacts)
@@ -183,9 +183,6 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			    }
 			    recentTaskList.add(recentContact);
 			}
-
-			List<String> newUserMsisdns = HikeConversationsDatabase.getInstance().getNewOrReturningUserMsisdns();
-			removeItemsFromListOnMsisdn(recentTaskList, newUserMsisdns);
 		}
 		Logger.d("TestQuery", "query time: " + (System.currentTimeMillis() - queryTime));
 
@@ -294,22 +291,6 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		}
 
 		return true;
-	}
-
-	private void removeItemsFromListOnMsisdn(List<ContactInfo> list, List<String> removeList)
-	{
-		Iterator<ContactInfo> iter = list.iterator();
-		while(iter.hasNext())
-		{
-			ContactInfo contact = iter.next();
-			for(String removeMsisdn : removeList)
-			{
-				if(removeMsisdn.equals(contact.getMsisdn()))
-				{
-					iter.remove();
-				}
-			}
-		}
 	}
 
 	private void addToStealthList(List<ContactInfo> contactList, List<ContactInfo> stealthList, boolean isGroupTask)
