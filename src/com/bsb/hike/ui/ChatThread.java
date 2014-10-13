@@ -2036,6 +2036,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							String msg = msgExtrasJson.getString(HikeConstants.Extras.MSG);
 							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, msg, isConversationOnHike());
 							sendMessage(convMessage);
+						}else if(msgExtrasJson.has(HikeConstants.Extras.POKE)){
+							// as we will be changing msisdn and hike status while inserting in DB
+							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, getString(R.string.poke_msg), isConversationOnHike());
+							JSONObject metadata = new JSONObject();
+							try
+							{
+								metadata.put(HikeConstants.POKE, true);
+								convMessage.setMetadata(metadata);
+								sendMessage(convMessage);
+							}
+							catch (JSONException e)
+							{
+								Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
+							}
 						}
 						else if (msgExtrasJson.has(HikeConstants.Extras.FILE_PATH))
 						{
