@@ -829,6 +829,11 @@ class PersistenceCache extends ContactsCache
 		try
 		{
 			ConcurrentLinkedQueue<PairModified<String, String>> clq = new ConcurrentLinkedQueue<PairModified<String, String>>();
+			if (TextUtils.isEmpty(groupName))
+			{
+				List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(grpId, false, false);
+				groupName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+			}
 			GroupDetails grpDetails = new GroupDetails(grpId, groupName, alive, clq);
 			groupPersistence.put(grpId, grpDetails);
 		}
