@@ -58,5 +58,133 @@
                 "sticker_092_yo"
             ]
         }
+    ],
+    
+    "stickerCategories": [
+        {
+            "catId": "recent",
+            "timestamp": 0,
+            "isVisible": true,
+            "isCustom": true,
+            "catIndex": 0,
+            "metadata": []
+        },
+        {
+            "catId": "humanoid",
+            "downloadPref": "humanoidDownloadShown",
+            "timestamp": 1,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 1,
+            "metadata": []
+        },
+        {
+            "catId": "expressions",
+            "downloadPref": "expDownloadShown",
+            "timestamp": 2,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 2,
+            "metadata": []
+        },
+        {
+            "catId": "love",
+            "downloadPref": "loveDownloadShown",
+            "timestamp": 3,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 3,
+            "metadata": []
+        },
+        {
+            "catId": "bollywood",
+            "downloadPref": "bollywoodDownloadShown",
+            "timestamp": 4,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 4,
+            "metadata": []
+        },
+        {
+            "catId": "indian",
+            "downloadPref": "indianDownloadShown",
+            "timestamp": 5,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 5,
+            "metadata": []
+        },
+        {
+            "catId": "doggy",
+            "downloadPref": "doggyDownloadShown",
+            "timestamp": 6,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 6,
+            "metadata": []
+        },
+        {
+            "catId": "rageface",
+            "downloadPref": "ragefaceDownloadShown",
+            "timestamp": 7,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 7,
+            "metadata": []
+        },
+        {
+            "catId": "jelly",
+            "downloadPref": "JellyDownloadShown",
+            "timestamp": 8,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 8,
+            "metadata": []
+        },
+        {
+            "catId": "sports",
+            "downloadPref": "sportsDownloadShown",
+            "timestamp": 9,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 9,
+            "metadata": []
+        },
+        {
+            "catId": "humanoid2",
+            "downloadPref": "humanoid2DownloadShown",
+            "timestamp": 10,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 10,
+            "metadata": []
+        },
+        {
+            "catId": "avatars",
+            "downloadPref": "avtarsDownloadShown",
+            "timestamp": 11,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 11,
+            "metadata": []
+        },
+        {
+            "catId": "smileyexpressions",
+            "downloadPref": "smileyexpressionDownloadShown",
+            "timestamp": 12,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 12,
+            "metadata": []
+        },
+        {
+            "catId": "kitty",
+            "downloadPref": "kittyDownloadShown",
+            "timestamp": 13,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 13,
+            "metadata": []
+        }
     ]
 }

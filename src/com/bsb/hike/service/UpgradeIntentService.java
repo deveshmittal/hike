@@ -69,7 +69,7 @@ public class UpgradeIntentService extends IntentService
 			editor.commit();
 		}
 		
-		if (prefs.getInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, -1) == 1)
+		if (prefs.getInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1) == 1)
 		{
 			if(StickerManager.moveHardcodedStickersToSdcard(getApplicationContext()))
 			{
@@ -78,6 +78,16 @@ public class UpgradeIntentService extends IntentService
 				editor.putBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false);
 				editor.commit();
 			}
+		}
+		
+		if (prefs.getInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 1) == 1)
+		{
+			upgradeForStickerShopVersion1();
+			Editor editor = prefs.edit();
+			editor.putInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 2);
+			editor.putBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false);
+			editor.commit();
+			StickerManager.getInstance().doInitialSetup();
 		}
 	}
 
@@ -106,5 +116,10 @@ public class UpgradeIntentService extends IntentService
 	private void upgradeForDatabaseVersion28()
 	{
 		HikeConversationsDatabase.getInstance().upgradeForDatabaseVersion28();
+	}
+
+	private void upgradeForStickerShopVersion1()
+	{
+		HikeConversationsDatabase.getInstance().upgradeForStickerShopVersion1();
 	}
 }

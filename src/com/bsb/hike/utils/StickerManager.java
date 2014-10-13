@@ -113,6 +113,28 @@ public class StickerManager
 	public static int RECENT_STICKERS_COUNT = 30;
 	
 	public static final int SIZE_IMAGE = (int) (80 * Utils.densityMultiplier);
+
+	public static final String UPGRADE_FOR_STICKER_SHOP_VERSION_1 = "upgradeForStickerShopVersion1";
+	
+	public static final String STICKERS_JSON_FILE_NAME = "stickers_data";
+	
+	public static final String STICKER_CATEGORIES = "stickerCategories";
+
+	public static final String CATEGORY_NAME = "categoryName";
+
+	public static final String IS_VISIBLE = "isVisible";
+
+	public static final String IS_CUSTOM = "isCustom";
+
+	public static final String IS_ADDED = "isAdded";
+
+	public static final String CATEGORY_INDEX = "catIndex";
+
+	public static final String METADATA = "metadata";
+
+	public static final String TIMESTAMP = "timestamp";
+
+	public static final String DOWNLOAD_PREF = "downloadPref";
 	
 	public enum StickerCategoryId
 	{
@@ -493,16 +515,15 @@ public class StickerManager
 
 	}
 	
-	public void doInitialSetup(Context applicationContext)
+	public void doInitialSetup()
 	{
 		// move stickers from external to internal if not done
-		init(applicationContext);
-		SharedPreferences settings = applicationContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		SharedPreferences settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		if(!settings.getBoolean(StickerManager.RECENT_STICKER_SERIALIZATION_LOGIC_CORRECTED, false)){
 			updateRecentStickerFile(settings);
 		}
 		
-		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(applicationContext);
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
 		/*
 		 * If we had earlier removed bollywood stickers we need to display them again.
 		 */
@@ -1394,7 +1415,7 @@ public class StickerManager
 		
 		try
 		{
-			JSONObject jsonObj = new JSONObject(Utils.loadJSONFromAsset(context, "stickers_data"));
+			JSONObject jsonObj = new JSONObject(Utils.loadJSONFromAsset(context, STICKERS_JSON_FILE_NAME));
 			JSONArray harcodedStickers = jsonObj.optJSONArray(HARCODED_STICKERS);
 			for (int i=0; i<harcodedStickers.length(); i++)
 			{
