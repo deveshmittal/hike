@@ -1163,10 +1163,19 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 					 */
 				}
-				if(multipleMessageList.size()==0){
+				if(multipleMessageList.size() ==0 || arrayList.size()==0){
 					return;
 				}else if(isSharingFile){
-					sendMessage(multipleMessageList.get(0));
+					ConvMessage convMessage = multipleMessageList.get(0);
+					convMessage.setMsisdn(arrayList.get(0).getMsisdn());
+					intent.putExtra(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
+					sendMessage(convMessage);
+				}else if(arrayList.size()==1){
+					// when forwarding to one contact , then we want to create conversation and land to recipient
+					ConvMessage convMessage = multipleMessageList.get(0);
+					convMessage.setMsisdn(arrayList.get(0).getMsisdn());
+					intent.putExtra(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
+					sendMessage(convMessage);
 				}else{
 					sendMultiMessages(multipleMessageList,arrayList);
 				}
