@@ -832,6 +832,18 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	 */
 	public void updateContactRecency(String msisdn, long timestamp)
 	{
+		updateContactRecency(msisdn, timestamp, true);
+	}
+
+	/**
+	 * This method updates the <code>lastMessaged</code> parameter of {@link ContactInfo} object and updates in database depending on parameter <code>updateInDb</code>
+	 * 
+	 * @param msisdn
+	 * @param timestamp
+	 * @param updateInDb
+	 */
+	public void updateContactRecency(String msisdn, long timestamp, boolean updateInDb)
+	{
 		ContactInfo contact = getContact(msisdn);
 		if (null != contact)
 		{
@@ -839,7 +851,10 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 			updatedContact.setLastMessaged(timestamp);
 			updateContacts(updatedContact);
 		}
-		hDb.updateContactRecency(msisdn, timestamp);
+		if (updateInDb)
+		{
+			hDb.updateContactRecency(msisdn, timestamp);
+		}
 	}
 
 	/**
