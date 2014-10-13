@@ -1166,7 +1166,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				if(multipleMessageList.size() ==0 || arrayList.size()==0){
 					return;
 				}else if(isSharingFile){
-					sendMessage(multipleMessageList.get(0));
+					ConvMessage convMessage = multipleMessageList.get(0);
+					convMessage.setMsisdn(arrayList.get(0).getMsisdn());
+					intent.putExtra(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
+					sendMessage(convMessage);
 				}else{
 					sendMultiMessages(multipleMessageList,arrayList);
 				}
