@@ -1163,7 +1163,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 					 */
 				}
-				if(multipleMessageList.size()==0){
+				if(multipleMessageList.size() ==0 || arrayList.size()==0){
 					return;
 				}else if(isSharingFile){
 					sendMessage(multipleMessageList.get(0));
