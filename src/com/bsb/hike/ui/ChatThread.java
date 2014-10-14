@@ -1,8 +1,6 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
-
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -61,6 +59,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
@@ -5436,7 +5435,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 0:
 					requestCode = HikeConstants.IMAGE_CAPTURE_CODE;
 					pickIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-					selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null, true);
+					File selectedDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
+					if (!selectedDir.exists())
+					{
+						if (!selectedDir.mkdirs())
+						{
+							Logger.d("MyCameraApp", "failed to create directory");
+							return;
+						}
+					}
+					String fileName = Utils.getOriginalFile(HikeFileType.IMAGE, null);
+					selectedFile = new File(selectedDir.getPath() + File.separator + fileName); 
 
 					pickIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFile));
 					/*
@@ -6030,7 +6039,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return;
 			}
 
-			HikeFileType hikeFileType = (requestCode == HikeConstants.IMAGE_TRANSFER_CODE || requestCode == HikeConstants.IMAGE_CAPTURE_CODE) ? HikeFileType.IMAGE
+			final HikeFileType hikeFileType = (requestCode == HikeConstants.IMAGE_TRANSFER_CODE || requestCode == HikeConstants.IMAGE_CAPTURE_CODE) ? HikeFileType.IMAGE
 					: requestCode == HikeConstants.VIDEO_TRANSFER_CODE ? HikeFileType.VIDEO : HikeFileType.AUDIO;
 
 			String filePath = null;
@@ -6080,7 +6089,42 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Logger.d(getClass().getSimpleName(), "File path: " + filePath);
 				}
 			}
-			initialiseFileTransfer(filePath, null, hikeFileType, null, false, -1, false);
+			if (requestCode == HikeConstants.IMAGE_CAPTURE_CODE && !HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false) && selectedFile != null)
+			{
+				final String fPath = filePath;
+				
+				HikeDialog.showDialog(ChatThread.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG, new HikeDialog.HikeDialogListener()
+				{
+					@Override
+					public void onSucess(Dialog dialog)
+					{
+						initialiseFileTransfer(fPath, null, hikeFileType, null, false, -1, false);
+						dialog.dismiss();
+					}
+
+					@Override
+					public void negativeClicked(Dialog dialog)
+					{
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void positiveClicked(Dialog dialog)
+					{
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void neutralClicked(Dialog dialog)
+					{
+						// TODO Auto-generated method stub
+
+					}
+				}, (Object[]) new Long[] { (long) 1, selectedFile.length() });
+			}else
+				initialiseFileTransfer(filePath, null, hikeFileType, null, false, -1, false);
 		}
 		else if (requestCode == HikeConstants.SHARE_LOCATION_CODE && resultCode == RESULT_OK)
 		{
