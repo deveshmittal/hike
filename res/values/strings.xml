@@ -1171,8 +1171,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="forward_tip_description">Now forward to multiple contacts at once</string>
     <string name="pin_notif_text">posted a pin</string>
     <string name="welcome_to">Welcome to</string>
-    <string name="small_fastest">fastest</string>
-    <string name="medium_faster">faster</string>
+    <string name="small_fastest">faster</string>
+    <string name="medium_faster">fast</string>
     <string name="original_slow">slow</string>
     <string name="forward_to_plural">Send message to %1$s contacts?</string>
     <string name="forward_to_singular">Send message to 1 contact?</string>
