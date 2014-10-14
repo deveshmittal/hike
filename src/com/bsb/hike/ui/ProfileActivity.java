@@ -2180,7 +2180,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					@Override
 					public void run()
 					{
-						if(profileType == ProfileType.CONTACT_INFO)
+						if(profileType == ProfileType.CONTACT_INFO || profileType == ProfileType.GROUP_INFO)
 						{
 							updateProfileImageInHeaderView();
 						}
