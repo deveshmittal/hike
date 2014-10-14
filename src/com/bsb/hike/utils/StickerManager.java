@@ -50,23 +50,11 @@ public class StickerManager
 	
 	public static final String RECENT_STICKER_SERIALIZATION_LOGIC_CORRECTED = "recentStickerSerializationCorrected";
 
-	public static final String SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP = "shownDefaultStickerCategoryPopup";
-
-	public static final String SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP = "shownDefaultStickerHumanoidCategoryPopup";
-
-	public static final String EXPRESSIONS_CATEGORY_INSERT_TO_DB = "defaultExpressionsCategoryInsertedToDB";
-
-	public static final String HUMANOID_CATEGORY_INSERT_TO_DB = "secondCategoryInsertedToDB";
-
 	public static final String REMOVED_CATGORY_IDS = "removedCategoryIds";
-
-	public static final String SHOW_BOLLYWOOD_STICKERS = "showBollywoodStickers";
 
 	public static final String RESET_REACHED_END_FOR_DEFAULT_STICKERS = "resetReachedEndForDefaultStickers";
 
 	public static final String CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES = "correctDefaultStickerDialogPreferences";
-
-	public static final String REMOVE_HUMANOID_STICKERS = "removeHumanoiStickers";
 
 	public static final String SHOWN_STICKERS_TUTORIAL = "shownStickersTutorial";
 	
@@ -524,34 +512,8 @@ public class StickerManager
 		}
 		
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
-		/*
-		 * If we had earlier removed bollywood stickers we need to display them again.
-		 */
-		if (settings.contains(StickerManager.SHOW_BOLLYWOOD_STICKERS))
-		{
-			setupBollywoodCategoryVisibility(settings);
-		}
-
 		setupStickerCategoryList(settings);
 		loadRecentStickers();
-
-		/*
-		 * This preference has been used here because of a bug where we were inserting this key in the settings preference
-		 */
-		if (!preferenceManager.contains(StickerManager.REMOVE_HUMANOID_STICKERS))
-		{
-			removeHumanoidSticker();
-		}
-		
-		if (!preferenceManager.getBoolean(StickerManager.EXPRESSIONS_CATEGORY_INSERT_TO_DB, false))
-		{
-			insertExpressionsCategory();
-		}
-
-		if (!preferenceManager.getBoolean(StickerManager.HUMANOID_CATEGORY_INSERT_TO_DB, false))
-		{
-			insertHumanoidCategory();
-		}
 
 		if (!settings.getBoolean(StickerManager.RESET_REACHED_END_FOR_DEFAULT_STICKERS, false))
 		{
@@ -561,13 +523,6 @@ public class StickerManager
 		if (!settings.getBoolean(StickerManager.ADD_NO_MEDIA_FILE_FOR_STICKERS, false))
 		{
 			addNoMediaFilesToStickerDirectories();
-		}
-		/*
-		 * Adding these preferences since they are used in the load more stickers logic.
-		 */
-		if (!settings.getBoolean(StickerManager.CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES, false))
-		{
-			setDialoguePref();
 		}
 
 		/*
@@ -681,22 +636,6 @@ public class StickerManager
 		}
 	}
 
-	public void insertExpressionsCategory()
-	{
-		HikeConversationsDatabase.getInstance().insertExpressionsStickerCategory();
-		Editor editor = preferenceManager.edit();
-		editor.putBoolean(EXPRESSIONS_CATEGORY_INSERT_TO_DB, true);
-		editor.commit();
-	}
-
-	public void insertHumanoidCategory()
-	{
-		HikeConversationsDatabase.getInstance().insertHumanoidStickerCategory();
-		Editor editor = preferenceManager.edit();
-		editor.putBoolean(HUMANOID_CATEGORY_INSERT_TO_DB, true);
-		editor.commit();
-	}
-
 	public void resetReachedEndForDefaultStickers()
 	{
 		HikeConversationsDatabase.getInstance().updateReachedEndForCategory(StickerCategoryId.expressions.name(), false);
@@ -706,29 +645,6 @@ public class StickerManager
 		editor.commit();
 	}
 
-	public void setDialoguePref()
-	{
-		SharedPreferences settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		Editor editor = settings.edit();
-		editor.putBoolean(StickerCategoryId.humanoid.downloadPref(), settings.getBoolean(SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP, false));
-		editor.putBoolean(StickerCategoryId.doggy.downloadPref(), settings.getBoolean(SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP, false));
-		editor.putBoolean(StickerManager.CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES, true);
-		editor.commit();
-	}
-
-	public void removeHumanoidSticker()
-	{
-		String categoryDirPath = getStickerDirectoryForCategoryId(context, StickerCategoryId.humanoid.name());
-		if (categoryDirPath != null)
-		{
-			File categoryDir = new File(categoryDirPath);
-			Utils.deleteFile(categoryDir);
-			Editor editor = preferenceManager.edit();
-			editor.putBoolean(REMOVE_HUMANOID_STICKERS, true);
-			editor.commit();
-		}
-	}
-	
 	public void addNoMediaFilesToStickerDirectories()
 	{
 		File dir = context.getExternalFilesDir(null);
@@ -769,26 +685,6 @@ public class StickerManager
 		catch (Exception e)
 		{
 		}
-	}
-
-	public static void setStickersForIndianUsers(boolean isIndianUser, SharedPreferences prefs)
-	{
-		HikeMessengerApp.isIndianUser = isIndianUser;
-		if (!prefs.contains(StickerManager.SHOW_BOLLYWOOD_STICKERS))
-		{
-			setupBollywoodCategoryVisibility(prefs);
-		}
-	}
-
-	public static void setupBollywoodCategoryVisibility(SharedPreferences prefs)
-	{
-		/*
-		 * We now show the bollywood category for all users.
-		 */
-		Editor editor = prefs.edit();
-		editor.remove(SHOW_BOLLYWOOD_STICKERS);
-		editor.remove(REMOVED_CATGORY_IDS);
-		editor.commit();
 	}
 
 	public Set<Sticker> getRecentStickerList()
