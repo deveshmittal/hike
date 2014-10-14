@@ -2618,6 +2618,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		wasOrientationChanged = false;
 
+		/*
+		 * Fix for action mode remaining open after multi-forward. Also, destroying action mode in the end so that above objects get initialized.
+		 */
+		if(isActionModeOn)
+		{
+			destroyActionMode();
+		}
 		return true;
 	}
 
