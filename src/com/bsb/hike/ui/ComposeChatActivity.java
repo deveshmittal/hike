@@ -958,8 +958,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private void forwardMultipleMessages(ArrayList<ContactInfo> arrayList)
 	{
+		Intent presentIntent = getIntent();
 		if(isSharingFile){
-			Intent presentIntent = getIntent();
 	        Intent intent = Utils.createIntentFromContactInfo(arrayList.get(0), true);
 	        intent.setClass(this, ChatThread.class);
 	        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -967,20 +967,28 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	        forwardMessageAsPerType(presentIntent, intent,arrayList);
 			startActivity(intent);
 			finish();
-		}else if (getIntent().hasExtra(HikeConstants.Extras.PREV_MSISDN))
-		{
-			Intent presentIntent = getIntent();
-			String id = getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN);
-			Intent intent = Utils.createIntentFromMsisdn(id, false);
-			intent.setClass(this, ChatThread.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			// forwarding to 1 is special case , we want to create conversation if does not exist and land to recipient
+		}else{
+			// forwarding it is
+			Intent intent = null;
 			if(arrayList.size()==1){
-			intent.putExtra(HikeConstants.Extras.MSISDN, arrayList.get(0).getMsisdn());
-			intent.putExtras(presentIntent);
+				// forwarding to 1 is special case , we want to create conversation if does not exist and land to recipient
+				intent = Utils.createIntentFromMsisdn(arrayList.get(0).getMsisdn(), false);
+				intent.putExtras(presentIntent);
+				intent.setClass(this, ChatThread.class);
 			}else{
-			forwardMessageAsPerType(presentIntent, intent,arrayList);
+				// multi forward to multi people
+				if(presentIntent.hasExtra(HikeConstants.Extras.PREV_MSISDN)){
+					// open chat thread from where we initiated
+					String id = presentIntent.getStringExtra(HikeConstants.Extras.PREV_MSISDN);
+					intent = Utils.createIntentFromMsisdn(id, false);
+					intent.setClass(this, ChatThread.class);
+				}else{
+					//home activity
+					intent = Utils.getHomeActivityIntent(this);
+				}
+				forwardMessageAsPerType(presentIntent, intent,arrayList);
 			}
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			finish();
 		}
