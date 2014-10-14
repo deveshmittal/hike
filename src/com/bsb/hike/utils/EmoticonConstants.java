@@ -958,7 +958,7 @@ public class EmoticonConstants {
 			R.drawable.places091, R.drawable.places093, R.drawable.places096,
 			R.drawable.places097, R.drawable.places098, R.drawable.places103,
 			R.drawable.places106, R.drawable.places118, R.drawable.places122,
-			R.drawable.places123, R.drawable.places124,
+			R.drawable.places123, R.drawable.places124, R.drawable.places125,
 
 			/* emoji_symbols */
 			R.drawable.symbols001, R.drawable.symbols002,

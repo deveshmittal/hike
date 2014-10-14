@@ -3847,7 +3847,7 @@ public class Utils
 
 		Logger.i("sound", "playing sound " + soundId);
 		MediaPlayer mp = new MediaPlayer();
-		mp.setAudioStreamType(AudioManager.STREAM_RING);
+		mp.setAudioStreamType(AudioManager.STREAM_SYSTEM);
 		Resources res = context.getResources();
 		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
 
@@ -3872,18 +3872,18 @@ public class Utils
 		}
 		catch (IllegalArgumentException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			mp.release();
 		}
 		catch (IllegalStateException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			mp.release();
 		}
 		catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			mp.release();
 		}
 	}
 
@@ -3898,6 +3898,50 @@ public class Utils
 		catch (Exception e)
 		{
 			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Plays non-ducking sound from given Uri. Plays on {@link android.Media.AudioManager#STREAM_SYSTEM AudioManager.STREAM_SYSTEM} to enable non-ducking playback.
+	 * 
+	 * @param context
+	 * @param soundUri
+	 */
+	public static void playSound(Context context, Uri soundUri)
+	{
+		MediaPlayer mp = new MediaPlayer();
+		mp.setAudioStreamType(AudioManager.STREAM_SYSTEM);
+		try
+		{
+			mp.setDataSource(context, soundUri);
+
+			mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
+			{
+
+				@Override
+				public void onCompletion(MediaPlayer mp)
+				{
+					mp.release();
+				}
+			});
+			mp.prepare();
+			mp.start();
+
+		}
+		catch (IllegalArgumentException e)
+		{
+			e.printStackTrace();
+			mp.release();
+		}
+		catch (IllegalStateException e)
+		{
+			e.printStackTrace();
+			mp.release();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			mp.release();
 		}
 	}
 

@@ -2567,7 +2567,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				{
 					conv = new Conversation(msisdn);
 					ContactInfo contact = ContactManager.getInstance().getContact(conv.getMsisdn());
-					ContactManager.getInstance().updateContactRecency(msisdn, timestamp);
+					ContactManager.getInstance().updateContactRecency(msisdn, timestamp, false);
 					if (null == contact)
 					{
 						msisdns.add(msisdn);
