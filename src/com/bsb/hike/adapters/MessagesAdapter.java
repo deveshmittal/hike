@@ -2560,23 +2560,28 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		else if(fss.getFTState() == FTState.IN_PROGRESS && fss.getTransferredSize() == 0)
 		{
 			float fakeProgress = 5 * 0.01f;
-			
 			if (fss.getTotalSize() > 0)
 			{
 				fakeProgress = (float) chunkSize;
-				fakeProgress /= fss.getTotalSize();
-				if (fakeProgress > 5 * 0.01f)
-				{
-					fakeProgress = 5 * 0.01f;
-				}
+				fakeProgress = fakeProgress / fss.getTotalSize() ;
 			}
-			holder.circularProgress.setProgress(fakeProgress);
+			
+			holder.circularProgress.stopAnimation();
+			holder.circularProgress.setAnimatedProgress(0, (int) (fakeProgress * 100), 6 * 1000, msgId);
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}
 		else
 		{
 			holder.circularProgress.setProgress(progress * 0.01f);
+			float fakeProgress = 5 * 0.01f;
+			if (fss.getTotalSize() > 0)
+			{
+				fakeProgress = (float) chunkSize;
+				fakeProgress = fakeProgress / fss.getTotalSize() ;
+			}
+			holder.circularProgress.stopAnimation();
+			holder.circularProgress.setAnimatedProgress(progress, progress + (int) (fakeProgress * 100), 6 * 1000, msgId);
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}

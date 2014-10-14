@@ -747,7 +747,20 @@ public class UploadFileTask extends FileTransferBase
 		RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 		raf.seek(mStart);
 
-		setChunkSize();
+		if (mStart == 0)
+		{
+
+			setChunkSize();
+
+			chunkSize = chunkSize / 5;
+
+		}
+		else
+		{
+
+			setChunkSize();
+
+		}
 		if (chunkSize > length)
 			chunkSize = (int) length;
 		setBufferSize();
@@ -826,6 +839,8 @@ public class UploadFileTask extends FileTransferBase
 					resetAndUpdate = true; // To reset retry logic and update UI
 
 					end = (int) length;
+					setChunkSize();
+					fileBytes = setupFileBytes(boundaryMesssage, boundary, chunkSize);
 					if (end >= (start + chunkSize))
 					{
 						end = start + chunkSize;
