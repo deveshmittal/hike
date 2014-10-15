@@ -44,7 +44,6 @@ import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
 

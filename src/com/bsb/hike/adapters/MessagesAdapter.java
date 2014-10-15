@@ -115,7 +115,6 @@ import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.HoloCircularProgress;

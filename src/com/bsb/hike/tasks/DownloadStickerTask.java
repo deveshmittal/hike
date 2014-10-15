@@ -31,7 +31,6 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.Utils;
 

@@ -50,7 +50,6 @@ import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
 public class ToastListener implements Listener
 {

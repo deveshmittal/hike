@@ -62,7 +62,6 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 
 public class HikeConversationsDatabase extends SQLiteOpenHelper
@@ -3828,12 +3827,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return stickerDataMap;
 	}
 
-	public boolean isStickerUpdateAvailable(StickerCategoryId categoryId)
+	public boolean isStickerUpdateAvailable(String categoryId)
 	{
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, new String[] { DBConstants.UPDATE_AVAILABLE }, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId.name() }, null,
+			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, new String[] { DBConstants.UPDATE_AVAILABLE }, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId }, null,
 					null, null);
 			if (!c.moveToFirst())
 			{
@@ -3869,16 +3868,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				c.close();
 			}
 		}
-	}
-
-	public void insertExpressionsStickerCategory()
-	{
-		addOrUpdateStickerCategory(StickerCategoryId.expressions.name(), 0, false);
-	}
-
-	public void insertHumanoidStickerCategory()
-	{
-		addOrUpdateStickerCategory(StickerCategoryId.humanoid.name(), 0, false);
 	}
 
 	public long addProtip(Protip protip)
