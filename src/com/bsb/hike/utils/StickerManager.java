@@ -15,6 +15,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -123,6 +124,10 @@ public class StickerManager
 	public static final String TIMESTAMP = "timestamp";
 
 	public static final String DOWNLOAD_PREF = "downloadPref";
+
+	public static final String RECENT = "recent";
+	
+	private LinkedHashMap<String, StickerCategory> stickerCategoriesMap;
 	
 	public enum StickerCategoryId
 	{
@@ -466,8 +471,6 @@ public class StickerManager
 
 	private Set<Sticker> recentStickers;
 
-	private List<StickerCategory> stickerCategories;
-
 	private Context context;
 
 	private static SharedPreferences preferenceManager;
@@ -489,7 +492,7 @@ public class StickerManager
 
 	private StickerManager()
 	{
-		stickerCategories = new ArrayList<StickerCategory>();
+		stickerCategoriesMap = new LinkedHashMap<String, StickerCategory>();
 		if (stickerTaskMap == null)
 		{
 			stickerTaskMap = new HashMap<String, StickerTaskBase>();
@@ -534,7 +537,6 @@ public class StickerManager
 
 			if (checkIfStickerCategoryExists(StickerCategoryId.doggy.name()))
 			{
-				HikeConversationsDatabase.getInstance().stickerUpdateAvailable(StickerCategoryId.doggy.name());
 				StickerManager.getInstance().setStickerUpdateAvailable(StickerCategoryId.doggy.name(), true);
 			}
 			else
@@ -555,7 +557,7 @@ public class StickerManager
 
 	public List<StickerCategory> getStickerCategoryList()
 	{
-		return stickerCategories;
+		return new ArrayList<StickerCategory>(stickerCategoriesMap.values());
 	}
 
 	public void setupStickerCategoryList(SharedPreferences preferences)
@@ -564,62 +566,21 @@ public class StickerManager
 		 * TODO : This will throw an exception in case of remove category as, this function will be called from mqtt thread and stickerCategories will be called from UI thread
 		 * also.
 		 */
-		stickerCategories = new ArrayList<StickerCategory>();
-		EnumMap<StickerCategoryId, StickerCategory> stickerDataMap = HikeConversationsDatabase.getInstance().stickerDataForCategories();
-		for (StickerCategoryId s : StickerCategoryId.values())
-		{
-			if (s.equals(StickerCategoryId.recent))
-			{
-				stickerCategories.add(new StickerCategory(StickerCategoryId.recent));
-				continue;
-			}
-			else if (StickerCategoryId.unknown.equals(s))
-			{
-				/*
-				 * We don't want to add the unknown category to this list.
-				 */
-				continue;
-			}
-			StickerCategory cat = stickerDataMap.get(s);
-			if (cat != null)
-				stickerCategories.add(cat);
-			else
-				stickerCategories.add(new StickerCategory(s, false, false));
-		}
-		String removedIds = preferences.getString(REMOVED_CATGORY_IDS, "[]");
-
-		try
-		{
-			JSONArray removedIdArray = new JSONArray(removedIds);
-			for (int i = 0; i < removedIdArray.length(); i++)
-			{
-				String removedCategoryId = removedIdArray.getString(i);
-				removeCategoryFromList(removedCategoryId);
-			}
-		}
-		catch (JSONException e)
-		{
-			Logger.w("HikeMessengerApp", "Invalid JSON", e);
-		}
+		stickerCategoriesMap.putAll(HikeConversationsDatabase.getInstance().getVisibleStickerCategories());
 	}
 
 	private void removeCategoryFromList(String removedCategoryId)
 	{
-		Iterator<StickerCategory> it = stickerCategories.iterator();
-		while (it.hasNext())
+		StickerCategory cat = stickerCategoriesMap.remove(removedCategoryId);
+		if(cat != null)
 		{
-			StickerCategory cat = it.next();
-			if (cat.categoryId.name().equals(removedCategoryId))
-			{
-				removeCategoryFromRecents(cat);
-				it.remove();
-			}
+			removeCategoryFromRecents(cat);
 		}
 	}
 
 	private void removeCategoryFromRecents(StickerCategory category)
 	{
-		String categoryDirPath = getStickerDirectoryForCategoryId(context, category.categoryId.name());
+		String categoryDirPath = getStickerDirectoryForCategoryId(context, category.getCategoryId());
 		if (categoryDirPath != null)
 		{
 			File smallCatDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
@@ -741,20 +702,17 @@ public class StickerManager
 
 	public void setStickerUpdateAvailable(String categoryId, boolean updateAvailable)
 	{
-		for (StickerCategory sc : stickerCategories)
-		{
-			if (sc.categoryId.name().equals(categoryId))
-				sc.updateAvailable = updateAvailable;
-		}
+		stickerCategoriesMap.get(categoryId).setUpdateAvailable(updateAvailable);
+		HikeConversationsDatabase.getInstance().stickerUpdateAvailable(categoryId, updateAvailable);
 	}
 
 	public StickerCategory getCategoryForIndex(int index)
 	{
-		if (index == -1 || index >= stickerCategories.size())
+		if (index == -1 || index >= stickerCategoriesMap.size())
 		{
 			throw new IllegalArgumentException();
 		}
-		return stickerCategories.get(index);
+		return (StickerCategory) stickerCategoriesMap.values().toArray()[index];
 	}
 
 	private String getExternalStickerDirectoryForCategoryId(Context context, String catId)
@@ -866,14 +824,9 @@ public class StickerManager
 		stickerTaskMap.remove(key);
 	}
 
-	public StickerCategory getCategoryForName(String categoryName)
+	public StickerCategory getCategoryForId(String categoryId)
 	{
-		for (int i = 0; i < stickerCategories.size(); i++)
-		{
-			if (stickerCategories.get(i).categoryId.name().equals(categoryName))
-				return stickerCategories.get(i);
-		}
-		return new StickerCategory(StickerCategoryId.unknown);
+		return stickerCategoriesMap.get(categoryId);
 	}
 
 	/***
@@ -1137,7 +1090,7 @@ public class StickerManager
 		return context.getFilesDir().getPath() + HikeConstants.STICKERS_ROOT;
 	}
 
-	public Map<String, StickerCategoryId> getStickerToCategoryMapping(
+	public Map<String, StickerCategory> getStickerToCategoryMapping(
 			Context context) {
 		String stickerRootDirectoryString = getStickerRootDirectory(context);
 
@@ -1157,7 +1110,7 @@ public class StickerManager
 			return null;
 		}
 
-		Map<String, StickerCategoryId> stickerToCategoryMap = new HashMap<String, StickerManager.StickerCategoryId>();
+		Map<String, StickerCategory> stickerToCategoryMap = new HashMap<String, StickerCategory>();
 
 		for (File stickerCategoryDirectory : stickerRootDirectory.listFiles()) {
 			/*
@@ -1179,16 +1132,13 @@ public class StickerManager
 					|| !stickerCategorySmallDirectory.exists()) {
 				continue;
 			}
-			StickerCategoryId categoryId = null;
-			try{
-			categoryId = StickerCategoryId
-					.valueOf(stickerCategoryDirectory.getName());
-			}catch(IllegalArgumentException ie){
-				continue;
+			StickerCategory stickerCategory = stickerCategoriesMap.get(stickerCategoryDirectory.getName());
+			if(stickerCategory == null)
+			{
+				stickerCategory = new StickerCategory(stickerCategoryDirectory.getName());
 			}
-
 			for (File stickerFile : stickerCategorySmallDirectory.listFiles()) {
-				stickerToCategoryMap.put(stickerFile.getName(), categoryId);
+				stickerToCategoryMap.put(stickerFile.getName(), stickerCategory);
 			}
 		}
 
@@ -1207,7 +1157,7 @@ public class StickerManager
 		Editor edit = settings.edit();
 		edit.putBoolean(StickerManager.RECENT_STICKER_SERIALIZATION_LOGIC_CORRECTED, true);
 		edit.commit();
-		Map<String, StickerCategoryId> stickerCategoryMapping = getStickerToCategoryMapping(context);
+		Map<String, StickerCategory> stickerCategoryMapping = getStickerToCategoryMapping(context);
 		// we do not want to try more than once, any failure , lets ignore this process there after
 		if(stickerCategoryMapping ==null){
 			return;
@@ -1236,18 +1186,9 @@ public class StickerManager
 					String stickerId = m.group();
 					Logger.i("recent", "Sticker id found is "+stickerId);
 					Sticker st = new Sticker();
-					StickerCategory category = new StickerCategory();
-					category.categoryId = stickerCategoryMapping.get(stickerId);
-					if(category.categoryId==null){
-						continue;
-					}
-					category.updateAvailable =false;
-					category.setReachedEnd(true);
-					st.setStickerData(-1, stickerId, category);
+					st.setStickerData(-1, stickerId, stickerCategoryMapping.get(stickerId));
 					recentStickers.add(st);
 				}
-				
-				
 				saveSortedListForCategory(StickerCategoryId.recent, recentStickers);
 			}
 			

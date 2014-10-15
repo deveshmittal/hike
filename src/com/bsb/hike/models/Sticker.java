@@ -20,17 +20,21 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	private String stickerId;
 
 	private StickerCategory category;
+	
+	private String categoryId;
 
 	public Sticker(StickerCategory category, String stickerId)
 	{
 		this.category = category;
 		this.stickerId = stickerId;
+		this.categoryId = category.getCategoryId();
 	}
 
-	public Sticker(String categoryName, String stickerId)
+	public Sticker(String categoryId, String stickerId)
 	{
 		this.stickerId = stickerId;
-		this.category = StickerManager.getInstance().getCategoryForName(categoryName);
+		this.category = StickerManager.getInstance().getCategoryForId(categoryId);
+		this.categoryId = categoryId;
 	}
 
 	public Sticker()
@@ -38,9 +42,29 @@ public class Sticker implements Serializable, Comparable<Sticker>
 
 	}
 
+	public String getCategoryId()
+	{
+		return categoryId;
+	}
+
+	public void setCategoryId(String categoryId)
+	{
+		this.categoryId = categoryId;
+	}
+
+	public void setStickerId(String stickerId)
+	{
+		this.stickerId = stickerId;
+	}
+
+	public void setCategory(StickerCategory category)
+	{
+		this.category = category;
+	}
+
 	public boolean isUnknownSticker()
 	{
-		return category == null || (category.categoryId == StickerCategoryId.unknown);
+		return category == null;
 	}
 
 	/**
@@ -67,8 +91,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 
 	public String getStickerPath(Context context)
 	{
-		String rootPath = category.categoryId == StickerCategoryId.unknown ? null : StickerManager.getInstance().getStickerDirectoryForCategoryId(context,
-				category.categoryId.name());
+		String rootPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId);
 		if (rootPath == null)
 		{
 			return null;
@@ -78,7 +101,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 
 	public String getSmallStickerPath(Context context)
 	{
-		return StickerManager.getInstance().getStickerDirectoryForCategoryId(context, category.categoryId.name()) + HikeConstants.SMALL_STICKER_ROOT + "/" + stickerId;
+		return StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId) + HikeConstants.SMALL_STICKER_ROOT + "/" + stickerId;
 	}
 
 	@Override
@@ -119,7 +142,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		if (!(object instanceof Sticker))
 			return false;
 		Sticker st = (Sticker) object;
-		return ((this.stickerId.equals(st.getStickerId())) && (this.category != null && st.getCategory() != null && this.category.categoryId == st.getCategory().categoryId));
+		return ((this.stickerId.equals(st.getStickerId())) && (this.categoryId.equals(st.getCategoryId())));
 	}
 
 	@Override
@@ -127,7 +150,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	{
 		int hash = 3;
 		if (category != null)
-			hash = 7 * hash + this.category.categoryId.ordinal();
+			hash = 7 * hash + this.categoryId.hashCode();
 		hash = 7 * hash + this.stickerId.hashCode();
 		return hash;
 	}
@@ -135,7 +158,12 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	public void serializeObj(ObjectOutputStream out) throws IOException
 	{
 		out.writeUTF(stickerId);
-		category.serializeObj(out);
+		StickerCategory cat = category;
+		if(cat == null)
+		{
+			cat = new StickerCategory(this.categoryId);
+		}
+		cat.serializeObj(out);
 	}
 
 	public void deSerializeObj(ObjectInputStream in) throws IOException, ClassNotFoundException

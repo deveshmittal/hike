@@ -68,9 +68,9 @@ public class DownloadStickerTask extends StickerTaskBase
 	@Override
 	protected FTResult doInBackground(Void... params)
 	{
-		Logger.d(getClass().getSimpleName(), "CategoryId: " + category.categoryId.name());
+		Logger.d(getClass().getSimpleName(), "CategoryId: " + category.getCategoryId());
 
-		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, category.categoryId.name());
+		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, category.getCategoryId());
 		if (directoryPath == null)
 		{
 			return FTResult.DOWNLOAD_FAILED;
@@ -106,7 +106,7 @@ public class DownloadStickerTask extends StickerTaskBase
 		try
 		{
 
-			JSONObject response = AccountUtils.downloadSticker(category.categoryId.name(), existingStickerIds);
+			JSONObject response = AccountUtils.downloadSticker(category.getCategoryId(), existingStickerIds);
 
 			if (response == null)
 			{
@@ -171,14 +171,14 @@ public class DownloadStickerTask extends StickerTaskBase
 		}
 
 		category.setReachedEnd(reachedEnd);
-		HikeConversationsDatabase.getInstance().addOrUpdateStickerCategory(category.categoryId.name(), totalNumber, reachedEnd);
+		HikeConversationsDatabase.getInstance().addOrUpdateStickerCategory(category.getCategoryId(), totalNumber, reachedEnd);
 		return FTResult.SUCCESS;
 	}
 
 	@Override
 	protected void onPostExecute(FTResult result)
 	{
-		StickerManager.getInstance().removeTask(category.categoryId.name());
+		StickerManager.getInstance().removeTask(category.getCategoryId());
 		if (result != FTResult.SUCCESS)
 		{
 			Intent i = new Intent(StickerManager.STICKERS_FAILED);
@@ -196,7 +196,7 @@ public class DownloadStickerTask extends StickerTaskBase
 		{
 			if (DownloadType.UPDATE.equals(downloadType) && stickerPageAdapter != null)
 			{
-				StickerManager.getInstance().setStickerUpdateAvailable(category.categoryId.name(), false);
+				StickerManager.getInstance().setStickerUpdateAvailable(category.getCategoryId(), false);
 				List<ViewType> l = stickerPageAdapter.getViewTypeList();
 				l.remove(ViewType.UPDATING_STICKER);
 				stickerPageAdapter.calculateNumRowsAndSize(true);

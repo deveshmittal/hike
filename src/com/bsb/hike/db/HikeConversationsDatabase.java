@@ -8,6 +8,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -3744,43 +3745,84 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.delete(DBConstants.STICKER_CATEGORIES_TABLE, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
 	}
 
-	public void stickerUpdateAvailable(String categoryId)
+	public void stickerUpdateAvailable(String categoryId, boolean updateAvailable)
 	{
 		ContentValues contentValues = new ContentValues();
-		contentValues.put(DBConstants.UPDATE_AVAILABLE, true);
+		contentValues.put(DBConstants.UPDATE_AVAILABLE, updateAvailable);
 
 		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
 	}
 
-	public EnumMap<StickerCategoryId, StickerCategory> stickerDataForCategories()
+	public LinkedHashMap<String, StickerCategory> getVisibleStickerCategories()
 	{
 		Cursor c = null;
-		EnumMap<StickerCategoryId, StickerCategory> stickerDataMap = new EnumMap<StickerManager.StickerCategoryId, StickerCategory>(StickerCategoryId.class);
+		LinkedHashMap<String, StickerCategory> stickerDataMap;
+		
 		try
 		{
-			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, new String[] { DBConstants.CATEGORY_ID, DBConstants.UPDATE_AVAILABLE, DBConstants.REACHED_END }, null, null, null, null, null);
-			while (c.moveToNext())
-			{
-				try
-				{
-					String category = c.getString(c.getColumnIndex(DBConstants.CATEGORY_ID));
-					boolean updateAvailable = c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
-					boolean reachedEnd = c.getInt(c.getColumnIndex(DBConstants.REACHED_END)) == 1;
-					StickerCategoryId catId = StickerManager.StickerCategoryId.getCategoryIdFromName(category);
-					StickerCategory s = new StickerCategory(catId, updateAvailable, reachedEnd);
-					stickerDataMap.put(catId, s);
-				}
-				catch (Exception e)
-				{
-
-				}
-			}
+			String selection = DBConstants.IS_VISIBLE + "=?";
+			String[] selectionArgs = { Integer.toString(1) };
+			
+			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, null , selection, selectionArgs, null, null, null);
+			stickerDataMap = parseStickerCategoriesCursor(c);
 		}
 		finally
 		{
 			if (c != null)
 			{
 				c.close();
+			}
+		}
+		return stickerDataMap;
+	}
+	
+	public LinkedHashMap<String, StickerCategory> getAllStickerCategories()
+	{
+		Cursor c = null;
+		LinkedHashMap<String, StickerCategory> stickerDataMap;
+		
+		try
+		{
+			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, null , null, null, null, null, null);
+			stickerDataMap = parseStickerCategoriesCursor(c);
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+		return stickerDataMap;
+	}
+	
+	public LinkedHashMap<String, StickerCategory> parseStickerCategoriesCursor(Cursor c)
+	{
+		LinkedHashMap<String, StickerCategory> stickerDataMap = new LinkedHashMap<String, StickerCategory>(c.getCount());
+
+		while (c.moveToNext())
+		{
+			try
+			{
+				String categoryId = c.getString(c.getColumnIndex(DBConstants.CATEGORY_ID));
+				String categoryName = c.getString(c.getColumnIndex(DBConstants.CATEGORY_NAME));
+				boolean updateAvailable = c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
+				boolean reachedEnd = c.getInt(c.getColumnIndex(DBConstants.REACHED_END)) == 1;
+				boolean isVisible = c.getInt(c.getColumnIndex(DBConstants.IS_VISIBLE)) == 1;
+				boolean isCustom = c.getInt(c.getColumnIndex(DBConstants.IS_CUSTOM)) == 1;
+				boolean isAdded = c.getInt(c.getColumnIndex(DBConstants.IS_ADDED)) == 1;
+				int catIndex = c.getInt(c.getColumnIndex(DBConstants.CATEGORY_INDEX));
+				String metadata = c.getString(c.getColumnIndex(DBConstants.METADATA));
+				int timeStamp = c.getInt(c.getColumnIndex(DBConstants.TIMESTAMP));
+				int totalStickers = c.getInt(c.getColumnIndex(DBConstants.TOTAL_NUMBER));
+
+				StickerCategory s = new StickerCategory(categoryId, categoryName, updateAvailable, reachedEnd, isVisible, isCustom, isAdded, catIndex, metadata, totalStickers,
+						timeStamp);
+				stickerDataMap.put(categoryId, s);
+			}
+			catch (Exception e)
+			{
+
 			}
 		}
 		return stickerDataMap;

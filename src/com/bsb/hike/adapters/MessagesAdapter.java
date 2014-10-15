@@ -756,18 +756,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			stickerHolder.loader.setVisibility(View.GONE);
 			Sticker sticker = metadata.getSticker();
 			setSenderDetails(convMessage, position, stickerHolder, true);
-			String categoryId;
-			/*
-			 * If the category is an unknown one, we have the category id stored in the metadata.
-			 */
-			if (sticker.getCategory().categoryId == StickerCategoryId.unknown)
-			{
-				categoryId = metadata.getUnknownStickerCategory();
-			}
-			else
-			{
-				categoryId = sticker.getCategory().categoryId.name();
-			}
+			String categoryId = sticker.getCategoryId();
 			String stickerId = sticker.getStickerId();
 
 			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId) + HikeConstants.LARGE_STICKER_ROOT;

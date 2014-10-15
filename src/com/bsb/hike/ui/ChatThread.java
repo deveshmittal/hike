@@ -6686,27 +6686,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Logger.d("ViewPager", "Page number: " + pageNum);
 			if (emoticonType == EmoticonType.STICKERS)
 			{
-				StickerCategory category = StickerManager.getInstance().getCategoryForIndex(pageNum);
-				StickerCategoryId categoryId = category.categoryId;
-				if (StickerCategoryId.recent.equals(categoryId))
-					return;
-				if (!categoryId.equals(StickerManager.StickerCategoryId.humanoid) && !categoryId.equals(StickerManager.StickerCategoryId.expressions))
-				{
-					if ((!StickerManager.getInstance().checkIfStickerCategoryExists(categoryId.name()) || !prefs.getBoolean(categoryId.downloadPref(), false))
-							&& !StickerManager.getInstance().isStickerDownloading(categoryId.name()))
-					{
-						postToHandlerStickerPreviewDialog(category);
-
-					}
-				}
-				else if (!prefs.getBoolean(categoryId.downloadPref(), false))
-				{
-					/*
-					 * Now we don't show sticker preview dialog for hardcoded categories
-					 */
-					prefs.edit().putBoolean(category.categoryId.downloadPref(), true).commit();
-					return;
-				}
 			}
 		}
 
@@ -6736,76 +6715,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	}
 
 	private void showStickerPreviewDialog(final StickerCategory category)
-	{
-		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.sticker_preview_dialog);
-
-		View parent = dialog.findViewById(R.id.preview_container);
-
-		setupStickerPreviewDialog(parent, category.categoryId);
-
-		Button okBtn = (Button) dialog.findViewById(R.id.ok_btn);
-		okBtn.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
-			{
-				dialog.dismiss();
-				getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-				Editor editor = prefs.edit();
-				try
-				{
-					editor.putBoolean(category.categoryId.downloadPref(), true);
-					if (category.categoryId.equals(StickerCategoryId.recent) || category.categoryId.equals(StickerCategoryId.humanoid)
-							|| category.categoryId.equals(StickerCategoryId.expressions))
-					{
-						return;
-					}
-					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(ChatThread.this, category, DownloadType.NEW_CATEGORY, null);
-					Utils.executeFtResultAsyncTask(downloadStickerTask);
-
-					StickerManager.getInstance().insertTask(category.categoryId.name(), downloadStickerTask);
-					updateStickerCategoryUI(category, false, null);
-
-				}
-				finally
-				{
-					editor.commit();
-				}
-			}
-		});
-
-		dialog.setOnCancelListener(new OnCancelListener()
-		{
-
-			/*
-			 * If user cancels non fixed category , he should be taken to recents if not empty else to humanoid whose index is 1
-			 */
-			@Override
-			public void onCancel(DialogInterface dialog)
-			{
-				if (!category.categoryId.equals(StickerCategoryId.recent) && !category.categoryId.equals(StickerCategoryId.humanoid)
-						&& !category.categoryId.equals(StickerCategoryId.expressions) && !StickerManager.getInstance().checkIfStickerCategoryExists(category.categoryId.name()))
-				{
-					int idx = 0;
-					if (StickerManager.getInstance().getRecentStickerList().size() == 0)
-						idx = 1;
-					emoticonViewPager.setCurrentItem(idx, false);
-				}
-			}
-		});
-
-		dialog.show();
-		Logger.i("chatthread", "show called for stickerpreviewdialog");
-		if (attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
-		{
-			// whenever dialog comes,it hides keyboard, so we need to make sure screen is properly resized to show emoticon pallette
-			// calling hide keyboard for edge cases , exceptional devices where keyboard not goes automatically
-			Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
-			resizeMainheight(attachmentWindow.getHeight(), false);
-		}
-	}
+	{}
 
 	private void setupStickerPreviewDialog(View parent, StickerCategoryId categoryId)
 	{
@@ -7033,7 +6943,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 
-		View emoticonPage = emoticonViewPager.findViewWithTag(category.categoryId);
+		View emoticonPage = emoticonViewPager.findViewWithTag(category.getCategoryId());
 
 		if (emoticonPage == null)
 		{
@@ -7170,16 +7080,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		JSONObject metadata = new JSONObject();
 		try
 		{
-			String categoryName;
-			if (sticker.getCategory().categoryId == StickerCategoryId.unknown)
-			{
-				categoryName = categoryIdIfUnknown;
-			}
-			else
-			{
-				categoryName = sticker.getCategory().categoryId.name();
-			}
-			metadata.put(StickerManager.CATEGORY_ID, categoryName);
+			String categoryId;
+			categoryId = sticker.getCategoryId();
+			
+			metadata.put(StickerManager.CATEGORY_ID, categoryId);
 
 			metadata.put(StickerManager.STICKER_ID, sticker.getStickerId());
 
@@ -7807,8 +7711,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						/*
 						 * If the category is an unknown one, we have the id saved in the json.
 						 */
-						String categoryId = sticker.getCategory().categoryId == StickerCategoryId.unknown ? message.getMetadata().getUnknownStickerCategory() : sticker
-								.getCategory().categoryId.name();
+						String categoryId = sticker.getCategoryId();
 						multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
 						multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_ID, sticker.getStickerId());
 					}
