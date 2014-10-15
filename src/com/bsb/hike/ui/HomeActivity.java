@@ -1,8 +1,11 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
@@ -62,7 +65,10 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.FtueContactsData;
+import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.modules.contactmgr.ContactManager;
@@ -75,7 +81,9 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeTip;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.HikeTip.TipType;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
@@ -89,9 +97,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private static final boolean TEST = false; // TODO: Test flag only, turn off
 												// for Production
 
+	private static final int DIWALI_YEAR = 2014;
+	private static final int DIWALI_MONTH = Calendar.OCTOBER;
+	private static final int DIWALI_DAY = 23;
+
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP, DIWALI_POPUP
 	}
 
 	private DialogShowing dialogShowing;
@@ -222,10 +234,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		if (savedInstanceState == null && dialogShowing == null)
 		{
-			/*
-			 * Only show app rater if the tutorial is not being shown an the app was just launched i.e not an orientation change
-			 */
-			AppRater.appLaunched(this);
+			if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_DIWALI_POPUP, false) && isDiwaliDate())
+			{
+				showDiwaliPopup();
+			}
+			else
+			{
+				/*
+				 * Only show app rater if the tutorial is not being shown an the app was just launched i.e not an orientation change
+				 */
+				AppRater.appLaunched(this);
+			}
 		}
 		else if (dialogShowing != null)
 		{
@@ -249,6 +268,87 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
+	}
+
+	private void showDiwaliPopup()
+	{
+		dialogShowing = DialogShowing.DIWALI_POPUP;
+
+		HikeDialogListener dialogListener = new HikeDialogListener()
+		{
+			@Override
+			public void positiveClicked(Dialog dialog)
+			{
+				sendDiwaliSticker();
+				dialog.dismiss();
+			}
+
+			@Override
+			public void onSucess(Dialog dialog)
+			{
+			}
+
+			@Override
+			public void neutralClicked(Dialog dialog)
+			{
+			}
+
+			@Override
+			public void negativeClicked(Dialog dialog)
+			{
+				dialog.dismiss();
+			}
+		};
+
+		dialog = HikeDialog.showDialog(this, HikeDialog.DIWALI_DIALOG, dialogListener, null);
+
+		dialog.setOnDismissListener(new OnDismissListener()
+		{
+			@Override
+			public void onDismiss(DialogInterface dialog)
+			{
+				onDismissDiwaliDialog();
+			}
+		});
+
+		dialog.setOnCancelListener(new OnCancelListener()
+		{
+			@Override
+			public void onCancel(DialogInterface dialog)
+			{
+				onDismissDiwaliDialog();
+			}
+		});
+
+		dialog.show();
+	}
+
+	private void sendDiwaliSticker()
+	{
+		Intent intent = IntentManager.getForwardStickerIntent(this, "078_happydiwali.png", StickerCategoryId.humanoid.name());
+		startActivity(intent);
+	}
+
+	private void onDismissDiwaliDialog()
+	{
+		dialogShowing = null;
+
+		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeMessengerApp.SHOWN_DIWALI_POPUP, true);
+	}
+
+	private boolean isDiwaliDate()
+	{
+		Calendar calendar = Calendar.getInstance();
+		int year = calendar.get(Calendar.YEAR);
+		int month = calendar.get(Calendar.MONTH);
+		int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+		if (year == DIWALI_YEAR && month == DIWALI_MONTH && day == DIWALI_DAY)
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	private void setupMainFragment(Bundle savedInstanceState)
@@ -1442,6 +1542,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		switch (dialogShowing)
 		{
+		case DIWALI_POPUP:
+			showDiwaliPopup();
+			break;
 		case SMS_CLIENT:
 			showSMSClientDialog();
 			break;
