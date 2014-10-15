@@ -44,4 +44,6 @@
 	
 	<dimen name="logo_top_margin">25dp</dimen>
 	<dimen name="welcome_bottom_margin">15dp</dimen>
+	<dimen name="diwali_popup_width">340dp</dimen>
+	<dimen name="diwali_popup_height">250dp</dimen>
 </resources>
