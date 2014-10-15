@@ -1067,7 +1067,9 @@ public class HikeNotification
 		//Reset ticker text since we dont want to tick older messages
 		hikeNotifMsgStack.setTickerText(null);
 		
-		if (!forceNotPlaySound)
+		AudioManager manager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+		
+		if (!forceNotPlaySound && !manager.isMusicActive())
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 			String notifSound = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
@@ -1078,15 +1080,15 @@ public class HikeNotification
 				{
 					if (NOTIF_SOUND_HIKE.equals(notifSound))
 					{
-						Utils.playSoundFromRaw(context, R.raw.hike_jingle_15);
+						mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
 					}
 					else if (NOTIF_SOUND_DEFAULT.equals(notifSound))
 					{
-						Utils.playSound(context, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+						mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
 					}
 					else
 					{
-						Utils.playSound(context, Uri.parse(notifSound));
+						mBuilder.setSound(Uri.parse(notifSound));
 					}
 				}
 
