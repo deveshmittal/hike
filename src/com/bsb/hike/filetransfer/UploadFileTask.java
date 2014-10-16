@@ -558,27 +558,7 @@ public class UploadFileTask extends FileTransferBase
 				return FTResult.CANCELLED;
 
 			_state = FTState.IN_PROGRESS;
-			JSONObject responseMd5 = null;
-			if(!isValidKey)
-			{
-				try
-				{
-					responseMd5 = verifyMD5(selectedFile);
-				}
-				catch (Exception e)
-				{
-					Logger.e(getClass().getSimpleName(), "Exception", e);
-					return FTResult.UPLOAD_FAILED;
-				}
-			}
-			
-			if(responseMd5 != null)
-			{
-				fileKey = responseMd5.optString(HikeConstants.FILE_KEY);
-				fileType = responseMd5.optString(HikeConstants.CONTENT_TYPE);
-				fileSize = responseMd5.optInt(HikeConstants.FILE_SIZE);
-			}
-			else if (TextUtils.isEmpty(fileKey))
+			if (TextUtils.isEmpty(fileKey))
 			{
 
 				JSONObject response = null;
@@ -701,6 +681,20 @@ public class UploadFileTask extends FileTransferBase
 		Logger.d(getClass().getSimpleName(), "Starting Upload from state : " + fst.getFTState().toString());
 		if (fst.getFTState().equals(FTState.NOT_STARTED))
 		{
+			
+			JSONObject responseMd5 = null;
+			try
+			{
+				Logger.d(getClass().getSimpleName(), "Verifying MD5");
+				responseMd5 = verifyMD5(selectedFile);
+			}
+			catch (Exception e)
+			{
+				Logger.e(getClass().getSimpleName(), "Exception", e);
+				return null;
+			}
+			if(responseMd5 != null)
+				return responseMd5;
 			// here as we are starting new upload, we have to create the new session id
 			X_SESSION_ID = UUID.randomUUID().toString();
 			Logger.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
@@ -1312,10 +1306,12 @@ public class UploadFileTask extends FileTransferBase
 					try
 					{
 						responseJson = new JSONObject();
-						responseJson.put(HikeConstants.FILE_KEY, resp.getFirstHeader(HikeConstants.FILE_KEY).getValue());
-						responseJson.put(HikeConstants.CONTENT_TYPE, resp.getFirstHeader(HikeConstants.CONTENT_TYPE).getValue());
-						responseJson.put(HikeConstants.FILE_SIZE, resp.getFirstHeader(HikeConstants.FILE_SIZE).getValue());
-						responseJson.put(HikeConstants.FILE_NAME, resp.getFirstHeader(HikeConstants.FILE_NAME).getValue());
+						JSONObject resData = new JSONObject();
+						resData.put(HikeConstants.FILE_KEY, resp.getFirstHeader(HikeConstants.FILE_KEY).getValue());
+						resData.put(HikeConstants.CONTENT_TYPE, resp.getFirstHeader(HikeConstants.CONTENT_TYPE).getValue());
+						resData.put(HikeConstants.FILE_SIZE, resp.getFirstHeader(HikeConstants.FILE_SIZE).getValue());
+						resData.put(HikeConstants.FILE_NAME, resp.getFirstHeader(HikeConstants.FILE_NAME).getValue());
+						responseJson.put(HikeConstants.DATA_2, resData);
 					}
 					catch (Exception e)
 					{
