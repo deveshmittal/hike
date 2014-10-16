@@ -375,7 +375,7 @@ public class UploadFileTask extends FileTransferBase
 		}
 		if (picasaUri == null)
 		{
-			if (hikeFile.getSourceFilePath() == null)
+			if (TextUtils.isEmpty(hikeFile.getSourceFilePath()))
 			{
 				Logger.d("This filepath: ", selectedFile.getPath());
 				Logger.d("Hike filepath: ", Utils.getFileParent(hikeFileType, true));
@@ -407,6 +407,11 @@ public class UploadFileTask extends FileTransferBase
 					hikeFile.setFile(selectedFile);
 				}
 				hikeFile.removeSourceFile();
+				JSONObject metadata = new JSONObject();
+				JSONArray filesArray = new JSONArray();
+				filesArray.put(hikeFile.serialize());
+				metadata.put(HikeConstants.FILES, filesArray);
+				((ConvMessage) userContext).setMetadata(metadata);
 			}
 		}
 		else
@@ -666,7 +671,8 @@ public class UploadFileTask extends FileTransferBase
 	{
 		int mStart = 0;
 		JSONObject responseJson = null;
-		FileSavedState fst = FileTransferManager.getInstance(context).getUploadFileState(sourceFile, msgId);
+		HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
+		FileSavedState fst = FileTransferManager.getInstance(context).getUploadFileState(hikeFile.getFile(), msgId);
 		setFileTotalSize((int) sourceFile.length());
 		// Bug Fix: 13029
 		setBytesTransferred(fst.getTransferredSize());
@@ -1000,8 +1006,7 @@ public class UploadFileTask extends FileTransferBase
 		if (TextUtils.isEmpty(fileKey)){
 			msgId = ((ConvMessage) userContext).getMsgID();
 			HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
-			selectedFile = new File(hikeFile.getFilePath());
-			FileSavedState fst = FileTransferManager.getInstance(context).getUploadFileState(selectedFile, msgId);
+			FileSavedState fst = FileTransferManager.getInstance(context).getUploadFileState(hikeFile.getFile(), msgId);
 			deleteStateFile();
 			if(fst != null && !TextUtils.isEmpty(fst.getFileKey())){
 				fileKey = fst.getFileKey();
