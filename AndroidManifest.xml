@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="835"
+    android:versionCode="836"
     android:versionName="3.3.1.58" >
 
     <uses-sdk
