@@ -7,10 +7,7 @@ import org.webrtc.PeerConnectionFactory;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.VOIP.WebRtcClient;
-import com.bsb.hike.service.VOIPService.VoIPBinder;
-import com.bsb.hike.ui.VoIPActivity;
 import com.bsb.hike.ui.VoIPActivityNew;
-import com.bsb.hike.ui.VoIPActivity.MessageHandler;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -19,12 +16,10 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioTrack;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.Looper;
+import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Button;
@@ -45,15 +40,17 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	private Boolean rejectCall;
 	private TextView callNo;
 	public static VoIPServiceNew vService;
-	private MessageHandler mHandler = VoIPActivity.serviceHandler ;
 	public static boolean serviceStarted = false;
 	private static boolean factoryStaticInitialized=false;
-	public static int blah = 1;
 	
-	public Boolean callConnected = false;
+	public boolean callConnected = false;
 	private boolean onSpeakers = false;
 	private boolean onMute = false;
 	private boolean run = true;
+	private PowerManager pm;
+	private PowerManager.WakeLock wl;
+
+
 	
 	public void onCreate() {
 	    super.onCreate();
@@ -197,6 +194,9 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		  NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
 		  mBuilder.setSmallIcon(R.drawable.ic_hike_user);
 		  mBuilder.setContentTitle("In Call");
+		  pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		  wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WL for keeping service running");
+		  wl.acquire();
 		  
 		  manufacturer = Build.MANUFACTURER;
 		  mContext = getApplicationContext();
@@ -265,6 +265,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	@Override
 	public void onDestroy(){
 		Log.d("onDestroy", "Destroying");
+		wl.release();
 		super.onDestroy();
 	}
 	

@@ -6,8 +6,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,9 +21,6 @@ import org.webrtc.SessionDescription;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-
-
-import com.haibison.android.lockpattern.util.Sys;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -43,7 +38,6 @@ public class WebRtcClient {
 	private MediaConstraints pcConstraints = new MediaConstraints();
 	private MediaStream lMS;
 	private RTCListener mListener;
-//	private SocketIOClient client;
 	private final MessageHandler messageHandler = new MessageHandler();
 	private final static String TAG = WebRtcClient.class.getSimpleName();
 	private String storedId;
@@ -53,23 +47,15 @@ public class WebRtcClient {
 	public boolean answerpressed = false;
 	private Boolean callReceived = false;
 	private Handler mHandler = new Handler();
-	private long startTime = 0;
+	public long startTime = 0;
 	private Handler heartBeatHandler = new Handler();
-	private Handler timerHandler = new Handler();
 	public String connectionState = "CHECKING";
-	private Timer timer = new Timer();
 	private boolean answering = true;
-	public static long callLength = 0;
-	private Handler callTimeHandler = new Handler();
-	
-	
+	public long callLength = 0;
 	
 	class HeartBeat implements Runnable{
 		@Override
 		public void run() {
-//			HeartBeat.cancel();
-//			timer.cancel();
-//			Looper.myLooper().quitSafely();
 			if (connectionState != "CONNECTED" ){
 				((VoIPServiceNew)mListener).onStatusChanged("DISCONNECTED");				
 			}
@@ -86,22 +72,6 @@ public class WebRtcClient {
 		
 	}
 	
-	class CallLengthCalculator implements Runnable{
-
-		@Override
-		public void run() {
-			callLength = System.currentTimeMillis() - startTime;
-			int seconds = (int) (callLength / 1000);
-		    int minutes = seconds / 60;
-		    seconds     = seconds % 60;
-		    HikeMessengerApp.getPubSub().publish("", callLength);
-
-		}
-		
-	}
-
-
-//	DONE: Removed arg "String:callId" from method onCallReady
 	public interface RTCListener {
 		void onCallReady();
 
@@ -129,14 +99,10 @@ public class WebRtcClient {
 	private class CreateOfferCommand implements Command {
 		public void execute(String peerId, JSONObject payload)
 				throws JSONException {
-//			Log.d(TAG, "CreateOfferCommand");
 			Peer peer = peers.get(peerId);
 			peer.pc.createOffer(peer, pcConstraints);
-//			timer.schedule(HeartBeat, 10000);
 			Thread handThread = new Thread(new HeartBeater());
 			handThread.start();
-//			Looper.prepare();
-//			heartBeatHandler.postDelayed(HeartBeat , 10000);
 			callReceived = true;
 			answering = false;
 		}
@@ -146,9 +112,6 @@ public class WebRtcClient {
 		public void execute(String peerId, JSONObject payload)
 				throws JSONException {
 			callReceived = true;
-//			timer.schedule(HeartBeat, 10000);
-//			Looper.prepare();			
-//			heartBeatHandler.postDelayed(HeartBeat , 10000);
 			Thread handThread = new Thread(new HeartBeater());
 			handThread.start();
 			Log.d(TAG, "CreateAnswerCommand");
@@ -190,23 +153,14 @@ public class WebRtcClient {
 						payload.getString("id"), payload.getInt("label"),
 						payload.getString("candidate"));
 				pc.addIceCandidate(candidate);
-			}
-//				}
+//			}
+				}
 		}
 	}
 	
 	private class EndCallCommand implements Command{
 		public void execute(String peerId, JSONObject payload) throws JSONException{
 			Log.d("ENDING CALL", "?????");
-//			lMS.removeTrack(lMS.audioTracks.get(0));
-//			Log.d("lMS","Disposed");
-//			lMS.dispose();
-//			destroyPeer();
-//			factory.dispose();
-//			factory = null;
-//			System.gc();
-//			Toast.makeText(getApplicationContext(), "ENDING CALL PLEASE WAIT", TOAT)
-//			addPeer("EndCall", MAX_PEER);
 			mListener.closeActivity();
 		}
 	}
@@ -237,10 +191,8 @@ public class WebRtcClient {
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
 		
 		Log.d("Sent", message.toString());
-		// client.emit("message", new JSONArray().put(message));
-		// TODO: Insert code to fire messages through pubsub and wrap in JSON according to Hike format.
 	}
-//	DONE: Change implementation to PUBSUBLISTENER
+	
 	public class MessageHandler implements Listener {
 		private HashMap<String, Command> commandMap;
 
@@ -256,6 +208,7 @@ public class WebRtcClient {
 			
 		//	DONE: change HikePubSub.MESSAGE_SENT to correct PubSubHandler
 			mPubSub.addListener(HikePubSub.VOIP_HANDSHAKE, this);
+			mPubSub.addListener(HikePubSub.VOIP_TIMEOUT, this);
 
 		}
 
@@ -380,7 +333,9 @@ public class WebRtcClient {
 				
 			}
 			if (iceConnectionState == PeerConnection.IceConnectionState.CONNECTED){
-				startTime = System.currentTimeMillis();
+				
+//				startTime = System.currentTimeMillis();
+//				callTimeHandler.post(new CallLengthCalculator());
 			}
 		}
 
@@ -511,13 +466,14 @@ public class WebRtcClient {
 	
 		iceServers.add(new PeerConnection.IceServer(
 				"stun:stun.l.google.com:19302"));
+//		iceServers.add(new PeerConnection.IceServer(
+//				"turn:numb.viagenie.ca:3478","anub018@gmail.com","123456"));
+
+//		iceServers.add(new PeerConnection.IceServer(
+//				"turn:54.179.186.147:3478","anu","123456"));
+		
 		iceServers.add(new PeerConnection.IceServer(
-				"turn:numb.viagenie.ca:3478","anub018@gmail.com","123456"));
-//
-////		iceServers.add(new PeerConnection.IceServer(
-////				"turn:192.168.1.95:3478","anu","JaiBabaKi"));
-		iceServers.add(new PeerConnection.IceServer(
-				"turn:54.179.186.147:3478","anu","123456"));
+				"turn:54.255.154.209:3478","hike","123456"));
 		
 		pcConstraints.mandatory.add(new MediaConstraints.KeyValuePair(
 				"OfferToReceiveAudio", "true"));
@@ -532,8 +488,7 @@ public class WebRtcClient {
 		Log.d("libjingle StreamName",lMS.label());
 		lMS.addTrack(factory.createAudioTrack("ARDAMS"+x+"a0"/*, factory.createAudioSource(new MediaConstraints())*/));
 		Log.d("camera added", "cameraadded");
-//		lMS.label();
-		
+
 		mListener.onLocalStream(lMS);
 	}
 
@@ -554,10 +509,6 @@ public class WebRtcClient {
 		Log.d("PEER","2");
 		peers.put(id, peer);
 		endPoints[endPoint] = true;
-		Log.d("PEER","3");
-
-		
-		Log.d("PEER","4");
 	}
 
 	private void removePeer(String id) {
@@ -565,8 +516,6 @@ public class WebRtcClient {
 		if(peers.get(id) != null)
 		{
 		Peer peer = peers.get(id);
-//		mListener.onRemoveRemoteStream(lMS);
-//		onRemoveStream(lMS);
 		try {
 			peer.pc.removeStream(lMS);
 			peer.pc.close();
@@ -575,12 +524,10 @@ public class WebRtcClient {
 			lMS.dispose();
 			lMS = null;
 		} catch (NullPointerException e) {
-			// TODO Auto-generated catch block
 			Log.d("WebRTCClient", "THIS SHOULD NEVER HAPPEN!");
 			e.printStackTrace();
 		}
 		peers.remove(peer.id);
-//		peer.pc = null;
 		Log.d("NewPeer","disposing video");
 
 		endPoints[peer.endPoint] = false;
