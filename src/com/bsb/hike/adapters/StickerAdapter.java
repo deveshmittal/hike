@@ -425,12 +425,11 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				}
 
 				StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
-				if (stickersList.isEmpty() || !category.getCategoryId().equals(sc.getCategoryId())
-						|| category.hasReachedEnd())
+				if (stickersList.isEmpty() || !category.getCategoryId().equals(sc.getCategoryId()))
 				{
 					return;
 				}
-				if (!StickerManager.getInstance().isStickerDownloading(category.getCategoryId()) && !category.hasReachedEnd() && !category.isUpdateAvailable())
+				if (!StickerManager.getInstance().isStickerDownloading(category.getCategoryId()) && !category.isUpdateAvailable())
 				{
 					if (firstVisibleItem + visibleItemCount >= totalItemCount - 1)
 					{

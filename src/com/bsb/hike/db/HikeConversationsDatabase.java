@@ -3707,26 +3707,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void updateReachedEndForCategory(String categoryId, boolean reachedEnd)
-	{
-		ContentValues values = new ContentValues();
-		values.put(DBConstants.REACHED_END, reachedEnd);
-
-		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, values, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
-	}
-
-	public void addOrUpdateStickerCategory(String categoryId, int totalNum, boolean reachedEnd)
+	public void addOrUpdateStickerCategory(String categoryId, int totalNum)
 	{
 		SQLiteStatement insertStatement = null;
 		try
 		{
 			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO " + DBConstants.STICKER_CATEGORIES_TABLE + " ( " + DBConstants.CATEGORY_ID + ", " + DBConstants.TOTAL_NUMBER
-					+ ", " + DBConstants.REACHED_END + ", " + DBConstants.UPDATE_AVAILABLE + " ) " + " VALUES (?, ?, ?, ?)");
+					+ ", "+ DBConstants.UPDATE_AVAILABLE + " ) " + " VALUES (?, ?, ?)");
 
 			insertStatement.bindString(1, categoryId);
 			insertStatement.bindLong(2, totalNum);
-			insertStatement.bindLong(3, reachedEnd ? 1 : 0);
-			insertStatement.bindLong(4, 0);
+			insertStatement.bindLong(3, 0);
 
 			insertStatement.execute();
 		}
@@ -3806,7 +3797,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String categoryId = c.getString(c.getColumnIndex(DBConstants.CATEGORY_ID));
 				String categoryName = c.getString(c.getColumnIndex(DBConstants.CATEGORY_NAME));
 				boolean updateAvailable = c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
-				boolean reachedEnd = c.getInt(c.getColumnIndex(DBConstants.REACHED_END)) == 1;
 				boolean isVisible = c.getInt(c.getColumnIndex(DBConstants.IS_VISIBLE)) == 1;
 				boolean isCustom = c.getInt(c.getColumnIndex(DBConstants.IS_CUSTOM)) == 1;
 				boolean isAdded = c.getInt(c.getColumnIndex(DBConstants.IS_ADDED)) == 1;
@@ -3815,7 +3805,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				int timeStamp = c.getInt(c.getColumnIndex(DBConstants.TIMESTAMP));
 				int totalStickers = c.getInt(c.getColumnIndex(DBConstants.TOTAL_NUMBER));
 
-				StickerCategory s = new StickerCategory(categoryId, categoryName, updateAvailable, reachedEnd, isVisible, isCustom, isAdded, catIndex, metadata, totalStickers,
+				StickerCategory s = new StickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, isAdded, catIndex, metadata, totalStickers,
 						timeStamp);
 				stickerDataMap.put(categoryId, s);
 			}
@@ -3839,27 +3829,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				return false;
 			}
 			return c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
-		}
-		finally
-		{
-			if (c != null)
-			{
-				c.close();
-			}
-		}
-	}
-
-	public boolean hasReachedStickerEnd(String categoryId)
-	{
-		Cursor c = null;
-		try
-		{
-			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, new String[] { DBConstants.REACHED_END }, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId }, null, null, null);
-			if (!c.moveToFirst())
-			{
-				return false;
-			}
-			return c.getInt(c.getColumnIndex(DBConstants.REACHED_END)) == 1;
 		}
 		finally
 		{
@@ -5207,25 +5176,22 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(tableName, new String[] { DBConstants.CATEGORY_ID, DBConstants.TOTAL_NUMBER, DBConstants.UPDATE_AVAILABLE, DBConstants.REACHED_END }, null, null,
+			c = mDb.query(tableName, new String[] { DBConstants.CATEGORY_ID, DBConstants.TOTAL_NUMBER, DBConstants.UPDATE_AVAILABLE }, null, null,
 					null, null, null);
 			
 			final int catIdColumnIndex = c.getColumnIndex(DBConstants.CATEGORY_ID);
 			final int totalNumColumnIndex = c.getColumnIndex(DBConstants.TOTAL_NUMBER);
 			final int updateAvailColumnIndex = c.getColumnIndex(DBConstants.UPDATE_AVAILABLE);
-			final int reachedEndColumnIndex = c.getColumnIndex(DBConstants.REACHED_END);
 			
 			while (c.moveToNext())
 			{
 				String catId = c.getString(catIdColumnIndex);
 				int totalNumber = c.getInt(totalNumColumnIndex);
 				int updateAvailable = c.getInt(updateAvailColumnIndex);
-				int reachedEnd = c.getInt(reachedEndColumnIndex);
 				
 				ContentValues contentValues = new ContentValues();
 				contentValues.put(DBConstants.TOTAL_NUMBER, totalNumber);
 				contentValues.put(DBConstants.UPDATE_AVAILABLE, updateAvailable);
-				contentValues.put(DBConstants.REACHED_END, reachedEnd);
 
 				result.put(catId, contentValues);
 			}
@@ -5262,7 +5228,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		 * metadata : other metadata associated with this category 
 		 */
 		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STICKER_CATEGORIES_TABLE + " (" + DBConstants.CATEGORY_ID + " TEXT PRIMARY KEY, " + DBConstants.CATEGORY_NAME
-				+ " TEXT, " + DBConstants.TOTAL_NUMBER + " INTEGER, " + DBConstants.REACHED_END + " INTEGER DEFAULT 0," + DBConstants.UPDATE_AVAILABLE + " INTEGER DEFAULT 0,"
+				+ " TEXT, " + DBConstants.TOTAL_NUMBER + " INTEGER, " + DBConstants.UPDATE_AVAILABLE + " INTEGER DEFAULT 0,"
 				+ DBConstants.IS_VISIBLE + " INTEGER DEFAULT 0," + DBConstants.IS_CUSTOM + " INTEGER DEFAULT 0," + DBConstants.IS_ADDED + " INTEGER DEFAULT 0,"
 				+ DBConstants.CATEGORY_INDEX + " INTEGER," + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.METADATA + " TEXT " + " )";
 

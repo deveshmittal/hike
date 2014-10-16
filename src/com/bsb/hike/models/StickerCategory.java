@@ -13,8 +13,6 @@ public class StickerCategory implements Serializable
 
 	private boolean updateAvailable;
 
-	private boolean reachedEnd = false;
-	
 	private String categoryName;
 	
 	private boolean isVisible;
@@ -32,12 +30,11 @@ public class StickerCategory implements Serializable
 	private int timeStamp;
 
 
-	public StickerCategory(String categoryId, String categoryName, boolean updateAvailable, boolean hasreachedEnd, boolean isVisible, boolean isCustom, boolean isAdded,
+	public StickerCategory(String categoryId, String categoryName, boolean updateAvailable, boolean isVisible, boolean isCustom, boolean isAdded,
 			int catIndex, String metadata, int totalStickers, int timeStamp)
 	{
 		this.categoryId = categoryId;
 		this.updateAvailable = updateAvailable;
-		this.reachedEnd = hasreachedEnd;
 		this.categoryName = categoryName;
 		this.isVisible = isVisible;
 		this.isCustom = isCustom;
@@ -160,16 +157,6 @@ public class StickerCategory implements Serializable
 		this.timeStamp = timeStamp;
 	}
 	
-	public boolean hasReachedEnd()
-	{
-		return reachedEnd;
-	}
-
-	public void setReachedEnd(boolean reachedEnd)
-	{
-		this.reachedEnd = reachedEnd;
-	}
-
 	@Override
 	public int hashCode()
 	{
@@ -205,13 +192,16 @@ public class StickerCategory implements Serializable
 	{
 		out.writeUTF(categoryId);
 		out.writeBoolean(updateAvailable);
-		out.writeBoolean(reachedEnd);
+		// After removing reachedEnd variable, we need to write dummy
+		// boolean, just to ensure backward/forward compatibility
+		out.writeBoolean(true);
 	}
 
 	public void deSerializeObj(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException
 	{
 		categoryId = in.readUTF();
 		updateAvailable = in.readBoolean();
-		reachedEnd = in.readBoolean();
+		//ignoring this varialbe after reading just to ensure backward compatibility
+		in.readBoolean();
 	}
 }

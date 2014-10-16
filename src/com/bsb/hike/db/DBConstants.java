@@ -150,8 +150,6 @@ public class DBConstants
 
 	public static final String TOTAL_NUMBER = "totalNum";
 
-	public static final String REACHED_END = "reachedEnd";
-
 	public static final String UPDATE_AVAILABLE = "updateAvailable";
 
 	public static final String LAST_SEEN = "lastSeen";

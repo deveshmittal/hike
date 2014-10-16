@@ -195,11 +195,6 @@ public class StickerManager
 		setupStickerCategoryList(settings);
 		loadRecentStickers();
 
-		if (!settings.getBoolean(StickerManager.RESET_REACHED_END_FOR_DEFAULT_STICKERS, false))
-		{
-			resetReachedEndForDefaultStickers();
-		}
-
 		if (!settings.getBoolean(StickerManager.ADD_NO_MEDIA_FILE_FOR_STICKERS, false))
 		{
 			addNoMediaFilesToStickerDirectories();
@@ -272,15 +267,6 @@ public class StickerManager
 			}
 			Utils.deleteFile(bigCatDir);
 		}
-	}
-
-	public void resetReachedEndForDefaultStickers()
-	{
-		HikeConversationsDatabase.getInstance().updateReachedEndForCategory(EXPRESSIONS, false);
-		HikeConversationsDatabase.getInstance().updateReachedEndForCategory(HUMANOID, false);
-		Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-		editor.putBoolean(RESET_REACHED_END_FOR_DEFAULT_STICKERS, true);
-		editor.commit();
 	}
 
 	public void addNoMediaFilesToStickerDirectories()
