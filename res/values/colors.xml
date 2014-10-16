@@ -358,8 +358,9 @@
     <color name="welcome_blue">#008fe1</color>
     <color name="diwali_popup">#ca2335</color>
     <color name="diwali_popup_btn_txt">#fe9e9e</color>
+    <color name="diwali_popup_btn_ok_txt">#febcbc</color>
     <color name="diwali_popup_divider">#b51f30</color>
-    <color name="diwali_popup_txt">#ffd4d9</color>
+    <color name="diwali_popup_txt">#febcbc</color>
     <color name="diwali_popup_btn_pressed">#33000000</color>
 </resources>
 	

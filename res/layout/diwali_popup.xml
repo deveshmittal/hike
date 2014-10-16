@@ -29,6 +29,7 @@
             android:id="@+id/btn_ok"
             style="@style/DiwaliPopupButton"
             android:background="@drawable/diwali_popup_right_btn"
+            android:textColor="@color/diwali_popup_btn_ok_txt"
             android:text="@string/wish_now"
             android:textStyle="bold|italic" />
     </LinearLayout>
