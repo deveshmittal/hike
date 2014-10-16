@@ -3799,13 +3799,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				boolean updateAvailable = c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
 				boolean isVisible = c.getInt(c.getColumnIndex(DBConstants.IS_VISIBLE)) == 1;
 				boolean isCustom = c.getInt(c.getColumnIndex(DBConstants.IS_CUSTOM)) == 1;
-				boolean isAdded = c.getInt(c.getColumnIndex(DBConstants.IS_ADDED)) == 1;
 				int catIndex = c.getInt(c.getColumnIndex(DBConstants.CATEGORY_INDEX));
 				String metadata = c.getString(c.getColumnIndex(DBConstants.METADATA));
 				int timeStamp = c.getInt(c.getColumnIndex(DBConstants.TIMESTAMP));
 				int totalStickers = c.getInt(c.getColumnIndex(DBConstants.TOTAL_NUMBER));
 
-				StickerCategory s = new StickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, isAdded, catIndex, metadata, totalStickers,
+				StickerCategory s = new StickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, metadata, totalStickers,
 						timeStamp);
 				stickerDataMap.put(categoryId, s);
 			}
@@ -5222,15 +5221,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		 * Update available : weather there is an update available for this category 
 		 * IS_VISIBLE : weather this category is visible
 		 * IS_CUSTOM : weather this is a custom category 
-		 * IS_ADDED : weather user has manually added this category to his/her sticker pallate 
 		 * category index : order of this category among all the categories
 		 * timestamp : time at which this category was added in the db
 		 * metadata : other metadata associated with this category 
 		 */
 		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STICKER_CATEGORIES_TABLE + " (" + DBConstants.CATEGORY_ID + " TEXT PRIMARY KEY, " + DBConstants.CATEGORY_NAME
-				+ " TEXT, " + DBConstants.TOTAL_NUMBER + " INTEGER, " + DBConstants.UPDATE_AVAILABLE + " INTEGER DEFAULT 0,"
-				+ DBConstants.IS_VISIBLE + " INTEGER DEFAULT 0," + DBConstants.IS_CUSTOM + " INTEGER DEFAULT 0," + DBConstants.IS_ADDED + " INTEGER DEFAULT 0,"
-				+ DBConstants.CATEGORY_INDEX + " INTEGER," + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.METADATA + " TEXT " + " )";
+				+ " TEXT, " + DBConstants.TOTAL_NUMBER + " INTEGER, " + DBConstants.UPDATE_AVAILABLE + " INTEGER DEFAULT 0," + DBConstants.IS_VISIBLE + " INTEGER DEFAULT 0,"
+				+ DBConstants.IS_CUSTOM + " INTEGER DEFAULT 0," + DBConstants.CATEGORY_INDEX + " INTEGER," + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.METADATA + " TEXT "
+				+ " )";
 
 		return sql;
 	}
@@ -5272,7 +5270,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				int isVisible = obj.optBoolean(StickerManager.IS_VISIBLE) ? 1 : 0;
 				int isCustom = obj.optBoolean(StickerManager.IS_CUSTOM) ? 1 : 0;
 				String downloadPreference = obj.optString(StickerManager.DOWNLOAD_PREF);
-				int isAdded = mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(downloadPreference, false) ? 1 : 0;
 				int catIndex = obj.optInt(StickerManager.CATEGORY_INDEX);
 				String metadata = obj.optString(DBConstants.METADATA);
 				int timeStamp = obj.optInt(StickerManager.TIMESTAMP);
@@ -5286,7 +5283,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				contentValues.put(DBConstants.CATEGORY_NAME, categoryName);
 				contentValues.put(DBConstants.IS_VISIBLE, isVisible);
 				contentValues.put(DBConstants.IS_CUSTOM, isCustom);
-				contentValues.put(DBConstants.IS_ADDED, isAdded);
 				contentValues.put(DBConstants.CATEGORY_INDEX, catIndex);
 				contentValues.put(DBConstants.TIMESTAMP, timeStamp);
 				contentValues.put(DBConstants.METADATA, metadata);
