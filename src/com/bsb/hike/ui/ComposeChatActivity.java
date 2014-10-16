@@ -1047,16 +1047,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						Toast.makeText(ComposeChatActivity.this, R.string.max_file_size, Toast.LENGTH_SHORT).show();
 					}
 
-//					String msisdn = Utils.isGroupConversation(arrayList.getMsisdn()) ? arrayList.getId() : arrayList.getMsisdn();
-//					boolean onHike = arrayList.isOnhike();
-//
-//					if (fileDetails.isEmpty())
-//					{
-//						return;
-//					}
-//
-//					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
-//					Utils.executeAsyncTask(fileTransferTask);
+					ContactInfo contactInfo = arrayList.get(0);
+					String msisdn = Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo.getId() : contactInfo.getMsisdn();
+					boolean onHike = contactInfo.isOnhike();
+
+					if (fileDetails.isEmpty())
+					{
+						return;
+					}
+
+					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+					Utils.executeAsyncTask(fileTransferTask);
 
 					progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
 
