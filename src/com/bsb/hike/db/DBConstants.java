@@ -211,4 +211,6 @@ public class DBConstants
 	public static final String CATEGORY_INDEX = "catIndex";
 
 	public static final String METADATA = "metadata";
+
+	public static final String STICKER_SHOP_TABLE = "stickerShopTable";
 }

@@ -163,6 +163,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CHAT_BG_INDEX + " ON " + DBConstants.CHAT_BG_TABLE + " (" + DBConstants.MSISDN + ")";
 		db.execSQL(sql);
+		sql = getStickerShopTableCreateQuery();
+		db.execSQL(sql);
 	}
 
 	public void deleteAll()
@@ -539,6 +541,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		if (oldVersion < 31)
 		{
 			db.execSQL(getStickerCategoryTableCreateQuery());
+			db.execSQL(getStickerShopTableCreateQuery());
 			// Edit the preference to ensure that HikeMessenger app knows we've
 			// reached the
 			// upgrade flow for version 31
@@ -5232,6 +5235,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		return sql;
 	}
+	
+	
+	public String getStickerShopTableCreateQuery()
+	{
+		/**
+		 * IS_ADDED : if user has added this category to his categories i.e. clicked on download this category once in life
+		 */
+		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STICKER_SHOP_TABLE + " (" + DBConstants.CATEGORY_ID + " TEXT PRIMARY KEY, " + DBConstants.CATEGORY_NAME
+				+ " TEXT, " + DBConstants.TOTAL_NUMBER + " INTEGER, " + DBConstants.IS_ADDED + " INTEGER DEFAULT 0," + DBConstants.CATEGORY_INDEX + " INTEGER,"
+				+ DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.METADATA + " TEXT " + " )";
+
+		return sql;
+	}
 
 	public void upgradeForStickerShopVersion1()
 	{
@@ -5267,9 +5283,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				JSONObject obj = stickerCategories.optJSONObject(i);
 				String categoryId = obj.optString(StickerManager.CATEGORY_ID);
 				String categoryName = categoryId;
-				int isVisible = obj.optBoolean(StickerManager.IS_VISIBLE) ? 1 : 0;
-				int isCustom = obj.optBoolean(StickerManager.IS_CUSTOM) ? 1 : 0;
 				String downloadPreference = obj.optString(StickerManager.DOWNLOAD_PREF);
+				/*
+				 * All categories which we have set to be visible OR user has already initiated a download for them once will be visible in the pallate
+				 */
+				int isVisible = obj.optBoolean(StickerManager.IS_VISIBLE)
+						|| mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(downloadPreference, false) ? 1 : 0;
+				int isCustom = obj.optBoolean(StickerManager.IS_CUSTOM) ? 1 : 0;
 				int catIndex = obj.optInt(StickerManager.CATEGORY_INDEX);
 				String metadata = obj.optString(DBConstants.METADATA);
 				int timeStamp = obj.optInt(StickerManager.TIMESTAMP);
@@ -5286,17 +5306,45 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				contentValues.put(DBConstants.CATEGORY_INDEX, catIndex);
 				contentValues.put(DBConstants.TIMESTAMP, timeStamp);
 				contentValues.put(DBConstants.METADATA, metadata);
-				mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
+
+				if (isVisible == 1)
+				{
+					mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
+					if (!mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(downloadPreference, false))
+					{
+						ContentValues contentValues2 = getContentValuesForStickerShopTable(categoryId, categoryName, catIndex, timeStamp, metadata);
+						mDb.insert(DBConstants.STICKER_SHOP_TABLE, null, contentValues2);
+					}
+				}
+				else
+				{
+					ContentValues contentValues2 = getContentValuesForStickerShopTable(categoryId, categoryName, catIndex, timeStamp, metadata);
+					mDb.insert(DBConstants.STICKER_SHOP_TABLE, null, contentValues2);
+				}
 			}
 			/*
 			 * Now we can drop the old stickers_table.
 			 */
-			mDb.execSQL("DROP TABLE " + STICKERS_TABLE);
+			if(!currentCategoryData.isEmpty())
+			{
+				mDb.execSQL("DROP TABLE " + STICKERS_TABLE);
+			}
 		}
 		catch (JSONException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private ContentValues getContentValuesForStickerShopTable(String categoryId, String categoryName, int catIndex, int timeStamp, String metadata)
+	{
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.CATEGORY_ID, categoryId);
+		contentValues.put(DBConstants.CATEGORY_NAME, categoryName);
+		contentValues.put(DBConstants.CATEGORY_INDEX, catIndex);
+		contentValues.put(DBConstants.TIMESTAMP, timeStamp);
+		contentValues.put(DBConstants.METADATA, metadata);
+		return contentValues;
 	}
 }
