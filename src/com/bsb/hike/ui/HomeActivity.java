@@ -234,7 +234,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		if (savedInstanceState == null && dialogShowing == null)
 		{
-			if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_DIWALI_POPUP, false) && isDiwaliDate())
+			if (HikeMessengerApp.isIndianUser() &&  !accountPrefs.getBoolean(HikeMessengerApp.SHOWN_DIWALI_POPUP, false) && isDiwaliDate())
 			{
 				showDiwaliPopup();
 			}

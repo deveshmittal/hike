@@ -1047,16 +1047,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						Toast.makeText(ComposeChatActivity.this, R.string.max_file_size, Toast.LENGTH_SHORT).show();
 					}
 
-//					String msisdn = Utils.isGroupConversation(arrayList.getMsisdn()) ? arrayList.getId() : arrayList.getMsisdn();
-//					boolean onHike = arrayList.isOnhike();
-//
-//					if (fileDetails.isEmpty())
-//					{
-//						return;
-//					}
-//
-//					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
-//					Utils.executeAsyncTask(fileTransferTask);
+					ContactInfo contactInfo = arrayList.get(0);
+					String msisdn = Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo.getId() : contactInfo.getMsisdn();
+					boolean onHike = contactInfo.isOnhike();
+
+					if (fileDetails.isEmpty())
+					{
+						return;
+					}
+
+					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+					Utils.executeAsyncTask(fileTransferTask);
 
 					progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
 
@@ -1177,6 +1178,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 					 */
 				}
+				Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_LONG).show();
 				if(multipleMessageList.size() ==0 || arrayList.size()==0){
 					return;
 				}else if(isSharingFile){
@@ -1297,7 +1299,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		MultipleConvMessage multiMessages = new MultipleConvMessage(multipleMessageList, arrayList, System.currentTimeMillis() / 1000);
 		mPubSub.publish(HikePubSub.MULTI_MESSAGE_SENT, multiMessages);
-		Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_LONG).show();
 	}
 
 	private void sendMessage(ConvMessage convMessage)
@@ -1575,11 +1576,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private void initialiseLocationTransfer(double latitude, double longitude, int zoomLevel, ArrayList<ContactInfo> arrayList)
 	{
 		clearTempData();
-		FileTransferManager.getInstance(getApplicationContext()).uploadLocation(((ContactInfo)arrayList.get(0)).getMsisdn(), latitude, longitude, zoomLevel, ((ContactInfo)arrayList.get(0)).isOnhike());
+		for(ContactInfo contactInfo:arrayList){
+		FileTransferManager.getInstance(getApplicationContext()).uploadLocation(contactInfo.getMsisdn(), latitude, longitude, zoomLevel, ((ContactInfo)arrayList.get(0)).isOnhike());
+		}
 	}
 	private void initialiseContactTransfer(JSONObject contactJson, ArrayList<ContactInfo> arrayList)
 	{
-		FileTransferManager.getInstance(getApplicationContext()).uploadContact(((ContactInfo)arrayList.get(0)).getMsisdn(), contactJson, (((ContactInfo)arrayList.get(0)).isOnhike()));
+		for(ContactInfo contactInfo:arrayList){
+		FileTransferManager.getInstance(getApplicationContext()).uploadContact(contactInfo.getMsisdn(), contactJson, (((ContactInfo)arrayList.get(0)).isOnhike()));
+		}
 	}
 
 	
