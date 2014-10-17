@@ -562,7 +562,6 @@ public class UploadFileTask extends FileTransferBase
 			if (_state == FTState.CANCELLED)
 				return FTResult.CANCELLED;
 
-			_state = FTState.IN_PROGRESS;
 			if (TextUtils.isEmpty(fileKey))
 			{
 
@@ -584,7 +583,8 @@ public class UploadFileTask extends FileTransferBase
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 				fileType = fileJSON.optString(HikeConstants.CONTENT_TYPE);
 				fileSize = fileJSON.optInt(HikeConstants.FILE_SIZE);
-			}
+			}else
+				_state = FTState.IN_PROGRESS;
 
 			JSONObject metadata = new JSONObject();
 			JSONArray filesArray = new JSONArray();
@@ -731,6 +731,9 @@ public class UploadFileTask extends FileTransferBase
 			}
 			Logger.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
 		}
+		_state = FTState.IN_PROGRESS;
+		LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+		
 		long length = sourceFile.length();
 		if (length < 1)
 		{
@@ -770,8 +773,10 @@ public class UploadFileTask extends FileTransferBase
 
 		int start = mStart;
 		int end = (int) length;
-		if (end > (start + chunkSize))
+		if (end >= (start + chunkSize))
 			end = start + chunkSize;
+		else
+			chunkSize = end - start;
 		end--;
 
 		byte[] fileBytes = setupFileBytes(boundaryMesssage, boundary, chunkSize);
