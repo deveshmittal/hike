@@ -965,8 +965,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	        String type = presentIntent.getType();
 	        forwardMessageAsPerType(presentIntent, intent,arrayList);
-			startActivity(intent);
-			finish();
+
+	        /*
+	         * If the intent action is ACTION_SEND_MULTIPLE then we don't need to start the activity here
+	         * since we start an async task for initiating the file upload and an activity is started when
+	         * that async task finishes execution.
+	         */
+	        if (!Intent.ACTION_SEND_MULTIPLE.equals(presentIntent.getAction()))
+	        {
+	        	startActivity(intent);
+	        	finish();
+	        }
 		}else{
 			// forwarding it is
 			Intent intent = null;
