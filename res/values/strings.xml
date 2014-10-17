@@ -1165,7 +1165,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
 	<string name="select_all_hike">Select all Hike contacts</string>
 	<string name="unselect_all_hike">Unselect all Hike contacts</string>
     <string name="recent_chats">RECENT CHATS</string>
-    <string name="messages_sent_succees">Messages Sent</string>
     <string name="new_chat_compose_hint">Search by name or number</string>
     <string name="forward_tip_heading">Sharing made easy</string>
     <string name="forward_tip_description">Now forward to multiple contacts at once</string>
@@ -1180,4 +1179,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="selected_contacts_count_singular">%1$s contact</string>
     <string name="wish_now">Wish now!</string>
     <string name="wish_you">Wish your friends!</string>
+    <string name="messages_sent_succees">Message Sent</string>
 </resources>
