@@ -85,7 +85,6 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.CLEAR_CONVERSATION, this);
 		mPubSub.addListener(HikePubSub.UPDATE_PIN_METADATA, this);
 		mPubSub.addListener(HikePubSub.MULTI_MESSAGE_SENT, this);
-		mPubSub.addListener(HikePubSub.MULTI_FILE_SENT, this);
 		mPubSub.addListener(HikePubSub.MULTI_FILE_UPLOADED, this);
 	}
 
@@ -148,13 +147,6 @@ public class DbConversationListener implements Listener
 			multiConvMessages.sendPubSubForConvScreenMultiMessage();
 			// publishing mqtt packet
 			mPubSub.publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
-		}
-		else if (HikePubSub.MULTI_FILE_SENT.equals(type))
-		{
-			MultipleConvMessage multiConvMessages = (MultipleConvMessage) object;
-
-			mConversationDb.addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),false);
-			multiConvMessages.sendPubSubForConvScreenMultiMessage();
 		}
 		else if (HikePubSub.MULTI_FILE_UPLOADED.equals(type))
 		{

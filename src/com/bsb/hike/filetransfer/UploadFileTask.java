@@ -294,7 +294,9 @@ public class UploadFileTask extends FileTransferBase
 				userContext = messageList.get(0);
 				ArrayList<ConvMessage> pubsubMsgList = new ArrayList<ConvMessage>();
 				pubsubMsgList.add((ConvMessage) userContext);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_FILE_SENT, new MultipleConvMessage(pubsubMsgList, contactList));
+				MultipleConvMessage multiConMsg = new MultipleConvMessage(pubsubMsgList, contactList);
+				HikeConversationsDatabase.getInstance().addConversations(multiConMsg.getMessageList(), multiConMsg.getContactList(),false);
+				multiConMsg.sendPubSubForConvScreenMultiMessage();
 			}
 			else
 			{
