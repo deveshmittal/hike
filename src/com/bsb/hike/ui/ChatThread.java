@@ -7715,7 +7715,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		for (int i = 0; i < menu.size(); i++)
 		{
 			MenuItem item = menu.getItem(i);
-			if (mOptionsList.get(item.getItemId()))
+			if (mOptionsList.get(item.getItemId()) != null && mOptionsList.get(item.getItemId()))
 			{
 				item.setVisible(true);
 			}
