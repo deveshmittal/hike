@@ -1,13 +1,18 @@
 package com.bsb.hike.models;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Pair;
+
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 
@@ -106,6 +111,30 @@ public class MultipleConvMessage
 		}
 		Logger.d("dcdc",object.toString());
 		return object;
+	}
+	
+	public void sendPubSubForConvScreenMultiMessage()
+	{
+		ArrayList<ConvMessage> convMessages = getMessageList();
+		long baseId = ((ConvMessage)convMessages.get(0)).getMsgID();
+		int totalMessages = convMessages.size();
+		ConvMessage lastMessage = convMessages.get(totalMessages-1);
+		long lastMessageId = baseId + totalMessages-1;
+		List<ContactInfo> recipient = getContactList();
+		int totalRecipient = recipient.size();
+		List<Pair<ContactInfo, ConvMessage>> allPairs = new ArrayList<Pair<ContactInfo,ConvMessage>>(totalRecipient);
+		long timestamp = getTimeStamp();
+		for(int i=0;i<totalRecipient;i++)
+		{
+			ConvMessage message = new ConvMessage(lastMessage);
+			message.setTimestamp(timestamp++);
+			message.setMsgID(lastMessageId+(i*totalMessages));
+			ContactInfo contactInfo = recipient.get(i);
+			message.setMsisdn(contactInfo.getMsisdn());
+			Pair<ContactInfo, ConvMessage> pair = new Pair<ContactInfo, ConvMessage>(contactInfo, message);
+			allPairs.add(pair);
+		}
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_MESSAGE_DB_INSERTED, allPairs);
 	}
 	
 }

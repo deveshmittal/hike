@@ -3563,6 +3563,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				setStateAndUpdateView(msgId, false);
 			}
+			if (mAdapter == null)
+			{
+				return;
+			}
 			runOnUiThread(mUpdateAdapter);
 		}
 		else if (HikePubSub.ICON_CHANGED.equals(type))
@@ -4257,6 +4261,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void setStateAndUpdateView(long msgId, boolean updateView)
 	{
+		/*
+		 * This would happen in the case if the events calling this method are called before the conversation is setup.
+		 */
+		if (mConversation == null || mAdapter == null)
+		{
+			return;
+		}
 		ConvMessage msg = findMessageById(msgId);
 		if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 		{
