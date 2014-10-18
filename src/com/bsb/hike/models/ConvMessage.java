@@ -456,8 +456,16 @@ public class ConvMessage
 	}
 
 	public void setMetadata(MessageMetadata messageMetadata)
-	{
+	{	
+		if(messageMetadata!=null){
 		this.metadata = messageMetadata;
+		isFileTransferMessage = this.metadata.getHikeFiles() != null  &&   this.metadata.getHikeFiles().size() > 0;
+
+		participantInfoState = this.metadata.getParticipantInfoState() ;
+
+		isStickerMessage = this.metadata.getSticker() != null;
+		}
+		
 	}
 
 	public void setMetadata(JSONObject metadata) throws JSONException
@@ -466,7 +474,7 @@ public class ConvMessage
 		{
 			this.metadata = new MessageMetadata(metadata, mIsSent);
 
-			isFileTransferMessage = this.metadata.getHikeFiles() != null;
+			isFileTransferMessage = this.metadata.getHikeFiles() != null  &&   this.metadata.getHikeFiles().size() > 0;
 
 			participantInfoState = this.metadata.getParticipantInfoState();
 
