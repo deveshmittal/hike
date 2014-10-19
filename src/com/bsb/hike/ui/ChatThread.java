@@ -6822,12 +6822,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
 		int actualPageNum = pageNum;
-		if (emoticonType == EmoticonType.STICKERS && pageNum == 0)
-		{
-			// if recent list is empty, then skip to first category
-			if (StickerManager.getInstance().getRecentStickerList().size() == 0)
-				actualPageNum = 1;
-		}
 		emoticonViewPager.setCurrentItem(actualPageNum, false);
 		emoticonViewPager.invalidate();
 
