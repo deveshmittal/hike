@@ -2341,6 +2341,10 @@ public class MqttMessagesManager
 			}
 		}
 		ConvMessage convMessage = new ConvMessage(jsonObj, conversation, context, false);
+		if(Utils.isGroupConversation(convMessage.getMsisdn()))
+		{
+			ContactManager.getInstance().updateGroupRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
+		}
 		return convMessage;
 	}
 

@@ -475,6 +475,10 @@ public class HikeService extends Service
 				 * User doesnt have google services
 				 */
 			}
+			catch (IllegalStateException e)
+			{
+				Logger.e("HikeService", "Exception during gcm registration : " , e);
+			}
 		}
 	}
 

@@ -400,6 +400,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ATOMIC_POP_UP_MESSAGE_CHAT = "apuMessageChat";
 
+	public static final String SHOWN_DIWALI_POPUP = "shownDiwaliPopup";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;

@@ -722,7 +722,6 @@
     <string name="file_msg_sent">File</string>
     <string name="copied">Copied</string>
     <string name="share_with">Share with %1$s?</string>
-    <string name="forward_to">Forward to %1$s?</string>
     <string name="no_internet_connection">No Internet Connection</string>
     <string name="num_new_messages">%1$s new messages</string>
     <string name="one_new_message">1 new message</string>
@@ -944,7 +943,6 @@
     <string name="add_favorites_upper_case">ADD FAVORITES</string>
     <string name="status_update_tip_header">Post your status</string>
     <string name="status_update_tip_msg">status is visible to favorites only</string>
-    <string name="new_chat_compose_hint">Search by name or number</string>
     <string name="new_ui_welcome_tip_header">Welcome to new hike</string>
     <string name="new_ui_welcome_tip_msg">easier to use and faster than ever</string>
     <string name="camera">Camera</string>
@@ -1100,7 +1098,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="incorrect_msisdn_msg">Please enter the number registered with hike on this phone.</string>
     <string name="delete_account_description">delete all your messages, free SMS and hike rewards</string>
     <string name="delete_account_heading_2">To delete your account, enter your number</string>
-    <string name="pin_notif_text">has posted a pin</string>
     <string name="delete_my_account">DELETE MY ACCOUNT</string>
     <string name="hike_extras">Hike Extras</string>
     <string name="mute_status_notification_header">Status and profile picture</string>
@@ -1163,5 +1160,24 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="no_file_profile">Files are shown here</string>
     <string name="num_new_conversations">%1$s conversations</string>
     <string name="notifications_contact_join_title">Contact joining hike</string>
+    <string name="share_with_names_numbers">Share with %1$s and %2$d others?</string>
+    <string name="forward_to_names_numbers">Send message to %1$s and %2$d others?</string>
+	<string name="select_all_hike">Select all Hike contacts</string>
+	<string name="unselect_all_hike">Unselect all Hike contacts</string>
+    <string name="recent_chats">RECENT CHATS</string>
+    <string name="new_chat_compose_hint">Search by name or number</string>
+    <string name="forward_tip_heading">Sharing made easy</string>
+    <string name="forward_tip_description">Now forward to multiple contacts at once</string>
+    <string name="pin_notif_text">posted a pin</string>
     <string name="welcome_to">Welcome to</string>
+    <string name="small_fastest">faster</string>
+    <string name="medium_faster">fast</string>
+    <string name="original_slow">slow</string>
+    <string name="forward_to_plural">Send message to %1$s contacts?</string>
+    <string name="forward_to_singular">Send message to 1 contact?</string>
+    <string name="selected_contacts_count_plural">%1$s contacts</string>
+    <string name="selected_contacts_count_singular">%1$s contact</string>
+    <string name="wish_now">Wish now!</string>
+    <string name="wish_you">Wish your friends!</string>
+    <string name="messages_sent_succees">Message Sent</string>
 </resources>

@@ -131,7 +131,7 @@ public class StickerManager
 
 	private static final String EXPRESSIONS = "expressions";
 
-	private static final String HUMANOID = "humanoid";
+	public static final String HUMANOID = "humanoid";
 	
 	private LinkedHashMap<String, StickerCategory> stickerCategoriesMap;
 	

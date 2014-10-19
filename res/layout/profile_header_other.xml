@@ -9,12 +9,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/header_bg"
+        android:clickable="true"
 		android:orientation="vertical">
 		
     <RelativeLayout
         android:id="@+id/profile_head"
         android:layout_width="match_parent"
-        android:layout_height="100dp">
+        android:layout_height="100dp"
+        android:onClick="openTimeline">
         
         <FrameLayout
             android:id="@+id/avatar_container"
@@ -45,13 +47,12 @@
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <View
                 android:id="@+id/divider"
                 android:layout_width="1.5dp"
                 android:layout_height="32dp"
-                android:layout_centerVertical="true"
                 android:layout_gravity="center"
                 android:background="#d9dbdc" />
 
@@ -59,10 +60,9 @@
                 android:id="@+id/view_profile"
                 android:layout_width="47dp"
                 android:layout_height="match_parent"
-                android:layout_toRightOf="@id/divider"
-                android:layout_centerVertical="true"
                 android:contentDescription="View profile"
                 android:background="@drawable/group_edit_selector"
+                android:onClick="openTimeline"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_arrow" />
         </LinearLayout>
