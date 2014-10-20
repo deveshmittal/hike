@@ -23,7 +23,6 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;

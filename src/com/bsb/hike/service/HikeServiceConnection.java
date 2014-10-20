@@ -136,6 +136,15 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 				long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
 				bundle.putLong(HikeConstants.MESSAGE_ID, msgId);
 			}
+			
+			if (HikeConstants.MqttMessageTypes.MULTIPLE_FORWARD.equals(o.optString(HikeConstants.SUB_TYPE)))
+			{
+				msg.arg2 = HikeConstants.MULTI_FORWARD_MESSAGE_TYPE;
+			}
+			else
+			{
+				msg.arg2 = HikeConstants.NORMAL_MESSAGE_TYPE;
+			}
 
 			msg.setData(bundle);
 			msg.replyTo = this.mMessenger;

@@ -1,6 +1,8 @@
 package com.bsb.hike.service;
 
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.channels.UnresolvedAddressException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -40,6 +42,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -167,6 +170,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private static final int MAX_RETRY_COUNT = 20;
 
 	private volatile int retryCount = 0;
+	
+	private static final String UNRESOLVED_EXCEPTION = "unresolved";
 
 	// constants used to define MQTT connection status, this is used by external classes and hardly of any use internally
 	public enum MQTTConnectionStatus
@@ -302,13 +307,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					Bundle bundle = msg.getData();
 					String message = bundle.getString(HikeConstants.MESSAGE);
 					long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
-					send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis()), msg.arg1);
+					send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
 				case 12341: // just for testing
 					Bundle b = msg.getData();
 					String m = b.getString(HikeConstants.MESSAGE);
 					long mId = b.getLong(HikeConstants.MESSAGE_ID, -1);
-					send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis()), msg.arg1);
+					send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
 				}
 			}
@@ -764,7 +769,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 		if (connectUsingIp)
 		{
-			return getIp() + ":" + FALLBACK_BROKER_PORT_NUMBER;
+			return getIp() + ":" + (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL : FALLBACK_BROKER_PORT_NUMBER);
 		}
 		else
 		{
@@ -953,7 +958,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					{
 						Logger.e(TAG, "invalid JSON message", e);
 					}
-					catch (Exception e)
+					catch (Throwable e)
 					{
 						Logger.e(TAG, "Exception when msg arrived : ", e);
 					}
@@ -1073,7 +1078,27 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					{
 						Long msgId = packet.getMsgId();
 						Logger.d(TAG, "Socket written success for msg with id : " + msgId);
-						HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
+						if(packet.getPacketType() == HikeConstants.MULTI_FORWARD_MESSAGE_TYPE)
+						{
+							try
+							{
+								JSONObject jsonObj = new JSONObject(new String(packet.getMessage()));
+
+								JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+								long baseId = data.optLong(HikeConstants.MESSAGE_ID);
+								JSONArray messages = data.optJSONArray(HikeConstants.MESSAGES);
+								JSONArray contacts = data.optJSONArray(HikeConstants.LIST);
+
+								int count = messages.length() * contacts.length();
+								HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MULTI_MSG, new Pair<Long, Integer>(baseId, count));
+							} catch (JSONException e) {
+								// Do nothing
+							}
+						}
+						else
+						{
+							HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
+						}
 					}
 				}
 			});
@@ -1132,9 +1157,20 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				Logger.e(TAG, "Exception : " + e.getCause().getMessage());
 				if (e.getCause() instanceof UnknownHostException)
 				{
-					Logger.e(TAG, "DNS Failure , Connect using ips");
-					connectUsingIp = true;
-					scheduleNextConnectionCheck(getConnRetryTime());
+					handleDNSException();
+				}
+				// we are getting this exception in one phone in which message is "Host is unresolved"
+				else if (e.getCause() instanceof SocketException)
+				{
+					if (e.getCause().getMessage() != null && e.getCause().getMessage().indexOf(UNRESOLVED_EXCEPTION) != -1)
+					{
+						handleDNSException();
+					}
+				}
+				// added this exception for safety , we might also get this exception in some phones
+				else if (e.getCause() instanceof UnresolvedAddressException)
+				{
+					handleDNSException();
 				}
 				// Till this point disconnect has already happened due to exception (This is as per lib)
 				else if (reConnect)
@@ -1201,7 +1237,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			break;
 		case MqttException.REASON_CODE_UNEXPECTED_ERROR:
 			// This could happen while reading or writing error on a socket, hence disconnection happens
-			connectOnMqttThread(MQTT_WAIT_BEFORE_RECONNECT_TIME);
+			scheduleNextConnectionCheck(getConnRetryTime());
 			break;
 		default:
 			Logger.e(TAG, "In Default : " + e.getMessage());
@@ -1209,10 +1245,18 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			connectOnMqttThread(getConnRetryTime());
 			break;
 		}
-		Logger.e(TAG, "Default Exception : " + e.getMessage());
 		e.printStackTrace();
 	}
 
+	/**
+	 * Dns exception occured, Connect using ips
+	 */
+	private void handleDNSException()
+	{
+		Logger.e(TAG, "DNS Failure , Connect using ips");
+		connectUsingIp = true;
+		scheduleNextConnectionCheck(getConnRetryTime());
+	}
 	public void destroyMqtt()
 	{
 		try

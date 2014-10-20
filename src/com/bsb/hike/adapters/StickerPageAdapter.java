@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.bsb.hike.R;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
@@ -329,11 +330,15 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		stickerLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{
 			notifyDataSetChanged();
 		}
+	}
+	
+	public StickerLoader getStickerLoader()
+	{
+		return stickerLoader;
 	}
 }

@@ -150,6 +150,13 @@
         <activity
             android:name="com.bsb.hike.ui.ProfileActivity"
             android:windowSoftInputMode="stateHidden" >
+            <intent-filter android:label="@string/set_profile_pic">
+                <action android:name="android.intent.action.ATTACH_DATA" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/*" />
+            </intent-filter>
         </activity>
         <activity
             android:name="com.bsb.hike.cropimage.CropImage"
@@ -191,12 +198,19 @@
         </activity>
         <activity android:name="com.bsb.hike.ui.GalleryActivity" >
         </activity>
+         <activity android:name="com.bsb.hike.ui.HikeSharedFilesActivity" >
+        </activity>
+        
         <activity android:name="com.bsb.hike.ui.GallerySelectionViewer" >
         </activity>
         <activity android:name="com.bsb.hike.ui.CountrySelectActivity" >
         </activity>
         <activity
             android:name="com.bsb.hike.ui.FileSelectActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+        <activity
+            android:name="com.bsb.hike.ui.SharedOtherFilesActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
@@ -271,6 +285,9 @@
                 <intent-filter android:priority="999" >
                     <action android:name="android.intent.action.TIME_SET" />
                 </intent-filter>
+            </receiver>
+            <receiver android:name="com.bsb.hike.notifications.NotificationDismissedReceiver" 
+                android:exported="false">
             </receiver>
 
          <activity
