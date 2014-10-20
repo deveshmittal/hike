@@ -512,6 +512,8 @@ public class HikeConstants
 	public static final String IS_GAMES_ITEM_CLICKED = "isGamesItemClicked";
 
 	public static final String IS_REWARDS_ITEM_CLICKED = "isRewardsItemClicked";
+	
+	public static final String IS_HOME_OVERFLOW_CLICKED = "isHomeOverflowClicked";
 
 	public static final String IS_OF_ICON_CLICKED = "isOfIconClicked";
 
