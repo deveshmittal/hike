@@ -6529,6 +6529,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void onStickerBtnClicked(View v)
 	{
+		if((Utils.getExternalStorageState() == ExternalStorageState.NONE))
+		{
+			Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+			return;
+		}
 		onEmoticonBtnClicked(v, 0, false);
 		if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
 		{
