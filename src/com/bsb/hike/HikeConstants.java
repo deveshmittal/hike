@@ -515,6 +515,8 @@ public class HikeConstants
 	
 	public static final String IS_HOME_OVERFLOW_CLICKED = "isHomeOverflowClicked";
 
+	public static final String SHOW_TIMELINE_RED_DOT = "showTimelineRedDot";
+	
 	public static final String IS_OF_ICON_CLICKED = "isOfIconClicked";
 
 	public static final String DONE = "Done";
