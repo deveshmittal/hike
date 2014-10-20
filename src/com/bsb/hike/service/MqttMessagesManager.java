@@ -1416,10 +1416,7 @@ public class MqttMessagesManager
 
 				for (int i = 0; i < stickerIds.length(); i++)
 				{
-					String stickerId = stickerIds.getString(i);
-					File stickerSmall = new File(categoryDir + HikeConstants.SMALL_STICKER_ROOT, stickerId);
-					stickerSmall.delete();
-					StickerManager.getInstance().removeStickerFromRecents(new Sticker(categoryId, stickerId));
+					StickerManager.getInstance().removeSticker(categoryId, stickerIds.getString(i));
 				}
 			}
 		}

@@ -1,10 +1,20 @@
 package com.bsb.hike.models;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OptionalDataException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import android.content.Context;
+
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
 
 public class StickerCategory implements Serializable
 {
@@ -155,6 +165,42 @@ public class StickerCategory implements Serializable
 	public void setTimeStamp(int timeStamp)
 	{
 		this.timeStamp = timeStamp;
+	}
+	
+	public List<Sticker> getStickerList(Context context)
+	{
+		final List<Sticker> stickersList;
+		if (isCustom())
+		{
+			return ((CustomStickerCategory) this).getStickerList(context);
+		}
+		else
+		{
+
+			long t1 = System.currentTimeMillis();
+			stickersList = new ArrayList<Sticker>();
+
+			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, getCategoryId());
+
+			if (categoryDirPath != null)
+			{
+				File categoryDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
+
+				if (categoryDir.exists())
+				{
+					String[] stickerIds = categoryDir.list(StickerManager.getInstance().stickerFileFilter);
+					for (String stickerId : stickerIds)
+					{
+						Sticker s = new Sticker(this, stickerId);
+						stickersList.add(s);
+					}
+				}
+			}
+			Collections.sort(stickersList);
+			long t2 = System.currentTimeMillis();
+			Logger.d(getClass().getSimpleName(), "Time to sort category : " + getCategoryId() + " in ms : " + (t2 - t1));
+		}
+		return stickersList;
 	}
 	
 	@Override

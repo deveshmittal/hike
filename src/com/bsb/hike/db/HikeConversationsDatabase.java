@@ -45,6 +45,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.CustomStickerCategory;
 import com.bsb.hike.models.FileListItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Conversation;
@@ -4091,8 +4092,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				int timeStamp = c.getInt(c.getColumnIndex(DBConstants.TIMESTAMP));
 				int totalStickers = c.getInt(c.getColumnIndex(DBConstants.TOTAL_NUMBER));
 
-				StickerCategory s = new StickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, metadata, totalStickers,
+				StickerCategory s;
+				if(!isCustom)
+				{
+					s = new StickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, metadata, totalStickers,
 						timeStamp);
+				}
+				else
+				{
+					s = new CustomStickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, metadata, totalStickers,
+							timeStamp);
+				}
 				stickerDataMap.put(categoryId, s);
 			}
 			catch (Exception e)

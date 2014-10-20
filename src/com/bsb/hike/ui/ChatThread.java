@@ -650,7 +650,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		resetLastSeenScheduler();
 
-		StickerManager.getInstance().saveSortedListForCategory(StickerManager.RECENT, StickerManager.getInstance().getRecentStickerList());
+		StickerManager.getInstance().saveCustomCategories();
 		if (messageMap != null)
 		{
 			messageMap.clear();

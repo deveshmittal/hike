@@ -320,58 +320,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		spo.getDownloadingParent().setVisibility(View.GONE);
 		spo.getDownloadingFailedButton().setVisibility(View.GONE);
 		spo.getStickerListView().setVisibility(View.VISIBLE);
-		final List<Sticker> stickersList;
-		if (category.isCustom())
-		{
-			//right now only recent category is custom
-			Set<Sticker> lhs = StickerManager.getInstance().getRecentStickerList();
-
-			/*
-			 * here using LinkedList as in recents we have to remove the sticker frequently to move it to front and in linked list 
-			 * remove operation is faster compared to arraylist
-			 */
-			stickersList = new LinkedList<Sticker>();
-			Iterator<Sticker> it = lhs.iterator();
-			while (it.hasNext())
-			{
-				try
-				{
-					Sticker st = (Sticker) it.next();
-					stickersList.add(0, st);
-				}
-				catch (Exception e)
-				{
-					Logger.e(getClass().getSimpleName(), "Exception in recent stickers", e);
-				}
-			}
-		}
-		else
-		{
-
-			long t1 = System.currentTimeMillis();
-			stickersList = new ArrayList<Sticker>();
-
-			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(activity, category.getCategoryId());
-
-			if (categoryDirPath != null)
-			{
-				File categoryDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
-
-				if (categoryDir.exists())
-				{
-					String[] stickerIds = categoryDir.list(StickerManager.getInstance().stickerFileFilter);
-					for (String stickerId : stickerIds)
-					{
-						Sticker s = new Sticker(category, stickerId);
-						stickersList.add(s);
-					}
-				}
-			}
-			Collections.sort(stickersList);
-			long t2 = System.currentTimeMillis();
-			Logger.d(getClass().getSimpleName(), "Time to sort category : " + category.getCategoryId() + " in ms : " + (t2 - t1));
-		}
-
+		final List<Sticker> stickersList = category.getStickerList(activity);
 		boolean updateAvailable = category.isUpdateAvailable();
 
 		final List<ViewType> viewTypeList = new ArrayList<StickerPageAdapter.ViewType>();
