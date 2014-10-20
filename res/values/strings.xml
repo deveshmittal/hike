@@ -1220,4 +1220,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="ftue_sticker_forward_title">Send to</string>
     <string name="ftue_sticker_forward_card_text">Great Choice!</string>
     <string name="ftue_sticker_forward_card_subtext">Try sending this sticker to your friends -</string>
+    <string name="conversation_empty">Tap \'<b>new message</b>\' icon on top\nto start a chat</string>
 </resources>

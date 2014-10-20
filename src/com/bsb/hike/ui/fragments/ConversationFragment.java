@@ -232,7 +232,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (wasViewSetup() && emptyView == null)  /*Adding wasViewSetup() safety check for an NPE here*/
 		{
 			ViewGroup emptyHolder = (ViewGroup) getView().findViewById(R.id.emptyViewHolder);
-			emptyView = LayoutInflater.from(getActivity()).inflate(R.layout.conversation_empty_view, emptyHolder);
+			emptyView = LayoutInflater.from(getActivity()).inflate(R.layout.conversation_empty_view2, emptyHolder);
 			// emptyHolder.addView(emptyView);
 			ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
 			friendsList.setEmptyView(emptyView);
@@ -1515,23 +1515,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				public void run()
 				{
 					deleteConversation(conversation);
-				}
-			});
-		}
-		else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type))
-		{
-			if (!isAdded())
-			{
-				return;
-			}
-			getActivity().runOnUiThread(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					setEmptyState();
-					setupEmptyView();
 				}
 			});
 		}
