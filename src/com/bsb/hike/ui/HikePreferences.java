@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -888,7 +889,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}
 				else if (getString(R.string.notif_sound_default).equals(newValue.toString()))
 				{
-					Utils.playDefaultNotificationSound(getApplicationContext());
+					Utils.playSound(getApplicationContext(), RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
 				}
 				return true;
 			}

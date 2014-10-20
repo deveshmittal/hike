@@ -585,17 +585,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener, O
 				String option = options[which];
 				if (getString(R.string.remove_from_favorites).equals(option))
 				{
-					FavoriteType favoriteType;
-					if (contactInfo.getFavoriteType() == FavoriteType.FRIEND)
-					{
-						favoriteType = FavoriteType.REQUEST_RECEIVED_REJECTED;
-					}
-					else
-					{
-						favoriteType = FavoriteType.NOT_FRIEND;
-					}
-					Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteRemoved);
+					Utils.checkAndUnfriendContact(contactInfo);
 				}
 			}
 		});
