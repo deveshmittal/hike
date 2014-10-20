@@ -6615,7 +6615,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 								editor.putBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, true);
 								editor.commit();
 							}
-							// TO-DO : Fire intent for sticker shop here 
+							Intent i = new Intent(ChatThread.this, StickerShopActivity.class);
+							startActivity(i);
 						}
 					});
 					

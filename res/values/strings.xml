@@ -1182,6 +1182,15 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="messages_sent_succees">Message Sent</string>
     <string name="new_stickers">NEW</string>
     <string name="download_category">DOWNLOAD</string>
+    <string name="wish_you">Wish your friends</string>
+    <string name="sticker_shop">Sticker Shop</string>
+    <string name="my_stickers">My Stickers</string>
+    <string name="update_all">UPDATE ALL</string>
     <string name="retry_sticker">RETRY</string>
     <string name="see_them">SEE THEM</string>
+    <string name="drag_tip_text">Drag to Reorder Packs</string>
+    <string name="drag_tip_subtext">Tap and drag to reorder your sticker packs</string>
+    <string name="sticker_cancel">CANCEL</string>
+    <string name="sticker_confirm">CONFIRM</string>
+    
 </resources>
