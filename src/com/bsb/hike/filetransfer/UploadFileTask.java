@@ -25,6 +25,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreConnectionPNames;
@@ -1027,7 +1028,7 @@ public class UploadFileTask extends FileTransferBase
 			{
 				mUrl = new URL(AccountUtils.fileTransferBaseDownloadUrl + fileKey);
 				HttpClient client = new DefaultHttpClient();
-				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
+				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 30 * 1000);
 				HttpHead head = new HttpHead(mUrl.toString());
 				head.addHeader("Cookie", "user=" + token + ";uid=" + uId);
 	
@@ -1086,7 +1087,7 @@ public class UploadFileTask extends FileTransferBase
 	{
 		HttpClient client = new DefaultHttpClient();
 		client.getParams().setParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, bufferSize);
-		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
+		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 30 * 1000);
 		// client.getParams().setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
 		long time = System.currentTimeMillis();
 		HttpPost post = new HttpPost(mUrl.toString());
@@ -1107,6 +1108,12 @@ public class UploadFileTask extends FileTransferBase
 			HttpResponse response = client.execute(post);
 			resCode = response.getStatusLine().getStatusCode();
 			res = EntityUtils.toString(response.getEntity());
+		}
+		catch (ConnectTimeoutException ex)
+		{
+			ex.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "FT Upload time out error : " + ex.getMessage());
+			return null;
 		}
 		catch (Exception e)
 		{
@@ -1303,7 +1310,7 @@ public class UploadFileTask extends FileTransferBase
 			{
 				mUrl = new URL(AccountUtils.fastFileUploadUrl + fileMD5);
 				HttpClient client = new DefaultHttpClient();
-				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
+				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 30 * 1000);
 				HttpHead head = new HttpHead(mUrl.toString());
 
 				HttpResponse resp = client.execute(head);
