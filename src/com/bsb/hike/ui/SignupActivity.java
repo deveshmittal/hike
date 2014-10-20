@@ -49,15 +49,20 @@ import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.BounceInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -114,6 +119,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private ViewGroup scanningContactsLayout;
 
+	private ViewGroup backupFoundLayout;
+
 	private ViewGroup restoringBackupLayout;
 
 	private TextView infoTxt;
@@ -142,7 +149,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private boolean msisdnErrorDuringSignup = false;
 
-	public static final int RESTORE_BACKUP = 4;
+	public static final int RESTORING_BACKUP = 5;
+
+	public static final int BACKUP_FOUND = 4;
 
 	public static final int SCANNING_CONTACTS = 3;
 
@@ -195,6 +204,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	private ImageView arrow;
 
 	private TextView postText;
+	
+	private ViewProperties sdCardProp;
 
 	private class ActivityState
 	{
@@ -216,6 +227,17 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 		public boolean fbConnected = false;
 	}
+	
+	private class ViewProperties
+	{
+		public int left;
+		
+		public int top;
+		
+		public int width;
+		
+		public int height;
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -233,6 +255,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
 		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
 		scanningContactsLayout = (ViewGroup) findViewById(R.id.scanning_contacts_layout);
+		backupFoundLayout = (ViewGroup) findViewById(R.id.backup_found_layout);
 		restoringBackupLayout = (ViewGroup) findViewById(R.id.restoring_backup_layout);
 
 		Object o = getLastCustomNonConfigurationInstance();
@@ -381,9 +404,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			mActionBarTitle.setText("");
 		}
-		else if (displayedChild == RESTORE_BACKUP)
+		else if (displayedChild == BACKUP_FOUND)
 		{
 			mActionBarTitle.setText("Restore Account");
+		}
+		else if (displayedChild == RESTORING_BACKUP)
+		{
+			mActionBarTitle.setText("Account Backup");
 		}
 	}
 
@@ -935,17 +962,24 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		setupActionBarTitle();
 	}
 	
-	private void prepareLayoutForRestoring(Bundle savedInstanceState)
+	private void prepareLayoutForBackupFound(Bundle savedInstanceState)
 	{
 		nextBtnContainer.setVisibility(View.GONE);
 		setupActionBarTitle();
 		preRestoreAnimation();
 	}
 	
+	private void prepareLayoutForRestoringAnimation(Bundle savedInstanceState)
+	{
+		nextBtnContainer.setVisibility(View.GONE);
+		setupActionBarTitle();
+		onRestoreAnimation();
+	}
+	
 	private void preRestoreAnimation()
 	{
-		long smileyOffset = 1000;
-		long smileyDuration = 400;
+		long smileyOffset = 800;
+		long smileyDuration = 300;
 		long convOffset = smileyOffset + smileyDuration;
 		long convDuration = smileyDuration;
 		long profileOffset = convOffset + convDuration;
@@ -953,11 +987,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		long restoreOffset = profileOffset + profileDuration;
 		long restoreDuration = 200;
 		
-		ImageView artProfile = (ImageView) restoringBackupLayout.findViewById(R.id.art_profile);
-		ImageView artConv = (ImageView) restoringBackupLayout.findViewById(R.id.art_conversation);
-		ImageView artSmiley = (ImageView) restoringBackupLayout.findViewById(R.id.art_smiley);
-		Button btnRestore = (Button) restoringBackupLayout.findViewById(R.id.btn_restore);
-		Button btnSkip = (Button) restoringBackupLayout.findViewById(R.id.btn_skip);
+		ImageView artProfile = (ImageView) backupFoundLayout.findViewById(R.id.art_profile);
+		ImageView artConv = (ImageView) backupFoundLayout.findViewById(R.id.art_conversation);
+		ImageView artSmiley = (ImageView) backupFoundLayout.findViewById(R.id.art_smiley);
+		Button btnRestore = (Button) backupFoundLayout.findViewById(R.id.btn_restore);
+		Button btnSkip = (Button) backupFoundLayout.findViewById(R.id.btn_skip);
 		
 		btnRestore.setOnClickListener(btnRestoreClick);
 		btnSkip.setOnClickListener(btnRestoreSkipClick);
@@ -1023,13 +1057,181 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		Logger.d("gaurav","starting animation");
 		btnRestore.setVisibility(View.INVISIBLE);
 		btnRestore.startAnimation(restoreAlphaAnimation);
-		btnSkip.setVisibility(View.VISIBLE);
+		btnSkip.setVisibility(View.INVISIBLE);
 		btnSkip.startAnimation(restoreAlphaAnimation);
 	}
-	
-	private void restoreAnimation()
+
+	private void finishPreRestoreAnimation()
 	{
+		long smileyOffset = 300;
+		long smileyDuration = 300;
+		long convOffset = smileyOffset + smileyDuration;
+		long convDuration = smileyDuration;
+		long profileOffset = convOffset + convDuration;
+		long profileDuration = smileyDuration;
+		long restoreOffset = profileOffset + profileDuration;
+		long restoreDuration = 200;
 		
+		ImageView artProfile = (ImageView) backupFoundLayout.findViewById(R.id.art_profile);
+		ImageView artConv = (ImageView) backupFoundLayout.findViewById(R.id.art_conversation);
+		ImageView artSmiley = (ImageView) backupFoundLayout.findViewById(R.id.art_smiley);
+		Button btnRestore = (Button) backupFoundLayout.findViewById(R.id.btn_restore);
+		Button btnSkip = (Button) backupFoundLayout.findViewById(R.id.btn_skip);
+		TextView textBackup = (TextView) backupFoundLayout.findViewById(R.id.txt_backup_title);
+		TextView textView = (TextView) backupFoundLayout.findViewById(R.id.txt_backup_hint);
+		
+		btnRestore.setOnClickListener(btnRestoreClick);
+		btnSkip.setOnClickListener(btnRestoreSkipClick);
+		
+		
+		// Animation Setup for smiley image
+		ScaleAnimation smileyScaleAnimation = new ScaleAnimation(1.0f, 0.0f, 1.0f, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,Animation.RELATIVE_TO_SELF, 1.0f);
+		smileyScaleAnimation.setInterpolator(new OvershootInterpolator());
+		
+		AlphaAnimation smileyAlphaAnimation = new AlphaAnimation(1.0f, 0.1f);
+		
+		AnimationSet smileyAnimSet = new AnimationSet(false);
+		smileyAnimSet.addAnimation(smileyScaleAnimation);
+		smileyAnimSet.addAnimation(smileyAlphaAnimation);
+		smileyAnimSet.setDuration(smileyDuration);
+		smileyAnimSet.setFillAfter(true);
+		smileyAnimSet.setStartOffset(smileyOffset);
+		
+		Logger.d("gaurav","finishing animation");
+		artSmiley.setVisibility(View.INVISIBLE);
+		artSmiley.startAnimation(smileyAnimSet);
+		
+		// Animation setup for conv image
+		ScaleAnimation convScaleAnimation = new ScaleAnimation(1.0f, 0.0f, 1.0f, 0.0f, Animation.RELATIVE_TO_SELF, 1.0f,Animation.RELATIVE_TO_SELF, 1.8f);
+		convScaleAnimation.setInterpolator(new OvershootInterpolator());
+		
+		AlphaAnimation convAlphaAnimation = new AlphaAnimation(1.0f, 0.1f);
+		
+		AnimationSet convAnimSet = new AnimationSet(false);
+		convAnimSet.addAnimation(convScaleAnimation);
+		convAnimSet.addAnimation(convAlphaAnimation);
+		convAnimSet.setDuration(convDuration);
+		convAnimSet.setFillAfter(true);
+		convAnimSet.setStartOffset(convOffset);
+		
+		Logger.d("gaurav","finishing animation");
+		artConv.setVisibility(View.INVISIBLE);
+		artConv.startAnimation(convAnimSet);
+
+		// Animation setup for profile image
+		ScaleAnimation profileScaleAnimation = new ScaleAnimation(1.0f, 0.0f, 1.0f, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,Animation.RELATIVE_TO_SELF, 2.2f);
+		profileScaleAnimation.setInterpolator(new OvershootInterpolator());
+		
+		AlphaAnimation profileAlphaAnimation = new AlphaAnimation(1.0f, 0.1f);
+		
+		AnimationSet profileAnimSet = new AnimationSet(false);
+		profileAnimSet.addAnimation(profileScaleAnimation);
+		profileAnimSet.addAnimation(profileAlphaAnimation);
+		profileAnimSet.setDuration(profileDuration);
+		profileAnimSet.setFillAfter(true);
+		profileAnimSet.setStartOffset(profileOffset);
+		
+		Logger.d("gaurav","finishing animation");
+		artProfile.setVisibility(View.INVISIBLE);
+		artProfile.startAnimation(profileAnimSet);
+		
+		// Animation setup for restore and skip buttons
+		AlphaAnimation fadeOutAnimation = new AlphaAnimation(1.0f, 0.0f);
+		fadeOutAnimation.setDuration(restoreDuration);
+		fadeOutAnimation.setFillAfter(true);
+		fadeOutAnimation.setStartOffset(restoreOffset);
+		
+		fadeOutAnimation.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				mTask.addUserInput("true");
+				viewFlipper.setDisplayedChild(RESTORING_BACKUP);
+				prepareLayoutForRestoringAnimation(null);
+			}
+		});
+		
+		Logger.d("gaurav","finishing animation");
+		btnRestore.setVisibility(View.INVISIBLE);
+		btnRestore.startAnimation(fadeOutAnimation);
+		btnSkip.setVisibility(View.INVISIBLE);
+		btnSkip.startAnimation(fadeOutAnimation);
+		textBackup.setVisibility(View.INVISIBLE);
+		textBackup.startAnimation(fadeOutAnimation);
+		textView.setVisibility(View.INVISIBLE);
+		textView.startAnimation(fadeOutAnimation);
+	}
+
+	private void initializeRestore()
+	{
+		finishPreRestoreAnimation();
+		sdCardProp = new ViewProperties();
+		ImageView sdCard = (ImageView) backupFoundLayout.findViewById(R.id.sd_card);
+		int [] screenLocation = new int[2];
+		sdCard.getLocationOnScreen(screenLocation);
+		sdCardProp.left = screenLocation[0];
+		sdCardProp.top = screenLocation[1];
+		sdCardProp.width = sdCard.getWidth();
+		sdCardProp.height = sdCard.getHeight();
+	}
+	private void onRestoreAnimation()
+	{
+		final ImageView sdCard = (ImageView) restoringBackupLayout.findViewById(R.id.sd_card);
+		final ImageView profilePic = (ImageView) restoringBackupLayout.findViewById(R.id.profile_pic);
+		final View restoreProgress = (View) restoringBackupLayout.findViewById(R.id.restore_process);
+		profilePic.setVisibility(View.INVISIBLE);
+		restoreProgress.setVisibility(View.INVISIBLE);
+		
+		sdCard.post(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				final int [] screenLocation = new int[2];
+				sdCard.getLocationOnScreen(screenLocation);
+				float widthScale = (float) sdCardProp.width/sdCard.getWidth();
+				float heightScale = (float) sdCardProp.height/sdCard.getHeight();
+				
+				Logger.d("gaurav"," prev props: " + sdCardProp.left + " : " + sdCardProp.top);
+				Logger.d("gaurav"," curr props: " + screenLocation[0] + " : " + screenLocation[1]);
+				TranslateAnimation sdCardTranslateAnimation = new TranslateAnimation(Animation.ABSOLUTE, (sdCardProp.left-screenLocation[0])/widthScale, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, (sdCardProp.top-screenLocation[1])/heightScale, Animation.RELATIVE_TO_SELF, 0);
+				ScaleAnimation sdCardScaleAnimation = new ScaleAnimation(widthScale, 1, heightScale, 1);
+				AnimationSet sdCardAnimationSet = new AnimationSet(true);
+				
+				sdCardAnimationSet.setAnimationListener(new AnimationListener()
+				{
+					@Override
+					public void onAnimationStart(Animation animation)
+					{}
+					@Override
+					public void onAnimationRepeat(Animation animation)
+					{}
+					
+					@Override
+					public void onAnimationEnd(Animation animation)
+					{
+						AlphaAnimation ppAnimation = new AlphaAnimation(0, 1);
+						ppAnimation.setDuration(200);
+						ppAnimation.setFillAfter(true);
+						profilePic.startAnimation(ppAnimation);
+						restoreProgress.startAnimation(ppAnimation);
+					}
+				});
+				sdCardAnimationSet.addAnimation(sdCardTranslateAnimation);
+				sdCardAnimationSet.addAnimation(sdCardScaleAnimation);
+				sdCardAnimationSet.setDuration(500);
+				sdCardAnimationSet.setFillAfter(true);
+				sdCardAnimationSet.setInterpolator(new DecelerateInterpolator());
+				sdCard.startAnimation(sdCardAnimationSet);
+			}
+		});
 	}
 	
 	public class ReverseInterpolator implements Interpolator {
@@ -1044,8 +1246,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		@Override
 		public void onClick(View v)
 		{
-			// TODO Auto-generated method stub
-			mTask.addUserInput("true");
+			initializeRestore();
 		}
 	};
 	
@@ -1054,8 +1255,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		@Override
 		public void onClick(View v)
 		{
-			// TODO Auto-generated method stub
-			mTask.addUserInput(null);
+			//mTask.addUserInput(null);
 		}
 	};
 
@@ -1382,10 +1582,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				showErrorMsg();
 			}
 		case BACKUP_AVAILABLE:
-			if (viewFlipper.getDisplayedChild() != RESTORE_BACKUP)
+			if (viewFlipper.getDisplayedChild() != BACKUP_FOUND)
 			{
-				viewFlipper.setDisplayedChild(RESTORE_BACKUP);
-				prepareLayoutForRestoring(null);
+				viewFlipper.setDisplayedChild(BACKUP_FOUND);
+				prepareLayoutForBackupFound(null);
 			}
 			break;
 		}

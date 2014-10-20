@@ -568,6 +568,19 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		{
 			boolean status = DBBackupRestore.getInstance().restoreDB();
 			publishProgress(new StateValue(State.RESTORED_BACKUP,status));
+//			synchronized (this)
+//			{
+//				try
+//				{
+//					this.wait();
+//				}
+//				catch (InterruptedException e)
+//				{
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//					Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
+//				}
+//			}
 		}
 		Logger.d("SignupTask", "Publishing Token_Created");
 
