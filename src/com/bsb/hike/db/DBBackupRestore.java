@@ -105,6 +105,7 @@ public class DBBackupRestore
 				File backup = getDBBackupFile(DBCopy.getName());
 				CBCEncryption.decryptFile(backup, DBCopy);
 				importDatabase(DBCopy);
+				DBCopy.delete();
 			}
 		}
 		catch (Exception e)
