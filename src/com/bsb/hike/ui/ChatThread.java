@@ -6567,7 +6567,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			emoticonViewPager = emoticonViewPager == null ? (ViewPager) emoticonLayout.findViewById(R.id.emoticon_pager) : emoticonViewPager;
 
 			View eraseKey = emoticonLayout.findViewById(R.id.erase_key);
-
+			ImageView shopIcon = (ImageView) emoticonLayout.findViewById(R.id.erase_key_image);
 			if (v != null)
 			{
 				int[] tabDrawables = null;
@@ -6596,7 +6596,29 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						emoticonType = EmoticonType.STICKERS;
 					}
-					eraseKey.setVisibility(View.GONE);
+					eraseKey.setVisibility(View.VISIBLE);
+					shopIcon.setImageResource(R.drawable.ic_add);
+					if(!prefs.getBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
+					{
+						eraseKey.setBackgroundResource(R.color.shop_icon_color);
+					}
+					eraseKey.setBackgroundResource(R.color.shop_icon_default_color);
+					eraseKey.setOnClickListener(new View.OnClickListener()
+					{
+						
+						@Override
+						public void onClick(View v)
+						{
+							if(!prefs.getBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
+							{
+								Editor editor = prefs.edit();
+								editor.putBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, true);
+								editor.commit();
+							}
+							// TO-DO : Fire intent for sticker shop here 
+						}
+					});
+					
 				}
 				else
 				{
@@ -6632,6 +6654,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 					}
 					eraseKey.setVisibility(View.VISIBLE);
+					eraseKey.setBackgroundResource(R.color.erase_key_color);
+					shopIcon.setImageResource(R.drawable.ic_erase);
 					eraseKey.setOnClickListener(new OnClickListener()
 					{
 

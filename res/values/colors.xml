@@ -362,5 +362,8 @@
     <color name="diwali_popup_divider">#b51f30</color>
     <color name="diwali_popup_txt">#febcbc</color>
     <color name="diwali_popup_btn_pressed">#33000000</color>
+    <color name="shop_icon_default_color">#2C2D31</color>
+    <color name="shop_icon_color">#008fe1</color>
+    <color name="erase_key_color">#434748</color>
 </resources>
 	
