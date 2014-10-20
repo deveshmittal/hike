@@ -258,6 +258,34 @@ public class ConvMessage
 		}
 		this.participantInfoState = participantInfoState;
 	}
+	
+	public ConvMessage(ConvMessage other) {
+		this.mappedMsgId = other.mappedMsgId;
+		this.groupParticipantMsisdn = other.groupParticipantMsisdn;
+		this.hashMessage = other.hashMessage;
+		this.isBlockAddHeader = other.isBlockAddHeader;
+		this.isFileTransferMessage = other.isFileTransferMessage;
+		this.isStickerMessage = other.isStickerMessage;
+		this.isTickSoundPlayed = other.isTickSoundPlayed;
+		this.messageType = other.messageType;
+		this.mInvite = other.mInvite;
+		this.mIsSent = other.mIsSent;
+		this.mIsSMS = other.mIsSMS;
+		this.mMessage = other.mMessage;
+		this.msgID = other.msgID;
+		this.mState = other.mState;
+		this.mTimestamp = other.mTimestamp;
+		this.participantInfoState = other.participantInfoState;
+		this.shouldShowPush = other.shouldShowPush;
+		this.unreadCount = other.unreadCount;
+		this.metadata = other.metadata;
+		try {
+			this.readByArray = other.readByArray !=null? new JSONArray(other.readByArray.toString()) : null;
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+				
+	}
 
 	public ConvMessage(JSONObject obj) throws JSONException
 	{
@@ -427,13 +455,26 @@ public class ConvMessage
 		setState(isSelfGenerated ? State.RECEIVED_READ : State.RECEIVED_UNREAD);
 	}
 
+	public void setMetadata(MessageMetadata messageMetadata)
+	{	
+		if(messageMetadata!=null){
+		this.metadata = messageMetadata;
+		isFileTransferMessage = this.metadata.getHikeFiles() != null  &&   this.metadata.getHikeFiles().size() > 0;
+
+		participantInfoState = this.metadata.getParticipantInfoState() ;
+
+		isStickerMessage = this.metadata.getSticker() != null;
+		}
+		
+	}
+
 	public void setMetadata(JSONObject metadata) throws JSONException
 	{
 		if (metadata != null)
 		{
 			this.metadata = new MessageMetadata(metadata, mIsSent);
 
-			isFileTransferMessage = this.metadata.getHikeFiles() != null;
+			isFileTransferMessage = this.metadata.getHikeFiles() != null  &&   this.metadata.getHikeFiles().size() > 0;
 
 			participantInfoState = this.metadata.getParticipantInfoState();
 
@@ -847,5 +888,9 @@ public class ConvMessage
 	public static boolean isMessageSent(State msgState)
 	{
 		return !(msgState==State.RECEIVED_READ || msgState == State.RECEIVED_UNREAD);
+	}
+	
+	public void setMsisdn(String msisdn){
+		this.mMsisdn = msisdn;
 	}
 }

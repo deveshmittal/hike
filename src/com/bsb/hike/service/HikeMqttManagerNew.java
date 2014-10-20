@@ -42,6 +42,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -306,13 +307,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					Bundle bundle = msg.getData();
 					String message = bundle.getString(HikeConstants.MESSAGE);
 					long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
-					send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis()), msg.arg1);
+					send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
 				case 12341: // just for testing
 					Bundle b = msg.getData();
 					String m = b.getString(HikeConstants.MESSAGE);
 					long mId = b.getLong(HikeConstants.MESSAGE_ID, -1);
-					send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis()), msg.arg1);
+					send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
 				}
 			}
@@ -957,7 +958,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					{
 						Logger.e(TAG, "invalid JSON message", e);
 					}
-					catch (Exception e)
+					catch (Throwable e)
 					{
 						Logger.e(TAG, "Exception when msg arrived : ", e);
 					}
@@ -1077,7 +1078,27 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					{
 						Long msgId = packet.getMsgId();
 						Logger.d(TAG, "Socket written success for msg with id : " + msgId);
-						HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
+						if(packet.getPacketType() == HikeConstants.MULTI_FORWARD_MESSAGE_TYPE)
+						{
+							try
+							{
+								JSONObject jsonObj = new JSONObject(new String(packet.getMessage()));
+
+								JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+								long baseId = data.optLong(HikeConstants.MESSAGE_ID);
+								JSONArray messages = data.optJSONArray(HikeConstants.MESSAGES);
+								JSONArray contacts = data.optJSONArray(HikeConstants.LIST);
+
+								int count = messages.length() * contacts.length();
+								HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MULTI_MSG, new Pair<Long, Integer>(baseId, count));
+							} catch (JSONException e) {
+								// Do nothing
+							}
+						}
+						else
+						{
+							HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
+						}
 					}
 				}
 			});
@@ -1216,7 +1237,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			break;
 		case MqttException.REASON_CODE_UNEXPECTED_ERROR:
 			// This could happen while reading or writing error on a socket, hence disconnection happens
-			connectOnMqttThread(MQTT_WAIT_BEFORE_RECONNECT_TIME);
+			scheduleNextConnectionCheck(getConnRetryTime());
 			break;
 		default:
 			Logger.e(TAG, "In Default : " + e.getMessage());

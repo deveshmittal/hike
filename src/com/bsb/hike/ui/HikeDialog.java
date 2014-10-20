@@ -42,6 +42,8 @@ public class HikeDialog
 
 	public static final int SMS_CLIENT_DIALOG = 7;
 
+	public static final int DIWALI_DIALOG = 8;
+
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
 	{
 		return showDialog(context, whichDialog, null, data);
@@ -64,6 +66,8 @@ public class HikeDialog
 			return showImageQualityDialog(context, listener, data);
 		case SMS_CLIENT_DIALOG:
 			return showSMSClientDialog(context, listener, data);
+		case DIWALI_DIALOG:
+			return showDiwaliDialog(context, listener);
 		}
 
 		return null;
@@ -434,6 +438,38 @@ public class HikeDialog
 		});
 
 		dialog.show();
+		return dialog;
+	}
+
+	private static Dialog showDiwaliDialog(Context context, final HikeDialogListener listener)
+	{
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.diwali_popup);
+		dialog.setCancelable(true);
+
+		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
+		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		okBtn.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				listener.positiveClicked(dialog);
+			}
+		});
+
+		cancelBtn.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				listener.negativeClicked(dialog);
+			}
+		});
+
+		dialog.show();
+
 		return dialog;
 	}
 

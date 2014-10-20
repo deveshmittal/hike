@@ -17,13 +17,15 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 
 	public static final String MQTT_DATABASE_NAME = "mqttpersistence";
 
-	public static final int MQTT_DATABASE_VERSION = 1;
+	public static final int MQTT_DATABASE_VERSION = 2;
 
 	public static final String MQTT_DATABASE_TABLE = "messages";
 
 	public static final String MQTT_MESSAGE_ID = "msgId";
 
 	public static final String MQTT_PACKET_ID = "mqttId";
+	
+	public static final String MQTT_PACKET_TYPE = "mqttType";
 
 	public static final String MQTT_MESSAGE = "data";
 
@@ -67,6 +69,7 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 			ih.bind(ih.getColumnIndex(MQTT_MESSAGE), packet.getMessage());
 			ih.bind(ih.getColumnIndex(MQTT_MESSAGE_ID), packet.getMsgId());
 			ih.bind(ih.getColumnIndex(MQTT_TIME_STAMP), packet.getTimeStamp());
+			ih.bind(ih.getColumnIndex(MQTT_PACKET_TYPE), packet.getPacketType());
 			long rowid = ih.execute();
 			if (rowid < 0)
 			{
@@ -91,7 +94,7 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 
 	public List<HikePacket> getAllSentMessages()
 	{
-		Cursor c = mDb.query(MQTT_DATABASE_TABLE, new String[] { MQTT_MESSAGE, MQTT_MESSAGE_ID, MQTT_TIME_STAMP, MQTT_PACKET_ID }, null, null, null, null, MQTT_TIME_STAMP);
+		Cursor c = mDb.query(MQTT_DATABASE_TABLE, new String[] { MQTT_MESSAGE, MQTT_MESSAGE_ID, MQTT_TIME_STAMP, MQTT_PACKET_ID, MQTT_PACKET_TYPE }, null, null, null, null, MQTT_TIME_STAMP);
 		try
 		{
 			List<HikePacket> vals = new ArrayList<HikePacket>(c.getCount());
@@ -99,10 +102,11 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 			int idIdx = c.getColumnIndex(MQTT_MESSAGE_ID);
 			int tsIdx = c.getColumnIndex(MQTT_TIME_STAMP);
 			int packetIdIdx = c.getColumnIndex(MQTT_PACKET_ID);
+			int packetTypeIdx = c.getColumnIndex(MQTT_PACKET_TYPE);
 
 			while (c.moveToNext())
 			{
-				HikePacket hikePacket = new HikePacket(c.getBlob(dataIdx), c.getLong(idIdx), c.getLong(tsIdx), c.getLong(packetIdIdx));
+				HikePacket hikePacket = new HikePacket(c.getBlob(dataIdx), c.getLong(idIdx), c.getLong(tsIdx), c.getLong(packetIdIdx), c.getInt(packetTypeIdx));
 				vals.add(hikePacket);
 			}
 
@@ -137,7 +141,7 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 		}
 
 		String sql = "CREATE TABLE IF NOT EXISTS " + MQTT_DATABASE_TABLE + " ( " + MQTT_PACKET_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + MQTT_MESSAGE_ID + " INTEGER,"
-				+ MQTT_MESSAGE + " BLOB," + MQTT_TIME_STAMP + " INTEGER" + " ) ";
+				+ MQTT_MESSAGE + " BLOB," + MQTT_TIME_STAMP + " INTEGER," +  MQTT_PACKET_TYPE + " INTEGER" + " ) ";
 		db.execSQL(sql);
 
 		sql = "CREATE INDEX IF NOT EXISTS " + MQTT_MSG_ID_INDEX + " ON " + MQTT_DATABASE_TABLE + "(" + MQTT_MESSAGE_ID + ")";
@@ -149,7 +153,11 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
-		// do nothing
+		if(oldVersion < 2)
+		{
+			String alter = "ALTER TABLE " + MQTT_DATABASE_TABLE + " ADD COLUMN " + MQTT_PACKET_TYPE + " INTEGER";
+			db.execSQL(alter);
+		}	
 	}
 
 	public void removeMessage(long msgId)
