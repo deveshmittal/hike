@@ -21,6 +21,8 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttActionListenerNew;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -849,11 +851,24 @@ public class ClientState
 			// this is QOS 1 or 2
 			{
 				lastOutBoundQOS1 = System.currentTimeMillis();
+				notifySentCallback(token);
 			}
 		}
 		else if (message instanceof MqttPingReq)
 		{
 			lastOutBoundQOS1 = System.currentTimeMillis();
+		}
+	}
+	
+	public void notifySentCallback(MqttToken token)
+	{
+		if (token != null)
+		{
+			IMqttActionListenerNew asyncCB = (IMqttActionListenerNew) token.getActionCallback();
+			if (asyncCB != null)
+			{
+				asyncCB.notifyWrittenOnSocket(token);
+			}
 		}
 	}
 

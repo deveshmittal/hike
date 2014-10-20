@@ -135,7 +135,7 @@ public class DownloadFileTask extends FileTransferBase
 				String byteRange = mStart + "-";
 				try
 				{
-					conn.setRequestProperty("Cookie", "user=" + token + ";uid=" + uId);
+					conn.setRequestProperty("Cookie", "user=" + token + ";UID=" + uId);
 					conn.setRequestProperty("Range", "bytes=" + byteRange);
 					conn.setConnectTimeout(10000);
 				}

@@ -17,7 +17,7 @@
             android:layout_alignParentLeft="true"
             android:text="Pankaj Verma"
             android:textColor="@color/standerd_black"
-            android:textSize="24sp"
+            android:textSize="@dimen/ftue_contact_card_text_size"
             android:textStyle="italic"
             android:paddingRight="17dp"
             android:paddingLeft="22dp" />

@@ -1,135 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="300dp"
-    android:layout_height="wrap_content"
-    android:background="@color/white"
-    android:gravity="center_horizontal"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_alert_box"
     android:orientation="vertical" >
 
-    <RelativeLayout
-        android:id="@+id/hike_sms_container"
+	<com.bsb.hike.view.CustomFontTextView 
+	    android:id="@+id/popup_header"
+	    android:layout_width="wrap_content"
+	    android:layout_height="64dp"
+	    android:text="Send 1 SMS as"
+	    android:textSize="24dp"
+	    android:textStyle="italic"
+	    android:gravity="center_vertical"
+	    android:textColor="@color/blue_hike"
+	    android:paddingLeft="24dp"
+	    />    
+	    
+	<View
+        android:id="@+id/divider1"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:paddingBottom="16dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="16dp" >
+        android:layout_height="0.5dp"
+        android:background="@color/blue_hike" />
+	
+	<LinearLayout
+	    android:id="@+id/hike_sms_container"
+	    android:layout_width="match_parent"
+	    android:layout_height="74dp"
+	    android:orientation="horizontal"
+	    android:background="@drawable/list_item"
+	    android:paddingLeft="28dp"
+	    android:clickable="true">
+	    
+	    <CheckBox
+	       android:id="@+id/hike_sms_checkbox"
+	       android:layout_width="wrap_content"
+	       android:layout_height="wrap_content"
+	       android:button="@drawable/preference_radio_btn"
+	       android:layout_gravity="center_vertical"
+	       android:clickable="true" />
+	    
+	    <LinearLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="vertical"
+	        android:layout_gravity="center_vertical"
+	        android:layout_marginLeft="14dp">
+	    
+		   <TextView 
+		       	android:id="@+id/hike_sms_header"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/free_hike_sms"
+				android:textColor="@drawable/sms_popup_text_selector"
+				android:textSize="18dp" />
+		   
+		   <TextView 
+		       	android:id="@+id/hike_sms_subtext"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/free_hike_sms_subtext"
+				android:textColor="@drawable/sms_popup_subtext_selector"
+				android:textSize="12dp" />
+		   
+	    </LinearLayout>
+	    
+	</LinearLayout>
 
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/hike_sms_header"
-            style="@style/UndeliveredPopup.Header"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:text="@string/free_hike_sms" />
-
-        <com.bsb.hike.view.CustomFontTextView
-            style="@style/UndeliveredPopup.Subtext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginTop="5dp"
-            android:text="@string/from_hike_number" />
-
-        <CheckBox
-            android:id="@+id/hike_sms_checkbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:button="@drawable/preference_radio_btn"
-            android:clickable="true" />
-
-        <com.bsb.hike.view.CustomFontTextView
-            style="@style/UndeliveredInfo"
-            android:layout_width="48dp"
-            android:layout_height="wrap_content"
-            android:minHeight="24dp"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
-            android:layout_toLeftOf="@id/hike_sms_checkbox"
-            android:background="@drawable/green_rounded_rectangle"
-            android:gravity="center"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:text="@string/hike_sms_info2" />
-    </RelativeLayout>
-
-    <View
-        android:id="@+id/divider"
+	<LinearLayout
+	    android:id="@+id/native_sms_container"
+	    android:layout_width="match_parent"
+	    android:layout_height="74dp"
+	    android:background="@drawable/list_item"
+	    android:orientation="horizontal"
+	    android:paddingLeft="28dp"
+	    android:clickable="true">
+	    
+	    <CheckBox
+	       android:id="@+id/native_sms_checkbox"
+	       android:layout_width="wrap_content"
+	       android:layout_height="wrap_content"
+	       android:button="@drawable/preference_radio_btn"
+	       android:layout_gravity="center_vertical"
+	       android:clickable="true" />
+	    
+	    <LinearLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="vertical"
+	        android:layout_gravity="center_vertical"
+	        android:layout_marginLeft="14dp">
+	    
+		   <TextView 
+		       	android:id="@+id/native_sms_header"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/regular_sms" 
+				android:textColor="@drawable/sms_popup_text_selector"
+				android:textSize="18dp"/>
+		   
+		   <TextView 
+		       	android:id="@+id/native_sms_subtext"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/carrier_charges_apply"
+				android:textColor="@drawable/sms_popup_subtext_selector"
+				android:textSize="12dp" />
+		   
+	    </LinearLayout>
+	    
+	</LinearLayout>
+	
+	<View
+        android:id="@+id/divider2"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="0.5dp"
         android:background="#1f73716d" />
-
-    <RelativeLayout
-        android:id="@+id/native_sms_container"
-        android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:paddingBottom="6dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="16dp" >
-
-        <CheckBox
-            android:id="@+id/native_sms_checkbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:button="@drawable/preference_radio_btn"
-            android:clickable="true" />
-
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/red_box"
-            style="@style/UndeliveredInfo"
-            android:layout_width="87dp"
-            android:layout_height="wrap_content"
-            android:minHeight="24dp"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
-            android:layout_toLeftOf="@id/native_sms_checkbox"
-            android:background="@drawable/red_rounded_rectangle"
-            android:gravity="center"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:text="@string/at_sms_rate" />
-        
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/native_sms_header"
-            style="@style/UndeliveredPopup.Header"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:text="@string/regular_sms" />
-
-        <com.bsb.hike.view.CustomFontTextView
-            style="@style/UndeliveredPopup.Subtext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/native_sms_header"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentBottom="true"
-            android:layout_toLeftOf="@id/red_box"
-            android:text="@string/from_your_number" />
-        
-    </RelativeLayout>
-
-    <View
-        android:id="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="#1f73716d" />
-
-    <com.bsb.hike.view.CustomFontButton
-        android:id="@+id/btn_send"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@drawable/list_item"
-        android:text="@string/send"
-        android:gravity="center"
-        android:textColor="@color/sms_popup"
-        android:textSize="16dp"
-        android:textStyle="bold" />
+	
+	<LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="50dp"
+	    android:orientation="horizontal">
+		
+	    <com.bsb.hike.view.CustomFontButton 
+	        android:id="@+id/btn_always"
+	        android:layout_width="0dp"
+	        android:layout_height="match_parent"
+	        android:layout_weight="1"
+	        android:text="Always"
+	        android:textSize="15dp"
+	        android:background="@drawable/list_item"
+	        android:textColor="@color/standerd_black"
+	        />
+	    
+	    <View
+	        android:id="@+id/horizontal_divider"
+	        android:layout_width="0.5dp"
+	        android:layout_height="match_parent"
+	        android:background="#1f73716d" />
+	    
+	    <com.bsb.hike.view.CustomFontButton 
+	        android:id="@+id/btn_just_once"
+	        android:layout_width="0dp"
+	        android:layout_height="match_parent"
+	        android:layout_weight="1"
+	        android:text="Just Once"
+	        android:textSize="15dp"
+	        android:background="@drawable/list_item"
+	        android:textColor="@color/standerd_black"
+	        />
+	</LinearLayout>
 
 </LinearLayout>

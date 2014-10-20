@@ -188,7 +188,7 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState>
 
 			State state = inbox ? (seen ? State.RECEIVED_READ : State.RECEIVED_UNREAD) : State.SENT_CONFIRMED;
 
-			ConvMessage convMessage = new ConvMessage(message, number, timestamp, state, -1, id, null, true);
+			ConvMessage convMessage = new ConvMessage(message, number, timestamp, state, -1, id, null, true,HikeConstants.MESSAGE_TYPE.PLAIN_TEXT);
 
 			List<ConvMessage> messageList = smsMap.get(number);
 			messageList.add(convMessage);

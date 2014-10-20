@@ -61,10 +61,29 @@ public class MessageMetadata
 	private StatusMessage statusMessage;
 
 	private Sticker sticker;
-
+	
 	private boolean oldUser;
+	
+	private boolean isGhostMessage;
+
+	public boolean isGhostMessage()
+	{
+		return isGhostMessage;
+	}
 
 	private NudgeAnimationType nudgeAnimationType = NudgeAnimationType.NONE;
+
+	private int pinMessage =0 ;
+
+	public int getPinMessage()
+	{
+		return pinMessage;
+	}
+
+	public void setPinMessage(int pinMessage)
+	{
+		this.pinMessage = pinMessage;
+	}
 
 	public MessageMetadata(JSONObject metadata, boolean isSent) throws JSONException
 	{
@@ -116,6 +135,7 @@ public class MessageMetadata
 			this.hikeFileList.add(new HikeFile(metadata, isSent));
 		}
 		this.isPokeMessage = metadata.optBoolean(HikeConstants.POKE);
+		this.pinMessage  = metadata.optInt(HikeConstants.PIN_MESSAGE);
 		this.json = metadata;
 		if (metadata.has(StickerManager.STICKER_ID))
 		{
@@ -231,7 +251,7 @@ public class MessageMetadata
 	{
 		return sticker;
 	}
-
+	
 	public boolean isOldUser()
 	{
 		return oldUser;

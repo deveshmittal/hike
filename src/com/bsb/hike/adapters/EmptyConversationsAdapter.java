@@ -4,24 +4,32 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.EmptyConversationContactItem;
+import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.CreateNewGroupActivity;
+import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.PeopleActivity;
+import com.bsb.hike.ui.WebViewActivity;
+import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.WhichScreen;
 
 public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationItem>
 {
@@ -33,6 +41,11 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 	private IconLoader iconLoader;
 
 	private LayoutInflater inflater;
+	
+	private enum ViewType
+	{
+		CONTACTS_CARD, FTUE_CARD, SEPERATOR
+	}
 
 	private class ViewHolder
 	{
@@ -46,6 +59,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 
 		TextView seeAll;
 
+		ImageView cardImg;
 	}
 
 	public EmptyConversationsAdapter(Context context, int textViewResourceId, List<EmptyConversationItem> objects)
@@ -58,20 +72,39 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 		iconLoader.setDefaultAvatarIfNoCustomIcon(true);
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
+	
+	public int getViewTypeCount()
+	{
+		return ViewType.values().length;
+	};
+
+
+	@Override
+	public int getItemViewType(int position)
+	{
+		EmptyConversationItem item = getItem(position);
+		if (item instanceof EmptyConversationContactItem)
+		{
+			return ViewType.CONTACTS_CARD.ordinal();
+		}
+		else if (item instanceof EmptyConversationFtueCardItem)
+		{
+			return ViewType.FTUE_CARD.ordinal();
+		}
+		return ViewType.SEPERATOR.ordinal();
+	}
 
 	@Override
 	public View getView(int position, View v, ViewGroup parent)
 	{
-		EmptyConversationItem item = getItem(position);
-
+		ViewType viewType = ViewType.values()[getItemViewType(position)];
 		ViewHolder viewHolder;
 		if (v == null)
 		{
 			viewHolder = new ViewHolder();
-			switch (item.getType())
+			if (viewType == ViewType.CONTACTS_CARD)
 			{
-			case EmptyConversationItem.HIKE_CONTACTS:
-			case EmptyConversationItem.SMS_CONTACTS:
+				EmptyConversationContactItem item = (EmptyConversationContactItem) getItem(position);
 
 				v = inflater.inflate(R.layout.ftue_updates_item, parent, false);
 
@@ -82,24 +115,31 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				viewHolder.parent = v.findViewById(R.id.main_content);
 
 				viewHolder.seeAll = (TextView) v.findViewById(R.id.see_all);
-				
+
 				viewHolder.contactsContainer.removeAllViews();
-				int limit = HikeConstants.FTUE_LIMIT;
-				for (int i=0; i< item.getContactList().size(); i++)
+				int limit = HikeConstants.FTUE_CONTACT_CARD_LIMIT;
+				for (int i = 0; i < item.getContactList().size(); i++)
 				{
 					View parentView = inflater.inflate(R.layout.ftue_recommended_list_item, parent, false);
 					viewHolder.contactsContainer.addView(parentView);
-					
 					if (--limit == 0)
 					{
 						break;
 					}
 				}
-
-				break;
-
-			default:
-				break;
+			}
+			else if (viewType == ViewType.FTUE_CARD)
+			{
+				v = inflater.inflate(R.layout.empty_conv_ftue_item, parent, false);
+				viewHolder.name = (TextView) v.findViewById(R.id.card_txt_header);
+				viewHolder.mainInfo = (TextView) v.findViewById(R.id.card_txt_msg);
+				viewHolder.seeAll = (TextView) v.findViewById(R.id.card_action_txt);
+				viewHolder.cardImg = (ImageView) v.findViewById(R.id.card_img);
+				viewHolder.parent = v.findViewById(R.id.all_content);
+			}
+			else if (viewType == ViewType.SEPERATOR)
+			{
+				v = inflater.inflate(R.layout.empty_conv_ftue_sep, parent, false);
 			}
 			v.setTag(viewHolder);
 		}
@@ -108,20 +148,65 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			viewHolder = (ViewHolder) v.getTag();
 		}
 
-		if (item.getType() == EmptyConversationItem.HIKE_CONTACTS || item.getType() == EmptyConversationItem.SMS_CONTACTS)
+		if (viewType == ViewType.CONTACTS_CARD)
 		{
+			EmptyConversationContactItem item = (EmptyConversationContactItem) getItem(position);
 			viewHolder.name.setText(item.getHeader());
 
-			int limit = HikeConstants.FTUE_LIMIT;
+			int limit = HikeConstants.FTUE_CONTACT_CARD_LIMIT;
 			View parentView = null;
-			for (int i=0; i< item.getContactList().size(); i++)
+			for (int i = 0; i < item.getContactList().size(); i++)
 			{
 				ContactInfo contactInfo = item.getContactList().get(i);
+				boolean shouldAdd = true;
+				if(item.getType() == EmptyConversationItem.SMS_CONTACTS){
+					if(!ContactUtils.isIndianMobileNumber(contactInfo.getMsisdn()))
+					{
+					   shouldAdd = false;	
+					}
+				}
+				if(shouldAdd)
+				{
 				parentView = viewHolder.contactsContainer.getChildAt(i);
 
 				ImageView avatar = (ImageView) parentView.findViewById(R.id.avatar);
 				TextView name = (TextView) parentView.findViewById(R.id.contact);
 				TextView status = (TextView) parentView.findViewById(R.id.info);
+				if (item.getType() == EmptyConversationItem.SMS_CONTACTS)
+				{
+					final ImageView addFriendBtn = (ImageView) parentView.findViewById(R.id.add_friend);
+					final TextView inviteText = (TextView) parentView.findViewById(R.id.invite_Text);
+					long inviteTime = contactInfo.getInviteTime();
+					if (inviteTime == 0)
+					{
+
+						addFriendBtn.setImageResource(R.drawable.ic_invite_to_hike);
+						addFriendBtn.setVisibility(View.VISIBLE);
+						inviteText.setVisibility(View.GONE);
+						parentView.findViewById(R.id.add_friend_divider).setVisibility(View.VISIBLE);
+						addFriendBtn.setTag(contactInfo);
+						addFriendBtn.setOnClickListener(new OnClickListener()
+						{
+
+							@Override
+							public void onClick(View v)
+							{
+								ContactInfo contactInfo = (ContactInfo) v.getTag();
+								Utils.sendInviteUtil(contactInfo, context, HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED, context.getString(R.string.native_header),
+										context.getString(R.string.native_info), WhichScreen.SMS_SECTION);
+								notifyDataSetChanged();
+							}
+						});
+					}
+					else
+					{
+
+						addFriendBtn.setVisibility(View.GONE);
+						inviteText.setTextColor(context.getResources().getColor(R.color.description_lightgrey));
+						inviteText.setVisibility(View.VISIBLE);
+						parentView.findViewById(R.id.add_friend_divider).setVisibility(View.GONE);
+					}
+				}
 
 				iconLoader.loadImage(contactInfo.getMsisdn(), true, avatar, true);
 
@@ -129,11 +214,12 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				status.setText(contactInfo.getMsisdn());
 
 				parentView.setTag(contactInfo);
-				parentView.setOnClickListener(ftueListItemClickListener);
+				parentView.setOnClickListener(contactCardClickListener);
 
 				if (--limit == 0)
 				{
 					break;
+				}
 				}
 			}
 
@@ -141,9 +227,9 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			{
 			case EmptyConversationItem.HIKE_CONTACTS:
 				viewHolder.mainInfo.setVisibility(View.GONE);
-				if (HomeActivity.ftueContactsData.getTotalHikeContactsCount() > HikeConstants.FTUE_LIMIT)
+				if (HomeActivity.ftueContactsData.getTotalHikeContactsCount() > HikeConstants.FTUE_CONTACT_CARD_LIMIT)
 				{
-					setUpSeeAllButton(viewHolder.seeAll);
+					setUpSeeAllButton(viewHolder.seeAll, false);
 				}
 				else
 				{
@@ -155,7 +241,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				viewHolder.mainInfo.setText(R.string.ftue_sms_contact_card_subtext);
 				if (HomeActivity.ftueContactsData.getTotalSmsContactsCount() > HomeActivity.ftueContactsData.getSmsContacts().size())
 				{
-					setUpSeeAllButton(viewHolder.seeAll);
+					setUpSeeAllButton(viewHolder.seeAll, true);
 				}
 				else
 				{
@@ -165,13 +251,40 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 
 			}
 		}
+		else if (viewType == ViewType.FTUE_CARD)
+		{
+			EmptyConversationFtueCardItem item = (EmptyConversationFtueCardItem) getItem(position);
+			viewHolder.name.setText(item.getHeaderTxtResId());
+			if (item.getType() == EmptyConversationFtueCardItem.GROUP)
+			{
+				viewHolder.mainInfo.setText(context.getString(item.getSubTxtResId(), HikeConstants.MAX_CONTACTS_IN_GROUP));
+			}
+			else
+			{
+				viewHolder.mainInfo.setText(item.getSubTxtResId());
+			}
+			viewHolder.seeAll.setText(item.getClickableTxtResId());
+			viewHolder.seeAll.setTextColor(item.getClickableTxtColor());
+			viewHolder.cardImg.setBackgroundColor(item.getImgBgColor());
+			viewHolder.cardImg.setImageResource(item.getImgResId());
+			viewHolder.cardImg.setScaleType(ScaleType.CENTER);
+			viewHolder.parent.setTag(item);
+			viewHolder.parent.setOnClickListener(ftueCardClickListener);
+		}
 		return v;
 	}
 
-	private void setUpSeeAllButton(TextView seeAllView)
+	private void setUpSeeAllButton(TextView seeAllView, boolean invite)
 	{
 		seeAllView.setVisibility(View.VISIBLE);
-		seeAllView.setText(R.string.see_all_upper_caps);
+		seeAllView.setTag(Boolean.valueOf(invite));
+		if(invite)
+		{
+			seeAllView.setText(R.string.invite_more);
+		}else
+		{
+			seeAllView.setText(R.string.see_all_upper_caps);	
+		}
 		seeAllView.setOnClickListener(seeAllBtnClickListener);
 	}
 
@@ -191,28 +304,70 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 		return super.isEnabled(position);
 	}
 
-	private OnClickListener ftueListItemClickListener = new OnClickListener()
+	private OnClickListener contactCardClickListener = new OnClickListener()
 	{
-
 		@Override
 		public void onClick(View v)
 		{
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 
 			Utils.startChatThread(context, contactInfo);
-			
+
 			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_START_CHAT_CLICKED, contactInfo.getMsisdn());
 
 		}
 	};
-
-	private OnClickListener seeAllBtnClickListener = new OnClickListener()
+	
+	private OnClickListener ftueCardClickListener = new OnClickListener()
 	{
-
 		@Override
 		public void onClick(View v)
 		{
-			Intent intent = new Intent(context, ComposeChatActivity.class);
+			EmptyConversationFtueCardItem item = (EmptyConversationFtueCardItem) v.getTag();
+			if (item.getType() == EmptyConversationItem.LAST_SEEN)
+			{
+				openActivityAndSendLogEvent(PeopleActivity.class, HikeConstants.LogEvent.FTUE_CARD_LAST_SEEN_CLICKED);
+			}
+			else if (item.getType() == EmptyConversationItem.GROUP)
+			{
+				openActivityAndSendLogEvent(CreateNewGroupActivity.class, HikeConstants.LogEvent.FTUE_CARD_GROUP_CLICKED);
+			}
+			else if (item.getType() == EmptyConversationItem.INVITE)
+			{
+				openActivityAndSendLogEvent(HikeListActivity.class, HikeConstants.LogEvent.FTUE_CARD_INVITE_CLICKED);
+			}
+			else if (item.getType() == EmptyConversationItem.HIKE_OFFLINE)
+			{
+				Intent intent = new Intent(context, WebViewActivity.class);
+				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.h2oTutorialUrl);
+				intent.putExtra(HikeConstants.Extras.TITLE, context.getResources().getString(R.string.hike_offline_caps));
+				context.startActivity(intent);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_HIKE_OFFLINE_CLICKED);
+			}
+		}
+	};
+
+	private void openActivityAndSendLogEvent(Class<?> activity, String logEventKey)
+	{
+		Intent intent = new Intent(context, activity);
+		context.startActivity(intent);
+		Utils.sendUILogEvent(logEventKey);
+	}
+
+	private OnClickListener seeAllBtnClickListener = new OnClickListener()
+	{
+		@Override
+		public void onClick(View v)
+		{
+			Boolean isInvite = (Boolean)v.getTag();
+			Intent intent;
+			if(isInvite.booleanValue())
+			{
+				 intent = new Intent(context, HikeListActivity.class);
+			}else
+			{
+				 intent = new Intent(context, ComposeChatActivity.class);
+			}
 			context.startActivity(intent);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_SEEL_ALL_CLICKED);
 		}

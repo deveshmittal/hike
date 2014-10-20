@@ -1,5 +1,6 @@
 package com.bsb.hike.service;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.List;
 
@@ -16,7 +17,6 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -43,10 +43,11 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
+import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMRegistrar;
 
 public class HikeService extends Service
@@ -874,35 +875,53 @@ public class HikeService extends Service
 
 	class PostSignupProfilePic extends BroadcastReceiver
 	{
-
 		@Override
 		public void onReceive(final Context context, Intent intent)
 		{
 			String profilePicPath = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH, null);
+
 			if (profilePicPath == null)
 			{
 				Logger.d(getClass().getSimpleName(), "Signup profile pic already uploaded");
+				HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
 				return;
 			}
+
+			final File f = new File(profilePicPath);
+			if (!(f.exists() && f.length() > 0))
+			{
+				Logger.d(getClass().getSimpleName(), "Signup profile pic does not exists or it's length is zero");
+				HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
+				f.delete();
+				return;
+			}
+
 			Logger.d(getClass().getSimpleName(), "profile pic upload started");
 
 			HikeHttpCallback hikeHttpCallBack = new HikeHttpCallback()
 			{
 				public void onSuccess(JSONObject response)
 				{
-					SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-					Editor editor = prefs.edit();
-					editor.remove(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
-					editor.commit();
-					String msisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
+					String msisdn = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.MSISDN_SETTING, null);
+					HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
 					Utils.renameTempProfileImage(msisdn);
+					// clearing cache for this msisdn because if user go to profile before rename (above line) executes then icon blurred image will be set in cache
+					HikeMessengerApp.getLruCache().clearIconForMSISDN(msisdn);
 					Logger.d(getClass().getSimpleName(), "profile pic upload done");
 				}
 
 				public void onFailure()
 				{
 					Logger.d(getClass().getSimpleName(), "profile pic upload failed");
-					scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_SIGNUP_PRO_PIC, sendSignupProfilePicToServer);
+					if (f.exists() && f.length() > 0)
+					{
+						scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME_SIGNUP_PRO_PIC, sendSignupProfilePicToServer);
+					}
+					else
+					{
+						HikeSharedPreferenceUtil.getInstance(context).removeData(HikeMessengerApp.SIGNUP_PROFILE_PIC_PATH);
+						f.delete();
+					}
 				}
 			};
 
@@ -910,7 +929,6 @@ public class HikeService extends Service
 			profilePicRequest.setFilePath(profilePicPath);
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
 			Utils.executeHttpTask(hikeHTTPTask, profilePicRequest);
-
 		}
 	}
 

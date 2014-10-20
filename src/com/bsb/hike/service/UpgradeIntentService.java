@@ -24,24 +24,38 @@ public class UpgradeIntentService extends IntentService
 	@Override
 	protected void onHandleIntent(Intent dbIntent)
 	{
-		makeRoundedThumbsForUserDb();
-
-		initialiseSharedMediaAndFileThumbnailTable();
 		context = this;
 		prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (prefs.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && prefs.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1)
+		{
+			makeRoundedThumbsForUserDb();
 
-		// setting the preferences to 2 to indicate we're done with the
-		// migration !
-		Editor editor = prefs.edit();
-		editor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 2);
-		editor.putInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, 2);
-		editor.putBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false);
-		editor.commit();
+			initialiseSharedMediaAndFileThumbnailTable();
 
-		// fire the pubsub event to let the HomeActivity class know that the
-		// avatar
-		// upgrade is done and it can stop the spinner
-		HikeMessengerApp.getPubSub().publish(HikePubSub.FINISHED_AVTAR_UPGRADE, null);
+			// setting the preferences to 2 to indicate we're done with the
+			// migration !
+			Editor editor = prefs.edit();
+			editor.putInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, 2);
+			editor.putInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, 2);
+			editor.putBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false);
+			editor.commit();
+
+			// fire the pubsub event to let the HomeActivity class know that the
+			// avatar
+			// upgrade is done and it can stop the spinner
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FINISHED_AVTAR_UPGRADE, null);
+		}
+
+		if (prefs.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1)
+		{
+			addMessageHashNMsisdnNReadByForGroup();
+			// setting the preferences to 2 to indicate we're done with the
+			// migration !
+			Editor editor = prefs.edit();
+			editor.putInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, 2);
+			editor.putBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false);
+			editor.commit();
+		}
 	}
 
 	public UpgradeIntentService()
@@ -61,4 +75,8 @@ public class UpgradeIntentService extends IntentService
 		HikeConversationsDatabase.getInstance().initialiseSharedMediaAndFileThumbnailTable();
 	}
 
+	private void addMessageHashNMsisdnNReadByForGroup()
+	{
+		HikeConversationsDatabase.getInstance().addMessageHashNMsisdnNReadByForGroup();
+	}
 }

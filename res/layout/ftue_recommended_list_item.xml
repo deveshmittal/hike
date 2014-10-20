@@ -22,6 +22,32 @@
                 android:id="@+id/avatar"
                 style="@style/AvatarStyle.Padding" />
         </RelativeLayout>
+        
+          <com.bsb.hike.view.CustomFontTextView
+             android:id="@+id/invite_Text"
+             android:layout_width="60dp"
+             android:layout_height="30dp"
+             android:layout_alignParentRight="true"
+             android:layout_centerVertical="true"
+             android:gravity="center"
+             android:text="@string/invited"
+             android:textColor="@color/white"
+             android:textSize="13sp"
+             android:textStyle="bold|italic"
+             android:visibility="gone" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/invite_Text"
+            android:layout_width="60dp"
+            android:layout_height="30dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:text="@string/invited"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold|italic"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/add_friend"
@@ -29,9 +55,9 @@
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
+            android:background="@drawable/list_item"
             android:paddingLeft="14dp"
             android:paddingRight="12dp"
-            android:background ="@drawable/list_item"
             android:src="@drawable/ic_add_friend"
             android:visibility="gone" />
 

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@color/pin_color" >
+
+        <ImageView
+            android:id="@+id/pattern"
+            android:layout_width="16dp"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/main_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignTop="@+id/main_content"
+            android:scaleType="fitXY"
+            android:src="@drawable/pin_pattern" />
+
+        <RelativeLayout
+            android:id="@+id/main_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/pattern"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/sender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="15dp"
+                android:text="Kavin"
+                android:textColor="#af9d52"
+                android:textSize="12sp" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:layout_toRightOf="@id/sender"
+                android:text="12:30 AM"
+                android:textColor="#af9d52"
+                android:textSize="12sp"
+                android:textStyle="italic" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginRight="15dp"
+                android:layout_below="@id/sender"
+                android:text="Mass bunk tomorrow! Let’s all go for a movie at DT Cinema."
+                android:textColor="#45400e"
+                android:textSize="16sp"
+                android:textStyle="italic" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        android:src="@drawable/pin_shadow" />
+
+</LinearLayout>

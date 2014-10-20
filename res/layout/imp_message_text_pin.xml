@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/pin_color" >
+
+        <ImageView
+            android:id="@+id/pattern"
+            android:layout_width="16dp"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/main_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignTop="@+id/main_content"
+            android:scaleType="fitXY"
+            android:src="@drawable/pin_pattern" />
+
+        <RelativeLayout
+            android:id="@+id/main_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/cross"
+            android:layout_toRightOf="@+id/pattern"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="15dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="sample"
+                android:textColor="@color/black"
+                android:textSize="17sp"
+                android:textStyle="italic" />
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/cross"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/main_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/main_content"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp"
+            android:src="@drawable/ic_cross" />
+    </RelativeLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        android:src="@drawable/pin_shadow" />
+
+</LinearLayout>

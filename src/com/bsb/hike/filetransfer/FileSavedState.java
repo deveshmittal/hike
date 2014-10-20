@@ -23,6 +23,8 @@ public class FileSavedState implements Serializable
 	private String _sessionId;
 
 	private String _responseJson;
+	
+	private String _fileKey;
 
 	public FileSavedState(FTState state, int totalSize, int transferredSize)
 	{
@@ -55,6 +57,12 @@ public class FileSavedState implements Serializable
 	{
 		_currentState = FTState.NOT_STARTED;
 	}
+	
+	public FileSavedState(FTState state, String mFileKey)
+	{
+		_currentState = state;
+		_fileKey = mFileKey;
+	}
 
 	public int getTotalSize()
 	{
@@ -74,6 +82,11 @@ public class FileSavedState implements Serializable
 	public String getSessionId()
 	{
 		return _sessionId;
+	}
+	
+	public String getFileKey()
+	{
+		return _fileKey;
 	}
 
 	public JSONObject getResponseJson()

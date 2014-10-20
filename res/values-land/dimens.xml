@@ -42,5 +42,6 @@
 	<dimen name="ftue_card_text_msg_font">16dp</dimen>
 	<dimen name="ftue_card_page_indicator_height">15dp</dimen>
 	
-	
+	<dimen name="logo_top_margin">25dp</dimen>
+	<dimen name="welcome_bottom_margin">15dp</dimen>
 </resources>

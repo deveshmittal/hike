@@ -39,6 +39,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.EmoticonAdapter;
+import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.adapters.MoodAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -60,7 +61,7 @@ import com.facebook.Session;
 import com.facebook.Session.StatusCallback;
 import com.facebook.SessionState;
 
-public class StatusUpdate extends AuthSocialAccountBaseActivity implements Listener, OnSoftKeyboardListener
+public class StatusUpdate extends AuthSocialAccountBaseActivity implements Listener, OnSoftKeyboardListener, EmoticonClickListener
 {
 
 	private class ActivityTask
@@ -686,7 +687,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 	private void setupEmoticonLayout(int whichSubcategory, int[] tabDrawable)
 	{
 
-		EmoticonAdapter statusEmojiAdapter = new EmoticonAdapter(this, statusTxt, getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT, tabDrawable,
+		EmoticonAdapter statusEmojiAdapter = new EmoticonAdapter(this, this, getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT, tabDrawable,
 				true);
 
 		ViewPager emoticonViewPager = (ViewPager) findViewById(R.id.emoticon_pager);
@@ -870,5 +871,12 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 	@Override
 	public void onHidden()
 	{
+	}
+
+	@Override
+	public void onEmoticonClicked(int emoticonIndex)
+	{
+		Utils.emoticonClicked(getApplicationContext(), emoticonIndex, statusTxt);
+		
 	}
 }

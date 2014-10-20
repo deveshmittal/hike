@@ -194,6 +194,23 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			i.printStackTrace();
 		}
 	}
+	
+	protected void saveFileKeyState(String mFileKey)
+	{
+		FileSavedState fss = new FileSavedState(_state, mFileKey);
+		try
+		{
+			FileOutputStream fileOut = new FileOutputStream(stateFile);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(fss);
+			out.close();
+			fileOut.close();
+		}
+		catch (IOException i)
+		{
+			i.printStackTrace();
+		}
+	}
 
 	protected void deleteStateFile()
 	{

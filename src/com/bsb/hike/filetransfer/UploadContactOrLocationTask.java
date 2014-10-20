@@ -188,7 +188,6 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	private JSONObject executeFileTransferRequest(String filePath, String fileName, JSONObject request, String fileType) throws Exception
 	{
 
-		HttpClient httpClient = AccountUtils.getClient();
 
 		HttpContext httpContext = new BasicHttpContext();
 
@@ -213,6 +212,7 @@ public class UploadContactOrLocationTask extends FileTransferBase
 		maxSize = entity.getContentLength();
 
 		httpPut.setEntity(entity);
+		HttpClient httpClient = AccountUtils.getClient(httpPut);
 		HttpResponse response = httpClient.execute(httpPut, httpContext);
 		String serverResponse = EntityUtils.toString(response.getEntity());
 

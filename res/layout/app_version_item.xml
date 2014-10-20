@@ -11,9 +11,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/version_item_marginTop"
         android:text="@string/app_version"
-        android:textColor="@color/list_item_header"
-        android:textSize="13sp"
-        android:textStyle="bold" />
+        android:textColor="@color/standerd_black"
+        android:textSize="12sp" />
 
     <ImageView
         android:id="@+id/with_love"

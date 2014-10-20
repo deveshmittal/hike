@@ -24,6 +24,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Utils;
 
 public class SettingsActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener
 {
@@ -42,7 +43,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		ArrayList<String> items = new ArrayList<String>();
 
 		items.add(getString(R.string.notifications));
-		items.add(getString(R.string.auto_download_media));
+		items.add(getString(R.string.settings_media));
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(HikeConstants.FREE_SMS_PREF, true))
 		{
 			int credits = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getInt(HikeMessengerApp.SMS_SETTING, 0);
@@ -61,7 +62,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		final ArrayList<String> itemsSummary = new ArrayList<String>();
 
 		itemsSummary.add(getString(R.string.notifications_hintext));
-		itemsSummary.add(getString(R.string.auto_download_media_hinttext));
+		itemsSummary.add(getString(R.string.auto_download_media_hinttext_new));
 		itemsSummary.add(getString(R.string.sms_setting_hinttext));
 		itemsSummary.add(getString(R.string.account_hintttext));
 		itemsSummary.add(getString(R.string.privacy_setting_hinttext));
@@ -194,7 +195,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 		case 1:
 			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.auto_download_preferences);
+			intent.putExtra(HikeConstants.Extras.PREF, R.xml.media_download_preferences);
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.auto_download_media);
 			break;
 		case 2:
@@ -206,9 +207,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			intent.putExtra(HikeConstants.Extras.TITLE, R.string.account);
 			break;
 		case 4:
-			intent = new Intent(this, HikePreferences.class);
-			intent.putExtra(HikeConstants.Extras.PREF, R.xml.privacy_preferences);
-			intent.putExtra(HikeConstants.Extras.TITLE, R.string.privacy);
+			intent = Utils.getIntentForPrivacyScreen(this);
 			break;
 		case 5:
 			Intent contactSyncIntent = new Intent(HikeService.MQTT_CONTACT_SYNC_ACTION);

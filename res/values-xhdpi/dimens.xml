@@ -19,6 +19,11 @@
 	<dimen name="card_header_img_content_padding_bottom">57dp</dimen>
 	<dimen name="card_header_text_padding_left">20dp</dimen>
 	<dimen name="card_header_text_padding_right">20dp</dimen>
-	
-	
+	<dimen name="ftue_card_header">24dp</dimen>
+	<dimen name="ftue_card_body">14dp</dimen>
+	<dimen name="ftue_card_click_text">14dp</dimen>
+	<dimen name="ftue_card_right_padding">10dp</dimen>
+	<dimen name="ftue_card_left_margin">18dp</dimen>
+	<dimen name="ftue_contact_card_text_size">24dp</dimen>
+	<dimen name="logo_top_margin">90dp</dimen>
 </resources>

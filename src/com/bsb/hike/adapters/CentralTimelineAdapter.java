@@ -648,6 +648,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			intent.setClass(context, ChatThread.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			context.startActivity(intent);
+			context.finish();
 		}
 	};
 
