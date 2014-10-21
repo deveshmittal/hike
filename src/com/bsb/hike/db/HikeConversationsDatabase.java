@@ -5628,4 +5628,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		contentValues.put(DBConstants.METADATA, metadata);
 		return contentValues;
 	}
+	
+	public void updateVisibilityAndIndex(List<StickerCategory> stickerCategories)
+	{
+		try
+		{
+			mDb.beginTransaction();
+			for (StickerCategory stickerCategory : stickerCategories)
+			{
+				ContentValues contentValues = new ContentValues();
+				contentValues.put(DBConstants.IS_VISIBLE, stickerCategory.isVisible());
+				contentValues.put(DBConstants.CATEGORY_INDEX, stickerCategory.getCategoryIndex());
+				
+				mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { stickerCategory.getCategoryId() });
+			}
+			mDb.setTransactionSuccessful();
+		}
+		catch (Exception e)
+		{
+			Logger.e(getClass().getSimpleName(), "Exception : ", e);
+			e.printStackTrace();
+		}
+		finally
+		{
+			mDb.endTransaction();
+		}
+	}
+	
 }

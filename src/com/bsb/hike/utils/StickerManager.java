@@ -979,4 +979,9 @@ public class StickerManager
 		Collections.sort(stickerCategories);
 		return stickerCategories;
 	}
+	
+	public void saveVisibilityAndIndex(List<StickerCategory> stickerCategories)
+	{
+		HikeConversationsDatabase.getInstance().updateVisibilityAndIndex(stickerCategories);
+	}
 }
