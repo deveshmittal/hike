@@ -238,7 +238,7 @@ public class StickerManager
 		 * TODO : This will throw an exception in case of remove category as, this function will be called from mqtt thread and stickerCategories will be called from UI thread
 		 * also.
 		 */
-		stickerCategoriesMap.putAll(HikeConversationsDatabase.getInstance().getVisibleStickerCategories());
+		stickerCategoriesMap.putAll(HikeConversationsDatabase.getInstance().getAllStickerCategoriesWithVisibility(true));
 	}
 
 	public void removeCategory(String removedCategoryId)
@@ -959,5 +959,21 @@ public class StickerManager
 
 		Utils.makeNoMediaFile(otherAssetsDir);
 		return otherAssetsDir;
+	}
+	
+	public List<StickerCategory> getMyStickerCategoryList()
+	{
+		ArrayList<StickerCategory> stickerCategories = new ArrayList<StickerCategory>(stickerCategoriesMap.values());
+		stickerCategories.addAll(HikeConversationsDatabase.getInstance().getAllStickerCategoriesWithVisibility(false).values());
+		Iterator<StickerCategory> it = stickerCategories.iterator();
+		while(it.hasNext())
+		{
+			StickerCategory sc = it.next();
+			if(sc.isCustom())
+			{
+				it.remove();
+			}
+		}
+		return stickerCategories;
 	}
 }

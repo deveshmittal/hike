@@ -4018,7 +4018,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
 	}
 
-	public LinkedHashMap<String, StickerCategory> getVisibleStickerCategories()
+	public LinkedHashMap<String, StickerCategory> getAllStickerCategoriesWithVisibility(boolean isVisible)
 	{
 		Cursor c = null;
 		LinkedHashMap<String, StickerCategory> stickerDataMap;
@@ -4026,7 +4026,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		try
 		{
 			String selection = DBConstants.IS_VISIBLE + "=?";
-			String[] selectionArgs = { Integer.toString(1) };
+			String[] selectionArgs = { isVisible ? Integer.toString(1) : Integer.toString(0) };
 			
 			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, null , selection, selectionArgs, null, null, null);
 			stickerDataMap = parseStickerCategoriesCursor(c);
