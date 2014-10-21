@@ -757,6 +757,10 @@ public class HikeConstants
 	public static final String LARGE_STICKER_ROOT = "/large";
 
 	public static final String SMALL_STICKER_ROOT = "/small";
+	
+	public static final String PREVIEW_STICKER_ROOT = "/preview";
+	
+	public static final String ENABLE_DISABLE_STICKER_ROOT = "/enable_disable";
 
 	public static final String HIKE_FILE_LIST_NAME = "hikeFiles";
 
@@ -1867,5 +1871,15 @@ public class HikeConstants
 	public static final int ATOMIC_APP_TIP_HIKE_REWARDS = 11;
 
 	public static final int SHARED_MEDIA_TYPE = 1;
+
+	public static enum STResult
+	{
+		SUCCESS, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, SERVER_ERROR, CARD_UNMOUNT, NO_SD_CARD, FILE_EXPIRED
+	}
 	
+	public static final String PREVIEW_IMAGE = "previewimg";
+	public static final String ENABLE_IMAGE = "enableimg";
+	public static final String DISABLE_IMAGE = "disableimg";
+	public static final String CATEGORY_ID = "catId";
+	public static final String SIZE = "size";	
 }
