@@ -232,32 +232,30 @@ public class StickerManager
 		stickerCategoriesMap.putAll(HikeConversationsDatabase.getInstance().getVisibleStickerCategories());
 	}
 
-	private void removeCategoryFromList(String removedCategoryId)
+	public void removeCategory(String removedCategoryId)
 	{
+		HikeConversationsDatabase.getInstance().removeStickerCategory(removedCategoryId);
 		StickerCategory cat = stickerCategoriesMap.remove(removedCategoryId);
-		if(cat != null)
+		if(!cat.isCustom())
 		{
-			removeCategoryFromRecents(cat);
-		}
-	}
-
-	private void removeCategoryFromRecents(StickerCategory category)
-	{
-		String categoryDirPath = getStickerDirectoryForCategoryId(context, category.getCategoryId());
-		if (categoryDirPath != null)
-		{
-			File smallCatDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
-			File bigCatDir = new File(categoryDirPath);
-			if (smallCatDir.exists())
+			String categoryDirPath = getStickerDirectoryForCategoryId(context, removedCategoryId);
+			if (categoryDirPath != null)
 			{
-				String[] stickerIds = smallCatDir.list();
-				for (String stickerId : stickerIds)
+				File smallCatDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
+				File bigCatDir = new File(categoryDirPath);
+				if (smallCatDir.exists())
 				{
-					recentStickers.remove(new Sticker(category, stickerId));
+					String[] stickerIds = smallCatDir.list();
+					for (String stickerId : stickerIds)
+					{
+						removeStickerFromCustomCategory(new Sticker(removedCategoryId, stickerId));
+					}
 				}
+				Utils.deleteFile(bigCatDir);
+				Utils.deleteFile(smallCatDir);
 			}
-			Utils.deleteFile(bigCatDir);
 		}
+		
 	}
 
 	public void addNoMediaFilesToStickerDirectories()
@@ -331,6 +329,12 @@ public class StickerManager
 			return;
 		}
 		Sticker st = new Sticker(categoryId, stickerId);
+		removeStickerFromCustomCategory(st);
+		
+	}
+	
+	public void removeStickerFromCustomCategory(Sticker st)
+	{
 		for(StickerCategory category : stickerCategoriesMap.values())
 		{
 			if(category.isCustom())
@@ -339,9 +343,6 @@ public class StickerManager
 				Logger.d(TAG, "Sticker removed from custom category : " + category.getCategoryId());
 			}
 		}
-
-		// remove the sticker from cache too, recycling stuff is handled by the cache itself
-		HikeMessengerApp.getLruCache().remove(st.getSmallStickerPath(context));
 	}
 
 	public void setStickerUpdateAvailable(String categoryId, boolean updateAvailable)

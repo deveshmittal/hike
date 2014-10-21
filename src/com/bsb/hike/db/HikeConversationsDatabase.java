@@ -4007,6 +4007,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	public void removeStickerCategory(String categoryId)
 	{
 		mDb.delete(DBConstants.STICKER_CATEGORIES_TABLE, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
+		mDb.delete(DBConstants.STICKER_SHOP_TABLE, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
 	}
 
 	public void stickerUpdateAvailable(String categoryId, boolean updateAvailable)

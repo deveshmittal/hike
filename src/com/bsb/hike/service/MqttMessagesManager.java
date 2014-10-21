@@ -1383,32 +1383,9 @@ public class MqttMessagesManager
 		}
 		else if (HikeConstants.REMOVE_STICKER.equals(subType) || HikeConstants.REMOVE_CATEGORY.equals(subType))
 		{
-			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId);
-			if (categoryDirPath == null)
-			{
-				return;
-			}
-			File categoryDir = new File(categoryDirPath);
-
-			/*
-			 * If the category itself does not exist, then we have nothing to delete
-			 */
-			if (!categoryDir.exists())
-			{
-				return;
-			}
-
 			if (HikeConstants.REMOVE_CATEGORY.equals(subType))
 			{
-				String removedIds = settings.getString(StickerManager.REMOVED_CATGORY_IDS, "[]");
-				JSONArray removedIdArray = new JSONArray(removedIds);
-				removedIdArray.put(categoryId);
-
-				Editor editor = settings.edit();
-				editor.putString(StickerManager.REMOVED_CATGORY_IDS, removedIdArray.toString());
-				editor.commit();
-
-				StickerManager.getInstance().setupStickerCategoryList(settings);
+				StickerManager.getInstance().removeCategory(categoryId);
 			}
 			else
 			{
