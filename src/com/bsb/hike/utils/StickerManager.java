@@ -229,7 +229,9 @@ public class StickerManager
 
 	public List<StickerCategory> getStickerCategoryList()
 	{
-		return new ArrayList<StickerCategory>(stickerCategoriesMap.values());
+		List<StickerCategory> stickerCategoryList = new ArrayList<StickerCategory>(stickerCategoriesMap.values());
+		Collections.sort(stickerCategoryList);
+		return stickerCategoryList;
 	}
 
 	public void setupStickerCategoryList(SharedPreferences preferences)
@@ -974,6 +976,7 @@ public class StickerManager
 				it.remove();
 			}
 		}
+		Collections.sort(stickerCategories);
 		return stickerCategories;
 	}
 }

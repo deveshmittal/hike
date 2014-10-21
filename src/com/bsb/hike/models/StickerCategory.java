@@ -16,7 +16,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 
-public class StickerCategory implements Serializable
+public class StickerCategory implements Serializable, Comparable<StickerCategory>
 {
 
 	private String categoryId;
@@ -127,12 +127,12 @@ public class StickerCategory implements Serializable
 		this.isAdded = isAdded;
 	}
 
-	public int isCatIndex()
+	public int getCategoryIndex()
 	{
 		return catIndex;
 	}
 
-	public void setCatIndex(int catIndex)
+	public void setCategoryIndex(int catIndex)
 	{
 		this.catIndex = catIndex;
 	}
@@ -249,5 +249,21 @@ public class StickerCategory implements Serializable
 		updateAvailable = in.readBoolean();
 		//ignoring this varialbe after reading just to ensure backward compatibility
 		in.readBoolean();
+	}
+
+	@Override
+	public int compareTo(StickerCategory another)
+	{
+		if (this.equals(another))
+		{
+			return 0;
+		}
+
+		if (another == null)
+		{
+			return -1;
+		}
+
+		return this.catIndex < another.getCategoryIndex() ? -1 : 1; 
 	}
 }
