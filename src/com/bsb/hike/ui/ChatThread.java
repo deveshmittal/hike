@@ -4255,6 +4255,19 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 		}
+		else if (HikePubSub.STICKER_CATEGORY_MAP_UPDATED.equals(type))
+		{
+
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					stickerAdapter.notifyDataSetChanged();
+				}
+			});
+		}
 	}
 
 	private void setStateAndUpdateView(long msgId, boolean updateView)

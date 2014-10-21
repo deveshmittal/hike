@@ -37,6 +37,7 @@ import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
@@ -255,7 +256,7 @@ public class StickerManager
 				Utils.deleteFile(smallCatDir);
 			}
 		}
-		
+		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
 	}
 
 	public void addNoMediaFilesToStickerDirectories()
