@@ -148,7 +148,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	public int hashCode()
 	{
 		int hash = 3;
-		if (category != null)
+		if (!TextUtils.isEmpty(categoryId))
 			hash = 7 * hash + this.categoryId.hashCode();
 		hash = 7 * hash + this.stickerId.hashCode();
 		return hash;
