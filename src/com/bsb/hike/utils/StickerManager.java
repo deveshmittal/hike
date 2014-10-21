@@ -984,4 +984,11 @@ public class StickerManager
 	{
 		HikeConversationsDatabase.getInstance().updateVisibilityAndIndex(stickerCategories);
 	}
+	
+	public int getNumColumnsForStickerGrid(Context context)
+	{
+		int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+		
+		return ((int) (screenWidth/SIZE_IMAGE));
+	}
 }
