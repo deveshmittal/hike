@@ -169,7 +169,7 @@ public class DownloadStickerTask extends StickerTaskBase
 			return FTResult.DOWNLOAD_FAILED;
 		}
 
-		HikeConversationsDatabase.getInstance().addOrUpdateStickerCategory(category.getCategoryId(), totalNumber);
+		HikeConversationsDatabase.getInstance().updateStickerCountForStickerCategory(category.getCategoryId(), totalNumber);
 		return FTResult.SUCCESS;
 	}
 

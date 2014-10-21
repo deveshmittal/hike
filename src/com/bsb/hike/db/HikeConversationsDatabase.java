@@ -3995,27 +3995,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void addOrUpdateStickerCategory(String categoryId, int totalNum)
+	public void updateStickerCountForStickerCategory(String categoryId, int totalNum)
 	{
-		SQLiteStatement insertStatement = null;
-		try
-		{
-			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO " + DBConstants.STICKER_CATEGORIES_TABLE + " ( " + DBConstants.CATEGORY_ID + ", " + DBConstants.TOTAL_NUMBER
-					+ ", "+ DBConstants.UPDATE_AVAILABLE + " ) " + " VALUES (?, ?, ?)");
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.TOTAL_NUMBER, totalNum);
 
-			insertStatement.bindString(1, categoryId);
-			insertStatement.bindLong(2, totalNum);
-			insertStatement.bindLong(3, 0);
-
-			insertStatement.execute();
-		}
-		finally
-		{
-			if (insertStatement != null)
-			{
-				insertStatement.close();
-			}
-		}
+		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
 	}
 
 	public void removeStickerCategory(String categoryId)
