@@ -337,65 +337,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickersList, category, viewTypeList, worker);
 		spo.setStickerPageAdapter(stickerPageAdapter);
 		spo.getStickerListView().setAdapter(stickerPageAdapter);
-		spo.getStickerListView().setOnScrollListener(new OnScrollListener()
-		{
-			private int previousFirstVisibleItem;
-
-			private long previousEventTime;
-
-			private int velocity;
-
-			@Override
-			public void onScrollStateChanged(AbsListView view, int scrollState)
-			{
-				/*
-				 * Only set flinging true if the list is actually flinging and the velocity is greater than 10.
-				 */
-				stickerPageAdapter.setIsListFlinging(scrollState == SCROLL_STATE_FLING && velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_IMAGES);
-			}
-
-			@Override
-			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
-			{
-				if (previousFirstVisibleItem != firstVisibleItem)
-				{
-					long currTime = System.currentTimeMillis();
-					long timeToScrollOneElement = currTime - previousEventTime;
-					velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
-
-					previousFirstVisibleItem = firstVisibleItem;
-					previousEventTime = currTime;
-				}
-
-				int currentIdx = ((ChatThread) activity).getCurrentPage();
-				if (currentIdx == -1)
-				{
-					return;
-				}
-
-				StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
-				if (stickersList.isEmpty() || !category.getCategoryId().equals(sc.getCategoryId()))
-				{
-					return;
-				}
-				if (!StickerManager.getInstance().isStickerDownloading(category.getCategoryId()) && !category.isUpdateAvailable())
-				{
-					if (firstVisibleItem + visibleItemCount >= totalItemCount - 1)
-					{
-						Logger.d(getClass().getSimpleName(), "Downloading more stickers " + category.getCategoryId());
-						// if downloading more is not already inserted, then only insert that view
-						if (!viewTypeList.get(viewTypeList.size() - 1).equals(ViewType.DOWNLOADING_MORE))
-							viewTypeList.add(ViewType.DOWNLOADING_MORE);
-						DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.MORE_STICKERS, stickerPageAdapter);
-
-						StickerManager.getInstance().insertTask(category.getCategoryId(), downloadStickerTask);
-						stickerPageAdapter.notifyDataSetChanged();
-						Utils.executeFtResultAsyncTask(downloadStickerTask);
-					}
-				}
-			}
-		});
-
 	}
 
 	private void addDefaultStickers(List<Sticker> stickerList, StickerCategory cat, String[] stickerIds)
