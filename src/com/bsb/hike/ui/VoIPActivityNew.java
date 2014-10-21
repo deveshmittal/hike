@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioManager;
+import android.media.AudioManager.OnAudioFocusChangeListener;
+import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -33,6 +35,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.service.VoIPServiceNew;
+import com.google.android.gms.internal.af;
 
 public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 
@@ -53,7 +56,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	public boolean callConnected = false;
 	public boolean isMute = false;
 	public boolean isSpeakerOn = false;
-//	MediaPlayer mMediaPlayer = new MediaPlayer();
+	MediaPlayer mMediaPlayer = new MediaPlayer();
 	private String storedId;
 	private Handler displayHandler = new Handler();
 	private long startTime = 0;
@@ -65,6 +68,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	private PowerManager pm;
 	private WakeLock screenOffLock;
 	private Ringtone r;
+	private AudioManager am;
+	OnAudioFocusChangeListener afChangeListener = null;
 	
 	class CallLengthManager implements Runnable{
 
@@ -94,7 +99,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 //		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 //		mProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
 //		sensorMaxRange = mProximity.getMaximumRange();
-		
+		am = (AudioManager)getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
 		if(getIntent().hasExtra("callerID")){
 			callerId = getIntent().getStringExtra("callerID");
 			storedId = callerId;
@@ -119,12 +124,14 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-		notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+				notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 		r = RingtoneManager.getRingtone(getApplicationContext(), notification);
 		r.setStreamType(AudioManager.STREAM_ALARM);
 		r.play();
+//		am.requestAudioFocus(afChangeListener,AudioManager.STREAM_MUSIC,AudioManager.AUDIOFOCUS_GAIN);
+
 //		mMediaPlayer = MediaPlayer.create(this, R.raw.hike_jingle_15);
-//		mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//		mMediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
 //		mMediaPlayer.setLooping(true);
 //		final MediaPlayer player = mMediaPlayer; 
 //		player.start();
@@ -197,7 +204,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 //			mMediaPlayer.release();
 			isPlaying = false;
 //			mMediaPlayer = null;
-//			r.stop();
+			r.stop();
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		}
 		screenOff();
@@ -277,7 +284,9 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 //			mMediaPlayer.reset();
 //			mMediaPlayer.release();
 //			mMediaPlayer = null;
-//			r.stop();
+			r.stop();
+//			if (am.)
+//			am.abandonAudioFocus(afChangeListener);
 		}
 		mPubSub.removeListener(HikePubSub.VOIP_HANDSHAKE, this);
 		mPubSub.removeListener(HikePubSub.VOIP_CALL_STATUS_CHANGED, this);

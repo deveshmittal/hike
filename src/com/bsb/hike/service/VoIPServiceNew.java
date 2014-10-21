@@ -265,6 +265,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	@Override
 	public void onDestroy(){
 		Log.d("onDestroy", "Destroying");
+		((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setMode(AudioManager.MODE_NORMAL);
 		wl.release();
 		super.onDestroy();
 	}
