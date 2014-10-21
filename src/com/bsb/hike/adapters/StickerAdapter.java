@@ -139,7 +139,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		Logger.d(getClass().getSimpleName(), "Item removed from position : " + position);
 		((ViewPager) container).removeView((View) object);
-		StickerCategory cat = StickerManager.getInstance().getCategoryForIndex(position);
+		StickerCategory cat = stickerCategoryList.get(position);
 		stickerObjMap.remove(cat);
 	}
 
@@ -148,7 +148,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		View emoticonPage;
 		emoticonPage = inflater.inflate(R.layout.sticker_page, null);
-		StickerCategory category = StickerManager.getInstance().getCategoryForIndex(position);
+		StickerCategory category = stickerCategoryList.get(position);
 		Logger.d(getClass().getSimpleName(), "Instantiate View for categpory : " + category.getCategoryId());
 		setupStickerPage(emoticonPage, category, false, null);
 

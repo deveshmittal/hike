@@ -351,15 +351,6 @@ public class StickerManager
 		HikeConversationsDatabase.getInstance().stickerUpdateAvailable(categoryId, updateAvailable);
 	}
 
-	public StickerCategory getCategoryForIndex(int index)
-	{
-		if (index == -1 || index >= stickerCategoriesMap.size())
-		{
-			throw new IllegalArgumentException();
-		}
-		return (StickerCategory) stickerCategoriesMap.values().toArray()[index];
-	}
-
 	private String getExternalStickerDirectoryForCategoryId(Context context, String catId)
 	{
 		File dir = context.getExternalFilesDir(null);

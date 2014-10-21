@@ -295,15 +295,9 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	{
 		Sticker sticker = (Sticker) v.getTag();
 		((ChatThread) activity).sendSticker(sticker);
-		int currentIdx = ((ChatThread) activity).getCurrentPage();
-		if (currentIdx == -1)
-		{
-			return;
-		}
-		StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
 
 		/* In case sticker is clicked on the recents screen, don't update the UI or recents list. Also if this sticker is disabled don't update the recents UI */
-		if (!sc.isCustom())
+		if (!category.isCustom())
 		{
 			StickerManager.getInstance().addRecentSticker(sticker);
 			LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(StickerManager.RECENTS_UPDATED).putExtra(StickerManager.RECENT_STICKER_SENT, sticker));
