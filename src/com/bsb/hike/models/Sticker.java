@@ -168,8 +168,10 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	public void deSerializeObj(ObjectInputStream in) throws IOException, ClassNotFoundException
 	{
 		stickerId = in.readUTF();
-		category = new StickerCategory();
-		category.deSerializeObj(in);
+		StickerCategory tempcategory = new StickerCategory();
+		tempcategory.deSerializeObj(in);
+		categoryId = tempcategory.getCategoryId();
+		this.category = StickerManager.getInstance().getCategoryForId(categoryId);
 	}
 
 	public void setStickerData(int stickerIndex,String stickerId,StickerCategory category){
