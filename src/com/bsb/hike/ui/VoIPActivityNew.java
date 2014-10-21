@@ -9,12 +9,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -39,7 +34,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.service.VoIPServiceNew;
 
-public class VoIPActivityNew extends Activity implements HikePubSub.Listener, SensorEventListener {
+public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 
 	private String callerId;
 	private String dialedId;
@@ -58,22 +53,18 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener, Se
 	public boolean callConnected = false;
 	public boolean isMute = false;
 	public boolean isSpeakerOn = false;
-	MediaPlayer mMediaPlayer = new MediaPlayer();
+//	MediaPlayer mMediaPlayer = new MediaPlayer();
 	private String storedId;
 	private Handler displayHandler = new Handler();
-	private Handler heartBeatHandler = new Handler();
 	private long startTime = 0;
 	private long callLength = 0;
-	private SensorManager mSensorManager;
-	private Sensor mProximity;
-	private float sensorMaxRange;
 	private boolean isPlaying = false;
 	Uri notification;
-	Ringtone r;
 	private boolean sensorDisabled = false;
 	private static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK = 32;
 	private PowerManager pm;
 	private WakeLock screenOffLock;
+	private Ringtone r;
 	
 	class CallLengthManager implements Runnable{
 
@@ -100,9 +91,9 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener, Se
 		mPubSub.addListener(HikePubSub.VOIP_CALL_STATUS_CHANGED, this);
 		mPubSub.addListener(HikePubSub.VOIP_DURATION, this);
 		pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-		mProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-		sensorMaxRange = mProximity.getMaximumRange();
+//		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+//		mProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+//		sensorMaxRange = mProximity.getMaximumRange();
 		
 		if(getIntent().hasExtra("callerID")){
 			callerId = getIntent().getStringExtra("callerID");
@@ -130,6 +121,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener, Se
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 		notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 		r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+		r.setStreamType(AudioManager.STREAM_ALARM);
 		r.play();
 //		mMediaPlayer = MediaPlayer.create(this, R.raw.hike_jingle_15);
 //		mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -205,7 +197,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener, Se
 //			mMediaPlayer.release();
 			isPlaying = false;
 //			mMediaPlayer = null;
-			r.stop();
+//			r.stop();
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		}
 		screenOff();
@@ -285,7 +277,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener, Se
 //			mMediaPlayer.reset();
 //			mMediaPlayer.release();
 //			mMediaPlayer = null;
-			r.stop();
+//			r.stop();
 		}
 		mPubSub.removeListener(HikePubSub.VOIP_HANDSHAKE, this);
 		mPubSub.removeListener(HikePubSub.VOIP_CALL_STATUS_CHANGED, this);
@@ -325,39 +317,39 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener, Se
 		Toast.makeText(getApplicationContext(), "CALL ENDED", Toast.LENGTH_LONG).show();
 	}
 
-	@Override
-	public void onSensorChanged(SensorEvent event) {
+//	@Override
+//	public void onSensorChanged(SensorEvent event) {
 //		float distance = event.values[0];
-		Log.d("Proximity","Sensor event");
-		if ( event.values[0] == 0 ){
+//		Log.d("Proximity","Sensor event");
+//		if ( event.values[0] == 0 ){
 //			screenOff();
-		} else {
+//		} else {
 //			screenOn();
-		}
-		
-	}
+//		}
+//		
+//	}
 	
 	@Override
 	  protected void onResume() {
 	    // Register a listener for the sensor.
 	    super.onResume();
-	    mSensorManager.registerListener(this, mProximity, SensorManager.SENSOR_DELAY_NORMAL);
+//	    mSensorManager.registerListener(this, mProximity, SensorManager.SENSOR_DELAY_NORMAL);
 	  }
 
 	
 	@Override
 	  protected void onPause() {
 	    // Be sure to unregister the sensor when the activity pauses.
-	    mSensorManager.unregisterListener(this);
+//	    mSensorManager.unregisterListener(this);
 //	    mMediaPlayer.release();
 	    super.onPause();
 	  }
 
 
-	@Override
-	public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		// TODO Auto-generated method stub		
-	}
+//	@Override
+//	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+//		// TODO Auto-generated method stub		
+//	}
 	
 	private void screenOff(){
 //		Activity activity = getActivity();

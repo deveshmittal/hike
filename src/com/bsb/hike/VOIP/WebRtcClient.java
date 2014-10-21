@@ -153,8 +153,8 @@ public class WebRtcClient {
 						payload.getString("id"), payload.getInt("label"),
 						payload.getString("candidate"));
 				pc.addIceCandidate(candidate);
-//			}
-				}
+			}
+//				}
 		}
 	}
 	
@@ -453,7 +453,7 @@ public class WebRtcClient {
 //						// TODO Auto-generated catch block
 //						e.printStackTrace();
 //					}
-//					mListener.closeActivity();
+					mListener.closeActivity();
 				}
 				
 			}
@@ -469,11 +469,11 @@ public class WebRtcClient {
 //		iceServers.add(new PeerConnection.IceServer(
 //				"turn:numb.viagenie.ca:3478","anub018@gmail.com","123456"));
 
-//		iceServers.add(new PeerConnection.IceServer(
-//				"turn:54.179.186.147:3478","anu","123456"));
-		
 		iceServers.add(new PeerConnection.IceServer(
-				"turn:54.255.154.209:3478","hike","123456"));
+				"turn:54.179.186.147:3478","hike","123456"));
+		
+//		iceServers.add(new PeerConnection.IceServer(
+//				"turn:54.255.154.209:3478","hike","123456"));
 		
 		pcConstraints.mandatory.add(new MediaConstraints.KeyValuePair(
 				"OfferToReceiveAudio", "true"));
