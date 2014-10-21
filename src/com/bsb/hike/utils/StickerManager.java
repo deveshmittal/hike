@@ -137,7 +137,7 @@ public class StickerManager
 
 	public static final String HUMANOID = "humanoid";
 	
-	private LinkedHashMap<String, StickerCategory> stickerCategoriesMap;
+	private Map<String, StickerCategory> stickerCategoriesMap;
 	
 	public FilenameFilter stickerFileFilter = new FilenameFilter()
 	{
@@ -171,7 +171,7 @@ public class StickerManager
 
 	private StickerManager()
 	{
-		stickerCategoriesMap = new LinkedHashMap<String, StickerCategory>();
+		stickerCategoriesMap = Collections.synchronizedMap(new LinkedHashMap<String, StickerCategory>());
 		if (stickerTaskMap == null)
 		{
 			stickerTaskMap = new HashMap<String, StickerTaskBase>();
