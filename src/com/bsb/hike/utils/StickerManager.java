@@ -788,13 +788,11 @@ public class StickerManager
 	 */
 	public File saveLargeStickers(File largeStickerDir, String stickerId, Bitmap largeStickerBitmap) throws IOException
 	{
-		Bitmap stickerImage = HikeBitmapFactory.createScaledBitmap(largeStickerBitmap, SIZE_IMAGE, SIZE_IMAGE, Bitmap.Config.ARGB_8888, true, true, false);
-		
-		if (stickerImage != null)
+		if (largeStickerBitmap != null)
 		{
 			File largeImage = new File(largeStickerDir, stickerId);
-			BitmapUtils.saveBitmapToFile(largeImage, stickerImage);
-			stickerImage.recycle();
+			BitmapUtils.saveBitmapToFile(largeImage, largeStickerBitmap);
+			largeStickerBitmap.recycle();
 			return largeImage;
 		}
 		return null;
