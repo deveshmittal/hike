@@ -367,15 +367,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		return stickerPageList;
 	}
 
-	private void addDefaultStickers(List<Sticker> stickerList, StickerCategory cat, String[] stickerIds)
-	{
-		int count = stickerIds.length;
-		for (int i = 0; i < count; i++)
-		{
-			stickerList.add(new Sticker(cat, stickerIds[i]));
-		}
-	}
-
 	@Override
 	public int getIconResId(int index)
 	{
