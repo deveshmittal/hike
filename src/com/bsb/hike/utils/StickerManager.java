@@ -137,6 +137,14 @@ public class StickerManager
 
 	public static final String HUMANOID = "humanoid";
 	
+	public static final String OTHER_STICKER_ASSET_ROOT = "/other";
+
+	public static final String PALLATE_ICON = "pallate_icon";
+
+	public static final String PALLATE_ICON_SELECTED = "pallate_icon_selected";
+
+	public static final String PREVIEW_IMAGE = "preview";
+	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
 	public FilenameFilter stickerFileFilter = new FilenameFilter()
@@ -877,5 +885,81 @@ public class StickerManager
 		}
 		
 		return true;
+	}
+	
+	public boolean moveStickerPreviewAssetsToSdcard()
+	{
+		if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
+		{
+			return false;
+		}
+
+		try
+		{
+			JSONObject jsonObj = new JSONObject(Utils.loadJSONFromAsset(context, StickerManager.STICKERS_JSON_FILE_NAME));
+			JSONArray stickerCategories = jsonObj.optJSONArray(StickerManager.STICKER_CATEGORIES);
+			for (int i = 0; i < stickerCategories.length(); i++)
+			{
+				JSONObject obj = stickerCategories.optJSONObject(i);
+				String categoryId = obj.optString(StickerManager.CATEGORY_ID);
+
+				String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId);
+				if (directoryPath == null)
+				{
+					return false;
+				}
+
+				File otherAssetsDir = getOtherAssetsStickerDirectory(directoryPath);
+
+				String pallateIcon = obj.optString(StickerManager.PALLATE_ICON);
+				String pallateIconSelected = obj.optString(StickerManager.PALLATE_ICON_SELECTED);
+				String previewImage = obj.optString(StickerManager.PREVIEW_IMAGE);
+
+				saveAssetToDirectory(otherAssetsDir, pallateIcon, StickerManager.PALLATE_ICON);
+				saveAssetToDirectory(otherAssetsDir, pallateIconSelected, StickerManager.PALLATE_ICON_SELECTED);
+				if (!TextUtils.isEmpty(previewImage))
+				{
+					saveAssetToDirectory(otherAssetsDir, previewImage, StickerManager.PREVIEW_IMAGE);
+				}
+			}
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+
+		return true;
+	}
+	
+	private void saveAssetToDirectory(File dir, String assetName, String fileName) throws IOException
+	{
+		int assetResId = context.getResources().getIdentifier(assetName, "drawable", context.getPackageName());
+		Bitmap assetBitmap = HikeBitmapFactory.decodeBitmapFromResource(context.getResources(), assetResId, Bitmap.Config.ARGB_8888);
+		if (assetBitmap != null)
+		{
+			File file = new File(dir, fileName + ".png");
+			BitmapUtils.saveBitmapToFile(file, assetBitmap);
+		}
+	}
+
+	public File getOtherAssetsStickerDirectory(String directoryPath)
+	{
+		File otherAssetsDir = new File(directoryPath + OTHER_STICKER_ASSET_ROOT);
+
+		if (!otherAssetsDir.exists())
+		{
+			otherAssetsDir.mkdirs();
+		}
+
+		Utils.makeNoMediaFile(otherAssetsDir);
+		return otherAssetsDir;
 	}
 }

@@ -121,5 +121,6 @@ public class UpgradeIntentService extends IntentService
 	private void upgradeForStickerShopVersion1()
 	{
 		HikeConversationsDatabase.getInstance().upgradeForStickerShopVersion1();
+		StickerManager.getInstance().moveStickerPreviewAssetsToSdcard();
 	}
 }
