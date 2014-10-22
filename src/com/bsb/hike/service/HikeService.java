@@ -1,8 +1,13 @@
 package com.bsb.hike.service;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,16 +38,17 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.Sticker;
+import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
@@ -66,12 +72,22 @@ public class HikeService extends Service
 		@Override
 		public void run()
 		{
-			Logger.d("ContactsChanged", "calling syncUpdates");
-			ContactUtils.syncUpdates(this.context);
-			if (manualSync)
+			if (!Utils.isUserOnline(context))
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNCED, null);
+				Logger.d("CONTACT UTILS", "Airplane mode is on , skipping sync update tasks.");
 			}
+			else
+			{
+				HikeMessengerApp.syncingContacts = true;
+				Logger.d("ContactsChanged", "calling syncUpdates, manualSync = " + manualSync);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNC_STARTED, null);
+
+				boolean contactsChanged = ContactManager.getInstance().syncUpdates(this.context);
+
+				HikeMessengerApp.syncingContacts = false;
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNCED, new Boolean[] {manualSync, contactsChanged});
+			}
+
 		}
 	}
 
@@ -265,15 +281,12 @@ public class HikeService extends Service
 	{
 		sm = StickerManager.getInstance();
 		// move stickers from external to internal if not done
-		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if (settings.getBoolean(StickerManager.STICKERS_MOVED_EXTERNAL_TO_INTERNAL, false))
-		{
-			sm.moveRecentStickerFileToInternal(getApplicationContext());
-			Editor edit = settings.edit();
-			edit.putBoolean(StickerManager.STICKERS_MOVED_EXTERNAL_TO_INTERNAL, true);
-			edit.commit();
-		}
 		sm.init(getApplicationContext());
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if(!settings.getBoolean(StickerManager.RECENT_STICKER_SERIALIZATION_LOGIC_CORRECTED, false)){
+			sm.updateRecentStickerFile(settings);
+		}
+		
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
 		/*
 		 * If we had earlier removed bollywood stickers we need to display them again.
@@ -284,6 +297,20 @@ public class HikeService extends Service
 		}
 
 		sm.setupStickerCategoryList(settings);
+		/*
+		* This preference has been used here because of a prepopulated recent sticker enhancement
+		* it will delete all the default stickers as we are adding some more default stickers 
+		*/
+		if (!preferenceManager.contains(StickerManager.REMOVE_DEFAULT_CAT_STICKERS))
+		{
+			sm.deleteDefaultDownloadedExpressionsStickers();
+			sm.deleteDefaultDownloadedStickers();
+			
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(StickerManager.REMOVE_DEFAULT_CAT_STICKERS, true);
+			editor.commit();
+		}
+		sm.loadRecentStickers();
 
 		/*
 		 * This preference has been used here because of a bug where we were inserting this key in the settings preference
@@ -292,7 +319,7 @@ public class HikeService extends Service
 		{
 			sm.removeHumanoidSticker();
 		}
-
+		
 		if (!preferenceManager.getBoolean(StickerManager.EXPRESSIONS_CATEGORY_INSERT_TO_DB, false))
 		{
 			sm.insertExpressionsCategory();
@@ -345,7 +372,7 @@ public class HikeService extends Service
 			StickerManager.getInstance().removeStickersFromRecents(StickerCategoryId.doggy.name(), sm.OLD_HARDCODED_STICKER_IDS_DOGGY);
 		}
 	}
-
+	
 	@Override
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{
@@ -482,15 +509,19 @@ public class HikeService extends Service
 		public void onChange(boolean selfChange)
 		{
 			Logger.d(getClass().getSimpleName(), "Contact content observer called");
+			if(HikeMessengerApp.syncingContacts)
+				Logger.d(getClass().getSimpleName(),"Contact Syncing already going on");
+			else
+			{
+				mContactsChanged.manualSync = manualSync;
+				HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
+				long delay = manualSync ? 0L: HikeConstants.CONTACT_UPDATE_TIMEOUT;
+				HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, delay);
+				// Schedule the next manual sync to happed 24 hours from now.
+				scheduleNextManualContactSync();
 
-			mContactsChanged.manualSync = manualSync;
-
-			HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
-			HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, HikeConstants.CONTACT_UPDATE_TIMEOUT);
-			// Schedule the next manual sync to happed 24 hours from now.
-			scheduleNextManualContactSync();
-
-			manualSync = false;
+				manualSync = false;
+			}
 		}
 	}
 
@@ -548,6 +579,10 @@ public class HikeService extends Service
 				/*
 				 * User doesnt have google services
 				 */
+			}
+			catch (IllegalStateException e)
+			{
+				Logger.e("HikeService", "Exception during gcm registration : " , e);
 			}
 		}
 	}
@@ -845,8 +880,8 @@ public class HikeService extends Service
 				return;
 			}
 
-			List<ContactInfo> contactinfos = HikeUserDatabase.getInstance().getContacts();
-			ContactUtils.setGreenBlueStatus(context, contactinfos);
+			List<ContactInfo> contactinfos = ContactManager.getInstance().getAllContacts();
+			ContactManager.getInstance().setGreenBlueStatus(context, contactinfos);
 			JSONObject data = AccountUtils.getWAJsonContactList(contactinfos);
 
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/info", RequestType.OTHER, new HikeHttpCallback()

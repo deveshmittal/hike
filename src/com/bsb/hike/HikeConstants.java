@@ -110,6 +110,8 @@ public class HikeConstants
 	public static final String FILE_KEY = "fk";
 
 	public static final String FILE_PATH = "fp";
+	
+	public static final String DOWNLOAD_FILE_URL_KEY = "url";
 
 	public static final String CREDITS = "credits";
 
@@ -236,6 +238,8 @@ public class HikeConstants
 	public static final String RESOLUTION_ID = "resId";
 
 	public static final String NUMBER_OF_STICKERS = "nos";
+	
+	public static final String TOTAL_STICKERS = "totalStickers";
 
 	public static final String DATA_2 = "data";
 
@@ -440,6 +444,8 @@ public class HikeConstants
 	public static final String IMAGE_QUALITY = "imageQuality";
 	
 	public static final String REMEMBER_IMAGE_CHOICE = "rememberImageChoice";
+	
+	public static final String SHOW_IMAGE_QUALITY_TIP = "showImageQualityTip";
 
 	public static final String HIKEBOT = "TD-HIKE";
 
@@ -472,10 +478,16 @@ public class HikeConstants
 	public static final String HELP_FEEDBACK_PREF = "helpFeedback";
 
 	public static final String STATUS_BOOLEAN_PREF = "statusBooleanPref";
+	
+	public static final String NUJ_NOTIF_BOOLEAN_PREF = "hikeNUJNotificationPref";
+	
+	public static final String H2O_NOTIF_BOOLEAN_PREF = "hikeOfflineNotificationPref";
 
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
 
 	public static final String UPGRADE_MSG_HASH_GROUP_READBY = "upgradeMsgHashGroupReadby";
+	
+	public static final String UPGRADE_FOR_DATABASE_VERSION_28 = "upgradeForDatabaseVersion28";
 
 	public static final String UPGRADE_AVATAR_CONV_DB = "upgradeAvtarProgressConv";
 
@@ -635,6 +647,8 @@ public class HikeConstants
 	public static final int NEW_PARTICIPANT = 2;
 
 	public static final String MAIL = "support@hike.in";
+	
+	public static final int MAX_RECENTS_TO_SHOW = 10;
 
 	// Had to add this constant since its only available in the android API for
 	// Honeycomb and higher.
@@ -763,6 +777,8 @@ public class HikeConstants
 
 	public static final String INDIA_COUNTRY_CODE = "+91";
 
+	public static final String SAUDI_ARABIA_COUNTRY_CODE = "+966";
+
 	public static final int MDPI_TIMES_10 = 11;
 
 	public static final String NAMESPACE = "http://schemas.android.com/apk/res/com.bsb.hike";
@@ -844,7 +860,7 @@ public class HikeConstants
 
 	public static final int FTUE_LIMIT = 5;
 	
-	public static final int FTUE_CONTACT_CARD_LIMIT = 4;
+	public static final int FTUE_CONTACT_CARD_LIMIT = 5;
 
 	public static final String FTUE_MSISDN_TYPE = "ftueContact";
 
@@ -911,7 +927,14 @@ public class HikeConstants
 	public static final String TO_SHOW = "toShow";
 	
 	public static final String PIN_DISPLAYED = "displayed";
-
+	
+	public static final int MAX_MEDIA_ITEMS_TO_LOAD_INITIALLY = 51;
+	
+	
+	public static final String TOTAL_SELECTIONS = "t";
+	
+	public static final String SUCCESSFUL_SELECTIONS = "s";
+	
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
@@ -936,6 +959,7 @@ public class HikeConstants
 		public static final String INVITE = "invite";
 
 		public static final String MSG = "msg";
+		public static final String POKE = "poke";
 
 		public static final String PREF = "pref";
 
@@ -1078,6 +1102,10 @@ public class HikeConstants
 		public static final String ZOOM_LEVEL = "zoomLevel";
 
 		public static final String CONTACT_INFO = "contactInfo";
+		
+		public static final String CONTACT_INFO_TIMELINE = "contactInfoTimeline";
+
+		public static final String CONTACT_ID = "contactId";
 
 		public static final String ON_HIKE = "onHike";
 
@@ -1230,6 +1258,24 @@ public class HikeConstants
 		public static final String TOTAL_MSGS_CURRENTLY_LOADED = "totalMsgsCurrentlyLoaded";
 		
 		public static final String PIN_TYPE_SHOWING="pinTypeShowing";
+
+		public static final String SHARED_FILE_ITEMS = "sharedFileItems";
+		
+		public static final String IS_LAST_MESSAGE = "isLastMessage";
+
+		public static final String IS_GROUP_CONVERSATION = "isGroupCoversation";
+
+		public static final String PARTICIPANT_MSISDN_ARRAY = "participantMsisdnArray";
+
+		public static final String PARTICIPANT_NAME_ARRAY = "participantNameArray";
+
+		public static final String CONVERSATION_NAME = "conversationName";
+
+		public static final String DELETE_MEDIA_FROM_PHONE = "deleteMediaFromPhone";
+
+		public static final String DELETED_MESSAGE_TYPE = "deletedMessageType";
+
+		public static final String CURRENT_POSITION = "currentPosition";
 	}
 
 	public static final class LogEvent
@@ -1297,6 +1343,18 @@ public class HikeConstants
 		public static final String NOTIFICATION_SCREEN = "profSnotyS";
 
 		public static final String PRIVACY_SCREEN = "profSprivS";
+		
+		public static final String MEDIA_THUMBNAIL_VIA_PROFILE = "profSthumb";
+		
+		public static final String OPEN_GALLERY_VIA_PROFILE = "profSopenGallery";
+		
+		public static final String SHARED_FILES_VIA_PROFILE = "profSsharedFiles";
+		
+		public static final String ADD_TO_FAVOURITE = "profSAddToFav";
+		
+		public static final String INVITE_TO_HIKE_VIA_PROFILE = "profSinvite";
+
+		public static final String SET_PROFILE_PIC_GALLERY = "profSpicGallery";
 
 		/*
 		 * Invite screen events <screen> = invS <event> = credB, creDtiPN, creDtiPY
@@ -1346,6 +1404,15 @@ public class HikeConstants
 		 * SignUp screen <screen> = signupS <event> = erroR
 		 */
 		public static final String SIGNUP_ERROR = "signupSerroR";
+
+		/*
+		 *  Compose screen <screen> = compS <event> = refContcts
+		 */
+		public static final String COMPOSE_REFRESH_CONTACTS = "compSrefContcts";
+
+		public static final String SELECT_ALL_HIKE_CONTACTS = "compSslctAllFwd";
+
+		public static final String CONFIRM_FORWARD = "compSconfFwd";
 
 		/*
 		 * Drawer screen <screen> = drS <event> = homE, gC, inV, reW, creD, proF, settinG
@@ -1497,6 +1564,59 @@ public class HikeConstants
 		
 		public static final String PIN_HISTORY_VIA_PIN_CLICK = "pinHistoryViaPinClick";
 		
+		/*
+		 * Settings screen <screen> = settingsS <event> = notifNUJEnabled, notifH2OEnabled, notifNUJDisabled, notifH2ODisabled
+		 */
+		public static final String SETTINGS_NOTIFICATION_NUJ_ON = "settingsSNotifNUJEnabled";
+		
+		public static final String SETTINGS_NOTIFICATION_H2O_ON = "settingsSNotifH2OEnabled";
+		
+		public static final String SETTINGS_NOTIFICATION_NUJ_OFF = "settingsSNotifNUJDisabled";
+		
+		public static final String SETTINGS_NOTIFICATION_H2O_OFF = "settingsSNotifH2ODisabled";
+		
+		/*
+		 * HikeSharedFiles Activity Screen = sharedMediaS<event>
+		 * */
+		public static final String OPEN_THUMBNAIL_VIA_GALLERY = "sharedMediaSthumbnailClick";
+
+		/*
+		 * Image selection from gallery event.
+		 */
+		public static final String GALLERY_SELECTION = "gallery";
+
+		/*
+		 * Atomic tips click events
+		 */
+		public static final String ATOMIC_FAVOURITES_TIP_CLICKED = "atomicFavTClick";
+
+		public static final String ATOMIC_INVITE_TIP_CLICKED = "atomicInviteTClick";
+
+		public static final String ATOMIC_PROFILE_PIC_TIP_CLICKED = "atomicProPicTClick";
+
+		public static final String ATOMIC_STATUS_TIP_CLICKED = "atomicStatusTClick";
+
+		public static final String ATOMIC_HTTP_TIP_CLICKED = "atomicHttpTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_CLICKED = "atomicAppSttngsTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_NOTIF_CLICKED = "atomicAppSttngsNotifTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_PRIVACY_CLICKED = "atomicAppSttngsPrivTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_SMS_CLICKED = "atomicAppSttngsSmsTClick";
+
+		public static final String ATOMIC_APP_TIP_SETTINGS_MEDIA_CLICKED = "atomicAppSttngsMediaTClick";
+
+		public static final String ATOMIC_APP_TIP_INVITE_FREE_SMS_CLICKED = "atomicAppInvFreeSmsTClick";
+
+		public static final String ATOMIC_APP_TIP_INVITE_WHATSAPP_CLICKED = "atomicAppInvWaTClick";
+
+		public static final String ATOMIC_APP_TIP_TIMELINE_CLICKED = "atomicAppTmlineTClick";
+
+		public static final String ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED = "atomicAppHikeExtraClick";
+
+		public static final String ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED = "atomicAppHikeRewardsClick";
 	}
 
 	public static final class MqttMessageTypes
@@ -1610,6 +1730,8 @@ public class HikeConstants
 		public static final String BULK_MESSAGE = "bm";
 
 		public static final String REMOVE_PIC = "icr";
+		
+		public static final String MULTIPLE_FORWARD = "mm";
 
 	}
 
@@ -1733,9 +1855,38 @@ public class HikeConstants
 		public static final int HASH_PIN_MESSAGE = 1;
 	}
 	
+	public static class REQUEST_BASE_URLS
+	{
+		public static final String HTTP_REQUEST_PROFILE_BASE_URL = "/account/profile/";
+	}
 	public static final String TEXT_PINS = "text_pins";
 
 	public static final String EXTRA_CONV_ID = "conv_id";
 	
 	public static final int MAX_PIN_CONTENT_LINES_IN_HISTORY = 10;
+	
+	public static final String URL = "url";
+	public static final String MEDIA_POSITION = "position";
+	
+	public static final String FROM_CHAT_THREAD = "ct";
+
+	public static final String LARGE = "large";
+	
+	public static final int ATOMIC_APP_TIP_SETTINGS = 1;
+	public static final int ATOMIC_APP_TIP_SETTINGS_NOTIF = 2;
+	public static final int ATOMIC_APP_TIP_SETTINGS_MEDIA = 3;
+	public static final int ATOMIC_APP_TIP_SETTINGS_SMS = 4;
+	public static final int ATOMIC_APP_TIP_SETTINGS_PRIVACY = 5;
+	public static final int ATOMIC_APP_TIP_TIMELINE = 6;
+	public static final int ATOMIC_APP_TIP_INVITE_FREE_SMS = 8;
+	public static final int ATOMIC_APP_TIP_INVITE_WATSAPP = 9;
+	public static final int ATOMIC_APP_TIP_HIKE_EXTRA = 10;
+	public static final int ATOMIC_APP_TIP_HIKE_REWARDS = 11;
+
+	public static final int SHARED_MEDIA_TYPE = 1;
+	
+	public static final int NORMAL_MESSAGE_TYPE = 0;
+	public static final int MULTI_FORWARD_MESSAGE_TYPE = 1;
+	public static final int SHARED_PIN_TYPE = 2;
+	public static final String SHOWN_MULTI_FORWARD_TIP = "shownMultiForwardTip";
 }

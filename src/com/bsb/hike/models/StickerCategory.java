@@ -85,14 +85,14 @@ public class StickerCategory implements Serializable
 
 	public void serializeObj(ObjectOutputStream out) throws IOException
 	{
-		out.writeObject(categoryId);
+		out.writeUTF(categoryId.name());
 		out.writeBoolean(updateAvailable);
 		out.writeBoolean(reachedEnd);
 	}
 
 	public void deSerializeObj(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException
 	{
-		categoryId = (StickerCategoryId) in.readObject();
+		categoryId = StickerCategoryId.valueOf(in.readUTF());
 		updateAvailable = in.readBoolean();
 		reachedEnd = in.readBoolean();
 	}
