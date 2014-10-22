@@ -1421,7 +1421,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		}
 		optionsList.add(new OverFlowMenuItem(getString(R.string.clear_chat), 5));
-		optionsList.add(new OverFlowMenuItem(getString(R.string.email_chat), 3));
+		if(messages.size() > 0)
+		{
+			optionsList.add(new OverFlowMenuItem(getString(R.string.email_chat), 3));
+		}
 
 		if (mConversation instanceof GroupConversation)
 		{
