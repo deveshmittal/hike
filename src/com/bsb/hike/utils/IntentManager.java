@@ -127,6 +127,7 @@ public class IntentManager
 		Intent intent = new Intent(context.getApplicationContext(), WebViewActivity.class);
 		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.rewardsUrl + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
 		intent.putExtra(HikeConstants.Extras.TITLE, context.getString(R.string.rewards));
+		intent.putExtra(HikeConstants.Extras.WEBVIEW_ALLOW_LOCATION, true);
 		return intent;
 	}
 
