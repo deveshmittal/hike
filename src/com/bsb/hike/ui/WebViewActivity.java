@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -35,6 +36,7 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity
 
 		String urlToLoad = getIntent().getStringExtra(HikeConstants.Extras.URL_TO_LOAD);
 		String title = getIntent().getStringExtra(HikeConstants.Extras.TITLE);
+		final boolean allowLoc = getIntent().getBooleanExtra(HikeConstants.Extras.WEBVIEW_ALLOW_LOCATION, false);
 
 		webView = (WebView) findViewById(R.id.t_and_c_page);
 		final ProgressBar bar = (ProgressBar) findViewById(R.id.progress);
@@ -106,6 +108,15 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity
 				super.onProgressChanged(view, newProgress);
 				bar.setProgress(newProgress);
 			}
+			
+			@Override
+	        public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) 
+			{
+				if(allowLoc)
+					callback.invoke(origin, true, false);
+				else
+					super.onGeolocationPermissionsShowPrompt(origin, callback);
+	        }
 		});
 		setupActionBar(title);
 	}
