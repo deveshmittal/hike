@@ -6811,7 +6811,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{}
 
 
-	private void updateStickerCategoryUI(StickerCategory category, boolean failed, DownloadType downloadTypeBeforeFail)
+	private void updateStickerCategoryUI(StickerCategory category)
 	{
 		if (stickerAdapter == null)
 		{
@@ -6825,7 +6825,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 
-		stickerAdapter.setupStickerPage(emoticonPage, category, failed, downloadTypeBeforeFail);
+		stickerAdapter.setupStickerPage(emoticonPage, category);
 
 	}
 
@@ -6858,7 +6858,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if (stickerAdapter == null)
 			{
-				stickerAdapter = new StickerAdapter(this, isPortrait);
+				stickerAdapter = new StickerAdapter(this);
 			}
 			emoticonViewPager.setAdapter(stickerAdapter);
 		}

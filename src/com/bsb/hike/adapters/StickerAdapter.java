@@ -19,7 +19,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -53,40 +52,16 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		private GridView stickerGridView;
 
-		private View downloadingParent;
-
-		private TextView downloadingText;
-
-		private Button downloadingFailed;
-
 		private StickerPageAdapter spa;
 
-		public StickerPageObjects(GridView sgv, View dp, TextView dt, Button df)
+		public StickerPageObjects(GridView sgv)
 		{
 			stickerGridView = sgv;
-			downloadingParent = dp;
-			downloadingText = dt;
-			downloadingFailed = df;
 		}
 
 		public GridView getStickerGridView()
 		{
 			return stickerGridView;
-		}
-
-		public View getDownloadingParent()
-		{
-			return downloadingParent;
-		}
-
-		public TextView getDownloadingText()
-		{
-			return downloadingText;
-		}
-
-		public Button getDownloadingFailedButton()
-		{
-			return downloadingFailed;
 		}
 
 		public void setStickerPageAdapter(StickerPageAdapter sp)
@@ -100,7 +75,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 	}
 
-	public StickerAdapter(Activity activity, boolean isPortrait)
+	public StickerAdapter(Activity activity)
 	{
 		this.inflater = LayoutInflater.from(activity);
 		this.activity = activity;
@@ -140,7 +115,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		emoticonPage = inflater.inflate(R.layout.sticker_page, null);
 		StickerCategory category = stickerCategoryList.get(position);
 		Logger.d(getClass().getSimpleName(), "Instantiate View for categpory : " + category.getCategoryId());
-		setupStickerPage(emoticonPage, category, false, null);
+		setupStickerPage(emoticonPage, category);
 
 		((ViewPager) container).addView(emoticonPage);
 		emoticonPage.setTag(category.getCategoryId());
@@ -235,20 +210,15 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 	};
 
-	public void setupStickerPage(final View parent, final StickerCategory category, boolean failed, final DownloadType downloadTypeBeforeFail)
+	public void setupStickerPage(final View parent, final StickerCategory category)
 	{
 		final GridView stickerGridView = (GridView) parent.findViewById(R.id.emoticon_grid);
 
-		View downloadingParent = parent.findViewById(R.id.downloading_container);
-		final TextView downloadingText = (TextView) parent.findViewById(R.id.downloading_sticker);
 		ViewGroup emptyView = (ViewGroup) parent.findViewById(R.id.emptyViewHolder);
-		Button downloadingFailed = (Button) parent.findViewById(R.id.sticker_fail_btn);
 
 		checkAndSetEmptyView(parent, emptyView, category, stickerGridView);
-		downloadingParent.setVisibility(View.GONE);
-		downloadingFailed.setVisibility(View.GONE);
 
-		StickerPageObjects spo = new StickerPageObjects(stickerGridView, downloadingParent, downloadingText, downloadingFailed);
+		StickerPageObjects spo = new StickerPageObjects(stickerGridView);
 		stickerGridView.setNumColumns(StickerManager.getInstance().getNumColumnsForStickerGrid(activity));
 		stickerObjMap.put(category, spo);
 		initStickers(spo, category);
@@ -276,13 +246,12 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				@Override
 				public void onClick(View v)
 				{
-					stickerGridView.getEmptyView().setVisibility(View.GONE);
 					category.setState(StickerCategory.DOWNLOADING);
 
 					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.NEW_CATEGORY, null);
 					Utils.executeFtResultAsyncTask(downloadStickerTask);
 					StickerManager.getInstance().insertTask(category.getCategoryId(), downloadStickerTask);
-					setupStickerPage(parent, category, false, null);
+					setupStickerPage(parent, category);
 
 				}
 			});
@@ -343,8 +312,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			return;
 		}
 
-		spo.getDownloadingParent().setVisibility(View.GONE);
-		spo.getDownloadingFailedButton().setVisibility(View.GONE);
 		spo.getStickerGridView().setVisibility(View.VISIBLE);
 		final List<Sticker> stickersList = category.getStickerList(activity);
 		final List<StickerPageAdapterItem> stickerPageList = generateStickerPageAdapterItemList(stickersList);
