@@ -142,17 +142,8 @@ public class MessageMetadata
 		this.json = metadata;
 		if (metadata.has(StickerManager.STICKER_ID))
 		{
-			if (metadata.has(StickerManager.STICKER_INDEX))
-			{
-				this.sticker = new Sticker(metadata.optString(StickerManager.CATEGORY_ID), metadata.optString(StickerManager.STICKER_ID),
-						metadata.optInt(StickerManager.STICKER_INDEX));
-			}
-			else
-			// this is the case when you receive a sticker from another user
-			{
-				String cat = metadata.optString(StickerManager.CATEGORY_ID);
-				this.sticker = new Sticker(cat, metadata.optString(StickerManager.STICKER_ID));
-			}
+			String cat = metadata.optString(StickerManager.CATEGORY_ID);
+			this.sticker = new Sticker(cat, metadata.optString(StickerManager.STICKER_ID));
 		}
 	}
 

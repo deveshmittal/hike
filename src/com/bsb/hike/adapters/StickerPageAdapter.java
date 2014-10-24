@@ -28,7 +28,6 @@ import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.utils.RecyclingImageView;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 
 public class StickerPageAdapter extends BaseAdapter implements OnClickListener
@@ -109,7 +108,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			{
 				this.numStickerRows = stickerList.size() / numItemsRow + 1;
 			}
-			if (category.categoryId.equals(StickerCategoryId.recent))
+			if (category.isCustom())
 			{
 				viewTypeList.clear();
 			}
@@ -129,10 +128,10 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			}
 			for (int i = 0; i < numStickerRows - count; i++)
 			{
-				viewTypeList.add(category.updateAvailable ? 1 : 0, ViewType.STICKER);
+				viewTypeList.add(category.isUpdateAvailable() ? 1 : 0, ViewType.STICKER);
 			}
 		}
-		else if (category.categoryId.equals(StickerCategoryId.recent))
+		else if (category.isCustom())
 		{
 			viewTypeList.add(ViewType.RECENT_EMPTY);
 		}
@@ -213,7 +212,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			/*
 			 * If this is the last item, its possible that the number of items won't fill the complete row
 			 */
-			int startPosition = category.updateAvailable ? position - 1 : position;
+			int startPosition = category.isUpdateAvailable() ? position - 1 : position;
 
 			for (int i = 0; i < numItemsRow; i++)
 			{
@@ -229,21 +228,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				}
 
 				Sticker sticker = stickerList.get(index);
-				if (sticker.getStickerIndex() >= 0) // for already copied stickers this will be > -1
-				{
-					if (StickerCategoryId.expressions.equals(sticker.getCategory().categoryId))
-					{
-						stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_EXPRESSIONS[sticker.getStickerIndex()], imageView, isListFlinging);
-					}
-					else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
-					{
-						stickerLoader.loadImage("res:" + StickerManager.getInstance().LOCAL_STICKER_SMALL_RES_IDS_HUMANOID[sticker.getStickerIndex()], imageView, isListFlinging);
-					}
-				}
-				else
-				{
-					stickerLoader.loadImage(sticker.getSmallStickerPath(activity), imageView, isListFlinging);
-				}
+				stickerLoader.loadImage(sticker.getSmallStickerPath(activity), imageView, isListFlinging);
 				imageView.setTag(sticker);
 				imageView.setOnClickListener(this);
 			}
@@ -253,7 +238,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			TextView updateText = (TextView) convertView.findViewById(R.id.txt);
 			ProgressBar progressBar = (ProgressBar) convertView.findViewById(R.id.download_progress);
 
-			if (StickerManager.getInstance().isStickerDownloading(category.categoryId.name()))
+			if (StickerManager.getInstance().isStickerDownloading(category.getCategoryId()))
 			{
 				progressBar.setVisibility(View.VISIBLE);
 				updateText.setText(R.string.updating_set);
@@ -276,7 +261,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 						DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.UPDATE, StickerPageAdapter.this);
 						Utils.executeFtResultAsyncTask(downloadStickerTask);
 
-						StickerManager.getInstance().insertTask(category.categoryId.name(), downloadStickerTask);
+						StickerManager.getInstance().insertTask(category.getCategoryId(), downloadStickerTask);
 						notifyDataSetChanged();
 					}
 				});
@@ -310,15 +295,9 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	{
 		Sticker sticker = (Sticker) v.getTag();
 		((ChatThread) activity).sendSticker(sticker);
-		int currentIdx = ((ChatThread) activity).getCurrentPage();
-		if (currentIdx == -1)
-		{
-			return;
-		}
-		StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
 
 		/* In case sticker is clicked on the recents screen, don't update the UI or recents list. Also if this sticker is disabled don't update the recents UI */
-		if (!StickerCategoryId.recent.equals(sc.categoryId))
+		if (!category.isCustom())
 		{
 			StickerManager.getInstance().addRecentSticker(sticker);
 			LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(StickerManager.RECENTS_UPDATED).putExtra(StickerManager.RECENT_STICKER_SENT, sticker));

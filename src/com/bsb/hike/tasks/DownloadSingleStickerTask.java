@@ -64,35 +64,11 @@ public class DownloadSingleStickerTask extends StickerTaskBase
 	@Override
 	protected FTResult doInBackground(Void... arg0)
 	{
-		// if sticker is from category which are bundled with app do not save small if present in bundled stickers
-		boolean saveSmallSticker = true;
 		if (dirPath == null)
 		{
 			return FTResult.DOWNLOAD_FAILED;
 		}
 		StickerManager stickerManager = StickerManager.getInstance();
-		if (catId.equals(StickerManager.StickerCategoryId.expressions.name()))
-		{
-			for (String stId : stickerManager.LOCAL_STICKER_IDS_EXPRESSIONS)
-			{
-				if (this.stId.equals(stId))
-				{
-					saveSmallSticker = false;
-					break;
-				}
-			}
-		}
-		else if (catId.equals(StickerManager.StickerCategoryId.humanoid.name()))
-		{
-			for (String stId : stickerManager.LOCAL_STICKER_IDS_HUMANOID)
-			{
-				if (this.stId.equals(stId))
-				{
-					saveSmallSticker = false;
-					break;
-				}
-			}
-		}
 		FileOutputStream fos = null;
 		try
 		{
@@ -140,9 +116,9 @@ public class DownloadSingleStickerTask extends StickerTaskBase
 			Utils.saveBase64StringToFile(new File(largeStickerPath), stickerData);
 
 			boolean isDisabled = data.optBoolean(HikeConstants.DISABLED_ST);
-			if (!isDisabled && saveSmallSticker)
+			if (!isDisabled)
 			{
-				Bitmap thumbnail = HikeBitmapFactory.scaleDownBitmap(largeStickerPath, DownloadStickerTask.SIZE_IMAGE, DownloadStickerTask.SIZE_IMAGE, true,false);
+				Bitmap thumbnail = HikeBitmapFactory.scaleDownBitmap(largeStickerPath, StickerManager.SIZE_IMAGE, StickerManager.SIZE_IMAGE, true,false);
 
 				if (thumbnail != null)
 				{

@@ -5,6 +5,7 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,7 +44,6 @@ import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
 
@@ -55,7 +55,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 	private Activity activity;
 
-	private Map<StickerCategoryId, StickerPageObjects> stickerObjMap;
+	private Map<StickerCategory, StickerPageObjects> stickerObjMap;
 	
 	private StickerLoader worker;
 
@@ -115,7 +115,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		this.inflater = LayoutInflater.from(activity);
 		this.activity = activity;
 		stickerCategoryList = StickerManager.getInstance().getStickerCategoryList();
-		stickerObjMap = Collections.synchronizedMap(new EnumMap<StickerCategoryId, StickerAdapter.StickerPageObjects>(StickerCategoryId.class));
+		stickerObjMap = Collections.synchronizedMap(new HashMap<StickerCategory, StickerAdapter.StickerPageObjects>());
 		worker = new StickerLoader(activity.getApplicationContext());
 
 		registerListener();
@@ -139,8 +139,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		Logger.d(getClass().getSimpleName(), "Item removed from position : " + position);
 		((ViewPager) container).removeView((View) object);
-		StickerCategory cat = StickerManager.getInstance().getCategoryForIndex(position);
-		stickerObjMap.remove(cat.categoryId);
+		StickerCategory cat = stickerCategoryList.get(position);
+		stickerObjMap.remove(cat);
 	}
 
 	@Override
@@ -148,12 +148,12 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		View emoticonPage;
 		emoticonPage = inflater.inflate(R.layout.sticker_page, null);
-		StickerCategory category = StickerManager.getInstance().getCategoryForIndex(position);
-		Logger.d(getClass().getSimpleName(), "Instantiate View for categpory : " + category.categoryId.name());
+		StickerCategory category = stickerCategoryList.get(position);
+		Logger.d(getClass().getSimpleName(), "Instantiate View for categpory : " + category.getCategoryId());
 		setupStickerPage(emoticonPage, category, false, null);
 
 		((ViewPager) container).addView(emoticonPage);
-		emoticonPage.setTag(category.categoryId);
+		emoticonPage.setTag(category.getCategoryId());
 
 		return emoticonPage;
 	}
@@ -173,7 +173,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		{
 			if (intent.getAction().equals(StickerManager.RECENTS_UPDATED))
 			{
-				StickerPageObjects spo = stickerObjMap.get(StickerCategoryId.recent);
+				StickerPageObjects spo = stickerObjMap.get(StickerManager.getInstance().getCategoryForId(StickerManager.RECENT));
 				if (spo != null)
 				{
 					final StickerPageAdapter stickerPageAdapter = spo.getStickerPageAdapter();
@@ -205,7 +205,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				Bundle b = intent.getBundleExtra(StickerManager.STICKER_DATA_BUNDLE);
 				final StickerCategory cat = (StickerCategory) b.getSerializable(StickerManager.STICKER_CATEGORY);
 				final DownloadType type = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
-				final StickerPageObjects spo = stickerObjMap.get(cat.categoryId);
+				final StickerPageObjects spo = stickerObjMap.get(cat);
 				final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
 				// if this category is already loaded then only proceed else ignore
 				if (spo != null)
@@ -222,7 +222,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 									return;
 								}
 
-								Logger.d(getClass().getSimpleName(), "Download failed for new category " + cat.categoryId.name());
+								Logger.d(getClass().getSimpleName(), "Download failed for new category " + cat.getCategoryId());
 
 								spo.getDownloadingParent().setVisibility(View.GONE);
 								spo.getStickerListView().setVisibility(View.GONE);
@@ -239,8 +239,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 										DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, cat, type, null);
 										Utils.executeFtResultAsyncTask(downloadStickerTask);
 
-										StickerManager.getInstance().insertTask(cat.categoryId.name(), downloadStickerTask);
-										spo.getDownloadingText().setText(activity.getString(R.string.downloading_category, cat.categoryId.name()));
+										StickerManager.getInstance().insertTask(cat.getCategoryId(), downloadStickerTask);
+										spo.getDownloadingText().setText(activity.getString(R.string.downloading_category, cat.getCategoryId()));
 									}
 								});
 
@@ -277,16 +277,16 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		downloadingFailed.setVisibility(View.GONE);
 
 		StickerPageObjects spo = new StickerPageObjects(stickerListView, downloadingParent, downloadingText, downloadingFailed);
-		stickerObjMap.put(category.categoryId, spo);
-		DownloadStickerTask currentStickerTask = (DownloadStickerTask) StickerManager.getInstance().getTask(category.categoryId.name());
+		stickerObjMap.put(category, spo);
+		DownloadStickerTask currentStickerTask = (DownloadStickerTask) StickerManager.getInstance().getTask(category.getCategoryId());
 
 		if (currentStickerTask != null && currentStickerTask.getDownloadType().equals(DownloadType.NEW_CATEGORY))
 		{
-			Logger.d(getClass().getSimpleName(), "Downloading new category " + category.categoryId.name());
+			Logger.d(getClass().getSimpleName(), "Downloading new category " + category.getCategoryId());
 
 			downloadingParent.setVisibility(View.VISIBLE);
 
-			downloadingText.setText(activity.getString(R.string.downloading_category, category.categoryId.name()));
+			downloadingText.setText(activity.getString(R.string.downloading_category, category.getCategoryId()));
 		}
 		else
 		{
@@ -320,72 +320,11 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		spo.getDownloadingParent().setVisibility(View.GONE);
 		spo.getDownloadingFailedButton().setVisibility(View.GONE);
 		spo.getStickerListView().setVisibility(View.VISIBLE);
-		final List<Sticker> stickersList;
-		if (category.categoryId.equals(StickerCategoryId.recent))
-		{
-			Set<Sticker> lhs = StickerManager.getInstance().getRecentStickerList();
-
-			/*
-			 * here using LinkedList as in recents we have to remove the sticker frequently to move it to front and in linked list 
-			 * remove operation is faster compared to arraylist
-			 */
-			stickersList = new LinkedList<Sticker>();
-			Iterator<Sticker> it = lhs.iterator();
-			while (it.hasNext())
-			{
-				try
-				{
-					Sticker st = (Sticker) it.next();
-					stickersList.add(0, st);
-				}
-				catch (Exception e)
-				{
-					Logger.e(getClass().getSimpleName(), "Exception in recent stickers", e);
-				}
-			}
-		}
-		else
-		{
-
-			long t1 = System.currentTimeMillis();
-			stickersList = new ArrayList<Sticker>();
-			if (category.categoryId.equals(StickerCategoryId.expressions))
-			{
-				addDefaultStickers(stickersList, category, StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS);
-			}
-			else if (category.categoryId.equals(StickerCategoryId.humanoid))
-			{
-				addDefaultStickers(stickersList, category, StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID);
-			}
-
-			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(activity, category.categoryId.name());
-
-			if (categoryDirPath != null)
-			{
-				File categoryDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
-
-				if (categoryDir.exists())
-				{
-					String[] stickerIds = categoryDir.list(StickerManager.getInstance().stickerFileFilter);
-					for (String stickerId : stickerIds)
-					{
-						Sticker s = new Sticker(category, stickerId);
-						// if the sticker is in app sticker, ignore it
-						if(s.isInAppSticker())
-							continue;
-						stickersList.add(s);
-					}
-				}
-			}
-			Collections.sort(stickersList);
-			long t2 = System.currentTimeMillis();
-			Logger.d(getClass().getSimpleName(), "Time to sort category : " + category.categoryId + " in ms : " + (t2 - t1));
-		}
-
-		boolean updateAvailable = category.updateAvailable;
+		final List<Sticker> stickersList = category.getStickerList(activity);
+		boolean updateAvailable = category.isUpdateAvailable();
 
 		final List<ViewType> viewTypeList = new ArrayList<StickerPageAdapter.ViewType>();
-		final DownloadStickerTask currentStickerTask = (DownloadStickerTask) StickerManager.getInstance().getTask(category.categoryId.name());
+		final DownloadStickerTask currentStickerTask = (DownloadStickerTask) StickerManager.getInstance().getTask(category.getCategoryId());
 		if (updateAvailable || (currentStickerTask != null && currentStickerTask.getDownloadType() == DownloadType.UPDATE))
 		{
 			viewTypeList.add(ViewType.UPDATING_STICKER);
@@ -398,66 +337,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickersList, category, viewTypeList, worker);
 		spo.setStickerPageAdapter(stickerPageAdapter);
 		spo.getStickerListView().setAdapter(stickerPageAdapter);
-		spo.getStickerListView().setOnScrollListener(new OnScrollListener()
-		{
-			private int previousFirstVisibleItem;
-
-			private long previousEventTime;
-
-			private int velocity;
-
-			@Override
-			public void onScrollStateChanged(AbsListView view, int scrollState)
-			{
-				/*
-				 * Only set flinging true if the list is actually flinging and the velocity is greater than 10.
-				 */
-				stickerPageAdapter.setIsListFlinging(scrollState == SCROLL_STATE_FLING && velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_IMAGES);
-			}
-
-			@Override
-			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
-			{
-				if (previousFirstVisibleItem != firstVisibleItem)
-				{
-					long currTime = System.currentTimeMillis();
-					long timeToScrollOneElement = currTime - previousEventTime;
-					velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
-
-					previousFirstVisibleItem = firstVisibleItem;
-					previousEventTime = currTime;
-				}
-
-				int currentIdx = ((ChatThread) activity).getCurrentPage();
-				if (currentIdx == -1)
-				{
-					return;
-				}
-
-				StickerCategory sc = StickerManager.getInstance().getCategoryForIndex(currentIdx);
-				if (stickersList.isEmpty() || !category.categoryId.equals(sc.categoryId)
-						|| !activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(category.categoryId.downloadPref(), false) || category.hasReachedEnd())
-				{
-					return;
-				}
-				if (!StickerManager.getInstance().isStickerDownloading(category.categoryId.name()) && !category.hasReachedEnd() && !category.updateAvailable)
-				{
-					if (firstVisibleItem + visibleItemCount >= totalItemCount - 1)
-					{
-						Logger.d(getClass().getSimpleName(), "Downloading more stickers " + category.categoryId.name());
-						// if downloading more is not already inserted, then only insert that view
-						if (!viewTypeList.get(viewTypeList.size() - 1).equals(ViewType.DOWNLOADING_MORE))
-							viewTypeList.add(ViewType.DOWNLOADING_MORE);
-						DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.MORE_STICKERS, stickerPageAdapter);
-
-						StickerManager.getInstance().insertTask(category.categoryId.name(), downloadStickerTask);
-						stickerPageAdapter.notifyDataSetChanged();
-						Utils.executeFtResultAsyncTask(downloadStickerTask);
-					}
-				}
-			}
-		});
-
 	}
 
 	private void addDefaultStickers(List<Sticker> stickerList, StickerCategory cat, String[] stickerIds)
@@ -465,20 +344,22 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		int count = stickerIds.length;
 		for (int i = 0; i < count; i++)
 		{
-			stickerList.add(new Sticker(cat, stickerIds[i], i));
+			stickerList.add(new Sticker(cat, stickerIds[i]));
 		}
 	}
 
 	@Override
 	public int getIconResId(int index)
 	{
-		return stickerCategoryList.get(index).categoryId.resId();
+		// TODO need to remove this hardcoded drawable usage. we should actually use pallate icons
+		// saved in folders of each category.
+		return R.drawable.recents;//stickerCategoryList.get(index).categoryId.resId();
 	}
 
 	@Override
 	public boolean isUpdateAvailable(int index)
 	{
-		return stickerCategoryList.get(index).updateAvailable;
+		return stickerCategoryList.get(index).isUpdateAvailable();
 	}
 
 	public void unregisterListeners()

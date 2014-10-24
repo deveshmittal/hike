@@ -31,7 +31,6 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.Utils;
 
@@ -51,8 +50,6 @@ public class DownloadStickerTask extends StickerTaskBase
 
 	private StickerPageAdapter stickerPageAdapter;
 
-	public static final int SIZE_IMAGE = (int) (80 * Utils.densityMultiplier);
-
 	public DownloadStickerTask(Context context, StickerCategory cat, DownloadType downloadType, StickerPageAdapter st)
 	{
 		this.context = context;
@@ -70,9 +67,9 @@ public class DownloadStickerTask extends StickerTaskBase
 	@Override
 	protected FTResult doInBackground(Void... params)
 	{
-		Logger.d(getClass().getSimpleName(), "CategoryId: " + category.categoryId.name());
+		Logger.d(getClass().getSimpleName(), "CategoryId: " + category.getCategoryId());
 
-		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, category.categoryId.name());
+		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, category.getCategoryId());
 		if (directoryPath == null)
 		{
 			return FTResult.DOWNLOAD_FAILED;
@@ -84,23 +81,6 @@ public class DownloadStickerTask extends StickerTaskBase
 		boolean reachedEnd = false;
 
 		JSONArray existingStickerIds = new JSONArray();
-		/*
-		 * If the category is the default one, we should add the default stickers as well.
-		 */
-		if (category.categoryId.equals(StickerCategoryId.humanoid))
-		{
-			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID)
-			{
-				existingStickerIds.put(stickerId);
-			}
-		}
-		else if (category.categoryId.equals(StickerCategoryId.expressions))
-		{
-			for (String stickerId : StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS)
-			{
-				existingStickerIds.put(stickerId);
-			}
-		}
 
 		if (smallStickerDir.exists())
 		{
@@ -125,7 +105,7 @@ public class DownloadStickerTask extends StickerTaskBase
 		try
 		{
 
-			JSONObject response = AccountUtils.downloadSticker(category.categoryId.name(), existingStickerIds);
+			JSONObject response = AccountUtils.downloadSticker(category.getCategoryId(), existingStickerIds);
 
 			if (response == null)
 			{
@@ -154,16 +134,13 @@ public class DownloadStickerTask extends StickerTaskBase
 					Sticker s = new Sticker(category, stickerId);
 					if (downloadType.equals(DownloadType.MORE_STICKERS) || downloadType.equals(DownloadType.UPDATE) && stickerPageAdapter != null)
 					{
-						// if this sticker is not in app sticker, add it to list
-						if(!s.isInAppSticker())
-							stickerPageAdapter.getStickerList().add(s);
+						stickerPageAdapter.getStickerList().add(s);
 					}
 					// some hack : seems server was sending stickers which already exist so it was leading to duplicate issue
 					// so we save small sticker , if not present already
 
-					File f = saveLargeStickers(largeStickerDir, stickerId, stickerData);
-					if(!s.isInAppSticker())
-						saveSmallStickers(smallStickerDir, stickerId, f);
+					File f = StickerManager.getInstance().saveLargeStickers(largeStickerDir, stickerId, stickerData);
+						StickerManager.getInstance().saveSmallStickers(smallStickerDir, stickerId, f);
 				}
 				catch (FileNotFoundException e)
 				{
@@ -192,34 +169,14 @@ public class DownloadStickerTask extends StickerTaskBase
 			return FTResult.DOWNLOAD_FAILED;
 		}
 
-		category.setReachedEnd(reachedEnd);
-		HikeConversationsDatabase.getInstance().addOrUpdateStickerCategory(category.categoryId.name(), totalNumber, reachedEnd);
+		HikeConversationsDatabase.getInstance().updateStickerCountForStickerCategory(category.getCategoryId(), totalNumber);
 		return FTResult.SUCCESS;
-	}
-
-	private File saveLargeStickers(File stickerDir, String stickerId, String stickerData) throws IOException
-	{
-		File f = new File(stickerDir, stickerId);
-		Utils.saveBase64StringToFile(f, stickerData);
-		return f;
-	}
-
-	private void saveSmallStickers(File smallStickerDir, String stickerId, File f) throws IOException
-	{
-		Bitmap small = HikeBitmapFactory.scaleDownBitmap(f.getAbsolutePath(), SIZE_IMAGE, SIZE_IMAGE, true, false);
-
-		if (small != null)
-		{
-			File smallImage = new File(smallStickerDir, stickerId);
-			BitmapUtils.saveBitmapToFile(smallImage, small);
-			small.recycle();
-		}
 	}
 
 	@Override
 	protected void onPostExecute(FTResult result)
 	{
-		StickerManager.getInstance().removeTask(category.categoryId.name());
+		StickerManager.getInstance().removeTask(category.getCategoryId());
 		if (result != FTResult.SUCCESS)
 		{
 			Intent i = new Intent(StickerManager.STICKERS_FAILED);
@@ -237,7 +194,7 @@ public class DownloadStickerTask extends StickerTaskBase
 		{
 			if (DownloadType.UPDATE.equals(downloadType) && stickerPageAdapter != null)
 			{
-				StickerManager.getInstance().setStickerUpdateAvailable(category.categoryId.name(), false);
+				StickerManager.getInstance().setStickerUpdateAvailable(category.getCategoryId(), false);
 				List<ViewType> l = stickerPageAdapter.getViewTypeList();
 				l.remove(ViewType.UPDATING_STICKER);
 				stickerPageAdapter.calculateNumRowsAndSize(true);
