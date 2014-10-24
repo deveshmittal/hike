@@ -13,7 +13,6 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
@@ -139,6 +138,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	{
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 		StickerPageAdapterItem item = getItem(position);
+		AbsListView.LayoutParams ll = new AbsListView.LayoutParams(sizeEachImage,sizeEachImage);
 		
 		if (convertView == null)
 		{
@@ -147,7 +147,6 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			case STICKER:
 				ImageView stickerImage = new RecyclingImageView(activity);
 				int padding = (int) (5 * Utils.densityMultiplier);
-				AbsListView.LayoutParams ll = new AbsListView.LayoutParams(sizeEachImage,sizeEachImage);
 				stickerImage.setLayoutParams(ll);
 				stickerImage.setScaleType(ScaleType.FIT_CENTER);
 				stickerImage.setPadding(padding, padding, padding, padding);
@@ -156,9 +155,11 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				break;
 			case UPDATE:
 				convertView = inflater.inflate(R.layout.update_sticker_set, null);
+				convertView.setLayoutParams(ll);
 				break;
 			case DOWNLOADING:
 				convertView = inflater.inflate(R.layout.downloading_new_stickers, null);
+				convertView.setLayoutParams(ll);
 				break;
 			case RETRY:
 				// TODO Add retry view here
@@ -183,24 +184,16 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			break;
 		case UPDATE:
 			View button = convertView.findViewById(R.id.update_btn);
-			TextView updateText = (TextView) convertView.findViewById(R.id.txt);
-			ProgressBar progressBar = (ProgressBar) convertView.findViewById(R.id.download_progress);
+			TextView updateText = (TextView) convertView.findViewById(R.id.new_number_stickers);
 
 			if (StickerManager.getInstance().isStickerDownloading(category.getCategoryId()))
 			{
-				progressBar.setVisibility(View.VISIBLE);
 				updateText.setText(R.string.updating_set);
-				updateText.setTextColor(activity.getResources().getColor(R.color.downloading_sticker));
 				convertView.setClickable(false);
-				button.setBackgroundResource(R.drawable.bg_sticker_downloading);
 			}
 			else
 			{
-				progressBar.setVisibility(View.GONE);
-				updateText.setText(R.string.new_stickers_available);
-				updateText.setTextColor(activity.getResources().getColor(R.color.actionbar_text));
 				convertView.setClickable(true);
-				button.setBackgroundResource(R.drawable.bg_download_sticker);
 				convertView.setOnClickListener(new OnClickListener()
 				{
 					@Override
