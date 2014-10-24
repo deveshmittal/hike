@@ -56,5 +56,11 @@
             android:textSize="14sp"
             android:text="Downloading Expressions" />
     </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/emptyViewHolder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+    </LinearLayout>
 
 </RelativeLayout>

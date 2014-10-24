@@ -259,30 +259,54 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 		View downloadingParent = parent.findViewById(R.id.downloading_container);
 		final TextView downloadingText = (TextView) parent.findViewById(R.id.downloading_sticker);
-
+		ViewGroup emptyView = (ViewGroup) parent.findViewById(R.id.emptyViewHolder);
 		Button downloadingFailed = (Button) parent.findViewById(R.id.sticker_fail_btn);
 
-		stickerGridView.setVisibility(View.GONE);
+		checkAndSetEmptyView(parent, emptyView, category, stickerGridView);
 		downloadingParent.setVisibility(View.GONE);
 		downloadingFailed.setVisibility(View.GONE);
 
 		StickerPageObjects spo = new StickerPageObjects(stickerGridView, downloadingParent, downloadingText, downloadingFailed);
 		stickerGridView.setNumColumns(StickerManager.getInstance().getNumColumnsForStickerGrid(activity));
 		stickerObjMap.put(category, spo);
-		DownloadStickerTask currentStickerTask = (DownloadStickerTask) StickerManager.getInstance().getTask(category.getCategoryId());
-
-		if (currentStickerTask != null && currentStickerTask.getDownloadType().equals(DownloadType.NEW_CATEGORY))
+		initStickers(spo, category);
+		
+	}
+	
+	private void checkAndSetEmptyView(final View parent, ViewGroup emptyView, final StickerCategory category, final GridView stickerGridView)
+	{
+		View empty;
+		if (category.isCustom())
 		{
-			Logger.d(getClass().getSimpleName(), "Downloading new category " + category.getCategoryId());
-
-			downloadingParent.setVisibility(View.VISIBLE);
-
-			downloadingText.setText(activity.getString(R.string.downloading_category, category.getCategoryId()));
+			// Set Recents EmptyView
+			empty = LayoutInflater.from(activity).inflate(R.layout.recent_empty_view, emptyView);
 		}
+
 		else
 		{
-			initStickers(spo, category);
+			// Set Download EmptyView
+			empty = LayoutInflater.from(activity).inflate(R.layout.sticker_pack_empty_view, emptyView);
+			TextView downloadBtn = (TextView) empty.findViewById(R.id.download_btn);
+			TextView categoryName = (TextView) empty.findViewById(R.id.category_name);
+			categoryName.setText(category.getCategoryName());
+			downloadBtn.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					stickerGridView.getEmptyView().setVisibility(View.GONE);
+					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.NEW_CATEGORY, null);
+					Utils.executeFtResultAsyncTask(downloadStickerTask);
+
+					StickerManager.getInstance().insertTask(category.getCategoryId(), downloadStickerTask);
+					setupStickerPage(parent, category, false, null);
+
+				}
+			});
+
 		}
+
+		stickerGridView.setEmptyView(empty);
 	}
 
 	/**
