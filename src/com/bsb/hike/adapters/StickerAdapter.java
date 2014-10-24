@@ -200,7 +200,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				// if this category is already loaded then only proceed else ignore
 				if (spo != null)
 				{
-					if (intent.getAction().equals(StickerManager.STICKERS_FAILED) && DownloadType.NEW_CATEGORY.equals(type))
+					if (intent.getAction().equals(StickerManager.STICKERS_FAILED) && (DownloadType.NEW_CATEGORY.equals(type) || DownloadType.MORE_STICKERS.equals(type)))
 					{
 						activity.runOnUiThread(new Runnable()
 						{
@@ -214,26 +214,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 								Logger.d(getClass().getSimpleName(), "Download failed for new category " + cat.getCategoryId());
 								cat.setState(StickerCategory.RETRY);
-								spo.getDownloadingParent().setVisibility(View.GONE);
-								spo.getStickerGridView().setVisibility(View.GONE);
-								spo.getDownloadingFailedButton().setVisibility(View.VISIBLE);
-								if(failedDueToLargeFile)
-								{
-									spo.getDownloadingFailedButton().setText(R.string.sticker_download_failed_large_file);
-								}
-								spo.getDownloadingFailedButton().setOnClickListener(new OnClickListener()
-								{
-									@Override
-									public void onClick(View v)
-									{
-										DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, cat, type, null);
-										Utils.executeFtResultAsyncTask(downloadStickerTask);
-
-										StickerManager.getInstance().insertTask(cat.getCategoryId(), downloadStickerTask);
-										spo.getDownloadingText().setText(activity.getString(R.string.downloading_category, cat.getCategoryId()));
-									}
-								});
-
+								addViewBasedOnState(stickerObjMap.get(cat), cat);
 							}
 						});
 					}
@@ -309,6 +290,34 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 
 		stickerGridView.setEmptyView(empty);
+	}
+
+	private void addViewBasedOnState(StickerPageObjects stickerPageObjects, StickerCategory category)
+	{
+		StickerPageAdapter spa = stickerPageObjects.getStickerPageAdapter();
+		List<StickerPageAdapterItem> stickerPageList = spa.getStickerPageAdapterItemList();
+		int state = category.getState();
+		stickerPageList.remove(0);
+		/* We add UI elements based on the current state of the sticker category*/
+		if (state == StickerCategory.UPDATE)
+		{
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.UPDATE));
+		}
+		else if (state == StickerCategory.DOWNLOADING)
+		{
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
+		}
+		else if(state == StickerCategory.RETRY)
+		{
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.RETRY));
+		}
+		
+		else if(state == StickerCategory.DONE)
+		{
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DONE));
+		}
+		
+		spa.notifyDataSetChanged();
 	}
 
 	/**
