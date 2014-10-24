@@ -13,6 +13,7 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
@@ -124,10 +125,13 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			break;
 		case StickerPageAdapterItem.RETRY:
 			viewType = ViewType.RETRY;
+			break;
 		case StickerPageAdapterItem.DONE:
-			viewType = viewType.DONE;
+			viewType = ViewType.DONE;
+			break;
 		case StickerPageAdapterItem.PLACE_HOLDER:
-			viewType = viewType.PLACE_HOLDER;
+			viewType = ViewType.PLACE_HOLDER;
+			break;
 		}
 		
 		return viewType.ordinal();
@@ -138,38 +142,48 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	{
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 		StickerPageAdapterItem item = getItem(position);
+		ViewHolder viewHolder = null;
 		AbsListView.LayoutParams ll = new AbsListView.LayoutParams(sizeEachImage,sizeEachImage);
 		
 		if (convertView == null)
 		{
+			viewHolder = new ViewHolder();
+			
 			switch (viewType)
 			{
 			case STICKER:
-				ImageView stickerImage = new RecyclingImageView(activity);
+				convertView = new RecyclingImageView(activity);
 				int padding = (int) (5 * Utils.densityMultiplier);
-				stickerImage.setLayoutParams(ll);
-				stickerImage.setScaleType(ScaleType.FIT_CENTER);
-				stickerImage.setPadding(padding, padding, padding, padding);
-				convertView = stickerImage;
+				convertView.setLayoutParams(ll);
+				((ImageView) convertView).setScaleType(ScaleType.FIT_CENTER);
+				((ImageView) convertView).setPadding(padding, padding, padding, padding);
 				
 				break;
-			case UPDATE:
+			case UPDATE:                //Since all of these have the same layout to be inflated
+			case DOWNLOADING:
+			case RETRY:
+			case DONE:
 				convertView = inflater.inflate(R.layout.update_sticker_set, null);
 				convertView.setLayoutParams(ll);
-				break;
-			case DOWNLOADING:
-				convertView = inflater.inflate(R.layout.downloading_new_stickers, null);
-				convertView.setLayoutParams(ll);
-				break;
-			case RETRY:
-				// TODO Add retry view here
-				break;
-			case DONE:
-				// TODO Add done view here
+				viewHolder.text = (TextView) convertView.findViewById(R.id.new_number_stickers);
+				viewHolder.image = (ImageView) convertView.findViewById(R.id.update_btn);
+				viewHolder.progress = (ProgressBar) convertView.findViewById(R.id.download_progress);
 				break;
 			case PLACE_HOLDER:
 				// TODO Add placeholder view here
 				break;
+			}
+			convertView.setTag(viewHolder);
+		}
+		
+		else
+		{
+			try{
+				
+			viewHolder = (ViewHolder) convertView.getTag();
+			}
+			catch(ClassCastException e)
+			{
 			}
 		}
 
@@ -177,50 +191,89 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		{
 		case STICKER:
 			Sticker sticker = (Sticker) item.getSticker();
-			stickerLoader.loadImage(sticker.getSmallStickerPath(activity), (ImageView)convertView, isListFlinging);
+			stickerLoader.loadImage(sticker.getSmallStickerPath(activity), ((ImageView) convertView), isListFlinging);
 			convertView.setTag(sticker);
 			convertView.setOnClickListener(this);
 				
 			break;
 		case UPDATE:
-			View button = convertView.findViewById(R.id.update_btn);
-			TextView updateText = (TextView) convertView.findViewById(R.id.new_number_stickers);
+			viewHolder.image.setVisibility(View.VISIBLE);
+			viewHolder.text.setVisibility(View.VISIBLE);
 
-			if (StickerManager.getInstance().isStickerDownloading(category.getCategoryId()))
+			viewHolder.image.setOnClickListener(new OnClickListener()
 			{
-				updateText.setText(R.string.updating_set);
-				convertView.setClickable(false);
-			}
-			else
-			{
-				convertView.setClickable(true);
-				convertView.setOnClickListener(new OnClickListener()
+				@Override
+				public void onClick(View v)
 				{
-					@Override
-					public void onClick(View v)
-					{
-						category.setState(StickerCategory.DOWNLOADING);
-						DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.UPDATE, StickerPageAdapter.this);
-						Utils.executeFtResultAsyncTask(downloadStickerTask);
-
-						StickerManager.getInstance().insertTask(category.getCategoryId(), downloadStickerTask);
-						notifyDataSetChanged();
-					}
-				});
-			}
+					initialiseDownloadStickerTask();
+				}
+			});
 
 			break;
 		case DOWNLOADING:
+			viewHolder.progress.setVisibility(View.VISIBLE);
+			
 			break;
 		case RETRY:
+			viewHolder.image.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_retry_sticker));
+			viewHolder.image.setVisibility(View.VISIBLE);
+			viewHolder.text.setVisibility(View.VISIBLE);
+			viewHolder.text.setText(activity.getResources().getString(R.string.retry_sticker));
+			viewHolder.image.setOnClickListener(new View.OnClickListener()
+			{
+				
+				@Override
+				public void onClick(View v)
+				{
+					initialiseDownloadStickerTask();
+				}
+			});
+			
 			break;
 		case DONE:
+			viewHolder.image.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_done_palette));
+			viewHolder.image.setVisibility(View.VISIBLE);
+			viewHolder.text.setVisibility(View.VISIBLE);
+			viewHolder.text.setText(activity.getResources().getString(R.string.see_them));
+			viewHolder.image.setOnClickListener(new View.OnClickListener()
+			{
+				
+				@Override
+				public void onClick(View v)
+				{
+					// TODO Add method to scroll to the new stickers
+				}
+			});
 			break;
 		case PLACE_HOLDER:
 			break;
 		}
 
 		return convertView;
+	}
+
+	private void initialiseDownloadStickerTask()
+	{
+		category.setState(StickerCategory.DOWNLOADING);
+		DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS ;
+		DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, type, StickerPageAdapter.this);
+		Utils.executeFtResultAsyncTask(downloadStickerTask);
+		StickerManager.getInstance().insertTask(category.getCategoryId(), downloadStickerTask);
+		replaceDownloadingatTop();
+	}
+
+	/**
+	 * Replaces the view at index 0 with Downloading view
+	 */
+	protected void replaceDownloadingatTop()
+	{
+		if(itemList.size() > 0 && (itemList.get(0).getStickerPageAdapterItemId() != StickerPageAdapterItem.STICKER))
+		{
+			itemList.remove(0);
+			itemList.add(new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
+			notifyDataSetChanged();
+		}
+		
 	}
 
 	/* This should be used only for recent stickers */
@@ -271,5 +324,14 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	public void addSticker(Sticker st)
 	{
 		this.itemList.add(new StickerPageAdapterItem(StickerPageAdapterItem.STICKER, st));
+	}
+	
+	private class ViewHolder
+	{
+		ImageView image;
+		
+		TextView text;
+		
+		ProgressBar progress;
 	}
 }

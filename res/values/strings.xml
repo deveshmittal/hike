@@ -1182,4 +1182,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="messages_sent_succees">Message Sent</string>
     <string name="new_stickers">NEW</string>
     <string name="download_category">DOWNLOAD</string>
+    <string name="retry_sticker">RETRY</string>
+    <string name="see_them">SEE THEM</string>
 </resources>
