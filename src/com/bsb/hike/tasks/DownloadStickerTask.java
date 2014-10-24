@@ -196,8 +196,9 @@ public class DownloadStickerTask extends StickerTaskBase
 			if (DownloadType.UPDATE.equals(downloadType) && stickerPageAdapter != null)
 			{
 				StickerManager.getInstance().setStickerUpdateAvailable(category.getCategoryId(), false);
+				category.setState(StickerCategory.DONE);
 				List<StickerPageAdapterItem> l = stickerPageAdapter.getStickerPageAdapterItemList();
-				l.remove(new StickerPageAdapterItem(StickerPageAdapterItem.UPDATE));
+				l.remove(0);
 				stickerPageAdapter.notifyDataSetChanged();
 				Intent i = new Intent(StickerManager.STICKERS_UPDATED);
 				LocalBroadcastManager.getInstance(context).sendBroadcast(i);
@@ -206,7 +207,8 @@ public class DownloadStickerTask extends StickerTaskBase
 			else if (DownloadType.MORE_STICKERS.equals(downloadType) && stickerPageAdapter != null)
 			{
 				List<StickerPageAdapterItem> l = stickerPageAdapter.getStickerPageAdapterItemList();
-				l.remove(new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
+				category.setState(StickerCategory.DONE);
+				l.remove(0);
 				stickerPageAdapter.notifyDataSetChanged();
 			}
 			else if (DownloadType.NEW_CATEGORY.equals(downloadType))

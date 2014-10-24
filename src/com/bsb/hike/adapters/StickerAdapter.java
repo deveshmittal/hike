@@ -213,7 +213,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 								}
 
 								Logger.d(getClass().getSimpleName(), "Download failed for new category " + cat.getCategoryId());
-
+								cat.setState(StickerCategory.RETRY);
 								spo.getDownloadingParent().setVisibility(View.GONE);
 								spo.getStickerGridView().setVisibility(View.GONE);
 								spo.getDownloadingFailedButton().setVisibility(View.VISIBLE);
@@ -244,6 +244,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 							@Override
 							public void run()
 							{
+								cat.setState(StickerCategory.DONE);
 								initStickers(spo, cat);
 							}
 						});
@@ -295,9 +296,10 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				public void onClick(View v)
 				{
 					stickerGridView.getEmptyView().setVisibility(View.GONE);
+					category.setState(StickerCategory.DOWNLOADING);
+
 					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.NEW_CATEGORY, null);
 					Utils.executeFtResultAsyncTask(downloadStickerTask);
-
 					StickerManager.getInstance().insertTask(category.getCategoryId(), downloadStickerTask);
 					setupStickerPage(parent, category, false, null);
 
@@ -337,18 +339,25 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		spo.getStickerGridView().setVisibility(View.VISIBLE);
 		final List<Sticker> stickersList = category.getStickerList(activity);
 		final List<StickerPageAdapterItem> stickerPageList = generateStickerPageAdapterItemList(stickersList);
-		boolean updateAvailable = category.isUpdateAvailable();
-
-		final DownloadStickerTask currentStickerTask = (DownloadStickerTask) StickerManager.getInstance().getTask(category.getCategoryId());
-		if (updateAvailable || (currentStickerTask != null && currentStickerTask.getDownloadType() == DownloadType.UPDATE))
+		
+		int state = category.getState(); 
+		/* We add UI elements based on the current state of the sticker category*/
+		switch (state) 
 		{
+		case StickerCategory.UPDATE : 
 			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.UPDATE));
-			updateAvailable = true;
+			break;
+		case StickerCategory.DOWNLOADING :
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
+			break;
+		case StickerCategory.RETRY :
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.RETRY));
+			break;
+		case StickerCategory.DONE : 
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DONE));
+			break;
 		}
-		if (currentStickerTask != null && currentStickerTask.getDownloadType() == DownloadType.MORE_STICKERS)
-		{
-			stickerPageList.add(new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
-		}
+		
 		final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickerPageList, category,worker);
 		spo.setStickerPageAdapter(stickerPageAdapter);
 		spo.getStickerGridView().setAdapter(stickerPageAdapter);
