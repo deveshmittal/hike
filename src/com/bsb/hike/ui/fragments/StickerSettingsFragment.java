@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.CheckBox;
 import android.widget.Toast;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -22,6 +23,7 @@ import com.bsb.hike.DragSortListView.DragSortListView;
 import com.bsb.hike.DragSortListView.DragSortListView.DragScrollProfile;
 import com.bsb.hike.adapters.StickerSettingsAdapter;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 
 public class StickerSettingsFragment extends SherlockFragment implements Listener, OnScrollListener, DragScrollProfile, OnItemClickListener
@@ -152,6 +154,9 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 	{
-		//TODO Toggle the checkbox by obtaining it from the view.
+		StickerCategory category = (StickerCategory) parent.getItemAtPosition(position);
+		CheckBox categoryVisibBox = (CheckBox) view.findViewById(R.id.category_checkbox);
+		categoryVisibBox.toggle();
+		category.setVisible(categoryVisibBox.isChecked());
 	}
 }

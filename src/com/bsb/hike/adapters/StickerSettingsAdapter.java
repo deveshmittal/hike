@@ -8,17 +8,19 @@ import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.BaseAdapter;
-import android.widget.RelativeLayout;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.DragSortListView.DragSortListView;
 import com.bsb.hike.DragSortListView.DragSortListView.DragSortListener;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.utils.Logger;
 
-public class StickerSettingsAdapter extends BaseAdapter implements DragSortListener
+public class StickerSettingsAdapter extends BaseAdapter implements DragSortListener, OnCheckedChangeListener
 {
 	/**
 	 * Key is ListView position, value is ArrayList position
@@ -83,7 +85,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		StickerCategory category = getItem(position);
+		final StickerCategory category = getItem(position);
 		ViewHolder viewHolder;
 		
 		if(convertView == null)
@@ -91,6 +93,9 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			convertView = mInflater.inflate(R.layout.sticker_settings_list_item, null);
 			viewHolder = new ViewHolder();
 			viewHolder.categoryName = (TextView) convertView.findViewById(R.id.category_name);
+			viewHolder.checkBox = (CheckBox) convertView.findViewById(R.id.category_checkbox);
+			viewHolder.checkBox.setTag(category);
+			viewHolder.checkBox.setOnCheckedChangeListener(this);
 			convertView.setTag(viewHolder);
 			
 		}
@@ -101,6 +106,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		}
 		
 		viewHolder.categoryName.setText(category.getCategoryName());
+		viewHolder.checkBox.setChecked(category.isVisible());
 		
 		return convertView;
 	}
@@ -211,6 +217,15 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	private class ViewHolder
 	{
 		TextView categoryName;
+		
+		CheckBox checkBox;
+	}
+
+	@Override
+	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+	{
+		StickerCategory category = (StickerCategory) buttonView.getTag();
+		category.setVisible(isChecked);
 	}
 
 }
