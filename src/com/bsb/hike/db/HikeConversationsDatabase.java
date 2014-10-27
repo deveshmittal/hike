@@ -5524,7 +5524,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		 * IS_ADDED : if user has added this category to his categories i.e. clicked on download this category once in life
 		 */
 		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STICKER_SHOP_TABLE + " (" + DBConstants.CATEGORY_ID + " TEXT PRIMARY KEY, " + DBConstants.CATEGORY_NAME
-				+ " TEXT, " + DBConstants.TOTAL_NUMBER + " INTEGER, " + DBConstants.IS_ADDED + " INTEGER DEFAULT 0," + DBConstants.CATEGORY_INDEX + " INTEGER,"
+				+ " TEXT, " + DBConstants.TOTAL_NUMBER + " INTEGER, " + DBConstants.IS_ADDED + " INTEGER DEFAULT 0,"
 				+ DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.METADATA + " TEXT " + " )";
 
 		return sql;
@@ -5593,13 +5593,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
 					if (!mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(downloadPreference, false))
 					{
-						ContentValues contentValues2 = getContentValuesForStickerShopTable(categoryId, categoryName, catIndex, timeStamp, metadata);
+						ContentValues contentValues2 = getContentValuesForStickerShopTable(categoryId, categoryName, timeStamp, metadata);
 						mDb.insert(DBConstants.STICKER_SHOP_TABLE, null, contentValues2);
 					}
 				}
 				else
 				{
-					ContentValues contentValues2 = getContentValuesForStickerShopTable(categoryId, categoryName, catIndex, timeStamp, metadata);
+					ContentValues contentValues2 = getContentValuesForStickerShopTable(categoryId, categoryName, timeStamp, metadata);
 					mDb.insert(DBConstants.STICKER_SHOP_TABLE, null, contentValues2);
 				}
 			}
@@ -5618,12 +5618,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 	
-	private ContentValues getContentValuesForStickerShopTable(String categoryId, String categoryName, int catIndex, int timeStamp, String metadata)
+	private ContentValues getContentValuesForStickerShopTable(String categoryId, String categoryName, int timeStamp, String metadata)
 	{
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.CATEGORY_ID, categoryId);
 		contentValues.put(DBConstants.CATEGORY_NAME, categoryName);
-		contentValues.put(DBConstants.CATEGORY_INDEX, catIndex);
 		contentValues.put(DBConstants.TIMESTAMP, timeStamp);
 		contentValues.put(DBConstants.METADATA, metadata);
 		return contentValues;
