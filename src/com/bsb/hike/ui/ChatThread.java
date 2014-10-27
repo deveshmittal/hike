@@ -4269,6 +4269,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 		ConvMessage msg = findMessageById(msgId);
+		
+		/*
+		 * This is a hackish check. For some cases we were getting convMsg in
+		 * another user's messageMap. which should not happen ideally. that was
+		 * leading to showing hikeOfflineTip in wrong ChatThread.
+		 */
+		if(msg == null || TextUtils.isEmpty(msg.getMsisdn())  || !msg.getMsisdn().equals(mContactNumber))
+		{
+			Logger.i("ChatThread", "We are getting a wrong msisdn convMessage object in " + mContactNumber + " ChatThread");
+			return;
+		}	
+		
 		if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 		{
 			if (activityVisible && (!msg.isTickSoundPlayed()) && Utils.isPlayTickSound(getApplicationContext()))
@@ -7715,7 +7727,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		for (int i = 0; i < menu.size(); i++)
 		{
 			MenuItem item = menu.getItem(i);
-			if (mOptionsList.get(item.getItemId()))
+			if (mOptionsList.get(item.getItemId()) != null && mOptionsList.get(item.getItemId()))
 			{
 				item.setVisible(true);
 			}

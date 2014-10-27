@@ -278,11 +278,7 @@ public class ConvMessage
 		this.participantInfoState = other.participantInfoState;
 		this.shouldShowPush = other.shouldShowPush;
 		this.unreadCount = other.unreadCount;
-		if(other.metadata!=null){try {
-			setMetadata(other.metadata.serialize());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}}
+		this.metadata = other.metadata;
 		try {
 			this.readByArray = other.readByArray !=null? new JSONArray(other.readByArray.toString()) : null;
 		} catch (JSONException e) {
@@ -459,13 +455,26 @@ public class ConvMessage
 		setState(isSelfGenerated ? State.RECEIVED_READ : State.RECEIVED_UNREAD);
 	}
 
+	public void setMetadata(MessageMetadata messageMetadata)
+	{	
+		if(messageMetadata!=null){
+		this.metadata = messageMetadata;
+		isFileTransferMessage = this.metadata.getHikeFiles() != null  &&   this.metadata.getHikeFiles().size() > 0;
+
+		participantInfoState = this.metadata.getParticipantInfoState() ;
+
+		isStickerMessage = this.metadata.getSticker() != null;
+		}
+		
+	}
+
 	public void setMetadata(JSONObject metadata) throws JSONException
 	{
 		if (metadata != null)
 		{
 			this.metadata = new MessageMetadata(metadata, mIsSent);
 
-			isFileTransferMessage = this.metadata.getHikeFiles() != null;
+			isFileTransferMessage = this.metadata.getHikeFiles() != null  &&   this.metadata.getHikeFiles().size() > 0;
 
 			participantInfoState = this.metadata.getParticipantInfoState();
 
