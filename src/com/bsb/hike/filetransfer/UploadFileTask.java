@@ -1347,7 +1347,8 @@ public class UploadFileTask extends FileTransferBase
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				retry++;
-				if (retry == (MAX_RETRY - 1))
+				Thread.sleep(60 * 1000);
+				if (retry == MAX_RETRY)
 					throw e;
 			}
 		}
