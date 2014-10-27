@@ -273,7 +273,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		if(itemList.size() > 0 && (itemList.get(0).getStickerPageAdapterItemId() != StickerPageAdapterItem.STICKER))
 		{
 			itemList.remove(0);
-			itemList.add(new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
+			itemList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
 			notifyDataSetChanged();
 		}
 		
