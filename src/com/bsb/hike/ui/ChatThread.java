@@ -5440,7 +5440,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						if (!selectedDir.mkdirs())
 						{
-							Logger.d("MyCameraApp", "failed to create directory");
+							Logger.d(getClass().getSimpleName(), "failed to create directory");
 							return;
 						}
 					}
@@ -6089,7 +6089,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Logger.d(getClass().getSimpleName(), "File path: " + filePath);
 				}
 			}
-			if (requestCode == HikeConstants.IMAGE_CAPTURE_CODE && !HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false) && selectedFile != null)
+			if (selectedFile != null && requestCode == HikeConstants.IMAGE_CAPTURE_CODE && !HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
 			{
 				final String fPath = filePath;
 				
