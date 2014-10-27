@@ -14,6 +14,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
+import com.bsb.hike.modules.stickerdownloadmgr.retry.DefaultRetryPolicy;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -42,10 +43,10 @@ public class StickerSizeDownloadTask extends BaseStickerDownloadTask
 		
 		try
 		{
-			String urlString = AccountUtils.base + "/metadata?catId=" + catId + "&resId=" + Utils.getResolutionId();;
+			String urlString = AccountUtils.base + "/stickers/size?catId=" + catId + "&resId=" + Utils.getResolutionId();;
 			if(AccountUtils.ssl)
 			{
-				urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/metadata?catId=" + catId + "&resId=" + Utils.getResolutionId();;
+				urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/stickers/size?catId=" + catId + "&resId=" + Utils.getResolutionId();;
 			}
 			
 			setDownloadUrl(urlString);
