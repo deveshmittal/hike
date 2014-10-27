@@ -195,4 +195,14 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 	{
 		this.resultObj = resultObject;
 	}
+	
+	public IStickerResultListener getCallback()
+	{
+		return callback;
+	}
+
+	public void setCallback(IStickerResultListener callback)
+	{
+		this.callback = callback;
+	}
 }
