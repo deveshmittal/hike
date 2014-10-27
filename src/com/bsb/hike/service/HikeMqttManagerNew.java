@@ -49,8 +49,14 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.MqttPersistenceException;
+import com.bsb.hike.model.HikeFriend;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.HikePacket;
+import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.sdk.HikeSDKStatusCode;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.HikeSDKConstants;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -296,6 +302,20 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			super(looper);
 		}
 
+		void returnExceptionMessageToCaller(Message argMessage)
+		{
+			argMessage.arg2 = HikeSDKStatusCode.STATUS_EXCEPTION;
+			try
+			{
+				argMessage.replyTo.send(argMessage);
+			}
+			catch (RemoteException e)
+			{
+				e.printStackTrace();
+			}
+			return;
+		}
+
 		@Override
 		public void handleMessage(Message msg)
 		{
@@ -314,6 +334,107 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					String m = b.getString(HikeConstants.MESSAGE);
 					long mId = b.getLong(HikeConstants.MESSAGE_ID, -1);
 					send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis(), msg.arg2), msg.arg1);
+					break;
+				case HikeService.SDK_REQ_GET_FRIENDS:
+					Bundle reqGetFriendsBundle = msg.getData();
+
+					if (reqGetFriendsBundle == null)
+					{
+						returnExceptionMessageToCaller(msg);
+						return;
+					}
+
+					JSONObject reqGetFriendsData = null;
+
+					try
+					{
+						reqGetFriendsData = new JSONObject(reqGetFriendsBundle.getString(HikeSDKConstants.HIKE_REQ_DATA_ID));
+					}
+					catch (JSONException e)
+					{
+						e.printStackTrace();
+						returnExceptionMessageToCaller(msg);
+						return;
+					}
+					String requestFilter = reqGetFriendsData.getString(HikeSDKConstants.HIKE_REQ_FILTER_ID);
+
+					List<ContactInfo> contacts = null;
+
+					int reqFilterKey = 0;
+					try
+					{
+						reqFilterKey = Integer.parseInt(requestFilter);
+					}
+					catch (NumberFormatException nfe)
+					{
+						nfe.printStackTrace();
+						returnExceptionMessageToCaller(msg);
+						return;
+					}
+
+					switch (reqFilterKey)
+					{
+					case -1:
+						// Favourites
+						contacts = ContactManager.getInstance().getContactsOfFavoriteType(FavoriteType.FRIEND, 1, "");
+						break;
+					case -2:
+						// On hike
+						contacts = new ArrayList<ContactInfo>();
+						List<ContactInfo> allContacts = ContactManager.getInstance().getAllContacts();
+						for (ContactInfo contact : allContacts)
+						{
+							if (contact.isOnhike())
+							{
+								contacts.add(contact);
+							}
+						}
+						break;
+					case -3:
+						// Not on hike
+						contacts = new ArrayList<ContactInfo>();
+						List<Pair<AtomicBoolean, ContactInfo>> nonHikePair = ContactManager.getInstance().getNonHikeContacts();
+						for (Pair<AtomicBoolean, ContactInfo> pair : nonHikePair)
+						{
+							contacts.add(pair.second);
+						}
+						break;
+					default:
+						// All contacts
+						contacts = ContactManager.getInstance().getAllContacts();
+					}
+
+					JSONObject responseJSON = new JSONObject();
+
+					JSONArray friendsListJSON = new JSONArray();
+
+					for (ContactInfo contact : contacts)
+					{
+						JSONObject friendJSON = new JSONObject();
+
+						String contactId = contact.getId();
+
+						String contactName = contact.getNameOrMsisdn();
+
+						if (!TextUtils.isEmpty(contactId) && !TextUtils.isEmpty(contactName))
+						{
+							friendJSON.put(HikeFriend.HIKE_FRIEND_ID_KEY, contactId);
+							friendJSON.put(HikeFriend.HIKE_FRIEND_NAME_KEY, contactName);
+							friendsListJSON.put(friendJSON);
+						}
+					}
+
+					responseJSON.put(HikeFriend.HIKE_FRIEND_LIST_ID, friendsListJSON);
+
+					reqGetFriendsBundle.putString(HikeSDKConstants.HIKE_REQ_DATA_ID, responseJSON.toString());
+
+					msg.setData(reqGetFriendsBundle);
+
+					// Set STATUS_OK
+					msg.arg2 = HikeSDKStatusCode.STATUS_OK;
+
+					msg.replyTo.send(msg);
+
 					break;
 				}
 			}

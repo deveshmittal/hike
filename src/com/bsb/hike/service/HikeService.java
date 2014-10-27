@@ -103,6 +103,8 @@ public class HikeService extends Service
 	public static final int MSG_APP_CONN_STATUS = 6;
 
 	public static final int MSG_APP_INVALID_TOKEN = 7;
+	
+	public static final int SDK_REQ_GET_FRIENDS = -11;
 
 	protected Messenger mApp;
 

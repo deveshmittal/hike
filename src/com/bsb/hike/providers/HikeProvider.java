@@ -115,11 +115,6 @@ public class HikeProvider extends ContentProvider
 			break;
 		}
 
-		if (c == null || !c.moveToFirst())
-		{
-			throw new IllegalArgumentException("Invalid path/parameters");
-		}
-
 		return c;
 	}
 
