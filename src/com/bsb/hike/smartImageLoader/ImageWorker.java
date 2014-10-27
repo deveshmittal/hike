@@ -215,14 +215,14 @@ public abstract class ImageWorker
 		boolean rounded = false;
 		if (idx > 0)
 		{
-			data = data.substring(0, idx);
+			data = new String(data.substring(0, idx));
 			rounded = true;
 		}
 		else
 		{
 			int idx1 = data.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
 			if (idx1 > 0)
-				data = data.substring(0, idx1);
+				data = new String(data.substring(0, idx1));
 		}
 		boolean isGroupConversation = Utils.isGroupConversation(data);
 
@@ -264,7 +264,8 @@ public abstract class ImageWorker
 	 */
 	public void setLoadingImage(Drawable bitmap)
 	{
-		mLoadingBitmap = drawableToBitmap(bitmap);
+		if(bitmap != null)
+			mLoadingBitmap = drawableToBitmap(bitmap);
 	}
 
 	/**

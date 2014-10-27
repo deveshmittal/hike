@@ -35,6 +35,12 @@ public class HikePubSub implements Runnable
 	 * broadcast when the sender sends the message (click the send button in chat thread view)
 	 */
 	public static final String MESSAGE_SENT = "messagesent";
+	
+	public static final String MULTI_MESSAGE_SENT = "multimessagesent";
+	
+	public static final String MULTI_MESSAGE_DB_INSERTED = "multimessagedbinserted";
+
+	public static final String MULTI_FILE_UPLOADED = "multiFileUploaded";
 
 	public static final String MESSAGE_DELIVERED = "messageDelivered"; // represents
 																		// that
@@ -92,6 +98,8 @@ public class HikePubSub implements Runnable
 	 * broadcast when the server receives the message and replies with a confirmation
 	 */
 	public static final String SERVER_RECEIVED_MSG = "serverReceivedMsg";
+	
+	public static final String SERVER_RECEIVED_MULTI_MSG = "serverReceivedMultiMsg";
 
 	/*
 	 * broadcast when a message is received from the sender but before it's been written our DB
@@ -254,8 +262,6 @@ public class HikePubSub implements Runnable
 
 	public static final String SHOW_IMAGE = "showImage";
 
-	public static final String RESET_UNREAD_COUNT = "resetUnreadCount";
-
 	public static final String PUSH_FILE_DOWNLOADED = "pushFileDownloaded";
 
 	public static final String PUSH_AVATAR_DOWNLOADED = "pushAvtarDownloaded";
@@ -373,6 +379,10 @@ public class HikePubSub implements Runnable
 	public static final String CONV_META_DATA_UPDATED = "convMetaDataUpdated";
 	
 	public static final String LATEST_PIN_DELETED = "lastPinDeleted";
+	
+	public static final String UNREAD_PIN_COUNT_RESET = "pinCountReset";
+
+	public static final String STICKER_CATEGORY_MAP_UPDATED = "stickerCategoryMapUpdated";
 
 	private final Thread mThread;
 

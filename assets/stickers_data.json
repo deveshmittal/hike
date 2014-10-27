@@ -67,6 +67,8 @@
             "isVisible": true,
             "isCustom": true,
             "catIndex": 0,
+            "pallate_icon": "ic_recent_stickers",
+            "pallate_icon_selected": "ic_recent_stickers_selected",
             "metadata": []
         },
         {
@@ -76,6 +78,8 @@
             "isVisible": true,
             "isCustom": false,
             "catIndex": 1,
+            "pallate_icon": "ic_humanoid",
+            "pallate_icon_selected": "ic_humanoid_selected",
             "metadata": []
         },
         {
@@ -85,6 +89,8 @@
             "isVisible": true,
             "isCustom": false,
             "catIndex": 2,
+            "pallate_icon": "ic_expressions",
+            "pallate_icon_selected": "ic_expressions_selected",
             "metadata": []
         },
         {
@@ -94,6 +100,8 @@
             "isVisible": true,
             "isCustom": false,
             "catIndex": 3,
+            "pallate_icon": "ic_love",
+            "pallate_icon_selected": "ic_love_selected",
             "metadata": []
         },
         {
@@ -103,6 +111,8 @@
             "isVisible": true,
             "isCustom": false,
             "catIndex": 4,
+            "pallate_icon": "ic_bollywood",
+            "pallate_icon_selected": "ic_bollywood_selected",
             "metadata": []
         },
         {
@@ -112,6 +122,8 @@
             "isVisible": true,
             "isCustom": false,
             "catIndex": 5,
+            "pallate_icon": "ic_indian",
+            "pallate_icon_selected": "ic_indian_selected",
             "metadata": []
         },
         {
@@ -121,6 +133,8 @@
             "isVisible": true,
             "isCustom": false,
             "catIndex": 6,
+            "pallate_icon": "ic_doggy",
+            "pallate_icon_selected": "ic_doggy_selected",
             "metadata": []
         },
         {
@@ -130,6 +144,8 @@
             "isVisible": true,
             "isCustom": false,
             "catIndex": 7,
+            "pallate_icon": "ic_rageface",
+            "pallate_icon_selected": "ic_rageface_selected",
             "metadata": []
         },
         {
@@ -139,6 +155,8 @@
             "isVisible": true,
             "isCustom": false,
             "catIndex": 8,
+            "pallate_icon": "ic_jelly",
+            "pallate_icon_selected": "ic_jelly_selected",
             "metadata": []
         },
         {
@@ -148,6 +166,8 @@
             "isVisible": true,
             "isCustom": false,
             "catIndex": 9,
+            "pallate_icon": "ic_sports",
+            "pallate_icon_selected": "ic_sports_selected",
             "metadata": []
         },
         {
@@ -157,6 +177,8 @@
             "isVisible": true,
             "isCustom": false,
             "catIndex": 10,
+            "pallate_icon": "ic_humanoid2",
+            "pallate_icon_selected": "ic_humanoid2_selected",
             "metadata": []
         },
         {
@@ -166,6 +188,8 @@
             "isVisible": true,
             "isCustom": false,
             "catIndex": 11,
+            "pallate_icon": "ic_avtars",
+            "pallate_icon_selected": "ic_avtars_selected",
             "metadata": []
         },
         {
@@ -175,6 +199,8 @@
             "isVisible": true,
             "isCustom": false,
             "catIndex": 12,
+            "pallate_icon": "ic_smileyexpression",
+            "pallate_icon_selected": "ic_smileyexpression_selected",
             "metadata": []
         },
         {
@@ -184,6 +210,8 @@
             "isVisible": true,
             "isCustom": false,
             "catIndex": 13,
+            "pallate_icon": "ic_kitty",
+            "pallate_icon_selected": "ic_kitty_selected",
             "metadata": []
         }
     ]

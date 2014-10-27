@@ -85,6 +85,9 @@ public class MessageMetadata
 		this.pinMessage = pinMessage;
 	}
 
+	public MessageMetadata(String jsonString,boolean isSent) throws JSONException{
+		this(new JSONObject(jsonString),isSent);
+	}
 	public MessageMetadata(JSONObject metadata, boolean isSent) throws JSONException
 	{
 		this.participantInfoState = metadata.has(HikeConstants.DND_USERS) || metadata.has(HikeConstants.DND_NUMBERS) ? ParticipantInfoState.DND_USER : ParticipantInfoState

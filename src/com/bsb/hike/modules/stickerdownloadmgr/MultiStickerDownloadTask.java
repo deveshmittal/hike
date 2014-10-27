@@ -135,7 +135,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 					Sticker s = new Sticker(category, stickerId);
 					if (downloadType.equals(DownloadType.MORE_STICKERS) || downloadType.equals(DownloadType.UPDATE) && stickerPageAdapter != null)
 					{
-						stickerPageAdapter.getStickerList().add(s);
+						stickerPageAdapter.addSticker(s);
 					}
 					// some hack : seems server was sending stickers which already exist so it was leading to duplicate issue
 					// so we save small sticker , if not present already
@@ -165,7 +165,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			return STResult.DOWNLOAD_FAILED;
 		}
 
-		HikeConversationsDatabase.getInstance().addOrUpdateStickerCategory(category.getCategoryId(), totalNumber);
+		HikeConversationsDatabase.getInstance().updateStickerCountForStickerCategory(category.getCategoryId(), totalNumber);
 		return STResult.SUCCESS;
 	}
 

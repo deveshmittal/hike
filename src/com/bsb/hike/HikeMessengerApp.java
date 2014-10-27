@@ -400,6 +400,12 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ATOMIC_POP_UP_MESSAGE_CHAT = "apuMessageChat";
 
+	public static final String SHOWN_DIWALI_POPUP = "shownDiwaliPopup";
+	
+	public static final String SHOW_SHOP_ICON_BLUE = "showShopIconBlue";
+	
+	public static final String IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN = "showCategoryReordering";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;
@@ -683,15 +689,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 				settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1 || settings.getInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, -1) == 1 || 
 				settings.getInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1) == 1 || settings.getInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 1) == 1 || TEST)
 		{
-			// turn off future push notifications as soon as the app has
-			// started.
-			// this has to be turned on whenever the upgrade finishes.
-			Editor editor = settings.edit();
-			editor.putBoolean(BLOCK_NOTIFICATIONS, true);
-			editor.commit();
-
-			Intent msgIntent = new Intent(this, UpgradeIntentService.class);
-			startService(msgIntent);
+			startUpdgradeIntent();
 		}
 
 		if(settings.getInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 1) == 2)
@@ -813,6 +811,19 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
 	}
 	
+	public void startUpdgradeIntent()
+	{
+		// turn off future push notifications as soon as the app has
+		// started.
+		// this has to be turned on whenever the upgrade finishes.
+		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+		editor.putBoolean(BLOCK_NOTIFICATIONS, true);
+		editor.commit();
+
+		Intent msgIntent = new Intent(this, UpgradeIntentService.class);
+		startService(msgIntent);
+	}
+
 	private void replaceGBKeys()
 	{
 		HikeSharedPreferenceUtil preferenceUtil = HikeSharedPreferenceUtil.getInstance(this);

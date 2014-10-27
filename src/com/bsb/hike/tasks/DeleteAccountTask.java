@@ -83,6 +83,11 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			}
 			StickerManager.getInstance().deleteStickers();
 
+			/*
+			 * We need to do this where on reset/delete account. We need to we need to run initial setup for stickers. for normal cases it runs from onCreate method of
+			 * HikeMessangerApp but in this case onCreate won't be called and user can complete signup.
+			 */
+			app.startUpdgradeIntent();
 			return true;
 		}
 		catch (Exception e)

@@ -1,12 +1,22 @@
 package com.bsb.hike.models;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OptionalDataException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-public class StickerCategory implements Serializable
+import android.content.Context;
+
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
+
+public class StickerCategory implements Serializable, Comparable<StickerCategory>
 {
 
 	private String categoryId;
@@ -28,13 +38,28 @@ public class StickerCategory implements Serializable
 	private int totalStickers;
 	
 	private int timeStamp;
-
+	
+	public static final int NONE = 0;
+	
+	public static final int UPDATE = 1;
+	
+	public static final int DOWNLOADING = 2;
+	
+	public static final int RETRY = 3;
+	
+	public static final int DONE = 4;
+	
+	private int state;
 
 	public StickerCategory(String categoryId, String categoryName, boolean updateAvailable, boolean isVisible, boolean isCustom, boolean isAdded,
 			int catIndex, String metadata, int totalStickers, int timeStamp)
 	{
 		this.categoryId = categoryId;
 		this.updateAvailable = updateAvailable;
+		if(this.updateAvailable)
+		{
+			setState(UPDATE);
+		}
 		this.categoryName = categoryName;
 		this.isVisible = isVisible;
 		this.isCustom = isCustom;
@@ -43,6 +68,7 @@ public class StickerCategory implements Serializable
 		this.metadata = metadata;
 		this.totalStickers = totalStickers;
 		this.timeStamp = timeStamp;
+		this.state = NONE;
 	}
 
 	// this is mostly used for recents stickers only
@@ -50,6 +76,7 @@ public class StickerCategory implements Serializable
 	{
 		this.categoryId = category;
 		this.updateAvailable = false;
+		this.state = NONE;
 	}
 
 	public StickerCategory()
@@ -74,6 +101,10 @@ public class StickerCategory implements Serializable
 
 	public void setUpdateAvailable(boolean updateAvailable)
 	{
+		if (updateAvailable)
+		{
+			setState(UPDATE);
+		}
 		this.updateAvailable = updateAvailable;
 	}
 
@@ -117,12 +148,12 @@ public class StickerCategory implements Serializable
 		this.isAdded = isAdded;
 	}
 
-	public int isCatIndex()
+	public int getCategoryIndex()
 	{
 		return catIndex;
 	}
 
-	public void setCatIndex(int catIndex)
+	public void setCategoryIndex(int catIndex)
 	{
 		this.catIndex = catIndex;
 	}
@@ -155,6 +186,52 @@ public class StickerCategory implements Serializable
 	public void setTimeStamp(int timeStamp)
 	{
 		this.timeStamp = timeStamp;
+	}
+	
+	public void setState(int state)
+	{
+		this.state = state;
+	}
+	
+	public int getState()
+	{
+		return state;
+	}
+	
+	public List<Sticker> getStickerList(Context context)
+	{
+		final List<Sticker> stickersList;
+		if (isCustom())
+		{
+			return ((CustomStickerCategory) this).getStickerList(context);
+		}
+		else
+		{
+
+			long t1 = System.currentTimeMillis();
+			stickersList = new ArrayList<Sticker>();
+
+			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, getCategoryId());
+
+			if (categoryDirPath != null)
+			{
+				File categoryDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
+
+				if (categoryDir.exists())
+				{
+					String[] stickerIds = categoryDir.list(StickerManager.getInstance().stickerFileFilter);
+					for (String stickerId : stickerIds)
+					{
+						Sticker s = new Sticker(this, stickerId);
+						stickersList.add(s);
+					}
+				}
+			}
+			Collections.sort(stickersList);
+			long t2 = System.currentTimeMillis();
+			Logger.d(getClass().getSimpleName(), "Time to sort category : " + getCategoryId() + " in ms : " + (t2 - t1));
+		}
+		return stickersList;
 	}
 	
 	@Override
@@ -203,5 +280,21 @@ public class StickerCategory implements Serializable
 		updateAvailable = in.readBoolean();
 		//ignoring this varialbe after reading just to ensure backward compatibility
 		in.readBoolean();
+	}
+
+	@Override
+	public int compareTo(StickerCategory another)
+	{
+		if (this.equals(another))
+		{
+			return 0;
+		}
+
+		if (another == null)
+		{
+			return -1;
+		}
+
+		return this.catIndex < another.getCategoryIndex() ? -1 : 1; 
 	}
 }

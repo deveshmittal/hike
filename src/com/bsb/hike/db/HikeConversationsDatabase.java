@@ -27,6 +27,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
@@ -44,6 +45,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.CustomStickerCategory;
 import com.bsb.hike.models.FileListItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Conversation;
@@ -57,6 +59,7 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.contactmgr.ConversationMsisdns;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
@@ -100,17 +103,22 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			db = mDb;
 		}
-		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + " STRING, " + DBConstants.MSG_STATUS + " INTEGER, " /*
-																																									 * this is to
-																																									 * check if msg
-																																									 * sent or
-																																									 * recieved of
-																																									 * the msg sent.
-																																									 */
-				+ DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + DBConstants.MAPPED_MSG_ID + " INTEGER, "
-				+ DBConstants.CONV_ID + " INTEGER," + DBConstants.MESSAGE_METADATA + " TEXT, " + DBConstants.GROUP_PARTICIPANT + " TEXT, " + DBConstants.IS_HIKE_MESSAGE
-				+ " INTEGER DEFAULT -1, " + DBConstants.READ_BY + " TEXT, " + DBConstants.MSISDN + " TEXT, " + DBConstants.MESSAGE_HASH + " TEXT DEFAULT NULL, "
-				+ DBConstants.MESSAGE_TYPE + " INTEGER" + " INTEGER DEFAULT -1" + " ) ";
+		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.MESSAGES_TABLE
+				+ " ( "
+				+ DBConstants.MESSAGE + " STRING, " // The message text
+				+ DBConstants.MSG_STATUS + " INTEGER, " // Whether the message is sent or not. Plus also tells us the current state of the message.
+				+ DBConstants.TIMESTAMP + " INTEGER, " // Message time stamp
+				+ DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " // The message id (Unique)
+				+ DBConstants.MAPPED_MSG_ID + " INTEGER, " // The message id of the message on the sender's side (Only applicable for received messages)
+				+ DBConstants.CONV_ID + " INTEGER," // Deprecated
+				+ DBConstants.MESSAGE_METADATA + " TEXT, " // Extra info of the message. Stored in JSON format
+				+ DBConstants.GROUP_PARTICIPANT + " TEXT, " // The MSISDN of the participant that sent the message (Only for groups)
+				+ DBConstants.IS_HIKE_MESSAGE + " INTEGER DEFAULT -1, " // Whether the message is a hike or SMS message.
+				+ DBConstants.READ_BY + " TEXT, " // Deprecated
+				+ DBConstants.MSISDN + " TEXT, " // The conversation's msisdn. This will be the msisdn for one-to-one and the group id for groups
+				+ DBConstants.MESSAGE_HASH + " TEXT DEFAULT NULL, " // Used for duplication checks.
+				+ DBConstants.MESSAGE_TYPE + " INTEGER" + " INTEGER DEFAULT -1" // The type of the message.
+				+ " ) ";
 
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CONVERSATION_INDEX + " ON " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.CONV_ID + " , " + DBConstants.TIMESTAMP
@@ -118,48 +126,101 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		db.execSQL(sql);
 		sql = "CREATE UNIQUE INDEX IF NOT EXISTS " + DBConstants.MESSAGE_HASH_INDEX + " ON " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE_HASH + " DESC" + " )";
 		db.execSQL(sql);
-		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.CONVERSATIONS_TABLE + " ( " + DBConstants.CONV_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + DBConstants.ONHIKE
-				+ " INTEGER, " + DBConstants.CONTACT_ID + " STRING, " + DBConstants.MSISDN + " UNIQUE, " + DBConstants.OVERLAY_DISMISSED + " INTEGER, " + DBConstants.MESSAGE
-				+ " STRING, " + DBConstants.MSG_STATUS + " INTEGER, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID + " INTEGER, " + DBConstants.MAPPED_MSG_ID
-				+ " INTEGER, " + DBConstants.MESSAGE_METADATA + " TEXT, " + DBConstants.GROUP_PARTICIPANT + " TEXT, " + DBConstants.IS_STATUS_MSG + " INTEGER DEFAULT 0, "
-				+ DBConstants.UNREAD_COUNT + " INTEGER DEFAULT 0, " + DBConstants.IS_STEALTH + " INTEGER DEFAULT 0, " + DBConstants.CONVERSATION_METADATA + " TEXT" + " )";
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.CONVERSATIONS_TABLE
+				+ " ( "
+				+ DBConstants.CONV_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " // Deprecated
+				+ DBConstants.ONHIKE + " INTEGER, " // Whether the conversation is on hike or not
+				+ DBConstants.CONTACT_ID + " STRING, " // Deprecated
+				+ DBConstants.MSISDN + " UNIQUE, " // The conversation's msisdn. This will be the msisdn for one-to-one and the group id for groups
+				+ DBConstants.OVERLAY_DISMISSED + " INTEGER, " // Flag. Whether to show the SMS Credits overlay or not.
+
+				// Messages table columns begin (We keep the last entry of messages for a conversation)
+				+ DBConstants.MESSAGE + " STRING, " 
+				+ DBConstants.MSG_STATUS + " INTEGER, "
+				+ DBConstants.TIMESTAMP + " INTEGER, "
+				+ DBConstants.MESSAGE_ID + " INTEGER, "
+				+ DBConstants.MAPPED_MSG_ID + " INTEGER, "
+				+ DBConstants.MESSAGE_METADATA + " TEXT, "
+				+ DBConstants.GROUP_PARTICIPANT + " TEXT, "
+				// Messages table columns end
+
+				+ DBConstants.IS_STATUS_MSG + " INTEGER DEFAULT 0, " // Whether the message is a status message.
+				+ DBConstants.UNREAD_COUNT + " INTEGER DEFAULT 0, " // The unread count for the conversation
+				+ DBConstants.IS_STEALTH + " INTEGER DEFAULT 0, " // Whether the conversation is a hidden conversation.
+				+ DBConstants.CONVERSATION_METADATA + " TEXT" // Extra info. JSON format
+				+ " )";
 		db.execSQL(sql);
-		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.GROUP_MEMBERS_TABLE + " ( " + DBConstants.GROUP_ID + " STRING, " + DBConstants.MSISDN + " TEXT, " + DBConstants.NAME
-				+ " TEXT, " + DBConstants.ONHIKE + " INTEGER, " + DBConstants.HAS_LEFT + " INTEGER, " + DBConstants.ON_DND + " INTEGER, " + DBConstants.SHOWN_STATUS + " INTEGER "
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.GROUP_MEMBERS_TABLE
+				+ " ( "
+				+ DBConstants.GROUP_ID + " STRING, " // The group id.
+				+ DBConstants.MSISDN + " TEXT, " // Msisdn of the group participant
+				+ DBConstants.NAME + " TEXT, " // Name of the participant
+				+ DBConstants.ONHIKE + " INTEGER, " // Whether the participant is on hike or not.
+				+ DBConstants.HAS_LEFT + " INTEGER, " // Whether the participant has left the group or not.
+				+ DBConstants.ON_DND + " INTEGER, " // Whether the participant is on DND or not
+				+ DBConstants.SHOWN_STATUS + " INTEGER " // Whether we have shown a DND status for this participant or not. 
 				+ " )";
 		db.execSQL(sql);
 		sql = "CREATE UNIQUE INDEX IF NOT EXISTS " + DBConstants.GROUP_INDEX + " ON " + DBConstants.GROUP_MEMBERS_TABLE + " ( " + DBConstants.GROUP_ID + ", " + DBConstants.MSISDN
 				+ " ) ";
 		db.execSQL(sql);
-		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.GROUP_INFO_TABLE + " ( " + DBConstants.GROUP_ID + " STRING PRIMARY KEY, " + DBConstants.GROUP_NAME + " TEXT, "
-				+ DBConstants.GROUP_OWNER + " TEXT, " + DBConstants.GROUP_ALIVE + " INTEGER, " + DBConstants.MUTE_GROUP + " INTEGER DEFAULT 0, " + DBConstants.READ_BY + " TEXT, "
-				+ DBConstants.MESSAGE_ID + " INTEGER" + " )";
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.GROUP_INFO_TABLE
+				+ " ( "
+				+ DBConstants.GROUP_ID + " STRING PRIMARY KEY, " // The group id
+				+ DBConstants.GROUP_NAME + " TEXT, " // Name of the group
+				+ DBConstants.GROUP_OWNER + " TEXT, " // Group owner's msisdn
+				+ DBConstants.GROUP_ALIVE + " INTEGER, " // Whether the group is alive or not
+				+ DBConstants.MUTE_GROUP + " INTEGER DEFAULT 0, " // Whether the group is muted or not
+				+ DBConstants.READ_BY + " TEXT, " // An array of the msisdns that have read the message.
+				+ DBConstants.MESSAGE_ID + " INTEGER" // The message id of the message we are showing the read by for.
+				+ " )";
 		db.execSQL(sql);
-		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.EMOTICON_TABLE + " ( " + DBConstants.EMOTICON_NUM + " INTEGER PRIMARY KEY, " + DBConstants.LAST_USED + " INTEGER" + " )";
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.EMOTICON_TABLE
+				+ " ( "
+				+ DBConstants.EMOTICON_NUM + " INTEGER PRIMARY KEY, " // The index of the emoticon
+				+ DBConstants.LAST_USED + " INTEGER" // Timestamp of when it was used
+				+ " )";
 		db.execSQL(sql);
 		sql = "CREATE UNIQUE INDEX IF NOT EXISTS " + DBConstants.EMOTICON_INDEX + " ON " + DBConstants.EMOTICON_TABLE + " ( " + DBConstants.EMOTICON_NUM + " ) ";
 		db.execSQL(sql);
-		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STATUS_TABLE + " (" + DBConstants.STATUS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + DBConstants.STATUS_MAPPED_ID
-				+ " TEXT UNIQUE, " + DBConstants.MSISDN + " TEXT, " + DBConstants.STATUS_TEXT + " TEXT, " + DBConstants.STATUS_TYPE + " INTEGER, " + DBConstants.TIMESTAMP
-				+ " INTEGER, " + DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0, " + DBConstants.SHOW_IN_TIMELINE + " INTEGER, " + DBConstants.MOOD_ID + " INTEGER, "
-				+ DBConstants.TIME_OF_DAY + " INTEGER" + " )";
+
+		sql = getStatusTableCreationStatement();
 		db.execSQL(sql);
+
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.STATUS_INDEX + " ON " + DBConstants.STATUS_TABLE + " ( " + DBConstants.MSISDN + " ) ";
 		db.execSQL(sql);
+		
 		sql = getStickerCategoryTableCreateQuery();
 		db.execSQL(sql);
-		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.PROTIP_TABLE + " (" + DBConstants.ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + DBConstants.PROTIP_MAPPED_ID
-				+ " TEXT UNIQUE, " + DBConstants.HEADER + " TEXT, " + DBConstants.PROTIP_TEXT + " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.IMAGE_URL
-				+ " TEXT, " + DBConstants.WAIT_TIME + " INTEGER, " + DBConstants.PROTIP_GAMING_DOWNLOAD_URL + " TEXT" + " )";
+
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.PROTIP_TABLE
+				+ " ("
+				+ DBConstants.ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " // Protip id
+				+ DBConstants.PROTIP_MAPPED_ID + " TEXT UNIQUE, " // Protip id sent by the server
+				+ DBConstants.HEADER + " TEXT, "  // Protip header text
+				+ DBConstants.PROTIP_TEXT + " TEXT, " // Protip subtext
+				+ DBConstants.TIMESTAMP + " INTEGER, " // Protip time stamp
+				+ DBConstants.IMAGE_URL + " TEXT, " // Protip image URL
+				+ DBConstants.WAIT_TIME + " INTEGER, " // When to show the Tip
+				+ DBConstants.PROTIP_GAMING_DOWNLOAD_URL + " TEXT"
+				+ " )";
 		db.execSQL(sql);
 		sql = getSharedMediaTableCreateQuery();
 		db.execSQL(sql);
-		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.FILE_THUMBNAIL_TABLE + " (" + DBConstants.FILE_KEY + " TEXT PRIMARY KEY, " + DBConstants.IMAGE + " BLOB" + " )";
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.FILE_THUMBNAIL_TABLE
+				+ " ("
+				+ DBConstants.FILE_KEY + " TEXT PRIMARY KEY, " // File key
+				+ DBConstants.IMAGE + " BLOB" // File thumbnail
+				+ " )";
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.FILE_THUMBNAIL_INDEX + " ON " + DBConstants.FILE_THUMBNAIL_TABLE + " (" + DBConstants.FILE_KEY + " )";
 		db.execSQL(sql);
-		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.CHAT_BG_TABLE + " (" + DBConstants.MSISDN + " TEXT UNIQUE, " + DBConstants.BG_ID + " TEXT, " + DBConstants.TIMESTAMP
-				+ " INTEGER" + ")";
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.CHAT_BG_TABLE
+				+ " ("
+				+ DBConstants.MSISDN + " TEXT UNIQUE, " // Msisdn or group id
+				+ DBConstants.BG_ID + " TEXT, " // Chat theme id
+				+ DBConstants.TIMESTAMP + " INTEGER" // Timestamp when this them was changed.
+				+ ")";
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CHAT_BG_INDEX + " ON " + DBConstants.CHAT_BG_TABLE + " (" + DBConstants.MSISDN + ")";
 		db.execSQL(sql);
@@ -176,6 +237,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.delete(DBConstants.EMOTICON_TABLE, null, null);
 		mDb.delete(DBConstants.STATUS_TABLE, null, null);
 		mDb.delete(DBConstants.STICKER_CATEGORIES_TABLE, null, null);
+		mDb.delete(DBConstants.STICKER_SHOP_TABLE, null, null);
 		mDb.delete(DBConstants.PROTIP_TABLE, null, null);
 		mDb.delete(DBConstants.SHARED_MEDIA_TABLE, null, null);
 		mDb.delete(DBConstants.FILE_THUMBNAIL_TABLE, null, null);
@@ -341,11 +403,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		if (oldVersion < 12)
 		{
 			// Drop table is required for user upgrading from build numbers: 8, 9, 10 or 11
-			String drop = "DROP TABLE " + DBConstants.STATUS_TABLE;
-			String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.STATUS_TABLE + " (" + DBConstants.STATUS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-					+ DBConstants.STATUS_MAPPED_ID + " TEXT UNIQUE, " + DBConstants.MSISDN + " TEXT, " + DBConstants.STATUS_TEXT + " TEXT, " + DBConstants.STATUS_TYPE
-					+ " INTEGER, " + DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0, " + DBConstants.SHOW_IN_TIMELINE + " INTEGER, "
-					+ DBConstants.MOOD_ID + " INTEGER, " + DBConstants.TIME_OF_DAY + " INTEGER" + " )";
+			String drop = "DROP TABLE IF EXISTS " + DBConstants.STATUS_TABLE;
+			String create = getStatusTableCreationStatement();
 
 			String alter1 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.MESSAGE + " STRING";
 			String alter2 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE + " ADD COLUMN " + DBConstants.MSG_STATUS + " INTEGER";
@@ -538,6 +597,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			deleteEmptyConversations(db);
 		}
 		
+		/*
+		 * Version 30 fixes a Play Store crash where some DBs did not have a moodId column.
+		 * We will first query the table and check if this column exists, if not we will drop
+		 * the table and create a new one
+		 */
+		if (oldVersion < 30)
+		{
+			if (!checkIfStatusTableIsValid(db))
+			{
+				dropAndRecreateStatusTable(db);
+			}
+		}
+		
 		if (oldVersion < 31)
 		{
 			db.execSQL(getStickerCategoryTableCreateQuery());
@@ -550,6 +622,60 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			editor.putInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1);
 			editor.commit();
 		}
+	}
+
+	private String getStatusTableCreationStatement()
+	{
+		return "CREATE TABLE IF NOT EXISTS " + DBConstants.STATUS_TABLE
+				+ " ("
+				+ DBConstants.STATUS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " // Status id
+				+ DBConstants.STATUS_MAPPED_ID + " TEXT UNIQUE, " // Status id sent by the server
+				+ DBConstants.MSISDN + " TEXT, " // Msisdn of the person who generated the status
+				+ DBConstants.STATUS_TEXT + " TEXT, " // Text of the status
+				+ DBConstants.STATUS_TYPE + " INTEGER, " // Type of status
+				+ DBConstants.TIMESTAMP + " INTEGER, " // Time stamp of status
+				+ DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0, " // Message id of the message this status generated in the messages table. Only valid if status is received when a one to one conversation exists.
+				+ DBConstants.SHOW_IN_TIMELINE + " INTEGER, " // Whether this status should be shown in the timeline or not.
+				+ DBConstants.MOOD_ID + " INTEGER, " // The mood id of the status
+				+ DBConstants.TIME_OF_DAY + " INTEGER" // Deprecated.
+				+ " )";
+	}
+
+	/**
+	 * This method checks if the status table has a mood id column. We had to add this to fix a bug
+	 * where this column did not exist for a few users.
+	 * @param db
+	 * @return
+	 */
+	private boolean checkIfStatusTableIsValid(SQLiteDatabase db)
+	{
+		Cursor c = null;
+		try
+		{
+			c = db.query(DBConstants.STATUS_TABLE, new String[] { DBConstants.MOOD_ID }, null, null, null, null, null);
+			return true;
+		}
+		catch (SQLiteException e)
+		{
+			Logger.w(getClass().getSimpleName(), "Mood id column does not exist");
+			return false;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
+	private void dropAndRecreateStatusTable(SQLiteDatabase db)
+	{
+		String drop = "DROP TABLE IF EXISTS " + DBConstants.STATUS_TABLE;
+		String create = getStatusTableCreationStatement();
+
+		db.execSQL(drop);
+		db.execSQL(create);
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike)
@@ -625,6 +751,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	public int updateMsgStatus(long msgID, int val, String msisdn)
 	{
 		String initialWhereClause = DBConstants.MESSAGE_ID + " =" + String.valueOf(msgID);
+
+		String query = initialWhereClause;
+
+		return executeUpdateMessageStatusStatement(query, val, msisdn);
+	}
+
+	public int updateMsgStatusBetween(long startMsgId, long endMsgId, int val, String msisdn)
+	{
+		String initialWhereClause = DBConstants.MESSAGE_ID + " BETWEEN " + startMsgId + " AND " + endMsgId;
 
 		String query = initialWhereClause;
 
@@ -1135,7 +1270,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		HikeMessengerApp.getPubSub().publish(HikePubSub.CONV_META_DATA_UPDATED, metadata);
 	}
 
-	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv)
+	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv,boolean bindForConvId)
 	{
 		final int messageColumn = 1;
 		final int msgStatusColumn = 2;
@@ -1156,7 +1291,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		insertStatement.bindLong(msgStatusColumn, conv.getState().ordinal());
 		insertStatement.bindLong(timestampColumn, conv.getTimestamp());
 		insertStatement.bindLong(mappedMsgIdColumn, conv.getMappedMsgID());
+		if(bindForConvId){
 		insertStatement.bindString(msisdnColumn, conv.getMsisdn());
+		}
 		insertStatement.bindString(messageMetadataColumn, conv.getMetadata() != null ? conv.getMetadata().serialize() : "");
 		insertStatement.bindLong(isHikeMessageColumn, conv.isSMS() ? 0 : 1);
 		insertStatement.bindString(groupParticipant, conv.getGroupParticipantMsisdn() != null ? conv.getGroupParticipantMsisdn() : "");
@@ -1227,6 +1364,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Logger.d(getClass().getSimpleName(), "Message hash: " + msgHash);
 		return msgHash;
 	}
+	
+	public boolean addConversations(List<ConvMessage> convMessages)
+	{
+		if(convMessages.isEmpty())
+		{
+			return false;
+		}
+		ArrayList<ContactInfo> contacts= new ArrayList<ContactInfo>(1);
+		String msisdn = convMessages.get(0).getMsisdn();
+		contacts.add(new ContactInfo(msisdn, msisdn, null, null,!convMessages.get(0).isSMS()));
+		
+		return addConversations(convMessages, contacts,true);
+	}
 
 	/**
 	 * 
@@ -1234,13 +1384,21 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 *            -- list of messages to be added to database
 	 * @return <li><b>true</b> if messages successfully added to database</li> <li><b>false</b> if messages are not inserted to database possibly due to duplicate</li>
 	 */
-	public boolean addConversations(List<ConvMessage> convMessages)
+	public boolean addConversations(List<ConvMessage> convMessages, ArrayList<ContactInfo> contacts,boolean createConvIfNotExist)
 	{
-		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
-				+ DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
-				+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MSISDN + " ) "
-				+ " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ?, ?, ? FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "."
-				+ DBConstants.MSISDN + "=?");
+		SQLiteStatement insertStatement = null;
+		if(createConvIfNotExist){
+			insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
+					+ DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
+					+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MSISDN + " ) "
+					+ " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID + ", ?, ?, ?, ? FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE " + DBConstants.CONVERSATIONS_TABLE + "."
+					+ DBConstants.MSISDN + "=?");	
+		}else{
+			insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
+					+ DBConstants.TIMESTAMP + "," + DBConstants.MAPPED_MSG_ID + " ," + DBConstants.MESSAGE_METADATA + "," + DBConstants.GROUP_PARTICIPANT 
+					+ ", " + DBConstants.IS_HIKE_MESSAGE + "," + DBConstants.MESSAGE_HASH + "," + DBConstants.MESSAGE_TYPE + "," + DBConstants.MSISDN + " ) values (?,?,?,?,?,?,?,?,?,?)");
+		}
+		
 		try
 		{
 			mDb.beginTransaction();
@@ -1250,39 +1408,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			int unreadMessageCount = 0;
 			int unreadPinMessageCount = 0;
 
-			Map<String, List<String>> map = new HashMap<String, List<String>>();
-
-			for (ConvMessage conv : convMessages)
+            Map<String, Pair<List<String>, Long>> map = new HashMap<String, Pair<List<String>, Long>>();
+			long timeStamp = System.currentTimeMillis() / 1000;
+			int totalMessage = convMessages.size()-1;
+			long baseId = -1;
+			for (ContactInfo contact : contacts)
 			{
-
-				String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
-
-				bindConversationInsert(insertStatement, conv);
-
-				/*
-				 * In case message is duplicate insert statement will throw exception . It will catch that exception and will return false denoting duplicate message case
-				 */
-				try
+				for (int i=0;i<=totalMessage;i++)
 				{
-					msgId = insertStatement.executeInsert();
-				}
-				catch (Exception e)
-				{
-					// duplicate message return false
-					Logger.e(getClass().getSimpleName(), "Duplicate value ", e);
-					return false;
-				}
+					ConvMessage conv  = convMessages.get(i);
+					conv.setSMS(!contact.isOnhike());
+					conv.setMsisdn(contact.getMsisdn());
+					String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
 
-				addThumbnailStringToMetadata(conv.getMetadata(), thumbnailString);
-				/*
-				 * Represents we dont have any conversation made for this msisdn. Here we are also checking whether the message is a group message, If it is and the conversation
-				 * does not exist we do not add a conversation.
-				 */
-				if (msgId <= 0 && !Utils.isGroupConversation(conv.getMsisdn()))
-				{
-					addConversation(conv.getMsisdn(), !conv.isSMS(), null, null, conv);
+					bindConversationInsert(insertStatement, conv,createConvIfNotExist);
 
-					bindConversationInsert(insertStatement, conv);
+					/*
+					 * In case message is duplicate insert statement will throw exception . It will catch that exception and will return false denoting duplicate message case
+					 */
 					try
 					{
 						msgId = insertStatement.executeInsert();
@@ -1294,46 +1437,82 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						return false;
 					}
 
-					assert (msgId >= 0);
-				}
+					addThumbnailStringToMetadata(conv.getMetadata(), thumbnailString);
+					/*
+					 * Represents we dont have any conversation made for this msisdn. Here we are also checking whether the message is a group message, If it is and the
+					 * conversation does not exist we do not add a conversation.
+					 */
+					if (msgId <= 0 && !Utils.isGroupConversation(conv.getMsisdn()))
+					{
+						
+						addConversation(conv.getMsisdn(), !conv.isSMS(), null, null, conv);
+						bindConversationInsert(insertStatement, conv,createConvIfNotExist);
+						try
+						{
+							msgId = insertStatement.executeInsert();
+						}
+						catch (Exception e)
+						{
+							// duplicate message return false
+							Logger.e(getClass().getSimpleName(), "Duplicate value ", e);
+							return false;
+						}
 
-				conv.setMsgID(msgId);
-				ChatThread.addtoMessageMap(conv);
+						assert (msgId >= 0);
+					}
+					if(baseId==-1){
+						baseId = msgId;
+					}
+					
+					conv.setMsgID(msgId);
+					ChatThread.addtoMessageMap(conv);
 
-				/*
-				 * msdId > 0 means that the conversation exists.
-				 */
-				if (conv.isFileTransferMessage() && msgId > 0)
-				{
-					addSharedMedia(conv);
-				}
-				if (Utils.shouldIncrementCounter(conv))
-				{
-					unreadMessageCount++;
-				}
-				/*
-				 * Updating the conversations table
-				 */
-				ContentValues contentValues = getContentValueForConversationMessage(conv);
-				mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { conv.getMsisdn() });
-
+					/*
+					 * msdId > 0 means that the conversation exists.
+					 */
+					if (conv.isFileTransferMessage() && msgId > 0)
+					{
+						addSharedMedia(conv);
+					}
+					if (Utils.shouldIncrementCounter(conv))
+					{
+						unreadMessageCount++;
+					}
+					/*
+					 * Updating the conversations table only for last message for each contact
+					 */
+					if(i==totalMessage){
+					// incrementing timestamp to save different timestamp for each conversation so that we can fetch in order
+					ContentValues contentValues = getContentValueForConversationMessage(conv,timeStamp++);
+					mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { conv.getMsisdn() });
+					}
 				// upgrade groupInfoTable
 				updateReadBy(conv);
 				if (Utils.isGroupConversation(conv.getMsisdn()))
 				{
+					long timestamp = 0;
+					Pair<List<String>, Long> pair = map.get(conv.getMsisdn());
+					if (pair != null)
+						timestamp = pair.second;
+					if (conv.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE)
+					{
+						timestamp = conv.getTimestamp();
+					}
 					List<String> lastMsisdns = new ArrayList<String>();
 					if (conv.getMetadata() != null)
 						lastMsisdns = getGroupLastMsgMsisdn(conv.getMetadata().getJSON());
-
 					if (lastMsisdns.size() == 0 && null != conv.getGroupParticipantMsisdn())
 					{
 						lastMsisdns.add(conv.getGroupParticipantMsisdn());
 					}
-					map.put(conv.getMsisdn(), lastMsisdns);
+					map.put(conv.getMsisdn(), new Pair<List<String>, Long>(lastMsisdns, timestamp));
 				}
-			}
+				}
 
-			incrementUnreadCounter(convMessages.get(0).getMsisdn(), unreadMessageCount);
+				incrementUnreadCounter(contact.getMsisdn(), unreadMessageCount);
+			}
+			// setting base DB id as whole packet logic for multi forward depends on base ID, i.e : first contact -> first message 
+			convMessages.get(0).setMsgID(baseId);			
 			mDb.setTransactionSuccessful();
 			ContactManager.getInstance().removeOlderLastGroupMsisdns(map);
 			return true;
@@ -1369,7 +1548,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 
 				String thumbnailString = extractThumbnailFromMetadata(conv.getMetadata());
-				bindConversationInsert(insertStatement, conv);
+				bindConversationInsert(insertStatement, conv,true);
 
 				try
 				{
@@ -1390,7 +1569,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				{
 					addConversation(conv.getMsisdn(), !conv.isSMS(), null, null, conv);
 
-					bindConversationInsert(insertStatement, conv);
+					bindConversationInsert(insertStatement, conv,true);
 					try
 					{
 						msgId = insertStatement.executeInsert();
@@ -1469,34 +1648,41 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 */
 	public void addLastConversations(List<ConvMessage> convMessages, HashMap<String, PairModified<ConvMessage, Integer>> lastPinMap)
 	{
-		Map<String, List<String>> map = new HashMap<String, List<String>>();
+		Map<String, Pair<List<String>, Long>> map = new HashMap<String, Pair<List<String>, Long>>();
 
 		for (ConvMessage conv : convMessages)
 		{
 			String msisdn = conv.getMsisdn();
-			ContentValues contentValues = getContentValueForConversationMessage(conv);
+			ContentValues contentValues = getContentValueForConversationMessage(conv,conv.getTimestamp());
 			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
 
 			if (lastPinMap.get(conv.getMsisdn()) != null)
 			{
 				lastPinMap.get(msisdn).setSecond(lastPinMap.get(msisdn).getSecond() - 1);
 			}
-			
+
 			if (Utils.isGroupConversation(conv.getMsisdn()))
 			{
+				long timestamp = 0;
+				Pair<List<String>, Long> pair = map.get(conv.getMsisdn());
+				if (pair != null)
+					timestamp = pair.second;
+				if (conv.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE)
+				{
+					timestamp = conv.getTimestamp();
+				}
 				List<String> lastMsisdns = new ArrayList<String>();
 				if (conv.getMetadata() != null)
 					lastMsisdns = getGroupLastMsgMsisdn(conv.getMetadata().getJSON());
-
 				if (lastMsisdns.size() == 0 && null != conv.getGroupParticipantMsisdn())
 				{
 					lastMsisdns.add(conv.getGroupParticipantMsisdn());
 				}
-				map.put(conv.getMsisdn(), lastMsisdns);
+				map.put(conv.getMsisdn(), new Pair<List<String>, Long>(lastMsisdns, timestamp));
 			}
 		}
 		ContactManager.getInstance().removeOlderLastGroupMsisdns(map);
-		
+
 		for (Entry<String, PairModified<ConvMessage, Integer>> entry : lastPinMap.entrySet())
 		{
 			PairModified<ConvMessage, Integer> pair = entry.getValue();
@@ -1523,7 +1709,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] { Long.toString(id) });
 	}
 
-	private ContentValues getContentValueForConversationMessage(ConvMessage conv)
+	private ContentValues getContentValueForConversationMessage(ConvMessage conv,long timeStampForMessage)
 	{
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.MESSAGE, conv.getMessage());
@@ -1538,7 +1724,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			contentValues.put(DBConstants.MESSAGE_ID, conv.getMsgID());
 			contentValues.put(DBConstants.MAPPED_MSG_ID, conv.getMappedMsgID());
 			contentValues.put(DBConstants.MSG_STATUS, conv.getState().ordinal());
-			contentValues.put(DBConstants.TIMESTAMP, conv.getTimestamp());
+			contentValues.put(DBConstants.TIMESTAMP, timeStampForMessage);
 		}
 		if (conv.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
@@ -2061,33 +2247,35 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public Pair<List<String>, Map<String, List<String>>> getConversationMsisdns()
+	public ConversationMsisdns getConversationMsisdns()
 	{
 		Cursor c = null;
-		List<String> convsMsisdns = new ArrayList<String>();
-		Map<String, List<String>> grpLastMsisdns = new HashMap<String, List<String>>();
+		List<String> oneToOneMsisdns = new ArrayList<String>();
+		Map<String, Pair<List<String>, Long>> grpLastMsisdns = new HashMap<String, Pair<List<String>, Long>>();
 
 		try
 		{
-			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.GROUP_PARTICIPANT, DBConstants.MESSAGE_METADATA }, null, null, null,
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.GROUP_PARTICIPANT, DBConstants.MESSAGE_METADATA ,DBConstants.TIMESTAMP}, null, null, null,
 					null, null);
 
 			final int msisdnColumn = c.getColumnIndex(DBConstants.MSISDN);
 			final int groupParticipantColumn = c.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
 			final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
+			final int timestampColumn = c.getColumnIndex(DBConstants.TIMESTAMP);
 
 			while (c.moveToNext())
 			{
 				String msisdn = c.getString(msisdnColumn);
 				String groupParticipant = c.getString(groupParticipantColumn);
 				String metadata = c.getString(metadataColumn);
+				long timestamp = c.getLong(timestampColumn);
 
 				if (Utils.isGroupConversation(msisdn))
 				{
-					List<String> grpMsisdns;
+					List<String> grpMsisdns = null;
 					try
 					{
-						if (null != metadata)
+						if (!TextUtils.isEmpty(metadata))
 						{
 							grpMsisdns = getGroupLastMsgMsisdn(new JSONObject(metadata));
 							if (null != grpMsisdns)
@@ -2099,9 +2287,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 										grpMsisdns.add(groupParticipant);
 									}
 								}
-								grpLastMsisdns.put(msisdn, grpMsisdns);
 							}
 						}
+						grpLastMsisdns.put(msisdn, new Pair<List<String>, Long>(grpMsisdns,timestamp));
 					}
 					catch (JSONException e)
 					{
@@ -2110,11 +2298,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				else
 				{
-					convsMsisdns.add(msisdn);
+					oneToOneMsisdns.add(msisdn);
 				}
 			}
-			Pair<List<String>, Map<String, List<String>>> allmsisdns = new Pair<List<String>, Map<String, List<String>>>(convsMsisdns, grpLastMsisdns);
-			return allmsisdns;
+			ConversationMsisdns convsMsisdns = new ConversationMsisdns(oneToOneMsisdns, grpLastMsisdns);
+			return convsMsisdns;
 		}
 		finally
 		{
@@ -2124,6 +2312,65 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 
+	}
+
+	/*
+	 * This method returns a list of ContactInfo for all 1-1 conversations with timestamp set.
+	 */
+	public List<ContactInfo> getOneToOneContacts(boolean removeNewOrReturningUsers)
+	{
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.TIMESTAMP, DBConstants.MESSAGE_METADATA}, null, null, null,
+					null, null);
+
+			final int msisdnColumn = c.getColumnIndex(DBConstants.MSISDN);
+			final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
+			final int timestampColumn = c.getColumnIndex(DBConstants.TIMESTAMP);
+
+			List<ContactInfo> oneToOneContacts = new ArrayList<ContactInfo>();
+			while(c.moveToNext())
+			{
+				String msisdn = c.getString(msisdnColumn);
+				String metadata = c.getString(metadataColumn);
+				long timestamp = c.getLong(timestampColumn);
+
+				if(!Utils.isGroupConversation(msisdn))
+				{
+					if (!TextUtils.isEmpty(metadata) && removeNewOrReturningUsers)
+					{
+						try
+						{
+							JSONObject md = new JSONObject(metadata);
+							if(md.optString(HikeConstants.TYPE).equals(HikeConstants.MqttMessageTypes.USER_JOINED))
+							{
+								continue;
+							}
+						}
+						catch (JSONException e)
+						{
+							Logger.e("HikeConversationsDatabase", "Exception while parsing metadata for fetching new users msisdn : " + e);
+						}
+					}
+					/*
+					 * It is assumed that the contact would be in persistence cache since we have a conversation going on for this msisdn.
+					 * If not, it makes a db query and loads into persistence cache.
+					 */
+					ContactInfo contact = ContactManager.getInstance().getContact(msisdn, false, true);
+					contact.setLastMessaged(timestamp);
+					oneToOneContacts.add(contact);
+				}
+			}
+			return oneToOneContacts;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
 	}
 
 	public List<String> getGroupLastMsgMsisdn(JSONObject metadata)
@@ -2316,6 +2563,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String msisdn = c.getString(msisdnIdx);
 				String messageString = c.getString(msgColumn);
 				String metadata = c.getString(metadataColumn);
+				long timestamp = c.getLong(tsColumn);
 
 				if (Utils.isGroupConversation(msisdn))
 				{
@@ -2331,6 +2579,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				{
 					conv = new Conversation(msisdn);
 					ContactInfo contact = ContactManager.getInstance().getContact(conv.getMsisdn());
+					ContactManager.getInstance().updateContactRecency(msisdn, timestamp, false);
 					if (null == contact)
 					{
 						msisdns.add(msisdn);
@@ -2696,9 +2945,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				{
 					Logger.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
 				}
-				ContentValues contentValues = getContentValueForConversationMessage(message);
+				ContentValues contentValues = getContentValueForConversationMessage(message,message.getTimestamp());
 				if (Utils.isGroupConversation(msisdn))
 				{
+					updateGroupRecency(message);
 					HikeMessengerApp.getContactManager().removeContact(c.getString(groupParticipantColumn), false);
 				}
 				mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
@@ -2732,6 +2982,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			if (c != null)
 			{
 				c.close();
+			}
+		}
+	}
+
+	private void updateGroupRecency(ConvMessage conv)
+	{
+		if (Utils.isGroupConversation(conv.getMsisdn()))
+		{
+			if (conv.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE)
+			{
+				ContactManager.getInstance().updateGroupRecency(conv.getMsisdn(), conv.getTimestamp());
 			}
 		}
 	}
@@ -3049,6 +3310,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	public Map<String, Integer> getAllGroupsActiveParticipantCount()
+	{
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] { DBConstants.GROUP_ID, "count(*) as count" },
+					(DBConstants.HAS_LEFT + "=0") , null, DBConstants.GROUP_ID, null, null);
+			Map<String, Integer> groupCountMap = new HashMap<String, Integer>();
+			while(c.moveToNext())
+			{
+				String groupId = c.getString(c.getColumnIndex(DBConstants.GROUP_ID));
+				int count = c.getInt(c.getColumnIndex("count"));
+				groupCountMap.put(groupId, count);
+			}
+			return groupCountMap;
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
+		}
+	}
+
 	public boolean isGroupMuted(String groupId)
 	{
 		Cursor c = null;
@@ -3249,7 +3535,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				// displayed in the list view when forwarding the message
 				String numberMembers = context.getString(R.string.num_people, (numMembers + 1));
 
-				ContactInfo group = new ContactInfo(groupId, numberMembers, groupName, groupId, true);
+				ContactInfo group = new ContactInfo(groupId, groupId, groupName, numberMembers, true);
 				groups.add(group);
 			}
 
@@ -3710,32 +3996,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void addOrUpdateStickerCategory(String categoryId, int totalNum)
+	public void updateStickerCountForStickerCategory(String categoryId, int totalNum)
 	{
-		SQLiteStatement insertStatement = null;
-		try
-		{
-			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO " + DBConstants.STICKER_CATEGORIES_TABLE + " ( " + DBConstants.CATEGORY_ID + ", " + DBConstants.TOTAL_NUMBER
-					+ ", "+ DBConstants.UPDATE_AVAILABLE + " ) " + " VALUES (?, ?, ?)");
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.TOTAL_NUMBER, totalNum);
 
-			insertStatement.bindString(1, categoryId);
-			insertStatement.bindLong(2, totalNum);
-			insertStatement.bindLong(3, 0);
-
-			insertStatement.execute();
-		}
-		finally
-		{
-			if (insertStatement != null)
-			{
-				insertStatement.close();
-			}
-		}
+		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
 	}
 
 	public void removeStickerCategory(String categoryId)
 	{
 		mDb.delete(DBConstants.STICKER_CATEGORIES_TABLE, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
+		mDb.delete(DBConstants.STICKER_SHOP_TABLE, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
 	}
 
 	public void stickerUpdateAvailable(String categoryId, boolean updateAvailable)
@@ -3746,7 +4018,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
 	}
 
-	public LinkedHashMap<String, StickerCategory> getVisibleStickerCategories()
+	public LinkedHashMap<String, StickerCategory> getAllStickerCategoriesWithVisibility(boolean isVisible)
 	{
 		Cursor c = null;
 		LinkedHashMap<String, StickerCategory> stickerDataMap;
@@ -3754,7 +4026,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		try
 		{
 			String selection = DBConstants.IS_VISIBLE + "=?";
-			String[] selectionArgs = { Integer.toString(1) };
+			String[] selectionArgs = { isVisible ? Integer.toString(1) : Integer.toString(0) };
 			
 			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, null , selection, selectionArgs, null, null, null);
 			stickerDataMap = parseStickerCategoriesCursor(c);
@@ -3807,8 +4079,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				int timeStamp = c.getInt(c.getColumnIndex(DBConstants.TIMESTAMP));
 				int totalStickers = c.getInt(c.getColumnIndex(DBConstants.TOTAL_NUMBER));
 
-				StickerCategory s = new StickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, metadata, totalStickers,
+				StickerCategory s;
+				if(!isCustom)
+				{
+					s = new StickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, metadata, totalStickers,
 						timeStamp);
+				}
+				else
+				{
+					s = new CustomStickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, metadata, totalStickers,
+							timeStamp);
+				}
 				stickerDataMap.put(categoryId, s);
 			}
 			catch (Exception e)
@@ -5129,7 +5410,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		String deleteSelectionString = deleteSelection.toString();
 		if (!"(".equals(deleteSelectionString))
 		{
-			deleteSelectionString = deleteSelectionString.substring(0, deleteSelectionString.length() - 1) + ")";
+			deleteSelectionString = new String(deleteSelectionString.substring(0, deleteSelectionString.length() - 1) + ")");
 			mDb.delete(DBConstants.CONVERSATIONS_TABLE, DBConstants.MSISDN + " IN " + deleteSelectionString, null);
 		}
 	}
@@ -5347,4 +5628,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		contentValues.put(DBConstants.METADATA, metadata);
 		return contentValues;
 	}
+	
+	public void updateVisibilityAndIndex(List<StickerCategory> stickerCategories)
+	{
+		try
+		{
+			mDb.beginTransaction();
+			for (StickerCategory stickerCategory : stickerCategories)
+			{
+				ContentValues contentValues = new ContentValues();
+				contentValues.put(DBConstants.IS_VISIBLE, stickerCategory.isVisible());
+				contentValues.put(DBConstants.CATEGORY_INDEX, stickerCategory.getCategoryIndex());
+				
+				mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { stickerCategory.getCategoryId() });
+			}
+			mDb.setTransactionSuccessful();
+		}
+		catch (Exception e)
+		{
+			Logger.e(getClass().getSimpleName(), "Exception : ", e);
+			e.printStackTrace();
+		}
+		finally
+		{
+			mDb.endTransaction();
+		}
+	}
+	
 }
