@@ -97,6 +97,7 @@ public class WebViewActivity extends HikeAppStateBaseFragmentActivity
 			}
 		};
 
+		webView.getSettings().setGeolocationEnabled(allowLoc);
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.loadUrl(urlToLoad);
 		webView.setWebViewClient(client);
