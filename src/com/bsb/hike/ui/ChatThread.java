@@ -6529,6 +6529,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void onStickerBtnClicked(View v)
 	{
+		if((Utils.getExternalStorageState() == ExternalStorageState.NONE))
+		{
+			Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+			return;
+		}
 		onEmoticonBtnClicked(v, 0, false);
 		if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
 		{
@@ -6562,7 +6567,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			emoticonViewPager = emoticonViewPager == null ? (ViewPager) emoticonLayout.findViewById(R.id.emoticon_pager) : emoticonViewPager;
 
 			View eraseKey = emoticonLayout.findViewById(R.id.erase_key);
-
+			ImageView shopIcon = (ImageView) emoticonLayout.findViewById(R.id.erase_key_image);
 			if (v != null)
 			{
 				int[] tabDrawables = null;
@@ -6591,7 +6596,30 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						emoticonType = EmoticonType.STICKERS;
 					}
-					eraseKey.setVisibility(View.GONE);
+					eraseKey.setVisibility(View.VISIBLE);
+					shopIcon.setImageResource(R.drawable.ic_add);
+					if(!prefs.getBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
+					{
+						eraseKey.setBackgroundResource(R.color.shop_icon_color);
+					}
+					eraseKey.setBackgroundResource(R.color.shop_icon_default_color);
+					eraseKey.setOnClickListener(new View.OnClickListener()
+					{
+						
+						@Override
+						public void onClick(View v)
+						{
+							if(!prefs.getBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
+							{
+								Editor editor = prefs.edit();
+								editor.putBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, true);
+								editor.commit();
+							}
+							Intent i = new Intent(ChatThread.this, StickerShopActivity.class);
+							startActivity(i);
+						}
+					});
+					
 				}
 				else
 				{
@@ -6627,6 +6655,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 					}
 					eraseKey.setVisibility(View.VISIBLE);
+					eraseKey.setBackgroundResource(R.color.erase_key_color);
+					shopIcon.setImageResource(R.drawable.ic_erase);
 					eraseKey.setOnClickListener(new OnClickListener()
 					{
 
@@ -6782,7 +6812,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	{}
 
 
-	private void updateStickerCategoryUI(StickerCategory category, boolean failed, DownloadType downloadTypeBeforeFail)
+	private void updateStickerCategoryUI(StickerCategory category)
 	{
 		if (stickerAdapter == null)
 		{
@@ -6796,7 +6826,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 
-		stickerAdapter.setupStickerPage(emoticonPage, category, failed, downloadTypeBeforeFail);
+		stickerAdapter.setupStickerPage(emoticonPage, category);
 
 	}
 
@@ -6829,7 +6859,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if (stickerAdapter == null)
 			{
-				stickerAdapter = new StickerAdapter(this, isPortrait);
+				stickerAdapter = new StickerAdapter(this);
 			}
 			emoticonViewPager.setAdapter(stickerAdapter);
 		}

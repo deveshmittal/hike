@@ -28,6 +28,7 @@ import com.bsb.hike.adapters.StickerPageAdapter.ViewType;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
@@ -134,7 +135,7 @@ public class DownloadStickerTask extends StickerTaskBase
 					Sticker s = new Sticker(category, stickerId);
 					if (downloadType.equals(DownloadType.MORE_STICKERS) || downloadType.equals(DownloadType.UPDATE) && stickerPageAdapter != null)
 					{
-						stickerPageAdapter.getStickerList().add(s);
+						stickerPageAdapter.addSticker(s);
 					}
 					// some hack : seems server was sending stickers which already exist so it was leading to duplicate issue
 					// so we save small sticker , if not present already
@@ -195,9 +196,9 @@ public class DownloadStickerTask extends StickerTaskBase
 			if (DownloadType.UPDATE.equals(downloadType) && stickerPageAdapter != null)
 			{
 				StickerManager.getInstance().setStickerUpdateAvailable(category.getCategoryId(), false);
-				List<ViewType> l = stickerPageAdapter.getViewTypeList();
-				l.remove(ViewType.UPDATING_STICKER);
-				stickerPageAdapter.calculateNumRowsAndSize(true);
+				category.setState(StickerCategory.DONE);
+				List<StickerPageAdapterItem> l = stickerPageAdapter.getStickerPageAdapterItemList();
+				l.remove(0);
 				stickerPageAdapter.notifyDataSetChanged();
 				Intent i = new Intent(StickerManager.STICKERS_UPDATED);
 				LocalBroadcastManager.getInstance(context).sendBroadcast(i);
@@ -205,9 +206,9 @@ public class DownloadStickerTask extends StickerTaskBase
 
 			else if (DownloadType.MORE_STICKERS.equals(downloadType) && stickerPageAdapter != null)
 			{
-				List<ViewType> l = stickerPageAdapter.getViewTypeList();
-				l.remove(ViewType.DOWNLOADING_MORE);
-				stickerPageAdapter.calculateNumRowsAndSize(true);
+				List<StickerPageAdapterItem> l = stickerPageAdapter.getStickerPageAdapterItemList();
+				category.setState(StickerCategory.DONE);
+				l.remove(0);
 				stickerPageAdapter.notifyDataSetChanged();
 			}
 			else if (DownloadType.NEW_CATEGORY.equals(downloadType))

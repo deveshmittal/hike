@@ -205,6 +205,8 @@
         </activity>
         <activity android:name="com.bsb.hike.ui.CountrySelectActivity" >
         </activity>
+        <activity android:name="com.bsb.hike.ui.StickerShopActivity"></activity>
+        <activity android:name="com.bsb.hike.ui.StickerSettingsActivity"></activity>
         <activity
             android:name="com.bsb.hike.ui.FileSelectActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" >

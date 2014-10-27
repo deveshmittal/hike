@@ -1,16 +1,10 @@
 package com.bsb.hike.adapters;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -25,19 +19,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.Button;
-import android.widget.ListView;
+import android.widget.GridView;
 import android.widget.TextView;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.EmoticonType;
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.adapters.StickerPageAdapter.ViewType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
@@ -61,42 +50,18 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 	private class StickerPageObjects
 	{
-		private ListView stickerListView;
-
-		private View downloadingParent;
-
-		private TextView downloadingText;
-
-		private Button downloadingFailed;
+		private GridView stickerGridView;
 
 		private StickerPageAdapter spa;
 
-		public StickerPageObjects(ListView slv, View dp, TextView dt, Button df)
+		public StickerPageObjects(GridView sgv)
 		{
-			stickerListView = slv;
-			downloadingParent = dp;
-			downloadingText = dt;
-			downloadingFailed = df;
+			stickerGridView = sgv;
 		}
 
-		public ListView getStickerListView()
+		public GridView getStickerGridView()
 		{
-			return stickerListView;
-		}
-
-		public View getDownloadingParent()
-		{
-			return downloadingParent;
-		}
-
-		public TextView getDownloadingText()
-		{
-			return downloadingText;
-		}
-
-		public Button getDownloadingFailedButton()
-		{
-			return downloadingFailed;
+			return stickerGridView;
 		}
 
 		public void setStickerPageAdapter(StickerPageAdapter sp)
@@ -110,7 +75,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 	}
 
-	public StickerAdapter(Activity activity, boolean isPortrait)
+	public StickerAdapter(Activity activity)
 	{
 		this.inflater = LayoutInflater.from(activity);
 		this.activity = activity;
@@ -150,7 +115,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		emoticonPage = inflater.inflate(R.layout.sticker_page, null);
 		StickerCategory category = stickerCategoryList.get(position);
 		Logger.d(getClass().getSimpleName(), "Instantiate View for categpory : " + category.getCategoryId());
-		setupStickerPage(emoticonPage, category, false, null);
+		setupStickerPage(emoticonPage, category);
 
 		((ViewPager) container).addView(emoticonPage);
 		emoticonPage.setTag(category.getCategoryId());
@@ -210,7 +175,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				// if this category is already loaded then only proceed else ignore
 				if (spo != null)
 				{
-					if (intent.getAction().equals(StickerManager.STICKERS_FAILED) && DownloadType.NEW_CATEGORY.equals(type))
+					if (intent.getAction().equals(StickerManager.STICKERS_FAILED) && (DownloadType.NEW_CATEGORY.equals(type) || DownloadType.MORE_STICKERS.equals(type)))
 					{
 						activity.runOnUiThread(new Runnable()
 						{
@@ -223,27 +188,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 								}
 
 								Logger.d(getClass().getSimpleName(), "Download failed for new category " + cat.getCategoryId());
-
-								spo.getDownloadingParent().setVisibility(View.GONE);
-								spo.getStickerListView().setVisibility(View.GONE);
-								spo.getDownloadingFailedButton().setVisibility(View.VISIBLE);
-								if(failedDueToLargeFile)
-								{
-									spo.getDownloadingFailedButton().setText(R.string.sticker_download_failed_large_file);
-								}
-								spo.getDownloadingFailedButton().setOnClickListener(new OnClickListener()
-								{
-									@Override
-									public void onClick(View v)
-									{
-										DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, cat, type, null);
-										Utils.executeFtResultAsyncTask(downloadStickerTask);
-
-										StickerManager.getInstance().insertTask(cat.getCategoryId(), downloadStickerTask);
-										spo.getDownloadingText().setText(activity.getString(R.string.downloading_category, cat.getCategoryId()));
-									}
-								});
-
+								cat.setState(StickerCategory.RETRY);
+								addViewBasedOnState(stickerObjMap.get(cat), cat);
 							}
 						});
 					}
@@ -254,6 +200,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 							@Override
 							public void run()
 							{
+								cat.setState(StickerCategory.DONE);
 								initStickers(spo, cat);
 							}
 						});
@@ -263,35 +210,83 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 	};
 
-	public void setupStickerPage(final View parent, final StickerCategory category, boolean failed, final DownloadType downloadTypeBeforeFail)
+	public void setupStickerPage(final View parent, final StickerCategory category)
 	{
-		final ListView stickerListView = (ListView) parent.findViewById(R.id.emoticon_grid);
+		final GridView stickerGridView = (GridView) parent.findViewById(R.id.emoticon_grid);
 
-		View downloadingParent = parent.findViewById(R.id.downloading_container);
-		final TextView downloadingText = (TextView) parent.findViewById(R.id.downloading_sticker);
+		ViewGroup emptyView = (ViewGroup) parent.findViewById(R.id.emptyViewHolder);
 
-		Button downloadingFailed = (Button) parent.findViewById(R.id.sticker_fail_btn);
+		checkAndSetEmptyView(parent, emptyView, category, stickerGridView);
 
-		stickerListView.setVisibility(View.GONE);
-		downloadingParent.setVisibility(View.GONE);
-		downloadingFailed.setVisibility(View.GONE);
-
-		StickerPageObjects spo = new StickerPageObjects(stickerListView, downloadingParent, downloadingText, downloadingFailed);
+		StickerPageObjects spo = new StickerPageObjects(stickerGridView);
+		stickerGridView.setNumColumns(StickerManager.getInstance().getNumColumnsForStickerGrid(activity));
 		stickerObjMap.put(category, spo);
-		DownloadStickerTask currentStickerTask = (DownloadStickerTask) StickerManager.getInstance().getTask(category.getCategoryId());
-
-		if (currentStickerTask != null && currentStickerTask.getDownloadType().equals(DownloadType.NEW_CATEGORY))
+		initStickers(spo, category);
+		
+	}
+	
+	private void checkAndSetEmptyView(final View parent, ViewGroup emptyView, final StickerCategory category, final GridView stickerGridView)
+	{
+		View empty;
+		if (category.isCustom())
 		{
-			Logger.d(getClass().getSimpleName(), "Downloading new category " + category.getCategoryId());
-
-			downloadingParent.setVisibility(View.VISIBLE);
-
-			downloadingText.setText(activity.getString(R.string.downloading_category, category.getCategoryId()));
+			// Set Recents EmptyView
+			empty = LayoutInflater.from(activity).inflate(R.layout.recent_empty_view, emptyView);
 		}
+
 		else
 		{
-			initStickers(spo, category);
+			// Set Download EmptyView
+			empty = LayoutInflater.from(activity).inflate(R.layout.sticker_pack_empty_view, emptyView);
+			TextView downloadBtn = (TextView) empty.findViewById(R.id.download_btn);
+			TextView categoryName = (TextView) empty.findViewById(R.id.category_name);
+			categoryName.setText(category.getCategoryName());
+			downloadBtn.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					category.setState(StickerCategory.DOWNLOADING);
+
+					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.NEW_CATEGORY, null);
+					Utils.executeFtResultAsyncTask(downloadStickerTask);
+					StickerManager.getInstance().insertTask(category.getCategoryId(), downloadStickerTask);
+					setupStickerPage(parent, category);
+
+				}
+			});
+
 		}
+
+		stickerGridView.setEmptyView(empty);
+	}
+
+	private void addViewBasedOnState(StickerPageObjects stickerPageObjects, StickerCategory category)
+	{
+		StickerPageAdapter spa = stickerPageObjects.getStickerPageAdapter();
+		List<StickerPageAdapterItem> stickerPageList = spa.getStickerPageAdapterItemList();
+		int state = category.getState();
+		stickerPageList.remove(0);
+		/* We add UI elements based on the current state of the sticker category*/
+		if (state == StickerCategory.UPDATE)
+		{
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.UPDATE));
+		}
+		else if (state == StickerCategory.DOWNLOADING)
+		{
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
+		}
+		else if(state == StickerCategory.RETRY)
+		{
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.RETRY));
+		}
+		
+		else if(state == StickerCategory.DONE)
+		{
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DONE));
+		}
+		
+		spa.notifyDataSetChanged();
 	}
 
 	/**
@@ -317,35 +312,44 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			return;
 		}
 
-		spo.getDownloadingParent().setVisibility(View.GONE);
-		spo.getDownloadingFailedButton().setVisibility(View.GONE);
-		spo.getStickerListView().setVisibility(View.VISIBLE);
+		spo.getStickerGridView().setVisibility(View.VISIBLE);
 		final List<Sticker> stickersList = category.getStickerList(activity);
-		boolean updateAvailable = category.isUpdateAvailable();
-
-		final List<ViewType> viewTypeList = new ArrayList<StickerPageAdapter.ViewType>();
-		final DownloadStickerTask currentStickerTask = (DownloadStickerTask) StickerManager.getInstance().getTask(category.getCategoryId());
-		if (updateAvailable || (currentStickerTask != null && currentStickerTask.getDownloadType() == DownloadType.UPDATE))
+		final List<StickerPageAdapterItem> stickerPageList = generateStickerPageAdapterItemList(stickersList);
+		
+		int state = category.getState(); 
+		/* We add UI elements based on the current state of the sticker category*/
+		switch (state) 
 		{
-			viewTypeList.add(ViewType.UPDATING_STICKER);
-			updateAvailable = true;
+		case StickerCategory.UPDATE : 
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.UPDATE));
+			break;
+		case StickerCategory.DOWNLOADING :
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
+			break;
+		case StickerCategory.RETRY :
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.RETRY));
+			break;
+		case StickerCategory.DONE : 
+			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DONE));
+			break;
 		}
-		if (currentStickerTask != null && currentStickerTask.getDownloadType() == DownloadType.MORE_STICKERS)
-		{
-			viewTypeList.add(ViewType.DOWNLOADING_MORE);
-		}
-		final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickersList, category, viewTypeList, worker);
+		
+		final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickerPageList, category,worker);
 		spo.setStickerPageAdapter(stickerPageAdapter);
-		spo.getStickerListView().setAdapter(stickerPageAdapter);
+		spo.getStickerGridView().setAdapter(stickerPageAdapter);
 	}
 
-	private void addDefaultStickers(List<Sticker> stickerList, StickerCategory cat, String[] stickerIds)
+	private List<StickerPageAdapterItem> generateStickerPageAdapterItemList(List<Sticker> stickersList)
 	{
-		int count = stickerIds.length;
-		for (int i = 0; i < count; i++)
+		List<StickerPageAdapterItem> stickerPageList = new ArrayList<StickerPageAdapterItem>();
+		if(stickersList != null)
 		{
-			stickerList.add(new Sticker(cat, stickerIds[i]));
+			for (Sticker st : stickersList)
+			{
+				stickerPageList.add(new StickerPageAdapterItem(StickerPageAdapterItem.STICKER, st));
+			}
 		}
+		return stickerPageList;
 	}
 
 	@Override

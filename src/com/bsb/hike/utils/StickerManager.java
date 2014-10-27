@@ -32,6 +32,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
@@ -983,5 +985,28 @@ public class StickerManager
 	public void saveVisibilityAndIndex(List<StickerCategory> stickerCategories)
 	{
 		HikeConversationsDatabase.getInstance().updateVisibilityAndIndex(stickerCategories);
+	}
+	
+	public int getNumColumnsForStickerGrid(Context context)
+	{
+		int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+		
+		return ((int) (screenWidth/SIZE_IMAGE));
+	}
+	
+	/**
+	 * Programatically sets StateListDrawable to Sticker Palette Icons. Takes baseFilePath as well as list of icons for pressed and normal states.
+	 * 
+	 * @param context
+	 * @param baseFilePath
+	 * @param iconList
+	 * @return
+	 */
+	public static StateListDrawable getStateListDrawableForStickerPalette(Context context, String baseFilePath, String... iconList)
+	{
+		StateListDrawable states = new StateListDrawable();
+		states.addState(new int[] { android.R.attr.state_selected }, new BitmapDrawable(context.getResources(), baseFilePath + "/" + iconList[0]));
+		states.addState(new int[] {}, new BitmapDrawable(context.getResources(), baseFilePath + "/" + iconList[1]));
+		return states;
 	}
 }

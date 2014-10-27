@@ -38,13 +38,28 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	private int totalStickers;
 	
 	private int timeStamp;
-
+	
+	public static final int NONE = 0;
+	
+	public static final int UPDATE = 1;
+	
+	public static final int DOWNLOADING = 2;
+	
+	public static final int RETRY = 3;
+	
+	public static final int DONE = 4;
+	
+	private int state;
 
 	public StickerCategory(String categoryId, String categoryName, boolean updateAvailable, boolean isVisible, boolean isCustom, boolean isAdded,
 			int catIndex, String metadata, int totalStickers, int timeStamp)
 	{
 		this.categoryId = categoryId;
 		this.updateAvailable = updateAvailable;
+		if(this.updateAvailable)
+		{
+			setState(UPDATE);
+		}
 		this.categoryName = categoryName;
 		this.isVisible = isVisible;
 		this.isCustom = isCustom;
@@ -53,6 +68,7 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 		this.metadata = metadata;
 		this.totalStickers = totalStickers;
 		this.timeStamp = timeStamp;
+		this.state = NONE;
 	}
 
 	// this is mostly used for recents stickers only
@@ -60,6 +76,7 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	{
 		this.categoryId = category;
 		this.updateAvailable = false;
+		this.state = NONE;
 	}
 
 	public StickerCategory()
@@ -84,6 +101,10 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 
 	public void setUpdateAvailable(boolean updateAvailable)
 	{
+		if (updateAvailable)
+		{
+			setState(UPDATE);
+		}
 		this.updateAvailable = updateAvailable;
 	}
 
@@ -165,6 +186,16 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	public void setTimeStamp(int timeStamp)
 	{
 		this.timeStamp = timeStamp;
+	}
+	
+	public void setState(int state)
+	{
+		this.state = state;
+	}
+	
+	public int getState()
+	{
+		return state;
 	}
 	
 	public List<Sticker> getStickerList(Context context)
