@@ -147,6 +147,8 @@ public class StickerManager
 
 	public static final String PREVIEW_IMAGE = "preview";
 	
+	public static final String PALETTE_ICON_TYPE = ".png"; 
+	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
 	public FilenameFilter stickerFileFilter = new FilenameFilter()
@@ -998,15 +1000,35 @@ public class StickerManager
 	 * Programatically sets StateListDrawable to Sticker Palette Icons. Takes baseFilePath as well as list of icons for pressed and normal states.
 	 * 
 	 * @param context
-	 * @param baseFilePath
-	 * @param iconList
-	 * @return
+	 * @param categoryId
+	 * @return {@link StateListDrawable}
 	 */
-	public static StateListDrawable getStateListDrawableForStickerPalette(Context context, String baseFilePath, String... iconList)
+	public static StateListDrawable getStateListDrawableForStickerPalette(Context context, String categoryId)
 	{
+		StickerManager stickerManager = StickerManager.getInstance();
 		StateListDrawable states = new StateListDrawable();
-		states.addState(new int[] { android.R.attr.state_selected }, new BitmapDrawable(context.getResources(), baseFilePath + "/" + iconList[0]));
-		states.addState(new int[] {}, new BitmapDrawable(context.getResources(), baseFilePath + "/" + iconList[1]));
+		states.addState(new int[] { android.R.attr.state_selected }, stickerManager.getPalleteIcon(context, categoryId, true));
+		states.addState(new int[] {}, stickerManager.getPalleteIcon(context, categoryId, false));
 		return states;
+	}
+	
+	/**
+	 * Return a BitmapDrawable for pallete icon for a given StickerCategory
+	 * @param ctx
+	 * @param categoryId
+	 * @param isPressed
+	 * @return {@link BitmapDrawable}
+	 */
+	public BitmapDrawable getPalleteIcon(Context ctx, String categoryId, boolean isPressed)
+	{
+		String baseFilePath = getStickerDirectoryForCategoryId(ctx, categoryId);
+		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + (isPressed ? PALLATE_ICON_SELECTED : PALLATE_ICON) + PALETTE_ICON_TYPE;
+		BitmapDrawable bitmapDrawable = new BitmapDrawable(ctx.getResources(), baseFilePath);
+		if (bitmapDrawable == null)
+		{
+			bitmapDrawable = (isPressed ? (BitmapDrawable) ctx.getResources().getDrawable(R.drawable.default_sticker_pallete_selected) : (BitmapDrawable) ctx.getResources()
+					.getDrawable(R.drawable.default_sticker_pallete));
+		}
+		return bitmapDrawable;
 	}
 }
