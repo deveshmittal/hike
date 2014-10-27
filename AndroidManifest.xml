@@ -68,6 +68,9 @@
         <service
             android:name="com.bsb.hike.service.HikeService"
             android:enabled="true" >
+            <intent-filter>
+                <action android:name="com.bsb.hike.service.ACTION_BIND"/>
+            </intent-filter>
         </service>
         <service android:name="com.bsb.hike.service.UpgradeIntentService" />
         <service android:name="com.bsb.hike.GCMIntentService" />
