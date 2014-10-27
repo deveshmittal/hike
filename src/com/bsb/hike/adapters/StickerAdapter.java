@@ -269,22 +269,24 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		int state = category.getState();
 		stickerPageList.remove(0);
 		/* We add UI elements based on the current state of the sticker category*/
-		if (state == StickerCategory.UPDATE)
+		switch (state) 
 		{
+		case StickerCategory.UPDATE :
 			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.UPDATE));
-		}
-		else if (state == StickerCategory.DOWNLOADING)
-		{
+			break;
+			
+		case StickerCategory.DOWNLOADING :
 			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
-		}
-		else if(state == StickerCategory.RETRY)
-		{
+			break;
+			
+		case StickerCategory.RETRY :
 			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.RETRY));
-		}
-		
-		else if(state == StickerCategory.DONE)
-		{
+			break;
+			
+		case StickerCategory.DONE :
 			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DONE));
+			break;
+			
 		}
 		
 		spa.notifyDataSetChanged();
