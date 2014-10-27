@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract.Data;
@@ -124,6 +125,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private String existingGroupId;
 
 	private volatile InitiateMultiFileTransferTask fileTransferTask;
+	private PreFileTransferAsycntask prefileTransferTask;
 
 	private ProgressDialog progressDialog;
 
@@ -184,6 +186,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		if (object instanceof InitiateMultiFileTransferTask)
 		{
 			fileTransferTask = (InitiateMultiFileTransferTask) object;
+			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
+		}else if( object instanceof PreFileTransferAsycntask){
+			prefileTransferTask = (PreFileTransferAsycntask) object;
 			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
 		}
 
@@ -410,6 +415,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		if (fileTransferTask != null)
 		{
 			return fileTransferTask;
+		}
+		else if(prefileTransferTask!=null){
+			return prefileTransferTask;
 		}
 		else
 		{
@@ -965,8 +973,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	        String type = presentIntent.getType();
 	        forwardMessageAsPerType(presentIntent, intent,arrayList);
-			startActivity(intent);
-			finish();
+
+	        /*
+	         * If the intent action is ACTION_SEND_MULTIPLE then we don't need to start the activity here
+	         * since we start an async task for initiating the file upload and an activity is started when
+	         * that async task finishes execution.
+	         */
+	        if (!Intent.ACTION_SEND_MULTIPLE.equals(presentIntent.getAction()))
+	        {
+	        	startActivity(intent);
+	        	finish();
+	        }
 		}else{
 			// forwarding it is
 			Intent intent = null;
@@ -975,6 +992,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				intent = Utils.createIntentFromMsisdn(arrayList.get(0).getMsisdn(), false);
 				intent.putExtras(presentIntent);
 				intent.setClass(this, ChatThread.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+				finish();
 			}else{
 				// multi forward to multi people
 				if(presentIntent.hasExtra(HikeConstants.Extras.PREV_MSISDN)){
@@ -986,11 +1006,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					//home activity
 					intent = Utils.getHomeActivityIntent(this);
 				}
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				forwardMessageAsPerType(presentIntent, intent,arrayList);
 			}
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
-			finish();
+
 		}
 	}
 
@@ -1073,6 +1092,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			intent.putExtras(presentIntent);
 		}else if ( presentIntent.hasExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT))
 		{
+			ArrayList<FileTransferData> fileTransferList = new ArrayList<ComposeChatActivity.FileTransferData>();
 			ArrayList<ConvMessage> multipleMessageList = new ArrayList<ConvMessage>();
 			String jsonString = presentIntent.getStringExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT);
 			try
@@ -1134,7 +1154,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						}
 						else
 						{
-							initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true, arrayList);
+							FileTransferData fileData = initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true, arrayList);
+							if(fileData!=null){
+								fileTransferList.add(fileData);
+							}
 						}
 					}
 					else if (msgExtrasJson.has(HikeConstants.Extras.LATITUDE) && msgExtrasJson.has(HikeConstants.Extras.LONGITUDE)
@@ -1178,7 +1201,13 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 					 */
 				}
-				Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_LONG).show();
+				if(!fileTransferList.isEmpty()){
+					prefileTransferTask = new PreFileTransferAsycntask(fileTransferList,intent);
+					Utils.executeAsyncTask(prefileTransferTask);
+				}else{
+					// if file trasfer started then it will show toast
+					Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_LONG).show();
+				}
 				if(multipleMessageList.size() ==0 || arrayList.size()==0){
 					return;
 				}else if(isSharingFile){
@@ -1188,6 +1217,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					sendMessage(convMessage);
 				}else{
 					sendMultiMessages(multipleMessageList,arrayList);
+					if(fileTransferList.isEmpty()){
+						// if it is >0 then onpost execute of PreFileTransferAsycntask will start intent
+						startActivity(intent);
+						finish();
+					}
 				}
 				
 			}
@@ -1546,14 +1580,14 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		return convMessage;
 		//sendMessage(convMessage);
 	}
-	private void initialiseFileTransfer(String filePath, String fileKey, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration,
+	private FileTransferData initialiseFileTransfer(String filePath, String fileKey, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration,
 			boolean isForwardingFile, ArrayList<ContactInfo> arrayList)
 	{
 		clearTempData();
 		if (filePath == null)
 		{
 			Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
-			return;
+			return null;
 		}
 		File file = new File(filePath);
 		Logger.d(getClass().getSimpleName(), "File size: " + file.length() + " File name: " + file.getName());
@@ -1561,10 +1595,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		if (HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
 		{
 			Toast.makeText(getApplicationContext(), R.string.max_file_size, Toast.LENGTH_SHORT).show();
-			return;
+			return null;
 		}
-		FileTransferManager.getInstance(getApplicationContext()).uploadFile(arrayList, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile,
-				((ContactInfo)arrayList.get(0)).isOnhike(), recordingDuration);
+		return new FileTransferData(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, isForwardingFile, arrayList, file);
 	}
 	private void clearTempData()
 	{
@@ -1596,5 +1629,62 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			Collections.reverse(recentContacts);
 		}
 		return recentContacts;
+	}
+	
+	private static class FileTransferData{
+		String filePath,fileKey,fileType;
+		HikeFileType hikeFileType;
+		boolean isRecording,isForwardingFile;
+		long recordingDuration;
+		ArrayList<ContactInfo> arrayList;
+		File file;
+		public FileTransferData(String filePath, String fileKey, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration,
+				boolean isForwardingFile, ArrayList<ContactInfo> arrayList,File file){
+				this.filePath = filePath;
+				this.fileKey = fileKey;
+				this.hikeFileType = hikeFileType;
+				this.fileType = fileType;
+				this.isRecording = isRecording;
+				this.recordingDuration = recordingDuration;
+				this.arrayList = arrayList;
+				this.file = file;
+			}
+	}
+	private class PreFileTransferAsycntask extends AsyncTask<Void, Void, Void>{
+		
+		ArrayList<FileTransferData> files;
+		Intent intent;
+		PreFileTransferAsycntask(ArrayList<FileTransferData> files,Intent intent){
+			this.files = files;
+			this.intent = intent;
+		}
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			progressDialog = ProgressDialog.show(ComposeChatActivity.this, null, getResources().getString(R.string.multi_file_creation));
+		}
+		@Override
+		protected Void doInBackground(Void... params) {
+			for(FileTransferData file:files){
+			FileTransferManager.getInstance(getApplicationContext()).uploadFile(file.arrayList, file.file, file.fileKey, file.fileType, file.hikeFileType, file.isRecording, file.isForwardingFile,
+					((ContactInfo)file.arrayList.get(0)).isOnhike(), file.recordingDuration);
+			}
+			return null;
+		}
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+			Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_LONG).show();
+			super.onPostExecute(result);
+			if(progressDialog!=null){
+			progressDialog.dismiss();
+			progressDialog = null;
+			}
+			startActivity(intent);
+			finish();
+			prefileTransferTask=null;
+		}
+		
 	}
 }

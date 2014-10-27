@@ -63,6 +63,7 @@ import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.AccountUtils;
@@ -286,15 +287,19 @@ public class UploadFileTask extends FileTransferBase
 			if (isMultiMsg)
 			{
 				messageList = new ArrayList<ConvMessage>();
+
+				MessageMetadata messageMetadata = new MessageMetadata(metadata, true);
 				for (ContactInfo contact : contactList)
 				{
-					ConvMessage msg = createConvMessage(fileName, metadata, contact.getMsisdn(), isRecipientOnhike);
+					ConvMessage msg = createConvMessage(fileName, messageMetadata, contact.getMsisdn(), isRecipientOnhike);
 					messageList.add(msg);
 				}
 				userContext = messageList.get(0);
 				ArrayList<ConvMessage> pubsubMsgList = new ArrayList<ConvMessage>();
 				pubsubMsgList.add((ConvMessage) userContext);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MULTI_FILE_SENT, new MultipleConvMessage(pubsubMsgList, contactList));
+				MultipleConvMessage multiConMsg = new MultipleConvMessage(pubsubMsgList, contactList);
+				HikeConversationsDatabase.getInstance().addConversations(multiConMsg.getMessageList(), multiConMsg.getContactList(),false);
+				multiConMsg.sendPubSubForConvScreenMultiMessage();
 			}
 			else
 			{
@@ -309,6 +314,16 @@ public class UploadFileTask extends FileTransferBase
 			e.printStackTrace();
 			return;
 		}
+	}
+
+	private ConvMessage createConvMessage(String fileName, MessageMetadata metadata, String msisdn, boolean isRecipientOnhike) throws JSONException
+	{
+		long time = System.currentTimeMillis() / 1000;
+		ConvMessage convMessage = new ConvMessage(fileName, msisdn, time, ConvMessage.State.SENT_UNCONFIRMED);
+		convMessage.setMetadata(metadata);
+		convMessage.setSMS(!isRecipientOnhike);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_MESSAGE_CREATED, convMessage);
+		return convMessage;
 	}
 
 	private ConvMessage createConvMessage(String fileName, JSONObject metadata, String msisdn, boolean isRecipientOnhike) throws JSONException
@@ -603,9 +618,11 @@ public class UploadFileTask extends FileTransferBase
 			if (isMultiMsg)
 			{
 				long ts = System.currentTimeMillis() / 1000;
+
+				MessageMetadata messageMetadata = new MessageMetadata(metadata, true);
 				for (ConvMessage msg : messageList)
 				{
-					msg.setMetadata(metadata);
+					msg.setMetadata(messageMetadata);
 					msg.setTimestamp(ts);
 					HikeConversationsDatabase.getInstance().updateMessageMetadata(msg.getMsgID(), msg.getMetadata());
 					//HikeMessengerApp.getPubSub().publish(HikePubSub.UPLOAD_FINISHED, msg);

@@ -86,7 +86,7 @@ public class AccountUtils
 
 	public static final int PRODUCTION_PORT_SSL = 443;
 
-	public static final int STAGING_PORT = 8080;
+	public static final int STAGING_PORT = 80;
 
 	public static final int STAGING_PORT_SSL = 443;
 
