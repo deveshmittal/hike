@@ -19,8 +19,7 @@ public class StickerConstants
 		MULTIPLE(1, "sm"),
 		PREVIEW(2, "sp"),
 		ENABLE_DISABLE(3, "sed"),
-		METADATA(4,"smd"),
-		SIZE(5, "ssz");
+		SIZE(4, "ssz"),
 		
 		private final int type;
 		private final String label;
