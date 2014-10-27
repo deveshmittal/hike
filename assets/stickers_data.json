@@ -1,0 +1,218 @@
+{
+    "harcodedStickers": [
+        {
+            "catId": "humanoid",
+            "stickerIds": [
+                "001_love1.png",
+                "002_love2.png",
+                "003_teasing.png",
+                "004_rofl.png",
+                "005_bored.png",
+                "006_angry.png",
+                "007_strangle.png",
+                "008_shocked.png",
+                "009_hurray.png",
+                "010_yawning.png",
+                "069_hi.png"
+            ],
+            "resourceIds": [
+                "sticker_001_love1",
+                "sticker_002_love2",
+                "sticker_003_teasing",
+                "sticker_004_rofl",
+                "sticker_005_bored",
+                "sticker_006_angry",
+                "sticker_007_strangle",
+                "sticker_008_shocked",
+                "sticker_009_hurray",
+                "sticker_010_yawning",
+                "sticker_069_hi"
+            ]
+        },
+        {
+            "catId": "expressions",
+            "stickerIds": [
+                "001_gn.png",
+                "002_lol.png",
+                "003_rofl.png",
+                "004_lmao.png",
+                "005_omg.png",
+                "006_brb.png",
+                "007_gtg.png",
+                "008_xoxo.png",
+                "113_whereareyou.png",
+                "112_watchadoing.png",
+                "092_yo.png"
+            ],
+            "resourceIds": [
+                "sticker_001_gn",
+                "sticker_002_lol",
+                "sticker_003_rofl",
+                "sticker_004_lmao",
+                "sticker_005_omg",
+                "sticker_006_brb",
+                "sticker_007_gtg",
+                "sticker_008_xoxo",
+                "sticker_113_whereareyou",
+                "sticker_112_watchadoing",
+                "sticker_092_yo"
+            ]
+        }
+    ],
+    
+    "stickerCategories": [
+        {
+            "catId": "recent",
+            "timestamp": 0,
+            "isVisible": true,
+            "isCustom": true,
+            "catIndex": 0,
+            "pallate_icon": "ic_recent_stickers",
+            "pallate_icon_selected": "ic_recent_stickers_selected",
+            "metadata": []
+        },
+        {
+            "catId": "humanoid",
+            "downloadPref": "humanoidDownloadShown",
+            "timestamp": 1,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 1,
+            "pallate_icon": "ic_humanoid",
+            "pallate_icon_selected": "ic_humanoid_selected",
+            "metadata": []
+        },
+        {
+            "catId": "expressions",
+            "downloadPref": "expDownloadShown",
+            "timestamp": 2,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 2,
+            "pallate_icon": "ic_expressions",
+            "pallate_icon_selected": "ic_expressions_selected",
+            "metadata": []
+        },
+        {
+            "catId": "love",
+            "downloadPref": "loveDownloadShown",
+            "timestamp": 3,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 3,
+            "pallate_icon": "ic_love",
+            "pallate_icon_selected": "ic_love_selected",
+            "metadata": []
+        },
+        {
+            "catId": "bollywood",
+            "downloadPref": "bollywoodDownloadShown",
+            "timestamp": 4,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 4,
+            "pallate_icon": "ic_bollywood",
+            "pallate_icon_selected": "ic_bollywood_selected",
+            "metadata": []
+        },
+        {
+            "catId": "indian",
+            "downloadPref": "indianDownloadShown",
+            "timestamp": 5,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 5,
+            "pallate_icon": "ic_indian",
+            "pallate_icon_selected": "ic_indian_selected",
+            "metadata": []
+        },
+        {
+            "catId": "doggy",
+            "downloadPref": "doggyDownloadShown",
+            "timestamp": 6,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 6,
+            "pallate_icon": "ic_doggy",
+            "pallate_icon_selected": "ic_doggy_selected",
+            "metadata": []
+        },
+        {
+            "catId": "rageface",
+            "downloadPref": "ragefaceDownloadShown",
+            "timestamp": 7,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 7,
+            "pallate_icon": "ic_rageface",
+            "pallate_icon_selected": "ic_rageface_selected",
+            "metadata": []
+        },
+        {
+            "catId": "jelly",
+            "downloadPref": "JellyDownloadShown",
+            "timestamp": 8,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 8,
+            "pallate_icon": "ic_jelly",
+            "pallate_icon_selected": "ic_jelly_selected",
+            "metadata": []
+        },
+        {
+            "catId": "sports",
+            "downloadPref": "sportsDownloadShown",
+            "timestamp": 9,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 9,
+            "pallate_icon": "ic_sports",
+            "pallate_icon_selected": "ic_sports_selected",
+            "metadata": []
+        },
+        {
+            "catId": "humanoid2",
+            "downloadPref": "humanoid2DownloadShown",
+            "timestamp": 10,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 10,
+            "pallate_icon": "ic_humanoid2",
+            "pallate_icon_selected": "ic_humanoid2_selected",
+            "metadata": []
+        },
+        {
+            "catId": "avatars",
+            "downloadPref": "avtarsDownloadShown",
+            "timestamp": 11,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 11,
+            "pallate_icon": "ic_avtars",
+            "pallate_icon_selected": "ic_avtars_selected",
+            "metadata": []
+        },
+        {
+            "catId": "smileyexpressions",
+            "downloadPref": "smileyexpressionDownloadShown",
+            "timestamp": 12,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 12,
+            "pallate_icon": "ic_smileyexpression",
+            "pallate_icon_selected": "ic_smileyexpression_selected",
+            "metadata": []
+        },
+        {
+            "catId": "kitty",
+            "downloadPref": "kittyDownloadShown",
+            "timestamp": 13,
+            "isVisible": true,
+            "isCustom": false,
+            "catIndex": 13,
+            "pallate_icon": "ic_kitty",
+            "pallate_icon_selected": "ic_kitty_selected",
+            "metadata": []
+        }
+    ]
+}
