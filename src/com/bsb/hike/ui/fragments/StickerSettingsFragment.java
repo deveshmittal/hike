@@ -103,6 +103,13 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		// TODO Auto-generated method stub
 		super.onPause();
 	}
+	
+	@Override
+	public void onStop()
+	{
+		mAdapter.persistChanges();
+		super.onStop();
+	}
 
 	@Override
 	public void onResume()

@@ -80,12 +80,20 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		this.inflater = LayoutInflater.from(activity);
 		this.activity = activity;
-		stickerCategoryList = StickerManager.getInstance().getStickerCategoryList();
+		instantiateStickerList();
 		stickerObjMap = Collections.synchronizedMap(new HashMap<StickerCategory, StickerAdapter.StickerPageObjects>());
 		worker = new StickerLoader(activity.getApplicationContext());
 
 		registerListener();
 		Logger.d(getClass().getSimpleName(), "Sticker Adapter instantiated ....");
+	}
+
+	/**
+	 * Utility method for updating the sticker list
+	 */
+	public void instantiateStickerList()
+	{
+		this.stickerCategoryList = StickerManager.getInstance().getStickerCategoryList();
 	}
 
 	@Override

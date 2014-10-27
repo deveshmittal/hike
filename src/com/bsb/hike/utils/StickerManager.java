@@ -987,9 +987,25 @@ public class StickerManager
 		return stickerCategories;
 	}
 	
-	public void saveVisibilityAndIndex(List<StickerCategory> stickerCategories)
+	public void saveVisibilityAndIndex(Set<StickerCategory> stickerCategories)
 	{
+		/**
+		 * Removing invisible/Adding visible categories from the StickerCategory Map
+		 */
+		for(StickerCategory stickerCategory : stickerCategories)
+		{
+			if(!stickerCategory.isVisible())
+			{
+				stickerCategoriesMap.remove(stickerCategory.getCategoryId());
+			}
+			else
+			{
+				stickerCategoriesMap.put(stickerCategory.getCategoryId(), stickerCategory);
+			}
+		}
+		
 		HikeConversationsDatabase.getInstance().updateVisibilityAndIndex(stickerCategories);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
 	}
 	
 	public int getNumColumnsForStickerGrid(Context context)
