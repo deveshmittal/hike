@@ -333,12 +333,36 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DONE));
 			break;
 		}
-		
-		final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickerPageList, category,worker);
-		spo.setStickerPageAdapter(stickerPageAdapter);
-		spo.getStickerGridView().setAdapter(stickerPageAdapter);
+		/**
+		 * Adding the placeholders in 0 sticker case in pallete. The placeholders will be added when state is either downloading or retry.
+		 */
+		if(stickersList.size() == 0 && (state == StickerCategory.DOWNLOADING || state == StickerCategory.RETRY))
+		{
+			int totalPlaceHolders = 2 * StickerManager.getInstance().getNumColumnsForStickerGrid(activity) - 1;
+			while(totalPlaceHolders > 0)
+			{
+				stickerPageList.add(new StickerPageAdapterItem(StickerPageAdapterItem.PLACE_HOLDER));
+				totalPlaceHolders --;
+			}
+		}
+		/**
+		 * If StickerPageAdapter is already initialised, we clear the prev list and add new items
+		 */
+		if(spo.getStickerPageAdapter() != null)
+		{
+			StickerPageAdapter stickerPageAdapter = spo.getStickerPageAdapter();
+			stickerPageAdapter.getStickerPageAdapterItemList().clear();
+			stickerPageAdapter.getStickerPageAdapterItemList().addAll(stickerPageList);
+			stickerPageAdapter.notifyDataSetChanged();
+		}
+		else
+		{
+			final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickerPageList, category, worker);
+			spo.setStickerPageAdapter(stickerPageAdapter);
+			spo.getStickerGridView().setAdapter(stickerPageAdapter);
+		}
 	}
-
+	
 	private List<StickerPageAdapterItem> generateStickerPageAdapterItemList(List<Sticker> stickersList)
 	{
 		List<StickerPageAdapterItem> stickerPageList = new ArrayList<StickerPageAdapterItem>();
