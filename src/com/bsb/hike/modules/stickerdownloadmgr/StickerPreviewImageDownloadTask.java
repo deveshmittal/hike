@@ -46,15 +46,15 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			return STResult.DOWNLOAD_FAILED;
 		}
 		
-		String previewImagePath = dirPath + HikeConstants.PREVIEW_STICKER_ROOT + HikeConstants.PREVIEW_IMAGE;
+		String previewImagePath = dirPath + HikeConstants.OTHER_ROOT + HikeConstants.PREVIEW_IMAGE;
 		
 		FileOutputStream fos = null;
 		try
 		{
-			File previewDir = new File(dirPath + HikeConstants.PREVIEW_STICKER_ROOT);
-			if (!previewDir.exists())
+			File otherDir = new File(dirPath + HikeConstants.OTHER_ROOT);
+			if (!otherDir.exists())
 			{
-				if (!previewDir.mkdirs())
+				if (!otherDir.mkdirs())
 				{
 					return STResult.DOWNLOAD_FAILED;
 				}

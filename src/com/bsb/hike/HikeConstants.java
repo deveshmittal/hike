@@ -759,10 +759,6 @@ public class HikeConstants
 	public static final String LARGE_STICKER_ROOT = "/large";
 
 	public static final String SMALL_STICKER_ROOT = "/small";
-	
-	public static final String PREVIEW_STICKER_ROOT = "/preview";
-	
-	public static final String ENABLE_DISABLE_STICKER_ROOT = "/enable_disable";
 
 	public static final String HIKE_FILE_LIST_NAME = "hikeFiles";
 

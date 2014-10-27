@@ -50,16 +50,16 @@ public class StickerEDImageDownloadTask extends BaseStickerDownloadTask
 			return STResult.DOWNLOAD_FAILED;
 		}
 		
-		String enableImagePath = dirPath + HikeConstants.ENABLE_DISABLE_STICKER_ROOT + "/" + HikeConstants.ENABLE_IMAGE;
-		String disableImagePath = dirPath + HikeConstants.ENABLE_DISABLE_STICKER_ROOT + "/" + HikeConstants.DISABLE_IMAGE;
+		String enableImagePath = dirPath + HikeConstants.OTHER_ROOT + "/" + HikeConstants.ENABLE_IMAGE;
+		String disableImagePath = dirPath + HikeConstants.OTHER_ROOT + "/" + HikeConstants.DISABLE_IMAGE;
 		
 		FileOutputStream fos = null;
 		try
 		{
-			File previewDir = new File(dirPath + HikeConstants.ENABLE_DISABLE_STICKER_ROOT);
-			if (!previewDir.exists())
+			File otherDir = new File(dirPath + HikeConstants.OTHER_ROOT);
+			if (!otherDir.exists())
 			{
-				if (!previewDir.mkdirs())
+				if (!otherDir.mkdirs())
 				{
 					return STResult.DOWNLOAD_FAILED;
 				}
