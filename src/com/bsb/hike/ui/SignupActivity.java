@@ -1248,6 +1248,16 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		final View dot1 = (View) restoringBackupLayout.findViewById(R.id.dot_center);
 		final View dot2 = (View) restoringBackupLayout.findViewById(R.id.dot_right);
 		
+		ShapeDrawable circle0 = new ShapeDrawable(new OvalShape());
+		circle0.getPaint().setColor(this.getResources().getColor(R.color.restoring_red));
+		dot0.setBackgroundDrawable(circle0);
+		ShapeDrawable circle1 = new ShapeDrawable(new OvalShape());
+		circle1.getPaint().setColor(this.getResources().getColor(R.color.restoring_green));
+		dot1.setBackgroundDrawable(circle1);
+		ShapeDrawable circle2 = new ShapeDrawable(new OvalShape());
+		circle2.getPaint().setColor(this.getResources().getColor(R.color.restoring_orange));
+		dot2.setBackgroundDrawable(circle2);
+		
 		AlphaAnimation dotIn0 = new AlphaAnimation(0, 1);
 		dotIn0.setDuration(100);
 		AlphaAnimation dotOut0 = new AlphaAnimation(1, 0);

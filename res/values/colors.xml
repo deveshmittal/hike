@@ -356,5 +356,8 @@
     <color name="group_edit_pressed">#33888888</color>
     <color name="files_disabled">#bbbbbb</color>
     <color name="welcome_blue">#008fe1</color>
+    <color name="restoring_red">#fe6565</color>
+    <color name="restoring_orange">#ffbc3c</color>
+    <color name="restoring_green">#38e5be</color>
 </resources>
 	
