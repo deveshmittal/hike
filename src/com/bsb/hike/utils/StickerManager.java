@@ -33,6 +33,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -147,7 +148,9 @@ public class StickerManager
 
 	public static final String PREVIEW_IMAGE = "preview";
 	
-	public static final String PALETTE_ICON_TYPE = ".png"; 
+	public static final String PALETTE_ICON_TYPE = ".png";
+	
+	public static final String PREVIEW_ICON_TYPE = ".png";
 	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
@@ -1030,5 +1033,26 @@ public class StickerManager
 					.getDrawable(R.drawable.default_sticker_pallete));
 		}
 		return bitmapDrawable;
+	}
+	
+	/**
+	 * Returns a category preview drawable
+	 * @param ctx
+	 * @param categoryId
+	 * @return {@link Drawable}
+	 */
+	public Drawable getCategoryPreviewAsset(Context ctx, String categoryId)
+	{
+		String baseFilePath = getStickerDirectoryForCategoryId(ctx, categoryId);
+		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + PREVIEW_IMAGE + PREVIEW_ICON_TYPE;
+		Drawable drawable = Drawable.createFromPath(baseFilePath);
+		
+		if(drawable == null)
+		{
+			drawable = ctx.getResources().getDrawable(R.drawable.default_sticker_preview);
+			
+		}
+		
+		return drawable;
 	}
 }

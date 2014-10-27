@@ -12,6 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -20,7 +21,7 @@ import com.bsb.hike.DragSortListView.DragSortListView;
 import com.bsb.hike.DragSortListView.DragSortListView.DragSortListener;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
 
 public class StickerSettingsAdapter extends BaseAdapter implements DragSortListener, OnCheckedChangeListener
 {
@@ -96,6 +97,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			viewHolder = new ViewHolder();
 			viewHolder.categoryName = (TextView) convertView.findViewById(R.id.category_name);
 			viewHolder.checkBox = (CheckBox) convertView.findViewById(R.id.category_checkbox);
+			viewHolder.categoryPreviewImage = (ImageView) convertView.findViewById(R.id.category_icon);
 			viewHolder.checkBox.setTag(category);
 			viewHolder.checkBox.setOnCheckedChangeListener(this);
 			convertView.setTag(viewHolder);
@@ -109,6 +111,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		
 		viewHolder.categoryName.setText(category.getCategoryName());
 		viewHolder.checkBox.setChecked(category.isVisible());
+		viewHolder.categoryPreviewImage.setImageDrawable(StickerManager.getInstance().getCategoryPreviewAsset(mContext, category.getCategoryId()));
 		
 		return convertView;
 	}
@@ -222,6 +225,8 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		TextView categoryName;
 		
 		CheckBox checkBox;
+		
+		ImageView categoryPreviewImage;
 	}
 
 	@Override
