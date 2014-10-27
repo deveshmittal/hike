@@ -403,6 +403,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String SHOWN_DIWALI_POPUP = "shownDiwaliPopup";
 	
 	public static final String SHOW_SHOP_ICON_BLUE = "showShopIconBlue";
+	
+	public static final String IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN = "showCategoryReordering";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 

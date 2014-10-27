@@ -23,6 +23,7 @@ import com.bsb.hike.DragSortListView.DragSortListView;
 import com.bsb.hike.DragSortListView.DragSortListView.DragScrollProfile;
 import com.bsb.hike.adapters.StickerSettingsAdapter;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 
@@ -41,13 +42,29 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	private int velocity;
 
 	private long previousEventTime;
+	
+	private HikeSharedPreferenceUtil prefs;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View parent = inflater.inflate(R.layout.sticker_settings, null);
+		prefs = HikeSharedPreferenceUtil.getInstance(getActivity());
+		showTipIfRequired(parent);
 		initAdapterAndList(parent);
 		return parent;
+	}
+
+	/**
+	 * Utility method to show category reordering tip
+	 * @param parent
+	 */
+	private void showTipIfRequired(View parent)
+	{
+		if(!prefs.getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))  //Showing the tip here
+		{
+			((View) parent.findViewById(R.id.reorder_tip)).setVisibility(View.VISIBLE); 
+		}
 	}
 
 	private void initAdapterAndList(View parent)

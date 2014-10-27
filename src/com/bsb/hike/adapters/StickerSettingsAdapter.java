@@ -14,10 +14,12 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.DragSortListView.DragSortListView;
 import com.bsb.hike.DragSortListView.DragSortListView.DragSortListener;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 
 public class StickerSettingsAdapter extends BaseAdapter implements DragSortListener, OnCheckedChangeListener
@@ -154,6 +156,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 				mListMapping.put(to, cursorFrom);
 				isDragged = true;
 				cleanMapping();
+				HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true);  //Setting the tip flag
 				notifyDataSetChanged();
 			}
 		}
