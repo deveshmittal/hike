@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpHead;
@@ -30,6 +31,7 @@ import com.bsb.hike.modules.stickerdownloadmgr.retry.DefaultRetryPolicy;
 import com.bsb.hike.modules.stickerdownloadmgr.retry.IRetryPolicy;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.Logger;
 
 abstract class BaseStickerDownloadTask implements Callable<STResult>
 {
@@ -112,8 +114,19 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 			HttpPost httpPost = new HttpPost(downloadUrl);
 			AccountUtils.addToken(httpPost);
 			httpPost.setEntity(entity);
-			JSONObject obj = AccountUtils.executeRequest(httpPost);
-			return obj;
+			HttpClient client = AccountUtils.getClient(httpPost);
+			
+			HttpResponse response;
+			response = client.execute(httpPost);
+			Logger.d("HTTP", "finished request");
+			if (response.getStatusLine().getStatusCode() != 200)
+			{
+				Logger.w("HTTP", "Request Failed: " + response.getStatusLine());
+				return null;
+			}
+
+			HttpEntity responseEntity = response.getEntity();
+			return AccountUtils.getResponse(responseEntity.getContent());
 		}
 		else if(StickerRequestType.SIZE == requestType)
 		{
