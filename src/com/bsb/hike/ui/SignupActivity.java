@@ -28,6 +28,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -61,6 +63,7 @@ import android.view.animation.BounceInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
+import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
@@ -312,6 +315,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				break;
 			case SCANNING_CONTACTS:
 				prepareLayoutForScanning(savedInstanceState);
+				break;
+			case RESTORING_BACKUP:
+				setupOnRestoreProgress();
 				break;
 			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
@@ -1221,7 +1227,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						ppAnimation.setDuration(200);
 						ppAnimation.setFillAfter(true);
 						profilePic.startAnimation(ppAnimation);
-						restoreProgress.startAnimation(ppAnimation);
+						
+						restoreProgress.setVisibility(View.VISIBLE);
+						setupOnRestoreProgress();
 					}
 				});
 				sdCardAnimationSet.addAnimation(sdCardTranslateAnimation);
@@ -1234,11 +1242,142 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		});
 	}
 	
-	public class ReverseInterpolator implements Interpolator {
-	    @Override
-	    public float getInterpolation(float paramFloat) {
-	        return Math.abs(paramFloat -1f);
-	    }
+	private void setupOnRestoreProgress()
+	{
+		final View dot0 = (View) restoringBackupLayout.findViewById(R.id.dot_left);
+		final View dot1 = (View) restoringBackupLayout.findViewById(R.id.dot_center);
+		final View dot2 = (View) restoringBackupLayout.findViewById(R.id.dot_right);
+		
+		AlphaAnimation dotIn0 = new AlphaAnimation(0, 1);
+		dotIn0.setDuration(100);
+		AlphaAnimation dotOut0 = new AlphaAnimation(1, 0);
+		dotOut0.setDuration(100);
+		dotOut0.setStartOffset(200);
+		RotateAnimation dotStay0 = new RotateAnimation(0, 360);
+		dotStay0.setDuration(400);
+		dotStay0.setStartOffset(300);
+		
+		final AnimationSet dota0 = new AnimationSet(true);
+		dota0.addAnimation(dotIn0);
+		dota0.addAnimation(dotOut0);
+		dota0.addAnimation(dotStay0);
+		dota0.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+				dotIn.setDuration(100);
+				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+				dotOut.setDuration(100);
+				dotOut.setStartOffset(200);
+				RotateAnimation dotStay = new RotateAnimation(0, 360);
+				dotStay.setDuration(400);
+				dotStay.setStartOffset(300);
+				AnimationSet dot = new AnimationSet(true);
+				dot.addAnimation(dotIn);
+				dot.addAnimation(dotOut);
+				dot.addAnimation(dotStay);
+				dot.setAnimationListener(this);
+				dot0.startAnimation(dot);
+			}
+		});
+
+		AlphaAnimation dotIn1 = new AlphaAnimation(0, 1);
+		dotIn1.setDuration(100);
+		AlphaAnimation dotOut1 = new AlphaAnimation(1, 0);
+		dotOut1.setDuration(100);
+		dotOut1.setStartOffset(200);
+		RotateAnimation dotStay1 = new RotateAnimation(0, 360);
+		dotStay1.setDuration(200);
+		dotStay1.setStartOffset(300);
+		
+		final AnimationSet dota1 = new AnimationSet(true);
+		dota1.addAnimation(dotIn1);
+		dota1.addAnimation(dotOut1);
+		dota1.addAnimation(dotStay1);
+		dota1.setStartOffset(200);
+		dota1.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+				dotIn.setDuration(100);
+				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+				dotOut.setDuration(100);
+				dotOut.setStartOffset(200);
+				RotateAnimation dotStay = new RotateAnimation(0, 360);
+				dotStay.setDuration(200);
+				dotStay.setStartOffset(300);
+				AnimationSet dot = new AnimationSet(true);
+				dot.addAnimation(dotIn);
+				dot.addAnimation(dotOut);
+				dot.addAnimation(dotStay);
+				dot.setStartOffset(200);
+				dot.setAnimationListener(this);
+				dot1.startAnimation(dot);
+			}
+		});
+		
+		AlphaAnimation dotIn2 = new AlphaAnimation(0, 1);
+		dotIn2.setDuration(100);
+		AlphaAnimation dotOut2 = new AlphaAnimation(1, 0);
+		dotOut2.setDuration(100);
+		dotOut2.setStartOffset(200);
+		
+		final AnimationSet dota2 = new AnimationSet(true);
+
+
+		dota2.addAnimation(dotIn2);
+		dota2.addAnimation(dotOut2);
+		dota2.setStartOffset(400);
+		dota2.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+				dotIn.setDuration(100);
+				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+				dotOut.setDuration(100);
+				dotOut.setStartOffset(200);
+				AnimationSet dot = new AnimationSet(true);
+				dot.addAnimation(dotIn);
+				dot.addAnimation(dotOut);
+				dot.setAnimationListener(this);
+				dot.setStartOffset(400);
+				dot2.startAnimation(dot);
+			}
+		});
+		
+		dot0.startAnimation(dota0);
+		dot1.startAnimation(dota1);
+		dot2.startAnimation(dota2);
 	}
 	
 	private OnClickListener btnRestoreClick = new OnClickListener()
