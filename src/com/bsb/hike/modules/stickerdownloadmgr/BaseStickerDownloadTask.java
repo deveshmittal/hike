@@ -40,15 +40,23 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 {
 
 	private IRetryPolicy retryPolicy;
+
 	private String downloadUrl;
 
 	private Handler handler;
+
 	private Context context;
+
 	private String taskId;
+
 	private STState _state;
+
 	private URL mUrl;
+
 	private Exception exception;
+
 	private Object resultObj;
+
 	private IStickerResultListener callback;
 
 	protected BaseStickerDownloadTask(Handler handler, Context ctx, String taskId, IStickerResultListener callback)
@@ -69,7 +77,7 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 	{
 		this.taskId = taskId;
 	}
-	
+
 	public String getDownloadUrl()
 	{
 		return downloadUrl;
@@ -79,7 +87,6 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 	{
 		this.downloadUrl = downloadUrl;
 	}
-
 
 	protected URLConnection initConn() throws IOException
 	{
@@ -96,7 +103,7 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 		AccountUtils.setNoTransform(conn);
 		return conn;
 	}
-	
+
 	protected HttpClient initConnHead() throws IOException
 	{
 		mUrl = new URL(downloadUrl);
@@ -179,23 +186,22 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 		{
 			throw ex;
 		}
-		
 	}
 
 	protected void postExecute(STResult result)
 	{
 		StickerDownloadManager.getInstance(context).removeTask(taskId);
-		if(result != STResult.SUCCESS)
+		if (result != STResult.SUCCESS)
 		{
-			if(callback != null)
+			if (callback != null)
 			{
 				callback.onFailure(resultObj, getException());
 			}
-			
+
 		}
 		else
 		{
-			if(callback != null)
+			if (callback != null)
 			{
 				callback.onSuccess(resultObj);
 			}
@@ -211,7 +217,7 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 	{
 		this.retryPolicy = retryPolicy;
 	}
-	
+
 	public Exception getException()
 	{
 		return exception;
@@ -221,7 +227,7 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 	{
 		this.exception = exception;
 	}
-	
+
 	public Object getResult()
 	{
 		return resultObj;
@@ -231,7 +237,7 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 	{
 		this.resultObj = resultObject;
 	}
-	
+
 	public IStickerResultListener getCallback()
 	{
 		return callback;
