@@ -168,9 +168,12 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			{
 				getCallback().onProgressUpdated(totalNumber);
 			}
-		}
-
-		HikeConversationsDatabase.getInstance().updateStickerCountForStickerCategory(category.getCategoryId(), totalNumber);
+			if(category.getTotalStickers() < totalNumber)
+			{
+				category.setTotalStickers(totalNumber);
+				HikeConversationsDatabase.getInstance().updateStickerCountForStickerCategory(category.getCategoryId(), totalNumber);
+			}
+		}	
 		return STResult.SUCCESS;
 	}
 
