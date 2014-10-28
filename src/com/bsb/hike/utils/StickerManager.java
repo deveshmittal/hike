@@ -158,6 +158,8 @@ public class StickerManager
 	public static final String PREVIEW_ICON_TYPE = ".png";
 
 	public static final String CATEGORY_SIZE = "categorySize";
+
+	public static final String SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE = "shownHardcodedCategoryUpdateAvailable";
 	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
@@ -234,6 +236,13 @@ public class StickerManager
 			{
 				StickerManager.getInstance().setStickerUpdateAvailable(DOGGY_CATEGORY, true);
 			}
+		}
+		
+		if (!settings.getBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, false))
+		{
+			settings.edit().putBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, true).commit();
+			StickerManager.getInstance().setStickerUpdateAvailable(HUMANOID, true);
+			StickerManager.getInstance().setStickerUpdateAvailable(EXPRESSIONS, true);
 		}
 	}
 
