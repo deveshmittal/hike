@@ -55,6 +55,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, category.getCategoryId());
 		if (directoryPath == null)
 		{
+			setException(new StickerException(StickerException.DIRECTORY_NOT_EXISTS));
 			return STResult.DOWNLOAD_FAILED;
 		}
 
@@ -107,6 +108,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 
 				if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
 				{
+					setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
 					return STResult.DOWNLOAD_FAILED;
 				}
 
@@ -114,6 +116,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 
 				if (length > Utils.getFreeSpace())
 				{
+					setException(new StickerException(StickerException.OUT_OF_SPACE));
 					return STResult.FILE_TOO_LARGE;
 				}
 
@@ -154,6 +157,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			}
 			catch (Exception e)
 			{
+				setException(new StickerException(e));
 				return STResult.DOWNLOAD_FAILED;
 			}
 
