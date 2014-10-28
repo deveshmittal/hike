@@ -667,20 +667,13 @@ public class ConversationsAdapter extends BaseAdapter
 				imgStatus.setImageResource(resId);
 				imgStatus.setVisibility(View.VISIBLE);
 			}
-			else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null))
+			else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null) && conversation.getUnreadCount() > 0)
 			{
 				unreadIndicator.setVisibility(View.VISIBLE);
 
 				unreadIndicator.setBackgroundResource(conversation.isStealth() ? R.drawable.bg_unread_counter_stealth : R.drawable.bg_unread_counter);
 
-				if (conversation.getUnreadCount() == 0)
-				{
-					unreadIndicator.setText("");
-				}
-				else
-				{
-					unreadIndicator.setText(Integer.toString(conversation.getUnreadCount()));
-				}
+				unreadIndicator.setText(Integer.toString(conversation.getUnreadCount()));
 			}
 			else
 			{

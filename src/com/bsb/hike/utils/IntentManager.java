@@ -1,8 +1,13 @@
 package com.bsb.hike.utils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HikePreferences;
@@ -10,6 +15,7 @@ import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.google.android.gms.internal.co;
 
 import android.content.Context;
@@ -121,6 +127,29 @@ public class IntentManager
 		Intent intent = new Intent(context.getApplicationContext(), WebViewActivity.class);
 		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.rewardsUrl + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
 		intent.putExtra(HikeConstants.Extras.TITLE, context.getString(R.string.rewards));
+		return intent;
+	}
+
+	public static Intent getForwardStickerIntent(Context context, String stickerId, String categoryId)
+	{
+		Utils.sendUILogEvent(HikeConstants.LogEvent.FORWARD_MSG);
+		Intent intent = new Intent(context, ComposeChatActivity.class);
+		intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+		JSONArray multipleMsgArray = new JSONArray();
+		try
+		{
+			JSONObject multiMsgFwdObject = new JSONObject();
+			multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
+			multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_ID, stickerId);
+			multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_INDEX, -1);
+			multipleMsgArray.put(multiMsgFwdObject);
+		}
+		catch (JSONException e)
+		{
+			Logger.e(context.getClass().getSimpleName(), "Invalid JSON", e);
+		}
+
+		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 		return intent;
 	}
 }
