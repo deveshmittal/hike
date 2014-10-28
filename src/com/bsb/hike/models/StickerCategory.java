@@ -56,10 +56,6 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	{
 		this.categoryId = categoryId;
 		this.updateAvailable = updateAvailable;
-		if(this.updateAvailable)
-		{
-			setState(UPDATE);
-		}
 		this.categoryName = categoryName;
 		this.isVisible = isVisible;
 		this.isCustom = isCustom;
@@ -68,7 +64,7 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 		this.metadata = metadata;
 		this.totalStickers = totalStickers;
 		this.timeStamp = timeStamp;
-		this.state = NONE;
+		this.state = updateAvailable ? UPDATE : NONE;
 	}
 
 	// this is mostly used for recents stickers only
