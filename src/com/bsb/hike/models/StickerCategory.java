@@ -33,9 +33,9 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	
 	private int catIndex;
 	
-	private String metadata;
-	
 	private int totalStickers;
+	
+	private int categorySize;
 	
 	private int timeStamp;
 	
@@ -52,7 +52,7 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	private int state;
 
 	public StickerCategory(String categoryId, String categoryName, boolean updateAvailable, boolean isVisible, boolean isCustom, boolean isAdded,
-			int catIndex, String metadata, int totalStickers, int timeStamp)
+			int catIndex, int totalStickers, int timeStamp, int categorySize)
 	{
 		this.categoryId = categoryId;
 		this.updateAvailable = updateAvailable;
@@ -61,10 +61,10 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 		this.isCustom = isCustom;
 		this.isAdded = isAdded;
 		this.catIndex = catIndex;
-		this.metadata = metadata;
 		this.totalStickers = totalStickers;
 		this.timeStamp = timeStamp;
 		this.state = updateAvailable ? UPDATE : NONE;
+		this.categorySize = categorySize;
 	}
 
 	// this is mostly used for recents stickers only
@@ -154,14 +154,14 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 		this.catIndex = catIndex;
 	}
 
-	public String getMetadata()
+	public int getCategorySize()
 	{
-		return metadata;
+		return categorySize;
 	}
 
-	public void setMetadata(String metadata)
+	public void setCategorySize(int categorySize)
 	{
-		this.metadata = metadata;
+		this.categorySize = categorySize;
 	}
 
 	public int getTotalStickers()

@@ -66,8 +66,7 @@
             "isVisible": true,
             "isCustom": true,
             "pallate_icon": "ic_recent_stickers",
-            "pallate_icon_selected": "ic_recent_stickers_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_recent_stickers_selected"
         },
         {
             "catId": "humanoid",
@@ -76,8 +75,7 @@
             "isCustom": false,
             "totalStickers":82,
             "pallate_icon": "ic_humanoid",
-            "pallate_icon_selected": "ic_humanoid_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_humanoid_selected"
         },
         {
             "catId": "expressions",
@@ -85,8 +83,7 @@
             "isVisible": true,
             "isCustom": false,
             "pallate_icon": "ic_expressions",
-            "pallate_icon_selected": "ic_expressions_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_expressions_selected"
         },
         {
             "catId": "love",
@@ -94,8 +91,7 @@
             "isVisible": true,
             "isCustom": false,
             "pallate_icon": "ic_love",
-            "pallate_icon_selected": "ic_love_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_love_selected"
         },
         {
             "catId": "bollywood",
@@ -103,8 +99,7 @@
             "isVisible": true,
             "isCustom": false,
             "pallate_icon": "ic_bollywood",
-            "pallate_icon_selected": "ic_bollywood_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_bollywood_selected"
         },
         {
             "catId": "indian",
@@ -112,8 +107,7 @@
             "isVisible": true,
             "isCustom": false,
             "pallate_icon": "ic_indian",
-            "pallate_icon_selected": "ic_indian_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_indian_selected"
         },
         {
             "catId": "doggy",
@@ -121,8 +115,7 @@
             "isVisible": true,
             "isCustom": false,
             "pallate_icon": "ic_doggy",
-            "pallate_icon_selected": "ic_doggy_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_doggy_selected"
         },
         {
             "catId": "rageface",
@@ -130,8 +123,7 @@
             "isVisible": true,
             "isCustom": false,
             "pallate_icon": "ic_rageface",
-            "pallate_icon_selected": "ic_rageface_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_rageface_selected"
         },
         {
             "catId": "jelly",
@@ -139,8 +131,7 @@
             "isVisible": true,
             "isCustom": false,
             "pallate_icon": "ic_jelly",
-            "pallate_icon_selected": "ic_jelly_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_jelly_selected"
         },
         {
             "catId": "sports",
@@ -148,8 +139,7 @@
             "isVisible": true,
             "isCustom": false,
             "pallate_icon": "ic_sports",
-            "pallate_icon_selected": "ic_sports_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_sports_selected"
         },
         {
             "catId": "humanoid2",
@@ -157,8 +147,7 @@
             "isVisible": true,
             "isCustom": false,
             "pallate_icon": "ic_humanoid2",
-            "pallate_icon_selected": "ic_humanoid2_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_humanoid2_selected"
         },
         {
             "catId": "avatars",
@@ -166,8 +155,7 @@
             "isVisible": true,
             "isCustom": false,
             "pallate_icon": "ic_avtars",
-            "pallate_icon_selected": "ic_avtars_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_avtars_selected"
         },
         {
             "catId": "smileyexpressions",
@@ -175,8 +163,7 @@
             "isVisible": true,
             "isCustom": false,
             "pallate_icon": "ic_smileyexpression",
-            "pallate_icon_selected": "ic_smileyexpression_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_smileyexpression_selected"
         },
         {
             "catId": "kitty",
@@ -184,8 +171,7 @@
             "isVisible": true,
             "isCustom": false,
             "pallate_icon": "ic_kitty",
-            "pallate_icon_selected": "ic_kitty_selected",
-            "metadata": []
+            "pallate_icon_selected": "ic_kitty_selected"
         }
     ]
 }
