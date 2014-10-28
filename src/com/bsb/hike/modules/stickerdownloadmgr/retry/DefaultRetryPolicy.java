@@ -14,7 +14,7 @@ public class DefaultRetryPolicy implements IRetryPolicy
 {
 
 	/** The default number of retry attempts. */
-	public static final int DEFAULT_MAX_RETRY_COUNT = 10;
+	public static final int DEFAULT_MAX_RETRY_COUNT = 1;
 
 	/** The default delay before retry a request (in ms). */
 	public static final long DEFAULT_DELAY_BEFORE_RETRY = 2500;
@@ -25,7 +25,7 @@ public class DefaultRetryPolicy implements IRetryPolicy
 	public static final float DEFAULT_BACKOFF_MULT = 1f;
 
 	/** The number of retry attempts. */
-	private int retryCount = DEFAULT_MAX_RETRY_COUNT;
+	private int retryCount = 0;
 
 	private int maxReconnectTime = DEFAULT_MAX_RECONNECT_TIME;
 
@@ -41,7 +41,7 @@ public class DefaultRetryPolicy implements IRetryPolicy
 	 */
 	private float backOffMultiplier = DEFAULT_BACKOFF_MULT;
 
-	private boolean retry = false;
+	private boolean retry = true;
 
 	private String taskId;
 
@@ -69,7 +69,7 @@ public class DefaultRetryPolicy implements IRetryPolicy
 		return retryCount;
 	}
 
-	public boolean retry()
+	public void retry(Exception error) throws Exception
 	{
 
 		if (retry && retryCount < maxRetryCount)
@@ -97,14 +97,13 @@ public class DefaultRetryPolicy implements IRetryPolicy
 			}
 			retryCount++;
 			Logger.d(getClass().getSimpleName(), "StD retry # : " + retryCount + " for taskId : " + taskId);
-			return true;
 
 		}
 		else
 		{
 			retryCount++;
 			Logger.d(getClass().getSimpleName(), "Returning false on retry attempt No. " + retryCount);
-			return false;
+			throw error;
 		}
 	}
 	

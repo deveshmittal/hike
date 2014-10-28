@@ -5,7 +5,7 @@ public interface IRetryPolicy
 	
 	int getRetryCount();
 	
-	boolean retry();
+	void retry(Exception error) throws Exception;
 	
 	void reset();
 }
