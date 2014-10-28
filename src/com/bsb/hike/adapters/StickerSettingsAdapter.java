@@ -1,17 +1,21 @@
 package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.content.Context;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -21,11 +25,12 @@ import com.bsb.hike.DragSortListView.DragSortListView.DragSortListener;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
 
-public class StickerSettingsAdapter extends BaseAdapter implements DragSortListener, OnCheckedChangeListener
+public class StickerSettingsAdapter extends BaseAdapter implements DragSortListener, OnClickListener
 {
 	/**
-	 * Key is ListView position, value is ArrayList position
+	 * Key is ListView position, value is ArrayList position ( which is to be interpreted as stickerCategoryIndex - 1 )
 	 */
 	private SparseIntArray mListMapping = new SparseIntArray();
 
@@ -37,7 +42,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 
 	private boolean isListFlinging;
 
-	private boolean isDragged = false;
+	private Set<StickerCategory> stickerSet = new HashSet<StickerCategory>();  //Stores the categories which have been reordered
 
 	public StickerSettingsAdapter(Context context, List<StickerCategory> stickerCategories)
 	{
@@ -96,8 +101,9 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			viewHolder = new ViewHolder();
 			viewHolder.categoryName = (TextView) convertView.findViewById(R.id.category_name);
 			viewHolder.checkBox = (CheckBox) convertView.findViewById(R.id.category_checkbox);
+			viewHolder.categoryPreviewImage = (ImageView) convertView.findViewById(R.id.category_icon);
 			viewHolder.checkBox.setTag(category);
-			viewHolder.checkBox.setOnCheckedChangeListener(this);
+			viewHolder.checkBox.setOnClickListener(this);
 			convertView.setTag(viewHolder);
 			
 		}
@@ -109,6 +115,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		
 		viewHolder.categoryName.setText(category.getCategoryName());
 		viewHolder.checkBox.setChecked(category.isVisible());
+		viewHolder.categoryPreviewImage.setImageDrawable(StickerManager.getInstance().getCategoryPreviewAsset(mContext, category.getCategoryId()));
 		
 		return convertView;
 	}
@@ -138,7 +145,6 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			if (from != to)
 			{
 				int cursorFrom = mListMapping.get(from, from);
-
 				if (from > to)
 				{
 					for (int i = from; i > to; --i)
@@ -146,6 +152,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 						mListMapping.put(i, mListMapping.get(i - 1, i - 1));
 					}
 				}
+				
 				else
 				{
 					for (int i = from; i < to; ++i)
@@ -153,17 +160,47 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 						mListMapping.put(i, mListMapping.get(i + 1, i + 1));
 					}
 				}
+				
 				mListMapping.put(to, cursorFrom);
-				isDragged = true;
 				cleanMapping();
-				HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true);  //Setting the tip flag
+				if(!HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))  //Resetting the tip flag
+				{
+					HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag}
+
+				}
 				notifyDataSetChanged();
+				
+				if( from > to)
+				{
+					for(int i = from; i>= to; --i)
+					{
+						addToStickerSet(i);
+					}
+				}
+				else
+				{
+					for (int i = from; i<= to; ++i)
+					{
+						addToStickerSet(i);
+					}
+				}
 			}
 		}
 		else
 		{
 			return;
 		}
+			
+	}
+	/**
+	 * Adds to Categories to stickerSet and also changes it's categoryIndex
+	 * @param categoryPos
+	 */
+	public void addToStickerSet(int categoryPos)
+	{
+		StickerCategory category = getItem(categoryPos);
+		category.setCategoryIndex(categoryPos + 1);  // stickerCategoryIndex is categoryPos + 1
+		stickerSet.add(category);
 	}
 
 	@Override
@@ -201,34 +238,40 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		{
 			mListMapping.delete(toRemove.get(i));
 		}
+		
 	}
 
 	public void persistChanges()
 	{
-		// TODO : Add method to persist the dragged changes in listview
+		if(stickerSet.size() > 0)
+		{
+			StickerManager.getInstance().saveVisibilityAndIndex(stickerSet);
+		}
 	}
 
-	/**
-	 * 
-	 * @return whether the list was reordered or not
-	 */
-	public boolean getDragged()
-	{
-		return isDragged;
-	}
-	
 	private class ViewHolder
 	{
 		TextView categoryName;
 		
 		CheckBox checkBox;
+		
+		ImageView categoryPreviewImage;
+	}
+	
+	@Override
+	public void onClick(View v)
+	{
+		StickerCategory category = (StickerCategory) v.getTag();
+		boolean visibility = !category.isVisible(); 
+		CheckBox checkBox = (CheckBox) v;
+		category.setVisible(visibility);
+		checkBox.setChecked(visibility);
+		stickerSet.add(category);
 	}
 
-	@Override
-	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+	public Set<StickerCategory> getStickerSet()
 	{
-		StickerCategory category = (StickerCategory) buttonView.getTag();
-		category.setVisible(isChecked);
+		return stickerSet;
 	}
 
 }

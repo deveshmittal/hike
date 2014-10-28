@@ -11,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
@@ -79,12 +80,20 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		this.inflater = LayoutInflater.from(activity);
 		this.activity = activity;
-		stickerCategoryList = StickerManager.getInstance().getStickerCategoryList();
+		instantiateStickerList();
 		stickerObjMap = Collections.synchronizedMap(new HashMap<StickerCategory, StickerAdapter.StickerPageObjects>());
 		worker = new StickerLoader(activity.getApplicationContext());
 
 		registerListener();
 		Logger.d(getClass().getSimpleName(), "Sticker Adapter instantiated ....");
+	}
+
+	/**
+	 * Utility method for updating the sticker list
+	 */
+	public void instantiateStickerList()
+	{
+		this.stickerCategoryList = StickerManager.getInstance().getStickerCategoryList();
 	}
 
 	@Override
@@ -268,22 +277,24 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		int state = category.getState();
 		stickerPageList.remove(0);
 		/* We add UI elements based on the current state of the sticker category*/
-		if (state == StickerCategory.UPDATE)
+		switch (state) 
 		{
+		case StickerCategory.UPDATE :
 			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.UPDATE));
-		}
-		else if (state == StickerCategory.DOWNLOADING)
-		{
+			break;
+			
+		case StickerCategory.DOWNLOADING :
 			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
-		}
-		else if(state == StickerCategory.RETRY)
-		{
+			break;
+			
+		case StickerCategory.RETRY :
 			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.RETRY));
-		}
-		
-		else if(state == StickerCategory.DONE)
-		{
+			break;
+			
+		case StickerCategory.DONE :
 			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DONE));
+			break;
+			
 		}
 		
 		spa.notifyDataSetChanged();
@@ -398,5 +409,12 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	public StickerLoader getStickerLoader()
 	{
 		return worker;
+	}
+
+	@Override
+	public StateListDrawable getPalleteIconDrawable(int index)
+	{
+		StickerCategory category = stickerCategoryList.get(index);
+		return StickerManager.getStateListDrawableForStickerPalette(activity, category.getCategoryId());
 	}
 }

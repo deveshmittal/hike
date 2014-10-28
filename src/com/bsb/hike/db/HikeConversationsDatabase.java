@@ -5629,7 +5629,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return contentValues;
 	}
 	
-	public void updateVisibilityAndIndex(List<StickerCategory> stickerCategories)
+	public void updateVisibilityAndIndex(Set<StickerCategory> stickerCategories)
 	{
 		try
 		{
@@ -5639,7 +5639,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				ContentValues contentValues = new ContentValues();
 				contentValues.put(DBConstants.IS_VISIBLE, stickerCategory.isVisible());
 				contentValues.put(DBConstants.CATEGORY_INDEX, stickerCategory.getCategoryIndex());
-				
+
 				mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { stickerCategory.getCategoryId() });
 			}
 			mDb.setTransactionSuccessful();
