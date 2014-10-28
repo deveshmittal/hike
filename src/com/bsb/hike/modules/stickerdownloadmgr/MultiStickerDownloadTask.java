@@ -52,7 +52,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	{
 		Logger.d(getClass().getSimpleName(), "CategoryId: " + category.getCategoryId());
 
-		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, category.getCategoryId());
+		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(category.getCategoryId());
 		if (directoryPath == null)
 		{
 			return STResult.DOWNLOAD_FAILED;

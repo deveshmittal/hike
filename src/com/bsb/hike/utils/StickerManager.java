@@ -259,7 +259,7 @@ public class StickerManager
 		StickerCategory cat = stickerCategoriesMap.remove(removedCategoryId);
 		if(!cat.isCustom())
 		{
-			String categoryDirPath = getStickerDirectoryForCategoryId(context, removedCategoryId);
+			String categoryDirPath = getStickerDirectoryForCategoryId(removedCategoryId);
 			if (categoryDirPath != null)
 			{
 				File smallCatDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
@@ -328,7 +328,7 @@ public class StickerManager
 
 	public void removeSticker(String categoryId, String stickerId)
 	{
-		String categoryDirPath = getStickerDirectoryForCategoryId(context, categoryId);
+		String categoryDirPath = getStickerDirectoryForCategoryId(categoryId);
 		if (categoryDirPath == null)
 		{
 			return;
@@ -389,12 +389,11 @@ public class StickerManager
 
 	/**
 	 * Returns the directory for a sticker category.
-	 * 
-	 * @param context
 	 * @param catId
+	 * 
 	 * @return
 	 */
-	public String getStickerDirectoryForCategoryId(Context context, String catId)
+	public String getStickerDirectoryForCategoryId(String catId)
 	{
 		/*
 		 * We give a higher priority to external storage. If we find an exisiting directory in the external storage, we will return its path. Otherwise if there is an exisiting
@@ -441,7 +440,7 @@ public class StickerManager
 
 	public boolean checkIfStickerCategoryExists(String categoryId)
 	{
-		String path = getStickerDirectoryForCategoryId(context, categoryId);
+		String path = getStickerDirectoryForCategoryId(categoryId);
 		if (path == null)
 			return false;
 
@@ -566,7 +565,7 @@ public class StickerManager
 		}
 
 		/* Delete recent stickers */
-		String recentsDir = getStickerDirectoryForCategoryId(context, StickerManager.RECENT);
+		String recentsDir = getStickerDirectoryForCategoryId(StickerManager.RECENT);
 		File rDir = new File(recentsDir);
 		if (rDir.exists())
 			Utils.deleteFile(rDir);
@@ -838,7 +837,7 @@ public class StickerManager
 				JSONObject obj = harcodedStickers.optJSONObject(i);
 				String categoryId = obj.getString(CATEGORY_ID);
 				
-				String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId);
+				String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId);
 				if (directoryPath == null)
 				{
 					return false;
@@ -913,7 +912,7 @@ public class StickerManager
 				JSONObject obj = stickerCategories.optJSONObject(i);
 				String categoryId = obj.optString(StickerManager.CATEGORY_ID);
 
-				String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId);
+				String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId);
 				if (directoryPath == null)
 				{
 					return false;
@@ -1082,7 +1081,7 @@ public class StickerManager
 	 */
 	public BitmapDrawable getPalleteIcon(Context ctx, String categoryId, boolean isPressed)
 	{
-		String baseFilePath = getStickerDirectoryForCategoryId(ctx, categoryId);
+		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
 		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + (isPressed ? PALLATE_ICON_SELECTED : PALLATE_ICON) + PALETTE_ICON_TYPE;
 		
 		BitmapDrawable bitmapDrawable = generateBitmapDrawable(ctx.getResources(), baseFilePath);
@@ -1119,7 +1118,7 @@ public class StickerManager
 	 */
 	public Drawable getCategoryPreviewAsset(Context ctx, String categoryId)
 	{
-		String baseFilePath = getStickerDirectoryForCategoryId(ctx, categoryId);
+		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
 		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + PREVIEW_IMAGE + PREVIEW_ICON_TYPE;
 		Drawable drawable = Drawable.createFromPath(baseFilePath);
 		

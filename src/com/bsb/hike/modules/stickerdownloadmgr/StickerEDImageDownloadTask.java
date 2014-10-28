@@ -44,7 +44,7 @@ public class StickerEDImageDownloadTask extends BaseStickerDownloadTask
 	@Override
 	public STResult call() throws Exception
 	{
-		String dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, catId);
+		String dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(catId);
 		if (dirPath == null)
 		{
 			return STResult.DOWNLOAD_FAILED;
