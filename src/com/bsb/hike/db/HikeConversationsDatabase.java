@@ -5571,9 +5571,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				int isVisible = obj.optBoolean(StickerManager.IS_VISIBLE)
 						|| mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(downloadPreference, false) ? 1 : 0;
 				int isCustom = obj.optBoolean(StickerManager.IS_CUSTOM) ? 1 : 0;
-				int catIndex = obj.optInt(StickerManager.CATEGORY_INDEX);
+				int catIndex = i;
 				String metadata = obj.optString(DBConstants.METADATA);
-				int timeStamp = obj.optInt(StickerManager.TIMESTAMP);
+				int timeStamp = i;
 
 				ContentValues contentValues = currentCategoryData.get(categoryId);
 				if (contentValues == null)
