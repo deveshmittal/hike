@@ -341,6 +341,12 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		return true;
 	}
 
+	public void initStickers(StickerCategory category)
+	{
+		StickerPageObjects spo = stickerObjMap.get(category);
+		initStickers(spo, category);
+	}
+	
 	private void initStickers(StickerPageObjects spo, final StickerCategory category)
 	{
 		if (!isCurrentEmoticonTypeStickers())

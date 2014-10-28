@@ -1042,11 +1042,8 @@ public class StickerManager
 		if (DownloadType.UPDATE.equals(downloadType) && stickerPageAdapter != null)
 		{
 			StickerManager.getInstance().setStickerUpdateAvailable(category.getCategoryId(), false);
-			category.setState(StickerCategory.DONE);
-			List<StickerPageAdapterItem> l = stickerPageAdapter.getStickerPageAdapterItemList();
-			l.remove(0);
-			stickerPageAdapter.notifyDataSetChanged();
 			Intent i = new Intent(StickerManager.STICKERS_UPDATED);
+			i.putExtra(CATEGORY_ID, category.getCategoryId());
 			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 		}
 
