@@ -196,8 +196,9 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			else
 			{
 				Bundle b = intent.getBundleExtra(StickerManager.STICKER_DATA_BUNDLE);
-				final StickerCategory cat = (StickerCategory) b.getSerializable(StickerManager.STICKER_CATEGORY);
+				final String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 				final DownloadType type = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
+				final StickerCategory cat = StickerManager.getInstance().getCategoryForId(categoryId);
 				final StickerPageObjects spo = stickerObjMap.get(cat);
 				final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
 				// if this category is already loaded then only proceed else ignore
