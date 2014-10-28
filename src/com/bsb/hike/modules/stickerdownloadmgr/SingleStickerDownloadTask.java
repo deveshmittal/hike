@@ -58,7 +58,7 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 		
 		if (dirPath == null)
 		{
-			setException(new Exception("Sticker directory does not exist"));
+			setException(new StickerException(StickerException.DIRECTORY_NOT_EXISTS));
 			return STResult.DOWNLOAD_FAILED;
 		}
 		
@@ -73,6 +73,7 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 			{
 				if (!largeDir.mkdirs())
 				{
+					setException(new StickerException(StickerException.DIRECTORY_NOT_CREATED));
 					return STResult.DOWNLOAD_FAILED;
 				}
 			}
@@ -81,6 +82,7 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 			{
 				if (!smallDir.mkdirs())
 				{
+					setException(new StickerException(StickerException.DIRECTORY_NOT_CREATED));
 					return STResult.DOWNLOAD_FAILED;
 				}
 			}
@@ -95,6 +97,7 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 			JSONObject response = (JSONObject) download(null, StickerRequestType.SINGLE);
 			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
 			{
+				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
 				return STResult.DOWNLOAD_FAILED;
 			}
 
@@ -119,6 +122,7 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 		}
 		catch (Exception e)
 		{
+			setException(new StickerException(e));
 			return STResult.DOWNLOAD_FAILED;
 		}
 		finally
@@ -133,6 +137,7 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 			catch (IOException e)
 			{
 				Logger.e(getClass().getSimpleName(), "Error while closing file", e);
+				setException(new StickerException(StickerException.ERROR_CLOSING_FILE));
 				return STResult.DOWNLOAD_FAILED;
 			}
 		}

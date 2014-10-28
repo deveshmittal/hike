@@ -43,6 +43,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 		String dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(catId);
 		if (dirPath == null)
 		{
+			setException(new StickerException(StickerException.DIRECTORY_NOT_EXISTS));
 			return STResult.DOWNLOAD_FAILED;
 		}
 		
@@ -56,6 +57,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			{
 				if (!otherDir.mkdirs())
 				{
+					setException(new StickerException(StickerException.DIRECTORY_NOT_CREATED));
 					return STResult.DOWNLOAD_FAILED;
 				}
 			}
@@ -70,6 +72,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			JSONObject response = (JSONObject) download(null, StickerRequestType.PREVIEW);
 			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)) || !catId.equals(response.getString(HikeConstants.CATEGORY_ID)))
 			{
+				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
 				return STResult.DOWNLOAD_FAILED;
 			}
 
@@ -82,6 +85,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 		}
 		catch(Exception e)
 		{
+			setException(new StickerException(e));
 			return STResult.DOWNLOAD_FAILED;
 		}
 		finally
@@ -96,6 +100,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			catch (IOException e)
 			{
 				Logger.e(getClass().getSimpleName(), "Error while closing file", e);
+				setException(new StickerException(StickerException.ERROR_CLOSING_FILE));
 				return STResult.DOWNLOAD_FAILED;
 			}
 		}

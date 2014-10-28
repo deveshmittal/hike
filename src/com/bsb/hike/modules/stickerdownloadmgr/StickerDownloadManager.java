@@ -63,14 +63,14 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 
-	public void DownloadMultipleStickers(StickerCategory cat, StickerConstants.DownloadType downloadType, StickerPageAdapter st, IStickerResultListener callback)
+	public void DownloadMultipleStickers(StickerCategory cat, StickerConstants.DownloadType downloadType, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.MULTIPLE, null, cat.getCategoryId());
 		if (queue.isTaskAlreadyExist(taskId))
 		{
 			return;
 		}
-		BaseStickerDownloadTask stickerCategoryTask = new MultiStickerDownloadTask(handler, context, taskId, cat, downloadType, st, callback);
+		BaseStickerDownloadTask stickerCategoryTask = new MultiStickerDownloadTask(handler, context, taskId, cat, downloadType, callback);
 		Request request = new Request(stickerCategoryTask);
 		queue.addTask(taskId, request);
 	}
