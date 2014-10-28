@@ -42,9 +42,10 @@ import android.util.Pair;
 import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
@@ -57,7 +58,6 @@ import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
-import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
 
@@ -249,8 +249,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_WALKIE_TALKIE_TIP = "shownWalkieTalkieTip";
 
-	public static final String SHOWN_STATUS_TIP = "shownStatusTip";
-
 	public static final String SHOWN_LAST_SEEN_TIP = "shownLastSeenTip";
 
 	public static final String PROTIP_WAIT_TIME = "protipWaitTime";
@@ -266,8 +264,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String SHOWN_NATIVE_INFO_POPUP = "shownNativeInfoPopup";
 
 	public static final String INVITED_FACEBOOK_FRIENDS_IDS = "invitedFacebookFriendsIds";
-
-	public static final String NOTIFIED_NO_STATUS = "notifiedNoStatus";
 
 	public static final String SERVER_RECOMMENDED_CONTACTS = "serverRecommendedContacts";
 
@@ -347,7 +343,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_WELCOME_HIKE_TIP = "shownWelcomeHikeTip";
 
-	public static final String SHOW_START_NEW_CHAT_TIP = "showStartNewChatTip";
+	public static final String SHOW_STEALTH_INFO_TIP = "showStealthInfoTip";
 
 	public static final String SHOW_STEALTH_UNREAD_TIP = "showStelathUnreadTip";
 
@@ -383,6 +379,14 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ATOMIC_POP_UP_STATUS = "stts";
 
+	public static final String ATOMIC_POP_UP_HTTP = "http";
+	
+	public static final String ATOMIC_POP_UP_APP_GENERIC = "app";
+	
+	public static final String ATOMIC_POP_UP_APP_GENERIC_WHAT = "appWhat";
+	
+	public static final String ATOMIC_POP_UP_HTTP_URL = "httpUrl";
+	
 	public static final String ATOMIC_POP_UP_NOTIF_MESSAGE = "apuNotifMessage";
 
 	public static final String ATOMIC_POP_UP_NOTIF_SCREEN = "apuNotifScreen";
@@ -394,6 +398,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String ATOMIC_POP_UP_HEADER_CHAT = "apuHeaderChat";
 
 	public static final String ATOMIC_POP_UP_MESSAGE_CHAT = "apuMessageChat";
+
+	public static final String SHOWN_DIWALI_POPUP = "shownDiwaliPopup";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -430,6 +436,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static HashMap<String, String> hikeBotNamesMap;
 
 	public static volatile boolean networkError;
+
+	public static volatile boolean syncingContacts = false;
 
 	public Handler appStateHandler;
 
@@ -665,7 +673,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		// succeeded by the
 		// onUpgrade() calls being triggered in the respective databases.
 		HikeConversationsDatabase.init(this);
-		HikeUserDatabase.init(this);
 
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
@@ -705,10 +712,13 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			Logger.d(getClass().getSimpleName(), "Init for apptracker sdk finished" + !preferenceManager.contains(HikeConstants.SSL_PREF));
 		}
 
-		if (!preferenceManager.contains(HikeConstants.SSL_PREF))
+		boolean isSAUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE);
+
+		// Setting SSL_PREF as false for existing SA users with SSL_PREF = true
+		if (!preferenceManager.contains(HikeConstants.SSL_PREF) || (isSAUser && settings.getBoolean(HikeConstants.SSL_PREF, false)))
 		{
 			Editor editor = preferenceManager.edit();
-			editor.putBoolean(HikeConstants.SSL_PREF, !isIndianUser);
+			editor.putBoolean(HikeConstants.SSL_PREF, !(isIndianUser || isSAUser));
 			editor.commit();
 		}
 
@@ -767,24 +777,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		}
 
 		/*
-		 * We will increase the unseen status count by one if the user has not posted any updates and if we have never notified the user of this before.
-		 */
-		if (!settings.contains(NOTIFIED_NO_STATUS))
-		{
-			String lastStatus = settings.getString(HikeMessengerApp.LAST_STATUS, "");
-
-			Editor editor = settings.edit();
-			if (TextUtils.isEmpty(lastStatus))
-			{
-				int count = settings.getInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
-				count++;
-				editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, count);
-			}
-			editor.putBoolean(NOTIFIED_NO_STATUS, true);
-			editor.commit();
-		}
-
-		/*
 		 * Replacing GB keys' strings.
 		 */
 		if (!settings.contains(GREENBLUE_DETAILS_SENT))
@@ -801,7 +793,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_SUPPORT, "hike support");
 		initHikeLruCache(getApplicationContext());
-
+		initContactManager();
 		/*
 		 * Fetching all stealth contacts on app creation so that the conversation cannot be opened through the shortcut or share screen.
 		 */
@@ -835,6 +827,19 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static HikeLruCache getLruCache()
 	{
 		return cache;
+	}
+
+	private static ContactManager conMgr;
+
+	private void initContactManager()
+	{
+		conMgr = ContactManager.getInstance();
+		conMgr.init(getApplicationContext());
+	}
+
+	public static ContactManager getContactManager()
+	{
+		return conMgr;
 	}
 
 	private void makeNoMediaFiles()

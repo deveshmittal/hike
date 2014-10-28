@@ -5,7 +5,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 public class DBConstants
 {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 28;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 30;
 
 	public static final int USERS_DATABASE_VERSION = 15;
 
@@ -197,4 +197,8 @@ public class DBConstants
 	public static final String IS_STEALTH = "isStealth";
 	
 	public static final String MESSAGE_HASH_INDEX = "messageHashIndex";
+
+	public static final String HIKE_FILE_TYPE = "hikeFileType";
+
+	public static final String IS_SENT = "isSent";
 }

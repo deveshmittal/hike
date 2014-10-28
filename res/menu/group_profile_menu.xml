@@ -2,15 +2,20 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
+        android:id="@+id/add_people"
+        android:icon="@drawable/ic_invitewhite"
+        android:showAsAction="always"
+        android:title="@string/add_people"/>
+    <item
         android:id="@+id/overflow_menu"
         android:icon="@drawable/ic_overflow"
         android:showAsAction="always"
         android:title="@string/other">
         <menu>
             <item
-                android:id="@+id/edit_group_name"
+                android:id="@+id/edit_group_picture"
                 android:showAsAction="never"
-                android:title="@string/edit_group_name"/>
+                android:title="@string/edit_picture"/>
             <item
                 android:id="@+id/leave_group"
                 android:showAsAction="never"

@@ -1018,6 +1018,7 @@ public class ClientState
 				case 1:
 					if (callback != null)
 					{
+						Logger.d(TAG, "Calling call back Message arrived for message : " + send.getMessage().toString());
 						callback.messageArrived(send);
 					}
 					break;

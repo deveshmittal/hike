@@ -45,8 +45,13 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	private IconLoader iconloader;
 
 	private boolean fetchGroups;
+	
+
+	private boolean fetchRecents;
 
 	private String existingGroupId;
+
+	private String sendingMsisdn;
 
 	private int statusForEmptyContactInfo;
 
@@ -55,8 +60,9 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	private boolean isCreatingOrEditingGroup;
 
 	private boolean lastSeenPref;
+	
 
-	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, String existingGroupId, FriendsListFetchedCallback friendsListFetchedCallback)
+	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, boolean fetchRecents, String existingGroupId, String sendingMsisdn, FriendsListFetchedCallback friendsListFetchedCallback)
 	{
 		super(context, listView, friendsListFetchedCallback, ContactInfo.lastSeenTimeComparatorWithoutFav);
 		selectedPeople = new HashMap<String, ContactInfo>();
@@ -67,10 +73,17 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		iconloader.setImageFadeIn(false);
 
 		this.existingGroupId = existingGroupId;
+		this.sendingMsisdn = sendingMsisdn;
 		this.fetchGroups = fetchGroups;
+		this.fetchRecents = fetchRecents;
 		groupsList = new ArrayList<ContactInfo>(0);
 		groupsStealthList = new ArrayList<ContactInfo>(0);
 		filteredGroupsList = new ArrayList<ContactInfo>(0);
+
+		recentContactsList = new ArrayList<ContactInfo>(0);
+		recentStealthContactsList = new ArrayList<ContactInfo>(0);
+		filteredRecentsList = new ArrayList<ContactInfo>(0);
+
 		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		/*
 		 * We should show sms contacts section in new compose
@@ -87,9 +100,9 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	public void executeFetchTask()
 	{
 		setLoadingView();
-		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, friendsStealthList, hikeStealthContactsList,
-				smsStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, filteredGroupsList,
-				existingParticipants, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true, false);
+		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, friendsStealthList, hikeStealthContactsList,
+				smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, filteredGroupsList, filteredRecentsList,
+				existingParticipants, sendingMsisdn, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true, false, fetchRecents);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
@@ -201,7 +214,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			else
 			{
 				holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
-				holder.status.setText(contactInfo.getMsisdn());
+				holder.status.setText(Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo.getPhoneNum():contactInfo.getMsisdn());
 				holder.statusMood.setVisibility(View.GONE);
 				holder.onlineIndicator.setVisibility(View.GONE);
 				if (viewType != ViewType.FRIEND && viewType != ViewType.FRIEND_REQUEST)
@@ -257,7 +270,6 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 				holder.checkbox.setVisibility(View.VISIBLE);
 				if (selectedPeople.containsKey(contactInfo.getMsisdn()))
 				{
-
 					holder.checkbox.setChecked(true);
 				}
 				else
@@ -378,6 +390,15 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		}
 
 		// hack for header, as we are using pinnedSectionListView
+		if(fetchRecents && !recentContactsList.isEmpty())
+		{
+			ContactInfo recentsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredRecentsList.size()), context.getString(R.string.recent_chats), RECENT_PHONE_NUM);
+			if (filteredRecentsList.size() > 0)
+			{
+				completeList.add(recentsSection);
+				completeList.addAll(filteredRecentsList);
+			}
+		}
 
 		if (fetchGroups && !groupsList.isEmpty())
 		{
@@ -529,7 +550,11 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	public int getItemViewType(int position)
 	{
 		ContactInfo info = getItem(position);
-		if (info.isUnknownContact() && info.getFavoriteType() == null)
+		if(Utils.isGroupConversation(info.getMsisdn()))
+		{
+			return super.getItemViewType(position);
+		}
+		else if (info.isUnknownContact() && info.getFavoriteType() == null)
 		{
 			return ViewType.NEW_CONTACT.ordinal();
 		}
@@ -543,7 +568,6 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		iconloader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{
@@ -571,4 +595,38 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			}
 		}
 	}
+	
+	public IconLoader getIconLoader()
+	{
+		return iconloader;
+	}
+	
+	public void selectAllContacts(boolean select)
+	{
+		if(select)
+		{
+			selectAllFromList(friendsList,recentContactsList,hikeContactsList,groupsList);
+			
+		}
+		else
+		{
+			selectedPeople.clear();
+		}
+		notifyDataSetChanged();
+	}
+	
+	private void selectAllFromList(List<ContactInfo> ...lists){
+		int total = lists.length;
+		for(int i=0;i<total;i++){
+			List<ContactInfo> list = lists[i];
+			if(list!=null){
+				for(ContactInfo contactInfo: list){
+					if(contactInfo.isOnhike()){
+						selectedPeople.put(contactInfo.getMsisdn(), contactInfo);
+					}
+				}
+			}
+		}
+	}
+	
 }

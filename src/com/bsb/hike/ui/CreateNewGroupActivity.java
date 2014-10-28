@@ -28,8 +28,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -314,7 +314,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 
 			tempBitmap.recycle();
 
-			HikeUserDatabase.getInstance().setIcon(groupId, bytes, false);
+			ContactManager.getInstance().setIcon(groupId, bytes, false);
 
 			break;
 		}
