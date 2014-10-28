@@ -68,19 +68,8 @@ public class StickerSizeDownloadTask extends BaseStickerDownloadTask
 				return STResult.DOWNLOAD_FAILED;
 			}
 		}
-		catch (JSONException e)
+		catch (Exception e)
 		{
-			Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
-			return STResult.DOWNLOAD_FAILED;
-		}
-		catch (MalformedURLException e)
-		{
-			Logger.e(getClass().getSimpleName(), "Invalid URL", e);
-			return STResult.DOWNLOAD_FAILED;
-		}
-		catch (IOException e)
-		{
-			Logger.e(getClass().getSimpleName(), "Error while downloding file", e);
 			return STResult.DOWNLOAD_FAILED;
 		}
 	}
