@@ -87,7 +87,7 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 	
-	public void DownloadEnableDisableImage(Context context, StickerCategory cat, DownloadType downloadType, StickerPageAdapter st, IStickerResultListener callback)
+	public void DownloadEnableDisableImage(Context context, StickerCategory cat, StickerPageAdapter st, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.ENABLE_DISABLE, null, cat.getCategoryId());
 		if (queue.isTaskAlreadyExist(taskId))
