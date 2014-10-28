@@ -69,7 +69,7 @@
             "downloadPref": "humanoidDownloadShown",
             "isVisible": true,
             "isCustom": false,
-            "totalStickers":82,
+            "totalStickers":50,
             "pallate_icon": "ic_humanoid",
             "pallate_icon_selected": "ic_humanoid_selected"
         },
@@ -78,6 +78,7 @@
             "downloadPref": "expDownloadShown",
             "isVisible": true,
             "isCustom": false,
+            "totalStickers":60,
             "pallate_icon": "ic_expressions",
             "pallate_icon_selected": "ic_expressions_selected"
         },
