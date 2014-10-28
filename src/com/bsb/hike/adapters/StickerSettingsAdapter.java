@@ -9,6 +9,7 @@ import android.content.Context;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
@@ -23,9 +24,10 @@ import com.bsb.hike.DragSortListView.DragSortListView;
 import com.bsb.hike.DragSortListView.DragSortListView.DragSortListener;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 
-public class StickerSettingsAdapter extends BaseAdapter implements DragSortListener, OnCheckedChangeListener
+public class StickerSettingsAdapter extends BaseAdapter implements DragSortListener, OnClickListener
 {
 	/**
 	 * Key is ListView position, value is ArrayList position ( which is to be interpreted as stickerCategoryIndex - 1 )
@@ -101,7 +103,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			viewHolder.checkBox = (CheckBox) convertView.findViewById(R.id.category_checkbox);
 			viewHolder.categoryPreviewImage = (ImageView) convertView.findViewById(R.id.category_icon);
 			viewHolder.checkBox.setTag(category);
-			viewHolder.checkBox.setOnCheckedChangeListener(this);
+			viewHolder.checkBox.setOnClickListener(this);
 			convertView.setTag(viewHolder);
 			
 		}
@@ -255,12 +257,15 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		
 		ImageView categoryPreviewImage;
 	}
-
+	
 	@Override
-	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+	public void onClick(View v)
 	{
-		StickerCategory category = (StickerCategory) buttonView.getTag();
-		category.setVisible(isChecked);
+		StickerCategory category = (StickerCategory) v.getTag();
+		boolean visibility = !category.isVisible(); 
+		CheckBox checkBox = (CheckBox) v;
+		category.setVisible(visibility);
+		checkBox.setChecked(visibility);
 		stickerSet.add(category);
 	}
 
