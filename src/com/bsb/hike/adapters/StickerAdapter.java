@@ -294,6 +294,17 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		int state = category.getState();
 		stickerPageList.remove(0);
 		/* We add UI elements based on the current state of the sticker category*/
+		addStickerPageAdapterItem(state, stickerPageList);
+		spa.notifyDataSetChanged();
+	}
+	
+	/**
+	 * Adds StickerPageAdapter Items to the list passed based on the state of the category
+	 * @param state
+	 * @param stickerPageList
+	 */
+	private void addStickerPageAdapterItem(int state, List<StickerPageAdapterItem> stickerPageList)
+	{
 		switch (state) 
 		{
 		case StickerCategory.UPDATE :
@@ -311,10 +322,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		case StickerCategory.DONE :
 			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DONE));
 			break;
-			
 		}
-		
-		spa.notifyDataSetChanged();
 	}
 
 	/**
@@ -346,21 +354,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		
 		int state = category.getState(); 
 		/* We add UI elements based on the current state of the sticker category*/
-		switch (state) 
-		{
-		case StickerCategory.UPDATE : 
-			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.UPDATE));
-			break;
-		case StickerCategory.DOWNLOADING :
-			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
-			break;
-		case StickerCategory.RETRY :
-			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.RETRY));
-			break;
-		case StickerCategory.DONE : 
-			stickerPageList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DONE));
-			break;
-		}
+		addStickerPageAdapterItem(state, stickerPageList);
 		/**
 		 * Adding the placeholders in 0 sticker case in pallete. The placeholders will be added when state is either downloading or retry.
 		 */
