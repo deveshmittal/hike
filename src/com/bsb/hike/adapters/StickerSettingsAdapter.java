@@ -102,6 +102,8 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			viewHolder.categoryName = (TextView) convertView.findViewById(R.id.category_name);
 			viewHolder.checkBox = (CheckBox) convertView.findViewById(R.id.category_checkbox);
 			viewHolder.categoryPreviewImage = (ImageView) convertView.findViewById(R.id.category_icon);
+			viewHolder.categorySize = (TextView) convertView.findViewById(R.id.category_size);
+			viewHolder.updateAvailable = (TextView) convertView.findViewById(R.id.update_available);
 			viewHolder.checkBox.setTag(category);
 			viewHolder.checkBox.setOnClickListener(this);
 			convertView.setTag(viewHolder);
@@ -113,6 +115,24 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
 		
+		if(category.getTotalStickers() > 0)
+		{
+			viewHolder.categorySize.setVisibility(View.VISIBLE);
+			viewHolder.categorySize.setText(mContext.getString(R.string.n_stickers, category.getTotalStickers()));
+		}
+		else
+		{
+			viewHolder.categorySize.setVisibility(View.GONE);
+		}
+		
+		if(category.getState() == StickerCategory.UPDATE)
+		{
+			viewHolder.updateAvailable.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			viewHolder.updateAvailable.setVisibility(View.GONE);
+		}
 		viewHolder.categoryName.setText(category.getCategoryName());
 		viewHolder.checkBox.setChecked(category.isVisible());
 		viewHolder.categoryPreviewImage.setImageDrawable(StickerManager.getInstance().getCategoryPreviewAsset(mContext, category.getCategoryId()));
@@ -256,6 +276,10 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		CheckBox checkBox;
 		
 		ImageView categoryPreviewImage;
+
+		TextView updateAvailable;
+		
+		TextView categorySize;
 	}
 	
 	@Override

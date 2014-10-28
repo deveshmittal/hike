@@ -268,6 +268,16 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			empty = LayoutInflater.from(activity).inflate(R.layout.sticker_pack_empty_view, emptyView);
 			TextView downloadBtn = (TextView) empty.findViewById(R.id.download_btn);
 			TextView categoryName = (TextView) empty.findViewById(R.id.category_name);
+			TextView category_details = (TextView) empty.findViewById(R.id.category_details);
+			if(category.getTotalStickers() > 0)
+			{
+				category_details.setVisibility(View.VISIBLE);
+				category_details.setText(activity.getString(R.string.n_stickers, category.getTotalStickers()));
+			}
+			else
+			{
+				category_details.setVisibility(View.GONE);
+			}
 			categoryName.setText(category.getCategoryName());
 			downloadBtn.setOnClickListener(new View.OnClickListener()
 			{
