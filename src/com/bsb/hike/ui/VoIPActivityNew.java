@@ -33,7 +33,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeUserDatabase;
+//import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.service.VoIPServiceNew;
 import com.google.android.gms.internal.af;
 
@@ -141,7 +141,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		setContentView(R.layout.call_accept_decline);
 		vActivity = this;
 		callNo = (TextView)this.findViewById(R.id.CallerId);
-		callNo.setText(HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(callerId).getNameOrMsisdn());
+//		callNo.setText(HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(callerId).getNameOrMsisdn());
+		callNo.setText("Incoming Number Goes Here!");
 		acceptCall = (Button)this.findViewById(R.id.acceptButton);
 		acceptCall.setBackgroundColor(Color.GREEN);
 		acceptCall.setTextColor(Color.WHITE);
@@ -241,8 +242,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		});
 		
 		inCallCallNo = (TextView)this.findViewById(R.id.PhoneNumberView1);
-		inCallCallNo.setText(HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(storedId).getNameOrMsisdn());
-		
+//		inCallCallNo.setText(HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(storedId).getNameOrMsisdn());
+		inCallCallNo.setText("Phone Number goes Here!");
 		inCallTimer = (TextView)this.findViewById(R.id.timerView1);
 		if (VoIPServiceNew.getVoIPSerivceInstance().client.connectionState != "CONNECTED")
 			inCallTimer.setText(VoIPServiceNew.getVoIPSerivceInstance().client.connectionState);
