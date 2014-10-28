@@ -100,6 +100,7 @@ import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
@@ -802,7 +803,32 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				 */
 				if (!downloadingSticker)
 				{
-					StickerDownloadManager.getInstance(context).DownloadSingleSticker(context, categoryId, stickerId, null);
+					StickerDownloadManager.getInstance(context).DownloadSingleSticker(context, categoryId, stickerId, new IStickerResultListener()
+					{
+						
+						@Override
+						public void onSuccess(Object result)
+						{
+							// TODO Auto-generated method stub
+							HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_DOWNLOADED, null);
+							
+						}
+						
+						@Override
+						public void onProgressUpdated(double percentage)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+						
+						@Override
+						public void onFailure(Object result, Throwable exception)
+						{
+							// TODO Auto-generated method stub
+							String largeStickerPath = (String) result;
+							(new File(largeStickerPath)).delete();
+						}
+					});
 				}
 			}
 			setTimeNStatus(position, stickerHolder, true, stickerHolder.placeHolder);

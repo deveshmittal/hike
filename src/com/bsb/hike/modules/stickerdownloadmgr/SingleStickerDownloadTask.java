@@ -143,15 +143,7 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 	protected void postExecute(STResult result)
 	{
 		// TODO Auto-generated method stub
-		if (result != STResult.SUCCESS)
-		{
-			(new File(largeStickerPath)).delete();
-			
-		}
-		else
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_DOWNLOADED, null);
-		}
+		setResult(largeStickerPath);
 		super.postExecute(result);
 		
 	}
