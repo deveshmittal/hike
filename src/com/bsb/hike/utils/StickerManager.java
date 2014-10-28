@@ -133,6 +133,8 @@ public class StickerManager
 
 	public static final String TIMESTAMP = "timestamp";
 
+	public static final String TOTAL_STICKERS = "totalStickers";
+	
 	public static final String DOWNLOAD_PREF = "downloadPref";
 
 	public static final String RECENT = "recent";

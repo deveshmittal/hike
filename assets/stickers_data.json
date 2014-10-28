@@ -74,6 +74,7 @@
             "downloadPref": "humanoidDownloadShown",
             "isVisible": true,
             "isCustom": false,
+            "totalStickers":82,
             "pallate_icon": "ic_humanoid",
             "pallate_icon_selected": "ic_humanoid_selected",
             "metadata": []

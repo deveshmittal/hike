@@ -5579,6 +5579,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				if (contentValues == null)
 				{
 					contentValues = new ContentValues();
+					if(obj.has(StickerManager.TOTAL_STICKERS))
+					{
+						contentValues.put(DBConstants.TOTAL_NUMBER, obj.optString(StickerManager.TOTAL_STICKERS));
+					}
 				}
 				contentValues.put(DBConstants.CATEGORY_ID, categoryId);
 				contentValues.put(DBConstants.CATEGORY_NAME, categoryName);
