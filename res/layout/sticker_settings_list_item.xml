@@ -88,7 +88,7 @@
             android:textSize="12sp" />
 
         <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/category_price"
+            android:id="@+id/update_available"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="UPDATE AVAILABLE"

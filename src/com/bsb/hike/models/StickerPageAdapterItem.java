@@ -4,7 +4,7 @@ public class StickerPageAdapterItem
 {
 	private int id;
 
-	private Sticker item;
+	private Object item;
 
 	public static final int STICKER = 1;
 
@@ -18,7 +18,7 @@ public class StickerPageAdapterItem
 
 	public static final int PLACE_HOLDER = 6;
 
-	public StickerPageAdapterItem(int id, Sticker item)
+	public StickerPageAdapterItem(int id, Object item)
 	{
 		this.id = id;
 		this.item = item;
@@ -30,6 +30,24 @@ public class StickerPageAdapterItem
 	}
 
 	public Sticker getSticker()
+	{
+		if(getItem() == null || id != STICKER)
+		{
+			return null;
+		}
+		return (Sticker) item;
+	}
+	
+	public int getCategoryMoreStickerCount()
+	{
+		if(getItem() == null || id != UPDATE)
+		{
+			return 0;
+		}
+		return (Integer) item;
+	}
+	
+	public Object getItem()
 	{
 		return item;
 	}
