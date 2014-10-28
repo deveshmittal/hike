@@ -2,6 +2,8 @@ package com.bsb.hike.modules.stickerdownloadmgr;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.Callable;
@@ -13,6 +15,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.HTTP;
@@ -102,46 +105,79 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 		client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, HikeConstants.SOCKET_TIMEOUT);
 		return client;
 	}
-	
-	protected Object download(JSONObject requestEntity, StickerRequestType requestType) throws IOException, JSONException
+
+	protected Object download(JSONObject requestEntity, StickerRequestType requestType) throws Exception
 	{
-		
-		
-		if(StickerRequestType.MULTIPLE == requestType)
+		while(true)
 		{
-			GzipByteArrayEntity entity;
-			entity = new GzipByteArrayEntity(requestEntity.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
-			HttpPost httpPost = new HttpPost(downloadUrl);
-			AccountUtils.addToken(httpPost);
-			httpPost.setEntity(entity);
-			HttpClient client = AccountUtils.getClient(httpPost);
-			
-			HttpResponse response;
-			response = client.execute(httpPost);
-			Logger.d("HTTP", "finished request");
-			if (response.getStatusLine().getStatusCode() != 200)
+			try
 			{
-				Logger.w("HTTP", "Request Failed: " + response.getStatusLine());
-				return null;
+				if (StickerRequestType.MULTIPLE == requestType)
+				{
+					GzipByteArrayEntity entity;
+					entity = new GzipByteArrayEntity(requestEntity.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
+					HttpPost httpPost = new HttpPost(downloadUrl);
+					AccountUtils.addToken(httpPost);
+					httpPost.setEntity(entity);
+					HttpClient client = AccountUtils.getClient(httpPost);
+
+					HttpResponse response;
+					response = client.execute(httpPost);
+					Logger.d("HTTP", "finished request");
+					if (response.getStatusLine().getStatusCode() != 200)
+					{
+						Logger.w("HTTP", "Request Failed: " + response.getStatusLine());
+						return null;
+					}
+
+					HttpEntity responseEntity = response.getEntity();
+					return AccountUtils.getResponse(responseEntity.getContent());
+				}
+				else if (StickerRequestType.SIZE == requestType)
+				{
+					DefaultHttpClient client = (DefaultHttpClient) initConnHead();
+					HttpHead head = new HttpHead(mUrl.toString());
+					head.addHeader("Cookie", "user=" + AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
+					HttpResponse resp = client.execute(head);
+					return resp;
+				}
+				else
+				{
+
+					URLConnection connection = initConn();
+					JSONObject response = AccountUtils.getResponse(connection.getInputStream());
+					return response;
+				}
 			}
-
-			HttpEntity responseEntity = response.getEntity();
-			return AccountUtils.getResponse(responseEntity.getContent());
+			catch (SocketTimeoutException e)
+			{
+				attemptRetryOnException(e);
+			}
+			catch (ConnectTimeoutException e)
+			{
+				attemptRetryOnException(e);
+			}
+			catch (MalformedURLException e)
+			{
+				throw new RuntimeException("Bad URL " + downloadUrl, e);
+			}
+			catch (IOException e)
+			{
+				attemptRetryOnException(e);
+			}
 		}
-		else if(StickerRequestType.SIZE == requestType)
-		{
-			DefaultHttpClient client = (DefaultHttpClient) initConnHead();
-			HttpHead head = new HttpHead(mUrl.toString());
-			head.addHeader("Cookie", "user=" + AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
-			HttpResponse resp = client.execute(head);
-			return resp;
-		}
-		else
-		{
 
-			URLConnection connection = initConn();
-			JSONObject response = AccountUtils.getResponse(connection.getInputStream());
-			return response;
+	}
+	
+	void attemptRetryOnException(Exception e) throws Exception
+	{
+		try
+		{
+			retryPolicy.retry(e);
+		}
+		catch(Exception ex)
+		{
+			throw ex;
 		}
 		
 	}
