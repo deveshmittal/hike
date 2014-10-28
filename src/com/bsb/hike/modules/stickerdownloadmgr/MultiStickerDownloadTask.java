@@ -37,12 +37,11 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	private StickerPageAdapter stickerPageAdapter;
 	private int stickerDownloadSize;
 
-	protected MultiStickerDownloadTask(Handler handler, Context ctx, String taskId, StickerCategory category, StickerConstants.DownloadType downloadType, StickerPageAdapter stickerPageAdapter, IStickerResultListener callback)
+	protected MultiStickerDownloadTask(Handler handler, Context ctx, String taskId, StickerCategory category, StickerConstants.DownloadType downloadType, IStickerResultListener callback)
 	{
 		super(handler, ctx, taskId, callback);
 		this.category  = category;
 		this.downloadType = downloadType;
-		this.stickerPageAdapter = stickerPageAdapter;
 		this.handler = handler;
 		this.context = ctx;
 	}
