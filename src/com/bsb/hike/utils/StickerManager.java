@@ -1059,6 +1059,7 @@ public class StickerManager
 		}
 		else if (DownloadType.NEW_CATEGORY.equals(downloadType))
 		{
+			category.setState(StickerCategory.DONE);
 			Intent i = new Intent(StickerManager.STICKERS_DOWNLOADED);
 			i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
 			LocalBroadcastManager.getInstance(context).sendBroadcast(i);

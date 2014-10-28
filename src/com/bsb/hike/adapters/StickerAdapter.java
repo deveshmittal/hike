@@ -209,7 +209,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 							@Override
 							public void run()
 							{
-								cat.setState(StickerCategory.DONE);
 								initStickers(spo, cat);
 							}
 						});
