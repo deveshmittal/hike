@@ -137,6 +137,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		IntentFilter filter = new IntentFilter(StickerManager.STICKERS_DOWNLOADED);
 		filter.addAction(StickerManager.STICKERS_FAILED);
 		filter.addAction(StickerManager.RECENTS_UPDATED);
+		filter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
 		LocalBroadcastManager.getInstance(activity).registerReceiver(mMessageReceiver, filter);
 	}
 
@@ -174,6 +175,24 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 					}
 				}
 			}
+			/**
+			 * More stickers downloaded case
+			 */
+			else if(intent.getAction().equals(StickerManager.MORE_STICKERS_DOWNLOADED))
+			{
+				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
+				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+				activity.runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						category.setState(StickerCategory.DONE);
+						initStickers(category);
+					}
+				});
+			}
+			
 			else
 			{
 				Bundle b = intent.getBundleExtra(StickerManager.STICKER_DATA_BUNDLE);

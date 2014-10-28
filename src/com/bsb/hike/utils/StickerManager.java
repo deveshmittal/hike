@@ -68,6 +68,8 @@ public class StickerManager
 	public static final String SHOWN_STICKERS_TUTORIAL = "shownStickersTutorial";
 	
 	public static final String STICKERS_DOWNLOADED = "st_downloaded";
+	
+	public static final String MORE_STICKERS_DOWNLOADED = "st_more_downloaded";
 
 	public static final String STICKERS_FAILED = "st_failed";
 
@@ -1049,9 +1051,11 @@ public class StickerManager
 
 		else if (DownloadType.MORE_STICKERS.equals(downloadType))
 		{
-			category.setState(StickerCategory.DONE);
-			// TODO : Add broadcast here
+			Intent i = new Intent(StickerManager.MORE_STICKERS_DOWNLOADED);
+			i.putExtra(CATEGORY_ID, category.getCategoryId());
+			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 		}
+		
 		else if (DownloadType.NEW_CATEGORY.equals(downloadType))
 		{
 			category.setState(StickerCategory.DONE);
