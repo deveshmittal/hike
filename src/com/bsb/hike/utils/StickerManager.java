@@ -1133,4 +1133,22 @@ public class StickerManager
 		
 		return drawable;
 	}
+	
+	/**
+	 * Generates StickerPageAdapterItemList based on the StickersList provided
+	 * @param stickersList
+	 * @return
+	 */
+	public List<StickerPageAdapterItem> generateStickerPageAdapterItemList(List<Sticker> stickersList)
+	{
+		List<StickerPageAdapterItem> stickerPageList = new ArrayList<StickerPageAdapterItem>();
+		if(stickersList != null)
+		{
+			for (Sticker st : stickersList)
+			{
+				stickerPageList.add(new StickerPageAdapterItem(StickerPageAdapterItem.STICKER, st));
+			}
+		}
+		return stickerPageList;
+	}
 }

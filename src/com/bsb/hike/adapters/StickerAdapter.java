@@ -288,7 +288,19 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 						public void onProgressUpdated(double percentage)
 						{
 							// TODO Auto-generated method stub
+							if(activity != null)
+							{	
+								activity.runOnUiThread(new Runnable()
+								{
+									
+									@Override
+									public void run()
+									{
+										initStickers(category);
+									}
+								});
 							
+							}
 						}
 						
 						@Override
@@ -376,7 +388,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 		spo.getStickerGridView().setVisibility(View.VISIBLE);
 		final List<Sticker> stickersList = category.getStickerList(activity);
-		final List<StickerPageAdapterItem> stickerPageList = generateStickerPageAdapterItemList(stickersList);
+		final List<StickerPageAdapterItem> stickerPageList = StickerManager.getInstance().generateStickerPageAdapterItemList(stickersList);
 		
 		int state = category.getState(); 
 		/* We add UI elements based on the current state of the sticker category*/
@@ -411,19 +423,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 	}
 	
-	private List<StickerPageAdapterItem> generateStickerPageAdapterItemList(List<Sticker> stickersList)
-	{
-		List<StickerPageAdapterItem> stickerPageList = new ArrayList<StickerPageAdapterItem>();
-		if(stickersList != null)
-		{
-			for (Sticker st : stickersList)
-			{
-				stickerPageList.add(new StickerPageAdapterItem(StickerPageAdapterItem.STICKER, st));
-			}
-		}
-		return stickerPageList;
-	}
-
 	@Override
 	public int getIconResId(int index)
 	{
