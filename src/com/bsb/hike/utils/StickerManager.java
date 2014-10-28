@@ -1042,7 +1042,8 @@ public class StickerManager
 	{
 		String baseFilePath = getStickerDirectoryForCategoryId(ctx, categoryId);
 		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + (isPressed ? PALLATE_ICON_SELECTED : PALLATE_ICON) + PALETTE_ICON_TYPE;
-		BitmapDrawable bitmapDrawable = new BitmapDrawable(ctx.getResources(), baseFilePath);
+		
+		BitmapDrawable bitmapDrawable = generateBitmapDrawable(ctx.getResources(), baseFilePath);
 		if (bitmapDrawable == null)
 		{
 			bitmapDrawable = (isPressed ? (BitmapDrawable) ctx.getResources().getDrawable(R.drawable.default_sticker_pallete_selected) : (BitmapDrawable) ctx.getResources()
@@ -1051,6 +1052,23 @@ public class StickerManager
 		return bitmapDrawable;
 	}
 	
+	/**
+	 * Returns a BitmapDrawable from HikeBitmapFactory
+	 * @param resources
+	 * @param baseFilePath
+	 * @return
+	 */
+	
+	private BitmapDrawable generateBitmapDrawable(Resources resources, String baseFilePath)
+	{
+		BitmapDrawable bd;
+		Bitmap bmp = HikeBitmapFactory.decodeFile(baseFilePath);
+		if(bmp == null)
+			return null;
+		bd = HikeBitmapFactory.getBitmapDrawable(resources, bmp);
+		return bd;
+	}
+
 	/**
 	 * Returns a category preview drawable
 	 * @param ctx
