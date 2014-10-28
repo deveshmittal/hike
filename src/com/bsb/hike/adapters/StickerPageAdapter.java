@@ -205,8 +205,17 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			break;
 		case UPDATE:
 			viewHolder.image.setVisibility(View.VISIBLE);
-			viewHolder.text.setVisibility(View.VISIBLE);
 
+			if(item.getCategoryMoreStickerCount() > 0)
+			{
+				viewHolder.text.setVisibility(View.VISIBLE);
+				viewHolder.text.setText(activity.getResources().getString(R.string.n_more, item.getCategoryMoreStickerCount()));
+			}
+			else
+			{
+				viewHolder.text.setVisibility(View.GONE);
+			}
+			
 			viewHolder.image.setOnClickListener(new OnClickListener()
 			{
 				@Override

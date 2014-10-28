@@ -324,4 +324,9 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 		}
 		return null;
 	}
+	
+	public int getMoreStickerCount()
+	{
+		return this.totalStickers - getStickerFiles().length;
+	}
 }
