@@ -37,12 +37,11 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	private StickerPageAdapter stickerPageAdapter;
 	private int stickerDownloadSize;
 
-	protected MultiStickerDownloadTask(Handler handler, Context ctx, String taskId, StickerCategory category, StickerConstants.DownloadType downloadType, StickerPageAdapter stickerPageAdapter, IStickerResultListener callback)
+	protected MultiStickerDownloadTask(Handler handler, Context ctx, String taskId, StickerCategory category, StickerConstants.DownloadType downloadType, IStickerResultListener callback)
 	{
 		super(handler, ctx, taskId, callback);
 		this.category  = category;
 		this.downloadType = downloadType;
-		this.stickerPageAdapter = stickerPageAdapter;
 		this.handler = handler;
 		this.context = ctx;
 	}
@@ -55,6 +54,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(category.getCategoryId());
 		if (directoryPath == null)
 		{
+			setException(new StickerException(StickerException.DIRECTORY_NOT_EXISTS));
 			return STResult.DOWNLOAD_FAILED;
 		}
 
@@ -107,6 +107,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 
 				if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
 				{
+					setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
 					return STResult.DOWNLOAD_FAILED;
 				}
 
@@ -114,6 +115,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 
 				if (length > Utils.getFreeSpace())
 				{
+					setException(new StickerException(StickerException.OUT_OF_SPACE));
 					return STResult.FILE_TOO_LARGE;
 				}
 
@@ -154,6 +156,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			}
 			catch (Exception e)
 			{
+				setException(new StickerException(e));
 				return STResult.DOWNLOAD_FAILED;
 			}
 
@@ -165,9 +168,12 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			{
 				getCallback().onProgressUpdated(totalNumber);
 			}
-		}
-
-		HikeConversationsDatabase.getInstance().updateStickerCountForStickerCategory(category.getCategoryId(), totalNumber);
+			if(category.getTotalStickers() < totalNumber)
+			{
+				category.setTotalStickers(totalNumber);
+				HikeConversationsDatabase.getInstance().updateStickerCountForStickerCategory(category.getCategoryId(), totalNumber);
+			}
+		}	
 		return STResult.SUCCESS;
 	}
 

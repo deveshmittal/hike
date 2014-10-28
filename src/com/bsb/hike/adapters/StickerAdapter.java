@@ -275,7 +275,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				public void onClick(View v)
 				{
 					category.setState(StickerCategory.DOWNLOADING);
-					StickerDownloadManager.getInstance(activity).DownloadMultipleStickers(category, DownloadType.NEW_CATEGORY, null, new IStickerResultListener()
+					StickerDownloadManager.getInstance(activity).DownloadMultipleStickers(category, DownloadType.NEW_CATEGORY, new IStickerResultListener()
 					{
 						
 						@Override

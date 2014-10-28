@@ -14,6 +14,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
@@ -49,6 +50,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	protected Boolean doInBackground(Void... unused)
 	{
 		FileTransferManager.getInstance(ctx).shutDownAll();
+		StickerDownloadManager.getInstance(ctx).shutDownAll();
 		HikeConversationsDatabase convDb = HikeConversationsDatabase.getInstance();
 		Editor editor = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
 		Editor appPrefEditor = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
