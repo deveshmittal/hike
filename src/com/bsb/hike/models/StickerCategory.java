@@ -63,8 +63,8 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 		this.catIndex = catIndex;
 		this.totalStickers = totalStickers;
 		this.timeStamp = timeStamp;
-		this.state = updateAvailable ? UPDATE : NONE;
 		this.categorySize = categorySize;
+		this.state = isMoreStickerAvailable() ? UPDATE : NONE;
 	}
 
 	// this is mostly used for recents stickers only
@@ -206,23 +206,17 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 
 			long t1 = System.currentTimeMillis();
 			stickersList = new ArrayList<Sticker>();
-
-			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, getCategoryId());
-
-			if (categoryDirPath != null)
+			
+			String[] stickerIds = getStickerFiles();
+			if(stickerIds != null)
 			{
-				File categoryDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
-
-				if (categoryDir.exists())
+				for (String stickerId : stickerIds)
 				{
-					String[] stickerIds = categoryDir.list(StickerManager.getInstance().stickerFileFilter);
-					for (String stickerId : stickerIds)
-					{
-						Sticker s = new Sticker(this, stickerId);
-						stickersList.add(s);
-					}
+					Sticker s = new Sticker(this, stickerId);
+					stickersList.add(s);
 				}
 			}
+			
 			Collections.sort(stickersList);
 			long t2 = System.currentTimeMillis();
 			Logger.d(getClass().getSimpleName(), "Time to sort category : " + getCategoryId() + " in ms : " + (t2 - t1));
@@ -292,5 +286,42 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 		}
 
 		return this.catIndex < another.getCategoryIndex() ? -1 : 1; 
+	}
+	
+	/**
+	 * Checks for the count of stickers from the stickers folder for this category. Returns true if the count is < totalStickers
+	 * @return  
+	 */
+	private boolean isMoreStickerAvailable()
+	{
+		String[] stickerFiles = getStickerFiles();
+		if(stickerFiles != null)
+		{
+			return stickerFiles.length < this.totalStickers;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Returns a list of Sticker files for a given sticker category
+	 * @return
+	 */
+	private String[] getStickerFiles()
+	{
+		String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(this.categoryId);
+		if (categoryDirPath != null)
+		{
+			File categoryDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
+
+			if (categoryDir.exists())
+			{
+				if(categoryDir.list() != null)
+				{
+					return categoryDir.list(StickerManager.getInstance().stickerFileFilter);
+				}
+			}
+		}
+		return null;
 	}
 }

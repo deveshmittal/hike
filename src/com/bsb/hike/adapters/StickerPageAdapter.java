@@ -32,6 +32,7 @@ import com.bsb.hike.ui.utils.RecyclingImageView;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
+
 public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 {
 
@@ -269,14 +270,29 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			@Override
 			public void onSuccess(Object result)
 			{
-				StickerManager.getInstance().sucessFullyDownloadedStickers(result, StickerPageAdapter.this);
+				StickerManager.getInstance().sucessFullyDownloadedStickers(result);
 			}
 			
 			@Override
 			public void onProgressUpdated(double percentage)
 			{
-				// TODO Auto-generated method stub
-				
+				if (activity != null)
+				{
+					final List<Sticker> categoriesList = category.getStickerList(activity);
+					
+					activity.runOnUiThread(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							StickerPageAdapterItem zeroethItem = itemList.get(0);
+							itemList.clear();
+							itemList.add(zeroethItem);
+							itemList.addAll(StickerManager.getInstance().generateStickerPageAdapterItemList(categoriesList));
+							notifyDataSetChanged();
+						}
+					});
+				}
 			}
 			
 			@Override

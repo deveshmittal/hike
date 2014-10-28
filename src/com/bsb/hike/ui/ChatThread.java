@@ -7321,12 +7321,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if (intent.getAction().equals(StickerManager.STICKERS_UPDATED))
 			{
-				if (iconPageIndicator != null)
+				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
+				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+				if (iconPageIndicator != null && stickerAdapter != null)
 				{
 					runOnUiThread(new Runnable()
 					{
 						public void run()
 						{
+							category.setState(StickerCategory.DONE);
+							stickerAdapter.initStickers(category);
+							stickerAdapter.notifyDataSetChanged();
 							iconPageIndicator.notifyDataSetChanged();
 						}
 					});
