@@ -18,23 +18,23 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants.EmoticonType;
+import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.R;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
+import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.smartImageLoader.StickerLoader;
-import com.bsb.hike.tasks.DownloadStickerTask;
-import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
 
 public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconPagerAdapter
@@ -256,10 +256,28 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				public void onClick(View v)
 				{
 					category.setState(StickerCategory.DOWNLOADING);
-
-					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, DownloadType.NEW_CATEGORY, null);
-					Utils.executeFtResultAsyncTask(downloadStickerTask);
-					StickerManager.getInstance().insertTask(category.getCategoryId(), downloadStickerTask);
+					StickerDownloadManager.getInstance(activity).DownloadMultipleStickers(category, DownloadType.NEW_CATEGORY, null, new IStickerResultListener()
+					{
+						
+						@Override
+						public void onSuccess(Object result)
+						{
+							StickerManager.getInstance().sucessFullyDownloadedStickers(result, null);
+						}
+						
+						@Override
+						public void onProgressUpdated(double percentage)
+						{
+							// TODO Auto-generated method stub
+							
+						}
+						
+						@Override
+						public void onFailure(Object result, Throwable exception)
+						{
+							StickerManager.getInstance().stickersDownloadFailed(result);
+						}
+					});
 					setupStickerPage(parent, category);
 
 				}

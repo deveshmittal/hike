@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,12 +18,15 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
+import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.tasks.DownloadStickerTask;
-import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.utils.RecyclingImageView;
 import com.bsb.hike.utils.StickerManager;
@@ -258,10 +262,29 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	private void initialiseDownloadStickerTask()
 	{
 		category.setState(StickerCategory.DOWNLOADING);
-		DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS ;
-		DownloadStickerTask downloadStickerTask = new DownloadStickerTask(activity, category, type, StickerPageAdapter.this);
-		Utils.executeFtResultAsyncTask(downloadStickerTask);
-		StickerManager.getInstance().insertTask(category.getCategoryId(), downloadStickerTask);
+		final DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS ;
+		StickerDownloadManager.getInstance(activity).DownloadMultipleStickers(category, type, StickerPageAdapter.this, new IStickerResultListener()
+		{
+			
+			@Override
+			public void onSuccess(Object result)
+			{
+				StickerManager.getInstance().sucessFullyDownloadedStickers(result, StickerPageAdapter.this);
+			}
+			
+			@Override
+			public void onProgressUpdated(double percentage)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onFailure(Object result, Throwable exception)
+			{
+				StickerManager.getInstance().stickersDownloadFailed(result);
+			}
+		});
 		replaceDownloadingatTop();
 	}
 

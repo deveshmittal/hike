@@ -2,16 +2,13 @@ package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
@@ -35,7 +33,9 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
@@ -44,10 +44,13 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.adapters.StickerPageAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.CustomStickerCategory;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.models.StickerPageAdapterItem;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class StickerManager
@@ -1031,6 +1034,45 @@ public class StickerManager
 		return states;
 	}
 	
+	public void sucessFullyDownloadedStickers(Object resultObj, StickerPageAdapter stickerPageAdapter)
+	{
+		Bundle b = (Bundle) resultObj;
+		StickerCategory category = (StickerCategory) b.getSerializable(StickerManager.STICKER_CATEGORY);
+		DownloadType downloadType = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
+		final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
+		if (DownloadType.UPDATE.equals(downloadType) && stickerPageAdapter != null)
+		{
+			StickerManager.getInstance().setStickerUpdateAvailable(category.getCategoryId(), false);
+			category.setState(StickerCategory.DONE);
+			List<StickerPageAdapterItem> l = stickerPageAdapter.getStickerPageAdapterItemList();
+			l.remove(0);
+			stickerPageAdapter.notifyDataSetChanged();
+			Intent i = new Intent(StickerManager.STICKERS_UPDATED);
+			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+		}
+
+		else if (DownloadType.MORE_STICKERS.equals(downloadType) && stickerPageAdapter != null)
+		{
+			List<StickerPageAdapterItem> l = stickerPageAdapter.getStickerPageAdapterItemList();
+			category.setState(StickerCategory.DONE);
+			l.remove(0);
+			stickerPageAdapter.notifyDataSetChanged();
+		}
+		else if (DownloadType.NEW_CATEGORY.equals(downloadType))
+		{
+			Intent i = new Intent(StickerManager.STICKERS_DOWNLOADED);
+			i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
+			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+		}
+	}
+	
+	public void stickersDownloadFailed(Object resultObj)
+	{
+		Bundle b = (Bundle) resultObj;
+		Intent i = new Intent(StickerManager.STICKERS_FAILED);
+		i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
+		LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+	}
 	/**
 	 * Return a BitmapDrawable for pallete icon for a given StickerCategory
 	 * @param ctx

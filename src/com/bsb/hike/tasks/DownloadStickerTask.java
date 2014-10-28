@@ -29,6 +29,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
@@ -37,11 +38,6 @@ import com.bsb.hike.utils.Utils;
 
 public class DownloadStickerTask extends StickerTaskBase
 {
-
-	public enum DownloadType
-	{
-		NEW_CATEGORY, UPDATE, MORE_STICKERS
-	}
 
 	private Context context;
 
