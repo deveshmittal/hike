@@ -5,6 +5,14 @@
     android:background="@drawable/art_sticker_shape"
     android:gravity="center"
     android:orientation="vertical" >
+    
+    <ImageView 
+        android:id="@+id/sticker_placeholder"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:scaleType="centerInside"
+        src="@drawable/misc_sticker_placeholder"
+        android:visibility="gone"/>
 
     <ImageView
         android:id="@+id/update_btn"

@@ -174,7 +174,9 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				viewHolder.progress = (ProgressBar) convertView.findViewById(R.id.download_progress);
 				break;
 			case PLACE_HOLDER:
-				// TODO Add placeholder view here
+				convertView = inflater.inflate(R.layout.update_sticker_set, null);
+				viewHolder.image = (ImageView) convertView.findViewById(R.id.sticker_placeholder);
+				convertView.setLayoutParams(ll);
 				break;
 			}
 			convertView.setTag(viewHolder);
@@ -250,6 +252,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			});
 			break;
 		case PLACE_HOLDER:
+			viewHolder.image.setVisibility(View.VISIBLE);
 			break;
 		}
 
@@ -293,7 +296,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		if(itemList.size() > 0 && (itemList.get(0).getStickerPageAdapterItemId() != StickerPageAdapterItem.STICKER))
 		{
 			itemList.remove(0);
-			itemList.add(new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
+			itemList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
 			notifyDataSetChanged();
 		}
 		

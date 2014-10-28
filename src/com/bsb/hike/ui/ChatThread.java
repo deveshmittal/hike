@@ -357,7 +357,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
 			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA,HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT,HikePubSub.CONV_META_DATA_UPDATED, 
-			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED };
+			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED };
 
 	private EmoticonType emoticonType;
 
@@ -4263,6 +4263,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
+					stickerAdapter.instantiateStickerList();
 					stickerAdapter.notifyDataSetChanged();
 				}
 			});
@@ -6779,6 +6780,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Logger.d("ViewPager", "Page number: " + pageNum);
 			if (emoticonType == EmoticonType.STICKERS)
 			{
+				StickerCategory category = stickerAdapter.getStickerCategory(pageNum);
+				if(category.getState() == StickerCategory.DONE)
+				{
+					category.setState(StickerCategory.NONE);
+				}
 			}
 		}
 
