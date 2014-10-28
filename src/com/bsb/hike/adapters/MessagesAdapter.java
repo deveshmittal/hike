@@ -2559,15 +2559,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else if(fss.getFTState() == FTState.IN_PROGRESS && fss.getTransferredSize() == 0)
 		{
-			float fakeProgress = 5 * 0.01f;
+			float animatedProgress = 5 * 0.01f;
 			if (fss.getTotalSize() > 0)
 			{
-				fakeProgress = (float) chunkSize;
-				fakeProgress = fakeProgress / fss.getTotalSize() ;
+				animatedProgress = (float) chunkSize;
+				animatedProgress = animatedProgress / fss.getTotalSize() ;
 			}
 			
 			holder.circularProgress.stopAnimation();
-			holder.circularProgress.setAnimatedProgress(0, (int) (fakeProgress * 100), 6 * 1000, msgId);
+			holder.circularProgress.setAnimatedProgress(0, (int) (animatedProgress * 100), 6 * 1000, msgId);
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}
@@ -2576,13 +2576,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.circularProgress.setProgress(progress * 0.01f);
 			holder.circularProgress.stopAnimation();
 			if(fss.getFTState() == FTState.IN_PROGRESS) {
-				float fakeProgress = 5 * 0.01f;
+				float animatedProgress = 5 * 0.01f;
 				if (fss.getTotalSize() > 0)
 				{
-					fakeProgress = (float) chunkSize;
-					fakeProgress = fakeProgress / fss.getTotalSize() ;
+					animatedProgress = (float) chunkSize;
+					animatedProgress = animatedProgress / fss.getTotalSize() ;
 				}
-				holder.circularProgress.setAnimatedProgress(progress, progress + (int) (fakeProgress * 100), 6 * 1000, msgId);
+				holder.circularProgress.setAnimatedProgress(progress, progress + (int) (animatedProgress * 100), 6 * 1000, msgId);
 			}
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
