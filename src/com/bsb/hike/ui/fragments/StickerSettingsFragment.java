@@ -178,9 +178,6 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 	{
-		StickerCategory category = (StickerCategory) parent.getItemAtPosition(position);
-		CheckBox categoryVisibBox = (CheckBox) view.findViewById(R.id.category_checkbox);
-		categoryVisibBox.toggle();
-		category.setVisible(categoryVisibBox.isChecked());
+		// TODO Some method might be added in future over here to handle clicks on list 
 	}
 }
