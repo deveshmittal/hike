@@ -1033,13 +1033,13 @@ public class StickerManager
 		return states;
 	}
 	
-	public void sucessFullyDownloadedStickers(Object resultObj, StickerPageAdapter stickerPageAdapter)
+	public void sucessFullyDownloadedStickers(Object resultObj)
 	{
 		Bundle b = (Bundle) resultObj;
 		StickerCategory category = (StickerCategory) b.getSerializable(StickerManager.STICKER_CATEGORY);
 		DownloadType downloadType = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
 		final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
-		if (DownloadType.UPDATE.equals(downloadType) && stickerPageAdapter != null)
+		if (DownloadType.UPDATE.equals(downloadType))
 		{
 			StickerManager.getInstance().setStickerUpdateAvailable(category.getCategoryId(), false);
 			Intent i = new Intent(StickerManager.STICKERS_UPDATED);
@@ -1047,12 +1047,10 @@ public class StickerManager
 			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 		}
 
-		else if (DownloadType.MORE_STICKERS.equals(downloadType) && stickerPageAdapter != null)
+		else if (DownloadType.MORE_STICKERS.equals(downloadType))
 		{
-			List<StickerPageAdapterItem> l = stickerPageAdapter.getStickerPageAdapterItemList();
 			category.setState(StickerCategory.DONE);
-			l.remove(0);
-			stickerPageAdapter.notifyDataSetChanged();
+			// TODO : Add broadcast here
 		}
 		else if (DownloadType.NEW_CATEGORY.equals(downloadType))
 		{

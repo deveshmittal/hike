@@ -261,7 +261,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 						@Override
 						public void onSuccess(Object result)
 						{
-							StickerManager.getInstance().sucessFullyDownloadedStickers(result, null);
+							StickerManager.getInstance().sucessFullyDownloadedStickers(result);
 						}
 						
 						@Override

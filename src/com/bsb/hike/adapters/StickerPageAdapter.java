@@ -269,7 +269,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			@Override
 			public void onSuccess(Object result)
 			{
-				StickerManager.getInstance().sucessFullyDownloadedStickers(result, StickerPageAdapter.this);
+				StickerManager.getInstance().sucessFullyDownloadedStickers(result);
 			}
 			
 			@Override
