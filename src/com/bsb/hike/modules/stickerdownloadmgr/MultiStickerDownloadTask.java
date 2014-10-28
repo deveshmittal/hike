@@ -4,29 +4,24 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.adapters.StickerPageAdapter;
-import com.bsb.hike.adapters.StickerPageAdapter.ViewType;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.NetworkHandler.NetworkType;
-import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
+import com.bsb.hike.modules.stickerdownloadmgr.retry.DefaultRetryPolicy;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
@@ -67,6 +62,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 		File smallStickerDir = new File(directoryPath + HikeConstants.SMALL_STICKER_ROOT);
 		int totalNumber = 0;
 		boolean reachedEnd = false;
+		boolean retry = true;
 
 		JSONArray existingStickerIds = new JSONArray();
 
@@ -89,80 +85,86 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 
 		Utils.makeNoMediaFile(largeStickerDir);
 		Utils.makeNoMediaFile(smallStickerDir);
-
-		try
+		while (!reachedEnd)
 		{
-			
 
-			JSONObject request = new JSONObject();
-			request.put(StickerManager.CATEGORY_ID, category.getCategoryId());
-			request.put(HikeConstants.STICKER_IDS, existingStickerIds);
-			request.put(HikeConstants.RESOLUTION_ID, Utils.getResolutionId());
-			request.put(HikeConstants.NUMBER_OF_STICKERS, stickerDownloadSize);
-			
-			String urlString = AccountUtils.base + "/stickers";
-			if(AccountUtils.ssl)
+			try
 			{
-				urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/stickers";
-			}
-			setDownloadUrl(urlString);
-			JSONObject response = (JSONObject) download(request, StickerRequestType.MULTIPLE);
 
-			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
+				JSONObject request = new JSONObject();
+				request.put(StickerManager.CATEGORY_ID, category.getCategoryId());
+				request.put(HikeConstants.STICKER_IDS, existingStickerIds);
+				request.put(HikeConstants.RESOLUTION_ID, Utils.getResolutionId());
+				request.put(HikeConstants.NUMBER_OF_STICKERS, getStickerDownloadSize());
+
+				String urlString = AccountUtils.base + "/stickers";
+				if (AccountUtils.ssl)
+				{
+					urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/stickers";
+				}
+				setDownloadUrl(urlString);
+				JSONObject response = (JSONObject) download(request, StickerRequestType.MULTIPLE);
+
+				if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
+				{
+					return STResult.DOWNLOAD_FAILED;
+				}
+
+				int length = response.toString().getBytes().length;
+
+				if (length > Utils.getFreeSpace())
+				{
+					return STResult.FILE_TOO_LARGE;
+				}
+
+				totalNumber = response.optInt(HikeConstants.TOTAL_STICKERS, -1);
+				reachedEnd = response.optBoolean(HikeConstants.REACHED_STICKER_END);
+				Logger.d(getClass().getSimpleName(), "Reached end? " + reachedEnd);
+				Logger.d(getClass().getSimpleName(), "Sticker count: " + totalNumber);
+				JSONObject data = response.getJSONObject(HikeConstants.DATA_2);
+				for (Iterator<String> keys = data.keys(); keys.hasNext();)
+				{
+					String stickerId = keys.next();
+					String stickerData = data.getString(stickerId);
+					existingStickerIds.put(stickerId);
+
+					try
+					{
+						Sticker s = new Sticker(category, stickerId);
+						if (downloadType.equals(DownloadType.MORE_STICKERS) || downloadType.equals(DownloadType.UPDATE) && stickerPageAdapter != null)
+						{
+							stickerPageAdapter.addSticker(s);
+						}
+						// some hack : seems server was sending stickers which already exist so it was leading to duplicate issue
+						// so we save small sticker , if not present already
+
+						File f = StickerManager.getInstance().saveLargeStickers(largeStickerDir, stickerId, stickerData);
+						StickerManager.getInstance().saveSmallStickers(smallStickerDir, stickerId, f);
+					}
+					catch (FileNotFoundException e)
+					{
+						Logger.w(getClass().getSimpleName(), e);
+					}
+					catch (IOException e)
+					{
+						Logger.w(getClass().getSimpleName(), e);
+					}
+				}
+
+			}
+			catch (Exception e)
 			{
 				return STResult.DOWNLOAD_FAILED;
 			}
 
-			int length = response.toString().getBytes().length;
-
-			if (length > Utils.getFreeSpace())
+			if (getRetryPolicy() != null)
 			{
-				return STResult.FILE_TOO_LARGE;
+				((DefaultRetryPolicy) getRetryPolicy()).reset();
 			}
-
-			totalNumber = response.optInt(HikeConstants.TOTAL_STICKERS, -1);
-			reachedEnd = response.optBoolean(HikeConstants.REACHED_STICKER_END);
-			Logger.d(getClass().getSimpleName(), "Reached end? " + reachedEnd);
-			Logger.d(getClass().getSimpleName(), "Sticker count: " + totalNumber);
-			JSONObject data = response.getJSONObject(HikeConstants.DATA_2);
-			for (Iterator<String> keys = data.keys(); keys.hasNext();)
+			if (getCallback() != null)
 			{
-				String stickerId = keys.next();
-				String stickerData = data.getString(stickerId);
-
-				try
-				{
-					Sticker s = new Sticker(category, stickerId);
-					if (downloadType.equals(DownloadType.MORE_STICKERS) || downloadType.equals(DownloadType.UPDATE) && stickerPageAdapter != null)
-					{
-						stickerPageAdapter.addSticker(s);
-					}
-					// some hack : seems server was sending stickers which already exist so it was leading to duplicate issue
-					// so we save small sticker , if not present already
-
-					File f = StickerManager.getInstance().saveLargeStickers(largeStickerDir, stickerId, stickerData);
-						StickerManager.getInstance().saveSmallStickers(smallStickerDir, stickerId, f);
-				}
-				catch (FileNotFoundException e)
-				{
-					Logger.w(getClass().getSimpleName(), e);
-				}
-				catch (IOException e)
-				{
-					Logger.w(getClass().getSimpleName(), e);
-				}
+				getCallback().onProgressUpdated(totalNumber);
 			}
-
-		}
-		catch (IllegalStateException e)
-		{
-			Logger.w(getClass().getSimpleName(), e);
-			return STResult.DOWNLOAD_FAILED;
-		}
-		catch (JSONException e)
-		{
-			Logger.w(getClass().getSimpleName(), e);
-			return STResult.DOWNLOAD_FAILED;
 		}
 
 		HikeConversationsDatabase.getInstance().updateStickerCountForStickerCategory(category.getCategoryId(), totalNumber);
@@ -173,54 +175,18 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	protected void postExecute(STResult result)
 	{
 		// TODO Auto-generated method stub
-		super.postExecute(result);
+		Bundle b = new Bundle();
+		b.putSerializable(StickerManager.STICKER_CATEGORY, category);
+		b.putSerializable(StickerManager.STICKER_DOWNLOAD_TYPE, downloadType);
 		if (result != STResult.SUCCESS)
 		{
-			Intent i = new Intent(StickerManager.STICKERS_FAILED);
-			Bundle b = new Bundle();
-			b.putSerializable(StickerManager.STICKER_CATEGORY, category);
-			b.putSerializable(StickerManager.STICKER_DOWNLOAD_TYPE, downloadType);
 			if(result == STResult.FILE_TOO_LARGE)
 			{
 				b.putBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE,true);
 			}
-			i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
-			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 		}
-		else
-		{
-			if (DownloadType.UPDATE.equals(downloadType) && stickerPageAdapter != null)
-			{
-				
-				StickerManager.getInstance().setStickerUpdateAvailable(category.getCategoryId(), false);
-				
-				//TODO
-//				List<ViewType> l = stickerPageAdapter.getViewTypeList();
-//				l.remove(ViewType.UPDATING_STICKER);
-//				stickerPageAdapter.calculateNumRowsAndSize(true);
-//				stickerPageAdapter.notifyDataSetChanged();
-				Intent i = new Intent(StickerManager.STICKERS_UPDATED);
-				LocalBroadcastManager.getInstance(context).sendBroadcast(i);
-			}
-
-			else if (DownloadType.MORE_STICKERS.equals(downloadType) && stickerPageAdapter != null)
-			{
-				// TODO
-//				List<ViewType> l = stickerPageAdapter.getViewTypeList();
-//				l.remove(ViewType.DOWNLOADING_MORE);
-//				stickerPageAdapter.calculateNumRowsAndSize(true);
-//				stickerPageAdapter.notifyDataSetChanged();
-			}
-			else if (DownloadType.NEW_CATEGORY.equals(downloadType))
-			{
-				Intent i = new Intent(StickerManager.STICKERS_DOWNLOADED);
-				Bundle b = new Bundle();
-				b.putSerializable(StickerManager.STICKER_CATEGORY, category);
-				b.putSerializable(StickerManager.STICKER_DOWNLOAD_TYPE, downloadType);
-				i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
-				LocalBroadcastManager.getInstance(context).sendBroadcast(i);
-			}
-		}
+		setResult(b);
+		super.postExecute(result);
 	}
 
 	public int getStickerDownloadSize()
