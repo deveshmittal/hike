@@ -189,7 +189,7 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 		{
 			if(callback != null)
 			{
-				callback.onFailure(null, getException());
+				callback.onFailure(resultObj, getException());
 			}
 			
 		}
