@@ -234,10 +234,6 @@ public class StickerManager
 			{
 				StickerManager.getInstance().setStickerUpdateAvailable(DOGGY_CATEGORY, true);
 			}
-			else
-			{
-				HikeConversationsDatabase.getInstance().removeStickerCategory(DOGGY_CATEGORY);
-			}
 		}
 	}
 
