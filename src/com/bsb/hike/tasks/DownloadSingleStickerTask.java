@@ -50,7 +50,7 @@ public class DownloadSingleStickerTask extends StickerTaskBase
 		this.catId = catId;
 		this.key = catId + stId;
 		this.stId = stId;
-		this.dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, catId);
+		this.dirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(catId);
 
 		this.largeStickerPath = this.dirPath + HikeConstants.LARGE_STICKER_ROOT + "/" + stId;
 		this.smallStickerPath = this.dirPath + HikeConstants.SMALL_STICKER_ROOT + "/" + stId;

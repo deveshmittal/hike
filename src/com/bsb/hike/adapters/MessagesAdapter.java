@@ -760,7 +760,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			String categoryId = sticker.getCategoryId();
 			String stickerId = sticker.getStickerId();
 
-			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId) + HikeConstants.LARGE_STICKER_ROOT;
+			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId) + HikeConstants.LARGE_STICKER_ROOT;
 			File stickerImage = null;
 			if (categoryDirPath != null)
 			{

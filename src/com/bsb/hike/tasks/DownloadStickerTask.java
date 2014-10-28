@@ -66,7 +66,7 @@ public class DownloadStickerTask extends StickerTaskBase
 	{
 		Logger.d(getClass().getSimpleName(), "CategoryId: " + category.getCategoryId());
 
-		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, category.getCategoryId());
+		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(category.getCategoryId());
 		if (directoryPath == null)
 		{
 			return FTResult.DOWNLOAD_FAILED;

@@ -52,7 +52,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	{
 		Logger.d(getClass().getSimpleName(), "CategoryId: " + category.getCategoryId());
 
-		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, category.getCategoryId());
+		String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(category.getCategoryId());
 		if (directoryPath == null)
 		{
 			return STResult.DOWNLOAD_FAILED;
@@ -176,7 +176,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	{
 		// TODO Auto-generated method stub
 		Bundle b = new Bundle();
-		b.putSerializable(StickerManager.STICKER_CATEGORY, category);
+		b.putSerializable(StickerManager.CATEGORY_ID, category.getCategoryId());
 		b.putSerializable(StickerManager.STICKER_DOWNLOAD_TYPE, downloadType);
 		if (result != STResult.SUCCESS)
 		{

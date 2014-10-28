@@ -68,6 +68,8 @@ public class StickerManager
 	public static final String SHOWN_STICKERS_TUTORIAL = "shownStickersTutorial";
 	
 	public static final String STICKERS_DOWNLOADED = "st_downloaded";
+	
+	public static final String MORE_STICKERS_DOWNLOADED = "st_more_downloaded";
 
 	public static final String STICKERS_FAILED = "st_failed";
 
@@ -259,7 +261,7 @@ public class StickerManager
 		StickerCategory cat = stickerCategoriesMap.remove(removedCategoryId);
 		if(!cat.isCustom())
 		{
-			String categoryDirPath = getStickerDirectoryForCategoryId(context, removedCategoryId);
+			String categoryDirPath = getStickerDirectoryForCategoryId(removedCategoryId);
 			if (categoryDirPath != null)
 			{
 				File smallCatDir = new File(categoryDirPath + HikeConstants.SMALL_STICKER_ROOT);
@@ -328,7 +330,7 @@ public class StickerManager
 
 	public void removeSticker(String categoryId, String stickerId)
 	{
-		String categoryDirPath = getStickerDirectoryForCategoryId(context, categoryId);
+		String categoryDirPath = getStickerDirectoryForCategoryId(categoryId);
 		if (categoryDirPath == null)
 		{
 			return;
@@ -389,12 +391,11 @@ public class StickerManager
 
 	/**
 	 * Returns the directory for a sticker category.
-	 * 
-	 * @param context
 	 * @param catId
+	 * 
 	 * @return
 	 */
-	public String getStickerDirectoryForCategoryId(Context context, String catId)
+	public String getStickerDirectoryForCategoryId(String catId)
 	{
 		/*
 		 * We give a higher priority to external storage. If we find an exisiting directory in the external storage, we will return its path. Otherwise if there is an exisiting
@@ -441,7 +442,7 @@ public class StickerManager
 
 	public boolean checkIfStickerCategoryExists(String categoryId)
 	{
-		String path = getStickerDirectoryForCategoryId(context, categoryId);
+		String path = getStickerDirectoryForCategoryId(categoryId);
 		if (path == null)
 			return false;
 
@@ -566,7 +567,7 @@ public class StickerManager
 		}
 
 		/* Delete recent stickers */
-		String recentsDir = getStickerDirectoryForCategoryId(context, StickerManager.RECENT);
+		String recentsDir = getStickerDirectoryForCategoryId(StickerManager.RECENT);
 		File rDir = new File(recentsDir);
 		if (rDir.exists())
 			Utils.deleteFile(rDir);
@@ -838,7 +839,7 @@ public class StickerManager
 				JSONObject obj = harcodedStickers.optJSONObject(i);
 				String categoryId = obj.getString(CATEGORY_ID);
 				
-				String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId);
+				String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId);
 				if (directoryPath == null)
 				{
 					return false;
@@ -913,7 +914,7 @@ public class StickerManager
 				JSONObject obj = stickerCategories.optJSONObject(i);
 				String categoryId = obj.optString(StickerManager.CATEGORY_ID);
 
-				String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId);
+				String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId);
 				if (directoryPath == null)
 				{
 					return false;
@@ -1034,32 +1035,33 @@ public class StickerManager
 		return states;
 	}
 	
-	public void sucessFullyDownloadedStickers(Object resultObj, StickerPageAdapter stickerPageAdapter)
+	public void sucessFullyDownloadedStickers(Object resultObj)
 	{
 		Bundle b = (Bundle) resultObj;
-		StickerCategory category = (StickerCategory) b.getSerializable(StickerManager.STICKER_CATEGORY);
+		String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 		DownloadType downloadType = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
 		final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
-		if (DownloadType.UPDATE.equals(downloadType) && stickerPageAdapter != null)
+		if (DownloadType.UPDATE.equals(downloadType))
 		{
-			StickerManager.getInstance().setStickerUpdateAvailable(category.getCategoryId(), false);
-			category.setState(StickerCategory.DONE);
-			List<StickerPageAdapterItem> l = stickerPageAdapter.getStickerPageAdapterItemList();
-			l.remove(0);
-			stickerPageAdapter.notifyDataSetChanged();
+			StickerManager.getInstance().setStickerUpdateAvailable(categoryId, false);
 			Intent i = new Intent(StickerManager.STICKERS_UPDATED);
+			i.putExtra(CATEGORY_ID, categoryId);
 			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 		}
 
-		else if (DownloadType.MORE_STICKERS.equals(downloadType) && stickerPageAdapter != null)
+		else if (DownloadType.MORE_STICKERS.equals(downloadType))
 		{
-			List<StickerPageAdapterItem> l = stickerPageAdapter.getStickerPageAdapterItemList();
-			category.setState(StickerCategory.DONE);
-			l.remove(0);
-			stickerPageAdapter.notifyDataSetChanged();
+			StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+			category.setState(StickerCategory.DONE);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there.
+			Intent i = new Intent(StickerManager.MORE_STICKERS_DOWNLOADED);
+			i.putExtra(CATEGORY_ID, categoryId);
+			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 		}
+		
 		else if (DownloadType.NEW_CATEGORY.equals(downloadType))
 		{
+			StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+			category.setState(StickerCategory.DONE);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there.
 			Intent i = new Intent(StickerManager.STICKERS_DOWNLOADED);
 			i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
 			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
@@ -1082,9 +1084,10 @@ public class StickerManager
 	 */
 	public BitmapDrawable getPalleteIcon(Context ctx, String categoryId, boolean isPressed)
 	{
-		String baseFilePath = getStickerDirectoryForCategoryId(ctx, categoryId);
+		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
 		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + (isPressed ? PALLATE_ICON_SELECTED : PALLATE_ICON) + PALETTE_ICON_TYPE;
-		BitmapDrawable bitmapDrawable = new BitmapDrawable(ctx.getResources(), baseFilePath);
+		
+		BitmapDrawable bitmapDrawable = generateBitmapDrawable(ctx.getResources(), baseFilePath);
 		if (bitmapDrawable == null)
 		{
 			bitmapDrawable = (isPressed ? (BitmapDrawable) ctx.getResources().getDrawable(R.drawable.default_sticker_pallete_selected) : (BitmapDrawable) ctx.getResources()
@@ -1094,6 +1097,23 @@ public class StickerManager
 	}
 	
 	/**
+	 * Returns a BitmapDrawable from HikeBitmapFactory
+	 * @param resources
+	 * @param baseFilePath
+	 * @return
+	 */
+	
+	private BitmapDrawable generateBitmapDrawable(Resources resources, String baseFilePath)
+	{
+		BitmapDrawable bd;
+		Bitmap bmp = HikeBitmapFactory.decodeFile(baseFilePath);
+		if(bmp == null)
+			return null;
+		bd = HikeBitmapFactory.getBitmapDrawable(resources, bmp);
+		return bd;
+	}
+
+	/**
 	 * Returns a category preview drawable
 	 * @param ctx
 	 * @param categoryId
@@ -1101,7 +1121,7 @@ public class StickerManager
 	 */
 	public Drawable getCategoryPreviewAsset(Context ctx, String categoryId)
 	{
-		String baseFilePath = getStickerDirectoryForCategoryId(ctx, categoryId);
+		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
 		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + PREVIEW_IMAGE + PREVIEW_ICON_TYPE;
 		Drawable drawable = Drawable.createFromPath(baseFilePath);
 		
@@ -1112,5 +1132,23 @@ public class StickerManager
 		}
 		
 		return drawable;
+	}
+	
+	/**
+	 * Generates StickerPageAdapterItemList based on the StickersList provided
+	 * @param stickersList
+	 * @return
+	 */
+	public List<StickerPageAdapterItem> generateStickerPageAdapterItemList(List<Sticker> stickersList)
+	{
+		List<StickerPageAdapterItem> stickerPageList = new ArrayList<StickerPageAdapterItem>();
+		if(stickersList != null)
+		{
+			for (Sticker st : stickersList)
+			{
+				stickerPageList.add(new StickerPageAdapterItem(StickerPageAdapterItem.STICKER, st));
+			}
+		}
+		return stickerPageList;
 	}
 }
