@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@id/drag_handle"
     android:layout_width="match_parent"
-    android:layout_height="86dp" >
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/sticker_settting_item_height" >
 
     <ImageView
         android:id="@+id/category_reorder_idicator"
@@ -20,6 +21,7 @@
         android:layout_centerVertical="true"
         android:layout_marginRight="18dp"
         android:layout_toRightOf="@id/category_reorder_idicator"
+        android:scaleType="centerInside"
         android:src="@drawable/sticker_069_hi" />
 
     <LinearLayout
@@ -45,6 +47,8 @@
         android:id="@+id/category_description"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_alignTop="@id/category_icon"
+        android:layout_alignBottom="@id/category_icon"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@id/category_checkbox_ll"
         android:layout_toRightOf="@id/category_icon"
@@ -54,8 +58,7 @@
         <RelativeLayout
             android:id="@+id/category_name_layout"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" >
+            android:layout_height="wrap_content">
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/category_name"
@@ -82,18 +85,20 @@
             android:id="@+id/category_size"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
             android:text="16 stickers, 225 KB"
             android:textColor="@color/missing_thumbnail"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/update_available"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="UPDATE AVAILABLE"
+            android:visibility="gone"
             android:textColor="@color/sticker_settings_update_color"
             android:textSize="12sp" />
     </LinearLayout>
+    
 
 </RelativeLayout>
