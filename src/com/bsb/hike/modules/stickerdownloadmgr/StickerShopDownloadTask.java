@@ -22,6 +22,7 @@ class StickerShopDownloadTask extends BaseStickerDownloadTask
 	private String taskId;
 	private Bundle bundle;
 	private long timeStamp;
+	private Object resultObject;
 	
 	protected StickerShopDownloadTask(Handler handler, Context ctx, String taskId, long timeStamp, IStickerResultListener callback)
 	{
@@ -63,6 +64,7 @@ class StickerShopDownloadTask extends BaseStickerDownloadTask
 				setException(new StickerException(StickerException.NULL_DATA));
 				return STResult.DOWNLOAD_FAILED;
 			}
+			resultObject = data;
 		}
 		catch (Exception e)
 		{
@@ -76,6 +78,7 @@ class StickerShopDownloadTask extends BaseStickerDownloadTask
 	protected void postExecute(STResult result)
 	{
 		// TODO Auto-generated method stub
+		setResult(resultObject);
 		super.postExecute(result);
 	}
 }
