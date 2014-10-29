@@ -35,6 +35,7 @@ import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.view.CustomFontButton;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
 
 public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconPagerAdapter
@@ -266,7 +267,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		{
 			// Set Download EmptyView
 			empty = LayoutInflater.from(activity).inflate(R.layout.sticker_pack_empty_view, emptyView);
-			TextView downloadBtn = (TextView) empty.findViewById(R.id.download_btn);
+			CustomFontButton downloadBtn = (CustomFontButton) empty.findViewById(R.id.download_btn);
 			TextView categoryName = (TextView) empty.findViewById(R.id.category_name);
 			TextView category_details = (TextView) empty.findViewById(R.id.category_details);
 			if(category.getTotalStickers() > 0)
@@ -385,7 +386,12 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 	public void initStickers(StickerCategory category)
 	{
-		StickerPageObjects spo = stickerObjMap.get(category.getCategoryId());
+		StickerPageObjects spo = stickerObjMap.get(category);
+		if(spo == null)
+		{
+			return;
+		}
+		
 		initStickers(spo, category);
 	}
 	
