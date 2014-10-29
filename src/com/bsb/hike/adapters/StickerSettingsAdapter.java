@@ -41,6 +41,8 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	private boolean isListFlinging;
 
 	private Set<StickerCategory> stickerSet = new HashSet<StickerCategory>();  //Stores the categories which have been reordered
+	
+	private int lastVisibleIndex = 0;   //gives the index of last visible category in the stickerCategoriesList
 
 	public StickerSettingsAdapter(Context context, List<StickerCategory> stickerCategories)
 	{
@@ -68,6 +70,10 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			{
 				category.setCategoryIndex(mListMapping[i]);
 				stickerSet.add(category);
+			}
+			if(category.isVisible())
+			{
+				lastVisibleIndex = i;
 			}
 		}
 	}
@@ -165,58 +171,66 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	@Override
 	public void drop(int from, int to)
 	{
-		if (true)
-		{ // Some Condition, at which the drop should occur.
-			if (from != to)
-			{
-				int cursorFrom = mListMapping[from];
-				if (from > to)
-				{
-					for (int i = from; i > to; --i)
-					{
-						mListMapping[i] =  mListMapping[i-1];
-					}
-				}
-				
-				else
-				{
-					for (int i = from; i < to; ++i)
-					{
-						mListMapping[i] = mListMapping[i+1];
-					}
-				}
-				
-				mListMapping[to] = cursorFrom;
-				
-				if(!HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))  //Resetting the tip flag
-				{
-					HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag}
+		StickerCategory category = getItem(from);
+		if ((from == to) || (!category.isVisible())) // Dropping at the same position. No need to perform Drop.
+		{
+			return;
+		}
 
-				}
-				notifyDataSetChanged();
-				
-				if( from > to)
-				{
-					for(int i = from; i>= to; --i)
-					{
-						addToStickerSet(i);
-					}
-				}
-				else
-				{
-					for (int i = from; i<= to; ++i)
-					{
-						addToStickerSet(i);
-					}
-				}
+		if (from > lastVisibleIndex)
+		{
+			if(to > lastVisibleIndex+1)
+			{
+			   return;
+			}
+			else
+			{
+				lastVisibleIndex++;
+			}
+		}
+
+		int cursorFrom = mListMapping[from];
+		if (from > to)
+		{
+			for (int i = from; i > to; --i)
+			{
+				mListMapping[i] = mListMapping[i - 1];
+			}
+		}
+
+		else
+		{
+			for (int i = from; i < to; ++i)
+			{
+				mListMapping[i] = mListMapping[i + 1];
+			}
+		}
+
+		mListMapping[to] = cursorFrom;
+
+		if (!HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false)) // Resetting the tip flag
+		{
+			HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag}
+
+		}
+		notifyDataSetChanged();
+
+		if (from > to)
+		{
+			for (int i = from; i >= to; --i)
+			{
+				addToStickerSet(i);
 			}
 		}
 		else
 		{
-			return;
+			for (int i = from; i <= to; ++i)
+			{
+				addToStickerSet(i);
+			}
 		}
-			
 	}
+	
 	/**
 	 * Adds to Categories to stickerSet and also changes it's categoryIndex
 	 * @param categoryPos
@@ -277,6 +291,25 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		category.setVisible(visibility);
 		checkBox.setChecked(visibility);
 		stickerSet.add(category);
+		int categoryIdx = stickerCategories.indexOf(category);
+		updateLastVisibleIndex(categoryIdx, category);
+	}
+
+	/**
+	 * Updates the lastVisible Category Index in the list based on the category whose visibility has just been toggled.
+	 * @param categoryIdx
+	 * @param category
+	 */
+	private void updateLastVisibleIndex(int categoryIdx, StickerCategory category)
+	{
+		if(categoryIdx == lastVisibleIndex && (!category.isVisible()))
+		{
+			lastVisibleIndex --;
+		}
+		else if((categoryIdx == lastVisibleIndex + 1) && (category.isVisible()))
+		{
+			lastVisibleIndex ++;
+		}
 	}
 
 	public Set<StickerCategory> getStickerSet()
