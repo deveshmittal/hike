@@ -1891,7 +1891,6 @@ public class HikeConstants
 	public static final String PREVIEW_IMAGE = "previewimg";
 	public static final String ENABLE_IMAGE = "enableimg";
 	public static final String DISABLE_IMAGE = "disableimg";
-	public static final String CATEGORY_ID = "catId";
 	public static final String SIZE = "size";	
 	public static final int NORMAL_MESSAGE_TYPE = 0;
 	public static final int MULTI_FORWARD_MESSAGE_TYPE = 1;

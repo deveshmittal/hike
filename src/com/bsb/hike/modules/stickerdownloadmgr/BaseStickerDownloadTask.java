@@ -28,6 +28,7 @@ import android.os.Handler;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.http.GzipByteArrayEntity;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.HttpRequestType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.STState;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.modules.stickerdownloadmgr.retry.DefaultRetryPolicy;
@@ -113,13 +114,13 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 		return client;
 	}
 
-	protected Object download(JSONObject requestEntity, StickerRequestType requestType) throws Exception
+	protected Object download(JSONObject requestEntity, HttpRequestType requestType) throws Exception
 	{
 		while(true)
 		{
 			try
 			{
-				if (StickerRequestType.MULTIPLE == requestType)
+				if (HttpRequestType.POST == requestType)
 				{
 					GzipByteArrayEntity entity;
 					entity = new GzipByteArrayEntity(requestEntity.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
@@ -140,7 +141,7 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 					HttpEntity responseEntity = response.getEntity();
 					return AccountUtils.getResponse(responseEntity.getContent());
 				}
-				else if (StickerRequestType.SIZE == requestType)
+				else if (HttpRequestType.HEAD == requestType)
 				{
 					DefaultHttpClient client = (DefaultHttpClient) initConnHead();
 					HttpHead head = new HttpHead(mUrl.toString());
@@ -148,7 +149,7 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 					HttpResponse resp = client.execute(head);
 					return resp;
 				}
-				else
+				else if(HttpRequestType.GET == requestType)
 				{
 
 					URLConnection connection = initConn();

@@ -1,5 +1,7 @@
 package com.bsb.hike.modules.stickerdownloadmgr;
 
+import org.json.JSONArray;
+
 import android.content.Context;
 import android.os.Handler;
 
@@ -98,6 +100,42 @@ public class StickerDownloadManager
 		Request request = new Request(stickerCategoryTask);
 		queue.addTask(taskId, request);
 	}
+	
+	public void DownloadStickerSize(Context context, StickerCategory cat, IStickerResultListener callback)
+	{
+		String taskId = getTaskId(StickerRequestType.SIZE, null, cat.getCategoryId());
+		if (queue.isTaskAlreadyExist(taskId))
+		{
+			return;
+		}
+		BaseStickerDownloadTask stickerCategoryTask = new StickerSizeDownloadTask(handler, context, taskId, cat, callback);
+		Request request = new Request(stickerCategoryTask);
+		queue.addTask(taskId, request);
+	}
+	
+	public void DownloadStickerShopTask(Context context, long timeStamp, IStickerResultListener callback)
+	{
+		String taskId = getTaskId(StickerRequestType.SHOP, null, null);
+		if (queue.isTaskAlreadyExist(taskId))
+		{
+			return;
+		}
+		BaseStickerDownloadTask stickerCategoryTask = new StickerShopDownloadTask(handler, context, taskId, timeStamp, callback);
+		Request request = new Request(stickerCategoryTask);
+		queue.addTask(taskId, request);
+	}
+	
+	public void DownloadStickerSignupUpgradeTask(Context context, JSONArray categoryList, IStickerResultListener callback)
+	{
+		String taskId = getTaskId(StickerRequestType.SHOP, null, null);
+		if (queue.isTaskAlreadyExist(taskId))
+		{
+			return;
+		}
+		BaseStickerDownloadTask stickerCategoryTask = new StickerSignupUpgradeDownloadTask(handler, context, taskId, categoryList, callback);
+		Request request = new Request(stickerCategoryTask);
+		queue.addTask(taskId, request);
+	}
 
 	public boolean isTaskAlreadyExists(StickerRequestType reqType, String stkId, String catId)
 	{
@@ -143,6 +181,23 @@ public class StickerDownloadManager
 			builder.append(StickerRequestType.ENABLE_DISABLE.getLabel());
 			builder.append("\\");
 			builder.append(catId);
+			builder.append("\\");
+		}
+		else if (reqType.getType() == StickerRequestType.SIZE.getType())
+		{
+			builder.append(StickerRequestType.SIZE.getLabel());
+			builder.append("\\");
+			builder.append(catId);
+			builder.append("\\");
+		}
+		else if (reqType.getType() == StickerRequestType.SIGNUP_UPGRADE.getType())
+		{
+			builder.append(StickerRequestType.SIGNUP_UPGRADE.getLabel());
+			builder.append("\\");
+		}
+		else if (reqType.getType() == StickerRequestType.SHOP.getType())
+		{
+			builder.append(StickerRequestType.SHOP.getLabel());
 			builder.append("\\");
 		}
 

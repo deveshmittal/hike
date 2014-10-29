@@ -13,6 +13,7 @@ import android.os.Handler;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.HttpRequestType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.modules.stickerdownloadmgr.retry.DefaultRetryPolicy;
 import com.bsb.hike.utils.AccountUtils;
@@ -50,7 +51,7 @@ public class StickerSizeDownloadTask extends BaseStickerDownloadTask
 			}
 			
 			setDownloadUrl(urlString);
-			HttpResponse response = (HttpResponse) download(null, StickerRequestType.SIZE);
+			HttpResponse response = (HttpResponse) download(null, HttpRequestType.HEAD);
 			int resCode = response.getStatusLine().getStatusCode();
 			// Make sure the response code is 200.
 			if (resCode == 200)

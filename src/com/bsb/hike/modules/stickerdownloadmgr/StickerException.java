@@ -14,6 +14,8 @@ public class StickerException extends Exception
 	public static final short ERROR_CLOSING_FILE = 0x05;
 	
 	public static final short NULL_DATA = 0x06;
+	
+	public static final short EMPTY_CATEGORY_LIST = 0x07;
 
 	
     private int errorCode;

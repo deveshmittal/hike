@@ -17,7 +17,7 @@ import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.NetworkHandler.NetworkType;
-import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.HttpRequestType;
 import com.bsb.hike.modules.stickerdownloadmgr.retry.DefaultRetryPolicy;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
@@ -101,7 +101,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 					urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/stickers";
 				}
 				setDownloadUrl(urlString);
-				JSONObject response = (JSONObject) download(request, StickerRequestType.MULTIPLE);
+				JSONObject response = (JSONObject) download(request, HttpRequestType.POST);
 
 				if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
 				{

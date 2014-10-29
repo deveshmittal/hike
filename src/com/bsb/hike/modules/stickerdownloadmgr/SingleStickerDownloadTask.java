@@ -24,6 +24,7 @@ import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.HikeConstants.STResult;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.HttpRequestType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
@@ -94,7 +95,7 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 			}
 			setDownloadUrl(urlString);
 			
-			JSONObject response = (JSONObject) download(null, StickerRequestType.SINGLE);
+			JSONObject response = (JSONObject) download(null, HttpRequestType.GET);
 			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
 			{
 				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));

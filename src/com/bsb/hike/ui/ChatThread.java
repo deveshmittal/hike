@@ -713,6 +713,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		isOverlayShowing = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.OVERLAY_SHOWING);
 
 		config = getResources().getConfiguration();
+		StickerManager.getInstance().checkAndDownLoadStickerData();
 
 		/* bind views to variables */
 
