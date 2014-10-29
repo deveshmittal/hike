@@ -14,6 +14,7 @@ import android.os.Handler;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.HttpRequestType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
@@ -69,7 +70,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			}
 			setDownloadUrl(urlString);
 			
-			JSONObject response = (JSONObject) download(null, StickerRequestType.PREVIEW);
+			JSONObject response = (JSONObject) download(null, HttpRequestType.GET);
 			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)) || !catId.equals(response.getString(StickerManager.CATEGORY_ID)))
 			{
 				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));

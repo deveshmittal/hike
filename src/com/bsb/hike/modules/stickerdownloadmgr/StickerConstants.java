@@ -13,6 +13,11 @@ public class StickerConstants
 		NEW_CATEGORY, UPDATE, MORE_STICKERS
 	}
 	
+	public enum HttpRequestType
+	{
+		POST, GET, HEAD
+	}
+	
 	public enum StickerRequestType
 	{
 		SINGLE(0, "ss"),
