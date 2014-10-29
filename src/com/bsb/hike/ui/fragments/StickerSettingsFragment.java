@@ -27,7 +27,7 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 
-public class StickerSettingsFragment extends SherlockFragment implements Listener, OnScrollListener, DragScrollProfile, OnItemClickListener
+public class StickerSettingsFragment extends SherlockFragment implements Listener, DragScrollProfile, OnItemClickListener
 {
 	private String[] pubSubListeners = {};
 
@@ -74,7 +74,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		stickerCategories.addAll(StickerManager.getInstance().getMyStickerCategoryList());
 		mAdapter = new StickerSettingsAdapter(getActivity(), stickerCategories);
 		mDslv = (DragSortListView) parent.findViewById(R.id.item_list);
-		mDslv.setOnScrollListener(this);
+		//mDslv.setOnScrollListener(this);
 		mDslv.setAdapter(mAdapter);
 		mDslv.setDragScrollProfile(this);
 		mDslv.setClickable(true);
@@ -129,36 +129,6 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	{
 		StickerSettingsFragment stickerSettingsFragment = new StickerSettingsFragment();
 		return stickerSettingsFragment;
-	}
-
-	@Override
-	public void onScrollStateChanged(AbsListView view, int scrollState)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
-	{
-		// TODO Auto-generated method stub
-		if (previousFirstVisibleItem != firstVisibleItem)
-		{
-			long currTime = System.currentTimeMillis();
-			long timeToScrollOneElement = currTime - previousEventTime;
-			velocity = (int) (((double) 1 / timeToScrollOneElement) * 1000);
-
-			previousFirstVisibleItem = firstVisibleItem;
-			previousEventTime = currTime;
-		}
-
-		if (mAdapter == null)
-		{
-			return;
-		}
-
-		mAdapter.setIsListFlinging(velocity > HikeConstants.MAX_VELOCITY_FOR_LOADING_IMAGES_SMALL);
-
 	}
 
 	@Override
