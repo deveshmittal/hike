@@ -1,6 +1,7 @@
 package com.bsb.hike.providers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.db.DBConstants;
@@ -83,32 +84,43 @@ public class HikeProvider extends ContentProvider
 
 		Cursor c = null;
 
-		// Convert hikeIds to msisdnList since avatar tables have msisdn - image mappings only
-		ArrayList<String> msisdnList = conManager.getMsisdnFromId(selectionArgs);
-
-		if (msisdnList == null || msisdnList.size() == 0)
-		{
-			throw new IllegalArgumentException("Invalid hikeIds");
-		}
-
-		Logger.d(TAG, "msisdnList: " + msisdnList.toString());
-
 		// Identify avatar request
 		switch (sURIMatcher.match(uri))
 		{
 		case ROUNDED_INDEX:
+			
+			// Convert hikeIds to msisdnList since avatar tables have msisdn - image mappings only
+			ArrayList<String> msisdnListRounded = conManager.getMsisdnFromId(selectionArgs);
+
+			if (msisdnListRounded == null || msisdnListRounded.size() == 0)
+			{
+				throw new IllegalArgumentException("Invalid hikeIds");
+			}
+
+			Logger.d(TAG, "msisdnList: " + msisdnListRounded.toString());
 
 			Logger.d(TAG, "Querying rounded avatar table");
 
-			c = hUserDb.query(DBConstants.ROUNDED_THUMBNAIL_TABLE, projection, HikeConstants.MSISDN + " IN " + Utils.getMsisdnStatement(msisdnList), null, null, null, sortOrder);
+			c = hUserDb.query(DBConstants.ROUNDED_THUMBNAIL_TABLE, projection, HikeConstants.MSISDN + " IN " + Utils.getMsisdnStatement(msisdnListRounded), null, null, null,
+					sortOrder);
 
 			break;
 
 		case NORMAL_INDEX:
 
+			// Convert hikeIds to msisdnList since avatar tables have msisdn - image mappings only
+			ArrayList<String> msisdnListNormal = conManager.getMsisdnFromId(selectionArgs);
+
+			if (msisdnListNormal == null || msisdnListNormal.size() == 0)
+			{
+				throw new IllegalArgumentException("Invalid hikeIds");
+			}
+
+			Logger.d(TAG, "msisdnList: " + msisdnListNormal.toString());
+
 			Logger.d(TAG, "Querying normal avatar table");
 
-			c = hUserDb.query(DBConstants.THUMBNAILS_TABLE, projection, HikeConstants.MSISDN + " IN " + Utils.getMsisdnStatement(msisdnList), null, null, null, sortOrder);
+			c = hUserDb.query(DBConstants.THUMBNAILS_TABLE, projection, HikeConstants.MSISDN + " IN " + Utils.getMsisdnStatement(msisdnListNormal), null, null, null, sortOrder);
 
 			break;
 		default:
