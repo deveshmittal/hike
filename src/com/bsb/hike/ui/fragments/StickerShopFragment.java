@@ -39,32 +39,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	{
 		// TODO Auto-generated method stub
 		View parent = inflater.inflate(R.layout.sticker_shop, null);
-		final LinearLayout v = (LinearLayout) parent.findViewById(R.id.update_all_ll);
-		Animation fadeOut = AnimationUtils.loadAnimation(getSherlockActivity(), R.anim.slide_up_noalpha);
-		fadeOut.setAnimationListener(new Animation.AnimationListener()
-		{
-			@Override
-			public void onAnimationStart(Animation animation)
-			{
-				// Called when the Animation starts
-			}
-
-			@Override
-			public void onAnimationEnd(Animation animation)
-			{
-				// Called when the Animation ended
-				// Since we are fading a View out we set the visibility
-				// to GONE once the Animation is finished
-				v.setVisibility(View.VISIBLE);
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation animation)
-			{
-				// This is called each time the Animation repeats
-			}
-		});
-		v.setAnimation(fadeOut);
+		
 		initAdapterAndList();
 		return parent;
 	}
