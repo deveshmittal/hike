@@ -106,7 +106,11 @@ public class CustomStickerCategory extends StickerCategory
 				{
 					Sticker s = new Sticker();
 					s.deSerializeObj(in);
-					list.add(s);
+					File f = new File(s.getSmallStickerPath());
+					if(f.exists())
+					{
+						list.add(s);
+					}
 				}
 				catch (Exception e)
 				{

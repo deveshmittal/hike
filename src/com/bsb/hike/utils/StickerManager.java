@@ -1160,4 +1160,31 @@ public class StickerManager
 		}
 		return stickerPageList;
 	}
+	
+	public JSONArray getAllInitialyInsertedStickerCategories()
+	{
+		JSONObject jsonObj;
+		JSONArray jsonArray = new JSONArray();
+		try
+		{
+			jsonObj = new JSONObject(Utils.loadJSONFromAsset(context, StickerManager.STICKERS_JSON_FILE_NAME));
+			JSONArray stickerCategories = jsonObj.optJSONArray(StickerManager.STICKER_CATEGORIES);
+			for (int i = 0; i < stickerCategories.length(); i++)
+			{
+				JSONObject obj = stickerCategories.optJSONObject(i);
+				String categoryId = obj.optString(StickerManager.CATEGORY_ID);
+				boolean isCustom = obj.optBoolean(StickerManager.IS_CUSTOM);
+				if (!isCustom)
+				{
+					jsonArray.put(categoryId);
+				}
+			}
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return jsonArray;
+	}
 }

@@ -74,7 +74,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	 */
 	public boolean isDisabled(Sticker sticker, Context ctx)
 	{
-		File f = new File(sticker.getSmallStickerPath(ctx));
+		File f = new File(sticker.getSmallStickerPath());
 		return !f.exists();
 	}
 
@@ -98,7 +98,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		return rootPath + HikeConstants.LARGE_STICKER_ROOT + "/" + stickerId;
 	}
 
-	public String getSmallStickerPath(Context context)
+	public String getSmallStickerPath()
 	{
 		return StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId) + HikeConstants.SMALL_STICKER_ROOT + "/" + stickerId;
 	}
@@ -156,6 +156,9 @@ public class Sticker implements Serializable, Comparable<Sticker>
 
 	public void serializeObj(ObjectOutputStream out) throws IOException
 	{
+		// After removing reachedEnd variable, we need to write dummy
+		// boolean, just to ensure backward/forward compatibility
+		out.writeInt(0);
 		out.writeUTF(stickerId);
 		StickerCategory cat = category;
 		if(cat == null)
@@ -167,6 +170,8 @@ public class Sticker implements Serializable, Comparable<Sticker>
 
 	public void deSerializeObj(ObjectInputStream in) throws IOException, ClassNotFoundException
 	{
+		//ignoring this varialbe after reading just to ensure backward compatibility
+		in.readInt();
 		stickerId = in.readUTF();
 		StickerCategory tempcategory = new StickerCategory();
 		tempcategory.deSerializeObj(in);
