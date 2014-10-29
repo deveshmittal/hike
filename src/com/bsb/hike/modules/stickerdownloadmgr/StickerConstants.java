@@ -24,7 +24,9 @@ public class StickerConstants
 		MULTIPLE(1, "sm"),
 		PREVIEW(2, "sp"),
 		ENABLE_DISABLE(3, "sed"),
-		SIZE(4, "ssz");
+		SIZE(4, "ssz"),
+		SIGNUP_UPGRADE(5, "ssu"),
+		SHOP(6, "ssp");
 		
 		private final int type;
 		private final String label;

@@ -103,6 +103,8 @@ public class StickerManager
 	
 	public static final String STICKER_IDS = "stickerIds";
 	
+	public static final String CATEGORY_IDS = "catIds";
+	
 	public static final String RESOURCE_IDS = "resourceIds";
 	
 	public static final String MOVED_HARDCODED_STICKERS_TO_SDCARD = "movedHardCodedStickersToSdcard";
