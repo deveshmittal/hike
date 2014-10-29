@@ -104,7 +104,6 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			viewHolder.categoryPreviewImage = (ImageView) convertView.findViewById(R.id.category_icon);
 			viewHolder.categorySize = (TextView) convertView.findViewById(R.id.category_size);
 			viewHolder.updateAvailable = (TextView) convertView.findViewById(R.id.update_available);
-			viewHolder.checkBox.setTag(category);
 			viewHolder.checkBox.setOnClickListener(this);
 			convertView.setTag(viewHolder);
 			
@@ -133,6 +132,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		{
 			viewHolder.updateAvailable.setVisibility(View.GONE);
 		}
+		viewHolder.checkBox.setTag(category);
 		viewHolder.categoryName.setText(category.getCategoryName());
 		viewHolder.checkBox.setChecked(category.isVisible());
 		viewHolder.categoryPreviewImage.setImageDrawable(StickerManager.getInstance().getCategoryPreviewAsset(mContext, category.getCategoryId()));
