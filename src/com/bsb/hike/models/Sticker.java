@@ -74,7 +74,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	 */
 	public boolean isDisabled(Sticker sticker, Context ctx)
 	{
-		File f = new File(sticker.getSmallStickerPath(ctx));
+		File f = new File(sticker.getSmallStickerPath());
 		return !f.exists();
 	}
 
@@ -98,7 +98,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		return rootPath + HikeConstants.LARGE_STICKER_ROOT + "/" + stickerId;
 	}
 
-	public String getSmallStickerPath(Context context)
+	public String getSmallStickerPath()
 	{
 		return StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId) + HikeConstants.SMALL_STICKER_ROOT + "/" + stickerId;
 	}
