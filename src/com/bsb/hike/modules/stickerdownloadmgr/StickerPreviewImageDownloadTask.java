@@ -70,7 +70,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			setDownloadUrl(urlString);
 			
 			JSONObject response = (JSONObject) download(null, StickerRequestType.PREVIEW);
-			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)) || !catId.equals(response.getString(HikeConstants.CATEGORY_ID)))
+			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)) || !catId.equals(response.getString(StickerManager.CATEGORY_ID)))
 			{
 				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
 				return STResult.DOWNLOAD_FAILED;
