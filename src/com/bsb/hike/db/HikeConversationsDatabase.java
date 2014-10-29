@@ -5668,7 +5668,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				ContentValues contentValues = new ContentValues();
 				if(jsonObj.has(HikeConstants.VISIBLITY))
 				{
-					contentValues.put(DBConstants.IS_VISIBLE, jsonObj.getBoolean(HikeConstants.VISIBLITY));
+					contentValues.put(DBConstants.IS_VISIBLE, jsonObj.getInt(HikeConstants.VISIBLITY));
 				}
 				if(!jsonObj.has(HikeConstants.NUMBER_OF_STICKERS) || !jsonObj.has(HikeConstants.SIZE))
 				{

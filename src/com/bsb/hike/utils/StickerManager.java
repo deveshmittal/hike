@@ -1249,7 +1249,11 @@ public class StickerManager
 				{
 					if(jsonObj.has(HikeConstants.VISIBLITY))
 					{
-						category.setVisible(jsonObj.optBoolean(HikeConstants.VISIBLITY));
+						int visibility = jsonObj.optInt(HikeConstants.VISIBLITY);
+						if(visibility == 1)
+							category.setVisible(true);
+						else
+							category.setVisible(false);
 					}
 					if(!jsonObj.has(HikeConstants.NUMBER_OF_STICKERS) || !jsonObj.has(HikeConstants.SIZE))
 					{
