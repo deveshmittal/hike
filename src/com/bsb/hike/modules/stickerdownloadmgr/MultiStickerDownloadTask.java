@@ -14,14 +14,10 @@ import android.os.Handler;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.STResult;
-import com.bsb.hike.adapters.StickerPageAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.NetworkHandler.NetworkType;
-import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.HttpRequestType;
-import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.modules.stickerdownloadmgr.retry.DefaultRetryPolicy;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
@@ -35,7 +31,6 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	private Context context;
 	private StickerCategory category;
 	private StickerConstants.DownloadType downloadType;
-	private StickerPageAdapter stickerPageAdapter;
 	private int stickerDownloadSize;
 
 	protected MultiStickerDownloadTask(Handler handler, Context ctx, String taskId, StickerCategory category, StickerConstants.DownloadType downloadType, IStickerResultListener callback)
@@ -136,14 +131,6 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 
 					try
 					{
-						Sticker s = new Sticker(category, stickerId);
-						if (downloadType.equals(DownloadType.MORE_STICKERS) || downloadType.equals(DownloadType.UPDATE) && stickerPageAdapter != null)
-						{
-							stickerPageAdapter.addSticker(s);
-						}
-						// some hack : seems server was sending stickers which already exist so it was leading to duplicate issue
-						// so we save small sticker , if not present already
-
 						File f = StickerManager.getInstance().saveLargeStickers(largeStickerDir, stickerId, stickerData);
 						StickerManager.getInstance().saveSmallStickers(smallStickerDir, stickerId, f);
 					}

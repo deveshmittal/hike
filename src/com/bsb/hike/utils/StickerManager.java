@@ -8,6 +8,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -993,7 +994,10 @@ public class StickerManager
 	public List<StickerCategory> getMyStickerCategoryList()
 	{
 		ArrayList<StickerCategory> stickerCategories = new ArrayList<StickerCategory>(stickerCategoriesMap.values());
-		stickerCategories.addAll(HikeConversationsDatabase.getInstance().getAllStickerCategoriesWithVisibility(false).values());
+		Collections.sort(stickerCategories);
+		ArrayList<StickerCategory> invisibleCategories = new ArrayList<StickerCategory>(HikeConversationsDatabase.getInstance().getAllStickerCategoriesWithVisibility(false).values());
+		Collections.sort(invisibleCategories);
+		stickerCategories.addAll(invisibleCategories);
 		Iterator<StickerCategory> it = stickerCategories.iterator();
 		while(it.hasNext())
 		{
@@ -1003,7 +1007,7 @@ public class StickerManager
 				it.remove();
 			}
 		}
-		Collections.sort(stickerCategories);
+		
 		return stickerCategories;
 	}
 	

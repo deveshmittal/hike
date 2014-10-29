@@ -1,12 +1,10 @@
 package com.bsb.hike.adapters;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import android.content.Context;
-import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,9 +28,9 @@ import com.bsb.hike.utils.StickerManager;
 public class StickerSettingsAdapter extends BaseAdapter implements DragSortListener, OnClickListener
 {
 	/**
-	 * Key is ListView position, value is ArrayList position ( which is to be interpreted as stickerCategoryIndex - 1 )
+	 * Index is ListView position, value is ArrayList position ( which is to be interpreted as stickerCategoryIndex - 1 )
 	 */
-	private SparseIntArray mListMapping = new SparseIntArray();
+	private int[] mListMapping;
 
 	private List<StickerCategory> stickerCategories;
 
@@ -43,26 +41,41 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	private boolean isListFlinging;
 
 	private Set<StickerCategory> stickerSet = new HashSet<StickerCategory>();  //Stores the categories which have been reordered
+	
+	private int lastVisibleIndex = 0;   //gives the index of last visible category in the stickerCategoriesList
 
 	public StickerSettingsAdapter(Context context, List<StickerCategory> stickerCategories)
 	{
 		this.mContext = context;
 		this.stickerCategories = stickerCategories;
 		this.mInflater = LayoutInflater.from(mContext);
+		mListMapping = new int[stickerCategories.size()];
+		initialiseMapping(mListMapping, stickerCategories);
+		
 	}
 
 	/**
-	 * Resets listview - arraylist position mapping.
+	 * Initialising the initial array mapping as well as we set the category index of those categories for which the indexes are != (position in arraylist + 1), i.e. the categories are randomly ordered. 
+	 * This is a one time overhead to ensure that next time user comes on this screen, we are able to show visible and invisible categories based on their appropriate order without any extra overhead.
+	 * @param mListMapping
+	 * @param stickerCategoryList
 	 */
-	public void reset()
+	private void initialiseMapping(int[] mListMapping, List<StickerCategory> stickerCategoryList)
 	{
-		resetMappings();
-		notifyDataSetChanged();
-	}
-
-	private void resetMappings()
-	{
-		mListMapping.clear();
+		for(int i=0; i< stickerCategoryList.size(); i++)
+		{
+			StickerCategory category = stickerCategoryList.get(i);
+			mListMapping[i] = i+1;
+			if(category.getCategoryIndex() != (mListMapping[i]))
+			{
+				category.setCategoryIndex(mListMapping[i]);
+				stickerSet.add(category);
+			}
+			if(category.isVisible())
+			{
+				lastVisibleIndex = i;
+			}
+		}
 	}
 
 	@Override
@@ -78,15 +91,13 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	@Override
 	public StickerCategory getItem(int position)
 	{
-		int pos = mListMapping.get(position, position);
-		return stickerCategories.get(pos);
+		return stickerCategories.get(mListMapping[position] - 1);
 	}
 
 	@Override
 	public long getItemId(int position)
 	{
-		// TODO Auto-generated method stub
-		return mListMapping.get(position, position);
+		return mListMapping[position] - 1;
 	}
 
 	@Override
@@ -104,7 +115,6 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			viewHolder.categoryPreviewImage = (ImageView) convertView.findViewById(R.id.category_icon);
 			viewHolder.categorySize = (TextView) convertView.findViewById(R.id.category_size);
 			viewHolder.updateAvailable = (TextView) convertView.findViewById(R.id.update_available);
-			viewHolder.checkBox.setTag(category);
 			viewHolder.checkBox.setOnClickListener(this);
 			convertView.setTag(viewHolder);
 			
@@ -133,6 +143,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		{
 			viewHolder.updateAvailable.setVisibility(View.GONE);
 		}
+		viewHolder.checkBox.setTag(category);
 		viewHolder.categoryName.setText(category.getCategoryName());
 		viewHolder.checkBox.setChecked(category.isVisible());
 		viewHolder.categoryPreviewImage.setImageDrawable(StickerManager.getInstance().getCategoryPreviewAsset(mContext, category.getCategoryId()));
@@ -160,58 +171,66 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	@Override
 	public void drop(int from, int to)
 	{
-		if (true)
-		{ // Some Condition, at which the drop should occur.
-			if (from != to)
-			{
-				int cursorFrom = mListMapping.get(from, from);
-				if (from > to)
-				{
-					for (int i = from; i > to; --i)
-					{
-						mListMapping.put(i, mListMapping.get(i - 1, i - 1));
-					}
-				}
-				
-				else
-				{
-					for (int i = from; i < to; ++i)
-					{
-						mListMapping.put(i, mListMapping.get(i + 1, i + 1));
-					}
-				}
-				
-				mListMapping.put(to, cursorFrom);
-				cleanMapping();
-				if(!HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))  //Resetting the tip flag
-				{
-					HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag}
+		StickerCategory category = getItem(from);
+		if ((from == to) || (!category.isVisible())) // Dropping at the same position. No need to perform Drop.
+		{
+			return;
+		}
 
-				}
-				notifyDataSetChanged();
-				
-				if( from > to)
-				{
-					for(int i = from; i>= to; --i)
-					{
-						addToStickerSet(i);
-					}
-				}
-				else
-				{
-					for (int i = from; i<= to; ++i)
-					{
-						addToStickerSet(i);
-					}
-				}
+		if (from > lastVisibleIndex)
+		{
+			if(to > lastVisibleIndex+1)
+			{
+			   return;
+			}
+			else
+			{
+				lastVisibleIndex++;
+			}
+		}
+
+		int cursorFrom = mListMapping[from];
+		if (from > to)
+		{
+			for (int i = from; i > to; --i)
+			{
+				mListMapping[i] = mListMapping[i - 1];
+			}
+		}
+
+		else
+		{
+			for (int i = from; i < to; ++i)
+			{
+				mListMapping[i] = mListMapping[i + 1];
+			}
+		}
+
+		mListMapping[to] = cursorFrom;
+
+		if (!HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false)) // Resetting the tip flag
+		{
+			HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag}
+
+		}
+		notifyDataSetChanged();
+
+		if (from > to)
+		{
+			for (int i = from; i >= to; --i)
+			{
+				addToStickerSet(i);
 			}
 		}
 		else
 		{
-			return;
+			for (int i = from; i <= to; ++i)
+			{
+				addToStickerSet(i);
+			}
 		}
-			
 	}
+	
 	/**
 	 * Adds to Categories to stickerSet and also changes it's categoryIndex
 	 * @param categoryPos
@@ -219,8 +238,13 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	public void addToStickerSet(int categoryPos)
 	{
 		StickerCategory category = getItem(categoryPos);
-		category.setCategoryIndex(categoryPos + 1);  // stickerCategoryIndex is categoryPos + 1
-		stickerSet.add(category);
+		int oldCategoryIndex = mListMapping[categoryPos];
+		int newCategoryIndex = categoryPos + 1;  // new stickerCategoryIndex is categoryPos + 1
+		if(oldCategoryIndex != newCategoryIndex)
+		{
+			category.setCategoryIndex(newCategoryIndex); 
+			stickerSet.add(category);
+		}
 	}
 
 	@Override
@@ -235,30 +259,6 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	{
 		// TODO Auto-generated method stub
 
-	}
-
-	/**
-	 * Remove unnecessary mappings from sparse array.
-	 */
-	private void cleanMapping()
-	{
-		ArrayList<Integer> toRemove = new ArrayList<Integer>();
-
-		int size = mListMapping.size();
-		for (int i = 0; i < size; ++i)
-		{
-			if (mListMapping.keyAt(i) == mListMapping.valueAt(i))
-			{
-				toRemove.add(mListMapping.keyAt(i));
-			}
-		}
-
-		size = toRemove.size();
-		for (int i = 0; i < size; ++i)
-		{
-			mListMapping.delete(toRemove.get(i));
-		}
-		
 	}
 
 	public void persistChanges()
@@ -291,6 +291,25 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		category.setVisible(visibility);
 		checkBox.setChecked(visibility);
 		stickerSet.add(category);
+		int categoryIdx = stickerCategories.indexOf(category);
+		updateLastVisibleIndex(categoryIdx, category);
+	}
+
+	/**
+	 * Updates the lastVisible Category Index in the list based on the category whose visibility has just been toggled.
+	 * @param categoryIdx
+	 * @param category
+	 */
+	private void updateLastVisibleIndex(int categoryIdx, StickerCategory category)
+	{
+		if(categoryIdx == lastVisibleIndex && (!category.isVisible()))
+		{
+			lastVisibleIndex --;
+		}
+		else if((categoryIdx == lastVisibleIndex + 1) && (category.isVisible()))
+		{
+			lastVisibleIndex ++;
+		}
 	}
 
 	public Set<StickerCategory> getStickerSet()
