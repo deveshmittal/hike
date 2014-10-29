@@ -2065,25 +2065,23 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 			}
 		}
 	}
-	
+
 	public ArrayList<String> getMsisdnFromId(String[] selectionArgs)
 	{
-		
-		Cursor c = getReadableDatabase().query(DBConstants.USERS_TABLE, new String[]{DBConstants.MSISDN}, DBConstants.ID+" IN "+Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null, null, null, null);
-		
-		if(!c.moveToFirst())
-		{
-			return null;
-		}
-		
+		Cursor c = getReadableDatabase().query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN },
+				DBConstants.ID + " IN " + Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null, null, null, null);
+
 		ArrayList<String> msisdnList = new ArrayList<String>();
-		
-		do
+
+		if (c.moveToFirst())
 		{
-			msisdnList.add(c.getString(c.getColumnIndexOrThrow(DBConstants.MSISDN)));
+			do
+			{
+				msisdnList.add(c.getString(c.getColumnIndexOrThrow(DBConstants.MSISDN)));
+			}
+			while (c.moveToNext());
 		}
-		while(c.moveToNext());
-			
+
 		return msisdnList;
 	}
 

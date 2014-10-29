@@ -103,8 +103,6 @@ public class HikeService extends Service
 	public static final int MSG_APP_CONN_STATUS = 6;
 
 	public static final int MSG_APP_INVALID_TOKEN = 7;
-	
-	public static final int SDK_REQ_GET_FRIENDS = -11;
 
 	protected Messenger mApp;
 
@@ -134,6 +132,14 @@ public class HikeService extends Service
 	public static final int MQTT_NOTIFICATION_UPDATE = 2;
 
 	public static final String POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION = "com.bsb.hike.POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION";
+	
+	/************************************************************************/
+	/* SDK Request Ids */
+	/************************************************************************/
+	
+	public static final int SDK_REQ_GET_USERS = -11;
+	
+	public static final int SDK_REQ_GET_LOGGED_USER_INFO = -14;
 
 	/************************************************************************/
 	/* VARIABLES - other local variables */

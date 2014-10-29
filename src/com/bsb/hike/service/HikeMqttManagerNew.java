@@ -29,6 +29,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,14 +51,15 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.MqttPersistenceException;
-import com.bsb.hike.model.HikeFriend;
+import com.bsb.hike.model.HikeUser;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.sdk.HikeSDKStatusCode;
+import com.bsb.hike.sdk.HikeSDKResponseCode;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSDKConstants;
 import com.bsb.hike.utils.HikeSSLUtil;
@@ -344,6 +349,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						return;
 					}
 
+					// TODO: Authenticate request
 					JSONObject reqGetFriendsData = null;
 
 					try
@@ -418,20 +424,69 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 						if (!TextUtils.isEmpty(contactId) && !TextUtils.isEmpty(contactName))
 						{
-							friendJSON.put(HikeFriend.HIKE_FRIEND_ID_KEY, contactId);
-							friendJSON.put(HikeFriend.HIKE_FRIEND_NAME_KEY, contactName);
+							friendJSON.put(HikeUser.HIKE_USER_ID_KEY, contactId);
+							friendJSON.put(HikeUser.HIKE_USER_NAME_KEY, contactName);
 							friendsListJSON.put(friendJSON);
 						}
 					}
 
-					responseJSON.put(HikeFriend.HIKE_FRIEND_LIST_ID, friendsListJSON);
+					responseJSON.put(HikeUser.HIKE_USERS_LIST_ID, friendsListJSON);
 
 					reqGetFriendsBundle.putString(HikeSDKConstants.HIKE_REQ_DATA_ID, responseJSON.toString());
 
 					msg.setData(reqGetFriendsBundle);
 
 					// Set STATUS_OK
-					msg.arg2 = HikeSDKStatusCode.STATUS_OK;
+					msg.arg2 = HikeSDKResponseCode.STATUS_OK;
+
+					msg.replyTo.send(msg);
+
+					break;
+
+				case HikeService.SDK_REQ_GET_LOGGED_USER_INFO:
+					Bundle reqUserInfoBundle = msg.getData();
+
+					if (reqUserInfoBundle == null)
+					{
+						returnExceptionMessageToCaller(msg);
+						return;
+					}
+
+					// TODO: Authenticate request
+
+					// User info is saved in shared preferences
+					SharedPreferences preferences = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);
+
+					ContactInfo userInfo = Utils.getUserContactInfo(preferences);
+
+					JSONObject reqUserInfoResponseJSON = new JSONObject();
+
+					JSONArray reqUserInfoJSONArray = new JSONArray();
+
+					if (userInfo != null)
+					{
+						JSONObject friendJSON = new JSONObject();
+
+						String contactId = userInfo.getId();
+
+						String contactName = userInfo.getNameOrMsisdn();
+
+						if (!TextUtils.isEmpty(contactId) && !TextUtils.isEmpty(contactName))
+						{
+							friendJSON.put(HikeUser.HIKE_USER_ID_KEY, "-1");
+							friendJSON.put(HikeUser.HIKE_USER_NAME_KEY, contactName);
+							
+							reqUserInfoJSONArray.put(friendJSON);
+						}
+					}
+					reqUserInfoResponseJSON.put(HikeUser.HIKE_USERS_LIST_ID, reqUserInfoJSONArray);
+
+					reqUserInfoBundle.putString(HikeSDKConstants.HIKE_REQ_DATA_ID, reqUserInfoResponseJSON.toString());
+
+					msg.setData(reqUserInfoBundle);
+
+					// Set STATUS_OK
+					msg.arg2 = HikeSDKResponseCode.STATUS_OK;
 
 					msg.replyTo.send(msg);
 
