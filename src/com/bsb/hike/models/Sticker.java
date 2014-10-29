@@ -156,6 +156,9 @@ public class Sticker implements Serializable, Comparable<Sticker>
 
 	public void serializeObj(ObjectOutputStream out) throws IOException
 	{
+		// After removing reachedEnd variable, we need to write dummy
+		// boolean, just to ensure backward/forward compatibility
+		out.writeInt(0);
 		out.writeUTF(stickerId);
 		StickerCategory cat = category;
 		if(cat == null)
@@ -167,6 +170,8 @@ public class Sticker implements Serializable, Comparable<Sticker>
 
 	public void deSerializeObj(ObjectInputStream in) throws IOException, ClassNotFoundException
 	{
+		//ignoring this varialbe after reading just to ensure backward compatibility
+		in.readInt();
 		stickerId = in.readUTF();
 		StickerCategory tempcategory = new StickerCategory();
 		tempcategory.deSerializeObj(in);
