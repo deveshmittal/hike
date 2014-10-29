@@ -59,6 +59,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 		int totalNumber = 0;
 		boolean reachedEnd = false;
 		boolean retry = true;
+		int existingStickerNumber = 0;
 
 		JSONArray existingStickerIds = new JSONArray();
 
@@ -68,6 +69,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			for (String stickerId : stickerIds)
 			{
 				existingStickerIds.put(stickerId);
+				existingStickerNumber ++;
 				Logger.d(getClass().getSimpleName(), "Existing id: " + stickerId);
 			}
 		}
@@ -81,7 +83,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 
 		Utils.makeNoMediaFile(largeStickerDir);
 		Utils.makeNoMediaFile(smallStickerDir);
-		while (!reachedEnd)
+		while (shouldContinue(reachedEnd, totalNumber, existingStickerNumber))
 		{
 
 			try
@@ -125,6 +127,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 					String stickerId = keys.next();
 					String stickerData = data.getString(stickerId);
 					existingStickerIds.put(stickerId);
+					existingStickerNumber++;
 
 					try
 					{
@@ -156,13 +159,72 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			{
 				getCallback().onProgressUpdated(totalNumber);
 			}
-			if(category.getTotalStickers() < totalNumber)
+			if(category.getTotalStickers() != totalNumber)
 			{
 				category.setTotalStickers(totalNumber);
 				HikeConversationsDatabase.getInstance().updateStickerCountForStickerCategory(category.getCategoryId(), totalNumber);
 			}
-		}	
-		return STResult.SUCCESS;
+		}
+		
+		if(isSucessfull(reachedEnd, totalNumber, existingStickerNumber))
+		{
+			return STResult.SUCCESS;
+		}
+		else
+		{
+			return STResult.DOWNLOAD_FAILED;
+		}
+	}
+	
+	/**
+	 * This function checks whether we should continue downloading stickers. 
+	 * 
+	 * @param reachedEnd
+	 * 	-- true if we have downloaded all the stickers false if we have not
+	 * @param totalNumber
+	 * 	-- total number of stickers in category
+	 * @param existingStickerNumber
+	 * 	-- existing number of stickers in category 
+	 * @return
+	 * 	false if reached end = true Or totalNumber count is less than zero (in case of server error) Or existing sticker count is greater
+	 * 	than or equal to total number
+	 */
+	private boolean shouldContinue(boolean reachedEnd, int totalNumber, int existingStickerNumber)
+	{
+		if(reachedEnd || totalNumber < 0 || (totalNumber > 0 && existingStickerNumber >= totalNumber))
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	
+	/**
+	 * This function checks whether call to download stickers is successful or not 
+	 * 
+	 * @param reachedEnd
+	 * 	-- true if we have downloaded all the stickers false if we have not
+	 * @param totalNumber
+	 * 	-- total number of stickers in category
+	 * @param existingStickerNumber
+	 * 	-- existing number of stickers in category 
+	 * @return
+	 * 	true if reachedend = true Or totalNumber count is greater than zero and existing sticker count is greater
+	 * 	than or equal to total number
+	 */
+	private boolean isSucessfull(boolean reachedEnd, int totalNumber, int existingStickerNumber)
+	{
+		
+		if(reachedEnd || (totalNumber > 0 && existingStickerNumber >= totalNumber))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	@Override
