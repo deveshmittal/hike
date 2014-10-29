@@ -94,12 +94,4 @@
         android:text="RESTORE"
         android:textColor="@color/white" />
 
-    <Button
-        android:id="@+id/btn_skip"
-        android:layout_width="212dp"
-        android:layout_height="48dp"
-        android:background="@color/white"
-        android:text="Skip>>"
-        android:textColor="@color/black_25" />
-
 </LinearLayout>

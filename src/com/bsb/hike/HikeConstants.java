@@ -997,6 +997,8 @@ public class HikeConstants
 
 		public static final String SIGNUP_PART = "signupPart";
 
+		public static final String SIGNUP_RESTORE_STATUS = "signupRestoreStatus";
+
 		public static final String SIGNUP_TEXT = "signupText";
 
 		public static final String SIGNUP_ERROR = "signupError";

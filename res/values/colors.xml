@@ -359,5 +359,6 @@
     <color name="restoring_red">#fe6565</color>
     <color name="restoring_orange">#ffbc3c</color>
     <color name="restoring_green">#38e5be</color>
+    <color name="restore_success_green">#69dd71</color>
 </resources>
 	

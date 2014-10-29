@@ -96,18 +96,10 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 		public String value;
 		
-		public boolean status;
-
 		public StateValue(State state, String value)
 		{
 			this.state = state;
 			this.value = value;
-		}
-		
-		public StateValue(State state, boolean status)
-		{
-			this.state = state;
-			this.status = status;
 		}
 	};
 
@@ -545,6 +537,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
+		this.data = null;
 		if (DBBackupRestore.getInstance().isBackupAvailable())
 		{
 			publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
@@ -563,24 +556,31 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			}
 		}
 
-		Logger.d("backup","performRestore data: " + this.data);
-		if (!TextUtils.isEmpty(this.data));
+		while (!TextUtils.isEmpty(this.data))
 		{
 			boolean status = DBBackupRestore.getInstance().restoreDB();
-			publishProgress(new StateValue(State.RESTORED_BACKUP,status));
-//			synchronized (this)
-//			{
-//				try
-//				{
-//					this.wait();
-//				}
-//				catch (InterruptedException e)
-//				{
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//					Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
-//				}
-//			}
+			if (status)
+			{
+				publishProgress(new StateValue(State.RESTORED_BACKUP,Boolean.TRUE.toString()));
+				this.data = null;
+			}
+			else
+			{
+				publishProgress(new StateValue(State.RESTORED_BACKUP,Boolean.FALSE.toString()));
+			}
+			synchronized (this)
+			{
+				try
+				{
+					this.wait();
+				}
+				catch (InterruptedException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
+				}
+			}
 		}
 		Logger.d("SignupTask", "Publishing Token_Created");
 

@@ -1,18 +1,10 @@
 package com.bsb.hike.ui;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.net.URI;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,11 +29,9 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.telephony.TelephonyManager;
-import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -51,17 +41,13 @@ import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.view.animation.BounceInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
@@ -85,7 +71,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
-import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -151,6 +136,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	private boolean addressBookError = false;
 
 	private boolean msisdnErrorDuringSignup = false;
+	
+	private String backupRestored = null;
 
 	public static final int RESTORING_BACKUP = 5;
 
@@ -286,6 +273,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		if (savedInstanceState != null)
 		{
 			msisdnErrorDuringSignup = savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR);
+			backupRestored = savedInstanceState.getString(HikeConstants.Extras.SIGNUP_RESTORE_STATUS);
 			int dispChild = savedInstanceState.getInt(HikeConstants.Extras.SIGNUP_PART);
 			showingSecondLoadingTxt = savedInstanceState.getBoolean(HikeConstants.Extras.SHOWING_SECOND_LOADING_TXT);
 			removeAnimation();
@@ -317,7 +305,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				prepareLayoutForScanning(savedInstanceState);
 				break;
 			case RESTORING_BACKUP:
-				setupOnRestoreProgress();
+				prepareLayoutForRestoringAnimation(savedInstanceState);
 				break;
 			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
@@ -599,6 +587,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private void submitClicked()
 	{
+		if (viewFlipper.getDisplayedChild() == BACKUP_FOUND || viewFlipper.getDisplayedChild() == RESTORING_BACKUP)
+		{
+			mTask.addUserInput(null);
+			return;
+		}
 		if (invalidNum != null)
 		{
 			invalidNum.setVisibility(View.GONE);
@@ -970,7 +963,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	
 	private void prepareLayoutForBackupFound(Bundle savedInstanceState)
 	{
-		nextBtnContainer.setVisibility(View.GONE);
+		nextBtnContainer.setVisibility(View.VISIBLE);
+		arrow.setVisibility(View.GONE);
+		postText.setText("Skip");
 		setupActionBarTitle();
 		preRestoreAnimation();
 	}
@@ -979,7 +974,72 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	{
 		nextBtnContainer.setVisibility(View.GONE);
 		setupActionBarTitle();
-		onRestoreAnimation();
+		
+		if (TextUtils.isEmpty(backupRestored))
+		{
+			TextView title = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_title);
+			TextView hint = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_hint);
+			title.setText("Restoring...");
+			hint.setText("please wait, this may take a while");
+			if (savedInstanceState == null)
+			{
+				onRestoreAnimation();
+			}
+			else
+			{
+				setupOnRestoreProgress();
+			}
+		}
+		else if (Boolean.TRUE.toString().equals(backupRestored))
+		{
+			TextView title = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_title);
+			TextView hint = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_hint);
+			title.setText("Restored");
+			hint.setText("your messages");
+			View restoreItems = (View) restoringBackupLayout.findViewById(R.id.restore_items);
+			ImageView restoreSuccess = (ImageView) restoringBackupLayout.findViewById(R.id.restore_success);
+			restoreItems.setVisibility(View.INVISIBLE);
+			restoreSuccess.setVisibility(View.VISIBLE);
+			if (savedInstanceState == null)
+			{
+				onRestoreSuccessAnimation();
+			}
+		}
+		else
+		{
+			TextView title = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_title);
+			TextView hint = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_hint);
+			title.setText("Something went wrong.");
+			hint.setText("would you like to retry?");
+			nextBtnContainer.setVisibility(View.VISIBLE);
+			arrow.setVisibility(View.GONE);
+			postText.setText("Skip");
+			final View restoreProgress = (View) restoringBackupLayout.findViewById(R.id.restore_progress);
+			final ImageView restoreFail = (ImageView) restoringBackupLayout.findViewById(R.id.restore_fail);
+			final Button retry  = (Button) restoringBackupLayout.findViewById(R.id.btn_retry);
+			
+			retry.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					backupRestored = null;
+					nextBtnContainer.setVisibility(View.GONE);
+					restoreProgress.setVisibility(View.VISIBLE);
+					restoreFail.setVisibility(View.INVISIBLE);
+					retry.setVisibility(View.INVISIBLE);
+					setupOnRestoreProgress();
+					mTask.addUserInput("true");
+				}
+			});
+			restoreProgress.setVisibility(View.INVISIBLE);
+			restoreFail.setVisibility(View.VISIBLE);
+			retry.setVisibility(View.VISIBLE);
+			if (savedInstanceState == null)
+			{
+				onRestoreFailAnimation();
+			}
+		}
 	}
 	
 	private void preRestoreAnimation()
@@ -997,11 +1057,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		ImageView artConv = (ImageView) backupFoundLayout.findViewById(R.id.art_conversation);
 		ImageView artSmiley = (ImageView) backupFoundLayout.findViewById(R.id.art_smiley);
 		Button btnRestore = (Button) backupFoundLayout.findViewById(R.id.btn_restore);
-		Button btnSkip = (Button) backupFoundLayout.findViewById(R.id.btn_skip);
 		
 		btnRestore.setOnClickListener(btnRestoreClick);
-		btnSkip.setOnClickListener(btnRestoreSkipClick);
-		
 		
 		// Animation Setup for smiley image
 		ScaleAnimation smileyScaleAnimation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 0.0f,Animation.RELATIVE_TO_SELF, 1.0f);
@@ -1016,7 +1073,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		smileyAnimSet.setFillAfter(true);
 		smileyAnimSet.setStartOffset(smileyOffset);
 		
-		Logger.d("gaurav","starting animation");
 		artSmiley.setVisibility(View.INVISIBLE);
 		artSmiley.startAnimation(smileyAnimSet);
 		
@@ -1033,7 +1089,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		convAnimSet.setFillAfter(true);
 		convAnimSet.setStartOffset(convOffset);
 		
-		Logger.d("gaurav","starting animation");
 		artConv.setVisibility(View.INVISIBLE);
 		artConv.startAnimation(convAnimSet);
 
@@ -1050,7 +1105,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		profileAnimSet.setFillAfter(true);
 		profileAnimSet.setStartOffset(profileOffset);
 		
-		Logger.d("gaurav","starting animation");
 		artProfile.setVisibility(View.INVISIBLE);
 		artProfile.startAnimation(profileAnimSet);
 		
@@ -1060,11 +1114,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		restoreAlphaAnimation.setFillAfter(true);
 		restoreAlphaAnimation.setStartOffset(restoreOffset);
 		
-		Logger.d("gaurav","starting animation");
 		btnRestore.setVisibility(View.INVISIBLE);
 		btnRestore.startAnimation(restoreAlphaAnimation);
-		btnSkip.setVisibility(View.INVISIBLE);
-		btnSkip.startAnimation(restoreAlphaAnimation);
 	}
 
 	private void finishPreRestoreAnimation()
@@ -1082,13 +1133,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		ImageView artConv = (ImageView) backupFoundLayout.findViewById(R.id.art_conversation);
 		ImageView artSmiley = (ImageView) backupFoundLayout.findViewById(R.id.art_smiley);
 		Button btnRestore = (Button) backupFoundLayout.findViewById(R.id.btn_restore);
-		Button btnSkip = (Button) backupFoundLayout.findViewById(R.id.btn_skip);
 		TextView textBackup = (TextView) backupFoundLayout.findViewById(R.id.txt_backup_title);
 		TextView textView = (TextView) backupFoundLayout.findViewById(R.id.txt_backup_hint);
 		
-		btnRestore.setOnClickListener(btnRestoreClick);
-		btnSkip.setOnClickListener(btnRestoreSkipClick);
-		
+		btnRestore.setClickable(false);
 		
 		// Animation Setup for smiley image
 		ScaleAnimation smileyScaleAnimation = new ScaleAnimation(1.0f, 0.0f, 1.0f, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,Animation.RELATIVE_TO_SELF, 1.0f);
@@ -1103,7 +1151,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		smileyAnimSet.setFillAfter(true);
 		smileyAnimSet.setStartOffset(smileyOffset);
 		
-		Logger.d("gaurav","finishing animation");
 		artSmiley.setVisibility(View.INVISIBLE);
 		artSmiley.startAnimation(smileyAnimSet);
 		
@@ -1120,7 +1167,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		convAnimSet.setFillAfter(true);
 		convAnimSet.setStartOffset(convOffset);
 		
-		Logger.d("gaurav","finishing animation");
 		artConv.setVisibility(View.INVISIBLE);
 		artConv.startAnimation(convAnimSet);
 
@@ -1137,7 +1183,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		profileAnimSet.setFillAfter(true);
 		profileAnimSet.setStartOffset(profileOffset);
 		
-		Logger.d("gaurav","finishing animation");
 		artProfile.setVisibility(View.INVISIBLE);
 		artProfile.startAnimation(profileAnimSet);
 		
@@ -1158,17 +1203,14 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			@Override
 			public void onAnimationEnd(Animation animation)
 			{
-				mTask.addUserInput("true");
 				viewFlipper.setDisplayedChild(RESTORING_BACKUP);
 				prepareLayoutForRestoringAnimation(null);
+				mTask.addUserInput("true");
 			}
 		});
 		
-		Logger.d("gaurav","finishing animation");
 		btnRestore.setVisibility(View.INVISIBLE);
 		btnRestore.startAnimation(fadeOutAnimation);
-		btnSkip.setVisibility(View.INVISIBLE);
-		btnSkip.startAnimation(fadeOutAnimation);
 		textBackup.setVisibility(View.INVISIBLE);
 		textBackup.startAnimation(fadeOutAnimation);
 		textView.setVisibility(View.INVISIBLE);
@@ -1191,7 +1233,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	{
 		final ImageView sdCard = (ImageView) restoringBackupLayout.findViewById(R.id.sd_card);
 		final ImageView profilePic = (ImageView) restoringBackupLayout.findViewById(R.id.profile_pic);
-		final View restoreProgress = (View) restoringBackupLayout.findViewById(R.id.restore_process);
+		final View restoreProgress = (View) restoringBackupLayout.findViewById(R.id.restore_progress);
 		profilePic.setVisibility(View.INVISIBLE);
 		restoreProgress.setVisibility(View.INVISIBLE);
 		
@@ -1205,8 +1247,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				float widthScale = (float) sdCardProp.width/sdCard.getWidth();
 				float heightScale = (float) sdCardProp.height/sdCard.getHeight();
 				
-				Logger.d("gaurav"," prev props: " + sdCardProp.left + " : " + sdCardProp.top);
-				Logger.d("gaurav"," curr props: " + screenLocation[0] + " : " + screenLocation[1]);
 				TranslateAnimation sdCardTranslateAnimation = new TranslateAnimation(Animation.ABSOLUTE, (sdCardProp.left-screenLocation[0])/widthScale, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, (sdCardProp.top-screenLocation[1])/heightScale, Animation.RELATIVE_TO_SELF, 0);
 				ScaleAnimation sdCardScaleAnimation = new ScaleAnimation(widthScale, 1, heightScale, 1);
 				AnimationSet sdCardAnimationSet = new AnimationSet(true);
@@ -1240,6 +1280,65 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				sdCard.startAnimation(sdCardAnimationSet);
 			}
 		});
+	}
+	
+	private void onRestoreSuccessAnimation()
+	{
+		View restoreItems = (View) restoringBackupLayout.findViewById(R.id.restore_items);
+		ImageView restoreSuccess = (ImageView) restoringBackupLayout.findViewById(R.id.restore_success);
+		
+		AlphaAnimation fadeout = new AlphaAnimation(1, 0);
+		ScaleAnimation scaleDown = new ScaleAnimation(1, 0, 1, 0, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		AnimationSet itemsRemove = new AnimationSet(true);
+		itemsRemove.addAnimation(fadeout);
+		itemsRemove.addAnimation(scaleDown);
+		itemsRemove.setInterpolator(new DecelerateInterpolator());
+		itemsRemove.setDuration(200);
+		itemsRemove.setFillAfter(true);
+		
+		ScaleAnimation scaleUp = new ScaleAnimation(0, 1, 0, 1, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		scaleUp.setInterpolator(new OvershootInterpolator());
+		scaleUp.setStartOffset(100);
+		scaleUp.setDuration(300);
+		scaleUp.setFillAfter(true);
+		
+		scaleUp.setAnimationListener(new AnimationListener()
+		{
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				mTask.addUserInput(null);
+			}
+		});
+		
+		restoreItems.startAnimation(itemsRemove);
+		restoreSuccess.startAnimation(scaleUp);
+	}
+	
+	private void onRestoreFailAnimation()
+	{
+		final ImageView restoreFail = (ImageView) restoringBackupLayout.findViewById(R.id.restore_fail);
+		final Button retry  = (Button) restoringBackupLayout.findViewById(R.id.btn_retry);
+		
+		ScaleAnimation scaleUp = new ScaleAnimation(0, 1, 0, 1, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		scaleUp.setInterpolator(new OvershootInterpolator());
+		scaleUp.setStartOffset(100);
+		scaleUp.setDuration(300);
+		
+		AlphaAnimation fadeIn = new AlphaAnimation(0, 1);
+		fadeIn.setInterpolator(new DecelerateInterpolator());
+		fadeIn.setStartOffset(100);
+		fadeIn.setDuration(200);
+		
+		restoreFail.startAnimation(scaleUp);
+		restoreFail.setVisibility(View.VISIBLE);
+		retry.setVisibility(View.VISIBLE);
 	}
 	
 	private void setupOnRestoreProgress()
@@ -1398,15 +1497,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			initializeRestore();
 		}
 	};
-	
-	private OnClickListener btnRestoreSkipClick = new OnClickListener()
-	{
-		@Override
-		public void onClick(View v)
-		{
-			//mTask.addUserInput(null);
-		}
-	};
 
 	private void resetViewFlipper()
 	{
@@ -1525,6 +1615,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		Session.saveSession(session, outState);
 
 		outState.putInt(HikeConstants.Extras.SIGNUP_PART, viewFlipper.getDisplayedChild());
+		outState.putString(HikeConstants.Extras.SIGNUP_RESTORE_STATUS, backupRestored);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout != null && loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, errorDialog != null);
 		if (enterEditText != null)
@@ -1730,12 +1821,17 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				showErrorMsg();
 			}
+			break;
 		case BACKUP_AVAILABLE:
 			if (viewFlipper.getDisplayedChild() != BACKUP_FOUND)
 			{
 				viewFlipper.setDisplayedChild(BACKUP_FOUND);
 				prepareLayoutForBackupFound(null);
 			}
+			break;
+		case RESTORED_BACKUP:
+			backupRestored = stateValue.value;
+			prepareLayoutForRestoringAnimation(null);
 			break;
 		}
 		setListeners();
