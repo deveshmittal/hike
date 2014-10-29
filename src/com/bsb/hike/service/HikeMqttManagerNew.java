@@ -309,7 +309,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 		void returnExceptionMessageToCaller(Message argMessage)
 		{
-			argMessage.arg2 = HikeSDKStatusCode.STATUS_EXCEPTION;
+			argMessage.arg2 = HikeSDKResponseCode.STATUS_EXCEPTION;
 			try
 			{
 				argMessage.replyTo.send(argMessage);
@@ -340,7 +340,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					long mId = b.getLong(HikeConstants.MESSAGE_ID, -1);
 					send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
-				case HikeService.SDK_REQ_GET_FRIENDS:
+				case HikeService.SDK_REQ_GET_USERS:
 					Bundle reqGetFriendsBundle = msg.getData();
 
 					if (reqGetFriendsBundle == null)
