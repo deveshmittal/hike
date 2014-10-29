@@ -2566,15 +2566,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				animatedProgress = animatedProgress / fss.getTotalSize() ;
 			}
 			
-			holder.circularProgress.stopAnimation();
-			holder.circularProgress.setAnimatedProgress(0, (int) (animatedProgress * 100), 6 * 1000, msgId);
+			holder.circularProgress.resetProgress();
+			if (Utils.isHoneycombOrHigher()){
+				holder.circularProgress.stopAnimation();
+				holder.circularProgress.setAnimatedProgress(0, (int) (animatedProgress * 100), 6 * 1000, msgId);
+			}else{
+				holder.circularProgress.setProgress(animatedProgress);
+			}
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}
 		else if(fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
 		{
 			holder.circularProgress.setProgress(progress * 0.01f);
-			holder.circularProgress.stopAnimation();
+			if (Utils.isHoneycombOrHigher())
+				holder.circularProgress.stopAnimation();
 			if(fss.getFTState() == FTState.IN_PROGRESS) {
 				float animatedProgress = 5 * 0.01f;
 				if (fss.getTotalSize() > 0)
@@ -2582,7 +2588,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					animatedProgress = (float) chunkSize;
 					animatedProgress = animatedProgress / fss.getTotalSize() ;
 				}
-				holder.circularProgress.setAnimatedProgress(progress, progress + (int) (animatedProgress * 100), 6 * 1000, msgId);
+				if (Utils.isHoneycombOrHigher())
+					holder.circularProgress.setAnimatedProgress(progress, progress + (int) (animatedProgress * 100), 6 * 1000, msgId);
 			}
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);

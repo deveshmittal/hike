@@ -664,15 +664,23 @@ public class HoloCircularProgress extends View {
 				animation.setInterpolator(new LinearInterpolator());
 				if (android.os.Build.VERSION.SDK_INT >= 18)
 					animation.setAutoCancel(true);
-				animation.addUpdateListener(animationListener);
+				animation.addUpdateListener(new AnimatorUpdateListener()
+				{
+					
+					@Override
+					public void onAnimationUpdate(ValueAnimator animation)
+					{
+						// TODO Auto-generated method stub
+						float progress = ((Integer)animation.getAnimatedValue()) * 0.01f;
+						progress = (float) (Math.round(progress*100.0)/100.0);
+						HoloCircularProgress.this.setProgress(progress);
+					}
+				});
 				animation.start();
 			}
 			else
 			{
 				animation.setIntValues(start, target);
-				// animation.setIntValues(this.target);
-				animation.removeUpdateListener(animationListener);
-				animation.addUpdateListener(animationListener);
 				animation.setDuration(duration);
 				animation.start();
 			}
@@ -690,17 +698,9 @@ public class HoloCircularProgress extends View {
 		}
 	}
 	
-	AnimatorUpdateListener animationListener = new AnimatorUpdateListener()
+	public void resetProgress()
 	{
-		
-		@Override
-		public void onAnimationUpdate(ValueAnimator animation)
-		{
-			// TODO Auto-generated method stub
-			float progress = ((Integer)animation.getAnimatedValue()) * 0.01f;
-			progress = (float) (Math.round(progress*100.0)/100.0);
-			HoloCircularProgress.this.setProgress(progress);
-		}
-	};
+		mProgress = 0.0f;
+	}
 
 }
