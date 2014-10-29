@@ -167,6 +167,8 @@ public class HikeService extends Service
 	private StickerManager sm;
 	
 	private static Context context;
+	
+	public static boolean appForegrounded = false;
 
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */

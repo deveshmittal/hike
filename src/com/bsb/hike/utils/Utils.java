@@ -2598,11 +2598,13 @@ public class Utils
 				object.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
+				HikeService.appForegrounded = true;
 			}
 			else if (!dueToConnect)
 			{
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_BACKGROUNDED, null);
+				HikeService.appForegrounded = false;
 			}
 			else
 			{
