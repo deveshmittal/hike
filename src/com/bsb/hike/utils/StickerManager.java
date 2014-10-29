@@ -45,11 +45,14 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.StickerPageAdapter;
+import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.CustomStickerCategory;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
+import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
@@ -164,6 +167,8 @@ public class StickerManager
 	public static final String CATEGORY_SIZE = "categorySize";
 
 	public static final String SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE = "shownHardcodedCategoryUpdateAvailable";
+	
+	public static final String STICKERS_SIZE_DOWNLOADED = "stickersSizeDownloaded";
 	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
@@ -1188,5 +1193,69 @@ public class StickerManager
 			e.printStackTrace();
 		}
 		return jsonArray;
+	}
+
+	public void checkAndDownLoadStickerData()
+	{
+		if (!HikeSharedPreferenceUtil.getInstance(context).getData(StickerManager.STICKERS_SIZE_DOWNLOADED, false))
+		{
+			
+			StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(context, getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
+			{
+				
+				@Override
+				public void onSuccess(Object result)
+				{
+					// TODO Auto-generated method stub
+					JSONArray resultData = (JSONArray) result;
+					HikeConversationsDatabase.getInstance().updateStickerCategoriesInDb(resultData);
+					HikeSharedPreferenceUtil.getInstance(context).saveData(StickerManager.STICKERS_SIZE_DOWNLOADED, true);
+					updateStickerCategoriesMetadata(resultData);
+				}
+				
+				@Override
+				public void onProgressUpdated(double percentage)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void onFailure(Object result, Throwable exception)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+			});
+		}
+	}
+	
+	public void updateStickerCategoriesMetadata(JSONArray jsonArray)
+	{
+		int length = jsonArray.length();
+		for (int i = 0; i < length; i++)
+		{
+			JSONObject jsonObj  = jsonArray.optJSONObject(i);
+			if(jsonObj != null)
+			{
+				String catId = jsonObj.optString(StickerManager.CATEGORY_ID);
+				
+				StickerCategory category = stickerCategoriesMap.get(catId);
+				if(category != null)
+				{
+					if(jsonObj.has(HikeConstants.VISIBLITY))
+					{
+						category.setVisible(jsonObj.optBoolean(HikeConstants.VISIBLITY));
+					}
+					if(!jsonObj.has(HikeConstants.NUMBER_OF_STICKERS) || !jsonObj.has(HikeConstants.SIZE))
+					{
+						return;
+					}
+					category.setTotalStickers(jsonObj.optInt(HikeConstants.NUMBER_OF_STICKERS));
+					category.setCategorySize(jsonObj.optInt(HikeConstants.SIZE));
+				}
+				
+			}
+		}
 	}
 }

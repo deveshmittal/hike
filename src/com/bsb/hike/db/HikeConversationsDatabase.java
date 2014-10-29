@@ -5663,12 +5663,26 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			for (int i=0; i<jsonArray.length(); i++)
 			{
 				JSONObject jsonObj  = jsonArray.getJSONObject(i);
-				String catId = jsonObj.optString(HikeConstants.CATEGORY_ID);
-				boolean visiblity = jsonObj.optBoolean(HikeConstants.VISIBLITY);
-				int totalStickers = jsonObj.optInt(HikeConstants.NUMBER_OF_STICKERS);
-				int categorySize = jsonObj.optInt(HikeConstants.SIZE);
-				
-				updateStickerCategoriesInDb(catId, visiblity, totalStickers, categorySize);
+				String catId = jsonObj.optString(StickerManager.CATEGORY_ID);
+
+				ContentValues contentValues = new ContentValues();
+				if(jsonObj.has(HikeConstants.VISIBLITY))
+				{
+					contentValues.put(DBConstants.IS_VISIBLE, jsonObj.getBoolean(HikeConstants.VISIBLITY));
+				}
+				if(!jsonObj.has(HikeConstants.NUMBER_OF_STICKERS) || !jsonObj.has(HikeConstants.SIZE))
+				{
+					return;
+				}
+				contentValues.put(DBConstants.TOTAL_NUMBER, jsonObj.getInt(HikeConstants.NUMBER_OF_STICKERS));
+				contentValues.put(DBConstants.CATEGORY_SIZE, jsonObj.getInt(HikeConstants.SIZE));
+
+				int rows = mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { catId });
+				if (rows == 0)
+				{
+					mDb.update(DBConstants.STICKER_SHOP_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { catId });
+				}
+			
 			}
 			mDb.setTransactionSuccessful();
 		}
@@ -5684,17 +5698,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	}
 	
 	public void updateStickerCategoriesInDb(String catId, boolean visiblity, int totalStickers, int categorySize)
-	{
-		ContentValues contentValues = new ContentValues();
-		contentValues.put(DBConstants.IS_VISIBLE, visiblity);
-		contentValues.put(DBConstants.TOTAL_NUMBER, totalStickers);
-		contentValues.put(DBConstants.CATEGORY_SIZE, categorySize);
-
-		int rows = mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { catId });
-		if (rows == 0)
-		{
-			mDb.update(DBConstants.STICKER_SHOP_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { catId });
-		}
-	}
+	{}
 	
 }
