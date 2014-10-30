@@ -25,22 +25,22 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/bubble_beach_2" />
 
-    <Button
+    <ImageButton
         android:id="@+id/declineButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="57dp"
-        android:text="Decline" />
+        android:background="@drawable/decline_voip_call" />
 
-    <Button
+    <ImageButton
         android:id="@+id/acceptButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/declineButton"
-        android:layout_alignRight="@+id/declineButton"
-        android:layout_marginBottom="40dp"
-        android:text="Accept" />
+        android:layout_alignLeft="@+id/PhoneNumberView1"
+        android:layout_marginBottom="18dp"
+        android:background="@drawable/accept_voip_call" />
 
 </RelativeLayout>

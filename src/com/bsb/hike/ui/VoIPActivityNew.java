@@ -1,8 +1,7 @@
 package com.bsb.hike.ui;
 
-import org.json.JSONObject;
 import org.json.JSONException;
-
+import org.json.JSONObject;
 import org.webrtc.PeerConnection;
 
 import android.app.Activity;
@@ -34,17 +33,16 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-//import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.service.VoIPServiceNew;
-import com.google.android.gms.internal.af;
+//import com.bsb.hike.db.HikeUserDatabase;
 
 public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 
 	private String callerId;
 	private String dialedId;
 	private ImageButton endCall;
-	private Button acceptCall;
-	private Button declineCall;
+	private ImageButton acceptCall;
+	private ImageButton declineCall;
 	private ImageButton speakerButton;
 	private ImageButton muteButton;
 	private ImageView speakerSound;
@@ -146,9 +144,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		callNo = (TextView)this.findViewById(R.id.CallerId);
 //		callNo.setText(HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(callerId).getNameOrMsisdn());
 		callNo.setText("Incoming Number Goes Here!");
-		acceptCall = (Button)this.findViewById(R.id.acceptButton);
-		acceptCall.setBackgroundColor(Color.GREEN);
-		acceptCall.setTextColor(Color.WHITE);
+		acceptCall = (ImageButton)this.findViewById(R.id.acceptButton);
+
 		acceptCall.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -164,9 +161,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			
 		});
 		
-		declineCall = (Button)this.findViewById(R.id.declineButton);
-		declineCall.setBackgroundColor(Color.RED);
-		declineCall.setTextColor(Color.WHITE);
+		declineCall = (ImageButton)this.findViewById(R.id.declineButton);
+
 		declineCall.setOnClickListener(new OnClickListener(){
 
 			@Override
