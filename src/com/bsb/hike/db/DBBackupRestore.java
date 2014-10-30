@@ -26,7 +26,7 @@ public class DBBackupRestore
 
 	private static final String[] dbNames = { DBConstants.CONVERSATIONS_DATABASE_NAME };
 
-	private static final String[] resetTableNames = { };
+	private static final String[] resetTableNames = { DBConstants.STICKER_SHOP_TABLE, DBConstants.STICKER_CATEGORIES_TABLE };
 	
 	private Context mContext;
 
