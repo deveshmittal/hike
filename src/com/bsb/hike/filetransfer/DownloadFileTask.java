@@ -80,6 +80,8 @@ public class DownloadFileTask extends FileTransferBase
 			String downLoadUrl = hikeFile.getDownloadURL();
 			if(TextUtils.isEmpty(downLoadUrl))
 				downLoadUrl = (AccountUtils.fileTransferBaseDownloadUrl + fileKey);
+			else if(AccountUtils.ssl)
+				downLoadUrl = downLoadUrl.replace("http", "https");
 				
 			mUrl = new URL(downLoadUrl);
 
