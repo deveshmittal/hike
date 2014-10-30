@@ -6,7 +6,7 @@
     android:versionName="3.3.5" >
 
     <uses-sdk
-        android:minSdkVersion="9"
+        android:minSdkVersion="11"
         android:targetSdkVersion="17" />
 
     <permission
@@ -315,6 +315,14 @@
     		 <!-- android:theme="@style/TranslucentBlack" -->
 
              
+         </activity>
+         
+         <activity
+             android:name="com.bsb.hike.ui.ReceiveCallActivity"
+             android:launchMode="singleTask"
+             android:taskAffinity=""
+             android:excludeFromRecents="true"
+             android:theme="@style/TranslucentBlack">
          </activity>
                      
             <activity
