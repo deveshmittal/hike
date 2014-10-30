@@ -181,10 +181,12 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 	{
 		try
 		{
+			Logger.d(StickerDownloadManager.TAG, "retrying task : " + taskId);
 			retryPolicy.retry(e);
 		}
 		catch(Exception ex)
 		{
+			Logger.d(StickerDownloadManager.TAG, "downlad failed for task : " + taskId);
 			throw ex;
 		}
 	}

@@ -10,6 +10,7 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.NetworkHandler.NetworkType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
+import com.bsb.hike.utils.Logger;
 
 public class StickerDownloadManager
 {
@@ -22,6 +23,8 @@ public class StickerDownloadManager
 	private Handler handler;
 	
 	private NetworkHandler networkHandler;
+	
+	public static final String TAG = "StickerDownloadManager";
 
 	private StickerDownloadManager(Context ctx)
 	{
@@ -58,6 +61,7 @@ public class StickerDownloadManager
 		String taskId = getTaskId(StickerRequestType.SINGLE, stkId, catId);
 		if (queue.isTaskAlreadyExist(taskId))
 		{
+			Logger.d(TAG, "Download SingleStickerTask for catId : " + catId + "  stkId : " + stkId + " alreadyExists");
 			return;
 		}
 		BaseStickerDownloadTask singleTask = new SingleStickerDownloadTask(handler, context, taskId, stkId, catId, callback);
@@ -68,6 +72,11 @@ public class StickerDownloadManager
 	public void DownloadMultipleStickers(StickerCategory cat, StickerConstants.DownloadType downloadType, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.MULTIPLE, null, cat.getCategoryId());
+		if (queue.isTaskAlreadyExist(taskId))
+		{
+			Logger.d(TAG, "DownloadMultipleStickers task for catId : " + cat.getCategoryId() +  " already exists");
+			return;
+		}
 		if (queue.isTaskAlreadyExist(taskId))
 		{
 			return;
@@ -82,6 +91,7 @@ public class StickerDownloadManager
 		String taskId = getTaskId(StickerRequestType.PREVIEW, null, cat.getCategoryId());
 		if (queue.isTaskAlreadyExist(taskId))
 		{
+			Logger.d(TAG, "DownloadStickersPrevieImage task for catId : " + cat.getCategoryId() +  " already exists");
 			return;
 		}
 		BaseStickerDownloadTask stickerCategoryTask = new StickerPreviewImageDownloadTask(handler, context, taskId, cat, callback);
@@ -94,6 +104,7 @@ public class StickerDownloadManager
 		String taskId = getTaskId(StickerRequestType.ENABLE_DISABLE, null, cat.getCategoryId());
 		if (queue.isTaskAlreadyExist(taskId))
 		{
+			Logger.d(TAG, "DownloadStickersEnableDisable task for catId : " + cat.getCategoryId() +  " already exists");
 			return;
 		}
 		BaseStickerDownloadTask stickerCategoryTask = new StickerEDImageDownloadTask(handler, context, taskId, cat, callback);
@@ -106,6 +117,7 @@ public class StickerDownloadManager
 		String taskId = getTaskId(StickerRequestType.SIZE, null, cat.getCategoryId());
 		if (queue.isTaskAlreadyExist(taskId))
 		{
+			Logger.d(TAG, "DownloadStickersSize task for catId : " + cat.getCategoryId() +  " already exists");
 			return;
 		}
 		BaseStickerDownloadTask stickerCategoryTask = new StickerSizeDownloadTask(handler, context, taskId, cat, callback);
@@ -118,6 +130,7 @@ public class StickerDownloadManager
 		String taskId = getTaskId(StickerRequestType.SHOP, null, null);
 		if (queue.isTaskAlreadyExist(taskId))
 		{
+			Logger.d(TAG, "DownloadStickersShop task " + " already exists");
 			return;
 		}
 		BaseStickerDownloadTask stickerCategoryTask = new StickerShopDownloadTask(handler, context, taskId, timeStamp, callback);
@@ -130,6 +143,7 @@ public class StickerDownloadManager
 		String taskId = getTaskId(StickerRequestType.SHOP, null, null);
 		if (queue.isTaskAlreadyExist(taskId))
 		{
+			Logger.d(TAG, "DownloadStickersSignupUpdrade task " + " already exists");
 			return;
 		}
 		BaseStickerDownloadTask stickerCategoryTask = new StickerSignupUpgradeDownloadTask(handler, context, taskId, categoryList, callback);
