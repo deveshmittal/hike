@@ -1,8 +1,7 @@
 package com.bsb.hike.ui;
 
-import org.json.JSONObject;
 import org.json.JSONException;
-
+import org.json.JSONObject;
 import org.webrtc.PeerConnection;
 
 import android.app.Activity;
@@ -26,6 +25,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,19 +33,20 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-//import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.service.VoIPServiceNew;
-import com.google.android.gms.internal.af;
+//import com.bsb.hike.db.HikeUserDatabase;
 
 public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 
 	private String callerId;
 	private String dialedId;
-	private Button endCall;
-	private Button acceptCall;
-	private Button declineCall;
+	private ImageButton endCall;
+	private ImageButton acceptCall;
+	private ImageButton declineCall;
 	private ImageButton speakerButton;
 	private ImageButton muteButton;
+	private ImageView speakerSound;
+	private ImageView micSlash;
 	private TextView callNo;
 	private TextView inCallCallNo;
 	private TextView inCallTimer;	
@@ -143,9 +144,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		callNo = (TextView)this.findViewById(R.id.CallerId);
 //		callNo.setText(HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(callerId).getNameOrMsisdn());
 		callNo.setText("Incoming Number Goes Here!");
-		acceptCall = (Button)this.findViewById(R.id.acceptButton);
-		acceptCall.setBackgroundColor(Color.GREEN);
-		acceptCall.setTextColor(Color.WHITE);
+		acceptCall = (ImageButton)this.findViewById(R.id.acceptButton);
+
 		acceptCall.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -161,9 +161,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			
 		});
 		
-		declineCall = (Button)this.findViewById(R.id.declineButton);
-		declineCall.setBackgroundColor(Color.RED);
-		declineCall.setTextColor(Color.WHITE);
+		declineCall = (ImageButton)this.findViewById(R.id.declineButton);
+
 		declineCall.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -221,6 +220,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			
 		});
 		speakerButton = (ImageButton)this.findViewById(R.id.SpeakerButton1);
+		speakerSound = (ImageView)this.findViewById(R.id.speakerSound);
+		micSlash = (ImageView)this.findViewById(R.id.micSlash);
 		speakerButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -229,7 +230,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 				changeSpeakerButton();
 			}
 		});
-		endCall = (Button)this.findViewById(R.id.endCallButton);
+		endCall = (ImageButton)this.findViewById(R.id.endCallButton);
 		endCall.setBackgroundColor(Color.RED);
 		endCall.setOnClickListener(new OnClickListener() {
 			
@@ -303,10 +304,10 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	
 	private void changeMuteButton() {
 		if(isMute){
-			muteButton.setBackgroundColor(Color.RED);
+			micSlash.setVisibility(ImageView.VISIBLE);
 			isMute = false;
 		} else {
-			muteButton.setBackgroundColor(Color.GREEN);
+			micSlash.setVisibility(ImageView.INVISIBLE);
 			isMute = true;
 		}
 		
@@ -314,10 +315,10 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	
 	private void changeSpeakerButton(){
 		if(!isSpeakerOn){
-			speakerButton.setImageResource(R.drawable.ic_sound_unchecked);
+			speakerSound.setVisibility(ImageView.INVISIBLE);
 			isSpeakerOn = true;
 		} else {
-			speakerButton.setImageResource(R.drawable.ic_sound_checked);
+			speakerSound.setVisibility(ImageView.VISIBLE);
 			isSpeakerOn = false;
 		}
 		
