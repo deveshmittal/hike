@@ -26,6 +26,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,11 +42,13 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 
 	private String callerId;
 	private String dialedId;
-	private Button endCall;
+	private ImageButton endCall;
 	private Button acceptCall;
 	private Button declineCall;
 	private ImageButton speakerButton;
 	private ImageButton muteButton;
+	private ImageView speakerSound;
+	private ImageView micSlash;
 	private TextView callNo;
 	private TextView inCallCallNo;
 	private TextView inCallTimer;	
@@ -221,6 +224,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			
 		});
 		speakerButton = (ImageButton)this.findViewById(R.id.SpeakerButton1);
+		speakerSound = (ImageView)this.findViewById(R.id.speakerSound);
+		micSlash = (ImageView)this.findViewById(R.id.micSlash);
 		speakerButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -229,7 +234,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 				changeSpeakerButton();
 			}
 		});
-		endCall = (Button)this.findViewById(R.id.endCallButton);
+		endCall = (ImageButton)this.findViewById(R.id.endCallButton);
 		endCall.setBackgroundColor(Color.RED);
 		endCall.setOnClickListener(new OnClickListener() {
 			
@@ -303,10 +308,10 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	
 	private void changeMuteButton() {
 		if(isMute){
-			muteButton.setBackgroundColor(Color.RED);
+			micSlash.setVisibility(ImageView.VISIBLE);
 			isMute = false;
 		} else {
-			muteButton.setBackgroundColor(Color.GREEN);
+			micSlash.setVisibility(ImageView.INVISIBLE);
 			isMute = true;
 		}
 		
@@ -314,10 +319,10 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	
 	private void changeSpeakerButton(){
 		if(!isSpeakerOn){
-			speakerButton.setImageResource(R.drawable.ic_sound_unchecked);
+			speakerSound.setVisibility(ImageView.INVISIBLE);
 			isSpeakerOn = true;
 		} else {
-			speakerButton.setImageResource(R.drawable.ic_sound_checked);
+			speakerSound.setVisibility(ImageView.VISIBLE);
 			isSpeakerOn = false;
 		}
 		
