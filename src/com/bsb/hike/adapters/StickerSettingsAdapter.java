@@ -137,6 +137,10 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		
 		if(category.getState() == StickerCategory.UPDATE)
 		{
+			if(!category.isVisible())
+			{
+				viewHolder.updateAvailable.setTextColor(mContext.getResources().getColor(R.color.shop_update_invisible_color));
+			}
 			viewHolder.updateAvailable.setVisibility(View.VISIBLE);
 		}
 		else

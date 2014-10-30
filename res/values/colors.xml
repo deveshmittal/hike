@@ -370,5 +370,6 @@
     <color name="white_100">#FFFFFFFF</color>
     <color name="sticker_shop_update_color">#4769a6</color>
     <color name="shop_update_details_color">#C4EF94</color>
+    <color name="shop_update_invisible_color">#cccccc</color>
 </resources>
 	
