@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import android.R.integer;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -31,6 +32,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
@@ -254,6 +256,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
+		if (oldVersion < newVersion)
+		{
+			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+			Editor editor = appPrefs.edit();
+			editor.putInt(HikeConstants.PREVIOUS_CONV_DB_VERSION, oldVersion);
+			editor.commit();
+		}
 		if (db == null)
 		{
 			db = mDb;
@@ -625,6 +634,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				dropAndRecreateStatusTable(db);
 			}
 		}
+	}
+
+	public void upgrade(int oldVersion, int newVersion)
+	{
+		onUpgrade(mDb, oldVersion, newVersion);
+	}
+	
+	public void clearTable(String table)
+	{
+		mDb.delete(table, null, null);
 	}
 
 	private String getStatusTableCreationStatement()
