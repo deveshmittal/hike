@@ -81,7 +81,6 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.view.CustomTypeFace;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
@@ -1185,8 +1184,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					{
 						String categoryId = msgExtrasJson.getString(StickerManager.FWD_CATEGORY_ID);
 						String stickerId = msgExtrasJson.getString(StickerManager.FWD_STICKER_ID);
-						int stickerIdx = msgExtrasJson.getInt(StickerManager.FWD_STICKER_INDEX);
-						Sticker sticker = new Sticker(categoryId, stickerId, stickerIdx);
+						Sticker sticker = new Sticker(categoryId, stickerId);
 						multipleMessageList.add(sendSticker(sticker, categoryId, arrayList));
 						boolean isDis = sticker.isDisabled(sticker, this.getApplicationContext());
 						// add this sticker to recents if this sticker is not disabled
@@ -1557,16 +1555,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		JSONObject metadata = new JSONObject();
 		try
 		{
-			String categoryName;
-			if (sticker.getCategory().categoryId == StickerCategoryId.unknown)
-			{
-				categoryName = categoryIdIfUnknown;
-			}
-			else
-			{
-				categoryName = sticker.getCategory().categoryId.name();
-			}
-			metadata.put(StickerManager.CATEGORY_ID, categoryName);
+			String categoryId = sticker.getCategoryId();
+			metadata.put(StickerManager.CATEGORY_ID, categoryId);
 
 			metadata.put(StickerManager.STICKER_ID, sticker.getStickerId());
 

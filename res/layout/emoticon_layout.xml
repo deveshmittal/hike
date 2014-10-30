@@ -27,6 +27,7 @@
                 android:background="#4f5455" />
 
             <ImageView
+                android:id="@+id/erase_key_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/emoticon_erase_key_background_selector"

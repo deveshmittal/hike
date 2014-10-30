@@ -426,8 +426,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				String countryCode = accountPrefs.getString(HikeMessengerApp.COUNTRY_CODE, "");
 				boolean isSAUser = countryCode.equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE);
 
-				StickerManager.setStickersForIndianUsers(HikeConstants.INDIA_COUNTRY_CODE.equals(countryCode), accountPrefs);
-
 				Editor accountEditor = accountPrefs.edit();
 				accountEditor.putBoolean(HikeMessengerApp.JUST_SIGNED_UP, true);
 				if (mActivityState != null)
