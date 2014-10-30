@@ -269,6 +269,8 @@ public class DownloadFileTask extends FileTransferBase
 						closeStreams(raf, in);
 						return FTResult.CANCELLED;
 					case IN_PROGRESS:
+						//When downloading file from cloudfront, then we are getting extra quotes at start and end of md5. So need to remove the quotes
+						md5Hash = removeExtraQuotes(md5Hash);
 						Logger.d(getClass().getSimpleName(), "Server md5 : " + md5Hash);
 						String file_md5Hash = Utils.fileToMD5(tempDownloadedFile.getPath());
 						if (md5Hash != null)
@@ -482,5 +484,14 @@ public class DownloadFileTask extends FileTransferBase
 		this.pausedProgress = -1;
 		if(_state != FTState.PAUSED)
 			sendProgress();
+	}
+	
+	private String removeExtraQuotes(String mText){
+		String result = mText;
+		if(mText.startsWith("\"") && mText.endsWith("\"")){
+			result = result.substring(1);
+			result = result.substring(0, result.length() - 1);
+		}
+		return result;
 	}
 }
