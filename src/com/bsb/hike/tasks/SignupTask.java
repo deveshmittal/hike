@@ -562,9 +562,9 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			boolean status = DBBackupRestore.getInstance(context).restoreDB();
 			if (status)
 			{
-				publishProgress(new StateValue(State.RESTORED_BACKUP,Boolean.TRUE.toString()));
 				ContactManager.getInstance().init(context);
 				this.data = null;
+				publishProgress(new StateValue(State.RESTORED_BACKUP,Boolean.TRUE.toString()));
 			}
 			else
 			{

@@ -304,6 +304,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			case SCANNING_CONTACTS:
 				prepareLayoutForScanning(savedInstanceState);
 				break;
+			case BACKUP_FOUND:
+				prepareLayoutForBackupFound(savedInstanceState);
+				break;
 			case RESTORING_BACKUP:
 				prepareLayoutForRestoringAnimation(savedInstanceState);
 				break;
@@ -965,7 +968,12 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		arrow.setVisibility(View.GONE);
 		postText.setText("Skip");
 		setupActionBarTitle();
-		preRestoreAnimation();
+		Button btnRestore = (Button) backupFoundLayout.findViewById(R.id.btn_restore);
+		btnRestore.setOnClickListener(btnRestoreClick);
+		if (savedInstanceState == null)
+		{
+			preRestoreAnimation();
+		}
 	}
 	
 	private void prepareLayoutForRestoringAnimation(Bundle savedInstanceState)
