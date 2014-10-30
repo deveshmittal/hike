@@ -406,6 +406,14 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		final List<Sticker> stickersList = category.getStickerList(activity);
 		final List<StickerPageAdapterItem> stickerPageList = StickerManager.getInstance().generateStickerPageAdapterItemList(stickersList);
 		
+		/**
+		 * Added logic to add update state of category if stickers were deleted from the folder
+		 */
+		if((category.getState() == StickerCategory.NONE) && stickersList.size() > 0 && (stickersList.size() < category.getTotalStickers()))
+		{
+			category.setState(StickerCategory.UPDATE);
+		}
+		
 		int state = category.getState(); 
 		/* We add UI elements based on the current state of the sticker category*/
 		addStickerPageAdapterItem(category, stickerPageList);
