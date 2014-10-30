@@ -6070,6 +6070,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					clearTempData();
 					return;
 				}
+				// Added this to avoid twice upload on capturing image from camera. 
+				//Issue is happening on device Samsung Ace.GT-S5830i due to "onActivityResult" called twice for image capture.
+				else if(requestCode == HikeConstants.IMAGE_CAPTURE_CODE)
+				{
+					if(selectedFile == null || !selectedFile.exists())
+						return;
+				}
 				else
 				{
 					String fileUriStart = "file://";
