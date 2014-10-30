@@ -350,7 +350,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private StickerEmoticonIconPageIndicator iconPageIndicator;
 
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.SMS_CREDIT_CHANGED,
-			HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_FAILED, HikePubSub.ICON_CHANGED,
+			HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED, HikePubSub.SERVER_RECEIVED_MSG,HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.MESSAGE_FAILED, HikePubSub.ICON_CHANGED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END, HikePubSub.CONTACT_ADDED, HikePubSub.UPLOAD_FINISHED,
 			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER,
 			HikePubSub.DELETE_MESSAGE, HikePubSub.GROUP_REVIVED, HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE,
@@ -1421,7 +1421,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		}
 		optionsList.add(new OverFlowMenuItem(getString(R.string.clear_chat), 5));
-		optionsList.add(new OverFlowMenuItem(getString(R.string.email_chat), 3));
+		if(messages.size() > 0)
+		{
+			optionsList.add(new OverFlowMenuItem(getString(R.string.email_chat), 3));
+		}
 
 		if (mConversation instanceof GroupConversation)
 		{
@@ -1725,7 +1728,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			// Poke message can only be deleted
 			selectedNonTextMsg(isMsgSelected);
-			selectedNonForwadableMsg(isMsgSelected);
 		}
 		else if (message.isStickerMessage())
 		{
@@ -1783,7 +1785,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		String message = mComposeView.getText().toString();
 
 
-		ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, message, isConversationOnHike());
+		ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, message, isConversationOnHike());
 		if (showingImpMessagePinCreate)
 		{
 			convMessage.setMessageType((Integer) v.getTag());
@@ -2035,8 +2037,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						if (msgExtrasJson.has(HikeConstants.Extras.MSG))
 						{
 							String msg = msgExtrasJson.getString(HikeConstants.Extras.MSG);
-							ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, msg, isConversationOnHike());
+							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, msg, isConversationOnHike());
 							sendMessage(convMessage);
+						}else if(msgExtrasJson.has(HikeConstants.Extras.POKE)){
+							// as we will be changing msisdn and hike status while inserting in DB
+							ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, getString(R.string.poke_msg), isConversationOnHike());
+							JSONObject metadata = new JSONObject();
+							try
+							{
+								metadata.put(HikeConstants.POKE, true);
+								convMessage.setMetadata(metadata);
+								sendMessage(convMessage);
+							}
+							catch (JSONException e)
+							{
+								Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
+							}
 						}
 						else if (msgExtrasJson.has(HikeConstants.Extras.FILE_PATH))
 						{
@@ -2300,8 +2316,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return false;
 			}
 
-			ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(mContactNumber, false, true);
+			ContactInfo contactInfo = HikeMessengerApp.getContactManager().getContact(mContactNumber, true, true);
 			mConversation = new Conversation(mContactNumber, (contactInfo != null) ? contactInfo.getName() : null, contactInfo.isOnhike());
+			mConversation.setMessages(HikeConversationsDatabase.getInstance().getConversationThread(mContactNumber, toLoad, mConversation, -1));
 		}
 		/*
 		 * Setting a flag which tells us whether the group contains sms users or not.
@@ -2361,7 +2378,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		boolean addBlockHeader = false;
 		if (!(mConversation instanceof GroupConversation))
 		{
-			contactInfo = HikeMessengerApp.getContactManager().getContact(mContactNumber, false,true);
+			contactInfo = HikeMessengerApp.getContactManager().getContact(mContactNumber, true,true);
 
 			favoriteType = contactInfo.getFavoriteType();
 
@@ -2604,6 +2621,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 */
 		wasOrientationChanged = false;
 
+		/*
+		 * Fix for action mode remaining open after multi-forward. Also, destroying action mode in the end so that above objects get initialized.
+		 */
+		if(isActionModeOn)
+		{
+			destroyActionMode();
+		}
 		return true;
 	}
 
@@ -3223,7 +3247,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 
 			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(mConversation.getMsisdn());
-			mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT, mConversation.getMsisdn());
 			mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
 			Logger.d("UnreadBug", "Unread count event triggered");
@@ -3371,7 +3394,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					// return to
 					// sender
 
-					mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT, mConversation.getMsisdn());
 					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 				}
 
@@ -3533,24 +3555,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))
 		{
 			long msgId = ((Long) object).longValue();
-			ConvMessage msg = findMessageById(msgId);
-			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
+			setStateAndUpdateView(msgId, true);
+		}
+		else if (HikePubSub.SERVER_RECEIVED_MULTI_MSG.equals(type))
+		{
+			Pair<Long, Integer> p  = (Pair<Long, Integer>) object;
+			long baseId = p.first;
+			int count = p.second;
+			for(long msgId=baseId; msgId<(baseId+count) ; msgId++)
 			{
-				if (activityVisible && (!msg.isTickSoundPlayed()) && Utils.isPlayTickSound(getApplicationContext()))
-				{
-					Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
-				}
-				msg.setTickSoundPlayed(true);
-				msg.setState(ConvMessage.State.SENT_CONFIRMED);
-				if (!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
-				{
-					if (!msg.isSMS())
-					{
-						mAdapter.addToUndeliverdMessage(msg);
-					}
-				}
-				runOnUiThread(mUpdateAdapter);
+				setStateAndUpdateView(msgId, false);
 			}
+			if (mAdapter == null)
+			{
+				return;
+			}
+			runOnUiThread(mUpdateAdapter);
 		}
 		else if (HikePubSub.ICON_CHANGED.equals(type))
 		{
@@ -4159,7 +4179,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					// TODO make the calls here.
 					mPubSub.publish(HikePubSub.MQTT_PUBLISH, jsonObject);
-					mPubSub.publish(HikePubSub.RESET_UNREAD_COUNT, mConversation.getMsisdn());
 					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 				}
 			}
@@ -4240,6 +4259,50 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true);
 				}
 			});
+		}
+	}
+
+	private void setStateAndUpdateView(long msgId, boolean updateView)
+	{
+		/*
+		 * This would happen in the case if the events calling this method are called before the conversation is setup.
+		 */
+		if (mConversation == null || mAdapter == null)
+		{
+			return;
+		}
+		ConvMessage msg = findMessageById(msgId);
+		
+		/*
+		 * This is a hackish check. For some cases we were getting convMsg in
+		 * another user's messageMap. which should not happen ideally. that was
+		 * leading to showing hikeOfflineTip in wrong ChatThread.
+		 */
+		if(msg == null || TextUtils.isEmpty(msg.getMsisdn())  || !msg.getMsisdn().equals(mContactNumber))
+		{
+			Logger.i("ChatThread", "We are getting a wrong msisdn convMessage object in " + mContactNumber + " ChatThread");
+			return;
+		}	
+		
+		if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
+		{
+			if (activityVisible && (!msg.isTickSoundPlayed()) && Utils.isPlayTickSound(getApplicationContext()))
+			{
+				Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
+			}
+			msg.setTickSoundPlayed(true);
+			msg.setState(ConvMessage.State.SENT_CONFIRMED);
+			if (!(mConversation instanceof GroupConversation) && mConversation.isOnhike())
+			{
+				if (!msg.isSMS())
+				{
+					mAdapter.addToUndeliverdMessage(msg);
+				}
+			}
+			if(updateView)
+			{
+				runOnUiThread(mUpdateAdapter);
+			}
 		}
 	}
 
@@ -7115,7 +7178,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void sendPoke()
 	{
-		ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, getString(R.string.poke_msg), isConversationOnHike());
+		ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, getString(R.string.poke_msg), isConversationOnHike());
 
 		JSONObject metadata = new JSONObject();
 		try
@@ -7158,7 +7221,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void sendSticker(Sticker sticker, String categoryIdIfUnknown)
 	{
-		ConvMessage convMessage = Utils.makeConvMessage(mConversation, mContactNumber, "Sticker", isConversationOnHike());
+		ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, "Sticker", isConversationOnHike());
 
 		JSONObject metadata = new JSONObject();
 		try
@@ -7667,7 +7730,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		for (int i = 0; i < menu.size(); i++)
 		{
 			MenuItem item = menu.getItem(i);
-			if (mOptionsList.get(item.getItemId()))
+			if (mOptionsList.get(item.getItemId()) != null && mOptionsList.get(item.getItemId()))
 			{
 				item.setVisible(true);
 			}
@@ -7778,7 +7841,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		case R.id.forward_msgs:
 			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			Collections.sort(selectedMsgIds);
-			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FORWARD_MSG);
 			Intent intent = new Intent(ChatThread.this, ComposeChatActivity.class);
 			String msg;
 			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
@@ -7805,6 +7868,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
 						multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_ID, sticker.getStickerId());
 						multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_INDEX, sticker.getStickerIndex());
+					}else if(message.getMetadata()!=null && message.getMetadata().isPokeMessage()){
+						multiMsgFwdObject.put(HikeConstants.Extras.POKE, true);
 					}
 					else
 					{

@@ -342,15 +342,15 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		{
 			setContentView(R.layout.profile);
 			this.profileType = ProfileType.GROUP_INFO;
-			HikeMessengerApp.getPubSub().addListeners(this, groupInfoPubSubListeners);
 			setupGroupProfileScreen();
+			HikeMessengerApp.getPubSub().addListeners(this, groupInfoPubSubListeners);
 		}
 		else if (getIntent().hasExtra(HikeConstants.Extras.CONTACT_INFO))
 		{
 			setContentView(R.layout.profile);
 			this.profileType = ProfileType.CONTACT_INFO;
-			HikeMessengerApp.getPubSub().addListeners(this, contactInfoPubSubListeners);
 			setupContactProfileScreen();
+			HikeMessengerApp.getPubSub().addListeners(this, contactInfoPubSubListeners);
 		}
 		else if(getIntent().hasExtra(HikeConstants.Extras.CONTACT_INFO_TIMELINE))
 		{
@@ -358,8 +358,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			View parent = findViewById(R.id.parent_layout);
 			parent.setBackgroundColor(getResources().getColor(R.color.standerd_background)); 
 			this.profileType = ProfileType.CONTACT_INFO_TIMELINE;
-			HikeMessengerApp.getPubSub().addListeners(this, contactInfoPubSubListeners);
 			setupContactTimelineScreen();
+			HikeMessengerApp.getPubSub().addListeners(this, contactInfoPubSubListeners);
 		}
 		else
 		{
@@ -374,10 +374,10 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			if (getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false))
 			{
 				// set pubsub listeners
-				HikeMessengerApp.getPubSub().addListeners(this, profilEditPubSubListeners);
 				setContentView(R.layout.profile_edit);
 				this.profileType = ProfileType.USER_PROFILE_EDIT;
 				setupEditScreen();
+				HikeMessengerApp.getPubSub().addListeners(this, profilEditPubSubListeners);
 			}
 			else
 			{
@@ -385,8 +385,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				View parent = findViewById(R.id.parent_layout);
 				parent.setBackgroundColor(getResources().getColor(R.color.standerd_background)); //Changing background color form white for self profile
 				this.profileType = ProfileType.USER_PROFILE;
-				HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
 				setupProfileScreen(savedInstanceState);
+				HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
 			}
 		}
 		if (mActivityState.groupEditDialogShowing)
@@ -615,20 +615,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			Utils.onCallClicked(ProfileActivity.this, mLocalMSISDN);
 			break;
 		case R.id.unfriend:
-			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND)
-			{
-				contactInfo.setFavoriteType(FavoriteType.REQUEST_SENT);
-
-				Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, contactInfo.getFavoriteType());
-				HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
-			}
-			else
-			{
-				contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
-
-				Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, contactInfo.getFavoriteType());
-				HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
-			}
+			FavoriteType fav = Utils.checkAndUnfriendContact(contactInfo);
+			contactInfo.setFavoriteType(fav);
 			invalidateOptionsMenu();
 			break;
 		case R.id.edit_group_picture:
@@ -2192,7 +2180,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					@Override
 					public void run()
 					{
-						if(profileType == ProfileType.CONTACT_INFO)
+						if(profileType == ProfileType.CONTACT_INFO || profileType == ProfileType.GROUP_INFO)
 						{
 							updateProfileImageInHeaderView();
 						}

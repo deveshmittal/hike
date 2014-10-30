@@ -647,6 +647,8 @@ public class HikeConstants
 	public static final int NEW_PARTICIPANT = 2;
 
 	public static final String MAIL = "support@hike.in";
+	
+	public static final int MAX_RECENTS_TO_SHOW = 10;
 
 	// Had to add this constant since its only available in the android API for
 	// Honeycomb and higher.
@@ -955,6 +957,7 @@ public class HikeConstants
 		public static final String INVITE = "invite";
 
 		public static final String MSG = "msg";
+		public static final String POKE = "poke";
 
 		public static final String PREF = "pref";
 
@@ -1039,6 +1042,8 @@ public class HikeConstants
 		public static final String URL_TO_LOAD = "urlToLoad";
 
 		public static final String TITLE = "title";
+		
+		public static final String WEBVIEW_ALLOW_LOCATION = "allocLoc";
 
 		public static final String FIRST_TIME_USER = "firstTimeUser";
 
@@ -1405,6 +1410,10 @@ public class HikeConstants
 		 */
 		public static final String COMPOSE_REFRESH_CONTACTS = "compSrefContcts";
 
+		public static final String SELECT_ALL_HIKE_CONTACTS = "compSslctAllFwd";
+
+		public static final String CONFIRM_FORWARD = "compSconfFwd";
+
 		/*
 		 * Drawer screen <screen> = drS <event> = homE, gC, inV, reW, creD, proF, settinG
 		 */
@@ -1721,6 +1730,8 @@ public class HikeConstants
 		public static final String BULK_MESSAGE = "bm";
 
 		public static final String REMOVE_PIC = "icr";
+		
+		public static final String MULTIPLE_FORWARD = "mm";
 
 	}
 
@@ -1874,6 +1885,8 @@ public class HikeConstants
 
 	public static final int SHARED_MEDIA_TYPE = 1;
 	
+	public static final int NORMAL_MESSAGE_TYPE = 0;
+	public static final int MULTI_FORWARD_MESSAGE_TYPE = 1;
 	public static final int SHARED_PIN_TYPE = 2;
-	
+	public static final String SHOWN_MULTI_FORWARD_TIP = "shownMultiForwardTip";
 }

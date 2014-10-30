@@ -70,6 +70,7 @@ import com.bsb.hike.models.EmptyConversationContactItem;
 import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationItem;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
@@ -182,12 +183,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.MESSAGE_DELIVERED,
 			HikePubSub.NEW_CONVERSATION, HikePubSub.MESSAGE_SENT, HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED, HikePubSub.CONTACT_ADDED,
-			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT,
+			HikePubSub.LAST_MESSAGE_DELETED, HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.GROUP_LEFT,
 			HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, HikePubSub.CLEAR_CONVERSATION, HikePubSub.CONVERSATION_CLEARED_BY_DELETING_LAST_MESSAGE, 
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
 			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
-			HikePubSub.CONTACT_DELETED };
+			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG };
 
 	private ConversationsAdapter mAdapter;
 
@@ -1217,13 +1218,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				 */
 				return;
 			}
-
-			ConvMessage lastConvMessage = null;
+			conv.setUnreadCount(0);
 
 			/*
 			 * look for the latest received messages and set them to read. Exit when we've found some read messages
 			 */
-			List<ConvMessage> messages = conv.getMessages();
+			final List<ConvMessage> messages = conv.getMessages();
 			for (int i = messages.size() - 1; i >= 0; --i)
 			{
 				ConvMessage msg = messages.get(i);
@@ -1235,13 +1235,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						break;
 					}
 
-					/*
-					 * We are only interested with the last convMessage object for updating the UI.
-					 */
-					if (i == messages.size() - 1)
-					{
-						lastConvMessage = msg;
-					}
 					msg.setState(ConvMessage.State.RECEIVED_READ);
 				}
 			}
@@ -1249,45 +1242,40 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			/*
 			 * We should only update the view if the last message's state was changed.
 			 */
-			if (!isAdded() || lastConvMessage == null)
+			if (!isAdded())
 			{
 				return;
 			}
 
-			final ConvMessage message = lastConvMessage;
 			getActivity().runOnUiThread(new Runnable()
 			{
 				
 				@Override
 				public void run()
 				{
-					updateViewForMessageStateChange(conv, message);
+					if (messages.isEmpty())
+					{
+						return;
+					}
+
+					ConvMessage lastConvMessage = messages.get(messages.size() - 1);
+					updateViewForMessageStateChange(conv, lastConvMessage);
 				}
 			});
 		}
 		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))
 		{
 			long msgId = ((Long) object).longValue();
-			final ConvMessage msg = findMessageById(msgId);
-			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
+			setStateAndUpdateView(msgId);
+		}
+		else if (HikePubSub.SERVER_RECEIVED_MULTI_MSG.equals(type))
+		{
+			Pair<Long, Integer> p  = (Pair<Long, Integer>) object;
+			long baseId = p.first;
+			int count = p.second;
+			for(long msgId=baseId; msgId<(baseId+count) ; msgId++)
 			{
-				msg.setState(ConvMessage.State.SENT_CONFIRMED);
-
-				if (!isAdded())
-				{
-					return;
-				}
-				getActivity().runOnUiThread(new Runnable()
-				{
-					
-					@Override
-					public void run()
-					{
-						Conversation conversation = mConversationsByMSISDN.get(msg.getMsisdn());
-						
-						updateViewForMessageStateChange(conversation, msg);
-					}
-				});
+				setStateAndUpdateView(msgId);
 			}
 		}
 		/*
@@ -1505,46 +1493,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				public void run()
 				{
 					toggleTypingNotification(isTyping, typingNotification);
-				}
-			});
-		}
-		else if (HikePubSub.RESET_UNREAD_COUNT.equals(type))
-		{
-			String msisdn = (String) object;
-			Logger.d("UnreadBug", "Unread count event received for " + msisdn);
-
-			final Conversation conv = mConversationsByMSISDN.get(msisdn);
-			if (conv == null)
-			{
-				Logger.d("UnreadBug", "Unread count event received for null conversation: " + msisdn);
-				return;
-			}
-			conv.setUnreadCount(0);
-			Logger.d("UnreadBug", "Unread count event received for non null conversation: " + conv.toString());
-
-			if (!isAdded())
-			{
-				Logger.d("UnreadBug", "Unread count event received but fragment not added");
-				return;
-			}
-			getActivity().runOnUiThread(new Runnable()
-			{
-				
-				@Override
-				public void run()
-				{
-					Logger.d("UnreadBug", "Unread count event received updating UI...");
-
-					List<ConvMessage> messages = conv.getMessages();
-
-					if (messages.isEmpty())
-					{
-						Logger.d("UnreadBug", "Unread count event received but messages list is empty");
-						return;
-					}
-
-					ConvMessage lastConvMessage = messages.get(messages.size() - 1);
-					updateViewForMessageStateChange(conv, lastConvMessage);
 				}
 			});
 		}
@@ -1970,6 +1918,46 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				}
 				((GroupConversation) conv).setGroupAlive(false);
 			}
+		}else if(HikePubSub.MULTI_MESSAGE_DB_INSERTED.equals(type)){
+			if (!isAdded())
+			{
+				return;
+			}
+			Logger.d(getClass().getSimpleName(), "New msg event sent or received.");
+			List<Pair<ContactInfo, ConvMessage>> allPairs = (List<Pair<ContactInfo, ConvMessage>>) object;
+			for(Pair<ContactInfo, ConvMessage> contactMessagePair: allPairs){
+				/* find the conversation corresponding to this message */
+				ContactInfo contactInfo = contactMessagePair.first;
+				String msisdn = contactInfo.getMsisdn();
+				final Conversation conv = mConversationsByMSISDN.get(msisdn);
+				// possible few conversation does not exist ,as we can forward to any contact
+				if (conv == null)
+				{
+					continue;
+				}
+
+				ConvMessage message = contactMessagePair.second;
+
+				if (conv.getMessages().size() > 0) {
+					if (message.getMsgID() < conv.getMessages()
+							.get(conv.getMessages().size() - 1).getMsgID()) {
+						continue;
+					}
+				}
+
+				// for multi messages , if conversation exists then only we need
+				// to update messages . No new conversation will be created
+					conv.addMessage(message);
+				
+			}
+			// messages added , update UI
+			getActivity().runOnUiThread(new Runnable()
+			{
+				public void run() {
+					Collections.sort(displayedConversations, mConversationsComparator);
+					notifyDataSetChanged();
+				};
+			});
 		}
 	}
 
@@ -2082,6 +2070,31 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 
 		return null;
+	}
+
+	private void setStateAndUpdateView(long msgId)
+	{
+		final ConvMessage msg = findMessageById(msgId);
+		if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
+		{
+			msg.setState(ConvMessage.State.SENT_CONFIRMED);
+
+			if (!isAdded())
+			{
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					Conversation conversation = mConversationsByMSISDN.get(msg.getMsisdn());
+
+					updateViewForMessageStateChange(conversation, msg);
+				}
+			});
+		}
 	}
 
 	private View getParenViewForConversation(Conversation conversation)
