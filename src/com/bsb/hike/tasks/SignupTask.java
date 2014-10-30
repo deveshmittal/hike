@@ -538,7 +538,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
 		this.data = null;
-		if (DBBackupRestore.getInstance().isBackupAvailable())
+		if (DBBackupRestore.getInstance(context).isBackupAvailable())
 		{
 			publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
 			synchronized (this)
@@ -558,10 +558,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 		while (!TextUtils.isEmpty(this.data))
 		{
-			boolean status = DBBackupRestore.getInstance().restoreDB();
+			boolean status = DBBackupRestore.getInstance(context).restoreDB();
 			if (status)
 			{
 				publishProgress(new StateValue(State.RESTORED_BACKUP,Boolean.TRUE.toString()));
+				ContactManager.getInstance().init(context);
 				this.data = null;
 			}
 			else

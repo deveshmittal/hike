@@ -1327,10 +1327,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					Utils.executeAsyncTask(logsTask);
 					break;
 				case 21:
-					DBBackupRestore.getInstance().backupDB();
+					DBBackupRestore.getInstance(getApplicationContext()).backupDB();
 					break;
 				case 22:
-					DBBackupRestore.getInstance().restoreDB();
+					DBBackupRestore.getInstance(getApplicationContext()).restoreDB();
 					break;
 				}
 

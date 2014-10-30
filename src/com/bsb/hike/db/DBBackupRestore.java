@@ -5,7 +5,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -22,19 +26,23 @@ public class DBBackupRestore
 
 	private static final String[] dbNames = { DBConstants.CONVERSATIONS_DATABASE_NAME };
 
-	private DBBackupRestore()
-	{
+	private static final String[] resetTableNames = { };
+	
+	private Context mContext;
 
+	private DBBackupRestore(Context context)
+	{
+		this.mContext = context;
 	}
 
-	public static DBBackupRestore getInstance()
+	public static DBBackupRestore getInstance(Context context)
 	{
 		if (_instance == null)
 		{
 			synchronized (FileTransferManager.class)
 			{
 				if (_instance == null)
-					_instance = new DBBackupRestore();
+					_instance = new DBBackupRestore(context.getApplicationContext());
 			}
 		}
 		return _instance;
@@ -105,6 +113,7 @@ public class DBBackupRestore
 				File backup = getDBBackupFile(DBCopy.getName());
 				CBCEncryption.decryptFile(backup, DBCopy);
 				importDatabase(DBCopy);
+				postRestoreSetup();
 				DBCopy.delete();
 			}
 		}
@@ -140,6 +149,26 @@ public class DBBackupRestore
 			time = System.currentTimeMillis() - time;
 			Logger.d(getClass().getSimpleName(), "DB import complete!! in " + time / 1000 + "." + time % 1000 + "s");
 		}
+	}
+
+	private void postRestoreSetup()
+	{
+		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+		int oldVersion = appPrefs.getInt(HikeConstants.PREVIOUS_CONV_DB_VERSION, DBConstants.CONVERSATIONS_DATABASE_VERSION);
+		int newVersion = DBConstants.CONVERSATIONS_DATABASE_VERSION;
+		if (newVersion > oldVersion && oldVersion > 0)
+		{
+			// 1. Upgrade db
+			HikeConversationsDatabase.getInstance().upgrade(oldVersion, newVersion);
+			// 2. Reset tables.
+			for ( String table : resetTableNames)
+			{
+				HikeConversationsDatabase.getInstance().clearTable(table);
+			}
+		}
+		Editor editor = appPrefs.edit();
+		editor.putInt(HikeConstants.PREVIOUS_CONV_DB_VERSION, 0);
+		editor.commit();
 	}
 
 	public boolean isBackupAvailable()
