@@ -59,7 +59,7 @@
     <ImageButton
         android:id="@+id/endCallButton"
         android:layout_width="100px"
-        android:shape="oval";
+        android:shape="oval"
         android:layout_height="100px"
         android:gravity="center_vertical|center_horizontal"
         android:layout_alignParentBottom="true"

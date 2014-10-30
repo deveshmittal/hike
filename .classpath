@@ -8,6 +8,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="src" path="/actionbarsherlock"/>
-	<classpathentry kind="lib" path="/Users/anu/android-sdk-macosx/add-ons/addon-google_apis-google-17/libs/maps.jar"/>
+	<classpathentry kind="lib" path="/Users/aaryaman/Hike/Android/maps.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
