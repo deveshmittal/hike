@@ -125,6 +125,14 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
 		
+		if(category.getCategoryId().equals(StickerManager.HUMANOID) || category.getCategoryId().equals(StickerManager.EXPRESSIONS))
+		{
+			viewHolder.checkBox.setVisibility(View.GONE);
+		}
+		else
+		{
+			viewHolder.checkBox.setVisibility(View.VISIBLE);
+		}
 		if(category.getTotalStickers() > 0)
 		{
 			viewHolder.categorySize.setVisibility(View.VISIBLE);

@@ -151,7 +151,7 @@ public class StickerManager
 
 	public static final String DOGGY_CATEGORY = "doggy";
 
-	private static final String EXPRESSIONS = "expressions";
+	public static final String EXPRESSIONS = "expressions";
 
 	public static final String HUMANOID = "humanoid";
 	
