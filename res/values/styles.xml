@@ -704,7 +704,8 @@
 	<style name="TranslucentBlack" parent="android:Theme.Translucent.NoTitleBar">  
         <item name="android:windowBackground">@color/transparent_black_color</item>  
     </style>  
-	
+
+	<!-- <style name="TranslucentBlack.dialog" parent = "android/style:Theme_Holo_DialogWhenLarge" ></style>	 -->
 
 	<style name="Transparent">
 	<item name="android:windowIsTranslucent">true</item>
