@@ -11,6 +11,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.utils.StickerManager;
 
 public class UpgradeIntentService extends IntentService
 {
@@ -67,6 +68,27 @@ public class UpgradeIntentService extends IntentService
 			editor.putBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false);
 			editor.commit();
 		}
+		
+		if (prefs.getInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1) == 1)
+		{
+			if(StickerManager.moveHardcodedStickersToSdcard(getApplicationContext()))
+			{
+				Editor editor = prefs.edit();
+				editor.putInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 2);
+				editor.putBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false);
+				editor.commit();
+			}
+		}
+		
+		if (prefs.getInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 1) == 1)
+		{
+			upgradeForStickerShopVersion1();
+			Editor editor = prefs.edit();
+			editor.putInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 2);
+			editor.putBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false);
+			editor.commit();
+			StickerManager.getInstance().doInitialSetup();
+		}
 	}
 
 	public UpgradeIntentService()
@@ -94,5 +116,11 @@ public class UpgradeIntentService extends IntentService
 	private void upgradeForDatabaseVersion28()
 	{
 		HikeConversationsDatabase.getInstance().upgradeForDatabaseVersion28();
+	}
+
+	private void upgradeForStickerShopVersion1()
+	{
+		HikeConversationsDatabase.getInstance().upgradeForStickerShopVersion1();
+		StickerManager.getInstance().moveStickerPreviewAssetsToSdcard();
 	}
 }

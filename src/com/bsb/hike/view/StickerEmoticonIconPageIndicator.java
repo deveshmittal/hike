@@ -1,6 +1,7 @@
 package com.bsb.hike.view;
 
 import android.content.Context;
+import android.graphics.drawable.StateListDrawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -8,6 +9,8 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.EmoticonAdapter;
+import com.bsb.hike.adapters.StickerAdapter;
 import com.viewpagerindicator.IconPageIndicator;
 import com.viewpagerindicator.IconPagerAdapter;
 
@@ -61,8 +64,14 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator
 
 			ImageView icon = (ImageView) stickerParent.findViewById(R.id.category_btn);
 			ImageView updateAvailable = (ImageView) stickerParent.findViewById(R.id.update_available);
-
-			icon.setImageResource(iconAdapter.getIconResId(i));
+			if (iconAdapter instanceof EmoticonAdapter)
+			{
+				icon.setImageResource(iconAdapter.getIconResId(i));
+			}
+			else if(iconAdapter instanceof StickerAdapter)
+			{
+				icon.setImageDrawable(iconAdapter.getPalleteIconDrawable(i));
+			}
 			updateAvailable.setVisibility(iconAdapter.isUpdateAvailable(i) ? View.VISIBLE : View.GONE);
 
 			stickerParent.setTag(i);
@@ -84,6 +93,8 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator
 	public interface StickerEmoticonIconPagerAdapter extends IconPagerAdapter
 	{
 		boolean isUpdateAvailable(int index);
+		StateListDrawable getPalleteIconDrawable(int index);
+		
 	}
 
 	private final OnClickListener mTabClickListener = new OnClickListener()

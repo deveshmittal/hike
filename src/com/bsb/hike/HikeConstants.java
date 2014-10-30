@@ -1882,9 +1882,22 @@ public class HikeConstants
 	public static final int ATOMIC_APP_TIP_HIKE_REWARDS = 11;
 
 	public static final int SHARED_MEDIA_TYPE = 1;
+
+	public static enum STResult
+	{
+		SUCCESS, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, SERVER_ERROR, CARD_UNMOUNT, NO_SD_CARD, FILE_EXPIRED
+	}
 	
+	public static final String PREVIEW_IMAGE = "previewimg";
+	public static final String ENABLE_IMAGE = "enableimg";
+	public static final String DISABLE_IMAGE = "disableimg";
+	public static final String SIZE = "size";	
 	public static final int NORMAL_MESSAGE_TYPE = 0;
 	public static final int MULTI_FORWARD_MESSAGE_TYPE = 1;
 	public static final int SHARED_PIN_TYPE = 2;
 	public static final String SHOWN_MULTI_FORWARD_TIP = "shownMultiForwardTip";
+
+	public static final String VISIBLITY = "visibility";
+
+	public static final String INDEX = "index";
 }
