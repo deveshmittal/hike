@@ -231,7 +231,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			}
 		});
 		endCall = (ImageButton)this.findViewById(R.id.endCallButton);
-		endCall.setBackgroundColor(Color.RED);
+//		endCall.setBackgroundColor(Color.RED);
 		endCall.setOnClickListener(new OnClickListener() {
 			
 			@Override
