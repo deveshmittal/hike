@@ -71,7 +71,6 @@ public class DownloadFileTask extends FileTransferBase
 			return FTResult.NO_SD_CARD;
 		}
 
-		_state = FTState.IN_PROGRESS;
 		Logger.d(getClass().getSimpleName(), "Instantiating download ....");
 		RandomAccessFile raf = null;
 		try
@@ -199,6 +198,8 @@ public class DownloadFileTask extends FileTransferBase
 					byte data[] = new byte[chunkSize];
 					// while ((numRead = in.read(data, 0, chunkSize)) != -1)
 					int numRead = 0;
+					_state = FTState.IN_PROGRESS;
+					sendProgress();
 					do
 					{
 						int byteRead = 0;
@@ -300,6 +301,8 @@ public class DownloadFileTask extends FileTransferBase
 						else
 						{
 							Logger.d(getClass().getSimpleName(), "FT Completed");
+							// Added sleep to complete the progress.
+							Thread.sleep(400);
 							// temp file is already deleted
 							_state = FTState.COMPLETED;
 							deleteStateFile();
