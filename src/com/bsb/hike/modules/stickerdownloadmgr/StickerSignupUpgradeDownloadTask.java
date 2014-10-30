@@ -12,6 +12,7 @@ import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.HttpRequestType;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 
 class StickerSignupUpgradeDownloadTask extends BaseStickerDownloadTask
@@ -55,7 +56,7 @@ class StickerSignupUpgradeDownloadTask extends BaseStickerDownloadTask
 			
 			JSONObject request = new JSONObject();
 			request.put(StickerManager.CATEGORY_IDS, categoryList);
-			
+			Logger.d(StickerDownloadManager.TAG,  "Starting download task : " + taskId + " url : " + urlString );
 			JSONObject response = (JSONObject) download(request, HttpRequestType.POST);
 			
 			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
@@ -63,6 +64,7 @@ class StickerSignupUpgradeDownloadTask extends BaseStickerDownloadTask
 				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
 				return STResult.DOWNLOAD_FAILED;
 			}
+			Logger.d(StickerDownloadManager.TAG,  "Got response for download task : " + taskId + " response : " + response.toString());
 			JSONArray data = response.optJSONArray(HikeConstants.DATA_2);
 			if(null == data)
 			{
@@ -73,6 +75,7 @@ class StickerSignupUpgradeDownloadTask extends BaseStickerDownloadTask
 		}
 		catch (Exception e)
 		{
+			Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
 			setException(new StickerException(e));
 			return STResult.DOWNLOAD_FAILED;
 		}

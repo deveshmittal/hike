@@ -32,6 +32,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	private StickerCategory category;
 	private StickerConstants.DownloadType downloadType;
 	private int stickerDownloadSize;
+	private String taskId;
 
 	protected MultiStickerDownloadTask(Handler handler, Context ctx, String taskId, StickerCategory category, StickerConstants.DownloadType downloadType, IStickerResultListener callback)
 	{
@@ -40,6 +41,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 		this.downloadType = downloadType;
 		this.handler = handler;
 		this.context = ctx;
+		this.taskId = taskId;
 	}
 
 	@Override
@@ -101,6 +103,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 					urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/stickers";
 				}
 				setDownloadUrl(urlString);
+				Logger.d(StickerDownloadManager.TAG,  "Starting download task : " + taskId + " url : " + urlString );
 				JSONObject response = (JSONObject) download(request, HttpRequestType.POST);
 
 				if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
@@ -108,7 +111,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 					setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
 					return STResult.DOWNLOAD_FAILED;
 				}
-
+				Logger.d(StickerDownloadManager.TAG,  "Got response for download task : " + taskId + " response : " + response.toString());
 				int length = response.toString().getBytes().length;
 
 				if (length > Utils.getFreeSpace())
@@ -147,6 +150,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			}
 			catch (Exception e)
 			{
+				Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
 				setException(new StickerException(e));
 				return STResult.DOWNLOAD_FAILED;
 			}

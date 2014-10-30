@@ -95,13 +95,14 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 			}
 			setDownloadUrl(urlString);
 			
+			Logger.d(StickerDownloadManager.TAG,  "Starting download task : " + taskId + " url : " + urlString );
 			JSONObject response = (JSONObject) download(null, HttpRequestType.GET);
 			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
 			{
 				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
 				return STResult.DOWNLOAD_FAILED;
 			}
-
+			Logger.d(StickerDownloadManager.TAG,  "Got response for download task : " + taskId + " response : " + response.toString());
 			JSONObject data = response.getJSONObject(HikeConstants.DATA_2);
 
 			String stickerData = data.getString(stkId);
@@ -123,6 +124,7 @@ public class SingleStickerDownloadTask extends BaseStickerDownloadTask
 		}
 		catch (Exception e)
 		{
+			Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
 			setException(new StickerException(e));
 			return STResult.DOWNLOAD_FAILED;
 		}
