@@ -885,6 +885,8 @@ public class UploadFileTask extends FileTransferBase
 			deleteStateFile();
 			break;
 		case IN_PROGRESS:
+			// Added sleep to complete the progress.
+			Thread.sleep(400);
 			Logger.d(getClass().getSimpleName(), "FT Completed");
 			_state = FTState.COMPLETED;
 			deleteStateFile();

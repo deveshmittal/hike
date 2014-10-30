@@ -703,4 +703,8 @@ public class HoloCircularProgress extends View {
 		mProgress = 0.0f;
 	}
 
+	public float getCurrentProgress()
+	{
+		return mProgress;
+	}
 }

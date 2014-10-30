@@ -2578,7 +2578,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else if(fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
 		{
-			holder.circularProgress.setProgress(progress * 0.01f);
+			if(progress != 100)
+				holder.circularProgress.setProgress(progress * 0.01f);
 			if (Utils.isHoneycombOrHigher())
 				holder.circularProgress.stopAnimation();
 			if(fss.getFTState() == FTState.IN_PROGRESS) {
@@ -2589,7 +2590,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					animatedProgress = animatedProgress / fss.getTotalSize() ;
 				}
 				if (Utils.isHoneycombOrHigher())
-					holder.circularProgress.setAnimatedProgress(progress, progress + (int) (animatedProgress * 100), 6 * 1000, msgId);
+				{
+					if(holder.circularProgress.getCurrentProgress() < (0.95f) && progress == 100){
+						holder.circularProgress.setAnimatedProgress((int) (holder.circularProgress.getCurrentProgress() * 100), progress, 300, msgId);
+					}else
+						holder.circularProgress.setAnimatedProgress(progress, progress + (int) (animatedProgress * 100), 6 * 1000, msgId);
+				}
 			}
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
