@@ -386,7 +386,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 
 	public void initStickers(StickerCategory category)
 	{
-		StickerPageObjects spo = stickerObjMap.get(category);
+		StickerPageObjects spo = stickerObjMap.get(category.getCategoryId());
 		if(spo == null)
 		{
 			return;
