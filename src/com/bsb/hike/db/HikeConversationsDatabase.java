@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,14 +35,18 @@ import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.db.DBConstants.HIKE_CONV_DB;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ContentLove;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.FileListItem;
@@ -66,7 +71,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 
-public class HikeConversationsDatabase extends SQLiteOpenHelper
+public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBConstants,HIKE_CONV_DB
 {
 
 	private SQLiteDatabase mDb;
@@ -117,6 +122,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ DBConstants.MSISDN + " TEXT, " // The conversation's msisdn. This will be the msisdn for one-to-one and the group id for groups
 				+ DBConstants.MESSAGE_HASH + " TEXT DEFAULT NULL, " // Used for duplication checks.
 				+ DBConstants.MESSAGE_TYPE + " INTEGER" + " INTEGER DEFAULT -1" // The type of the message.
+				+ DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER DEFAULT -1" // love id applicable to few messages like content
 				+ " ) ";
 
 		db.execSQL(sql);
@@ -226,6 +232,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ ")";
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CHAT_BG_INDEX + " ON " + DBConstants.CHAT_BG_TABLE + " (" + DBConstants.MSISDN + ")";
+		db.execSQL(sql);
+		// CONTENT LOVE TABLE
+		sql = CREATE_TABLE + LOVE_TABLE + "(" + _ID
+				+ " INTEGER PRIMARY KEY AUTOINCREMENT, " + LOVE_ID
+				+ " INTEGER, " + COUNT + " INTEGER, " + USER_STATUS
+				+ " INTEGER, " + REF_COUNT + " INTEGER, "
+				+ HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")"; 
 		db.execSQL(sql);
 	}
 
@@ -624,6 +637,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				dropAndRecreateStatusTable(db);
 			}
+		}
+		
+		/**
+		 * We introduced content here, so love concept came in message table for content shared by people
+		 */
+		if(oldVersion < 31){
+			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER";
+			db.execSQL(alter);
 		}
 	}
 
