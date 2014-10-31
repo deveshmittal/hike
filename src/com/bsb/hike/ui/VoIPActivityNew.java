@@ -33,6 +33,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.VoIPServiceNew;
 //import com.bsb.hike.db.HikeUserDatabase;
 
@@ -71,6 +73,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	private Ringtone r;
 	private AudioManager am;
 	OnAudioFocusChangeListener afChangeListener = null;
+	private String mContactName;
+	private String mContactNumber;
 	
 	class CallLengthManager implements Runnable{
 
@@ -104,15 +108,49 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		if(getIntent().hasExtra("callerID")){
 			callerId = getIntent().getStringExtra("callerID");
 			storedId = callerId;
+			ContactInfo contactInfo = ContactManager.getInstance().getContactInfoFromPhoneNo(callerId);
+			if (contactInfo != null)
+			{
+				mContactName = contactInfo.getName();
+				mContactNumber = contactInfo.getMsisdn();
+				if( mContactName == null)
+				{
+					mContactName = mContactNumber = dialedId;
+					Log.d("contactName", mContactName);
+				}
+			}
 			prepareAnswer();
 		} else if (getIntent().hasExtra("dialedID")){
 			dialedId = getIntent().getStringExtra("dialedID");
 			storedId = dialedId;
+			ContactInfo contactInfo = ContactManager.getInstance().getContactInfoFromPhoneNo(dialedId);
+			if (contactInfo != null)
+			{
+				mContactName = contactInfo.getName();
+				mContactNumber = contactInfo.getMsisdn();
+				if( mContactName == null)
+				{
+					mContactName = mContactNumber = dialedId;
+					Log.d("contactName", mContactName);
+				}
+//				Log.d("contactName from info", mContactName);
+			}
 			prepareInCall();
 		} else {
 			resumeId = getIntent().getStringExtra("resumeID");
 			storedId = resumeId;
 			Log.d("STOREDID", storedId);
+			ContactInfo contactInfo = ContactManager.getInstance().getContactInfoFromPhoneNo(storedId);
+			if (contactInfo != null)
+			{
+				mContactName = contactInfo.getName();
+				mContactNumber = contactInfo.getMsisdn();
+				if( mContactName == null)
+				{
+					mContactName = mContactNumber = storedId;
+					Log.d("contactName", mContactName);
+				}
+			}
 			prepareResume();			
 		}
 	}
@@ -143,7 +181,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		vActivity = this;
 		callNo = (TextView)this.findViewById(R.id.CallerId);
 //		callNo.setText(HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(callerId).getNameOrMsisdn());
-		callNo.setText("Incoming Number Goes Here!");
+		callNo.setText(mContactName);
 		acceptCall = (ImageButton)this.findViewById(R.id.acceptButton);
 
 		acceptCall.setOnClickListener(new OnClickListener(){
@@ -244,7 +282,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		
 		inCallCallNo = (TextView)this.findViewById(R.id.PhoneNumberView1);
 //		inCallCallNo.setText(HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(storedId).getNameOrMsisdn());
-		inCallCallNo.setText("Phone Number goes Here!");
+		inCallCallNo.setText(mContactName);
 		inCallTimer = (TextView)this.findViewById(R.id.timerView1);
 		if (VoIPServiceNew.getVoIPSerivceInstance().client.connectionState != "CONNECTED")
 			inCallTimer.setText(VoIPServiceNew.getVoIPSerivceInstance().client.connectionState);
