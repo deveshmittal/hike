@@ -3,7 +3,9 @@ package com.bsb.hike.ui;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.VoIPServiceNew;
 import com.bsb.hike.utils.Utils;
@@ -13,6 +15,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -25,7 +28,9 @@ import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ImageView.ScaleType;
 
 public class ReceiveCallActivity extends Activity implements HikePubSub.Listener {
 	
@@ -33,6 +38,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 	private TextView callNo;
 	private ImageButton acceptCall;
 	private ImageButton declineCall;
+	private ImageView displayPic;
 	private VoIPServiceNew vService;
 	private Uri notification;
 	private Ringtone r;
@@ -72,6 +78,8 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		r = RingtoneManager.getRingtone(getApplicationContext(), notification);
 		r.setStreamType(AudioManager.STREAM_ALARM);
 		r.play();
+		displayPic = (ImageView)this.findViewById(R.id.voipContactPicture);
+		setDisplayPic();
 		callNo = (TextView)this.findViewById(R.id.CallerId);
 		callNo.setText(mContactName);
 		acceptCall = (ImageButton)this.findViewById(R.id.acceptButton);
@@ -140,6 +148,30 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 			finish();
 		}
 		
+	}
+	
+	private void setDisplayPic()
+	{
+		if (displayPic == null)
+		{
+			Log.d("displayPic","is Null");
+			return;
+		}
+
+		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true);
+		Log.d("ContactNumber",mContactNumber);
+		if (drawable != null)
+		{
+			displayPic.setScaleType(ScaleType.FIT_CENTER);
+			displayPic.setImageDrawable(drawable);
+			displayPic.setBackgroundDrawable(null);
+		}
+		else
+		{
+			displayPic.setScaleType(ScaleType.CENTER_INSIDE);
+			displayPic.setImageResource(R.drawable.ic_default_avatar);
+			displayPic.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true));
+		}
 	}
 	
 }
