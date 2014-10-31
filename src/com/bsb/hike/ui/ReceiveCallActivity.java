@@ -70,14 +70,20 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 //		setTheme(android.R.style.Theme_DeviceDefault_DialogWhenLarge);
 		setContentView(R.layout.call_accept_decline);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+//		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+//		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+//		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//		getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+		WindowManager.LayoutParams params = getWindow().getAttributes();
+		Log.d("Screen Size x",((Integer)(params.x)).toString());
+		Log.d("Screen Size y",((Integer)(params.y)).toString());
+		Log.d("Screen Size h",((Integer)(params.height)).toString());
+		Log.d("Screen Size w",((Integer)(params.width)).toString());
+		getWindow().setLayout(800, 1050);
 		notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 		r = RingtoneManager.getRingtone(getApplicationContext(), notification);
 		r.setStreamType(AudioManager.STREAM_ALARM);
-		r.play();
+//		r.play();
 		displayPic = (ImageView)this.findViewById(R.id.voipContactPicture);
 		setDisplayPic();
 		callNo = (TextView)this.findViewById(R.id.CallerId);
@@ -90,7 +96,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 
 			@Override
 			public void onClick(View v) {
-				r.stop();
+//				r.stop();
 				Intent intent = i;
 				intent.putExtra("decline", false);				
 				vService = VoIPServiceNew.getVoIPSerivceInstance();

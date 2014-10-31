@@ -251,7 +251,7 @@ public class RTCActivity extends Activity implements WebRtcClient.RTCListener{
   public void setInCallLayout()
   {
 	  setContentView(R.layout.incall_layout);
-	  endCall = (Button)this.findViewById(R.id.endCallButton);
+	  endCall = (Button)this.findViewById(R.id.endCallButton1);
 	  endCall.setBackgroundColor(Color.RED);
 	  endCall.setOnClickListener(new OnClickListener() {
 	    @Override

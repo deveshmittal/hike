@@ -133,7 +133,7 @@ public class VoIPActivity extends Activity implements HikePubSub.Listener {
 //			  unbindService(vsc);
 		  }
 		  Log.d("VoIPActivity", "startService Called!");
-		  endCall = (Button)this.findViewById(R.id.endCallButton);
+//		  endCall = (Button)this.findViewById(R.id.endCallButton);
 		  endCall.setBackgroundColor(Color.RED);
 		  endCall.setOnClickListener(new OnClickListener() {
 		    @Override
@@ -154,7 +154,7 @@ public class VoIPActivity extends Activity implements HikePubSub.Listener {
 	
 	public void drawInCallLayout(){
 		setContentView(R.layout.incall_layout);
-		endCall = (Button)this.findViewById(R.id.endCallButton);
+//		endCall = (Button)this.findViewById(R.id.endCallButton);
 		  endCall.setBackgroundColor(Color.RED);
 		  endCall.setOnClickListener(new OnClickListener() {
 		    @Override

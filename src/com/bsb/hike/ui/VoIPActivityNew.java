@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaPlayer;
@@ -28,11 +29,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ImageView.ScaleType;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.VoIPServiceNew;
@@ -75,6 +78,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	OnAudioFocusChangeListener afChangeListener = null;
 	private String mContactName;
 	private String mContactNumber;
+	private ImageView displayPic;
 	
 	class CallLengthManager implements Runnable{
 
@@ -177,12 +181,13 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		Log.w("Audio Starting", "Audio Starting");
 //		mMediaPlayer.start();
 		isPlaying = true;
-		setContentView(R.layout.call_accept_decline);
+		setContentView(R.layout.full_call_accept_decline);
+		displayPic = (ImageView)this.findViewById(R.id.fullvoipContactPicture);
 		vActivity = this;
 		callNo = (TextView)this.findViewById(R.id.CallerId);
 //		callNo.setText(HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(callerId).getNameOrMsisdn());
 		callNo.setText(mContactName);
-		acceptCall = (ImageButton)this.findViewById(R.id.acceptButton);
+		acceptCall = (ImageButton)this.findViewById(R.id.fullacceptButton);
 
 		acceptCall.setOnClickListener(new OnClickListener(){
 
@@ -199,7 +204,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			
 		});
 		
-		declineCall = (ImageButton)this.findViewById(R.id.declineButton);
+		declineCall = (ImageButton)this.findViewById(R.id.fulldeclineButton);
 
 		declineCall.setOnClickListener(new OnClickListener(){
 
@@ -247,6 +252,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		}
 		screenOff();
 		setContentView(R.layout.incall_layout);
+		displayPic = (ImageView)this.findViewById(R.id.inCallContactPicture1);
+		setDisplayPic();
 		muteButton =(ImageButton)this.findViewById(R.id.muteButton1);
 		muteButton.setOnClickListener(new OnClickListener() {
 			
@@ -268,8 +275,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 				changeSpeakerButton();
 			}
 		});
-		endCall = (ImageButton)this.findViewById(R.id.endCallButton);
-//		endCall.setBackgroundColor(Color.RED);
+		endCall = (ImageButton)this.findViewById(R.id.endCallButton1);
 		endCall.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -435,6 +441,30 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		if(onLock.isHeld())
 		{
 			onLock.release();
+		}
+	}
+	
+	private void setDisplayPic()
+	{
+		if (displayPic == null)
+		{
+			Log.d("displayPic","is Null");
+			return;
+		}
+
+		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true);
+		Log.d("ContactNumber",mContactNumber);
+		if (drawable != null)
+		{
+			displayPic.setScaleType(ScaleType.FIT_CENTER);
+			displayPic.setImageDrawable(drawable);
+			displayPic.setBackgroundDrawable(null);
+		}
+		else
+		{
+			displayPic.setScaleType(ScaleType.CENTER_INSIDE);
+			displayPic.setImageResource(R.drawable.ic_default_avatar);
+			displayPic.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true));
 		}
 	}
 	

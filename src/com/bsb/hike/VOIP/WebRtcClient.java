@@ -161,6 +161,7 @@ public class WebRtcClient {
 	private class EndCallCommand implements Command{
 		public void execute(String peerId, JSONObject payload) throws JSONException{
 			Log.d("ENDING CALL", "?????");
+			notifyCallEnded();
 			mListener.closeActivity();
 		}
 	}
