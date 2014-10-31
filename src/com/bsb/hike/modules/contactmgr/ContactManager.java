@@ -4,6 +4,7 @@
 package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,6 +37,7 @@ import android.util.Pair;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.db.DbException;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -57,7 +59,7 @@ import com.bsb.hike.utils.Utils;
 public class ContactManager implements ITransientCache, HikePubSub.Listener
 {
 	// This should always be present so making it loading on class loading itself
-	private volatile static ContactManager _instance = new ContactManager();
+	private volatile static ContactManager _instance;
 
 	private PersistenceCache persistenceCache;
 
@@ -94,6 +96,11 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		return hDb.getWritableDatabase();
 	}
 
+	public SQLiteDatabase getReadableDatabase()
+	{
+		return hDb.getReadableDatabase();
+	}
+	
 	public void init(Context ctx)
 	{
 		context = ctx.getApplicationContext();
@@ -2057,6 +2064,35 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 				contact.setOnGreenBlue(true);
 			}
 		}
+	}
+
+	public ArrayList<String> getMsisdnFromId(String[] selectionArgs)
+	{
+		Cursor c = getReadableDatabase().query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN },
+				DBConstants.ID + " IN " + Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null, null, null, null);
+
+		ArrayList<String> msisdnList = new ArrayList<String>();
+
+		if (c.moveToFirst())
+		{
+			do
+			{
+				msisdnList.add(c.getString(c.getColumnIndexOrThrow(DBConstants.MSISDN)));
+			}
+			while (c.moveToNext());
+		}
+
+		// Incase of hike id == -1, add self msisdn
+		for (int i = 0; i < selectionArgs.length; i++)
+		{
+			if (selectionArgs[i].equals("-1"))
+			{
+				ContactInfo userContact = Utils.getUserContactInfo(context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE));
+				msisdnList.add(userContact.getMsisdn());
+			}
+		}
+
+		return msisdnList;
 	}
 
 	@Override

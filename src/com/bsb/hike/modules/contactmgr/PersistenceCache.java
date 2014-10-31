@@ -443,6 +443,9 @@ class PersistenceCache extends ContactsCache
 	 */
 	void loadMemory()
 	{
+		if(HikeConversationsDatabase.getInstance() == null)
+			return;
+		
 		ConversationMsisdns allmsisdns = HikeConversationsDatabase.getInstance().getConversationMsisdns();
 		// oneToOneMsisdns contains list of msisdns with whom one to one conversation currently exists
 		// groupLastMsisdnsMap is map between group Id and list of last msisdns (msisdns of last message) in a group
