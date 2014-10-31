@@ -1223,6 +1223,34 @@ public class MqttMessagesManager
 			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.WATSAPP_INVITE_MESSAGE_KEY, message);
 		}
 
+		/*
+		 * WebView names and their respective urls for Rewards and Hike Extras will be controlled by server  
+		 * 		 
+		 */
+		// Hike Extras
+		if (data.has(HikeConstants.HIKE_EXTRAS_NAME))
+		{
+			String hikeExtrasName = data.getString(HikeConstants.HIKE_EXTRAS_NAME);
+			editor.putString(HikeConstants.HIKE_EXTRAS_NAME, hikeExtrasName);
+		}
+		if (data.has(HikeConstants.HIKE_EXTRAS_URL))
+		{
+			String hikeExtrasUrl = data.getString(HikeConstants.HIKE_EXTRAS_URL);
+			editor.putString(HikeConstants.HIKE_EXTRAS_URL, hikeExtrasUrl);
+		}
+
+		// Hike Rewards
+		if (data.has(HikeConstants.REWARDS_NAME))
+		{
+			String rewards_name = data.getString(HikeConstants.REWARDS_NAME);
+			editor.putString(HikeConstants.REWARDS_NAME, rewards_name);
+		}
+		if (data.has(HikeConstants.REWARDS_URL))
+		{
+			String rewards_url = data.getString(HikeConstants.REWARDS_URL);
+			editor.putString(HikeConstants.REWARDS_URL, rewards_url);
+		}
+
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
 	}

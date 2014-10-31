@@ -1889,4 +1889,12 @@ public class HikeConstants
 	public static final int MULTI_FORWARD_MESSAGE_TYPE = 1;
 	public static final int SHARED_PIN_TYPE = 2;
 	public static final String SHOWN_MULTI_FORWARD_TIP = "shownMultiForwardTip";
+		
+	public static final String HIKE_EXTRAS_NAME = "hike_extras_name";
+	
+	public static final String HIKE_EXTRAS_URL = "hike_extras_url";
+	
+	public static final String REWARDS_NAME = "rewards_name";
+		
+	public static final String REWARDS_URL = "rewards_url";
 }
