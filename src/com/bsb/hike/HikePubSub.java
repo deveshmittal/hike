@@ -381,6 +381,8 @@ public class HikePubSub implements Runnable
 	public static final String LATEST_PIN_DELETED = "lastPinDeleted";
 	
 	public static final String UNREAD_PIN_COUNT_RESET = "pinCountReset";
+	
+	public static final String HIKE_SDK_MESSAGE = "hikeSdkMessage";
 
 	private final Thread mThread;
 
