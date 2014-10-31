@@ -2082,6 +2082,16 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 			while (c.moveToNext());
 		}
 
+		// Incase of hike id == -1, add self msisdn
+		for (int i = 0; i < selectionArgs.length; i++)
+		{
+			if (selectionArgs[i].equals("-1"))
+			{
+				ContactInfo userContact = Utils.getUserContactInfo(context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE));
+				msisdnList.add(userContact.getMsisdn());
+			}
+		}
+
 		return msisdnList;
 	}
 
