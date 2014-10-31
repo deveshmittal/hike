@@ -18,17 +18,22 @@ package org.eclipse.paho.client.mqttv3.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttAck;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnack;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttInputStream;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttPingResp;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
+import android.os.RemoteException;
+import android.util.Log;
+
+import com.bsb.hike.utils.HikeTestUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 /**
  * Receives MQTT packets from the server.
@@ -56,6 +61,8 @@ public class CommsReceiver implements Runnable
 	private final static String className = CommsReceiver.class.getName();
 
 	private final String TAG = "CommsReciever";
+	
+	private HikeTestUtil mTestUtil = null;
 
 	public CommsReceiver(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, InputStream in, Socket socket)
 	{
@@ -64,6 +71,7 @@ public class CommsReceiver implements Runnable
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.tokenStore = tokenStore;
+		mTestUtil = HikeTestUtil.getInstance(null);
 	}
 
 	/**
@@ -169,11 +177,59 @@ public class CommsReceiver implements Runnable
 						// An ack should always have a token assoicated with it.
 						throw new MqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
 					}
+					if (message instanceof MqttPingResp)
+					{
+						try 
+						{
+							mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received MqttPingResponse at :" + 
+							HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(mTestUtil.getContext()));
+						}
+						catch (RemoteException e) 
+						{
+							e.printStackTrace();
+						}
+
+					}
+					else if(message instanceof MqttConnack)
+					{
+						try 
+						{
+							mTestUtil.writeConnLogsToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received MqttConnack at :" +
+							HikeTestUtil.getCurrentTimeInMilliseconds() + "," + Utils.getCellLocation(mTestUtil.getContext()));
+						}
+						catch (RemoteException e) 
+						{
+							e.printStackTrace();
+						}
+
+					}
+					else
+					{
+						try 
+						{
+							mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received MqttAck at :" + 
+							HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(mTestUtil.getContext()));
+						}
+						catch (RemoteException e) 
+						{
+							e.printStackTrace();
+						}
+					}									
 				}
 				else
 				{
 					// A new message has arrived
 					clientState.notifyReceivedMsg(message);
+					String payload = new String(message.getPayload(), "UTF-8");
+					try 
+					{
+						mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(receiver) received message at :" + HikeTestUtil.getCurrentTimeInMilliseconds() +
+						"," + payload + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(mTestUtil.getContext()));
+					}
+					catch (RemoteException e) 
+					{
+						e.printStackTrace();
+					}
 				}
 			}
 			catch (MqttException ex)

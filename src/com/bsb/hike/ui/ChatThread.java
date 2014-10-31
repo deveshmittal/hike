@@ -1,8 +1,6 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
-
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -13,9 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Pattern;
 import java.util.Random;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,14 +40,12 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.graphics.Shader.TileMode;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
@@ -74,8 +70,6 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -113,6 +107,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
+import android.webkit.MimeTypeMap;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -135,7 +130,6 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -151,13 +145,12 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.AccountAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter;
+import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
-import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.filetransfer.FileSavedState;
@@ -181,21 +174,17 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
-import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.ui.utils.HashSpanWatcher;
-import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.CustomAlertDialog;
@@ -203,6 +192,7 @@ import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.HikeTestUtil;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.LastSeenScheduler;
@@ -214,6 +204,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
+import com.bsb.hike.utils.customClasses.AsyncTask.MyAsyncTask;
 import com.bsb.hike.view.CustomFontEditText;
 import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 import com.bsb.hike.view.CustomLinearLayout;
@@ -445,6 +436,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private ScreenOffReceiver screenOffBR;
 
 	private HashSpanWatcher hashWatcher;
+	
+	private HikeTestUtil mTestUtil = null;
+	
+	private static int hike_message_counter = HikeTestUtil.HIKE_MESSAGE_COUNTER_DEFAULT;
+	
+	private static int hike_message_delay = HikeTestUtil.HIKE_MESSAGE_DELAY_DEFAULT;
 
 	@Override
 	protected void onPause()
@@ -859,7 +856,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			
 		}
 		Logger.i("chatthread", "on create end");
-
+		
+		mTestUtil = HikeTestUtil.getInstance(getApplicationContext());
 	}
 
 	private boolean showImpMessageIfRequired()
@@ -1437,6 +1435,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 
+		if (mConversation instanceof GroupConversation)
+		{
+			optionsList.add(new OverFlowMenuItem(getString(R.string.pin_history), 8));
+		}
+
+		if(!Utils.isGroupConversation(mContactNumber))
+		{
+			optionsList.add(new OverFlowMenuItem(getString(R.string.start_test), 9));
+			
+			optionsList.add(new OverFlowMenuItem(getString(R.string.send_logs), 10));
+			
+			optionsList.add(new OverFlowMenuItem(getString(R.string.simulation_settings), 11));
+			
+			optionsList.add(new OverFlowMenuItem(getString(R.string.delay_settings), 12));
+		}
 		dismissPopupWindow();
 
 		attachmentWindow = new PopupWindow(this);
@@ -1528,12 +1541,254 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 4:
 					setupThemePicker(null);
 					break;
+
+				// start test simulation here
+				case 9:
+					ExternalStorageState val = Utils.getExternalStorageState();
+					Log.d("HikeTestUtil", "external storage state :" + val);
+					
+					if(val==ExternalStorageState.NONE)
+					{	
+						Log.d("HikeTestUtil", "sd card is not present");
+						Toast toast = Toast.makeText(getApplicationContext(), "Simulation can't start. Please insert sd card.", Toast.LENGTH_LONG);
+						toast.show();
+					}
+					else
+					{
+						// delete old test report and create new one
+						mTestUtil.deleteFile();
+						
+						// start the simulation now
+						StartHikeTestingAsyncTask startTestTask = new StartHikeTestingAsyncTask();					
+						startTestTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
+					}
+					break;
+				// send test logs via email client from here					
+				case 10:
+					ExternalStorageState sdcardSate = Utils.getExternalStorageState();
+
+					if(sdcardSate==ExternalStorageState.NONE)
+					{	
+						Log.d("HikeTestUtil", "sd card is not present");
+						Toast toast = Toast.makeText(getApplicationContext(), "Test report does not exists. Please insert sd card.", Toast.LENGTH_LONG);
+						toast.show();
+					}
+					else
+					{
+						// close the file
+						mTestUtil.closeDataFile();
+						mTestUtil.closeConnectionFile();
+						
+						ArrayList<Uri> uris = new ArrayList<Uri>();
+						
+						File dataFile = new File(HikeTestUtil.TEST_LOGS_FILE_PATH);
+						Uri u1 = Uri.fromFile(dataFile);
+						uris.add(u1);
+						
+						File connFile = new File(HikeTestUtil.TEST_CONN_FILE_PATH);
+						Uri u2 = Uri.fromFile(connFile);
+						uris.add(u2);
+						
+						StringBuilder message = new StringBuilder("\n\n");
+
+						try
+						{
+							message.append(getString(R.string.hike_version) + " " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName + "\n");
+						}
+						catch (NameNotFoundException e)
+						{
+							e.printStackTrace();
+						}
+
+						message.append(getString(R.string.device_name) + " " + Build.MANUFACTURER + " " + Build.MODEL + "\n");
+						message.append(getString(R.string.android_version) + " " + Build.VERSION.RELEASE + "\n");
+						String msisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.MSISDN_SETTING, "");
+						message.append(getString(R.string.msisdn) + " " + msisdn);
+
+						// start email sender activity
+						Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+						intent.setType("text/plain");
+						intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"rajesh@hike.in"});
+						intent.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.log_email_subject) + "_" + HikeTestUtil.getCurrentDateTime());
+						intent.putExtra(Intent.EXTRA_TEXT, message.toString());
+						intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);		
+						startActivity(Intent.createChooser(intent, getResources().getString(R.string.email_test_logs)));
+					}					
+					break;
+				// configure hm counter from here					
+				case 11:
+					AlertDialog alertDialog = new AlertDialog.Builder(ChatThread.this).create();
+					alertDialog.setTitle("Message counter");
+					alertDialog.setMessage("Enter number of hike messages to be sent(1-50)");
+					alertDialog.setIcon(R.drawable.ic_launcher);
+
+					final EditText input = new EditText(ChatThread.this);
+					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+					input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+					input.setLayoutParams(lp);
+					alertDialog.setView(input);
+
+					// Setting OK Button
+					alertDialog.setButton("OK", new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog, int which)
+						{
+							if(input.getText().length() > 0)
+							{
+								String value = input.getText().toString();
+								hike_message_counter = Integer.valueOf(value);
+								
+								if(hike_message_counter >HikeTestUtil.HIKE_MESSAGE_COUNTER_MAX || hike_message_counter <= 0)
+								{
+									Toast toast = Toast.makeText(getApplicationContext(), "Value should be between 1-50.", Toast.LENGTH_SHORT);
+									toast.show();	
+									hike_message_counter = HikeTestUtil.HIKE_MESSAGE_COUNTER_DEFAULT;
+								}
+							}
+							else
+							{
+								Toast toast = Toast.makeText(getApplicationContext(), "Field can't be blank!", Toast.LENGTH_SHORT);
+								toast.show();
+							}
+						}
+					});
+					alertDialog.show();
+				break;
+				// configure delay among hms
+				case 12:
+				AlertDialog delayDialog = new AlertDialog.Builder(ChatThread.this).create();
+				delayDialog.setTitle("Message delay");
+				delayDialog.setMessage("Enter delay between messages(100ms-2000ms)");
+				delayDialog.setIcon(R.drawable.ic_launcher);
+
+				final EditText delayInput = new EditText(ChatThread.this);
+				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+				delayInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+				delayInput.setLayoutParams(p);
+				delayDialog.setView(delayInput);
+
+				// Setting OK Button
+				delayDialog.setButton("OK", new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int which)
+					{
+						if(delayInput.getText().length() > 0)
+						{
+							String value = delayInput.getText().toString();
+							hike_message_delay = Integer.valueOf(value);
+							mTestUtil.setMessageDelay(hike_message_delay);
+							
+							if(hike_message_delay >HikeTestUtil.HIKE_MESSAGE_DELAY_MAX || hike_message_delay < HikeTestUtil.HIKE_MESSAGE_DELAY_MIN)
+							{
+								Toast toast = Toast.makeText(getApplicationContext(), "Value should be between 100-2000 milliseconds.", Toast.LENGTH_SHORT);
+								toast.show();	
+								hike_message_delay = HikeTestUtil.HIKE_MESSAGE_DELAY_DEFAULT;
+							}
+						}
+						else
+						{
+							Toast toast = Toast.makeText(getApplicationContext(), "Field can't be blank!", Toast.LENGTH_SHORT);
+							toast.show();
+						}
+					}
+				});
+				delayDialog.show();
+				break;					
 				}
 
 			}
 		};
 
 		setupPopupWindow(optionsList, onItemClickListener);
+	}
+
+	class StartHikeTestingAsyncTask extends MyAsyncTask<Void, Pair<ConvMessage, Boolean>, Void>
+	{
+		@SuppressWarnings("unchecked")
+		@Override
+		protected Void doInBackground(Void... params)
+		{
+			// hm testing
+			for (int k = 1; k <= hike_message_counter; k++)
+			{
+				String message = "Message " + k;
+				ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, message, isConversationOnHike());
+				Pair<ConvMessage, Boolean> testPair = new Pair<ConvMessage, Boolean>(convMessage, false);				
+				publishProgress(testPair);
+				
+				try
+				{
+					Thread.sleep(hike_message_delay);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+			}			
+			return null;
+		}
+		
+		@Override
+		protected void onProgressUpdate(Pair<ConvMessage, Boolean>... pair)
+		{
+			ConvMessage convMsg = pair[0].first;
+			boolean isFT = pair[0].second;
+			
+			if(!isFT)
+			{
+				sendMessage(convMsg);
+	
+				if (mComposeViewWatcher != null)
+				{
+					mComposeViewWatcher.onMessageSent();
+				}
+			}
+		}
+		
+		@Override
+		protected void onPostExecute(Void result)
+		{			
+			// ft testing
+			File dir = new File("/sdcard/Hike/TestFiles");
+			
+			for (File child:dir.listFiles())
+			{
+				if(child!=null)
+				{
+					String fileType = getMimeType(child.getPath());
+					
+					if(fileType!=null)
+					{
+						HikeFileType hikeFileType = HikeFileType.fromString(fileType, false);
+						
+						if(hikeFileType!=HikeFileType.OTHER)
+						{
+							initialiseFileTransfer(child.getPath(), null, hikeFileType, fileType, false, -1, false);
+						}
+						else
+						{
+							continue;
+						}
+					}
+				}
+			}	
+			CharSequence text = "Simulation has ended. Wait to receive all the messages after which you can send test report.";
+			int duration = Toast.LENGTH_LONG;
+
+			Toast toast = Toast.makeText(getApplicationContext(), text, duration);
+			toast.show();
+		}
+	}
+
+	public static String getMimeType(String url)
+	{
+	    String type = null;
+	    String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+	    if (extension != null) {
+	        MimeTypeMap mime = MimeTypeMap.getSingleton();
+	        type = mime.getMimeTypeFromExtension(extension);
+	    }
+	    return type;
 	}
 
 	private void clearConversation()

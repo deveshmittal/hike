@@ -10,16 +10,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.FutureTask;
 
-import javax.net.ssl.HttpsURLConnection;
-
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -42,6 +38,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.MediaStore.MediaColumns;
@@ -68,6 +65,7 @@ import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
+import com.bsb.hike.utils.HikeTestUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -101,6 +99,8 @@ public class UploadFileTask extends FileTransferBase
 
 	private boolean freshStart;
 	
+	private HikeTestUtil mTestUtil = null;
+	
 	private ArrayList<ContactInfo> contactList;
 	
 	private ArrayList<ConvMessage> messageList;
@@ -120,7 +120,8 @@ public class UploadFileTask extends FileTransferBase
 		this.isRecipientOnhike = isRecipientOnHike;
 		this.fileKey = fileKey;
 		_state = FTState.INITIALIZED;
-		createConvMessage();
+		mTestUtil = HikeTestUtil.getInstance(context);
+		createConvMessage();		
 	}
 	
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, ArrayList<ContactInfo> contactList, File sourceFile,
@@ -139,7 +140,7 @@ public class UploadFileTask extends FileTransferBase
 		_state = FTState.INITIALIZED;
 		createConvMessage();
 	}
-
+	
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Object convMessage,
 			boolean isRecipientOnHike)
 	{
@@ -367,6 +368,9 @@ public class UploadFileTask extends FileTransferBase
 		HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
 		hikeFileType = hikeFile.getHikeFileType();
 
+		// UPLOAD INIT LOG
+		mTestUtil.setMsgidTimestampPair(msgId, System.currentTimeMillis());
+
 		selectedFile = new File(hikeFile.getFilePath());
 		String fileName = selectedFile.getName();
 		if (hikeFile.getFilePath() == null)
@@ -552,6 +556,22 @@ public class UploadFileTask extends FileTransferBase
 			}
 		}
 
+		// time spent in initializing file upload
+		long initTime = mTestUtil.getTimestampForMsgid(msgId);
+		long currTime = System.currentTimeMillis();
+		mTestUtil.setMsgidTimestampPair(msgId, currTime);
+		long diffTime = System.currentTimeMillis() - initTime;
+		
+		try 
+		{
+			mTestUtil.writeDataToFile("APP," +  msgId + "," + "UPLOAD-PREP-TIME" + "," + Long.toString(diffTime) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() +
+					"," + mFile.getName() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
+		}
+		catch (RemoteException e1) 
+		{
+			e1.printStackTrace();
+		}		
+
 		try
 		{
 			if (_state == FTState.CANCELLED)
@@ -603,6 +623,12 @@ public class UploadFileTask extends FileTransferBase
 				// return FTResult.FAILED_UNRECOVERABLE;
 				// }
 			}
+
+			long lastTime = mTestUtil.getTimestampForMsgid(msgId);
+			long _currTime = System.currentTimeMillis();
+			long difTime = _currTime - lastTime;
+			mTestUtil.writeDataToFile("APP," +  msgId + "," + "UPLOAD-TIME" + "," + Long.toString(difTime) +
+			"," + Long.toString(_currTime) + "," + mFile.getName() + "," + fileKey + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));		
 
 			JSONObject metadata = new JSONObject();
 			JSONArray filesArray = new JSONArray();

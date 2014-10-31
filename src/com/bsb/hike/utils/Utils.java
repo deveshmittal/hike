@@ -77,8 +77,8 @@ import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.Typeface;
 import android.graphics.Shader.TileMode;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -95,6 +95,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -106,8 +107,11 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.telephony.CellLocation;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
+import android.telephony.cdma.CdmaCellLocation;
+import android.telephony.gsm.GsmCellLocation;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -4740,6 +4744,46 @@ public class Utils
 		    return output;
 		}
 		return null;
+	}
+	
+	public static String getCellLocation(Context context) throws RemoteException 
+	{
+		if(context == null)
+		{
+			return null;
+		}
+		TelephonyManager telMgr =  (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+				
+		CellLocation location = telMgr.getCellLocation();
+		
+		String cellid = null;
+		
+		if(location instanceof GsmCellLocation)
+		{
+			// Cell Id
+		    int cid = ((GsmCellLocation)location).getCid();
+		    
+		    cellid = String.valueOf(cid);
+		    
+		    // LAC-id
+//		    lacid = ((GsmCellLocation)location).getLac();
+		    
+//		    // MCC
+//		    String MCC = telMgr.getNetworkOperator();
+//		    mcc = Integer.parseInt(MCC.substring(0, 3));
+	
+//		    // Operator name
+//		    opName = telMgr.getNetworkOperatorName();		    
+		}
+		else if(location instanceof CdmaCellLocation)
+		{
+			int baseStnLat = ((CdmaCellLocation)location).getBaseStationLatitude();
+			
+			int baseStnLong = ((CdmaCellLocation)location).getBaseStationLongitude();	
+
+			cellid = String.valueOf(baseStnLat) + "_" + String.valueOf(baseStnLong);
+		}
+	    return cellid;
 	}
 	
 	/**

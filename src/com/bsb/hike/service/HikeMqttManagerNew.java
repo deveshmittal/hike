@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttActionListenerNew;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
@@ -17,7 +18,6 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
-import org.eclipse.paho.client.mqttv3.IMqttActionListenerNew;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,6 +42,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -52,6 +53,7 @@ import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
+import com.bsb.hike.utils.HikeTestUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -172,6 +174,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private volatile int retryCount = 0;
 	
 	private static final String UNRESOLVED_EXCEPTION = "unresolved";
+	
+	private long endTimeConnect;
+
+	private HikeTestUtil mTestUtil = null;
 
 	// constants used to define MQTT connection status, this is used by external classes and hardly of any use internally
 	public enum MQTTConnectionStatus
@@ -340,6 +346,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		connChkRunnable = new ConnectionCheckRunnable();
 		disConnectRunnable = new DisconnectRunnable();
 		activityChkRunnable = new ActivityCheckRunnable();
+		
+		mTestUtil = HikeTestUtil.getInstance(context);
 	}
 
 	/*
@@ -674,7 +682,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				else
 					op.setSocketFactory(null);
 				Logger.d(TAG, "MQTT connecting on : " + mqtt.getServerURI());
-				mqtt.connect(op, null, getConnectListener());
+				mqtt.connect(op, System.currentTimeMillis(), getConnectListener());
 			}
 			else
 			{
@@ -880,6 +888,18 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				@Override
 				public void onSuccess(IMqttToken arg0)
 				{
+					endTimeConnect = System.currentTimeMillis();
+					long startTimeConnect = (Long) arg0.getUserContext();
+					try 
+					{
+						mTestUtil.writeConnLogsToFile("APP," + "CONN-ACK(SUCCESS)" + "," + Long.toString(endTimeConnect - startTimeConnect) + "," +
+						HikeTestUtil.getCurrentTimeInMilliseconds() + "," + Utils.getCellLocation(context));
+					}
+					catch (RemoteException e1) 
+					{
+						e1.printStackTrace();
+					}
+
 					try
 					{
 						pushConnect = false;
@@ -915,6 +935,18 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				@Override
 				public void onFailure(IMqttToken arg0, Throwable value)
 				{
+					endTimeConnect = System.currentTimeMillis();
+					long startTimeConnect = (Long) arg0.getUserContext();
+					try 
+					{
+						mTestUtil.writeConnLogsToFile("\n\n" + "APP," +  "CONN-ACK(FAILURE)" + "," +
+						Long.toString(endTimeConnect - startTimeConnect) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + Utils.getCellLocation(context));
+					}					
+					catch (RemoteException e1) 
+					{
+						e1.printStackTrace();
+					}
+
 					try
 					{
 						MqttException exception = (MqttException) value;
@@ -932,6 +964,81 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 			};
 		}
 		return listernerConnect;
+	}
+
+	/**
+	 * It records the dr and mr timings for a hike message
+	 * @param json json object
+	 */
+	private void recordDRandMR(JSONObject json)
+	{
+		long currTime = System.currentTimeMillis();			
+		String type = json.optString(HikeConstants.TYPE);
+		
+		if(HikeConstants.MqttMessageTypes.DELIVERY_REPORT.equals(type))
+		{
+			Log.d("HikeMqttManagerNew", "Its a dr packet.");
+			String id = json.optString(HikeConstants.DATA);
+			long msgID = 0;
+			
+			try
+			{
+				msgID = Long.parseLong(id);
+			}
+			catch(NumberFormatException ex)
+			{
+				ex.printStackTrace();
+			}
+			
+			Long retVal = mTestUtil.getTimestampForMsgid(msgID);
+			
+			if(retVal != null )
+			{
+				long Stime = retVal.longValue();
+				mTestUtil.setMsgidTimestampPair(msgID, currTime);
+				Log.d("HikeMqttManagerNew", "Time taken to deliver the message(S->D)[" + Long.toString(msgID) + "]" + Long.toString(currTime-Stime));
+				
+				try 
+				{
+					mTestUtil.writeDataToFile("APP," +  msgID + "," + "S-D" + "," + Long.toString(System.currentTimeMillis()-Stime) + "," + 
+					HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
+				}
+				catch (RemoteException e) 
+				{
+					e.printStackTrace();
+				}
+			}
+			else
+			{
+				Log.d("HikeTestUtil", "no timestamp found for this msgId");
+			}
+		}
+		else if(HikeConstants.MqttMessageTypes.MESSAGE_READ.equals(type))
+		{
+			Log.d("HikeMqttManagerNew", "Its a mr packet");
+			JSONArray msgIds = json.optJSONArray(HikeConstants.DATA);
+			
+			// logging mr timings
+			for(int p=0; p<msgIds.length(); p++)
+			{					
+				if(mTestUtil.getMsgIdTimeMap().containsKey(msgIds.optLong(p)))
+				{
+					Log.d("HikeMqttManagerNew", "read msgIds :"+ msgIds.optLong(p));
+					long timestamp = mTestUtil.getTimestampForMsgid(msgIds.optLong(p));
+					Log.d("HikeMqttManagerNew", "Time taken to read the message[" + Long.toString(msgIds.optLong(p)) + "]" + Long.toString(currTime - timestamp));
+					try 
+					{
+						mTestUtil.writeDataToFile("APP," + Long.toString(msgIds.optLong(p)) + "," + "D-R" + "," + Long.toString(currTime - timestamp) + "," +
+						HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
+					}
+					catch (RemoteException e) 
+					{
+						e.printStackTrace();
+					}
+					mTestUtil.getMsgIdTimeMap().remove(msgIds.optLong(p));
+				}
+			}
+		}
 	}
 
 	/* This call back will be called when message is arrived */
@@ -952,6 +1059,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						String messageBody = new String(bytes, "UTF-8");
 						Logger.i(TAG, "messageArrived called " + messageBody);
 						JSONObject jsonObj = new JSONObject(messageBody);
+						recordDRandMR(jsonObj);
 						mqttMessageManager.saveMqttMessage(jsonObj);
 					}
 					catch (JSONException e)
@@ -1023,6 +1131,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 
 		Logger.d(TAG, "About to send message " + new String(packet.getMessage()));
+		
+		// log time before publish
+		mTestUtil.setMsgidTimestampPair(packet.getMsgId(), System.currentTimeMillis());
+
 		try
 		{
 			Logger.d(TAG, "Current inflight msg count : " + mqtt.getInflightMessages());
@@ -1036,6 +1148,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				@Override
 				public void onSuccess(IMqttToken arg0)
 				{
+					long msgTimeToS = System.currentTimeMillis();
+
 					try
 					{
 						cancelNetworkErrorTimer();
@@ -1046,6 +1160,13 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 							if (packet.getMsgId() > 0)
 							{
 								Long msgId = packet.getMsgId();
+								long timestamp = mTestUtil.getTimestampForMsgid(msgId);
+								Log.d(TAG, "Recieved S status for msg with id : " + msgId);
+								Log.d(TAG, "Time taken to send msg with msgId " + msgId + " to hike-server in ms(Clock to S) : " + Long.toString(msgTimeToS-timestamp));
+								mTestUtil.writeDataToFile("APP," +  msgId + "," + "CLOCK-S" + "," + Long.toString(msgTimeToS-timestamp) + "," + 
+								HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
+								mTestUtil.setMsgidTimestampPair(msgId, msgTimeToS);
+
 								Logger.d(TAG, "Recieved S status for msg with id : " + msgId);
 								// HikeMessengerApp.getPubSub().publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
 							}

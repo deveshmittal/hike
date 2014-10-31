@@ -18,18 +18,20 @@ package org.eclipse.paho.client.mqttv3.internal;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.SocketException;
-import java.util.HashMap;
-import java.util.Map;
+
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttAck;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttOutputStream;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttPingReq;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
+import com.bsb.hike.utils.HikeTestUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 public class CommsSender implements Runnable
 {
@@ -55,6 +57,8 @@ public class CommsSender implements Runnable
 	private final static String className = CommsSender.class.getName();
 
 	private final String TAG = "COMMSSENDER";
+	
+	private HikeTestUtil mTestUtil = null;
 
 	public CommsSender(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, OutputStream out, Socket socket)
 	{
@@ -63,7 +67,7 @@ public class CommsSender implements Runnable
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.tokenStore = tokenStore;
-
+		mTestUtil = HikeTestUtil.getInstance(null);
 	}
 
 	/**
@@ -133,6 +137,8 @@ public class CommsSender implements Runnable
 					{
 						out.write(message);
 						out.flush();
+						mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent MqttAck at :" +
+						HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(mTestUtil.getContext()));
 					}
 					else
 					{
@@ -171,6 +177,22 @@ public class CommsSender implements Runnable
 									int length = ((MqttPublish) message).getHeaderLength() + ((MqttPublish) message).getPayloadLength();
 									Logger.d(TAG, "bytes written on socket : " + length);
 									logSocketProperties();
+								}
+								if (message instanceof MqttPingReq)
+								{
+									mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent mqtt ping-request at :" +
+									HikeTestUtil.getCurrentTimeInMilliseconds() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(mTestUtil.getContext()));
+								}
+								else if (message instanceof MqttConnect)
+								{
+									mTestUtil.writeConnLogsToFile("\n\n" + "MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent MqttConnect at :" +
+									HikeTestUtil.getCurrentTimeInMilliseconds() + "," + Utils.getCellLocation(mTestUtil.getContext()));
+								}
+								else
+								{
+									String payload = new String(message.getPayload(), "UTF-8");
+									mTestUtil.writeDataToFile("MQTT," +  message.getMessageId() + "," + "mqttlib(sender) sent message at :" +
+									HikeTestUtil.getCurrentTimeInMilliseconds() + "," + payload + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(mTestUtil.getContext()));									
 								}
 
 								clientState.notifySent(message);
