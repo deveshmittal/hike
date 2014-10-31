@@ -1844,6 +1844,8 @@ public class HikeConstants
 		public static final int PLAIN_TEXT = 0;
 
 		public static final int TEXT_PIN = 1;
+		
+		public static final int CONTENT = 2;
 	}
 	
 	public static class HASH_MESSAGE_TYPE
