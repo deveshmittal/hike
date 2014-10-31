@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.view.View.OnClickListener;
 import android.content.Context;
 import android.preference.PreferenceManager;
@@ -150,12 +154,28 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		else
 		{
 			holder = (ViewHolder) convertView.getTag();
-			holder.msisdn = contactInfo.getMsisdn();
+			String msisdn = contactInfo.getMsisdn();
+			holder.msisdn = msisdn;
 
 			holder.status.setText(contactInfo.getMsisdn());
 
 			String name = contactInfo.getName();
-			holder.name.setText("".equals(name) || null == name ? contactInfo.getMsisdn() : name);
+			if(TextUtils.isEmpty(name))
+			{
+				holder.name.setText(msisdn);
+			}
+			else
+			{
+				Integer startIndex = contactSpanStartIndexes.get(msisdn);
+				if(startIndex!=null)
+				{
+					holder.name.setText(getSpanText(name, startIndex), TextView.BufferType.SPANNABLE);
+				}
+				else
+				{
+					holder.name.setText(name);
+				}
+			}
 
 			if (viewType == ViewType.NEW_CONTACT)
 			{

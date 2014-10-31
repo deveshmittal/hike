@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
@@ -133,7 +134,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	private ContactFilter contactFilter;
 
-	private String queryText;
+	protected String queryText;
 
 	private boolean lastSeenPref;
 
@@ -1025,7 +1026,25 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 			updateViewsRelatedToAvatar(convertView, contactInfo);
 
-			name.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo.getMsisdn() : contactInfo.getName());
+			String contactName = contactInfo.getName();
+			String msisdn = contactInfo.getMsisdn();
+
+			if(TextUtils.isEmpty(contactName))
+			{
+				name.setText(msisdn);
+			}
+			else
+			{
+				Integer startIndex = contactSpanStartIndexes.get(msisdn);
+				if(startIndex!=null)
+				{
+					name.setText(getSpanText(contactName, startIndex), TextView.BufferType.SPANNABLE);
+				}
+				else
+				{
+					name.setText(contactName);
+				}
+			}
 
 			if (viewType == ViewType.FRIEND || viewType == ViewType.FRIEND_REQUEST || viewType == ViewType.FTUE_CONTACT)
 			{
@@ -1219,6 +1238,13 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		}
 
 		return convertView;
+	}
+
+	protected SpannableString getSpanText(String text, Integer start)
+	{
+		SpannableString spanName = new SpannableString(text);
+		spanName.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.blue_color_span)), start, start+queryText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		return spanName;
 	}
 
 	private void updateViewsRelatedToAvatar(View parentView, ContactInfo contactInfo)
