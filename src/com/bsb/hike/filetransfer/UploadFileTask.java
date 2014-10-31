@@ -140,7 +140,7 @@ public class UploadFileTask extends FileTransferBase
 		_state = FTState.INITIALIZED;
 		createConvMessage();
 	}
-
+	
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Object convMessage,
 			boolean isRecipientOnHike)
 	{
