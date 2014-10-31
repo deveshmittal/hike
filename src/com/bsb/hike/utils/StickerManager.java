@@ -1113,6 +1113,7 @@ public class StickerManager
 		BitmapDrawable bitmapDrawable = generateBitmapDrawable(ctx.getResources(), baseFilePath);
 		if (bitmapDrawable == null)
 		{
+			StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
 			bitmapDrawable = (isPressed ? (BitmapDrawable) ctx.getResources().getDrawable(R.drawable.default_sticker_pallete_selected) : (BitmapDrawable) ctx.getResources()
 					.getDrawable(R.drawable.default_sticker_pallete));
 		}
