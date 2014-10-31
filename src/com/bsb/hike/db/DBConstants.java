@@ -229,5 +229,23 @@ public class DBConstants
 		public static final String LOVE_ID_REL = "love_id";
 		// MESSAGE TABLE ENDS HERE
 	}
-	
+	/**
+	 * 
+	 * @author gauravKhanna
+	 *
+	 */
+	public static interface HIKE_CONTENT{
+		public static final int DB_VERSION = 1;
+		public static final String DB_NAME = "hike_content_db";
+		// CONTENT TABLE -> _id,content_id,love_id,channel_id,timestamp,metadata
+		public static final String CONTENT_TABLE = "content";
+		public static final String CONTENT_ID = "content_id";
+		public static final String LOVE_ID = "love_id";
+		public static final String CHANNEL_ID = "channel_id";
+		public static final String TIMESTAMP = "timestamp";
+		public static final String METADATA = "metadata";
+		// CONTENT TABLE ENDS HERE
+		
+		public static final String CONTENT_ID_INDEX = "contentTableContentIdIndex";
+	}
 }
