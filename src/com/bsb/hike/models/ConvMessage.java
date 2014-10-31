@@ -16,6 +16,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.platform.ContentLove;
+import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -76,7 +78,7 @@ public class ConvMessage
 	private int messageType = HikeConstants.MESSAGE_TYPE.PLAIN_TEXT;
 	// private boolean showResumeButton = true;
 	public ContentLove contentLove;
-	
+	public PlatformMessageMetadata platformMessageMetadata;
 	public boolean isLovePresent(){
 		return contentLove!=null;
 	}
@@ -207,6 +209,9 @@ public class ConvMessage
 		}
 	}
 
+	public ConvMessage(){
+		
+	}
 	public ConvMessage(int unreadCount, long timestamp, long msgId)
 	{
 		this.unreadCount = unreadCount;
@@ -898,9 +903,5 @@ public class ConvMessage
 		this.mMsisdn = msisdn;
 	}
 	
-	public static class ContentLove{
-		public int loveCount,loveId;
-		public boolean userStatus;
-		public Date updatedTimeStamp;
-	}
+	
 }
