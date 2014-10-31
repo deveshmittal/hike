@@ -9,6 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
+        android:layout_marginTop="32dp"
         android:layout_centerHorizontal="true"
         android:text="INCOMING CALL"
         android:textAppearance="?android:attr/textAppearanceLarge"
@@ -18,9 +19,9 @@
         android:id="@+id/CallerId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/PhoneNumberView1"
+        android:layout_below="@+id/voipContactPicture"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="12dp"
         android:text="Large Text"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/bubble_beach_2" />
@@ -32,11 +33,11 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/imageView1"
+        android:layout_below="@+id/voipContactPicture"
         android:layout_marginBottom="128dp"
-        android:layout_marginRight="24dp"
-        android:layout_marginLeft="164dp"
-        android:layout_marginTop="82dp"
+        android:layout_marginRight="36dp"
+        android:layout_marginLeft="152dp"
+        android:layout_marginTop="92dp"
         android:background="@drawable/decline_voip_call" />
 
     <ImageButton
@@ -46,18 +47,18 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/imageView1"
+        android:layout_below="@+id/voipContactPicture"
         android:layout_marginBottom="128dp"
-        android:layout_marginRight="164dp"
-        android:layout_marginLeft="24dp"
-        android:layout_marginTop="82dp"
+        android:layout_marginRight="152dp"
+        android:layout_marginLeft="36dp"
+        android:layout_marginTop="92dp"
         android:background="@drawable/accept_voip_call" />
 
     <ImageView
         android:id="@+id/voipContactPicture"
         android:layout_width="100dp"
         android:layout_height="80dp"
-        android:layout_below="@+id/CallerId"
+        android:layout_below="@+id/PhoneNumberView1"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="19dp"
         android:background="@drawable/emo_5_tab_selected" />
