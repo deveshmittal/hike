@@ -37,8 +37,6 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	
 	private int categorySize;
 	
-	private int timeStamp;
-	
 	public static final int NONE = 0;
 	
 	public static final int UPDATE = 1;
@@ -52,7 +50,7 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	private int state;
 
 	public StickerCategory(String categoryId, String categoryName, boolean updateAvailable, boolean isVisible, boolean isCustom, boolean isAdded,
-			int catIndex, int totalStickers, int timeStamp, int categorySize)
+			int catIndex, int totalStickers, int categorySize)
 	{
 		this.categoryId = categoryId;
 		this.updateAvailable = updateAvailable;
@@ -62,7 +60,6 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 		this.isAdded = isAdded;
 		this.catIndex = catIndex;
 		this.totalStickers = totalStickers;
-		this.timeStamp = timeStamp;
 		this.categorySize = categorySize;
 		this.state = isMoreStickerAvailable() ? UPDATE : NONE;
 	}
@@ -174,16 +171,6 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 		this.totalStickers = totalStickers;
 	}
 
-	public int getTimeStamp()
-	{
-		return timeStamp;
-	}
-
-	public void setTimeStamp(int timeStamp)
-	{
-		this.timeStamp = timeStamp;
-	}
-	
 	public void setState(int state)
 	{
 		this.state = state;

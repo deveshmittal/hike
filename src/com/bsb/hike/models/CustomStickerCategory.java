@@ -30,9 +30,9 @@ public class CustomStickerCategory extends StickerCategory
 	}
 
 	public CustomStickerCategory(String categoryId, String categoryName, boolean updateAvailable, boolean isVisible, boolean isCustom, boolean isAdded, int catIndex,
-			int totalStickers, int timeStamp, int categorySize)
+			int totalStickers, int categorySize)
 	{
-		super(categoryId, categoryName, updateAvailable, isVisible, isCustom, isAdded, catIndex, totalStickers, timeStamp, categorySize);
+		super(categoryId, categoryName, updateAvailable, isVisible, isCustom, isAdded, catIndex, totalStickers, categorySize);
 		loadStickers();
 	}
 
