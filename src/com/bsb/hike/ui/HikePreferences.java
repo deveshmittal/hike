@@ -1,5 +1,7 @@
 package com.bsb.hike.ui;
 
+import java.text.SimpleDateFormat;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,8 +34,11 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.HikeConstants.ImageQuality;
+import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
+import com.bsb.hike.tasks.BackupAccountTask;
+import com.bsb.hike.tasks.BackupAccountTask.BackupAccountListener;
 import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.tasks.UnlinkTwitterTask;
@@ -48,12 +53,12 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
 import com.facebook.Session;
 
-public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, OnPreferenceChangeListener, DeleteAccountListener
+public class HikePreferences extends HikeAppStateBasePreferenceActivity implements OnPreferenceClickListener, OnPreferenceChangeListener, DeleteAccountListener, BackupAccountListener
 {
 
 	private enum BlockingTaskType
 	{
-		NONE, DELETING_ACCOUNT, UNLINKING_ACCOUNT, UNLINKING_TWITTER
+		NONE, DELETING_ACCOUNT, UNLINKING_ACCOUNT, UNLINKING_TWITTER, BACKUP_ACCOUNT
 	}
 
 	private ActivityCallableTask mTask;
@@ -103,6 +108,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		else
 		{
 			Utils.logEvent(HikePreferences.this, HikeConstants.LogEvent.NOTIFICATION_SCREEN);
+		}
+		Preference backupPreference = getPreferenceScreen().findPreference(HikeConstants.BACKUP_PREF);
+		if (backupPreference != null)
+		{
+			backupPreference.setOnPreferenceClickListener(this);
 		}
 		Preference unlinkPreference = getPreferenceScreen().findPreference(HikeConstants.UNLINK_PREF);
 		if (unlinkPreference != null)
@@ -343,6 +353,9 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			case UNLINKING_TWITTER:
 				message = getString(R.string.social_unlinking);
 				break;
+			case BACKUP_ACCOUNT:
+				message = "Creating a backup on your chats. Daily backups occur at 03:00.";
+				break;
 
 			default:
 				return;
@@ -368,6 +381,13 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			 Intent i = new Intent(getApplicationContext(), DeleteAccount.class);
 			 startActivity(i);
+		}
+		else if (preference.getKey().equals(HikeConstants.BACKUP_PREF))
+		{
+			BackupAccountTask task = new BackupAccountTask(getApplicationContext(), HikePreferences.this);
+			blockingTaskType = BlockingTaskType.BACKUP_ACCOUNT;
+			setBlockingTask(task);
+			Utils.executeBoolResultAsyncTask(task);
 		}
 		else if (preference.getKey().equals(HikeConstants.UNLINK_PREF))
 		{
@@ -806,6 +826,10 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			break;
 		case R.xml.media_download_preferences:
 			updateImageQualityPrefView();
+			break;
+		case R.xml.account_preferences:
+			updateAccountBackupPrefView();
+			break;
 		}
 	}
 	
@@ -837,6 +861,18 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		{
 			preference.setTitle(getResources().getString(R.string.image_quality_prefs));
 		}
+	}
+	
+	private void updateAccountBackupPrefView()
+	{
+		Preference preference = getPreferenceScreen().findPreference(HikeConstants.BACKUP_PREF);
+		long lastBackupTime = DBBackupRestore.getInstance(getApplicationContext()).getLastBackupTime();
+		String backupSummary = "Last backup: never";
+		if (lastBackupTime > 0)
+		{
+			backupSummary = "Last backup: " + Utils.getFormattedDateTimeFromTimestamp(lastBackupTime/1000, getResources().getConfiguration().locale);
+		}
+		preference.setSummary(backupSummary);
 	}
 	
 	private void updateNotifPrefView()
@@ -919,6 +955,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		LockPattern.onLockActivityResult(this, requestCode, resultCode, data);
 		super.onActivityResult(requestCode, resultCode, data);
 	}
-	
+
+	@Override
+	public void accountBacked(boolean isSuccess)
+	{
+		 dismissProgressDialog();
+		 updateAccountBackupPrefView();
+	}
 
 }

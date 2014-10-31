@@ -184,6 +184,21 @@ public class DBBackupRestore
 		return true;
 	}
 
+	public long getLastBackupTime()
+	{
+		for (String fileName : dbNames)
+		{
+			File currentDB = getCurrentDBFile(fileName);
+			File DBCopy = getDBCopyFile(currentDB.getName());
+			File backup = getDBBackupFile(DBCopy.getName());
+			if (backup.exists())
+			{
+				return backup.lastModified();
+			}
+		}
+		return -1;
+	}
+
 	private static File getCurrentDBFile(String dbName)
 	{
 		File data = Environment.getDataDirectory();

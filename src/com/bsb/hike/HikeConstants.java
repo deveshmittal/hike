@@ -461,6 +461,8 @@ public class HikeConstants
 	
 	public static final String FTUE_HIKE_SUPPORT = "+hike4+";
 
+	public static final String BACKUP_PREF = "backupAccount";
+
 	public static final String UNLINK_PREF = "unlinkAccount";
 
 	public static final String DELETE_PREF = "deleteAccount";
