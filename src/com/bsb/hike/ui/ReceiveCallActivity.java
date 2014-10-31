@@ -1,7 +1,12 @@
 package com.bsb.hike.ui;
 
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.VoIPServiceNew;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.HikePubSub;
 
 import android.app.Activity;
@@ -13,6 +18,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -31,11 +37,25 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 	private Uri notification;
 	private Ringtone r;
 	private boolean callStarted;
+	private String mContactName;
+	private String mContactNumber;
+	private Context prefs;
 	
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		if(getIntent().hasExtra("callerID")){
 			callerId = getIntent().getStringExtra("callerID");
+		}
+		ContactInfo contactInfo = ContactManager.getInstance().getContactInfoFromPhoneNo(callerId);
+		if (contactInfo != null)
+		{
+			mContactName = contactInfo.getName();
+			mContactNumber = contactInfo.getMsisdn();
+			if( mContactName == null)
+			{
+				mContactName = mContactNumber = callerId;
+				Log.d("contactName", mContactName);
+			}
 		}
 		setFinishOnTouchOutside(false);
 		final Intent i = new Intent(this,com.bsb.hike.service.VoIPServiceNew.class);
@@ -53,7 +73,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		r.setStreamType(AudioManager.STREAM_ALARM);
 		r.play();
 		callNo = (TextView)this.findViewById(R.id.CallerId);
-		callNo.setText("Incoming Number Goes Here!");
+		callNo.setText(mContactName);
 		acceptCall = (ImageButton)this.findViewById(R.id.acceptButton);
 //		acceptCall.setBackgroundColor(Color.GREEN);
 //		acceptCall.setTextColor(Color.WHITE);
