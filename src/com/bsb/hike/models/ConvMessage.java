@@ -75,7 +75,11 @@ public class ConvMessage
 	private int unreadCount = -1;
 	private int messageType = HikeConstants.MESSAGE_TYPE.PLAIN_TEXT;
 	// private boolean showResumeButton = true;
+	public ContentLove contentLove;
 	
+	public boolean isLovePresent(){
+		return contentLove!=null;
+	}
 	public int getMessageType()
 	{
 		return messageType;
@@ -892,5 +896,11 @@ public class ConvMessage
 	
 	public void setMsisdn(String msisdn){
 		this.mMsisdn = msisdn;
+	}
+	
+	public static class ContentLove{
+		public int loveCount,loveId;
+		public boolean userStatus;
+		public Date updatedTimeStamp;
 	}
 }
