@@ -152,7 +152,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		  }
 		  Log.d("VOIPSERVICE","5");			
 //		  VoIPActivityNew.getVoIPActivityInstance().raiseEndCallToast();
-		  VoIPActivityNew.getVoIPActivityInstance().finish();
+//		  VoIPActivityNew.getVoIPActivityInstance().finish();
 		  Log.d("VOIPSERVICE","6");
 		  stopSelf();
 		  Log.d("VOIPSERVICE","7");
