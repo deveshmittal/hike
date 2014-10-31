@@ -76,6 +76,8 @@ public class StickerManager
 	public static final String MORE_STICKERS_DOWNLOADED = "st_more_downloaded";
 
 	public static final String STICKERS_FAILED = "st_failed";
+	
+	public static final String STICKERS_PROGRESS = "st_progress";
 
 	public static final String STICKER_DOWNLOAD_TYPE = "stDownloadType";
 
@@ -170,6 +172,8 @@ public class StickerManager
 	public static final String SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE = "shownHardcodedCategoryUpdateAvailable";
 	
 	public static final String STICKERS_SIZE_DOWNLOADED = "stickersSizeDownloaded";
+	
+	public static final String PERCENTAGE = "percentage";
 	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
@@ -1095,6 +1099,15 @@ public class StickerManager
 		category.setState(StickerCategory.RETRY);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there
 		
 		Intent i = new Intent(StickerManager.STICKERS_FAILED);
+		i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
+		LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+	}
+	
+	public void onStickersDownloadProgress(Object resultObj)
+	{
+		Bundle b = (Bundle) resultObj;
+		
+		Intent i = new Intent(StickerManager.STICKERS_PROGRESS);
 		i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
 		LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 	}
