@@ -9,9 +9,11 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1116,6 +1118,24 @@ public class UploadFileTask extends FileTransferBase
 		{
 			ex.printStackTrace();
 			Logger.e(getClass().getSimpleName(), "FT Upload time out error : " + ex.getMessage());
+			return null;
+		}
+		catch (SocketException ex)
+		{
+			ex.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "FT Upload Socket error : " + ex.getMessage());
+			error();
+			res = null;
+			retry = false;
+			return null;
+		}
+		catch (UnknownHostException ex)
+		{
+			ex.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "FT Upload UnknownHost error : " + ex.getMessage());
+			error();
+			res = null;
+			retry = false;
 			return null;
 		}
 		catch (Exception e)
