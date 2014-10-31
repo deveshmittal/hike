@@ -193,6 +193,12 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 					}
 				});
 			}
+			else if(intent.getAction().equals(StickerManager.STICKERS_PROGRESS))
+			{
+				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
+				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+				initStickers(category);
+			}
 			
 			else
 			{
