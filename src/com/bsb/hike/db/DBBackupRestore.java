@@ -12,6 +12,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.utils.CBCEncryption;
 import com.bsb.hike.utils.Logger;
@@ -28,11 +29,15 @@ public class DBBackupRestore
 
 	private static final String[] resetTableNames = { };
 	
+	private String backupToken;
+	
 	private Context mContext;
 
 	private DBBackupRestore(Context context)
 	{
 		this.mContext = context;
+		SharedPreferences settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		backupToken = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, null);
 	}
 
 	public static DBBackupRestore getInstance(Context context)
@@ -60,7 +65,7 @@ public class DBBackupRestore
 					return false;
 
 				File backup = getDBBackupFile(dbCopy.getName());
-				CBCEncryption.encryptFile(dbCopy, backup);
+				CBCEncryption.encryptFile(dbCopy, backup, backupToken);
 				dbCopy.delete();
 			}
 		}
@@ -111,7 +116,7 @@ public class DBBackupRestore
 				File currentDB = getCurrentDBFile(fileName);
 				File DBCopy = getDBCopyFile(currentDB.getName());
 				File backup = getDBBackupFile(DBCopy.getName());
-				CBCEncryption.decryptFile(backup, DBCopy);
+				CBCEncryption.decryptFile(backup, DBCopy, backupToken);
 				importDatabase(DBCopy);
 				postRestoreSetup();
 				DBCopy.delete();
