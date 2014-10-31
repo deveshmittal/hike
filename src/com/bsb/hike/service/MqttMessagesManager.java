@@ -972,10 +972,20 @@ public class MqttMessagesManager
 					ContactManager.getInstance().setMultipleContactsToFavorites(favorites);
 				}
 			}
-			editor.putString(HikeMessengerApp.REWARDS_TOKEN, account.optString(HikeConstants.REWARDS_TOKEN));
-			editor.putBoolean(HikeMessengerApp.SHOW_REWARDS, account.optBoolean(HikeConstants.SHOW_REWARDS));
+			
+			String rewardsToken = account.optString(HikeConstants.REWARDS_TOKEN);
+			if(!TextUtils.isEmpty(rewardsToken))	
+			{
+				/* Server may disable rewards but not necessary invalidate rewards token.
+				 * To help Server not resend rewards token (and thus save server side DB queries) when later enabling rewards,
+				 * client will be caching the rewards token.
+				 */
+				editor.putString(HikeMessengerApp.REWARDS_TOKEN, rewardsToken);
+				// TODO. Should this be games_token ?
+				editor.putString(HikeMessengerApp.GAMES_TOKEN, rewardsToken); 
+			}
 
-			editor.putString(HikeMessengerApp.GAMES_TOKEN, account.optString(HikeConstants.REWARDS_TOKEN));
+			editor.putBoolean(HikeMessengerApp.SHOW_REWARDS, account.optBoolean(HikeConstants.SHOW_REWARDS));
 			editor.putBoolean(HikeMessengerApp.SHOW_GAMES, account.optBoolean(HikeConstants.SHOW_GAMES));
 
 			if (account.optBoolean(HikeConstants.SHOW_REWARDS))

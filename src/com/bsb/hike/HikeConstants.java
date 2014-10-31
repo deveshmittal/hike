@@ -1042,6 +1042,8 @@ public class HikeConstants
 		public static final String URL_TO_LOAD = "urlToLoad";
 
 		public static final String TITLE = "title";
+		
+		public static final String WEBVIEW_ALLOW_LOCATION = "allocLoc";
 
 		public static final String FIRST_TIME_USER = "firstTimeUser";
 

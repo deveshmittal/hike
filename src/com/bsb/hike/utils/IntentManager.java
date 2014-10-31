@@ -161,6 +161,8 @@ public class IntentManager
 		{
 			intent.putExtra(HikeConstants.Extras.TITLE, rewards_name);
 		}
+		intent.putExtra(HikeConstants.Extras.WEBVIEW_ALLOW_LOCATION, true);
+		
 		return intent;
 	}
 

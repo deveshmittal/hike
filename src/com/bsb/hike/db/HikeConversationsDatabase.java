@@ -980,7 +980,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					}
 					else
 					{
-						return;
+						continue;
 					}
 
 					JSONArray readByArray;
@@ -1004,10 +1004,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					/*
 					 * Checking if this number has already been added.
 					 */
-					boolean alreadyAdded = false;
 					for (String msisdn : pair.getFirst().getSecond())
 					{
-						for (int i = 0; i < readByArray.length(); i++)
+						boolean alreadyAdded = false;
+						int length = readByArray.length();
+						
+						for (int i = 0; i < length; i++)
 						{
 							if (readByArray.optString(i).equals(msisdn))
 							{
