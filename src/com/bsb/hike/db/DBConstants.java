@@ -200,5 +200,34 @@ public class DBConstants
 
 	public static final String HIKE_FILE_TYPE = "hikeFileType";
 
+	public static final String _ID = "_id";
+	
+	public static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS ";
+	public static final String CREATE_INDEX = "CREATE INDEX IF NOT EXISTS ";
+	
 	public static final String IS_SENT = "isSent";
+	
+	
+	
+	public static interface HIKE_CONV_DB{
+		// CHANNEL TABLE -> _id,channel_id,name,visibility,index 
+		public static final String CHANNEL_TABLE = "channel";
+		public static final String CHANNEL_ID = "channel_id";
+		public static final String CHANNEL_NAME = "name";
+		public static final String VISIILITY = "visibility";
+		public static final String INDEX_ORDER = "index";
+		// CHANNEL TABLE ENDS HERE
+		// LOVE TABLE -> _id,love_id,count,user_status,ref_count,timestamp
+		public static final String LOVE_TABLE = "love";
+		public static final String LOVE_ID = "love_id";
+		public static final String COUNT = "count";
+		public static final String USER_STATUS = "user_status";
+		public static final String REF_COUNT = "ref_count";
+		public static final String TIMESTAMP = "timestamp";
+		// LOVE TABLE ENDS HERE
+		// MESSAGE TABLE
+		public static final String LOVE_ID_REL = "love_id";
+		// MESSAGE TABLE ENDS HERE
+	}
+	
 }
