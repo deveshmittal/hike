@@ -2,8 +2,10 @@ package com.bsb.hike.ui;
 
 import com.bsb.hike.R;
 import com.bsb.hike.service.VoIPServiceNew;
+import com.bsb.hike.HikePubSub;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -19,7 +21,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class ReceiveCallActivity extends Activity {
+public class ReceiveCallActivity extends Activity implements HikePubSub.Listener {
 	
 	private String callerId;
 	private TextView callNo;
@@ -35,6 +37,7 @@ public class ReceiveCallActivity extends Activity {
 		if(getIntent().hasExtra("callerID")){
 			callerId = getIntent().getStringExtra("callerID");
 		}
+		setFinishOnTouchOutside(false);
 		final Intent i = new Intent(this,com.bsb.hike.service.VoIPServiceNew.class);
 		i.putExtras(getIntent().getExtras());
 //		setTheme(android.R.style.Theme_Dialog);
@@ -103,6 +106,20 @@ public class ReceiveCallActivity extends Activity {
 			finish();
 		}
 		super.onPause();
+	}
+	
+	public void onDestroy(){
+		((AudioManager) getSystemService(Context.AUDIO_SERVICE)).setMode(AudioManager.MODE_NORMAL);
+		super.onDestroy();
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object) {
+		if(type == HikePubSub.VOIP_FINISHED)
+		{
+			finish();
+		}
+		
 	}
 	
 }

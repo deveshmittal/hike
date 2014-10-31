@@ -256,7 +256,10 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 
 	@Override
 	public void onEventReceived(String type, Object object) {
-		if(type == HikePubSub.VOIP_HANDSHAKE){
+		if (type == HikePubSub.VOIP_FINISHED){
+			finish();
+		}
+		else if(type == HikePubSub.VOIP_HANDSHAKE){
 			try {
 				JSONObject json = (JSONObject) object;
 				JSONObject data = (JSONObject) json.get(HikeConstants.DATA);
@@ -294,6 +297,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		mPubSub.removeListener(HikePubSub.VOIP_CALL_STATUS_CHANGED, this);
 		mPubSub.removeListener(HikePubSub.VOIP_DURATION, this);
 		screenOn();
+		((AudioManager) getSystemService(Context.AUDIO_SERVICE)).setMode(AudioManager.MODE_NORMAL);
 //		screenOffLock.release();
 		super.onDestroy();
 	}

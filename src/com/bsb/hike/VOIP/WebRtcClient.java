@@ -543,4 +543,8 @@ public class WebRtcClient {
 		return messageHandler;
 	}
 	
+	public void notifyCallEnded(){
+		mPubSub.publish(HikePubSub.VOIP_FINISHED, "Nice Talking" );
+	}
+	
 }

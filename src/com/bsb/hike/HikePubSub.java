@@ -369,6 +369,8 @@ public class HikePubSub implements Runnable
 	public static final String VOIP_CALL_STATUS_CHANGED = "VoIPStatusChange";
 	
 	public static final String VOIP_DURATION = "VoIPDurationEvent";
+	
+	public static final String VOIP_FINISHED = "VoIPCallEnded";
 
 	public static final String HIKE_SHARED_FILE_DELETED = "hikeSharedFileDeleted";
 
