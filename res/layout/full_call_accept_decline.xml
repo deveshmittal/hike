@@ -2,10 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:drawable/dialog_frame" >
+    android:background="@drawable/bg_black_incall" >
 
     <TextView
-        android:id="@+id/PhoneNumberView1"
+        android:id="@+id/fullPhoneNumberView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -15,10 +15,10 @@
         android:textColor="@color/bubble_beach_2" />
 
     <TextView
-        android:id="@+id/CallerId"
+        android:id="@+id/fullCallerId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/PhoneNumberView1"
+        android:layout_below="@+id/fullPhoneNumberView1"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="32dp"
         android:text="Large Text"
@@ -26,7 +26,7 @@
         android:textColor="@color/bubble_beach_2" />
 
     <ImageButton
-        android:id="@+id/declineButton"
+        android:id="@+id/fulldeclineButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -35,21 +35,20 @@
         android:background="@drawable/decline_voip_call" />
 
     <ImageButton
-        android:id="@+id/acceptButton"
+        android:id="@+id/fullacceptButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/declineButton"
-        android:layout_alignLeft="@+id/PhoneNumberView1"
+        android:layout_above="@+id/fulldeclineButton"
+        android:layout_alignLeft="@+id/fullPhoneNumberView1"
         android:layout_marginBottom="18dp"
         android:background="@drawable/accept_voip_call" />
 
-    <ImageView
-        android:id="@+id/imageView1"
+        <ImageView
+        android:id="@+id/fullimageView1"
         android:layout_width="75dp"
         android:layout_height="60dp"
-        android:layout_below="@+id/CallerId"
+        android:layout_below="@+id/fullCallerId"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="19dp"
         android:background="@drawable/emo_5_tab_selected" />
-
 </RelativeLayout>
