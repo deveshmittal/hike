@@ -1061,6 +1061,9 @@ public class StickerManager
 		String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 		DownloadType downloadType = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
 		final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
+		StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+		category.setState(StickerCategory.DONE);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there.
+		
 		if (DownloadType.UPDATE.equals(downloadType))
 		{
 			StickerManager.getInstance().setStickerUpdateAvailable(categoryId, false);
@@ -1071,8 +1074,6 @@ public class StickerManager
 
 		else if (DownloadType.MORE_STICKERS.equals(downloadType))
 		{
-			StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
-			category.setState(StickerCategory.DONE);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there.
 			Intent i = new Intent(StickerManager.MORE_STICKERS_DOWNLOADED);
 			i.putExtra(CATEGORY_ID, categoryId);
 			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
@@ -1080,8 +1081,6 @@ public class StickerManager
 		
 		else if (DownloadType.NEW_CATEGORY.equals(downloadType))
 		{
-			StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
-			category.setState(StickerCategory.DONE);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there.
 			Intent i = new Intent(StickerManager.STICKERS_DOWNLOADED);
 			i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
 			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
@@ -1091,6 +1090,10 @@ public class StickerManager
 	public void stickersDownloadFailed(Object resultObj)
 	{
 		Bundle b = (Bundle) resultObj;
+		String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
+		StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+		category.setState(StickerCategory.RETRY);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there
+		
 		Intent i = new Intent(StickerManager.STICKERS_FAILED);
 		i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
 		LocalBroadcastManager.getInstance(context).sendBroadcast(i);
