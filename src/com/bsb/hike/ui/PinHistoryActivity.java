@@ -501,6 +501,7 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 	{
 		Bundle bundle = new Bundle();
 		bundle.putString(HikeConstants.Extras.MSISDN, msisdn);
+		bundle.putInt(HikeConstants.Extras.DELETED_MESSAGE_TYPE, HikeConstants.SHARED_PIN_TYPE);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(selectedPinIds, bundle));
 		
 		

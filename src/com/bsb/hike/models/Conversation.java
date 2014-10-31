@@ -146,6 +146,18 @@ public class Conversation implements Comparable<Conversation>
 		this.messages.add(message);
 	}
 
+	/**
+	 * We add just the last message to the message-list because only 
+	 * the last message is shown in the conversation list view at home
+	 * @param message Incoming ConvMessage object
+	 */
+	public void clearMessageListAndAddMessage(ConvMessage message)
+	{		
+		this.messages.clear();
+		
+		this.messages.add(message);
+	}
+	
 	public int getUnreadCount()
 	{
 		return unreadCount;

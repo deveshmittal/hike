@@ -51,7 +51,7 @@ public class HikeSSLUtil
 		}
 
 		// get the remaining DN without CN=
-		dn = dn.substring(i + 3);
+		dn = new String(dn.substring(i + 3));
 		char[] dncs = dn.toCharArray();
 		for (i = 0; i < dncs.length; i++)
 		{

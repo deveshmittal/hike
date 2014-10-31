@@ -78,6 +78,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	public static final String CONTACT_PHONE_NUM = "--126";
 
+	public static final String RECENT_PHONE_NUM = "-128";
+
 	public enum ViewType
 	{
 		SECTION, FRIEND, NOT_FRIEND_HIKE, NOT_FRIEND_SMS, FRIEND_REQUEST, EXTRA, EMPTY, FTUE_CONTACT, REMOVE_SUGGESTIONS, NEW_CONTACT
@@ -92,12 +94,16 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	protected List<ContactInfo> hikeContactsList;
 
 	protected List<ContactInfo> smsContactsList;
+	
+	protected List<ContactInfo> recentContactsList;
 
 	protected List<ContactInfo> friendsStealthList;
 
 	protected List<ContactInfo> hikeStealthContactsList;
 
 	protected List<ContactInfo> smsStealthContactsList;
+
+	protected List<ContactInfo> recentStealthContactsList;
 
 	protected List<ContactInfo> filteredFriendsList;
 
@@ -110,6 +116,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	protected List<ContactInfo> groupsStealthList;
 
 	protected List<ContactInfo> filteredGroupsList;
+	
+	protected List<ContactInfo> filteredRecentsList;
 
 	protected Context context;
 
@@ -173,7 +181,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		friendsList = new ArrayList<ContactInfo>(0);
 		hikeContactsList = new ArrayList<ContactInfo>(0);
 		smsContactsList = new ArrayList<ContactInfo>(0);
-
+		
 		friendsStealthList = new ArrayList<ContactInfo>(0);
 		hikeStealthContactsList = new ArrayList<ContactInfo>(0);
 		smsStealthContactsList = new ArrayList<ContactInfo>(0);
@@ -190,8 +198,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	public void executeFetchTask()
 	{
 		setLoadingView();
-		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, friendsStealthList, hikeStealthContactsList,
-				smsStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, false, true);
+		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, friendsStealthList, hikeStealthContactsList,
+				smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, false, true, false);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
@@ -227,23 +235,28 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				List<ContactInfo> filteredHikeContactsList = new ArrayList<ContactInfo>();
 				List<ContactInfo> filteredSmsContactsList = new ArrayList<ContactInfo>();
 				List<ContactInfo> filteredGroupList = new ArrayList<ContactInfo>();
+				List<ContactInfo> filteredRecentsList = new ArrayList<ContactInfo>();
 
 				filterList(friendsList, filteredFriendsList, textToBeFiltered);
 				filterList(hikeContactsList, filteredHikeContactsList, textToBeFiltered);
 				filterList(smsContactsList, filteredSmsContactsList, textToBeFiltered);
+
 				if (groupsList != null && !groupsList.isEmpty())
 				{
 					filterList(groupsList, filteredGroupList, textToBeFiltered);
+				}
+				
+				if (recentContactsList != null && !recentContactsList.isEmpty())
+				{
+					filterList(recentContactsList, filteredRecentsList, textToBeFiltered);
 				}
 
 				List<List<ContactInfo>> resultList = new ArrayList<List<ContactInfo>>(3);
 				resultList.add(filteredFriendsList);
 				resultList.add(filteredHikeContactsList);
 				resultList.add(filteredSmsContactsList);
-				if (groupsList != null && !groupsList.isEmpty())
-				{
-					resultList.add(filteredGroupList);
-				}
+				resultList.add(filteredGroupList);
+				resultList.add(filteredRecentsList);
 
 				results.values = resultList;
 				isFiltered = true;
@@ -283,7 +296,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					}
 
 					String msisdn = info.getMsisdn();
-					if (msisdn != null)
+					if (msisdn != null && !Utils.isGroupConversation(msisdn))
 					{
 						// word boundary is not working because of +91 , resolve later --gauravKhanna
 						if (msisdn.contains(textToBeFiltered))
@@ -313,6 +326,12 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				filteredGroupsList.clear();
 				filteredGroupsList.addAll(resultList.get(3));
 			}
+			
+			if (recentContactsList != null && !recentContactsList.isEmpty())
+			{
+				filteredRecentsList.clear();
+				filteredRecentsList.addAll(resultList.get(4));
+			}
 
 			makeCompleteList(true);
 		}
@@ -324,10 +343,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		resultList.add(friendsList);
 		resultList.add(hikeContactsList);
 		resultList.add(smsContactsList);
-		if (groupsList != null && !groupsList.isEmpty())
-		{
-			resultList.add(groupsList);
-		}
+		resultList.add(groupsList);
+		resultList.add(recentContactsList);
 
 		return resultList;
 	}
