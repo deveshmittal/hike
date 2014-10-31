@@ -159,9 +159,9 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			{
 				((DefaultRetryPolicy) getRetryPolicy()).reset();
 			}
-			if (getCallback() != null)
+			if(totalNumber != 0)
 			{
-				getCallback().onProgressUpdated(totalNumber);
+				sendProgressOrResult(null, true, existingStickerNumber/totalNumber);
 			}
 			if(category.getTotalStickers() != totalNumber)
 			{
@@ -235,18 +235,35 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	protected void postExecute(STResult result)
 	{
 		// TODO Auto-generated method stub
+		sendProgressOrResult(result, false, 0);
+		super.postExecute(result);
+	}
+	
+	void sendProgressOrResult(STResult result, boolean isProgress, double percentage)
+	{
 		Bundle b = new Bundle();
 		b.putSerializable(StickerManager.CATEGORY_ID, category.getCategoryId());
-		b.putSerializable(StickerManager.STICKER_DOWNLOAD_TYPE, downloadType);
-		if (result != STResult.SUCCESS)
+		if(isProgress)
 		{
-			if(result == STResult.FILE_TOO_LARGE)
+				b.putSerializable(StickerManager.PERCENTAGE, percentage);
+				StickerManager.getInstance().onStickersDownloadProgress(b);
+		}
+		else
+		{
+			b.putSerializable(StickerManager.STICKER_DOWNLOAD_TYPE, downloadType);
+			if (result != STResult.SUCCESS)
 			{
-				b.putBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE,true);
+				if(result == STResult.FILE_TOO_LARGE)
+				{
+					b.putBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE,true);
+				}
+				StickerManager.getInstance().stickersDownloadFailed(b);
+			}
+			else
+			{
+				StickerManager.getInstance().sucessFullyDownloadedStickers(b);
 			}
 		}
-		setResult(b);
-		super.postExecute(result);
 	}
 
 	public int getStickerDownloadSize()
