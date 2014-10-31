@@ -157,6 +157,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 	protected LastSeenComparator lastSeenComparator;
 
+	protected Map<String, Integer> contactSpanStartIndexes;
+
 	public FriendsAdapter(Context context, ListView listView, FriendsListFetchedCallback friendsListFetchedCallback, LastSeenComparator lastSeenComparator)
 	{
 		this.listView = listView;
@@ -193,6 +195,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		lastStatusMessagesMap = new HashMap<String, StatusMessage>();
 
 		listFetchedOnce = false;
+
+		contactSpanStartIndexes = new HashMap<String, Integer>();
 	}
 
 	public void executeFetchTask()
@@ -225,6 +229,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		protected FilterResults performFiltering(CharSequence constraint)
 		{
 			FilterResults results = new FilterResults();
+			contactSpanStartIndexes.clear();
 
 			if (!TextUtils.isEmpty(constraint))
 			{
@@ -275,35 +280,50 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 
 			try
 			{
+
 				for (ContactInfo info : allList)
 				{
 					String name = info.getName();
-					if (name != null)
+					boolean endReached = false;
+					boolean found = false;
+					int startIndex = 0;
+					while(!endReached && name!=null)
 					{
 						name = name.toLowerCase();
-						// for word boundary
-						try
+						if(name.startsWith(textToBeFiltered))
 						{
-							if (name.contains(textToBeFiltered))
+							found = true;
+							break;
+						}
+						else
+						{
+							String tokens[] = name.split(" ", 2);
+							if(tokens.length > 1)
 							{
-								listToUpdate.add(info);
-								continue;
+								startIndex += tokens[0].length() + 1;
+								name = tokens[1];
+							}
+							else
+							{
+								endReached = true;
 							}
 						}
-						catch (Exception e)
-						{
-						}
 					}
-
-					String msisdn = info.getMsisdn();
-					if (msisdn != null && !Utils.isGroupConversation(msisdn))
+					if(found)
 					{
-						// word boundary is not working because of +91 , resolve later --gauravKhanna
-						if (msisdn.contains(textToBeFiltered))
+						contactSpanStartIndexes.put(info.getMsisdn(), startIndex);
+						listToUpdate.add(info);
+					}
+					else
+					{
+						String msisdn = info.getMsisdn();
+						if (msisdn != null && !Utils.isGroupConversation(msisdn))
 						{
-							listToUpdate.add(info);
+							if(msisdn.contains(textToBeFiltered))
+							{
+								listToUpdate.add(info);
+							}
 						}
-
 					}
 				}
 			}
