@@ -44,7 +44,7 @@
         android:background="@drawable/accept_voip_call" />
 
         <ImageView
-        android:id="@+id/fullimageView1"
+        android:id="@+id/fullvoipContactPicture"
         android:layout_width="75dp"
         android:layout_height="60dp"
         android:layout_below="@+id/fullCallerId"
