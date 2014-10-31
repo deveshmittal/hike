@@ -799,7 +799,7 @@ public class AccountUtils
 			 * We need the response to save the id of the status.
 			 */
 			if (requestType == RequestType.STATUS_UPDATE || requestType == RequestType.HIKE_JOIN_TIME || requestType == RequestType.PROFILE_PIC
-					|| requestType == RequestType.SOCIAL_POST)
+					|| requestType == RequestType.SOCIAL_POST || requestType == RequestType.OTHER)
 			{
 				hikeHttpRequest.setResponse(obj);
 			}

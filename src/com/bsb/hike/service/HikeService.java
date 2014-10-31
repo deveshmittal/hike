@@ -594,6 +594,11 @@ public class HikeService extends Service
 					Logger.d(getClass().getSimpleName(), "Send successful");
 					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 					editor.putBoolean(HikeMessengerApp.DEVICE_DETAILS_SENT, true);
+					if (response != null)
+					{
+						String backupToken = response.optString("backup_token");
+						editor.putString(HikeMessengerApp.BACKUP_TOKEN_SETTING, backupToken);
+					}
 					editor.commit();
 				}
 
