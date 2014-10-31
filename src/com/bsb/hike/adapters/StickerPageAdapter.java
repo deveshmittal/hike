@@ -273,43 +273,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	{
 		category.setState(StickerCategory.DOWNLOADING);
 		final DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS ;
-		StickerDownloadManager.getInstance(activity).DownloadMultipleStickers(category, type, new IStickerResultListener()
-		{
-			
-			@Override
-			public void onSuccess(Object result)
-			{
-				StickerManager.getInstance().sucessFullyDownloadedStickers(result);
-			}
-			
-			@Override
-			public void onProgressUpdated(double percentage)
-			{
-				if (activity != null)
-				{
-					final List<Sticker> categoriesList = category.getStickerList(activity);
-					
-					activity.runOnUiThread(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							StickerPageAdapterItem zeroethItem = itemList.get(0);
-							itemList.clear();
-							itemList.add(zeroethItem);
-							itemList.addAll(StickerManager.getInstance().generateStickerPageAdapterItemList(categoriesList));
-							notifyDataSetChanged();
-						}
-					});
-				}
-			}
-			
-			@Override
-			public void onFailure(Object result, Throwable exception)
-			{
-				StickerManager.getInstance().stickersDownloadFailed(result);
-			}
-		});
+		StickerDownloadManager.getInstance(activity).DownloadMultipleStickers(category, type, null);
 		replaceDownloadingatTop();
 	}
 
