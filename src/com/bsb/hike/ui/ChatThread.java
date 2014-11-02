@@ -6800,42 +6800,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	};
 
-	private void postToHandlerStickerPreviewDialog(final StickerCategory category)
-	{
-		mHandler.post(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				showStickerPreviewDialog(category);
-
-			}
-		});
-	}
-
-	private void showStickerPreviewDialog(final StickerCategory category)
-	{}
-
-
-	private void updateStickerCategoryUI(StickerCategory category)
-	{
-		if (stickerAdapter == null)
-		{
-			return;
-		}
-
-		View emoticonPage = emoticonViewPager.findViewWithTag(category.getCategoryId());
-
-		if (emoticonPage == null)
-		{
-			return;
-		}
-
-		stickerAdapter.setupStickerPage(emoticonPage, category);
-
-	}
-
 	public int getCurrentPage()
 	{
 		if (emoticonViewPager == null || emoticonType != EmoticonType.STICKERS)
