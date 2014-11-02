@@ -14,6 +14,7 @@ import android.widget.ListView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerShopAdapter;
@@ -23,7 +24,7 @@ import com.bsb.hike.utils.StickerManager;
 
 public class StickerShopFragment extends SherlockFragment implements OnScrollListener, Listener
 {
-	private String[] pubSubListeners = {};
+	private String[] pubSubListeners = {HikePubSub.STICKER_CATEGORY_MAP_UPDATED};
 
 	private StickerShopAdapter mAdapter;
 	
@@ -34,6 +35,8 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	private int velocity;
 
 	private long previousEventTime;
+	
+	Map<String, StickerCategory> stickerCategoriesMap;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -85,7 +88,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	private void initAdapterAndList()
 	{
 		listview = (ListView) getView().findViewById(android.R.id.list);
-		Map<String, StickerCategory> stickerCategoriesMap = new HashMap<String, StickerCategory>();
+		stickerCategoriesMap = new HashMap<String, StickerCategory>();
 		stickerCategoriesMap.putAll(StickerManager.getInstance().getStickerCategoryMap());
 		mAdapter = new StickerShopAdapter(getSherlockActivity(), HikeConversationsDatabase.getInstance().getCursorForStickerShop(),stickerCategoriesMap);
 		listview.setAdapter(mAdapter);
@@ -124,8 +127,31 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
-		// TODO Auto-generated method stub
+		if (HikePubSub.STICKER_CATEGORY_MAP_UPDATED.equals(type))
+		{
+			if(!isAdded())
+			{
+				return;
+			}
+			getSherlockActivity().runOnUiThread(new Runnable()
+			{
 
+				@Override
+				public void run()
+				{
+					updateStickerCategoriesMap(StickerManager.getInstance().getStickerCategoryMap());
+					mAdapter.notifyDataSetChanged();
+				}
+			});
+		}
+
+	}
+
+
+	public void updateStickerCategoriesMap(Map<String, StickerCategory> stickerCategoryMap)
+	{
+		this.stickerCategoriesMap.clear();
+		this.stickerCategoriesMap.putAll(stickerCategoryMap);
 	}
 
 	public static StickerShopFragment newInstance()
