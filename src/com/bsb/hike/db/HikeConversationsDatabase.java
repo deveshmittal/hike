@@ -5627,11 +5627,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			mDb.beginTransaction();
 			for (StickerCategory stickerCategory : stickerCategories)
 			{
-				ContentValues contentValues = new ContentValues();
-				contentValues.put(DBConstants.IS_VISIBLE, stickerCategory.isVisible());
-				contentValues.put(DBConstants.CATEGORY_INDEX, stickerCategory.getCategoryIndex());
-
-				mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { stickerCategory.getCategoryId() });
+				updateVisibilityAndIndex(stickerCategory);
 			}
 			mDb.setTransactionSuccessful();
 		}
@@ -5644,6 +5640,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			mDb.endTransaction();
 		}
+	}
+	
+	public void updateVisibilityAndIndex(StickerCategory stickerCategory)
+	{
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.IS_VISIBLE, stickerCategory.isVisible());
+		contentValues.put(DBConstants.CATEGORY_INDEX, stickerCategory.getCategoryIndex());
+
+		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { stickerCategory.getCategoryId() });
 	}
 	
 	public void updateStickerCategoriesInDb(JSONArray jsonArray)

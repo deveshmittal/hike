@@ -1305,17 +1305,26 @@ public class StickerManager
 		{
 			category = stickerCategoriesMap.get(category.getCategoryId());
 		}
-		category.setState(StickerCategory.DOWNLOADING);
-		final DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS ;
-		StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, type, null);
-		category.setVisible(true);
-		addCategoryToStickerCategoriesMap(category);
+		if(category.getDownloadedStickersCount() < category.getTotalStickers())
+		{
+			category.setState(StickerCategory.DOWNLOADING);
+			final DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
+			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, type, null);
+		}
+		saveCategoryAsVisible(category);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
 	}
 
-	private void addCategoryToStickerCategoriesMap(StickerCategory category)
+	private void saveCategoryAsVisible(StickerCategory category)
 	{
+		if (category.isVisible())
+		{
+			return;
+		}
+		category.setVisible(true);
+		category.setCategoryIndex(stickerCategoriesMap.size());
 		stickerCategoriesMap.put(category.getCategoryId(), category);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
+		HikeConversationsDatabase.getInstance().updateVisibilityAndIndex(category);
 	}
 
 }
