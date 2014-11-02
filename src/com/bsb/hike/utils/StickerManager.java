@@ -387,6 +387,10 @@ public class StickerManager
 
 	public void setStickerUpdateAvailable(String categoryId, boolean updateAvailable)
 	{
+		if(!stickerCategoriesMap.containsKey(categoryId))
+		{
+			return;
+		}
 		stickerCategoriesMap.get(categoryId).setUpdateAvailable(updateAvailable);
 		HikeConversationsDatabase.getInstance().stickerUpdateAvailable(categoryId, updateAvailable);
 	}
