@@ -274,9 +274,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 
 	private void initialiseDownloadStickerTask()
 	{
-		category.setState(StickerCategory.DOWNLOADING);
-		final DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS ;
-		StickerDownloadManager.getInstance(activity).DownloadMultipleStickers(category, type, null);
+		StickerManager.getInstance().initialiseDownloadStickerTask(category, activity);
 		replaceDownloadingatTop();
 	}
 
