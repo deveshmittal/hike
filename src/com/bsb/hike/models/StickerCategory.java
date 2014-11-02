@@ -47,6 +47,8 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	
 	public static final int DONE = 4;
 	
+	private int downloadedStickersCount = -1;
+	
 	private int state;
 
 	public StickerCategory(String categoryId, String categoryName, boolean updateAvailable, boolean isVisible, boolean isCustom, boolean isAdded,
@@ -202,6 +204,11 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 					Sticker s = new Sticker(this, stickerId);
 					stickersList.add(s);
 				}
+				setDownloadedStickersCount(stickerIds.length);
+			}
+			else
+			{
+				setDownloadedStickersCount(0);
 			}
 			
 			Collections.sort(stickersList);
@@ -279,15 +286,13 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	 * Checks for the count of stickers from the stickers folder for this category. Returns true if the count is < totalStickers
 	 * @return  
 	 */
-	private boolean isMoreStickerAvailable()
+	public boolean isMoreStickerAvailable()
 	{
-		String[] stickerFiles = getStickerFiles();
-		if(stickerFiles != null)
+		if(getDownloadedStickersCount() == 0)
 		{
-			return stickerFiles.length < this.totalStickers;
+			return false;
 		}
-		
-		return false;
+		return getDownloadedStickersCount() < getTotalStickers();
 	}
 	
 	/**
@@ -305,7 +310,8 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 			{
 				if(categoryDir.list() != null)
 				{
-					return categoryDir.list(StickerManager.getInstance().stickerFileFilter);
+					String[] list = categoryDir.list(StickerManager.getInstance().stickerFileFilter);
+					return list;
 				}
 			}
 		}
@@ -314,6 +320,29 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	
 	public int getMoreStickerCount()
 	{
-		return this.totalStickers - getStickerFiles().length;
+		return this.totalStickers - getDownloadedStickersCount();
+	}
+	
+	public int getDownloadedStickersCount()
+	{
+		if(downloadedStickersCount == -1)
+		{
+			updateDownloadedStickersCount();
+		}
+		return downloadedStickersCount;
+	}
+	
+	public void updateDownloadedStickersCount()
+	{
+		String[] stickerFiles = getStickerFiles();
+		if(stickerFiles != null)
+			setDownloadedStickersCount(stickerFiles.length);
+		else
+			setDownloadedStickersCount(0);
+	}
+	
+	public void setDownloadedStickersCount(int count)
+	{
+		this.downloadedStickersCount = count;
 	}
 }

@@ -1076,6 +1076,11 @@ public class StickerManager
 		DownloadType downloadType = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
 		final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
 		StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+		if(category == null)
+		{
+			return;
+		}
+		category.updateDownloadedStickersCount();
 		category.setState(StickerCategory.DONE);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there.
 		
 		if (DownloadType.UPDATE.equals(downloadType))
