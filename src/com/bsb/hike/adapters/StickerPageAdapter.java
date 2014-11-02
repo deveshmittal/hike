@@ -68,7 +68,6 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		this.inflater = LayoutInflater.from(activity);
 		this.stickerLoader = worker;
 		calculateSizeOfStickerImage();
-		registerListener();
 	}
 
 	public List<StickerPageAdapterItem> getStickerPageAdapterItemList()
@@ -353,38 +352,5 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		
 		ProgressBar progress;
 	}
-	
-	private void registerListener()
-	{
-		IntentFilter filter = new IntentFilter(StickerManager.STICKERS_PROGRESS);
-		LocalBroadcastManager.getInstance(activity).registerReceiver(mMessageReceiver, filter);
-	}
-	
-	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver()
-	{
 
-		@Override
-		public void onReceive(Context context, Intent intent)
-		{
-			if (intent.getAction().equals(StickerManager.STICKERS_PROGRESS))
-			{
-
-				final List<Sticker> categoriesList = category.getStickerList(activity);
-
-				StickerPageAdapterItem zeroethItem = itemList.get(0);
-				itemList.clear();
-				itemList.add(zeroethItem);
-				itemList.addAll(StickerManager.getInstance().generateStickerPageAdapterItemList(categoriesList));
-				notifyDataSetChanged();
-				
-
-			}
-		}
-	};
-	
-	public void unregisterListeners()
-	{
-		LocalBroadcastManager.getInstance(activity).unregisterReceiver(mMessageReceiver);
-	}
-	
 }
