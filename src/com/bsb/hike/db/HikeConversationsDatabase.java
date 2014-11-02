@@ -4001,13 +4001,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.TOTAL_NUMBER, totalNum);
 
-		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
+		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { categoryId });
 	}
 
 	public void removeStickerCategory(String categoryId)
 	{
-		mDb.delete(DBConstants.STICKER_CATEGORIES_TABLE, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
-		mDb.delete(DBConstants.STICKER_SHOP_TABLE, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
+		mDb.delete(DBConstants.STICKER_CATEGORIES_TABLE, DBConstants._ID + "=?", new String[] { categoryId });
+		mDb.delete(DBConstants.STICKER_SHOP_TABLE, DBConstants._ID + "=?", new String[] { categoryId });
 	}
 
 	public void stickerUpdateAvailable(String categoryId, boolean updateAvailable)
@@ -4015,7 +4015,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.UPDATE_AVAILABLE, updateAvailable);
 
-		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
+		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { categoryId });
 	}
 
 	public LinkedHashMap<String, StickerCategory> getAllStickerCategoriesWithVisibility(boolean isVisible)
@@ -4069,7 +4069,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			try
 			{
-				String categoryId = c.getString(c.getColumnIndex(DBConstants.CATEGORY_ID));
+				String categoryId = c.getString(c.getColumnIndex(DBConstants._ID));
 				String categoryName = c.getString(c.getColumnIndex(DBConstants.CATEGORY_NAME));
 				boolean updateAvailable = c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
 				boolean isVisible = c.getInt(c.getColumnIndex(DBConstants.IS_VISIBLE)) == 1;
@@ -4105,7 +4105,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, new String[] { DBConstants.UPDATE_AVAILABLE }, DBConstants.CATEGORY_ID + "=?", new String[] { categoryId }, null,
+			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, new String[] { DBConstants.UPDATE_AVAILABLE }, DBConstants._ID + "=?", new String[] { categoryId }, null,
 					null, null);
 			if (!c.moveToFirst())
 			{
@@ -5508,7 +5508,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		 * category index : order of this category among all the categories
 		 * metadata : other metadata associated with this category 
 		 */
-		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STICKER_CATEGORIES_TABLE + " (" + DBConstants.CATEGORY_ID + " TEXT PRIMARY KEY, " + DBConstants.CATEGORY_NAME
+		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STICKER_CATEGORIES_TABLE + " (" + DBConstants._ID + " TEXT PRIMARY KEY, " + DBConstants.CATEGORY_NAME
 				+ " TEXT, " + DBConstants.TOTAL_NUMBER + " INTEGER, " + DBConstants.UPDATE_AVAILABLE + " INTEGER DEFAULT 0," + DBConstants.IS_VISIBLE + " INTEGER DEFAULT 0,"
 				+ DBConstants.IS_CUSTOM + " INTEGER DEFAULT 0," + DBConstants.CATEGORY_INDEX + " INTEGER," + DBConstants.CATEGORY_SIZE + " INTEGER DEFAULT 0 " + " )";
 		return sql;
@@ -5517,7 +5517,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	
 	public String getStickerShopTableCreateQuery()
 	{
-		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STICKER_SHOP_TABLE + " (" + DBConstants.CATEGORY_ID + " TEXT PRIMARY KEY, " + DBConstants.CATEGORY_NAME
+		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STICKER_SHOP_TABLE + " (" + DBConstants._ID + " TEXT PRIMARY KEY, " + DBConstants.CATEGORY_NAME
 				+ " TEXT, " + DBConstants.TOTAL_NUMBER + " INTEGER, " + DBConstants.CATEGORY_SIZE + " INTEGER DEFAULT 0 " + " )";
 
 		return sql;
@@ -5575,7 +5575,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						contentValues.put(DBConstants.TOTAL_NUMBER, obj.optString(StickerManager.TOTAL_STICKERS));
 					}
 				}
-				contentValues.put(DBConstants.CATEGORY_ID, categoryId);
+				contentValues.put(DBConstants._ID, categoryId);
 				contentValues.put(DBConstants.CATEGORY_NAME, categoryName);
 				contentValues.put(DBConstants.IS_VISIBLE, isVisible);
 				contentValues.put(DBConstants.IS_CUSTOM, isCustom);
@@ -5614,7 +5614,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	private ContentValues getContentValuesForStickerShopTable(String categoryId, String categoryName, int categorySize)
 	{
 		ContentValues contentValues = new ContentValues();
-		contentValues.put(DBConstants.CATEGORY_ID, categoryId);
+		contentValues.put(DBConstants._ID, categoryId);
 		contentValues.put(DBConstants.CATEGORY_NAME, categoryName);
 		contentValues.put(DBConstants.CATEGORY_SIZE, categorySize);
 		return contentValues;
@@ -5631,7 +5631,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				contentValues.put(DBConstants.IS_VISIBLE, stickerCategory.isVisible());
 				contentValues.put(DBConstants.CATEGORY_INDEX, stickerCategory.getCategoryIndex());
 
-				mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { stickerCategory.getCategoryId() });
+				mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { stickerCategory.getCategoryId() });
 			}
 			mDb.setTransactionSuccessful();
 		}
@@ -5668,10 +5668,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				contentValues.put(DBConstants.TOTAL_NUMBER, jsonObj.getInt(HikeConstants.NUMBER_OF_STICKERS));
 				contentValues.put(DBConstants.CATEGORY_SIZE, jsonObj.getInt(HikeConstants.SIZE));
 
-				int rows = mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { catId });
+				int rows = mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { catId });
 				if (rows == 0)
 				{
-					mDb.update(DBConstants.STICKER_SHOP_TABLE, contentValues, DBConstants.CATEGORY_ID + "=?", new String[] { catId });
+					mDb.update(DBConstants.STICKER_SHOP_TABLE, contentValues, DBConstants._ID + "=?", new String[] { catId });
 				}
 			
 			}
