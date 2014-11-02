@@ -1,5 +1,8 @@
 package com.bsb.hike.ui.fragments;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +18,8 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerShopAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.utils.StickerManager;
 
 public class StickerShopFragment extends SherlockFragment implements OnScrollListener, Listener
 {
@@ -80,7 +85,9 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	private void initAdapterAndList()
 	{
 		listview = (ListView) getView().findViewById(android.R.id.list);
-		mAdapter = new StickerShopAdapter(getSherlockActivity(), HikeConversationsDatabase.getInstance().getCursorForStickerShop());
+		Map<String, StickerCategory> stickerCategoriesMap = new HashMap<String, StickerCategory>();
+		stickerCategoriesMap.putAll(StickerManager.getInstance().getStickerCategoryMap());
+		mAdapter = new StickerShopAdapter(getSherlockActivity(), HikeConversationsDatabase.getInstance().getCursorForStickerShop(),stickerCategoriesMap);
 		listview.setAdapter(mAdapter);
 
 	}

@@ -73,6 +73,15 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 		this.updateAvailable = false;
 		this.state = NONE;
 	}
+	
+	public StickerCategory(String categoryId, String categoryName, int totalStickers, int categorySize)
+	{
+		this.categoryId = categoryId;
+		this.categoryName = categoryName;
+		this.totalStickers = totalStickers;
+		this.categorySize = categorySize;
+		this.state = NONE;
+	}
 
 	public StickerCategory()
 	{
