@@ -263,6 +263,12 @@ public class StickerManager
 		return stickerCategoryList;
 	}
 
+	public Map<String, StickerCategory> getStickerCategoryMap()
+	{
+		// TODO Auto-generated method stub
+		return stickerCategoriesMap;
+	}
+
 	public void setupStickerCategoryList(SharedPreferences preferences)
 	{
 		/*

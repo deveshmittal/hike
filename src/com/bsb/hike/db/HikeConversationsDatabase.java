@@ -5688,7 +5688,20 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 	
-	public void updateStickerCategoriesInDb(String catId, boolean visiblity, int totalStickers, int categorySize)
-	{}
+	public Cursor getCursorForStickerShop()
+	{
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, new String[] { DBConstants._ID, DBConstants.TOTAL_NUMBER, DBConstants.CATEGORY_NAME, DBConstants.CATEGORY_SIZE }, null, null,
+					null, null, null);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "Exception in updateToNewStickerCategoryTable",e);
+		}
+		return c;
+	}
 	
 }

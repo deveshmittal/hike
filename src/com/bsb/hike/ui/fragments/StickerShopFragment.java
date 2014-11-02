@@ -1,16 +1,12 @@
 package com.bsb.hike.ui.fragments;
 
-import java.util.List;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.LinearLayout;
+import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bsb.hike.HikeConstants;
@@ -18,15 +14,15 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerShopAdapter;
-import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.db.HikeConversationsDatabase;
 
 public class StickerShopFragment extends SherlockFragment implements OnScrollListener, Listener
 {
 	private String[] pubSubListeners = {};
 
-	private List<StickerCategory> newStickerCategories;
-
 	private StickerShopAdapter mAdapter;
+	
+	private ListView listview;
 
 	private int previousFirstVisibleItem;
 
@@ -39,33 +35,6 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	{
 		// TODO Auto-generated method stub
 		View parent = inflater.inflate(R.layout.sticker_shop, null);
-		final LinearLayout v = (LinearLayout) parent.findViewById(R.id.update_all_ll);
-		Animation fadeOut = AnimationUtils.loadAnimation(getSherlockActivity(), R.anim.slide_up_noalpha);
-		fadeOut.setAnimationListener(new Animation.AnimationListener()
-		{
-			@Override
-			public void onAnimationStart(Animation animation)
-			{
-				// Called when the Animation starts
-			}
-
-			@Override
-			public void onAnimationEnd(Animation animation)
-			{
-				// Called when the Animation ended
-				// Since we are fading a View out we set the visibility
-				// to GONE once the Animation is finished
-				v.setVisibility(View.VISIBLE);
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation animation)
-			{
-				// This is called each time the Animation repeats
-			}
-		});
-		v.setAnimation(fadeOut);
-		initAdapterAndList();
 		return parent;
 	}
 
@@ -74,6 +43,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	{
 		// TODO Register PubSub Listeners
 		super.onActivityCreated(savedInstanceState);
+		initAdapterAndList();
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
@@ -109,8 +79,9 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 
 	private void initAdapterAndList()
 	{
-		// TODO Initialise the adapter.
-		// adapter.setEmptyView as well to be done here
+		listview = (ListView) getView().findViewById(android.R.id.list);
+		mAdapter = new StickerShopAdapter(getSherlockActivity(), HikeConversationsDatabase.getInstance().getCursorForStickerShop());
+		listview.setAdapter(mAdapter);
 
 	}
 
@@ -155,5 +126,4 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		StickerShopFragment stickerShopFragment = new StickerShopFragment();
 		return stickerShopFragment;
 	}
-
 }
