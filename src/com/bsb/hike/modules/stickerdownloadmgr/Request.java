@@ -9,8 +9,12 @@ import com.bsb.hike.utils.Logger;
 
 class Request extends FutureTask<STResult> implements Comparable<Request>
 {
+	public static final int PRIORITY_HIGH = 0;
+    public static final int PRIORITY_NORMAL = 50;
+    public static final int PRIORITY_LOW = 100;
+    
 	private BaseStickerDownloadTask task;
-	private int priority;
+	private int priority = PRIORITY_NORMAL;
 
 	public Request(BaseStickerDownloadTask callable)
 	{

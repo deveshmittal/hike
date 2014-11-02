@@ -22,7 +22,7 @@ class RequestQueue
 	public RequestQueue()
 	{
 		// TODO Auto-generated constructor stub
-		queue = new LinkedBlockingQueue<Runnable>(DEFAULT_CAPACITY);
+		queue = new PriorityBlockingQueue<Runnable>();
 		stickerTaskMap = new ConcurrentHashMap<String, Request>();
 		dispatcher = new TaskDispatcher(this);
 		dispatcher.start();

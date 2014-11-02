@@ -16,6 +16,8 @@ public class StickerException extends Exception
 	public static final short NULL_DATA = 0x06;
 	
 	public static final short EMPTY_CATEGORY_LIST = 0x07;
+	
+	public static final short NO_NETWORK = 0x08;
 
 	
     private int errorCode;
