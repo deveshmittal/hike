@@ -1305,7 +1305,7 @@ public class StickerManager
 		{
 			category = stickerCategoriesMap.get(category.getCategoryId());
 		}
-		if(category.getDownloadedStickersCount() < category.getTotalStickers())
+		if(category.getTotalStickers() == 0 || category.getDownloadedStickersCount() < category.getTotalStickers())
 		{
 			category.setState(StickerCategory.DOWNLOADING);
 			final DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;

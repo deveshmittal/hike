@@ -3,7 +3,12 @@ package com.bsb.hike.ui.fragments;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +25,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerShopAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.utils.StickerManager;
 
 public class StickerShopFragment extends SherlockFragment implements OnScrollListener, Listener
@@ -53,6 +59,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		super.onActivityCreated(savedInstanceState);
 		initAdapterAndList();
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+		registerListener();
 	}
 
 	@Override
@@ -60,6 +67,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	{
 		// TODO Clear the adapter and stickercategory list as well
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
+		unregisterListeners();
 		super.onDestroy();
 	}
 
@@ -147,6 +155,76 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 
 	}
 
+	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver()
+	{
+		@Override
+		public void onReceive(Context context, Intent intent)
+		{
+			if (intent.getAction().equals(StickerManager.MORE_STICKERS_DOWNLOADED))
+			{
+				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
+				final StickerCategory category = stickerCategoriesMap.get(categoryId);
+				if (category == null)
+				{
+					return;
+				}
+				getSherlockActivity().runOnUiThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						mAdapter.notifyDataSetChanged();
+					}
+				});
+			}
+			else if (intent.getAction().equals(StickerManager.STICKERS_PROGRESS))
+			{
+				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
+				final StickerCategory category = stickerCategoriesMap.get(categoryId);
+				if (category == null)
+				{
+					return;
+				}
+			}
+
+			else
+			{
+				Bundle b = intent.getBundleExtra(StickerManager.STICKER_DATA_BUNDLE);
+				final String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
+				final DownloadType type = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
+				final StickerCategory category = stickerCategoriesMap.get(categoryId);
+				if (category == null)
+				{
+					return;
+				}
+
+				// if this category is already loaded then only proceed else ignore
+				if (intent.getAction().equals(StickerManager.STICKERS_FAILED) && (DownloadType.NEW_CATEGORY.equals(type) || DownloadType.MORE_STICKERS.equals(type)))
+				{
+					getSherlockActivity().runOnUiThread(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							category.setState(StickerCategory.RETRY);
+							mAdapter.notifyDataSetChanged();
+						}
+					});
+				}
+				else if (intent.getAction().equals(StickerManager.STICKERS_DOWNLOADED) && DownloadType.NEW_CATEGORY.equals(type))
+				{
+					getSherlockActivity().runOnUiThread(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							mAdapter.notifyDataSetChanged();
+						}
+					});
+				}
+			}
+		}
+	};
 
 	public void updateStickerCategoriesMap(Map<String, StickerCategory> stickerCategoryMap)
 	{
@@ -158,5 +236,19 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	{
 		StickerShopFragment stickerShopFragment = new StickerShopFragment();
 		return stickerShopFragment;
+	}
+	
+	private void registerListener()
+	{
+		IntentFilter filter = new IntentFilter(StickerManager.STICKERS_DOWNLOADED);
+		filter.addAction(StickerManager.STICKERS_FAILED);
+		filter.addAction(StickerManager.STICKERS_PROGRESS);
+		filter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
+		LocalBroadcastManager.getInstance(getSherlockActivity()).registerReceiver(mMessageReceiver, filter);
+	}
+	
+	public void unregisterListeners()
+	{
+		LocalBroadcastManager.getInstance(getSherlockActivity()).unregisterReceiver(mMessageReceiver);
 	}
 }
