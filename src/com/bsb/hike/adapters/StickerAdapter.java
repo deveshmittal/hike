@@ -138,6 +138,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		IntentFilter filter = new IntentFilter(StickerManager.STICKERS_DOWNLOADED);
 		filter.addAction(StickerManager.STICKERS_FAILED);
 		filter.addAction(StickerManager.RECENTS_UPDATED);
+		filter.addAction(StickerManager.STICKERS_PROGRESS);
 		filter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
 		LocalBroadcastManager.getInstance(activity).registerReceiver(mMessageReceiver, filter);
 	}
