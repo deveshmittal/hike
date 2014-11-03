@@ -17,6 +17,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import com.bsb.hike.platform.CardConstants;
+import com.bsb.hike.platform.CardRenderer;
+import com.bsb.hike.platform.ChatThreadCardRenderer;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -309,6 +312,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	
 	private HighQualityThumbLoader hqThumbLoader;
 
+    private CardRenderer mChatThreadCardRenderer;
+
 	/*
 	 * this is set of all the currently visible messages which are stuck in tick and are not sms
 	 */
@@ -341,6 +346,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		hqThumbLoader = new HighQualityThumbLoader();
 		hqThumbLoader.setImageFadeIn(false);
 		hqThumbLoader.setDefaultDrawableNull(false);
+        this.mChatThreadCardRenderer = new CardRenderer(CardConstants.CHAT_THREAD_CARD_COUNT_TYPE_COUNT, context);
 	}
 
 	public void setChatTheme(ChatTheme theme)
@@ -620,7 +626,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	@Override
 	public int getViewTypeCount()
 	{
-		return ViewType.values().length;
+		return ViewType.values().length + mChatThreadCardRenderer.getCardCount();
 	}
 
 	@Override
@@ -2187,6 +2193,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			participantInfoHolder.container.addView(participantInfo);
 			dayHolder = participantInfoHolder;
 		}
+        else if (convMessage.isContentType()){
+             mChatThreadCardRenderer.getView(v, convMessage);
+        }
 		else if (viewType == ViewType.UNKNOWN_BLOCK_ADD)
 		{
 			Logger.i("chatthread", "getview of unknown header");
