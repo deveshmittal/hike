@@ -1,25 +1,21 @@
 package com.bsb.hike.db;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.R.integer;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
@@ -36,7 +32,6 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -46,15 +41,14 @@ import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.DBConstants.HIKE_CONV_DB;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.ConvMessage.ContentLove;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.FileListItem;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.FileListItem;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
@@ -63,6 +57,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.contactmgr.ConversationMsisdns;
+import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
@@ -5072,7 +5067,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ " WHERE " + HIKE_CONV_DB.LOVE_ID + " in "
 				+ loveIdsCommaSeparated;
 		Cursor c = mDb.rawQuery(query, null);
-		List<ContentLove> listToReturn = new ArrayList<ConvMessage.ContentLove>();
+		List<ContentLove> listToReturn = new ArrayList<ContentLove>();
 		if(c.getCount()>0){
 			int loveId = c.getColumnIndex(HIKE_CONV_DB.LOVE_ID);
 			int count = c.getColumnIndex(HIKE_CONV_DB.COUNT);
