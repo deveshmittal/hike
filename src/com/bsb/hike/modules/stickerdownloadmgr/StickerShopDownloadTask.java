@@ -47,10 +47,7 @@ class StickerShopDownloadTask extends BaseStickerDownloadTask
 			
 			setDownloadUrl(urlString);
 			
-			JSONObject request = new JSONObject();
-			request.put(HikeConstants.TIMESTAMP, timeStamp);
-			
-			JSONObject response = (JSONObject) download(request, HttpRequestType.POST);
+			JSONObject response = (JSONObject) download(null, HttpRequestType.GET);
 			
 			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
 			{
