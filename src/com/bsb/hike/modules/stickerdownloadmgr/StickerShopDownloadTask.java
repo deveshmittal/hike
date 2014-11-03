@@ -21,16 +21,16 @@ class StickerShopDownloadTask extends BaseStickerDownloadTask
 	private Context context;
 	private String taskId;
 	private Bundle bundle;
-	private long timeStamp;
+	private int offset;
 	private Object resultObject;
 	
-	protected StickerShopDownloadTask(Handler handler, Context ctx, String taskId, long timeStamp, IStickerResultListener callback)
+	protected StickerShopDownloadTask(Handler handler, Context ctx, String taskId, int offset, IStickerResultListener callback)
 	{
 		super(handler, ctx, taskId, callback);
 		this.handler = handler;
 		this.taskId = taskId;
 		context = ctx;
-		this.timeStamp = timeStamp;
+		this.offset = offset;
 	}
 
 	@Override
@@ -39,11 +39,10 @@ class StickerShopDownloadTask extends BaseStickerDownloadTask
 		
 		try
 		{
-			timeStamp = 0;
-			String urlString = AccountUtils.base + "/stickers/shop?ts=" + timeStamp;
+			String urlString = AccountUtils.base + "/stickers/shop?offset=" + offset;
 			if(AccountUtils.ssl)
 			{
-				urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/stickers/shop?ts=" + timeStamp ;
+				urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/stickers/shop?offset=" + offset ;
 			}
 			
 			setDownloadUrl(urlString);

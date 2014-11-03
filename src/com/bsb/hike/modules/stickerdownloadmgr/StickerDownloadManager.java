@@ -126,7 +126,7 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 	
-	public void DownloadStickerShopTask(Context context, long timeStamp, IStickerResultListener callback)
+	public void DownloadStickerShopTask(Context context, int offset, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.SHOP, null, null);
 		if (queue.isTaskAlreadyExist(taskId))
@@ -134,7 +134,7 @@ public class StickerDownloadManager
 			Logger.d(TAG, "DownloadStickersShop task " + " already exists");
 			return;
 		}
-		BaseStickerDownloadTask stickerCategoryTask = new StickerShopDownloadTask(handler, context, taskId, timeStamp, callback);
+		BaseStickerDownloadTask stickerCategoryTask = new StickerShopDownloadTask(handler, context, taskId, offset, callback);
 		Request request = new Request(stickerCategoryTask);
 		queue.addTask(taskId, request);
 	}
