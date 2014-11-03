@@ -58,6 +58,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
+import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -1464,7 +1465,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void addEmailLogItem(List<OverFlowMenuItem> overFlowMenuItems)
 	{
-		overFlowMenuItems.add(new OverFlowMenuItem("Send logs", 9));
+		if (AppConfig.SHOW_SEND_LOGS_OPTION)
+		{
+			overFlowMenuItems.add(new OverFlowMenuItem("Send logs", 9));
+		}
 	}
 
 	@Override
