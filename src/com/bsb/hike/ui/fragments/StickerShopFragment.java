@@ -3,10 +3,13 @@ package com.bsb.hike.ui.fragments;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONArray;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
@@ -25,7 +28,10 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerShopAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.StickerManager;
 
 public class StickerShopFragment extends SherlockFragment implements OnScrollListener, Listener
@@ -189,6 +195,11 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
 		// TODO Auto-generated method stub
+		if (!isDownloading && (firstVisibleItem + visibleItemCount)  <= totalItemCount - 5 && StickerManager.getInstance().moreDataAvailableForStickerShop())
+		{
+			downLoadStickerData(mAdapter.getCursor().getCount());
+		}
+		
 		if (previousFirstVisibleItem != firstVisibleItem)
 		{
 			long currTime = System.currentTimeMillis();

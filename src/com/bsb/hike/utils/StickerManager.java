@@ -177,6 +177,8 @@ public class StickerManager
 	
 	public static final String LAST_STICKER_SHOP_UPDATE_TIME = "lastStickerShopUpdateTime";
 	
+	public static final String STICKER_SHOP_DATA_FULLY_FETCHED = "stickerShopDataFullyFetched";
+	
 	public static final long STICKER_SHOP_REFRESH_TIME = 24 * 60 * 60 * 1000;
 	
 	private Map<String, StickerCategory> stickerCategoriesMap;
@@ -1341,5 +1343,10 @@ public class StickerManager
 			HikeSharedPreferenceUtil.getInstance(context).saveData(StickerManager.STICKER_SHOP_DATA_FULLY_FETCHED, false);
 		}
 		return lastUpdateTime + STICKER_SHOP_REFRESH_TIME < System.currentTimeMillis();
+	}
+	
+	public boolean moreDataAvailableForStickerShop()
+	{
+		return !HikeSharedPreferenceUtil.getInstance(context).getData(STICKER_SHOP_DATA_FULLY_FETCHED, true);
 	}
 }
