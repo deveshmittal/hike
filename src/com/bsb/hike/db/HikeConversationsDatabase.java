@@ -5661,23 +5661,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				JSONObject jsonObj  = jsonArray.getJSONObject(i);
 				String catId = jsonObj.optString(StickerManager.CATEGORY_ID);
 
+				if(TextUtils.isEmpty(catId))
+				{
+					continue;
+				}
 				ContentValues contentValues = new ContentValues();
+				contentValues.put(DBConstants._ID, catId);
 				if(jsonObj.has(HikeConstants.VISIBLITY))
 				{
 					contentValues.put(DBConstants.IS_VISIBLE, jsonObj.getInt(HikeConstants.VISIBLITY));
 				}
-				if(!jsonObj.has(HikeConstants.NUMBER_OF_STICKERS) || !jsonObj.has(HikeConstants.SIZE))
+				if(jsonObj.has(HikeConstants.CAT_NAME))
 				{
-					return;
+					contentValues.put(DBConstants.CATEGORY_NAME, jsonObj.getInt(HikeConstants.CAT_NAME));
 				}
-				contentValues.put(DBConstants.TOTAL_NUMBER, jsonObj.getInt(HikeConstants.NUMBER_OF_STICKERS));
-				contentValues.put(DBConstants.CATEGORY_SIZE, jsonObj.getInt(HikeConstants.SIZE));
+				if(jsonObj.has(HikeConstants.NUMBER_OF_STICKERS))
+				{
+					contentValues.put(DBConstants.TOTAL_NUMBER, jsonObj.getInt(HikeConstants.NUMBER_OF_STICKERS));
+				}
+				if(jsonObj.has(HikeConstants.SIZE))
+				{
+					contentValues.put(DBConstants.CATEGORY_SIZE, jsonObj.getInt(HikeConstants.SIZE));
+				}
 
-				int rows = mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { catId });
-				if (rows == 0)
-				{
-					mDb.update(DBConstants.STICKER_SHOP_TABLE, contentValues, DBConstants._ID + "=?", new String[] { catId });
-				}
+				mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { catId });
+				mDb.insertWithOnConflict(DBConstants.STICKER_SHOP_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
 			
 			}
 			mDb.setTransactionSuccessful();
