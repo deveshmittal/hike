@@ -71,6 +71,7 @@ public class DBBackupRestore
 		}
 		catch (Exception e)
 		{
+			deleteTempFiles();
 			e.printStackTrace();
 			return false;
 		}
@@ -114,16 +115,17 @@ public class DBBackupRestore
 			for (String fileName : dbNames)
 			{
 				File currentDB = getCurrentDBFile(fileName);
-				File DBCopy = getDBCopyFile(currentDB.getName());
-				File backup = getDBBackupFile(DBCopy.getName());
-				CBCEncryption.decryptFile(backup, DBCopy, backupToken);
-				importDatabase(DBCopy);
+				File dbCopy = getDBCopyFile(currentDB.getName());
+				File backup = getDBBackupFile(dbCopy.getName());
+				CBCEncryption.decryptFile(backup, dbCopy, backupToken);
+				importDatabase(dbCopy);
 				postRestoreSetup();
-				DBCopy.delete();
+				dbCopy.delete();
 			}
 		}
 		catch (Exception e)
 		{
+			deleteTempFiles();
 			e.printStackTrace();
 			return false;
 		}
@@ -203,8 +205,18 @@ public class DBBackupRestore
 		}
 		return -1;
 	}
+	
+	private void deleteTempFiles()
+	{
+		for (String fileName : dbNames)
+		{
+			File currentDB = getCurrentDBFile(fileName);
+			File dbCopy = getDBCopyFile(currentDB.getName());
+			dbCopy.delete();
+		}	
+	}
 
-	private static File getCurrentDBFile(String dbName)
+	private File getCurrentDBFile(String dbName)
 	{
 		File data = Environment.getDataDirectory();
 		String currentDBPath = "//data//" + HIKE_PACKAGE_NAME + "//databases//" + dbName + "";
@@ -212,13 +224,13 @@ public class DBBackupRestore
 		return currentDB;
 	}
 
-	private static File getDBBackupFile(String name)
+	private File getDBBackupFile(String name)
 	{
 		new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT).mkdirs();
 		return new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT, name + ".backup");
 	}
 
-	private static File getDBCopyFile(String name)
+	private File getDBCopyFile(String name)
 	{
 		new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT).mkdirs();
 		return new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT, name);
