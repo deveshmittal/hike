@@ -224,11 +224,6 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 
 		mListMapping[to] = cursorFrom;
 
-		if (!HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false)) // Resetting the tip flag
-		{
-			HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag}
-
-		}
 		notifyDataSetChanged();
 
 		if (from > to)
@@ -350,6 +345,11 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		{
 			cb.setVisibility(View.VISIBLE);
 		}
+	}
+	
+	public int getLastVisibleIndex()
+	{
+		return lastVisibleIndex;
 	}
 
 }

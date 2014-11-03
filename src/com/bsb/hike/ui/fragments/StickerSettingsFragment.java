@@ -15,9 +15,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,12 +30,14 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.DragSortListView.DragSortListView;
 import com.bsb.hike.DragSortListView.DragSortListView.DragScrollProfile;
+import com.bsb.hike.DragSortListView.DragSortListView.DropListener;
 import com.bsb.hike.adapters.StickerSettingsAdapter;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 
 public class StickerSettingsFragment extends SherlockFragment implements Listener, DragScrollProfile, OnItemClickListener
@@ -60,8 +65,8 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	{
 		View parent = inflater.inflate(R.layout.sticker_settings, null);
 		prefs = HikeSharedPreferenceUtil.getInstance(getActivity());
-		showTipIfRequired(parent);
 		initAdapterAndList(parent);
+		showTipIfRequired(parent);
 		checkAndInflateUpdateView(parent);
 		
 		registerListener();
@@ -186,10 +191,74 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	 */
 	private void showTipIfRequired(View parent)
 	{
+		showDragTip(parent);
+	}
+	
+	private void showDragTip(final View parent)
+	{
 		if(!prefs.getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))  //Showing the tip here
 		{
-			((View) parent.findViewById(R.id.reorder_tip)).setVisibility(View.VISIBLE); 
+			final View v =(View) parent.findViewById(R.id.reorder_tip);
+			v.setVisibility(View.VISIBLE);
+			
+			mDslv.addDropListener(new DropListener()
+			{
+				@Override
+				public void drop(int from, int to)
+				{	
+					StickerCategory category = mAdapter.getItem(from);
+					if ((from == to) || (!category.isVisible())) // Dropping at the same position. No need to perform Drop.
+					{
+						return;
+					}
+
+					if (from > mAdapter.getLastVisibleIndex() && to > mAdapter.getLastVisibleIndex() + 1)
+					{
+						   return;
+					}
+					
+					ImageView tickImage = (ImageView) parent.findViewById(R.id.reorder_indicator);
+					tickImage.setImageResource(R.drawable.art_tick);
+					TextView tipText = (TextView) parent.findViewById(R.id.drag_tip);
+					tipText.setText(getResources().getString(R.string.great_job));
+					tipText.setTextColor(getResources().getColor(R.color.white));
+					((View) parent).findViewById(R.id.drag_tip_subtext).setVisibility(View.GONE);
+					v.setBackgroundColor(getResources().getColor(R.color.sticker_drag_tip_bg_color));
+					
+					TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, 0, Animation.ABSOLUTE, -v.getHeight());
+					animation.setDuration(400);
+					animation.setStartOffset(300);
+					parent.setAnimation(animation);
+					
+					animation.setAnimationListener(new AnimationListener()
+					{
+						@Override
+						public void onAnimationStart(Animation animation)
+						{
+							
+						}
+						
+						@Override
+						public void onAnimationRepeat(Animation animation)
+						{
+							
+						}
+						
+						@Override
+						public void onAnimationEnd(Animation animation)
+						{
+							v.setVisibility(View.GONE);
+							TranslateAnimation temp = new TranslateAnimation(0, 0, 0, 0);
+							temp.setDuration(1l);
+							parent.startAnimation(temp);
+						}
+					});
+					
+					prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
+				}
+			});
 		}
+
 	}
 
 	private void initAdapterAndList(View parent)
