@@ -43,6 +43,8 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	private long previousEventTime;
 	
 	Map<String, StickerCategory> stickerCategoriesMap;
+	
+	private boolean isDownloading = false;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -98,9 +100,89 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		listview = (ListView) getView().findViewById(android.R.id.list);
 		stickerCategoriesMap = new HashMap<String, StickerCategory>();
 		stickerCategoriesMap.putAll(StickerManager.getInstance().getStickerCategoryMap());
-		mAdapter = new StickerShopAdapter(getSherlockActivity(), HikeConversationsDatabase.getInstance().getCursorForStickerShop(),stickerCategoriesMap);
+		if(StickerManager.getInstance().stickerShopUpdateNeeded())
+		{
+			HikeConversationsDatabase.getInstance().clearStickerShop();
+			downLoadStickerData(0);
+		}
+		else
+		{
+			setAdapterAndCursor();
+		}
+	}
+	
+	private void setAdapterAndCursor()
+	{
+		Cursor cursor = HikeConversationsDatabase.getInstance().getCursorForStickerShop();
+		mAdapter = new StickerShopAdapter(getSherlockActivity(), cursor, stickerCategoriesMap);
 		listview.setAdapter(mAdapter);
+		listview.setOnScrollListener(this);
+	}
 
+	public void downLoadStickerData(final int currentCategoriesCount)
+	{
+		isDownloading = true;
+		StickerDownloadManager.getInstance(getSherlockActivity()).DownloadStickerShopTask(getSherlockActivity(), currentCategoriesCount, new IStickerResultListener()
+		{
+
+			@Override
+			public void onSuccess(Object result)
+			{
+				// TODO Auto-generated method stub
+				JSONArray resultData = (JSONArray) result;
+				if(resultData.length() == 0)
+				{
+					HikeSharedPreferenceUtil.getInstance(getSherlockActivity()).saveData(StickerManager.STICKER_SHOP_DATA_FULLY_FETCHED, true);
+					return;
+				}
+				HikeConversationsDatabase.getInstance().updateStickerCategoriesInDb(resultData);
+				if (!isAdded())
+				{
+					return;
+				}
+				getSherlockActivity().runOnUiThread(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						if(currentCategoriesCount == 0)
+						{
+							HikeSharedPreferenceUtil.getInstance(getSherlockActivity()).saveData(StickerManager.LAST_STICKER_SHOP_UPDATE_TIME, System.currentTimeMillis());
+							setAdapterAndCursor();
+						}
+						//footerView.setVisibility(View.GONE);
+						isDownloading = false;
+					}
+				});
+			}
+
+			@Override
+			public void onProgressUpdated(double percentage)
+			{
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onFailure(Object result, Throwable exception)
+			{
+				//footerView.setVisibility(View.GONE);
+				if (!isAdded())
+				{
+					return;
+				}
+				getSherlockActivity().runOnUiThread(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						isDownloading = false;
+					}
+				});
+			}
+		});
 	}
 
 	@Override

@@ -175,6 +175,10 @@ public class StickerManager
 	
 	public static final String PERCENTAGE = "percentage";
 	
+	public static final String LAST_STICKER_SHOP_UPDATE_TIME = "lastStickerShopUpdateTime";
+	
+	public static final long STICKER_SHOP_REFRESH_TIME = 24 * 60 * 60 * 1000;
+	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
 	public FilenameFilter stickerFileFilter = new FilenameFilter()
@@ -1327,4 +1331,15 @@ public class StickerManager
 		HikeConversationsDatabase.getInstance().updateVisibilityAndIndex(category);
 	}
 
+	public boolean stickerShopUpdateNeeded()
+	{
+		long lastUpdateTime = HikeSharedPreferenceUtil.getInstance(context).getData(LAST_STICKER_SHOP_UPDATE_TIME, 0L);
+		boolean updateNeeded = 	(lastUpdateTime + STICKER_SHOP_REFRESH_TIME) < System.currentTimeMillis();
+		
+		if(updateNeeded && HikeSharedPreferenceUtil.getInstance(context).getData(STICKER_SHOP_DATA_FULLY_FETCHED, true))
+		{
+			HikeSharedPreferenceUtil.getInstance(context).saveData(StickerManager.STICKER_SHOP_DATA_FULLY_FETCHED, false);
+		}
+		return lastUpdateTime + STICKER_SHOP_REFRESH_TIME < System.currentTimeMillis();
+	}
 }

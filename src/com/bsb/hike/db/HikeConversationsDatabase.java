@@ -5717,4 +5717,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return c;
 	}
 	
+
+	public void clearStickerShop()
+	{
+		mDb.delete(DBConstants.STICKER_SHOP_TABLE, null, null);
+	}
 }
