@@ -175,6 +175,12 @@ public class StickerManager
 	
 	public static final String PERCENTAGE = "percentage";
 	
+	public static final String LAST_STICKER_SHOP_UPDATE_TIME = "lastStickerShopUpdateTime";
+	
+	public static final String STICKER_SHOP_DATA_FULLY_FETCHED = "stickerShopDataFullyFetched";
+	
+	public static final long STICKER_SHOP_REFRESH_TIME = 24 * 60 * 60 * 1000;
+	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
 	public FilenameFilter stickerFileFilter = new FilenameFilter()
@@ -265,6 +271,12 @@ public class StickerManager
 		List<StickerCategory> stickerCategoryList = new ArrayList<StickerCategory>(stickerCategoriesMap.values());
 		Collections.sort(stickerCategoryList);
 		return stickerCategoryList;
+	}
+
+	public Map<String, StickerCategory> getStickerCategoryMap()
+	{
+		// TODO Auto-generated method stub
+		return stickerCategoriesMap;
 	}
 
 	public void setupStickerCategoryList(SharedPreferences preferences)
@@ -391,6 +403,10 @@ public class StickerManager
 
 	public void setStickerUpdateAvailable(String categoryId, boolean updateAvailable)
 	{
+		if(!stickerCategoriesMap.containsKey(categoryId))
+		{
+			return;
+		}
 		stickerCategoriesMap.get(categoryId).setUpdateAvailable(updateAvailable);
 		HikeConversationsDatabase.getInstance().stickerUpdateAvailable(categoryId, updateAvailable);
 	}
@@ -1066,6 +1082,11 @@ public class StickerManager
 		DownloadType downloadType = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
 		final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
 		StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+		if(category == null)
+		{
+			return;
+		}
+		category.updateDownloadedStickersCount();
 		category.setState(StickerCategory.DONE);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there.
 		
 		if (DownloadType.UPDATE.equals(downloadType))
@@ -1282,5 +1303,50 @@ public class StickerManager
 				
 			}
 		}
+	}
+	
+	public void initialiseDownloadStickerTask(StickerCategory category, Context context)
+	{
+		if(stickerCategoriesMap.containsKey(category.getCategoryId()))
+		{
+			category = stickerCategoriesMap.get(category.getCategoryId());
+		}
+		if(category.getTotalStickers() == 0 || category.getDownloadedStickersCount() < category.getTotalStickers())
+		{
+			category.setState(StickerCategory.DOWNLOADING);
+			final DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
+			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, type, null);
+		}
+		saveCategoryAsVisible(category);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
+	}
+
+	private void saveCategoryAsVisible(StickerCategory category)
+	{
+		if (category.isVisible())
+		{
+			return;
+		}
+		category.setVisible(true);
+		category.setCategoryIndex(stickerCategoriesMap.size());
+		stickerCategoriesMap.put(category.getCategoryId(), category);
+		HikeConversationsDatabase.getInstance().updateVisibilityAndIndex(category);
+	}
+
+	public boolean stickerShopUpdateNeeded()
+	{
+		long lastUpdateTime = HikeSharedPreferenceUtil.getInstance(context).getData(LAST_STICKER_SHOP_UPDATE_TIME, 0L);
+		boolean updateNeeded = 	(lastUpdateTime + STICKER_SHOP_REFRESH_TIME) < System.currentTimeMillis();
+		
+		if(updateNeeded && HikeSharedPreferenceUtil.getInstance(context).getData(STICKER_SHOP_DATA_FULLY_FETCHED, true))
+		{
+			HikeSharedPreferenceUtil.getInstance(context).saveData(StickerManager.STICKER_SHOP_DATA_FULLY_FETCHED, false);
+		}
+		return lastUpdateTime + STICKER_SHOP_REFRESH_TIME < System.currentTimeMillis();
+	}
+	
+	public boolean moreDataAvailableForStickerShop()
+	{
+		return !HikeSharedPreferenceUtil.getInstance(context).getData(STICKER_SHOP_DATA_FULLY_FETCHED, true);
 	}
 }

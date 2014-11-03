@@ -138,6 +138,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		IntentFilter filter = new IntentFilter(StickerManager.STICKERS_DOWNLOADED);
 		filter.addAction(StickerManager.STICKERS_FAILED);
 		filter.addAction(StickerManager.RECENTS_UPDATED);
+		filter.addAction(StickerManager.STICKERS_PROGRESS);
 		filter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
 		LocalBroadcastManager.getInstance(activity).registerReceiver(mMessageReceiver, filter);
 	}
@@ -183,6 +184,10 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			{
 				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
 				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+				if(category == null)
+				{
+					return;
+				}
 				activity.runOnUiThread(new Runnable()
 				{
 					@Override
@@ -197,6 +202,10 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			{
 				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
 				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+				if(category == null)
+				{
+					return;
+				}
 				initStickers(category);
 			}
 			
@@ -206,6 +215,10 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				final String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 				final DownloadType type = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
 				final StickerCategory cat = StickerManager.getInstance().getCategoryForId(categoryId);
+				if(cat == null)
+				{
+					return;
+				}
 				final StickerPageObjects spo = stickerObjMap.get(cat.getCategoryId());
 				final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
 				// if this category is already loaded then only proceed else ignore
