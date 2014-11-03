@@ -1211,7 +1211,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				viewFlipper.setDisplayedChild(RESTORING_BACKUP);
 				prepareLayoutForRestoringAnimation(null);
-				mTask.addUserInput("true");
 			}
 		});
 		
@@ -1276,6 +1275,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						
 						restoreProgress.setVisibility(View.VISIBLE);
 						setupOnRestoreProgress();
+						mTask.addUserInput("true");
 					}
 				});
 				sdCardAnimationSet.addAnimation(sdCardTranslateAnimation);
