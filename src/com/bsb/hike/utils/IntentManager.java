@@ -108,7 +108,7 @@ public class IntentManager
 	{
 		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Intent intent = new Intent(context.getApplicationContext(), WebViewActivity.class);		
-		String hikeExtrasUrl = prefs.getString(HikeConstants.HIKE_EXTRAS_URL, AccountUtils.gamesUrl + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
+		String hikeExtrasUrl = prefs.getString(HikeConstants.HIKE_EXTRAS_URL, AccountUtils.gamesUrl);
 		               
 		if(!TextUtils.isEmpty(hikeExtrasUrl))                   
 		{
@@ -141,7 +141,7 @@ public class IntentManager
 	{
 		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Intent intent = new Intent(context.getApplicationContext(), WebViewActivity.class);
-		String rewards_url = prefs.getString(HikeConstants.REWARDS_URL, AccountUtils.rewardsUrl + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
+		String rewards_url = prefs.getString(HikeConstants.REWARDS_URL, AccountUtils.rewardsUrl);
 		
 		if(!TextUtils.isEmpty(rewards_url))
 		{
