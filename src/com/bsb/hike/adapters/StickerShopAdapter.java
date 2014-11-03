@@ -82,7 +82,7 @@ public class StickerShopAdapter extends CursorAdapter
 		viewholder.categoryName = (TextView) v.findViewById(R.id.category_name);
 		viewholder.stickersPackDetails = (TextView) v.findViewById(R.id.pack_details);
 		viewholder.downloadState = (ImageView) v.findViewById(R.id.category_download_btn);
-		viewholder.downloadProgress = (ProgressBar) v.findViewById(R.id.download_progress);
+		viewholder.downloadProgress = (ProgressBar) v.findViewById(R.id.download_progress_bar);
 		viewholder.downloadState.setOnClickListener(mDownloadButtonClickListener);
 		v.setTag(viewholder);
 		return v;
