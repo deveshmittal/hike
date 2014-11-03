@@ -31,6 +31,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.DBBackupRestore;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
@@ -562,6 +563,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			boolean status = DBBackupRestore.getInstance(context).restoreDB();
 			if (status)
 			{
+				HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
 				ContactManager.getInstance().init(context);
 				this.data = null;
 				publishProgress(new StateValue(State.RESTORED_BACKUP,Boolean.TRUE.toString()));
