@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.bsb.hike.R;
 import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -189,6 +190,7 @@ public class StickerShopAdapter extends CursorAdapter
 			switch (downloadButton.getDrawable().getLevel())
 			{
 			case NOT_DOWNLOADED:
+				StickerDownloadManager.getInstance(mContext).DownloadEnableDisableImage(mContext, category.getCategoryId(), null);
 			case UPDATE_AVAILABLE:
 			case RETRY:
 				StickerManager.getInstance().initialiseDownloadStickerTask(category, mContext);
