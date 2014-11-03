@@ -36,6 +36,7 @@ import com.bsb.hike.modules.stickerdownloadmgr.retry.IRetryPolicy;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 abstract class BaseStickerDownloadTask implements Callable<STResult>
 {
@@ -120,6 +121,14 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 		{
 			try
 			{
+				/**
+				 * Return in case of no connectivity
+				 */
+				if(!Utils.isUserOnline(context))
+				{
+					throw new StickerException(StickerException.NO_NETWORK);
+				}
+				
 				if (HttpRequestType.POST == requestType)
 				{
 					GzipByteArrayEntity entity;
