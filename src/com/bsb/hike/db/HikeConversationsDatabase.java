@@ -5673,7 +5673,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				if(jsonObj.has(HikeConstants.CAT_NAME))
 				{
-					contentValues.put(DBConstants.CATEGORY_NAME, jsonObj.getInt(HikeConstants.CAT_NAME));
+					contentValues.put(DBConstants.CATEGORY_NAME, jsonObj.getString(HikeConstants.CAT_NAME));
 				}
 				if(jsonObj.has(HikeConstants.NUMBER_OF_STICKERS))
 				{
