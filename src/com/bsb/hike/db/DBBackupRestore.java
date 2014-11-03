@@ -44,7 +44,7 @@ public class DBBackupRestore
 	{
 		if (_instance == null)
 		{
-			synchronized (FileTransferManager.class)
+			synchronized (DBBackupRestore.class)
 			{
 				if (_instance == null)
 					_instance = new DBBackupRestore(context.getApplicationContext());
