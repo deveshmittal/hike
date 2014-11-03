@@ -110,6 +110,7 @@ public class StickerDownloadManager
 		}
 		BaseStickerDownloadTask stickerCategoryTask = new StickerEDImageDownloadTask(handler, context, taskId, categoryId, callback);
 		Request request = new Request(stickerCategoryTask);
+		request.setPrioity(Request.PRIORITY_HIGHEST);
 		queue.addTask(taskId, request);
 	}
 	
