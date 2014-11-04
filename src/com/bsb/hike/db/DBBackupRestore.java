@@ -215,6 +215,18 @@ public class DBBackupRestore
 			dbCopy.delete();
 		}	
 	}
+	
+	public void deleteAllFiles()
+	{
+		for (String fileName : dbNames)
+		{
+			File currentDB = getCurrentDBFile(fileName);
+			File dbCopy = getDBCopyFile(currentDB.getName());
+			File backup = getDBBackupFile(dbCopy.getName());
+			dbCopy.delete();
+			backup.delete();
+		}	
+	}
 
 	private File getCurrentDBFile(String dbName)
 	{
