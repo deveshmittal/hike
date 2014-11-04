@@ -2742,8 +2742,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		/*
 		 * We show the time stamp in the status message separately so no need to show this time stamp.
 		 */
-		ViewType viewtype = ViewType.values()[getItemViewType(position)];
-		if (viewtype == ViewType.STATUS_MESSAGE || viewtype == ViewType.PIN_TEXT_RECEIVE || viewtype == ViewType.PIN_TEXT_SENT)
+        int type = getItemViewType(position);
+        ViewType viewtype = null;
+        if (type < viewTypeCount) {
+            viewtype = ViewType.values()[type];
+        }
+
+		if (null != viewtype && (viewtype == ViewType.STATUS_MESSAGE || viewtype == ViewType.PIN_TEXT_RECEIVE || viewtype == ViewType.PIN_TEXT_SENT))
 		{
 			return false;
 		}
