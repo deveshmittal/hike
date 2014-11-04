@@ -6602,11 +6602,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					eraseKey.setVisibility(View.VISIBLE);
 					shopIcon.setImageResource(R.drawable.ic_sticker_shop);
+					eraseKey.setBackgroundResource(R.color.sticker_pallete_bg_color);
 					if(!prefs.getBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 					{
 						eraseKey.setBackgroundResource(R.color.shop_icon_color);
 					}
-					eraseKey.setBackgroundResource(R.color.shop_icon_default_color);
+					
 					eraseKey.setOnClickListener(new View.OnClickListener()
 					{
 						
@@ -6659,7 +6660,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 					}
 					eraseKey.setVisibility(View.VISIBLE);
-					eraseKey.setBackgroundResource(R.color.erase_key_color);
+					eraseKey.setBackgroundResource(R.color.sticker_pallete_bg_color);
 					shopIcon.setImageResource(R.drawable.ic_erase);
 					eraseKey.setOnClickListener(new OnClickListener()
 					{
