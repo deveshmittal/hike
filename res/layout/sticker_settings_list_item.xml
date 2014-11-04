@@ -48,7 +48,9 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:contentDescription="Progress Bar"
+            android:indeterminateDrawable="@drawable/progress_downloading_sticker"
             android:visibility="gone" />
+        
 </LinearLayout>
 
     <LinearLayout
