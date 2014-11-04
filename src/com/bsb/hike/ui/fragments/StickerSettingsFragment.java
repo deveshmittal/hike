@@ -135,27 +135,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				{
 					category.setState(StickerCategory.DOWNLOADING);
 					final DownloadType type = DownloadType.UPDATE;
-					StickerDownloadManager.getInstance(getActivity()).DownloadMultipleStickers(category, type, new IStickerResultListener()
-					{
-						
-						@Override
-						public void onSuccess(Object result)
-						{
-							StickerManager.getInstance().sucessFullyDownloadedStickers(result);
-						}
-						
-						@Override
-						public void onProgressUpdated(double percentage)
-						{
-							
-						}
-						
-						@Override
-						public void onFailure(Object result, Throwable exception)
-						{
-							StickerManager.getInstance().stickersDownloadFailed(result);
-						}
-					});
+					StickerDownloadManager.getInstance(getActivity()).DownloadMultipleStickers(category, type, null);
 				}
 				
 				mAdapter.notifyDataSetChanged();
