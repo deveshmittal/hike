@@ -514,6 +514,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 			}
 		}
+        else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT)
+        {
+            return viewTypeCount + mChatThreadCardRenderer.getItemViewType(convMessage);
+        }
 		else if (convMessage.getUnreadCount() > 0)
 		{
 			type = ViewType.UNREAD_COUNT;
@@ -569,7 +573,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	@Override
 	public int getViewTypeCount()
 	{
-		return ViewType.values().length + mChatThreadCardRenderer.getCardCount();
+		return viewTypeCount + mChatThreadCardRenderer.getCardCount();
 	}
 
 	@Override
