@@ -8,6 +8,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AnimationUtils;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
@@ -113,7 +114,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			viewHolder.categoryPreviewImage = (ImageView) convertView.findViewById(R.id.category_icon);
 			viewHolder.categorySize = (TextView) convertView.findViewById(R.id.category_size);
 			viewHolder.updateAvailable = (TextView) convertView.findViewById(R.id.update_available);
-			viewHolder.downloadProgress = (ProgressBar) convertView.findViewById(R.id.download_progress);
+			viewHolder.downloadProgress = convertView.findViewById(R.id.download_progress);
 			viewHolder.checkBox.setOnClickListener(this);
 			convertView.setTag(viewHolder);
 			
@@ -123,6 +124,9 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		{
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
+		
+		viewHolder.downloadProgress.setVisibility(View.GONE); //This is being done to clear the spinner animation.
+		viewHolder.downloadProgress.clearAnimation();
 		
 		if(category.getTotalStickers() > 0)
 		{
@@ -151,11 +155,13 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			viewHolder.updateAvailable.setVisibility(View.VISIBLE);
 			viewHolder.downloadProgress.setVisibility(View.VISIBLE);
 			viewHolder.checkBox.setVisibility(View.GONE);
+			viewHolder.downloadProgress.setAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate));
 		}
 		else
-		{
+		{ 
 			viewHolder.updateAvailable.setVisibility(View.GONE);
 			viewHolder.downloadProgress.setVisibility(View.GONE);
+			viewHolder.downloadProgress.clearAnimation();
 			checkAndDisableCheckBox(category.getCategoryId(), viewHolder.checkBox);
 		}
 		
@@ -292,7 +298,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		
 		TextView categorySize;
 		
-		ProgressBar downloadProgress;
+		View downloadProgress;
 	}
 	
 	@Override

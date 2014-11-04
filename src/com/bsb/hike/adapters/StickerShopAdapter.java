@@ -8,6 +8,7 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AnimationUtils;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -58,7 +59,7 @@ public class StickerShopAdapter extends CursorAdapter
 
 		ImageView downloadState;
 
-		ProgressBar downloadProgress;
+		View downloadProgress;
 	}
 
 	public StickerShopAdapter(Context context, Cursor cursor, Map<String, StickerCategory> stickerCategoriesMap)
@@ -82,7 +83,7 @@ public class StickerShopAdapter extends CursorAdapter
 		viewholder.categoryName = (TextView) v.findViewById(R.id.category_name);
 		viewholder.stickersPackDetails = (TextView) v.findViewById(R.id.pack_details);
 		viewholder.downloadState = (ImageView) v.findViewById(R.id.category_download_btn);
-		viewholder.downloadProgress = (ProgressBar) v.findViewById(R.id.download_progress_bar);
+		viewholder.downloadProgress = v.findViewById(R.id.download_progress_bar);
 		viewholder.downloadState.setOnClickListener(mDownloadButtonClickListener);
 		v.setTag(viewholder);
 		return v;
@@ -92,7 +93,8 @@ public class StickerShopAdapter extends CursorAdapter
 	public void bindView(View view, Context context, Cursor cursor)
 	{
 		ViewHolder viewholder = (ViewHolder) view.getTag();
-
+		viewholder.downloadProgress.setVisibility(View.GONE); //This is being done to clear the spinner animation. 
+		viewholder.downloadProgress.clearAnimation();
 		String categoryId = cursor.getString(idColoumn);
 		String categoryName = cursor.getString(categoryNameColoumn);
 		int totalStickerCount = cursor.getInt(totalStickersCountColoumn);
@@ -125,7 +127,7 @@ public class StickerShopAdapter extends CursorAdapter
 			stickerCategoriesMap.put(categoryId, category);
 		}
 		viewholder.downloadState.setVisibility(View.VISIBLE);
-		viewholder.downloadProgress.setVisibility(View.GONE);
+		
 		if(category.isVisible())
 		{
 			switch (category.getState())
@@ -150,6 +152,7 @@ public class StickerShopAdapter extends CursorAdapter
 			case StickerCategory.DOWNLOADING:
 				viewholder.downloadState.setVisibility(View.GONE);
 				viewholder.downloadProgress.setVisibility(View.VISIBLE);
+				viewholder.downloadProgress.setAnimation(AnimationUtils.loadAnimation(context, R.anim.rotate));
 				break;
 			default:
 				break;

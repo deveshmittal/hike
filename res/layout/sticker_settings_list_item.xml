@@ -43,12 +43,12 @@
             android:focusable="false"
             android:focusableInTouchMode="false" />
         
-        <ProgressBar
+        <ImageView
             android:id="@+id/download_progress"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:contentDescription="Progress Bar"
-            android:indeterminateDrawable="@drawable/progress_downloading_sticker"
+            android:src="@drawable/ic_spinner_green"
             android:visibility="gone" />
         
 </LinearLayout>

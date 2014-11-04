@@ -31,11 +31,11 @@
             android:scaleType="centerInside"
             android:src="@drawable/sticker_shop_download_drawable_selector" />
 
-       <ProgressBar 
+       <ImageView 
         android:id="@+id/download_progress_bar"
        	android:layout_width="24dp"
        	android:layout_height="24dp"
-        android:indeterminateDrawable="@drawable/sticker_shop_progress_bar"
+        android:src="@drawable/ic_spinner"
         android:visibility="gone" />
     </LinearLayout>
 	
