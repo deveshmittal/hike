@@ -13,6 +13,8 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.ConvMessagePacketKeys;
+import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
@@ -288,6 +290,8 @@ public class ConvMessage
 		this.shouldShowPush = other.shouldShowPush;
 		this.unreadCount = other.unreadCount;
 		this.metadata = other.metadata;
+		this.platformMessageMetadata = other.platformMessageMetadata;
+		this.contentLove = other.contentLove;
 		try {
 			this.readByArray = other.readByArray !=null? new JSONArray(other.readByArray.toString()) : null;
 		} catch (JSONException e) {
@@ -346,7 +350,15 @@ public class ConvMessage
 			{
 				this.messageType = mdata.getInt(HikeConstants.PIN_MESSAGE);
 			}
+			// TODO : We should parse metadata based on message type, so doing now for content, we should clean the else part sometime
+			if(HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE.equals(data.get(HikeConstants.SUB_TYPE))){
+				this.messageType  = MESSAGE_TYPE.CONTENT;
+				platformMessageMetadata  = new PlatformMessageMetadata(data.getJSONObject(HikeConstants.METADATA));
+			}else{
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
+		}
+		}else if(HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE.equals(data.getString(HikeConstants.SUB_TYPE))){
+			this.messageType = MESSAGE_TYPE.CONTENT;
 		}
 		this.isStickerMessage = HikeConstants.STICKER.equals(obj.optString(HikeConstants.SUB_TYPE));
 		/**
@@ -679,7 +691,14 @@ public class ConvMessage
 				{
 					object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
 				}
-
+				// TODO : we should add all sub types here and set metadata accordingly
+				switch(messageType){
+				case MESSAGE_TYPE.CONTENT:
+					object.put(HikeConstants.SUB_TYPE, ConvMessagePacketKeys.CONTENT_TYPE);
+					object.put(HikeConstants.METADATA, platformMessageMetadata.toJSON());
+					break;
+				}
+				
 				object.put(HikeConstants.TYPE, mInvite ? HikeConstants.MqttMessageTypes.INVITE : HikeConstants.MqttMessageTypes.MESSAGE);
 			}
 		}
