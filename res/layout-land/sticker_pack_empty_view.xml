@@ -31,8 +31,8 @@
             android:layout_height="wrap_content"
             android:text="@string/new_stickers"
             android:textColor="@color/shop_icon_color"
-            android:layout_marginTop="4dp"
-            android:textSize="12sp" />
+            android:textSize="12sp" 
+            android:layout_marginTop="4dp" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/category_name"
@@ -44,29 +44,45 @@
             android:textColor="@color/white"
             android:textSize="24sp" />
 
+        <LinearLayout 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+            
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/category_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="16 Stickers, 200KB"
+            android:layout_marginRight="8dp"
             android:textColor="@color/standerd_light_grey2"
             android:textSize="12sp" />
+        
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/separator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="|"
+            android:textColor="#333333"
+            android:textSize="12sp" />
+        
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/category_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="FREE"
+            android:layout_marginLeft="8dp"
             android:textColor="@color/standerd_light_grey2"
             android:textSize="12sp" />
+        </LinearLayout>
         
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/download_btn"
             android:layout_width="150dp"
             android:layout_height="36dp"
-            android:layout_gravity="center"
-             android:background="@drawable/download_btn_round"
-            android:layout_marginTop="20dp"
+            android:background="@drawable/download_btn_round"
+            android:layout_marginTop="10dp"
             android:textSize="12sp"
             android:text="@string/download_category"
             android:textColor="@color/white" />
