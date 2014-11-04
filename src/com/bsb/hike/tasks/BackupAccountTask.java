@@ -21,7 +21,7 @@ public class BackupAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	
 	public BackupAccountTask(Context context, BackupAccountListener activity)
 	{
-		this.ctx = context;
+		this.ctx = context.getApplicationContext();
 		this.listener = activity;
 	}
 
