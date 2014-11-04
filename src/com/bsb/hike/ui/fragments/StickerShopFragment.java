@@ -240,6 +240,10 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 				@Override
 				public void run()
 				{
+					if(mAdapter == null)
+					{
+						return;
+					}
 					updateStickerCategoriesMap(StickerManager.getInstance().getStickerCategoryMap());
 					mAdapter.notifyDataSetChanged();
 				}
@@ -266,6 +270,10 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 					@Override
 					public void run()
 					{
+						if(mAdapter == null)
+						{
+							return;
+						}
 						mAdapter.notifyDataSetChanged();
 					}
 				});
@@ -299,6 +307,10 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 						@Override
 						public void run()
 						{
+							if(mAdapter == null)
+							{
+								return;
+							}
 							category.setState(StickerCategory.RETRY);
 							mAdapter.notifyDataSetChanged();
 						}
@@ -311,6 +323,10 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 						@Override
 						public void run()
 						{
+							if(mAdapter == null)
+							{
+								return;
+							}
 							mAdapter.notifyDataSetChanged();
 						}
 					});
