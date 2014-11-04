@@ -499,6 +499,8 @@ public class HikeConstants
 
 	public static final String SINGLE_INVITE_SMS_ALERT_CHECKED = "singleSmsAlertChecked";
 
+	public static final String FTUE_STICKER_SENT = "ftueStickerSent";
+	
 	public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
 	
 	public static final String SHOW_NUX_SCREEN = "showNuxScreen";
