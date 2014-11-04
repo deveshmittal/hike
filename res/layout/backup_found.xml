@@ -11,14 +11,14 @@
         android:id="@+id/txt_backup_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Backup found"
+        android:text="@string/backup_found"
         android:textSize="24dp" />
 
     <TextView
         android:id="@+id/txt_backup_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="would you like to restore your account?"
+        android:text="@string/backup_found_hint"
         android:textColor="@color/black_45"
         android:textSize="15dp" />
 
@@ -91,7 +91,7 @@
         android:layout_height="48dp"
         android:layout_marginTop="50dp"
         android:background="@color/blue_hike"
-        android:text="RESTORE"
+        android:text="@string/restore"
         android:textColor="@color/white" />
 
 </LinearLayout>

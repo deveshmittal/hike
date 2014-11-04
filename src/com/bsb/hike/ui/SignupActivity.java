@@ -403,11 +403,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 		else if (displayedChild == BACKUP_FOUND)
 		{
-			mActionBarTitle.setText("Restore Account");
+			mActionBarTitle.setText(R.string.restore_account);
 		}
 		else if (displayedChild == RESTORING_BACKUP)
 		{
-			mActionBarTitle.setText("Account Backup");
+			mActionBarTitle.setText(R.string.account_backup);
 		}
 	}
 
@@ -966,7 +966,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	{
 		nextBtnContainer.setVisibility(View.VISIBLE);
 		arrow.setVisibility(View.GONE);
-		postText.setText("Skip");
+		postText.setText(R.string.skip);
 		setupActionBarTitle();
 		Button btnRestore = (Button) backupFoundLayout.findViewById(R.id.btn_restore);
 		btnRestore.setOnClickListener(btnRestoreClick);
@@ -985,8 +985,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			TextView title = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_title);
 			TextView hint = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_hint);
-			title.setText("Restoring...");
-			hint.setText("please wait, this may take a while");
+			title.setText(R.string.restoring___);
+			hint.setText(R.string.restoring____hint);
 			if (savedInstanceState == null)
 			{
 				onRestoreAnimation();
@@ -1000,8 +1000,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			TextView title = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_title);
 			TextView hint = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_hint);
-			title.setText("Restored");
-			hint.setText("your messages");
+			title.setText(R.string.restored);
+			hint.setText(R.string.restored_hint);
 			View restoreItems = (View) restoringBackupLayout.findViewById(R.id.restore_items);
 			ImageView restoreSuccess = (ImageView) restoringBackupLayout.findViewById(R.id.restore_success);
 			restoreItems.setVisibility(View.INVISIBLE);
@@ -1015,11 +1015,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			TextView title = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_title);
 			TextView hint = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_hint);
-			title.setText("Something went wrong.");
-			hint.setText("would you like to retry?");
+			title.setText(R.string.restore_error);
+			hint.setText(R.string.restore_error_hint);
 			nextBtnContainer.setVisibility(View.VISIBLE);
 			arrow.setVisibility(View.GONE);
-			postText.setText("Skip");
+			postText.setText(R.string.skip);
 			final View restoreProgress = (View) restoringBackupLayout.findViewById(R.id.restore_progress);
 			final ImageView restoreFail = (ImageView) restoringBackupLayout.findViewById(R.id.restore_fail);
 			final Button retry  = (Button) restoringBackupLayout.findViewById(R.id.btn_retry);

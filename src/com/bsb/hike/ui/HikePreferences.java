@@ -355,7 +355,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				message = getString(R.string.social_unlinking);
 				break;
 			case BACKUP_ACCOUNT:
-				message = "Creating a backup on your chats. Daily backups occur at 03:00.";
+				message = getString(R.string.creating_backup_message);
 				break;
 
 			default:
@@ -868,12 +868,14 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	{
 		Preference preference = getPreferenceScreen().findPreference(HikeConstants.BACKUP_PREF);
 		long lastBackupTime = DBBackupRestore.getInstance(getApplicationContext()).getLastBackupTime();
+		String lastBackup = getResources().getString(R.string.last_backup);
+		String time = getResources().getString(R.string.never);
 		String backupSummary = "Last backup: never";
 		if (lastBackupTime > 0)
 		{
-			backupSummary = "Last backup: " + Utils.getFormattedDateTimeFromTimestamp(lastBackupTime/1000, getResources().getConfiguration().locale);
+			time = Utils.getFormattedDateTimeFromTimestamp(lastBackupTime/1000, getResources().getConfiguration().locale);
 		}
-		preference.setSummary(backupSummary);
+		preference.setSummary(lastBackup + ": " + time);
 	}
 	
 	private void updateNotifPrefView()
