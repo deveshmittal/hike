@@ -1841,11 +1841,19 @@ public class HikeConstants
 
 	public static class MESSAGE_TYPE
 	{
+		public static final String MESSAGE_TYPE = "messageType";
+				
 		public static final int PLAIN_TEXT = 0;
 
 		public static final int TEXT_PIN = 1;
 		
 		public static final int CONTENT = 2;
+	}
+	
+	public static interface ConvMessagePacketKeys{
+		public static final String CONTENT_TYPE = "content";
+		public static final String PIN_TYPE = "pin";
+		public static final String LOVE_ID = "loveID";
 	}
 	
 	public static class HASH_MESSAGE_TYPE
