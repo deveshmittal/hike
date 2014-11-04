@@ -581,13 +581,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		long startTime = System.currentTimeMillis();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		ViewType viewType = ViewType.values()[getItemViewType(position)];
+        int type = getItemViewType(position);
+		ViewType viewType = null;
 
 		final ConvMessage convMessage = getItem(position);
 
 		DayHolder dayHolder = null;
 		View v = convertView;
 		// Applicable to all kinds of messages
+        if (type >= viewTypeCount){
+            mChatThreadCardRenderer.getView(v, convMessage);
+        }  else
+            viewType = ViewType.values()[type];
+
+
 		if (viewType == ViewType.TYPING_NOTIFICATION)
 		{
 
@@ -2140,9 +2147,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			participantInfoHolder.container.addView(participantInfo);
 			dayHolder = participantInfoHolder;
 		}
-        else if (convMessage.isContentType()){
-             mChatThreadCardRenderer.getView(v, convMessage);
-        }
 		else if (viewType == ViewType.UNKNOWN_BLOCK_ADD)
 		{
 			Logger.i("chatthread", "getview of unknown header");
