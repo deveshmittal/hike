@@ -201,7 +201,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			}
 			else if(intent.getAction().equals(StickerManager.STICKERS_PROGRESS))
 			{
-				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
+				Bundle b = intent.getBundleExtra(StickerManager.STICKER_DATA_BUNDLE);
+				String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
 				if(category == null)
 				{
