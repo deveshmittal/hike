@@ -6601,7 +6601,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						emoticonType = EmoticonType.STICKERS;
 					}
 					eraseKey.setVisibility(View.VISIBLE);
-					shopIcon.setImageResource(R.drawable.ic_add);
+					shopIcon.setImageResource(R.drawable.ic_sticker_shop);
 					if(!prefs.getBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 					{
 						eraseKey.setBackgroundResource(R.color.shop_icon_color);
