@@ -15,14 +15,18 @@ import com.bsb.hike.platform.CardComponent.VideoComponent;
 public class PlatformMessageMetadata implements HikePlatformConstants {
 	public int layoutId;
 	public int loveId;
-	public String recepient; 
+	
 	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();;
 	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();;
-
+	private JSONObject json;
+	public PlatformMessageMetadata(String jsonString) throws JSONException {
+		this(new JSONObject(jsonString));
+	}
 	public PlatformMessageMetadata(JSONObject json) {
+		this.json = json;
 		layoutId = getInt(json, LAYOUT_ID);
 		loveId = getInt(json, LOVE_ID);
-		recepient = getString(json, RECEPIENT);
+	
 		
 		if (json.has(DATA)) {
 			try {
@@ -142,5 +146,9 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 			}
 		}
 		return null;
+	}
+	
+	public String toJSON(){
+		return json.toString();
 	}
 }
