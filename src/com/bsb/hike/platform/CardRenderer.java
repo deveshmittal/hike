@@ -69,12 +69,14 @@ public class CardRenderer {
 
             for (CardComponent.TextComponent textComponent : textComponentList) {
                 String tag = textComponent.getTag();
-                viewHashMap.put(tag, view.findViewWithTag(tag));
+                if (!TextUtils.isEmpty(tag))
+                    viewHashMap.put(tag, view.findViewWithTag(tag));
             }
 
             for (CardComponent.MediaComponent mediaComponent : mediaComponentList) {
                 String tag = mediaComponent.getTag();
-                viewHashMap.put(tag, view.findViewWithTag(tag));
+                if (!TextUtils.isEmpty(tag))
+                    viewHashMap.put(tag, view.findViewWithTag(tag));
             }
 
         }
@@ -99,29 +101,68 @@ public class CardRenderer {
 
 
     public int getCardCount() {
-        return cardCount;
+        return CardConstants.CHAT_THREAD_CARD_COUNT_TYPE_COUNT;
     }
 
+    public int getItemViewType(ConvMessage convMessage) {
 
+        Log.d(CardRenderer.class.getSimpleName(), "hash code for convMessage is " + String.valueOf(convMessage.hashCode()));
+        cardType = convMessage.platformMessageMetadata.layoutId;
+        if (convMessage.isSent()) {
+
+            switch (cardType) {
+                case 1:
+                    return IMAGE_CARD_LAYOUT_SENT;
+
+                case 2:
+                    return VIDEO_CARD_LAYOUT_SENT;
+
+                case 3:
+                    return GAMES_CARD_LAYOUT_SENT;
+
+                case 4:
+                    return ARTICLE_CARD_LAYOUT_SENT;
+            }
+
+        }
+        else
+        {
+            switch (cardType) {
+                case 1:
+                    return IMAGE_CARD_LAYOUT_RECEIVED;
+
+                case 2:
+                    return VIDEO_CARD_LAYOUT_RECEIVED;
+
+                case 3:
+                    return GAMES_CARD_LAYOUT_RECEIVED;
+
+                case 4:
+                    return ARTICLE_CARD_LAYOUT_RECEIVED;
+            }
+
+        }
+        return 0;
+
+    }
 
     public View getView(View view, ConvMessage convMessage){
 
-        int type = convMessage.platformMessageMetadata.layoutId;
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         List<CardComponent.TextComponent> textComponents = convMessage.platformMessageMetadata.textComponents;
         List<CardComponent.MediaComponent> mediaComponents = convMessage.platformMessageMetadata.mediaComponents;
 
-        if (type == CardConstants.IMAGE_CARD_LAYOUT)
+        if (cardType == CardConstants.IMAGE_CARD_LAYOUT)
         {
             ViewHolder viewHolder;
             if (view == null){
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout, null);
+                    view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
-                    view = inflater.inflate(R.layout.card_layout, null);
+                    view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents);
@@ -136,16 +177,16 @@ public class CardRenderer {
             cardDataFiller(textComponents, mediaComponents, viewHolder);
 
         }
-        else if (type == CardConstants.VIDEO_CARD_LAYOUT)
+        else if (cardType == CardConstants.VIDEO_CARD_LAYOUT)
         {
             ViewHolder viewHolder;
             if (view == null){
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout, null);
+                    view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
-                    view = inflater.inflate(R.layout.card_layout, null);
+                    view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents);
@@ -160,17 +201,17 @@ public class CardRenderer {
             cardDataFiller(textComponents, mediaComponents, viewHolder);
 
         }
-        else if (type == CardConstants.GAMES_CARD_LAYOUT)
+        else if (cardType == CardConstants.GAMES_CARD_LAYOUT)
         {
             ViewHolder viewHolder;
             if (view == null){
                 viewHolder = new ViewHolder();
 
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout, null);
+                    view = inflater.inflate(R.layout.card_layout_games_sent, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
-                    view = inflater.inflate(R.layout.card_layout, null);
+                    view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents);
@@ -186,16 +227,16 @@ public class CardRenderer {
 
 
         }
-        else if (type == CardConstants.ARTICLE_CARD_LAYOUT)
+        else if (cardType == CardConstants.ARTICLE_CARD_LAYOUT)
         {
             ViewHolder viewHolder;
             if (view == null){
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout, null);
+                    view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
-                    view = inflater.inflate(R.layout.card_layout, null);
+                    view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents);
@@ -218,16 +259,21 @@ public class CardRenderer {
     private void cardDataFiller(List<CardComponent.TextComponent> textComponents, List<CardComponent.MediaComponent> mediaComponents, ViewHolder viewHolder) {
         for (CardComponent.TextComponent textComponent : textComponents) {
             String tag = textComponent.getTag();
-            TextView tv = (TextView) viewHolder.viewHashMap.get(tag);
-            tv.setText(textComponent.getText());
+            if (!TextUtils.isEmpty(tag)) {
+
+                TextView tv = (TextView) viewHolder.viewHashMap.get(tag);
+                tv.setText(textComponent.getText());
+            }
         }
 
         for (CardComponent.MediaComponent mediaComponent : mediaComponents) {
             String tag = mediaComponent.getTag();
 
-            View mediaView =  viewHolder.viewHashMap.get(tag);
-            if (mediaView instanceof ImageView)
-                ((ImageView) mediaView).setImageBitmap(HikeBitmapFactory.stringToBitmap(mediaComponent.getBase64()));
+            if (!TextUtils.isEmpty(tag)) {
+                View mediaView = viewHolder.viewHashMap.get(tag);
+                if (mediaView instanceof ImageView)
+                    ((ImageView) mediaView).setImageBitmap(HikeBitmapFactory.stringToBitmap(mediaComponent.getBase64()));
+            }
 
         }
     }
