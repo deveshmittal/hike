@@ -1,6 +1,8 @@
 package com.bsb.hike.platform;
 
 import android.content.Context;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,14 +21,22 @@ import java.util.List;
  */
 public class CardRenderer {
 
-    int cardCount;
     Context mContext;
+    int cardType;
 
-    public CardRenderer(int cardCount, Context context){
-        this.cardCount = cardCount;
+    public CardRenderer(Context context){
         this.mContext = context;
 
     }
+
+    private static final int IMAGE_CARD_LAYOUT_SENT = 0;
+    private static final int IMAGE_CARD_LAYOUT_RECEIVED = 1;
+    private static final int VIDEO_CARD_LAYOUT_SENT = 2;
+    private static final int VIDEO_CARD_LAYOUT_RECEIVED = 3;
+    private static final int GAMES_CARD_LAYOUT_SENT = 4;
+    private static final int GAMES_CARD_LAYOUT_RECEIVED = 5;
+    private static final int ARTICLE_CARD_LAYOUT_SENT = 6;
+    private static final int ARTICLE_CARD_LAYOUT_RECEIVED = 7;
 
 
     private static class ViewHolder
