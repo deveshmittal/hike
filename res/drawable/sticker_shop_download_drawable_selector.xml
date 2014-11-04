@@ -2,7 +2,7 @@
 <level-list xmlns:android="http://schemas.android.com/apk/res/android" >
     <!-- added and download done -->
     <item
-        android:drawable="@drawable/ic_unchecked"
+        android:drawable="@drawable/shop_download_done"
         android:maxLevel="0" />
     <!-- download -->
     <item
@@ -10,7 +10,7 @@
         android:maxLevel="1" />
     <!-- update -->
     <item
-        android:drawable="@drawable/ui_checked"
+        android:drawable="@drawable/ic_update"
         android:maxLevel="2" />
     <!-- retry download -->
     <item
