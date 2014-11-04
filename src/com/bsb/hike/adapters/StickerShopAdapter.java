@@ -18,6 +18,7 @@ import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.smartImageLoader.StickerLoader;
+import com.bsb.hike.smartImageLoader.StickerPreviewLoader;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
@@ -27,7 +28,7 @@ public class StickerShopAdapter extends CursorAdapter
 
 	private Context context;
 
-	private StickerLoader stickerLoader;
+	private StickerPreviewLoader stickerPreviewLoader;
 	
 	private boolean isListFlinging;
 
@@ -58,6 +59,8 @@ public class StickerShopAdapter extends CursorAdapter
 		TextView stickersPackDetails;
 
 		ImageView downloadState;
+		
+		ImageView categoryPreviewIcon;
 
 		ProgressBar downloadProgress;
 	}
@@ -67,7 +70,7 @@ public class StickerShopAdapter extends CursorAdapter
 		super(context, cursor, false);
 		this.context = context;
 		this.layoutInflater = LayoutInflater.from(context);
-		this.stickerLoader = new StickerLoader(context);
+		this.stickerPreviewLoader = new StickerPreviewLoader(context, true);
 		this.idColoumn = cursor.getColumnIndex(DBConstants._ID);
 		this.categoryNameColoumn = cursor.getColumnIndex(DBConstants.CATEGORY_NAME);
 		this.totalStickersCountColoumn = cursor.getColumnIndex(DBConstants.TOTAL_NUMBER);
@@ -84,6 +87,7 @@ public class StickerShopAdapter extends CursorAdapter
 		viewholder.stickersPackDetails = (TextView) v.findViewById(R.id.pack_details);
 		viewholder.downloadState = (ImageView) v.findViewById(R.id.category_download_btn);
 		viewholder.downloadProgress = (ProgressBar) v.findViewById(R.id.download_progress);
+		viewholder.categoryPreviewIcon = (ImageView) v.findViewById(R.id.category_icon);
 		viewholder.downloadState.setOnClickListener(mDownloadButtonClickListener);
 		v.setTag(viewholder);
 		return v;
@@ -99,6 +103,7 @@ public class StickerShopAdapter extends CursorAdapter
 		int totalStickerCount = cursor.getInt(totalStickersCountColoumn);
 		int categorySizeInBytes = cursor.getInt(categorySizeColoumn);
 		viewholder.categoryName.setText(cursor.getString(categoryNameColoumn));
+		stickerPreviewLoader.loadImage(categoryId, viewholder.categoryPreviewIcon, isListFlinging);
 
 		if (totalStickerCount > 0)
 		{
@@ -164,9 +169,9 @@ public class StickerShopAdapter extends CursorAdapter
 	}
 	
 
-	public StickerLoader getStickerLoader()
+	public StickerPreviewLoader getStickerPreviewLoader()
 	{
-		return stickerLoader;
+		return stickerPreviewLoader;
 	}
 	
 	public void setIsListFlinging(boolean b)
