@@ -9,6 +9,8 @@ import com.bsb.hike.db.DBBackupRestore;
 public class BackupAccountTask extends AsyncTask<Void, Void, Boolean> implements ActivityCallableTask
 {
 	private Context ctx;
+	
+	private boolean isFinished = false;
 
 	public static interface BackupAccountListener
 	{
@@ -33,6 +35,7 @@ public class BackupAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	protected void onPostExecute(Boolean result)
 	{
 		listener.accountBacked(result);
+		isFinished = true;
 	}
 
 	@Override
@@ -45,7 +48,6 @@ public class BackupAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	@Override
 	public boolean isFinished()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return isFinished;
 	}
 }
