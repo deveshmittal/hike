@@ -463,20 +463,15 @@ public class StickerManager
 				return stickerDir.getPath();
 			}
 		}
-		File stickerDir = new File(getInternalStickerDirectoryForCategoryId(catId));
-		Logger.d(TAG, "Checking Internal Storage dir : " + stickerDir.getAbsolutePath());
-		if (stickerDir.exists())
-		{
-			Logger.d(TAG, "Internal Storage dir exist so returning it.");
-			return stickerDir.getPath();
-		}
 		if (externalAvailable)
 		{
 			Logger.d(TAG, "Returning external storage dir.");
 			return getExternalStickerDirectoryForCategoryId(context, catId);
 		}
-		Logger.d(TAG, "Returning internal storage dir.");
-		return getInternalStickerDirectoryForCategoryId(catId);
+		else
+		{
+			return null;	
+		}	
 	}
 
 	public boolean checkIfStickerCategoryExists(String categoryId)
