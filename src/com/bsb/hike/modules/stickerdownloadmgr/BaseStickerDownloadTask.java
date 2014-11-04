@@ -36,6 +36,7 @@ import com.bsb.hike.modules.stickerdownloadmgr.retry.IRetryPolicy;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 abstract class BaseStickerDownloadTask implements Callable<STResult>
@@ -124,6 +125,10 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 				/**
 				 * Return in case of no connectivity
 				 */
+				if(!StickerManager.getInstance().isMinimumMemoryAvailable())
+				{
+					throw new StickerException(StickerException.OUT_OF_SPACE);
+				}
 				if(!Utils.isUserOnline(context))
 				{
 					throw new StickerException(StickerException.NO_NETWORK);
