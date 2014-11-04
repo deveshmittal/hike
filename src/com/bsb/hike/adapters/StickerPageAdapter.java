@@ -81,10 +81,10 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 
 		this.numItemsRow = StickerManager.getInstance().getNumColumnsForStickerGrid(activity);
 
-		int emoticonPagerPadding = (int) 2 * activity.getResources().getDimensionPixelSize(R.dimen.emoticon_pager_padding);
 		int stickerPadding = (int) 2 * activity.getResources().getDimensionPixelSize(R.dimen.sticker_padding);
-
-		int remainingSpace = (screenWidth - emoticonPagerPadding - stickerPadding) - (this.numItemsRow * StickerManager.SIZE_IMAGE);
+		int horizontalSpacing = (int) (this.numItemsRow - 1) * activity.getResources().getDimensionPixelSize(R.dimen.sticker_grid_horizontal_padding);
+		
+		int remainingSpace = (screenWidth - horizontalSpacing - stickerPadding) - (this.numItemsRow * StickerManager.SIZE_IMAGE);
 
 		this.sizeEachImage = StickerManager.SIZE_IMAGE + ((int) (remainingSpace / this.numItemsRow));
 
