@@ -640,7 +640,7 @@ public class ConvMessage
 		JSONObject md = null;
 		try
 		{
-			if (participantInfoState == ParticipantInfoState.CHAT_BACKGROUND)
+			if (participantInfoState == ParticipantInfoState.CHAT_BACKGROUND && metadata!=null)
 			{
 				object = metadata.getJSON();
 			}
