@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.accounts.NetworkErrorException;
@@ -39,6 +40,7 @@ import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
 public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> implements ActivityCallableTask
 {
@@ -129,6 +131,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	private String userName;
 
+	private int numOfHikeContactsCount = 0;
+	
 	private static final String INDIA_ISO = "IN";
 
 	public static final String START_UPLOAD_PROFILE = "start";
@@ -463,7 +467,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				}
 				Logger.d("SignupTask", "about to insert addressbook");
 				ContactManager.getInstance().setAddressBookAndBlockList(addressbook, blockList);
-
+				numOfHikeContactsCount = getHikeContactCount(addressbook);
 			}
 			catch (Exception e)
 			{
@@ -526,7 +530,40 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 				}
 				publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
-				AccountUtils.setProfile(userName, birthdate, isFemale.booleanValue());
+				JSONObject nuxDetails = AccountUtils.setProfile(userName, birthdate, isFemale.booleanValue());
+				
+				// TODO showNuxScreen and nuxStickerDetails will be obtained from nuxDetails json Object when server starts sending these values
+				boolean showNuxScreen = true;
+				String nuxStickerDetails = null;
+				/*Temporary code*/
+				try
+				{
+					JSONObject jj = new JSONObject();
+					JSONArray arr = new JSONArray();
+					String hum = StickerCategoryId.humanoid.name();
+					String exp = StickerCategoryId.expressions.name();
+					JSONObject j1 = new JSONObject().put("stickerid", "069_hi.png").put("category", hum);
+					JSONObject j2 = new JSONObject().put("stickerid", "003_teasing.png").put("category", hum);
+					JSONObject j3 = new JSONObject().put("stickerid", "002_love2.png").put("category", hum);
+					JSONObject j4 = new JSONObject().put("stickerid", "112_watchadoing.png").put("category", exp);
+					arr.put(j1);
+					arr.put(j2);
+					arr.put(j3);
+					arr.put(j4);
+					jj.put("data", arr);
+					nuxStickerDetails = jj.toString();
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+				/**/
+				
+				Editor editor = settings.edit();
+				editor.putInt(HikeConstants.HIKE_CONTACTS_COUNT, numOfHikeContactsCount);
+				editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, showNuxScreen);
+				editor.putString(HikeConstants.NUX_STICKER_DETAILS, nuxStickerDetails);
+				editor.commit();
 			}
 			catch (InterruptedException e)
 			{
@@ -591,7 +628,26 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		settings.edit().putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true).commit();
 		return Boolean.TRUE;
 	}
-
+	
+	/**
+	 * This method traverses the contacts list and returns the count of hike contacts in it.
+	 * 
+	 * @param contacts
+	 * @return
+	 */
+	private int getHikeContactCount(List<ContactInfo> contacts)
+	{
+		int numOfHikeContacts = 0;
+		for (ContactInfo contact : contacts)
+		{
+			if (contact.isOnhike())
+			{
+				numOfHikeContacts++;
+			}
+		}
+		return numOfHikeContacts;
+	}
+	
 	@Override
 	protected void onCancelled()
 	{

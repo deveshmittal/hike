@@ -528,7 +528,7 @@ public class AccountUtils
 		// Assert.assertTrue("Token is empty", !TextUtils.isEmpty(mToken));
 	}
 
-	public static void setProfile(String name, Birthday birthdate, boolean isFemale) throws NetworkErrorException, IllegalStateException
+	public static JSONObject setProfile(String name, Birthday birthdate, boolean isFemale) throws NetworkErrorException, IllegalStateException
 	{
 		HttpPost httppost = new HttpPost(base + "/account/profile");
 		addToken(httppost);
@@ -562,14 +562,17 @@ public class AccountUtils
 			{
 				throw new NetworkErrorException("Unable to set name");
 			}
+			return obj;
 		}
 		catch (JSONException e)
 		{
 			Logger.wtf("AccountUtils", "Unable to encode name as JSON");
+			return null;
 		}
 		catch (UnsupportedEncodingException e)
 		{
 			Logger.wtf("AccountUtils", "Unable to encode name");
+			return null;
 		}
 	}
 
