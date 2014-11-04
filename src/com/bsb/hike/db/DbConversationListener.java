@@ -409,8 +409,10 @@ public class DbConversationListener implements Listener
 	private void handleHikeSdkMessage(Object object){
 		if(object instanceof JSONObject){
 		List<ConvMessage> listOfMessages = HikeSDKMessageFilter.filterMessage((JSONObject) object);
+		if(listOfMessages!=null){
 		HikeConversationsDatabase.getInstance().addConversations(listOfMessages);
 		// publish MQTT and update UI here
+			}
 		}
 	}
 
