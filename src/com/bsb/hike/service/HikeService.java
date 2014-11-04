@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,6 +36,7 @@ import com.bsb.hike.GCMIntentService;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
@@ -208,6 +210,8 @@ public class HikeService extends Service
 		mContactHandlerLooper = contactHandlerThread.getLooper();
 		mContactsChangedHandler = new Handler(mContactHandlerLooper);
 		mContactsChanged = new ContactsChanged(this);
+		
+		scheduleNextAccountBackup();
 
 		/*
 		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of
@@ -701,6 +705,40 @@ public class HikeService extends Service
 			sendBroadcast(new Intent(HikeService.POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION));
 		}
 	};
+	
+	private Runnable BackupAccountRunnable = new Runnable()
+	{
+		@Override
+		public void run()
+		{
+			DBBackupRestore.getInstance(HikeService.this).backupDB();
+			scheduleNextAccountBackup();
+		}
+	};
+	
+	private void scheduleNextAccountBackup()
+	{
+		long MaxBackupDelay = 24 * 60 * 60 * 1000;  // 24 Hours
+		long lastBackup = DBBackupRestore.getInstance(HikeService.this).getLastBackupTime();
+		
+		long scheduleTime = 0;
+		if ((System.currentTimeMillis() - lastBackup) > MaxBackupDelay)
+		{
+			scheduleTime = 0;
+		}
+		else
+		{
+			Calendar c = Calendar.getInstance();
+	        c.add(Calendar.DAY_OF_MONTH, 1);
+	        c.set(Calendar.HOUR_OF_DAY, 3);
+	        c.set(Calendar.MINUTE, 0);
+	        c.set(Calendar.SECOND, 0);
+	        c.set(Calendar.MILLISECOND, 0);
+	        scheduleTime = (c.getTimeInMillis()-System.currentTimeMillis());
+	        
+		}
+		postRunnableWithDelay(BackupAccountRunnable, scheduleTime);
+	}
 
 	private void scheduleNextManualContactSync()
 	{
