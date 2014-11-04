@@ -140,6 +140,8 @@ public class HikeService extends Service
 	public static final int SDK_REQ_GET_USERS = -11;
 	
 	public static final int SDK_REQ_GET_LOGGED_USER_INFO = -14;
+	
+	public static final int SDK_REQ_SEND_MESSAGE = -13;
 
 	/************************************************************************/
 	/* VARIABLES - other local variables */

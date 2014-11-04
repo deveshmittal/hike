@@ -46,6 +46,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.ToastListener;
+import com.bsb.hike.platform.HikeSDKRequestHandler;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
@@ -440,6 +441,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static volatile boolean syncingContacts = false;
 
 	public Handler appStateHandler;
+
+	private HikeSDKRequestHandler hikeSDKRequestHandler;
 
 	class IncomingHandler extends Handler
 	{
@@ -972,6 +975,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		if (activityTimeLogger == null)
 		{
 			activityTimeLogger = new ActivityTimeLogger();
+		}
+		if(hikeSDKRequestHandler == null)
+		{
+			hikeSDKRequestHandler = HikeSDKRequestHandler.getInstance(getApplicationContext());
 		}
 	}
 
