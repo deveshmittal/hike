@@ -1216,7 +1216,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					intent.putExtra(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
 					sendMessage(convMessage);
 				}else{
-					sendMultiMessages(multipleMessageList,arrayList);
+					sendMultiMessages(multipleMessageList,arrayList,isFtueFwd);
 					if(fileTransferList.isEmpty()){
 						// if it is >0 then onpost execute of PreFileTransferAsycntask will start intent
 						startActivity(intent);
@@ -1327,11 +1327,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		toReturn.addAll(set);
 		return toReturn;
 	}
-	
-	
-	private void sendMultiMessages(ArrayList<ConvMessage> multipleMessageList, ArrayList<ContactInfo> arrayList)
+
+	private void sendMultiMessages(ArrayList<ConvMessage> multipleMessageList, ArrayList<ContactInfo> arrayList ,boolean createChatThread)
 	{
-		MultipleConvMessage multiMessages = new MultipleConvMessage(multipleMessageList, arrayList, System.currentTimeMillis() / 1000);
+		MultipleConvMessage multiMessages = new MultipleConvMessage(multipleMessageList, arrayList, System.currentTimeMillis() / 1000 , createChatThread);
 		mPubSub.publish(HikePubSub.MULTI_MESSAGE_SENT, multiMessages);
 	}
 

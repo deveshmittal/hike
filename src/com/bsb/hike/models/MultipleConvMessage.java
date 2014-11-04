@@ -21,7 +21,7 @@ public class MultipleConvMessage
 	
 	private ArrayList<ConvMessage> messageList;
 	private ArrayList<ContactInfo> contactList;
-	
+	private boolean createChatThread;
 
 	public ArrayList<ConvMessage> getMessageList()
 	{
@@ -55,6 +55,16 @@ public class MultipleConvMessage
 		this.timeStamp = timeStamp;
 	}
 	
+	public void setCreateChatThread(boolean val)
+	{
+		this.createChatThread = val;
+	}
+	
+	public boolean getCreateChatThread()
+	{
+		return createChatThread;
+	}
+	
 	public MultipleConvMessage(ArrayList<ConvMessage> messageList, ArrayList<ContactInfo> contactList)
 	{
 		this.messageList = messageList;
@@ -68,6 +78,15 @@ public class MultipleConvMessage
 		this.timeStamp = timeStamp;
 		this.contactList = contactList;
 	}
+	
+	public MultipleConvMessage(ArrayList<ConvMessage> messageList, ArrayList<ContactInfo> contactList, long timeStamp,boolean createChatThread)
+	{
+		this.messageList = messageList;
+		this.timeStamp = timeStamp;
+		this.contactList = contactList;
+		this.createChatThread = createChatThread;
+	}
+	
 	public JSONObject serialize()
 	{
 		JSONObject object = new JSONObject();
