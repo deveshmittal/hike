@@ -38,6 +38,8 @@ import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.platform.HikeSDKMessageFilter;
+import com.bsb.hike.sdk.HikeSDK;
 import com.bsb.hike.service.SmsMessageStatusReceiver;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -86,6 +88,7 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.UPDATE_PIN_METADATA, this);
 		mPubSub.addListener(HikePubSub.MULTI_MESSAGE_SENT, this);
 		mPubSub.addListener(HikePubSub.MULTI_FILE_UPLOADED, this);
+		mPubSub.addListener(HikePubSub.HIKE_SDK_MESSAGE, this);
 	}
 
 	@Override
@@ -398,6 +401,18 @@ public class DbConversationListener implements Listener
 				Conversation conv = (Conversation)object;
 				HikeConversationsDatabase.getInstance().updateConversationMetadata(conv.getMsisdn(), conv.getMetaData());
 			
+		}else if(HikePubSub.HIKE_SDK_MESSAGE.equals(type)){
+			handleHikeSdkMessage(object);
+		}
+	}
+	
+	private void handleHikeSdkMessage(Object object){
+		if(object instanceof JSONObject){
+		List<ConvMessage> listOfMessages = HikeSDKMessageFilter.filterMessage((JSONObject) object);
+		if(listOfMessages!=null){
+		HikeConversationsDatabase.getInstance().addConversations(listOfMessages);
+		// publish MQTT and update UI here
+			}
 		}
 	}
 
