@@ -29,13 +29,13 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 	private String taskId;
 	private String catId;
 
-	protected StickerPreviewImageDownloadTask(Handler handler, Context ctx, String taskId, StickerCategory category, IStickerResultListener callback)
+	protected StickerPreviewImageDownloadTask(Handler handler, Context ctx, String taskId, String categoryId, IStickerResultListener callback)
 	{
 		super(handler, ctx, taskId , callback);
 		this.handler = handler;
 		this.taskId = taskId;
 		context = ctx;
-		this.catId = category.getCategoryId();
+		this.catId = categoryId;
 	}
 
 	@Override

@@ -87,15 +87,15 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 	
-	public void DownloadStickerPreviewImage(Context context, StickerCategory cat, DownloadType downloadType, StickerPageAdapter st, IStickerResultListener callback)
+	public void DownloadStickerPreviewImage(Context context, String categoryId, IStickerResultListener callback)
 	{
-		String taskId = getTaskId(StickerRequestType.PREVIEW, null, cat.getCategoryId());
+		String taskId = getTaskId(StickerRequestType.PREVIEW, null, categoryId);
 		if (queue.isTaskAlreadyExist(taskId))
 		{
-			Logger.d(TAG, "DownloadStickersPrevieImage task for catId : " + cat.getCategoryId() +  " already exists");
+			Logger.d(TAG, "DownloadStickersPrevieImage task for catId : " + categoryId +  " already exists");
 			return;
 		}
-		BaseStickerDownloadTask stickerCategoryTask = new StickerPreviewImageDownloadTask(handler, context, taskId, cat, callback);
+		BaseStickerDownloadTask stickerCategoryTask = new StickerPreviewImageDownloadTask(handler, context, taskId, categoryId, callback);
 		Request request = new Request(stickerCategoryTask);
 		queue.addTask(taskId, request);
 	}
