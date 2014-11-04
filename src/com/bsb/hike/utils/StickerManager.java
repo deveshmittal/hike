@@ -1172,24 +1172,26 @@ public class StickerManager
 	}
 
 	/**
-	 * Returns a category preview drawable
+	 * Returns a category preview {@link Bitmap}
 	 * @param ctx
 	 * @param categoryId
-	 * @return {@link Drawable}
+	 * @param downloadIfNotFound -- true if it should be downloaded if not found.
+	 * @return {@link Bitmap}
 	 */
-	public Drawable getCategoryPreviewAsset(Context ctx, String categoryId)
+	public Bitmap getCategoryPreviewAsset(Context ctx, String categoryId, boolean downloadIfNotFound)
 	{
 		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
 		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + PREVIEW_IMAGE + PREVIEW_ICON_TYPE;
-		Drawable drawable = Drawable.createFromPath(baseFilePath);
-		
-		if(drawable == null)
+		Bitmap bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
+		if (bitmap == null)
 		{
-			drawable = ctx.getResources().getDrawable(R.drawable.default_sticker_preview);
-			
+			if (downloadIfNotFound)
+			{
+				StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(ctx, categoryId, null);
+			}
+			bitmap = HikeBitmapFactory.decodeResource(ctx.getResources(), R.drawable.default_sticker_preview);
 		}
-		
-		return drawable;
+		return bitmap;
 	}
 	
 	/**
