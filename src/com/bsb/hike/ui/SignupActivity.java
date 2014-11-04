@@ -1,15 +1,11 @@
 package com.bsb.hike.ui;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -36,11 +32,9 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.telephony.TelephonyManager;
-import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -81,6 +75,7 @@ import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.facebook.Request;
@@ -437,8 +432,16 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				 */
 				Utils.setupUri(this.getApplicationContext());
 
-				mHandler.removeCallbacks(startWelcomeScreen);
-				mHandler.postDelayed(startWelcomeScreen, 2500);
+				if (accountPrefs.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false) && (accountPrefs.getInt(HikeConstants.HIKE_CONTACTS_COUNT, 0) > 0))
+				{
+					mHandler.removeCallbacks(startNuxScreen);
+					mHandler.postDelayed(startNuxScreen, 2500);
+				}
+				else
+				{
+					mHandler.removeCallbacks(startWelcomeScreen);
+					mHandler.postDelayed(startWelcomeScreen, 2500);
+				}
 
 			}
 			else if (mCurrentState != null && mCurrentState.value != null && mCurrentState.value.equals(HikeConstants.CHANGE_NUMBER))
@@ -452,6 +455,17 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 	}
 
+	Runnable startNuxScreen = new Runnable()
+	{	
+		@Override
+		public void run()
+		{
+			Intent i = new Intent(SignupActivity.this, FtueActivity.class);
+			startActivity(i);
+			finish();
+		}
+	};
+	
 	Runnable startWelcomeScreen = new Runnable()
 	{
 		@Override
