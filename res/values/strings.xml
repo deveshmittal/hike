@@ -1180,4 +1180,10 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="wish_now">Wish now!</string>
     <string name="wish_you">Wish your friends!</string>
     <string name="messages_sent_succees">Message Sent</string>
+    <string name="ftue_sticker_screen_title">Hi %1$s</string>
+    <string name ="ftue_sticker_screen_header">Stickers!</string>
+    <string name="ftue_sticker_screen_text">Hike has a ton of stickers. Which one below is your favorite?</string>
+    <string name="ftue_sticker_forward_title">Send to</string>
+    <string name="ftue_sticker_forward_card_text">Great Choice!</string>
+    <string name="ftue_sticker_forward_card_subtext">Try sending this sticker to your friends -</string>
 </resources>
