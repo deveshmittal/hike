@@ -33,6 +33,8 @@ import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.CustomByteArrayEntity;
 import com.bsb.hike.models.ConvMessage;
@@ -68,9 +70,9 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	private FutureTask<FTResult> futureTask;
 
 	protected UploadContactOrLocationTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String msisdn, double latitude,
-			double longitude, int zoomLevel, boolean isRecipientOnhike)
+			double longitude, int zoomLevel, boolean isRecipientOnhike, String token, String uId)
 	{
-		super(handler, fileTaskMap, ctx, null, -1, null);
+		super(handler, fileTaskMap, ctx, null, -1, null, token, uId);
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.zoomLevel = zoomLevel;
@@ -82,9 +84,9 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	}
 
 	protected UploadContactOrLocationTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String msisdn, JSONObject contactJson,
-			boolean isRecipientOnhike)
+			boolean isRecipientOnhike, String token, String uId)
 	{
-		super(handler, fileTaskMap, ctx, null, -1, null);
+		super(handler, fileTaskMap, ctx, null, -1, null, token, uId);
 		this.msisdn = msisdn;
 		this.contactJson = contactJson;
 		this.uploadingContact = true;
@@ -94,9 +96,9 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	}
 
 	protected UploadContactOrLocationTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, Object convMessage, boolean uploadingContact,
-			boolean isRecipientOnhike)
+			boolean isRecipientOnhike, String token, String uId)
 	{
-		super(handler, fileTaskMap, ctx, null, -1, null);
+		super(handler, fileTaskMap, ctx, null, -1, null, token, uId);
 		this.userContext = convMessage;
 		this.uploadingContact = uploadingContact;
 		this.isRecipientOnhike = isRecipientOnhike;
@@ -124,11 +126,11 @@ public class UploadContactOrLocationTask extends FileTransferBase
 				latitude = hikeFile.getLatitude();
 				longitude = hikeFile.getLongitude();
 				address = hikeFile.getAddress();
-				
-				if(address == null)
+
+				if (address == null)
 					address = Utils.getAddressFromGeoPoint(new GeoPoint((int) (latitude * 1E6), (int) (longitude * 1E6)), context);
 
-				if(TextUtils.isEmpty(hikeFile.getThumbnailString()))
+				if (TextUtils.isEmpty(hikeFile.getThumbnailString()))
 				{
 					fetchThumbnailAndUpdateConvMessage(latitude, longitude, zoomLevel, address, (ConvMessage) userContext);
 				}
@@ -186,7 +188,6 @@ public class UploadContactOrLocationTask extends FileTransferBase
 	private JSONObject executeFileTransferRequest(String filePath, String fileName, JSONObject request, String fileType) throws Exception
 	{
 
-		HttpClient httpClient = AccountUtils.getClient();
 
 		HttpContext httpContext = new BasicHttpContext();
 
@@ -211,6 +212,10 @@ public class UploadContactOrLocationTask extends FileTransferBase
 		maxSize = entity.getContentLength();
 
 		httpPut.setEntity(entity);
+		HttpClient httpClient = AccountUtils.getClient(httpPut);
+		if(httpClient==null){
+			throw new NetworkErrorException("Unable to perform request");
+		}
 		HttpResponse response = httpClient.execute(httpPut, httpContext);
 		String serverResponse = EntityUtils.toString(response.getEntity());
 
@@ -291,9 +296,12 @@ public class UploadContactOrLocationTask extends FileTransferBase
 		String staticMapUrl = String.format(Locale.US, STATIC_MAP_UNFORMATTED_URL, latitude, longitude, zoomLevel, HikeConstants.MAX_DIMENSION_LOCATION_THUMBNAIL_PX);
 		Logger.d(getClass().getSimpleName(), "Static map url: " + staticMapUrl);
 
-		Bitmap thumbnail = BitmapFactory.decodeStream((InputStream) new URL(staticMapUrl).getContent());
-		String thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
-
+		Bitmap thumbnail = HikeBitmapFactory.decodeStream((InputStream) new URL(staticMapUrl).getContent());
+		String thumbnailString = Base64.encodeToString(BitmapUtils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
+		if (thumbnail != null)
+		{
+			thumbnail.recycle();
+		}
 		JSONObject metadata = getFileTransferMetadataForLocation(latitude, longitude, zoomLevel, address, thumbnailString);
 
 		convMessage.setMetadata(metadata);

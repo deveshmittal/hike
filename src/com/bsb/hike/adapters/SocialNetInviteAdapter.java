@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.SocialNetFriendInfo;
 import com.bsb.hike.smartImageLoader.SocialIconLoader;
 import com.bsb.hike.utils.Logger;
@@ -92,7 +93,7 @@ public class SocialNetInviteAdapter extends ArrayAdapter<Pair<AtomicBoolean, Soc
 		holder.txt_itemName.setText(currFriend.getName());
 		CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.checkbox);
 		checkBox.setChecked(getItem(position).first.get());
-		holder.itemImage.setImageDrawable(Utils.getDefaultIconForUserFromDecodingRes(context, "+" + currFriend.getId()));
+		holder.itemImage.setImageDrawable(HikeBitmapFactory.getDefaultIconForUserFromDecodingRes(context, "+" + currFriend.getId()));
 		holder.itemImage.setTag(currFriend.getImageUrl());
 		imgLoader.loadImage(currFriend.getImageUrl(), holder.itemImage, isListFlinging);
 		// }
@@ -207,7 +208,6 @@ public class SocialNetInviteAdapter extends ArrayAdapter<Pair<AtomicBoolean, Soc
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		imgLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{

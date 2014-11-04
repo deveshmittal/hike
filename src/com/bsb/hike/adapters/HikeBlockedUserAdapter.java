@@ -16,8 +16,9 @@ import android.widget.TextView;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.Utils;
 
@@ -34,8 +35,7 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 
 	private static List<ContactInfo> getItems(Activity activity)
 	{
-		HikeUserDatabase db = HikeUserDatabase.getInstance();
-		List<ContactInfo> contacts = db.getContacts();
+		List<ContactInfo> contacts = ContactManager.getInstance().getAllContacts();
 		Collections.sort(contacts);
 		return contacts;
 	}
@@ -44,8 +44,7 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 	{
 		super(activity, viewItemId, getItems(activity));
 		this.context = activity;
-		HikeUserDatabase db = HikeUserDatabase.getInstance();
-		this.blockedUsers = db.getBlockedUsers();
+		this.blockedUsers = ContactManager.getInstance().getBlockedMsisdnSet();
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		iconLoader = new IconLoader(context, mIconImageSize);
 	}
@@ -77,7 +76,7 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 		}
 		else
 		{
-			imageView.setImageDrawable(Utils.getDefaultIconForUserFromDecodingRes(context, contactInfo.getMsisdn(), true));
+			imageView.setImageDrawable(HikeBitmapFactory.getDefaultIconForUserFromDecodingRes(context, contactInfo.getMsisdn(), true));
 		}
 
 		ImageView blockImg = (ImageView) v.findViewById(R.id.contact_button);

@@ -1,6 +1,7 @@
 package com.bsb.hike.tasks;
 
 import java.io.File;
+
 import java.util.List;
 import java.util.Map;
 
@@ -28,13 +29,14 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -85,7 +87,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, GENDER, SCANNING_CONTACTS, PIN_VERIFIED
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, SCANNING_CONTACTS, PIN_VERIFIED
 	};
 
 	public class StateValue
@@ -121,10 +123,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public static boolean isAlreadyFetchingNumber = false;
 
-	private Birthday birthdate;
-
-	private Boolean isFemale;
-
 	private String userName;
 
 	private static final String INDIA_ISO = "IN";
@@ -147,7 +145,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public static SignupTask getSignupTask(Activity activity)
 	{
-		if (signupTask == null)
+		if (signupTask == null || signupTask.isCancelled())
 		{
 			signupTask = new SignupTask(activity);
 		}
@@ -178,25 +176,15 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		this.profilePicSmall = profilePic;
 	}
 
-	public void addBirthdate(Birthday birthdate)
-	{
-		this.birthdate = birthdate;
-	}
-
 	public void addUserName(String name)
 	{
 		this.userName = name;
 	}
 
-	
-	public void addGender(Boolean isFemale)
-	{
-		this.isFemale = isFemale;
-	}
-
 	@Override
 	protected Boolean doInBackground(Void... unused)
 	{
+		deletePreviouslySavedProfileImages();
 		Logger.e("SignupTask", "FETCHING NUMBER? " + isAlreadyFetchingNumber);
 		isPinError = false;
 		isRunning = true;
@@ -416,23 +404,20 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		if(userName != null)
 		{
-			publishProgress(new StateValue(State.GENDER, ""));
-			if(isFemale != null)
-			{
-				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
-			}
+			publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 		}
 
 		/* scan the addressbook */
 		if (!ab_scanned)
 		{
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
-			List<ContactInfo> contactinfos = ContactUtils.getContacts(this.context);
-			ContactUtils.setGreenBlueStatus(this.context, contactinfos);
-			HikeUserDatabase db = null;
+			ContactManager conMgr = ContactManager.getInstance();
+			List<ContactInfo> contactinfos = conMgr.getContacts(this.context);
+			conMgr.setGreenBlueStatus(this.context, contactinfos);
+			
 			try
 			{
-				Map<String, List<ContactInfo>> contacts = ContactUtils.convertToMap(contactinfos);
+				Map<String, List<ContactInfo>> contacts = conMgr.convertToMap(contactinfos);
 				JSONObject jsonForAddressBookAndBlockList = AccountUtils.postAddressBook(token, contacts);
 
 				List<ContactInfo> addressbook = AccountUtils.getContactList(jsonForAddressBookAndBlockList, contacts);
@@ -458,8 +443,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					return Boolean.FALSE;
 				}
 				Logger.d("SignupTask", "about to insert addressbook");
-				db = HikeUserDatabase.getInstance();
-				db.setAddressBookAndBlockList(addressbook, blockList);
+				ContactManager.getInstance().setAddressBookAndBlockList(addressbook, blockList);
 
 			}
 			catch (Exception e)
@@ -506,24 +490,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				
-				if (isFemale == null)
-				{
-					/*
-					 * publishing this will cause the the Activity to ask the user for a name and signal us
-					 */
-					publishProgress(new StateValue(State.GENDER, ""));
-					synchronized (this)
-					{
-						this.wait();
-					}
-				}
-				
 				if(getDisplayChild() != SignupActivity.SCANNING_CONTACTS)
 				{
 					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 				}
 				publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
-				AccountUtils.setProfile(userName, birthdate, isFemale.booleanValue());
+				AccountUtils.setProfile(userName);
 			}
 			catch (InterruptedException e)
 			{
@@ -546,13 +518,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			this.data = null;
 			Editor editor = settings.edit();
 			editor.putString(HikeMessengerApp.NAME_SETTING, userName);
-			editor.putInt(HikeConstants.Extras.GENDER, isFemale ? 2 : 1);
-			if (birthdate != null)
-			{
-				editor.putInt(HikeMessengerApp.BIRTHDAY_DAY, birthdate.day);
-				editor.putInt(HikeMessengerApp.BIRTHDAY_MONTH, birthdate.month);
-				editor.putInt(HikeMessengerApp.BIRTHDAY_YEAR, birthdate.year);
-			}
 			/*
 			 * Setting these values as true for now. They will be reset on upgrades.
 			 */
@@ -566,9 +531,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 		if (profilePicSmall != null)
 		{
-				byte[] bytes = Utils.bitmapToBytes(profilePicSmall, Bitmap.CompressFormat.JPEG, 100);
-				HikeUserDatabase db = HikeUserDatabase.getInstance();
-				db.setIcon(msisdn, bytes, false);
+				byte[] bytes = BitmapUtils.bitmapToBytes(profilePicSmall, Bitmap.CompressFormat.JPEG, 100);
+				ContactManager.getInstance().setIcon(msisdn, bytes, false);
 		}
 		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
@@ -579,6 +543,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
 		isAlreadyFetchingNumber = false;
 
+		/*
+		 * We show these tips only to upgrading users
+		 */
+		settings.edit().putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true).commit();
+		/*
+		 * We show this tip only to new signup users
+		 */
+		settings.edit().putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true).commit();
 		return Boolean.TRUE;
 	}
 
@@ -661,14 +633,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 
-	public static SignupTask startTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
+	public static SignupTask startTask(Activity activity, String userName, Bitmap profilePicSmall)
 	{
 		getSignupTask(activity);
 		if (!signupTask.isRunning())
 		{
-			signupTask.addGender(isFemale);
 			signupTask.addUserName(userName);
-			signupTask.addBirthdate(birthday);
 			signupTask.addProfilePicPath(null, profilePicSmall);
 			/*
 			 * if we are on signupActivity we should not anymore try to
@@ -690,13 +660,28 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 	
-	public static SignupTask restartTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
+	public static SignupTask restartTask(Activity activity, String userName, Bitmap profilePicSmall)
 	{
 		if (signupTask != null && signupTask.isRunning())
 		{
 			signupTask.cancelTask();
 		}
-		startTask(activity, userName, isFemale, birthday, profilePicSmall);
+		startTask(activity, userName, profilePicSmall);
 		return signupTask;
 	}
+	
+    private void deletePreviouslySavedProfileImages()
+    {
+    	String dirPath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
+    	File dir = new File(dirPath);
+    	if (!dir.exists())
+    	{
+    		return;
+    	}
+    	for (File file : dir.listFiles())
+    	{
+    		file.delete();
+    	}
+    }
+
 }

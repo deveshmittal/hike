@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.FTResult;
@@ -27,6 +28,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
@@ -35,8 +37,6 @@ import com.bsb.hike.utils.Utils;
 
 public class DownloadFileTask extends FileTransferBase
 {
-	private URL mUrl;
-
 	private File tempDownloadedFile;
 
 	private boolean showToast;
@@ -44,9 +44,9 @@ public class DownloadFileTask extends FileTransferBase
 	private int num = 0;
 
 	protected DownloadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, String fileKey, long msgId,
-			HikeFileType hikeFileType, Object userContext, boolean showToast)
+			HikeFileType hikeFileType, Object userContext, boolean showToast, String token, String uId)
 	{
-		super(handler, fileTaskMap, ctx, destinationFile, msgId, hikeFileType);
+		super(handler, fileTaskMap, ctx, destinationFile, msgId, hikeFileType, token, uId);
 		this.fileKey = fileKey;
 		this.showToast = showToast;
 		this.userContext = userContext;
@@ -76,7 +76,12 @@ public class DownloadFileTask extends FileTransferBase
 		RandomAccessFile raf = null;
 		try
 		{
-			mUrl = new URL(AccountUtils.fileTransferBaseDownloadUrl + fileKey);
+			HikeFile hikeFile = ((ConvMessage)userContext).getMetadata().getHikeFiles().get(0);
+			String downLoadUrl = hikeFile.getDownloadURL();
+			if(TextUtils.isEmpty(downLoadUrl))
+				downLoadUrl = (AccountUtils.fileTransferBaseDownloadUrl + fileKey);
+				
+			mUrl = new URL(downLoadUrl);
 
 			FileSavedState fst = FileTransferManager.getInstance(context).getDownloadFileState(mFile, msgId);
 			/* represents this file is either not started or unrecovered error has happened */
@@ -119,18 +124,6 @@ public class DownloadFileTask extends FileTransferBase
 		return FTResult.DOWNLOAD_FAILED;
 	}
 
-	private URLConnection initConn() throws IOException
-	{
-		URLConnection conn = (HttpURLConnection) mUrl.openConnection();
-		if (AccountUtils.ssl)
-		{
-			((HttpsURLConnection) conn).setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
-		}
-		AccountUtils.addUserAgent(conn);
-		AccountUtils.setNoTransform(conn);;
-		return conn;
-	}
-
 	// we can extend this later to multiple download threads (if required)
 	private FTResult downloadFile(long mStartByte, RandomAccessFile raf, boolean ssl)
 	{
@@ -149,6 +142,7 @@ public class DownloadFileTask extends FileTransferBase
 				String byteRange = mStart + "-";
 				try
 				{
+					conn.setRequestProperty("Cookie", "user=" + token + ";UID=" + uId);
 					conn.setRequestProperty("Range", "bytes=" + byteRange);
 					conn.setConnectTimeout(10000);
 				}
@@ -159,7 +153,13 @@ public class DownloadFileTask extends FileTransferBase
 				conn.connect();
 				int resCode = ssl ? ((HttpsURLConnection) conn).getResponseCode() : ((HttpURLConnection) conn).getResponseCode();
 				// Make sure the response code is in the 200 range.
-				if (resCode / 100 != 2)
+				if (resCode == RESPONSE_BAD_REQUEST || resCode == RESPONSE_NOT_FOUND)
+				{
+					Logger.d(getClass().getSimpleName(), "Server response code is not in 200 range: " + resCode + "; fk:" + fileKey);
+					error();
+					return FTResult.FILE_EXPIRED;
+				}
+				else if (resCode / 100 != 2)
 				{
 					Logger.d(getClass().getSimpleName(), "Server response code is not in 200 range: " + resCode + "; fk:" + fileKey);
 					error();
@@ -249,9 +249,11 @@ public class DownloadFileTask extends FileTransferBase
 						mStart += byteRead;
 						// increase the downloaded size
 						incrementBytesTransferred(byteRead);
+						saveIntermediateProgress(null);
 						progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
 						// showButton();
-						sendProgress();
+						if(_state != FTState.PAUSED)
+							sendProgress();
 					}
 					while (_state == FTState.IN_PROGRESS);
 
@@ -302,10 +304,10 @@ public class DownloadFileTask extends FileTransferBase
 							retry = false;
 						}
 						break;
-					case PAUSING:
+					case PAUSED:
 						_state = FTState.PAUSED;
 						Logger.d(getClass().getSimpleName(), "FT PAUSED");
-						saveFileState();
+						saveFileState(null);
 						retry = false;
 						break;
 					default:
@@ -313,32 +315,46 @@ public class DownloadFileTask extends FileTransferBase
 					}
 				}
 			}
-			catch (IOException e)
+			catch (Exception e)
 			{
-				Logger.e(getClass().getSimpleName(), "FT error : " + e.getMessage());
-				if (e.getMessage() != null && (e.getMessage().contains(NETWORK_ERROR_1) || e.getMessage().contains(NETWORK_ERROR_2)))
-				{
-					// here we should retry
-					mStart = _bytesTransferred;
-					// Is case id the task quits after making MAX attempts
-					// the file state is saved
-					if (retryAttempts >= MAX_RETRY_ATTEMPTS)
-					{
-						error();
-						res = FTResult.DOWNLOAD_FAILED;
-					}
-				}
-				else
+				Logger.e(getClass().getSimpleName(), "FT Download error : " + e.getMessage());
+				// here we should retry
+				mStart = _bytesTransferred;
+				// Is case id the task quits after making MAX attempts
+				// the file state is saved
+				if (retryAttempts >= MAX_RETRY_ATTEMPTS)
 				{
 					error();
 					res = FTResult.DOWNLOAD_FAILED;
 					retry = false;
 				}
 			}
-			catch (Exception e)
-			{
-				Logger.e(getClass().getSimpleName(), "FT error : " + e.getMessage());
-			}
+//			catch (IOException e)
+//			{
+//				Logger.e(getClass().getSimpleName(), "FT error : " + e.getMessage());
+//				if (e.getMessage() != null && (e.getMessage().contains(NETWORK_ERROR_1) || e.getMessage().contains(NETWORK_ERROR_2)))
+//				{
+//					// here we should retry
+//					mStart = _bytesTransferred;
+//					// Is case id the task quits after making MAX attempts
+//					// the file state is saved
+//					if (retryAttempts >= MAX_RETRY_ATTEMPTS)
+//					{
+//						error();
+//						res = FTResult.DOWNLOAD_FAILED;
+//					}
+//				}
+//				else
+//				{
+//					error();
+//					res = FTResult.DOWNLOAD_FAILED;
+//					retry = false;
+//				}
+//			}
+//			catch (Exception e)
+//			{
+//				Logger.e(getClass().getSimpleName(), "FT error : " + e.getMessage());
+//			}
 		}
 		if (res == FTResult.SUCCESS)
 			res = closeStreams(raf, in);
@@ -405,7 +421,7 @@ public class DownloadFileTask extends FileTransferBase
 	private void error()
 	{
 		_state = FTState.ERROR;
-		saveFileState();
+		saveFileState(null);
 	}
 
 	private void deleteTempFile()
@@ -458,6 +474,8 @@ public class DownloadFileTask extends FileTransferBase
 			}
 		}
 		// showButton();
-		sendProgress();
+		this.pausedProgress = -1;
+		if(_state != FTState.PAUSED)
+			sendProgress();
 	}
 }

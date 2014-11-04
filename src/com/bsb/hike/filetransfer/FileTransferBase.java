@@ -4,10 +4,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.FutureTask;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.json.JSONObject;
 
@@ -17,6 +22,8 @@ import android.os.Handler;
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -25,7 +32,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	public enum FTState
 	{
 		NOT_STARTED, INITIALIZED, IN_PROGRESS, // DOWNLOADING OR UPLOADING
-		PAUSED, CANCELLED, COMPLETED, ERROR, PAUSING
+		PAUSED, CANCELLED, COMPLETED, ERROR
 	}
 
 	protected static String NETWORK_ERROR_1 = "timed out";
@@ -34,6 +41,20 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected static String NETWORK_ERROR_3 = "Network is unreachable";
 	
+	protected static int RESPONSE_OK = 200;
+	
+	protected static int RESPONSE_ACCEPTED = 201;
+	
+	protected static int RESPONSE_BAD_REQUEST = 400;
+	
+	protected static int RESPONSE_NOT_FOUND = 404;
+	
+	protected static int INTERNAL_SERVER_ERROR = 500;
+
+	protected String token;
+
+	protected String uId;
+
 	protected static String ETAG = "Etag";
 
 	protected boolean retry = true; // this will be used when network fails and you have to retry
@@ -61,6 +82,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	
 	protected int fileSize;
 
+	protected URL mUrl;
+
 	protected File stateFile; // this represents state file in which file state will be saved
 
 	protected volatile FTState _state;
@@ -78,6 +101,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected volatile Thread mThread = null;
 
 	protected ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
+	
+	protected int pausedProgress ;
 
 	protected FileTransferBase(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, long msgId, HikeFileType hikeFileType)
 	{
@@ -87,6 +112,18 @@ public abstract class FileTransferBase implements Callable<FTResult>
 		this.hikeFileType = hikeFileType;
 		context = ctx;
 		this.fileTaskMap = fileTaskMap;
+	}
+	
+	protected FileTransferBase(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, long msgId, HikeFileType hikeFileType, String token, String uId)
+	{
+		this.handler = handler;
+		this.mFile = destinationFile;
+		this.msgId = msgId;
+		this.hikeFileType = hikeFileType;
+		context = ctx;
+		this.fileTaskMap = fileTaskMap;
+		this.token = token;
+		this.uId = uId;
 	}
 
 	protected void setFileTotalSize(int ts)
@@ -104,31 +141,25 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	{
 		_bytesTransferred = value;
 	}
-
-	protected void saveFileState()
+	
+	protected void saveIntermediateProgress(String uuid)
 	{
-		if (_totalSize <= 0)
-			return;
-		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred);
-		try
-		{
-			FileOutputStream fileOut = new FileOutputStream(stateFile);
-			ObjectOutputStream out = new ObjectOutputStream(fileOut);
-			out.writeObject(fss);
-			out.close();
-			fileOut.close();
-		}
-		catch (IOException i)
-		{
-			i.printStackTrace();
-		}
+		saveFileState(FTState.ERROR, uuid, null);
 	}
 
 	protected void saveFileState(String uuid)
 	{
-		if (_totalSize <= 0)
-			return;
-		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, uuid);
+		saveFileState(uuid, null);
+	}
+
+	protected void saveFileState(String uuid, JSONObject response)
+	{
+		saveFileState(_state, uuid, response);
+	}
+	
+	private void saveFileState(FTState state, String uuid, JSONObject response)
+	{
+		FileSavedState fss = new FileSavedState(state, _totalSize, _bytesTransferred, uuid, response);
 		try
 		{
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
@@ -142,10 +173,44 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			i.printStackTrace();
 		}
 	}
-
-	protected void saveFileState(JSONObject response)
+	
+	protected void saveFileState(File stateFile, FTState state, String uuid, JSONObject response)
 	{
-		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, response);
+		FileSavedState fss = new FileSavedState(state, _totalSize, _bytesTransferred, uuid, response);
+		try
+		{
+			FileOutputStream fileOut = new FileOutputStream(stateFile);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(fss);
+			out.close();
+			fileOut.close();
+		}
+		catch (IOException i)
+		{
+			i.printStackTrace();
+		}
+	}
+	
+	protected void saveFileKeyState(File stateFile, String mFileKey)
+	{
+		FileSavedState fss = new FileSavedState(_state, mFileKey);
+		try
+		{
+			FileOutputStream fileOut = new FileOutputStream(stateFile);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(fss);
+			out.close();
+			fileOut.close();
+		}
+		catch (IOException i)
+		{
+			i.printStackTrace();
+		}
+	}
+	
+	protected void saveFileKeyState(String mFileKey)
+	{
+		FileSavedState fss = new FileSavedState(_state, mFileKey);
 		try
 		{
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
@@ -162,8 +227,13 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected void deleteStateFile()
 	{
-		if (stateFile != null && stateFile.exists())
-			stateFile.delete();
+		deleteStateFile(stateFile);
+	}
+	
+	protected void deleteStateFile(File file)
+	{
+		if (file != null && file.exists())
+			file.delete();
 	}
 
 	protected void setState(FTState mState)
@@ -238,5 +308,31 @@ public abstract class FileTransferBase implements Callable<FTResult>
 		}
 	}
 	
+	protected URLConnection initConn() throws IOException
+	{
+		URLConnection conn = (HttpURLConnection) mUrl.openConnection();
+		if (AccountUtils.ssl)
+		{
+			((HttpsURLConnection) conn).setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
+		}
+		AccountUtils.addUserAgent(conn);
+		AccountUtils.setNoTransform(conn);;
+		return conn;
+	}
 	
+	public Object getUserContext()
+	{
+		return userContext;
+	}
+	
+	public int getPausedProgress()
+	{
+		return this.pausedProgress;
+	}
+
+	public void setPausedProgress(int pausedProgress)
+	{
+		this.pausedProgress = pausedProgress;
+	}
+
 }

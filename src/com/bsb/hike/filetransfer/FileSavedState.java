@@ -23,6 +23,8 @@ public class FileSavedState implements Serializable
 	private String _sessionId;
 
 	private String _responseJson;
+	
+	private String _fileKey;
 
 	public FileSavedState(FTState state, int totalSize, int transferredSize)
 	{
@@ -33,27 +35,31 @@ public class FileSavedState implements Serializable
 		_responseJson = null;
 	}
 
-	public FileSavedState(FTState state, int totalSize, int transferredSize, String sId)
+	public FileSavedState(FTState state, int totalSize, int transferredSize, String sId, JSONObject response)
 	{
 		_currentState = state;
 		_totalSize = totalSize;
 		_transferredSize = transferredSize;
 		_sessionId = sId;
-		_responseJson = null;
-	}
-
-	public FileSavedState(FTState state, int totalSize, int transferredSize, JSONObject response)
-	{
-		_currentState = state;
-		_totalSize = totalSize;
-		_transferredSize = transferredSize;
-		_sessionId = null;
-		_responseJson = response.toString();
+		if (response != null)
+		{
+			_responseJson = response.toString();
+		}
+		else
+		{
+			_responseJson = null;
+		}
 	}
 
 	public FileSavedState()
 	{
 		_currentState = FTState.NOT_STARTED;
+	}
+	
+	public FileSavedState(FTState state, String mFileKey)
+	{
+		_currentState = state;
+		_fileKey = mFileKey;
 	}
 
 	public int getTotalSize()
@@ -75,6 +81,11 @@ public class FileSavedState implements Serializable
 	{
 		return _sessionId;
 	}
+	
+	public String getFileKey()
+	{
+		return _fileKey;
+	}
 
 	public JSONObject getResponseJson()
 	{
@@ -93,4 +104,13 @@ public class FileSavedState implements Serializable
 			return null;
 		}
 	}
+
+	@Override
+	public String toString()
+	{
+		// TODO Auto-generated method stub
+		String s = super.toString() + " " + _currentState + " " + _transferredSize + "/" + _totalSize;
+		return s;
+	}
+	
 }

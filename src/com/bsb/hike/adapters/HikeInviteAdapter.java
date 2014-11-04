@@ -327,5 +327,9 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		}
 		return convertView;
 	}
-
+	
+	public IconLoader getIconLoader()
+	{
+		return iconLoader;
+	}
 }

@@ -20,7 +20,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	/*
 	 * Used for the local stickers. Will be -1 for non local stickers
 	 */
-	private int stickerIndex = -1;
+	private int stickerIndex = -1; 
 
 	private String stickerId;
 
@@ -31,6 +31,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		this.stickerId = stickerId;
 		this.stickerIndex = stickerIndex;
 		this.category = category;
+		setupIndexForSwapedCategories();
 	}
 
 	public Sticker(StickerCategory category, String stickerId)
@@ -57,6 +58,7 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		this.stickerId = stickerId;
 		this.category = StickerManager.getInstance().getCategoryForName(categoryName);
 		this.stickerIndex = stickerIdx;
+		setupIndexForSwapedCategories();
 	}
 
 	public boolean isUnknownSticker()
@@ -65,32 +67,35 @@ public class Sticker implements Serializable, Comparable<Sticker>
 	}
 
 	private void setupStickerindex(StickerCategory category2, String stickerId2)
+
 	{
 		/*
+		 * 
 		 * Only set sticker index if the category is a local one
 		 */
-		if (category != null && category.categoryId.equals(StickerCategoryId.humanoid) || category.categoryId.equals(StickerCategoryId.doggy))
-		{
-			/*
-			 * Making sure there is an '_' character in the sticker name.
-			 */
-			int idx = stickerId.indexOf("_");
-			if (idx != -1)
-			{
-				int stickerNumber = -1;
-				try
-				{
-					stickerNumber = Integer.valueOf(stickerId.substring(0, idx));
-				}
-				catch (NumberFormatException e)
-				{
-					Logger.wtf(getClass().getSimpleName(), "Server sent wrong sticker id : " + stickerId);
-				}
+		String[] cat = null;
 
-				if ((category.categoryId.equals(StickerCategoryId.doggy) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_DOGGY.length)
-						|| (category.categoryId.equals(StickerCategoryId.humanoid) && stickerNumber <= StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID.length))
+		if (category.categoryId == StickerCategoryId.humanoid)
+		{
+			cat = StickerManager.getInstance().LOCAL_STICKER_IDS_HUMANOID;
+		}
+		else if (category.categoryId == StickerCategoryId.expressions)
+		{
+			cat = StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS;
+		}
+
+		if (cat != null)
+		{
+			int count = cat.length;
+			for (int i = 0; i < count; i++)
+
+			{
+				if (cat[i].equals(stickerId))
+
 				{
-					this.stickerIndex = stickerNumber - 1;
+					this.stickerIndex = i;
+					break;
+
 				}
 			}
 		}
@@ -111,19 +116,18 @@ public class Sticker implements Serializable, Comparable<Sticker>
 						return true;
 				}
 			}
-			else if (category.categoryId == StickerCategoryId.doggy)
+			else if (category.categoryId == StickerCategoryId.expressions)
 			{
-				int count = StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY.length;
+				int count = StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS.length;
 				for (int i = 0; i < count; i++)
 				{
-					if (StickerManager.getInstance().LOCAL_STICKER_IDS_DOGGY[i].equals(stickerId))
+					if (StickerManager.getInstance().LOCAL_STICKER_IDS_EXPRESSIONS[i].equals(stickerId))
 						return true;
 				}
 			}
 			return false;
 		}
 		return false;
-
 	}
 
 	/**
@@ -222,34 +226,56 @@ public class Sticker implements Serializable, Comparable<Sticker>
 		return hash;
 	}
 
-	public void serializeObj(ObjectOutputStream out)
+	public void serializeObj(ObjectOutputStream out) throws IOException
 	{
-		try
+		out.writeInt(stickerIndex);
+		out.writeUTF(stickerId);
+		category.serializeObj(out);
+	}
+
+	public void deSerializeObj(ObjectInputStream in) throws IOException, ClassNotFoundException
+	{
+		stickerIndex = in.readInt();
+		stickerId = in.readUTF();
+		category = new StickerCategory();
+		category.deSerializeObj(in);
+		setupIndexForSwapedCategories();
+	}
+
+	public void setStickerData(int stickerIndex,String stickerId,StickerCategory category){
+		this.stickerIndex = stickerIndex;
+		this.stickerId = stickerId;
+		this.category = category;
+		setupIndexForSwapedCategories();
+	}
+	/*
+	 * We save sticker index -1 for all non-hardcoded stickers in message metadata. So when moving doggy to non-hardcoded and expressions to hardcoded. all doggy sticker will now
+	 * be stickerIndex -1 and all hardcoded expressions will have a non negetive index value
+	 */
+	private void setupIndexForSwapedCategories()
+	{
+		if (category != null)
 		{
-			out.writeInt(stickerIndex);
-			out.writeUTF(stickerId);
-			category.serializeObj(out);
-		}
-		catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (category.categoryId.equals(StickerCategoryId.doggy))
+			{
+				this.stickerIndex = -1;
+				return;
+			}
+			if (category.categoryId.equals(StickerCategoryId.expressions)||category.categoryId.equals(StickerCategoryId.humanoid) && stickerIndex == -1)
+			{
+				setupStickerindex(category, stickerId);
+				return;
+			}
 		}
 	}
 
-	public void deSerializeObj(ObjectInputStream in)
+	public boolean isInAppSticker()
 	{
-		try
+		if(category != null)
 		{
-			stickerIndex = in.readInt();
-			stickerId = in.readUTF();
-			category = new StickerCategory();
-			category.deSerializeObj(in);
+			if((category.categoryId == StickerCategoryId.humanoid || category.categoryId == StickerCategoryId.expressions) && stickerIndex >= 0)
+				return true;
 		}
-		catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		return false;
 	}
 }

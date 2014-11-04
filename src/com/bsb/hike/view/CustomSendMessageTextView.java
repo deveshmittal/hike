@@ -4,21 +4,22 @@ import android.content.Context;
 import android.text.Layout;
 import android.util.AttributeSet;
 
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class CustomSendMessageTextView extends CustomFontTextView
 {
-	//private String TAG = "CustomSendMessageTextView";
+	private String TAG = "CustomSendMessageTextView";
 	
 	private static final int maxWidth = 265;
 	
-	private static final int widthTime12Hour = 78;
+	private static final int widthTime12Hour = 75;
 	
-	private static final int widthTime24Hour = 59;
+	private static final int widthTime24Hour = 57;
 	
-	private static final int widthMargin = 5;
+	private static final int widthMargin = 2;
 	
-	private static final int heightTime = 14;
+	private static final int heightTime = 16;
 
 	public CustomSendMessageTextView(Context context)
 	{
@@ -44,7 +45,7 @@ public class CustomSendMessageTextView extends CustomFontTextView
 			int linesMaxWidth = 0;
 			int lines = 0;
 			
-			//super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+			super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 			Layout layout = getLayout();
 			lines = layout.getLineCount();
 			float lastLine = layout.getLineWidth(lines - 1);
@@ -53,7 +54,6 @@ public class CustomSendMessageTextView extends CustomFontTextView
 			linesMaxWidth = lastLineWidth = (int) Math.ceil(lastLine);
 
 			//Logger.d(TAG, "lastLine: " + lastLine + ", density multiplier: " + Utils.densityMultiplier);
-
 			for (int n = 0; n < lines; ++n)
 			{
 				float lineWidth;
@@ -67,6 +67,7 @@ public class CustomSendMessageTextView extends CustomFontTextView
 				}
 				catch (Exception e)
 				{
+					Logger.d(TAG,"inner exception: " + e);
 					return;
 				}
 
@@ -83,7 +84,7 @@ public class CustomSendMessageTextView extends CustomFontTextView
 			{
 				widthAddition = widthTime12Hour;
 			}
-
+			
 			if((int) (((widthAddition + widthMargin) * Utils.densityMultiplier) + lastLineWidth) < (int)(maxWidth * Utils.densityMultiplier))
 			//if (getContext().getResources().getDisplayMetrics().widthPixels - lastLineWidth > ((widthAddition + widthMargin) * Utils.densityMultiplier))
 			{
@@ -92,7 +93,8 @@ public class CustomSendMessageTextView extends CustomFontTextView
 				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
 				parentHeight = viewHeight;
 				//Logger.d(TAG, "Width: " + parentWidth + ", Height: " + parentHeight);
-				linesMaxWidth = Math.max(linesMaxWidth, (int) ((widthAddition * Utils.densityMultiplier) + lastLineWidth));
+				linesMaxWidth = Math.max(linesMaxWidth, (int) (((widthAddition + 0) * Utils.densityMultiplier) + lastLineWidth));
+				//super.onMeasure(MeasureSpec.makeMeasureSpec(linesMaxWidth, MeasureSpec.EXACTLY), heightMeasureSpec);
 				this.setMeasuredDimension(linesMaxWidth, parentHeight);
 			}
 			else
@@ -107,6 +109,7 @@ public class CustomSendMessageTextView extends CustomFontTextView
 		}
 		catch (Exception e)
 		{
+			Logger.d(TAG,"exception: " + e);
 			try
 			{
 				super.onMeasure(widthMeasureSpec, heightMeasureSpec);

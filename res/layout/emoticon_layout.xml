@@ -1,82 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:background="#2a3231"
     android:orientation="vertical" >
 
     <RelativeLayout
+        android:id="@+id/icon_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#2a3231"
-        android:orientation="vertical" >
-
-        <RelativeLayout
-            android:id="@+id/icon_container"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_alignParentBottom="true" >
-            
-            <LinearLayout
-                android:id="@+id/erase_key"
-                android:layout_width="48dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
-                android:background="#434748"
-                android:orientation="vertical"
-                android:visibility="gone" >
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#4f5455" />
-                
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_erase" />
-                
-            </LinearLayout>
-
-            <com.bsb.hike.view.StickerEmoticonIconPageIndicator
-                android:id="@+id/icon_indicator"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_toLeftOf="@id/erase_key"
-                android:layout_alignWithParentIfMissing="true"
-                android:background="@drawable/emoticon_tab_normal" />
-        </RelativeLayout>
-
-        <android.support.v4.view.ViewPager
-            android:id="@+id/emoticon_pager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@id/icon_container"
-            android:paddingBottom="@dimen/emoticon_pager_padding"
-            android:paddingTop="@dimen/emoticon_pager_padding" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_alignParentTop="true"
-            android:background="@color/sticker_emoticon_divider" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_above="@id/icon_container"
-            android:background="@color/sticker_emoticon_divider" />
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true" >
 
         <LinearLayout
-            android:id="@+id/stickers_tip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/erase_key"
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="35dp"
+            android:background="#434748"
+            android:orientation="vertical"
             android:visibility="gone" >
 
-            <include layout="@layout/tool_tip" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#4f5455" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/emoticon_erase_key_background_selector"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_erase" />
         </LinearLayout>
+
+        <com.bsb.hike.view.StickerEmoticonIconPageIndicator
+            android:id="@+id/icon_indicator"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_toLeftOf="@id/erase_key"
+            android:background="@drawable/emoticon_tab_normal" />
     </RelativeLayout>
 
-</LinearLayout>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/emoticon_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/icon_container"
+        android:paddingBottom="@dimen/emoticon_pager_padding"
+        android:paddingTop="@dimen/emoticon_pager_padding" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/sticker_emoticon_divider" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_above="@id/icon_container"
+        android:background="@color/sticker_emoticon_divider" />
+
+    <LinearLayout
+        android:id="@+id/stickers_tip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="35dp"
+        android:visibility="gone" >
+
+        <include layout="@layout/tool_tip" />
+    </LinearLayout>
+
+</RelativeLayout>

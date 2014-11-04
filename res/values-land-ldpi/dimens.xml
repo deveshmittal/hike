@@ -2,4 +2,7 @@
 <resources>
     <dimen name="emoticon_pallete">170dp</dimen>
     <dimen name="addfriend_popup_content_height">150dp</dimen>
+    <dimen name="stealth_pop_img_margin_left">15dp</dimen>
+	<dimen name="stealth_pop_img_margin_right">15dp</dimen>
+    
 </resources>

@@ -26,8 +26,10 @@ import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.ChangeProfileImageBaseActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -104,7 +106,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 		}
 		else
 		{
-			groupImage.setBackgroundResource(Utils.getDefaultAvatarResourceId(groupId, true));
+			groupImage.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(groupId, true));
 		}
 	}
 
@@ -261,7 +263,7 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 					String fileUriString = selectedFileUri.toString();
 					if (fileUriString.startsWith(fileUriStart))
 					{
-						selectedFileIcon = new File(URI.create(fileUriString));
+						selectedFileIcon = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
 						/*
 						 * Done to fix the issue in a few Sony devices.
 						 */
@@ -299,16 +301,20 @@ public class CreateNewGroupActivity extends ChangeProfileImageBaseActivity
 				return;
 			}
 
-			Bitmap tempBitmap = Utils.scaleDownImage(finalDestFilePath, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, true);
+			Bitmap tempBitmap = HikeBitmapFactory.scaleDownBitmap(finalDestFilePath, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS, HikeConstants.SIGNUP_PROFILE_IMAGE_DIMENSIONS,
+					Bitmap.Config.RGB_565, true, false);
 
-			groupBitmap = Utils.getCircularBitmap(tempBitmap);
-			groupImage.setImageBitmap(Utils.getCircularBitmap(tempBitmap));
+			groupBitmap = HikeBitmapFactory.getCircularBitmap(tempBitmap);
+			groupImage.setImageBitmap(HikeBitmapFactory.getCircularBitmap(tempBitmap));
 
 			/*
 			 * Saving the icon in the DB.
 			 */
-			byte[] bytes = Utils.bitmapToBytes(tempBitmap, CompressFormat.JPEG, 100);
-			HikeUserDatabase.getInstance().setIcon(groupId, bytes, false);
+			byte[] bytes = BitmapUtils.bitmapToBytes(tempBitmap, CompressFormat.JPEG, 100);
+
+			tempBitmap.recycle();
+
+			ContactManager.getInstance().setIcon(groupId, bytes, false);
 
 			break;
 		}

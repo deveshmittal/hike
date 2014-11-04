@@ -13,4 +13,19 @@
     <dimen name="signup_profile_pic_dimen">96dp</dimen>
     <dimen name="signup_profile_pic_icon_dimen">32dp</dimen>
     <dimen name="addfriend_popup_title_padding_right">24dp</dimen>
+    <dimen name="ftue_card_text_header_font">40dp</dimen>
+	<dimen name="ftue_card_text_msg_font">20dp</dimen>
+	<dimen name="card_header_img_content_padding_top">15dp</dimen>
+	<dimen name="card_header_img_content_padding_bottom">57dp</dimen>
+	<dimen name="card_header_text_padding_left">20dp</dimen>
+	<dimen name="card_header_text_padding_right">20dp</dimen>
+	<dimen name="ftue_card_header">24dp</dimen>
+	<dimen name="ftue_card_body">14dp</dimen>
+	<dimen name="ftue_card_click_text">14dp</dimen>
+	<dimen name="ftue_card_right_padding">10dp</dimen>
+	<dimen name="ftue_card_left_margin">18dp</dimen>
+	<dimen name="ftue_contact_card_text_size">24dp</dimen>
+	<dimen name="logo_top_margin">90dp</dimen>
+	<dimen name="welcome_artwork_padding">0dp</dimen>
+	<dimen name="welcome_with_love_top">30dp</dimen>
 </resources>

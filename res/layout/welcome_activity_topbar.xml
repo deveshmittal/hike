@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_gravity="right|top"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:id="@+id/terms_and_conditions"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="right|top"
+            android:minWidth="70dp"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/bg_overflow_menu_selector"
+            android:orientation="horizontal" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom"
+                android:gravity="center"
+                android:paddingLeft="11dp"
+                android:paddingRight="11dp"
+                android:text="@string/terms"
+                android:textColor="@color/standerd_grey"
+                android:textSize="14sp" />
+        </LinearLayout>
+        
+        <View
+            android:id="@+id/seprator"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_toLeftOf="@id/terms_and_conditions"
+            android:background="#e6e6e6" />
+        
+        <ImageView
+            android:id="@+id/ic_micromax"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignTop="@id/seprator"
+            android:layout_alignBottom="@id/seprator"
+            android:scaleType="centerInside"
+            android:layout_marginLeft="19dp"
+            android:src="@drawable/micromax_logo"
+            android:visibility="visible" />
+        
+    </RelativeLayout>

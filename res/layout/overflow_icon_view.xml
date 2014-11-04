@@ -5,9 +5,11 @@
 
     <ImageView
         android:id="@+id/overflow_icon_image"
+        android:contentDescription="Overflow menu"
         android:layout_width="56dp"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
+        android:scaleType="centerInside"
         android:src="@drawable/ic_overflow_home" />
 
     <com.bsb.hike.view.CustomFontTextView
@@ -21,6 +23,9 @@
         android:gravity="center"
         android:text="1"
         android:textColor="@color/white"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:paddingBottom="1dp"
         android:textSize="12dp"
         android:textStyle="bold"
         android:visibility="gone" />

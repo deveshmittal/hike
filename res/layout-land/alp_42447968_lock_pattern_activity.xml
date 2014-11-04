@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Copyright 2012 Hai Bison
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:background="@color/alp_42447968_pattern_red_background"
+    android:layout_height="wrap_content" >
+
+    <RelativeLayout
+        android:id="@+id/alp_42447968_view_lock_pattern_view_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true" >
+
+        <com.haibison.android.lockpattern.widget.LockPatternView
+            android:id="@+id/alp_42447968_view_lock_pattern"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="19dp"
+        android:layout_marginRight="4dp"
+        android:layout_toLeftOf="@id/alp_42447968_view_lock_pattern_view_group"
+        android:layout_above="@id/alp_42447968_viewgroup_footer"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:layout_alignParentLeft="true">
+        
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+            
+            <ImageView 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_stealth_passcode_50"
+                android:layout_gravity="center"/>
+            
+			<com.bsb.hike.view.CustomFontTextView
+		        android:id="@+id/alp_42447968_textview_info"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:paddingTop="5dp"
+		        android:gravity="center"
+		        android:minLines="2"
+		        android:textAppearance="?android:attr/textAppearanceMedium"
+		        android:textIsSelectable="true"
+		        android:textSize="14sp" />
+        </LinearLayout>
+        
+    </RelativeLayout>
+    
+
+    <LinearLayout
+        android:id="@+id/alp_42447968_viewgroup_footer"
+        android:layout_width="144dp"
+        android:layout_height="111dp"
+        android:paddingLeft="19dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <!-- A separator view -->
+
+        <LinearLayout
+            style="?attr/alp_42447968_button_bar_style"
+            android:layout_width="match_parent"
+            android:layout_height="96dp"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/alp_42447968_button_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/popup_button_bg_selector"
+                android:gravity="center"
+                android:text="@string/cancel"
+                android:textColor="@drawable/popup_button_text_color_selector"
+                android:textSize="16sp"
+                android:visibility="gone" />
+
+            <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/alp_42447968_button_confirm"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/popup_button_bg_selector"
+                android:enabled="false"
+                android:gravity="center"
+                android:text="@string/continue_txt"
+                android:textColor="@drawable/popup_button_text_color_selector"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

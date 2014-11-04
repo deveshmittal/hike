@@ -24,6 +24,8 @@ import android.graphics.drawable.BitmapDrawable;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -106,8 +108,8 @@ public class TimelineImageLoader extends ImageWorker
 		{
 			try
 			{
-				bitmap = decodeSampledBitmapFromFile(orgFile.getPath(), mImageWidth, mImageHeight);
-				// Logger.d(TAG, id + " Compressed Bitmap size in KB: " + Utils.getBitmapSize(bitmap)/1000);
+				bitmap = HikeBitmapFactory.scaleDownBitmap(orgFile.getPath(), mImageWidth, mImageHeight, Bitmap.Config.RGB_565, true, false);
+				Logger.d(TAG, id + " Compressed Bitmap size in KB: " + BitmapUtils.getBitmapSize(bitmap) / 1024);
 			}
 			catch (Exception e1)
 			{

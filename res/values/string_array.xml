@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="vibratePrefKeys">
+        <item>@string/vib_off_key</item>
+        <item>@string/vib_default_key</item>
+        <item>@string/vib_short_key</item>
+        <item>@string/vib_long_key</item>
+    </string-array>
+    <string-array name="vibratePrefValues">
+        <item>@string/vib_off</item>
+        <item>@string/vib_default</item>
+        <item>@string/vib_short</item>
+        <item>@string/vib_long</item>
+    </string-array>
+    <string-array name="notificationSoundPrefKeys">
+        <item>@string/notif_sound_off_key</item>
+        <item>@string/notif_sound_default_key</item>
+        <item>@string/notif_sound_Hike_key</item>
+    </string-array>
+    <string-array name="notificationSoundPrefValues">
+        <item>@string/notif_sound_off</item>
+        <item>@string/notif_sound_default</item>
+        <item>@string/notif_sound_Hike</item>
+    </string-array>
+
+</resources>

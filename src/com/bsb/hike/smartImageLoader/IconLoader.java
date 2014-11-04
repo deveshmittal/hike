@@ -4,7 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
-import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 
 public class IconLoader extends ImageWorker
 {
@@ -76,10 +77,12 @@ public class IconLoader extends ImageWorker
 		boolean rounded = false;
 		if (idx > 0)
 		{
-			id = id.substring(0, idx);
+			id = new String(id.substring(0, idx));
 			rounded = true;
 		}
-		Bitmap bm = decodeSampledBitmapFromByeArray(id, rounded, mImageWidth, mImageHeight);
+		byte[] icondata = ContactManager.getInstance().getIconByteArray(id, rounded);
+		
+		Bitmap bm = HikeBitmapFactory.decodeSampledBitmapFromByteArray(icondata, mImageWidth, mImageHeight);
 		return bm;
 	}
 

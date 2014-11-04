@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/day_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="5dp"
+    android:layout_marginTop="10dp"
+    android:paddingBottom="5dp"
+    android:paddingTop="10dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingLeft="@dimen/chat_bubble_edge_spacing"
+    android:paddingRight="@dimen/chat_bubble_edge_spacing" >
+
+    <View
+        android:id="@+id/day_left"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_gravity="center"
+        android:layout_weight="10"
+        android:background="@color/day_line" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/day"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="7dp"
+        android:layout_marginRight="7dp"
+        android:text="This is the timestamp"
+        android:textColor="@color/list_item_header"
+        android:textSize="12sp"
+        android:textStyle="bold|italic" />
+
+    <View
+        android:id="@+id/day_right"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_gravity="center"
+        android:layout_weight="10"
+        android:background="@color/day_line" />
+
+</LinearLayout>

@@ -14,14 +14,20 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ThumbnailUtils;
 import android.os.Build.VERSION_CODES;
+import android.provider.MediaStore;
 import android.support.v4.util.LruCache;
 
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
 import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.ui.utils.RecyclingBitmapDrawable;
+import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.MySoftReference;
 
@@ -38,7 +44,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 
 	// Constants to easily toggle various caches
 	private static final boolean DEFAULT_MEM_CACHE_ENABLED = true;
-	
+
 	private final static int MAX_CACHE_SIZE = 1024 * 15;
 
 	private static HikeLruCache instance;
@@ -91,7 +97,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 				throw new IllegalArgumentException("setMemCacheSizePercent - percent must be " + "between 0.01 and 0.8 (inclusive)");
 			}
 			memCacheSize = Math.round(percent * Runtime.getRuntime().maxMemory() / 1024);
-			if(memCacheSize > MAX_CACHE_SIZE)
+			if (memCacheSize > MAX_CACHE_SIZE)
 				memCacheSize = MAX_CACHE_SIZE;
 		}
 	}
@@ -120,43 +126,11 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	}
 
 	/**
-	 * Get the size in bytes of a bitmap in a BitmapDrawable. Note that from Android 4.4 (KitKat) onward this returns the allocated memory size of the bitmap which can be larger
-	 * than the actual bitmap data byte count (in the case it was re-used).
-	 * 
-	 * @param value
-	 * @return size in bytes
-	 */
-	@TargetApi(VERSION_CODES.KITKAT)
-	public static int getBitmapSize(BitmapDrawable value)
-	{
-		Bitmap bitmap = value.getBitmap();
-		if (bitmap == null)
-		{
-			return 0;
-		}
-
-		// From KitKat onward use getAllocationByteCount() as allocated bytes can potentially be
-		// larger than bitmap byte count.
-		if (Utils.hasKitKat())
-		{
-			return bitmap.getAllocationByteCount();
-		}
-
-		if (Utils.hasHoneycombMR1())
-		{
-			return bitmap.getByteCount();
-		}
-
-		// Pre HC-MR1
-		return bitmap.getRowBytes() * bitmap.getHeight();
-	}
-
-	/**
 	 * Measure item size in kilobytes rather than units which is more practical for a bitmap cache
 	 */
 	protected int sizeOf(String key, BitmapDrawable value)
 	{
-		final int bitmapSize = getBitmapSize(value) / 1024;
+		final int bitmapSize = BitmapUtils.getBitmapSize(value) / 1024;
 		return bitmapSize == 0 ? 1 : bitmapSize;
 	}
 
@@ -167,17 +141,6 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 			// The removed entry is a recycling drawable, so notify it
 			// that it has been removed from the memory cache
 			((RecyclingBitmapDrawable) oldValue).setIsCached(false);
-		}
-		else
-		{
-			// The removed entry is a standard BitmapDrawable
-
-			if (Utils.hasHoneycomb())
-			{
-				// We're running on Honeycomb or later, so add the bitmap
-				// to a SoftReference set for possible use with inBitmap later
-				reusableBitmaps.add(new MySoftReference<Bitmap>(oldValue.getBitmap()));
-			}
 		}
 	}
 
@@ -307,16 +270,10 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		{
 			int idx = key.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
 			if (idx > 0)
-				key = key.substring(0, idx);
-			BitmapDrawable bd = (BitmapDrawable) HikeUserDatabase.getInstance().getIcon(key, rounded);
+				key = new String(key.substring(0, idx));
+			BitmapDrawable bd = (BitmapDrawable) ContactManager.getInstance().getIcon(key, rounded);
 			if (bd != null)
 			{
-				if (!Utils.hasHoneycomb())
-				{
-					// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
-					// which will recycle automagically
-					bd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
-				}
 				putInCache(cacheKey, bd);
 			}
 			return bd;
@@ -331,15 +288,9 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		if (b == null)
 		{
 			BitmapDrawable bd = (BitmapDrawable) HikeConversationsDatabase.getInstance().getFileThumbnail(key);
-			if (!Utils.hasHoneycomb())
+			if (bd == null)
 			{
-				if (bd == null)
-				{
-					return null;
-				}
-				// Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
-				// which will recycle automagically
-				bd = new RecyclingBitmapDrawable(mResources, bd.getBitmap());
+				return null;
 			}
 			putInCache(key, bd);
 			return bd;
@@ -347,11 +298,12 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		else
 			return b;
 	}
-
-	public void deleteIconForMSISDN(String msisdn)
+	
+	public boolean deleteIconForMSISDN(String msisdn)
 	{
-		HikeUserDatabase.getInstance().removeIcon(msisdn);
-		clearIconForMSISDN(msisdn);
+        boolean rowsDeleted = ContactManager.getInstance().removeIcon(msisdn);
+        clearIconForMSISDN(msisdn);
+		return rowsDeleted;
 	}
 
 	public void clearIconForMSISDN(String msisdn)
@@ -373,18 +325,23 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		if (bd != null)
 			return bd;
 
-		Bitmap stickerBitmap = BitmapFactory.decodeFile(path);
+		Bitmap stickerBitmap = HikeBitmapFactory.decodeFile(path);
 		if (stickerBitmap == null)
 		{
 			return null;
 		}
 
-		if (Utils.hasHoneycomb())
-			bd = new BitmapDrawable(mResources, stickerBitmap);
-		else
-			bd = new RecyclingBitmapDrawable(mResources, stickerBitmap);
-		putInCache(path, bd);
+		bd = HikeBitmapFactory.getBitmapDrawable(mResources, stickerBitmap);
+
+		if (bd != null)
+		{
+			putInCache(path, bd);
+		}
 		return bd;
 	}
 
+	public void removeItemForKey(String key)
+	{
+		remove(key);
+	}
 }

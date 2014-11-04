@@ -19,10 +19,10 @@ import com.bsb.hike.HikeConstants.SMSSyncState;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -38,8 +38,6 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState>
 
 	Set<String> rejectedNumbers;
 
-	HikeUserDatabase hUDb;
-
 	HikeConversationsDatabase hCDb;
 
 	public SyncOldSMSTask(Context context)
@@ -47,7 +45,6 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState>
 		this.context = context;
 		this.smsMap = new HashMap<String, List<ConvMessage>>();
 		this.rejectedNumbers = new HashSet<String>();
-		this.hUDb = HikeUserDatabase.getInstance();
 		this.hCDb = HikeConversationsDatabase.getInstance();
 	}
 
@@ -168,7 +165,7 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState>
 				/*
 				 * Check if contact exists
 				 */
-				ContactInfo contactInfo = hUDb.getContactInfoFromPhoneNoOrMsisdn(number);
+				ContactInfo contactInfo = ContactManager.getInstance().getContactInfoFromPhoneNoOrMsisdn(number);
 				if (contactInfo == null)
 				{
 					Logger.d(getClass().getSimpleName(), "Does not exist!!");
@@ -188,7 +185,7 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState>
 
 			State state = inbox ? (seen ? State.RECEIVED_READ : State.RECEIVED_UNREAD) : State.SENT_CONFIRMED;
 
-			ConvMessage convMessage = new ConvMessage(message, number, timestamp, state, -1, id, null, true);
+			ConvMessage convMessage = new ConvMessage(message, number, timestamp, state, -1, id, null, true,HikeConstants.MESSAGE_TYPE.PLAIN_TEXT);
 
 			List<ConvMessage> messageList = smsMap.get(number);
 			messageList.add(convMessage);

@@ -6,14 +6,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.ActivityNotFoundException;
+import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
@@ -151,13 +159,17 @@ public class HikeFile
 	private JSONArray events;
 
 	private boolean isSent;
+	
+	private String img_quality;
+	
+	private String downloadURL;
 
 	public HikeFile(JSONObject fileJSON, boolean isSent)
 	{
 		this.fileName = fileJSON.optString(HikeConstants.FILE_NAME);
 		this.fileTypeString = fileJSON.optString(HikeConstants.CONTENT_TYPE);
 		this.thumbnailString = fileJSON.optString(HikeConstants.THUMBNAIL, null);
-		this.thumbnail = thumbnail == null ? Utils.stringToDrawable(thumbnailString) : thumbnail;
+		this.thumbnail = thumbnail == null ? makeThumbnailFromString(thumbnailString) : thumbnail;
 		this.sourceFilePath = fileJSON.optString(HikeConstants.SOURCE_FILE_PATH);
 		if(isSent)
 		{
@@ -182,32 +194,39 @@ public class HikeFile
 		this.recordingDuration = fileJSON.optLong(HikeConstants.PLAYTIME, -1);
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
 		this.isSent = isSent;
+		this.img_quality = fileJSON.optString(HikeConstants.FILE_IMAGE_QUALITY, null);
+		if(!isSent)
+		{
+			this.downloadURL = fileJSON.optString(HikeConstants.DOWNLOAD_FILE_URL_KEY);
+		}
 		// this.file = TextUtils.isEmpty(this.fileKey) ? null : Utils
 		// .getOutputMediaFile(hikeFileType, fileName);
 	}
 
-	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, boolean isSent)
+	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, boolean isSent, String img_quality)
 	{
 		this.fileName = fileName;
 		this.fileTypeString = fileTypeString;
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.thumbnail = makeThumbnailFromBitmap(thumbnail);
 		this.recordingDuration = recordingDuration;
 		this.isSent = isSent;
+		this.img_quality = img_quality;
 	}
 
-	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, String source, int fileSize, boolean isSent)
+	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail, long recordingDuration, String source, int fileSize, boolean isSent, String img_quality)
 	{
 		this.fileName = fileName;
 		this.fileTypeString = fileTypeString;
 		this.hikeFileType = HikeFileType.fromString(fileTypeString, recordingDuration != -1);
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.thumbnail = makeThumbnailFromBitmap(thumbnail);
 		this.recordingDuration = recordingDuration;
 		this.sourceFilePath = source;
 		this.isSent = isSent;
 		this.fileSize = fileSize;
+		this.img_quality = img_quality;
 	}
 
 	public HikeFile(double latitude, double longitude, int zoomLevel, String address, String thumbnailString, Bitmap thumbnail, boolean isSent)
@@ -220,8 +239,28 @@ public class HikeFile
 		this.hikeFileType = HikeFileType.fromString(fileTypeString);
 		this.address = address;
 		this.thumbnailString = thumbnailString;
-		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.thumbnail = makeThumbnailFromBitmap(thumbnail);
 		this.isSent = isSent;
+	}
+
+	private Drawable makeThumbnailFromBitmap(Bitmap bitmap)
+	{
+		Drawable thumbnail = HikeBitmapFactory.getBitmapDrawable(bitmap);
+		if (thumbnail instanceof RecyclingBitmapDrawable)
+		{
+			((RecyclingBitmapDrawable) thumbnail).incrementCacheReference();
+		}
+		return thumbnail;
+	}
+
+	private Drawable makeThumbnailFromString(String thumbnailString)
+	{
+		Drawable thumbnail = HikeBitmapFactory.stringToDrawable(thumbnailString);
+		if (thumbnail instanceof RecyclingBitmapDrawable)
+		{
+			((RecyclingBitmapDrawable) thumbnail).incrementCacheReference();
+		}
+		return thumbnail;
 	}
 
 	public JSONObject serialize()
@@ -234,9 +273,13 @@ public class HikeFile
 			fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
 			fileJSON.putOpt(HikeConstants.FILE_SIZE, fileSize);
 			fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
-			if(isSent)
+			if(isSent && (getHikeFileType() != HikeFileType.CONTACT) && (getHikeFileType() != HikeFileType.LOCATION))
 			{
-				fileJSON.putOpt(HikeConstants.FILE_PATH, getFile().getPath());
+				File file = getFile();
+				if (file != null)
+				{
+					fileJSON.putOpt(HikeConstants.FILE_PATH, file.getPath());
+				}
 			}
 			if (sourceFilePath != null)
 			{
@@ -261,6 +304,9 @@ public class HikeFile
 				fileJSON.putOpt(HikeConstants.ADDRESSES, addresses);
 				fileJSON.putOpt(HikeConstants.EVENTS, events);
 			}
+			if(this.hikeFileType == HikeFileType.IMAGE && this.img_quality != null){
+				fileJSON.putOpt(HikeConstants.FILE_IMAGE_QUALITY, this.img_quality);
+			}
 
 			return fileJSON;
 		}
@@ -270,7 +316,19 @@ public class HikeFile
 		}
 		return null;
 	}
-
+	
+	public String getExactFilePath()
+	{
+		if(hikeFileType == HikeFileType.IMAGE || !TextUtils.isEmpty(fileKey))
+		{
+			return getFilePath();
+		}
+		else 
+		{
+			return sourceFilePath;
+		}
+	}
+	
 	public String getFileName()
 	{
 		return fileName;
@@ -334,6 +392,11 @@ public class HikeFile
 		return hikeFileType;
 	}
 
+	public void setHikeFileType(HikeFileType hikeFileType)
+	{
+		this.hikeFileType = hikeFileType;
+	}
+
 	public double getLatitude()
 	{
 		return latitude;
@@ -357,6 +420,11 @@ public class HikeFile
 	public long getRecordingDuration()
 	{
 		return recordingDuration;
+	}
+
+	public void setRecordingDuration(long recordingDuration)
+	{
+		this.recordingDuration = recordingDuration;
 	}
 
 	public boolean wasFileDownloaded()
@@ -387,7 +455,10 @@ public class HikeFile
 		{
 			file = Utils.getOutputMediaFile(hikeFileType, fileName, isSent);
 		}
-		return file.getPath();
+		if(file != null)
+			return file.getPath();
+		else
+			return null;
 	}
 
 	public File getFile()
@@ -402,6 +473,11 @@ public class HikeFile
 	public String getSourceFilePath()
 	{
 		return sourceFilePath;
+	}
+	
+	public void setSourceFilePath(String sourceFilePath)
+	{
+		this.sourceFilePath = sourceFilePath;
 	}
 
 	public void removeSourceFile()
@@ -437,6 +513,159 @@ public class HikeFile
 	public void setFileName(String fName)
 	{
 		fileName = fName;
+	}
+	/*
+	 * Get server configured download url 
+	 */
+	public String getDownloadURL()
+	{
+		Logger.d("HikeDownloadURL", "DowloadURL = " + downloadURL);
+		return downloadURL;
+	}
+
+	public boolean isSent()
+	{
+		return isSent;
+	}
+
+	public void setSent(boolean isSent)
+	{
+		this.isSent = isSent;
+	}
+	
+	/*
+	 * this method might return null file object in some cases. So, We always need to use exactFilePathFileExists() method to check weather
+	 * actually file exists or not.
+	 */
+	public File getFileFromExactFilePath()
+	{
+		String exactFilePath = getExactFilePath();
+		/*
+		 * Added empty check for exact file path because if file path is empty then application get crashed on creating new file. Cases where exact file path can be empty are : 1)
+		 * ExternalStorageState is None. (2) Source file path is null Fogbugz Id : 37242
+		 */
+		if (!TextUtils.isEmpty(exactFilePath) && (file == null || !file.getAbsolutePath().equals(exactFilePath)))
+		{
+			file = new File(exactFilePath);
+		}
+		return file;
+	}
+	
+	public boolean exactFilePathFileExists()
+	{
+		File file = getFileFromExactFilePath();
+		return file != null && file.exists();
+	}
+
+	public void shareFile(Context context)
+	{
+		switch (getHikeFileType())
+		{
+		case LOCATION:
+		case CONTACT:
+		case PROFILE:
+			return;
+
+		default:
+			break;
+		}
+		/*
+		 * getting exact file path to support sharing even not fully uploaded files
+		 */
+		String currentFileSelectionPath = HikeConstants.FILE_SHARE_PREFIX + getExactFilePath();
+		String currentFileSelectionMimeType = getFileTypeString();
+		Utils.startShareImageIntent(context, currentFileSelectionMimeType, currentFileSelectionPath);
+	}
+
+	public static void openFile(File file, String fileTypeString, Context context)
+	{
+		Intent openFile = new Intent(Intent.ACTION_VIEW);
+		openFile.setDataAndType(Uri.fromFile(file), fileTypeString);
+		try
+		{
+			context.startActivity(openFile);
+		}
+		catch (ActivityNotFoundException e)
+		{
+			Logger.w("HikeFile", "Trying to open an unknown format", e);
+			Toast.makeText(context, R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	public static void openFile(HikeFile hikeFile, Context context)
+	{
+		openFile(hikeFile.getFile(), hikeFile.getFileTypeString(), context);
+	}
+	
+	/**
+	 * This method is used to delete HikeFiles from the SDCard/Internal memory of the phone. The method obtains Id from the MediaStore and then deletes files from MediaStore 
+	 * 
+	 * @param hikeFile
+	 */
+	
+	public void delete(Context context)
+	{
+		String[] retCol = null;
+		Uri uri = null;
+		int id = -1;
+		switch (this.getHikeFileType())
+		{
+		case IMAGE:
+			retCol = new String[] { MediaStore.Images.Media._ID };
+			uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+			id = getMediaId(this.getFilePath(), retCol, uri, context);
+			break;
+		case VIDEO:
+			retCol = new String[] { MediaStore.Video.Media._ID };
+			uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+			id = getMediaId(this.getFilePath(), retCol, uri, context);
+			break;
+		default:
+			break;
+		}
+
+		if (id != -1)
+		{
+			context.getContentResolver().delete(ContentUris.withAppendedId(uri, id), null, null);
+		}
+
+		if (this.exactFilePathFileExists())
+		{
+			this.getFileFromExactFilePath().delete();
+		}
+	}
+	
+	/**
+	 * This method is used to query the internal Media Db of Android for the index of a media file.
+	 * 
+	 * @param filePath
+	 * @return The index of the Media from the relevant table if present or -1 if not present/the params supplied are null.
+	 */
+	
+	private int getMediaId(String filePath, String[] retCol, Uri uri, Context context)
+	{
+		int id = -1;
+		if (retCol == null || uri == null || filePath == null)
+		{
+			return -1;
+		}
+		Cursor cur = context.getContentResolver().query(uri, retCol, MediaStore.MediaColumns.DATA + "='" + filePath + "'", null, null);
+		try
+		{
+			if (cur.getCount() == 0)
+			{
+				return -1;
+			}
+			cur.moveToFirst();
+
+			id = cur.getInt(cur.getColumnIndex(MediaStore.MediaColumns._ID));
+		}
+
+		finally
+		{
+			cur.close();
+		}
+		return id;
 	}
 
 }

@@ -21,6 +21,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
@@ -98,7 +99,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean>
 		}
 
 		this.filePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
-		this.fileName = filePath + "/" + fileName;
+		this.fileName = filePath + "/" + Utils.getTempProfileImageFileName(id);
 
 		this.showToast = showToast;
 	}
@@ -181,6 +182,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean>
 	{
 		File file = new File(fileName);
 		file.delete();
+		Utils.removeTempProfileImage(id);
 	}
 
 	@Override
@@ -188,6 +190,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean>
 	{
 		if (result == false)
 		{
+			Utils.removeTempProfileImage(id);
 			if (showToast)
 			{
 				Toast.makeText(context, R.string.error_download, Toast.LENGTH_SHORT).show();
@@ -201,17 +204,33 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean>
 			/*
 			 * Removing the smaller icon in cache.
 			 */
-			HikeMessengerApp.getLruCache().remove(id);
+			Utils.renameTempProfileImage(id);
+
+			String idpp = id;
+
+			if (!statusImage)
+			{
+				idpp = id + ProfileAdapter.PROFILE_PIC_SUFFIX;
+			}
+
+			HikeMessengerApp.getLruCache().remove(idpp);
 
 			if (statusImage)
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED, null);
+			}
+			else
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_IMAGE_DOWNLOADED, id);
 			}
 
 			if (this.name == null)
 				this.name = this.msisdn; // show the msisdn if its an unsaved contact
 			if (statusImage && !TextUtils.isEmpty(this.fileName) && !TextUtils.isEmpty(this.msisdn))
 			{
+				String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT + HikeConstants.PROFILE_ROOT;
+				this.fileName = directory + "/" + Utils.getProfileImageFileName(msisdn);
+
 				Bundle bundle = new Bundle();
 				bundle.putString(HikeConstants.Extras.IMAGE_PATH, this.fileName);
 				bundle.putString(HikeConstants.Extras.MSISDN, this.msisdn);

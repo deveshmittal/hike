@@ -47,7 +47,7 @@ public class GalleryAdapter extends BaseAdapter
 		this.selectedGalleryItems = selectedItems;
 		this.selectedScreen = selectedScreen;
 
-		this.galleryImageLoader = new GalleryImageLoader(context);
+		this.galleryImageLoader = new GalleryImageLoader(context , sizeOfImage);
 		this.galleryImageLoader.setDontSetBackground(true);
 	}
 
@@ -114,7 +114,7 @@ public class GalleryAdapter extends BaseAdapter
 		if (galleryItem != null)
 		{
 			holder.galleryThumb.setImageDrawable(null);
-			galleryImageLoader.loadImage(GalleryImageLoader.GALLERY_KEY_PREFIX + Long.toString(galleryItem.getId()), holder.galleryThumb, isListFlinging);
+			galleryImageLoader.loadImage(GalleryImageLoader.GALLERY_KEY_PREFIX + galleryItem.getFilePath(), holder.galleryThumb, isListFlinging);
 			holder.galleryThumb.setScaleType(ScaleType.CENTER_CROP);
 		}
 		else
@@ -149,12 +149,16 @@ public class GalleryAdapter extends BaseAdapter
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		galleryImageLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{
 			notifyDataSetChanged();
 		}
 
+	}
+	
+	public GalleryImageLoader getGalleryImageLoader()
+	{
+		return galleryImageLoader;
 	}
 }

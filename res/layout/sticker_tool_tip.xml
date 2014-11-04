@@ -1,40 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/tip_green_bg"
+    android:orientation="vertical" >
 
- <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/tip_container"
-    android:layout_width="255dp"
-    android:layout_height="98dp"
-    android:background="@drawable/bg_sticker_ftue"
-    android:orientation="horizontal"
-    android:weightSum="10" >
-
-    <ImageView android:id="@+id/sticker_image_icon"
-        android:layout_width="90dp"
-        android:layout_height="94dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginBottom="-4dp"
-        android:layout_gravity="bottom"
-        android:background="@null"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_sticker_ftue" />
-    
-    <TextView
-        android:id="@+id/tip_text"
-        android:layout_width="0dp"
+    <RelativeLayout
+        android:id="@+id/all_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="10"
-        android:layout_gravity="center_vertical"
-        android:layout_marginBottom="4dp"
-        android:paddingBottom="5dp"
-        android:paddingLeft="18dp"
-        android:paddingTop="5dp"
-        android:paddingRight="8dp"
-        android:shadowColor="#4D000000"
-        android:shadowDy="0.6"
-        android:shadowRadius="0.6"
-        android:text="@string/moods_tip"
-        android:textColor="@color/profile_item_bckg"
-        android:textStyle="normal"
-        android:textSize="18sp" />
+        android:background="@drawable/popup_button_bg_selector"
+        android:gravity="center"
+        android:minHeight="74dp"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/arrow_pointer"
+            android:layout_width="49dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:paddingTop="15dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="7dp"
+            android:scaleType="center"
+            android:src="@drawable/ftue_down_arrow" />
+
+        <LinearLayout
+            android:id="@+id/tip_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_toRightOf="@id/arrow_pointer"
+            android:orientation="vertical"
+            android:paddingBottom="15dp"
+            android:paddingRight="62dp"
+            android:paddingTop="10dp" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/tip_header"
+                style="@style/TipHeader"
+                android:text="@string/stickers" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/tip_msg"
+                style="@style/TipBody"
+                android:text="@string/sticker_tip_msg" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="57dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/tip_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@id/tip_content" >
+
+            <View
+                android:id="@+id/close_divider"
+                android:layout_width="1dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center_vertical"
+                android:background="@color/tip_green_divider_color" />
+
+            <ImageView
+                android:id="@+id/close_tip"
+                android:layout_width="56dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/popup_button_bg_selector"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_tip_cross" />
+        </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

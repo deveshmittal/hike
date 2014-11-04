@@ -6,19 +6,16 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.WelcomeTutorial;
 import com.bsb.hike.HikeMessengerApp;
@@ -29,8 +26,6 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import com.viewpagerindicator.IconPageIndicator;
-import com.viewpagerindicator.IconPagerAdapter;
 
 public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements SignupTask.OnSignupTaskProgressUpdate
 {
@@ -42,12 +37,8 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private ViewGroup tcContinueLayout;
 
-	private View hikeLogoContainer;
-
 	private boolean isMicromaxDevice;
 
-	private ViewPager mPager;
-	
 	private Dialog errorDialog;
 
 	SignupTask mTask; 
@@ -64,8 +55,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		mAcceptButton = (Button) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
 		tcText = findViewById(R.id.terms_and_conditions);
-		hikeLogoContainer = findViewById(R.id.hike_logo_container);
-
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
 
 		String model = Build.MODEL;
@@ -87,9 +76,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 				}
 			}
 		}
-
-		hikeLogoContainer.setVisibility(View.VISIBLE);
-		tcContinueLayout.setVisibility(View.VISIBLE);
+        tcContinueLayout.setVisibility(View.VISIBLE);
 		if ((savedState != null) && (savedState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR)))
 		{
 			showError();
@@ -111,17 +98,16 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 		});
 
-		mPager = (ViewPager) findViewById(R.id.tutorial_pager);
-		mPager.setAdapter(new TutorialPagerAdapter());
-
-		IconPageIndicator mIndicator = (IconPageIndicator) findViewById(R.id.tutorial_indicator);
-		mIndicator.setViewPager(mPager);
-		mIndicator.setOnPageChangeListener(onPageChangeListener);
+		ImageView micromaxImage = (ImageView) findViewById(R.id.ic_micromax);
+		micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE : View.GONE);
 	}
 
 	public void onHikeIconClicked(View v)
 	{
-		changeHost();
+		if (AppConfig.ALLOW_STAGING_TOGGLE)
+		{
+			changeHost();
+		}
 	}
 
 	private void changeHost()
@@ -253,67 +239,7 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 			// TODO Auto-generated method stub
 		}
 	};
-	private class TutorialPagerAdapter extends PagerAdapter implements IconPagerAdapter
-	{
-		private int mCount = 3;
-
-		@Override
-		public int getCount()
-		{
-			return mCount;
-		}
-
-		@Override
-		public int getIconResId(int index)
-		{
-			return R.drawable.welcome_tutorial_icon_indecator;
-		}
-
-		@Override
-		public boolean isViewFromObject(View view, Object object)
-		{
-			// TODO Auto-generated method stub
-			return view == object;
-		}
-		
-		@Override
-		public Object instantiateItem(ViewGroup container, int position)
-		{
-			View parent = LayoutInflater.from(WelcomeActivity.this).inflate(R.layout.tutorial_fragments, null);
-			TextView tutorialHeader = (TextView) parent.findViewById(R.id.tutorial_title);
-			ImageView tutorialImage = (ImageView) parent.findViewById(R.id.tutorial_img);
-			ImageView micromaxImage = (ImageView) parent.findViewById(R.id.ic_micromax);
-			switch (position)
-			{
-			case 0:
-				tutorialHeader.setText(R.string.tutorial1_header_title);
-				tutorialImage.setImageResource(R.drawable.tutorial1_img);
-				micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE : View.GONE);
-				break;
-			case 1:
-				tutorialHeader.setText(R.string.tutorial2_header_title);
-				tutorialImage.setImageResource(R.drawable.tutorial2_img);
-				micromaxImage.setVisibility(View.GONE);
-				break;
-			case 2:
-				tutorialHeader.setText(R.string.tutorial3_header_title);
-				tutorialImage.setImageResource(R.drawable.tutorial3_img);
-				micromaxImage.setVisibility(View.GONE);
-				break;
-			}
-			((ViewPager) container).addView(parent);
-			return parent;
-		}
-		
-		@Override
-		public void destroyItem(ViewGroup container, int position, Object object)
-		{
-			Logger.d(getClass().getSimpleName(), "Item removed from position : " + position);
-			((ViewPager) container).removeView((View) object);
-		}
-
-
-	}
+	
 	
 	private void showNetworkErrorPopup()
 	{

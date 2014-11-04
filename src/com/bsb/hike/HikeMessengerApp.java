@@ -6,7 +6,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
@@ -28,7 +30,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.os.Message;
@@ -36,14 +37,15 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Pair;
 
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
@@ -53,20 +55,20 @@ import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
-import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
 
 @ReportsCrashes(formKey = "", customReportContent = { ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
 		ReportField.ANDROID_VERSION, ReportField.STACK_TRACE, ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE })
-public class HikeMessengerApp extends Application implements Listener
+public class HikeMessengerApp extends Application implements HikePubSub.Listener
 {
 
 	public static enum CurrentState
 	{
-		OPENED, RESUMED, BACKGROUNDED, CLOSED, NEW_ACTIVITY, BACK_PRESSED
+		OPENED, RESUMED, BACKGROUNDED, CLOSED, NEW_ACTIVITY, BACK_PRESSED, NEW_ACTIVITY_IN_BG
 	}
 
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
@@ -240,12 +242,12 @@ public class HikeMessengerApp extends Application implements Listener
 	public static final String SERVER_TIME_OFFSET = "serverTimeOffset";
 
 	public static final String SHOWN_EMOTICON_TIP = "shownEmoticonTip1";
+	
+	public static final String SHOWN_PIN_TIP = "shownPinTip";
 
 	public static final String SHOWN_MOODS_TIP = "shownMoodsTip1";
 
 	public static final String SHOWN_WALKIE_TALKIE_TIP = "shownWalkieTalkieTip";
-
-	public static final String SHOWN_STATUS_TIP = "shownStatusTip";
 
 	public static final String SHOWN_LAST_SEEN_TIP = "shownLastSeenTip";
 
@@ -262,8 +264,6 @@ public class HikeMessengerApp extends Application implements Listener
 	public static final String SHOWN_NATIVE_INFO_POPUP = "shownNativeInfoPopup";
 
 	public static final String INVITED_FACEBOOK_FRIENDS_IDS = "invitedFacebookFriendsIds";
-
-	public static final String NOTIFIED_NO_STATUS = "notifiedNoStatus";
 
 	public static final String SERVER_RECOMMENDED_CONTACTS = "serverRecommendedContacts";
 
@@ -301,9 +301,9 @@ public class HikeMessengerApp extends Application implements Listener
 
 	public static final String SHOWN_CHAT_BG_TOOL_TIP = "shownChatBgToolTip";
 
-	public static final String GREENBLUE_DETAILS_SENT = "whatsappDetailsSent";
+	public static final String GREENBLUE_DETAILS_SENT = "gbDetailsSent";
 
-	public static final String LAST_BACK_OFF_TIME_GREENBLUE = "lastBackOffTimeWhatsapp";
+	public static final String LAST_BACK_OFF_TIME_GREENBLUE = "lastBackOffTimeGb";
 
 	public static final String SHOWN_VALENTINE_CHAT_BG_FTUE = "shownValentineChatBgFtue";
 
@@ -312,8 +312,6 @@ public class HikeMessengerApp extends Application implements Listener
 	public static final String SHOWN_VALENTINE_NUDGE_TIP = "shownValentineNudgeTip";
 
 	public static final String SHOWN_ADD_FRIENDS_POPUP = "shownAddFriendsPopup";
-
-	public static final String THOR_DETAILS_SENT = "thorDetailsSent";
 
 	public static final String WELCOME_TUTORIAL_VIEWED = "welcomeTutorialViewed";
 
@@ -328,6 +326,80 @@ public class HikeMessengerApp extends Application implements Listener
 	public static final String SHOWN_GROUP_CHAT_TIP = "shownGroupChatTip";
 
 	public static final String SHOWN_ADD_FAVORITE_TIP = "shownAddFavoriteTip";
+	
+	public static final String MQTT_IPS = "mqttIps";
+
+	public static final String STEALTH_ENCRYPTED_PATTERN = "stealthEncryptedPattern";
+
+	public static final String STEALTH_MODE = "stealthMode";
+
+	public static final String STEALTH_MODE_SETUP_DONE = "steatlhModeSetupDone";
+
+	public static final String SHOWING_STEALTH_FTUE_CONV_TIP = "showingStealthFtueConvTip";
+
+	public static final String RESET_COMPLETE_STEALTH_START_TIME = "resetCompleteStealthStartTime";
+
+	public static final String SHOWN_FIRST_UNMARK_STEALTH_TOAST = "shownFirstUnmarkStealthToast";
+
+	public static final String SHOWN_WELCOME_HIKE_TIP = "shownWelcomeHikeTip";
+
+	public static final String SHOW_STEALTH_INFO_TIP = "showStealthInfoTip";
+
+	public static final String SHOW_STEALTH_UNREAD_TIP = "showStelathUnreadTip";
+
+	public static final String STEALTH_UNREAD_TIP_MESSAGE = "stealthUnreadTipMessage";
+
+	public static final String STEALTH_UNREAD_TIP_HEADER = "stealthUnreadTipHeader";
+
+	public static final String LAST_STEALTH_POPUP_ID = "lastStealthPopupId";
+
+	public static final String SHOWN_WELCOME_TO_HIKE_CARD = "shownWelcomeToHikeCard";
+
+	public static final String FRIEND_REQ_COUNT = "frReqCount";
+	
+	public static final String HAS_UNSET_SMS_PREFS_ON_KITKAT_UPGRAGE = "hasUnsetSmsPrefsOnKitkatUpgrade";
+
+	public static final String ATOMIC_POP_UP_TYPE_MAIN = "apuTypeMain";
+
+	public static final String ATOMIC_POP_UP_TYPE_CHAT = "apuTypeChat";
+
+	public static final String ATOMIC_POP_UP_STICKER = "stk";
+
+	public static final String ATOMIC_POP_UP_PROFILE_PIC = "pp";
+
+	public static final String ATOMIC_POP_UP_ATTACHMENT = "ft";
+
+	public static final String ATOMIC_POP_UP_INFORMATIONAL = "info";
+
+	public static final String ATOMIC_POP_UP_FAVOURITES = "fav";
+
+	public static final String ATOMIC_POP_UP_THEME = "theme";
+
+	public static final String ATOMIC_POP_UP_INVITE = "inv";
+
+	public static final String ATOMIC_POP_UP_STATUS = "stts";
+
+	public static final String ATOMIC_POP_UP_HTTP = "http";
+	
+	public static final String ATOMIC_POP_UP_APP_GENERIC = "app";
+	
+	public static final String ATOMIC_POP_UP_APP_GENERIC_WHAT = "appWhat";
+	
+	public static final String ATOMIC_POP_UP_HTTP_URL = "httpUrl";
+	
+	public static final String ATOMIC_POP_UP_NOTIF_MESSAGE = "apuNotifMessage";
+
+	public static final String ATOMIC_POP_UP_NOTIF_SCREEN = "apuNotifScreen";
+
+	public static final String ATOMIC_POP_UP_HEADER_MAIN = "apuHeaderMain";
+
+	public static final String ATOMIC_POP_UP_MESSAGE_MAIN = "apuMessageMain";
+
+	public static final String ATOMIC_POP_UP_HEADER_CHAT = "apuHeaderChat";
+
+	public static final String ATOMIC_POP_UP_MESSAGE_CHAT = "apuMessageChat";
+
+	public static final String SHOWN_DIWALI_POPUP = "shownDiwaliPopup";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -340,6 +412,8 @@ public class HikeMessengerApp extends Application implements Listener
 	private static Messenger mMessenger;
 
 	private static Map<String, TypingNotification> typingNotificationMap;
+
+	private static Set<String> stealthMsisdn;
 
 	private Messenger mService;
 
@@ -357,11 +431,15 @@ public class HikeMessengerApp extends Application implements Listener
 
 	private ActivityTimeLogger activityTimeLogger;
 
-	public static Map<String, Long> lastSeenFriendsMap;
+	public static Map<String, Pair<Integer, Long>> lastSeenFriendsMap;
 
 	public static HashMap<String, String> hikeBotNamesMap;
 
 	public static volatile boolean networkError;
+
+	public static volatile boolean syncingContacts = false;
+
+	public Handler appStateHandler;
 
 	class IncomingHandler extends Handler
 	{
@@ -399,7 +477,7 @@ public class HikeMessengerApp extends Application implements Listener
 		mPubSubInstance = new HikePubSub();
 		if (HikeMessengerApp.lastSeenFriendsMap == null)
 		{
-			HikeMessengerApp.lastSeenFriendsMap = new HashMap<String, Long>();
+			HikeMessengerApp.lastSeenFriendsMap = new HashMap<String, Pair<Integer, Long>>();
 		}
 	}
 
@@ -456,12 +534,6 @@ public class HikeMessengerApp extends Application implements Listener
 		@Override
 		public void send(CrashReportData crashReportData) throws ReportSenderException
 		{
-			/* only send ACRA reports if we're in release mode */
-			if (0 != (getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE))
-			{
-				return;
-			}
-
 			try
 			{
 				final String reportUrl = AccountUtils.base + "/logs/android";
@@ -532,6 +604,8 @@ public class HikeMessengerApp extends Application implements Listener
 		// -1 in both cases means an uninitialized setting, mostly on first
 		// launch or interrupted upgrades.
 		int convInt = settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1);
+		int msgHashGrpReadUpgrade = settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1);
+		int upgradeForDbVersion28 = settings.getInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, -1);
 		ACRA.init(this);
 		CustomReportSender customReportSender = new CustomReportSender();
 		ErrorReporter.getInstance().setReportSender(customReportSender);
@@ -551,6 +625,28 @@ public class HikeMessengerApp extends Application implements Listener
 			mEditor.commit();
 		}
 
+		if (msgHashGrpReadUpgrade == -1)
+		{
+			Editor mEditor = settings.edit();
+			// set the pref to 0 to indicate we've reached the state to init the
+			// hike conversation database.
+			mEditor.putInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, 0);
+			mEditor.commit();
+		}
+		
+		if (upgradeForDbVersion28 == -1)
+		{
+			Editor mEditor = settings.edit();
+			// set the pref to 0 to indicate we've reached the state to init the
+			// hike conversation database.
+			mEditor.putInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, 0);
+			mEditor.commit();
+		}
+		/*
+		 * Resetting the stealth mode when the app starts. 
+		 */
+		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+		performPreferenceTransition();
 		String currentAppVersion = settings.getString(CURRENT_APP_VERSION, "");
 		String actualAppVersion = "";
 		try
@@ -577,11 +673,11 @@ public class HikeMessengerApp extends Application implements Listener
 		// succeeded by the
 		// onUpgrade() calls being triggered in the respective databases.
 		HikeConversationsDatabase.init(this);
-		HikeUserDatabase.init(this);
 
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
-		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || TEST)
+		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || 
+				settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1 || settings.getInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, -1) == 1 || TEST)
 		{
 			// turn off future push notifications as soon as the app has
 			// started.
@@ -616,10 +712,13 @@ public class HikeMessengerApp extends Application implements Listener
 			Logger.d(getClass().getSimpleName(), "Init for apptracker sdk finished" + !preferenceManager.contains(HikeConstants.SSL_PREF));
 		}
 
-		if (!preferenceManager.contains(HikeConstants.SSL_PREF))
+		boolean isSAUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE);
+
+		// Setting SSL_PREF as false for existing SA users with SSL_PREF = true
+		if (!preferenceManager.contains(HikeConstants.SSL_PREF) || (isSAUser && settings.getBoolean(HikeConstants.SSL_PREF, false)))
 		{
 			Editor editor = preferenceManager.edit();
-			editor.putBoolean(HikeConstants.SSL_PREF, !isIndianUser);
+			editor.putBoolean(HikeConstants.SSL_PREF, !(isIndianUser || isSAUser));
 			editor.commit();
 		}
 
@@ -636,10 +735,25 @@ public class HikeMessengerApp extends Application implements Listener
 			editor.putBoolean(HikeConstants.STATUS_BOOLEAN_PREF, preferenceManager.getInt(HikeConstants.STATUS_PREF, 0) == 0);
 			editor.commit();
 		}
+		
+		if(Utils.isKitkatOrHigher() && !HikeSharedPreferenceUtil.getInstance(this).getData(HAS_UNSET_SMS_PREFS_ON_KITKAT_UPGRAGE, false))
+		{
+			/*
+			 * On upgrade in kitkat or higher we need to reset sms setting preferences 
+			 * as we are now removing these settings from UI.
+			 */
+			HikeSharedPreferenceUtil.getInstance(this).saveData(HAS_UNSET_SMS_PREFS_ON_KITKAT_UPGRAGE, true);
+			Editor editor = preferenceManager.edit();
+			editor.remove(HikeConstants.SEND_SMS_PREF);
+			editor.remove(HikeConstants.RECEIVE_SMS_PREF);
+			editor.commit();
+		}
 
 		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), Utils.switchSSLOn(getApplicationContext()));
 
 		typingNotificationMap = new HashMap<String, TypingNotification>();
+
+		stealthMsisdn = new HashSet<String>();
 
 		initialiseListeners();
 
@@ -663,37 +777,42 @@ public class HikeMessengerApp extends Application implements Listener
 		}
 
 		/*
-		 * We will increase the unseen status count by one if the user has not posted any updates and if we have never notified the user of this before.
+		 * Replacing GB keys' strings.
 		 */
-		if (!settings.contains(NOTIFIED_NO_STATUS))
+		if (!settings.contains(GREENBLUE_DETAILS_SENT))
 		{
-			String lastStatus = settings.getString(HikeMessengerApp.LAST_STATUS, "");
-
-			Editor editor = settings.edit();
-			if (TextUtils.isEmpty(lastStatus))
-			{
-				int count = settings.getInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
-				count++;
-				editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, count);
-			}
-			editor.putBoolean(NOTIFIED_NO_STATUS, true);
-			editor.commit();
+			replaceGBKeys();
 		}
 
 		makeNoMediaFiles();
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SWITCHED_DATA_CONNECTION, this);
 
 		hikeBotNamesMap = new HashMap<String, String>();
 		hikeBotNamesMap.put(HikeConstants.FTUE_TEAMHIKE_MSISDN, "team hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKEBOT_MSISDN, "Emma from hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
+		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
+		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_SUPPORT, "hike support");
 		initHikeLruCache(getApplicationContext());
-
+		initContactManager();
 		/*
-		 * Setting the last seen preference for the friends comparator.
+		 * Fetching all stealth contacts on app creation so that the conversation cannot be opened through the shortcut or share screen.
 		 */
-		ContactInfo.lastSeenTimeComparator.lastSeenPref = preferenceManager.getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+		HikeConversationsDatabase.getInstance().addStealthMsisdnToMap();
+
+		appStateHandler = new Handler();
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
+	}
+
+	private void replaceGBKeys()
+	{
+		HikeSharedPreferenceUtil preferenceUtil = HikeSharedPreferenceUtil.getInstance(this);
+
+		boolean gbDetailsSent = preferenceUtil.getData("whatsappDetailsSent", false);
+		int lastGBBackoffTime = preferenceUtil.getData("lastBackOffTimeWhatsapp", 0);
+
+		preferenceUtil.saveData(GREENBLUE_DETAILS_SENT, gbDetailsSent);
+		preferenceUtil.saveData(LAST_BACK_OFF_TIME_GREENBLUE, lastGBBackoffTime);
 	}
 
 	private static HikeLruCache cache;
@@ -708,6 +827,19 @@ public class HikeMessengerApp extends Application implements Listener
 	public static HikeLruCache getLruCache()
 	{
 		return cache;
+	}
+
+	private static ContactManager conMgr;
+
+	private void initContactManager()
+	{
+		conMgr = ContactManager.getInstance();
+		conMgr.init(getApplicationContext());
+	}
+
+	public static ContactManager getContactManager()
+	{
+		return conMgr;
 	}
 
 	private void makeNoMediaFiles()
@@ -792,6 +924,41 @@ public class HikeMessengerApp extends Application implements Listener
 		return typingNotificationMap;
 	}
 
+	public static void addStealthMsisdnToMap(String msisdn)
+	{
+		stealthMsisdn.add(msisdn);
+	}
+
+	public static void addNewStealthMsisdn(String msisdn)
+	{
+		addStealthMsisdnToMap(msisdn);
+		getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_MARKED, msisdn);
+	}
+
+	public static void removeStealthMsisdn(String msisdn)
+	{
+		removeStealthMsisdn(msisdn, true);
+	}
+
+	public static void removeStealthMsisdn(String msisdn, boolean publishEvent)
+	{
+		stealthMsisdn.remove(msisdn);
+		if(publishEvent)
+		{
+			getPubSub().publish(HikePubSub.STEALTH_CONVERSATION_UNMARKED, msisdn);
+		}
+	}
+
+	public static void clearStealthMsisdn()
+	{
+		stealthMsisdn.clear();
+	}
+
+	public static boolean isStealthMsisdn(String msisdn)
+	{
+		return stealthMsisdn.contains(msisdn);
+	}
+
 	public void initialiseListeners()
 	{
 		if (dbConversationListener == null)
@@ -811,12 +978,35 @@ public class HikeMessengerApp extends Application implements Listener
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
-		if (HikePubSub.SWITCHED_DATA_CONNECTION.equals(type))
+		if(HikePubSub.CONNECTED_TO_MQTT.equals(type))
 		{
-			SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-			boolean isWifiConnection = object != null ? (Boolean) object : Utils.switchSSLOn(getApplicationContext());
+			appStateHandler.post(appStateChangedRunnable);
+		}
+	}
 
-			Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), isWifiConnection);
+	private Runnable appStateChangedRunnable = new Runnable()
+	{
+		
+		@Override
+		public void run()
+		{
+			/*
+			 * Send a fg/bg packet on reconnecting.
+			 */
+			Utils.appStateChanged(HikeMessengerApp.this.getApplicationContext(), false, false, false, true);
+		}
+	};
+
+	private void performPreferenceTransition()
+	{
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		if (!pref.getBoolean(HikeConstants.PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST, false))
+		{
+			Editor edit = pref.edit();
+			edit.putString(HikeConstants.NOTIF_SOUND_PREF, Utils.getOldSoundPref(this));
+			edit.putString(HikeConstants.VIBRATE_PREF_LIST, Utils.getOldVibratePref(this));
+			edit.putBoolean(HikeConstants.PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST, true);
+			edit.commit();
 		}
 	}
 }

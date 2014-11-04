@@ -15,7 +15,7 @@ import com.bsb.hike.utils.Utils;
 
 public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 {
-	public static enum FavoriteType
+	public enum FavoriteType
 	{
 		NOT_FRIEND, REQUEST_RECEIVED, FRIEND, AUTO_RECOMMENDED_FAVORITE, REQUEST_SENT, REQUEST_SENT_REJECTED, REQUEST_RECEIVED_REJECTED
 	}
@@ -32,9 +32,37 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	private String id;
 
-	private boolean onhike;
+	private short bits = 0;
 
-	private boolean hasCustomPhoto;
+	/*
+	 * bits 1111
+	 * 
+	 * bit index 3210
+	 */
+
+	/*
+	 * index value
+	 * 
+	 * 0 onhike
+	 * 
+	 * 1 hasCustomPhoto
+	 * 
+	 * 2 onGreenBlue
+	 * 
+	 * 3 FavType
+	 * 
+	 * 4 FavType
+	 * 
+	 * 5 FavType
+	 * 
+	 * 6 offline
+	 * 
+	 * 7 offline
+	 * 
+	 * FavouriteType has seven values so taking three bits
+	 * 
+	 * offline value can be -1, 0 , 1 so taking two bits
+	 */
 
 	private String msisdnType;
 
@@ -42,17 +70,149 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	private String phoneNum;
 
-	private FavoriteType favoriteType;
-
 	private long hikeJoinTime;
 
 	private long lastSeenTime;
 
-	private int offline = 1;
-
 	private long inviteTime;
 
-	private boolean onGreenBlue = false;
+	/**
+	 * Returns true if bit at index is 1 otherwise false
+	 * 
+	 * @param index
+	 * @throws IndexOutOfBoundsException
+	 */
+	private boolean get(int index)
+	{
+		if (index < 0 || index >= 16)
+			throw new IndexOutOfBoundsException("Using short so value of index can be between 0 and 15 inclusive");
+		return ((bits & (1 << index)) != 0);
+	}
+
+	/**
+	 * Sets the bit at index to 1
+	 * 
+	 * @param index
+	 * @throws IndexOutOfBoundsException
+	 */
+	private void set(int index)
+	{
+		if (index < 0 || index >= 16)
+			throw new IndexOutOfBoundsException("Using short so value of index can be between 0 and 15 inclusive");
+		bits = (short) (bits | (1 << index));
+	}
+
+	/**
+	 * Sets the bit at index to 0
+	 * 
+	 * @param index
+	 * @throws IndexOutOfBoundsException
+	 */
+	private void clear(int index)
+	{
+		if (index < 0 || index >= 16)
+			throw new IndexOutOfBoundsException("Using short so value of index can be between 0 and 15 inclusive");
+		bits = (short) (bits & ~(1 << index));
+	}
+
+	/**
+	 * Sets the bit at index to 1 if val is true and 0 if val is false
+	 * 
+	 * @param index
+	 * @param val
+	 */
+	private void set(int index, boolean val)
+	{
+		if (val)
+			set(index);
+		else
+			clear(index);
+	}
+
+	/**
+	 * Sets the bits from fromIndex to toIndex with binary of num . The bit at toIndex is least significant bit of num and the bit at fromindex is most significant bit.
+	 * 
+	 * @param fromIndex
+	 * @param toIndex
+	 * @param num
+	 * @throws IllegalArgumentException
+	 * @throws IndexOutOfBoundsException
+	 */
+	private void setNum(int fromIndex, int toIndex, int num)
+	{
+		if (toIndex < fromIndex)
+			throw new IllegalArgumentException("Starting index should be less than or equal to ending index");
+		if (fromIndex < 0 || toIndex >= 16)
+			throw new IndexOutOfBoundsException("Value of index can be between 0 and 15 inclusive");
+		while (num > 0)
+		{
+			if (toIndex < fromIndex)
+				throw new IllegalArgumentException("Number of bits required for num is greater than number of bits we set(to-from+1)");
+			set(toIndex, (num & 1) != 0);
+			num = num >> 1;
+			toIndex--;
+		}
+		if (toIndex >= fromIndex)
+			clear(fromIndex, toIndex);
+	}
+
+	/**
+	 * Sets all the bits from fromIndex to toIndex to 0
+	 * 
+	 * @param fromIndex
+	 * @param toIndex
+	 * @throws IllegalArgumentException
+	 * @throws IndexOutOfBoundsException
+	 */
+	private void clear(int fromIndex, int toIndex)
+	{
+		if (toIndex < fromIndex)
+			throw new IllegalArgumentException("Starting index should be less than or equal to ending index");
+		if (fromIndex < 0 || toIndex >= 16)
+			throw new IndexOutOfBoundsException("Value of index can be between 0 and 15 inclusive");
+		if (fromIndex == toIndex)
+			clear(fromIndex);
+		else
+		{
+			int n = 0;
+			for (int i = fromIndex; i <= toIndex; ++i)
+			{
+				n = n << 1;
+				n += 1;
+			}
+			n = n << fromIndex;
+			bits = (short) (bits & ~n);
+		}
+	}
+
+	/**
+	 * Returns the integer represented by bits from fromIndex to toIndex with least significant bit as toIndex and most significant bit as fromIndex
+	 * 
+	 * @param fromIndex
+	 * @param toIndex
+	 * @throws IllegalArgumentException
+	 * @throws IndexOutOfBoundsException
+	 */
+	private int getNum(int fromIndex, int toIndex)
+	{
+		if (toIndex < fromIndex)
+			throw new IllegalArgumentException("Starting index should be less than or equal to ending index");
+		if (fromIndex < 0 || toIndex >= 16)
+			throw new IndexOutOfBoundsException("Value of index can be between 0 and 15 inclusive");
+		if (toIndex == fromIndex)
+			return (get(fromIndex)) ? 1 : 0;
+		else
+		{
+			int res = 0, x = 1;
+			for (int i = toIndex; i >= fromIndex; --i)
+			{
+				if (get(i))
+					res += x;
+				x = x << 1;
+			}
+			return res;
+		}
+	}
 
 	public String getName()
 	{
@@ -73,7 +233,16 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 		return Utils.getFirstName(this.name);
 	}
-
+    
+	public String getFirstNameAndSurname()
+	{
+		if(name==null || TextUtils.isEmpty(name))
+		{
+			return this.msisdn;
+		}
+		
+		return Utils.getFirstNameAndSurname(this.name);
+	}
 	public void setName(String name)
 	{
 		this.name = name;
@@ -101,12 +270,12 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	public boolean isOnhike()
 	{
-		return onhike;
+		return get(0);
 	}
 
 	public void setOnhike(boolean onhike)
 	{
-		this.onhike = onhike;
+		set(0, onhike);
 	}
 
 	public String getPhoneNum()
@@ -121,12 +290,12 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	public boolean hasCustomPhoto()
 	{
-		return hasCustomPhoto;
+		return get(1);
 	}
 
 	public void setHasCustomPhoto(boolean hasCustomPhoto)
 	{
-		this.hasCustomPhoto = hasCustomPhoto;
+		set(1, hasCustomPhoto);
 	}
 
 	public String getMsisdnType()
@@ -151,12 +320,16 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	public FavoriteType getFavoriteType()
 	{
-		return favoriteType;
+		int n = getNum(3, 5);
+		if (7 == n)
+			return null;
+		return FavoriteType.values()[n];
 	}
 
 	public void setFavoriteType(FavoriteType favoriteType)
 	{
-		this.favoriteType = favoriteType;
+		int n = favoriteType.ordinal();
+		setNum(3, 5, n);
 	}
 
 	public long getHikeJoinTime()
@@ -205,12 +378,12 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	public int getOffline()
 	{
-		return offline;
+		return getNum(6, 7) - 1;
 	}
 
 	public void setOffline(int offline)
 	{
-		this.offline = offline;
+		setNum(6, 7, offline + 1);
 	}
 
 	public long getInviteTime()
@@ -225,12 +398,12 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	public boolean isOnGreenBlue()
 	{
-		return onGreenBlue;
+		return get(2);
 	}
 
 	public void setOnGreenBlue(boolean onGreenBlue)
 	{
-		this.onGreenBlue = onGreenBlue;
+		set(2, onGreenBlue);
 	}
 
 	public String getFormattedHikeJoinTime()
@@ -260,22 +433,25 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		this.id = id;
 		this.msisdn = msisdn;
 		this.name = name;
-		this.onhike = onhike;
+		set(0, onhike);
 		this.phoneNum = phoneNum;
-		this.hasCustomPhoto = hasCustomPhoto;
+		set(1, hasCustomPhoto);
 		this.msisdnType = msisdnType;
 		this.lastMessaged = lastMessaged;
 		this.hikeJoinTime = hikeJoinTime;
+		setNum(6, 7, 2);
+		setNum(3, 5, 7);
 	}
 
 	public ContactInfo(ContactInfo contactInfo)
 	{
 		this(contactInfo.getId(), contactInfo.getMsisdn(), contactInfo.getName(), contactInfo.getPhoneNum(), contactInfo.isOnhike(), "", contactInfo.getLastMessaged(), contactInfo
 				.hasCustomPhoto(), contactInfo.getHikeJoinTime());
-		this.favoriteType = contactInfo.getFavoriteType();
+		int n = contactInfo.getFavoriteType().ordinal();
+		setNum(3, 5, n);
 		this.inviteTime = contactInfo.getInviteTime();
 		this.lastSeenTime = contactInfo.getLastSeenTime();
-		this.offline = contactInfo.getOffline();
+		setNum(6, 7, contactInfo.getOffline() + 1);
 	}
 
 	@Override
@@ -333,7 +509,9 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		return json;
 	}
 
-	public static LastSeenComparator lastSeenTimeComparator = new LastSeenComparator();
+	public static LastSeenComparator lastSeenTimeComparator = new LastSeenComparator(true);
+
+	public static LastSeenComparator lastSeenTimeComparatorWithoutFav = new LastSeenComparator(false);
 
 	@Override
 	public int compareTo(ContactInfo rhs)

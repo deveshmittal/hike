@@ -3,6 +3,7 @@ package com.bsb.hike.models;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OptionalDataException;
 import java.io.Serializable;
 
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
@@ -82,37 +83,17 @@ public class StickerCategory implements Serializable
 		return true;
 	}
 
-	public void serializeObj(ObjectOutputStream out)
+	public void serializeObj(ObjectOutputStream out) throws IOException
 	{
-		try
-		{
-			out.writeObject(categoryId);
-			out.writeBoolean(updateAvailable);
-			out.writeBoolean(reachedEnd);
-		}
-		catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		out.writeUTF(categoryId.name());
+		out.writeBoolean(updateAvailable);
+		out.writeBoolean(reachedEnd);
 	}
 
-	public void deSerializeObj(ObjectInputStream in)
+	public void deSerializeObj(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException
 	{
-		try
-		{
-			categoryId = (StickerCategoryId) in.readObject();
-			updateAvailable = in.readBoolean();
-			reachedEnd = in.readBoolean();
-		}
-		catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (ClassNotFoundException e)
-		{
-
-		}
+		categoryId = StickerCategoryId.valueOf(in.readUTF());
+		updateAvailable = in.readBoolean();
+		reachedEnd = in.readBoolean();
 	}
 }

@@ -6,7 +6,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="60dp"
         android:background="@drawable/list_item"
         android:orientation="horizontal"
         android:paddingLeft="@dimen/contact_list_item_padding"
@@ -14,8 +14,8 @@
 
         <RelativeLayout
             android:id="@+id/avatar_container"
-            android:layout_width="@dimen/small_avatar"
-            android:layout_height="@dimen/small_avatar"
+            android:layout_width="@dimen/hike_list_item_avtar"
+            android:layout_height="@dimen/hike_list_item_avtar"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true" >
 
@@ -55,7 +55,7 @@
                 android:singleLine="true"
                 android:text="Kavin Mittal kja skldlkas daskd asdjlasj dlasdl asdj las das d"
                 android:textColor="@color/list_item_header"
-                android:textSize="14sp"
+                android:textSize="15sp"
                 android:textStyle="bold|italic" />
 
             <com.bsb.hike.view.CustomFontTextView

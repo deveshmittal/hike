@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="312dp"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_alert_box" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/image_quality_popup_header"
+                android:layout_width="wrap_content"
+                android:layout_height="54dp"
+                android:gravity="center_vertical"
+                android:paddingLeft="24dp"
+                android:text="@string/image_quality_popup_header"
+                android:textColor="@color/blue_hike"
+                android:textSize="24sp"
+                android:textStyle="italic" />
+
+            <View
+                android:id="@+id/divider1"
+                android:layout_width="wrap_content"
+                android:layout_height="0.5dp"
+                android:background="@color/blue_hike" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:id="@+id/hike_small_container"
+                android:layout_width="match_parent"
+                android:layout_height="65dp"
+                android:background="@drawable/list_item"
+                android:clickable="true"
+                android:orientation="horizontal"
+                android:paddingLeft="24dp" >
+
+                <CheckBox
+                    android:id="@+id/hike_small_checkbox"
+                    android:layout_width="24dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:button="@drawable/preference_radio_btn"
+                    android:clickable="false" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="12dp"
+                    android:orientation="vertical" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" >
+
+                        <com.bsb.hike.view.CustomFontTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/image_quality_small"
+                            android:textColor="@color/image_quality_popup_text_color"
+                            android:textSize="18sp" />
+
+                        <com.bsb.hike.view.CustomFontTextView
+                            android:id="@+id/image_quality_small_cftv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/image_quality_popup_text_color"
+                            android:textSize="18sp"
+                            android:textStyle="italic" />
+                    </LinearLayout>
+
+                    <com.bsb.hike.view.CustomFontTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/small_fastest"
+                        android:textColor="@color/standerd_grey"
+                        android:textSize="15sp"
+                        android:textStyle="italic" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/hike_medium_container"
+                android:layout_width="match_parent"
+                android:layout_height="65dp"
+                android:background="@drawable/list_item"
+                android:clickable="true"
+                android:orientation="horizontal"
+                android:paddingLeft="24dp" >
+
+                <CheckBox
+                    android:id="@+id/hike_medium_checkbox"
+                    android:layout_width="24dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:button="@drawable/preference_radio_btn"
+                    android:clickable="false" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="12dp"
+                    android:orientation="vertical" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" >
+
+                        <com.bsb.hike.view.CustomFontTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/image_quality_medium"
+                            android:textColor="@color/image_quality_popup_text_color"
+                            android:textSize="18sp" />
+
+                        <com.bsb.hike.view.CustomFontTextView
+                            android:id="@+id/image_quality_medium_cftv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/image_quality_popup_text_color"
+                            android:textSize="18sp"
+                            android:textStyle="italic" />
+                    </LinearLayout>
+
+                    <com.bsb.hike.view.CustomFontTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/medium_faster"
+                        android:textColor="@color/standerd_grey"
+                        android:textSize="15sp"
+                        android:textStyle="italic" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/hike_original_container"
+                android:layout_width="match_parent"
+                android:layout_height="65dp"
+                android:background="@drawable/list_item"
+                android:clickable="true"
+                android:orientation="horizontal"
+                android:paddingLeft="24dp" >
+
+                <CheckBox
+                    android:id="@+id/hike_original_checkbox"
+                    android:layout_width="24dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:button="@drawable/preference_radio_btn"
+                    android:clickable="false" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="12dp"
+                    android:orientation="vertical" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" >
+
+                        <com.bsb.hike.view.CustomFontTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/image_quality_original"
+                            android:textColor="@color/image_quality_popup_text_color"
+                            android:textSize="18sp" />
+
+                        <com.bsb.hike.view.CustomFontTextView
+                            android:id="@+id/image_quality_original_cftv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/image_quality_popup_text_color"
+                            android:textSize="18sp"
+                            android:textStyle="italic" />
+                    </LinearLayout>
+
+                    <com.bsb.hike.view.CustomFontTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/original_slow"
+                        android:textColor="@color/standerd_grey"
+                        android:textSize="15sp"
+                        android:textStyle="italic" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#1f73716d" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal" >
+
+            <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/btn_always"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/list_item"
+                android:text="@string/always"
+                android:textColor="@color/image_quality_popup_text_color"
+                android:textSize="15sp" />
+
+            <View
+                android:id="@+id/horizontal_divider"
+                android:layout_width="0.5dp"
+                android:layout_height="match_parent"
+                android:background="#1f73716d" />
+
+            <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/btn_just_once"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/list_item"
+                android:text="@string/just_once"
+                android:textColor="@color/image_quality_popup_text_color"
+                android:textSize="15sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

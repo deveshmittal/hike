@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sender_details"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="left|center_vertical"
+    android:orientation="horizontal" >
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/sender_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:text="Name/Number"
+        android:textColor="@color/chat_color"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/sender_unsaved_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:gravity="left"
+        android:text="NAME"
+        android:textColor="@color/unsaved_contact_name"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+</LinearLayout>

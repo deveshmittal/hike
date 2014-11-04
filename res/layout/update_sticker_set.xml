@@ -8,7 +8,7 @@
         android:id="@+id/update_btn"
         style="@style/ProfileButtons"
         android:background="@drawable/bg_download_sticker"
-        android:layout_width="180dp"
+        android:layout_width="260dp"
         android:layout_marginBottom="20dp"
         android:layout_marginTop="20dp"
         android:orientation="vertical"

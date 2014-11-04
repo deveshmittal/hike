@@ -61,11 +61,33 @@ public class MessageMetadata
 	private StatusMessage statusMessage;
 
 	private Sticker sticker;
-
+	
 	private boolean oldUser;
+	
+	private boolean isGhostMessage;
+
+	public boolean isGhostMessage()
+	{
+		return isGhostMessage;
+	}
 
 	private NudgeAnimationType nudgeAnimationType = NudgeAnimationType.NONE;
 
+	private int pinMessage =0 ;
+
+	public int getPinMessage()
+	{
+		return pinMessage;
+	}
+
+	public void setPinMessage(int pinMessage)
+	{
+		this.pinMessage = pinMessage;
+	}
+
+	public MessageMetadata(String jsonString,boolean isSent) throws JSONException{
+		this(new JSONObject(jsonString),isSent);
+	}
 	public MessageMetadata(JSONObject metadata, boolean isSent) throws JSONException
 	{
 		this.participantInfoState = metadata.has(HikeConstants.DND_USERS) || metadata.has(HikeConstants.DND_NUMBERS) ? ParticipantInfoState.DND_USER : ParticipantInfoState
@@ -116,6 +138,7 @@ public class MessageMetadata
 			this.hikeFileList.add(new HikeFile(metadata, isSent));
 		}
 		this.isPokeMessage = metadata.optBoolean(HikeConstants.POKE);
+		this.pinMessage  = metadata.optInt(HikeConstants.PIN_MESSAGE);
 		this.json = metadata;
 		if (metadata.has(StickerManager.STICKER_ID))
 		{
@@ -231,7 +254,7 @@ public class MessageMetadata
 	{
 		return sticker;
 	}
-
+	
 	public boolean isOldUser()
 	{
 		return oldUser;
@@ -245,63 +268,5 @@ public class MessageMetadata
 	public void setNudgeAnimationType(NudgeAnimationType type)
 	{
 		this.nudgeAnimationType = type;
-	}
-
-	public Spannable getMessage(final Context context, final ConvMessage convMessage, boolean shouldSetClickListener)
-	{
-		String content = "tap here";
-		StringBuilder formatArg = new StringBuilder();
-		final StringBuilder dndMsisdn = new StringBuilder();
-		if (dndNumbers != null)
-		{
-			try
-			{
-				Map<String, GroupParticipant> participantList = ((GroupConversation) convMessage.getConversation()).getGroupParticipantList();
-				for (int i = 0; i < dndNumbers.length(); i++)
-				{
-					GroupParticipant dndParticipant = participantList.get(dndNumbers.getString(i));
-					if (dndParticipant != null)
-					{
-						String separator = (i == (dndNumbers.length() - 2)) ? " and " : ((i < dndNumbers.length() - 2) ? ", " : "");
-						formatArg.append(dndParticipant.getContactInfo().getFirstName() + separator);
-					}
-					String msisdnSeparator = (i < (dndNumbers.length() - 1)) ? Build.MANUFACTURER.equalsIgnoreCase("Samsung") ? "," : ";" : "";
-					dndMsisdn.append(dndNumbers.getString(i) + msisdnSeparator);
-				}
-			}
-			catch (JSONException e)
-			{
-				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
-			}
-		}
-		else
-		{
-			formatArg.append(Utils.getFirstName(convMessage.getConversation().getLabel()));
-			dndMsisdn.append(convMessage.getMsisdn());
-		}
-		String message = context.getString(!TextUtils.isEmpty(dndMissedCallNumber) ? R.string.dnd_message : !newUser ? R.string.friend_joined_hike_no_creds
-				: R.string.friend_joined_hike_with_creds, formatArg, dndMissedCallNumber);
-		Spannable spannable = Spannable.Factory.getInstance().newSpannable(message);
-		int index = message.indexOf(content);
-		if (index != -1 && shouldSetClickListener)
-		{
-			spannable.setSpan(new ClickableSpan()
-			{
-				@Override
-				public void onClick(View blah)
-				{
-					Intent intent = !TextUtils.isEmpty(dndMissedCallNumber) ? new Intent(Intent.ACTION_VIEW) : new Intent(context, CreditsActivity.class);
-					if (!TextUtils.isEmpty(dndMissedCallNumber))
-					{
-						Utils.logEvent(context, HikeConstants.LogEvent.OPT_IN_TAP_HERE);
-						intent = new Intent(Intent.ACTION_VIEW);
-						intent.setData(Uri.parse("sms:" + dndMsisdn));
-						intent.putExtra("sms_body", context.getString(R.string.dnd_invite_message, dndMissedCallNumber));
-					}
-					context.startActivity(intent);
-				}
-			}, index, index + content.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-		}
-		return spannable;
 	}
 }

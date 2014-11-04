@@ -70,8 +70,6 @@
                 class="com.actionbarsherlock.widget.SearchView$SearchAutoComplete"
                 android:background="@null"
                 android:contentDescription="@string/abs__searchview_description_query"
-                android:drawableLeft="@drawable/ic_top_bar_search"
-                android:drawablePadding="5dp"
                 android:dropDownAnchor="@id/abs__search_edit_frame"
                 android:dropDownHeight="wrap_content"
                 android:dropDownHorizontalOffset="0dip"
@@ -96,7 +94,7 @@
                 android:focusable="true"
                 android:paddingLeft="8dip"
                 android:paddingRight="8dip"
-                android:src="?attr/searchViewCloseIcon" />
+                android:src="@drawable/ic_top_bar_search_close" />
         </LinearLayout>
 
         <LinearLayout

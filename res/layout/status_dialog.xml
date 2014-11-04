@@ -99,7 +99,7 @@
                     android:layout_alignParentRight="true"
                     android:background="@null"
                     android:onClick="onEmojiClick"
-                    android:src="@drawable/emoticon_hike_btn" />
+                    android:src="@drawable/smiley_selector" />
 
                 <com.bsb.hike.view.CustomFontEditText
                     android:id="@+id/status_txt"
@@ -112,7 +112,8 @@
                     android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
                     android:textColor="@color/list_item_header"
                     android:textColorHint="@color/description_lightgrey"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:maxLength="@integer/status_text_limit" />
             </RelativeLayout>
         </RelativeLayout>
 

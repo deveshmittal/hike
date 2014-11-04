@@ -2,6 +2,8 @@ package com.bsb.hike.smartImageLoader;
 
 import java.net.URL;
 
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -71,7 +73,7 @@ public class SocialIconLoader extends ImageWorker
 	{
 		try
 		{
-			Bitmap bitmap = BitmapFactory.decodeStream(new URL(url).openConnection().getInputStream());
+			Bitmap bitmap = HikeBitmapFactory.decodeStream(new URL(url).openConnection().getInputStream());
 			return bitmap;
 		}
 		catch (Exception ex)

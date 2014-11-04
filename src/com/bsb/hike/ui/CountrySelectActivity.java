@@ -35,6 +35,10 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
 public class CountrySelectActivity extends HikeAppStateBaseFragmentActivity implements TextWatcher
 {
+	public static final String RESULT_COUNTRY_NAME = "resCName";
+
+	public static final String RESULT_COUNTRY_CODE = "resCode";
+
 	private SectionedBaseAdapter listViewAdapter;
 
 	private PinnedHeaderListView listView;
@@ -133,10 +137,7 @@ public class CountrySelectActivity extends HikeAppStateBaseFragmentActivity impl
 					if (i < searchResult.size())
 					{
 						Country c = searchResult.get(i);
-						Intent intent = new Intent();
-						intent.putExtra(HikeConstants.Extras.SELECTED_COUNTRY, c.name);
-						setResult(RESULT_OK, intent);
-						finish();
+						setResult(c);
 					}
 				}
 				else
@@ -150,10 +151,7 @@ public class CountrySelectActivity extends HikeAppStateBaseFragmentActivity impl
 						if (row < arr.size())
 						{
 							Country c = arr.get(row);
-							Intent intent = new Intent();
-							intent.putExtra(HikeConstants.Extras.SELECTED_COUNTRY, c.name);
-							setResult(RESULT_OK, intent);
-							finish();
+							setResult(c);
 						}
 					}
 				}
@@ -162,6 +160,16 @@ public class CountrySelectActivity extends HikeAppStateBaseFragmentActivity impl
 
 		filter = new CountryFilter();
 		setupActionBar();
+	}
+
+	private void setResult(Country c)
+	{
+		Intent intent = new Intent();
+		intent.putExtra(HikeConstants.Extras.SELECTED_COUNTRY, c.name);
+		intent.putExtra(RESULT_COUNTRY_NAME, c.name);
+		intent.putExtra(RESULT_COUNTRY_CODE, c.code);
+		setResult(RESULT_OK, intent);
+		finish();
 	}
 
 	private void setupActionBar()

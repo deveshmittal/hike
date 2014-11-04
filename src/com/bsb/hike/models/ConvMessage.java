@@ -21,15 +21,12 @@ import com.bsb.hike.utils.Utils;
 
 public class ConvMessage
 {
-
-	public static final int SMS_TOGGLE_ID = -119;
+	private boolean isBlockAddHeader;
 
 	private long msgID; // this corresponds to msgID stored in sender's DB
 
 	private long mappedMsgId; // this corresponds to msgID stored in receiver's
 								// DB
-
-	private Conversation mConversation;
 
 	private String mMessage;
 
@@ -61,8 +58,33 @@ public class ConvMessage
 
 	private boolean shouldShowPush = true;
 
+	private boolean isTickSoundPlayed = false;
+	
+	private int  hashMessage= HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE;
+
+	public int getHashMessage()
+	{
+		return hashMessage;
+	}
+
+	public void setHashMessage(int hashMessage)
+	{
+		this.hashMessage = hashMessage;
+	}
+
 	private int unreadCount = -1;
+	private int messageType = HikeConstants.MESSAGE_TYPE.PLAIN_TEXT;
 	// private boolean showResumeButton = true;
+	
+	public int getMessageType()
+	{
+		return messageType;
+	}
+
+	public void setMessageType(int messageType)
+	{
+		this.messageType = messageType;
+	}
 
 	public boolean isInvite()
 	{
@@ -116,6 +138,7 @@ public class ConvMessage
 		RECEIVED_READ, /* message received and read */
 		UNKNOWN
 	};
+	
 
 	public static enum ParticipantInfoState
 	{
@@ -204,16 +227,19 @@ public class ConvMessage
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn)
 	{
-		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, false);
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, false,HikeConstants.MESSAGE_TYPE.PLAIN_TEXT);
 	}
-
-	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS)
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, int type)
 	{
-		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO);
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, false, type);
+	}
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS, int type)
+	{
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO, type);
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState, long msgid, long mappedMsgId, String groupParticipantMsisdn, boolean isSMS,
-			ParticipantInfoState participantInfoState)
+			ParticipantInfoState participantInfoState, int type)
 	{
 		assert (msisdn != null);
 		this.mMsisdn = msisdn;
@@ -221,11 +247,44 @@ public class ConvMessage
 		this.mTimestamp = timestamp;
 		this.msgID = msgid;
 		this.mappedMsgId = mappedMsgId;
-		mIsSent = (msgState == State.SENT_UNCONFIRMED || msgState == State.SENT_CONFIRMED || msgState == State.SENT_DELIVERED || msgState == State.SENT_DELIVERED_READ || msgState == State.SENT_FAILED);
+		mIsSent = isMessageSent(msgState);
 		this.groupParticipantMsisdn = groupParticipantMsisdn;
 		this.mIsSMS = isSMS;
+		this.messageType= type;
 		setState(msgState);
+		if(msgState.ordinal() >= State.SENT_CONFIRMED.ordinal())
+		{
+			setTickSoundPlayed(true);
+		}
 		this.participantInfoState = participantInfoState;
+	}
+	
+	public ConvMessage(ConvMessage other) {
+		this.mappedMsgId = other.mappedMsgId;
+		this.groupParticipantMsisdn = other.groupParticipantMsisdn;
+		this.hashMessage = other.hashMessage;
+		this.isBlockAddHeader = other.isBlockAddHeader;
+		this.isFileTransferMessage = other.isFileTransferMessage;
+		this.isStickerMessage = other.isStickerMessage;
+		this.isTickSoundPlayed = other.isTickSoundPlayed;
+		this.messageType = other.messageType;
+		this.mInvite = other.mInvite;
+		this.mIsSent = other.mIsSent;
+		this.mIsSMS = other.mIsSMS;
+		this.mMessage = other.mMessage;
+		this.msgID = other.msgID;
+		this.mState = other.mState;
+		this.mTimestamp = other.mTimestamp;
+		this.participantInfoState = other.participantInfoState;
+		this.shouldShowPush = other.shouldShowPush;
+		this.unreadCount = other.unreadCount;
+		this.metadata = other.metadata;
+		try {
+			this.readByArray = other.readByArray !=null? new JSONArray(other.readByArray.toString()) : null;
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+				
 	}
 
 	public ConvMessage(JSONObject obj) throws JSONException
@@ -245,6 +304,7 @@ public class ConvMessage
 			this.mMessage = data.getString(HikeConstants.HIKE_MESSAGE);
 			mIsSMS = false;
 		}
+		
 		this.mTimestamp = data.getLong(HikeConstants.TIMESTAMP);
 		/* prevent us from receiving a message from the future */
 		long now = System.currentTimeMillis() / 1000;
@@ -272,6 +332,11 @@ public class ConvMessage
 		}
 		if (data.has(HikeConstants.METADATA))
 		{
+			JSONObject mdata = data.getJSONObject(HikeConstants.METADATA);
+			if (mdata.has(HikeConstants.PIN_MESSAGE))
+			{
+				this.messageType = mdata.getInt(HikeConstants.PIN_MESSAGE);
+			}
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
 		}
 		this.isStickerMessage = HikeConstants.STICKER.equals(obj.optString(HikeConstants.SUB_TYPE));
@@ -387,8 +452,20 @@ public class ConvMessage
 			}
 			break;
 		}
-		this.mConversation = conversation;
 		setState(isSelfGenerated ? State.RECEIVED_READ : State.RECEIVED_UNREAD);
+	}
+
+	public void setMetadata(MessageMetadata messageMetadata)
+	{	
+		if(messageMetadata!=null){
+		this.metadata = messageMetadata;
+		isFileTransferMessage = this.metadata.getHikeFiles() != null  &&   this.metadata.getHikeFiles().size() > 0;
+
+		participantInfoState = this.metadata.getParticipantInfoState() ;
+
+		isStickerMessage = this.metadata.getSticker() != null;
+		}
+		
 	}
 
 	public void setMetadata(JSONObject metadata) throws JSONException
@@ -397,11 +474,13 @@ public class ConvMessage
 		{
 			this.metadata = new MessageMetadata(metadata, mIsSent);
 
-			isFileTransferMessage = this.metadata.getHikeFiles() != null;
+			isFileTransferMessage = this.metadata.getHikeFiles() != null  &&   this.metadata.getHikeFiles().size() > 0;
 
 			participantInfoState = this.metadata.getParticipantInfoState();
 
 			isStickerMessage = this.metadata.getSticker() != null;
+			
+			
 		}
 	}
 
@@ -472,8 +551,7 @@ public class ConvMessage
 	@Override
 	public String toString()
 	{
-		String convId = mConversation == null ? "null" : Long.toString(mConversation.getConvId());
-		return "ConvMessage [mConversation=" + convId + ", mMessage=" + mMessage + ", mMsisdn=" + mMsisdn + ", mTimestamp=" + mTimestamp + ", mIsSent=" + mIsSent + ", mState="
+		return "ConvMessage [mMessage=" + mMessage + ", mMsisdn=" + mMsisdn + ", mTimestamp=" + mTimestamp + ", mIsSent=" + mIsSent + ", mState="
 				+ mState + "]";
 	}
 
@@ -553,13 +631,18 @@ public class ConvMessage
 					{
 						md = metadata.getJSON();
 						data.put(HikeConstants.METADATA, md);
-					}
+					}else if(messageType!=HikeConstants.MESSAGE_TYPE.PLAIN_TEXT)
+					{
+						md = metadata.getJSON();
+						data.put(HikeConstants.METADATA, md);
+				    }
 					else if (metadata.isPokeMessage())
 					{
 						data.put(HikeConstants.POKE, true);
 					}
 				}
 				data.put(!mIsSMS ? HikeConstants.HIKE_MESSAGE : HikeConstants.SMS_MESSAGE, mMessage);
+				
 				data.put(HikeConstants.TIMESTAMP, mTimestamp);
 
 				if (mInvite)
@@ -569,6 +652,11 @@ public class ConvMessage
 				else
 				{
 					data.put(HikeConstants.MESSAGE_ID, msgID);
+
+					if(HikeMessengerApp.isStealthMsisdn(mMsisdn) && isSent())
+					{
+						data.put(HikeConstants.STEALTH, true);
+					}
 				}
 
 				object.put(HikeConstants.TO, mMsisdn);
@@ -593,56 +681,14 @@ public class ConvMessage
 		return object;
 	}
 
-	public void setConversation(Conversation conversation)
-	{
-		this.mConversation = conversation;
-	}
-
-	public Conversation getConversation()
-	{
-		return mConversation;
-	}
-
 	public String getTimestampFormatted(boolean pretty, Context context)
 	{
-		Date date = new Date(mTimestamp * 1000);
-		if (pretty)
-		{
-			PrettyTime p = new PrettyTime();
-			return p.format(date);
-		}
-		else
-		{
-			String format;
-			if (android.text.format.DateFormat.is24HourFormat(context))
-			{
-				format = "HH:mm";
-			}
-			else
-			{
-				format = "h:mm aaa";
-			}
-
-			DateFormat df = new SimpleDateFormat(format);
-			return df.format(date);
-		}
+		return Utils.getFormattedTime(pretty, context, mTimestamp);
 	}
 
 	public String getMessageDate(Context context)
 	{
-		Date date = new Date(mTimestamp * 1000);
-		String format;
-		if (android.text.format.DateFormat.is24HourFormat(context))
-		{
-			format = "d MMM ''yy";
-		}
-		else
-		{
-			format = "d MMM ''yy";
-		}
-
-		DateFormat df = new SimpleDateFormat(format);
-		return df.format(date);
+		return Utils.getFormattedDate(context, mTimestamp);
 	}
 
 	public void setMsgID(long msgID)
@@ -697,6 +743,7 @@ public class ConvMessage
 		{
 			ids.put(String.valueOf(mappedMsgId));
 			object.put(HikeConstants.DATA, ids);
+			object.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()/1000));
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
 			object.put(HikeConstants.TO, mMsisdn);
 		}
@@ -798,8 +845,52 @@ public class ConvMessage
 	{
 		this.shouldShowPush = shouldShowPush;
 	}
+
+	public void setBlockAddHeader(boolean isBlockAddHeader)
+	{
+		this.isBlockAddHeader = isBlockAddHeader;
+	}
+
+	public boolean isBlockAddHeader()
+	{
+		return isBlockAddHeader;
+	}
 	
-	public boolean isSmsToggle(){
-		return msgID == ConvMessage.SMS_TOGGLE_ID;
+	public boolean isTickSoundPlayed()
+	{
+		return isTickSoundPlayed;
+	}
+
+	public void setTickSoundPlayed(boolean isTickSoundPlayed)
+	{
+		this.isTickSoundPlayed = isTickSoundPlayed;
+	}
+
+	/**
+	 * Whether a notification sound should be played while displaying this message in Android notifications shade
+	 * 
+	 * @return
+	 */
+	public boolean isSilent()
+	{
+		// Do not play sound in case of bg change, participant joined, nuj/ruj, status updates
+		if ((getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND) || (getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
+				|| (getParticipantInfoState() == ParticipantInfoState.USER_JOIN) || (getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	public static boolean isMessageSent(State msgState)
+	{
+		return !(msgState==State.RECEIVED_READ || msgState == State.RECEIVED_UNREAD);
+	}
+	
+	public void setMsisdn(String msisdn){
+		this.mMsisdn = msisdn;
 	}
 }

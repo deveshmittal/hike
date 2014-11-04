@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    android:gravity="center_vertical|left"
+    android:minHeight="30dp"
+    android:paddingBottom="4dp" >
+
+    <ViewStub
+        android:id="@+id/day_stub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout="@layout/message_day_container" />
+
+    <RelativeLayout
+        android:id="@+id/overlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/day_container"
+        android:paddingBottom="2.5dp" >
+
+        <include
+            android:id="@+id/avatar_container"
+            android:layout_width="@dimen/chatthread_avatar"
+            android:layout_height="@dimen/chatthread_avatar"
+            android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
+            android:layout_marginTop="2.5dp"
+            layout="@layout/message_sender_avatar" />
+
+        <include
+            android:id="@+id/sender_details"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/chat_bubble_nudge_edge_spacing"
+            android:layout_marginTop="2.5dp"
+            android:layout_toRightOf="@id/avatar_container"
+            layout="@layout/message_sender_details" />
+
+        <RelativeLayout
+            android:id="@+id/placeholder"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_below="@id/sender_details"
+            android:layout_marginLeft="@dimen/chat_bubble_nudge_edge_spacing"
+            android:layout_marginTop="2.5dp"
+            android:layout_toRightOf="@id/avatar_container"
+            android:background="@drawable/bg_ft_progress"
+            android:gravity="center" >
+
+            <ProgressBar
+                android:id="@+id/initializing"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:layout_centerInParent="true"
+                android:indeterminateDrawable="@drawable/circular_double_spinner_dark"
+                android:visibility="gone" />
+
+            <com.bsb.hike.view.HoloCircularProgress
+                xmlns:app="http://schemas.android.com/apk/res/com.bsb.hike"
+                android:id="@+id/play_progress"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:visibility="gone"
+                app:marker_visible="false"
+                app:progress="0.00"
+                app:progress_background_color="#00000000"
+                app:progress_color="@color/rec_progress"
+                app:stroke_width="2dp"
+                app:thumb_visible="false" />
+
+            <ImageView
+                android:id="@+id/action"
+                android:layout_width="16dp"
+                android:layout_height="20dp"
+                android:layout_centerInParent="true" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:textSize="10sp"
+                android:visibility="gone" />
+        </RelativeLayout>
+
+        <include
+            android:id="@+id/time_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/placeholder"
+            android:layout_marginLeft="@dimen/chat_bubble_time_edge_spacing"
+            android:layout_marginTop="4dp"
+            android:layout_toRightOf="@id/avatar_container"
+            layout="@layout/message_time_status_ext" />
+    </RelativeLayout>
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@id/overlay"
+        android:layout_alignTop="@id/overlay"
+        layout="@layout/message_overlay" />
+
+</RelativeLayout>

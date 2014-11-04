@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="72dp"
-    android:layout_weight="1"
-    android:background="@drawable/updates_bg_selector"
-    android:paddingLeft="8dp"
-    android:paddingRight="8dp" >
+    android:layout_height="53dp"
+    android:background="@drawable/list_item" >
 
     <LinearLayout
         android:id="@+id/image_container"
-        android:layout_width="@dimen/medium_avatar"
-        android:layout_height="@dimen/medium_avatar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:gravity="center"
-        android:layout_marginRight="5dp" >
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="14dp"
+        android:gravity="center" >
 
         <RelativeLayout
             android:id="@+id/avatar_container"
-            android:layout_width="@dimen/medium_avatar"
-            android:layout_height="@dimen/medium_avatar" >
+            android:layout_width="36dp"
+            android:layout_height="36dp" >
 
             <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/avatar"
@@ -33,10 +31,35 @@
             android:id="@+id/add_participant"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="5dp"
-            android:src="@drawable/ic_add_participant"
+            android:layout_gravity="center"
+            android:layout_marginLeft="11dp"
+            android:src="@drawable/ic_invite_to_hike"
             android:visibility="gone" />
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:background="@drawable/bg_compose_tag"
+        android:minWidth="48dp"
+        android:layout_width="wrap_content"
+        android:layout_height="24dp"
+		android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:layout_marginRight="8dp"   
+        android:visibility="gone"
+        android:id="@+id/owner_indicator" >
+        
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/owner_indicator_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/group_admin"
+        android:textColor="@color/blue_hike"
+        android:paddingLeft="6dp"
+        android:paddingRight="6dp"
+        android:textSize="11sp"
+        android:layout_gravity="center"
+        android:textStyle="normal"/>
     </LinearLayout>
 
     <LinearLayout
@@ -44,9 +67,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginRight="5dp"
+        android:layout_marginRight="6dp"
         android:layout_toRightOf="@id/image_container"
-        android:orientation="vertical" >
+        android:layout_toLeftOf="@id/owner_indicator"
+        android:orientation="horizontal" >
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/name"
@@ -56,25 +80,46 @@
             android:singleLine="true"
             android:text="Rishabh Sharma"
             android:textColor="@color/updates_text"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:textStyle="bold|italic" />
-
-        <com.bsb.hike.view.LinkedTextView
-            android:id="@+id/main_info"
+        
+        <LinearLayout 
+            android:id="@+id/unsaved_cont_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="2:45"
-            android:textColor="@color/participant_last_seen"
-            android:textSize="12sp" />
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:visibility="gone"
+            >
+        
+             <View
+                android:id="@+id/divider"
+                android:layout_width="0.5dp"
+                android:layout_height="14dp"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="6dp"
+                android:background="@color/updates_text" />
+             
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/telephone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="Rishabh Sharma"
+            android:textColor="@color/updates_text"
+            android:textSize="14sp"
+            android:textStyle="italic" />
+        
+        </LinearLayout>
+
     </LinearLayout>
 
-    <ImageView 
-        android:id="@+id/owner_indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:src="@drawable/ic_group_owner"
-        android:paddingTop="8dp"
-        android:visibility="gone"/>
+
+    <View
+        style="@style/Divider"
+        android:layout_alignParentBottom="true" />
+
 </RelativeLayout>

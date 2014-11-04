@@ -10,14 +10,24 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/gallery_selected_grid_height"
         android:layout_alignParentBottom="true"
-        android:listSelector="@android:color/transparent"
         android:horizontalSpacing="@dimen/gallery_grid_spacing"
+        android:listSelector="@android:color/transparent"
         android:verticalSpacing="@dimen/gallery_grid_spacing" />
+
+    <LinearLayout
+        android:id="@+id/tipContainerTop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical" >
+    </LinearLayout>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/selection_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/selection_grid" />
+        android:layout_above="@id/selection_grid"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_below="@id/tipContainerTop" />
 
 </RelativeLayout>

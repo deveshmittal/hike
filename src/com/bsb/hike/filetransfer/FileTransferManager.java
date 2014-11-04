@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.Thread.State;
+import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,13 +30,16 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.Logger;
@@ -273,14 +277,33 @@ public class FileTransferManager extends BroadcastReceiver
 		return fileTaskMap.containsKey(msgId);
 	}
 
+	public ConvMessage getMessage(long msgId)
+	{
+		FutureTask<FTResult> obj = fileTaskMap.get(msgId);
+		if (obj != null)
+		{
+			Object msg = ((MyFutureTask) obj).getTask().getUserContext();
+			if (msg != null)
+			{
+				return ((ConvMessage) msg);
+			}
+		}
+		return null;
+	}
+
 	public void downloadFile(File destinationFile, String fileKey, long msgId, HikeFileType hikeFileType, Object userContext, boolean showToast)
 	{
-		if (isFileTaskExist(msgId))
+		if (isFileTaskExist(msgId)){
+			validateFilePauseState(msgId);
 			return;
+		}
 		if(taskOverflowLimitAchieved())
 			return;
 		
-		DownloadFileTask task = new DownloadFileTask(handler, fileTaskMap, context, destinationFile, fileKey, msgId, hikeFileType, userContext, showToast);
+		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
+		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
+		DownloadFileTask task = new DownloadFileTask(handler, fileTaskMap, context, destinationFile, fileKey, msgId, hikeFileType, userContext, showToast, token, uId);
 		try
 		{
 			MyFutureTask ft = new MyFutureTask(task);
@@ -294,7 +317,7 @@ public class FileTransferManager extends BroadcastReceiver
 
 	}
 
-	public void uploadFile(String msisdn, File sourceFile, String fileType, HikeFileType hikeFileType, boolean isRec, boolean isForwardMsg, boolean isRecipientOnHike,
+	public void uploadFile(String msisdn, File sourceFile, String fileKey, String fileType, HikeFileType hikeFileType, boolean isRec, boolean isForwardMsg, boolean isRecipientOnHike,
 			long recordingDuration)
 	{
 		if(taskOverflowLimitAchieved())
@@ -303,7 +326,24 @@ public class FileTransferManager extends BroadcastReceiver
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, msisdn, sourceFile, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike,
+		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, msisdn, sourceFile, fileKey, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike,
+				recordingDuration);
+		// UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, convMessage, isRecipientOnHike);
+		MyFutureTask ft = new MyFutureTask(task);
+		task.setFutureTask(ft);
+		pool.execute(ft);
+	}
+	
+	public void uploadFile(ArrayList<ContactInfo> contactList, File sourceFile, String fileKey, String fileType, HikeFileType hikeFileType, boolean isRec, boolean isForwardMsg, boolean isRecipientOnHike,
+			long recordingDuration)
+	{
+		if(taskOverflowLimitAchieved())
+			return;
+		
+		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
+		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
+		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, contactList, sourceFile, fileKey, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike,
 				recordingDuration);
 		// UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, convMessage, isRecipientOnHike);
 		MyFutureTask ft = new MyFutureTask(task);
@@ -313,8 +353,10 @@ public class FileTransferManager extends BroadcastReceiver
 
 	public void uploadFile(ConvMessage convMessage, boolean isRecipientOnHike)
 	{
-		if (isFileTaskExist(convMessage.getMsgID()))
+		if (isFileTaskExist(convMessage.getMsgID())){
+			validateFilePauseState(convMessage.getMsgID());
 			return;
+		}
 		if(taskOverflowLimitAchieved())
 			return;
 		
@@ -358,7 +400,10 @@ public class FileTransferManager extends BroadcastReceiver
 		if(taskOverflowLimitAchieved())
 			return;
 		
-		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, msisdn, latitude, longitude, zoomLevel, isRecipientOnhike);
+		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
+		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
+		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, msisdn, latitude, longitude, zoomLevel, isRecipientOnhike, token, uId);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
 		pool.execute(ft);
@@ -369,7 +414,10 @@ public class FileTransferManager extends BroadcastReceiver
 		if(taskOverflowLimitAchieved())
 			return;
 		
-		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, msisdn, contactJson, isRecipientOnhike);
+		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
+		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
+		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, msisdn, contactJson, isRecipientOnhike, token, uId);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
 		pool.execute(ft);
@@ -377,12 +425,17 @@ public class FileTransferManager extends BroadcastReceiver
 
 	public void uploadContactOrLocation(ConvMessage convMessage, boolean uploadingContact, boolean isRecipientOnhike)
 	{
-		if (isFileTaskExist(convMessage.getMsgID()))
+		if (isFileTaskExist(convMessage.getMsgID())){
+			validateFilePauseState(convMessage.getMsgID());
 			return;
+		}
 		if(taskOverflowLimitAchieved())
 			return;
 		
-		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, convMessage, uploadingContact, isRecipientOnhike);
+		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
+		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
+		UploadContactOrLocationTask task = new UploadContactOrLocationTask(handler, fileTaskMap, context, convMessage, uploadingContact, isRecipientOnhike, token, uId);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
 		pool.execute(ft);
@@ -412,7 +465,7 @@ public class FileTransferManager extends BroadcastReceiver
 		else
 			fss = getDownloadFileState(msgId, mFile);
 
-		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED)
+		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.INITIALIZED)
 		{
 			FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 			if (obj != null)
@@ -437,7 +490,10 @@ public class FileTransferManager extends BroadcastReceiver
 		FutureTask<FTResult> obj = fileTaskMap.get(msgId);
 		if (obj != null)
 		{
-			((MyFutureTask) obj).getTask().setState(FTState.PAUSING);
+			FileTransferBase task = ((MyFutureTask) obj).getTask();
+			task.setPausedProgress(task._bytesTransferred);
+			task.setState(FTState.PAUSED);
+			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 			Logger.d(getClass().getSimpleName(), "pausing the task....");
 		}
 	}
@@ -454,7 +510,7 @@ public class FileTransferManager extends BroadcastReceiver
 	// this will be used when user deletes account or unlink account
 	public void deleteAllFTRFiles()
 	{
-		if (HIKE_TEMP_DIR != null)
+		if (HIKE_TEMP_DIR != null && HIKE_TEMP_DIR.listFiles() != null)
 			for (File f : HIKE_TEMP_DIR.listFiles())
 			{
 				if (f != null)
@@ -527,7 +583,7 @@ public class FileTransferManager extends BroadcastReceiver
 				e.printStackTrace();
 			}
 		}
-		return fss;
+		return fss != null ? fss : new FileSavedState();
 	}
 
 	// this function gives the state of uploading for a file
@@ -703,7 +759,7 @@ public class FileTransferManager extends BroadcastReceiver
 		else
 			fss = getDownloadFileState(mFile, msgId);
 
-		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSING || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
+		if (fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
 		{
 			if (fss.getTotalSize() > 0)
 			{
@@ -772,5 +828,17 @@ public class FileTransferManager extends BroadcastReceiver
 			return true;
 		else
 			return false;
+	}
+	
+	private void validateFilePauseState(long msgId){
+		FutureTask<FTResult> obj = fileTaskMap.get(msgId);
+		if (obj != null)
+		{
+			FileTransferBase task = ((MyFutureTask) obj).getTask();
+			if(task.getPausedProgress() == task._bytesTransferred && task._state == FTState.PAUSED){
+				task.setState(FTState.IN_PROGRESS);
+				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+			}
+		}
 	}
 }

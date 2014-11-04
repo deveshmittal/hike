@@ -516,6 +516,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 										d.put(HikeConstants.NATIVE_INVITES, nativeinvites);
 										data.put(HikeConstants.DATA, d);
 										data.put(HikeConstants.TIMESTAMP, System.currentTimeMillis() / 1000);
+										data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
 										HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, data);
 										Logger.d("SocialNetInviteActivity", "fb packet" + data.toString());
 
@@ -595,7 +596,30 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 		 * mMenu.findItem(R.id.sendInvite).setEnabled(true); else { mMenu.findItem(R.id.sendInvite).setEnabled(false); }
 		 */
 	}
-
+	
+	@Override
+	protected void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(adapter != null)
+		{
+			adapter.getSocialIconLoader().setExitTasksEarly(true);
+		}
+	}
+	
+	@Override
+	protected void onResume()
+	{
+		// TODO Auto-generated method stub
+		super.onResume();
+		if(adapter != null)
+		{
+			adapter.getSocialIconLoader().setExitTasksEarly(false);
+			adapter.notifyDataSetChanged();
+		}
+	}
+	
 	@Override
 	protected void onDestroy()
 	{

@@ -30,5 +30,16 @@
        	android:clickable="false"
        	android:focusable="false"
         android:visibility="gone" />
+    
+    <ImageView
+        android:id="@+id/intro_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:scaleType="centerInside"
+        android:paddingRight="12dp"
+        android:src="@drawable/ic_stealth_passcode_list"
+        android:visibility="gone" />
 
 </RelativeLayout>

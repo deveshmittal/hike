@@ -4,7 +4,9 @@ import android.app.Dialog;
 import android.content.Context;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.bsb.hike.R;
 
@@ -18,6 +20,8 @@ public class CustomAlertDialog extends Dialog
 	Button btnOk;
 
 	Button btnCancel;
+	
+	CheckBox bodyCheckBox;
 
 	public CustomAlertDialog(Context context)
 	{
@@ -29,8 +33,9 @@ public class CustomAlertDialog extends Dialog
 		body = (TextView) this.findViewById(R.id.body_text);
 		btnOk = (Button) this.findViewById(R.id.btn_ok);
 		btnCancel = (Button) this.findViewById(R.id.btn_cancel);
+		bodyCheckBox = (CheckBox) findViewById(R.id.body_checkbox);
 
-		findViewById(R.id.body_checkbox).setVisibility(View.GONE);
+		bodyCheckBox.setVisibility(View.GONE);
 	}
 
 	public void setHeader(String headerText)
@@ -105,4 +110,26 @@ public class CustomAlertDialog extends Dialog
 		});
 	}
 
+	public void setCancelButtonVisibility(int val)
+	{
+		btnCancel.setVisibility(val);
+	}
+	
+	public void setCheckBox(int checkBoxStringResId, OnCheckedChangeListener l)
+	{
+		bodyCheckBox.setVisibility(View.VISIBLE);
+		bodyCheckBox.setOnCheckedChangeListener(l);
+		bodyCheckBox.setText(checkBoxStringResId);
+	}
+	
+	public void setCheckBox(int checkBoxStringResId)
+	{
+		bodyCheckBox.setVisibility(View.VISIBLE);
+		bodyCheckBox.setText(checkBoxStringResId);
+	}
+	
+	public boolean isChecked()
+	{
+		return bodyCheckBox.getVisibility() == View.VISIBLE && bodyCheckBox.isChecked();
+	}
 }

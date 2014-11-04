@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/popup"
+    android:layout_width="275dp"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:background="#e6564f"
+    android:gravity="center_horizontal"
+    android:orientation="vertical" >
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/stealth_ftue_pu_img_margin_bottom"
+        android:layout_marginTop="@dimen/stealth_ftue_pu_img_margin_top"
+        android:src="@drawable/img_stealth_intro" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:text="@string/introducing_stealth_mode"
+        android:textColor="#ffffef"
+        android:textStyle="bold"
+        android:textSize="18dp" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/stealth_ftue_pu_msg_margin_bottom"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:gravity="center"
+        android:text="@string/stealth_mode_popup_msg"
+        android:textColor="#ffffef"
+        android:textSize="14dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#ca4c45" />
+
+    <LinearLayout
+        android:id="@+id/button_container"
+        android:layout_width="match_parent"
+        android:layout_height="47dp"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true" >
+        
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/noButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/popup_button_bg_selector"
+            android:clickable="true"
+            android:gravity="center"
+            android:text="@string/quick_setup"
+            android:textColor="#ffffef"
+            android:textSize="16dp"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/btn_separator"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="#ca4c45"
+            android:visibility="gone" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/awesomeButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/popup_button_bg_selector"
+            android:clickable="true"
+            android:gravity="center"
+            android:text="@string/quick_setup"
+            android:textColor="#ffffef"
+            android:textSize="16dp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>

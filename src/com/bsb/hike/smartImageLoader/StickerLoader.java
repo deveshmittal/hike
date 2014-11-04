@@ -1,5 +1,7 @@
 package com.bsb.hike.smartImageLoader;
 
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,11 +23,11 @@ public class StickerLoader extends ImageWorker
 		if (data.contains("res:"))
 		{
 			int id = Integer.parseInt(data.substring(data.indexOf(":") + 1));
-			return BitmapFactory.decodeResource(mResources, id);
+			return HikeBitmapFactory.decodeResource(mResources, id);
 		}
 		else
 		{
-			return BitmapFactory.decodeFile(data);
+			return HikeBitmapFactory.decodeFile(data);
 		}
 	}
 

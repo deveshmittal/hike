@@ -3,6 +3,7 @@ package com.bsb.hike.view;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.widget.EditText;
 
 import com.bsb.hike.HikeConstants;
@@ -16,6 +17,8 @@ public class CustomFontEditText extends EditText
 	private CustomTypeFace customTypeFace;
 
 	private int style;
+
+	private BackKeyListener listener;
 
 	private void setFont(AttributeSet attrs)
 	{
@@ -87,5 +90,32 @@ public class CustomFontEditText extends EditText
 				super.setTypeface(customTypeFace.normal);
 			}
 		}
+	}
+
+	public void setBackKeyListener(BackKeyListener listener)
+	{
+		this.listener = listener;
+	}
+
+	@Override
+	public boolean onKeyPreIme(int keyCode, KeyEvent event)
+	{
+		boolean result = false;
+		if (keyCode == KeyEvent.KEYCODE_BACK)
+		{
+			result = super.onKeyPreIme(keyCode, event);
+
+			// User has pressed Back key Hide your view as you do it in your activity
+			if (listener != null)
+			{
+				listener.onBackKeyPressedET(this);
+			}
+		}
+		return result;
+	}
+
+	public static interface BackKeyListener
+	{
+		public void onBackKeyPressedET(CustomFontEditText editText);
 	}
 }

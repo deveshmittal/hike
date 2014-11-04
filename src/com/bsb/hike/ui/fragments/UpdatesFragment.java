@@ -24,7 +24,6 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.CentralTimelineAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.Protip;
@@ -33,6 +32,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -63,7 +63,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	private long previousEventTime;
 
 	private int velocity;
-
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
@@ -93,9 +93,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		super.onPause();
 		if (centralTimelineAdapter != null)
 		{
-			centralTimelineAdapter.getTimelineImageLoader().setPauseWork(false);
 			centralTimelineAdapter.getTimelineImageLoader().setExitTasksEarly(true);
-			centralTimelineAdapter.getIconImageLoader().setPauseWork(false);
 			centralTimelineAdapter.getIconImageLoader().setExitTasksEarly(true);
 		}
 	}
@@ -136,7 +134,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id)
 	{
-		StatusMessage statusMessage = centralTimelineAdapter.getItem(position);
+		StatusMessage statusMessage = centralTimelineAdapter.getItem(position - getListView().getHeaderViewsCount());
 		if (statusMessage.getId() == CentralTimelineAdapter.FTUE_ITEM_ID || (statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
 				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST) || (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP))
 		{
@@ -150,10 +148,20 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 			return;
 		}
 
+		if (HikeMessengerApp.isStealthMsisdn(statusMessage.getMsisdn()))
+		{
+			int stealthMode = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
+			if (stealthMode != HikeConstants.STEALTH_ON)
+			{
+				return;
+			}
+		}
 		Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(null, statusMessage.getMsisdn(), statusMessage.getNotNullName(), statusMessage.getMsisdn()), true);
 		intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
 		intent.setClass(getActivity(), ChatThread.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
+		getActivity().finish();
 	}
 
 	@Override
@@ -197,9 +205,11 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 
 					if (!olderMessages.isEmpty())
 					{
+						int scrollOffset = getListView().getChildAt(0).getTop();
+
 						statusMessages.addAll(statusMessages.size(), olderMessages);
 						centralTimelineAdapter.notifyDataSetChanged();
-						getListView().setSelection(firstVisibleItem);
+						getListView().setSelectionFromTop(firstVisibleItem, scrollOffset);
 					}
 					else
 					{
@@ -250,7 +260,6 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		{
 			final StatusMessage statusMessage = (StatusMessage) object;
 			final int startIndex = getStartIndex();
-			Utils.resetUnseenStatusCount(prefs);
 
 			if (!isAdded())
 			{
@@ -358,7 +367,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 
 	private boolean shouldAddFTUEItem()
 	{
-		if (HomeActivity.ftueList.isEmpty() || statusMessages.size() > HikeConstants.MIN_STATUS_COUNT || prefs.getBoolean(HikeMessengerApp.HIDE_FTUE_SUGGESTIONS, false))
+		if (HomeActivity.ftueContactsData.isEmpty() || statusMessages.size() > HikeConstants.MIN_STATUS_COUNT || prefs.getBoolean(HikeMessengerApp.HIDE_FTUE_SUGGESTIONS, false))
 		{
 			return false;
 		}
@@ -367,7 +376,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		 * To add an ftue item, we need to make sure the user does not have 5 friends.
 		 */
 		int friendCounter = 0;
-		for (ContactInfo contactInfo : HomeActivity.ftueList)
+		for (ContactInfo contactInfo : HomeActivity.ftueContactsData.getCompleteList())
 		{
 			FavoriteType favoriteType = contactInfo.getFavoriteType();
 			if (favoriteType == FavoriteType.FRIEND || favoriteType == FavoriteType.REQUEST_RECEIVED || favoriteType == FavoriteType.REQUEST_SENT
@@ -376,7 +385,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 				friendCounter++;
 			}
 		}
-		return friendCounter < HikeConstants.FTUE_LIMIT;
+		return friendCounter < HikeConstants.FTUE_LIMIT && friendCounter < HomeActivity.ftueContactsData.getCompleteList().size();
 	}
 
 	private void addFTUEItem(List<StatusMessage> statusMessages)
@@ -402,7 +411,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		@Override
 		protected List<StatusMessage> doInBackground(Void... params)
 		{
-			List<ContactInfo> friendsList = HikeUserDatabase.getInstance().getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, userMsisdn);
+			List<ContactInfo> friendsList = HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.BOTH_VALUE, userMsisdn);
 
 			ArrayList<String> msisdnList = new ArrayList<String>();
 

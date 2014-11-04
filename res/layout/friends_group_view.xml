@@ -38,7 +38,6 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:text="Friends"
                     android:textColor="#0f8fe1"
                     android:textSize="14sp"
                     android:textStyle="bold" />

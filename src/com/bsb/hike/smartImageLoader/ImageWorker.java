@@ -19,24 +19,24 @@ package com.bsb.hike.smartImageLoader;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.support.v4.app.FragmentManager;
 import android.widget.ImageView;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ProfileAdapter;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -64,15 +64,19 @@ public abstract class ImageWorker
 
 	private AtomicBoolean mExitTasksEarly = new AtomicBoolean(false);
 
-	protected boolean mPauseWork = false;
-
-	private final Object mPauseWorkLock = new Object();
-
 	protected Resources mResources;
 
 	private boolean setDefaultAvatarIfNoCustomIcon = false;
 
 	private boolean setHiResDefaultAvatar = false;
+	
+	private boolean setDefaultDrawableNull = true;
+	
+	/*
+	 * This case is currently being used in very specific scenerio of
+	 * media viewer files for which we could not create thumbnails(ex. tif images)
+	 */
+	private Drawable defaultDrawable = null;
 
 	protected ImageWorker()
 	{
@@ -88,6 +92,12 @@ public abstract class ImageWorker
 	{
 		String key = data + (rounded ? ROUND_SUFFIX : "");
 		loadImage(key, imageView, false, runOnUiThread);
+	}
+
+	public void loadImage(String data, boolean rounded, ImageView imageView, boolean runOnUiThread, boolean isFlinging, boolean setDefaultAvatarInitially)
+	{
+		String key = data + (rounded ? ROUND_SUFFIX : "");
+		loadImage(key, imageView, isFlinging, runOnUiThread, setDefaultAvatarInitially);
 	}
 
 	/**
@@ -112,6 +122,11 @@ public abstract class ImageWorker
 
 	public void loadImage(String data, ImageView imageView, boolean isFlinging, boolean runOnUiThread)
 	{
+		loadImage(data, imageView, isFlinging, runOnUiThread, false);
+	}
+
+	public void loadImage(String data, ImageView imageView, boolean isFlinging, boolean runOnUiThread, boolean setDefaultAvatarInitially)
+	{
 		if (data == null)
 		{
 			return;
@@ -119,9 +134,17 @@ public abstract class ImageWorker
 
 		BitmapDrawable value = null;
 
-		imageView.setImageDrawable(null);
-		imageView.setBackgroundDrawable(null);
-
+		if (setDefaultAvatarInitially)
+		{
+			setDefaultAvatar(imageView, data);
+		}
+		else
+		{
+			if(setDefaultDrawableNull){
+				imageView.setImageDrawable(null);
+				imageView.setBackgroundDrawable(null);
+			}
+		}
 		if (mImageCache != null)
 		{
 			value = mImageCache.get(data);
@@ -132,7 +155,6 @@ public abstract class ImageWorker
 				value = null;
 			}
 		}
-
 		if (value != null)
 		{
 			Logger.d(TAG, data + " Bitmap found in cache and is not recycled.");
@@ -144,8 +166,11 @@ public abstract class ImageWorker
 			Bitmap b = processBitmapOnUiThread(data);
 			if (b != null && mImageCache != null)
 			{
-				BitmapDrawable bd = Utils.getBitmapDrawable(mResources, b);
-				mImageCache.putInCache(data, bd);
+				BitmapDrawable bd = HikeBitmapFactory.getBitmapDrawable(mResources, b);
+				if (bd != null)
+				{
+					mImageCache.putInCache(data, bd);
+				}
 				imageView.setImageDrawable(bd);
 			}
 			else if (b == null && setDefaultAvatarIfNoCustomIcon)
@@ -155,8 +180,22 @@ public abstract class ImageWorker
 		}
 		else if (cancelPotentialWork(data, imageView) && !isFlinging)
 		{
+			Bitmap loadingBitmap = mLoadingBitmap;
+
+			/*
+			 * Setting this loading bitmap to prevent the imageView from showing a blank drawable while we try to fetch the actual drawable for the imageView.
+			 */
+			if (setDefaultAvatarInitially)
+			{
+				Drawable drawable = imageView.getDrawable();
+				if (drawable instanceof BitmapDrawable)
+				{
+					loadingBitmap = ((BitmapDrawable) drawable).getBitmap();
+				}
+			}
+
 			final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-			final AsyncDrawable asyncDrawable = new AsyncDrawable(mResources, mLoadingBitmap, task);
+			final AsyncDrawable asyncDrawable = new AsyncDrawable(mResources, loadingBitmap, task);
 			imageView.setImageDrawable(asyncDrawable);
 
 			// NOTE: This uses a custom version of AsyncTask that has been pulled from the
@@ -176,18 +215,18 @@ public abstract class ImageWorker
 		boolean rounded = false;
 		if (idx > 0)
 		{
-			data = data.substring(0, idx);
+			data = new String(data.substring(0, idx));
 			rounded = true;
 		}
 		else
 		{
 			int idx1 = data.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
 			if (idx1 > 0)
-				data = data.substring(0, idx1);
+				data = new String(data.substring(0, idx1));
 		}
 		boolean isGroupConversation = Utils.isGroupConversation(data);
 
-		imageView.setBackgroundResource(Utils.getDefaultAvatarResourceId(data, rounded));
+		imageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(data, rounded));
 		if (setHiResDefaultAvatar)
 		{
 			imageView.setImageResource(isGroupConversation ? R.drawable.ic_default_avatar_group_hires : R.drawable.ic_default_avatar_hires);
@@ -217,6 +256,17 @@ public abstract class ImageWorker
 	{
 		mLoadingBitmap = bitmap;
 	}
+	
+	/**
+	 * Set placeholder bitmap that shows when the the background thread is running.
+	 * 
+	 * @param bitmap
+	 */
+	public void setLoadingImage(Drawable bitmap)
+	{
+		if(bitmap != null)
+			mLoadingBitmap = drawableToBitmap(bitmap);
+	}
 
 	/**
 	 * Set placeholder bitmap that shows when the the background thread is running.
@@ -225,7 +275,7 @@ public abstract class ImageWorker
 	 */
 	public void setLoadingImage(int resId)
 	{
-		mLoadingBitmap = BitmapFactory.decodeResource(mResources, resId);
+		mLoadingBitmap = HikeBitmapFactory.decodeBitmapFromResource(mResources, resId, Bitmap.Config.RGB_565);
 	}
 
 	/**
@@ -251,7 +301,6 @@ public abstract class ImageWorker
 	public void setExitTasksEarly(boolean exitTasksEarly)
 	{
 		mExitTasksEarly.set(exitTasksEarly);
-		setPauseWork(false);
 	}
 
 	public void setDefaultAvatarIfNoCustomIcon(boolean b)
@@ -264,6 +313,16 @@ public abstract class ImageWorker
 		this.setHiResDefaultAvatar = b;
 	}
 
+	public void setDefaultDrawableNull(boolean b)
+	{
+		this.setDefaultDrawableNull = b;
+	}
+	
+	public void setDefaultDrawable(Drawable d)
+	{
+		this.defaultDrawable = d;
+	}
+	
 	/**
 	 * Subclasses should override this to define any processing or work that must happen to produce the final bitmap. This will be executed in a background thread and be long
 	 * running. For example, you could resize a large bitmap here, or pull down an image from the network.
@@ -378,21 +437,6 @@ public abstract class ImageWorker
 			Bitmap bitmap = null;
 			BitmapDrawable drawable = null;
 
-			// Wait here if work is paused and the task is not cancelled
-			synchronized (mPauseWorkLock)
-			{
-				while (mPauseWork && !isCancelled())
-				{
-					try
-					{
-						mPauseWorkLock.wait();
-					}
-					catch (InterruptedException e)
-					{
-					}
-				}
-			}
-
 			// If the bitmap was not found in the cache and this task has not been cancelled by
 			// another thread and the ImageView that was originally bound to this task is still
 			// bound back to this task and our "exit early" flag is not set, then call the main
@@ -409,7 +453,7 @@ public abstract class ImageWorker
 			if (bitmap != null)
 			{
 
-				drawable = Utils.getBitmapDrawable(mResources, bitmap);
+				drawable = HikeBitmapFactory.getBitmapDrawable(mResources, bitmap);
 
 				if (mImageCache != null)
 				{
@@ -434,13 +478,26 @@ public abstract class ImageWorker
 			}
 
 			final ImageView imageView = getAttachedImageView();
-			if (value != null && imageView != null)
+			if(imageView != null)
 			{
-				setImageDrawable(imageView, value);
-			}
-			else if (value == null && imageView != null && setDefaultAvatarIfNoCustomIcon)
-			{
-				setDefaultAvatar(imageView, data);
+				if (value != null)
+				{
+					setImageDrawable(imageView, value);
+				}
+				else if (setDefaultAvatarIfNoCustomIcon)
+				{
+					setDefaultAvatar(imageView, data);
+				}
+				else if (defaultDrawable != null)
+				{
+					/*
+					 * This case is currently being used in very specific scenerio of
+					 * media viewer files for which we could not create thumbnails(ex. tif images)
+					 */
+					setImageDrawable(imageView, defaultDrawable);
+					imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+				}
+
 			}
 		}
 
@@ -448,10 +505,6 @@ public abstract class ImageWorker
 		protected void onCancelled(BitmapDrawable value)
 		{
 			super.onCancelled(value);
-			synchronized (mPauseWorkLock)
-			{
-				mPauseWorkLock.notifyAll();
-			}
 		}
 
 		/**
@@ -513,7 +566,7 @@ public abstract class ImageWorker
 				if (!dontSetBackground)
 				{
 					// Set background to loading bitmap
-					imageView.setBackgroundDrawable(new BitmapDrawable(mResources, mLoadingBitmap));
+					imageView.setBackgroundDrawable(HikeBitmapFactory.getBitmapDrawable(mResources, mLoadingBitmap));
 				}
 
 				imageView.setImageDrawable(td);
@@ -530,283 +583,21 @@ public abstract class ImageWorker
 		}
 	}
 
-	/**
-	 * Pause any ongoing background work. This can be used as a temporary measure to improve performance. For example background work could be paused when a ListView or GridView is
-	 * being scrolled using a {@link android.widget.AbsListView.OnScrollListener} to keep scrolling smooth.
-	 * <p>
-	 * If work is paused, be sure setPauseWork(false) is called again before your fragment or activity is destroyed (for example during {@link android.app.Activity#onPause()}), or
-	 * there is a risk the background thread will never finish.
-	 */
-	public void setPauseWork(boolean pauseWork)
-	{
-		synchronized (mPauseWorkLock)
-		{
-			mPauseWork = pauseWork;
-			if (!mPauseWork)
-			{
-				mPauseWorkLock.notifyAll();
-			}
-		}
-	}
-
-	/**
-	 * Decode and sample down a bitmap from resources to the requested width and height.
-	 * 
-	 * @param res
-	 *            The resources object containing the image data
-	 * @param resId
-	 *            The resource id of the image data
-	 * @param reqWidth
-	 *            The requested width of the resulting bitmap
-	 * @param reqHeight
-	 *            The requested height of the resulting bitmap
-	 * @param cache
-	 *            The ImageCache used to find candidate bitmaps for use with inBitmap
-	 * @return A bitmap sampled down from the original with the same aspect ratio and dimensions that are equal to or greater than the requested width and height
-	 */
-	public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqWidth, int reqHeight)
-	{
-
-		// First decode with inJustDecodeBounds=true to check dimensions
-		final BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-		BitmapFactory.decodeResource(res, resId, options);
-
-		// Calculate inSampleSize
-		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-		// If we're running on Honeycomb or newer, try to use inBitmap
-		// if (Utils.hasHoneycomb())
-		// {
-		// addInBitmapOptions(options, cache);
-		// }
-
-		// Decode bitmap with inSampleSize set
-		options.inJustDecodeBounds = false;
-		Bitmap result = null;
-		try
-		{
-			result = BitmapFactory.decodeResource(res, resId, options);
-		}
-		catch (IllegalArgumentException e)
-		{
-			result = BitmapFactory.decodeResource(res, resId);
-		}
-		catch (Exception e)
-		{
-			Logger.e(TAG, "Exception in decoding Bitmap from resources: ", e);
-		}
-		return result;
-	}
-
-	/**
-	 * Decode and sample down a bitmap from a file to the requested width and height.
-	 * 
-	 * @param filename
-	 *            The full path of the file to decode
-	 * @param reqWidth
-	 *            The requested width of the resulting bitmap
-	 * @param reqHeight
-	 *            The requested height of the resulting bitmap
-	 * @param cache
-	 *            The ImageCache used to find candidate bitmaps for use with inBitmap
-	 * @return A bitmap sampled down from the original with the same aspect ratio and dimensions that are equal to or greater than the requested width and height
-	 */
-	public static Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth, int reqHeight)
-	{
-		// First decode with inJustDecodeBounds=true to check dimensions
-		final BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(filename, options);
-
-		// Calculate inSampleSize
-		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-		// If we're running on Honeycomb or newer, try to use inBitmap
-		// if (Utils.hasHoneycomb())
-		// {
-		// addInBitmapOptions(options, cache);
-		// }
-
-		// Decode bitmap with inSampleSize set
-		options.inJustDecodeBounds = false;
-		Bitmap result = null;
-		try
-		{
-			result = BitmapFactory.decodeFile(filename, options);
-		}
-		catch (IllegalArgumentException e)
-		{
-			result = BitmapFactory.decodeFile(filename, options);
-		}
-		catch (Exception e)
-		{
-			Logger.e(TAG, "Exception in decoding Bitmap from file: ", e);
-		}
-		return result;
-	}
-
-	/**
-	 * Decode and sample down a bitmap from a file to the requested width and height.
-	 * 
-	 * @param filename
-	 *            The full path of the file to decode
-	 * @param reqWidth
-	 *            The requested width of the resulting bitmap
-	 * @param reqHeight
-	 *            The requested height of the resulting bitmap
-	 * @param cache
-	 *            The ImageCache used to find candidate bitmaps for use with inBitmap
-	 * @return A bitmap sampled down from the original with the same aspect ratio and dimensions that are equal to or greater than the requested width and height
-	 */
-	public static Bitmap decodeSampledBitmapFromByeArray(String msisdn, boolean rounded, int reqWidth, int reqHeight)
-	{
-		byte[] icondata = HikeUserDatabase.getInstance().getIconByteArray(msisdn, rounded);
-		if (icondata == null)
-			return null;
-		// First decode with inJustDecodeBounds=true to check dimensions
-		final BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-
-		BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
-
-		// Calculate inSampleSize
-		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-		// If we're running on Honeycomb or newer, try to use inBitmap
-		// if (Utils.hasHoneycomb())
-		// {
-		// addInBitmapOptions(options, cache);
-		// }
-
-		// Decode bitmap with inSampleSize set
-		options.inJustDecodeBounds = false;
-		Bitmap result = null;
-		try
-		{
-			result = BitmapFactory.decodeByteArray(icondata, 0, icondata.length, options);
-		}
-		catch (IllegalArgumentException e)
-		{
-			result = BitmapFactory.decodeByteArray(icondata, 0, icondata.length);
-		}
-		catch (Exception e)
-		{
-			Logger.e(TAG, "Exception in decoding Bitmap from ByteArray: ", e);
-		}
-		return result;
-	}
-
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	protected static void addInBitmapOptions(BitmapFactory.Options options)
-	{
-		// inBitmap only works with mutable bitmaps so force the decoder to
-		// return mutable bitmaps.
-		options.inMutable = true;
-		HikeLruCache cache = HikeMessengerApp.getLruCache();
-		if (cache != null)
-		{
-			// Try and find a bitmap to use for inBitmap
-			Bitmap inBitmap = cache.getBitmapFromReusableSet(options);
-
-			if (inBitmap != null)
-			{
-				Logger.d(TAG, "Found a bitmap in reusable set.");
-				options.inBitmap = inBitmap;
-			}
-		}
-	}
-
-	/**
-	 * Calculate an inSampleSize for use in a {@link BitmapFactory.Options} object when decoding bitmaps using the decode* methods from {@link BitmapFactory}. This implementation
-	 * calculates the closest inSampleSize that is a power of 2 and will result in the final decoded bitmap having a width and height equal to or larger than the requested width
-	 * and height.
-	 * 
-	 * @param options
-	 *            An options object with out* params already populated (run through a decode* method with inJustDecodeBounds==true
-	 * @param reqWidth
-	 *            The requested width of the resulting bitmap
-	 * @param reqHeight
-	 *            The requested height of the resulting bitmap
-	 * @return The value to be used for inSampleSize
-	 */
-	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight)
-	{
-		// Raw height and width of image
-		final int height = options.outHeight;
-		final int width = options.outWidth;
-		int inSampleSize = 1;
-
-		if (height > reqHeight || width > reqWidth)
-		{
-
-			final int halfHeight = height / 2;
-			final int halfWidth = width / 2;
-
-			// Calculate the largest inSampleSize value that is a power of 2 and keeps both
-			// height and width larger than the requested height and width.
-			while ((halfHeight / inSampleSize) > reqHeight && (halfWidth / inSampleSize) > reqWidth)
-			{
-				inSampleSize *= 2;
-			}
-
-			// This offers some additional logic in case the image has a strange
-			// aspect ratio. For example, a panorama may have a much larger
-			// width than height. In these cases the total pixels might still
-			// end up being too large to fit comfortably in memory, so we should
-			// be more aggressive with sample down the image (=larger inSampleSize).
-
-			long totalPixels = width * height / inSampleSize;
-
-			// Anything more than 2x the requested pixels we'll sample down further
-			final long totalReqPixelsCap = reqWidth * reqHeight * 2;
-
-			while (totalPixels > totalReqPixelsCap)
-			{
-				inSampleSize *= 2;
-				totalPixels /= 2;
-			}
-		}
-		return inSampleSize;
-	}
-
-	/**
-	 * Decode and sample down a bitmap from resources to the requested inSampleSize.
-	 * 
-	 * @param res
-	 *            The resources object containing the image data
-	 * @param resId
-	 *            The resource id of the image data
-	 * @param inSampleSize
-	 *            The value to be used for inSampleSize
-	 * @return A bitmap sampled down from the original with the same aspect ratio and dimensions that are equal to or greater than the requested width and height
-	 */
-	public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int inSampleSize)
-	{
-
-		final BitmapFactory.Options options = new BitmapFactory.Options();
-
-		options.inSampleSize = inSampleSize;
-
-		options.inJustDecodeBounds = false;
-		Bitmap result = null;
-		try
-		{
-			result = BitmapFactory.decodeResource(res, resId, options);
-		}
-		catch (IllegalArgumentException e)
-		{
-			result = BitmapFactory.decodeResource(res, resId);
-		}
-		catch (Exception e)
-		{
-			Logger.e(TAG, "Exception in decoding Bitmap from resources: ", e);
-		}
-		return result;
-	}
-
 	public HikeLruCache getLruCache()
 	{
 		return this.mImageCache;
+	}
+	
+	public static Bitmap drawableToBitmap (Drawable drawable) {
+	    if (drawable instanceof BitmapDrawable) {
+	        return ((BitmapDrawable)drawable).getBitmap();
+	    }
+
+	    Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Config.ARGB_8888);
+	    Canvas canvas = new Canvas(bitmap); 
+	    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+	    drawable.draw(canvas);
+
+	    return bitmap;
 	}
 }

@@ -55,6 +55,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -163,7 +164,7 @@ public class CropImage extends MonitoredActivity
 			mSaveUri = extras.containsKey(MediaStore.EXTRA_OUTPUT) ? getImageUri(extras.getString(MediaStore.EXTRA_OUTPUT)) : null;
 			mBitmap = getBitmap(mImagePath);
 			String imageOrientation = Utils.getImageOrientation(mImagePath);
-			mBitmap = Utils.rotateBitmap(mBitmap, Utils.getRotatedAngle(imageOrientation));
+			mBitmap = HikeBitmapFactory.rotateBitmap(mBitmap, Utils.getRotatedAngle(imageOrientation));
 
 			mAspectX = extras.getInt(HikeConstants.Extras.ASPECT_X);
 			mAspectY = extras.getInt(HikeConstants.Extras.ASPECT_Y);

@@ -37,6 +37,7 @@
             android:orientation="vertical" >
 
             <com.bsb.hike.view.CustomFontTextView
+                android:alpha="0.7"
                 android:id="@+id/timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -47,13 +48,14 @@
                 android:textStyle="bold|italic" />
 
             <com.bsb.hike.view.LinkedTextView
+                android:alpha="0.7"
                 android:id="@+id/status_info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_toLeftOf="@id/timestamp"
                 android:text="@string/xyz_posted_update"
-                android:textColor="@color/list_item_subtext"
+                android:textColor="@color/black"
                 android:textSize="12sp"
                 android:textStyle="bold|italic" />
         </RelativeLayout>
@@ -67,19 +69,7 @@
             android:layout_marginTop="1dp"
             android:ellipsize="end"
             android:maxLines="5"
-            android:textColor="@color/list_item_header"
-            android:textSize="14sp" />
+            android:textColor="@color/white"
+            android:textSize="16sp" />
     </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/status_tip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:paddingBottom="10dp"
-        android:visibility="gone" >
-
-        <include layout="@layout/tool_tip" />
-    </LinearLayout>
-
 </LinearLayout>

@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.view.View.OnClickListener;
 import android.content.Context;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,9 +21,13 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.FetchFriendsTask;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.WhichScreen;
 import com.bsb.hike.view.PinnedSectionListView.PinnedSectionListAdapter;
 
 public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionListAdapter
@@ -39,34 +45,64 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	private IconLoader iconloader;
 
 	private boolean fetchGroups;
+	
+
+	private boolean fetchRecents;
 
 	private String existingGroupId;
+
+	private String sendingMsisdn;
 
 	private int statusForEmptyContactInfo;
 
 	private List<ContactInfo> newContactsList;
 
-	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, String existingGroupId)
+	private boolean isCreatingOrEditingGroup;
+
+	private boolean lastSeenPref;
+	
+
+	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, boolean fetchRecents, String existingGroupId, String sendingMsisdn, FriendsListFetchedCallback friendsListFetchedCallback)
 	{
-		super(context, listView);
+		super(context, listView, friendsListFetchedCallback, ContactInfo.lastSeenTimeComparatorWithoutFav);
 		selectedPeople = new HashMap<String, ContactInfo>();
 		existingParticipants = new HashMap<String, ContactInfo>();
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		iconloader = new IconLoader(context, mIconImageSize);
 		iconloader.setDefaultAvatarIfNoCustomIcon(true);
+		iconloader.setImageFadeIn(false);
 
 		this.existingGroupId = existingGroupId;
+		this.sendingMsisdn = sendingMsisdn;
 		this.fetchGroups = fetchGroups;
+		this.fetchRecents = fetchRecents;
 		groupsList = new ArrayList<ContactInfo>(0);
+		groupsStealthList = new ArrayList<ContactInfo>(0);
 		filteredGroupsList = new ArrayList<ContactInfo>(0);
+
+		recentContactsList = new ArrayList<ContactInfo>(0);
+		recentStealthContactsList = new ArrayList<ContactInfo>(0);
+		filteredRecentsList = new ArrayList<ContactInfo>(0);
+
+		this.lastSeenPref = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+		/*
+		 * We should show sms contacts section in new compose
+		 */
+		showSMSContacts = true;
+	}
+
+	public void setIsCreatingOrEditingGroup(boolean b)
+	{
+		isCreatingOrEditingGroup = b;
 	}
 
 	@Override
 	public void executeFetchTask()
 	{
 		setLoadingView();
-		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, filteredFriendsList, filteredHikeContactsList,
-				filteredSmsContactsList, groupsList, filteredGroupsList, existingParticipants, fetchGroups, existingGroupId);
+		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, friendsStealthList, hikeStealthContactsList,
+				smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, filteredGroupsList, filteredRecentsList,
+				existingParticipants, sendingMsisdn, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true, false, fetchRecents);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
@@ -81,7 +117,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 		if (convertView == null)
 		{
-			convertView = inflateView(viewType);
+			convertView = inflateView(viewType, parent);
 
 		}
 
@@ -95,6 +131,16 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			TextView count = (TextView) convertView.findViewById(R.id.count);
 			count.setText(contactInfo.getMsisdn());
 			// set section heading
+			if (contactInfo.getPhoneNum() != null && contactInfo.getPhoneNum().equals(FRIEND_PHONE_NUM))
+			{
+				tv.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_favorites_star), null, null, null);
+				tv.setCompoundDrawablePadding((int) context.getResources().getDimension(R.dimen.favorites_star_icon_drawable_padding));
+			}
+			else
+			{
+				tv.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+			}
+
 		}
 		else if (viewType == ViewType.EXTRA)
 		{
@@ -104,6 +150,8 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		else
 		{
 			holder = (ViewHolder) convertView.getTag();
+			holder.msisdn = contactInfo.getMsisdn();
+
 			holder.status.setText(contactInfo.getMsisdn());
 
 			String name = contactInfo.getName();
@@ -111,14 +159,102 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 			if (viewType == ViewType.NEW_CONTACT)
 			{
+				holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
 				holder.status.setText(statusForEmptyContactInfo);
+				holder.statusMood.setVisibility(View.GONE);
+				holder.onlineIndicator.setVisibility(View.GONE);
+			}
+			else if (contactInfo.getFavoriteType() == FavoriteType.FRIEND || contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED)
+			{
+				holder.status.setText("is friend");
+				StatusMessage lastStatusMessage = getLastStatusMessagesMap().get(contactInfo.getMsisdn());
+				if (lastStatusMessage != null)
+				{
+					holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
+					switch (lastStatusMessage.getStatusMessageType())
+					{
+					case TEXT:
+						holder.status.setText(lastStatusMessage.getText());
+						if (lastStatusMessage.hasMood())
+						{
+							holder.statusMood.setVisibility(View.VISIBLE);
+							holder.statusMood.setImageResource(EmoticonConstants.moodMapping.get(lastStatusMessage.getMoodId()));
+						}
+						else
+						{
+							holder.statusMood.setVisibility(View.GONE);
+						}
+						break;
+
+					case PROFILE_PIC:
+						holder.status.setText(R.string.changed_profile);
+						holder.statusMood.setVisibility(View.GONE);
+						break;
+
+					default:
+						break;
+					}
+				}
+				else
+				{
+					holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
+					holder.status.setText(contactInfo.getMsisdn());
+					holder.statusMood.setVisibility(View.GONE);
+				}
+				if (lastSeenPref && contactInfo.getOffline() == 0 && !showCheckbox)
+				{
+					holder.onlineIndicator.setVisibility(View.VISIBLE);
+					holder.onlineIndicator.setImageResource(R.drawable.ic_online_green_dot);
+				}
+				else
+				{
+					holder.onlineIndicator.setVisibility(View.GONE);
+				}
 			}
 			else
 			{
-				holder.status.setText(contactInfo.getMsisdn());
+				holder.status.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
+				holder.status.setText(Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo.getPhoneNum():contactInfo.getMsisdn());
+				holder.statusMood.setVisibility(View.GONE);
+				holder.onlineIndicator.setVisibility(View.GONE);
+				if (viewType != ViewType.FRIEND && viewType != ViewType.FRIEND_REQUEST)
+				{
+					if (!contactInfo.isOnhike() && !showCheckbox)
+					{
+						long inviteTime = contactInfo.getInviteTime();
+						if (inviteTime == 0)
+						{
+							holder.inviteIcon.setVisibility(View.VISIBLE);
+							holder.inviteText.setVisibility(View.GONE);
+							holder.divider.setVisibility(View.VISIBLE);
+							holder.inviteIcon.setTag(contactInfo);
+							holder.inviteIcon.setOnClickListener(new OnClickListener()
+							{
+
+								public void onClick(View v)
+								{
+									ContactInfo contactInfo = (ContactInfo) v.getTag();
+									Utils.sendInviteUtil(contactInfo, context, HikeConstants.SINGLE_INVITE_SMS_ALERT_CHECKED, context.getString(R.string.native_header),
+											context.getString(R.string.native_info), WhichScreen.SMS_SECTION);
+									notifyDataSetChanged();
+								}
+							});
+						}
+						else
+						{
+
+							holder.inviteIcon.setVisibility(View.GONE);
+							holder.inviteText.setVisibility(View.VISIBLE);
+							holder.divider.setVisibility(View.GONE);
+						}
+					}
+				}
 			}
 
-			if (contactInfo.isUnknownContact())
+			/*
+			 * We don't have an avatar for new contacts. So set a hard coded one
+			 */
+			if (viewType == ViewType.NEW_CONTACT)
 			{
 				holder.userImage.setScaleType(ScaleType.CENTER_INSIDE);
 				holder.userImage.setBackgroundResource(R.drawable.avatar_01_rounded);
@@ -126,15 +262,14 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			}
 			else
 			{
-				String id = contactInfo.isGroupConversationContact() ? contactInfo.getId() : contactInfo.getMsisdn();
-				iconloader.loadImage(id, true, holder.userImage, true);
+				updateViewsRelatedToAvatar(convertView, contactInfo);
 			}
+
 			if (showCheckbox)
 			{
 				holder.checkbox.setVisibility(View.VISIBLE);
 				if (selectedPeople.containsKey(contactInfo.getMsisdn()))
 				{
-
 					holder.checkbox.setChecked(true);
 				}
 				else
@@ -150,9 +285,28 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		return convertView;
 	}
 
-	private View inflateView(ViewType viewType)
+	private void updateViewsRelatedToAvatar(View parentView, ContactInfo contactInfo)
+	{
+		ViewHolder holder = (ViewHolder) parentView.getTag();
+
+		/*
+		 * If the viewholder's msisdn is different from the converstion's msisdn, it means that the viewholder is currently being used for a different conversation. We don't need
+		 * to do anything here then.
+		 */
+		if (!contactInfo.getMsisdn().equals(holder.msisdn))
+		{
+			return;
+		}
+
+		holder.userImage.setScaleType(ScaleType.FIT_CENTER);
+		String id = contactInfo.isGroupConversationContact() ? contactInfo.getId() : contactInfo.getMsisdn();
+		iconloader.loadImage(id, true, holder.userImage, false, isListFlinging, true);
+	}
+
+	private View inflateView(ViewType viewType, ViewGroup parent)
 	{
 		View convertView = null;
+		ViewHolder holder = null;
 		switch (viewType)
 		{
 		case SECTION:
@@ -161,13 +315,30 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		case EXTRA:
 			convertView = LayoutInflater.from(context).inflate(R.layout.compose_chat_header, null);
 			break;
+		case FRIEND:
+		case FRIEND_REQUEST:
+			convertView = LayoutInflater.from(context).inflate(R.layout.friends_child_view, null);
+			holder = new ViewHolder();
+			holder.userImage = (ImageView) convertView.findViewById(R.id.avatar);
+			holder.name = (TextView) convertView.findViewById(R.id.contact);
+			holder.status = (TextView) convertView.findViewById(R.id.last_seen);
+			holder.statusMood = (ImageView) convertView.findViewById(R.id.status_mood);
+			holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
+			holder.onlineIndicator = (ImageView) convertView.findViewById(R.id.online_indicator);
+			convertView.setTag(holder);
+			break;
 		default:
-			convertView = LayoutInflater.from(context).inflate(R.layout.hike_list_item, null);
-			ViewHolder holder = new ViewHolder();
+			convertView = LayoutInflater.from(context).inflate(R.layout.hike_list_item, parent, false);
+			holder = new ViewHolder();
 			holder.userImage = (ImageView) convertView.findViewById(R.id.contact_image);
 			holder.name = (TextView) convertView.findViewById(R.id.name);
 			holder.status = (TextView) convertView.findViewById(R.id.number);
+			holder.statusMood = (ImageView) convertView.findViewById(R.id.status_mood);
 			holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
+			holder.onlineIndicator = (ImageView) convertView.findViewById(R.id.online_indicator);
+			holder.inviteText = (TextView) convertView.findViewById(R.id.invite_Text);
+			holder.inviteIcon = (ImageView) convertView.findViewById(R.id.invite_icon);
+			holder.divider = (View) convertView.findViewById(R.id.invite_divider);
 			convertView.setTag(holder);
 			break;
 		}
@@ -183,11 +354,33 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		TextView status;
 
 		CheckBox checkbox;
+
+		ImageView statusMood;
+
+		ImageView onlineIndicator;
+
+		String msisdn;
+
+		View divider;
+
+		TextView inviteText;
+
+		ImageView inviteIcon;
 	}
 
 	@Override
 	public void makeCompleteList(boolean filtered)
 	{
+		makeCompleteList(filtered, false);
+	}
+
+	@Override
+	public void makeCompleteList(boolean filtered, boolean firstFetch)
+	{
+		if (firstFetch)
+		{
+			friendsListFetchedCallback.listFetched();
+		}
 
 		boolean shouldContinue = makeSetupForCompleteList(filtered);
 
@@ -197,10 +390,19 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		}
 
 		// hack for header, as we are using pinnedSectionListView
+		if(fetchRecents && !recentContactsList.isEmpty())
+		{
+			ContactInfo recentsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredRecentsList.size()), context.getString(R.string.recent_chats), RECENT_PHONE_NUM);
+			if (filteredRecentsList.size() > 0)
+			{
+				completeList.add(recentsSection);
+				completeList.addAll(filteredRecentsList);
+			}
+		}
 
 		if (fetchGroups && !groupsList.isEmpty())
 		{
-			ContactInfo groupSection = new ContactInfo(SECTION_ID, Integer.toString(filteredGroupsList.size()), context.getString(R.string.group_chats_upper_case), FRIEND_PHONE_NUM);
+			ContactInfo groupSection = new ContactInfo(SECTION_ID, Integer.toString(filteredGroupsList.size()), context.getString(R.string.group_chats_upper_case), GROUP_MSISDN);
 			if (filteredGroupsList.size() > 0)
 			{
 				completeList.add(groupSection);
@@ -348,11 +550,83 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	public int getItemViewType(int position)
 	{
 		ContactInfo info = getItem(position);
-		if (info.isUnknownContact() && info.getFavoriteType() == null)
+		if(Utils.isGroupConversation(info.getMsisdn()))
+		{
+			return super.getItemViewType(position);
+		}
+		else if (info.isUnknownContact() && info.getFavoriteType() == null)
 		{
 			return ViewType.NEW_CONTACT.ordinal();
 		}
 		return super.getItemViewType(position);
 	}
 
+	private boolean isListFlinging;
+
+	public void setIsListFlinging(boolean b)
+	{
+		boolean notify = b != isListFlinging;
+
+		isListFlinging = b;
+
+		if (notify && !isListFlinging)
+		{
+			/*
+			 * We don't want to call notifyDataSetChanged here since that causes the UI to freeze for a bit. Instead we pick out the views and update the avatars there.
+			 */
+			int count = listView.getChildCount();
+			for (int i = 0; i < count; i++)
+			{
+				View view = listView.getChildAt(i);
+				int indexOfData = listView.getFirstVisiblePosition() + i;
+
+				ViewType viewType = ViewType.values()[getItemViewType(indexOfData)];
+				ContactInfo contactInfo = getItem(indexOfData);
+
+				/*
+				 * Since sms contacts and dividers cannot have custom avatars, we simply skip these cases.
+				 */
+				if (viewType == ViewType.SECTION || viewType == ViewType.EXTRA || !contactInfo.isOnhike())
+				{
+					continue;
+				}
+
+				updateViewsRelatedToAvatar(view, getItem(indexOfData));
+			}
+		}
+	}
+	
+	public IconLoader getIconLoader()
+	{
+		return iconloader;
+	}
+	
+	public void selectAllContacts(boolean select)
+	{
+		if(select)
+		{
+			selectAllFromList(friendsList,recentContactsList,hikeContactsList,groupsList);
+			
+		}
+		else
+		{
+			selectedPeople.clear();
+		}
+		notifyDataSetChanged();
+	}
+	
+	private void selectAllFromList(List<ContactInfo> ...lists){
+		int total = lists.length;
+		for(int i=0;i<total;i++){
+			List<ContactInfo> list = lists[i];
+			if(list!=null){
+				for(ContactInfo contactInfo: list){
+					if(contactInfo.isOnhike()){
+						selectedPeople.put(contactInfo.getMsisdn(), contactInfo);
+					}
+				}
+			}
+		}
+	}
+	
 }

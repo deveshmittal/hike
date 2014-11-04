@@ -35,6 +35,8 @@ import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.facebook.Session;
@@ -42,6 +44,20 @@ import com.facebook.SessionState;
 
 public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Listener, OnItemClickListener
 {
+
+	private static final int SMS = 1;
+
+	private static final int FACEBOOK = 2;
+
+	private static final int TWITTER = 3;
+
+	private static final int EMAIL = 4;
+
+	private static final int OTHER = 5;
+
+	private static final int WATSAPP = 6;
+
+	private static final int INVITE_EXTRA = 7;
 
 	private SharedPreferences settings;
 
@@ -63,28 +79,48 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 		setContentView(R.layout.settings);
 
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-
+		boolean watsAppPresent = HikeSharedPreferenceUtil.getInstance(getApplicationContext()).getData(HikeConstants.WATSAPP_INVITE_ENABLED, true)
+				&& Utils.isPackageInstalled(getApplicationContext(), HikeConstants.PACKAGE_WATSAPP);
 		ArrayList<String> items = new ArrayList<String>();
 		items.add(getString(!HikeMessengerApp.isIndianUser() || settings.getBoolean(HikeMessengerApp.SEND_NATIVE_INVITE, false) ? R.string.sms : R.string.free_sms_txt));
+		if (watsAppPresent)
+		{
+			items.add(getString(R.string.invite_with_watsapp));
+		}
 		items.add(getString(R.string.facebook));
 		items.add(getString(R.string.twitter));
 		items.add(getString(R.string.email));
 		items.add(getString(R.string.share_via_other));
-		items.add(null);
-
+		items.add(getString(R.string.invite_friends));
 		final ArrayList<Integer> itemIcons = new ArrayList<Integer>();
 		itemIcons.add(R.drawable.ic_invite_sms);
+		if (watsAppPresent)
+		{
+			itemIcons.add(R.drawable.ic_whatsapp);
+		}
 		itemIcons.add(R.drawable.ic_invite_fb);
 		itemIcons.add(R.drawable.ic_invite_twitter);
 		itemIcons.add(R.drawable.ic_invite_email);
 		itemIcons.add(R.drawable.ic_invite_other);
 
+		// we could do with objects as well , that would be best but big change
+		final ArrayList<Integer> itemTags = new ArrayList<Integer>();
+		itemTags.add(SMS);
+		if (watsAppPresent)
+		{
+			itemTags.add(WATSAPP);
+		}
+		itemTags.add(FACEBOOK);
+		itemTags.add(TWITTER);
+		itemTags.add(EMAIL);
+		itemTags.add(OTHER);
+		itemTags.add(INVITE_EXTRA);
 		ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(this, R.layout.setting_item, R.id.item, items)
 		{
 
 			public int getItemViewType(int position)
 			{
-				if (getItem(position) == null)
+				if (getString(R.string.invite_friends).equals(getItem(position)))
 				{
 					return ViewType.EXTRA.ordinal();
 				}
@@ -137,7 +173,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 					subText.setText(R.string.invite_subtext);
 					break;
 				}
-
+				convertView.setTag(itemTags.get(position));
 				return convertView;
 			}
 
@@ -210,7 +246,15 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 				@Override
 				public void run()
 				{
-					onItemClick(null, null, facebook ? 1 : 2, 0);
+					if (facebook)
+					{
+						onClickPickFriends();
+					}
+					else
+					{
+						// twitter
+						postToSocialNetwork(false);
+					}
 				}
 			});
 		}
@@ -389,19 +433,23 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
-		switch (position)
+		int tag = (Integer) view.getTag();
+		switch (tag)
 		{
-		case 0:
+		case SMS:
 			Utils.logEvent(this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_SMS_SCREEN_FROM_INVITE);
-			startActivity(new Intent(this, HikeListActivity.class));
+			IntentManager.openInviteSMS(this);
 			break;
-
-		case 1:
+		case WATSAPP:
+			Utils.sendUILogEvent(HikeConstants.LogEvent.WATS_APP_INVITE);
+			sendInviteViaWatsApp();
+			break;
+		case FACEBOOK:
 			onClickPickFriends();
 			break;
 
-		case 2:
+		case TWITTER:
 			if (!settings.getBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE, false))
 			{
 				startActivity(new Intent(this, TwitterAuthActivity.class));
@@ -412,7 +460,7 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 			}
 			break;
 
-		case 3:
+		case EMAIL:
 			Intent mailIntent = new Intent(Intent.ACTION_SENDTO);
 
 			mailIntent.setData(Uri.parse("mailto:"));
@@ -422,11 +470,15 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 			startActivity(mailIntent);
 			break;
 
-		case 4:
+		case OTHER:
 			Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_INVITE);
 			Utils.startShareIntent(this, Utils.getInviteMessage(this, R.string.invite_share_message));
 			break;
 		}
 	}
 
+	private void sendInviteViaWatsApp()
+	{
+		IntentManager.openInviteWatsApp(this);
+	}
 }

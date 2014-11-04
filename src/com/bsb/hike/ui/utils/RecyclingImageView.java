@@ -1,5 +1,7 @@
 package com.bsb.hike.ui.utils;
 
+import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -45,6 +47,21 @@ public class RecyclingImageView extends ImageView
 		super.onDetachedFromWindow();
 	}
 
+	/**
+	 * @see android.widget.ImageView#setImageResource(int)
+	 */
+	@Override
+	public void setImageResource(int resId)
+	{
+		// get previous drawable
+		final Drawable previousDrawable = getDrawable();
+
+		super.setImageResource(resId);
+
+		// Notify previous drawable so it is no longer displayed
+		notifyDrawable(previousDrawable, false);
+	}
+	
 	/**
 	 * @see android.widget.ImageView#setImageDrawable(android.graphics.drawable.Drawable)
 	 */

@@ -33,12 +33,13 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.TipType;
+import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.EmoticonAdapter;
+import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.adapters.MoodAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -50,6 +51,7 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.EmoticonTextWatcher;
+import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
@@ -59,7 +61,7 @@ import com.facebook.Session;
 import com.facebook.Session.StatusCallback;
 import com.facebook.SessionState;
 
-public class StatusUpdate extends AuthSocialAccountBaseActivity implements Listener, OnSoftKeyboardListener
+public class StatusUpdate extends AuthSocialAccountBaseActivity implements Listener, OnSoftKeyboardListener, EmoticonClickListener
 {
 
 	private class ActivityTask
@@ -227,7 +229,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 			layoutParams.rightMargin = marginRight;
 
 			tipView.setLayoutParams(layoutParams);
-			Utils.showTip(this, TipType.MOOD, tipView);
+			HikeTip.showTip(this, TipType.MOOD, tipView);
 		}
 	}
 
@@ -258,6 +260,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 			@Override
 			public void onClick(View v)
 			{
+				Utils.hideSoftKeyboard(StatusUpdate.this, statusTxt);
 				onBackPressed();
 			}
 		});
@@ -277,7 +280,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 
 	private void setTitle()
 	{
-		title.setText(moodParent.getVisibility() == View.VISIBLE ? R.string.moods : R.string.new_update);
+		title.setText(moodParent.getVisibility() == View.VISIBLE ? R.string.moods : R.string.status);
 	}
 
 	private Runnable cancelStatusPost = new Runnable()
@@ -436,7 +439,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		}
 		if (tipView != null)
 		{
-			Utils.closeTip(TipType.MOOD, tipView, preferences);
+			HikeTip.closeTip(TipType.MOOD, tipView, preferences);
 		}
 		if (emojiParent.getVisibility() == View.VISIBLE)
 		{
@@ -653,8 +656,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 
 		int offset = 0;
 		int emoticonsListSize = 0;
-		tabDrawables = new int[] { R.drawable.ic_recents_emo, EmoticonConstants.EMOJI_RES_IDS[0], EmoticonConstants.EMOJI_RES_IDS[109], EmoticonConstants.EMOJI_RES_IDS[162],
-				EmoticonConstants.EMOJI_RES_IDS[294], EmoticonConstants.EMOJI_RES_IDS[392] };
+		tabDrawables = new int[] { R.drawable.emo_recent, R.drawable.emo_tab_5_selector, R.drawable.emo_tab_6_selector, R.drawable.emo_tab_7_selector,
+				R.drawable.emo_tab_8_selector, R.drawable.emo_tab_9_selector };
 		offset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
 		emoticonsListSize = EmoticonConstants.EMOJI_RES_IDS.length;
 
@@ -684,7 +687,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 	private void setupEmoticonLayout(int whichSubcategory, int[] tabDrawable)
 	{
 
-		EmoticonAdapter statusEmojiAdapter = new EmoticonAdapter(this, statusTxt, getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT, tabDrawable,
+		EmoticonAdapter statusEmojiAdapter = new EmoticonAdapter(this, this, getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT, tabDrawable,
 				true);
 
 		ViewPager emoticonViewPager = (ViewPager) findViewById(R.id.emoticon_pager);
@@ -868,5 +871,12 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 	@Override
 	public void onHidden()
 	{
+	}
+
+	@Override
+	public void onEmoticonClicked(int emoticonIndex)
+	{
+		Utils.emoticonClicked(getApplicationContext(), emoticonIndex, statusTxt);
+		
 	}
 }
