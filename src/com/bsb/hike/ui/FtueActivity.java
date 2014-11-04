@@ -87,6 +87,17 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity
 
 		GridView gridview = (GridView) findViewById(R.id.gridview);
 		gridview.setAdapter(new FtueAdapter(this));
+		gridview.setOnItemClickListener(new OnItemClickListener()
+		{
+			public void onItemClick(AdapterView<?> parent, View v, int position, long id)
+			{
+				Sticker st = (Sticker) v.getTag();
+				Intent intent = IntentManager.getFtueForwardStickerIntent(FtueActivity.this, st.getStickerId(), st.getCategory().categoryId.name());
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				FtueActivity.this.finish();
+				startActivity(intent);
+			}
+		});
 	}
 
 	private void setupActionBar(String name)
