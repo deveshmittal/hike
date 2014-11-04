@@ -116,7 +116,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 				+ DBConstants.READ_BY + " TEXT, " // Deprecated
 				+ DBConstants.MSISDN + " TEXT, " // The conversation's msisdn. This will be the msisdn for one-to-one and the group id for groups
 				+ DBConstants.MESSAGE_HASH + " TEXT DEFAULT NULL, " // Used for duplication checks.
-				+ DBConstants.MESSAGE_TYPE + " INTEGER" + " INTEGER DEFAULT -1" // The type of the message.
+				+ DBConstants.MESSAGE_TYPE + " INTEGER" + " INTEGER DEFAULT -1, " // The type of the message.
 				+ DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER DEFAULT -1" // love id applicable to few messages like content
 				+ " ) ";
 
