@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.EmoticonType;
 import com.bsb.hike.HikeConstants.STResult;
@@ -235,7 +236,10 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 								{
 									return;
 								}
-
+								if(failedDueToLargeFile)
+								{
+									Toast.makeText(activity, R.string.out_of_space, Toast.LENGTH_SHORT).show();
+								}
 								Logger.d(getClass().getSimpleName(), "Download failed for new category " + cat.getCategoryId());
 								cat.setState(StickerCategory.RETRY);
 								addViewBasedOnState(stickerObjMap.get(cat.getCategoryId()), cat);
