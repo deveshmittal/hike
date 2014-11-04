@@ -381,7 +381,7 @@ public class HikePubSub implements Runnable
 	public static final String LATEST_PIN_DELETED = "lastPinDeleted";
 	
 	public static final String UNREAD_PIN_COUNT_RESET = "pinCountReset";
-	
+
 	/**
 	 * Hike SDK pub sub events
 	 */
@@ -392,8 +392,7 @@ public class HikePubSub implements Runnable
 	public static final String SDK_REQ_SEND_MSG = "sdkSendMessage";
 	
 	public static final String HIKE_SDK_MESSAGE = "hikeSdkMessage";
-	
-	
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

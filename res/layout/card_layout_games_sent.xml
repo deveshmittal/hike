@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:descendantFocusability="blocksDescendants"
+                android:gravity="center_vertical|right"
+                android:minHeight="30dp"
+                android:paddingBottom="4dp" >
+
+    <ViewStub
+            android:id="@+id/day_stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout="@layout/message_day_container" />
+
+    <RelativeLayout
+            android:id="@+id/message_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/day_container"
+            android:layout_marginBottom="3dp"
+            android:layout_marginRight="@dimen/chat_bubble_edge_spacing"
+            android:layout_marginTop="3dp"
+            android:background="@drawable/ic_bubble_green_selector"
+            android:orientation="vertical"
+            android:paddingLeft="12dp"
+            android:paddingRight="18dp" >
+
+        <ImageView
+                android:id="@+id/card_image"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:tag="IMG1"
+                android:src="@drawable/hike_avtar_protip"
+                android:layout_width="100dp"
+                android:layout_height="100dp"/>
+
+
+        <LinearLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="wrap_content"
+                android:layout_toLeftOf="@id/card_image"
+                android:layout_marginRight="10dp"
+                android:id="@+id/text_container"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:layout_height="wrap_content"
+                >
+
+            <TextView
+                    android:id="@+id/title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="11.5dp"
+                    android:layout_marginRight="11.55dp"
+                    android:text="Dadi vs Jellies"
+                    android:textStyle="bold|italic"
+                    android:tag="T1"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    />
+
+            <TextView
+                    android:id="@+id/payment_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="11.55dp"
+                    android:text="FREE"
+                    android:tag="T2"
+                    android:textColor="#979797"
+                    android:textSize="14sp"
+                    android:textStyle="italic"
+                    />
+
+
+
+            <TextView
+                    android:id="@+id/description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:textSize="14sp"
+                    android:tag="T3"
+                    android:textStyle="bold|italic"
+                    android:textColor="#ff0000"
+                    android:text="Everyone's favourite Dadi"
+                    android:layout_gravity="center_vertical"
+                    />
+
+            <TextView
+                    android:id="@+id/package_info"
+                    android:layout_width="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:gravity="center_horizontal"
+                    android:layout_height="wrap_content"
+                    android:textColor="#000000"
+                    android:tag="T4"
+                    android:textSize="14sp"
+                    android:textStyle="italic"
+                    android:text="Get it on play store"
+                    android:enabled="false"
+                    />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <include
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/message_container"
+            android:layout_alignRight="@id/message_container"
+            android:layout_marginBottom="6dp"
+            android:layout_marginRight="14dp"
+            layout="@layout/message_time_status" />
+
+    <include
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@id/message_container"
+            android:layout_below="@id/day_container"
+            layout="@layout/message_overlay" />
+
+    <ViewStub
+            android:id="@+id/message_info_stub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/message_container"
+            android:layout="@layout/message_sent_info" />
+
+</RelativeLayout>
