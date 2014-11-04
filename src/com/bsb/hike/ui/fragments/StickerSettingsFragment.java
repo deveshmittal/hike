@@ -64,19 +64,29 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View parent = inflater.inflate(R.layout.sticker_settings, null);
-		prefs = HikeSharedPreferenceUtil.getInstance(getActivity());
-		initAdapterAndList(parent);
-		showTipIfRequired(parent);
-		checkAndInflateUpdateView(parent);
 		
-		registerListener();
 		return parent;
 	}
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState)
+	{
+		// TODO Auto-generated method stub
+		super.onActivityCreated(savedInstanceState);
+		prefs = HikeSharedPreferenceUtil.getInstance(getActivity());
+		initAdapterAndList();
+		showTipIfRequired();
+		checkAndInflateUpdateView();
+		
+		registerListener();
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+	}
 
-	private void checkAndInflateUpdateView(final View parent)
+	private void checkAndInflateUpdateView()
 	{
 		if(shouldAddUpdateView())
-		{
+		{	
+			final View parent = getView();
 			final View updateAll = parent.findViewById(R.id.update_all_ll);
 			final View confirmAll = parent.findViewById(R.id.confirmation_ll);
 			
@@ -169,15 +179,16 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	 * Utility method to show category reordering tip
 	 * @param parent
 	 */
-	private void showTipIfRequired(View parent)
+	private void showTipIfRequired()
 	{
-		showDragTip(parent);
+		showDragTip();
 	}
-	
-	private void showDragTip(final View parent)
+
+	private void showDragTip()
 	{
 		if(!prefs.getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))  //Showing the tip here
 		{
+			final View parent = getView();
 			final View v =(View) parent.findViewById(R.id.reorder_tip);
 			v.setVisibility(View.VISIBLE);
 			
@@ -241,10 +252,9 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 
 	}
 
-	private void initAdapterAndList(View parent)
+	private void initAdapterAndList()
 	{
-		// TODO Initialise the listview and adapter here
-		// TODO Add the empty state for listView here as well. Will there be an empty state for settings?
+		View parent = getView();
 		stickerCategories.addAll(StickerManager.getInstance().getMyStickerCategoryList());
 		mAdapter = new StickerSettingsAdapter(getActivity(), stickerCategories);
 		mDslv = (DragSortListView) parent.findViewById(R.id.item_list);
@@ -256,18 +266,10 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	}
 
 	@Override
-	public void onActivityCreated(Bundle savedInstanceState)
-	{
-		// TODO Auto-generated method stub
-		super.onActivityCreated(savedInstanceState);
-		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
-	}
-
-	@Override
 	public void onDestroy()
 	{
-		// TODO Clear the adapter and stickercategory list as well
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
+		unregisterListeners();
 		super.onDestroy();
 	}
 
@@ -378,5 +380,10 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			}
 		}
 	};
+	
+	public void unregisterListeners()
+	{
+		LocalBroadcastManager.getInstance(getSherlockActivity()).unregisterReceiver(mMessageReceiver);
+	}
 
 }
