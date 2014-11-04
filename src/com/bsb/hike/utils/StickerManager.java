@@ -181,6 +181,8 @@ public class StickerManager
 	
 	public static final long STICKER_SHOP_REFRESH_TIME = 24 * 60 * 60 * 1000;
 	
+	public static final long MINIMUM_FREE_SPACE = 10 * 1024 * 1024;
+	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
 	public FilenameFilter stickerFileFilter = new FilenameFilter()
@@ -1350,5 +1352,20 @@ public class StickerManager
 	public boolean moreDataAvailableForStickerShop()
 	{
 		return !HikeSharedPreferenceUtil.getInstance(context).getData(STICKER_SHOP_DATA_FULLY_FETCHED, true);
+	}
+	
+	public boolean isMinimumMemoryAvailable()
+	{
+		double freeSpace = Utils.getFreeSpace();
+		
+		Logger.d(TAG, "free space : " + freeSpace);
+		if(freeSpace > MINIMUM_FREE_SPACE)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }
