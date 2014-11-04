@@ -147,6 +147,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.EmoticonType;
+import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
@@ -188,6 +189,7 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -7849,6 +7851,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					ConvMessage message = selectedMessagesMap.get(selectedMsgIds.get(i));
 					JSONObject multiMsgFwdObject = new JSONObject();
+					multiMsgFwdObject.put(HikeConstants.MESSAGE_TYPE.MESSAGE_TYPE, message.getMessageType());
 					if (message.isFileTransferMessage())
 					{
 						HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
@@ -7867,6 +7870,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_INDEX, sticker.getStickerIndex());
 					}else if(message.getMetadata()!=null && message.getMetadata().isPokeMessage()){
 						multiMsgFwdObject.put(HikeConstants.Extras.POKE, true);
+					}else if(message.getMessageType()==MESSAGE_TYPE.CONTENT){
+						multiMsgFwdObject.put(MESSAGE_TYPE.MESSAGE_TYPE, MESSAGE_TYPE.CONTENT);
+						if(message.platformMessageMetadata!=null){
+						multiMsgFwdObject.put(HikeConstants.METADATA, message.platformMessageMetadata.toJSON());
+						if(message.contentLove!=null){
+							multiMsgFwdObject.put(ContentLove.LOVE_ID, message.contentLove.loveId);
+						}
+						}
 					}
 					else
 					{
