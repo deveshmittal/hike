@@ -1,5 +1,6 @@
 package com.bsb.hike.db;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -13,7 +14,6 @@ import android.preference.PreferenceManager;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.utils.CBCEncryption;
 import com.bsb.hike.utils.Logger;
 
@@ -28,9 +28,9 @@ public class DBBackupRestore
 	private static final String[] dbNames = { DBConstants.CONVERSATIONS_DATABASE_NAME };
 
 	private static final String[] resetTableNames = { DBConstants.STICKER_SHOP_TABLE, DBConstants.STICKER_CATEGORIES_TABLE };
-	
+
 	private String backupToken;
-	
+
 	private Context mContext;
 
 	private DBBackupRestore(Context context)
@@ -84,23 +84,31 @@ public class DBBackupRestore
 	{
 		Long time = System.currentTimeMillis();
 		File dbCopy;
+
+		FileChannel src = null;
+		FileChannel dst = null;
+		FileInputStream in = null;
+		FileOutputStream out = null;
+
 		try
 		{
 			File currentDB = getCurrentDBFile(databaseName);
 			dbCopy = getDBCopyFile(currentDB.getName());
-			if (currentDB.exists())
-			{
-				FileChannel src = new FileInputStream(currentDB).getChannel();
-				FileChannel dst = new FileOutputStream(dbCopy).getChannel();
-				dst.transferFrom(src, 0, src.size());
-				src.close();
-				dst.close();
-			}
+			in = new FileInputStream(currentDB);
+			src = in.getChannel();
+			out = new FileOutputStream(dbCopy);
+			dst = out.getChannel();
+
+			dst.transferFrom(src, 0, src.size());
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			return null;
+		}
+		finally
+		{
+			closeChannelsAndStreams(src, dst, in, out);
 		}
 		time = System.currentTimeMillis() - time;
 		Logger.d(getClass().getSimpleName(), "DB Export complete!! in " + time / 1000 + "." + time % 1000 + "s");
@@ -137,25 +145,33 @@ public class DBBackupRestore
 	private void importDatabase(File dbCopy)
 	{
 		Long time = System.currentTimeMillis();
-		File currentDB = getCurrentDBFile(dbCopy.getName());
-		if (dbCopy.exists())
+
+		FileChannel src = null;
+		FileChannel dst = null;
+		FileInputStream in = null;
+		FileOutputStream out = null;
+
+		try
 		{
-			try
-			{
-				FileChannel src = new FileInputStream(dbCopy).getChannel();
-				FileChannel dst = new FileOutputStream(currentDB).getChannel();
-				dst.transferFrom(src, 0, src.size());
-				src.close();
-				dst.close();
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				Logger.d(getClass().getSimpleName(), "copy fail");
-			}
-			time = System.currentTimeMillis() - time;
-			Logger.d(getClass().getSimpleName(), "DB import complete!! in " + time / 1000 + "." + time % 1000 + "s");
+			File currentDB = getCurrentDBFile(dbCopy.getName());
+			in = new FileInputStream(dbCopy);
+			src = in.getChannel();
+			out = new FileOutputStream(currentDB);
+			dst = out.getChannel();
+
+			dst.transferFrom(src, 0, src.size());
 		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Logger.d(getClass().getSimpleName(), "copy fail");
+		}
+		finally
+		{
+			closeChannelsAndStreams(src, dst, in, out);
+		}
+		time = System.currentTimeMillis() - time;
+		Logger.d(getClass().getSimpleName(), "DB import complete!! in " + time / 1000 + "." + time % 1000 + "s");
 	}
 
 	private void postRestoreSetup()
@@ -168,7 +184,7 @@ public class DBBackupRestore
 			// 1. Upgrade db
 			HikeConversationsDatabase.getInstance().upgrade(oldVersion, newVersion);
 			// 2. Reset tables.
-			for ( String table : resetTableNames)
+			for (String table : resetTableNames)
 			{
 				HikeConversationsDatabase.getInstance().clearTable(table);
 			}
@@ -176,6 +192,22 @@ public class DBBackupRestore
 		Editor editor = appPrefs.edit();
 		editor.putInt(HikeConstants.PREVIOUS_CONV_DB_VERSION, 0);
 		editor.commit();
+	}
+
+	private void closeChannelsAndStreams(Closeable... closeables)
+	{
+		for (Closeable closeable : closeables)
+		{
+			try
+			{
+				if (closeable != null)
+					closeable.close();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public boolean isBackupAvailable()
@@ -205,7 +237,7 @@ public class DBBackupRestore
 		}
 		return -1;
 	}
-	
+
 	private void deleteTempFiles()
 	{
 		for (String fileName : dbNames)
@@ -213,9 +245,9 @@ public class DBBackupRestore
 			File currentDB = getCurrentDBFile(fileName);
 			File dbCopy = getDBCopyFile(currentDB.getName());
 			dbCopy.delete();
-		}	
+		}
 	}
-	
+
 	public void deleteAllFiles()
 	{
 		for (String fileName : dbNames)
@@ -225,7 +257,7 @@ public class DBBackupRestore
 			File backup = getDBBackupFile(dbCopy.getName());
 			dbCopy.delete();
 			backup.delete();
-		}	
+		}
 	}
 
 	private File getCurrentDBFile(String dbName)
