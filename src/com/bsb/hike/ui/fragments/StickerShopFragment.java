@@ -205,7 +205,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		if (!isDownloading && (firstVisibleItem + visibleItemCount)  <= totalItemCount - 5 && StickerManager.getInstance().moreDataAvailableForStickerShop())
 		{
 			footerView.setVisibility(View.VISIBLE);
-			downLoadStickerData(mAdapter.getCursor().getCount());
+			downLoadStickerData(mAdapter.getCursor().getCount() + 1);
 		}
 		
 		if (previousFirstVisibleItem != firstVisibleItem)
