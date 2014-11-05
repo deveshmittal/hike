@@ -1462,7 +1462,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		}
 	}
 
-	protected void setEmptyView()
+	public void setEmptyView()
 	{
 		if (emptyView != null)
 		{
