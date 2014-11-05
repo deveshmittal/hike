@@ -382,6 +382,8 @@ public class HikePubSub implements Runnable
 	
 	public static final String UNREAD_PIN_COUNT_RESET = "pinCountReset";
 
+	public static final String SWITCH_OFF_NUX_MODE = "switchOffNuxMode";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

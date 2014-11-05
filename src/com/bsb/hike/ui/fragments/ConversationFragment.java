@@ -177,6 +177,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			if (mAdapter.getCount() == 0)
 			{
 				setEmptyState();
+				switchOffNuxMode();
 			}
 		}
 	}
@@ -188,7 +189,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
 			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
-			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG };
+			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.SWITCH_OFF_NUX_MODE };
 
 	private ConversationsAdapter mAdapter;
 
@@ -954,6 +955,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			if (mAdapter.getCount() == 0)
 			{
 				setEmptyState();
+				switchOffNuxMode();
 			}
 		}
 		else
@@ -1222,6 +1224,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					}
 					displayedConversations.add(conversation);
 					Collections.sort(displayedConversations, mConversationsComparator);
+					if(!conversation.getMsisdn().equals(HikeConstants.FTUE_HIKE_SUPPORT))
+					{
+						switchOffNuxMode();
+					}
 
 					notifyDataSetChanged();
 				}
@@ -1979,6 +1985,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				};
 			});
 		}
+		else if(HikePubSub.SWITCH_OFF_NUX_MODE.equals(type))
+		{
+			getActivity().runOnUiThread(new Runnable()
+			{
+				public void run()
+				{
+					switchOffNuxMode();
+				};
+			});
+		}
 	}
 
 	private Conversation getFirstConversation()
@@ -2511,10 +2527,25 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		}
 	}
 
+	private void removeInviteFooterView()
+	{
+		inviteFooter.findViewById(R.id.nux_invite_parent).setVisibility(View.GONE);
+		getListView().removeFooterView(inviteFooter);
+	}
+
 	private void inviteButtonClicked()
 	{
 		Intent intent = Utils.getNuxInviteForwardIntent(getActivity());
 		startActivity(intent);
 	}
 
+	private void switchOffNuxMode()
+	{
+		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.Extras.SHOW_NUX_INVITE_MODE, false))
+		{
+			HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeConstants.Extras.NUX_HOME_INVITE_FOOTER);
+			HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeConstants.Extras.SHOW_NUX_INVITE_MODE);
+			removeInviteFooterView();
+		}
+	}
 }
