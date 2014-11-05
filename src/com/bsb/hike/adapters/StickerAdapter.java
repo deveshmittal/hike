@@ -300,7 +300,12 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			if(category.getTotalStickers() > 0)
 			{
 				category_details.setVisibility(View.VISIBLE);
-				category_details.setText(activity.getString(R.string.n_stickers, category.getTotalStickers()));
+				String detailsString = activity.getString(R.string.n_stickers, category.getTotalStickers());
+				if(category.getCategorySize() > 0)
+				{
+					detailsString += ", " + Utils.getSizeForDisplay(category.getCategorySize());
+				}
+				category_details.setText(detailsString);
 				if(Utils.getDeviceOrientation(activity.getApplicationContext()) == Configuration.ORIENTATION_LANDSCAPE)
 				{
 					separator.setVisibility(View.VISIBLE);
