@@ -311,7 +311,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		originalAdapterLength = adapter.getCount();
 
 		initTagEditText();
-		initTips();
+
+		if(!nuxInviteMode)
+		{
+			initTips();
+		}
+
 		if (existingGroupId != null)
 		{
 			MIN_MEMBERS_GROUP_CHAT = 1;
@@ -1535,6 +1540,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			ComposeChatActivity.this.finish();
 			return;
+		}
+		else if(composeMode == NUX_INVITE_MODE)
+		{
+			Intent intent = Utils.getHomeActivityIntent(this);
+			startActivity(intent);
 		}
 		super.onBackPressed();
 	}
