@@ -1274,6 +1274,12 @@ public class HikeConstants
 		public static final String DELETED_MESSAGE_TYPE = "deletedMessageType";
 
 		public static final String CURRENT_POSITION = "currentPosition";
+
+		public static final String SHOW_NUX_INVITE_MODE = "showNuxInviteMode";
+
+		public static final String NUX_HOME_INVITE_FOOTER = "nuxHomeInviteFooter";
+
+		public static final String NUX_INVITE_FORWARD = "nuxInviteForward";
 	}
 
 	public static final class LogEvent
