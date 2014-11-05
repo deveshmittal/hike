@@ -15,7 +15,6 @@ import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.google.android.gms.internal.co;
 
 import android.content.Context;
@@ -177,7 +176,6 @@ public class IntentManager
 			JSONObject multiMsgFwdObject = new JSONObject();
 			multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
 			multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_ID, stickerId);
-			multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_INDEX, -1);
 			multipleMsgArray.put(multiMsgFwdObject);
 		}
 		catch (JSONException e)

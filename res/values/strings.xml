@@ -1180,4 +1180,33 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="wish_now">Wish now!</string>
     <string name="wish_you">Wish your friends!</string>
     <string name="messages_sent_succees">Message Sent</string>
+    <string name="new_stickers">NEW</string>
+    <string name="download_category">DOWNLOAD</string>
+    <string name="wish_you">Wish your friends</string>
+    <string name="sticker_shop">Sticker Shop</string>
+    <string name="my_stickers">My Stickers</string>
+    <string name="update_all">UPDATE ALL</string>
+    <string name="retry_sticker">RETRY</string>
+    <string name="see_them">SEE THEM</string>
+    <string name="drag_tip_text">Drag to Reorder Packs</string>
+    <string name="drag_tip_subtext">Tap and drag to reorder your sticker packs</string>
+    <string name="sticker_cancel">CANCEL</string>
+    <string name="sticker_confirm">CONFIRM</string>
+    <string name="n_more">%1$d MORE</string>
+    <string name="n_stickers">%1$d Stickers</string>
+    <string name="last_backup">Last backup</string>
+    <string name="never">never</string>
+    <string name="creating_backup_message">Creating a backup on your chats. Daily backups occur at 03:00.</string>
+    <string name="restore_account">Restore Account</string>
+    <string name="account_backup">Account Backup</string>
+    <string name="backup_found">Backup found</string>
+    <string name="backup_found_hint">would you like to restore your account?</string>
+    <string name="restore">RESTORE</string>
+    <string name="restoring...">Restoring...</string>
+    <string name="restoring..._hint">please wait, this may take a while</string>
+    <string name="restored">Restored</string>
+    <string name="restored_hint">your account and messages</string>
+    <string name="restore_error">Something went wrong.</string>
+    <string name="restore_error_hint">would you like to retry?</string>
+    
 </resources>

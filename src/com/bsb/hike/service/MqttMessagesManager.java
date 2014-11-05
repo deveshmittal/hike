@@ -1417,37 +1417,13 @@ public class MqttMessagesManager
 		String categoryId = data.getString(StickerManager.CATEGORY_ID);
 		if (HikeConstants.ADD_STICKER.equals(subType))
 		{
-			convDb.stickerUpdateAvailable(categoryId);
 			StickerManager.getInstance().setStickerUpdateAvailable(categoryId, true);
 		}
 		else if (HikeConstants.REMOVE_STICKER.equals(subType) || HikeConstants.REMOVE_CATEGORY.equals(subType))
 		{
-			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId);
-			if (categoryDirPath == null)
-			{
-				return;
-			}
-			File categoryDir = new File(categoryDirPath);
-
-			/*
-			 * If the category itself does not exist, then we have nothing to delete
-			 */
-			if (!categoryDir.exists())
-			{
-				return;
-			}
-
 			if (HikeConstants.REMOVE_CATEGORY.equals(subType))
 			{
-				String removedIds = settings.getString(StickerManager.REMOVED_CATGORY_IDS, "[]");
-				JSONArray removedIdArray = new JSONArray(removedIds);
-				removedIdArray.put(categoryId);
-
-				Editor editor = settings.edit();
-				editor.putString(StickerManager.REMOVED_CATGORY_IDS, removedIdArray.toString());
-				editor.commit();
-
-				StickerManager.getInstance().setupStickerCategoryList(settings);
+				StickerManager.getInstance().removeCategory(categoryId);
 			}
 			else
 			{
@@ -1455,10 +1431,7 @@ public class MqttMessagesManager
 
 				for (int i = 0; i < stickerIds.length(); i++)
 				{
-					String stickerId = stickerIds.getString(i);
-					File stickerSmall = new File(categoryDir + HikeConstants.SMALL_STICKER_ROOT, stickerId);
-					stickerSmall.delete();
-					StickerManager.getInstance().removeStickerFromRecents(new Sticker(categoryId, stickerId));
+					StickerManager.getInstance().removeSticker(categoryId, stickerIds.getString(i));
 				}
 			}
 		}

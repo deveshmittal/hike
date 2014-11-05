@@ -50,7 +50,6 @@ import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
 public class ToastListener implements Listener
 {
@@ -569,36 +568,10 @@ public class ToastListener implements Listener
 		if (convMessage.isStickerMessage())
 		{
 			final Sticker sticker = convMessage.getMetadata().getSticker();
-			/*
-			 * If this is the first category, then the sticker are a part of the app bundle itself
-			 */
-			if (sticker.isDefaultSticker())
+			final String filePath = sticker.getStickerPath(context);
+			if (!TextUtils.isEmpty(filePath))
 			{
-				int resourceId = 0;
-
-				if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
-				{
-					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[sticker.getStickerIndex()];
-				}
-				else if (StickerCategoryId.expressions.equals(sticker.getCategory().categoryId))
-				{
-					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS[sticker.getStickerIndex()];
-				}
-
-				if (resourceId > 0)
-				{
-					final Drawable dr = context.getResources().getDrawable(resourceId);
-					bigPictureImage = HikeBitmapFactory.drawableToBitmap(dr, Bitmap.Config.ARGB_8888);
-				}
-
-			}
-			else
-			{
-				final String filePath = sticker.getStickerPath(context);
-				if (!TextUtils.isEmpty(filePath))
-				{
-					bigPictureImage = HikeBitmapFactory.decodeFile(filePath);
-				}
+				bigPictureImage = HikeBitmapFactory.decodeFile(filePath);
 			}
 		}
 		return bigPictureImage;

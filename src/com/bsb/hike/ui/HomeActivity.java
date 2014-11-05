@@ -84,7 +84,6 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.HikeTip.TipType;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
@@ -326,7 +325,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void sendDiwaliSticker()
 	{
-		Intent intent = IntentManager.getForwardStickerIntent(this, "078_happydiwali.png", StickerCategoryId.humanoid.name());
+		Intent intent = IntentManager.getForwardStickerIntent(this, "078_happydiwali.png", StickerManager.HUMANOID);
 		startActivity(intent);
 	}
 
@@ -1436,7 +1435,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 9:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
-					break;	
+					break;
 				}
 
 				if (intent != null)
