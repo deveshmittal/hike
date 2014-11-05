@@ -199,7 +199,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	{
 		setLoadingView();
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, friendsStealthList, hikeStealthContactsList,
-				smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, false, true, false);
+				smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, false, true, false, false);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
@@ -319,19 +319,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		{
 			List<List<ContactInfo>> resultList = (List<List<ContactInfo>>) results.values;
 
-			makeFilteredList(constraint, resultList.get(0), resultList.get(1), resultList.get(2));
-
-			if (groupsList != null && !groupsList.isEmpty())
-			{
-				filteredGroupsList.clear();
-				filteredGroupsList.addAll(resultList.get(3));
-			}
-			
-			if (recentContactsList != null && !recentContactsList.isEmpty())
-			{
-				filteredRecentsList.clear();
-				filteredRecentsList.addAll(resultList.get(4));
-			}
+			makeFilteredList(constraint, resultList);
 
 			makeCompleteList(true);
 		}
@@ -349,17 +337,41 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		return resultList;
 	}
 
-	protected void makeFilteredList(CharSequence constraint, List<ContactInfo> friendList, List<ContactInfo> hikeContactList, List<ContactInfo> smsList)
+	protected void makeFilteredList(CharSequence constraint, List<List<ContactInfo>> resultList)
 	{
+		int listsSize = resultList.size();
+
 		filteredFriendsList.clear();
-		filteredFriendsList.addAll(friendList);
+		if(listsSize > 0)
+		{
+			filteredFriendsList.addAll(resultList.get(0));
+		}
 
 		filteredHikeContactsList.clear();
-		filteredHikeContactsList.addAll(hikeContactList);
+		if(listsSize > 1)
+		{
+			filteredHikeContactsList.addAll(resultList.get(1));
+		}
 
 		filteredSmsContactsList.clear();
-		filteredSmsContactsList.addAll(smsList);
+		if(listsSize > 2)
+		{
+			filteredSmsContactsList.addAll(resultList.get(2));
+		}
 
+		if (groupsList != null && !groupsList.isEmpty())
+		{
+			filteredGroupsList.clear();
+			if(listsSize > 3)
+				filteredGroupsList.addAll(resultList.get(3));
+		}
+
+		if (recentContactsList != null && !recentContactsList.isEmpty())
+		{
+			filteredRecentsList.clear();
+			if(listsSize > 4)
+				filteredRecentsList.addAll(resultList.get(4));
+		}
 	}
 
 	public void makeCompleteList(boolean filtered)
