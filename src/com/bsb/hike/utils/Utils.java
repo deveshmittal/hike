@@ -172,6 +172,7 @@ import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -4788,5 +4789,28 @@ public class Utils
 		Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteRemoved);
 		return favoriteType;
+	}
+
+	public static Intent getNuxInviteForwardIntent(Context context)
+	{
+		Intent intent = new Intent(context, ComposeChatActivity.class);
+		intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+		JSONArray multipleMsgArray = new JSONArray();
+		JSONObject multiMsgFwdObject = new JSONObject();
+		try
+		{
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.MSG, Utils.getInviteMessage(context, R.string.invite_share_message));
+			multipleMsgArray.put(multiMsgFwdObject);
+		}
+		catch (JSONException e)
+		{
+			Logger.e("HomeInviteFooter", "Invalid JSON", e);
+		}
+		if(HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.Extras.SHOW_NUX_INVITE_MODE, false))
+		{
+			intent.putExtra(HikeConstants.Extras.NUX_INVITE_FORWARD, true);
+		}
+		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
+		return intent;
 	}
 }

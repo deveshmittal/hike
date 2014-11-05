@@ -214,6 +214,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private int velocity;
 
+	private View inviteFooter;
+
 	private enum hikeBotConvStat
 	{
 		NOTVIEWED, VIEWED, DELETED
@@ -312,6 +314,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 		mConversationsComparator = new Conversation.ConversationComparator();
 		fetchConversations();
+
+		showInviteFooterIfRequired();
 
 		for (TypingNotification typingNotification : HikeMessengerApp.getTypingNotificationSet().values())
 		{
@@ -812,6 +816,18 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		ShowTipIfNeeded(displayedConversations.isEmpty());
 		
 		mAdapter = new ConversationsAdapter(getActivity(), displayedConversations, getListView());
+
+		inviteFooter = LayoutInflater.from(getActivity()).inflate(R.layout.nux_invite_footer, null);
+		inviteFooter.findViewById(R.id.nux_invite_now).setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v)
+			{
+				inviteButtonClicked();
+			}
+		});
+
+		getListView().addFooterView(inviteFooter);
 
 		setListAdapter(mAdapter);
 
@@ -2484,7 +2500,21 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			ShowTipIfNeeded(displayedConversations.isEmpty());
 			notifyDataSetChanged();
 		}
+		showInviteFooterIfRequired();
+	}
 
+	private void showInviteFooterIfRequired()
+	{
+		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.Extras.NUX_HOME_INVITE_FOOTER, false))
+		{
+			inviteFooter.findViewById(R.id.nux_invite_parent).setVisibility(View.VISIBLE);
+		}
+	}
+
+	private void inviteButtonClicked()
+	{
+		Intent intent = Utils.getNuxInviteForwardIntent(getActivity());
+		startActivity(intent);
 	}
 
 }
