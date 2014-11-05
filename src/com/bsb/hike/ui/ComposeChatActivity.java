@@ -1047,7 +1047,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				forwardMessageAsPerType(presentIntent, intent,arrayList);
 			}
-
+			if(nuxInviteMode)
+			{
+				mPubSub.publish(HikePubSub.SWITCH_OFF_NUX_MODE, false);
+			}
 		}
 	}
 
