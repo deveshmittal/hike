@@ -5706,7 +5706,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, new String[] { DBConstants._ID, DBConstants.TOTAL_NUMBER, DBConstants.CATEGORY_NAME, DBConstants.CATEGORY_SIZE }, null, null,
+			c = mDb.query(DBConstants.STICKER_SHOP_TABLE, new String[] { DBConstants._ID, DBConstants.TOTAL_NUMBER, DBConstants.CATEGORY_NAME, DBConstants.CATEGORY_SIZE }, null, null,
 					null, null, null);
 		}
 		catch (Exception e)
