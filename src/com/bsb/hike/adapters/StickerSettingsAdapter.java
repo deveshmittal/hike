@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.DragSortListView.DragSortListView;
@@ -172,7 +173,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		viewHolder.checkBox.setTag(category);
 		viewHolder.categoryName.setText(category.getCategoryName());
 		viewHolder.checkBox.setChecked(category.isVisible());
-		stickerPreviewLoader.loadImage(category.getCategoryId(), viewHolder.categoryPreviewImage, isListFlinging);
+		stickerPreviewLoader.loadImage(category.getCategoryId() + HikeConstants.DELIMETER + StickerManager.PREVIEW_IMAGE, viewHolder.categoryPreviewImage, isListFlinging);
 		
 		return convertView;
 	}

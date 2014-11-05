@@ -1902,4 +1902,6 @@ public class HikeConstants
 	public static final String INDEX = "index";
 	
 	public static final String CAT_NAME = "name";
+	
+	public static final String DELIMETER = ":";
 }

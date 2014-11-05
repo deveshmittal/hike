@@ -12,6 +12,7 @@ import android.content.Context;
 import android.os.Handler;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.HttpRequestType;
@@ -48,12 +49,12 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			return STResult.DOWNLOAD_FAILED;
 		}
 		
-		String previewImagePath = dirPath + HikeConstants.OTHER_ROOT + HikeConstants.PREVIEW_IMAGE;
+		String previewImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT  + "/" + StickerManager.PREVIEW_IMAGE + StickerManager.PREVIEW_ICON_TYPE;
 		
 		FileOutputStream fos = null;
 		try
 		{
-			File otherDir = new File(dirPath + HikeConstants.OTHER_ROOT);
+			File otherDir = new File(dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT);
 			if (!otherDir.exists())
 			{
 				if (!otherDir.mkdirs())
@@ -63,10 +64,10 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 				}
 			}
 			
-			String urlString = AccountUtils.base + "/preview?catId=" + catId + "&resId=" + Utils.getResolutionId();
+			String urlString = AccountUtils.base + "/stickers/preview?catId=" + catId + "&resId=" + Utils.getResolutionId();
 			if(AccountUtils.ssl)
 			{
-				urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/preview?catId=" + catId + "&resId=" + Utils.getResolutionId();
+				urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/stickers/preview?catId=" + catId + "&resId=" + Utils.getResolutionId();
 			}
 			setDownloadUrl(urlString);
 			
@@ -80,7 +81,8 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			JSONObject data = response.getJSONObject(HikeConstants.DATA_2);
 
 			String stickerData = data.getString(HikeConstants.PREVIEW_IMAGE);
-
+			
+			HikeMessengerApp.getLruCache().remove(catId + HikeConstants.DELIMETER + StickerManager.PREVIEW_IMAGE);
 			Utils.saveBase64StringToFile(new File(previewImagePath), stickerData);
 			
 		}
