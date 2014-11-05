@@ -229,55 +229,58 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				@Override
 				public void drop(int from, int to)
 				{	
-					StickerCategory category = mAdapter.getItem(from);
-					if ((from == to) || (!category.isVisible())) // Dropping at the same position. No need to perform Drop.
+					if(!prefs.getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))
 					{
-						return;
-					}
+						prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
+						StickerCategory category = mAdapter.getItem(from);
+						if ((from == to) || (!category.isVisible())) // Dropping at the same position. No need to perform Drop.
+						{
+							return;
+						}
 
-					if (from > mAdapter.getLastVisibleIndex() && to > mAdapter.getLastVisibleIndex() + 1)
-					{
-						   return;
+						if (from > mAdapter.getLastVisibleIndex() && to > mAdapter.getLastVisibleIndex() + 1)
+						{
+							return;
+						}
+
+						ImageView tickImage = (ImageView) parent.findViewById(R.id.reorder_indicator);
+						tickImage.setImageResource(R.drawable.art_tick);
+						TextView tipText = (TextView) parent.findViewById(R.id.drag_tip);
+						tipText.setText(getResources().getString(R.string.great_job));
+						tipText.setTextColor(getResources().getColor(R.color.white));
+						((View) parent).findViewById(R.id.drag_tip_subtext).setVisibility(View.GONE);
+						v.setBackgroundColor(getResources().getColor(R.color.sticker_drag_tip_bg_color));
+
+						TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, 0,
+								Animation.ABSOLUTE, -v.getHeight());
+						animation.setDuration(400);
+						animation.setStartOffset(300);
+						mDslv.setAnimation(animation);
+
+						animation.setAnimationListener(new AnimationListener()
+						{
+							@Override
+							public void onAnimationStart(Animation animation)
+							{
+
+							}
+
+							@Override
+							public void onAnimationRepeat(Animation animation)
+							{
+
+							}
+
+							@Override
+							public void onAnimationEnd(Animation animation)
+							{
+								v.setVisibility(View.GONE);
+								TranslateAnimation temp = new TranslateAnimation(0, 0, 0, 0);
+								temp.setDuration(1l);
+								parent.startAnimation(temp);
+							}
+						});
 					}
-					
-					ImageView tickImage = (ImageView) parent.findViewById(R.id.reorder_indicator);
-					tickImage.setImageResource(R.drawable.art_tick);
-					TextView tipText = (TextView) parent.findViewById(R.id.drag_tip);
-					tipText.setText(getResources().getString(R.string.great_job));
-					tipText.setTextColor(getResources().getColor(R.color.white));
-					((View) parent).findViewById(R.id.drag_tip_subtext).setVisibility(View.GONE);
-					v.setBackgroundColor(getResources().getColor(R.color.sticker_drag_tip_bg_color));
-					
-					TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, 0, Animation.ABSOLUTE, -v.getHeight());
-					animation.setDuration(400);
-					animation.setStartOffset(300);
-					parent.setAnimation(animation);
-					
-					animation.setAnimationListener(new AnimationListener()
-					{
-						@Override
-						public void onAnimationStart(Animation animation)
-						{
-							
-						}
-						
-						@Override
-						public void onAnimationRepeat(Animation animation)
-						{
-							
-						}
-						
-						@Override
-						public void onAnimationEnd(Animation animation)
-						{
-							v.setVisibility(View.GONE);
-							TranslateAnimation temp = new TranslateAnimation(0, 0, 0, 0);
-							temp.setDuration(1l);
-							parent.startAnimation(temp);
-						}
-					});
-					
-					prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
 				}
 			});
 		}
