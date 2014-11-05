@@ -34,7 +34,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
@@ -121,12 +120,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			unlinkPreference.setOnPreferenceClickListener(this);
 		}
 		
-		Preference imageQuality = getPreferenceScreen().findPreference(HikeConstants.IMAGE_QUALITY);
-		if (imageQuality != null)
-		{
-			imageQuality.setOnPreferenceClickListener(this);
-		}
-
 		Preference unlinkFacebookPreference = getPreferenceScreen().findPreference(HikeConstants.UNLINK_FB);
 		if (unlinkFacebookPreference != null)
 		{
@@ -654,40 +647,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				}, dialogStrings);
 			}
 		}
-		else if (HikeConstants.IMAGE_QUALITY.equals(preference.getKey()))
-		{	
-			HikeDialog.showDialog(HikePreferences.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG,  new HikeDialog.HikeDialogListener()
-			{
-				@Override
-				public void onSucess(Dialog dialog)
-				{
-					updateImageQualityPrefView();
-					dialog.dismiss();
-				}
-
-				@Override
-				public void negativeClicked(Dialog dialog)
-				{
-					// TODO Auto-generated method stub
-					
-				}
-
-				@Override
-				public void positiveClicked(Dialog dialog)
-				{
-					// TODO Auto-generated method stub
-					
-				}
-
-				@Override
-				public void neutralClicked(Dialog dialog)
-				{
-					// TODO Auto-generated method stub
-					
-				}
-			}, (Object[]) null);
-
-		}
 		else if(HikeConstants.CHANGE_STEALTH_PASSCODE.equals(preference.getKey()))
 		{
 			LockPattern.confirmPattern(HikePreferences.this, true);
@@ -825,42 +784,9 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		case R.xml.notification_preferences:
 			updateNotifPrefView();
 			break;
-		case R.xml.media_download_preferences:
-			updateImageQualityPrefView();
-			break;
 		case R.xml.account_preferences:
 			updateAccountBackupPrefView();
 			break;
-		}
-	}
-	
-	private void updateImageQualityPrefView()
-	{
-		Preference preference = getPreferenceScreen().findPreference(HikeConstants.IMAGE_QUALITY);
-		if (HikeSharedPreferenceUtil.getInstance(HikePreferences.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
-		{
-			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(HikePreferences.this);
-
-			int imageQuality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
-
-			String qualityString = "";
-			switch (imageQuality)
-			{
-			case ImageQuality.QUALITY_ORIGINAL:
-				qualityString = "Original";
-				break;
-			case ImageQuality.QUALITY_MEDIUM:
-				qualityString = "Medium";
-				break;
-			case ImageQuality.QUALITY_SMALL:
-				qualityString = "Small";
-				break;
-			}
-			preference.setTitle(getResources().getString(R.string.image_quality_prefs) + " - " + qualityString);
-		}
-		else
-		{
-			preference.setTitle(getResources().getString(R.string.image_quality_prefs));
 		}
 	}
 	

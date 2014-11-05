@@ -1050,6 +1050,8 @@ public class HikeConstants
 		public static final String URL_TO_LOAD = "urlToLoad";
 
 		public static final String TITLE = "title";
+		
+		public static final String WEBVIEW_ALLOW_LOCATION = "allocLoc";
 
 		public static final String FIRST_TIME_USER = "firstTimeUser";
 
@@ -1908,4 +1910,12 @@ public class HikeConstants
 	public static final String VISIBLITY = "visibility";
 
 	public static final String INDEX = "index";
+		
+	public static final String HIKE_EXTRAS_NAME = "hike_extras_name";
+	
+	public static final String HIKE_EXTRAS_URL = "hike_extras_url";
+	
+	public static final String REWARDS_NAME = "rewards_name";
+		
+	public static final String REWARDS_URL = "rewards_url";
 }
