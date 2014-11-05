@@ -1,24 +1,21 @@
 package com.bsb.hike.db;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.R.integer;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
@@ -34,22 +31,24 @@ import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
+import android.util.SparseArray;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.db.DBConstants.HIKE_CONV_DB;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.FileListItem;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.FileListItem;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
@@ -58,6 +57,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.contactmgr.ConversationMsisdns;
+import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
@@ -66,7 +66,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 
-public class HikeConversationsDatabase extends SQLiteOpenHelper
+public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBConstants,HIKE_CONV_DB
 {
 
 	private SQLiteDatabase mDb;
@@ -116,7 +116,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ DBConstants.READ_BY + " TEXT, " // Deprecated
 				+ DBConstants.MSISDN + " TEXT, " // The conversation's msisdn. This will be the msisdn for one-to-one and the group id for groups
 				+ DBConstants.MESSAGE_HASH + " TEXT DEFAULT NULL, " // Used for duplication checks.
-				+ DBConstants.MESSAGE_TYPE + " INTEGER" + " INTEGER DEFAULT -1" // The type of the message.
+				+ DBConstants.MESSAGE_TYPE + " INTEGER" + " INTEGER DEFAULT -1, " // The type of the message.
+				+ DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER DEFAULT -1" // love id applicable to few messages like content
 				+ " ) ";
 
 		db.execSQL(sql);
@@ -226,6 +227,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ ")";
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CHAT_BG_INDEX + " ON " + DBConstants.CHAT_BG_TABLE + " (" + DBConstants.MSISDN + ")";
+		db.execSQL(sql);
+		// CONTENT LOVE TABLE
+		sql = CREATE_TABLE + LOVE_TABLE + "(" + _ID
+				+ " INTEGER PRIMARY KEY AUTOINCREMENT, " + LOVE_ID
+				+ " INTEGER, " + COUNT + " INTEGER, " + USER_STATUS
+				+ " INTEGER, " + REF_COUNT + " INTEGER, "
+				+ HIKE_CONV_DB.TIMESTAMP + " INTEGER" + ")"; 
 		db.execSQL(sql);
 	}
 
@@ -624,6 +632,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				dropAndRecreateStatusTable(db);
 			}
+		}
+		
+		/**
+		 * We introduced content here, so love concept came in message table for content shared by people
+		 */
+		if(oldVersion < 31){
+			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER";
+			db.execSQL(alter);
 		}
 	}
 
@@ -4998,9 +5014,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		final int isHikeMessageColumn = c.getColumnIndex(DBConstants.IS_HIKE_MESSAGE);
 		final int readByColumn = c.getColumnIndex(DBConstants.READ_BY);
 		final int typeColumn = c.getColumnIndex(DBConstants.MESSAGE_TYPE);
-
+		final int loveIdColumn = c.getColumnIndex(DBConstants.HIKE_CONV_DB.LOVE_ID_REL);
 		List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
-
+		SparseArray<ConvMessage> contentMessages = new SparseArray<ConvMessage>();
+		StringBuilder loveIds = new StringBuilder("(");
 		while (c.moveToNext())
 		{
 			int hikeMessage = c.getInt(isHikeMessageColumn);
@@ -5008,6 +5025,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			ConvMessage message = new ConvMessage(c.getString(msgColumn), conversation.getMsisdn(), c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)),
 					c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn), !isHikeMessage, c.getInt(typeColumn));
+			if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT){
+				int loveId = c.getInt(loveIdColumn);
+				// DEFAULT value of love id is -1 
+				if(loveId !=- 1){
+				loveIds.append(loveId);
+				loveIds.append(",");
+				contentMessages.put(loveId, message);
+				}
+			}
 			String metadata = c.getString(metadataColumn);
 			try
 			{
@@ -5020,7 +5046,43 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			message.setReadByArray(c.getString(readByColumn));
 			elements.add(elements.size(), message);
 		}
+		if(contentMessages.size()>0){
+			String loveIdsCommaSeparated = loveIds.substring(0, loveIds.length()-1)+")"; // -1 coz of last comma
+			// fetch love data from love table
+			List<ContentLove> list = getContentLoveData(loveIdsCommaSeparated);
+			for(ContentLove love : list){
+				ConvMessage message = (ConvMessage) contentMessages.get(love.loveId);
+				if(message!=null){
+					message.contentLove = love;
+				}
+			}
+		}
 		return elements;
+	}
+	
+	private List<ContentLove> getContentLoveData(String loveIdsCommaSeparated){
+		String query = "SELECT " + DBConstants.HIKE_CONV_DB.LOVE_ID + ","
+				+ HIKE_CONV_DB.COUNT + "," + HIKE_CONV_DB.USER_STATUS + ","
+				+ HIKE_CONV_DB.TIMESTAMP + " FROM " + HIKE_CONV_DB.LOVE_TABLE
+				+ " WHERE " + HIKE_CONV_DB.LOVE_ID + " in "
+				+ loveIdsCommaSeparated;
+		Cursor c = mDb.rawQuery(query, null);
+		List<ContentLove> listToReturn = new ArrayList<ContentLove>();
+		if(c.getCount()>0){
+			int loveId = c.getColumnIndex(HIKE_CONV_DB.LOVE_ID);
+			int count = c.getColumnIndex(HIKE_CONV_DB.COUNT);
+			int userStatus = c.getColumnIndex(HIKE_CONV_DB.USER_STATUS);
+			int timeStamp = c.getColumnIndex(HIKE_CONV_DB.TIMESTAMP);
+			while(c.moveToNext()){
+				ContentLove love = new ContentLove();
+				love.loveId = c.getInt(loveId);
+				love.loveCount = c.getInt(count);
+				love.userStatus = c.getInt(userStatus) ==1;
+				love.updatedTimeStamp = new Date(c.getLong(timeStamp));
+				listToReturn.add(love);
+			}
+		}
+		return listToReturn;
 	}
 
 	/**
