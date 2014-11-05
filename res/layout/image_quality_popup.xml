@@ -215,28 +215,12 @@
             android:orientation="horizontal" >
 
             <com.bsb.hike.view.CustomFontButton
-                android:id="@+id/btn_always"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/list_item"
-                android:text="@string/always"
-                android:textColor="@color/image_quality_popup_text_color"
-                android:textSize="15sp" />
-
-            <View
-                android:id="@+id/horizontal_divider"
-                android:layout_width="0.5dp"
-                android:layout_height="match_parent"
-                android:background="#1f73716d" />
-
-            <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/btn_just_once"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/list_item"
-                android:text="@string/just_once"
+                android:text="@string/image_quality_send"
                 android:textColor="@color/image_quality_popup_text_color"
                 android:textSize="15sp" />
         </LinearLayout>
