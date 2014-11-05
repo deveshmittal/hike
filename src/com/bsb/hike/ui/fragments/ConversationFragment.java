@@ -403,6 +403,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			editor.commit();
 		}
 
+		if(HikeConstants.FTUE_HIKE_SUPPORT.equals(conv.getMsisdn()) && HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.Extras.SHOW_NUX_INVITE_MODE, false))
+		{
+			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeConstants.Extras.NUX_HOME_INVITE_FOOTER, true);
+		}
 	}
 
 	private void resetStealthTipClicked()
