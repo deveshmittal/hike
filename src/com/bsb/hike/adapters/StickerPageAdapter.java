@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -81,10 +82,10 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 
 		this.numItemsRow = StickerManager.getInstance().getNumColumnsForStickerGrid(activity);
 
-		int emoticonPagerPadding = (int) 2 * activity.getResources().getDimensionPixelSize(R.dimen.emoticon_pager_padding);
 		int stickerPadding = (int) 2 * activity.getResources().getDimensionPixelSize(R.dimen.sticker_padding);
-
-		int remainingSpace = (screenWidth - emoticonPagerPadding - stickerPadding) - (this.numItemsRow * StickerManager.SIZE_IMAGE);
+		int horizontalSpacing = (int) (this.numItemsRow - 1) * activity.getResources().getDimensionPixelSize(R.dimen.sticker_grid_horizontal_padding);
+		
+		int remainingSpace = (screenWidth - horizontalSpacing - stickerPadding) - (this.numItemsRow * StickerManager.SIZE_IMAGE);
 
 		this.sizeEachImage = StickerManager.SIZE_IMAGE + ((int) (remainingSpace / this.numItemsRow));
 
@@ -175,7 +176,8 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				convertView.setLayoutParams(ll);
 				viewHolder.text = (TextView) convertView.findViewById(R.id.new_number_stickers);
 				viewHolder.image = (ImageView) convertView.findViewById(R.id.update_btn);
-				viewHolder.progress = (ProgressBar) convertView.findViewById(R.id.download_progress);
+				viewHolder.progress =  convertView.findViewById(R.id.download_progress);
+				
 				break;
 			case PLACE_HOLDER:
 				convertView = inflater.inflate(R.layout.update_sticker_set, null);
@@ -196,7 +198,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			{
 			}
 		}
-
+		
 		switch (viewType)
 		{
 		case STICKER:
@@ -208,7 +210,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			break;
 		case UPDATE:
 			viewHolder.image.setVisibility(View.VISIBLE);
-
+			clearAnimation(viewHolder.progress);
 			if(item.getCategoryMoreStickerCount() > 0)
 			{
 				viewHolder.text.setVisibility(View.VISIBLE);
@@ -231,13 +233,16 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			break;
 		case DOWNLOADING:
 			viewHolder.progress.setVisibility(View.VISIBLE);
+			viewHolder.progress.setAnimation(AnimationUtils.loadAnimation(activity, R.anim.rotate));
 			
 			break;
 		case RETRY:
 			viewHolder.image.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_retry_sticker));
 			viewHolder.image.setVisibility(View.VISIBLE);
 			viewHolder.text.setVisibility(View.VISIBLE);
+			clearAnimation(viewHolder.progress);
 			viewHolder.text.setText(activity.getResources().getString(R.string.retry_sticker));
+			
 			viewHolder.image.setOnClickListener(new View.OnClickListener()
 			{
 				
@@ -253,6 +258,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			viewHolder.image.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_done_palette));
 			viewHolder.image.setVisibility(View.VISIBLE);
 			viewHolder.text.setVisibility(View.VISIBLE);
+			clearAnimation(viewHolder.progress);
 			viewHolder.text.setText(activity.getResources().getString(R.string.see_them));
 			viewHolder.image.setOnClickListener(new View.OnClickListener()
 			{
@@ -348,7 +354,18 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		
 		TextView text;
 		
-		ProgressBar progress;
+		View progress;
 	}
+	
+	/**
+	 * Used to clear the spinner animation here
+	 * @param v
+	 */
+	private void clearAnimation(View v)
+	{
+		v.setVisibility(View.GONE);
+		v.clearAnimation();
+	}
+
 
 }

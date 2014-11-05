@@ -14,7 +14,11 @@
         android:fadingEdge="none"
         android:listSelector="@android:color/transparent"
         android:paddingLeft="@dimen/sticker_padding"
-        android:paddingRight="@dimen/sticker_padding" />
+        android:paddingRight="@dimen/sticker_padding"
+        android:paddingTop="@dimen/sticker_padding"
+        android:horizontalSpacing="@dimen/sticker_grid_horizontal_padding"
+        android:verticalSpacing="@dimen/sticker_padding"
+        android:scrollbarStyle="outsideOverlay"/>
 
     
     <LinearLayout

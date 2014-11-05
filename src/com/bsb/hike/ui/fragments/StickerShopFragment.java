@@ -51,6 +51,8 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	Map<String, StickerCategory> stickerCategoriesMap;
 	
 	private boolean isDownloading = false;
+	
+	View footerView;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -106,15 +108,18 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		listview = (ListView) getView().findViewById(android.R.id.list);
 		stickerCategoriesMap = new HashMap<String, StickerCategory>();
 		stickerCategoriesMap.putAll(StickerManager.getInstance().getStickerCategoryMap());
+		View headerView = getActivity().getLayoutInflater().inflate(R.layout.sticker_shop_header, null);
+		footerView = getActivity().getLayoutInflater().inflate(R.layout.sticker_shop_footer, null);
+		footerView.setVisibility(View.GONE);
+		listview.addHeaderView(headerView);
+		listview.addFooterView(footerView);
+		
 		if(StickerManager.getInstance().stickerShopUpdateNeeded())
 		{
 			HikeConversationsDatabase.getInstance().clearStickerShop();
 			downLoadStickerData(0);
 		}
-		else
-		{
-			setAdapterAndCursor();
-		}
+		setAdapterAndCursor();
 	}
 	
 	private void setAdapterAndCursor()
@@ -157,7 +162,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 							HikeSharedPreferenceUtil.getInstance(getSherlockActivity()).saveData(StickerManager.LAST_STICKER_SHOP_UPDATE_TIME, System.currentTimeMillis());
 							setAdapterAndCursor();
 						}
-						//footerView.setVisibility(View.GONE);
+						footerView.setVisibility(View.GONE);
 						isDownloading = false;
 					}
 				});
@@ -184,6 +189,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 					@Override
 					public void run()
 					{
+						footerView.setVisibility(View.GONE);
 						isDownloading = false;
 					}
 				});
@@ -197,6 +203,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		// TODO Auto-generated method stub
 		if (!isDownloading && (firstVisibleItem + visibleItemCount)  <= totalItemCount - 5 && StickerManager.getInstance().moreDataAvailableForStickerShop())
 		{
+			footerView.setVisibility(View.VISIBLE);
 			downLoadStickerData(mAdapter.getCursor().getCount());
 		}
 		

@@ -126,7 +126,7 @@
             android:layout_marginLeft="10dp"/>
         
         <LinearLayout 
-            android:id="@+id/pack_details"
+            android:id="@+id/pack_details_ll"
             android:orientation="vertical"
             android:layout_above="@id/divider"
             android:layout_width="match_parent"
