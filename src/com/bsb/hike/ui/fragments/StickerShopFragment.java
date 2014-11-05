@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bsb.hike.HikeConstants;
@@ -301,6 +302,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 				final String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 				final DownloadType type = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
 				final StickerCategory category = stickerCategoriesMap.get(categoryId);
+				final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
 				if (category == null)
 				{
 					return;
@@ -317,6 +319,10 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 							if(mAdapter == null)
 							{
 								return;
+							}
+							if(failedDueToLargeFile)
+							{
+								Toast.makeText(getActivity(), R.string.out_of_space, Toast.LENGTH_SHORT).show();
 							}
 							category.setState(StickerCategory.RETRY);
 							mAdapter.notifyDataSetChanged();
