@@ -65,7 +65,6 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.FtueContactsData;
@@ -1426,12 +1425,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
 					break;
-				case 21:
-					DBBackupRestore.getInstance(getApplicationContext()).backupDB();
-					break;
-				case 22:
-					DBBackupRestore.getInstance(getApplicationContext()).restoreDB();
-					break;
 				}
 
 				if (intent != null)
@@ -1475,8 +1468,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			overFlowMenuItems.add(new OverFlowMenuItem("Send logs", 9));
 		}
-		overFlowMenuItems.add(new OverFlowMenuItem("Backup", 21));
-		overFlowMenuItems.add(new OverFlowMenuItem("Restore", 22));
 	}
 
 	@Override
