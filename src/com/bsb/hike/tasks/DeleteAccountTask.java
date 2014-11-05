@@ -69,7 +69,10 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			app.disconnectFromService();
 			ctx.stopService(new Intent(ctx, HikeService.class));
 
-			DBBackupRestore.getInstance(ctx).deleteAllFiles();
+			if (delete)
+			{
+				DBBackupRestore.getInstance(ctx).deleteAllFiles();
+			}
 			ContactManager.getInstance().deleteAll();
 			convDb.deleteAll();
 			HikeMessengerApp.getLruCache().clearIconCache();
