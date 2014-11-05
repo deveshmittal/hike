@@ -1289,11 +1289,22 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
 		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.hike_extras), 3));
+			String hikeExtrasName = accountPrefs.getString(HikeConstants.HIKE_EXTRAS_NAME, getApplicationContext().getString(R.string.hike_extras));
+					                       
+			if(!TextUtils.isEmpty(hikeExtrasName))
+			{
+				optionsList.add(new OverFlowMenuItem(hikeExtrasName, 3));
+			}
 		}
+		
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
 		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.rewards), 4));
+			String rewards_name = accountPrefs.getString(HikeConstants.REWARDS_NAME, getApplicationContext().getString(R.string.rewards));
+												
+			if(!TextUtils.isEmpty(rewards_name))
+			{
+				optionsList.add(new OverFlowMenuItem(rewards_name, 4));
+			}
 		}
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
@@ -1427,7 +1438,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 9:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
-					break;	
+					break;
 				}
 
 				if (intent != null)
