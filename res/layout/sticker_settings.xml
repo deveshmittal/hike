@@ -73,7 +73,8 @@
         dslv:sort_enabled="true"
         dslv:track_drag_sort="false"
         dslv:use_default_controller="true"
-        android:layout_below="@id/reorder_tip"/>
+        android:layout_below="@id/reorder_tip"
+        android:scrollbarStyle="outsideOverlay"/>
 
    <LinearLayout
         android:id="@+id/update_all_ll"
