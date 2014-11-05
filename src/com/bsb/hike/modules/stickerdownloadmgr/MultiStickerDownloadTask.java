@@ -254,9 +254,12 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			if (result != STResult.SUCCESS)
 			{
 				Exception e = getException();
-				if(getException() != null && ((StickerException) getException()).getErrorCode() == StickerException.OUT_OF_SPACE)
+				if(e != null && e instanceof StickerException)
 				{
-					b.putBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE, true);
+					if(((StickerException) e).getErrorCode() == StickerException.OUT_OF_SPACE)
+					{
+						b.putBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE, true);
+					}
 				}
 				StickerManager.getInstance().stickersDownloadFailed(b);
 			}
