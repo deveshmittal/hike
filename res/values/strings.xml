@@ -1194,6 +1194,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="sticker_confirm">CONFIRM</string>
     <string name="n_more">%1$d MORE</string>
     <string name="n_stickers">%1$d Stickers</string>
+    <string name="out_of_space">Get More Space</string>
     <string name="sticker_pack_free">FREE</string>
     <string name="n_packs">%1$d Packs</string>
     <string name="downloading_sticker">DOWNLOAING STICKERS</string>

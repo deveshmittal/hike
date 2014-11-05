@@ -181,6 +181,8 @@ public class StickerManager
 	
 	public static final long STICKER_SHOP_REFRESH_TIME = 24 * 60 * 60 * 1000;
 	
+	public static final long MINIMUM_FREE_SPACE = 10 * 1024 * 1024;
+	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
 	public FilenameFilter stickerFileFilter = new FilenameFilter()
@@ -461,20 +463,15 @@ public class StickerManager
 				return stickerDir.getPath();
 			}
 		}
-		File stickerDir = new File(getInternalStickerDirectoryForCategoryId(catId));
-		Logger.d(TAG, "Checking Internal Storage dir : " + stickerDir.getAbsolutePath());
-		if (stickerDir.exists())
-		{
-			Logger.d(TAG, "Internal Storage dir exist so returning it.");
-			return stickerDir.getPath();
-		}
 		if (externalAvailable)
 		{
 			Logger.d(TAG, "Returning external storage dir.");
 			return getExternalStickerDirectoryForCategoryId(context, catId);
 		}
-		Logger.d(TAG, "Returning internal storage dir.");
-		return getInternalStickerDirectoryForCategoryId(catId);
+		else
+		{
+			return null;	
+		}	
 	}
 
 	public boolean checkIfStickerCategoryExists(String categoryId)
@@ -1172,24 +1169,26 @@ public class StickerManager
 	}
 
 	/**
-	 * Returns a category preview drawable
+	 * Returns a category preview {@link Bitmap}
 	 * @param ctx
 	 * @param categoryId
-	 * @return {@link Drawable}
+	 * @param downloadIfNotFound -- true if it should be downloaded if not found.
+	 * @return {@link Bitmap}
 	 */
-	public Drawable getCategoryPreviewAsset(Context ctx, String categoryId)
+	public Bitmap getCategoryPreviewAsset(Context ctx, String categoryId, boolean downloadIfNotFound)
 	{
 		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
 		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + PREVIEW_IMAGE + PREVIEW_ICON_TYPE;
-		Drawable drawable = Drawable.createFromPath(baseFilePath);
-		
-		if(drawable == null)
+		Bitmap bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
+		if (bitmap == null)
 		{
-			drawable = ctx.getResources().getDrawable(R.drawable.default_sticker_preview);
-			
+			if (downloadIfNotFound)
+			{
+				StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(ctx, categoryId, null);
+			}
+			bitmap = HikeBitmapFactory.decodeResource(ctx.getResources(), R.drawable.default_sticker_preview);
 		}
-		
-		return drawable;
+		return bitmap;
 	}
 	
 	/**
@@ -1348,5 +1347,20 @@ public class StickerManager
 	public boolean moreDataAvailableForStickerShop()
 	{
 		return !HikeSharedPreferenceUtil.getInstance(context).getData(STICKER_SHOP_DATA_FULLY_FETCHED, true);
+	}
+	
+	public boolean isMinimumMemoryAvailable()
+	{
+		double freeSpace = Utils.getFreeSpace();
+		
+		Logger.d(TAG, "free space : " + freeSpace);
+		if(freeSpace > MINIMUM_FREE_SPACE)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

@@ -1303,7 +1303,17 @@ public class Utils
 	public static double getFreeSpace()
 	{
 		StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-		double sdAvailSize = (double) stat.getAvailableBlocks() * (double) stat.getBlockSize();
+		double sdAvailSize = 0.0;
+		if(isJELLY_BEAN_MR2OrHigher())
+		{
+			 sdAvailSize = (double) stat.getAvailableBlocksLong() * (double) stat.getBlockSizeLong();
+		}
+		else
+		{
+			sdAvailSize = (double) stat.getAvailableBlocks() * (double) stat.getBlockSize();
+		}
+		Logger.d("StickerSize", "get available blocks : " + (double) stat.getAvailableBlocks() + "  get block size : " + (double) stat.getBlockSize());
+		
 		return sdAvailSize;
 	}
 
@@ -3021,7 +3031,11 @@ public class Utils
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 	}
-
+	
+	public static boolean isJELLY_BEAN_MR2OrHigher()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2;
+	}
 	public static void executeAsyncTask(AsyncTask<Void, Void, Void> asyncTask)
 	{
 		if (isHoneycombOrHigher())

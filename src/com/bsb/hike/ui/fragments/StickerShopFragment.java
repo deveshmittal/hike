@@ -88,7 +88,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		super.onPause();
 		if (mAdapter != null)
 		{
-			mAdapter.getStickerLoader().setExitTasksEarly(true);
+			mAdapter.getStickerPreviewLoader().setExitTasksEarly(true);
 		}
 	}
 
@@ -98,7 +98,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		super.onResume();
 		if (mAdapter != null)
 		{
-			mAdapter.getStickerLoader().setExitTasksEarly(false);
+			mAdapter.getStickerPreviewLoader().setExitTasksEarly(false);
 			mAdapter.notifyDataSetChanged();
 		}
 	}
@@ -247,6 +247,10 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 				@Override
 				public void run()
 				{
+					if(mAdapter == null)
+					{
+						return;
+					}
 					updateStickerCategoriesMap(StickerManager.getInstance().getStickerCategoryMap());
 					mAdapter.notifyDataSetChanged();
 				}
@@ -273,6 +277,10 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 					@Override
 					public void run()
 					{
+						if(mAdapter == null)
+						{
+							return;
+						}
 						mAdapter.notifyDataSetChanged();
 					}
 				});
@@ -306,6 +314,10 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 						@Override
 						public void run()
 						{
+							if(mAdapter == null)
+							{
+								return;
+							}
 							category.setState(StickerCategory.RETRY);
 							mAdapter.notifyDataSetChanged();
 						}
@@ -318,6 +330,10 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 						@Override
 						public void run()
 						{
+							if(mAdapter == null)
+							{
+								return;
+							}
 							mAdapter.notifyDataSetChanged();
 						}
 					});

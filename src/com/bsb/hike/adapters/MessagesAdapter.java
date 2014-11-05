@@ -825,6 +825,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 						public void onFailure(Object result, Throwable exception)
 						{
 							// TODO Auto-generated method stub
+							if(result == null)
+							{
+								return ;
+							}
 							String largeStickerPath = (String) result;
 							(new File(largeStickerPath)).delete();
 						}
