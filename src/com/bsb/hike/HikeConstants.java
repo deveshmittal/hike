@@ -461,6 +461,8 @@ public class HikeConstants
 	
 	public static final String FTUE_HIKE_SUPPORT = "+hike4+";
 
+	public static final String BACKUP_PREF = "backupAccount";
+
 	public static final String UNLINK_PREF = "unlinkAccount";
 
 	public static final String DELETE_PREF = "deleteAccount";
@@ -488,6 +490,8 @@ public class HikeConstants
 	public static final String UPGRADE_MSG_HASH_GROUP_READBY = "upgradeMsgHashGroupReadby";
 	
 	public static final String UPGRADE_FOR_DATABASE_VERSION_28 = "upgradeForDatabaseVersion28";
+
+	public static final String PREVIOUS_CONV_DB_VERSION = "previousConvDBVersion";
 
 	public static final String UPGRADE_AVATAR_CONV_DB = "upgradeAvtarProgressConv";
 
@@ -739,6 +743,8 @@ public class HikeConstants
 	public static final int SHOW_CREDITS_AFTER_NUM = 10;
 
 	public static final String HIKE_MEDIA_DIRECTORY_ROOT = Environment.getExternalStorageDirectory() + "/Hike/Media";
+
+	public static final String HIKE_BACKUP_DIRECTORY_ROOT = Environment.getExternalStorageDirectory() + "/Hike/Backup";
 
 	public static final String PROFILE_ROOT = "/hike Profile Images";
 
@@ -996,6 +1002,8 @@ public class HikeConstants
 		public static final String SIGNUP_TASK_RUNNING = "signupTaskRunning";
 
 		public static final String SIGNUP_PART = "signupPart";
+
+		public static final String SIGNUP_RESTORE_STATUS = "signupRestoreStatus";
 
 		public static final String SIGNUP_TEXT = "signupText";
 

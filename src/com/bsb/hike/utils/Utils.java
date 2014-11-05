@@ -535,6 +535,7 @@ public class Utils
 		editor.putString(HikeMessengerApp.MSISDN_SETTING, accountInfo.msisdn);
 		editor.putString(HikeMessengerApp.TOKEN_SETTING, accountInfo.token);
 		editor.putString(HikeMessengerApp.UID_SETTING, accountInfo.uid);
+		editor.putString(HikeMessengerApp.BACKUP_TOKEN_SETTING, accountInfo.backupToken);
 		editor.putInt(HikeMessengerApp.SMS_SETTING, accountInfo.smsCredits);
 		editor.putInt(HikeMessengerApp.INVITED, accountInfo.all_invitee);
 		editor.putInt(HikeMessengerApp.INVITED_JOINED, accountInfo.all_invitee_joined);

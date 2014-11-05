@@ -1424,7 +1424,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 9:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
-					break;	
+					break;
 				}
 
 				if (intent != null)

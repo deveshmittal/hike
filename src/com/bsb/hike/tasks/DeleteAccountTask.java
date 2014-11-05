@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.modules.contactmgr.ContactManager;
@@ -68,6 +69,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			app.disconnectFromService();
 			ctx.stopService(new Intent(ctx, HikeService.class));
 
+			DBBackupRestore.getInstance(ctx).deleteAllFiles();
 			ContactManager.getInstance().deleteAll();
 			convDb.deleteAll();
 			HikeMessengerApp.getLruCache().clearIconCache();

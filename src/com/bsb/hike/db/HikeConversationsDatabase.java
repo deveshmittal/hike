@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import android.R.integer;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -32,6 +33,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
@@ -254,6 +256,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
+		if (oldVersion < newVersion)
+		{
+			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+			Editor editor = appPrefs.edit();
+			editor.putInt(HikeConstants.PREVIOUS_CONV_DB_VERSION, oldVersion);
+			editor.commit();
+		}
 		if (db == null)
 		{
 			db = mDb;
@@ -622,6 +631,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			editor.putInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1);
 			editor.commit();
 		}
+	}
+
+	public void upgrade(int oldVersion, int newVersion)
+	{
+		onUpgrade(mDb, oldVersion, newVersion);
+	}
+	
+	public void clearTable(String table)
+	{
+		mDb.delete(table, null, null);
 	}
 
 	private String getStatusTableCreationStatement()
@@ -4585,6 +4604,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		values.put(DBConstants.IS_STEALTH, isStealth ? 1 : 0);
 
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN + "=?", new String[] { msisdn });
+	}
+	
+	public void resetConversationsStealthStatus()
+	{
+		ContentValues values = new ContentValues();
+		values.put(DBConstants.IS_STEALTH, 0);
+		
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, null, null);
 	}
 
 	public void addStealthMsisdnToMap()
