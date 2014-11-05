@@ -3,6 +3,7 @@ package com.bsb.hike.smartImageLoader;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.utils.StickerManager;
 
 public class StickerPreviewLoader extends ImageWorker
@@ -23,8 +24,9 @@ public class StickerPreviewLoader extends ImageWorker
 	}
 
 	@Override
-	protected Bitmap processBitmap(String categoryId)
+	protected Bitmap processBitmap(String data)
 	{	
+		String categoryId = data.split(HikeConstants.DELIMETER)[0];
 		Bitmap bmp = StickerManager.getInstance().getCategoryPreviewAsset(ctx, categoryId, downloadIfNotFound);
 		return bmp;
 	}

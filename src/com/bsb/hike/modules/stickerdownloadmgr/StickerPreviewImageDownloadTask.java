@@ -12,6 +12,7 @@ import android.content.Context;
 import android.os.Handler;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.HttpRequestType;
@@ -80,7 +81,8 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			JSONObject data = response.getJSONObject(HikeConstants.DATA_2);
 
 			String stickerData = data.getString(HikeConstants.PREVIEW_IMAGE);
-
+			
+			HikeMessengerApp.getLruCache().remove(catId + HikeConstants.DELIMETER + StickerManager.PREVIEW_IMAGE);
 			Utils.saveBase64StringToFile(new File(previewImagePath), stickerData);
 			
 		}
