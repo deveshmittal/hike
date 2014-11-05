@@ -39,6 +39,7 @@ import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
 
 public class StickerSettingsFragment extends SherlockFragment implements Listener, DragScrollProfile, OnItemClickListener
 {
@@ -126,6 +127,9 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		TextView confirmBtn = (TextView) parent.findViewById(R.id.confirm_btn);
 		totalPacks.setText(getString(R.string.n_packs, visibleAndUpdateStickerSet.size()));
 		categoryCost.setText(R.string.sticker_pack_free);
+		
+		displayTotalStickersCount(totalStickers);
+		
 		cancelBtn.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -141,7 +145,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			@Override
 			public void onClick(View v)
 			{
-				for(final StickerCategory category : visibleAndUpdateStickerSet)
+				for(StickerCategory category : visibleAndUpdateStickerSet)
 				{
 					category.setState(StickerCategory.DOWNLOADING);
 					final DownloadType type = DownloadType.UPDATE;
@@ -152,6 +156,34 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				confirmView.setVisibility(View.GONE);
 			}
 		});
+	}
+
+	private void displayTotalStickersCount(TextView totalStickers)
+	{
+		int totalCount = 0;
+		int totalSize = 0;
+		for(StickerCategory category : visibleAndUpdateStickerSet)
+		{
+			if(category.getMoreStickerCount() > 0)
+			{
+				totalCount += category.getMoreStickerCount(); 
+			}
+			
+			if(category.getCategorySize() > 0)
+			{
+				totalSize += category.getCategorySize();
+			}
+		}
+		if(totalCount > 0)
+		{
+			String text = getActivity().getResources().getString(R.string.n_stickers, totalCount);
+			if(totalSize > 0)
+			{
+				text += ", " + Utils.getSizeForDisplay(totalSize);
+			}
+			
+			totalStickers.setText(text);
+		}
 	}
 
 	private boolean shouldAddUpdateView()

@@ -150,8 +150,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
                 android:layout_marginLeft="20dp"
-                android:textColor="@color/shop_update_details_color"
-                android:text="56 stickers, 225 KB"/>
+                android:textColor="@color/shop_update_details_color"/>
            </LinearLayout>
            
         <LinearLayout 
