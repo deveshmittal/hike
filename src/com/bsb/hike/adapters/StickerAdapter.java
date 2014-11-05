@@ -11,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -37,6 +38,7 @@ import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontButton;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
 
@@ -116,6 +118,11 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		Logger.d(getClass().getSimpleName(), "Item removed from position : " + position);
 		((ViewPager) container).removeView((View) object);
+		if(stickerCategoryList.size() <= position)  //We were getting an ArrayIndexOutOfBounds Exception here
+		{
+			return;
+		}
+		
 		StickerCategory cat = stickerCategoryList.get(position);
 		stickerObjMap.remove(cat.getCategoryId());
 	}
@@ -297,14 +304,28 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			TextView category_details = (TextView) empty.findViewById(R.id.category_details);
 			ImageView previewImage = (ImageView) empty.findViewById(R.id.preview_image);
 			previewImage.setImageBitmap(StickerManager.getInstance().getCategoryPreviewAsset(activity, category.getCategoryId(), true));
+			TextView separator = (TextView) empty.findViewById(R.id.separator);
 			if(category.getTotalStickers() > 0)
 			{
 				category_details.setVisibility(View.VISIBLE);
-				category_details.setText(activity.getString(R.string.n_stickers, category.getTotalStickers()));
+				String detailsString = activity.getString(R.string.n_stickers, category.getTotalStickers());
+				if(category.getCategorySize() > 0)
+				{
+					detailsString += ", " + Utils.getSizeForDisplay(category.getCategorySize());
+				}
+				category_details.setText(detailsString);
+				if(Utils.getDeviceOrientation(activity.getApplicationContext()) == Configuration.ORIENTATION_LANDSCAPE)
+				{
+					separator.setVisibility(View.VISIBLE);
+				}
 			}
 			else
 			{
 				category_details.setVisibility(View.GONE);
+				if(Utils.getDeviceOrientation(activity.getApplicationContext()) == Configuration.ORIENTATION_LANDSCAPE)
+				{
+					separator.setVisibility(View.GONE);
+				}
 			}
 			categoryName.setText(category.getCategoryName());
 			downloadBtn.setOnClickListener(new View.OnClickListener()
