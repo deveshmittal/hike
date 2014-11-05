@@ -65,6 +65,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.FtueContactsData;
@@ -479,6 +480,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		switch (item.getItemId())
 		{
 		case R.id.new_conversation:
+			StickerManager.moveHardcodedStickersToSdcard(this);
 			intent = new Intent(this, ComposeChatActivity.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
@@ -1270,6 +1272,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	public void showOverFlowMenu()
 	{
 
+		HikeConversationsDatabase.getInstance().freshUpgradeForStickerShopVersion1();
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
 		final String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);

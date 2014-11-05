@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -157,13 +158,14 @@ public class DragSortListView extends ListView {
      * A listener that receives callbacks whenever the floating View
      * hovers over a new position.
      */
-    private DragListener mDragListener;
-
+    private List<DragListener> mDragListeners = new ArrayList<DragListener>();
     /**
      * A listener that receives a callback when the floating View
      * is dropped.
      */
-    private DropListener mDropListener;
+    //private DropListener mDropListener;
+    
+    private List<DropListener> mDropListeners = new ArrayList<DropListener>();
 
     /**
      * A listener that receives a callback when the floating View
@@ -1103,8 +1105,11 @@ R.styleable.DragSortListView_drop_animation_duration,
         }
 
         if (itemPos != mFloatPos) {
-            if (mDragListener != null) {
-                mDragListener.drag(mFloatPos - numHeaders, itemPos - numHeaders);
+            if (mDragListeners != null) {
+            	for(DragListener dragListener : mDragListeners)
+                {
+            		dragListener.drag(mFloatPos - numHeaders, itemPos - numHeaders);
+                }
             }
 
             mFloatPos = itemPos;
@@ -1452,12 +1457,17 @@ R.styleable.DragSortListView_drop_animation_duration,
      * this is a position in your input ListAdapter).
      */
     public void moveItem(int from, int to) {
-        if (mDropListener != null) {
-            final int count = getInputAdapter().getCount();
-            if (from >= 0 && from < count && to >= 0 && to < count) {
-                mDropListener.drop(from, to);
-            }
-        }
+    	if (mDropListeners != null)
+		{
+			for (DropListener dropListener : mDropListeners)
+			{
+				final int count = getInputAdapter().getCount();
+				if (from >= 0 && from < count && to >= 0 && to < count)
+				{
+					dropListener.drop(from, to);
+				}
+			}
+		}
     }
 
     /**
@@ -1491,9 +1501,12 @@ R.styleable.DragSortListView_drop_animation_duration,
         // DataSetObserver
         mDragState = DROPPING;
 
-        if (mDropListener != null && mFloatPos >= 0 && mFloatPos < getCount()) {
+        for(DropListener dropListener : mDropListeners)
+        {
+        	if (dropListener != null && mFloatPos >= 0 && mFloatPos < getCount()) {
             final int numHeaders = getHeaderViewsCount();
-            mDropListener.drop(mSrcPos - numHeaders, mFloatPos - numHeaders);
+            dropListener.drop(mSrcPos - numHeaders, mFloatPos - numHeaders);
+        	}
         }
 
         destroyFloatView();
@@ -2468,7 +2481,12 @@ R.styleable.DragSortListView_drop_animation_duration,
     }
 
     public void setDragListener(DragListener l) {
-        mDragListener = l;
+        addDragListener(l);
+    }
+    
+    public void addDragListener(DragListener l)
+    {
+    	mDragListeners.add(l);
     }
 
     /**
@@ -2502,7 +2520,12 @@ R.styleable.DragSortListView_drop_animation_duration,
      * @param l
      */
     public void setDropListener(DropListener l) {
-        mDropListener = l;
+        addDropListener(l);
+    }
+    
+    public void addDropListener(DropListener l)
+    {
+    	mDropListeners.add(l);
     }
 
     /**

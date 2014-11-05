@@ -11,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -20,7 +21,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.EmoticonType;
 import com.bsb.hike.HikeConstants.STResult;
@@ -35,6 +38,7 @@ import com.bsb.hike.smartImageLoader.StickerLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontButton;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
 
@@ -114,6 +118,11 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		Logger.d(getClass().getSimpleName(), "Item removed from position : " + position);
 		((ViewPager) container).removeView((View) object);
+		if(stickerCategoryList.size() <= position)  //We were getting an ArrayIndexOutOfBounds Exception here
+		{
+			return;
+		}
+		
 		StickerCategory cat = stickerCategoryList.get(position);
 		stickerObjMap.remove(cat.getCategoryId());
 	}
@@ -138,6 +147,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		IntentFilter filter = new IntentFilter(StickerManager.STICKERS_DOWNLOADED);
 		filter.addAction(StickerManager.STICKERS_FAILED);
 		filter.addAction(StickerManager.RECENTS_UPDATED);
+		filter.addAction(StickerManager.STICKERS_PROGRESS);
 		filter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
 		LocalBroadcastManager.getInstance(activity).registerReceiver(mMessageReceiver, filter);
 	}
@@ -183,6 +193,10 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			{
 				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
 				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+				if(category == null)
+				{
+					return;
+				}
 				activity.runOnUiThread(new Runnable()
 				{
 					@Override
@@ -193,6 +207,17 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 					}
 				});
 			}
+			else if(intent.getAction().equals(StickerManager.STICKERS_PROGRESS))
+			{
+				Bundle b = intent.getBundleExtra(StickerManager.STICKER_DATA_BUNDLE);
+				String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
+				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+				if(category == null)
+				{
+					return;
+				}
+				initStickers(category);
+			}
 			
 			else
 			{
@@ -200,6 +225,10 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				final String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 				final DownloadType type = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
 				final StickerCategory cat = StickerManager.getInstance().getCategoryForId(categoryId);
+				if(cat == null)
+				{
+					return;
+				}
 				final StickerPageObjects spo = stickerObjMap.get(cat.getCategoryId());
 				final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
 				// if this category is already loaded then only proceed else ignore
@@ -216,7 +245,10 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 								{
 									return;
 								}
-
+								if(failedDueToLargeFile)
+								{
+									Toast.makeText(activity, R.string.out_of_space, Toast.LENGTH_SHORT).show();
+								}
 								Logger.d(getClass().getSimpleName(), "Download failed for new category " + cat.getCategoryId());
 								cat.setState(StickerCategory.RETRY);
 								addViewBasedOnState(stickerObjMap.get(cat.getCategoryId()), cat);
@@ -270,14 +302,30 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			CustomFontButton downloadBtn = (CustomFontButton) empty.findViewById(R.id.download_btn);
 			TextView categoryName = (TextView) empty.findViewById(R.id.category_name);
 			TextView category_details = (TextView) empty.findViewById(R.id.category_details);
+			ImageView previewImage = (ImageView) empty.findViewById(R.id.preview_image);
+			previewImage.setImageBitmap(StickerManager.getInstance().getCategoryPreviewAsset(activity, category.getCategoryId(), true));
+			TextView separator = (TextView) empty.findViewById(R.id.separator);
 			if(category.getTotalStickers() > 0)
 			{
 				category_details.setVisibility(View.VISIBLE);
-				category_details.setText(activity.getString(R.string.n_stickers, category.getTotalStickers()));
+				String detailsString = activity.getString(R.string.n_stickers, category.getTotalStickers());
+				if(category.getCategorySize() > 0)
+				{
+					detailsString += ", " + Utils.getSizeForDisplay(category.getCategorySize());
+				}
+				category_details.setText(detailsString);
+				if(Utils.getDeviceOrientation(activity.getApplicationContext()) == Configuration.ORIENTATION_LANDSCAPE)
+				{
+					separator.setVisibility(View.VISIBLE);
+				}
 			}
 			else
 			{
 				category_details.setVisibility(View.GONE);
+				if(Utils.getDeviceOrientation(activity.getApplicationContext()) == Configuration.ORIENTATION_LANDSCAPE)
+				{
+					separator.setVisibility(View.GONE);
+				}
 			}
 			categoryName.setText(category.getCategoryName());
 			downloadBtn.setOnClickListener(new View.OnClickListener()
@@ -286,40 +334,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				public void onClick(View v)
 				{
 					category.setState(StickerCategory.DOWNLOADING);
-					StickerDownloadManager.getInstance(activity).DownloadMultipleStickers(category, DownloadType.NEW_CATEGORY, new IStickerResultListener()
-					{
-						
-						@Override
-						public void onSuccess(Object result)
-						{
-							StickerManager.getInstance().sucessFullyDownloadedStickers(result);
-						}
-						
-						@Override
-						public void onProgressUpdated(double percentage)
-						{
-							// TODO Auto-generated method stub
-							if(activity != null)
-							{	
-								activity.runOnUiThread(new Runnable()
-								{
-									
-									@Override
-									public void run()
-									{
-										initStickers(category);
-									}
-								});
-							
-							}
-						}
-						
-						@Override
-						public void onFailure(Object result, Throwable exception)
-						{
-							StickerManager.getInstance().stickersDownloadFailed(result);
-						}
-					});
+					StickerDownloadManager.getInstance(activity).DownloadMultipleStickers(category, DownloadType.NEW_CATEGORY, null);
 					setupStickerPage(parent, category);
 
 				}

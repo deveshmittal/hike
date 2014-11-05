@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="144dp" >
+
+    <com.bsb.hike.ui.utils.RecyclingImageView
+        android:id="@+id/shop_banner"
+        android:layout_width="match_parent"
+        android:layout_height="144dp"
+        android:src="@drawable/shop_banner"
+        android:scaleType="center"/>
+
+</LinearLayout>

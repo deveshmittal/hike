@@ -3,44 +3,51 @@
     android:layout_width="match_parent"
     android:layout_height="86dp" >
 
-    <FrameLayout
-        android:id="@+id/category_icon_layout"
-        android:layout_width="58dp"
-        android:layout_height="58dp"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="18dp"
-        android:layout_marginRight="18dp" >
-
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="center" />
-
         <ImageView
             android:id="@+id/category_icon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </FrameLayout>
-
-    <ImageView
-        android:id="@+id/category_download_btn"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="18dp"
+            android:layout_marginRight="18dp"
+            android:scaleType="centerInside" />
+        
+	<LinearLayout
+        android:id="@+id/category_download_group"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_alignBottom="@id/category_icon"
+        android:layout_alignTop="@id/category_icon"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_download" />
+        android:gravity="center">
 
-    <LinearLayout
+        <ImageView
+            android:id="@+id/category_download_btn"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:src="@drawable/sticker_shop_download_drawable_selector" />
+
+       <ImageView 
+        android:id="@+id/download_progress_bar"
+       	android:layout_width="24dp"
+       	android:layout_height="24dp"
+        android:src="@drawable/ic_spinner"
+        android:visibility="gone" />
+    </LinearLayout>
+	
+	<LinearLayout
         android:id="@+id/category_description"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_alignBottom="@id/category_icon"
+        android:layout_alignTop="@id/category_icon"
         android:layout_centerVertical="true"
-        android:layout_toLeftOf="@id/category_download_btn"
-        android:layout_toRightOf="@id/category_icon_layout"
+        android:layout_toLeftOf="@id/category_download_group"
+        android:layout_toRightOf="@id/category_icon"
         android:gravity="center_vertical"
         android:orientation="vertical" >
 
@@ -48,13 +55,15 @@
             android:id="@+id/category_name_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" >
+            android:gravity="center_vertical" >
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/category_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Humanoid"
+                android:singleLine="true"
+                android:ellipsize="end"
                 android:textColor="@color/standerd_black"
                 android:textSize="18sp" />
 
@@ -72,10 +81,9 @@
         </RelativeLayout>
 
         <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/category_size"
+            android:id="@+id/pack_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
             android:text="16 stickers, 225 KB"
             android:textColor="@color/missing_thumbnail"
             android:textSize="12sp" />

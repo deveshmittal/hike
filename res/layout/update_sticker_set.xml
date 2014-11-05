@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:scaleType="centerInside"
-        src="@drawable/misc_sticker_placeholder"
+        android:src="@drawable/misc_sticker_placeholder"
         android:visibility="gone"/>
 
     <ImageView
@@ -24,12 +24,12 @@
         android:src="@drawable/ic_update"
         android:visibility="gone" />
 
-    <ProgressBar
+    <ImageView
         android:id="@+id/download_progress"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:contentDescription="Progress Bar"
-        android:indeterminateDrawable="@drawable/progress_downloading_sticker"
+        android:src="@drawable/ic_spinner_green"
         android:visibility="gone" />
 
     <com.bsb.hike.view.CustomFontTextView
