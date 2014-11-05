@@ -76,6 +76,8 @@
                 android:layout_height="wrap_content"
                 android:text="Humanoid"
                 android:textColor="@color/standerd_black"
+                android:singleLine="true"
+                android:ellipsize="end"
                 android:textSize="18sp" />
 
             <com.bsb.hike.view.CustomFontTextView

@@ -259,8 +259,10 @@ public class StickerManager
 				StickerManager.getInstance().setStickerUpdateAvailable(DOGGY_CATEGORY, true);
 			}
 		}
-		
-		if (!settings.getBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, false))
+		/*
+		 * We use JUST_SIGNED_UP flag from preferences to explicitly avoid setting stickerUpdateAvailable tru for Humanoid and Expressions.
+		 */
+		if ((!settings.getBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, false)) && (settings.getBoolean(HikeMessengerApp.JUST_SIGNED_UP, false)))
 		{
 			settings.edit().putBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, true).commit();
 			StickerManager.getInstance().setStickerUpdateAvailable(HUMANOID, true);

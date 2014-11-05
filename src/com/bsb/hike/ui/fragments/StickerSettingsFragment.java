@@ -39,6 +39,7 @@ import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
 
 public class StickerSettingsFragment extends SherlockFragment implements Listener, DragScrollProfile, OnItemClickListener
 {
@@ -126,6 +127,9 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		TextView confirmBtn = (TextView) parent.findViewById(R.id.confirm_btn);
 		totalPacks.setText(getString(R.string.n_packs, visibleAndUpdateStickerSet.size()));
 		categoryCost.setText(R.string.sticker_pack_free);
+		
+		displayTotalStickersCount(totalStickers);
+		
 		cancelBtn.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -141,7 +145,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			@Override
 			public void onClick(View v)
 			{
-				for(final StickerCategory category : visibleAndUpdateStickerSet)
+				for(StickerCategory category : visibleAndUpdateStickerSet)
 				{
 					category.setState(StickerCategory.DOWNLOADING);
 					final DownloadType type = DownloadType.UPDATE;
@@ -152,6 +156,34 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				confirmView.setVisibility(View.GONE);
 			}
 		});
+	}
+
+	private void displayTotalStickersCount(TextView totalStickers)
+	{
+		int totalCount = 0;
+		int totalSize = 0;
+		for(StickerCategory category : visibleAndUpdateStickerSet)
+		{
+			if(category.getMoreStickerCount() > 0)
+			{
+				totalCount += category.getMoreStickerCount(); 
+			}
+			
+			if(category.getCategorySize() > 0)
+			{
+				totalSize += category.getCategorySize();
+			}
+		}
+		if(totalCount > 0)
+		{
+			String text = getActivity().getResources().getString(R.string.n_stickers, totalCount);
+			if(totalSize > 0)
+			{
+				text += ", " + Utils.getSizeForDisplay(totalSize);
+			}
+			
+			totalStickers.setText(text);
+		}
 	}
 
 	private boolean shouldAddUpdateView()
@@ -197,55 +229,58 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				@Override
 				public void drop(int from, int to)
 				{	
-					StickerCategory category = mAdapter.getItem(from);
-					if ((from == to) || (!category.isVisible())) // Dropping at the same position. No need to perform Drop.
+					if(!prefs.getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))
 					{
-						return;
-					}
+						prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
+						StickerCategory category = mAdapter.getItem(from);
+						if ((from == to) || (!category.isVisible())) // Dropping at the same position. No need to perform Drop.
+						{
+							return;
+						}
 
-					if (from > mAdapter.getLastVisibleIndex() && to > mAdapter.getLastVisibleIndex() + 1)
-					{
-						   return;
+						if (from > mAdapter.getLastVisibleIndex() && to > mAdapter.getLastVisibleIndex() + 1)
+						{
+							return;
+						}
+
+						ImageView tickImage = (ImageView) parent.findViewById(R.id.reorder_indicator);
+						tickImage.setImageResource(R.drawable.art_tick);
+						TextView tipText = (TextView) parent.findViewById(R.id.drag_tip);
+						tipText.setText(getResources().getString(R.string.great_job));
+						tipText.setTextColor(getResources().getColor(R.color.white));
+						((View) parent).findViewById(R.id.drag_tip_subtext).setVisibility(View.GONE);
+						v.setBackgroundColor(getResources().getColor(R.color.sticker_drag_tip_bg_color));
+
+						TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, 0,
+								Animation.ABSOLUTE, -v.getHeight());
+						animation.setDuration(400);
+						animation.setStartOffset(300);
+						mDslv.setAnimation(animation);
+
+						animation.setAnimationListener(new AnimationListener()
+						{
+							@Override
+							public void onAnimationStart(Animation animation)
+							{
+
+							}
+
+							@Override
+							public void onAnimationRepeat(Animation animation)
+							{
+
+							}
+
+							@Override
+							public void onAnimationEnd(Animation animation)
+							{
+								v.setVisibility(View.GONE);
+								TranslateAnimation temp = new TranslateAnimation(0, 0, 0, 0);
+								temp.setDuration(1l);
+								parent.startAnimation(temp);
+							}
+						});
 					}
-					
-					ImageView tickImage = (ImageView) parent.findViewById(R.id.reorder_indicator);
-					tickImage.setImageResource(R.drawable.art_tick);
-					TextView tipText = (TextView) parent.findViewById(R.id.drag_tip);
-					tipText.setText(getResources().getString(R.string.great_job));
-					tipText.setTextColor(getResources().getColor(R.color.white));
-					((View) parent).findViewById(R.id.drag_tip_subtext).setVisibility(View.GONE);
-					v.setBackgroundColor(getResources().getColor(R.color.sticker_drag_tip_bg_color));
-					
-					TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, 0, Animation.ABSOLUTE, -v.getHeight());
-					animation.setDuration(400);
-					animation.setStartOffset(300);
-					parent.setAnimation(animation);
-					
-					animation.setAnimationListener(new AnimationListener()
-					{
-						@Override
-						public void onAnimationStart(Animation animation)
-						{
-							
-						}
-						
-						@Override
-						public void onAnimationRepeat(Animation animation)
-						{
-							
-						}
-						
-						@Override
-						public void onAnimationEnd(Animation animation)
-						{
-							v.setVisibility(View.GONE);
-							TranslateAnimation temp = new TranslateAnimation(0, 0, 0, 0);
-							temp.setDuration(1l);
-							parent.startAnimation(temp);
-						}
-					});
-					
-					prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
 				}
 			});
 		}
@@ -373,6 +408,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				Bundle b = intent.getBundleExtra(StickerManager.STICKER_DATA_BUNDLE);
 				String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+				final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
 				if (getActivity() != null)
 				{
 					getActivity().runOnUiThread(new Runnable()
@@ -381,6 +417,10 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 						@Override
 						public void run()
 						{
+							if(failedDueToLargeFile)
+							{
+								Toast.makeText(getActivity(), R.string.out_of_space, Toast.LENGTH_SHORT).show();
+							}
 							category.setState(StickerCategory.RETRY);
 							mAdapter.notifyDataSetChanged();
 						}

@@ -7,6 +7,7 @@
         android:id="@+id/shop_banner"
         android:layout_width="match_parent"
         android:layout_height="144dp"
-        android:src="@drawable/shop_banner" />
+        android:src="@drawable/shop_banner"
+        android:scaleType="center"/>
 
 </LinearLayout>

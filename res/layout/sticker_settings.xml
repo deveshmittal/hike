@@ -73,7 +73,8 @@
         dslv:sort_enabled="true"
         dslv:track_drag_sort="false"
         dslv:use_default_controller="true"
-        android:layout_below="@id/reorder_tip"/>
+        android:layout_below="@id/reorder_tip"
+        android:scrollbarStyle="outsideOverlay"/>
 
    <LinearLayout
         android:id="@+id/update_all_ll"
@@ -149,8 +150,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
                 android:layout_marginLeft="20dp"
-                android:textColor="@color/shop_update_details_color"
-                android:text="56 stickers, 225 KB"/>
+                android:textColor="@color/shop_update_details_color"/>
            </LinearLayout>
            
         <LinearLayout 
