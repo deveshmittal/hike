@@ -5718,6 +5718,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	}
 	
 
+	public void freshUpgradeForStickerShopVersion1()
+	{
+		try
+		{
+			mDb.beginTransaction();
+			
+			mDb.execSQL("DROP TABLE " + DBConstants.STICKER_CATEGORIES_TABLE);
+			mDb.execSQL("DROP TABLE " + DBConstants.STICKER_SHOP_TABLE);
+			mDb.execSQL(getStickerCategoryTableCreateQuery());
+			mDb.execSQL(getStickerShopTableCreateQuery());
+			
+			insertAllCategoriesToStickersTable();
+			mDb.setTransactionSuccessful();
+		}
+		catch (Exception e)
+		{
+			Logger.e(getClass().getSimpleName(), "Exception : ", e);
+			e.printStackTrace();
+		}
+		finally
+		{
+			mDb.endTransaction();
+		}
+	}
+
 	public void clearStickerShop()
 	{
 		mDb.delete(DBConstants.STICKER_SHOP_TABLE, null, null);
