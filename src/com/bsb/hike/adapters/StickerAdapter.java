@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.EmoticonType;
 import com.bsb.hike.HikeConstants.STResult;
@@ -200,7 +201,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			}
 			else if(intent.getAction().equals(StickerManager.STICKERS_PROGRESS))
 			{
-				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
+				Bundle b = intent.getBundleExtra(StickerManager.STICKER_DATA_BUNDLE);
+				String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
 				if(category == null)
 				{
@@ -235,7 +237,10 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 								{
 									return;
 								}
-
+								if(failedDueToLargeFile)
+								{
+									Toast.makeText(activity, R.string.out_of_space, Toast.LENGTH_SHORT).show();
+								}
 								Logger.d(getClass().getSimpleName(), "Download failed for new category " + cat.getCategoryId());
 								cat.setState(StickerCategory.RETRY);
 								addViewBasedOnState(stickerObjMap.get(cat.getCategoryId()), cat);

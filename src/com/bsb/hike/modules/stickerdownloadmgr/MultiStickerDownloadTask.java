@@ -117,7 +117,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 				if (length > Utils.getFreeSpace())
 				{
 					setException(new StickerException(StickerException.OUT_OF_SPACE));
-					return STResult.FILE_TOO_LARGE;
+					return STResult.DOWNLOAD_FAILED;
 				}
 
 				totalNumber = response.optInt(HikeConstants.TOTAL_STICKERS, -1);
@@ -151,7 +151,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			catch (Exception e)
 			{
 				Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
-				setException(new StickerException(e));
+				setException(e);
 				return STResult.DOWNLOAD_FAILED;
 			}
 
@@ -253,9 +253,10 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			b.putSerializable(StickerManager.STICKER_DOWNLOAD_TYPE, downloadType);
 			if (result != STResult.SUCCESS)
 			{
-				if(result == STResult.FILE_TOO_LARGE)
+				Exception e = getException();
+				if(getException() != null && ((StickerException) getException()).getErrorCode() == StickerException.OUT_OF_SPACE)
 				{
-					b.putBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE,true);
+					b.putBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE, true);
 				}
 				StickerManager.getInstance().stickersDownloadFailed(b);
 			}

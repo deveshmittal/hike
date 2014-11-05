@@ -21,6 +21,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.DragSortListView.DragSortListView;
 import com.bsb.hike.DragSortListView.DragSortListView.DragSortListener;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.smartImageLoader.StickerPreviewLoader;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
@@ -43,6 +44,8 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	private Set<StickerCategory> stickerSet = new HashSet<StickerCategory>();  //Stores the categories which have been reordered
 	
 	private int lastVisibleIndex = 0;   //gives the index of last visible category in the stickerCategoriesList
+	
+	private StickerPreviewLoader stickerPreviewLoader;
 
 	public StickerSettingsAdapter(Context context, List<StickerCategory> stickerCategories)
 	{
@@ -50,6 +53,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		this.stickerCategories = stickerCategories;
 		this.mInflater = LayoutInflater.from(mContext);
 		mListMapping = new int[stickerCategories.size()];
+		this.stickerPreviewLoader = new StickerPreviewLoader(context, false);
 		initialiseMapping(mListMapping, stickerCategories);
 		
 	}
@@ -146,7 +150,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		viewHolder.checkBox.setTag(category);
 		viewHolder.categoryName.setText(category.getCategoryName());
 		viewHolder.checkBox.setChecked(category.isVisible());
-		viewHolder.categoryPreviewImage.setImageDrawable(StickerManager.getInstance().getCategoryPreviewAsset(mContext, category.getCategoryId()));
+		stickerPreviewLoader.loadImage(category.getCategoryId(), viewHolder.categoryPreviewImage, isListFlinging);
 		
 		return convertView;
 	}
@@ -315,6 +319,11 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	public Set<StickerCategory> getStickerSet()
 	{
 		return stickerSet;
+	}
+	
+	public StickerPreviewLoader getStickerPreviewLoader()
+	{
+		return stickerPreviewLoader;
 	}
 
 }

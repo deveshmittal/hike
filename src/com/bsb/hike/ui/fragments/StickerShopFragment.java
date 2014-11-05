@@ -86,7 +86,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		super.onPause();
 		if (mAdapter != null)
 		{
-			mAdapter.getStickerLoader().setExitTasksEarly(true);
+			mAdapter.getStickerPreviewLoader().setExitTasksEarly(true);
 		}
 	}
 
@@ -96,7 +96,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		super.onResume();
 		if (mAdapter != null)
 		{
-			mAdapter.getStickerLoader().setExitTasksEarly(false);
+			mAdapter.getStickerPreviewLoader().setExitTasksEarly(false);
 			mAdapter.notifyDataSetChanged();
 		}
 	}

@@ -102,6 +102,10 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	{
 		// TODO Auto-generated method stub
 		super.onPause();
+		if (mAdapter != null)
+		{
+			mAdapter.getStickerPreviewLoader().setExitTasksEarly(true);
+		}
 	}
 	
 	@Override
@@ -116,6 +120,11 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	{
 		// TODO Auto-generated method stub
 		super.onResume();
+		if (mAdapter != null)
+		{
+			mAdapter.getStickerPreviewLoader().setExitTasksEarly(false);
+			mAdapter.notifyDataSetChanged();
+		}
 	}
 
 	@Override

@@ -1900,4 +1900,6 @@ public class HikeConstants
 	public static final String VISIBLITY = "visibility";
 
 	public static final String INDEX = "index";
+	
+	public static final String CAT_NAME = "name";
 }
