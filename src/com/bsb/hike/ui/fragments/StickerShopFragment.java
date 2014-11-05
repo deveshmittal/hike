@@ -147,6 +147,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 					return;
 				}
 				HikeConversationsDatabase.getInstance().updateStickerCategoriesInDb(resultData);
+				final Cursor updatedCursor = HikeConversationsDatabase.getInstance().getCursorForStickerShop();
 				if (!isAdded())
 				{
 					return;
@@ -160,8 +161,8 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 						if(currentCategoriesCount == 0)
 						{
 							HikeSharedPreferenceUtil.getInstance(getSherlockActivity()).saveData(StickerManager.LAST_STICKER_SHOP_UPDATE_TIME, System.currentTimeMillis());
-							setAdapterAndCursor();
 						}
+						mAdapter.changeCursor(updatedCursor);
 						footerView.setVisibility(View.GONE);
 						isDownloading = false;
 					}
