@@ -219,7 +219,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 		postText.setText(R.string.send);
 		
 		title.setText(R.string.preview);
-		imageSettingsBtn.setVisibility(View.VISIBLE);
+		imageSettingsBtn.setVisibility(View.GONE);
 		backContainer.setOnClickListener(new OnClickListener()
 		{
 			@Override
