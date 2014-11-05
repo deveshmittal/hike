@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -301,6 +302,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			CustomFontButton downloadBtn = (CustomFontButton) empty.findViewById(R.id.download_btn);
 			TextView categoryName = (TextView) empty.findViewById(R.id.category_name);
 			TextView category_details = (TextView) empty.findViewById(R.id.category_details);
+			ImageView previewImage = (ImageView) empty.findViewById(R.id.preview_image);
+			previewImage.setImageBitmap(StickerManager.getInstance().getCategoryPreviewAsset(activity, category.getCategoryId(), true));
 			TextView separator = (TextView) empty.findViewById(R.id.separator);
 			if(category.getTotalStickers() > 0)
 			{

@@ -5706,7 +5706,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, new String[] { DBConstants._ID, DBConstants.TOTAL_NUMBER, DBConstants.CATEGORY_NAME, DBConstants.CATEGORY_SIZE }, null, null,
+			c = mDb.query(DBConstants.STICKER_SHOP_TABLE, new String[] { DBConstants._ID, DBConstants.TOTAL_NUMBER, DBConstants.CATEGORY_NAME, DBConstants.CATEGORY_SIZE }, null, null,
 					null, null, null);
 		}
 		catch (Exception e)
@@ -5717,6 +5717,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return c;
 	}
 	
+
+	public void freshUpgradeForStickerShopVersion1()
+	{
+		try
+		{
+			mDb.beginTransaction();
+			
+			mDb.execSQL("DROP TABLE " + DBConstants.STICKER_CATEGORIES_TABLE);
+			mDb.execSQL("DROP TABLE " + DBConstants.STICKER_SHOP_TABLE);
+			mDb.execSQL(getStickerCategoryTableCreateQuery());
+			mDb.execSQL(getStickerShopTableCreateQuery());
+			
+			insertAllCategoriesToStickersTable();
+			mDb.setTransactionSuccessful();
+		}
+		catch (Exception e)
+		{
+			Logger.e(getClass().getSimpleName(), "Exception : ", e);
+			e.printStackTrace();
+		}
+		finally
+		{
+			mDb.endTransaction();
+		}
+	}
 
 	public void clearStickerShop()
 	{

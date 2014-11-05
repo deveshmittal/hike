@@ -865,7 +865,7 @@ public class StickerManager
 		{
 			return false;
 		}
-		
+		boolean result = true;
 		try
 		{
 			JSONObject jsonObj = new JSONObject(Utils.loadJSONFromAsset(context, STICKERS_JSON_FILE_NAME));
@@ -878,7 +878,8 @@ public class StickerManager
 				String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId);
 				if (directoryPath == null)
 				{
-					return false;
+					result = false;
+					break;
 				}
 
 				Resources mResources = context.getResources();
@@ -899,6 +900,7 @@ public class StickerManager
 				
 				JSONArray stickerIds = obj.getJSONArray(STICKER_IDS);
 				JSONArray resourceIds = obj.getJSONArray(RESOURCE_IDS);
+				
 				for (int j=0; j<stickerIds.length(); j++)
 				{
 					String stickerId = stickerIds.optString(j);
@@ -913,7 +915,7 @@ public class StickerManager
 					}
 					else
 					{
-						return false;
+						result = false;
 					}
 				}	
 			}
@@ -922,16 +924,16 @@ public class StickerManager
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return false;
+			result = false;
 		}
 		catch (IOException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return false;
+			result = false;
 		}
 		
-		return true;
+		return result;
 	}
 	
 	public boolean moveStickerPreviewAssetsToSdcard()
@@ -940,7 +942,7 @@ public class StickerManager
 		{
 			return false;
 		}
-
+		boolean result = true;
 		try
 		{
 			JSONObject jsonObj = new JSONObject(Utils.loadJSONFromAsset(context, StickerManager.STICKERS_JSON_FILE_NAME));
@@ -953,7 +955,8 @@ public class StickerManager
 				String directoryPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId);
 				if (directoryPath == null)
 				{
-					return false;
+					result = false;
+					break;
 				}
 
 				File otherAssetsDir = getOtherAssetsStickerDirectory(directoryPath);
@@ -962,6 +965,7 @@ public class StickerManager
 				String pallateIconSelected = obj.optString(StickerManager.PALLATE_ICON_SELECTED);
 				String previewImage = obj.optString(StickerManager.PREVIEW_IMAGE);
 
+				saveAssetToDirectory(otherAssetsDir, previewImage, StickerManager.PREVIEW_ICON_TYPE);
 				saveAssetToDirectory(otherAssetsDir, pallateIcon, StickerManager.PALLATE_ICON);
 				saveAssetToDirectory(otherAssetsDir, pallateIconSelected, StickerManager.PALLATE_ICON_SELECTED);
 				if (!TextUtils.isEmpty(previewImage))
@@ -974,16 +978,16 @@ public class StickerManager
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return false;
+			result = false;
 		}
 		catch (IOException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return false;
+			result = false;
 		}
 
-		return true;
+		return result;
 	}
 	
 	private void saveAssetToDirectory(File dir, String assetName, String fileName) throws IOException
