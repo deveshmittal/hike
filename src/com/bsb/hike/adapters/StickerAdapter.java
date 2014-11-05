@@ -117,6 +117,11 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		Logger.d(getClass().getSimpleName(), "Item removed from position : " + position);
 		((ViewPager) container).removeView((View) object);
+		if(stickerCategoryList.size() <= position)  //We were getting an ArrayIndexOutOfBounds Exception here
+		{
+			return;
+		}
+		
 		StickerCategory cat = stickerCategoryList.get(position);
 		stickerObjMap.remove(cat.getCategoryId());
 	}
