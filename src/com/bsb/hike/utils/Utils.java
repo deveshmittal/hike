@@ -4815,5 +4815,15 @@ public class Utils
 		}
 		return json;
 	}
+	
+	/**
+	 * Returns the device Orientation as either ORIENTATION_PORTRAIT or ORIENTATION_LANDSCAPE
+	 * @param ctx
+	 * @return ORIENTATION_PORTRAIT or ORIENTATION_LANDSCAPE
+	 */
+	public static int getDeviceOrientation(Context ctx)
+	{
+		return ctx.getResources().getConfiguration().orientation;
+	}
 
 }
