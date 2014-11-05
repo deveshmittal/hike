@@ -439,6 +439,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				}
 				else
 				{
+					Editor e = accountPrefs.edit();
+					e.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, true);
+					e.commit();
 					mHandler.removeCallbacks(startWelcomeScreen);
 					mHandler.postDelayed(startWelcomeScreen, 2500);
 				}
