@@ -119,13 +119,14 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		footerView = getActivity().getLayoutInflater().inflate(R.layout.sticker_shop_footer, null);
 		listview.addHeaderView(headerView);
 		listview.addFooterView(footerView);
-		
+		setAdapterAndCursor();
+		listview.removeFooterView(footerView);
+
 		if(StickerManager.getInstance().stickerShopUpdateNeeded())
 		{
 			HikeConversationsDatabase.getInstance().clearStickerShop();
 			downLoadStickerData(0);
 		}
-		setAdapterAndCursor();
 	}
 	
 	private void setAdapterAndCursor()
@@ -139,6 +140,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	public void downLoadStickerData(final int currentCategoriesCount)
 	{
 		downloadState = DOWNLOADING;
+		listview.addFooterView(footerView);
 		StickerDownloadManager.getInstance(getSherlockActivity()).DownloadStickerShopTask(getSherlockActivity(), currentCategoriesCount, new IStickerResultListener()
 		{
 
@@ -170,6 +172,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 						}
 						mAdapter.changeCursor(updatedCursor);
 						listview.removeFooterView(footerView);
+						mAdapter.notifyDataSetChanged();
 						downloadState = NOT_DOWNLOADING;
 					}
 				});
@@ -210,7 +213,6 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		// TODO Auto-generated method stub
 		if (downloadState == NOT_DOWNLOADING && (firstVisibleItem + visibleItemCount)  > (totalItemCount - 5) && StickerManager.getInstance().moreDataAvailableForStickerShop())
 		{
-			listview.addFooterView(footerView);
 			downLoadStickerData(mAdapter.getCursor().getCount() + 1);
 		}
 		
