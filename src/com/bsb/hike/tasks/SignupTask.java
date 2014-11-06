@@ -89,7 +89,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, SCANNING_CONTACTS, PIN_VERIFIED, BACKUP_AVAILABLE, RESTORED_BACKUP
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, SCANNING_CONTACTS, PIN_VERIFIED, BACKUP_AVAILABLE, RESTORING_BACKUP
 	};
 
 	public class StateValue
@@ -126,6 +126,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	public static boolean isAlreadyFetchingNumber = false;
 
 	private String userName;
+	
+	private StateValue mStateValue;
 
 	private static final String INDIA_ISO = "IN";
 
@@ -560,18 +562,20 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 		while (!TextUtils.isEmpty(this.data))
 		{
+			mStateValue = new StateValue(State.RESTORING_BACKUP,null);
 			boolean status = DBBackupRestore.getInstance(context).restoreDB();
 			if (status)
 			{
 				HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
 				ContactManager.getInstance().init(context);
 				this.data = null;
-				publishProgress(new StateValue(State.RESTORED_BACKUP,Boolean.TRUE.toString()));
+				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString());
 			}
 			else
 			{
-				publishProgress(new StateValue(State.RESTORED_BACKUP,Boolean.FALSE.toString()));
+				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.FALSE.toString());
 			}
+			publishProgress(mStateValue);
 			synchronized (this)
 			{
 				try
@@ -605,6 +609,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		 */
 		settings.edit().putBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, true).commit();
 		return Boolean.TRUE;
+	}
+	
+	public StateValue getStateValue()
+	{
+		return mStateValue;
 	}
 
 	@Override
