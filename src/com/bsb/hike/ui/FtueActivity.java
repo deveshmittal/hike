@@ -33,6 +33,7 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -99,7 +100,8 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id)
 			{
 				Sticker st = (Sticker) v.getTag();
-				Intent intent = IntentManager.getFtueForwardStickerIntent(FtueActivity.this, st.getStickerId(), st.getCategory().getCategoryId());
+				Intent intent = IntentManager.getForwardStickerIntent(FtueActivity.this, st.getStickerId(), st.getCategory().getCategoryId(), true);
+				intent.putExtra(StickerManager.STICKER_ID, st.getStickerId());
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				FtueActivity.this.finish();
 				startActivity(intent);

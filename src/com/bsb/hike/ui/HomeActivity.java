@@ -346,7 +346,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void sendDiwaliSticker()
 	{
-		Intent intent = IntentManager.getForwardStickerIntent(this, "078_happydiwali.png", StickerManager.HUMANOID);
+		Intent intent = IntentManager.getForwardStickerIntent(this, "078_happydiwali.png", StickerManager.HUMANOID, false);
 		startActivity(intent);
 	}
 
