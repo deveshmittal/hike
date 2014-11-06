@@ -151,8 +151,8 @@ public class CustomStickerCategory extends StickerCategory
 
 	public void addDefaultRecentSticker()
 	{
-		String[] recentSticker = { "002_lol.png", "003_teasing.png", "112_watchadoing.png", "113_whereareyou.png", "092_yo.png", "069_hi.png" };
-		String[] recentCat = { "expressions", "humanoid", "expressions", "expressions", "expressions", "humanoid" };
+		String[] recentSticker = { "002_lol.png", "003_teasing.png", "113_whereareyou.png", "069_hi.png" };
+		String[] recentCat = { "expressions", "humanoid",  "expressions", "humanoid" };
 
 		int count = recentSticker.length;
 		for (int i = 0; i < count; i++)
