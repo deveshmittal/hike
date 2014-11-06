@@ -781,6 +781,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 					Editor editor = settings.edit();
 					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, true);
+					editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
 					editor.commit();
 					ComposeChatActivity.this.finish();
 					startActivity(intent);
@@ -949,6 +950,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 					Editor editor = settings.edit();
 					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, false);
+					editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
 					editor.commit();
 				}
 				forwardConfirmDialog.dismiss();
