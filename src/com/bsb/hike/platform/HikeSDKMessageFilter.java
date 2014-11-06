@@ -16,6 +16,7 @@ public class HikeSDKMessageFilter implements HikePlatformConstants{
 		ArrayList<String> msisdns = ContactManager.getInstance().getMsisdnFromId(toArray);
 		for(String msisdn : msisdns){
 		ConvMessage convMessage = new ConvMessage();
+        convMessage.setMessage("test");
 		convMessage.setMessageType(com.bsb.hike.model.card.CardConstants.CARD_MSG_TYPE.equals(json.optString(MESSAGE_TYPE)) ? HikeConstants.MESSAGE_TYPE.CONTENT
 				: HikeConstants.MESSAGE_TYPE.PLAIN_TEXT);
 		convMessage.setMsisdn(msisdn);
