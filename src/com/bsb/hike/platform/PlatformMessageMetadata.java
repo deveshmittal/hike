@@ -24,13 +24,14 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 	}
 	public PlatformMessageMetadata(JSONObject json) {
 		this.json = json;
-		layoutId = getInt(json, LAYOUT_ID);
-		loveId = getInt(json, LOVE_ID);
+
 	
 		
 		if (json.has(DATA)) {
 			try {
 				JSONObject data = json.getJSONObject(DATA);
+                layoutId = getInt(data, LAYOUT_ID);
+                loveId = getInt(data, LOVE_ID);
 				if (data.has(ASSETS)) {
 					JSONObject assets = data.getJSONObject(ASSETS);
 					if (assets.has(TEXTS)) {
