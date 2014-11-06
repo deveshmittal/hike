@@ -12,15 +12,13 @@ import android.graphics.drawable.shapes.OvalShape;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Handler;
+import android.os.*;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.view.*;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -72,39 +70,39 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
     private int viewTypeCount = ViewType.values().length;
 
-	private static class DayHolder
+	public static class DayHolder
 	{
-		ViewStub dayStub;
+		public ViewStub dayStub;
 
-		View dayStubInflated;
+		public View dayStubInflated;
 	}
 
-	private static class DetailViewHolder extends DayHolder
+	public static class DetailViewHolder extends DayHolder
 	{
 
-		ImageView status;
+		public ImageView status;
 
-		TextView time;
+		public TextView time;
 
-		View timeStatus;
+		public View timeStatus;
 
-		View senderDetails;
+		public View senderDetails;
 
-		TextView senderName;
+		public TextView senderName;
 
-		TextView senderNameUnsaved;
+		public TextView senderNameUnsaved;
 
-		ImageView avatarImage;
+		public ImageView avatarImage;
 
-		ViewGroup avatarContainer;
+		public ViewGroup avatarContainer;
 
-		View selectedStateOverlay;
+		public View selectedStateOverlay;
 
-		ViewGroup messageContainer;
+		public ViewGroup messageContainer;
 
-		ViewStub messageInfoStub;
+		public ViewStub messageInfoStub;
 
-		View messageInfoInflated;
+		public View messageInfoInflated;
 	}
 
 	private static class FTViewHolder extends DetailViewHolder
