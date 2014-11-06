@@ -580,8 +580,13 @@ public class Utils
 	{
 		// Added these lines to prevent the bad username/password bug.
 		HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
-		app.disconnectFromService();
+		app.setServiceAsDisconnected();
 		activity.stopService(new Intent(activity, HikeService.class));
+	}
+	
+	public static void stopService(Context argContext)
+	{
+		argContext.stopService(new Intent(argContext, HikeService.class));
 	}
 
 	public static String formatNo(String msisdn)

@@ -26,6 +26,7 @@ import twitter4j.auth.AccessToken;
 import twitter4j.auth.OAuthAuthorization;
 import twitter4j.conf.ConfigurationContext;
 import android.app.Application;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -36,20 +37,16 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.util.Pair;
 
 import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
-import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.ToastListener;
-import com.bsb.hike.platform.HikeSDKRequestHandler;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
-import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.service.UpgradeIntentService;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
@@ -416,10 +413,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	private static Set<String> stealthMsisdn;
 
-	private Messenger mService;
-
-	private HikeServiceConnection mServiceConnection;
-
 	private boolean mInitialized;
 
 	private String token;
@@ -441,8 +434,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static volatile boolean syncingContacts = false;
 
 	public Handler appStateHandler;
-
-	private HikeSDKRequestHandler hikeSDKRequestHandler;
 
 	class IncomingHandler extends Handler
 	{
@@ -468,7 +459,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 				break;
 			case HikeService.MSG_APP_INVALID_TOKEN:
 				Logger.d("HikeMessengerApp", "received invalid token message from service");
-				HikeMessengerApp.this.disconnectFromService();
+				HikeMessengerApp.this.setServiceAsDisconnected();
 				HikeMessengerApp.this.stopService(new Intent(HikeMessengerApp.this, HikeService.class));
 				HikeMessengerApp.this.startActivity(new Intent(HikeMessengerApp.this, WelcomeActivity.class));
 			}
@@ -484,31 +475,19 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		}
 	}
 
-	public void sendToService(Message message)
-	{
-		try
-		{
-			mService.send(message);
-		}
-		catch (RemoteException e)
-		{
-			Logger.e("HikeMessengerApp", "Unable to connect to service", e);
-		}
-	}
-
-	public void disconnectFromService()
+	public void setServiceAsDisconnected()
 	{
 		if (mInitialized)
 		{
-			synchronized (HikeMessengerApp.class)
-			{
-				if (mInitialized)
-				{
-					mInitialized = false;
-					unbindService(mServiceConnection);
-					mServiceConnection = null;
-				}
-			}
+			mInitialized = false;
+		}
+	}
+	
+	public void setServiceAsConnected()
+	{
+		if(!mInitialized)
+		{
+			mInitialized = true;
 		}
 	}
 
@@ -521,9 +500,17 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			{
 				if (!mInitialized)
 				{
-					mInitialized = true;
 					Logger.d("HikeMessengerApp", "Initializing service");
-					mServiceConnection = HikeServiceConnection.createConnection(this, mMessenger);
+					
+					ComponentName service = HikeMessengerApp.this.startService(new Intent(HikeMessengerApp.this, HikeService.class));
+					
+					if(service.getClassName().equals(HikeService.class.getName()))
+					{
+						//Service started
+						setServiceAsConnected();
+						HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED, null);
+						HikeMessengerApp.this.sendBroadcast(new Intent(HikeService.SEND_RAI_TO_SERVER_ACTION));
+					}
 				}
 			}
 		}
@@ -876,11 +863,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		return mPubSubInstance;
 	}
 
-	public void setService(Messenger service)
-	{
-		this.mService = service;
-	}
-
 	public static boolean isIndianUser()
 	{
 		return isIndianUser;
@@ -975,10 +957,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		if (activityTimeLogger == null)
 		{
 			activityTimeLogger = new ActivityTimeLogger();
-		}
-		if(hikeSDKRequestHandler == null)
-		{
-			hikeSDKRequestHandler = HikeSDKRequestHandler.getInstance(getApplicationContext());
 		}
 	}
 

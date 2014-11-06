@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -44,6 +45,8 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.platform.HikeSDKRequestHandler;
+import com.bsb.hike.service.HikeMqttManagerNew.IncomingHandler;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
@@ -170,10 +173,14 @@ public class HikeService extends Service
 
 	private ContactsChanged mContactsChanged;
 
-	private Looper mContactHandlerLooper;
+	private Looper mHikeUtilLooper;
 
 	private StickerManager sm;
 
+	private HikeSDKRequestHandler mHikeSDKRequestHandler;
+
+	private Messenger mSDKRequestMessenger;
+	
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -220,10 +227,29 @@ public class HikeService extends Service
 		 * notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent); startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 		 */
 
-		HandlerThread contactHandlerThread = new HandlerThread("");
-		contactHandlerThread.start();
-		mContactHandlerLooper = contactHandlerThread.getLooper();
-		mContactsChangedHandler = new Handler(mContactHandlerLooper);
+		/**
+		 * Make hike utility thread
+		 */
+		HandlerThread hikeUtilHandlerThread = new HandlerThread("HIKE_UTIL");
+		hikeUtilHandlerThread.start();
+		
+		/**
+		 * Extract utility looper
+		 */
+		mHikeUtilLooper = hikeUtilHandlerThread.getLooper();
+		
+		/**
+		 * Make SDK request handler with utility looper
+		 */
+		mHikeSDKRequestHandler = new HikeSDKRequestHandler(this.getApplicationContext(), mHikeUtilLooper);
+		
+		mSDKRequestMessenger = new Messenger(mHikeSDKRequestHandler);
+		
+		/**
+		 * Make contact changed handler with utility looper
+		 */
+		mContactsChangedHandler = new Handler(mHikeUtilLooper);
+		
 		mContactsChanged = new ContactsChanged(this);
 
 		/*
@@ -424,9 +450,9 @@ public class HikeService extends Service
 			contactsReceived = null;
 		}
 
-		if (mContactHandlerLooper != null)
+		if (mHikeUtilLooper != null)
 		{
-			mContactHandlerLooper.quit();
+			mHikeUtilLooper.quit();
 		}
 
 		if (manualContactSyncTrigger != null)
@@ -498,7 +524,7 @@ public class HikeService extends Service
 	@Override
 	public IBinder onBind(Intent intent)
 	{
-		return mMqttManager.getMessenger().getBinder();
+		return mSDKRequestMessenger.getBinder();
 	}
 
 	/************************************************************************/
