@@ -4806,9 +4806,9 @@ public class Utils
 		{
 			Logger.e("HomeInviteFooter", "Invalid JSON", e);
 		}
-		if(HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.Extras.SHOW_NUX_INVITE_MODE, false))
+		if(HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false))
 		{
-			intent.putExtra(HikeConstants.Extras.NUX_INVITE_FORWARD, true);
+			intent.putExtra(HikeConstants.NUX_INVITE_FORWARD, true);
 		}
 		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 		return intent;

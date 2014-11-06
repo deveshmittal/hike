@@ -7880,9 +7880,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
-			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.Extras.SHOW_NUX_INVITE_MODE, false) && mContactNumber.equals(HikeConstants.FTUE_HIKE_SUPPORT))
+			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false) && mContactNumber.equals(HikeConstants.FTUE_HIKE_SUPPORT))
 			{
-				intent.putExtra(HikeConstants.Extras.NUX_INVITE_FORWARD, true);
+				intent.putExtra(HikeConstants.NUX_INVITE_FORWARD, true);
 			}
 			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);

@@ -408,9 +408,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			editor.commit();
 		}
 
-		if(HikeConstants.FTUE_HIKE_SUPPORT.equals(conv.getMsisdn()) && HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.Extras.SHOW_NUX_INVITE_MODE, false))
+		if(HikeConstants.FTUE_HIKE_SUPPORT.equals(conv.getMsisdn()) && HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false))
 		{
-			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeConstants.Extras.NUX_HOME_INVITE_FOOTER, true);
+			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeConstants.NUX_HOME_INVITE_FOOTER, true);
 		}
 	}
 
@@ -2521,7 +2521,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void showInviteFooterIfRequired()
 	{
-		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.Extras.NUX_HOME_INVITE_FOOTER, false))
+		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.NUX_HOME_INVITE_FOOTER, false))
 		{
 			inviteFooter.findViewById(R.id.nux_invite_parent).setVisibility(View.VISIBLE);
 		}
@@ -2541,10 +2541,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void switchOffNuxMode()
 	{
-		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.Extras.SHOW_NUX_INVITE_MODE, false))
+		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false))
 		{
-			HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeConstants.Extras.NUX_HOME_INVITE_FOOTER);
-			HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeConstants.Extras.SHOW_NUX_INVITE_MODE);
+			HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeConstants.NUX_HOME_INVITE_FOOTER);
+			HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeConstants.SHOW_NUX_INVITE_MODE);
 			removeInviteFooterView();
 		}
 	}

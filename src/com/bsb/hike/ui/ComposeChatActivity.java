@@ -171,7 +171,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		createGroup = getIntent().getBooleanExtra(HikeConstants.Extras.CREATE_GROUP, false);
 		isForwardingMessage = getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false);
 		isSharingFile = getIntent().getType() != null;
-		nuxInviteMode = getIntent().getBooleanExtra(HikeConstants.Extras.NUX_INVITE_FORWARD, false);
+		nuxInviteMode = getIntent().getBooleanExtra(HikeConstants.NUX_INVITE_FORWARD, false);
 
 		// Getting the group id. This will be a valid value if the intent
 		// was passed to add group participants.
