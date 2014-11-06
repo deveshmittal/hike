@@ -64,7 +64,6 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			GCMRegistrar.unregister(ctx.getApplicationContext());
 
 			HikeMessengerApp app = (HikeMessengerApp) ctx.getApplicationContext();
-			Utils.stopService(ctx);
 			app.setServiceAsDisconnected();
 			ctx.stopService(new Intent(ctx, HikeService.class));
 
