@@ -231,7 +231,7 @@ public class HikeDialog
 		dialog.setCanceledOnTouchOutside(true);
 		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		final Editor editor = appPrefs.edit();
-		int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+		int quality = ImageQuality.QUALITY_DEFAULT;
 		final LinearLayout small_ll = (LinearLayout) dialog.findViewById(R.id.hike_small_container);
 		final LinearLayout medium_ll = (LinearLayout) dialog.findViewById(R.id.hike_medium_container);
 		final LinearLayout original_ll = (LinearLayout) dialog.findViewById(R.id.hike_original_container);
@@ -242,7 +242,6 @@ public class HikeDialog
 		CustomFontTextView smallSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_small_cftv);
 		CustomFontTextView mediumSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_medium_cftv);
 		CustomFontTextView originalSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_original_cftv);
-		Button always = (Button) dialog.findViewById(R.id.btn_always);
 		Button once = (Button) dialog.findViewById(R.id.btn_just_once);
 		
 		if(data!=null)
@@ -296,11 +295,6 @@ public class HikeDialog
 				case R.id.hike_original_container:
 					showImageQualityOption(ImageQuality.QUALITY_ORIGINAL, small, medium, original);
 					break;
-				case R.id.btn_always:
-					saveImageQualitySettings(editor, small, medium, original);
-					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, true);
-					callOnSucess(listener, dialog);
-					break;
 				case R.id.btn_just_once:
 					saveImageQualitySettings(editor, small, medium, original);
 					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, false);
@@ -313,7 +307,6 @@ public class HikeDialog
 		small_ll.setOnClickListener(imageQualityDialogOnClickListener);
 		medium_ll.setOnClickListener(imageQualityDialogOnClickListener);
 		original_ll.setOnClickListener(imageQualityDialogOnClickListener);
-		always.setOnClickListener(imageQualityDialogOnClickListener);
 		once.setOnClickListener(imageQualityDialogOnClickListener);
 
 		dialog.show();

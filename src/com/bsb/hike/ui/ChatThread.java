@@ -189,7 +189,6 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.tasks.DownloadStickerTask;
-import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -211,7 +210,6 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomFontEditText;
@@ -359,7 +357,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
 			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA,HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT,HikePubSub.CONV_META_DATA_UPDATED, 
-			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED };
+			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED };
 
 	private EmoticonType emoticonType;
 
@@ -651,7 +649,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		resetLastSeenScheduler();
 
-		StickerManager.getInstance().saveSortedListForCategory(StickerCategoryId.recent, StickerManager.getInstance().getRecentStickerList());
+		StickerManager.getInstance().saveCustomCategories();
 		if (messageMap != null)
 		{
 			messageMap.clear();
@@ -715,6 +713,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		isOverlayShowing = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.OVERLAY_SHOWING);
 
 		config = getResources().getConfiguration();
+		StickerManager.getInstance().checkAndDownLoadStickerData();
 
 		/* bind views to variables */
 
@@ -1421,7 +1420,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		}
 		optionsList.add(new OverFlowMenuItem(getString(R.string.clear_chat), 5));
-		optionsList.add(new OverFlowMenuItem(getString(R.string.email_chat), 3));
+		if(messages.size() > 0)
+		{
+			optionsList.add(new OverFlowMenuItem(getString(R.string.email_chat), 3));
+		}
 
 		if (mConversation instanceof GroupConversation)
 		{
@@ -2109,8 +2111,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						{
 							String categoryId = msgExtrasJson.getString(StickerManager.FWD_CATEGORY_ID);
 							String stickerId = msgExtrasJson.getString(StickerManager.FWD_STICKER_ID);
-							int stickerIdx = msgExtrasJson.getInt(StickerManager.FWD_STICKER_INDEX);
-							Sticker sticker = new Sticker(categoryId, stickerId, stickerIdx);
+							Sticker sticker = new Sticker(categoryId, stickerId);
 							sendSticker(sticker, categoryId);
 							boolean isDis = sticker.isDisabled(sticker, this.getApplicationContext());
 							// add this sticker to recents if this sticker is not disabled
@@ -4256,6 +4257,23 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true);
 				}
 			});
+		}
+		else if (HikePubSub.STICKER_CATEGORY_MAP_UPDATED.equals(type))
+		{
+			if(stickerAdapter == null)
+			{
+				return;
+			}
+				runOnUiThread(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						stickerAdapter.instantiateStickerList();
+						stickerAdapter.notifyDataSetChanged();
+					}
+				});
 		}
 	}
 
@@ -6518,6 +6536,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	public void onStickerBtnClicked(View v)
 	{
+		if((Utils.getExternalStorageState() == ExternalStorageState.NONE))
+		{
+			Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+			return;
+		}
 		onEmoticonBtnClicked(v, 0, false);
 		if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
 		{
@@ -6551,7 +6574,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			emoticonViewPager = emoticonViewPager == null ? (ViewPager) emoticonLayout.findViewById(R.id.emoticon_pager) : emoticonViewPager;
 
 			View eraseKey = emoticonLayout.findViewById(R.id.erase_key);
-
+			ImageView shopIcon = (ImageView) emoticonLayout.findViewById(R.id.erase_key_image);
 			if (v != null)
 			{
 				int[] tabDrawables = null;
@@ -6580,7 +6603,31 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						emoticonType = EmoticonType.STICKERS;
 					}
-					eraseKey.setVisibility(View.GONE);
+					eraseKey.setVisibility(View.VISIBLE);
+					shopIcon.setImageResource(R.drawable.ic_sticker_shop);
+					eraseKey.setBackgroundResource(R.color.sticker_pallete_bg_color);
+					if(!prefs.getBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
+					{
+						eraseKey.setBackgroundResource(R.color.shop_icon_color);
+					}
+					
+					eraseKey.setOnClickListener(new View.OnClickListener()
+					{
+						
+						@Override
+						public void onClick(View v)
+						{
+							if(!prefs.getBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
+							{
+								Editor editor = prefs.edit();
+								editor.putBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, true);
+								editor.commit();
+							}
+							Intent i = new Intent(ChatThread.this, StickerShopActivity.class);
+							startActivity(i);
+						}
+					});
+					
 				}
 				else
 				{
@@ -6616,6 +6663,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 					}
 					eraseKey.setVisibility(View.VISIBLE);
+					eraseKey.setBackgroundResource(R.color.sticker_pallete_bg_color);
+					shopIcon.setImageResource(R.drawable.ic_erase);
 					eraseKey.setOnClickListener(new OnClickListener()
 					{
 
@@ -6739,26 +6788,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Logger.d("ViewPager", "Page number: " + pageNum);
 			if (emoticonType == EmoticonType.STICKERS)
 			{
-				StickerCategory category = StickerManager.getInstance().getCategoryForIndex(pageNum);
-				StickerCategoryId categoryId = category.categoryId;
-				if (StickerCategoryId.recent.equals(categoryId))
-					return;
-				if (!categoryId.equals(StickerManager.StickerCategoryId.humanoid) && !categoryId.equals(StickerManager.StickerCategoryId.expressions))
+				StickerCategory category = stickerAdapter.getStickerCategory(pageNum);
+				if(category.getState() == StickerCategory.DONE)
 				{
-					if ((!StickerManager.getInstance().checkIfStickerCategoryExists(categoryId.name()) || !prefs.getBoolean(categoryId.downloadPref(), false))
-							&& !StickerManager.getInstance().isStickerDownloading(categoryId.name()))
-					{
-						postToHandlerStickerPreviewDialog(category);
-
-					}
-				}
-				else if (!prefs.getBoolean(categoryId.downloadPref(), false))
-				{
-					/*
-					 * Now we don't show sticker preview dialog for hardcoded categories
-					 */
-					prefs.edit().putBoolean(category.categoryId.downloadPref(), true).commit();
-					return;
+					category.setState(StickerCategory.NONE);
 				}
 			}
 		}
@@ -6773,329 +6806,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 		}
 	};
-
-	private void postToHandlerStickerPreviewDialog(final StickerCategory category)
-	{
-		mHandler.post(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				showStickerPreviewDialog(category);
-
-			}
-		});
-	}
-
-	private void showStickerPreviewDialog(final StickerCategory category)
-	{
-		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.sticker_preview_dialog);
-
-		View parent = dialog.findViewById(R.id.preview_container);
-
-		setupStickerPreviewDialog(parent, category.categoryId);
-
-		Button okBtn = (Button) dialog.findViewById(R.id.ok_btn);
-		okBtn.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
-			{
-				dialog.dismiss();
-				getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-				Editor editor = prefs.edit();
-				try
-				{
-					editor.putBoolean(category.categoryId.downloadPref(), true);
-					if (category.categoryId.equals(StickerCategoryId.recent) || category.categoryId.equals(StickerCategoryId.humanoid)
-							|| category.categoryId.equals(StickerCategoryId.expressions))
-					{
-						return;
-					}
-					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(ChatThread.this, category, DownloadType.NEW_CATEGORY, null);
-					Utils.executeFtResultAsyncTask(downloadStickerTask);
-
-					StickerManager.getInstance().insertTask(category.categoryId.name(), downloadStickerTask);
-					updateStickerCategoryUI(category, false, null);
-
-				}
-				finally
-				{
-					editor.commit();
-				}
-			}
-		});
-
-		dialog.setOnCancelListener(new OnCancelListener()
-		{
-
-			/*
-			 * If user cancels non fixed category , he should be taken to recents if not empty else to humanoid whose index is 1
-			 */
-			@Override
-			public void onCancel(DialogInterface dialog)
-			{
-				if (!category.categoryId.equals(StickerCategoryId.recent) && !category.categoryId.equals(StickerCategoryId.humanoid)
-						&& !category.categoryId.equals(StickerCategoryId.expressions) && !StickerManager.getInstance().checkIfStickerCategoryExists(category.categoryId.name()))
-				{
-					int idx = 0;
-					if (StickerManager.getInstance().getRecentStickerList().size() == 0)
-						idx = 1;
-					emoticonViewPager.setCurrentItem(idx, false);
-				}
-			}
-		});
-
-		dialog.show();
-		Logger.i("chatthread", "show called for stickerpreviewdialog");
-		if (attachmentWindow != null && attachmentWindow.getContentView() == emoticonLayout)
-		{
-			// whenever dialog comes,it hides keyboard, so we need to make sure screen is properly resized to show emoticon pallette
-			// calling hide keyboard for edge cases , exceptional devices where keyboard not goes automatically
-			Utils.hideSoftKeyboard(getApplicationContext(), mComposeView);
-			resizeMainheight(attachmentWindow.getHeight(), false);
-		}
-	}
-
-	private void setupStickerPreviewDialog(View parent, StickerCategoryId categoryId)
-	{
-		GradientDrawable parentDrawable = (GradientDrawable) parent.getBackground();
-		Button stickerBtn = (Button) parent.findViewById(R.id.ok_btn);
-		TextView category = (TextView) parent.findViewById(R.id.preview_text);
-		View divider = parent.findViewById(R.id.divider);
-		ImageView sticker = (ImageView) parent.findViewById(R.id.preview_image);
-
-		int resParentBg = 0;
-		int stickerBtnBg = 0;
-		int stickerBtnText = 0;
-		int stickerBtnTextColor = 0;
-		int stickerBtnShadowColor = 0;
-		String categoryText = null;
-		int categoryTextColor = 0;
-		int categoryTextShadowColor = 0;
-		int dividerBg = 0;
-
-		switch (categoryId)
-		{
-		case humanoid:
-			resParentBg = getResources().getColor(R.color.humanoid_bg);
-
-			stickerBtnBg = R.drawable.humanoid_btn;
-			stickerBtnText = android.R.string.ok;
-			stickerBtnTextColor = getResources().getColor(R.color.humanoid_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.humanoid_btn_text_shadow);
-
-			categoryText = getResources().getString(R.string.hikins);
-			categoryTextColor = getResources().getColor(R.color.humanoid_text);
-			categoryTextShadowColor = getResources().getColor(R.color.humanoid_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.humanoid_div);
-			break;
-		case doggy:
-			resParentBg = getResources().getColor(R.color.doggy_bg);
-
-			stickerBtnBg = R.drawable.doggy_btn;
-			stickerBtnText = R.string.free_download;
-			stickerBtnTextColor = getResources().getColor(R.color.doggy_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.doggy_btn_text_shadow);
-
-			categoryText = getString(R.string.snuggles);
-			categoryTextColor = getResources().getColor(R.color.doggy_text);
-			categoryTextShadowColor = getResources().getColor(R.color.doggy_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.doggy_div);
-			break;
-		case kitty:
-			resParentBg = getResources().getColor(R.color.kitty_bg);
-
-			stickerBtnBg = R.drawable.kitty_btn;
-			stickerBtnText = R.string.free_download;
-			stickerBtnTextColor = getResources().getColor(R.color.kitty_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.kitty_btn_text_shadow);
-
-			categoryText = getString(R.string.meawmiley);
-			categoryTextColor = getResources().getColor(R.color.kitty_text);
-			categoryTextShadowColor = getResources().getColor(R.color.kitty_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.kitty_div);
-			break;
-		case expressions:
-			resParentBg = getResources().getColor(R.color.exp_bg);
-
-			stickerBtnBg = R.drawable.exp_btn;
-			stickerBtnText = android.R.string.ok;
-			stickerBtnTextColor = getResources().getColor(R.color.exp_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.exp_btn_text_shadow);
-
-			categoryText = getString(R.string.expressions);
-			categoryTextColor = getResources().getColor(R.color.exp_text);
-			categoryTextShadowColor = getResources().getColor(R.color.exp_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.exp_div);
-			break;
-		case bollywood:
-			resParentBg = getResources().getColor(R.color.bollywood_bg);
-
-			stickerBtnBg = R.drawable.bollywood_btn;
-			stickerBtnText = R.string.free_download;
-			stickerBtnTextColor = getResources().getColor(R.color.bollywood_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.bollywood_btn_text_shadow);
-
-			categoryText = getString(R.string.bollywood);
-			categoryTextColor = getResources().getColor(R.color.bollywood_text);
-			categoryTextShadowColor = getResources().getColor(R.color.bollywood_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.bollywood_div);
-			break;
-		case rageface:
-			resParentBg = getResources().getColor(R.color.rf_bg);
-
-			stickerBtnBg = R.drawable.rf_btn;
-			stickerBtnText = R.string.free_download;
-			stickerBtnTextColor = getResources().getColor(R.color.rf_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.rf_btn_text_shadow);
-
-			categoryText = getString(R.string.rageface);
-			categoryTextColor = getResources().getColor(R.color.rf_text);
-			categoryTextShadowColor = getResources().getColor(R.color.rf_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.rf_div);
-			break;
-		case humanoid2:
-			resParentBg = getResources().getColor(R.color.humanoid2_bg);
-
-			stickerBtnBg = R.drawable.humanoid2_btn;
-			stickerBtnText = R.string.free_download;
-			stickerBtnTextColor = getResources().getColor(R.color.humanoid2_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.humanoid2_btn_text_shadow);
-
-			categoryText = getString(R.string.youandi);
-			categoryTextColor = getResources().getColor(R.color.humanoid2_text);
-			categoryTextShadowColor = getResources().getColor(R.color.humanoid2_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.humanoid2_div);
-			break;
-		case smileyexpressions:
-			resParentBg = getResources().getColor(R.color.se_bg);
-
-			stickerBtnBg = R.drawable.se_btn;
-			stickerBtnText = R.string.free_download;
-			stickerBtnTextColor = getResources().getColor(R.color.se_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.se_btn_text_shadow);
-
-			categoryText = getString(R.string.wackysmilyes);
-			categoryTextColor = getResources().getColor(R.color.se_text);
-			categoryTextShadowColor = getResources().getColor(R.color.se_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.se_div);
-			break;
-		case avatars:
-			resParentBg = getResources().getColor(R.color.avtars_bg);
-
-			stickerBtnBg = R.drawable.avtars_btn;
-			stickerBtnText = R.string.free_download;
-			stickerBtnTextColor = getResources().getColor(R.color.avtars_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.avtars_btn_text_shadow);
-
-			categoryText = getString(R.string.avatars);
-			categoryTextColor = getResources().getColor(R.color.avtars_text);
-			categoryTextShadowColor = getResources().getColor(R.color.avtars_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.avtars_div);
-			break;
-		case indian:
-			resParentBg = getResources().getColor(R.color.indian_bg);
-
-			stickerBtnBg = R.drawable.indian_btn;
-			stickerBtnText = R.string.free_download;
-			stickerBtnTextColor = getResources().getColor(R.color.indian_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.indian_btn_text_shadow);
-
-			categoryText = getString(R.string.thingsIndianSay);
-			categoryTextColor = getResources().getColor(R.color.indian_text);
-			categoryTextShadowColor = getResources().getColor(R.color.indian_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.indian_div);
-			break;
-		case love:
-			resParentBg = getResources().getColor(R.color.love_bg);
-
-			stickerBtnBg = R.drawable.love_btn;
-			stickerBtnText = R.string.free_download;
-			stickerBtnTextColor = getResources().getColor(R.color.love_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.love_btn_text_shadow);
-
-			categoryText = getString(R.string.loveyouforever);
-			categoryTextColor = getResources().getColor(R.color.love_text);
-			categoryTextShadowColor = getResources().getColor(R.color.love_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.love_div);
-			break;
-		case sports:
-			resParentBg = getResources().getColor(R.color.sports_bg);
-
-			stickerBtnBg = R.drawable.sports_btn;
-			stickerBtnText = R.string.free_download;
-			stickerBtnTextColor = getResources().getColor(R.color.sports_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.sports_btn_text_shadow);
-
-			categoryText = getString(R.string.sportmaniacs);
-			categoryTextColor = getResources().getColor(R.color.sports_text);
-			categoryTextShadowColor = getResources().getColor(R.color.sports_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.sports_div);
-			break;
-		case jelly:
-			resParentBg = getResources().getColor(R.color.jellies_bg);
-
-			stickerBtnBg = R.drawable.jellies_btn;
-			stickerBtnText = R.string.download;
-			stickerBtnTextColor = getResources().getColor(R.color.jellies_btn_text);
-			stickerBtnShadowColor = getResources().getColor(R.color.jellies_btn_text_shadow);
-
-			categoryText = getString(R.string.wicked_jellies);
-			categoryTextColor = getResources().getColor(R.color.jellies_text);
-			categoryTextShadowColor = getResources().getColor(R.color.jellies_text_shadow);
-
-			dividerBg = getResources().getColor(R.color.jellies_div);
-			break;
-		}
-
-		parentDrawable.setColor(resParentBg);
-		sticker.setImageResource(categoryId.previewResId());
-
-		stickerBtn.setBackgroundResource(stickerBtnBg);
-		stickerBtn.setText(stickerBtnText);
-		stickerBtn.setTextColor(stickerBtnTextColor);
-		stickerBtn.setShadowLayer(0.7f, 0, 0.7f, stickerBtnShadowColor);
-
-		category.setText(categoryText);
-		category.setTextColor(categoryTextColor);
-		category.setShadowLayer(0.6f, 0, 0.6f, categoryTextShadowColor);
-
-		divider.setBackgroundColor(dividerBg);
-	}
-
-	private void updateStickerCategoryUI(StickerCategory category, boolean failed, DownloadType downloadTypeBeforeFail)
-	{
-		if (stickerAdapter == null)
-		{
-			return;
-		}
-
-		View emoticonPage = emoticonViewPager.findViewWithTag(category.categoryId);
-
-		if (emoticonPage == null)
-		{
-			return;
-		}
-
-		stickerAdapter.setupStickerPage(emoticonPage, category, failed, downloadTypeBeforeFail);
-
-	}
 
 	public int getCurrentPage()
 	{
@@ -7126,18 +6836,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if (stickerAdapter == null)
 			{
-				stickerAdapter = new StickerAdapter(this, isPortrait);
+				stickerAdapter = new StickerAdapter(this);
 			}
 			emoticonViewPager.setAdapter(stickerAdapter);
 		}
 
 		int actualPageNum = pageNum;
-		if (emoticonType == EmoticonType.STICKERS && pageNum == 0)
-		{
-			// if recent list is empty, then skip to first category
-			if (StickerManager.getInstance().getRecentStickerList().size() == 0)
-				actualPageNum = 1;
-		}
 		emoticonViewPager.setCurrentItem(actualPageNum, false);
 		emoticonViewPager.invalidate();
 
@@ -7223,16 +6927,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		JSONObject metadata = new JSONObject();
 		try
 		{
-			String categoryName;
-			if (sticker.getCategory().categoryId == StickerCategoryId.unknown)
-			{
-				categoryName = categoryIdIfUnknown;
-			}
-			else
-			{
-				categoryName = sticker.getCategory().categoryId.name();
-			}
-			metadata.put(StickerManager.CATEGORY_ID, categoryName);
+			String categoryId;
+			categoryId = sticker.getCategoryId();
+			
+			metadata.put(StickerManager.CATEGORY_ID, categoryId);
 
 			metadata.put(StickerManager.STICKER_ID, sticker.getStickerId());
 
@@ -7595,12 +7293,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if (intent.getAction().equals(StickerManager.STICKERS_UPDATED))
 			{
-				if (iconPageIndicator != null)
+				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
+				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+				if (iconPageIndicator != null && stickerAdapter != null)
 				{
 					runOnUiThread(new Runnable()
 					{
 						public void run()
 						{
+							category.setState(StickerCategory.DONE);
+							stickerAdapter.initStickers(category);
+							stickerAdapter.notifyDataSetChanged();
 							iconPageIndicator.notifyDataSetChanged();
 						}
 					});
@@ -7860,11 +7563,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						/*
 						 * If the category is an unknown one, we have the id saved in the json.
 						 */
-						String categoryId = sticker.getCategory().categoryId == StickerCategoryId.unknown ? message.getMetadata().getUnknownStickerCategory() : sticker
-								.getCategory().categoryId.name();
+						String categoryId = sticker.getCategoryId();
 						multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
 						multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_ID, sticker.getStickerId());
-						multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_INDEX, sticker.getStickerIndex());
 					}else if(message.getMetadata()!=null && message.getMetadata().isPokeMessage()){
 						multiMsgFwdObject.put(HikeConstants.Extras.POKE, true);
 					}
@@ -7888,13 +7589,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		case R.id.copy_msgs:
 			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			Collections.sort(selectedMsgIds);
-			String msgStr = selectedMessagesMap.get(selectedMsgIds.get(0)).getMessage();
-			for (int i = 1; i < selectedMsgIds.size(); i++)
+			StringBuilder msgStr = new StringBuilder();
+			int size = selectedMsgIds.size();
+			
+			for (int i = 0; i < size; i++)
 			{
-				msgStr += "\n" + selectedMessagesMap.get(selectedMsgIds.get(i)).getMessage();
+				msgStr.append(selectedMessagesMap.get(selectedMsgIds.get(i)).getMessage());
+				msgStr.append("\n");				
 			}
-			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-			clipboard.setText(msgStr);
+			Utils.setClipboardText(msgStr.toString(), getApplicationContext());
 			Toast.makeText(ChatThread.this, R.string.copied, Toast.LENGTH_SHORT).show();
 			destroyActionMode();
 			return true;

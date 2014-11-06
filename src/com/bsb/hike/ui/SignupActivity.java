@@ -1,18 +1,10 @@
 package com.bsb.hike.ui;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.net.URI;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,6 +20,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -35,11 +29,9 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.telephony.TelephonyManager;
-import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -50,7 +42,16 @@ import android.view.View.OnFocusChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
+import android.view.animation.RotateAnimation;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -70,7 +71,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
-import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -107,6 +107,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private ViewGroup scanningContactsLayout;
 
+	private ViewGroup backupFoundLayout;
+
+	private ViewGroup restoringBackupLayout;
+
 	private TextView infoTxt;
 
 	private TextView loadingText;
@@ -132,6 +136,12 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	private boolean addressBookError = false;
 
 	private boolean msisdnErrorDuringSignup = false;
+	
+	private String backupRestored = null;
+
+	public static final int RESTORING_BACKUP = 5;
+
+	public static final int BACKUP_FOUND = 4;
 
 	public static final int SCANNING_CONTACTS = 3;
 
@@ -184,6 +194,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	private ImageView arrow;
 
 	private TextView postText;
+	
+	private ViewProperties sdCardProp;
 
 	private class ActivityState
 	{
@@ -205,6 +217,17 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 		public boolean fbConnected = false;
 	}
+	
+	private class ViewProperties
+	{
+		public int left;
+		
+		public int top;
+		
+		public int width;
+		
+		public int height;
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -222,6 +245,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
 		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
 		scanningContactsLayout = (ViewGroup) findViewById(R.id.scanning_contacts_layout);
+		backupFoundLayout = (ViewGroup) findViewById(R.id.backup_found_layout);
+		restoringBackupLayout = (ViewGroup) findViewById(R.id.restoring_backup_layout);
 
 		Object o = getLastCustomNonConfigurationInstance();
 		if (o instanceof ActivityState)
@@ -248,6 +273,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		if (savedInstanceState != null)
 		{
 			msisdnErrorDuringSignup = savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR);
+			backupRestored = savedInstanceState.getString(HikeConstants.Extras.SIGNUP_RESTORE_STATUS);
 			int dispChild = savedInstanceState.getInt(HikeConstants.Extras.SIGNUP_PART);
 			showingSecondLoadingTxt = savedInstanceState.getBoolean(HikeConstants.Extras.SHOWING_SECOND_LOADING_TXT);
 			removeAnimation();
@@ -277,6 +303,12 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				break;
 			case SCANNING_CONTACTS:
 				prepareLayoutForScanning(savedInstanceState);
+				break;
+			case BACKUP_FOUND:
+				prepareLayoutForBackupFound(savedInstanceState);
+				break;
+			case RESTORING_BACKUP:
+				prepareLayoutForRestoringAnimation(savedInstanceState);
 				break;
 			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
@@ -369,6 +401,14 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			mActionBarTitle.setText("");
 		}
+		else if (displayedChild == BACKUP_FOUND)
+		{
+			mActionBarTitle.setText(R.string.restore_account);
+		}
+		else if (displayedChild == RESTORING_BACKUP)
+		{
+			mActionBarTitle.setText(R.string.account_backup);
+		}
 	}
 
 	@Override
@@ -388,8 +428,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				 */
 				String countryCode = accountPrefs.getString(HikeMessengerApp.COUNTRY_CODE, "");
 				boolean isSAUser = countryCode.equals(HikeConstants.SAUDI_ARABIA_COUNTRY_CODE);
-
-				StickerManager.setStickersForIndianUsers(HikeConstants.INDIA_COUNTRY_CODE.equals(countryCode), accountPrefs);
 
 				Editor accountEditor = accountPrefs.edit();
 				accountEditor.putBoolean(HikeMessengerApp.JUST_SIGNED_UP, true);
@@ -550,6 +588,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private void submitClicked()
 	{
+		if (viewFlipper.getDisplayedChild() == BACKUP_FOUND || viewFlipper.getDisplayedChild() == RESTORING_BACKUP)
+		{
+			mTask.addUserInput(null);
+			return;
+		}
 		if (invalidNum != null)
 		{
 			invalidNum.setVisibility(View.GONE);
@@ -918,6 +961,548 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		nextBtnContainer.setVisibility(View.GONE);
 		setupActionBarTitle();
 	}
+	
+	private void prepareLayoutForBackupFound(Bundle savedInstanceState)
+	{
+		nextBtnContainer.setVisibility(View.VISIBLE);
+		arrow.setVisibility(View.GONE);
+		postText.setText(R.string.skip);
+		setupActionBarTitle();
+		Button btnRestore = (Button) backupFoundLayout.findViewById(R.id.btn_restore);
+		btnRestore.setOnClickListener(btnRestoreClick);
+		if (savedInstanceState == null)
+		{
+			preRestoreAnimation();
+		}
+	}
+	
+	private void prepareLayoutForRestoringAnimation(Bundle savedInstanceState)
+	{
+		nextBtnContainer.setVisibility(View.GONE);
+		setupActionBarTitle();
+		
+		if (TextUtils.isEmpty(backupRestored))
+		{
+			TextView title = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_title);
+			TextView hint = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_hint);
+			title.setText(R.string.restoring___);
+			hint.setText(R.string.restoring____hint);
+			if (savedInstanceState == null)
+			{
+				onRestoreAnimation();
+			}
+			else
+			{
+				setupOnRestoreProgress();
+			}
+		}
+		else if (Boolean.TRUE.toString().equals(backupRestored))
+		{
+			TextView title = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_title);
+			TextView hint = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_hint);
+			title.setText(R.string.restored);
+			hint.setText(R.string.restored_hint);
+			View restoreItems = (View) restoringBackupLayout.findViewById(R.id.restore_items);
+			ImageView restoreSuccess = (ImageView) restoringBackupLayout.findViewById(R.id.restore_success);
+			restoreItems.setVisibility(View.INVISIBLE);
+			restoreSuccess.setVisibility(View.VISIBLE);
+			if (savedInstanceState == null)
+			{
+				onRestoreSuccessAnimation();
+			}
+		}
+		else
+		{
+			TextView title = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_title);
+			TextView hint = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_hint);
+			title.setText(R.string.restore_error);
+			hint.setText(R.string.restore_error_hint);
+			nextBtnContainer.setVisibility(View.VISIBLE);
+			arrow.setVisibility(View.GONE);
+			postText.setText(R.string.skip);
+			final View restoreProgress = (View) restoringBackupLayout.findViewById(R.id.restore_progress);
+			final ImageView restoreFail = (ImageView) restoringBackupLayout.findViewById(R.id.restore_fail);
+			final Button retry  = (Button) restoringBackupLayout.findViewById(R.id.btn_retry);
+			
+			retry.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					backupRestored = null;
+					nextBtnContainer.setVisibility(View.GONE);
+					restoreProgress.setVisibility(View.VISIBLE);
+					restoreFail.setVisibility(View.INVISIBLE);
+					retry.setVisibility(View.INVISIBLE);
+					setupOnRestoreProgress();
+					mTask.addUserInput("true");
+				}
+			});
+			restoreProgress.setVisibility(View.INVISIBLE);
+			restoreFail.setVisibility(View.VISIBLE);
+			retry.setVisibility(View.VISIBLE);
+			if (savedInstanceState == null)
+			{
+				onRestoreFailAnimation();
+			}
+		}
+	}
+	
+	private void preRestoreAnimation()
+	{
+		long smileyOffset = 800;
+		long smileyDuration = 300;
+		long convOffset = smileyOffset + smileyDuration;
+		long convDuration = smileyDuration;
+		long profileOffset = convOffset + convDuration;
+		long profileDuration = smileyDuration;
+		long restoreOffset = profileOffset + profileDuration;
+		long restoreDuration = 200;
+		
+		ImageView artProfile = (ImageView) backupFoundLayout.findViewById(R.id.art_profile);
+		ImageView artConv = (ImageView) backupFoundLayout.findViewById(R.id.art_conversation);
+		ImageView artSmiley = (ImageView) backupFoundLayout.findViewById(R.id.art_smiley);
+		Button btnRestore = (Button) backupFoundLayout.findViewById(R.id.btn_restore);
+		
+		btnRestore.setOnClickListener(btnRestoreClick);
+		
+		// Animation Setup for smiley image
+		ScaleAnimation smileyScaleAnimation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 0.0f,Animation.RELATIVE_TO_SELF, 1.0f);
+		smileyScaleAnimation.setInterpolator(new OvershootInterpolator());
+		
+		AlphaAnimation smileyAlphaAnimation = new AlphaAnimation(0.1f, 1.0f);
+		
+		AnimationSet smileyAnimSet = new AnimationSet(false);
+		smileyAnimSet.addAnimation(smileyScaleAnimation);
+		smileyAnimSet.addAnimation(smileyAlphaAnimation);
+		smileyAnimSet.setDuration(smileyDuration);
+		smileyAnimSet.setFillAfter(true);
+		smileyAnimSet.setStartOffset(smileyOffset);
+		
+		artSmiley.setVisibility(View.INVISIBLE);
+		artSmiley.startAnimation(smileyAnimSet);
+		
+		// Animation setup for conv image
+		ScaleAnimation convScaleAnimation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f,Animation.RELATIVE_TO_SELF, 1.8f);
+		convScaleAnimation.setInterpolator(new OvershootInterpolator());
+		
+		AlphaAnimation convAlphaAnimation = new AlphaAnimation(0.1f, 1.0f);
+		
+		AnimationSet convAnimSet = new AnimationSet(false);
+		convAnimSet.addAnimation(convScaleAnimation);
+		convAnimSet.addAnimation(convAlphaAnimation);
+		convAnimSet.setDuration(convDuration);
+		convAnimSet.setFillAfter(true);
+		convAnimSet.setStartOffset(convOffset);
+		
+		artConv.setVisibility(View.INVISIBLE);
+		artConv.startAnimation(convAnimSet);
+
+		// Animation setup for profile image
+		ScaleAnimation profileScaleAnimation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 0.0f,Animation.RELATIVE_TO_SELF, 2.2f);
+		profileScaleAnimation.setInterpolator(new OvershootInterpolator());
+		
+		AlphaAnimation profileAlphaAnimation = new AlphaAnimation(0.1f, 1.0f);
+		
+		AnimationSet profileAnimSet = new AnimationSet(false);
+		profileAnimSet.addAnimation(profileScaleAnimation);
+		profileAnimSet.addAnimation(profileAlphaAnimation);
+		profileAnimSet.setDuration(profileDuration);
+		profileAnimSet.setFillAfter(true);
+		profileAnimSet.setStartOffset(profileOffset);
+		
+		artProfile.setVisibility(View.INVISIBLE);
+		artProfile.startAnimation(profileAnimSet);
+		
+		// Animation setup for restore and skip buttons
+		AlphaAnimation restoreAlphaAnimation = new AlphaAnimation(0.0f, 1.0f);
+		restoreAlphaAnimation.setDuration(restoreDuration);
+		restoreAlphaAnimation.setFillAfter(true);
+		restoreAlphaAnimation.setStartOffset(restoreOffset);
+		
+		btnRestore.setVisibility(View.INVISIBLE);
+		btnRestore.startAnimation(restoreAlphaAnimation);
+	}
+
+	private void finishPreRestoreAnimation()
+	{
+		long smileyOffset = 300;
+		long smileyDuration = 300;
+		long convOffset = smileyOffset + smileyDuration;
+		long convDuration = smileyDuration;
+		long profileOffset = convOffset + convDuration;
+		long profileDuration = smileyDuration;
+		long restoreOffset = profileOffset + profileDuration;
+		long restoreDuration = 200;
+		
+		ImageView artProfile = (ImageView) backupFoundLayout.findViewById(R.id.art_profile);
+		ImageView artConv = (ImageView) backupFoundLayout.findViewById(R.id.art_conversation);
+		ImageView artSmiley = (ImageView) backupFoundLayout.findViewById(R.id.art_smiley);
+		Button btnRestore = (Button) backupFoundLayout.findViewById(R.id.btn_restore);
+		TextView textBackup = (TextView) backupFoundLayout.findViewById(R.id.txt_backup_title);
+		TextView textView = (TextView) backupFoundLayout.findViewById(R.id.txt_backup_hint);
+		
+		btnRestore.setClickable(false);
+		
+		// Animation Setup for smiley image
+		ScaleAnimation smileyScaleAnimation = new ScaleAnimation(1.0f, 0.0f, 1.0f, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,Animation.RELATIVE_TO_SELF, 1.0f);
+		smileyScaleAnimation.setInterpolator(new OvershootInterpolator());
+		
+		AlphaAnimation smileyAlphaAnimation = new AlphaAnimation(1.0f, 0.1f);
+		
+		AnimationSet smileyAnimSet = new AnimationSet(false);
+		smileyAnimSet.addAnimation(smileyScaleAnimation);
+		smileyAnimSet.addAnimation(smileyAlphaAnimation);
+		smileyAnimSet.setDuration(smileyDuration);
+		smileyAnimSet.setFillAfter(true);
+		smileyAnimSet.setStartOffset(smileyOffset);
+		
+		artSmiley.setVisibility(View.INVISIBLE);
+		artSmiley.startAnimation(smileyAnimSet);
+		
+		// Animation setup for conv image
+		ScaleAnimation convScaleAnimation = new ScaleAnimation(1.0f, 0.0f, 1.0f, 0.0f, Animation.RELATIVE_TO_SELF, 1.0f,Animation.RELATIVE_TO_SELF, 1.8f);
+		convScaleAnimation.setInterpolator(new OvershootInterpolator());
+		
+		AlphaAnimation convAlphaAnimation = new AlphaAnimation(1.0f, 0.1f);
+		
+		AnimationSet convAnimSet = new AnimationSet(false);
+		convAnimSet.addAnimation(convScaleAnimation);
+		convAnimSet.addAnimation(convAlphaAnimation);
+		convAnimSet.setDuration(convDuration);
+		convAnimSet.setFillAfter(true);
+		convAnimSet.setStartOffset(convOffset);
+		
+		artConv.setVisibility(View.INVISIBLE);
+		artConv.startAnimation(convAnimSet);
+
+		// Animation setup for profile image
+		ScaleAnimation profileScaleAnimation = new ScaleAnimation(1.0f, 0.0f, 1.0f, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,Animation.RELATIVE_TO_SELF, 2.2f);
+		profileScaleAnimation.setInterpolator(new OvershootInterpolator());
+		
+		AlphaAnimation profileAlphaAnimation = new AlphaAnimation(1.0f, 0.1f);
+		
+		AnimationSet profileAnimSet = new AnimationSet(false);
+		profileAnimSet.addAnimation(profileScaleAnimation);
+		profileAnimSet.addAnimation(profileAlphaAnimation);
+		profileAnimSet.setDuration(profileDuration);
+		profileAnimSet.setFillAfter(true);
+		profileAnimSet.setStartOffset(profileOffset);
+		
+		artProfile.setVisibility(View.INVISIBLE);
+		artProfile.startAnimation(profileAnimSet);
+		
+		// Animation setup for restore and skip buttons
+		AlphaAnimation fadeOutAnimation = new AlphaAnimation(1.0f, 0.0f);
+		fadeOutAnimation.setDuration(restoreDuration);
+		fadeOutAnimation.setFillAfter(true);
+		fadeOutAnimation.setStartOffset(restoreOffset);
+		
+		fadeOutAnimation.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				viewFlipper.setDisplayedChild(RESTORING_BACKUP);
+				prepareLayoutForRestoringAnimation(null);
+			}
+		});
+		
+		btnRestore.setVisibility(View.INVISIBLE);
+		btnRestore.startAnimation(fadeOutAnimation);
+		textBackup.setVisibility(View.INVISIBLE);
+		textBackup.startAnimation(fadeOutAnimation);
+		textView.setVisibility(View.INVISIBLE);
+		textView.startAnimation(fadeOutAnimation);
+	}
+
+	private void initializeRestore()
+	{
+		finishPreRestoreAnimation();
+		sdCardProp = new ViewProperties();
+		ImageView sdCard = (ImageView) backupFoundLayout.findViewById(R.id.sd_card);
+		int [] screenLocation = new int[2];
+		sdCard.getLocationOnScreen(screenLocation);
+		sdCardProp.left = screenLocation[0];
+		sdCardProp.top = screenLocation[1];
+		sdCardProp.width = sdCard.getWidth();
+		sdCardProp.height = sdCard.getHeight();
+	}
+	private void onRestoreAnimation()
+	{
+		final ImageView sdCard = (ImageView) restoringBackupLayout.findViewById(R.id.sd_card);
+		final ImageView profilePic = (ImageView) restoringBackupLayout.findViewById(R.id.profile_pic);
+		final View restoreProgress = (View) restoringBackupLayout.findViewById(R.id.restore_progress);
+		profilePic.setVisibility(View.INVISIBLE);
+		restoreProgress.setVisibility(View.INVISIBLE);
+		
+		sdCard.post(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				final int [] screenLocation = new int[2];
+				sdCard.getLocationOnScreen(screenLocation);
+				float widthScale = (float) sdCardProp.width/sdCard.getWidth();
+				float heightScale = (float) sdCardProp.height/sdCard.getHeight();
+				
+				TranslateAnimation sdCardTranslateAnimation = new TranslateAnimation(Animation.ABSOLUTE, (sdCardProp.left-screenLocation[0])/widthScale, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, (sdCardProp.top-screenLocation[1])/heightScale, Animation.RELATIVE_TO_SELF, 0);
+				ScaleAnimation sdCardScaleAnimation = new ScaleAnimation(widthScale, 1, heightScale, 1);
+				AnimationSet sdCardAnimationSet = new AnimationSet(true);
+				
+				sdCardAnimationSet.setAnimationListener(new AnimationListener()
+				{
+					@Override
+					public void onAnimationStart(Animation animation)
+					{}
+					@Override
+					public void onAnimationRepeat(Animation animation)
+					{}
+					
+					@Override
+					public void onAnimationEnd(Animation animation)
+					{
+						AlphaAnimation ppAnimation = new AlphaAnimation(0, 1);
+						ppAnimation.setDuration(200);
+						ppAnimation.setFillAfter(true);
+						profilePic.startAnimation(ppAnimation);
+						
+						restoreProgress.setVisibility(View.VISIBLE);
+						setupOnRestoreProgress();
+						mTask.addUserInput("true");
+					}
+				});
+				sdCardAnimationSet.addAnimation(sdCardTranslateAnimation);
+				sdCardAnimationSet.addAnimation(sdCardScaleAnimation);
+				sdCardAnimationSet.setDuration(500);
+				sdCardAnimationSet.setFillAfter(true);
+				sdCardAnimationSet.setInterpolator(new DecelerateInterpolator());
+				sdCard.startAnimation(sdCardAnimationSet);
+			}
+		});
+	}
+	
+	private void onRestoreSuccessAnimation()
+	{
+		View restoreItems = (View) restoringBackupLayout.findViewById(R.id.restore_items);
+		ImageView restoreSuccess = (ImageView) restoringBackupLayout.findViewById(R.id.restore_success);
+		
+		AlphaAnimation fadeout = new AlphaAnimation(1, 0);
+		ScaleAnimation scaleDown = new ScaleAnimation(1, 0, 1, 0.4f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		AnimationSet itemsRemove = new AnimationSet(true);
+		itemsRemove.addAnimation(fadeout);
+		itemsRemove.addAnimation(scaleDown);
+		itemsRemove.setInterpolator(new DecelerateInterpolator());
+		itemsRemove.setDuration(200);
+		itemsRemove.setFillAfter(true);
+		
+		ScaleAnimation scaleUp = new ScaleAnimation(0, 1, 0, 1, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		scaleUp.setInterpolator(new OvershootInterpolator());
+		scaleUp.setStartOffset(100);
+		scaleUp.setDuration(300);
+		scaleUp.setFillAfter(true);
+		
+		scaleUp.setAnimationListener(new AnimationListener()
+		{
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				mTask.addUserInput(null);
+			}
+		});
+		
+		restoreItems.startAnimation(itemsRemove);
+		restoreSuccess.startAnimation(scaleUp);
+	}
+	
+	private void onRestoreFailAnimation()
+	{
+		final ImageView restoreFail = (ImageView) restoringBackupLayout.findViewById(R.id.restore_fail);
+		final Button retry  = (Button) restoringBackupLayout.findViewById(R.id.btn_retry);
+		
+		ScaleAnimation scaleUp = new ScaleAnimation(0, 1, 0, 1, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		scaleUp.setInterpolator(new OvershootInterpolator());
+		scaleUp.setStartOffset(100);
+		scaleUp.setDuration(300);
+		
+		AlphaAnimation fadeIn = new AlphaAnimation(0, 1);
+		fadeIn.setInterpolator(new DecelerateInterpolator());
+		fadeIn.setStartOffset(100);
+		fadeIn.setDuration(200);
+		
+		restoreFail.startAnimation(scaleUp);
+		restoreFail.setVisibility(View.VISIBLE);
+		retry.setVisibility(View.VISIBLE);
+	}
+	
+	private void setupOnRestoreProgress()
+	{
+		final View dot0 = (View) restoringBackupLayout.findViewById(R.id.dot_left);
+		final View dot1 = (View) restoringBackupLayout.findViewById(R.id.dot_center);
+		final View dot2 = (View) restoringBackupLayout.findViewById(R.id.dot_right);
+		
+		ShapeDrawable circle0 = new ShapeDrawable(new OvalShape());
+		circle0.getPaint().setColor(this.getResources().getColor(R.color.restoring_red));
+		dot0.setBackgroundDrawable(circle0);
+		ShapeDrawable circle1 = new ShapeDrawable(new OvalShape());
+		circle1.getPaint().setColor(this.getResources().getColor(R.color.restoring_green));
+		dot1.setBackgroundDrawable(circle1);
+		ShapeDrawable circle2 = new ShapeDrawable(new OvalShape());
+		circle2.getPaint().setColor(this.getResources().getColor(R.color.restoring_orange));
+		dot2.setBackgroundDrawable(circle2);
+		
+		AlphaAnimation dotIn0 = new AlphaAnimation(0, 1);
+		dotIn0.setDuration(100);
+		AlphaAnimation dotOut0 = new AlphaAnimation(1, 0);
+		dotOut0.setDuration(100);
+		dotOut0.setStartOffset(200);
+		RotateAnimation dotStay0 = new RotateAnimation(0, 360);
+		dotStay0.setDuration(400);
+		dotStay0.setStartOffset(300);
+		
+		final AnimationSet dota0 = new AnimationSet(true);
+		dota0.addAnimation(dotIn0);
+		dota0.addAnimation(dotOut0);
+		dota0.addAnimation(dotStay0);
+		dota0.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+				dotIn.setDuration(100);
+				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+				dotOut.setDuration(100);
+				dotOut.setStartOffset(200);
+				RotateAnimation dotStay = new RotateAnimation(0, 360);
+				dotStay.setDuration(400);
+				dotStay.setStartOffset(300);
+				AnimationSet dot = new AnimationSet(true);
+				dot.addAnimation(dotIn);
+				dot.addAnimation(dotOut);
+				dot.addAnimation(dotStay);
+				dot.setAnimationListener(this);
+				dot0.startAnimation(dot);
+			}
+		});
+
+		AlphaAnimation dotIn1 = new AlphaAnimation(0, 1);
+		dotIn1.setDuration(100);
+		AlphaAnimation dotOut1 = new AlphaAnimation(1, 0);
+		dotOut1.setDuration(100);
+		dotOut1.setStartOffset(200);
+		RotateAnimation dotStay1 = new RotateAnimation(0, 360);
+		dotStay1.setDuration(200);
+		dotStay1.setStartOffset(300);
+		
+		final AnimationSet dota1 = new AnimationSet(true);
+		dota1.addAnimation(dotIn1);
+		dota1.addAnimation(dotOut1);
+		dota1.addAnimation(dotStay1);
+		dota1.setStartOffset(200);
+		dota1.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+				dotIn.setDuration(100);
+				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+				dotOut.setDuration(100);
+				dotOut.setStartOffset(200);
+				RotateAnimation dotStay = new RotateAnimation(0, 360);
+				dotStay.setDuration(200);
+				dotStay.setStartOffset(300);
+				AnimationSet dot = new AnimationSet(true);
+				dot.addAnimation(dotIn);
+				dot.addAnimation(dotOut);
+				dot.addAnimation(dotStay);
+				dot.setStartOffset(200);
+				dot.setAnimationListener(this);
+				dot1.startAnimation(dot);
+			}
+		});
+		
+		AlphaAnimation dotIn2 = new AlphaAnimation(0, 1);
+		dotIn2.setDuration(100);
+		AlphaAnimation dotOut2 = new AlphaAnimation(1, 0);
+		dotOut2.setDuration(100);
+		dotOut2.setStartOffset(200);
+		
+		final AnimationSet dota2 = new AnimationSet(true);
+
+
+		dota2.addAnimation(dotIn2);
+		dota2.addAnimation(dotOut2);
+		dota2.setStartOffset(400);
+		dota2.setAnimationListener(new AnimationListener()
+		{
+			@Override
+			public void onAnimationStart(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+				dotIn.setDuration(100);
+				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+				dotOut.setDuration(100);
+				dotOut.setStartOffset(200);
+				AnimationSet dot = new AnimationSet(true);
+				dot.addAnimation(dotIn);
+				dot.addAnimation(dotOut);
+				dot.setAnimationListener(this);
+				dot.setStartOffset(400);
+				dot2.startAnimation(dot);
+			}
+		});
+		
+		dot0.startAnimation(dota0);
+		dot1.startAnimation(dota1);
+		dot2.startAnimation(dota2);
+	}
+	
+	private OnClickListener btnRestoreClick = new OnClickListener()
+	{
+		@Override
+		public void onClick(View v)
+		{
+			initializeRestore();
+		}
+	};
 
 	private void resetViewFlipper()
 	{
@@ -1036,6 +1621,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		Session.saveSession(session, outState);
 
 		outState.putInt(HikeConstants.Extras.SIGNUP_PART, viewFlipper.getDisplayedChild());
+		outState.putString(HikeConstants.Extras.SIGNUP_RESTORE_STATUS, backupRestored);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout != null && loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, errorDialog != null);
 		if (enterEditText != null)
@@ -1241,6 +1827,17 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				showErrorMsg();
 			}
+			break;
+		case BACKUP_AVAILABLE:
+			if (viewFlipper.getDisplayedChild() != BACKUP_FOUND)
+			{
+				viewFlipper.setDisplayedChild(BACKUP_FOUND);
+				prepareLayoutForBackupFound(null);
+			}
+			break;
+		case RESTORED_BACKUP:
+			backupRestored = stateValue.value;
+			prepareLayoutForRestoringAnimation(null);
 			break;
 		}
 		setListeners();

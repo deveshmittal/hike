@@ -23,6 +23,7 @@ import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.smartImageLoader.IconLoader;
@@ -104,9 +105,10 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		textView.setText(contactInfo.getName());
 
 		TextView numView = (TextView) v.findViewById(R.id.number);
+		String msisdn = contactInfo.getMsisdn();
 		if (pair != null)
 		{
-			numView.setText(contactInfo.getMsisdn());
+			numView.setText(msisdn);
 			if (!TextUtils.isEmpty(contactInfo.getMsisdnType()))
 			{
 				numView.append(" (" + contactInfo.getMsisdnType() + ")");
@@ -116,8 +118,15 @@ public class HikeInviteAdapter extends SectionedBaseAdapter implements TextWatch
 		{
 			numView.setText(showingBlockedList ? R.string.tap_here_block : R.string.tap_here_invite);
 		}
-		numView.setVisibility(isEnabled(section, position) ? View.VISIBLE : View.INVISIBLE);
 
+		if (HikeMessengerApp.hikeBotNamesMap.containsKey(msisdn))
+		{
+			numView.setVisibility(View.GONE);
+		}
+		else
+		{
+			numView.setVisibility(isEnabled(section, position) ? View.VISIBLE : View.INVISIBLE);
+		}
 		CheckBox checkBox = (CheckBox) v.findViewById(R.id.checkbox);
 		checkBox.setVisibility(pair != null ? View.VISIBLE : View.GONE);
 		checkBox.setButtonDrawable(showingBlockedList ? R.drawable.block_button : R.drawable.hike_list_item_checkbox);

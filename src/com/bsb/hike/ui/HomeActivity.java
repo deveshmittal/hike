@@ -65,6 +65,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.FtueContactsData;
@@ -84,7 +85,6 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.HikeTip.TipType;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
@@ -326,7 +326,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void sendDiwaliSticker()
 	{
-		Intent intent = IntentManager.getForwardStickerIntent(this, "078_happydiwali.png", StickerCategoryId.humanoid.name());
+		Intent intent = IntentManager.getForwardStickerIntent(this, "078_happydiwali.png", StickerManager.HUMANOID);
 		startActivity(intent);
 	}
 
@@ -1287,11 +1287,22 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
 		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.hike_extras), 3));
+			String hikeExtrasName = accountPrefs.getString(HikeConstants.HIKE_EXTRAS_NAME, getApplicationContext().getString(R.string.hike_extras));
+					                       
+			if(!TextUtils.isEmpty(hikeExtrasName))
+			{
+				optionsList.add(new OverFlowMenuItem(hikeExtrasName, 3));
+			}
 		}
+		
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
 		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.rewards), 4));
+			String rewards_name = accountPrefs.getString(HikeConstants.REWARDS_NAME, getApplicationContext().getString(R.string.rewards));
+												
+			if(!TextUtils.isEmpty(rewards_name))
+			{
+				optionsList.add(new OverFlowMenuItem(rewards_name, 4));
+			}
 		}
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
@@ -1425,7 +1436,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 9:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
-					break;	
+					break;
 				}
 
 				if (intent != null)
