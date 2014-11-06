@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -54,6 +55,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ComposeChatAdapter;
 import com.bsb.hike.adapters.FriendsAdapter;
 import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
@@ -616,11 +619,26 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.clearAllSelection(true);
 			adapter.toggleShowSMSContacts(false);
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
-			findViewById(R.id.nuxCard).setVisibility(View.VISIBLE);
+			findViewById(R.id.nuxComposeCard).setVisibility(View.VISIBLE);
+			setSticker();
 			break;
 		}
 		setTitle();
 	}
+	
+	/**
+	 * This is used for nux screen when user taps on sticker that needs to be shown in compose chat screen
+	 */
+	private void setSticker()
+	{
+		String stickerId = getIntent().getStringExtra(StickerManager.STICKER_ID);
+		int idx = stickerId.lastIndexOf(".");
+		String resName = "sticker_"+stickerId.substring(0, idx);
+		Bitmap stickerBitmap = BitmapUtils.getBitmapFromResourceName(getApplicationContext(), resName);
+		ImageView imageView = (ImageView) findViewById(R.id.nuxComposeSticker);
+		imageView.setImageDrawable(HikeBitmapFactory.getBitmapDrawable(stickerBitmap));
+	}
+	
 	private void setupForSelectAll(){
 		View selectAllCont = findViewById(R.id.select_all_container);
 		selectAllCont.setVisibility(View.VISIBLE);
@@ -1248,7 +1266,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					{
 						String categoryId = msgExtrasJson.getString(StickerManager.FWD_CATEGORY_ID);
 						String stickerId = msgExtrasJson.getString(StickerManager.FWD_STICKER_ID);
-						// TODO show this sticker on card in case of ftue forward
 						Sticker sticker = new Sticker(categoryId, stickerId);
 						multipleMessageList.add(sendSticker(sticker, categoryId, arrayList));
 						boolean isDis = sticker.isDisabled(sticker, this.getApplicationContext());

@@ -15,7 +15,7 @@
 	    android:layout="@layout/welcome_hike_tip" android:inflatedId="@+id/tipMultiForward"/>
 
     <RelativeLayout
-        android:id="@+id/nuxCard"
+        android:id="@+id/nuxComposeCard"
         style="@style/CardContainerWithdoutPadding"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,7 +25,7 @@
         android:visibility="gone" >
 
         <com.bsb.hike.ui.utils.RecyclingImageView
-            android:id="@+id/nuxSticker"
+            android:id="@+id/nuxComposeSticker"
             android:layout_width="72dp"
             android:layout_height="72dp"
             android:scaleType="fitCenter"
@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
-            android:layout_toRightOf="@id/nuxSticker"
+            android:layout_toRightOf="@id/nuxComposeSticker"
             android:orientation="vertical" >
 
             <com.bsb.hike.view.CustomFontTextView
