@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import java.util.Random;
 import java.util.Set;
 
+import com.bsb.hike.platform.PlatformMessageMetadata;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1733,6 +1734,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			// Sticker message is a non text message.
 			selectedNonTextMsg(isMsgSelected);
 		}
+        else if (message.getMessageType() == MESSAGE_TYPE.CONTENT)
+        {
+            // Content card is a non text message.
+            selectedNonTextMsg(isMsgSelected);
+        }
 
 		invalidateOptionsMenu();
 		return true;
@@ -2123,6 +2129,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							 */
 							intent.removeExtra(StickerManager.FWD_CATEGORY_ID);
 						}
+                        else if(msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.CONTENT){
+                            // as we will be changing msisdn and hike status while inserting in DB
+                            ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, "test", isConversationOnHike());
+                            convMessage.setMessageType(MESSAGE_TYPE.CONTENT);
+                            convMessage.platformMessageMetadata = new PlatformMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
+
+                            sendMessage(convMessage);
+
+                        }
 						/*
 						 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
 						 */
