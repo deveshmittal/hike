@@ -1910,6 +1910,10 @@ public class HikeConstants
 	public static final String VISIBLITY = "visibility";
 
 	public static final String INDEX = "index";
+	
+	public static final String CAT_NAME = "name";
+	
+	public static final String DELIMETER = ":";
 		
 	public static final String HIKE_EXTRAS_NAME = "hike_extras_name";
 	

@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="880"
-    android:versionName="3.3.5.50" >
+    android:versionCode="882"
+    android:versionName="3.3.5.52" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -205,8 +205,12 @@
         </activity>
         <activity android:name="com.bsb.hike.ui.CountrySelectActivity" >
         </activity>
-        <activity android:name="com.bsb.hike.ui.StickerShopActivity"></activity>
-        <activity android:name="com.bsb.hike.ui.StickerSettingsActivity"></activity>
+        <activity android:name="com.bsb.hike.ui.StickerShopActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+        <activity android:name="com.bsb.hike.ui.StickerSettingsActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
         <activity
             android:name="com.bsb.hike.ui.FileSelectActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" >

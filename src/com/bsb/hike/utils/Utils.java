@@ -1306,7 +1306,17 @@ public class Utils
 	public static double getFreeSpace()
 	{
 		StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-		double sdAvailSize = (double) stat.getAvailableBlocks() * (double) stat.getBlockSize();
+		double sdAvailSize = 0.0;
+		if(isJELLY_BEAN_MR2OrHigher())
+		{
+			 sdAvailSize = (double) stat.getAvailableBlocksLong() * (double) stat.getBlockSizeLong();
+		}
+		else
+		{
+			sdAvailSize = (double) stat.getAvailableBlocks() * (double) stat.getBlockSize();
+		}
+		Logger.d("StickerSize", "get available blocks : " + (double) stat.getAvailableBlocks() + "  get block size : " + (double) stat.getBlockSize());
+		
 		return sdAvailSize;
 	}
 
@@ -3009,7 +3019,12 @@ public class Utils
 
 		return jObject;
 	}
-
+	
+	public static boolean isGingerbreadOrHigher()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD;
+	}
+	
 	public static boolean isHoneycombOrHigher()
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
@@ -3019,7 +3034,11 @@ public class Utils
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 	}
-
+	
+	public static boolean isJELLY_BEAN_MR2OrHigher()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2;
+	}
 	public static void executeAsyncTask(AsyncTask<Void, Void, Void> asyncTask)
 	{
 		if (isHoneycombOrHigher())
@@ -4828,6 +4847,16 @@ public class Utils
 			return null;
 		}
 		return json;
+	}
+	
+	/**
+	 * Returns the device Orientation as either ORIENTATION_PORTRAIT or ORIENTATION_LANDSCAPE
+	 * @param ctx
+	 * @return ORIENTATION_PORTRAIT or ORIENTATION_LANDSCAPE
+	 */
+	public static int getDeviceOrientation(Context ctx)
+	{
+		return ctx.getResources().getConfiguration().orientation;
 	}
 
 }

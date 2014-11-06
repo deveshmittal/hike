@@ -33,13 +33,13 @@ public class StickerEDImageDownloadTask extends BaseStickerDownloadTask
 	private String catId;
 	private String stkId;
 	
-	protected StickerEDImageDownloadTask(Handler handler, Context ctx, String taskId, StickerCategory category, IStickerResultListener callback)
+	protected StickerEDImageDownloadTask(Handler handler, Context ctx, String taskId, String categoryId, IStickerResultListener callback)
 	{
 		super(handler, ctx, taskId, callback);
 		this.handler = handler;
 		context = ctx;
 		this.taskId = taskId;
-		this.catId = category.getCategoryId();	
+		this.catId = categoryId;
 	}
 
 	@Override
@@ -52,13 +52,13 @@ public class StickerEDImageDownloadTask extends BaseStickerDownloadTask
 			return STResult.DOWNLOAD_FAILED;
 		}
 		
-		String enableImagePath = dirPath + HikeConstants.OTHER_ROOT + "/" + HikeConstants.ENABLE_IMAGE;
-		String disableImagePath = dirPath + HikeConstants.OTHER_ROOT + "/" + HikeConstants.DISABLE_IMAGE;
+		String enableImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT + "/" + StickerManager.PALLATE_ICON_SELECTED + StickerManager.PALETTE_ICON_TYPE;
+		String disableImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT + "/" + StickerManager.PALLATE_ICON + StickerManager.PALETTE_ICON_TYPE;
 		
 		FileOutputStream fos = null;
 		try
 		{
-			File otherDir = new File(dirPath + HikeConstants.OTHER_ROOT);
+			File otherDir = new File(dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT);
 			if (!otherDir.exists())
 			{
 				if (!otherDir.mkdirs())
@@ -68,10 +68,10 @@ public class StickerEDImageDownloadTask extends BaseStickerDownloadTask
 				}
 			}
 			
-			String urlString = AccountUtils.base + "/enable_disable?catId=" + catId + "&resId=" + Utils.getResolutionId();
+			String urlString = AccountUtils.base + "/stickers/enable_disable?catId=" + catId + "&resId=" + Utils.getResolutionId();
 			if(AccountUtils.ssl)
 			{
-				urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/enable_disable?catId=" + catId + "&resId=" + Utils.getResolutionId();
+				urlString = AccountUtils.HTTPS_STRING + AccountUtils.host + "/v1" + "/stickers/enable_disable?catId=" + catId + "&resId=" + Utils.getResolutionId();
 			}
 			setDownloadUrl(urlString);
 			

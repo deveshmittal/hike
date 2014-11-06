@@ -4260,17 +4260,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (HikePubSub.STICKER_CATEGORY_MAP_UPDATED.equals(type))
 		{
-
-			runOnUiThread(new Runnable()
+			if(stickerAdapter == null)
 			{
-
-				@Override
-				public void run()
+				return;
+			}
+				runOnUiThread(new Runnable()
 				{
-					stickerAdapter.instantiateStickerList();
-					stickerAdapter.notifyDataSetChanged();
-				}
-			});
+
+					@Override
+					public void run()
+					{
+						stickerAdapter.instantiateStickerList();
+						stickerAdapter.notifyDataSetChanged();
+					}
+				});
 		}
 	}
 
@@ -6601,12 +6604,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						emoticonType = EmoticonType.STICKERS;
 					}
 					eraseKey.setVisibility(View.VISIBLE);
-					shopIcon.setImageResource(R.drawable.ic_add);
+					shopIcon.setImageResource(R.drawable.ic_sticker_shop);
+					eraseKey.setBackgroundResource(R.color.sticker_pallete_bg_color);
 					if(!prefs.getBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 					{
 						eraseKey.setBackgroundResource(R.color.shop_icon_color);
 					}
-					eraseKey.setBackgroundResource(R.color.shop_icon_default_color);
+					
 					eraseKey.setOnClickListener(new View.OnClickListener()
 					{
 						
@@ -6659,7 +6663,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						}
 					}
 					eraseKey.setVisibility(View.VISIBLE);
-					eraseKey.setBackgroundResource(R.color.erase_key_color);
+					eraseKey.setBackgroundResource(R.color.sticker_pallete_bg_color);
 					shopIcon.setImageResource(R.drawable.ic_erase);
 					eraseKey.setOnClickListener(new OnClickListener()
 					{
@@ -6802,42 +6806,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 		}
 	};
-
-	private void postToHandlerStickerPreviewDialog(final StickerCategory category)
-	{
-		mHandler.post(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				showStickerPreviewDialog(category);
-
-			}
-		});
-	}
-
-	private void showStickerPreviewDialog(final StickerCategory category)
-	{}
-
-
-	private void updateStickerCategoryUI(StickerCategory category)
-	{
-		if (stickerAdapter == null)
-		{
-			return;
-		}
-
-		View emoticonPage = emoticonViewPager.findViewWithTag(category.getCategoryId());
-
-		if (emoticonPage == null)
-		{
-			return;
-		}
-
-		stickerAdapter.setupStickerPage(emoticonPage, category);
-
-	}
 
 	public int getCurrentPage()
 	{
