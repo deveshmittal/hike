@@ -6,7 +6,7 @@
     android:gravity="center" >
 
     <com.bsb.hike.ui.utils.RecyclingImageView
-        android:id="@+id/pallete_category_icon"
+        android:id="@+id/preview_image"
         android:layout_width="125dp"
         android:layout_height="178dp"
         android:layout_gravity="center_vertical"
@@ -18,9 +18,9 @@
         android:id="@+id/category_update_details"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_alignTop="@id/pallete_category_icon"
-        android:layout_alignBottom="@id/pallete_category_icon"
-        android:layout_toRightOf="@+id/pallete_category_icon"
+        android:layout_alignTop="@id/preview_image"
+        android:layout_alignBottom="@id/preview_image"
+        android:layout_toRightOf="@id/preview_image"
         android:paddingRight="@dimen/sticker_pack_empty_view_margin"
         android:gravity="center_vertical"
         android:orientation="vertical" >
