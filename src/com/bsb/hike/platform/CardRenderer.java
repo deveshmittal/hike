@@ -1,6 +1,8 @@
 package com.bsb.hike.platform;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,8 +12,12 @@ import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.smartcache.HikeLruCache;
+import com.bsb.hike.utils.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,10 +28,11 @@ import java.util.List;
 public class CardRenderer {
 
     Context mContext;
-    int cardType;
+    HikeLruCache hikeLruCache;
 
     public CardRenderer(Context context){
         this.mContext = context;
+        hikeLruCache = HikeMessengerApp.getLruCache();
 
     }
 
@@ -271,8 +278,38 @@ public class CardRenderer {
 
             if (!TextUtils.isEmpty(tag)) {
                 View mediaView = viewHolder.viewHashMap.get(tag);
-                if (mediaView instanceof ImageView)
-                    ((ImageView) mediaView).setImageBitmap(HikeBitmapFactory.stringToBitmap(mediaComponent.getBase64()));
+                if (mediaView instanceof ImageView) {
+                    BitmapDrawable value = null;
+                    String data = mediaComponent.getKey();
+                    Bitmap bitmap = HikeBitmapFactory.stringToBitmap(mediaComponent.getBase64());
+                    if (hikeLruCache != null)
+                    {
+
+                        value = hikeLruCache.get(data);
+                        // if bitmap is found in cache and is recyclyed, remove this from cache and make thread get new Bitmap
+                        if (null != value && value.getBitmap().isRecycled())
+                        {
+                            hikeLruCache.remove(data);
+                            value = null;
+                        }
+                    }
+
+                    if (null != value)
+                    {
+                        Logger.d(CardRenderer.class.getSimpleName(), data + " Bitmap found in cache and is not recycled.");
+                        // Bitmap found in memory cache
+                        ((ImageView) mediaView).setImageDrawable(value);
+                    }
+                    else if (null != bitmap) {
+                        BitmapDrawable bitmapDrawable = HikeBitmapFactory.getBitmapDrawable(bitmap);
+                        ((ImageView) mediaView).setImageDrawable(bitmapDrawable);
+
+                        if (null != hikeLruCache)
+                            hikeLruCache.putInCache(data, bitmapDrawable);
+
+                    }
+
+                }
             }
 
         }
