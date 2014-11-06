@@ -314,6 +314,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		if (isFtueFwd)
 		{
+			ViewStub composeCard = (ViewStub) findViewById(R.id.nuxComposeCardStub);
+			composeCard.inflate();
 			setMode(FTUE_FWD);
 		}
 		else if (isForwardingMessage && !isSharingFile)
