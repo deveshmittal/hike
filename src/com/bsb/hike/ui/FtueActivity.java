@@ -10,6 +10,8 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +27,8 @@ import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
@@ -44,6 +48,8 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity
 
 	private SharedPreferences accountPrefs;
 
+	private Resources mResources;
+
 	private List<Sticker> stickers = new ArrayList<Sticker>(NUM_OF_STICKERS);
 
 	@Override
@@ -58,6 +64,7 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity
 		HikeMessengerApp app = (HikeMessengerApp) getApplication();
 		app.connectToService();
 
+		mResources = this.getResources();
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 		setContentView(R.layout.ftue6);
 		String name = accountPrefs.getString(HikeMessengerApp.NAME_SETTING, null);
@@ -121,8 +128,6 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity
 	{
 		private Context mContext;
 
-		private Integer[] stickerResIds = { R.drawable.sticker_002_lol, R.drawable.sticker_003_teasing, R.drawable.sticker_113_whereareyou, R.drawable.sticker_069_hi };
-
 		public FtueAdapter(Context c)
 		{
 			mContext = c;
@@ -131,7 +136,7 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity
 		@Override
 		public int getCount()
 		{
-			return stickerResIds.length;
+			return stickers.size();
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent)
@@ -147,8 +152,14 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity
 			{
 				imageView = (ImageView) convertView;
 			}
-			imageView.setImageResource(stickerResIds[position]);
-			imageView.setTag(stickers.get(position));
+
+			Sticker sticker = stickers.get(position);
+			String stickerId = sticker.getStickerId();
+			int idx = stickerId.lastIndexOf(".");
+			String resName = "sticker_" + stickerId.substring(0, idx);
+			Bitmap stickerBitmap = BitmapUtils.getBitmapFromResourceName(getApplicationContext(), resName);
+			imageView.setImageDrawable(HikeBitmapFactory.getBitmapDrawable(stickerBitmap));
+			imageView.setTag(sticker);
 			return imageView;
 		}
 
