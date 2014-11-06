@@ -137,8 +137,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private boolean msisdnErrorDuringSignup = false;
 	
-	private String backupRestored = null;
-
 	public static final int RESTORING_BACKUP = 5;
 
 	public static final int BACKUP_FOUND = 4;
@@ -269,11 +267,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			mActivityState = new ActivityState();
 		}
 
+		mTask = SignupTask.startTask(this, mActivityState.userName, mActivityState.profileBitmap);
 		setupActionBar();
 		if (savedInstanceState != null)
 		{
 			msisdnErrorDuringSignup = savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR);
-			backupRestored = savedInstanceState.getString(HikeConstants.Extras.SIGNUP_RESTORE_STATUS);
 			int dispChild = savedInstanceState.getInt(HikeConstants.Extras.SIGNUP_PART);
 			showingSecondLoadingTxt = savedInstanceState.getBoolean(HikeConstants.Extras.SHOWING_SECOND_LOADING_TXT);
 			removeAnimation();
@@ -305,10 +303,15 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				prepareLayoutForScanning(savedInstanceState);
 				break;
 			case BACKUP_FOUND:
-				prepareLayoutForBackupFound(savedInstanceState);
-				break;
 			case RESTORING_BACKUP:
-				prepareLayoutForRestoringAnimation(savedInstanceState);
+				if (mTask.getStateValue() == null || mTask.getStateValue().state != State.RESTORING_BACKUP)
+				{
+					prepareLayoutForBackupFound(savedInstanceState);
+				}
+				else
+				{
+					prepareLayoutForRestoringAnimation(savedInstanceState);
+				}
 				break;
 			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
@@ -319,7 +322,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				showErrorMsg();
 			}
-			mTask = SignupTask.startTask(this, mActivityState.userName, mActivityState.profileBitmap);
 		}
 		else
 		{
@@ -980,8 +982,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	{
 		nextBtnContainer.setVisibility(View.GONE);
 		setupActionBarTitle();
+		String restoreStatus = null;
+		if (mTask.getStateValue() != null)
+		{
+			restoreStatus = mTask.getStateValue().value;
+		}
 		
-		if (TextUtils.isEmpty(backupRestored))
+		if (TextUtils.isEmpty(restoreStatus))
 		{
 			TextView title = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_title);
 			TextView hint = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_hint);
@@ -996,7 +1003,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				setupOnRestoreProgress();
 			}
 		}
-		else if (Boolean.TRUE.toString().equals(backupRestored))
+		else if (Boolean.TRUE.toString().equals(restoreStatus))
 		{
 			TextView title = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_title);
 			TextView hint = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_hint);
@@ -1029,7 +1036,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				@Override
 				public void onClick(View v)
 				{
-					backupRestored = null;
 					nextBtnContainer.setVisibility(View.GONE);
 					restoreProgress.setVisibility(View.VISIBLE);
 					restoreFail.setVisibility(View.INVISIBLE);
@@ -1299,12 +1305,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		itemsRemove.addAnimation(fadeout);
 		itemsRemove.addAnimation(scaleDown);
 		itemsRemove.setInterpolator(new DecelerateInterpolator());
+		itemsRemove.setStartOffset(HikeConstants.BACKUP_RESTORE_UI_DELAY);
 		itemsRemove.setDuration(200);
 		itemsRemove.setFillAfter(true);
 		
 		ScaleAnimation scaleUp = new ScaleAnimation(0, 1, 0, 1, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
 		scaleUp.setInterpolator(new OvershootInterpolator());
-		scaleUp.setStartOffset(100);
+		scaleUp.setStartOffset(100 + HikeConstants.BACKUP_RESTORE_UI_DELAY);
 		scaleUp.setDuration(300);
 		scaleUp.setFillAfter(true);
 		
@@ -1621,7 +1628,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		Session.saveSession(session, outState);
 
 		outState.putInt(HikeConstants.Extras.SIGNUP_PART, viewFlipper.getDisplayedChild());
-		outState.putString(HikeConstants.Extras.SIGNUP_RESTORE_STATUS, backupRestored);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout != null && loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, errorDialog != null);
 		if (enterEditText != null)
@@ -1835,8 +1841,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				prepareLayoutForBackupFound(null);
 			}
 			break;
-		case RESTORED_BACKUP:
-			backupRestored = stateValue.value;
+		case RESTORING_BACKUP:
 			prepareLayoutForRestoringAnimation(null);
 			break;
 		}
