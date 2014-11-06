@@ -192,6 +192,10 @@ public class HikeService extends Service
 	{
 		super.onCreate();
 
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED, null);
+		
+		HikeService.this.sendBroadcast(new Intent(HikeService.SEND_RAI_TO_SERVER_ACTION));
+
 		Logger.d("TestUpdate", "Service started");
 
 		if (sendGCMIdToServerTrigger == null)
@@ -227,30 +231,7 @@ public class HikeService extends Service
 		 * notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent); startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 		 */
 
-		/**
-		 * Make hike utility thread
-		 */
-		HandlerThread hikeUtilHandlerThread = new HandlerThread("HIKE_UTIL");
-		hikeUtilHandlerThread.start();
-		
-		/**
-		 * Extract utility looper
-		 */
-		mHikeUtilLooper = hikeUtilHandlerThread.getLooper();
-		
-		/**
-		 * Make SDK request handler with utility looper
-		 */
-		mHikeSDKRequestHandler = new HikeSDKRequestHandler(this.getApplicationContext(), mHikeUtilLooper);
-		
-		mSDKRequestMessenger = new Messenger(mHikeSDKRequestHandler);
-		
-		/**
-		 * Make contact changed handler with utility looper
-		 */
-		mContactsChangedHandler = new Handler(mHikeUtilLooper);
-		
-		mContactsChanged = new ContactsChanged(this);
+		initializeAndAssignUtilityThread();
 
 		/*
 		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of
@@ -310,6 +291,47 @@ public class HikeService extends Service
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
 		setupStickers();
+	}
+
+	private void initializeAndAssignUtilityThread()
+	{
+		/**
+		 * Make hike utility thread
+		 */
+		HandlerThread hikeUtilHandlerThread = new HandlerThread("HIKE_UTIL")
+		{
+			@Override
+			public void run()
+			{
+				super.run();
+				Looper.prepare();
+				/**
+				 * Extract utility looper
+				 */
+				mHikeUtilLooper = Looper.myLooper();
+				
+				/**
+				 * Make SDK request handler with utility looper
+				 */
+				mHikeSDKRequestHandler = new HikeSDKRequestHandler(HikeService.this.getApplicationContext(), mHikeUtilLooper);
+				
+				mSDKRequestMessenger = new Messenger(mHikeSDKRequestHandler);
+				
+				/**
+				 * Make contact changed handler with utility looper
+				 */
+				mContactsChangedHandler = new Handler(mHikeUtilLooper);
+				
+				mContactsChanged = new ContactsChanged(HikeService.this);
+				
+				contactsReceived.onChange(true);
+				
+				Looper.loop();
+				
+			}
+		};
+		hikeUtilHandlerThread.start();
+		
 	}
 
 	private void setupStickers()
@@ -548,14 +570,17 @@ public class HikeService extends Service
 				Logger.d(getClass().getSimpleName(),"Contact Syncing already going on");
 			else
 			{
-				mContactsChanged.manualSync = manualSync;
-				HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
-				long delay = manualSync ? 0L: HikeConstants.CONTACT_UPDATE_TIMEOUT;
-				HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, delay);
-				// Schedule the next manual sync to happed 24 hours from now.
-				scheduleNextManualContactSync();
-
-				manualSync = false;
+				if(mContactsChanged!=null)
+				{
+					mContactsChanged.manualSync = manualSync;
+					HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
+					long delay = manualSync ? 0L: HikeConstants.CONTACT_UPDATE_TIMEOUT;
+					HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, delay);
+					// Schedule the next manual sync to happed 24 hours from now.
+					scheduleNextManualContactSync();
+	
+					manualSync = false;
+				}
 			}
 		}
 	}

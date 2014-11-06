@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
@@ -413,7 +414,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	private static Set<String> stealthMsisdn;
 
-	private boolean mInitialized;
+	private AtomicBoolean mInitialized = new AtomicBoolean(false);
 
 	private String token;
 
@@ -477,39 +478,35 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public void setServiceAsDisconnected()
 	{
-		if (mInitialized)
-		{
-			mInitialized = false;
-		}
+		mInitialized.compareAndSet(true, false);
 	}
 	
 	public void setServiceAsConnected()
 	{
-		if(!mInitialized)
-		{
-			mInitialized = true;
-		}
+		mInitialized.compareAndSet(false, true);
 	}
 
 	public void connectToService()
 	{
 		Logger.d("HikeMessengerApp", "calling connectToService:" + mInitialized);
-		if (!mInitialized)
+		if (!mInitialized.get())
 		{
 			synchronized (HikeMessengerApp.class)
 			{
-				if (!mInitialized)
+				if (!mInitialized.get())
 				{
 					Logger.d("HikeMessengerApp", "Initializing service");
 					
 					ComponentName service = HikeMessengerApp.this.startService(new Intent(HikeMessengerApp.this, HikeService.class));
 					
-					if(service.getClassName().equals(HikeService.class.getName()))
+					if(service!=null && service.getClassName().equals(HikeService.class.getName()))
 					{
 						//Service started
 						setServiceAsConnected();
-						HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED, null);
-						HikeMessengerApp.this.sendBroadcast(new Intent(HikeService.SEND_RAI_TO_SERVER_ACTION));
+					}
+					else
+					{
+						setServiceAsDisconnected();
 					}
 				}
 			}
