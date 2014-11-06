@@ -480,7 +480,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		switch (item.getItemId())
 		{
 		case R.id.new_conversation:
-			StickerManager.moveHardcodedStickersToSdcard(this);
 			intent = new Intent(this, ComposeChatActivity.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
@@ -1272,7 +1271,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	public void showOverFlowMenu()
 	{
 
-		HikeConversationsDatabase.getInstance().freshUpgradeForStickerShopVersion1();
 		ArrayList<OverFlowMenuItem> optionsList = new ArrayList<OverFlowMenuItem>();
 
 		final String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
