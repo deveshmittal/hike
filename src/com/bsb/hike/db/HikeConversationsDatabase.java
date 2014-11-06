@@ -5581,20 +5581,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				contentValues.put(DBConstants.IS_CUSTOM, isCustom);
 				contentValues.put(DBConstants.CATEGORY_INDEX, catIndex);
 
-				if (isVisible == 1)
-				{
-					mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
-					if (!mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(downloadPreference, false))
-					{
-						ContentValues contentValues2 = getContentValuesForStickerShopTable(categoryId, categoryName, 0);
-						mDb.insert(DBConstants.STICKER_SHOP_TABLE, null, contentValues2);
-					}
-				}
-				else
-				{
-					ContentValues contentValues2 = getContentValuesForStickerShopTable(categoryId, categoryName, 0);
-					mDb.insert(DBConstants.STICKER_SHOP_TABLE, null, contentValues2);
-				}
+				mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
 			}
 			/*
 			 * Now we can drop the old stickers_table.
@@ -5717,32 +5704,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return c;
 	}
 	
-
-	public void freshUpgradeForStickerShopVersion1()
-	{
-		try
-		{
-			mDb.beginTransaction();
-			
-			mDb.execSQL("DROP TABLE " + DBConstants.STICKER_CATEGORIES_TABLE);
-			mDb.execSQL("DROP TABLE " + DBConstants.STICKER_SHOP_TABLE);
-			mDb.execSQL(getStickerCategoryTableCreateQuery());
-			mDb.execSQL(getStickerShopTableCreateQuery());
-			
-			insertAllCategoriesToStickersTable();
-			mDb.setTransactionSuccessful();
-		}
-		catch (Exception e)
-		{
-			Logger.e(getClass().getSimpleName(), "Exception : ", e);
-			e.printStackTrace();
-		}
-		finally
-		{
-			mDb.endTransaction();
-		}
-	}
-
 	public void clearStickerShop()
 	{
 		mDb.delete(DBConstants.STICKER_SHOP_TABLE, null, null);
