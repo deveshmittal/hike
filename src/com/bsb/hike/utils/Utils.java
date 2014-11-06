@@ -3206,7 +3206,6 @@ public class Utils
 	{
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
 
 	public static void resetUnseenFriendRequestCount(Context context)
@@ -4136,17 +4135,17 @@ public class Utils
 	 * Adding this method to compute the overall count for showing in overflow menu on home screen
 	 * 
 	 * @param accountPref
-	 * @param count
+	 * @param defaultValue
 	 * @return
 	 */
-	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref)
+	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref, boolean defaultValue)
 	{
 		int overallCount = 0;
-		if (!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
+		if (!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, defaultValue)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
 		{
 			overallCount++;
 		}
-		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
+		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, defaultValue)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
 		{
 			overallCount++;
 		}

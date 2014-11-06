@@ -1214,5 +1214,10 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="downloading_sticker">DOWNLOAING STICKERS</string>
     <string name="update_all_fail_string">You cannot update hidden packs.</string>
     <string name="great_job">Great Job</string>
-    
+    <string name="ftue_sticker_screen_title">Hi %1$s</string>
+    <string name ="ftue_sticker_screen_header">Stickers!</string>
+    <string name="ftue_sticker_screen_text">Hike has a ton of stickers. Which one below is your favorite?</string>
+    <string name="ftue_sticker_forward_title">Send to</string>
+    <string name="ftue_sticker_forward_card_text">Great Choice!</string>
+    <string name="ftue_sticker_forward_card_subtext">Try sending this sticker to your friends -</string>
 </resources>

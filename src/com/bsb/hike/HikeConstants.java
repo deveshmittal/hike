@@ -503,12 +503,24 @@ public class HikeConstants
 
 	public static final String SINGLE_INVITE_SMS_ALERT_CHECKED = "singleSmsAlertChecked";
 
+	public static final String SHOW_NUX_INVITE_MODE = "showNuxInviteMode";
+	
+	public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
+	
+	public static final String SHOW_NUX_SCREEN = "showNuxScreen";
+		
+	public static final String NUX_STICKER_DETAILS = "nuxStickerDetails";
+	
 	public static final String FTUE_ADD_SMS_ALERT_CHECKED = "ftueSmsAlertChecked";
 
 	public static final String IS_GAMES_ITEM_CLICKED = "isGamesItemClicked";
 
 	public static final String IS_REWARDS_ITEM_CLICKED = "isRewardsItemClicked";
+	
+	public static final String IS_HOME_OVERFLOW_CLICKED = "isHomeOverflowClicked";
 
+	public static final String SHOW_TIMELINE_RED_DOT = "showTimelineRedDot";
+	
 	public static final String IS_OF_ICON_CLICKED = "isOfIconClicked";
 
 	public static final String DONE = "Done";
@@ -1284,6 +1296,12 @@ public class HikeConstants
 		public static final String DELETED_MESSAGE_TYPE = "deletedMessageType";
 
 		public static final String CURRENT_POSITION = "currentPosition";
+		
+		public static final String FTUE_FORWARD = "ftueForward";
+		
+		public static final String FTUE_STICKER_ID_LIST = "ftueStickerIdsList";
+		
+		public static final String FTUE_STICKER_CATEGORY_LIST = "ftueStickerCategoryList";
 	}
 
 	public static final class LogEvent

@@ -14,6 +14,50 @@
 	    android:layout_width="wrap_content" android:layout_height="wrap_content"
 	    android:layout="@layout/welcome_hike_tip" android:inflatedId="@+id/tipMultiForward"/>
 
+    <RelativeLayout
+        android:id="@+id/nuxCard"
+        style="@style/CardContainerWithdoutPadding"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="24dp"
+        android:paddingLeft="20dp"
+        android:paddingTop="24dp"
+        android:visibility="gone" >
+
+        <com.bsb.hike.ui.utils.RecyclingImageView
+            android:id="@+id/nuxSticker"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/sticker_006_angry" />
+
+        <LinearLayout
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_toRightOf="@id/nuxSticker"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/ftue_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ftue_sticker_forward_card_text"
+                android:textColor="@color/black"
+                android:textSize="24sp" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/ftue_text2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="@string/ftue_sticker_forward_card_subtext"
+                android:textColor="@color/grey"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </RelativeLayout>
+    
     <com.bsb.hike.view.TagEditText
         android:id="@+id/composeChatNewGroupTagET"
         android:layout_width="match_parent"

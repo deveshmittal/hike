@@ -164,6 +164,28 @@ public class IntentManager
 		
 		return intent;
 	}
+	
+	public static Intent getFtueForwardStickerIntent(Context context, String stickerId, String categoryId)
+	{
+		Utils.sendUILogEvent(HikeConstants.LogEvent.FORWARD_MSG);
+		Intent intent = new Intent(context, ComposeChatActivity.class);
+		intent.putExtra(HikeConstants.Extras.FTUE_FORWARD, true);
+		JSONArray multipleMsgArray = new JSONArray();
+		try
+		{
+			JSONObject multiMsgFwdObject = new JSONObject();
+			multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
+			multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_ID, stickerId);
+			multipleMsgArray.put(multiMsgFwdObject);
+		}
+		catch (JSONException e)
+		{
+			Logger.e(context.getClass().getSimpleName(), "Invalid JSON", e);
+		}
+
+		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
+		return intent;
+	}
 
 	public static Intent getForwardStickerIntent(Context context, String stickerId, String categoryId)
 	{
