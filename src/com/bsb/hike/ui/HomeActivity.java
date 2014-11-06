@@ -733,7 +733,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
 		}
-		Utils.requestAccountInfo(false, true);
+		Utils.requestAccountInfo(false, HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false));
 		Utils.sendLocaleToServer(HomeActivity.this);
 		deviceDetailsSent = true;
 	}
