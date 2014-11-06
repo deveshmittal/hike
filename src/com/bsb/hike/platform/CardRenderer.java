@@ -46,22 +46,9 @@ public class CardRenderer {
     private static final int ARTICLE_CARD_LAYOUT_RECEIVED = 7;
 
 
-    private static class ViewHolder
+    public static class ViewHolder extends MessagesAdapter.DetailViewHolder
     {
-        ViewStub dayStub;
-        View dayStubInflated;
-        ImageView status;
-        TextView time;
-        View timeStatus;
-        View senderDetails;
-        TextView senderName;
-        TextView senderNameUnsaved;
-        ImageView avatarImage;
-        ViewGroup avatarContainer;
-        View selectedStateOverlay;
-        ViewGroup messageContainer;
-        ViewStub messageInfoStub;
-        View messageInfoInflated;
+
         HashMap<String, View> viewHashMap;
 
         public void initializeHolder( View view, List<CardComponent.TextComponent> textComponentList, List<CardComponent.MediaComponent> mediaComponentList) {
@@ -73,6 +60,8 @@ public class CardRenderer {
             selectedStateOverlay = view.findViewById(R.id.selected_state_overlay);
             messageContainer = (ViewGroup) view.findViewById(R.id.message_container);
             dayStub = (ViewStub) view.findViewById(R.id.day_stub);
+            messageInfoStub = (ViewStub) view.findViewById(R.id.message_info_stub);
+
 
             for (CardComponent.TextComponent textComponent : textComponentList) {
                 String tag = textComponent.getTag();
@@ -114,7 +103,7 @@ public class CardRenderer {
     public int getItemViewType(ConvMessage convMessage) {
 
         Log.d(CardRenderer.class.getSimpleName(), "hash code for convMessage is " + String.valueOf(convMessage.hashCode()));
-        cardType = convMessage.platformMessageMetadata.layoutId;
+        int cardType = convMessage.platformMessageMetadata.layoutId;
         if (convMessage.isSent()) {
 
             switch (cardType) {
@@ -157,6 +146,7 @@ public class CardRenderer {
 
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+        int cardType = convMessage.platformMessageMetadata.layoutId;
         List<CardComponent.TextComponent> textComponents = convMessage.platformMessageMetadata.textComponents;
         List<CardComponent.MediaComponent> mediaComponents = convMessage.platformMessageMetadata.mediaComponents;
 
@@ -166,7 +156,7 @@ public class CardRenderer {
             if (view == null){
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_games_received, null);
+                    view = inflater.inflate(R.layout.card_layout_games_sent, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
                     view = inflater.inflate(R.layout.card_layout_games_received, null);
@@ -190,7 +180,7 @@ public class CardRenderer {
             if (view == null){
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_games_received, null);
+                    view = inflater.inflate(R.layout.card_layout_games_sent, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
                     view = inflater.inflate(R.layout.card_layout_games_received, null);
@@ -240,7 +230,7 @@ public class CardRenderer {
             if (view == null){
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_games_received, null);
+                    view = inflater.inflate(R.layout.card_layout_games_sent, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
                     view = inflater.inflate(R.layout.card_layout_games_received, null);
