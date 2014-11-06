@@ -22,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
@@ -237,7 +238,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			
 			break;
 		case RETRY:
-			viewHolder.image.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_retry_sticker));
+			viewHolder.image.setImageBitmap(HikeBitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_retry_sticker));
 			viewHolder.image.setVisibility(View.VISIBLE);
 			viewHolder.text.setVisibility(View.VISIBLE);
 			clearAnimation(viewHolder.progress);
@@ -255,7 +256,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			
 			break;
 		case DONE:
-			viewHolder.image.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_done_palette));
+			viewHolder.image.setImageBitmap(HikeBitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_done_palette));
 			viewHolder.image.setVisibility(View.VISIBLE);
 			viewHolder.text.setVisibility(View.VISIBLE);
 			clearAnimation(viewHolder.progress);
