@@ -828,7 +828,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 		});
 
-		getListView().addFooterView(inviteFooter);
+		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false))
+		{
+			getListView().addFooterView(inviteFooter);
+		}
 
 		setListAdapter(mAdapter);
 
