@@ -4790,27 +4790,4 @@ public class Utils
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteRemoved);
 		return favoriteType;
 	}
-
-	public static Intent getNuxInviteForwardIntent(Context context)
-	{
-		Intent intent = new Intent(context, ComposeChatActivity.class);
-		intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
-		JSONArray multipleMsgArray = new JSONArray();
-		JSONObject multiMsgFwdObject = new JSONObject();
-		try
-		{
-			multiMsgFwdObject.putOpt(HikeConstants.Extras.MSG, Utils.getInviteMessage(context, R.string.invite_share_message));
-			multipleMsgArray.put(multiMsgFwdObject);
-		}
-		catch (JSONException e)
-		{
-			Logger.e("HomeInviteFooter", "Invalid JSON", e);
-		}
-		if(HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false))
-		{
-			intent.putExtra(HikeConstants.NUX_INVITE_FORWARD, true);
-		}
-		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
-		return intent;
-	}
 }

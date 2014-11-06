@@ -2538,7 +2538,8 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void inviteButtonClicked()
 	{
-		Intent intent = Utils.getNuxInviteForwardIntent(getActivity());
+		Intent intent = new Intent(getActivity(), HikeListActivity.class);
+		intent.putExtra(HikeConstants.NUX_INVITE_FORWARD, true);
 		startActivity(intent);
 	}
 
