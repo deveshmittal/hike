@@ -25,7 +25,7 @@ public class CardComponent {
 	}
 
 	public static class MediaComponent extends CardComponent {
-		private int key;
+		private String key;
 		private String base64;
 		private String url;
 		private String type, size, duration;
@@ -33,9 +33,17 @@ public class CardComponent {
 		public MediaComponent(String tag, String base64, String url,
 				String type, String size, String duration) {
 			super(tag);
+            this.base64 = base64;
+            this.url = url;
+            this.type = type;
+            this.size = size;
+            this.duration = duration;
+            if (null != base64)
+                this.key = String.valueOf(base64.hashCode());
+
 		}
 
-		public int getKey() {
+		public String getKey() {
 			return key;
 		}
 
