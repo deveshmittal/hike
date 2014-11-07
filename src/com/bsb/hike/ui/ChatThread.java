@@ -7875,7 +7875,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						if(message.platformMessageMetadata!=null){
 						multiMsgFwdObject.put(HikeConstants.METADATA, message.platformMessageMetadata.toJSON());
 						if(message.contentLove!=null){
-							multiMsgFwdObject.put(ContentLove.LOVE_ID, message.contentLove.loveId);
+							multiMsgFwdObject.put(HikeConstants.ConvMessagePacketKeys.LOVE_ID, message.contentLove.loveId);
 						}
 						}
 					}

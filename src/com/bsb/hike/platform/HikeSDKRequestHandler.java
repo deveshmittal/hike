@@ -11,6 +11,8 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -18,42 +20,29 @@ import android.util.Pair;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.model.HikeUser;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.sdk.HikeSDKResponseCode;
+import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.HikeSDKConstants;
 import com.bsb.hike.utils.Utils;
 
 /**
- * Handles requests made by HikeSDK. Implements pub sub listener which is where all the requests are retrieved.
+ * Handles requests made by HikeSDK.
  * 
  * @author AtulM
  * 
  */
-public class HikeSDKRequestHandler implements Listener
+public class HikeSDKRequestHandler extends Handler
 {
 	private Context mContext;
 
-	private static HikeSDKRequestHandler hikeSDKReqHandler;
-
-	private String[] mHikePubSubListeners = { HikePubSub.SDK_REQ_GET_INFO, HikePubSub.SDK_REQ_GET_USERS, HikePubSub.SDK_REQ_SEND_MSG };
-
-	private HikeSDKRequestHandler(Context argContext)
+	public HikeSDKRequestHandler(Context argContext, Looper looper)
 	{
-		this.mContext = argContext;
-		HikeMessengerApp.getPubSub().addListeners(this, mHikePubSubListeners);
-	}
-
-	public static HikeSDKRequestHandler getInstance(Context argContext)
-	{
-		if (hikeSDKReqHandler == null)
-		{
-			hikeSDKReqHandler = new HikeSDKRequestHandler(argContext.getApplicationContext());
-		}
-		return hikeSDKReqHandler;
+		super(looper);
+		mContext = argContext;
 	}
 
 	/**
@@ -75,18 +64,15 @@ public class HikeSDKRequestHandler implements Listener
 		return;
 	}
 
+	
 	@Override
-	public void onEventReceived(String type, Object object)
+	public void handleMessage(Message msg)
 	{
-		if (HikePubSub.SDK_REQ_GET_INFO.equals(type))
+		super.handleMessage(msg);
+
+		if (msg.what == HikeService.SDK_REQ_GET_LOGGED_USER_INFO)
 		{
 
-			if (!(object instanceof Message))
-			{
-				return;
-			}
-
-			Message msg = (Message) object;
 			Bundle reqUserInfoBundle = msg.getData();
 
 			if (reqUserInfoBundle == null || reqUserInfoBundle.isEmpty())
@@ -158,14 +144,8 @@ public class HikeSDKRequestHandler implements Listener
 			}
 
 		}
-		else if (HikePubSub.SDK_REQ_GET_USERS.equals(type))
+		else if (msg.what == HikeService.SDK_REQ_GET_USERS)
 		{
-			if (!(object instanceof Message))
-			{
-				return;
-			}
-
-			Message msg = (Message) object;
 
 			Bundle reqGetFriendsBundle = msg.getData();
 
@@ -299,15 +279,8 @@ public class HikeSDKRequestHandler implements Listener
 			}
 
 		}
-		else if (HikePubSub.SDK_REQ_SEND_MSG.equals(type))
+		else if (msg.what == HikeService.SDK_REQ_SEND_MESSAGE)
 		{
-			if (!(object instanceof Message))
-			{
-				return;
-			}
-
-			Message msg = (Message) object;
-
 			Bundle reqSendMessageBundle = msg.getData();
 
 			if (reqSendMessageBundle == null)
@@ -332,5 +305,6 @@ public class HikeSDKRequestHandler implements Listener
 			}
 
 		}
+
 	}
 }

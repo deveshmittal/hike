@@ -3,8 +3,6 @@ package com.bsb.hike.providers;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.bsb.hike.HikeConstants;
-import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.Authenticator;
 import com.bsb.hike.utils.Logger;
@@ -15,6 +13,7 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 
 /**
@@ -55,12 +54,12 @@ public class HikeProvider extends ContentProvider
 	{
 		conManager = ContactManager.getInstance();
 
-		// It is observed that providers get initated before conManager (conManager == null). Hence need to init
+		// It is observed that providers get initiated before conManager (conManager == null). Hence need to init
 		conManager.init(getContext());
 
 		hUserDb = conManager.getReadableDatabase();
 
-		// Check for initialization of vital objects
+		// Check for initialization of required objects
 		if (hUserDb != null)
 		{
 			return true;
@@ -88,40 +87,63 @@ public class HikeProvider extends ContentProvider
 		switch (sURIMatcher.match(uri))
 		{
 		case ROUNDED_INDEX:
-			
-			// Convert hikeIds to msisdnList since avatar tables have msisdn - image mappings only
-			ArrayList<String> msisdnListRounded = conManager.getMsisdnFromId(selectionArgs);
 
-			if (msisdnListRounded == null || msisdnListRounded.size() == 0)
+			try
 			{
-				throw new IllegalArgumentException("Invalid hikeIds");
+				// For better security, use hard-coded selection columns
+				if (selection == null)
+				{
+					c = hUserDb.rawQuery(
+									"SELECT roundedThumbnailTable.image, users.id " 
+									+ "FROM roundedThumbnailTable " 
+									+ "INNER JOIN users "
+									+ "ON roundedThumbnailTable.msisdn=users.msisdn", null);
+				}
+				else
+				{
+					c = hUserDb.rawQuery(
+							"SELECT roundedThumbnailTable.image, users.id" 
+							+ " FROM roundedThumbnailTable " 
+							+ "INNER JOIN users "
+							+ "ON roundedThumbnailTable.msisdn=users.msisdn " 
+							+ "WHERE users.id IN " 
+							+ Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
+				}
 			}
-
-			Logger.d(TAG, "msisdnList: " + msisdnListRounded.toString());
-
-			Logger.d(TAG, "Querying rounded avatar table");
-
-			c = hUserDb.query(DBConstants.ROUNDED_THUMBNAIL_TABLE, projection, HikeConstants.MSISDN + " IN " + Utils.getMsisdnStatement(msisdnListRounded), null, null, null,
-					sortOrder);
-
+			catch (SQLiteException e)
+			{
+				c = null;
+				e.printStackTrace();
+			}
 			break;
 
 		case NORMAL_INDEX:
-
-			// Convert hikeIds to msisdnList since avatar tables have msisdn - image mappings only
-			ArrayList<String> msisdnListNormal = conManager.getMsisdnFromId(selectionArgs);
-
-			if (msisdnListNormal == null || msisdnListNormal.size() == 0)
+			try
 			{
-				throw new IllegalArgumentException("Invalid hikeIds");
+				// For better security, use hard-coded selection columns
+				if (selection == null)
+				{
+					c = hUserDb.rawQuery(
+									"SELECT thumbnails.image, users.id " 
+									+ "FROM thumbnails " 
+									+ "INNER JOIN users " 
+									+ "ON thumbnails.msisdn=users.msisdn", null);
+				}
+				else
+				{
+					c = hUserDb.rawQuery(
+								"SELECT thumbnails.image, users.id " 
+								+ "FROM thumbnails " 
+								+ "INNER JOIN users " 
+								+ "ON thumbnails.msisdn=users.msisdn "
+								+ "WHERE users.id IN " 
+								+ Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
+				}
 			}
-
-			Logger.d(TAG, "msisdnList: " + msisdnListNormal.toString());
-
-			Logger.d(TAG, "Querying normal avatar table");
-
-			c = hUserDb.query(DBConstants.THUMBNAILS_TABLE, projection, HikeConstants.MSISDN + " IN " + Utils.getMsisdnStatement(msisdnListNormal), null, null, null, sortOrder);
-
+			catch (SQLiteException e)
+			{
+				e.printStackTrace();
+			}
 			break;
 		default:
 			break;
