@@ -804,7 +804,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				 */
 				if (!downloadingSticker)
 				{
-					StickerDownloadManager.getInstance(context).DownloadSingleSticker(context, categoryId, stickerId, new IStickerResultListener()
+					StickerDownloadManager.getInstance(context).DownloadSingleSticker(categoryId, stickerId, new IStickerResultListener()
 					{
 						
 						@Override

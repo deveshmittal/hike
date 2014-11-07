@@ -155,7 +155,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		downloadState = DOWNLOADING;
 		listview.removeFooterView(downloadFailedFooterView);
 		listview.addFooterView(loadingFooterView);
-		StickerDownloadManager.getInstance(getSherlockActivity()).DownloadStickerShopTask(getSherlockActivity(), currentCategoriesCount, new IStickerResultListener()
+		StickerDownloadManager.getInstance(getSherlockActivity()).DownloadStickerShopTask(currentCategoriesCount, new IStickerResultListener()
 		{
 
 			@Override

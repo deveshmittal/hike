@@ -56,7 +56,7 @@ public class StickerDownloadManager
 		_instance = null;
 	}
 
-	public void DownloadSingleSticker(Context context, String catId, String stkId, IStickerResultListener callback)
+	public void DownloadSingleSticker(String catId, String stkId, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.SINGLE, stkId, catId);
 		if (queue.isTaskAlreadyExist(taskId))
@@ -87,7 +87,7 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 	
-	public void DownloadStickerPreviewImage(Context context, String categoryId, IStickerResultListener callback)
+	public void DownloadStickerPreviewImage(String categoryId, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.PREVIEW, null, categoryId);
 		if (queue.isTaskAlreadyExist(taskId))
@@ -100,7 +100,7 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 	
-	public void DownloadEnableDisableImage(Context context, String categoryId, IStickerResultListener callback)
+	public void DownloadEnableDisableImage(String categoryId, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.ENABLE_DISABLE, null, categoryId);
 		if (queue.isTaskAlreadyExist(taskId))
@@ -114,7 +114,7 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 	
-	public void DownloadStickerSize(Context context, StickerCategory cat, IStickerResultListener callback)
+	public void DownloadStickerSize(StickerCategory cat, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.SIZE, null, cat.getCategoryId());
 		if (queue.isTaskAlreadyExist(taskId))
@@ -127,7 +127,7 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 	
-	public void DownloadStickerShopTask(Context context, int offset, IStickerResultListener callback)
+	public void DownloadStickerShopTask(int offset, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.SHOP, null, null);
 		if (queue.isTaskAlreadyExist(taskId))
@@ -140,7 +140,7 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 	
-	public void DownloadStickerSignupUpgradeTask(Context context, JSONArray categoryList, IStickerResultListener callback)
+	public void DownloadStickerSignupUpgradeTask(JSONArray categoryList, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.SHOP, null, null);
 		if (queue.isTaskAlreadyExist(taskId))

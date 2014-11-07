@@ -1148,7 +1148,7 @@ public class StickerManager
 		BitmapDrawable bitmapDrawable = generateBitmapDrawable(ctx.getResources(), baseFilePath);
 		if (bitmapDrawable == null)
 		{
-			StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
+			StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(categoryId, null);
 			bitmapDrawable = (isPressed ? (BitmapDrawable) ctx.getResources().getDrawable(R.drawable.default_sticker_pallete_icon_selected) : (BitmapDrawable) ctx.getResources()
 					.getDrawable(R.drawable.default_sticker_pallete_icon_unselected));
 		}
@@ -1190,17 +1190,17 @@ public class StickerManager
 			{
 				if(type.equalsIgnoreCase(PALLATE_ICON_SELECTED))
 				{
-					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
+					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(categoryId, null);
 					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_pallete_icon_selected);
 				}
 				else if(type.equalsIgnoreCase(PALLATE_ICON))
 				{
-					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
+					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(categoryId, null);
 					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_pallete_icon_unselected);
 				}
 				else if(type.equalsIgnoreCase(PREVIEW_IMAGE))
 				{
-					StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(ctx, categoryId, null);
+					StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(categoryId, null);
 					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_preview);
 				}
 			}
@@ -1258,7 +1258,7 @@ public class StickerManager
 		if (!HikeSharedPreferenceUtil.getInstance(context).getData(StickerManager.STICKERS_SIZE_DOWNLOADED, false))
 		{
 			
-			StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(context, getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
+			StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
 			{
 				
 				@Override
