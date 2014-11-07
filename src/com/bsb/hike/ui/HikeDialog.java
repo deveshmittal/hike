@@ -250,10 +250,6 @@ public class HikeDialog
 			int smallsz,mediumsz,originalsz;
 			if(dataBundle.length>0)
 				{
-				if(dataBundle[0]!=1)
-					header.setText(context.getString(R.string.image_quality_send) + " " + dataBundle[0] + " " + context.getString(R.string.image_quality_files_as));
-				else
-					header.setText(context.getString(R.string.image_quality_send) + " " + dataBundle[0] + " " + context.getString(R.string.image_quality_file_as));				
 				
 				originalsz = dataBundle[1].intValue();
 				smallsz = (int) (dataBundle[0] * HikeConstants.IMAGE_SIZE_SMALL);
