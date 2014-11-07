@@ -1178,18 +1178,31 @@ public class StickerManager
 	 * @param downloadIfNotFound -- true if it should be downloaded if not found.
 	 * @return {@link Bitmap}
 	 */
-	public Bitmap getCategoryPreviewAsset(Context ctx, String categoryId, boolean downloadIfNotFound)
+	public Bitmap getCategoryOtherAsset(Context ctx, String categoryId, String type, boolean downloadIfNotFound)
 	{
 		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
-		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + PREVIEW_IMAGE + PREVIEW_ICON_TYPE;
+		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + type + OTHER_ICON_TYPE;
 		Bitmap bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
 		if (bitmap == null)
 		{
 			if (downloadIfNotFound)
 			{
-				StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(ctx, categoryId, null);
+				if(type.equalsIgnoreCase(PALLATE_ICON_SELECTED))
+				{
+					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
+					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_pallete_icon_selected);
+				}
+				else if(type.equalsIgnoreCase(PALLATE_ICON))
+				{
+					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
+					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_pallete_icon_unselected);
+				}
+				else if(type.equalsIgnoreCase(PREVIEW_IMAGE))
+				{
+					StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(ctx, categoryId, null);
+					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_preview);
+				}
 			}
-			bitmap = HikeBitmapFactory.decodeResource(ctx.getResources(), R.drawable.default_sticker_preview);
 		}
 		return bitmap;
 	}
