@@ -163,9 +163,7 @@ public class StickerManager
 
 	public static final String PREVIEW_IMAGE = "preview";
 	
-	public static final String PALETTE_ICON_TYPE = ".png";
-	
-	public static final String PREVIEW_ICON_TYPE = ".png";
+	public static final String OTHER_ICON_TYPE = ".png";
 
 	public static final String CATEGORY_SIZE = "categorySize";
 

@@ -49,7 +49,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			return STResult.DOWNLOAD_FAILED;
 		}
 		
-		String previewImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT  + "/" + StickerManager.PREVIEW_IMAGE + StickerManager.PREVIEW_ICON_TYPE;
+		String previewImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT  + "/" + StickerManager.PREVIEW_IMAGE + StickerManager.OTHER_ICON_TYPE;
 		
 		FileOutputStream fos = null;
 		try
