@@ -1380,7 +1380,7 @@ public class StickerManager
 		}
 	}
 	
-	public String getStickerImageUrl(String categoryId, String type)
+	public String getCategoryOtherAssetLoaderKey(String categoryId, String type)
 	{
 		return categoryId + HikeConstants.DELIMETER + type;
 	}

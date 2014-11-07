@@ -304,7 +304,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			TextView categoryName = (TextView) empty.findViewById(R.id.category_name);
 			TextView category_details = (TextView) empty.findViewById(R.id.category_details);
 			ImageView previewImage = (ImageView) empty.findViewById(R.id.preview_image);
-			stickerOtherIconLoader.loadImage(StickerManager.getInstance().getStickerImageUrl(category.getCategoryId(), StickerManager.PREVIEW_IMAGE), previewImage);
+			stickerOtherIconLoader.loadImage(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(category.getCategoryId(), StickerManager.PREVIEW_IMAGE), previewImage);
 			TextView separator = (TextView) empty.findViewById(R.id.separator);
 			if(category.getTotalStickers() > 0)
 			{
