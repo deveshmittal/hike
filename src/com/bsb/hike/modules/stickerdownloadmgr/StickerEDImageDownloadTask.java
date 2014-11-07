@@ -52,8 +52,8 @@ public class StickerEDImageDownloadTask extends BaseStickerDownloadTask
 			return STResult.DOWNLOAD_FAILED;
 		}
 		
-		String enableImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT + "/" + StickerManager.PALLATE_ICON_SELECTED + StickerManager.PALETTE_ICON_TYPE;
-		String disableImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT + "/" + StickerManager.PALLATE_ICON + StickerManager.PALETTE_ICON_TYPE;
+		String enableImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT + "/" + StickerManager.PALLATE_ICON_SELECTED + StickerManager.OTHER_ICON_TYPE;
+		String disableImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT + "/" + StickerManager.PALLATE_ICON + StickerManager.OTHER_ICON_TYPE;
 		
 		FileOutputStream fos = null;
 		try
@@ -75,13 +75,15 @@ public class StickerEDImageDownloadTask extends BaseStickerDownloadTask
 			}
 			setDownloadUrl(urlString);
 			
+			Logger.d(StickerDownloadManager.TAG,  "Starting download task : " + taskId + " url : " + urlString );
 			JSONObject response = (JSONObject) download(null, HttpRequestType.GET);
 			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)) || !catId.equals(response.getString(StickerManager.CATEGORY_ID)))
 			{
 				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
 				return STResult.DOWNLOAD_FAILED;
 			}
-
+			
+			Logger.d(StickerDownloadManager.TAG,  "Got response for download task : " + taskId + " response : " + response.toString());
 			JSONObject data = response.getJSONObject(HikeConstants.DATA_2);
 
 			String enableImg = data.getString(HikeConstants.ENABLE_IMAGE);
@@ -93,6 +95,7 @@ public class StickerEDImageDownloadTask extends BaseStickerDownloadTask
 		}
 		catch(Exception e)
 		{
+			Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
 			setException(new StickerException(e));
 			return STResult.DOWNLOAD_FAILED;
 		}
