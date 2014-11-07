@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="86dp" >
 
-        <ImageView
+        <com.bsb.hike.ui.utils.RecyclingImageView
             android:id="@+id/category_icon"
             android:layout_width="58dp"
             android:layout_height="58dp"
@@ -24,14 +24,14 @@
         android:layout_marginRight="4dp"
         android:gravity="center">
 
-        <ImageView
+        <com.bsb.hike.ui.utils.RecyclingImageView
             android:id="@+id/category_download_btn"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerInside"
             android:src="@drawable/sticker_shop_download_drawable_selector" />
 
-       <ImageView 
+       <com.bsb.hike.ui.utils.RecyclingImageView 
         android:id="@+id/download_progress_bar"
        	android:layout_width="24dp"
        	android:layout_height="24dp"
