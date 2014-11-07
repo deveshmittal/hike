@@ -39,7 +39,7 @@
         android:contentDescription="Update Count"
         android:text="5 MORE"
         android:textColor="@color/standerd_light_grey2"
-        android:textSize="12sp"
+        android:textSize="9sp"
         android:visibility="gone" />
 
 </LinearLayout>
