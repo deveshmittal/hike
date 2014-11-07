@@ -1197,7 +1197,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="out_of_space">Get More Space</string>
     <string name="sticker_pack_free">FREE</string>
     <string name="n_packs">%1$d Packs</string>
-    <string name="downloading_sticker">DOWNLOAING STICKERS</string>
+    <string name="downloading_sticker">DOWNLOADING STICKERS</string>
     <string name="update_all_fail_string">You cannot update hidden packs.</string>
     <string name="great_job">Great Job</string>
     
