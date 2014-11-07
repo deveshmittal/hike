@@ -15,6 +15,7 @@ import com.bsb.hike.platform.CardComponent.VideoComponent;
 public class PlatformMessageMetadata implements HikePlatformConstants {
 	public int layoutId;
 	public int loveId;
+    public String notifText;
 	
 	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();
 	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();
@@ -33,6 +34,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 				JSONObject data = json.getJSONObject(DATA);
                 layoutId = getInt(data, LAYOUT_ID);
                 loveId = getInt(data, LOVE_ID);
+                notifText = getString(data, NOTIF_TEXT);
 				if (data.has(ASSETS)) {
 					JSONObject assets = data.getJSONObject(ASSETS);
 					if (assets.has(TEXTS)) {

@@ -17,6 +17,7 @@ public interface HikePlatformConstants {
 	String MEDIA_SIZE = "size";
 	String DURATION = "duration";
 	String LAYOUT_ID = "layoutID";
+    String NOTIF_TEXT = "summary";
 	String LOVE_ID = "loveID";
 	String RECEPIENT = "to";
 	String MESSAGE_TYPE = "t";
