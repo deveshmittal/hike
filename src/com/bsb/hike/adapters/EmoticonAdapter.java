@@ -1,6 +1,7 @@
 package com.bsb.hike.adapters;
 
 import android.app.Activity;
+import android.graphics.drawable.StateListDrawable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -113,5 +114,12 @@ public class EmoticonAdapter extends PagerAdapter implements StickerEmoticonIcon
 	public boolean isUpdateAvailable(int index)
 	{
 		return false;
+	}
+
+	@Override
+	public StateListDrawable getPalleteIconDrawable(int index)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -332,7 +332,8 @@ class PersistenceCache extends ContactsCache
 				grpDetails = groupPersistence.get(msisdn);
 				if (null == grpDetails)
 					return null;
-				if (!TextUtils.isEmpty(grpDetails.getGroupName()))
+				String groupName = grpDetails.getGroupName();
+				if (!(TextUtils.isEmpty(groupName) || groupName.equals(grpDetails.getGroupId())))
 					return grpDetails.getGroupName();
 			}
 			finally
@@ -546,6 +547,37 @@ class PersistenceCache extends ContactsCache
 					msPair.setSecond(name);
 				}
 			}
+		}
+	}
+
+	/**
+	 * This method should be called when both persistence and transient cache have been initialized. It traverses through {@link #groupPersistence} map and if group name is empty
+	 * or equal to group id then it creates a default group name from group participants and sets it in map.
+	 */
+	void updateGroupNames()
+	{
+		writeLock.lock();
+		try
+		{
+			for (Entry<String, GroupDetails> mapEntry : groupPersistence.entrySet())
+			{
+				String msisdn = mapEntry.getKey();
+				GroupDetails grpDetails = mapEntry.getValue();
+				if (null != grpDetails)
+				{
+					String groupName = grpDetails.getGroupName();
+					if (TextUtils.isEmpty(groupName) || groupName.equals(grpDetails.getGroupId()))
+					{
+						List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(msisdn, false, false);
+						String grpName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));
+						grpDetails.setGroupName(grpName);
+					}
+				}
+			}
+		}
+		finally
+		{
+			writeLock.unlock();
 		}
 	}
 
@@ -829,7 +861,7 @@ class PersistenceCache extends ContactsCache
 		try
 		{
 			ConcurrentLinkedQueue<PairModified<String, String>> clq = new ConcurrentLinkedQueue<PairModified<String, String>>();
-			if (TextUtils.isEmpty(groupName))
+			if (TextUtils.isEmpty(groupName) || groupName.equals(grpId))
 			{
 				List<PairModified<GroupParticipant, String>> grpParticipants = ContactManager.getInstance().getGroupParticipants(grpId, false, false);
 				groupName = Utils.defaultGroupName(new ArrayList<PairModified<GroupParticipant, String>>(grpParticipants));

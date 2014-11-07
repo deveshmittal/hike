@@ -3,30 +3,34 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_alignParentBottom="true"
-    android:background="#2a3231"
+    android:background="@color/sticker_pallete_bg_color"
     android:orientation="vertical" >
 
     <RelativeLayout
         android:id="@+id/icon_container"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="48.5dp"
         android:layout_alignParentBottom="true" >
 
+     <View
+       	android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/sticker_emoticon_divider" />
+        
         <LinearLayout
             android:id="@+id/erase_key"
             android:layout_width="48dp"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:background="#434748"
+            android:layout_below="@id/divider"
+            android:background="@color/sticker_pallete_bg_color"
             android:orientation="vertical"
             android:visibility="gone" >
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#4f5455" />
-
             <ImageView
+                android:id="@+id/erase_key_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/emoticon_erase_key_background_selector"
@@ -38,6 +42,7 @@
             android:id="@+id/icon_indicator"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_below="@id/divider"
             android:layout_alignWithParentIfMissing="true"
             android:layout_toLeftOf="@id/erase_key"
             android:background="@drawable/emoticon_tab_normal" />
@@ -48,19 +53,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/icon_container"
-        android:paddingBottom="@dimen/emoticon_pager_padding"
-        android:paddingTop="@dimen/emoticon_pager_padding" />
+        />
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="0.5dp"
         android:layout_alignParentTop="true"
-        android:background="@color/sticker_emoticon_divider" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_above="@id/icon_container"
         android:background="@color/sticker_emoticon_divider" />
 
     <LinearLayout
