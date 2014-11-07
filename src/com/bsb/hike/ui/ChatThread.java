@@ -459,6 +459,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(stickerAdapter != null)
 		{
 			stickerAdapter.getStickerLoader().setExitTasksEarly(true);
+			stickerAdapter.getStickerOtherIconLoader().setExitTasksEarly(true);
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
 		activityVisible = false;
@@ -486,6 +487,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(stickerAdapter != null)
 		{
 			stickerAdapter.getStickerLoader().setExitTasksEarly(false);
+			stickerAdapter.getStickerOtherIconLoader().setExitTasksEarly(false);
 			stickerAdapter.notifyDataSetChanged();
 		}
 		/* mark any messages unread as read */

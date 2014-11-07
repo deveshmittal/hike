@@ -1379,4 +1379,9 @@ public class StickerManager
 			return false;
 		}
 	}
+	
+	public String getStickerImageUrl(String categoryId, String type)
+	{
+		return categoryId + HikeConstants.DELIMETER + type;
+	}
 }

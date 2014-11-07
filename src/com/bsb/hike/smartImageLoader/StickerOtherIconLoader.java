@@ -6,17 +6,18 @@ import android.graphics.Bitmap;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.utils.StickerManager;
 
-public class StickerPreviewLoader extends ImageWorker
+public class StickerOtherIconLoader extends ImageWorker
 {
 	private Context ctx;
 	private boolean downloadIfNotFound;
+	private int defaultResourceId;
 	
 	/**
 	 * 
 	 * @param ctx
 	 * @param downloadIfNotFound -- true if preview image should be downloaded if not found
 	 */
-	public StickerPreviewLoader(Context ctx, boolean downloadIfNotFound)
+	public StickerOtherIconLoader(Context ctx, boolean downloadIfNotFound)
 	{
 		super();
 		this.ctx = ctx;
@@ -26,8 +27,10 @@ public class StickerPreviewLoader extends ImageWorker
 	@Override
 	protected Bitmap processBitmap(String data)
 	{	
-		String categoryId = data.split(HikeConstants.DELIMETER)[0];
-		Bitmap bmp = StickerManager.getInstance().getCategoryPreviewAsset(ctx, categoryId, downloadIfNotFound);
+		String[] args = data.split(HikeConstants.DELIMETER);
+		String categoryId = args[0];
+		String type = args[1];
+		Bitmap bmp = StickerManager.getInstance().getCategoryOtherAsset(ctx, categoryId, type, downloadIfNotFound);
 		return bmp;
 	}
 
