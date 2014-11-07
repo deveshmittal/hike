@@ -408,7 +408,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			editor.commit();
 		}
 
-		if(HikeConstants.FTUE_HIKE_SUPPORT.equals(conv.getMsisdn()) && HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false) && (displayedConversations.size() == 1))
+		if(HikeConstants.NUX_BOT.equals(conv.getMsisdn()) && HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false) && (displayedConversations.size() == 1))
 		{
 			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeConstants.NUX_HOME_INVITE_FOOTER, true);
 		}
@@ -1227,7 +1227,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					}
 					displayedConversations.add(conversation);
 					Collections.sort(displayedConversations, mConversationsComparator);
-					if(!conversation.getMsisdn().equals(HikeConstants.FTUE_HIKE_SUPPORT))
+					if(!conversation.getMsisdn().equals(HikeConstants.NUX_BOT))
 					{
 						switchOffNuxMode();
 					}
