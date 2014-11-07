@@ -15,34 +15,42 @@
             android:layout="@layout/message_day_container" />
 
     <RelativeLayout
-            android:id="@+id/message_container"
+            android:id="@+id/overlay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
+            android:paddingBottom="2.5dp" >
+
+    <RelativeLayout
+            android:id="@+id/message_container"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
             android:layout_marginBottom="3dp"
+            android:tag="@string/content_card_tag"
             android:layout_marginRight="@dimen/chat_bubble_edge_spacing"
             android:layout_marginTop="3dp"
             android:background="@drawable/ic_bubble_green_selector"
             android:orientation="vertical"
             android:paddingLeft="12dp"
-            android:paddingRight="18dp" >
+             >
 
         <ImageView
                 android:id="@+id/card_image"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:tag="IMG1"
+                android:tag="I1"
                 android:src="@drawable/hike_avtar_protip"
-                android:layout_width="100dp"
-                android:layout_height="100dp"/>
+                android:layout_width="92dp"
+                android:layout_height="92dp"/>
 
 
         <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_toLeftOf="@id/card_image"
                 android:layout_marginRight="10dp"
+                android:layout_alignParentLeft="true"
                 android:id="@+id/text_container"
-                android:layout_marginTop="10dp"
                 android:orientation="vertical"
                 android:layout_height="wrap_content"
                 >
@@ -51,13 +59,13 @@
                     android:id="@+id/title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="11.5dp"
+                    android:layout_marginTop="10dp"
                     android:layout_marginRight="11.55dp"
                     android:text="Dadi vs Jellies"
-                    android:textStyle="bold|italic"
+                    android:textStyle="bold"
                     android:tag="T1"
                     android:textSize="14sp"
-                    android:textColor="#000000"
+                    android:textColor="#292929"
                     />
 
             <TextView
@@ -68,8 +76,8 @@
                     android:layout_marginRight="11.55dp"
                     android:text="FREE"
                     android:tag="T2"
-                    android:textColor="#979797"
-                    android:textSize="14sp"
+                    android:textColor="#92ce28"
+                    android:textSize="11sp"
                     android:textStyle="italic"
                     />
 
@@ -80,10 +88,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     android:tag="T3"
-                    android:textStyle="bold|italic"
-                    android:textColor="#ff0000"
+                    android:textStyle="italic"
+                    android:textColor="#7a7c7d"
                     android:text="Everyone's favourite Dadi"
                     android:layout_gravity="center_vertical"
                     />
@@ -94,9 +102,9 @@
                     android:layout_marginTop="5dp"
                     android:gravity="center_horizontal"
                     android:layout_height="wrap_content"
-                    android:textColor="#000000"
+                    android:textColor="#adb1b4"
                     android:tag="T4"
-                    android:textSize="14sp"
+                    android:textSize="10sp"
                     android:textStyle="italic"
                     android:text="Get it on play store"
                     android:enabled="false"
@@ -107,18 +115,21 @@
     </RelativeLayout>
 
     <include
+            android:id="@+id/time_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/message_container"
-            android:layout_alignRight="@id/message_container"
-            android:layout_marginBottom="6dp"
-            android:layout_marginRight="14dp"
-            layout="@layout/message_time_status" />
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/message_container"
+            android:layout_marginRight="@dimen/chat_bubble_time_edge_spacing"
+            android:layout_marginTop="4dp"
+            layout="@layout/message_time_status_ext" />
+        </RelativeLayout>
 
     <include
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignBottom="@id/message_container"
+            android:layout_alignBottom="@id/overlay"
+            android:layout_alignTop="@id/overlay"
             layout="@layout/message_overlay" />
 
     <ViewStub
@@ -126,7 +137,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_below="@id/message_container"
+            android:layout_below="@id/overlay"
             android:layout="@layout/message_sent_info" />
 
 </RelativeLayout>
