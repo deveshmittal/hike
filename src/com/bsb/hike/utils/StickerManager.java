@@ -963,7 +963,6 @@ public class StickerManager
 				String pallateIconSelected = obj.optString(StickerManager.PALLATE_ICON_SELECTED);
 				String previewImage = obj.optString(StickerManager.PREVIEW_IMAGE);
 
-				saveAssetToDirectory(otherAssetsDir, previewImage, StickerManager.PREVIEW_ICON_TYPE);
 				saveAssetToDirectory(otherAssetsDir, pallateIcon, StickerManager.PALLATE_ICON);
 				saveAssetToDirectory(otherAssetsDir, pallateIconSelected, StickerManager.PALLATE_ICON_SELECTED);
 				if (!TextUtils.isEmpty(previewImage))
