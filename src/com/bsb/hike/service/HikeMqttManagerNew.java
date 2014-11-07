@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -51,6 +52,7 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.MqttPersistenceException;
@@ -73,7 +75,7 @@ import com.bsb.hike.utils.Utils;
  * interval of time. All pings are handled by mqtt paho internally. As soon as you get connected simply reschdule next conn check. In case of no netowrk and SERVER unavailable , we
  * should try and connect on exponential basis.
  * */
-public class HikeMqttManagerNew extends BroadcastReceiver
+public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 {
 	// this variable when true, does not allow mqtt operation such as publish or connect
 	// this will become true when you force close or force disconnect mqtt (ex : ssl toggle)
@@ -340,17 +342,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					long mId = b.getLong(HikeConstants.MESSAGE_ID, -1);
 					send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
-				case HikeService.SDK_REQ_GET_USERS:
-					HikeMessengerApp.getPubSub().publish(HikePubSub.SDK_REQ_GET_USERS, Message.obtain(msg));
-					break;
-
-				case HikeService.SDK_REQ_GET_LOGGED_USER_INFO:
-					HikeMessengerApp.getPubSub().publish(HikePubSub.SDK_REQ_GET_INFO, Message.obtain(msg));
-					break;
-					
-				case HikeService.SDK_REQ_SEND_MESSAGE:
-					HikeMessengerApp.getPubSub().publish(HikePubSub.SDK_REQ_SEND_MSG, Message.obtain(msg));
-					break;
 				}
 			}
 			catch (Exception e)
@@ -376,6 +367,10 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		connChkRunnable = new ConnectionCheckRunnable();
 		disConnectRunnable = new DisconnectRunnable();
 		activityChkRunnable = new ActivityCheckRunnable();
+		
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH_LOW, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.TOKEN_CREATED, this);
 	}
 
 	/*
@@ -1293,7 +1288,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		connectUsingIp = true;
 		scheduleNextConnectionCheck(getConnRetryTime());
 	}
-	public void destroyMqtt()
+	@SuppressLint("NewApi") public void destroyMqtt()
 	{
 		try
 		{
@@ -1553,5 +1548,60 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 		}
 	}
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
 
+		Message msg;
+		if (HikePubSub.TOKEN_CREATED.equals(type))
+		{
+			msg = Message.obtain();
+			msg.what = HikeService.MSG_APP_TOKEN_CREATED;
+			msg.replyTo = this.mMessenger;
+		}
+		else
+		{
+			JSONObject o = (JSONObject) object;
+			String data = o.toString();
+			msg = Message.obtain();
+			msg.what = HikeService.MSG_APP_PUBLISH;
+			Bundle bundle = new Bundle();
+			bundle.putString(HikeConstants.MESSAGE, data);
+
+			/* set the QoS */
+			msg.arg1 = HikePubSub.MQTT_PUBLISH_LOW.equals(type) ? 0 : 1;
+
+			/*
+			 * if this is a message, then grab the messageId out of the json object so we can get confirmation of success/failure
+			 */
+			if (HikeConstants.MqttMessageTypes.MESSAGE.equals(o.optString(HikeConstants.TYPE)) || (HikeConstants.MqttMessageTypes.INVITE.equals(o.optString(HikeConstants.TYPE))))
+			{
+				JSONObject json = o.optJSONObject(HikeConstants.DATA);
+				long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
+				bundle.putLong(HikeConstants.MESSAGE_ID, msgId);
+			}
+			
+			if (HikeConstants.MqttMessageTypes.MULTIPLE_FORWARD.equals(o.optString(HikeConstants.SUB_TYPE)))
+			{
+				msg.arg2 = HikeConstants.MULTI_FORWARD_MESSAGE_TYPE;
+			}
+			else
+			{
+				msg.arg2 = HikeConstants.NORMAL_MESSAGE_TYPE;
+			}
+
+			msg.setData(bundle);
+			msg.replyTo = this.mMessenger;
+		}
+
+		try
+		{
+			mMessenger.send(msg);
+		}
+		catch (RemoteException e)
+		{
+			/* Service is dead. What to do? */
+			Logger.e("HikeServiceConnection", "Remote Service dead", e);
+		}
+	}
 }

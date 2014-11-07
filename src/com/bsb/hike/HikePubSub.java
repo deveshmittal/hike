@@ -375,24 +375,14 @@ public class HikePubSub implements Runnable
 	public static String HIKE_TO_OFFLINE_PUSH = "hikeToOfflinePush";
 
 	public static String PROFILE_UPDATE_FINISH = "profileUpdateFinish";
+
+	public static String HIKE_SDK_MESSAGE = "hikeSDKMessage";
 	
 	public static final String CONV_META_DATA_UPDATED = "convMetaDataUpdated";
 	
 	public static final String LATEST_PIN_DELETED = "lastPinDeleted";
 	
 	public static final String UNREAD_PIN_COUNT_RESET = "pinCountReset";
-	
-	/**
-	 * Hike SDK pub sub events
-	 */
-	public static final String SDK_REQ_GET_USERS = "sdkGetUsers";
-	
-	public static final String SDK_REQ_GET_INFO = "sdkGetInfo";
-	
-	public static final String SDK_REQ_SEND_MSG = "sdkSendMessage";
-	
-	public static final String HIKE_SDK_MESSAGE = "hikeSdkMessage";
-	
 	
 	private final Thread mThread;
 

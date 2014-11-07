@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -44,6 +45,8 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.platform.HikeSDKRequestHandler;
+import com.bsb.hike.service.HikeMqttManagerNew.IncomingHandler;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
@@ -170,10 +173,14 @@ public class HikeService extends Service
 
 	private ContactsChanged mContactsChanged;
 
-	private Looper mContactHandlerLooper;
+	private Looper mHikeUtilLooper;
 
 	private StickerManager sm;
 
+	private HikeSDKRequestHandler mHikeSDKRequestHandler;
+
+	private Messenger mSDKRequestMessenger;
+	
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -184,6 +191,10 @@ public class HikeService extends Service
 	public void onCreate()
 	{
 		super.onCreate();
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED, null);
+		
+		HikeService.this.sendBroadcast(new Intent(HikeService.SEND_RAI_TO_SERVER_ACTION));
 
 		Logger.d("TestUpdate", "Service started");
 
@@ -220,11 +231,7 @@ public class HikeService extends Service
 		 * notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent); startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 		 */
 
-		HandlerThread contactHandlerThread = new HandlerThread("");
-		contactHandlerThread.start();
-		mContactHandlerLooper = contactHandlerThread.getLooper();
-		mContactsChangedHandler = new Handler(mContactHandlerLooper);
-		mContactsChanged = new ContactsChanged(this);
+		initializeAndAssignUtilityThread();
 
 		/*
 		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of
@@ -284,6 +291,47 @@ public class HikeService extends Service
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
 		setupStickers();
+	}
+
+	private void initializeAndAssignUtilityThread()
+	{
+		/**
+		 * Make hike utility thread
+		 */
+		HandlerThread hikeUtilHandlerThread = new HandlerThread("HIKE_UTIL")
+		{
+			@Override
+			public void run()
+			{
+				super.run();
+				Looper.prepare();
+				/**
+				 * Extract utility looper
+				 */
+				mHikeUtilLooper = Looper.myLooper();
+				
+				/**
+				 * Make SDK request handler with utility looper
+				 */
+				mHikeSDKRequestHandler = new HikeSDKRequestHandler(HikeService.this.getApplicationContext(), mHikeUtilLooper);
+				
+				mSDKRequestMessenger = new Messenger(mHikeSDKRequestHandler);
+				
+				/**
+				 * Make contact changed handler with utility looper
+				 */
+				mContactsChangedHandler = new Handler(mHikeUtilLooper);
+				
+				mContactsChanged = new ContactsChanged(HikeService.this);
+				
+				contactsReceived.onChange(true);
+				
+				Looper.loop();
+				
+			}
+		};
+		hikeUtilHandlerThread.start();
+		
 	}
 
 	private void setupStickers()
@@ -424,9 +472,9 @@ public class HikeService extends Service
 			contactsReceived = null;
 		}
 
-		if (mContactHandlerLooper != null)
+		if (mHikeUtilLooper != null)
 		{
-			mContactHandlerLooper.quit();
+			mHikeUtilLooper.quit();
 		}
 
 		if (manualContactSyncTrigger != null)
@@ -498,7 +546,7 @@ public class HikeService extends Service
 	@Override
 	public IBinder onBind(Intent intent)
 	{
-		return mMqttManager.getMessenger().getBinder();
+		return mSDKRequestMessenger.getBinder();
 	}
 
 	/************************************************************************/
@@ -522,14 +570,17 @@ public class HikeService extends Service
 				Logger.d(getClass().getSimpleName(),"Contact Syncing already going on");
 			else
 			{
-				mContactsChanged.manualSync = manualSync;
-				HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
-				long delay = manualSync ? 0L: HikeConstants.CONTACT_UPDATE_TIMEOUT;
-				HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, delay);
-				// Schedule the next manual sync to happed 24 hours from now.
-				scheduleNextManualContactSync();
-
-				manualSync = false;
+				if(mContactsChanged!=null)
+				{
+					mContactsChanged.manualSync = manualSync;
+					HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
+					long delay = manualSync ? 0L: HikeConstants.CONTACT_UPDATE_TIMEOUT;
+					HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, delay);
+					// Schedule the next manual sync to happed 24 hours from now.
+					scheduleNextManualContactSync();
+	
+					manualSync = false;
+				}
 			}
 		}
 	}
