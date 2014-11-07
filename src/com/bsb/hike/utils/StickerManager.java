@@ -55,6 +55,7 @@ import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class StickerManager
@@ -1276,9 +1277,9 @@ public class StickerManager
 					// TODO Auto-generated method stub
 					
 				}
-				
+
 				@Override
-				public void onFailure(Object result, Throwable exception)
+				public void onFailure(Object result, StickerException exception)
 				{
 					// TODO Auto-generated method stub
 					

@@ -32,6 +32,7 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.StickerManager;
 
@@ -186,7 +187,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 			}
 
 			@Override
-			public void onFailure(Object result, Throwable exception)
+			public void onFailure(Object result, StickerException exception)
 			{
 				//footerView.setVisibility(View.GONE);
 				if (!isAdded())

@@ -102,6 +102,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.DownloadSingleStickerTask;
@@ -820,11 +821,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 							// TODO Auto-generated method stub
 							
 						}
-						
+
 						@Override
-						public void onFailure(Object result, Throwable exception)
+						public void onFailure(Object result, StickerException exception)
 						{
-							// TODO Auto-generated method stub
 							if(result == null)
 							{
 								return ;

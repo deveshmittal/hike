@@ -70,6 +70,11 @@ public class StickerSizeDownloadTask extends BaseStickerDownloadTask
 				return STResult.DOWNLOAD_FAILED;
 			}
 		}
+		catch (StickerException e)
+		{
+			setException(e);
+			return STResult.DOWNLOAD_FAILED;
+		}
 		catch (Exception e)
 		{
 			setException(new StickerException(e));
