@@ -578,6 +578,8 @@ public class HikeConstants
 
 	public static final int NETWORK_ERROR_POP_UP_TIME = 120 * 1000;
 
+	public static final int BACKUP_RESTORE_UI_DELAY = 2 * 1000; 
+
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 
 	public static final String ADAPTER_NAME = "hikeadapter";
@@ -1002,8 +1004,6 @@ public class HikeConstants
 		public static final String SIGNUP_TASK_RUNNING = "signupTaskRunning";
 
 		public static final String SIGNUP_PART = "signupPart";
-
-		public static final String SIGNUP_RESTORE_STATUS = "signupRestoreStatus";
 
 		public static final String SIGNUP_TEXT = "signupText";
 
