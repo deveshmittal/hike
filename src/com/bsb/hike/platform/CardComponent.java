@@ -1,5 +1,9 @@
 package com.bsb.hike.platform;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.smartcache.HikeLruCache;
+import org.json.JSONObject;
+
 public class CardComponent {
 	protected String tag;
 	public CardComponent(String tag) {
@@ -94,4 +98,17 @@ public class CardComponent {
 		}
 
 	}
+
+    public static class ActionComponent extends CardComponent{
+        private JSONObject android_intent;
+
+        public ActionComponent(String tag, JSONObject android) {
+            super(tag);
+            this.android_intent = android;
+        }
+
+        public JSONObject getAndroidIntent() {
+            return android_intent;
+        }
+    }
 }

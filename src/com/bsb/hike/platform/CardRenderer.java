@@ -17,15 +17,16 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.smartcache.HikeLruCache;
-import com.bsb.hike.utils.Logger;
 
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 /**
  * Created by shobhit on 29/10/14.
  */
-public class CardRenderer {
+public class CardRenderer implements View.OnLongClickListener {
 
     Context mContext;
     HikeLruCache hikeLruCache;
@@ -46,12 +47,14 @@ public class CardRenderer {
     private static final int ARTICLE_CARD_LAYOUT_RECEIVED = 7;
 
 
+
+
     public static class ViewHolder extends MessagesAdapter.DetailViewHolder
     {
 
         HashMap<String, View> viewHashMap;
 
-        public void initializeHolder( View view, List<CardComponent.TextComponent> textComponentList, List<CardComponent.MediaComponent> mediaComponentList) {
+        public void initializeHolder(View view, List<CardComponent.TextComponent> textComponentList, List<CardComponent.MediaComponent> mediaComponentList, ArrayList<CardComponent.ActionComponent> actionComponents) {
 
             viewHashMap = new HashMap<String, View>();
             time = (TextView) view.findViewById(R.id.time);
@@ -71,6 +74,12 @@ public class CardRenderer {
 
             for (CardComponent.MediaComponent mediaComponent : mediaComponentList) {
                 String tag = mediaComponent.getTag();
+                if (!TextUtils.isEmpty(tag))
+                    viewHashMap.put(tag, view.findViewWithTag(tag));
+            }
+
+            for (CardComponent.ActionComponent actionComponent : actionComponents) {
+                String tag = actionComponent.getTag();
                 if (!TextUtils.isEmpty(tag))
                     viewHashMap.put(tag, view.findViewWithTag(tag));
             }
@@ -149,6 +158,7 @@ public class CardRenderer {
         int cardType = convMessage.platformMessageMetadata.layoutId;
         List<CardComponent.TextComponent> textComponents = convMessage.platformMessageMetadata.textComponents;
         List<CardComponent.MediaComponent> mediaComponents = convMessage.platformMessageMetadata.mediaComponents;
+        ArrayList<CardComponent.ActionComponent> actionComponents = convMessage.platformMessageMetadata.actionComponents;
 
         if (cardType == CardConstants.IMAGE_CARD_LAYOUT)
         {
@@ -162,7 +172,7 @@ public class CardRenderer {
                     view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
-                viewHolder.initializeHolder(view, textComponents, mediaComponents);
+                viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
 
                 view.setTag(viewHolder);
             }
@@ -171,6 +181,7 @@ public class CardRenderer {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
+            cardCallToActions(actionComponents, viewHolder);
             cardDataFiller(textComponents, mediaComponents, viewHolder);
 
         }
@@ -186,7 +197,7 @@ public class CardRenderer {
                     view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
-                viewHolder.initializeHolder(view, textComponents, mediaComponents);
+                viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
 
                 view.setTag(viewHolder);
             }
@@ -195,6 +206,7 @@ public class CardRenderer {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
+            cardCallToActions(actionComponents, viewHolder);
             cardDataFiller(textComponents, mediaComponents, viewHolder);
 
         }
@@ -211,15 +223,17 @@ public class CardRenderer {
                     view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
-                viewHolder.initializeHolder(view, textComponents, mediaComponents);
+                viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
 
                 view.setTag(viewHolder);
+
             }
             else
             {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
+            cardCallToActions(actionComponents, viewHolder);
             cardDataFiller(textComponents, mediaComponents, viewHolder);
 
 
@@ -236,7 +250,7 @@ public class CardRenderer {
                     view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
-                viewHolder.initializeHolder(view, textComponents, mediaComponents);
+                viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
 
                 view.setTag(viewHolder);
             }
@@ -245,11 +259,34 @@ public class CardRenderer {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
+            cardCallToActions(actionComponents, viewHolder);
             cardDataFiller(textComponents, mediaComponents, viewHolder);
 
         }
 
         return view;
+    }
+
+    private void cardCallToActions(ArrayList<CardComponent.ActionComponent> actionComponents, ViewHolder viewHolder) {
+        for (final CardComponent.ActionComponent actionComponent : actionComponents) {
+            String tag = actionComponent.getTag();
+            if (!TextUtils.isEmpty(tag)) {
+
+                View actionView =  viewHolder.viewHashMap.get(tag);
+                actionView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            CardController.callToAction(actionComponent.getAndroidIntent(), mContext);
+                        } catch (URISyntaxException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+                actionView.setOnLongClickListener(this);
+            }
+        }
     }
 
 
@@ -304,6 +341,13 @@ public class CardRenderer {
 
         }
     }
+
+    @Override
+    public boolean onLongClick(View v) {
+        return false;
+    }
+
+
 
 
 }

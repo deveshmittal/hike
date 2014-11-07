@@ -16,8 +16,9 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 	public int layoutId;
 	public int loveId;
 	
-	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();;
-	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();;
+	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();
+	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();
+    public ArrayList<CardComponent.ActionComponent> actionComponents = new ArrayList<CardComponent.ActionComponent>();
 	private JSONObject json;
 	public PlatformMessageMetadata(String jsonString) throws JSONException {
 		this(new JSONObject(jsonString));
@@ -46,6 +47,10 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 					if(assets.has(AUDIO)){
 						parseAudioComponents(assets.getJSONArray(AUDIO));
 					}
+                    if(assets.has(ACTIONS)){
+                        parseActionComponents(assets.getJSONArray(ACTIONS));
+                    }
+
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -53,7 +58,25 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 		}
 	}
 
-	private void parseTextComponents(JSONArray json) {
+    private void parseActionComponents(JSONArray jsonArray) {
+
+        int total = jsonArray.length();
+
+        for (int i = 0; i < total; i++) {
+            try {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                CardComponent.ActionComponent actionComponent = new CardComponent.ActionComponent(obj.optString(TAG),
+                        obj.optJSONObject(ANDROID_INTENT));
+                actionComponents.add(actionComponent);
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private void parseTextComponents(JSONArray json) {
 		int total = json.length();
 
 		for (int i = 0; i < total; i++) {
