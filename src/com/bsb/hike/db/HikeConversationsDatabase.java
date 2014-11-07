@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import android.R.integer;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -32,6 +33,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
@@ -254,6 +256,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
+		if (oldVersion < newVersion)
+		{
+			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+			Editor editor = appPrefs.edit();
+			editor.putInt(HikeConstants.PREVIOUS_CONV_DB_VERSION, oldVersion);
+			editor.commit();
+		}
 		if (db == null)
 		{
 			db = mDb;
@@ -624,6 +633,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	public void upgrade(int oldVersion, int newVersion)
+	{
+		onUpgrade(mDb, oldVersion, newVersion);
+	}
+	
+	public void clearTable(String table)
+	{
+		mDb.delete(table, null, null);
+	}
+
 	private String getStatusTableCreationStatement()
 	{
 		return "CREATE TABLE IF NOT EXISTS " + DBConstants.STATUS_TABLE
@@ -977,7 +996,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					}
 					else
 					{
-						return;
+						continue;
 					}
 
 					JSONArray readByArray;
@@ -1001,10 +1020,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					/*
 					 * Checking if this number has already been added.
 					 */
-					boolean alreadyAdded = false;
 					for (String msisdn : pair.getFirst().getSecond())
 					{
-						for (int i = 0; i < readByArray.length(); i++)
+						boolean alreadyAdded = false;
+						int length = readByArray.length();
+						
+						for (int i = 0; i < length; i++)
 						{
 							if (readByArray.optString(i).equals(msisdn))
 							{
@@ -4586,6 +4607,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN + "=?", new String[] { msisdn });
 	}
+	
+	public void resetConversationsStealthStatus()
+	{
+		ContentValues values = new ContentValues();
+		values.put(DBConstants.IS_STEALTH, 0);
+		
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, null, null);
+	}
 
 	public void addStealthMsisdnToMap()
 	{
@@ -5581,20 +5610,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				contentValues.put(DBConstants.IS_CUSTOM, isCustom);
 				contentValues.put(DBConstants.CATEGORY_INDEX, catIndex);
 
-				if (isVisible == 1)
-				{
-					mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
-					if (!mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(downloadPreference, false))
-					{
-						ContentValues contentValues2 = getContentValuesForStickerShopTable(categoryId, categoryName, 0);
-						mDb.insert(DBConstants.STICKER_SHOP_TABLE, null, contentValues2);
-					}
-				}
-				else
-				{
-					ContentValues contentValues2 = getContentValuesForStickerShopTable(categoryId, categoryName, 0);
-					mDb.insert(DBConstants.STICKER_SHOP_TABLE, null, contentValues2);
-				}
+				mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
 			}
 			/*
 			 * Now we can drop the old stickers_table.
@@ -5717,32 +5733,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return c;
 	}
 	
-
-	public void freshUpgradeForStickerShopVersion1()
-	{
-		try
-		{
-			mDb.beginTransaction();
-			
-			mDb.execSQL("DROP TABLE " + DBConstants.STICKER_CATEGORIES_TABLE);
-			mDb.execSQL("DROP TABLE " + DBConstants.STICKER_SHOP_TABLE);
-			mDb.execSQL(getStickerCategoryTableCreateQuery());
-			mDb.execSQL(getStickerShopTableCreateQuery());
-			
-			insertAllCategoriesToStickersTable();
-			mDb.setTransactionSuccessful();
-		}
-		catch (Exception e)
-		{
-			Logger.e(getClass().getSimpleName(), "Exception : ", e);
-			e.printStackTrace();
-		}
-		finally
-		{
-			mDb.endTransaction();
-		}
-	}
-
 	public void clearStickerShop()
 	{
 		mDb.delete(DBConstants.STICKER_SHOP_TABLE, null, null);
