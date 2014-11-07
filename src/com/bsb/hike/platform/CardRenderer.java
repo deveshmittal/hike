@@ -306,40 +306,21 @@ public class CardRenderer implements View.OnLongClickListener {
             if (!TextUtils.isEmpty(tag)) {
                 View mediaView = viewHolder.viewHashMap.get(tag);
                 if (mediaView instanceof ImageView) {
-                    BitmapDrawable value = null;
                     String data = mediaComponent.getKey();
-                    Bitmap bitmap = HikeBitmapFactory.stringToBitmap(mediaComponent.getBase64());
-                    if (hikeLruCache != null)
-                    {
+                    String base64 = mediaComponent.getBase64();
+                    BitmapDrawable value = hikeLruCache.getBitmapDrawableFromBase64(data, base64);
 
-                        value = hikeLruCache.get(data);
-                        // if bitmap is found in cache and is recyclyed, remove this from cache and make thread get new Bitmap
-                        if (null != value && value.getBitmap().isRecycled())
-                        {
-                            hikeLruCache.remove(data);
-                            value = null;
-                        }
+                    if (null == value) {
+                        Bitmap bitmap = HikeBitmapFactory.stringToBitmap(base64);
+                        value = HikeBitmapFactory.getBitmapDrawable(bitmap);
                     }
-
-                    if (null != value)
-                    {
-                        Logger.d(CardRenderer.class.getSimpleName(), data + " Bitmap found in cache and is not recycled.");
-                        // Bitmap found in memory cache
-                        ((ImageView) mediaView).setImageDrawable(value);
-                    }
-                    else if (null != bitmap) {
-                        BitmapDrawable bitmapDrawable = HikeBitmapFactory.getBitmapDrawable(bitmap);
-                        ((ImageView) mediaView).setImageDrawable(bitmapDrawable);
-
-                        if (null != hikeLruCache)
-                            hikeLruCache.putInCache(data, bitmapDrawable);
-
-                    }
+                    ((ImageView) mediaView).setImageDrawable(value);
 
                 }
-            }
 
+            }
         }
+
     }
 
     @Override

@@ -39,7 +39,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 						parseTextComponents(assets.getJSONArray(TEXTS));
 					}
 					if (assets.has(IMAGES)) {
-						parseImageComponents(json.getJSONArray(IMAGES));
+						parseImageComponents(assets.getJSONArray(IMAGES));
 					}
 					if(assets.has(VIDEOS)){
 						parseVideoComponents(assets.getJSONArray(VIDEOS));
