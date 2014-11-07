@@ -507,7 +507,7 @@ public class HikeConstants
 	
 	public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
 	
-	public static final String SHOW_NUX_SCREEN = "showNuxScreen";
+	public static final String SHOW_NUX_SCREEN = "show_nux_screen";
 		
 	public static final String NUX_STICKER_DETAILS = "nuxStickerDetails";
 	
@@ -952,7 +952,8 @@ public class HikeConstants
 	public static final String SUCCESSFUL_SELECTIONS = "s";
 	
 	public static final String DRAWABLE = "drawable";
-
+	
+	public static final String NUX_STICKERS = "stickers";
 	
 	public static final class ResultCodes
 	{

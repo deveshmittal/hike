@@ -533,37 +533,18 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
 				JSONObject nuxDetails = AccountUtils.setProfile(userName, birthdate, isFemale.booleanValue());
 				
-				// TODO showNuxScreen and nuxStickerDetails will be obtained from nuxDetails json Object when server starts sending these values
-				boolean showNuxScreen = true;
-				String nuxStickerDetails = null;
-				/*Temporary code*/
-				try
+				boolean showNuxScreen = false;
+				String nuxStickers = null;
+				if (null != nuxDetails)
 				{
-					JSONObject jj = new JSONObject();
-					JSONArray arr = new JSONArray();
-					String hum = StickerManager.HUMANOID;
-					String exp = StickerManager.EXPRESSIONS;
-					JSONObject j1 = new JSONObject().put("stickerid", "002_lol.png").put("category", exp);
-					JSONObject j2 = new JSONObject().put("stickerid", "003_teasing.png").put("category", hum);
-					JSONObject j3 = new JSONObject().put("stickerid", "113_whereareyou.png").put("category", exp);
-					JSONObject j4 = new JSONObject().put("stickerid", "069_hi.png").put("category", hum);
-					arr.put(j1);
-					arr.put(j2);
-					arr.put(j3);
-					arr.put(j4);
-					jj.put("data", arr);
-					nuxStickerDetails = jj.toString();
+					showNuxScreen = nuxDetails.optBoolean(HikeConstants.SHOW_NUX_SCREEN);
+					JSONArray nuxStickerDetailsJson = nuxDetails.optJSONArray(HikeConstants.NUX_STICKERS);
+					nuxStickers = nuxStickerDetailsJson.toString();
 				}
-				catch (JSONException e)
-				{
-					e.printStackTrace();
-				}
-				/**/
-				
 				Editor editor = settings.edit();
 				editor.putInt(HikeConstants.HIKE_CONTACTS_COUNT, numOfHikeContactsCount);
 				editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, showNuxScreen);
-				editor.putString(HikeConstants.NUX_STICKER_DETAILS, nuxStickerDetails);
+				editor.putString(HikeConstants.NUX_STICKER_DETAILS, nuxStickers);
 				editor.commit();
 			}
 			catch (InterruptedException e)

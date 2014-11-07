@@ -75,13 +75,12 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity
 		{
 			try
 			{
-				JSONObject nuxStickerDetailsObj = new JSONObject(nuxStickerDetails);
-				JSONArray arr = nuxStickerDetailsObj.getJSONArray("data");
+				JSONArray arr = new JSONArray(nuxStickerDetails);
 				for (int i = 0; i < arr.length(); ++i)
 				{
 					JSONObject j = (JSONObject) arr.get(i);
-					String category = j.getString("category");
-					String stickerId = j.getString("stickerid");
+					String category = j.getString(StickerManager.CATEGORY_ID);
+					String stickerId = j.getString(StickerManager.STICKER_ID);
 					Sticker s = new Sticker(category, stickerId);
 					Logger.d(TAG, " stickers category " + category + "  id : " + stickerId);
 					stickers.add(s);
