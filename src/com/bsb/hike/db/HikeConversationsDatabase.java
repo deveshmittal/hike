@@ -5686,9 +5686,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				ContentValues contentValues = new ContentValues();
 				contentValues.put(DBConstants._ID, catId);
+				int isVisible = 0;
 				if(jsonObj.has(HikeConstants.VISIBLITY))
 				{
-					contentValues.put(DBConstants.IS_VISIBLE, jsonObj.getInt(HikeConstants.VISIBLITY));
+					isVisible = jsonObj.getInt(HikeConstants.VISIBLITY);
+					contentValues.put(DBConstants.IS_VISIBLE, isVisible);
 				}
 				if(jsonObj.has(HikeConstants.CAT_NAME))
 				{
@@ -5703,9 +5705,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					contentValues.put(DBConstants.CATEGORY_SIZE, jsonObj.getInt(HikeConstants.SIZE));
 				}
 
-				mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { catId });
+				int rowsAffected = mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { catId });
+				/*
+				 * if row is not there in stickerCategoriesTable and server specifically tells us to switch on the visibility 
+				 * then we need to insert this item in stickerCategoriesTable
+				 */
+				if(isVisible == 1 && rowsAffected == 0)
+				{
+					mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
+				}
 				mDb.insertWithOnConflict(DBConstants.STICKER_SHOP_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
-			
 			}
 			mDb.setTransactionSuccessful();
 		}
