@@ -28,6 +28,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.R.anim;
 import com.bsb.hike.DragSortListView.DragSortListView;
 import com.bsb.hike.DragSortListView.DragSortListView.DragScrollProfile;
 import com.bsb.hike.DragSortListView.DragSortListView.DropListener;
@@ -220,7 +221,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	{
 		if(!prefs.getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))  //Showing the tip here
 		{
-			final View parent = getView();
+			final View parent = getView().findViewById(R.id.list_ll);
 			final View v =(View) parent.findViewById(R.id.reorder_tip);
 			v.setVisibility(View.VISIBLE);
 			
@@ -250,19 +251,18 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 						tipText.setTextColor(getResources().getColor(R.color.white));
 						((View) parent).findViewById(R.id.drag_tip_subtext).setVisibility(View.GONE);
 						v.setBackgroundColor(getResources().getColor(R.color.sticker_drag_tip_bg_color));
-
+						
 						TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, 0,
 								Animation.ABSOLUTE, -v.getHeight());
 						animation.setDuration(400);
-						animation.setStartOffset(300);
-						mDslv.setAnimation(animation);
-
+						animation.setStartOffset(800);
+						parent.setAnimation(animation);
+						
 						animation.setAnimationListener(new AnimationListener()
 						{
 							@Override
 							public void onAnimationStart(Animation animation)
 							{
-
 							}
 
 							@Override

@@ -4,6 +4,12 @@
     android:layout_height="match_parent"
     android:background="@color/white" >
     
+    <LinearLayout 
+        android:id="@+id/list_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+    
     <RelativeLayout
         android:id="@+id/reorder_tip"
         android:layout_width="match_parent"
@@ -75,6 +81,8 @@
         dslv:use_default_controller="true"
         android:layout_below="@id/reorder_tip"
         android:scrollbarStyle="outsideOverlay"/>
+    
+    </LinearLayout>
 
    <LinearLayout
         android:id="@+id/update_all_ll"
