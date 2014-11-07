@@ -6,6 +6,7 @@
     android:orientation="vertical" >
 
     
+    
     <LinearLayout
         android:id="@+id/ll_commitId_branch_version"
         android:layout_width="match_parent"
