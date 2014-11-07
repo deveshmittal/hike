@@ -345,7 +345,7 @@ public class ConvMessage
 				this.messageType = mdata.getInt(HikeConstants.PIN_MESSAGE);
 			}
 			// TODO : We should parse metadata based on message type, so doing now for content, we should clean the else part sometime
-			if(HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE.equals(data.optString(HikeConstants.SUB_TYPE))){
+			if(HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE))){
 				this.messageType  = MESSAGE_TYPE.CONTENT;
 				platformMessageMetadata  = new PlatformMessageMetadata(data.getJSONObject(HikeConstants.METADATA));
 			}else{
