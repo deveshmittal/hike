@@ -5610,7 +5610,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				contentValues.put(DBConstants.IS_CUSTOM, isCustom);
 				contentValues.put(DBConstants.CATEGORY_INDEX, catIndex);
 
-				mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
+				if(isVisible == 1)
+				{
+					mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
+				}
 			}
 			/*
 			 * Now we can drop the old stickers_table.
