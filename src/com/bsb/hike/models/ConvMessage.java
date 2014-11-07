@@ -1,17 +1,7 @@
 package com.bsb.hike.models;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.ocpsoft.prettytime.PrettyTime;
-
 import android.content.Context;
 import android.text.TextUtils;
-
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.ConvMessagePacketKeys;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
@@ -22,6 +12,9 @@ import com.bsb.hike.platform.ContentLove;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ConvMessage
 {
@@ -42,7 +35,7 @@ public class ConvMessage
 
 	private boolean mIsSMS;
 
-	private State mState;
+	private State mState = State.SENT_UNCONFIRMED;
 
 	private boolean mInvite;
 
@@ -212,6 +205,7 @@ public class ConvMessage
 	}
 
 	public ConvMessage(){
+        this.mTimestamp = System.currentTimeMillis()/1000;
 		
 	}
 	public ConvMessage(int unreadCount, long timestamp, long msgId)
@@ -351,13 +345,13 @@ public class ConvMessage
 				this.messageType = mdata.getInt(HikeConstants.PIN_MESSAGE);
 			}
 			// TODO : We should parse metadata based on message type, so doing now for content, we should clean the else part sometime
-			if(HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE.equals(data.get(HikeConstants.SUB_TYPE))){
+			if(HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE))){
 				this.messageType  = MESSAGE_TYPE.CONTENT;
 				platformMessageMetadata  = new PlatformMessageMetadata(data.getJSONObject(HikeConstants.METADATA));
 			}else{
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
 		}
-		}else if(HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE.equals(data.getString(HikeConstants.SUB_TYPE))){
+		}else if(HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE.equals(data.optString(HikeConstants.SUB_TYPE))){
 			this.messageType = MESSAGE_TYPE.CONTENT;
 		}
 		this.isStickerMessage = HikeConstants.STICKER.equals(obj.optString(HikeConstants.SUB_TYPE));
@@ -695,7 +689,7 @@ public class ConvMessage
 				switch(messageType){
 				case MESSAGE_TYPE.CONTENT:
 					object.put(HikeConstants.SUB_TYPE, ConvMessagePacketKeys.CONTENT_TYPE);
-					object.put(HikeConstants.METADATA, platformMessageMetadata.toJSON());
+					data.put(HikeConstants.METADATA, platformMessageMetadata.getJSON());
 					break;
 				}
 				

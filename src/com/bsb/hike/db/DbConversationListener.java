@@ -1,15 +1,5 @@
 package com.bsb.hike.db;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
@@ -19,30 +9,28 @@ import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Pair;
-
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
-import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.*;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.FtueContactInfo;
-import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.models.MultipleConvMessage;
-import com.bsb.hike.models.Protip;
-import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.HikeSDKMessageFilter;
-import com.bsb.hike.sdk.HikeSDK;
 import com.bsb.hike.service.SmsMessageStatusReceiver;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 public class DbConversationListener implements Listener
 {
@@ -407,14 +395,28 @@ public class DbConversationListener implements Listener
 	}
 	
 	private void handleHikeSdkMessage(Object object){
-		if(object instanceof JSONObject){
-		List<ConvMessage> listOfMessages = HikeSDKMessageFilter.filterMessage((JSONObject) object);
-		if(listOfMessages!=null){
-		HikeConversationsDatabase.getInstance().addConversations(listOfMessages);
+	//	if(object instanceof JSONObject){
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject((String) object);
+            JSONObject parseJSON = new JSONObject(jsonObject.optString("message"));
+            List<ConvMessage> listOfMessages = HikeSDKMessageFilter.filterMessage((JSONObject) parseJSON);
+            if(listOfMessages!=null) {
+                HikeConversationsDatabase.getInstance().addConversations(listOfMessages);
+                for(ConvMessage cm : listOfMessages){
+                    mPubSub.publish(HikePubSub.MQTT_PUBLISH, cm.serialize());
+
+                }
+            }
+        } catch (JSONException e) {
+
+            e.printStackTrace();
+        }
+
 		// publish MQTT and update UI here
-			}
+		//	}
 		}
-	}
+
 
 	private void sendNativeSMSFallbackLogEvent(boolean onHike, boolean userOnline, int numMessages)
 	{

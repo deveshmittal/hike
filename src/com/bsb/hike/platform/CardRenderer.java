@@ -1,6 +1,8 @@
 package com.bsb.hike.platform;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,22 +12,28 @@ import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.smartcache.HikeLruCache;
 
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 /**
  * Created by shobhit on 29/10/14.
  */
-public class CardRenderer {
+public class CardRenderer implements View.OnLongClickListener {
 
     Context mContext;
-    int cardType;
+    HikeLruCache hikeLruCache;
 
     public CardRenderer(Context context){
         this.mContext = context;
+        hikeLruCache = HikeMessengerApp.getLruCache();
 
     }
 
@@ -39,25 +47,14 @@ public class CardRenderer {
     private static final int ARTICLE_CARD_LAYOUT_RECEIVED = 7;
 
 
-    private static class ViewHolder
+
+
+    public static class ViewHolder extends MessagesAdapter.DetailViewHolder
     {
-        ViewStub dayStub;
-        View dayStubInflated;
-        ImageView status;
-        TextView time;
-        View timeStatus;
-        View senderDetails;
-        TextView senderName;
-        TextView senderNameUnsaved;
-        ImageView avatarImage;
-        ViewGroup avatarContainer;
-        View selectedStateOverlay;
-        ViewGroup messageContainer;
-        ViewStub messageInfoStub;
-        View messageInfoInflated;
+
         HashMap<String, View> viewHashMap;
 
-        public void initializeHolder( View view, List<CardComponent.TextComponent> textComponentList, List<CardComponent.MediaComponent> mediaComponentList) {
+        public void initializeHolder(View view, List<CardComponent.TextComponent> textComponentList, List<CardComponent.MediaComponent> mediaComponentList, ArrayList<CardComponent.ActionComponent> actionComponents) {
 
             viewHashMap = new HashMap<String, View>();
             time = (TextView) view.findViewById(R.id.time);
@@ -66,6 +63,8 @@ public class CardRenderer {
             selectedStateOverlay = view.findViewById(R.id.selected_state_overlay);
             messageContainer = (ViewGroup) view.findViewById(R.id.message_container);
             dayStub = (ViewStub) view.findViewById(R.id.day_stub);
+            messageInfoStub = (ViewStub) view.findViewById(R.id.message_info_stub);
+
 
             for (CardComponent.TextComponent textComponent : textComponentList) {
                 String tag = textComponent.getTag();
@@ -75,6 +74,12 @@ public class CardRenderer {
 
             for (CardComponent.MediaComponent mediaComponent : mediaComponentList) {
                 String tag = mediaComponent.getTag();
+                if (!TextUtils.isEmpty(tag))
+                    viewHashMap.put(tag, view.findViewWithTag(tag));
+            }
+
+            for (CardComponent.ActionComponent actionComponent : actionComponents) {
+                String tag = actionComponent.getTag();
                 if (!TextUtils.isEmpty(tag))
                     viewHashMap.put(tag, view.findViewWithTag(tag));
             }
@@ -107,7 +112,7 @@ public class CardRenderer {
     public int getItemViewType(ConvMessage convMessage) {
 
         Log.d(CardRenderer.class.getSimpleName(), "hash code for convMessage is " + String.valueOf(convMessage.hashCode()));
-        cardType = convMessage.platformMessageMetadata.layoutId;
+        int cardType = convMessage.platformMessageMetadata.layoutId;
         if (convMessage.isSent()) {
 
             switch (cardType) {
@@ -150,8 +155,10 @@ public class CardRenderer {
 
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+        int cardType = convMessage.platformMessageMetadata.layoutId;
         List<CardComponent.TextComponent> textComponents = convMessage.platformMessageMetadata.textComponents;
         List<CardComponent.MediaComponent> mediaComponents = convMessage.platformMessageMetadata.mediaComponents;
+        ArrayList<CardComponent.ActionComponent> actionComponents = convMessage.platformMessageMetadata.actionComponents;
 
         if (cardType == CardConstants.IMAGE_CARD_LAYOUT)
         {
@@ -159,13 +166,13 @@ public class CardRenderer {
             if (view == null){
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_games_received, null);
+                    view = inflater.inflate(R.layout.card_layout_games_sent, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
                     view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
-                viewHolder.initializeHolder(view, textComponents, mediaComponents);
+                viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
 
                 view.setTag(viewHolder);
             }
@@ -174,6 +181,7 @@ public class CardRenderer {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
+            cardCallToActions(actionComponents, viewHolder);
             cardDataFiller(textComponents, mediaComponents, viewHolder);
 
         }
@@ -183,13 +191,13 @@ public class CardRenderer {
             if (view == null){
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_games_received, null);
+                    view = inflater.inflate(R.layout.card_layout_games_sent, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
                     view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
-                viewHolder.initializeHolder(view, textComponents, mediaComponents);
+                viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
 
                 view.setTag(viewHolder);
             }
@@ -198,6 +206,7 @@ public class CardRenderer {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
+            cardCallToActions(actionComponents, viewHolder);
             cardDataFiller(textComponents, mediaComponents, viewHolder);
 
         }
@@ -214,15 +223,17 @@ public class CardRenderer {
                     view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
-                viewHolder.initializeHolder(view, textComponents, mediaComponents);
+                viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
 
                 view.setTag(viewHolder);
+
             }
             else
             {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
+            cardCallToActions(actionComponents, viewHolder);
             cardDataFiller(textComponents, mediaComponents, viewHolder);
 
 
@@ -233,13 +244,13 @@ public class CardRenderer {
             if (view == null){
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_games_received, null);
+                    view = inflater.inflate(R.layout.card_layout_games_sent, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
                     view = inflater.inflate(R.layout.card_layout_games_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
-                viewHolder.initializeHolder(view, textComponents, mediaComponents);
+                viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
 
                 view.setTag(viewHolder);
             }
@@ -248,11 +259,34 @@ public class CardRenderer {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
+            cardCallToActions(actionComponents, viewHolder);
             cardDataFiller(textComponents, mediaComponents, viewHolder);
 
         }
 
         return view;
+    }
+
+    private void cardCallToActions(ArrayList<CardComponent.ActionComponent> actionComponents, ViewHolder viewHolder) {
+        for (final CardComponent.ActionComponent actionComponent : actionComponents) {
+            String tag = actionComponent.getTag();
+            if (!TextUtils.isEmpty(tag)) {
+
+                View actionView =  viewHolder.viewHashMap.get(tag);
+                actionView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            CardController.callToAction(actionComponent.getAndroidIntent(), mContext);
+                        } catch (URISyntaxException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+                actionView.setOnLongClickListener(this);
+            }
+        }
     }
 
 
@@ -271,12 +305,30 @@ public class CardRenderer {
 
             if (!TextUtils.isEmpty(tag)) {
                 View mediaView = viewHolder.viewHashMap.get(tag);
-                if (mediaView instanceof ImageView)
-                    ((ImageView) mediaView).setImageBitmap(HikeBitmapFactory.stringToBitmap(mediaComponent.getBase64()));
-            }
+                if (mediaView instanceof ImageView) {
+                    String data = mediaComponent.getKey();
+                    String base64 = mediaComponent.getBase64();
+                    BitmapDrawable value = hikeLruCache.getBitmapDrawableFromBase64(data, base64);
 
+                    if (null == value) {
+                        Bitmap bitmap = HikeBitmapFactory.stringToBitmap(base64);
+                        value = HikeBitmapFactory.getBitmapDrawable(bitmap);
+                    }
+                    ((ImageView) mediaView).setImageDrawable(value);
+
+                }
+
+            }
         }
+
     }
+
+    @Override
+    public boolean onLongClick(View v) {
+        return false;
+    }
+
+
 
 
 }

@@ -1,21 +1,5 @@
 package com.bsb.hike.db;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
@@ -32,39 +16,30 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
 import android.util.SparseArray;
-
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.DBConstants.HIKE_CONV_DB;
-import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.*;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.FileListItem;
-import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.HikeSharedFile;
-import com.bsb.hike.models.MessageMetadata;
-import com.bsb.hike.models.Protip;
-import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.contactmgr.ConversationMsisdns;
 import com.bsb.hike.platform.ContentLove;
+import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.utils.ChatTheme;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.PairModified;
-import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.*;
 import com.bsb.hike.utils.StickerManager.StickerCategoryId;
-import com.bsb.hike.utils.Utils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBConstants,HIKE_CONV_DB
 {
@@ -1313,7 +1288,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		if(bindForConvId){
 		insertStatement.bindString(msisdnColumn, conv.getMsisdn());
 		}
-		insertStatement.bindString(messageMetadataColumn, conv.getMetadata() != null ? conv.getMetadata().serialize() : "");
+        if(conv.getMessageType() == com.bsb.hike.HikeConstants.MESSAGE_TYPE.CONTENT) {
+            insertStatement.bindString(messageMetadataColumn, conv.platformMessageMetadata != null ? conv.platformMessageMetadata.toJSON().toString() : "");
+
+        }  else
+            insertStatement.bindString(messageMetadataColumn, conv.getMetadata() != null ? conv.getMetadata().serialize() : "");
+
 		insertStatement.bindLong(isHikeMessageColumn, conv.isSMS() ? 0 : 1);
 		insertStatement.bindString(groupParticipant, conv.getGroupParticipantMsisdn() != null ? conv.getGroupParticipantMsisdn() : "");
 		String msgHash = createMessageHash(conv);
@@ -5025,19 +5005,23 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 			ConvMessage message = new ConvMessage(c.getString(msgColumn), conversation.getMsisdn(), c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)),
 					c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn), c.getString(groupParticipantColumn), !isHikeMessage, c.getInt(typeColumn));
-			if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT){
-				int loveId = c.getInt(loveIdColumn);
-				// DEFAULT value of love id is -1 
-				if(loveId !=- 1){
-				loveIds.append(loveId);
-				loveIds.append(",");
-				contentMessages.put(loveId, message);
-				}
-			}
+			//if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT){
+//				int loveId = c.getInt(loveIdColumn);
+//				// DEFAULT value of love id is -1
+//				if(loveId !=- 1){
+//				loveIds.append(loveId);
+//				loveIds.append(",");
+//				contentMessages.put(loveId, message);
+//				}
+			//}
 			String metadata = c.getString(metadataColumn);
 			try
 			{
-				message.setMetadata(metadata);
+                if(message.getMessageType() == com.bsb.hike.HikeConstants.MESSAGE_TYPE.CONTENT){
+                    message.platformMessageMetadata = new PlatformMessageMetadata(metadata);
+                }else{
+                    message.setMetadata(metadata);
+                }
 			}
 			catch (JSONException e)
 			{

@@ -15,29 +15,33 @@ import com.bsb.hike.platform.CardComponent.VideoComponent;
 public class PlatformMessageMetadata implements HikePlatformConstants {
 	public int layoutId;
 	public int loveId;
+    public String notifText;
 	
-	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();;
-	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();;
+	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();
+	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();
+    public ArrayList<CardComponent.ActionComponent> actionComponents = new ArrayList<CardComponent.ActionComponent>();
 	private JSONObject json;
 	public PlatformMessageMetadata(String jsonString) throws JSONException {
 		this(new JSONObject(jsonString));
 	}
 	public PlatformMessageMetadata(JSONObject json) {
 		this.json = json;
-		layoutId = getInt(json, LAYOUT_ID);
-		loveId = getInt(json, LOVE_ID);
+
 	
 		
 		if (json.has(DATA)) {
 			try {
 				JSONObject data = json.getJSONObject(DATA);
+                layoutId = getInt(data, LAYOUT_ID);
+                loveId = getInt(data, LOVE_ID);
+                notifText = getString(data, NOTIF_TEXT);
 				if (data.has(ASSETS)) {
 					JSONObject assets = data.getJSONObject(ASSETS);
 					if (assets.has(TEXTS)) {
 						parseTextComponents(assets.getJSONArray(TEXTS));
 					}
 					if (assets.has(IMAGES)) {
-						parseImageComponents(json.getJSONArray(IMAGES));
+						parseImageComponents(assets.getJSONArray(IMAGES));
 					}
 					if(assets.has(VIDEOS)){
 						parseVideoComponents(assets.getJSONArray(VIDEOS));
@@ -45,6 +49,10 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 					if(assets.has(AUDIO)){
 						parseAudioComponents(assets.getJSONArray(AUDIO));
 					}
+                    if(assets.has(ACTIONS)){
+                        parseActionComponents(assets.getJSONArray(ACTIONS));
+                    }
+
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -52,7 +60,25 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 		}
 	}
 
-	private void parseTextComponents(JSONArray json) {
+    private void parseActionComponents(JSONArray jsonArray) {
+
+        int total = jsonArray.length();
+
+        for (int i = 0; i < total; i++) {
+            try {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                CardComponent.ActionComponent actionComponent = new CardComponent.ActionComponent(obj.optString(TAG),
+                        obj.optJSONObject(ANDROID_INTENT));
+                actionComponents.add(actionComponent);
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private void parseTextComponents(JSONArray json) {
 		int total = json.length();
 
 		for (int i = 0; i < total; i++) {
@@ -151,4 +177,8 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 	public String toJSON(){
 		return json.toString();
 	}
+
+    public JSONObject getJSON (){
+        return json;
+    }
 }
