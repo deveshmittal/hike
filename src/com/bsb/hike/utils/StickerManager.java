@@ -1192,7 +1192,7 @@ public class StickerManager
 			{
 				StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(ctx, categoryId, null);
 			}
-			bitmap = HikeBitmapFactory.decodeResource(ctx.getResources(), R.drawable.default_sticker_preview);
+			bitmap = HikeBitmapFactory.decodeResource(ctx.getResources(), R.drawable.shop_placeholder);
 		}
 		return bitmap;
 	}

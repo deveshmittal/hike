@@ -812,8 +812,8 @@ R.styleable.DragSortListView_drop_animation_duration,
                 alphaMod = 0;
             }
 
-            final int alpha = (int) (255f * mCurrFloatAlpha * alphaMod);
-
+           // final int alpha = (int) (255f * mCurrFloatAlpha * alphaMod);
+            final int alpha = (int) (255f);
             canvas.save();
             // Log.d("mobeta", "clip rect bounds: " + canvas.getClipBounds());
             canvas.translate(mFloatLoc.x, mFloatLoc.y);

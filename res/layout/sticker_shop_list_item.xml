@@ -10,7 +10,8 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="18dp"
             android:layout_marginRight="18dp"
-            android:scaleType="centerInside" />
+            android:scaleType="centerInside"
+            android:src="@drawable/shop_placeholder" />
         
 	<LinearLayout
         android:id="@+id/category_download_group"
