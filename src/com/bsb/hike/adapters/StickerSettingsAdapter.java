@@ -143,39 +143,62 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			viewHolder.categorySize.setVisibility(View.GONE);
 		}
 		
-		if(category.getState() == StickerCategory.UPDATE)
+		int state = category.getState();
+		switch(state)
 		{
-			if(!category.isVisible())
-			{
-				viewHolder.updateAvailable.setTextColor(mContext.getResources().getColor(R.color.shop_update_invisible_color));
-			}
+			case StickerCategory.UPDATE:
+				viewHolder.updateAvailable.setTextColor(category.isVisible() ? mContext.getResources().getColor(R.color.sticker_settings_update_color) : mContext.getResources().getColor(R.color.shop_update_invisible_color));
+				viewHolder.updateAvailable.setVisibility(View.VISIBLE);
+				checkAndDisableCheckBox(category.getCategoryId(), viewHolder.checkBox);
+				
+				break;
+			case StickerCategory.DOWNLOADING:
+				viewHolder.updateAvailable.setTextColor(category.isVisible() ? mContext.getResources().getColor(R.color.sticker_settings_update_color) : mContext.getResources().getColor(R.color.shop_update_invisible_color));
+				viewHolder.updateAvailable.setText(R.string.downloading_sticker);
+				viewHolder.updateAvailable.setVisibility(View.VISIBLE);
+				viewHolder.downloadProgress.setVisibility(View.VISIBLE);
+				viewHolder.checkBox.setVisibility(View.GONE);
+				viewHolder.downloadProgress.setAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate));
+
+				break;
+			case StickerCategory.DONE:
+				showUIForState(state, viewHolder, category.getCategoryId(), category.isVisible());
+				
+				break;
+			case StickerCategory.RETRY:
+				showUIForState(state, viewHolder, category.getCategoryId(), category.isVisible());
+				
+				break;
+			default:
+				viewHolder.updateAvailable.setVisibility(View.GONE);
+				viewHolder.downloadProgress.setVisibility(View.GONE);
+				viewHolder.downloadProgress.clearAnimation();
+				checkAndDisableCheckBox(category.getCategoryId(), viewHolder.checkBox);
+				
+		}
 			
-			viewHolder.updateAvailable.setVisibility(View.VISIBLE);
-			checkAndDisableCheckBox(category.getCategoryId(), viewHolder.checkBox);
-		}
-		
-		else if(category.getState() == StickerCategory.DOWNLOADING)
-		{
-			viewHolder.updateAvailable.setText(R.string.downloading_sticker);
-			viewHolder.updateAvailable.setVisibility(View.VISIBLE);
-			viewHolder.downloadProgress.setVisibility(View.VISIBLE);
-			viewHolder.checkBox.setVisibility(View.GONE);
-			viewHolder.downloadProgress.setAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate));
-		}
-		else
-		{ 
-			viewHolder.updateAvailable.setVisibility(View.GONE);
-			viewHolder.downloadProgress.setVisibility(View.GONE);
-			viewHolder.downloadProgress.clearAnimation();
-			checkAndDisableCheckBox(category.getCategoryId(), viewHolder.checkBox);
-		}
-		
 		viewHolder.checkBox.setTag(category);
 		viewHolder.categoryName.setText(category.getCategoryName());
 		viewHolder.checkBox.setChecked(category.isVisible());
 		stickerOtherIconLoader.loadImage(StickerManager.getInstance().getStickerImageUrl(category.getCategoryId(), StickerManager.PREVIEW_IMAGE), viewHolder.categoryPreviewImage, isListFlinging);
 		
 		return convertView;
+	}
+
+	/**
+	 * Handles the display of UI for a Settings page list item based on the categoryState 
+	 * @param state
+	 * @param viewHolder
+	 * @param categoryId
+	 */
+	private void showUIForState(int state, ViewHolder viewHolder, String categoryId, boolean isVisible)
+	{
+		viewHolder.updateAvailable.setVisibility(View.VISIBLE);
+		viewHolder.updateAvailable.setText(state == StickerCategory.DONE ? R.string.downloading_sticker : R.string.retry_sticker);
+		viewHolder.updateAvailable.setTextColor((state == StickerCategory.DONE && isVisible) ? mContext.getResources().getColor(R.color.sticker_settings_update_color) : mContext.getResources().getColor(R.color.shop_update_invisible_color));
+		viewHolder.downloadProgress.setVisibility(View.GONE);
+		viewHolder.downloadProgress.clearAnimation();
+		checkAndDisableCheckBox(categoryId, viewHolder.checkBox);	
 	}
 
 	public void setIsListFlinging(boolean b)
