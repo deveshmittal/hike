@@ -287,6 +287,7 @@ public class StickerManager
 		 * TODO : This will throw an exception in case of remove category as, this function will be called from mqtt thread and stickerCategories will be called from UI thread
 		 * also.
 		 */
+		stickerCategoriesMap.clear();
 		stickerCategoriesMap.putAll(HikeConversationsDatabase.getInstance().getAllStickerCategoriesWithVisibility(true));
 	}
 
