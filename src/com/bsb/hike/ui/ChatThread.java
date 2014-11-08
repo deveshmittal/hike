@@ -6624,7 +6624,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							{
 								HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
 							}
+							if(HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))  //The shop icon would be blue unless the user clicks on it once
 							{
+								HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
 							}
 							Intent i = new Intent(ChatThread.this, StickerShopActivity.class);
 							startActivity(i);

@@ -1924,4 +1924,8 @@ public class HikeConstants
 	public static final String REWARDS_NAME = "rewards_name";
 		
 	public static final String REWARDS_URL = "rewards_url";
+
+	public static final String SHOP = "shop";
+
+	public static final String BADGE = "badge";
 }
