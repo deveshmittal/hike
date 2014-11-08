@@ -229,7 +229,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		// TODO Auto-generated method stub
 		if (downloadState == NOT_DOWNLOADING && (firstVisibleItem + visibleItemCount)  > (totalItemCount - 5) && StickerManager.getInstance().moreDataAvailableForStickerShop())
 		{
-			downLoadStickerData(mAdapter.getCursor().getCount() + 1);
+			downLoadStickerData(mAdapter.getCount() + 1);
 		}
 		
 		if (previousFirstVisibleItem != firstVisibleItem)
