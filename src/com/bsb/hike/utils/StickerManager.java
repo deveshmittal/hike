@@ -53,6 +53,7 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
@@ -1321,7 +1322,7 @@ public class StickerManager
 		}
 	}
 	
-	public void initialiseDownloadStickerTask(StickerCategory category, Context context)
+	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, Context context)
 	{
 		if(stickerCategoriesMap.containsKey(category.getCategoryId()))
 		{
@@ -1331,7 +1332,7 @@ public class StickerManager
 		{
 			category.setState(StickerCategory.DOWNLOADING);
 			final DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
-			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, type, null);
+			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, type, source, null);
 		}
 		saveCategoryAsVisible(category);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);

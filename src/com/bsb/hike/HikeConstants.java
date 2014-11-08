@@ -239,6 +239,8 @@ public class HikeConstants
 
 	public static final String NUMBER_OF_STICKERS = "nos";
 	
+	public static final String DOWNLOAD_SOURCE = "dsrc";
+	
 	public static final String TOTAL_STICKERS = "totalStickers";
 
 	public static final String DATA_2 = "data";

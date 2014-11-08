@@ -17,6 +17,7 @@ import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.NetworkHandler.NetworkType;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.HttpRequestType;
 import com.bsb.hike.modules.stickerdownloadmgr.retry.DefaultRetryPolicy;
 import com.bsb.hike.utils.AccountUtils;
@@ -33,8 +34,9 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	private StickerConstants.DownloadType downloadType;
 	private int stickerDownloadSize;
 	private String taskId;
+	private DownloadSource source;
 
-	protected MultiStickerDownloadTask(Handler handler, Context ctx, String taskId, StickerCategory category, StickerConstants.DownloadType downloadType, IStickerResultListener callback)
+	protected MultiStickerDownloadTask(Handler handler, Context ctx, String taskId, StickerCategory category, StickerConstants.DownloadType downloadType, DownloadSource source, IStickerResultListener callback)
 	{
 		super(handler, ctx, taskId, callback);
 		this.category  = category;
@@ -42,6 +44,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 		this.handler = handler;
 		this.context = ctx;
 		this.taskId = taskId;
+		this.source = source;
 	}
 
 	@Override
@@ -96,6 +99,11 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 				request.put(HikeConstants.STICKER_IDS, existingStickerIds);
 				request.put(HikeConstants.RESOLUTION_ID, Utils.getResolutionId());
 				request.put(HikeConstants.NUMBER_OF_STICKERS, getStickerDownloadSize());
+				if(source != null)
+				{
+					request.put(HikeConstants.DOWNLOAD_SOURCE, source.ordinal());
+				}
+				
 
 				String urlString = AccountUtils.base + "/stickers";
 				if (AccountUtils.ssl)

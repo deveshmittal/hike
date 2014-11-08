@@ -8,6 +8,7 @@ import android.os.Handler;
 import com.bsb.hike.adapters.StickerPageAdapter;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.NetworkHandler.NetworkType;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.utils.Logger;
@@ -69,7 +70,7 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 
-	public void DownloadMultipleStickers(StickerCategory cat, StickerConstants.DownloadType downloadType, IStickerResultListener callback)
+	public void DownloadMultipleStickers(StickerCategory cat, StickerConstants.DownloadType downloadType, DownloadSource source, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.MULTIPLE, null, cat.getCategoryId());
 		if (queue.isTaskAlreadyExist(taskId))
@@ -81,7 +82,7 @@ public class StickerDownloadManager
 		{
 			return;
 		}
-		BaseStickerDownloadTask stickerCategoryTask = new MultiStickerDownloadTask(handler, context, taskId, cat, downloadType, callback);
+		BaseStickerDownloadTask stickerCategoryTask = new MultiStickerDownloadTask(handler, context, taskId, cat, downloadType, source, callback);
 		Request request = new Request(stickerCategoryTask);
 		request.setPrioity(Request.PRIORITY_HIGH);
 		queue.addTask(taskId, request);
