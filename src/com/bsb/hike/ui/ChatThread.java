@@ -188,7 +188,6 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
-import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -459,6 +458,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(stickerAdapter != null)
 		{
 			stickerAdapter.getStickerLoader().setExitTasksEarly(true);
+			stickerAdapter.getStickerOtherIconLoader().setExitTasksEarly(true);
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
 		activityVisible = false;
@@ -486,6 +486,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(stickerAdapter != null)
 		{
 			stickerAdapter.getStickerLoader().setExitTasksEarly(false);
+			stickerAdapter.getStickerOtherIconLoader().setExitTasksEarly(false);
 			stickerAdapter.notifyDataSetChanged();
 		}
 		/* mark any messages unread as read */
@@ -6550,6 +6551,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Editor editor = prefs.edit();
 			editor.putBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
 			editor.commit();
+		}
+		if (!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, false))
+		{
+			HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, true);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_BTN_CLICKED);
 		}
 	}
 

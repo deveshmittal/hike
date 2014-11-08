@@ -53,8 +53,10 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class StickerManager
@@ -163,9 +165,7 @@ public class StickerManager
 
 	public static final String PREVIEW_IMAGE = "preview";
 	
-	public static final String PALETTE_ICON_TYPE = ".png";
-	
-	public static final String PREVIEW_ICON_TYPE = ".png";
+	public static final String OTHER_ICON_TYPE = ".png";
 
 	public static final String CATEGORY_SIZE = "categorySize";
 
@@ -194,8 +194,6 @@ public class StickerManager
 		}
 	};
 
-	public Map<String, StickerTaskBase> stickerTaskMap;
-
 	private Context context;
 
 	private static SharedPreferences preferenceManager;
@@ -218,10 +216,6 @@ public class StickerManager
 	private StickerManager()
 	{
 		stickerCategoriesMap = Collections.synchronizedMap(new LinkedHashMap<String, StickerCategory>());
-		if (stickerTaskMap == null)
-		{
-			stickerTaskMap = new HashMap<String, StickerTaskBase>();
-		}
 	}
 
 	public void init(Context ctx)
@@ -492,30 +486,6 @@ public class StickerManager
 				return false;
 		}
 		return false;
-	}
-
-	public boolean isStickerDownloading(String key)
-	{
-		if (key != null)
-			return stickerTaskMap.containsKey(key);
-		return false;
-	}
-
-	public StickerTaskBase getTask(String key)
-	{
-		if (key == null)
-			return null;
-		return stickerTaskMap.get(key);
-	}
-
-	public void insertTask(String categoryId, StickerTaskBase downloadStickerTask)
-	{
-		stickerTaskMap.put(categoryId, downloadStickerTask);
-	}
-
-	public void removeTask(String key)
-	{
-		stickerTaskMap.remove(key);
 	}
 
 	public StickerCategory getCategoryForId(String categoryId)
@@ -965,7 +935,6 @@ public class StickerManager
 				String pallateIconSelected = obj.optString(StickerManager.PALLATE_ICON_SELECTED);
 				String previewImage = obj.optString(StickerManager.PREVIEW_IMAGE);
 
-				saveAssetToDirectory(otherAssetsDir, previewImage, StickerManager.PREVIEW_ICON_TYPE);
 				saveAssetToDirectory(otherAssetsDir, pallateIcon, StickerManager.PALLATE_ICON);
 				saveAssetToDirectory(otherAssetsDir, pallateIconSelected, StickerManager.PALLATE_ICON_SELECTED);
 				if (!TextUtils.isEmpty(previewImage))
@@ -1145,14 +1114,14 @@ public class StickerManager
 	public BitmapDrawable getPalleteIcon(Context ctx, String categoryId, boolean isPressed)
 	{
 		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
-		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + (isPressed ? PALLATE_ICON_SELECTED : PALLATE_ICON) + PALETTE_ICON_TYPE;
+		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + (isPressed ? PALLATE_ICON_SELECTED : PALLATE_ICON) + OTHER_ICON_TYPE;
 		
 		BitmapDrawable bitmapDrawable = generateBitmapDrawable(ctx.getResources(), baseFilePath);
 		if (bitmapDrawable == null)
 		{
-			StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
-			bitmapDrawable = (isPressed ? (BitmapDrawable) ctx.getResources().getDrawable(R.drawable.default_sticker_pallete_selected) : (BitmapDrawable) ctx.getResources()
-					.getDrawable(R.drawable.default_sticker_pallete));
+			StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(categoryId, null);
+			bitmapDrawable = (isPressed ? (BitmapDrawable) ctx.getResources().getDrawable(R.drawable.default_sticker_pallete_icon_selected) : (BitmapDrawable) ctx.getResources()
+					.getDrawable(R.drawable.default_sticker_pallete_icon_unselected));
 		}
 		return bitmapDrawable;
 	}
@@ -1181,18 +1150,31 @@ public class StickerManager
 	 * @param downloadIfNotFound -- true if it should be downloaded if not found.
 	 * @return {@link Bitmap}
 	 */
-	public Bitmap getCategoryPreviewAsset(Context ctx, String categoryId, boolean downloadIfNotFound)
+	public Bitmap getCategoryOtherAsset(Context ctx, String categoryId, String type, boolean downloadIfNotFound)
 	{
 		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
-		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + PREVIEW_IMAGE + PREVIEW_ICON_TYPE;
+		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + type + OTHER_ICON_TYPE;
 		Bitmap bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
 		if (bitmap == null)
 		{
 			if (downloadIfNotFound)
 			{
-				StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(ctx, categoryId, null);
+				if(type.equalsIgnoreCase(PALLATE_ICON_SELECTED))
+				{
+					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(categoryId, null);
+					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_pallete_icon_selected);
+				}
+				else if(type.equalsIgnoreCase(PALLATE_ICON))
+				{
+					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(categoryId, null);
+					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_pallete_icon_unselected);
+				}
+				else if(type.equalsIgnoreCase(PREVIEW_IMAGE))
+				{
+					StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(categoryId, null);
+					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_preview);
+				}
 			}
-			bitmap = HikeBitmapFactory.decodeResource(ctx.getResources(), R.drawable.default_sticker_preview);
 		}
 		return bitmap;
 	}
@@ -1247,7 +1229,7 @@ public class StickerManager
 		if (!HikeSharedPreferenceUtil.getInstance(context).getData(StickerManager.STICKERS_SIZE_DOWNLOADED, false))
 		{
 			
-			StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(context, getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
+			StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
 			{
 				
 				@Override
@@ -1266,9 +1248,9 @@ public class StickerManager
 					// TODO Auto-generated method stub
 					
 				}
-				
+
 				@Override
-				public void onFailure(Object result, Throwable exception)
+				public void onFailure(Object result, StickerException exception)
 				{
 					// TODO Auto-generated method stub
 					
@@ -1310,7 +1292,7 @@ public class StickerManager
 		}
 	}
 	
-	public void initialiseDownloadStickerTask(StickerCategory category, Context context)
+	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, Context context)
 	{
 		if(stickerCategoriesMap.containsKey(category.getCategoryId()))
 		{
@@ -1320,7 +1302,7 @@ public class StickerManager
 		{
 			category.setState(StickerCategory.DOWNLOADING);
 			final DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
-			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, type, null);
+			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, type, source, null);
 		}
 		saveCategoryAsVisible(category);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
@@ -1368,5 +1350,10 @@ public class StickerManager
 		{
 			return false;
 		}
+	}
+	
+	public String getStickerImageUrl(String categoryId, String type)
+	{
+		return categoryId + HikeConstants.DELIMETER + type;
 	}
 }

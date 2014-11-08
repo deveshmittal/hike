@@ -1,6 +1,5 @@
 package com.bsb.hike.adapters;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -26,15 +25,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.EmoticonType;
-import com.bsb.hike.HikeConstants.STResult;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
-import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.smartImageLoader.StickerLoader;
+import com.bsb.hike.smartImageLoader.StickerOtherIconLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
@@ -53,6 +53,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	private Map<String, StickerPageObjects> stickerObjMap;
 	
 	private StickerLoader worker;
+	
+	private StickerOtherIconLoader stickerOtherIconLoader;
 
 	private class StickerPageObjects
 	{
@@ -88,7 +90,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		instantiateStickerList();
 		stickerObjMap = Collections.synchronizedMap(new HashMap<String, StickerAdapter.StickerPageObjects>());
 		worker = new StickerLoader(activity.getApplicationContext());
-
+		stickerOtherIconLoader = new StickerOtherIconLoader(activity, true);
 		registerListener();
 		Logger.d(getClass().getSimpleName(), "Sticker Adapter instantiated ....");
 	}
@@ -303,7 +305,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			TextView categoryName = (TextView) empty.findViewById(R.id.category_name);
 			TextView category_details = (TextView) empty.findViewById(R.id.category_details);
 			ImageView previewImage = (ImageView) empty.findViewById(R.id.preview_image);
-			previewImage.setImageBitmap(StickerManager.getInstance().getCategoryPreviewAsset(activity, category.getCategoryId(), true));
+			stickerOtherIconLoader.loadImage(StickerManager.getInstance().getStickerImageUrl(category.getCategoryId(), StickerManager.PREVIEW_IMAGE), previewImage);
 			TextView separator = (TextView) empty.findViewById(R.id.separator);
 			if(category.getTotalStickers() > 0)
 			{
@@ -334,7 +336,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				public void onClick(View v)
 				{
 					category.setState(StickerCategory.DOWNLOADING);
-					StickerDownloadManager.getInstance(activity).DownloadMultipleStickers(category, DownloadType.NEW_CATEGORY, null);
+					StickerDownloadManager.getInstance(activity).DownloadMultipleStickers(category, DownloadType.NEW_CATEGORY, DownloadSource.FIRST_TIME, null);
 					setupStickerPage(parent, category);
 
 				}
@@ -484,6 +486,11 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	public StickerLoader getStickerLoader()
 	{
 		return worker;
+	}
+	
+	public StickerOtherIconLoader getStickerOtherIconLoader()
+	{
+		return stickerOtherIconLoader;
 	}
 
 	@Override

@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -32,6 +33,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.StickerManager;
@@ -153,8 +155,9 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	{
 		downloadState = DOWNLOADING;
 		listview.removeFooterView(downloadFailedFooterView);
+		listview.removeFooterView(loadingFooterView);
 		listview.addFooterView(loadingFooterView);
-		StickerDownloadManager.getInstance(getSherlockActivity()).DownloadStickerShopTask(getSherlockActivity(), currentCategoriesCount, new IStickerResultListener()
+		StickerDownloadManager.getInstance(getSherlockActivity()).DownloadStickerShopTask(currentCategoriesCount, new IStickerResultListener()
 		{
 
 			@Override
@@ -199,7 +202,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 			}
 
 			@Override
-			public void onFailure(Object result, Throwable exception)
+			public void onFailure(Object result, final StickerException exception)
 			{
 				//footerView.setVisibility(View.GONE);
 				if (!isAdded())
@@ -214,7 +217,18 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 					{
 						downloadState = DOWNLOAD_FAILED;
 						listview.removeFooterView(loadingFooterView);
+						listview.removeFooterView(downloadFailedFooterView);
 						listview.addFooterView(downloadFailedFooterView);
+						
+						TextView failedText = (TextView) downloadFailedFooterView.findViewById(R.id.download_failed_message);
+						if(exception != null && exception.getErrorCode() == StickerException.OUT_OF_SPACE)
+						{
+							failedText.setText(R.string.shop_download_failed_out_of_space);
+						}
+						else
+						{
+							failedText.setText(R.string.shop_download_failed);
+						}
 					}
 				});
 			}
