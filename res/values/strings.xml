@@ -1200,5 +1200,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="downloading_sticker">DOWNLOADING STICKERS</string>
     <string name="update_all_fail_string">You cannot update hidden packs.</string>
     <string name="great_job">Great Job</string>
-    
+    <string name="downloading_stk">DOWNLOADING</string>
 </resources>
