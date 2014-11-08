@@ -1345,7 +1345,7 @@ public class StickerManager
 		category.setVisible(true);
 		category.setCategoryIndex(stickerCategoriesMap.size());
 		stickerCategoriesMap.put(category.getCategoryId(), category);
-		HikeConversationsDatabase.getInstance().updateVisibilityAndIndex(category);
+		HikeConversationsDatabase.getInstance().insertInToStickerCategoriesTable(category);
 	}
 
 	public boolean stickerShopUpdateNeeded()

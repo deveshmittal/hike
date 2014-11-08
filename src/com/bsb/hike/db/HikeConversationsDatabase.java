@@ -5670,6 +5670,21 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { stickerCategory.getCategoryId() });
 	}
 	
+	public void insertInToStickerCategoriesTable(StickerCategory stickerCategory)
+	{
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants._ID, stickerCategory.getCategoryId());
+		contentValues.put(DBConstants.CATEGORY_NAME, stickerCategory.getCategoryName());
+		contentValues.put(DBConstants.TOTAL_NUMBER, stickerCategory.getTotalStickers());
+		contentValues.put(DBConstants.UPDATE_AVAILABLE, stickerCategory.isUpdateAvailable());
+		contentValues.put(DBConstants.IS_CUSTOM, stickerCategory.isCustom());
+		contentValues.put(DBConstants.CATEGORY_SIZE, stickerCategory.getCategorySize());
+		contentValues.put(DBConstants.IS_VISIBLE, stickerCategory.isVisible());
+		contentValues.put(DBConstants.CATEGORY_INDEX, stickerCategory.getCategoryIndex());
+
+		mDb.insertWithOnConflict(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
+	}
+	
 	public void updateStickerCategoriesInDb(JSONArray jsonArray)
 	{
 		try
