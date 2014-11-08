@@ -8,7 +8,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,9 +30,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -45,8 +41,6 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.adapters.StickerPageAdapter;
-import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.CustomStickerCategory;
 import com.bsb.hike.models.Sticker;
@@ -1065,22 +1059,6 @@ public class StickerManager
 		return ((int) (screenWidth/SIZE_IMAGE));
 	}
 	
-	/**
-	 * Programatically sets StateListDrawable to Sticker Palette Icons. Takes baseFilePath as well as list of icons for pressed and normal states.
-	 * 
-	 * @param context
-	 * @param categoryId
-	 * @return {@link StateListDrawable}
-	 */
-	public static StateListDrawable getStateListDrawableForStickerPalette(Context context, String categoryId)
-	{
-		StickerManager stickerManager = StickerManager.getInstance();
-		StateListDrawable states = new StateListDrawable();
-		states.addState(new int[] { android.R.attr.state_selected }, stickerManager.getPalleteIcon(context, categoryId, true));
-		states.addState(new int[] {}, stickerManager.getPalleteIcon(context, categoryId, false));
-		return states;
-	}
-	
 	public void sucessFullyDownloadedStickers(Object resultObj)
 	{
 		Bundle b = (Bundle) resultObj;
@@ -1138,45 +1116,7 @@ public class StickerManager
 		i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
 		LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 	}
-	/**
-	 * Return a BitmapDrawable for pallete icon for a given StickerCategory
-	 * @param ctx
-	 * @param categoryId
-	 * @param isPressed
-	 * @return {@link BitmapDrawable}
-	 */
-	public BitmapDrawable getPalleteIcon(Context ctx, String categoryId, boolean isPressed)
-	{
-		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
-		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + (isPressed ? PALLATE_ICON_SELECTED : PALLATE_ICON) + OTHER_ICON_TYPE;
-		
-		BitmapDrawable bitmapDrawable = generateBitmapDrawable(ctx.getResources(), baseFilePath);
-		if (bitmapDrawable == null)
-		{
-			StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
-			bitmapDrawable = (isPressed ? (BitmapDrawable) ctx.getResources().getDrawable(R.drawable.default_sticker_pallete_icon_selected) : (BitmapDrawable) ctx.getResources()
-					.getDrawable(R.drawable.default_sticker_pallete_icon_unselected));
-		}
-		return bitmapDrawable;
-	}
 	
-	/**
-	 * Returns a BitmapDrawable from HikeBitmapFactory
-	 * @param resources
-	 * @param baseFilePath
-	 * @return
-	 */
-	
-	private BitmapDrawable generateBitmapDrawable(Resources resources, String baseFilePath)
-	{
-		BitmapDrawable bd;
-		Bitmap bmp = HikeBitmapFactory.decodeFile(baseFilePath);
-		if(bmp == null)
-			return null;
-		bd = HikeBitmapFactory.getBitmapDrawable(resources, bmp);
-		return bd;
-	}
-
 	/**
 	 * Returns a category preview {@link Bitmap}
 	 * @param ctx

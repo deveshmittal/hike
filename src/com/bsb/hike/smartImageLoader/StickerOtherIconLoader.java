@@ -10,7 +10,6 @@ public class StickerOtherIconLoader extends ImageWorker
 {
 	private Context ctx;
 	private boolean downloadIfNotFound;
-	private int defaultResourceId;
 	
 	/**
 	 * 
@@ -39,7 +38,7 @@ public class StickerOtherIconLoader extends ImageWorker
 	protected Bitmap processBitmapOnUiThread(String data)
 	{
 		// TODO Auto-generated method stub
-		return null;
+		return processBitmap(data);
 	}
 
 }

@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
@@ -25,7 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.EmoticonType;
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
@@ -493,10 +491,9 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	}
 
 	@Override
-	public StateListDrawable getPalleteIconDrawable(int index)
+	public String getCategoryIdForIndex(int index)
 	{
-		StickerCategory category = stickerCategoryList.get(index);
-		return StickerManager.getStateListDrawableForStickerPalette(activity, category.getCategoryId());
+		return stickerCategoryList.get(index).getCategoryId();
 	}
 	
 	/**

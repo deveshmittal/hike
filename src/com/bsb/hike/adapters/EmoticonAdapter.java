@@ -117,9 +117,10 @@ public class EmoticonAdapter extends PagerAdapter implements StickerEmoticonIcon
 	}
 
 	@Override
-	public StateListDrawable getPalleteIconDrawable(int index)
+	public String getCategoryIdForIndex(int index)
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }
