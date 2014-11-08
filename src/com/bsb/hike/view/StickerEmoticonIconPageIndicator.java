@@ -17,9 +17,6 @@ import com.viewpagerindicator.IconPagerAdapter;
 public class StickerEmoticonIconPageIndicator extends IconPageIndicator
 {
 
-	private int screenWidth;
-
-	private int minWidth;
 
 	public StickerEmoticonIconPageIndicator(Context context)
 	{
@@ -30,10 +27,6 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator
 	{
 		super(context, attrs);
 
-		screenWidth = context.getResources().getDisplayMetrics().widthPixels;
-
-		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-		minWidth = (int) (48 * metrics.density);
 	}
 
 	/*
@@ -51,17 +44,9 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator
 
 		int count = iconAdapter.getCount();
 
-		int itemWidth = (int) (screenWidth / count);
-
-		if (itemWidth < minWidth)
-		{
-			itemWidth = minWidth;
-		}
-
 		for (int i = 0; i < count; i++)
 		{
-			View stickerParent = inflater.inflate(R.layout.sticker_btn, null);
-
+			View stickerParent = inflater.inflate(R.layout.sticker_btn, mIconsLayout, false);
 			ImageView icon = (ImageView) stickerParent.findViewById(R.id.category_btn);
 			ImageView updateAvailable = (ImageView) stickerParent.findViewById(R.id.update_available);
 			if (iconAdapter instanceof EmoticonAdapter)
@@ -76,9 +61,6 @@ public class StickerEmoticonIconPageIndicator extends IconPageIndicator
 
 			stickerParent.setTag(i);
 			stickerParent.setOnClickListener(mTabClickListener);
-
-			LayoutParams layoutParams = new LayoutParams(itemWidth, LayoutParams.MATCH_PARENT);
-			stickerParent.setLayoutParams(layoutParams);
 
 			mIconsLayout.addView(stickerParent);
 		}
