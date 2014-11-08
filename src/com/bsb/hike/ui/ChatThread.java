@@ -188,7 +188,6 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
-import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;

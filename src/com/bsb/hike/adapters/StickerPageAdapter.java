@@ -31,7 +31,6 @@ import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.smartImageLoader.StickerLoader;
-import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.utils.RecyclingImageView;
 import com.bsb.hike.utils.StickerManager;

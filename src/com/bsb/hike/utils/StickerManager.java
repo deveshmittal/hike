@@ -194,8 +194,6 @@ public class StickerManager
 		}
 	};
 
-	public Map<String, StickerTaskBase> stickerTaskMap;
-
 	private Context context;
 
 	private static SharedPreferences preferenceManager;
@@ -218,10 +216,6 @@ public class StickerManager
 	private StickerManager()
 	{
 		stickerCategoriesMap = Collections.synchronizedMap(new LinkedHashMap<String, StickerCategory>());
-		if (stickerTaskMap == null)
-		{
-			stickerTaskMap = new HashMap<String, StickerTaskBase>();
-		}
 	}
 
 	public void init(Context ctx)
@@ -492,30 +486,6 @@ public class StickerManager
 				return false;
 		}
 		return false;
-	}
-
-	public boolean isStickerDownloading(String key)
-	{
-		if (key != null)
-			return stickerTaskMap.containsKey(key);
-		return false;
-	}
-
-	public StickerTaskBase getTask(String key)
-	{
-		if (key == null)
-			return null;
-		return stickerTaskMap.get(key);
-	}
-
-	public void insertTask(String categoryId, StickerTaskBase downloadStickerTask)
-	{
-		stickerTaskMap.put(categoryId, downloadStickerTask);
-	}
-
-	public void removeTask(String key)
-	{
-		stickerTaskMap.remove(key);
 	}
 
 	public StickerCategory getCategoryForId(String categoryId)

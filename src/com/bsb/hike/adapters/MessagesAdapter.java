@@ -105,7 +105,6 @@ import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.tasks.DownloadSingleStickerTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
@@ -769,9 +768,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 
 			String key = categoryId + stickerId;
-			boolean downloadingSticker = StickerManager.getInstance().isStickerDownloading(key);
 
-			if (stickerImage != null && stickerImage.exists() && !downloadingSticker)
+			if (stickerImage != null && stickerImage.exists())
 			{
 				Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
 				if (stickerDrawable != null)
@@ -799,41 +797,36 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				stickerHolder.image.setVisibility(View.GONE);
 				stickerHolder.image.setImageDrawable(null);
 
-				/*
-				 * Download the sticker if not already downloading.
-				 */
-				if (!downloadingSticker)
+				StickerDownloadManager.getInstance(context).DownloadSingleSticker(categoryId, stickerId, new IStickerResultListener()
 				{
-					StickerDownloadManager.getInstance(context).DownloadSingleSticker(categoryId, stickerId, new IStickerResultListener()
-					{
-						
-						@Override
-						public void onSuccess(Object result)
-						{
-							// TODO Auto-generated method stub
-							HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_DOWNLOADED, null);
-							
-						}
-						
-						@Override
-						public void onProgressUpdated(double percentage)
-						{
-							// TODO Auto-generated method stub
-							
-						}
 
-						@Override
-						public void onFailure(Object result, StickerException exception)
+					@Override
+					public void onSuccess(Object result)
+					{
+						// TODO Auto-generated method stub
+						HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_DOWNLOADED, null);
+
+					}
+
+					@Override
+					public void onProgressUpdated(double percentage)
+					{
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onFailure(Object result, StickerException exception)
+					{
+						if(result == null)
 						{
-							if(result == null)
-							{
-								return ;
-							}
-							String largeStickerPath = (String) result;
-							(new File(largeStickerPath)).delete();
+							return ;
 						}
-					});
-				}
+						String largeStickerPath = (String) result;
+						(new File(largeStickerPath)).delete();
+					}
+				});
+				
 			}
 			setTimeNStatus(position, stickerHolder, true, stickerHolder.placeHolder);
 			setSelection(convMessage, stickerHolder.selectedStateOverlay);
