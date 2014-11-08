@@ -180,6 +180,8 @@ public class StickerManager
 	public static final long STICKER_SHOP_REFRESH_TIME = 24 * 60 * 60 * 1000;
 	
 	public static final long MINIMUM_FREE_SPACE = 10 * 1024 * 1024;
+
+	public static final String SHOW_STICKER_SHOP_BADGE = "showStickerShopBadge";
 	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	

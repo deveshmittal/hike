@@ -6583,6 +6583,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				if (v.getId() == R.id.sticker_btn)
 				{
+					View shopIconViewGroup = eraseKey;
 					if (emoticonType == EmoticonType.STICKERS)
 					{
 						// view not changed , exit with dismiss dialog
@@ -6605,25 +6606,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						emoticonType = EmoticonType.STICKERS;
 					}
-					eraseKey.setVisibility(View.VISIBLE);
+					shopIconViewGroup.setVisibility(View.VISIBLE);
 					shopIcon.setImageResource(R.drawable.ic_sticker_shop);
-					eraseKey.setBackgroundResource(R.color.sticker_pallete_bg_color);
-					if(!prefs.getBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
+					shopIconViewGroup.setBackgroundResource(R.color.sticker_pallete_bg_color);
+					if(!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 					{
-						eraseKey.setBackgroundResource(R.color.shop_icon_color);
+						shopIconViewGroup.setBackgroundResource(R.color.shop_icon_color);
 					}
 					
-					eraseKey.setOnClickListener(new View.OnClickListener()
+					shopIconViewGroup.setOnClickListener(new View.OnClickListener()
 					{
 						
 						@Override
 						public void onClick(View v)
 						{
-							if(!prefs.getBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
+							if(!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 							{
-								Editor editor = prefs.edit();
-								editor.putBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, true);
-								editor.commit();
+								HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
+							}
+							{
 							}
 							Intent i = new Intent(ChatThread.this, StickerShopActivity.class);
 							startActivity(i);
