@@ -119,7 +119,7 @@
         },
         {
             "catId": "humanoid",
-            "catName": "We are Hikins",
+            "categoryName": "We are Hikins",
             "downloadPref": "humanoidDownloadShown",
             "isVisible": true,
             "isCustom": false,
@@ -130,7 +130,7 @@
         },
         {
             "catId": "delhi",
-            "catName": "Saddi Dilli",
+            "categoryName": "Saddi Dilli",
             "downloadPref": "delhiDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -141,7 +141,7 @@
         },
         {
             "catId": "mumbai",
-            "catName": "Kasa Kaay Mumbai",
+            "categoryName": "Kasa Kaay Mumbai",
             "downloadPref": "mumbaiDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -152,7 +152,7 @@
         },
         {
             "catId": "kolkatta",
-            "catName": "Bong Connection",
+            "categoryName": "Bong Connection",
             "downloadPref": "kolkattaDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -163,7 +163,7 @@
         },
         {
             "catId": "gujrat",
-            "catName": "Aapno Gujarat",
+            "categoryName": "Aapno Gujarat",
             "downloadPref": "gujratDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -174,7 +174,7 @@
         },
         {
             "catId": "banglore",
-            "catName": "Banglore",
+            "categoryName": "Banglore",
             "downloadPref": "bangloreDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -185,7 +185,7 @@
         },
         {
             "catId": "hyderabad",
-            "catName": "Hyderabad",
+            "categoryName": "Hyderabad",
             "downloadPref": "hyderabadDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -196,7 +196,7 @@
         },
         {
             "catId": "bhopal",
-            "catName": "Bhopal",
+            "categoryName": "Bhopal",
             "downloadPref": "bhopalDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -207,7 +207,7 @@
         },
         {
             "catId": "chennai",
-            "catName": "Sooper Tamilian",
+            "categoryName": "Sooper Tamilian",
             "downloadPref": "chennaiDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -218,7 +218,7 @@
         },
         {
             "catId": "bihar",
-            "catName": "Hamaar Bihar",
+            "categoryName": "Hamaar Bihar",
             "downloadPref": "biharDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -229,7 +229,7 @@
         },
         {
             "catId": "kerala",
-            "catName": "Tani Naadan",
+            "categoryName": "Tani Naadan",
             "downloadPref": "keralaDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -240,7 +240,7 @@
         },
         {
             "catId": "guwahati",
-            "catName": "Ami Axomiya",
+            "categoryName": "Ami Axomiya",
             "downloadPref": "guwahatiDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -251,7 +251,7 @@
         },
         {
             "catId": "indian",
-            "catName": "Things Indians Say",
+            "categoryName": "Things Indians Say",
             "downloadPref": "indianDownloadShown",
             "isVisible": true,
             "isCustom": false,
@@ -262,7 +262,7 @@
         },
         {
             "catId": "expressions",
-            "catName": "Express it All",
+            "categoryName": "Express it All",
             "downloadPref": "expDownloadShown",
             "isVisible": true,
             "isCustom": false,
@@ -273,7 +273,7 @@
         },
         {
             "catId": "love",
-            "catName": "Love You Forever",
+            "categoryName": "Love You Forever",
             "downloadPref": "loveDownloadShown",
             "isVisible": true,
             "isCustom": false,
@@ -284,7 +284,7 @@
         },
         {
             "catId": "bollywood",
-            "catName": "Bollywood Masala",
+            "categoryName": "Bollywood Masala",
             "downloadPref": "bollywoodDownloadShown",
             "isVisible": true,
             "isCustom": false,
@@ -295,7 +295,7 @@
         },
         {
             "catId": "rageface",
-            "catName": "What's Your Rage Face?",
+            "categoryName": "What's Your Rage Face?",
             "downloadPref": "ragefaceDownloadShown",
             "isVisible": true,
             "isCustom": false,
@@ -306,7 +306,7 @@
         },
         {
             "catId": "doggy",
-            "catName": "Adorable Snuggles",
+            "categoryName": "Adorable Snuggles",
             "downloadPref": "doggyDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -316,7 +316,7 @@
         },
         {
             "catId": "jelly",
-            "catName": "Wicked Jellies",
+            "categoryName": "Wicked Jellies",
             "downloadPref": "JellyDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -326,7 +326,7 @@
         },
         {
             "catId": "sports",
-            "catName": "Sports Maniacs",
+            "categoryName": "Sports Maniacs",
             "downloadPref": "sportsDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -336,7 +336,7 @@
         },
         {
             "catId": "humanoid2",
-            "catName": "Girl Power",
+            "categoryName": "Girl Power",
             "downloadPref": "humanoid2DownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -346,7 +346,7 @@
         },
         {
             "catId": "avatars",
-            "catName": "Superhero Avatars",
+            "categoryName": "Superhero Avatars",
             "downloadPref": "avtarsDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -356,7 +356,7 @@
         },
         {
             "catId": "smileyexpressions",
-            "catName": "Wacky Smileys",
+            "categoryName": "Wacky Smileys",
             "downloadPref": "smileyexpressionDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -366,7 +366,7 @@
         },
         {
             "catId": "kitty",
-            "catName": "Meow, I'm Miley!",
+            "categoryName": "Meow, I'm Miley!",
             "downloadPref": "kittyDownloadShown",
             "isVisible": false,
             "isCustom": false,

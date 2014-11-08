@@ -5585,7 +5585,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				JSONObject obj = stickerCategories.optJSONObject(i);
 				String categoryId = obj.optString(StickerManager.CATEGORY_ID);
-				String categoryName = categoryId;
+				String categoryName = obj.optString(StickerManager.CATEGORY_NAME);;
 				String downloadPreference = obj.optString(StickerManager.DOWNLOAD_PREF);
 				/*
 				 * All categories which we have set to be visible OR user has already initiated a download for them once will be visible in the pallate
