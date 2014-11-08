@@ -145,6 +145,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	{
 		IntentFilter filter = new IntentFilter(StickerManager.STICKERS_DOWNLOADED);
 		filter.addAction(StickerManager.STICKERS_FAILED);
+		filter.addAction(StickerManager.STICKERS_UPDATED);
 		filter.addAction(StickerManager.RECENTS_UPDATED);
 		filter.addAction(StickerManager.STICKERS_PROGRESS);
 		filter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
@@ -188,7 +189,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 			/**
 			 * More stickers downloaded case
 			 */
-			else if(intent.getAction().equals(StickerManager.MORE_STICKERS_DOWNLOADED))
+			else if(intent.getAction().equals(StickerManager.MORE_STICKERS_DOWNLOADED) || intent.getAction().equals(StickerManager.STICKERS_UPDATED))
 			{
 				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
 				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
