@@ -407,6 +407,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String SHOWN_SHOP_ICON_BLUE = "shownShopIconBlue";
 	
 	public static final String IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN = "showCategoryReordering";
+	
+	public static final String STICKED_BTN_CLICKED_FIRST_TIME = "stickerBtnClickedFirstTime";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 

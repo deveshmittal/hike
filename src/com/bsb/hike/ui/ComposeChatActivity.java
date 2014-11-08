@@ -1302,9 +1302,22 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
 			Logger.d(getClass().getSimpleName(), "Contained a message: " + msg);
-			ContactInfo contact = (ContactInfo) arrayList.get(0);
-			ConvMessage convMessage = Utils.makeConvMessage(contact.getMsisdn(), msg, contact.isOnhike());
-			sendMessage(convMessage);
+			if(msg == null){
+				Bundle extraText = presentIntent.getExtras();
+				if(extraText.get(Intent.EXTRA_TEXT) != null)
+					msg = extraText.get(Intent.EXTRA_TEXT).toString();
+			}
+			if(msg == null)
+				Toast.makeText(getApplicationContext(), R.string.text_empty_error, Toast.LENGTH_SHORT).show();
+			else
+			{
+				ContactInfo contact = (ContactInfo) arrayList.get(0);
+				if(contact != null)
+				{
+					ConvMessage convMessage = Utils.makeConvMessage(contact.getMsisdn(), msg, contact.isOnhike());
+					sendMessage(convMessage);
+				}
+			}
 		}
 	}
 	

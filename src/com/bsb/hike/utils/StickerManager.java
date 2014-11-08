@@ -47,8 +47,10 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class StickerManager
@@ -194,8 +196,6 @@ public class StickerManager
 		}
 	};
 
-	public Map<String, StickerTaskBase> stickerTaskMap;
-
 	private Context context;
 
 	private static SharedPreferences preferenceManager;
@@ -218,10 +218,6 @@ public class StickerManager
 	private StickerManager()
 	{
 		stickerCategoriesMap = Collections.synchronizedMap(new LinkedHashMap<String, StickerCategory>());
-		if (stickerTaskMap == null)
-		{
-			stickerTaskMap = new HashMap<String, StickerTaskBase>();
-		}
 	}
 
 	public void init(Context ctx)
@@ -508,30 +504,6 @@ public class StickerManager
 				return false;
 		}
 		return false;
-	}
-
-	public boolean isStickerDownloading(String key)
-	{
-		if (key != null)
-			return stickerTaskMap.containsKey(key);
-		return false;
-	}
-
-	public StickerTaskBase getTask(String key)
-	{
-		if (key == null)
-			return null;
-		return stickerTaskMap.get(key);
-	}
-
-	public void insertTask(String categoryId, StickerTaskBase downloadStickerTask)
-	{
-		stickerTaskMap.put(categoryId, downloadStickerTask);
-	}
-
-	public void removeTask(String key)
-	{
-		stickerTaskMap.remove(key);
 	}
 
 	public StickerCategory getCategoryForId(String categoryId)
@@ -1176,10 +1148,10 @@ public class StickerManager
 				{
 				case PALLATE_ICON_TYPE:
 				case PALLATE_ICON_SELECTED_TYPE:
-					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
+					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(categoryId, null);
 					break;
 				case PREVIEW_IMAGE_TYPE:
-					StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(ctx, categoryId, null);
+					StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(categoryId, null);
 					break;
 				default:
 					break;
@@ -1240,7 +1212,7 @@ public class StickerManager
 		if (!HikeSharedPreferenceUtil.getInstance(context).getData(StickerManager.STICKERS_SIZE_DOWNLOADED, false))
 		{
 			
-			StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(context, getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
+			StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
 			{
 				
 				@Override
@@ -1259,9 +1231,9 @@ public class StickerManager
 					// TODO Auto-generated method stub
 					
 				}
-				
+
 				@Override
-				public void onFailure(Object result, Throwable exception)
+				public void onFailure(Object result, StickerException exception)
 				{
 					// TODO Auto-generated method stub
 					
@@ -1303,7 +1275,7 @@ public class StickerManager
 		}
 	}
 	
-	public void initialiseDownloadStickerTask(StickerCategory category, Context context)
+	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, Context context)
 	{
 		if(stickerCategoriesMap.containsKey(category.getCategoryId()))
 		{
@@ -1313,7 +1285,7 @@ public class StickerManager
 		{
 			category.setState(StickerCategory.DOWNLOADING);
 			final DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
-			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, type, null);
+			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, type, source, null);
 		}
 		saveCategoryAsVisible(category);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);

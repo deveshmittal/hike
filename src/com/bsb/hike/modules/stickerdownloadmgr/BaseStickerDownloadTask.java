@@ -56,7 +56,7 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 
 	private URL mUrl;
 
-	private Exception exception;
+	private StickerException exception;
 
 	private Object resultObj;
 
@@ -201,7 +201,7 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 		catch(Exception ex)
 		{
 			Logger.d(StickerDownloadManager.TAG, "downlad failed for task : " + taskId);
-			throw ex;
+			throw new StickerException(ex);
 		}
 	}
 
@@ -235,12 +235,12 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 		this.retryPolicy = retryPolicy;
 	}
 
-	public Exception getException()
+	public StickerException getException()
 	{
 		return exception;
 	}
 
-	public void setException(Exception exception)
+	public void setException(StickerException exception)
 	{
 		this.exception = exception;
 	}

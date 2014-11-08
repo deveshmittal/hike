@@ -64,6 +64,12 @@ class StickerShopDownloadTask extends BaseStickerDownloadTask
 			}
 			resultObject = data;
 		}
+		catch (StickerException e)
+		{
+			Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
+			setException(e);
+			return STResult.DOWNLOAD_FAILED;
+		}
 		catch (Exception e)
 		{
 			Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);

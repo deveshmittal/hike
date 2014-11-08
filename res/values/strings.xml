@@ -1214,5 +1214,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="downloading_sticker">DOWNLOAING STICKERS</string>
     <string name="update_all_fail_string">You cannot update hidden packs.</string>
     <string name="great_job">Great Job</string>
+    <string name="text_empty_error">Text Can\'t be empty!</string>
+    <string name="shop_download_failed">Download failed. Try again.</string>
+    <string name="shop_download_failed_out_of_space">Out of space. Free some space.</string>
     
 </resources>

@@ -241,6 +241,8 @@ public class HikeConstants
 
 	public static final String NUMBER_OF_STICKERS = "nos";
 	
+	public static final String DOWNLOAD_SOURCE = "dsrc";
+	
 	public static final String TOTAL_STICKERS = "totalStickers";
 
 	public static final String DATA_2 = "data";
@@ -579,6 +581,8 @@ public class HikeConstants
 	public static final int CALL_ME_WAIT_TIME = 150 * 1000;
 
 	public static final int NETWORK_ERROR_POP_UP_TIME = 120 * 1000;
+
+	public static final int BACKUP_RESTORE_UI_DELAY = 2 * 1000; 
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 
@@ -1004,8 +1008,6 @@ public class HikeConstants
 		public static final String SIGNUP_TASK_RUNNING = "signupTaskRunning";
 
 		public static final String SIGNUP_PART = "signupPart";
-
-		public static final String SIGNUP_RESTORE_STATUS = "signupRestoreStatus";
 
 		public static final String SIGNUP_TEXT = "signupText";
 
@@ -1573,6 +1575,16 @@ public class HikeConstants
 		public static final String PIN_HISTORY_VIA_MENU = "pinHistoryViaMenu";
 		
 		public static final String PIN_HISTORY_VIA_PIN_CLICK = "pinHistoryViaPinClick";
+		
+		public static final String STICKER_BTN_CLICKED = "stickerBtnClicked";
+		
+		public static final String STICKER_SETTING_BTN_CLICKED = "stickerSettingBtnClicked";
+		
+		public static final String SEEN_REORDERING_TIP = "seenReorderingTip";
+		
+		public static final String UPDATE_ALL_CONFIRM_CLICKED = "updateAllConfirmClicked";
+		
+		public static final String UPDATE_ALL_CANCEL_CLICKED = "updateAllCancelClicked";
 		
 		/*
 		 * Settings screen <screen> = settingsS <event> = notifNUJEnabled, notifH2OEnabled, notifNUJDisabled, notifH2ODisabled
