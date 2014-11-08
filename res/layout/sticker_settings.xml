@@ -141,7 +141,7 @@
             android:layout_height="match_parent"
             android:textSize="16sp"
             android:textColor="@color/white"
-            android:text="FREE"
+            android:text="@string/sticker_pack_free"
             android:layout_above="@id/divider"
             android:gravity="center"
             android:layout_alignParentRight="true"
@@ -164,7 +164,7 @@
                 android:textSize="18sp"
                 android:layout_marginLeft="20dp"
                 android:textColor="@color/white"
-                android:text="12 Packs"/>
+                />
             
              <com.bsb.hike.view.CustomFontTextView 
                 android:id="@+id/pack_details"
