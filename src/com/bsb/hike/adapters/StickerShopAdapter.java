@@ -8,10 +8,9 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.AnimationUtils;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -19,8 +18,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
-import com.bsb.hike.smartImageLoader.StickerLoader;
-import com.bsb.hike.smartImageLoader.StickerPreviewLoader;
+import com.bsb.hike.smartImageLoader.StickerOtherIconLoader;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
@@ -30,7 +28,7 @@ public class StickerShopAdapter extends CursorAdapter
 
 	private Context context;
 
-	private StickerPreviewLoader stickerPreviewLoader;
+	private StickerOtherIconLoader stickerOtherIconLoader;
 	
 	private boolean isListFlinging;
 
@@ -72,7 +70,7 @@ public class StickerShopAdapter extends CursorAdapter
 		super(context, cursor, false);
 		this.context = context;
 		this.layoutInflater = LayoutInflater.from(context);
-		this.stickerPreviewLoader = new StickerPreviewLoader(context, true);
+		this.stickerOtherIconLoader = new StickerOtherIconLoader(context, true);
 		this.idColoumn = cursor.getColumnIndex(DBConstants._ID);
 		this.categoryNameColoumn = cursor.getColumnIndex(DBConstants.CATEGORY_NAME);
 		this.totalStickersCountColoumn = cursor.getColumnIndex(DBConstants.TOTAL_NUMBER);
@@ -106,7 +104,7 @@ public class StickerShopAdapter extends CursorAdapter
 		int totalStickerCount = cursor.getInt(totalStickersCountColoumn);
 		int categorySizeInBytes = cursor.getInt(categorySizeColoumn);
 		viewholder.categoryName.setText(cursor.getString(categoryNameColoumn));
-		stickerPreviewLoader.loadImage(categoryId + HikeConstants.DELIMETER + StickerManager.PREVIEW_IMAGE, viewholder.categoryPreviewIcon, isListFlinging);
+		stickerOtherIconLoader.loadImage(StickerManager.getInstance().getStickerImageUrl(categoryId, StickerManager.PREVIEW_IMAGE), viewholder.categoryPreviewIcon, isListFlinging);
 
 		if (totalStickerCount > 0)
 		{
@@ -173,9 +171,9 @@ public class StickerShopAdapter extends CursorAdapter
 	}
 	
 
-	public StickerPreviewLoader getStickerPreviewLoader()
+	public StickerOtherIconLoader getStickerPreviewLoader()
 	{
-		return stickerPreviewLoader;
+		return stickerOtherIconLoader;
 	}
 	
 	public void setIsListFlinging(boolean b)

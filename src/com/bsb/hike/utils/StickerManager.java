@@ -163,9 +163,7 @@ public class StickerManager
 
 	public static final String PREVIEW_IMAGE = "preview";
 	
-	public static final String PALETTE_ICON_TYPE = ".png";
-	
-	public static final String PREVIEW_ICON_TYPE = ".png";
+	public static final String OTHER_ICON_TYPE = ".png";
 
 	public static final String CATEGORY_SIZE = "categorySize";
 
@@ -965,7 +963,6 @@ public class StickerManager
 				String pallateIconSelected = obj.optString(StickerManager.PALLATE_ICON_SELECTED);
 				String previewImage = obj.optString(StickerManager.PREVIEW_IMAGE);
 
-				saveAssetToDirectory(otherAssetsDir, previewImage, StickerManager.PREVIEW_ICON_TYPE);
 				saveAssetToDirectory(otherAssetsDir, pallateIcon, StickerManager.PALLATE_ICON);
 				saveAssetToDirectory(otherAssetsDir, pallateIconSelected, StickerManager.PALLATE_ICON_SELECTED);
 				if (!TextUtils.isEmpty(previewImage))
@@ -1145,14 +1142,14 @@ public class StickerManager
 	public BitmapDrawable getPalleteIcon(Context ctx, String categoryId, boolean isPressed)
 	{
 		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
-		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + (isPressed ? PALLATE_ICON_SELECTED : PALLATE_ICON) + PALETTE_ICON_TYPE;
+		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + (isPressed ? PALLATE_ICON_SELECTED : PALLATE_ICON) + OTHER_ICON_TYPE;
 		
 		BitmapDrawable bitmapDrawable = generateBitmapDrawable(ctx.getResources(), baseFilePath);
 		if (bitmapDrawable == null)
 		{
 			StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
-			bitmapDrawable = (isPressed ? (BitmapDrawable) ctx.getResources().getDrawable(R.drawable.default_sticker_pallete_selected) : (BitmapDrawable) ctx.getResources()
-					.getDrawable(R.drawable.default_sticker_pallete));
+			bitmapDrawable = (isPressed ? (BitmapDrawable) ctx.getResources().getDrawable(R.drawable.default_sticker_pallete_icon_selected) : (BitmapDrawable) ctx.getResources()
+					.getDrawable(R.drawable.default_sticker_pallete_icon_unselected));
 		}
 		return bitmapDrawable;
 	}
@@ -1181,18 +1178,31 @@ public class StickerManager
 	 * @param downloadIfNotFound -- true if it should be downloaded if not found.
 	 * @return {@link Bitmap}
 	 */
-	public Bitmap getCategoryPreviewAsset(Context ctx, String categoryId, boolean downloadIfNotFound)
+	public Bitmap getCategoryOtherAsset(Context ctx, String categoryId, String type, boolean downloadIfNotFound)
 	{
 		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
-		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + PREVIEW_IMAGE + PREVIEW_ICON_TYPE;
+		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + type + OTHER_ICON_TYPE;
 		Bitmap bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
 		if (bitmap == null)
 		{
 			if (downloadIfNotFound)
 			{
-				StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(ctx, categoryId, null);
+				if(type.equalsIgnoreCase(PALLATE_ICON_SELECTED))
+				{
+					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
+					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_pallete_icon_selected);
+				}
+				else if(type.equalsIgnoreCase(PALLATE_ICON))
+				{
+					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
+					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_pallete_icon_unselected);
+				}
+				else if(type.equalsIgnoreCase(PREVIEW_IMAGE))
+				{
+					StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(ctx, categoryId, null);
+					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.shop_placeholder);
+				}
 			}
-			bitmap = HikeBitmapFactory.decodeResource(ctx.getResources(), R.drawable.shop_placeholder);
 		}
 		return bitmap;
 	}
@@ -1368,5 +1378,10 @@ public class StickerManager
 		{
 			return false;
 		}
+	}
+	
+	public String getStickerImageUrl(String categoryId, String type)
+	{
+		return categoryId + HikeConstants.DELIMETER + type;
 	}
 }
