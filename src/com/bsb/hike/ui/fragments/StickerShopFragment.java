@@ -165,9 +165,11 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 				if(resultData.length() == 0)
 				{
 					HikeSharedPreferenceUtil.getInstance(getSherlockActivity()).saveData(StickerManager.STICKER_SHOP_DATA_FULLY_FETCHED, true);
-					return;
 				}
-				HikeConversationsDatabase.getInstance().updateStickerCategoriesInDb(resultData);
+				else
+				{
+					HikeConversationsDatabase.getInstance().updateStickerCategoriesInDb(resultData);
+				}
 				final Cursor updatedCursor = HikeConversationsDatabase.getInstance().getCursorForStickerShop();
 				if (!isAdded())
 				{
