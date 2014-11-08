@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
@@ -136,6 +137,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			public void onClick(View v)
 			{
 				confirmView.setVisibility(View.GONE);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.UPDATE_ALL_CANCEL_CLICKED);
 			}
 		});
 		
@@ -151,7 +153,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 					final DownloadType type = DownloadType.UPDATE;
 					StickerDownloadManager.getInstance(getActivity()).DownloadMultipleStickers(category, type, null);
 				}
-				
+				Utils.sendUILogEvent(HikeConstants.LogEvent.UPDATE_ALL_CONFIRM_CLICKED);
 				mAdapter.notifyDataSetChanged();
 				confirmView.setVisibility(View.GONE);
 			}
@@ -232,6 +234,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 					if(!prefs.getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))
 					{
 						prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
+						Utils.sendUILogEvent(HikeConstants.LogEvent.SEEN_REORDERING_TIP);
 						StickerCategory category = mAdapter.getItem(from);
 						if ((from == to) || (!category.isVisible())) // Dropping at the same position. No need to perform Drop.
 						{

@@ -1572,6 +1572,16 @@ public class HikeConstants
 		
 		public static final String PIN_HISTORY_VIA_PIN_CLICK = "pinHistoryViaPinClick";
 		
+		public static final String STICKER_BTN_CLICKED = "stickerBtnClicked";
+		
+		public static final String STICKER_SETTING_BTN_CLICKED = "stickerSettingBtnClicked";
+		
+		public static final String SEEN_REORDERING_TIP = "seenReorderingTip";
+		
+		public static final String UPDATE_ALL_CONFIRM_CLICKED = "updateAllConfirmClicked";
+		
+		public static final String UPDATE_ALL_CANCEL_CLICKED = "updateAllCancelClicked";
+		
 		/*
 		 * Settings screen <screen> = settingsS <event> = notifNUJEnabled, notifH2OEnabled, notifNUJDisabled, notifH2ODisabled
 		 */

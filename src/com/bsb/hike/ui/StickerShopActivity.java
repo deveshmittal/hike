@@ -23,6 +23,7 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.StickerShopFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.Utils;
 
 public class StickerShopActivity extends HikeAppStateBaseFragmentActivity
 {
@@ -97,6 +98,7 @@ public class StickerShopActivity extends HikeAppStateBaseFragmentActivity
 			@Override
 			public void onClick(View v)
 			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_SETTING_BTN_CLICKED);
 				Intent i = new Intent(StickerShopActivity.this, StickerSettingsActivity.class);
 				startActivity(i);
 			}

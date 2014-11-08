@@ -6553,6 +6553,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			editor.putBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
 			editor.commit();
 		}
+		if (!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, false))
+		{
+			HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, true);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_BTN_CLICKED);
+		}
 	}
 
 	public void onEmoticonBtnClicked(View v)
