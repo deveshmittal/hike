@@ -35,6 +35,7 @@ import com.bsb.hike.DragSortListView.DragSortListView.DropListener;
 import com.bsb.hike.adapters.StickerSettingsAdapter;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -149,9 +150,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			{
 				for(StickerCategory category : visibleAndUpdateStickerSet)
 				{
-					category.setState(StickerCategory.DOWNLOADING);
-					final DownloadType type = DownloadType.UPDATE;
-					StickerDownloadManager.getInstance(getActivity()).DownloadMultipleStickers(category, type, null, null);
+					StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.SETTINGS, getSherlockActivity());
 				}
 				Utils.sendUILogEvent(HikeConstants.LogEvent.UPDATE_ALL_CONFIRM_CLICKED);
 				mAdapter.notifyDataSetChanged();
