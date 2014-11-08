@@ -406,12 +406,27 @@ public class StickerManager
 
 	public void setStickerUpdateAvailable(String categoryId, boolean updateAvailable)
 	{
-		if(!stickerCategoriesMap.containsKey(categoryId))
+		updateStickerCategoryData(categoryId, updateAvailable, -1, -1);
+	}
+	public void updateStickerCategoryData(String categoryId, Boolean updateAvailable, int totalStickerCount, int categorySize)
+	{
+		StickerCategory category = stickerCategoriesMap.get(categoryId);
+		if(category != null)
 		{
-			return;
+			if(updateAvailable != null)
+			{
+				category.setUpdateAvailable(updateAvailable);
+			}
+			if(totalStickerCount != -1)
+			{
+				category.setTotalStickers(totalStickerCount);
+			}
+			if(categorySize != -1)
+			{
+				category.setCategorySize(categorySize);
+			}
 		}
-		stickerCategoriesMap.get(categoryId).setUpdateAvailable(updateAvailable);
-		HikeConversationsDatabase.getInstance().stickerUpdateAvailable(categoryId, updateAvailable);
+		HikeConversationsDatabase.getInstance().updateStickerCategoryData(categoryId, updateAvailable, totalStickerCount, categorySize);
 	}
 
 	private String getExternalStickerDirectoryForCategoryId(Context context, String catId)

@@ -4019,10 +4019,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public void updateStickerCountForStickerCategory(String categoryId, int totalNum)
 	{
-		ContentValues contentValues = new ContentValues();
-		contentValues.put(DBConstants.TOTAL_NUMBER, totalNum);
-
-		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { categoryId });
+		updateStickerCategoryData(categoryId, null, totalNum, -1);
 	}
 
 	public void removeStickerCategory(String categoryId)
@@ -4031,12 +4028,34 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.delete(DBConstants.STICKER_SHOP_TABLE, DBConstants._ID + "=?", new String[] { categoryId });
 	}
 
-	public void stickerUpdateAvailable(String categoryId, boolean updateAvailable)
+	public void updateStickerCategoryData(String categoryId, Boolean updateAvailable, int totalStickerCount, int categorySize)
 	{
 		ContentValues contentValues = new ContentValues();
-		contentValues.put(DBConstants.UPDATE_AVAILABLE, updateAvailable);
+		if(updateAvailable != null)
+		{
+			contentValues.put(DBConstants.UPDATE_AVAILABLE, updateAvailable);
+		}
+		if(totalStickerCount != -1)
+		{
+			contentValues.put(DBConstants.TOTAL_NUMBER, totalStickerCount);
+		}
+		if(categorySize != -1)
+		{
+			contentValues.put(DBConstants.CATEGORY_SIZE, categorySize);
+		}
 
 		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { categoryId });
+		/*
+		 * There is no field as UPDATE_AVAILABLE in sticker shop
+		 */
+		contentValues.remove(DBConstants.UPDATE_AVAILABLE);
+		if(contentValues.size() > 0)
+		{
+			/*
+			 * if this category is also there in shop we need to update values there as well
+			 */
+			mDb.update(DBConstants.STICKER_SHOP_TABLE, contentValues, DBConstants._ID + "=?", new String[] { categoryId });
+		}
 	}
 
 	public LinkedHashMap<String, StickerCategory> getAllStickerCategoriesWithVisibility(boolean isVisible)

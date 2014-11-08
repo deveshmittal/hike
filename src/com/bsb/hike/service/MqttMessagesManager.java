@@ -1417,7 +1417,9 @@ public class MqttMessagesManager
 		String categoryId = data.getString(StickerManager.CATEGORY_ID);
 		if (HikeConstants.ADD_STICKER.equals(subType))
 		{
-			StickerManager.getInstance().setStickerUpdateAvailable(categoryId, true);
+			int stickerCount = data.optInt(HikeConstants.COUNT, -1);
+			int categorySize = data.optInt(HikeConstants.UPDATED_SIZE, -1);
+			StickerManager.getInstance().updateStickerCategoryData(categoryId, true, stickerCount, categorySize);
 		}
 		else if (HikeConstants.REMOVE_STICKER.equals(subType) || HikeConstants.REMOVE_CATEGORY.equals(subType))
 		{
@@ -1433,6 +1435,12 @@ public class MqttMessagesManager
 				{
 					StickerManager.getInstance().removeSticker(categoryId, stickerIds.getString(i));
 				}
+				int stickerCount = data.optInt(HikeConstants.COUNT, -1);
+				int categorySize = data.optInt(HikeConstants.UPDATED_SIZE, -1);
+				/*
+				 * We should not update updateAvailable field in this case
+				 */
+				StickerManager.getInstance().updateStickerCategoryData(categoryId, null, stickerCount, categorySize);
 			}
 		}
 	}
