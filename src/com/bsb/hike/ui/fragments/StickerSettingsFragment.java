@@ -368,13 +368,25 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 	{
-		// TODO Some method might be added in future over here to handle clicks on list 
+		StickerCategory category = mAdapter.getItem(position);
+		if(category.getState() == StickerCategory.RETRY && category.isVisible())
+		{
+			category.setState(StickerCategory.DOWNLOADING);
+			StickerManager.getInstance().initialiseDownloadStickerTask(category, getActivity());
+			mAdapter.notifyDataSetChanged();
+		}
+		
+		else
+		{
+			return;
+		}
 	}
 	
 	private void registerListener()
 	{
 		IntentFilter filter = new IntentFilter(StickerManager.STICKERS_UPDATED);
 		filter.addAction(StickerManager.STICKERS_FAILED);
+		filter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
 		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mMessageReceiver, filter);
 	}
 	
@@ -383,7 +395,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
-			if (intent.getAction().equals(StickerManager.STICKERS_UPDATED))
+			if (intent.getAction().equals(StickerManager.STICKERS_UPDATED) || intent.getAction().equals(StickerManager.MORE_STICKERS_DOWNLOADED))
 			{
 				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
 				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
