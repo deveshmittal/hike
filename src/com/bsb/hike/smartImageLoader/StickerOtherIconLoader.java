@@ -21,6 +21,7 @@ public class StickerOtherIconLoader extends ImageWorker
 	{
 		super();
 		this.ctx = ctx;
+		mResources = ctx.getResources();
 		this.downloadIfNotFound = downloadIfNotFound;
 	}
 
@@ -29,7 +30,7 @@ public class StickerOtherIconLoader extends ImageWorker
 	{	
 		String[] args = data.split(HikeConstants.DELIMETER);
 		String categoryId = args[0];
-		String type = args[1];
+		int type = Integer.valueOf(args[1]);
 		Bitmap bmp = StickerManager.getInstance().getCategoryOtherAsset(ctx, categoryId, type, downloadIfNotFound);
 		return bmp;
 	}

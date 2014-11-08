@@ -163,6 +163,12 @@ public class StickerManager
 
 	public static final String PREVIEW_IMAGE = "preview";
 	
+	public static final int PALLATE_ICON_TYPE = 0;
+
+	public static final int PALLATE_ICON_SELECTED_TYPE = 1;
+
+	public static final int PREVIEW_IMAGE_TYPE = 2;
+	
 	public static final String OTHER_ICON_TYPE = ".png";
 
 	public static final String CATEGORY_SIZE = "categorySize";
@@ -1178,32 +1184,51 @@ public class StickerManager
 	 * @param downloadIfNotFound -- true if it should be downloaded if not found.
 	 * @return {@link Bitmap}
 	 */
-	public Bitmap getCategoryOtherAsset(Context ctx, String categoryId, String type, boolean downloadIfNotFound)
+	public Bitmap getCategoryOtherAsset(Context ctx, String categoryId, int type, boolean downloadIfNotFound)
 	{
-		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
-		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + type + OTHER_ICON_TYPE;
-		Bitmap bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
+		String baseFilePath = getStickerDirectoryForCategoryId(categoryId) + OTHER_STICKER_ASSET_ROOT + "/";
+		Bitmap bitmap = null;
+		int defaultIconResId = 0;
+		switch (type)
+		{
+		case PALLATE_ICON_TYPE:
+			baseFilePath += PALLATE_ICON + OTHER_ICON_TYPE;
+			bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
+			defaultIconResId = R.drawable.default_sticker_pallete_icon_unselected;
+			break;
+		case PALLATE_ICON_SELECTED_TYPE:
+			baseFilePath += PALLATE_ICON_SELECTED + OTHER_ICON_TYPE;
+			bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
+			defaultIconResId = R.drawable.default_sticker_pallete_icon_selected;
+			break;
+		case PREVIEW_IMAGE_TYPE:
+			baseFilePath += PREVIEW_IMAGE + OTHER_ICON_TYPE;
+			bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
+			defaultIconResId = R.drawable.default_sticker_preview;
+			break;
+		default:
+			break;
+		}
 		if (bitmap == null)
 		{
+			bitmap = HikeBitmapFactory.decodeResource(ctx.getResources(), defaultIconResId);
 			if (downloadIfNotFound)
 			{
-				if(type.equalsIgnoreCase(PALLATE_ICON_SELECTED))
+				switch (type)
 				{
+				case PALLATE_ICON_TYPE:
+				case PALLATE_ICON_SELECTED_TYPE:
 					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
-					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_pallete_icon_selected);
-				}
-				else if(type.equalsIgnoreCase(PALLATE_ICON))
-				{
-					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
-					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_pallete_icon_unselected);
-				}
-				else if(type.equalsIgnoreCase(PREVIEW_IMAGE))
-				{
+					break;
+				case PREVIEW_IMAGE_TYPE:
 					StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(ctx, categoryId, null);
-					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_preview);
+					break;
+				default:
+					break;
 				}
 			}
 		}
+
 		return bitmap;
 	}
 	
@@ -1380,7 +1405,7 @@ public class StickerManager
 		}
 	}
 	
-	public String getCategoryOtherAssetLoaderKey(String categoryId, String type)
+	public String getCategoryOtherAssetLoaderKey(String categoryId, int type)
 	{
 		return categoryId + HikeConstants.DELIMETER + type;
 	}
