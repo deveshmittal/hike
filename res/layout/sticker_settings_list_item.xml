@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@id/drag_handle"
+    android:id="@+id/list_parent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="@dimen/sticker_settting_item_height" >
 
     <com.bsb.hike.ui.utils.RecyclingImageView
-        android:id="@+id/category_reorder_idicator"
+        android:id="@id/drag_handle"
         android:layout_width="34dp"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
@@ -20,7 +20,7 @@
         android:layout_height="58dp"
         android:layout_centerVertical="true"
         android:layout_marginRight="18dp"
-        android:layout_toRightOf="@id/category_reorder_idicator"
+        android:layout_toRightOf="@id/drag_handle"
         android:scaleType="centerInside"
         android:src="@drawable/sticker_069_hi" />
 
