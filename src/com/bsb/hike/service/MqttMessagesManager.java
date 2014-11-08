@@ -1414,13 +1414,16 @@ public class MqttMessagesManager
 	{
 		String subType = jsonObj.getString(HikeConstants.SUB_TYPE);
 		JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
-		String categoryId = data.getString(StickerManager.CATEGORY_ID);
 		if (HikeConstants.ADD_STICKER.equals(subType))
 		{
-			StickerManager.getInstance().setStickerUpdateAvailable(categoryId, true);
+			String categoryId = data.getString(StickerManager.CATEGORY_ID);
+			int stickerCount = data.optInt(HikeConstants.COUNT, -1);
+			int categorySize = data.optInt(HikeConstants.UPDATED_SIZE, -1);
+			StickerManager.getInstance().updateStickerCategoryData(categoryId, true, stickerCount, categorySize);
 		}
 		else if (HikeConstants.REMOVE_STICKER.equals(subType) || HikeConstants.REMOVE_CATEGORY.equals(subType))
 		{
+			String categoryId = data.getString(StickerManager.CATEGORY_ID);
 			if (HikeConstants.REMOVE_CATEGORY.equals(subType))
 			{
 				StickerManager.getInstance().removeCategory(categoryId);
@@ -1433,6 +1436,24 @@ public class MqttMessagesManager
 				{
 					StickerManager.getInstance().removeSticker(categoryId, stickerIds.getString(i));
 				}
+				int stickerCount = data.optInt(HikeConstants.COUNT, -1);
+				int categorySize = data.optInt(HikeConstants.UPDATED_SIZE, -1);
+				/*
+				 * We should not update updateAvailable field in this case
+				 */
+				StickerManager.getInstance().updateStickerCategoryData(categoryId, null, stickerCount, categorySize);
+			}
+		}
+		else if (HikeConstants.SHOP.equals(subType))
+		{
+			boolean showBadge = data.optBoolean(HikeConstants.BADGE, false);
+			/*
+			 * reseting sticker shop update time so that next time we fetch a fresh sicker shop
+			 */
+			HikeSharedPreferenceUtil.getInstance(context).saveData(StickerManager.LAST_STICKER_SHOP_UPDATE_TIME, 0l);
+			if(showBadge)
+			{
+				HikeSharedPreferenceUtil.getInstance(context).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, true);
 			}
 		}
 	}

@@ -228,6 +228,8 @@ public class HikeConstants
 	public static final String CRICKET_MOODS = "cmoods";
 
 	public static final String COUNT = "c";
+	
+	public static final String UPDATED_SIZE = "s";
 
 	public static final String DEFAULT_SMS_CLIENT_TUTORIAL = "dsctutorial";
 
@@ -1934,4 +1936,8 @@ public class HikeConstants
 	public static final String REWARDS_NAME = "rewards_name";
 		
 	public static final String REWARDS_URL = "rewards_url";
+
+	public static final String SHOP = "shop";
+
+	public static final String BADGE = "badge";
 }
