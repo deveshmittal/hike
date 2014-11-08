@@ -1054,6 +1054,7 @@ public class StickerManager
 		Bundle b = (Bundle) resultObj;
 		String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 		DownloadType downloadType = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
+		DownloadSource downloadSource = (DownloadSource) b.getSerializable(HikeConstants.DOWNLOAD_SOURCE);
 		final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
 		StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
 		if(category == null)
@@ -1061,8 +1062,14 @@ public class StickerManager
 			return;
 		}
 		category.updateDownloadedStickersCount();
-		category.setState(StickerCategory.DONE);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there.
-		
+		if(downloadSource == DownloadSource.SHOP || downloadSource == DownloadSource.SETTINGS)
+		{
+			category.setState(StickerCategory.NONE);
+		}
+		else
+		{
+			category.setState(StickerCategory.DONE);
+		}
 		if (DownloadType.UPDATE.equals(downloadType))
 		{
 			StickerManager.getInstance().setStickerUpdateAvailable(categoryId, false);

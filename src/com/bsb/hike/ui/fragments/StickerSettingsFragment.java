@@ -397,7 +397,6 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 						@Override
 						public void run()
 						{
-							category.setState(StickerCategory.DONE);
 							mAdapter.notifyDataSetChanged();
 
 						}

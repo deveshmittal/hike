@@ -257,6 +257,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	{
 		Bundle b = new Bundle();
 		b.putSerializable(StickerManager.CATEGORY_ID, category.getCategoryId());
+		b.putSerializable(HikeConstants.DOWNLOAD_SOURCE, source);
 		if(isProgress)
 		{
 				b.putSerializable(StickerManager.PERCENTAGE, percentage);
