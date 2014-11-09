@@ -256,13 +256,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
-		if (oldVersion < newVersion)
-		{
-			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-			Editor editor = appPrefs.edit();
-			editor.putInt(HikeConstants.PREVIOUS_CONV_DB_VERSION, oldVersion);
-			editor.commit();
-		}
 		if (db == null)
 		{
 			db = mDb;

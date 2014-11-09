@@ -491,8 +491,6 @@ public class HikeConstants
 	
 	public static final String UPGRADE_FOR_DATABASE_VERSION_28 = "upgradeForDatabaseVersion28";
 
-	public static final String PREVIOUS_CONV_DB_VERSION = "previousConvDBVersion";
-
 	public static final String UPGRADE_AVATAR_CONV_DB = "upgradeAvtarProgressConv";
 
 	public static final String NO_CALL_ALERT_CHECKED = "noCallAlertChecked";
