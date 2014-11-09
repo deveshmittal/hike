@@ -172,7 +172,12 @@ public class CustomStickerCategory extends StickerCategory
 		{
 			synchronized (stickerSet)
 			{
-				stickerSet.add(new Sticker(recentCat[i], recentSticker[i]));
+				Sticker s = new Sticker(recentCat[i], recentSticker[i]);
+				File f = new File(s.getSmallStickerPath());
+				if(f.exists())
+				{
+					stickerSet.add(s);
+				}
 			}
 		}
 
