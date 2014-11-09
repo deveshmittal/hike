@@ -1285,6 +1285,10 @@ public class StickerManager
 	
 	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, Context context)
 	{
+		initialiseDownloadStickerTask(category, source, null, context);
+	}
+	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, DownloadType downloadType, Context context)
+	{
 		if(stickerCategoriesMap.containsKey(category.getCategoryId()))
 		{
 			category = stickerCategoriesMap.get(category.getCategoryId());
@@ -1292,8 +1296,11 @@ public class StickerManager
 		if(category.getTotalStickers() == 0 || category.getDownloadedStickersCount() < category.getTotalStickers())
 		{
 			category.setState(StickerCategory.DOWNLOADING);
-			final DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
-			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, type, source, null);
+			if(downloadType== null)
+			{
+				downloadType = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
+			}
+			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, downloadType, source, null);
 		}
 		saveCategoryAsVisible(category);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);

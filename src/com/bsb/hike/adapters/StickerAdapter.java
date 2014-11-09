@@ -333,10 +333,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				@Override
 				public void onClick(View v)
 				{
-					category.setState(StickerCategory.DOWNLOADING);
-					StickerDownloadManager.getInstance(activity).DownloadMultipleStickers(category, DownloadType.NEW_CATEGORY, DownloadSource.FIRST_TIME, null);
+					StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.FIRST_TIME, DownloadType.NEW_CATEGORY, activity);
 					setupStickerPage(parent, category);
-
 				}
 			});
 
