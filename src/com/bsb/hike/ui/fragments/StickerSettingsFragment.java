@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
@@ -35,6 +36,7 @@ import com.bsb.hike.DragSortListView.DragSortListView.DropListener;
 import com.bsb.hike.adapters.StickerSettingsAdapter;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -137,6 +139,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			public void onClick(View v)
 			{
 				confirmView.setVisibility(View.GONE);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.UPDATE_ALL_CANCEL_CLICKED);
 			}
 		});
 		
@@ -148,11 +151,9 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			{
 				for(StickerCategory category : visibleAndUpdateStickerSet)
 				{
-					category.setState(StickerCategory.DOWNLOADING);
-					final DownloadType type = DownloadType.UPDATE;
-					StickerDownloadManager.getInstance(getActivity()).DownloadMultipleStickers(category, type, null);
+					StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.SETTINGS, getSherlockActivity());
 				}
-				
+				Utils.sendUILogEvent(HikeConstants.LogEvent.UPDATE_ALL_CONFIRM_CLICKED);
 				mAdapter.notifyDataSetChanged();
 				confirmView.setVisibility(View.GONE);
 			}
@@ -233,6 +234,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 					if(!prefs.getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))
 					{
 						prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
+						Utils.sendUILogEvent(HikeConstants.LogEvent.SEEN_REORDERING_TIP);
 						StickerCategory category = mAdapter.getItem(from);
 						if ((from == to) || (!category.isVisible())) // Dropping at the same position. No need to perform Drop.
 						{
@@ -372,7 +374,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		if(category.getState() == StickerCategory.RETRY && category.isVisible())
 		{
 			category.setState(StickerCategory.DOWNLOADING);
-			StickerManager.getInstance().initialiseDownloadStickerTask(category, getActivity());
+			StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.SETTINGS, getActivity());
 			mAdapter.notifyDataSetChanged();
 		}
 		
@@ -407,7 +409,6 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 						@Override
 						public void run()
 						{
-							category.setState(StickerCategory.DONE);
 							mAdapter.notifyDataSetChanged();
 
 						}

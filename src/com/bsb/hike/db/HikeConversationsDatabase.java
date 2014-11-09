@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import android.R.integer;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -32,6 +33,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
@@ -254,6 +256,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
+		if (oldVersion < newVersion)
+		{
+			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+			Editor editor = appPrefs.edit();
+			editor.putInt(HikeConstants.PREVIOUS_CONV_DB_VERSION, oldVersion);
+			editor.commit();
+		}
 		if (db == null)
 		{
 			db = mDb;
@@ -624,6 +633,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	public void upgrade(int oldVersion, int newVersion)
+	{
+		onUpgrade(mDb, oldVersion, newVersion);
+	}
+	
+	public void clearTable(String table)
+	{
+		mDb.delete(table, null, null);
+	}
+
 	private String getStatusTableCreationStatement()
 	{
 		return "CREATE TABLE IF NOT EXISTS " + DBConstants.STATUS_TABLE
@@ -977,7 +996,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					}
 					else
 					{
-						return;
+						continue;
 					}
 
 					JSONArray readByArray;
@@ -1001,10 +1020,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					/*
 					 * Checking if this number has already been added.
 					 */
-					boolean alreadyAdded = false;
 					for (String msisdn : pair.getFirst().getSecond())
 					{
-						for (int i = 0; i < readByArray.length(); i++)
+						boolean alreadyAdded = false;
+						int length = readByArray.length();
+						
+						for (int i = 0; i < length; i++)
 						{
 							if (readByArray.optString(i).equals(msisdn))
 							{
@@ -3998,10 +4019,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public void updateStickerCountForStickerCategory(String categoryId, int totalNum)
 	{
-		ContentValues contentValues = new ContentValues();
-		contentValues.put(DBConstants.TOTAL_NUMBER, totalNum);
-
-		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { categoryId });
+		updateStickerCategoryData(categoryId, null, totalNum, -1);
 	}
 
 	public void removeStickerCategory(String categoryId)
@@ -4010,12 +4028,34 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.delete(DBConstants.STICKER_SHOP_TABLE, DBConstants._ID + "=?", new String[] { categoryId });
 	}
 
-	public void stickerUpdateAvailable(String categoryId, boolean updateAvailable)
+	public void updateStickerCategoryData(String categoryId, Boolean updateAvailable, int totalStickerCount, int categorySize)
 	{
 		ContentValues contentValues = new ContentValues();
-		contentValues.put(DBConstants.UPDATE_AVAILABLE, updateAvailable);
+		if(updateAvailable != null)
+		{
+			contentValues.put(DBConstants.UPDATE_AVAILABLE, updateAvailable);
+		}
+		if(totalStickerCount != -1)
+		{
+			contentValues.put(DBConstants.TOTAL_NUMBER, totalStickerCount);
+		}
+		if(categorySize != -1)
+		{
+			contentValues.put(DBConstants.CATEGORY_SIZE, categorySize);
+		}
 
 		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { categoryId });
+		/*
+		 * There is no field as UPDATE_AVAILABLE in sticker shop
+		 */
+		contentValues.remove(DBConstants.UPDATE_AVAILABLE);
+		if(contentValues.size() > 0)
+		{
+			/*
+			 * if this category is also there in shop we need to update values there as well
+			 */
+			mDb.update(DBConstants.STICKER_SHOP_TABLE, contentValues, DBConstants._ID + "=?", new String[] { categoryId });
+		}
 	}
 
 	public LinkedHashMap<String, StickerCategory> getAllStickerCategoriesWithVisibility(boolean isVisible)
@@ -4585,6 +4625,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		values.put(DBConstants.IS_STEALTH, isStealth ? 1 : 0);
 
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN + "=?", new String[] { msisdn });
+	}
+	
+	public void resetConversationsStealthStatus()
+	{
+		ContentValues values = new ContentValues();
+		values.put(DBConstants.IS_STEALTH, 0);
+		
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, null, null);
 	}
 
 	public void addStealthMsisdnToMap()
@@ -5556,7 +5604,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				JSONObject obj = stickerCategories.optJSONObject(i);
 				String categoryId = obj.optString(StickerManager.CATEGORY_ID);
-				String categoryName = categoryId;
+				String categoryName = obj.optString(StickerManager.CATEGORY_NAME);;
 				String downloadPreference = obj.optString(StickerManager.DOWNLOAD_PREF);
 				/*
 				 * All categories which we have set to be visible OR user has already initiated a download for them once will be visible in the pallate
@@ -5581,7 +5629,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				contentValues.put(DBConstants.IS_CUSTOM, isCustom);
 				contentValues.put(DBConstants.CATEGORY_INDEX, catIndex);
 
-				mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
+				if(isVisible == 1)
+				{
+					mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
+				}
 			}
 			/*
 			 * Now we can drop the old stickers_table.
@@ -5638,6 +5689,21 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { stickerCategory.getCategoryId() });
 	}
 	
+	public void insertInToStickerCategoriesTable(StickerCategory stickerCategory)
+	{
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants._ID, stickerCategory.getCategoryId());
+		contentValues.put(DBConstants.CATEGORY_NAME, stickerCategory.getCategoryName());
+		contentValues.put(DBConstants.TOTAL_NUMBER, stickerCategory.getTotalStickers());
+		contentValues.put(DBConstants.UPDATE_AVAILABLE, stickerCategory.isUpdateAvailable());
+		contentValues.put(DBConstants.IS_CUSTOM, stickerCategory.isCustom());
+		contentValues.put(DBConstants.CATEGORY_SIZE, stickerCategory.getCategorySize());
+		contentValues.put(DBConstants.IS_VISIBLE, stickerCategory.isVisible());
+		contentValues.put(DBConstants.CATEGORY_INDEX, stickerCategory.getCategoryIndex());
+
+		mDb.insertWithOnConflict(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
+	}
+	
 	public void updateStickerCategoriesInDb(JSONArray jsonArray)
 	{
 		try
@@ -5654,9 +5720,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				ContentValues contentValues = new ContentValues();
 				contentValues.put(DBConstants._ID, catId);
+				int isVisible = 0;
 				if(jsonObj.has(HikeConstants.VISIBLITY))
 				{
-					contentValues.put(DBConstants.IS_VISIBLE, jsonObj.getInt(HikeConstants.VISIBLITY));
+					isVisible = jsonObj.getInt(HikeConstants.VISIBLITY);
+					contentValues.put(DBConstants.IS_VISIBLE, isVisible);
 				}
 				if(jsonObj.has(HikeConstants.CAT_NAME))
 				{
@@ -5671,9 +5739,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					contentValues.put(DBConstants.CATEGORY_SIZE, jsonObj.getInt(HikeConstants.SIZE));
 				}
 
-				mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { catId });
+				int rowsAffected = mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { catId });
+				/*
+				 * if row is not there in stickerCategoriesTable and server specifically tells us to switch on the visibility 
+				 * then we need to insert this item in stickerCategoriesTable
+				 */
+				if(isVisible == 1 && rowsAffected == 0)
+				{
+					mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
+				}
 				mDb.insertWithOnConflict(DBConstants.STICKER_SHOP_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
-			
 			}
 			mDb.setTransactionSuccessful();
 		}

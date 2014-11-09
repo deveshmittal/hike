@@ -28,10 +28,10 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.smartImageLoader.StickerLoader;
-import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.utils.RecyclingImageView;
 import com.bsb.hike.utils.StickerManager;
@@ -228,7 +228,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				@Override
 				public void onClick(View v)
 				{
-					initialiseDownloadStickerTask();
+					initialiseDownloadStickerTask(DownloadSource.X_MORE);
 				}
 			});
 
@@ -253,7 +253,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				@Override
 				public void onClick(View v)
 				{
-					initialiseDownloadStickerTask();
+					initialiseDownloadStickerTask(null);
 				}
 			});
 			
@@ -282,9 +282,9 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		return convertView;
 	}
 
-	private void initialiseDownloadStickerTask()
+	private void initialiseDownloadStickerTask(DownloadSource source)
 	{
-		StickerManager.getInstance().initialiseDownloadStickerTask(category, activity);
+		StickerManager.getInstance().initialiseDownloadStickerTask(category, source, activity);
 		replaceDownloadingatTop();
 	}
 

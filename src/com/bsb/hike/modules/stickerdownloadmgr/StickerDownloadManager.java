@@ -8,6 +8,7 @@ import android.os.Handler;
 import com.bsb.hike.adapters.StickerPageAdapter;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.NetworkHandler.NetworkType;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.StickerRequestType;
 import com.bsb.hike.utils.Logger;
@@ -56,7 +57,7 @@ public class StickerDownloadManager
 		_instance = null;
 	}
 
-	public void DownloadSingleSticker(Context context, String catId, String stkId, IStickerResultListener callback)
+	public void DownloadSingleSticker(String catId, String stkId, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.SINGLE, stkId, catId);
 		if (queue.isTaskAlreadyExist(taskId))
@@ -69,7 +70,7 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 
-	public void DownloadMultipleStickers(StickerCategory cat, StickerConstants.DownloadType downloadType, IStickerResultListener callback)
+	public void DownloadMultipleStickers(StickerCategory cat, StickerConstants.DownloadType downloadType, DownloadSource source, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.MULTIPLE, null, cat.getCategoryId());
 		if (queue.isTaskAlreadyExist(taskId))
@@ -81,13 +82,13 @@ public class StickerDownloadManager
 		{
 			return;
 		}
-		BaseStickerDownloadTask stickerCategoryTask = new MultiStickerDownloadTask(handler, context, taskId, cat, downloadType, callback);
+		BaseStickerDownloadTask stickerCategoryTask = new MultiStickerDownloadTask(handler, context, taskId, cat, downloadType, source, callback);
 		Request request = new Request(stickerCategoryTask);
 		request.setPrioity(Request.PRIORITY_HIGH);
 		queue.addTask(taskId, request);
 	}
 	
-	public void DownloadStickerPreviewImage(Context context, String categoryId, IStickerResultListener callback)
+	public void DownloadStickerPreviewImage(String categoryId, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.PREVIEW, null, categoryId);
 		if (queue.isTaskAlreadyExist(taskId))
@@ -100,7 +101,7 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 	
-	public void DownloadEnableDisableImage(Context context, String categoryId, IStickerResultListener callback)
+	public void DownloadEnableDisableImage(String categoryId, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.ENABLE_DISABLE, null, categoryId);
 		if (queue.isTaskAlreadyExist(taskId))
@@ -114,7 +115,7 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 	
-	public void DownloadStickerSize(Context context, StickerCategory cat, IStickerResultListener callback)
+	public void DownloadStickerSize(StickerCategory cat, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.SIZE, null, cat.getCategoryId());
 		if (queue.isTaskAlreadyExist(taskId))
@@ -127,7 +128,7 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 	
-	public void DownloadStickerShopTask(Context context, int offset, IStickerResultListener callback)
+	public void DownloadStickerShopTask(int offset, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.SHOP, null, null);
 		if (queue.isTaskAlreadyExist(taskId))
@@ -140,7 +141,7 @@ public class StickerDownloadManager
 		queue.addTask(taskId, request);
 	}
 	
-	public void DownloadStickerSignupUpgradeTask(Context context, JSONArray categoryList, IStickerResultListener callback)
+	public void DownloadStickerSignupUpgradeTask(JSONArray categoryList, IStickerResultListener callback)
 	{
 		String taskId = getTaskId(StickerRequestType.SHOP, null, null);
 		if (queue.isTaskAlreadyExist(taskId))

@@ -87,6 +87,12 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			Utils.saveBase64StringToFile(new File(previewImagePath), stickerData);
 			
 		}
+		catch(StickerException e)
+		{
+			Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
+			setException(e);
+			return STResult.DOWNLOAD_FAILED;
+		}
 		catch(Exception e)
 		{
 			Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);

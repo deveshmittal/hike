@@ -1,7 +1,6 @@
 package com.bsb.hike.tasks;
 
 import java.io.File;
-
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +30,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.db.DBBackupRestore;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
@@ -88,7 +89,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, SCANNING_CONTACTS, PIN_VERIFIED
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, SCANNING_CONTACTS, PIN_VERIFIED, BACKUP_AVAILABLE, RESTORING_BACKUP
 	};
 
 	public class StateValue
@@ -96,7 +97,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		public State state;
 
 		public String value;
-
+		
 		public StateValue(State state, String value)
 		{
 			this.state = state;
@@ -125,13 +126,15 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	public static boolean isAlreadyFetchingNumber = false;
 
 	private String userName;
+	
+	private StateValue mStateValue;
 
 	private static final String INDIA_ISO = "IN";
 
 	public static final String START_UPLOAD_PROFILE = "start";
 
 	public static final String FINISHED_UPLOAD_PROFILE = "finish";
-
+	
 	public boolean isRunning()
 	{
 		return isRunning;
@@ -538,6 +541,55 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
+		this.data = null;
+		if (DBBackupRestore.getInstance(context).isBackupAvailable())
+		{
+			publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
+			synchronized (this)
+			{
+				try
+				{
+					this.wait();
+				}
+				catch (InterruptedException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					Logger.d("backup","Interrupted while waiting for user's choice on restore.");
+				}
+			}
+		}
+
+		while (!TextUtils.isEmpty(this.data))
+		{
+			mStateValue = new StateValue(State.RESTORING_BACKUP,null);
+			boolean status = DBBackupRestore.getInstance(context).restoreDB();
+			if (status)
+			{
+				HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
+				ContactManager.getInstance().init(context);
+				this.data = null;
+				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString());
+			}
+			else
+			{
+				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.FALSE.toString());
+			}
+			publishProgress(mStateValue);
+			synchronized (this)
+			{
+				try
+				{
+					this.wait();
+				}
+				catch (InterruptedException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
+				}
+			}
+		}
 		Logger.d("SignupTask", "Publishing Token_Created");
 
 		/* tell the service to start listening for new messages */
@@ -557,6 +609,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		 */
 		settings.edit().putBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, true).commit();
 		return Boolean.TRUE;
+	}
+	
+	public StateValue getStateValue()
+	{
+		return mStateValue;
 	}
 
 	@Override

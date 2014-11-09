@@ -86,6 +86,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String UID_SETTING = "uid";
 
+	public static final String BACKUP_TOKEN_SETTING = "backup_token";
+
 	public static final String UPDATE_SETTING = "update";
 
 	public static final String ANALYTICS = "analytics";
@@ -402,9 +404,11 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_DIWALI_POPUP = "shownDiwaliPopup";
 	
-	public static final String SHOW_SHOP_ICON_BLUE = "showShopIconBlue";
+	public static final String SHOWN_SHOP_ICON_BLUE = "shownShopIconBlue";
 	
 	public static final String IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN = "showCategoryReordering";
+	
+	public static final String STICKED_BTN_CLICKED_FIRST_TIME = "stickerBtnClickedFirstTime";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 

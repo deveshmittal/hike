@@ -188,7 +188,6 @@ import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
-import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -1422,7 +1421,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		}
 		optionsList.add(new OverFlowMenuItem(getString(R.string.clear_chat), 5));
-		optionsList.add(new OverFlowMenuItem(getString(R.string.email_chat), 3));
+		if(messages.size() > 0)
+		{
+			optionsList.add(new OverFlowMenuItem(getString(R.string.email_chat), 3));
+		}
 
 		if (mConversation instanceof GroupConversation)
 		{
@@ -6550,6 +6552,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			editor.putBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
 			editor.commit();
 		}
+		if (!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, false))
+		{
+			HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, true);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_BTN_CLICKED);
+		}
 	}
 
 	public void onEmoticonBtnClicked(View v)
@@ -6580,6 +6587,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				if (v.getId() == R.id.sticker_btn)
 				{
+					View shopIconViewGroup = eraseKey;
 					if (emoticonType == EmoticonType.STICKERS)
 					{
 						// view not changed , exit with dismiss dialog
@@ -6602,25 +6610,27 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						emoticonType = EmoticonType.STICKERS;
 					}
-					eraseKey.setVisibility(View.VISIBLE);
+					shopIconViewGroup.setVisibility(View.VISIBLE);
 					shopIcon.setImageResource(R.drawable.ic_sticker_shop);
-					eraseKey.setBackgroundResource(R.color.sticker_pallete_bg_color);
-					if(!prefs.getBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
+					shopIconViewGroup.setBackgroundResource(R.color.sticker_pallete_bg_color);
+					if(!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 					{
-						eraseKey.setBackgroundResource(R.color.shop_icon_color);
+						shopIconViewGroup.setBackgroundResource(R.color.shop_icon_color);
 					}
 					
-					eraseKey.setOnClickListener(new View.OnClickListener()
+					shopIconViewGroup.setOnClickListener(new View.OnClickListener()
 					{
 						
 						@Override
 						public void onClick(View v)
 						{
-							if(!prefs.getBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
+							if(!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 							{
-								Editor editor = prefs.edit();
-								editor.putBoolean(HikeMessengerApp.SHOW_SHOP_ICON_BLUE, true);
-								editor.commit();
+								HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
+							}
+							if(HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))  //The shop icon would be blue unless the user clicks on it once
+							{
+								HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
 							}
 							Intent i = new Intent(ChatThread.this, StickerShopActivity.class);
 							startActivity(i);
@@ -7292,21 +7302,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			if (intent.getAction().equals(StickerManager.STICKERS_UPDATED))
 			{
-				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
-				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
-				if (iconPageIndicator != null && stickerAdapter != null)
+				runOnUiThread(new Runnable()
 				{
-					runOnUiThread(new Runnable()
+					public void run()
 					{
-						public void run()
-						{
-							category.setState(StickerCategory.DONE);
-							stickerAdapter.initStickers(category);
-							stickerAdapter.notifyDataSetChanged();
-							iconPageIndicator.notifyDataSetChanged();
-						}
-					});
-				}
+						iconPageIndicator.notifyDataSetChanged();
+					}
+				});
 			}
 		}
 	}
@@ -7588,13 +7590,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		case R.id.copy_msgs:
 			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			Collections.sort(selectedMsgIds);
-			String msgStr = selectedMessagesMap.get(selectedMsgIds.get(0)).getMessage();
-			for (int i = 1; i < selectedMsgIds.size(); i++)
+			StringBuilder msgStr = new StringBuilder();
+			int size = selectedMsgIds.size();
+			
+			for (int i = 0; i < size; i++)
 			{
-				msgStr += "\n" + selectedMessagesMap.get(selectedMsgIds.get(i)).getMessage();
+				msgStr.append(selectedMessagesMap.get(selectedMsgIds.get(i)).getMessage());
+				msgStr.append("\n");				
 			}
-			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-			clipboard.setText(msgStr);
+			Utils.setClipboardText(msgStr.toString(), getApplicationContext());
 			Toast.makeText(ChatThread.this, R.string.copied, Toast.LENGTH_SHORT).show();
 			destroyActionMode();
 			return true;

@@ -6,10 +6,11 @@
 
     <ListView 
         android:id="@id/android:list"
+        android:visibility="gone"
         style="@style/HomeList" />
         
     <include
         layout="@layout/spinner_center_screen"
-        android:visibility="gone" />
+        android:id="@+id/loading_data" />
     
 </RelativeLayout>

@@ -8,7 +8,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,9 +30,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -45,16 +41,16 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.adapters.StickerPageAdapter;
-import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.CustomStickerCategory;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class StickerManager
@@ -163,6 +159,12 @@ public class StickerManager
 
 	public static final String PREVIEW_IMAGE = "preview";
 	
+	public static final int PALLATE_ICON_TYPE = 0;
+
+	public static final int PALLATE_ICON_SELECTED_TYPE = 1;
+
+	public static final int PREVIEW_IMAGE_TYPE = 2;
+	
 	public static final String OTHER_ICON_TYPE = ".png";
 
 	public static final String CATEGORY_SIZE = "categorySize";
@@ -180,6 +182,8 @@ public class StickerManager
 	public static final long STICKER_SHOP_REFRESH_TIME = 24 * 60 * 60 * 1000;
 	
 	public static final long MINIMUM_FREE_SPACE = 10 * 1024 * 1024;
+
+	public static final String SHOW_STICKER_SHOP_BADGE = "showStickerShopBadge";
 	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
@@ -191,8 +195,6 @@ public class StickerManager
 			return !".nomedia".equalsIgnoreCase(fileName);
 		}
 	};
-
-	public Map<String, StickerTaskBase> stickerTaskMap;
 
 	private Context context;
 
@@ -216,10 +218,6 @@ public class StickerManager
 	private StickerManager()
 	{
 		stickerCategoriesMap = Collections.synchronizedMap(new LinkedHashMap<String, StickerCategory>());
-		if (stickerTaskMap == null)
-		{
-			stickerTaskMap = new HashMap<String, StickerTaskBase>();
-		}
 	}
 
 	public void init(Context ctx)
@@ -287,6 +285,7 @@ public class StickerManager
 		 * TODO : This will throw an exception in case of remove category as, this function will be called from mqtt thread and stickerCategories will be called from UI thread
 		 * also.
 		 */
+		stickerCategoriesMap.clear();
 		stickerCategoriesMap.putAll(HikeConversationsDatabase.getInstance().getAllStickerCategoriesWithVisibility(true));
 	}
 
@@ -405,12 +404,27 @@ public class StickerManager
 
 	public void setStickerUpdateAvailable(String categoryId, boolean updateAvailable)
 	{
-		if(!stickerCategoriesMap.containsKey(categoryId))
+		updateStickerCategoryData(categoryId, updateAvailable, -1, -1);
+	}
+	public void updateStickerCategoryData(String categoryId, Boolean updateAvailable, int totalStickerCount, int categorySize)
+	{
+		StickerCategory category = stickerCategoriesMap.get(categoryId);
+		if(category != null)
 		{
-			return;
+			if(updateAvailable != null)
+			{
+				category.setUpdateAvailable(updateAvailable);
+			}
+			if(totalStickerCount != -1)
+			{
+				category.setTotalStickers(totalStickerCount);
+			}
+			if(categorySize != -1)
+			{
+				category.setCategorySize(categorySize);
+			}
 		}
-		stickerCategoriesMap.get(categoryId).setUpdateAvailable(updateAvailable);
-		HikeConversationsDatabase.getInstance().stickerUpdateAvailable(categoryId, updateAvailable);
+		HikeConversationsDatabase.getInstance().updateStickerCategoryData(categoryId, updateAvailable, totalStickerCount, categorySize);
 	}
 
 	private String getExternalStickerDirectoryForCategoryId(Context context, String catId)
@@ -490,30 +504,6 @@ public class StickerManager
 				return false;
 		}
 		return false;
-	}
-
-	public boolean isStickerDownloading(String key)
-	{
-		if (key != null)
-			return stickerTaskMap.containsKey(key);
-		return false;
-	}
-
-	public StickerTaskBase getTask(String key)
-	{
-		if (key == null)
-			return null;
-		return stickerTaskMap.get(key);
-	}
-
-	public void insertTask(String categoryId, StickerTaskBase downloadStickerTask)
-	{
-		stickerTaskMap.put(categoryId, downloadStickerTask);
-	}
-
-	public void removeTask(String key)
-	{
-		stickerTaskMap.remove(key);
 	}
 
 	public StickerCategory getCategoryForId(String categoryId)
@@ -1059,27 +1049,12 @@ public class StickerManager
 		return ((int) (screenWidth/SIZE_IMAGE));
 	}
 	
-	/**
-	 * Programatically sets StateListDrawable to Sticker Palette Icons. Takes baseFilePath as well as list of icons for pressed and normal states.
-	 * 
-	 * @param context
-	 * @param categoryId
-	 * @return {@link StateListDrawable}
-	 */
-	public static StateListDrawable getStateListDrawableForStickerPalette(Context context, String categoryId)
-	{
-		StickerManager stickerManager = StickerManager.getInstance();
-		StateListDrawable states = new StateListDrawable();
-		states.addState(new int[] { android.R.attr.state_selected }, stickerManager.getPalleteIcon(context, categoryId, true));
-		states.addState(new int[] {}, stickerManager.getPalleteIcon(context, categoryId, false));
-		return states;
-	}
-	
 	public void sucessFullyDownloadedStickers(Object resultObj)
 	{
 		Bundle b = (Bundle) resultObj;
 		String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 		DownloadType downloadType = (DownloadType) b.getSerializable(StickerManager.STICKER_DOWNLOAD_TYPE);
+		DownloadSource downloadSource = (DownloadSource) b.getSerializable(HikeConstants.DOWNLOAD_SOURCE);
 		final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
 		StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
 		if(category == null)
@@ -1087,8 +1062,14 @@ public class StickerManager
 			return;
 		}
 		category.updateDownloadedStickersCount();
-		category.setState(StickerCategory.DONE);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there.
-		
+		if(downloadSource == DownloadSource.SHOP || downloadSource == DownloadSource.SETTINGS)
+		{
+			category.setState(StickerCategory.NONE);
+		}
+		else
+		{
+			category.setState(StickerCategory.DONE);
+		}
 		if (DownloadType.UPDATE.equals(downloadType))
 		{
 			StickerManager.getInstance().setStickerUpdateAvailable(categoryId, false);
@@ -1132,45 +1113,7 @@ public class StickerManager
 		i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
 		LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 	}
-	/**
-	 * Return a BitmapDrawable for pallete icon for a given StickerCategory
-	 * @param ctx
-	 * @param categoryId
-	 * @param isPressed
-	 * @return {@link BitmapDrawable}
-	 */
-	public BitmapDrawable getPalleteIcon(Context ctx, String categoryId, boolean isPressed)
-	{
-		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
-		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + (isPressed ? PALLATE_ICON_SELECTED : PALLATE_ICON) + OTHER_ICON_TYPE;
-		
-		BitmapDrawable bitmapDrawable = generateBitmapDrawable(ctx.getResources(), baseFilePath);
-		if (bitmapDrawable == null)
-		{
-			StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
-			bitmapDrawable = (isPressed ? (BitmapDrawable) ctx.getResources().getDrawable(R.drawable.default_sticker_pallete_icon_selected) : (BitmapDrawable) ctx.getResources()
-					.getDrawable(R.drawable.default_sticker_pallete_icon_unselected));
-		}
-		return bitmapDrawable;
-	}
 	
-	/**
-	 * Returns a BitmapDrawable from HikeBitmapFactory
-	 * @param resources
-	 * @param baseFilePath
-	 * @return
-	 */
-	
-	private BitmapDrawable generateBitmapDrawable(Resources resources, String baseFilePath)
-	{
-		BitmapDrawable bd;
-		Bitmap bmp = HikeBitmapFactory.decodeFile(baseFilePath);
-		if(bmp == null)
-			return null;
-		bd = HikeBitmapFactory.getBitmapDrawable(resources, bmp);
-		return bd;
-	}
-
 	/**
 	 * Returns a category preview {@link Bitmap}
 	 * @param ctx
@@ -1178,32 +1121,51 @@ public class StickerManager
 	 * @param downloadIfNotFound -- true if it should be downloaded if not found.
 	 * @return {@link Bitmap}
 	 */
-	public Bitmap getCategoryOtherAsset(Context ctx, String categoryId, String type, boolean downloadIfNotFound)
+	public Bitmap getCategoryOtherAsset(Context ctx, String categoryId, int type, boolean downloadIfNotFound)
 	{
-		String baseFilePath = getStickerDirectoryForCategoryId(categoryId);
-		baseFilePath = baseFilePath + OTHER_STICKER_ASSET_ROOT + "/" + type + OTHER_ICON_TYPE;
-		Bitmap bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
+		String baseFilePath = getStickerDirectoryForCategoryId(categoryId) + OTHER_STICKER_ASSET_ROOT + "/";
+		Bitmap bitmap = null;
+		int defaultIconResId = 0;
+		switch (type)
+		{
+		case PALLATE_ICON_TYPE:
+			baseFilePath += PALLATE_ICON + OTHER_ICON_TYPE;
+			bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
+			defaultIconResId = R.drawable.default_sticker_pallete_icon_unselected;
+			break;
+		case PALLATE_ICON_SELECTED_TYPE:
+			baseFilePath += PALLATE_ICON_SELECTED + OTHER_ICON_TYPE;
+			bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
+			defaultIconResId = R.drawable.default_sticker_pallete_icon_selected;
+			break;
+		case PREVIEW_IMAGE_TYPE:
+			baseFilePath += PREVIEW_IMAGE + OTHER_ICON_TYPE;
+			bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
+			defaultIconResId = R.drawable.default_sticker_preview;
+			break;
+		default:
+			break;
+		}
 		if (bitmap == null)
 		{
+			bitmap = HikeBitmapFactory.decodeResource(ctx.getResources(), defaultIconResId);
 			if (downloadIfNotFound)
 			{
-				if(type.equalsIgnoreCase(PALLATE_ICON_SELECTED))
+				switch (type)
 				{
-					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
-					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_pallete_icon_selected);
-				}
-				else if(type.equalsIgnoreCase(PALLATE_ICON))
-				{
-					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(ctx, categoryId, null);
-					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.default_sticker_pallete_icon_unselected);
-				}
-				else if(type.equalsIgnoreCase(PREVIEW_IMAGE))
-				{
-					StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(ctx, categoryId, null);
-					bitmap = HikeBitmapFactory.decodeResource( ctx.getResources(), R.drawable.shop_placeholder);
+				case PALLATE_ICON_TYPE:
+				case PALLATE_ICON_SELECTED_TYPE:
+					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(categoryId, null);
+					break;
+				case PREVIEW_IMAGE_TYPE:
+					StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(categoryId, null);
+					break;
+				default:
+					break;
 				}
 			}
 		}
+
 		return bitmap;
 	}
 	
@@ -1257,7 +1219,7 @@ public class StickerManager
 		if (!HikeSharedPreferenceUtil.getInstance(context).getData(StickerManager.STICKERS_SIZE_DOWNLOADED, false))
 		{
 			
-			StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(context, getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
+			StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
 			{
 				
 				@Override
@@ -1276,9 +1238,9 @@ public class StickerManager
 					// TODO Auto-generated method stub
 					
 				}
-				
+
 				@Override
-				public void onFailure(Object result, Throwable exception)
+				public void onFailure(Object result, StickerException exception)
 				{
 					// TODO Auto-generated method stub
 					
@@ -1320,7 +1282,7 @@ public class StickerManager
 		}
 	}
 	
-	public void initialiseDownloadStickerTask(StickerCategory category, Context context)
+	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, Context context)
 	{
 		if(stickerCategoriesMap.containsKey(category.getCategoryId()))
 		{
@@ -1330,7 +1292,7 @@ public class StickerManager
 		{
 			category.setState(StickerCategory.DOWNLOADING);
 			final DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
-			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, type, null);
+			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, type, source, null);
 		}
 		saveCategoryAsVisible(category);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
@@ -1345,7 +1307,7 @@ public class StickerManager
 		category.setVisible(true);
 		category.setCategoryIndex(stickerCategoriesMap.size());
 		stickerCategoriesMap.put(category.getCategoryId(), category);
-		HikeConversationsDatabase.getInstance().updateVisibilityAndIndex(category);
+		HikeConversationsDatabase.getInstance().insertInToStickerCategoriesTable(category);
 	}
 
 	public boolean stickerShopUpdateNeeded()
@@ -1380,7 +1342,7 @@ public class StickerManager
 		}
 	}
 	
-	public String getStickerImageUrl(String categoryId, String type)
+	public String getCategoryOtherAssetLoaderKey(String categoryId, int type)
 	{
 		return categoryId + HikeConstants.DELIMETER + type;
 	}
