@@ -1208,5 +1208,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="restored_hint">your account and messages</string>
     <string name="restore_error">Something went wrong.</string>
     <string name="restore_error_hint">would you like to retry?</string>
-    
+    <string name="backup_successful">Backup created successfully</string>
+    <string name="backup_failed">Backup failed</string>
 </resources>
