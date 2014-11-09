@@ -83,7 +83,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 
 			String stickerData = data.getString(HikeConstants.PREVIEW_IMAGE);
 			
-			HikeMessengerApp.getLruCache().remove(catId + HikeConstants.DELIMETER + StickerManager.PREVIEW_IMAGE);
+			HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(catId, StickerManager.PREVIEW_IMAGE_TYPE));
 			Utils.saveBase64StringToFile(new File(previewImagePath), stickerData);
 			
 		}

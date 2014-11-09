@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants.STResult;
@@ -89,6 +90,8 @@ public class StickerEDImageDownloadTask extends BaseStickerDownloadTask
 			String enableImg = data.getString(HikeConstants.ENABLE_IMAGE);
 			String disableImg = data.getString(HikeConstants.DISABLE_IMAGE);
 
+			HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(catId, StickerManager.PALLATE_ICON_SELECTED_TYPE));
+			HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(catId, StickerManager.PALLATE_ICON_TYPE));
 			Utils.saveBase64StringToFile(new File(enableImagePath), enableImg);
 			Utils.saveBase64StringToFile(new File(disableImagePath), disableImg);
 			
