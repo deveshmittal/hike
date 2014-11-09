@@ -1141,7 +1141,7 @@ public class StickerManager
 		case PREVIEW_IMAGE_TYPE:
 			baseFilePath += PREVIEW_IMAGE + OTHER_ICON_TYPE;
 			bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
-			defaultIconResId = R.drawable.default_sticker_preview;
+			defaultIconResId = R.drawable.shop_placeholder;
 			break;
 		default:
 			break;

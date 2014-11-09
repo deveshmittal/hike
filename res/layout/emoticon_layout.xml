@@ -25,7 +25,7 @@
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_below="@id/divider"
-            android:background="@color/sticker_pallete_bg_color"
+            android:background="#33363a"
             android:orientation="vertical"
             android:visibility="gone" >
 
@@ -33,7 +33,6 @@
                 android:id="@+id/erase_key_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/emoticon_erase_key_background_selector"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_erase" />
         </LinearLayout>
@@ -52,8 +51,7 @@
         android:id="@+id/emoticon_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/icon_container"
-        />
+        android:layout_above="@id/icon_container"/>
 
     <View
         android:layout_width="match_parent"

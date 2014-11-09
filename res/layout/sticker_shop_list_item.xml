@@ -3,14 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="86dp" >
 
-        <ImageView
+        <com.bsb.hike.ui.utils.RecyclingImageView
             android:id="@+id/category_icon"
             android:layout_width="58dp"
             android:layout_height="58dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="18dp"
             android:layout_marginRight="18dp"
-            android:scaleType="centerInside" />
+            android:scaleType="centerInside"
+            android:src="@drawable/shop_placeholder" />
         
 	<LinearLayout
         android:id="@+id/category_download_group"
@@ -24,14 +25,14 @@
         android:layout_marginRight="4dp"
         android:gravity="center">
 
-        <ImageView
+        <com.bsb.hike.ui.utils.RecyclingImageView
             android:id="@+id/category_download_btn"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerInside"
             android:src="@drawable/sticker_shop_download_drawable_selector" />
 
-       <ImageView 
+       <com.bsb.hike.ui.utils.RecyclingImageView 
         android:id="@+id/download_progress_bar"
        	android:layout_width="24dp"
        	android:layout_height="24dp"
@@ -61,7 +62,6 @@
                 android:id="@+id/category_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Humanoid"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:textColor="@color/standerd_black"
@@ -74,7 +74,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_marginLeft="6dp"
                 android:layout_toRightOf="@id/category_name"
-                android:text="NEW"
+                android:text="@string/new_stickers"
                 android:textColor="#0f8fe1"
                 android:textSize="12sp"
                 android:visibility="gone" />
@@ -84,7 +84,6 @@
             android:id="@+id/pack_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="16 stickers, 225 KB"
             android:textColor="@color/missing_thumbnail"
             android:textSize="12sp" />
 
@@ -92,7 +91,7 @@
             android:id="@+id/category_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="FREE"
+            android:text="@string/sticker_pack_free"
             android:textColor="@color/tab_pressed"
             android:textSize="12sp" />
     </LinearLayout>

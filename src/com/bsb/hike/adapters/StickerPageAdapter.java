@@ -22,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
@@ -177,6 +178,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				viewHolder.text = (TextView) convertView.findViewById(R.id.new_number_stickers);
 				viewHolder.image = (ImageView) convertView.findViewById(R.id.update_btn);
 				viewHolder.progress =  convertView.findViewById(R.id.download_progress);
+				viewHolder.parent = convertView.findViewById(R.id.update_sticker_parent);
 				
 				break;
 			case PLACE_HOLDER:
@@ -221,7 +223,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				viewHolder.text.setVisibility(View.GONE);
 			}
 			
-			viewHolder.image.setOnClickListener(new OnClickListener()
+			viewHolder.parent.setOnClickListener(new OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
@@ -234,16 +236,18 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		case DOWNLOADING:
 			viewHolder.progress.setVisibility(View.VISIBLE);
 			viewHolder.progress.setAnimation(AnimationUtils.loadAnimation(activity, R.anim.rotate));
+			viewHolder.text.setVisibility(View.VISIBLE);
+			viewHolder.text.setText(activity.getResources().getString(R.string.downloading_stk));
 			
 			break;
 		case RETRY:
-			viewHolder.image.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_retry_sticker));
+			viewHolder.image.setImageBitmap(HikeBitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_retry_sticker));
 			viewHolder.image.setVisibility(View.VISIBLE);
 			viewHolder.text.setVisibility(View.VISIBLE);
 			clearAnimation(viewHolder.progress);
 			viewHolder.text.setText(activity.getResources().getString(R.string.retry_sticker));
 			
-			viewHolder.image.setOnClickListener(new View.OnClickListener()
+			viewHolder.parent.setOnClickListener(new View.OnClickListener()
 			{
 				
 				@Override
@@ -255,12 +259,12 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			
 			break;
 		case DONE:
-			viewHolder.image.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_done_palette));
+			viewHolder.image.setImageBitmap(HikeBitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_done_palette));
 			viewHolder.image.setVisibility(View.VISIBLE);
 			viewHolder.text.setVisibility(View.VISIBLE);
 			clearAnimation(viewHolder.progress);
 			viewHolder.text.setText(activity.getResources().getString(R.string.see_them));
-			viewHolder.image.setOnClickListener(new View.OnClickListener()
+			viewHolder.parent.setOnClickListener(new View.OnClickListener()
 			{
 				
 				@Override
@@ -355,6 +359,8 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		TextView text;
 		
 		View progress;
+		
+		View parent;
 	}
 	
 	/**
