@@ -1187,7 +1187,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="my_stickers">My Stickers</string>
     <string name="update_all">UPDATE ALL</string>
     <string name="retry_sticker">RETRY</string>
-    <string name="see_them">SEE THEM</string>
+    <string name="see_them">DONE</string>
     <string name="drag_tip_text">Drag to Reorder Packs</string>
     <string name="drag_tip_subtext">Tap and drag to reorder your sticker packs</string>
     <string name="sticker_cancel">CANCEL</string>
@@ -1211,9 +1211,11 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="out_of_space">Get More Space</string>
     <string name="sticker_pack_free">FREE</string>
     <string name="n_packs">%1$d Packs</string>
-    <string name="downloading_sticker">DOWNLOAING STICKERS</string>
+    <string name="downloading_sticker">DOWNLOADING STICKERS</string>
     <string name="update_all_fail_string">You cannot update hidden packs.</string>
     <string name="great_job">Great Job</string>
+    <string name="downloading_stk">DOWNLOADING</string>
+    <string name="update_sticker">UPDATE AVAILABLE</string>
     <string name="text_empty_error">Text Can\'t be empty!</string>
     <string name="shop_download_failed">Download failed. Try again.</string>
     <string name="shop_download_failed_out_of_space">Out of space. Free some space.</string>

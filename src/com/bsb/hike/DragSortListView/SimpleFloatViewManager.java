@@ -1,11 +1,15 @@
 package com.bsb.hike.DragSortListView;
 
+import com.bsb.hike.R;
+import com.bsb.hike.utils.Logger;
+
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
 
 /**
@@ -60,11 +64,12 @@ public class SimpleFloatViewManager implements DragSortListView.FloatViewManager
 		{
 			mImageView = new ImageView(mListView.getContext());
 		}
-		mImageView.setBackgroundColor(mFloatBGColor);
+		int shadowHeight = (int) mListView.getContext().getResources().getDimension(R.dimen.drag_shadow_height);
+		mImageView.setBackgroundDrawable(mListView.getContext().getResources().getDrawable(R.drawable.dragdrop));
 		mImageView.setPadding(0, 0, 0, 0);
 		mImageView.setImageBitmap(mFloatBitmap);
-		mImageView.setLayoutParams(new ViewGroup.LayoutParams(v.getWidth(), v.getHeight()));
-
+		mImageView.setScaleType(ScaleType.CENTER);
+		mImageView.setLayoutParams(new ViewGroup.LayoutParams(v.getWidth(), v.getHeight() + 2 * shadowHeight));
 		return mImageView;
 	}
 
