@@ -26,12 +26,12 @@
             "stickerIds": [
                 "008_dl_bhai.png",
                 "009_dl_tumsena.png",
-                "011_dl_benchod.png"
+                "001_dl_oye.png"
             ],
             "resourceIds": [
                 "sticker_008_dl_bhai",
                 "sticker_009_dl_tumsena",
-                "sticker_011_dl_benchod"
+                "sticker_001_dl_oye"
             ]
         },
         {
@@ -80,7 +80,7 @@
                 "008_abeysaale.png",
                 "009_ghanta.png",
                 "012_Item.png",
-                "014_chalhatt.png",
+                "014_Chalhatt.png",
                 "035_machaa.png",
                 "053_aiyo.png"
             ],
@@ -88,7 +88,7 @@
                 "sticker_007_pakaamat",
                 "sticker_008_abeysaale",
                 "sticker_009_ghanta",
-                "sticker_012_Item",
+                "sticker_012_item",
                 "sticker_014_chalhatt",
                 "sticker_035_machaa",
                 "sticker_053_aiyo"
