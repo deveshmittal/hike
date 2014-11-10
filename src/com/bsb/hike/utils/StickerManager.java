@@ -179,6 +179,14 @@ public class StickerManager
 	
 	public static final String STICKER_SHOP_DATA_FULLY_FETCHED = "stickerShopDataFullyFetched";
 	
+	public static final String SEND_SOURCE = "source";
+	
+	public static final String FROM_RECENT = "r";
+	
+	public static final String FROM_FORWARD = "f";
+	
+	public static final String FROM_OTHER = "o";
+	
 	//TODO reset it again for production, only for next QA build
 	public static final long STICKER_SHOP_REFRESH_TIME =  10 * 60 * 1000;//24 * 60 * 60 * 1000;
 	

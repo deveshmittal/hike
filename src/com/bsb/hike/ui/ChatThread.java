@@ -2113,7 +2113,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							String categoryId = msgExtrasJson.getString(StickerManager.FWD_CATEGORY_ID);
 							String stickerId = msgExtrasJson.getString(StickerManager.FWD_STICKER_ID);
 							Sticker sticker = new Sticker(categoryId, stickerId);
-							sendSticker(sticker, categoryId);
+							sendSticker(sticker, categoryId, StickerManager.FROM_FORWARD);
 							boolean isDis = sticker.isDisabled(sticker, this.getApplicationContext());
 							// add this sticker to recents if this sticker is not disabled
 							if (!isDis)
@@ -6924,12 +6924,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 	}
 
-	public void sendSticker(Sticker sticker)
+	public void sendSticker(Sticker sticker, String source)
 	{
-		sendSticker(sticker, null);
+		sendSticker(sticker, null, source);
 	}
 
-	public void sendSticker(Sticker sticker, String categoryIdIfUnknown)
+	public void sendSticker(Sticker sticker, String categoryIdIfUnknown, String source)
 	{
 		ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, "Sticker", isConversationOnHike());
 
@@ -6942,6 +6942,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			metadata.put(StickerManager.CATEGORY_ID, categoryId);
 
 			metadata.put(StickerManager.STICKER_ID, sticker.getStickerId());
+			
+			if(!source.equalsIgnoreCase(StickerManager.FROM_OTHER))
+			{
+				metadata.put(StickerManager.SEND_SOURCE, source);
+			}
 
 			convMessage.setMetadata(metadata);
 			Logger.d(getClass().getSimpleName(), "metadata: " + metadata.toString());
