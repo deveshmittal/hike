@@ -298,39 +298,29 @@ public class HikeService extends Service
 		/**
 		 * Make hike utility thread
 		 */
-		HandlerThread hikeUtilHandlerThread = new HandlerThread("HIKE_UTIL")
-		{
-			@Override
-			public void run()
-			{
-				super.run();
-				Looper.prepare();
-				/**
-				 * Extract utility looper
-				 */
-				mHikeUtilLooper = Looper.myLooper();
-				
-				/**
-				 * Make SDK request handler with utility looper
-				 */
-				mHikeSDKRequestHandler = new HikeSDKRequestHandler(HikeService.this.getApplicationContext(), mHikeUtilLooper);
-				
-				mSDKRequestMessenger = new Messenger(mHikeSDKRequestHandler);
-				
-				/**
-				 * Make contact changed handler with utility looper
-				 */
-				mContactsChangedHandler = new Handler(mHikeUtilLooper);
-				
-				mContactsChanged = new ContactsChanged(HikeService.this);
-				
-				contactsReceived.onChange(true);
-				
-				Looper.loop();
-				
-			}
-		};
+		HandlerThread hikeUtilHandlerThread = new HandlerThread("HIKE_UTIL");
+		
+		
 		hikeUtilHandlerThread.start();
+		
+		/**
+		 * Extract utility looper
+		 */
+		mHikeUtilLooper = Looper.myLooper();
+		
+		/**
+		 * Make SDK request handler with utility looper
+		 */
+		mHikeSDKRequestHandler = new HikeSDKRequestHandler(HikeService.this.getApplicationContext(), mHikeUtilLooper);
+		
+		mSDKRequestMessenger = new Messenger(mHikeSDKRequestHandler);
+		
+		/**
+		 * Make contact changed handler with utility looper
+		 */
+		mContactsChangedHandler = new Handler(mHikeUtilLooper);
+		
+		mContactsChanged = new ContactsChanged(HikeService.this);
 		
 	}
 
