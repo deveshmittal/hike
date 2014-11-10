@@ -1300,19 +1300,19 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		ImageView restoreSuccess = (ImageView) restoringBackupLayout.findViewById(R.id.restore_success);
 		
 		AlphaAnimation fadeout = new AlphaAnimation(1, 0);
-		ScaleAnimation scaleDown = new ScaleAnimation(1, 0, 1, 0.4f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		ScaleAnimation scaleDown = new ScaleAnimation(1, 0, 1, 0.4f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.3f);
 		AnimationSet itemsRemove = new AnimationSet(true);
 		itemsRemove.addAnimation(fadeout);
 		itemsRemove.addAnimation(scaleDown);
 		itemsRemove.setInterpolator(new DecelerateInterpolator());
 		itemsRemove.setStartOffset(HikeConstants.BACKUP_RESTORE_UI_DELAY);
-		itemsRemove.setDuration(200);
+		itemsRemove.setDuration(400);
 		itemsRemove.setFillAfter(true);
 		
 		ScaleAnimation scaleUp = new ScaleAnimation(0, 1, 0, 1, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
 		scaleUp.setInterpolator(new OvershootInterpolator());
-		scaleUp.setStartOffset(100 + HikeConstants.BACKUP_RESTORE_UI_DELAY);
-		scaleUp.setDuration(300);
+		scaleUp.setStartOffset(200 + HikeConstants.BACKUP_RESTORE_UI_DELAY);
+		scaleUp.setDuration(400);
 		scaleUp.setFillAfter(true);
 		
 		scaleUp.setAnimationListener(new AnimationListener()

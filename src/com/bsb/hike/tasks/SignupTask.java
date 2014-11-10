@@ -562,13 +562,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 		while (!TextUtils.isEmpty(this.data))
 		{
+			this.data = null;
 			mStateValue = new StateValue(State.RESTORING_BACKUP,null);
 			boolean status = DBBackupRestore.getInstance(context).restoreDB();
 			if (status)
 			{
 				HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
 				ContactManager.getInstance().init(context);
-				this.data = null;
 				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString());
 			}
 			else
