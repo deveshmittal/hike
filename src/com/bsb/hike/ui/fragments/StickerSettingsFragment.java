@@ -63,6 +63,8 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	private long previousEventTime;
 	
 	private HikeSharedPreferenceUtil prefs;
+	
+	private View footerView;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -116,8 +118,15 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 					{
 						Toast.makeText(getActivity(), R.string.update_all_fail_string, Toast.LENGTH_SHORT).show();
 					}
+				
+					mDslv.removeFooterView(footerView);
 				}
 			});
+		}
+		
+		else
+		{
+			mDslv.removeFooterView(footerView);
 		}
 	}
 
@@ -297,6 +306,8 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		mAdapter = new StickerSettingsAdapter(getActivity(), stickerCategories);
 		mDslv = (DragSortListView) parent.findViewById(R.id.item_list);
 		//mDslv.setOnScrollListener(this);
+		footerView = getActivity().getLayoutInflater().inflate(R.layout.sticker_settings_footer, null);
+		mDslv.addFooterView(footerView);
 		mDslv.setAdapter(mAdapter);
 		mDslv.setDragScrollProfile(this);
 		mDslv.setClickable(true);
