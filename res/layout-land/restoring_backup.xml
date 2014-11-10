@@ -84,15 +84,17 @@
             android:gravity="center"
             android:orientation="vertical" >
 
-            <TextView
+            <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/txt_restore_title"
+                style="@style/SignupHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Restoring..."
                 android:textSize="24dp" />
 
-            <TextView
+            <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/txt_restore_hint"
+                style="@style/SignupHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="please wait, this may take a while"

@@ -83,15 +83,17 @@
         android:gravity="center"
         android:orientation="vertical" >
 
-        <TextView
+        <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/txt_backup_title"
+            style="@style/SignupHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Backup found"
             android:textSize="24dp" />
 
-        <TextView
+        <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/txt_backup_hint"
+            style="@style/SignupHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="would you like to restore your account?"
