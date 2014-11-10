@@ -42,13 +42,10 @@
             android:layout_marginBottom="3dp"
             android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
             android:layout_marginTop="3dp"
-            android:layout_marginRight="10dp"
             android:tag="@string/content_card_tag"
             android:layout_toRightOf="@id/avatar_container"
             android:layout_below="@id/sender_details"
-            android:background="@drawable/ic_bubble_white_selector"
-            android:paddingLeft="18dp"
-            android:paddingRight="12dp" >
+            android:background="@drawable/ic_bubble_white_selector">
 
         <ImageView
                 android:id="@+id/card_image"
@@ -66,9 +63,9 @@
                 android:layout_width="wrap_content"
                 android:layout_toLeftOf="@id/card_image"
                 android:layout_alignParentLeft="true"
-                android:layout_marginRight="10dp"
+                android:padding="12dp"
+                android:layout_centerVertical="true"
                 android:id="@+id/text_container"
-                android:layout_marginTop="10dp"
                 android:orientation="vertical"
                 android:layout_height="wrap_content"
                 >
@@ -78,12 +75,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:layout_marginRight="11.55dp"
                     android:text="Dadi vs Jellies"
                     android:textStyle="bold"
                     android:tag="T1"
                     android:textSize="14sp"
                     android:textColor="#292929"
+                    android:singleLine="true"
+                    android:ellipsize="end"
                     />
 
             <TextView
@@ -91,12 +89,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:layout_marginRight="11.55dp"
                     android:text="FREE"
                     android:tag="T2"
                     android:textColor="#92ce28"
                     android:textSize="11sp"
                     android:textStyle="italic"
+                    android:singleLine="true"
+                    android:ellipsize="end"
                     />
 
 
@@ -112,6 +111,8 @@
                         android:textColor="#7a7c7d"
                         android:text="Everyone's favourite Dadi"
                         android:layout_gravity="center_vertical"
+                        android:singleLine="true"
+                        android:ellipsize="end"
                         />
 
                     <TextView
@@ -126,6 +127,8 @@
                             android:textStyle="italic"
                             android:text="Get it on play store"
                             android:enabled="false"
+                            android:singleLine="true"
+                            android:ellipsize="end"
                             />
 
             </LinearLayout>
