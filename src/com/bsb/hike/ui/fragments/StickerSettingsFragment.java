@@ -245,7 +245,8 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 						{
 							return;
 						}
-
+						prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
+						
 						ImageView tickImage = (ImageView) parent.findViewById(R.id.reorder_indicator);
 						tickImage.setImageResource(R.drawable.art_tick);
 						TextView tipText = (TextView) parent.findViewById(R.id.drag_tip);
