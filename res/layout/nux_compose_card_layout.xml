@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/nuxComposeCard"
-    style="@style/CardContainerWithdoutPadding"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="24dp"
+    android:gravity="center"
+    android:orientation="horizontal"
     android:paddingLeft="20dp"
-    android:paddingTop="24dp"
+    android:paddingRight="20dp"
+    android:paddingTop="20dp"
+    android:paddingBottom="20dp"
     android:visibility="gone" >
 
     <com.bsb.hike.ui.utils.RecyclingImageView
@@ -21,7 +23,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
-        android:layout_toRightOf="@id/nuxComposeSticker"
         android:orientation="vertical" >
 
         <com.bsb.hike.view.CustomFontTextView
@@ -36,10 +37,10 @@
             android:id="@+id/ftue_text2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="8dp"
             android:text="@string/ftue_sticker_forward_card_subtext"
             android:textColor="@color/grey"
             android:textSize="14sp" />
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>
