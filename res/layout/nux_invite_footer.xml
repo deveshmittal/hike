@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+<LinearLayout
     android:id="@+id/nux_invite_parent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_horizontal"
+    android:layout_marginTop="@dimen/invite_footer_top_margin"
     android:visibility="gone">
     
 	<ImageView
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-	    android:layout_marginTop="163dp"
 	    android:src="@drawable/art_sticker_whistle"/>
 	
 	<TextView
@@ -44,4 +49,5 @@
 	    android:text="@string/invite_now_uppercase" >
 	</Button>
 
+</LinearLayout>
 </LinearLayout>

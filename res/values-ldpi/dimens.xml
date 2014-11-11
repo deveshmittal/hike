@@ -32,4 +32,5 @@
     <dimen name="welcome_bottom_margin">15dp</dimen>
     <dimen name="welcome_artwork_padding">10dp</dimen>
     <dimen name="welcome_with_love_top">15dp</dimen>
+    <dimen name="invite_footer_top_margin">80dp</dimen>
 </resources>
