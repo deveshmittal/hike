@@ -204,10 +204,16 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 				downLoadStickerData(mAdapter.getCount() + 1);
 			}
 		});
-		if(StickerManager.getInstance().stickerShopUpdateNeeded())
+		
+		if(StickerManager.getInstance().stickerShopUpdateNeeded() || mAdapter.isEmpty())
 		{
+			listview.setVisibility(View.GONE);
 			HikeConversationsDatabase.getInstance().clearStickerShop();
 			downLoadStickerData(0);
+		}
+		else
+		{
+			listview.setVisibility(View.VISIBLE);
 		}
 	}
 	
@@ -266,6 +272,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 							HikeSharedPreferenceUtil.getInstance(getSherlockActivity()).saveData(StickerManager.LAST_STICKER_SHOP_UPDATE_TIME, System.currentTimeMillis());
 						}
 						mAdapter.changeCursor(updatedCursor);
+						listview.setVisibility(View.VISIBLE);
 						listview.removeFooterView(loadingFooterView);
 						loadingEmptyState.setVisibility(View.GONE);
 						clearAnimation(progressBar);
@@ -528,7 +535,6 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	 */
 	private void clearAnimation(View v)
 	{
-		v.setVisibility(View.GONE);
 		v.clearAnimation();
 	}
 }
