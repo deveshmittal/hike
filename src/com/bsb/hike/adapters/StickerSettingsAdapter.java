@@ -12,6 +12,7 @@ import android.view.animation.AnimationUtils;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -116,7 +117,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			convertView = mInflater.inflate(R.layout.sticker_settings_list_item, null);
 			viewHolder = new ViewHolder();
 			viewHolder.categoryName = (TextView) convertView.findViewById(R.id.category_name);
-			viewHolder.checkBox = (CheckBox) convertView.findViewById(R.id.category_checkbox);
+			viewHolder.checkBox = (ImageButton) convertView.findViewById(R.id.category_checkbox);
 			viewHolder.categoryPreviewImage = (ImageView) convertView.findViewById(R.id.category_icon);
 			viewHolder.categorySize = (TextView) convertView.findViewById(R.id.category_size);
 			viewHolder.updateAvailable = (TextView) convertView.findViewById(R.id.update_available);
@@ -180,7 +181,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			
 		viewHolder.checkBox.setTag(category);
 		viewHolder.categoryName.setText(category.getCategoryName());
-		viewHolder.checkBox.setChecked(category.isVisible());
+		viewHolder.checkBox.setSelected(category.isVisible());
 		stickerOtherIconLoader.loadImage(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(category.getCategoryId(), StickerManager.PREVIEW_IMAGE_TYPE), viewHolder.categoryPreviewImage, isListFlinging);
 		
 		return convertView;
@@ -319,7 +320,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	{
 		TextView categoryName;
 		
-		CheckBox checkBox;
+		ImageButton checkBox;
 		
 		ImageView categoryPreviewImage;
 
@@ -336,9 +337,9 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		StickerCategory category = (StickerCategory) v.getTag();
 		boolean visibility = !category.isVisible();
 		Toast.makeText(mContext, visibility ? mContext.getResources().getString(R.string.pack_visible) : mContext.getResources().getString(R.string.pack_hidden), Toast.LENGTH_SHORT).show();;
-		CheckBox checkBox = (CheckBox) v;
+		ImageButton checkBox = (ImageButton) v;
 		category.setVisible(visibility);
-		checkBox.setChecked(visibility);
+		checkBox.setSelected(visibility);
 		stickerSet.add(category);
 		int categoryIdx = stickerCategories.indexOf(category);
 		updateLastVisibleIndex(categoryIdx, category);
@@ -372,11 +373,11 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		return stickerOtherIconLoader;
 	}
 	/**
-	 * Hides/makes the checkbox visible conditionally
+	 * Hides/makes the ImageButton visible conditionally
 	 * @param categoryId
 	 * @param cb
 	 */
-	private void checkAndDisableCheckBox(String categoryId, CheckBox cb)
+	private void checkAndDisableCheckBox(String categoryId, ImageButton cb)
 	{
 		if(categoryId.equals(StickerManager.HUMANOID) || categoryId.equals(StickerManager.EXPRESSIONS))
 		{
