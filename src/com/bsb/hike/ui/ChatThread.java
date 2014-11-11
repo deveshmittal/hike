@@ -681,7 +681,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * Making the action bar transparent for custom theming.
 		 */
 		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-		HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, true);
 		super.onCreate(savedInstanceState);
 
 		/* force the user into the reg-flow process if the token isn't set */
