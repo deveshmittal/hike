@@ -71,7 +71,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 
 			if (delete)
 			{
-				DBBackupRestore.getInstance(ctx).deleteAllFiles();
+				//DBBackupRestore.getInstance(ctx).deleteAllFiles();
 			}
 			ContactManager.getInstance().deleteAll();
 			convDb.deleteAll();
