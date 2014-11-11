@@ -62,13 +62,16 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 
 	private boolean isListFlinging;
 	
-	public StickerPageAdapter(Activity activity, List<StickerPageAdapterItem> itemList, StickerCategory category, StickerLoader worker)
+	AbsListView absListView;
+	
+	public StickerPageAdapter(Activity activity, List<StickerPageAdapterItem> itemList, StickerCategory category, StickerLoader worker, AbsListView absListView )
 	{
 		this.activity = activity;
 		this.itemList = itemList;
 		this.category = category;
 		this.inflater = LayoutInflater.from(activity);
 		this.stickerLoader = worker;
+		this.absListView = absListView;
 		calculateSizeOfStickerImage();
 	}
 
@@ -121,7 +124,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	{
 		ViewType viewType = ViewType.STICKER;  //Default value.
 		StickerPageAdapterItem item = getItem(position);
-		int itemId = item.getStickerPageAdapterItemId();
+		int itemId = item.getType();
 		switch(itemId)
 		{
 		case StickerPageAdapterItem.STICKER :
@@ -192,13 +195,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		
 		else
 		{
-			try{
-				
 			viewHolder = (ViewHolder) convertView.getTag();
-			}
-			catch(ClassCastException e)
-			{
-			}
 		}
 		
 		switch (viewType)
@@ -206,7 +203,6 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		case STICKER:
 			Sticker sticker = (Sticker) item.getSticker();
 			stickerLoader.loadImage(sticker.getSmallStickerPath(), ((ImageView) convertView), isListFlinging);
-			convertView.setTag(sticker);
 			convertView.setOnClickListener(this);
 				
 			break;
@@ -223,14 +219,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				viewHolder.text.setVisibility(View.GONE);
 			}
 			
-			viewHolder.parent.setOnClickListener(new OnClickListener()
-			{
-				@Override
-				public void onClick(View v)
-				{
-					initialiseDownloadStickerTask(DownloadSource.X_MORE);
-				}
-			});
+			convertView.setOnClickListener(this);
 
 			break;
 		case DOWNLOADING:
@@ -247,15 +236,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			clearAnimation(viewHolder.progress);
 			viewHolder.text.setText(activity.getResources().getString(R.string.retry_sticker));
 			
-			viewHolder.parent.setOnClickListener(new View.OnClickListener()
-			{
-				
-				@Override
-				public void onClick(View v)
-				{
-					initialiseDownloadStickerTask(null);
-				}
-			});
+			convertView.setOnClickListener(this);
 			
 			break;
 		case DONE:
@@ -264,21 +245,13 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			viewHolder.text.setVisibility(View.VISIBLE);
 			clearAnimation(viewHolder.progress);
 			viewHolder.text.setText(activity.getResources().getString(R.string.see_them));
-			viewHolder.parent.setOnClickListener(new View.OnClickListener()
-			{
-				
-				@Override
-				public void onClick(View v)
-				{
-					// TODO Add method to scroll to the new stickers
-				}
-			});
+			convertView.setOnClickListener(this);
 			break;
 		case PLACE_HOLDER:
 			viewHolder.image.setVisibility(View.VISIBLE);
 			break;
 		}
-
+		viewHolder.position = position;
 		return convertView;
 	}
 
@@ -293,7 +266,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	 */
 	protected void replaceDownloadingatTop()
 	{
-		if(itemList.size() > 0 && (itemList.get(0).getStickerPageAdapterItemId() != StickerPageAdapterItem.STICKER))
+		if(itemList.size() > 0 && (itemList.get(0).getType() != StickerPageAdapterItem.STICKER))
 		{
 			itemList.remove(0);
 			itemList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
@@ -319,15 +292,36 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	@Override
 	public void onClick(View v)
 	{
-		Sticker sticker = (Sticker) v.getTag();
-		((ChatThread) activity).sendSticker(sticker);
-
-		/* In case sticker is clicked on the recents screen, don't update the UI or recents list. Also if this sticker is disabled don't update the recents UI */
-		if (!category.isCustom())
+		ViewHolder viewHolder = (ViewHolder) v.getTag();
+		int position = viewHolder.position;
+		StickerPageAdapterItem item = (StickerPageAdapterItem) getItem(position); 
+		switch (item.getType())
 		{
-			StickerManager.getInstance().addRecentSticker(sticker);
-			LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(StickerManager.RECENTS_UPDATED).putExtra(StickerManager.RECENT_STICKER_SENT, sticker));
+		case StickerPageAdapterItem.STICKER:
+			Sticker sticker = item.getSticker();
+			((ChatThread) activity).sendSticker(sticker);
+
+			/* In case sticker is clicked on the recents screen, don't update the UI or recents list. Also if this sticker is disabled don't update the recents UI */
+			if (!category.isCustom())
+			{
+				StickerManager.getInstance().addRecentSticker(sticker);
+				LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(StickerManager.RECENTS_UPDATED).putExtra(StickerManager.RECENT_STICKER_SENT, sticker));
+			}
+			break;
+		case StickerPageAdapterItem.UPDATE:
+			initialiseDownloadStickerTask(DownloadSource.X_MORE);
+			break;
+		case StickerPageAdapterItem.RETRY:
+			initialiseDownloadStickerTask(DownloadSource.RETRY);
+			break;
+		case StickerPageAdapterItem.DONE:
+			final int count = getCount()-1;
+			absListView.smoothScrollBy(count*sizeEachImage, 300);
+			break;
+		default:
+			break;
 		}
+	
 	}
 
 	public void setIsListFlinging(boolean b)
@@ -361,6 +355,8 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		View progress;
 		
 		View parent;
+		
+		int position;
 	}
 	
 	/**

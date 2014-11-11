@@ -454,7 +454,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 		else
 		{
-			final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickerPageList, category, worker);
+			final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickerPageList, category, worker, spo.getStickerGridView());
 			spo.setStickerPageAdapter(stickerPageAdapter);
 			spo.getStickerGridView().setAdapter(stickerPageAdapter);
 		}
