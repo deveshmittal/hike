@@ -650,18 +650,26 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
 		isAlreadyFetchingNumber = false;
 
+		Editor edit = settings.edit();
 		/*
 		 * We show these tips only to upgrading users
 		 */
-		settings.edit().putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true).commit();
+		edit.putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
 		/*
 		 * We show this tip only to new signup users
 		 */
-		settings.edit().putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true).commit();
+		edit.putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true);
 		/*
 		 * We need to show update available for hardcoded categories only to upgrading users.
 		 */
-		settings.edit().putBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, true).commit();
+		edit.putBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, true);
+		
+		/*
+		 * We don't want to show red dot on overflow menu for new users
+		 */
+		edit.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, true);
+		
+		edit.commit();
 		return Boolean.TRUE;
 	}
 	

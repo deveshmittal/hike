@@ -198,12 +198,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			initialiseHomeScreen(savedInstanceState);
 		}
 		
-		
-		boolean newUser = getIntent().getBooleanExtra(HikeConstants.Extras.NEW_USER, false);
-		Editor editor = accountPrefs.edit();
-		editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, newUser);
-		editor.commit();
-		
 	}
 
 	private void setupActionBar()
