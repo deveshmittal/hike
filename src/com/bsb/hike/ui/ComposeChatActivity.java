@@ -32,6 +32,7 @@ import android.view.View;
 import android.view.ViewStub;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -618,6 +619,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			setupForSelectAll();
 			break;
 		case NUX_INVITE_MODE:
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 			adapter.showCheckBoxAgainstItems(true);
 			tagEditText.clear(false);
 			adapter.removeFilter();
