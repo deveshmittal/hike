@@ -8,7 +8,7 @@
                 "004_rofl.png",
                 "005_bored.png",
                 "006_angry.png",
-                "007_strangle.png",
+                "018_Whistling.png",
                 "069_hi.png"
             ],
             "resourceIds": [
@@ -17,7 +17,7 @@
                 "sticker_004_rofl",
                 "sticker_005_bored",
                 "sticker_006_angry",
-                "sticker_007_strangle",
+                "sticker_018_whistling",
                 "sticker_069_hi"
             ]
         },
@@ -98,12 +98,12 @@
             "catId": "expressions",
             "stickerIds": [
                 "002_lol.png",
-                "005_omg.png",
+                "061_lovelips.png",
                 "113_whereareyou.png"
             ],
             "resourceIds": [
                 "sticker_002_lol",
-                "sticker_005_omg",
+                "sticker_061_lovelips",
                 "sticker_113_whereareyou"
             ]
         }

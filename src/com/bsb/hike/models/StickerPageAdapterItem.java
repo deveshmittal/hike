@@ -2,7 +2,7 @@ package com.bsb.hike.models;
 
 public class StickerPageAdapterItem
 {
-	private int id;
+	private int type;
 
 	private Object item;
 
@@ -18,20 +18,20 @@ public class StickerPageAdapterItem
 
 	public static final int PLACE_HOLDER = 6;
 
-	public StickerPageAdapterItem(int id, Object item)
+	public StickerPageAdapterItem(int type, Object item)
 	{
-		this.id = id;
+		this.type = type;
 		this.item = item;
 	}
 
-	public StickerPageAdapterItem(int id)
+	public StickerPageAdapterItem(int type)
 	{
-		this.id = id;
+		this.type = type;
 	}
 
 	public Sticker getSticker()
 	{
-		if(getItem() == null || id != STICKER)
+		if(getItem() == null || type != STICKER)
 		{
 			return null;
 		}
@@ -40,7 +40,7 @@ public class StickerPageAdapterItem
 	
 	public int getCategoryMoreStickerCount()
 	{
-		if(getItem() == null || id != UPDATE)
+		if(getItem() == null || type != UPDATE)
 		{
 			return 0;
 		}
@@ -52,9 +52,9 @@ public class StickerPageAdapterItem
 		return item;
 	}
 
-	public int getStickerPageAdapterItemId()
+	public int getType()
 	{
-		return id;
+		return type;
 	}
 
 	/* Need to override equals and hashcode inorder to use them in recentStickers linkedhashset */
@@ -67,13 +67,13 @@ public class StickerPageAdapterItem
 			return true;
 		if (!(object instanceof StickerPageAdapterItem))
 			return false;
-		if (((StickerPageAdapterItem) object).getStickerPageAdapterItemId() != this.getStickerPageAdapterItemId())
+		if (((StickerPageAdapterItem) object).getType() != this.getType())
 		{
 			return false;
 		}
-		if (((StickerPageAdapterItem) object).getStickerPageAdapterItemId() == this.getStickerPageAdapterItemId())
+		if (((StickerPageAdapterItem) object).getType() == this.getType())
 		{
-			if (this.getStickerPageAdapterItemId() == STICKER)
+			if (this.getType() == STICKER)
 			{
 				return (this.getSticker().equals(((StickerPageAdapterItem) object).getSticker()));
 			}
@@ -94,7 +94,7 @@ public class StickerPageAdapterItem
 		{
 			hash += 7 * hash + this.item.hashCode();
 		}
-		hash += 7 * hash + this.id;
+		hash += 7 * hash + this.type;
 
 		return hash;
 	}

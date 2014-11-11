@@ -179,8 +179,7 @@ public class StickerManager
 	
 	public static final String STICKER_SHOP_DATA_FULLY_FETCHED = "stickerShopDataFullyFetched";
 	
-	//TODO reset it again for production, only for next QA build
-	public static final long STICKER_SHOP_REFRESH_TIME =  10 * 60 * 1000;//24 * 60 * 60 * 1000;
+	public static final long STICKER_SHOP_REFRESH_TIME = 24 * 60 * 60 * 1000;
 	
 	public static final long MINIMUM_FREE_SPACE = 10 * 1024 * 1024;
 
@@ -519,7 +518,12 @@ public class StickerManager
 	
 	public void saveSortedListForCategory(String catId)
 	{
-		Set<Sticker> list = ((CustomStickerCategory) stickerCategoriesMap.get(catId)).getStickerSet();
+		CustomStickerCategory customCategory = ((CustomStickerCategory) stickerCategoriesMap.get(catId));
+		if(customCategory == null)
+		{
+			return;
+		}
+		Set<Sticker> list = customCategory.getStickerSet();
 		try
 		{
 			if (list.size() == 0)
@@ -1285,6 +1289,10 @@ public class StickerManager
 	
 	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, Context context)
 	{
+		initialiseDownloadStickerTask(category, source, null, context);
+	}
+	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, DownloadType downloadType, Context context)
+	{
 		if(stickerCategoriesMap.containsKey(category.getCategoryId()))
 		{
 			category = stickerCategoriesMap.get(category.getCategoryId());
@@ -1292,8 +1300,11 @@ public class StickerManager
 		if(category.getTotalStickers() == 0 || category.getDownloadedStickersCount() < category.getTotalStickers())
 		{
 			category.setState(StickerCategory.DOWNLOADING);
-			final DownloadType type = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
-			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, type, source, null);
+			if(downloadType== null)
+			{
+				downloadType = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
+			}
+			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, downloadType, source, null);
 		}
 		saveCategoryAsVisible(category);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
