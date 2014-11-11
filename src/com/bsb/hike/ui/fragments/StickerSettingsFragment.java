@@ -63,6 +63,10 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	private long previousEventTime;
 	
 	private HikeSharedPreferenceUtil prefs;
+	
+	private View footerView;
+	
+	private boolean isUpdateAllTapped = false;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -106,6 +110,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				@Override
 				public void onClick(View v)
 				{
+					isUpdateAllTapped = true;
 					if(shouldAddUpdateView())
 					{
 						updateAll.setVisibility(View.INVISIBLE);
@@ -116,8 +121,15 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 					{
 						Toast.makeText(getActivity(), R.string.update_all_fail_string, Toast.LENGTH_SHORT).show();
 					}
+				
+					mDslv.removeFooterView(footerView);
 				}
 			});
+		}
+		
+		else
+		{
+			mDslv.removeFooterView(footerView);
 		}
 	}
 
@@ -128,7 +140,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		TextView totalStickers = (TextView) parent.findViewById(R.id.pack_details);
 		TextView cancelBtn = (TextView) parent.findViewById(R.id.cancel_btn);
 		TextView confirmBtn = (TextView) parent.findViewById(R.id.confirm_btn);
-		totalPacks.setText(getString(R.string.n_packs, visibleAndUpdateStickerSet.size()));
+		totalPacks.setText(visibleAndUpdateStickerSet.size() == 1 ? getString(R.string.singular_packs, visibleAndUpdateStickerSet.size()) : getString(R.string.n_packs, visibleAndUpdateStickerSet.size()));
 		categoryCost.setText(R.string.sticker_pack_free);
 		
 		displayTotalStickersCount(totalStickers);
@@ -138,6 +150,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			@Override
 			public void onClick(View v)
 			{
+				isUpdateAllTapped = false;
 				confirmView.setVisibility(View.GONE);
 				Utils.sendUILogEvent(HikeConstants.LogEvent.UPDATE_ALL_CANCEL_CLICKED);
 			}
@@ -149,6 +162,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			@Override
 			public void onClick(View v)
 			{
+				isUpdateAllTapped = false;
 				for(StickerCategory category : visibleAndUpdateStickerSet)
 				{
 					StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.SETTINGS, getSherlockActivity());
@@ -178,7 +192,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		}
 		if(totalCount > 0)
 		{
-			String text = getActivity().getResources().getString(R.string.n_stickers, totalCount);
+			String text = totalCount == 1 ? getActivity().getResources().getString(R.string.singular_stickers, totalCount) : getActivity().getResources().getString(R.string.n_stickers, totalCount);
 			if(totalSize > 0)
 			{
 				text += ", " + Utils.getSizeForDisplay(totalSize);
@@ -245,7 +259,8 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 						{
 							return;
 						}
-
+						prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
+						
 						ImageView tickImage = (ImageView) parent.findViewById(R.id.reorder_indicator);
 						tickImage.setImageResource(R.drawable.art_tick);
 						TextView tipText = (TextView) parent.findViewById(R.id.drag_tip);
@@ -296,6 +311,8 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		mAdapter = new StickerSettingsAdapter(getActivity(), stickerCategories);
 		mDslv = (DragSortListView) parent.findViewById(R.id.item_list);
 		//mDslv.setOnScrollListener(this);
+		footerView = getActivity().getLayoutInflater().inflate(R.layout.sticker_settings_footer, null);
+		mDslv.addFooterView(footerView);
 		mDslv.setAdapter(mAdapter);
 		mDslv.setDragScrollProfile(this);
 		mDslv.setClickable(true);
@@ -448,4 +465,15 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		LocalBroadcastManager.getInstance(getSherlockActivity()).unregisterReceiver(mMessageReceiver);
 	}
 
+	public boolean getIsUpdateAllTapped()
+	{
+		return isUpdateAllTapped;
+	}
+
+	public void hideConfirmAllView()
+	{
+		isUpdateAllTapped = false;
+		View confirmAll = getView().findViewById(R.id.confirmation_ll);
+		confirmAll.setVisibility(View.GONE);
+	}
 }

@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_alignParentBottom="true"
-    android:background="@color/sticker_pallete_bg_color"
     android:orientation="vertical" >
 
     <RelativeLayout
@@ -25,7 +24,7 @@
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_below="@id/divider"
-            android:background="#33363a"
+            android:background="#555555"
             android:orientation="vertical"
             android:visibility="gone" >
 
@@ -55,14 +54,15 @@
             android:layout_below="@id/divider"
             android:layout_alignWithParentIfMissing="true"
             android:layout_toLeftOf="@id/erase_key"
-            android:background="@drawable/emoticon_tab_normal" />
+            android:background="#2d2f31" />
     </RelativeLayout>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/emoticon_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/icon_container"/>
+        android:layout_above="@id/icon_container"
+        android:background="#1f2122"/>
 
     <View
         android:layout_width="match_parent"

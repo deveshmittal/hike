@@ -22,7 +22,7 @@
         android:layout_marginBottom="6dp"
         android:contentDescription="Update Button"
         android:scaleType="centerInside"
-        android:src="@drawable/ic_update"
+        android:src="@drawable/ic_update_palette"
         android:visibility="gone" />
 
     <ImageView
@@ -30,7 +30,7 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:contentDescription="Progress Bar"
-        android:src="@drawable/ic_spinner_green"
+        android:src="@drawable/ic_spinner_update_palette"
         android:visibility="gone" />
 
     <com.bsb.hike.view.CustomFontTextView

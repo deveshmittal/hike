@@ -58,6 +58,8 @@ public class StickerShopAdapter extends CursorAdapter
 		TextView totalStickers;
 
 		TextView stickersPackDetails;
+		
+		TextView categoryPrice;
 
 		ImageView downloadState;
 		
@@ -89,6 +91,7 @@ public class StickerShopAdapter extends CursorAdapter
 		viewholder.downloadState = (ImageView) v.findViewById(R.id.category_download_btn);
 		viewholder.categoryPreviewIcon = (ImageView) v.findViewById(R.id.category_icon);
 		viewholder.downloadProgress = v.findViewById(R.id.download_progress_bar);
+		viewholder.categoryPrice = (TextView) v.findViewById(R.id.category_price);
 		viewholder.downloadState.setOnClickListener(mDownloadButtonClickListener);
 		v.setTag(viewholder);
 		return v;
@@ -109,7 +112,7 @@ public class StickerShopAdapter extends CursorAdapter
 
 		if (totalStickerCount > 0)
 		{
-			String detailsStirng = context.getResources().getString(R.string.n_stickers, totalStickerCount);
+			String detailsStirng = totalStickerCount == 1 ? context.getResources().getString(R.string.singular_stickers, totalStickerCount)  : context.getResources().getString(R.string.n_stickers, totalStickerCount);
 			if (categorySizeInBytes > 0)
 			{
 				detailsStirng += ", " + Utils.getSizeForDisplay(categorySizeInBytes);
@@ -143,30 +146,40 @@ public class StickerShopAdapter extends CursorAdapter
 				if (category.getDownloadedStickersCount() == 0)
 				{
 					viewholder.downloadState.setImageLevel(NOT_DOWNLOADED);
+					viewholder.categoryPrice.setVisibility(View.VISIBLE);
+					viewholder.categoryPrice.setText(context.getResources().getString(R.string.sticker_pack_free));
 				}
 				else
 				{
 					viewholder.downloadState.setImageLevel(FULLY_DOWNLOADED);
+					viewholder.categoryPrice.setVisibility(View.GONE);
 				}
 				break;
 			case StickerCategory.UPDATE:
 				viewholder.downloadState.setImageLevel(UPDATE_AVAILABLE);
+				viewholder.categoryPrice.setVisibility(View.VISIBLE);
+				viewholder.categoryPrice.setText(context.getResources().getString(R.string.update_sticker));
 				break;
 			case StickerCategory.RETRY:
 				viewholder.downloadState.setImageLevel(RETRY);
+				viewholder.categoryPrice.setVisibility(View.VISIBLE);
+				viewholder.categoryPrice.setText(context.getResources().getString(R.string.retry_sticker));
 				break;
 			case StickerCategory.DOWNLOADING:
 				viewholder.downloadState.setVisibility(View.GONE);
 				viewholder.downloadProgress.setVisibility(View.VISIBLE);
 				viewholder.downloadProgress.setAnimation(AnimationUtils.loadAnimation(context, R.anim.rotate));
-				break;
-			default:
+				viewholder.categoryPrice.setVisibility(View.VISIBLE);
+				viewholder.categoryPrice.setText(context.getResources().getString(R.string.downloading_stk));
+				
 				break;
 			}
 		}
 		else
 		{
 			viewholder.downloadState.setImageLevel(NOT_DOWNLOADED);
+			viewholder.categoryPrice.setVisibility(View.VISIBLE);
+			viewholder.categoryPrice.setText(context.getResources().getString(R.string.sticker_pack_free));
 		}
 		viewholder.downloadState.setTag(category);
 	}

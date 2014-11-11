@@ -71,8 +71,9 @@
         android:id="@+id/item_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:dividerHeight="0.5dp"
         android:fastScrollEnabled="false"
+        android:divider="@drawable/home_list_divider"
+        android:dividerHeight="0.5dp"
         android:paddingBottom="0dp"
         dslv:collapsed_height="2dp"
         dslv:drag_enabled="true"
@@ -154,9 +155,8 @@
             android:layout_above="@id/divider"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_toLeftOf="@id/sticker_cost"
-            android:gravity="center_vertical">
-            
+            android:layout_toLeftOf="@id/sticker_cost">
+                    
             <com.bsb.hike.view.CustomFontTextView 
                 android:id="@+id/total_packs"
                 android:layout_width="wrap_content"
@@ -172,6 +172,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
                 android:layout_marginLeft="20dp"
+                android:layout_marginBottom="4dp"
                 android:textColor="@color/shop_update_details_color"/>
            </LinearLayout>
            

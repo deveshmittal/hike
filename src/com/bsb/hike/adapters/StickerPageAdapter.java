@@ -225,8 +225,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		case DOWNLOADING:
 			viewHolder.progress.setVisibility(View.VISIBLE);
 			viewHolder.progress.setAnimation(AnimationUtils.loadAnimation(activity, R.anim.rotate));
-			viewHolder.text.setVisibility(View.VISIBLE);
-			viewHolder.text.setText(activity.getResources().getString(R.string.downloading_stk));
+			viewHolder.text.setVisibility(View.GONE);
 			
 			break;
 		case RETRY:
