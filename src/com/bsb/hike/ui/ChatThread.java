@@ -681,7 +681,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		 * Making the action bar transparent for custom theming.
 		 */
 		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-
+		HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, true);
 		super.onCreate(savedInstanceState);
 
 		/* force the user into the reg-flow process if the token isn't set */
@@ -6581,6 +6581,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 			View eraseKey = emoticonLayout.findViewById(R.id.erase_key);
 			ImageView shopIcon = (ImageView) emoticonLayout.findViewById(R.id.erase_key_image);
+			if(v.getId() == R.id.sticker_btn && HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))  //The shop icon would be blue unless the user clicks on it once
+			{
+				emoticonLayout.findViewById(R.id.sticker_shop_badge).setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				emoticonLayout.findViewById(R.id.sticker_shop_badge).setVisibility(View.GONE);
+			}
 			if (v != null)
 			{
 				int[] tabDrawables = null;
