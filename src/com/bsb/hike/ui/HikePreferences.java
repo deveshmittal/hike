@@ -793,15 +793,19 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	private void updateAccountBackupPrefView()
 	{
 		Preference preference = getPreferenceScreen().findPreference(HikeConstants.BACKUP_PREF);
-		long lastBackupTime = DBBackupRestore.getInstance(getApplicationContext()).getLastBackupTime();
-		String lastBackup = getResources().getString(R.string.last_backup);
-		String time = getResources().getString(R.string.never);
-		String backupSummary = "Last backup: never";
-		if (lastBackupTime > 0)
-		{
-			time = Utils.getFormattedDateTimeFromTimestamp(lastBackupTime/1000, getResources().getConfiguration().locale);
-		}
-		preference.setSummary(lastBackup + ": " + time);
+		getPreferenceScreen().removePreference(preference);
+//		long lastBackupTime = DBBackupRestore.getInstance(getApplicationContext()).getLastBackupTime();
+//		if (lastBackupTime > 0)
+//		{
+//			String lastBackup = getResources().getString(R.string.last_backup);
+//			String time = Utils.getFormattedDateTimeFromTimestamp(lastBackupTime/1000, getResources().getConfiguration().locale);
+//			preference.setSummary(lastBackup + ": " + time);
+//		}
+//		else
+//		{
+//			String backupMissing = getResources().getString(R.string.backup_missing);
+//			preference.setSummary(backupMissing);
+//		}
 	}
 	
 	private void updateNotifPrefView()
