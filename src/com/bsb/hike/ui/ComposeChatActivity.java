@@ -149,6 +149,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private List<ContactInfo> recentContacts;
 	
 	private boolean selectAllMode;
+	
+	private ViewStub composeCard;
+	
+	private View composeCardInflated;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -314,8 +318,30 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		if (isFtueFwd)
 		{
-			ViewStub composeCard = (ViewStub) findViewById(R.id.nuxComposeCardStub);
-			composeCard.inflate();
+			composeCard = (ViewStub) findViewById(R.id.nuxComposeCardStub);
+			if (composeCardInflated == null)
+			{
+				composeCard.setOnInflateListener(new ViewStub.OnInflateListener()
+				{
+					@Override
+					public void onInflate(ViewStub stub, View inflated)
+					{
+						composeCardInflated = inflated;
+					}
+				});
+				try
+				{
+					composeCard.inflate();
+				}
+				catch (Exception e)
+				{
+
+				}
+			}
+			else
+			{
+				composeCardInflated.setVisibility(View.VISIBLE);
+			}
 			setMode(FTUE_FWD);
 		}
 		else if (isForwardingMessage && !isSharingFile)
@@ -340,6 +366,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		// need to confirm with rishabh --gauravKhanna
 		tagEditText.setMinCharChangeThresholdForTag(8);
 		tagEditText.setSeparator(TagEditText.SEPARATOR_SPACE);
+		tagEditText.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				if (null != composeCardInflated)
+				{
+					composeCardInflated.setVisibility(View.GONE);
+				}
+			}
+		});
 	}
 	
 	private void initTips(){
@@ -621,7 +658,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.clearAllSelection(true);
 			adapter.toggleShowSMSContacts(false);
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
-			findViewById(R.id.nuxComposeCard).setVisibility(View.VISIBLE);
+			if (null != composeCardInflated)
+				composeCardInflated.setVisibility(View.VISIBLE);
 			setSticker();
 			break;
 		}
