@@ -519,7 +519,12 @@ public class StickerManager
 	
 	public void saveSortedListForCategory(String catId)
 	{
-		Set<Sticker> list = ((CustomStickerCategory) stickerCategoriesMap.get(catId)).getStickerSet();
+		CustomStickerCategory customCategory = ((CustomStickerCategory) stickerCategoriesMap.get(catId));
+		if(customCategory == null)
+		{
+			return;
+		}
+		Set<Sticker> list = customCategory.getStickerSet();
 		try
 		{
 			if (list.size() == 0)
