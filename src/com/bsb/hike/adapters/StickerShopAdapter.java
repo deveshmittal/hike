@@ -109,7 +109,7 @@ public class StickerShopAdapter extends CursorAdapter
 
 		if (totalStickerCount > 0)
 		{
-			String detailsStirng = context.getResources().getString(R.string.n_stickers, totalStickerCount);
+			String detailsStirng = totalStickerCount == 1 ? context.getResources().getString(R.string.singular_stickers, totalStickerCount)  : context.getResources().getString(R.string.n_stickers, totalStickerCount);
 			if (categorySizeInBytes > 0)
 			{
 				detailsStirng += ", " + Utils.getSizeForDisplay(categorySizeInBytes);

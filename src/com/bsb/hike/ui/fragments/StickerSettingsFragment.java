@@ -140,7 +140,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		TextView totalStickers = (TextView) parent.findViewById(R.id.pack_details);
 		TextView cancelBtn = (TextView) parent.findViewById(R.id.cancel_btn);
 		TextView confirmBtn = (TextView) parent.findViewById(R.id.confirm_btn);
-		totalPacks.setText(getString(R.string.n_packs, visibleAndUpdateStickerSet.size()));
+		totalPacks.setText(visibleAndUpdateStickerSet.size() == 1 ? getString(R.string.singular_packs, visibleAndUpdateStickerSet.size()) : getString(R.string.n_packs, visibleAndUpdateStickerSet.size()));
 		categoryCost.setText(R.string.sticker_pack_free);
 		
 		displayTotalStickersCount(totalStickers);
@@ -192,7 +192,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		}
 		if(totalCount > 0)
 		{
-			String text = getActivity().getResources().getString(R.string.n_stickers, totalCount);
+			String text = totalCount == 1 ? getActivity().getResources().getString(R.string.singular_stickers, totalCount) : getActivity().getResources().getString(R.string.n_stickers, totalCount);
 			if(totalSize > 0)
 			{
 				text += ", " + Utils.getSizeForDisplay(totalSize);

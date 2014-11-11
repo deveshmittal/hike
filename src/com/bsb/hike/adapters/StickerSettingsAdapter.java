@@ -136,7 +136,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		if(category.getTotalStickers() > 0)
 		{
 			viewHolder.categorySize.setVisibility(View.VISIBLE);
-			viewHolder.categorySize.setText(mContext.getString(R.string.n_stickers, category.getTotalStickers()));
+			viewHolder.categorySize.setText(category.getTotalStickers() == 1 ? mContext.getString(R.string.singular_stickers, category.getTotalStickers()) : mContext.getString(R.string.n_stickers, category.getTotalStickers()));
 		}
 		else
 		{
