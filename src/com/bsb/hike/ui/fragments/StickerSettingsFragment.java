@@ -65,6 +65,8 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	private HikeSharedPreferenceUtil prefs;
 	
 	private View footerView;
+	
+	private boolean isUpdateAllTapped = false;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -108,6 +110,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				@Override
 				public void onClick(View v)
 				{
+					isUpdateAllTapped = true;
 					if(shouldAddUpdateView())
 					{
 						updateAll.setVisibility(View.INVISIBLE);
@@ -147,6 +150,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			@Override
 			public void onClick(View v)
 			{
+				isUpdateAllTapped = false;
 				confirmView.setVisibility(View.GONE);
 				Utils.sendUILogEvent(HikeConstants.LogEvent.UPDATE_ALL_CANCEL_CLICKED);
 			}
@@ -158,6 +162,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			@Override
 			public void onClick(View v)
 			{
+				isUpdateAllTapped = false;
 				for(StickerCategory category : visibleAndUpdateStickerSet)
 				{
 					StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.SETTINGS, getSherlockActivity());
@@ -460,4 +465,15 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		LocalBroadcastManager.getInstance(getSherlockActivity()).unregisterReceiver(mMessageReceiver);
 	}
 
+	public boolean getIsUpdateAllTapped()
+	{
+		return isUpdateAllTapped;
+	}
+
+	public void hideConfirmAllView()
+	{
+		isUpdateAllTapped = false;
+		View confirmAll = getView().findViewById(R.id.confirmation_ll);
+		confirmAll.setVisibility(View.GONE);
+	}
 }
