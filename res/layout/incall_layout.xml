@@ -81,6 +81,8 @@
         android:layout_above="@+id/PhoneNumberView1"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="27dp"
-        android:src="@drawable/a" />
+        android:src="@drawable/a"
+        android:background="@color/white"
+        android:padding="1dp" />
 
 </RelativeLayout>

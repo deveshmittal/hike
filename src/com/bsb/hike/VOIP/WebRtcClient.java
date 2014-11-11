@@ -30,7 +30,7 @@ import com.bsb.hike.service.VoIPServiceNew;
 import com.bsb.hike.utils.Logger;
 
 public class WebRtcClient {
-	private final static int MAX_PEER = 4;
+	private final static int MAX_PEER = 2;
 	private boolean[] endPoints = new boolean[MAX_PEER];
 	private PeerConnectionFactory factory;
 	private HashMap<String, Peer> peers = new HashMap<String, Peer>();
@@ -437,26 +437,26 @@ public class WebRtcClient {
 		factory = new PeerConnectionFactory();
 		long sysTime = System.currentTimeMillis();
 		
-		Runnable checkCallReceived = new Runnable(){
-
-			@Override
-			public void run() {
-				if (callReceived == false){
+//		Runnable checkCallReceived = new Runnable(){
+//
+//			@Override
+//			public void run() {
+//				if (callReceived == false){
 //					try {
 //						sendMessage(storedId, HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE, null);
 //					} catch (JSONException e) {
 //						// TODO Auto-generated catch block
 //						e.printStackTrace();
 //					}
-					mListener.closeActivity();
-				}
-				
-			}
-			
-		};
+//					mListener.closeActivity();
+//				}
+//				
+//			}
+//			
+//		};
 		
-		mHandler.removeCallbacks(checkCallReceived);
-        mHandler.postDelayed(checkCallReceived, 30000);
+//		mHandler.removeCallbacks(checkCallReceived);
+//        mHandler.postDelayed(checkCallReceived, 30000);
 
 	
 		iceServers.add(new PeerConnection.IceServer(

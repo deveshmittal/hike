@@ -3299,11 +3299,11 @@ public class Utils
 				public void onClick(View v)
 				{
 					Utils.logEvent(mActivity, HikeConstants.LogEvent.MENU_CALL);
-					Intent callIntent = new Intent(mActivity,com.bsb.hike.ui.VoIPActivityNew.class);
+					Intent callIntent = new Intent(mActivity.getApplicationContext(),com.bsb.hike.ui.VoIPActivityNew.class);
 					callIntent.putExtra("dialedID", mContactNumber);
 //					callIntent.setData(Uri.parse("tel:" + mContactNumber));
 					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, json);
-					Intent serviceIntent = new Intent(mActivity,com.bsb.hike.service.VoIPServiceNew.class);
+					Intent serviceIntent = new Intent(mActivity.getApplicationContext(),com.bsb.hike.service.VoIPServiceNew.class);
 					System.gc();
 					mActivity.startService(serviceIntent);
 					mActivity.startActivity(callIntent);
@@ -3330,7 +3330,7 @@ public class Utils
 			callIntent.putExtra("dialedID", mContactNumber);
 //			callIntent.setData(Uri.parse("tel:" + mContactNumber));
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, json);
-			Intent serviceIntent = new Intent(mActivity,com.bsb.hike.service.VoIPServiceNew.class);
+			Intent serviceIntent = new Intent(mActivity.getApplicationContext(),com.bsb.hike.service.VoIPServiceNew.class);
 			System.gc();
 			mActivity.startService(serviceIntent);
 			mActivity.startActivity(callIntent);
