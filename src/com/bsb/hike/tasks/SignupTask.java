@@ -539,7 +539,10 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				{
 					showNuxScreen = nuxDetails.optBoolean(HikeConstants.SHOW_NUX_SCREEN);
 					JSONArray nuxStickerDetailsJson = nuxDetails.optJSONArray(HikeConstants.NUX_STICKERS);
-					nuxStickers = nuxStickerDetailsJson.toString();
+					if (null != nuxStickerDetailsJson)
+					{
+						nuxStickers = nuxStickerDetailsJson.toString();
+					}
 				}
 				Editor editor = settings.edit();
 				editor.putInt(HikeConstants.HIKE_CONTACTS_COUNT, numOfHikeContactsCount);
