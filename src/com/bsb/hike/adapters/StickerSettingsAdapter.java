@@ -196,7 +196,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	{
 		viewHolder.updateAvailable.setVisibility(View.VISIBLE);
 		viewHolder.updateAvailable.setText(state == StickerCategory.DONE ? R.string.downloading_sticker : R.string.retry_sticker);
-		viewHolder.updateAvailable.setTextColor((state == StickerCategory.DONE && isVisible) ? mContext.getResources().getColor(R.color.sticker_settings_update_color) : mContext.getResources().getColor(R.color.shop_update_invisible_color));
+		viewHolder.updateAvailable.setTextColor(isVisible ? mContext.getResources().getColor(R.color.sticker_settings_update_color) : mContext.getResources().getColor(R.color.shop_update_invisible_color));
 		viewHolder.downloadProgress.setVisibility(View.GONE);
 		viewHolder.downloadProgress.clearAnimation();
 		checkAndDisableCheckBox(categoryId, viewHolder.checkBox);	
