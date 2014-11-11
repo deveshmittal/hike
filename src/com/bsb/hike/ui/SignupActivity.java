@@ -145,8 +145,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private ImageView profilePicCamIcon;
 
-	private TextView genderDesctribeText;
-
 	private Handler mHandler;
 
 	private boolean addressBookError = false;
@@ -1037,15 +1035,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	{
 		femaleText = (TextView) genderLayout.findViewById(R.id.female);
 		maleText = (TextView) genderLayout.findViewById(R.id.male);
-		genderDesctribeText = (TextView) genderLayout.findViewById(R.id.describe_txt);
 		if (savedInstanceState != null && savedInstanceState.containsKey(HikeConstants.Extras.GENDER))
 		{
 			mActivityState.isFemale = savedInstanceState.getBoolean(HikeConstants.Extras.GENDER);
 			selectGender(mActivityState.isFemale);
-		}
-		if (mActivityState.isFemale == null)
-		{
-			genderDesctribeText.setText("");
 		}
 		nextBtnContainer.setVisibility(View.VISIBLE);
 		setupActionBarTitle();
@@ -1628,26 +1621,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	{
 		femaleText.setSelected(mActivityState.isFemale);
 		maleText.setSelected(!mActivityState.isFemale);
-
-		setGenderDescribeRandomText(mActivityState.isFemale);
-	}
-
-	private void setGenderDescribeRandomText(boolean isFemale)
-	{
-		int size = 0;
-		int describeStringRes;
-		Random random = new Random();
-		if (isFemale)
-		{
-			size = HikeConstants.FEMALE_SELECTED_STRINGS.length;
-			describeStringRes = HikeConstants.FEMALE_SELECTED_STRINGS[random.nextInt(size)];
-		}
-		else
-		{
-			size = HikeConstants.MALE_SELECTED_STRINGS.length;
-			describeStringRes = HikeConstants.MALE_SELECTED_STRINGS[random.nextInt(size)];
-		}
-		genderDesctribeText.setText(describeStringRes);
 	}
 
 	private void resetViewFlipper()
