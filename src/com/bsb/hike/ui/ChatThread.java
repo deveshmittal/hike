@@ -99,6 +99,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewStub;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
@@ -186,6 +187,7 @@ import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.tasks.DownloadStickerTask;
@@ -329,6 +331,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private View hikeToOfflineTipview;
 	
 	private TextView topUnreadPinsIndicator;
+	
+	private ViewStub pulsatingDot;
+	
+	private View pulsatingDotInflated;
 
 	private int HIKE_TO_OFFLINE_TIP_STATE_1 = 1;
 
@@ -860,7 +866,31 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		Logger.i("chatthread", "on create end");
 
 	}
+	
+	private void startPulsatingDotAnimation()
+	{
+		new Handler().postDelayed(new Runnable()
+		{
 
+			@Override
+			public void run()
+			{
+				ImageView ringView1 = (ImageView) findViewById(R.id.ring1);
+				ringView1.startAnimation(HikeAnimationFactory.getPulsatingDotAnimation(0));
+			}
+		}, 0);
+
+		new Handler().postDelayed(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				ImageView ringView2 = (ImageView) findViewById(R.id.ring2);
+				ringView2.startAnimation(HikeAnimationFactory.getPulsatingDotAnimation(0));
+			}
+		}, 1500);
+	}
+	
 	private boolean showImpMessageIfRequired()
 	{
 		if (mConversation instanceof GroupConversation && mConversation.getMetaData() != null && mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
@@ -2475,12 +2505,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		/*
 		 * Only show these tips in a live group conversation or other conversations and is the conversation is not a hike bot conversation.
 		 */
-		if (!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
+		boolean isNuxBot = mContactNumber.equals("+914567845678");
+		
+		if (isNuxBot || !HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
 		{
 			boolean shownSticker = true;
 			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
 			{
-				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
+				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, isNuxBot))
 				{
 					shownSticker = false;
 					showStickerFtueTip();
@@ -2635,31 +2667,32 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if(tipView!=null){
 			tipView.setVisibility(View.GONE);
 		}
-		tipView = findViewById(R.id.emoticon_tip);
-		tipView.setVisibility(View.VISIBLE);
-		tipView.setOnTouchListener(new OnTouchListener()
+		
+		if (pulsatingDotInflated == null)
 		{
-			@Override
-			public boolean onTouch(View arg0, MotionEvent arg1)
+			pulsatingDot = (ViewStub) findViewById(R.id.pulsatingDotViewStub);
+			pulsatingDot.setOnInflateListener(new ViewStub.OnInflateListener()
 			{
-				// disabling on touch gesture for sticker ftue tip
-				// so that we do not send an unnecessary nudge on a
-				// double tap on tipview.
-				return true;
+				@Override
+				public void onInflate(ViewStub stub, View inflated)
+				{
+					pulsatingDotInflated = inflated;
+				}
+			});
+			try
+			{
+				pulsatingDot.inflate();
 			}
-		});
-		tipView.setTag(TipType.EMOTICON);
+			catch (Exception e)
+			{
 
-		ImageView closeIcon = (ImageView) tipView.findViewById(R.id.close_tip);
-		closeIcon.setOnClickListener(new View.OnClickListener()
+			}
+		}
+		else
 		{
-
-			@Override
-			public void onClick(View v)
-			{
-				HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
-			}
-		});
+			pulsatingDotInflated.setVisibility(View.VISIBLE);
+		}
+		startPulsatingDotAnimation();
 	}
 	
 	private void showPinFtueTip()
@@ -6547,6 +6580,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			/*
 			 * Added this code to prevent the sticker ftue tip from showing up if the user has already used stickers.
 			 */
+			if (null != pulsatingDotInflated)
+			{
+				pulsatingDotInflated.setVisibility(View.GONE);
+			}
 			Editor editor = prefs.edit();
 			editor.putBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
 			editor.commit();
