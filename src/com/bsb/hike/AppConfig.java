@@ -8,7 +8,7 @@ public class AppConfig
 
 	public static final boolean SHOW_SEND_LOGS_OPTION = true;
 	
-	public static final String COMMIT_ID = "N.A";
+	public static final String COMMIT_ID = "commitid";
 
-	public static final String BRANCH_NAME = "N.A";
+	public static final String BRANCH_NAME = "branchname";
 }
