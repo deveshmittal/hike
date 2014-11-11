@@ -541,55 +541,55 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
-		this.data = null;
-		if (DBBackupRestore.getInstance(context).isBackupAvailable())
-		{
-			publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
-			synchronized (this)
-			{
-				try
-				{
-					this.wait();
-				}
-				catch (InterruptedException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					Logger.d("backup","Interrupted while waiting for user's choice on restore.");
-				}
-			}
-		}
-
-		while (!TextUtils.isEmpty(this.data))
-		{
-			this.data = null;
-			mStateValue = new StateValue(State.RESTORING_BACKUP,null);
-			boolean status = DBBackupRestore.getInstance(context).restoreDB();
-			if (status)
-			{
-				HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
-				ContactManager.getInstance().init(context);
-				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString());
-			}
-			else
-			{
-				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.FALSE.toString());
-			}
-			publishProgress(mStateValue);
-			synchronized (this)
-			{
-				try
-				{
-					this.wait();
-				}
-				catch (InterruptedException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
-				}
-			}
-		}
+//		this.data = null;
+//		if (DBBackupRestore.getInstance(context).isBackupAvailable())
+//		{
+//			publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
+//			synchronized (this)
+//			{
+//				try
+//				{
+//					this.wait();
+//				}
+//				catch (InterruptedException e)
+//				{
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//					Logger.d("backup","Interrupted while waiting for user's choice on restore.");
+//				}
+//			}
+//		}
+//
+//		while (!TextUtils.isEmpty(this.data))
+//		{
+//			this.data = null;
+//			mStateValue = new StateValue(State.RESTORING_BACKUP,null);
+//			boolean status = DBBackupRestore.getInstance(context).restoreDB();
+//			if (status)
+//			{
+//				HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
+//				ContactManager.getInstance().init(context);
+//				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString());
+//			}
+//			else
+//			{
+//				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.FALSE.toString());
+//			}
+//			publishProgress(mStateValue);
+//			synchronized (this)
+//			{
+//				try
+//				{
+//					this.wait();
+//				}
+//				catch (InterruptedException e)
+//				{
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//					Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
+//				}
+//			}
+//		}
 		Logger.d("SignupTask", "Publishing Token_Created");
 
 		/* tell the service to start listening for new messages */
