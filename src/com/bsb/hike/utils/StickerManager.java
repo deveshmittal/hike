@@ -1355,4 +1355,24 @@ public class StickerManager
 	{
 		return categoryId + HikeConstants.DELIMETER + type;
 	}
+	
+	public void checkAndSendAnalytics(boolean visible)
+	{
+		if(visible)
+		{
+			if (!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STICKER_SETTING_CHECK_BOX_CLICKED, false))
+			{
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.STICKER_SETTING_CHECK_BOX_CLICKED, true);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_CHECK_BOX_CLICKED);
+			}
+		}
+		else
+		{
+			if (!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STICKER_SETTING_UNCHECK_BOX_CLICKED, false))
+			{
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.STICKER_SETTING_UNCHECK_BOX_CLICKED, true);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_UNCHECK_BOX_CLICKED);
+			}
+		}
+	}
 }

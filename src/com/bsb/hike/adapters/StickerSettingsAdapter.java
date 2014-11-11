@@ -340,6 +340,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		stickerSet.add(category);
 		int categoryIdx = stickerCategories.indexOf(category);
 		updateLastVisibleIndex(categoryIdx, category);
+		StickerManager.getInstance().checkAndSendAnalytics(visibility);
 	}
 
 	/**
@@ -389,5 +390,4 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	{
 		return lastVisibleIndex;
 	}
-
 }
