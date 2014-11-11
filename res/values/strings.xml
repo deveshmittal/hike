@@ -1195,7 +1195,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="n_more">%1$d MORE</string>
     <string name="n_stickers">%1$d Stickers</string>
     <string name="last_backup">Last backup</string>
-    <string name="never">never</string>
     <string name="creating_backup_message">Creating a backup on your chats. Daily backups occur at 03:00.</string>
     <string name="restore_account">Restore Account</string>
     <string name="account_backup">Account Backup</string>
@@ -1209,6 +1208,10 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="restore_error">Something went wrong.</string>
     <string name="restore_error_hint">would you like to retry?</string>
     <string name="out_of_space">Insufficient memory</string>
+    <string name="backup_successful">Backup created successfully</string>
+    <string name="backup_failed">Backup failed</string>
+    <string name="backup_missing">Backup missing. Tap to backup manually</string>
+    <string name="out_of_space">Get More Space</string>
     <string name="sticker_pack_free">FREE</string>
     <string name="n_packs">%1$d Packs</string>
     <string name="downloading_sticker">DOWNLOADING STICKERS</string>

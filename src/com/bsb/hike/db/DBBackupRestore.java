@@ -4,13 +4,14 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.channels.FileChannel;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -24,6 +25,8 @@ public class DBBackupRestore
 	private static final String HIKE_PACKAGE_NAME = "com.bsb.hike";
 
 	public static final String DATABASE_EXT = ".db";
+
+	public static final String BACKUP = "backup";
 
 	private static final String[] dbNames = { DBConstants.CONVERSATIONS_DATABASE_NAME };
 
@@ -75,6 +78,10 @@ public class DBBackupRestore
 			e.printStackTrace();
 			return false;
 		}
+		if (!updateBackupState())
+		{
+			return false;
+		}
 		time = System.currentTimeMillis() - time;
 		Logger.d(getClass().getSimpleName(), "Backup complete!! in " + time / 1000 + "." + time % 1000 + "s");
 		return true;
@@ -118,6 +125,15 @@ public class DBBackupRestore
 	public boolean restoreDB()
 	{
 		Long time = System.currentTimeMillis();
+		BackupState state = getBackupState();
+		if (state == null)
+		{
+			return false;
+		}
+		if (state.getDBVersion() > DBConstants.CONVERSATIONS_DATABASE_VERSION)
+		{
+			return false;
+		}
 		try
 		{
 			for (String fileName : dbNames)
@@ -127,7 +143,6 @@ public class DBBackupRestore
 				File backup = getDBBackupFile(dbCopy.getName());
 				CBCEncryption.decryptFile(backup, dbCopy, backupToken);
 				importDatabase(dbCopy);
-				postRestoreSetup();
 				dbCopy.delete();
 			}
 		}
@@ -137,6 +152,7 @@ public class DBBackupRestore
 			e.printStackTrace();
 			return false;
 		}
+		postRestoreSetup(state);
 		time = System.currentTimeMillis() - time;
 		Logger.d(getClass().getSimpleName(), "Restore complete!! in " + time / 1000 + "." + time % 1000 + "s");
 		return true;
@@ -174,24 +190,16 @@ public class DBBackupRestore
 		Logger.d(getClass().getSimpleName(), "DB import complete!! in " + time / 1000 + "." + time % 1000 + "s");
 	}
 
-	private void postRestoreSetup()
+	private void postRestoreSetup(BackupState state)
 	{
-		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-		int oldVersion = appPrefs.getInt(HikeConstants.PREVIOUS_CONV_DB_VERSION, DBConstants.CONVERSATIONS_DATABASE_VERSION);
-		int newVersion = DBConstants.CONVERSATIONS_DATABASE_VERSION;
-		if (newVersion > oldVersion && oldVersion > 0)
+		if (state.getDBVersion() < DBConstants.CONVERSATIONS_DATABASE_VERSION)
 		{
-			// 1. Upgrade db
-			HikeConversationsDatabase.getInstance().upgrade(oldVersion, newVersion);
-			// 2. Reset tables.
-			for (String table : resetTableNames)
-			{
-				HikeConversationsDatabase.getInstance().clearTable(table);
-			}
+			HikeConversationsDatabase.getInstance().upgrade(state.getDBVersion() , DBConstants.CONVERSATIONS_DATABASE_VERSION);
 		}
-		Editor editor = appPrefs.edit();
-		editor.putInt(HikeConstants.PREVIOUS_CONV_DB_VERSION, 0);
-		editor.commit();
+		for (String table : resetTableNames)
+		{
+			HikeConversationsDatabase.getInstance().clearTable(table);
+		}
 	}
 
 	private void closeChannelsAndStreams(Closeable... closeables)
@@ -220,20 +228,19 @@ public class DBBackupRestore
 			if (!backup.exists())
 				return false;
 		}
+		if(!getBackupStateFile().exists())
+		{
+			return false;
+		}
 		return true;
 	}
 
 	public long getLastBackupTime()
 	{
-		for (String fileName : dbNames)
+		BackupState state = getBackupState();
+		if (state != null)
 		{
-			File currentDB = getCurrentDBFile(fileName);
-			File DBCopy = getDBCopyFile(currentDB.getName());
-			File backup = getDBBackupFile(DBCopy.getName());
-			if (backup.exists())
-			{
-				return backup.lastModified();
-			}
+			return state.getBackupTime();
 		}
 		return -1;
 	}
@@ -271,13 +278,78 @@ public class DBBackupRestore
 	private File getDBBackupFile(String name)
 	{
 		new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT).mkdirs();
-		return new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT, name + ".backup");
+		return new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT, name + "." + BACKUP);
 	}
 
 	private File getDBCopyFile(String name)
 	{
 		new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT).mkdirs();
 		return new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT, name);
+	}
+	
+	private File getBackupStateFile()
+	{
+		new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT).mkdirs();
+		return new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT, BACKUP);
+	}
+	
+	private boolean updateBackupState()
+	{
+		BackupState state = new BackupState(dbNames[0], DBConstants.CONVERSATIONS_DATABASE_VERSION);
+		File backupStateFile = getBackupStateFile();
+		FileOutputStream fileOut = null;
+		ObjectOutputStream out = null;
+		try
+		{
+			fileOut = new FileOutputStream(backupStateFile);
+			out = new ObjectOutputStream(fileOut);
+			out.writeObject(state);
+			out.close();
+			fileOut.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+		finally
+		{
+			closeChannelsAndStreams(fileOut,out);
+		}
+		return true;
+	}
+	
+	private BackupState getBackupState()
+	{
+		BackupState state = null;
+		File backupStateFile = getBackupStateFile();
+		FileInputStream fileIn = null;
+		ObjectInputStream in = null;
+		try
+		{
+			if (!backupStateFile.exists())
+			{
+				return null;
+			}
+			fileIn = new FileInputStream(backupStateFile);
+			in = new ObjectInputStream(fileIn);
+			state = (BackupState) in.readObject();
+			in.close();
+			fileIn.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		catch (ClassNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			closeChannelsAndStreams(fileIn,in);
+		}
+		return state;
 	}
 
 }
