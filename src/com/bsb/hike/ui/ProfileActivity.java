@@ -315,7 +315,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(com.actionbarsherlock.view.Window.FEATURE_ACTION_BAR_OVERLAY);
 
-		if (Utils.requireAuth(this))
+		if (Utils.requireAuth(this) || Utils.showNuxScreen(this))
 		{
 			return;
 		}

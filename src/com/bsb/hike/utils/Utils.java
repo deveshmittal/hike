@@ -174,6 +174,7 @@ import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.FtueActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -579,6 +580,18 @@ public class Utils
 		return false;
 	}
 
+	public static boolean showNuxScreen(Activity activity)
+	{
+		SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (settings.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false))
+		{
+			activity.startActivity(new Intent(activity, FtueActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+			activity.finish();
+			return true;
+		}
+		return false;
+	}
+	
 	public static void disconnectAndStopService(Activity activity)
 	{
 		// Added these lines to prevent the bad username/password bug.

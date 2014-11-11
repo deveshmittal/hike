@@ -169,20 +169,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		if (Utils.requireAuth(this))
+		if (Utils.requireAuth(this) || Utils.showNuxScreen(this))
 		{
 			return;
 		}
-		
-		SharedPreferences settings = this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-
-		if (settings.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false))
-		{
-			this.startActivity(new Intent(this, FtueActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-			this.finish();
-			return;
-		}
-		
+				
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
 		HikeMessengerApp app = (HikeMessengerApp) getApplication();
@@ -428,7 +419,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		super.onNewIntent(intent);
 
-		if (Utils.requireAuth(this))
+		if (Utils.requireAuth(this) || Utils.showNuxScreen(this))
 		{
 			return;
 		}
