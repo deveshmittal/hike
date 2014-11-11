@@ -223,10 +223,10 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		final ImageView progressBar = (ImageView) loadingEmptyState.findViewById(R.id.loading_progress_bar);
 		final TextView loadingFailedEmptyStateMainText = (TextView) loadingFailedEmptyState.findViewById(R.id.main_text);
 		final TextView loadingFailedEmptyStateSubText = (TextView) loadingFailedEmptyState.findViewById(R.id.sub_text);
+		progressBar.setAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.rotate));
 		if(currentCategoriesCount == 0)
 		{
 			loadingEmptyState.setVisibility(View.VISIBLE);
-			progressBar.setAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.rotate));
 			loadingFailedEmptyState.setVisibility(View.GONE);
 		}
 		
