@@ -3,10 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="@dimen/sticker_pack_empty_view_margin"
-    android:layout_marginRight="@dimen/sticker_pack_empty_view_margin" >
+    android:gravity="center" >
 
     <com.bsb.hike.ui.utils.RecyclingImageView
-        android:id="@+id/pallete_category_icon"
+        android:id="@+id/preview_image"
         android:layout_width="125dp"
         android:layout_height="178dp"
         android:layout_gravity="center_vertical"
@@ -18,9 +18,10 @@
         android:id="@+id/category_update_details"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_alignTop="@id/pallete_category_icon"
-        android:layout_alignBottom="@id/pallete_category_icon"
-        android:layout_toRightOf="@+id/pallete_category_icon"
+        android:layout_alignTop="@id/preview_image"
+        android:layout_alignBottom="@id/preview_image"
+        android:layout_toRightOf="@+id/preview_image"
+        android:paddingRight="@dimen/sticker_pack_empty_view_margin"
         android:gravity="center_vertical"
         android:orientation="vertical" >
 
@@ -30,6 +31,7 @@
             android:layout_height="wrap_content"
             android:text="@string/new_stickers"
             android:textColor="@color/shop_icon_color"
+            android:layout_marginTop="4dp"
             android:textSize="12sp" />
 
         <com.bsb.hike.view.CustomFontTextView
@@ -49,6 +51,15 @@
             android:text="16 Stickers, 200KB"
             android:textColor="@color/standerd_light_grey2"
             android:textSize="12sp" />
+        
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/separator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="|"
+            android:textColor="#333333"
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/category_price"
@@ -63,7 +74,7 @@
             android:layout_width="150dp"
             android:layout_height="36dp"
             android:layout_gravity="center"
-            android:background="@color/shop_icon_color"
+             android:background="@drawable/download_btn_round"
             android:layout_marginTop="20dp"
             android:textSize="12sp"
             android:text="@string/download_category"

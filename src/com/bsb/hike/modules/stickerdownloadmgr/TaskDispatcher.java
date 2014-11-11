@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 class TaskDispatcher
 {
@@ -20,7 +21,7 @@ class TaskDispatcher
 
 	private final int MAXIMUM_POOL_SIZE = 3;
 
-	private final short KEEP_ALIVE_TIME = 60; // in seconds
+	private final short KEEP_ALIVE_TIME = 5 * 60; // in seconds
 	
 	private class MyThreadFactory implements ThreadFactory
 	{
@@ -56,6 +57,12 @@ class TaskDispatcher
 	void start()
 	{
 		pool = new ThreadPoolExecutor(2, MAXIMUM_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, queue.getQueue(), new MyThreadFactory(), executionHandler);
+		
+		if(Utils.isGingerbreadOrHigher())
+		{
+			pool.allowCoreThreadTimeOut(true);
+		}
+			
 	}
 	
 	void execute(Request request)

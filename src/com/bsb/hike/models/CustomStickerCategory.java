@@ -30,9 +30,9 @@ public class CustomStickerCategory extends StickerCategory
 	}
 
 	public CustomStickerCategory(String categoryId, String categoryName, boolean updateAvailable, boolean isVisible, boolean isCustom, boolean isAdded, int catIndex,
-			int totalStickers, int timeStamp, int categorySize)
+			int totalStickers, int categorySize)
 	{
-		super(categoryId, categoryName, updateAvailable, isVisible, isCustom, isAdded, catIndex, totalStickers, timeStamp, categorySize);
+		super(categoryId, categoryName, updateAvailable, isVisible, isCustom, isAdded, catIndex, totalStickers, categorySize);
 		loadStickers();
 	}
 
@@ -151,8 +151,8 @@ public class CustomStickerCategory extends StickerCategory
 
 	public void addDefaultRecentSticker()
 	{
-		String[] recentSticker = { "002_lol.png", "003_teasing.png", "112_watchadoing.png", "113_whereareyou.png", "092_yo.png", "069_hi.png" };
-		String[] recentCat = { "expressions", "humanoid", "expressions", "expressions", "expressions", "humanoid" };
+		String[] recentSticker = { "002_lol.png", "003_teasing.png", "113_whereareyou.png", "069_hi.png" };
+		String[] recentCat = { "expressions", "humanoid",  "expressions", "humanoid" };
 
 		int count = recentSticker.length;
 		for (int i = 0; i < count; i++)

@@ -37,8 +37,6 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	
 	private int categorySize;
 	
-	private int timeStamp;
-	
 	public static final int NONE = 0;
 	
 	public static final int UPDATE = 1;
@@ -49,10 +47,12 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	
 	public static final int DONE = 4;
 	
+	private int downloadedStickersCount = -1;
+	
 	private int state;
 
 	public StickerCategory(String categoryId, String categoryName, boolean updateAvailable, boolean isVisible, boolean isCustom, boolean isAdded,
-			int catIndex, int totalStickers, int timeStamp, int categorySize)
+			int catIndex, int totalStickers, int categorySize)
 	{
 		this.categoryId = categoryId;
 		this.updateAvailable = updateAvailable;
@@ -62,7 +62,6 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 		this.isAdded = isAdded;
 		this.catIndex = catIndex;
 		this.totalStickers = totalStickers;
-		this.timeStamp = timeStamp;
 		this.categorySize = categorySize;
 		this.state = isMoreStickerAvailable() ? UPDATE : NONE;
 	}
@@ -72,6 +71,15 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	{
 		this.categoryId = category;
 		this.updateAvailable = false;
+		this.state = NONE;
+	}
+	
+	public StickerCategory(String categoryId, String categoryName, int totalStickers, int categorySize)
+	{
+		this.categoryId = categoryId;
+		this.categoryName = categoryName;
+		this.totalStickers = totalStickers;
+		this.categorySize = categorySize;
 		this.state = NONE;
 	}
 
@@ -174,16 +182,6 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 		this.totalStickers = totalStickers;
 	}
 
-	public int getTimeStamp()
-	{
-		return timeStamp;
-	}
-
-	public void setTimeStamp(int timeStamp)
-	{
-		this.timeStamp = timeStamp;
-	}
-	
 	public void setState(int state)
 	{
 		this.state = state;
@@ -215,6 +213,11 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 					Sticker s = new Sticker(this, stickerId);
 					stickersList.add(s);
 				}
+				setDownloadedStickersCount(stickerIds.length);
+			}
+			else
+			{
+				setDownloadedStickersCount(0);
 			}
 			
 			Collections.sort(stickersList);
@@ -292,15 +295,13 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	 * Checks for the count of stickers from the stickers folder for this category. Returns true if the count is < totalStickers
 	 * @return  
 	 */
-	private boolean isMoreStickerAvailable()
+	public boolean isMoreStickerAvailable()
 	{
-		String[] stickerFiles = getStickerFiles();
-		if(stickerFiles != null)
+		if(getDownloadedStickersCount() == 0)
 		{
-			return stickerFiles.length < this.totalStickers;
+			return false;
 		}
-		
-		return false;
+		return getDownloadedStickersCount() < getTotalStickers();
 	}
 	
 	/**
@@ -318,7 +319,8 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 			{
 				if(categoryDir.list() != null)
 				{
-					return categoryDir.list(StickerManager.getInstance().stickerFileFilter);
+					String[] list = categoryDir.list(StickerManager.getInstance().stickerFileFilter);
+					return list;
 				}
 			}
 		}
@@ -327,6 +329,29 @@ public class StickerCategory implements Serializable, Comparable<StickerCategory
 	
 	public int getMoreStickerCount()
 	{
-		return this.totalStickers - getStickerFiles().length;
+		return this.totalStickers - getDownloadedStickersCount();
+	}
+	
+	public int getDownloadedStickersCount()
+	{
+		if(downloadedStickersCount == -1)
+		{
+			updateDownloadedStickersCount();
+		}
+		return downloadedStickersCount;
+	}
+	
+	public void updateDownloadedStickersCount()
+	{
+		String[] stickerFiles = getStickerFiles();
+		if(stickerFiles != null)
+			setDownloadedStickersCount(stickerFiles.length);
+		else
+			setDownloadedStickersCount(0);
+	}
+	
+	public void setDownloadedStickersCount(int count)
+	{
+		this.downloadedStickersCount = count;
 	}
 }

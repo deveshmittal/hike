@@ -116,17 +116,17 @@ public class AccountUtils
 
 	public static String fileTransferBaseViewUrl = FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION;
 
-	public static final String REWARDS_PRODUCTION_BASE = "hike.in/rewards/android/";
+	public static final String REWARDS_PRODUCTION_BASE = "hike.in/rewards/";
 
-	public static final String REWARDS_STAGING_BASE = "staging.im.hike.in/rewards/android/";
+	public static final String REWARDS_STAGING_BASE = "staging.im.hike.in/rewards/";
 
-	public static String rewardsUrl = HTTP_STRING + REWARDS_PRODUCTION_BASE;
+	public static String rewardsUrl = REWARDS_PRODUCTION_BASE;
 
-	public static final String GAMES_PRODUCTION_BASE = "hike.in/games/android/";
+	public static final String GAMES_PRODUCTION_BASE = "hike.in/games/";
 
-	public static final String GAMES_STAGING_BASE = "staging.im.hike.in/games/android/";
+	public static final String GAMES_STAGING_BASE = "staging.im.hike.in/games/";
 
-	public static String gamesUrl = HTTP_STRING + GAMES_PRODUCTION_BASE;
+	public static String gamesUrl = GAMES_PRODUCTION_BASE;
 
 	public static final String STICKERS_PRODUCTION_BASE = "hike.in/s/%1$s/%2$s";
 
