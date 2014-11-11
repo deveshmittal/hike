@@ -4870,5 +4870,40 @@ public class Utils
 	{
 		return ctx.getResources().getConfiguration().orientation;
 	}
+	
+	public static void sendDetailsAfterSignup(Context context, boolean upgrade, boolean sendBot)
+	{
+		sendDeviceDetails(context, upgrade, sendBot);
+		SharedPreferences accountPrefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP, false))
+		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FB_CLICK);
+		}
+		if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) > -1)
+		{
+			if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+			}
+			else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+			}
+			Editor editor = accountPrefs.edit();
+			editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
+			editor.commit();
+		}
+	}
+
+	private static void sendDeviceDetails(Context context, boolean upgrade, boolean sendBot)
+	{
+		JSONObject obj = getDeviceDetails(context);
+		if (obj != null)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+		}
+		requestAccountInfo(upgrade, sendBot);
+		sendLocaleToServer(context);
+	}
 
 }
