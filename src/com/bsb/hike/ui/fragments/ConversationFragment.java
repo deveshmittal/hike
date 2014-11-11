@@ -2534,6 +2534,10 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		inviteFooter.findViewById(R.id.nux_invite_parent).setVisibility(View.GONE);
 		getListView().removeFooterView(inviteFooter);
+		/*
+		 * Need to set adapter again after removing footer view because getListView.getChildCount doesn't update. (Hack)
+		 */
+		setListAdapter(mAdapter);
 	}
 
 	private void inviteButtonClicked()
@@ -2545,7 +2549,9 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void switchOffNuxMode()
 	{
-		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false))
+		boolean isNuxModeOn = HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false);
+		Logger.d(getClass().getSimpleName(), "Switching off nux mode = " + isNuxModeOn);
+		if(isNuxModeOn)
 		{
 			HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeConstants.NUX_HOME_INVITE_FOOTER);
 			HikeSharedPreferenceUtil.getInstance(getActivity()).removeData(HikeConstants.SHOW_NUX_INVITE_MODE);
