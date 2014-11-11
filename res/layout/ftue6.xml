@@ -3,34 +3,33 @@
     android:id="@+id/ftue_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:gravity="center_horizontal"
     android:orientation="vertical" >
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/nuxCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="12dp"
-        android:layout_marginRight="12dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_updates_white"
-        android:paddingBottom="24dp"
-        android:paddingLeft="20dp"
-        android:paddingTop="24dp" >
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal"
+        android:gravity="center" >
 
         <com.bsb.hike.ui.utils.RecyclingImageView
             android:id="@+id/nuxSticker"
             android:layout_width="72dp"
             android:layout_height="72dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/icon_nux_question" />
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/sticker_icon" />
 
         <LinearLayout
             android:id="@+id/text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
-            android:layout_toRightOf="@id/nuxSticker"
             android:orientation="vertical" >
 
             <com.bsb.hike.view.CustomFontTextView
@@ -45,23 +44,70 @@
                 android:id="@+id/ftue_text2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="8dp"
                 android:text="@string/ftue_sticker_screen_text"
                 android:textColor="@color/grey"
                 android:textSize="14sp" />
         </LinearLayout>
-    </RelativeLayout>
+    </LinearLayout>
 
-    <GridView
-        android:id="@+id/gridview"
+    <LinearLayout
+        android:id="@+id/nuxStickers"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="24dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="35dp"
         android:gravity="center"
-        android:horizontalSpacing="20dp"
-        android:listSelector="@color/transparent"
-        android:numColumns="2"
-        android:stretchMode="columnWidth"
-        android:verticalSpacing="20dp" />
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/top"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/one"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/sticker_002_lol" />
+
+            <ImageView
+                android:id="@+id/two"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/sticker_001_as_kikorisa" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/bottom"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/three"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/sticker_001_as_kikorisa" />
+
+            <ImageView
+                android:id="@+id/four"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/sticker_001_as_kikorisa" />
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>
