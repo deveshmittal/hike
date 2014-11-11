@@ -46,6 +46,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 		if (dirPath == null)
 		{
 			setException(new StickerException(StickerException.DIRECTORY_NOT_EXISTS));
+			Logger.e(StickerDownloadManager.TAG, "Sticker download failed directory does not exist for task : " + taskId);
 			return STResult.DOWNLOAD_FAILED;
 		}
 		
@@ -60,6 +61,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 				if (!otherDir.mkdirs())
 				{
 					setException(new StickerException(StickerException.DIRECTORY_NOT_CREATED));
+					Logger.e(StickerDownloadManager.TAG, "Sticker download failed directory not created for task : " + taskId);
 					return STResult.DOWNLOAD_FAILED;
 				}
 			}
@@ -76,6 +78,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)) || !catId.equals(response.getString(StickerManager.CATEGORY_ID)))
 			{
 				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
+				Logger.e(StickerDownloadManager.TAG, "Sticker download failed null or invalid response for task : " + taskId);
 				return STResult.DOWNLOAD_FAILED;
 			}
 			Logger.d(StickerDownloadManager.TAG,  "Got response for download task : " + taskId + " response : " + response.toString());
@@ -83,7 +86,7 @@ public class StickerPreviewImageDownloadTask extends BaseStickerDownloadTask
 
 			String stickerData = data.getString(HikeConstants.PREVIEW_IMAGE);
 			
-			HikeMessengerApp.getLruCache().remove(catId + HikeConstants.DELIMETER + StickerManager.PREVIEW_IMAGE);
+			HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(catId, StickerManager.PREVIEW_IMAGE_TYPE));
 			Utils.saveBase64StringToFile(new File(previewImagePath), stickerData);
 			
 		}

@@ -1584,6 +1584,9 @@ public class HikeConstants
 		
 		public static final String UPDATE_ALL_CANCEL_CLICKED = "updateAllCancelClicked";
 		
+		public static final String STICKER_CHECK_BOX_CLICKED = "stickerChkBoxClicked";
+		
+		public static final String STICKER_UNCHECK_BOX_CLICKED = "stickerUnchkBoxClicked";
 		/*
 		 * Settings screen <screen> = settingsS <event> = notifNUJEnabled, notifH2OEnabled, notifNUJDisabled, notifH2ODisabled
 		 */

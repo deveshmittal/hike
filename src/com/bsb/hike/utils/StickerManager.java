@@ -180,6 +180,14 @@ public class StickerManager
 	public static final String STICKER_SHOP_DATA_FULLY_FETCHED = "stickerShopDataFullyFetched";
 	
 	public static final long STICKER_SHOP_REFRESH_TIME = 24 * 60 * 60 * 1000;
+
+	public static final String SEND_SOURCE = "source";
+	
+	public static final String FROM_RECENT = "r";
+	
+	public static final String FROM_FORWARD = "f";
+	
+	public static final String FROM_OTHER = "o";
 	
 	public static final long MINIMUM_FREE_SPACE = 10 * 1024 * 1024;
 
@@ -1357,5 +1365,25 @@ public class StickerManager
 	public String getCategoryOtherAssetLoaderKey(String categoryId, int type)
 	{
 		return categoryId + HikeConstants.DELIMETER + type;
+	}
+	
+	public void checkAndSendAnalytics(boolean visible)
+	{
+		if(visible)
+		{
+			if (!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STICKER_SETTING_CHECK_BOX_CLICKED, false))
+			{
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.STICKER_SETTING_CHECK_BOX_CLICKED, true);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_CHECK_BOX_CLICKED);
+			}
+		}
+		else
+		{
+			if (!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STICKER_SETTING_UNCHECK_BOX_CLICKED, false))
+			{
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.STICKER_SETTING_UNCHECK_BOX_CLICKED, true);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_UNCHECK_BOX_CLICKED);
+			}
+		}
 	}
 }

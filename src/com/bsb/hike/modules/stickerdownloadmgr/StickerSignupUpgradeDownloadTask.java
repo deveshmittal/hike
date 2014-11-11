@@ -43,6 +43,7 @@ class StickerSignupUpgradeDownloadTask extends BaseStickerDownloadTask
 			if(categoryList == null || categoryList.length() == 0)
 			{
 				setException(new StickerException(StickerException.EMPTY_CATEGORY_LIST));
+				Logger.e(StickerDownloadManager.TAG, "Sticker download failed empty category list for task : " + taskId);
 				return STResult.DOWNLOAD_FAILED;
 			}
 			
@@ -62,6 +63,7 @@ class StickerSignupUpgradeDownloadTask extends BaseStickerDownloadTask
 			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
 			{
 				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
+				Logger.e(StickerDownloadManager.TAG, "Sticker download failed null or invalid response for task : " + taskId);
 				return STResult.DOWNLOAD_FAILED;
 			}
 			Logger.d(StickerDownloadManager.TAG,  "Got response for download task : " + taskId + " response : " + response.toString());
@@ -69,6 +71,7 @@ class StickerSignupUpgradeDownloadTask extends BaseStickerDownloadTask
 			if(null == data)
 			{
 				setException(new StickerException(StickerException.NULL_DATA));
+				Logger.e(StickerDownloadManager.TAG, "Sticker download failed null data for task : " + taskId);
 				return STResult.DOWNLOAD_FAILED;
 			}
 			resultObject = data;
