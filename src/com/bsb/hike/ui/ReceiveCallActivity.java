@@ -15,6 +15,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.Ringtone;
@@ -36,8 +37,8 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 	
 	private String callerId;
 	private TextView callNo;
-	private ImageButton acceptCall;
-	private ImageButton declineCall;
+	private ImageView acceptCall;
+	private ImageView declineCall;
 	private ImageView displayPic;
 	private VoIPServiceNew vService;
 	private Uri notification;
@@ -52,7 +53,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		if(getIntent().hasExtra("callerID")){
 			callerId = getIntent().getStringExtra("callerID");
 		}
-		ContactInfo contactInfo = ContactManager.getInstance().getContactInfoFromPhoneNo(callerId);
+		ContactInfo contactInfo = ContactManager.getInstance().getContact(callerId, true, true);
 		if (contactInfo != null)
 		{
 			mContactName = contactInfo.getName();
@@ -79,7 +80,11 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		Log.d("Screen Size y",((Integer)(params.y)).toString());
 		Log.d("Screen Size h",((Integer)(params.height)).toString());
 		Log.d("Screen Size w",((Integer)(params.width)).toString());
-		getWindow().setLayout(800, 1050);
+		Point size = new Point();
+		getWindowManager().getDefaultDisplay().getSize(size);
+		int width = size.x;
+		int height = size.y;
+		getWindow().setLayout(((int)(float)(0.85*(float)(width))), (int)((float)(0.60*(float)height)));
 		notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 		r = RingtoneManager.getRingtone(getApplicationContext(), notification);
 		r.setStreamType(AudioManager.STREAM_ALARM);
@@ -88,7 +93,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		setDisplayPic();
 		callNo = (TextView)this.findViewById(R.id.CallerId);
 		callNo.setText(mContactName);
-		acceptCall = (ImageButton)this.findViewById(R.id.acceptButton);
+		acceptCall = (ImageView)this.findViewById(R.id.acceptButton);
 //		acceptCall.setBackgroundColor(Color.GREEN);
 //		acceptCall.setTextColor(Color.WHITE);
 		acceptCall.setOnClickListener(new OnClickListener(){
@@ -113,7 +118,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 			
 		});
 		
-		declineCall = (ImageButton)this.findViewById(R.id.declineButton);
+		declineCall = (ImageView)this.findViewById(R.id.declineButton);
 //		declineCall.setBackgroundColor(Color.RED);
 //		declineCall.setTextColor(Color.WHITE);
 		declineCall.setOnClickListener(new OnClickListener(){

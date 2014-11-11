@@ -112,7 +112,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		if(getIntent().hasExtra("callerID")){
 			callerId = getIntent().getStringExtra("callerID");
 			storedId = callerId;
-			ContactInfo contactInfo = ContactManager.getInstance().getContactInfoFromPhoneNo(callerId);
+			ContactInfo contactInfo = ContactManager.getInstance().getContact(callerId,true,true);
 			if (contactInfo != null)
 			{
 				mContactName = contactInfo.getName();

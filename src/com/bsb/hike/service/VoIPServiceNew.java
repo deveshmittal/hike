@@ -5,6 +5,7 @@ import org.webrtc.MediaStream;
 import org.webrtc.PeerConnectionFactory;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.VOIP.WebRtcClient;
 import com.bsb.hike.ui.VoIPActivityNew;
@@ -31,14 +32,10 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	private String callerId;
 	private String manufacturer;
 	private Context mContext;
-	private Button endCall;
-	private Button acceptCall; 
-	private Button declineCall;
 	private String dialedId;
 	private int notifId = 10000;
 	private NotificationManager mNotificationManager;
 	private Boolean rejectCall;
-	private TextView callNo;
 	public static VoIPServiceNew vService;
 	public static boolean serviceStarted = false;
 	private static boolean factoryStaticInitialized=false;
@@ -50,7 +47,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	private PowerManager pm;
 	private PowerManager.WakeLock wl;
 
-
+//	android:background="@android:drawable/dialog_frame"
 	
 	public void onCreate() {
 	    super.onCreate();
@@ -113,6 +110,8 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 			  }
 //		  	VoIPActivityNew.getVoIPActivityInstance().raiseEndCallToast();
 			  VoIPActivityNew.getVoIPActivityInstance().finish();
+			  client.mPubSub.removeListener(HikePubSub.VOIP_HANDSHAKE, client.getMessageHandler());
+			  client.mPubSub.removeListener(HikePubSub.VOIP_TIMEOUT, client.getMessageHandler());
 			  stopSelf();
 		  }
 	  }

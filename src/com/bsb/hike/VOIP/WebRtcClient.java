@@ -41,7 +41,7 @@ public class WebRtcClient {
 	private final MessageHandler messageHandler = new MessageHandler();
 	private final static String TAG = WebRtcClient.class.getSimpleName();
 	private String storedId;
-	private HikePubSub mPubSub;
+	public HikePubSub mPubSub;
 	private Random random = new Random();
 	private int index = random.nextInt(10000);
 	public boolean answerpressed = false;
