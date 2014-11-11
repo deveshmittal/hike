@@ -15,6 +15,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -333,13 +334,15 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	public void onClick(View v)
 	{
 		StickerCategory category = (StickerCategory) v.getTag();
-		boolean visibility = !category.isVisible(); 
+		boolean visibility = !category.isVisible();
+		Toast.makeText(mContext, visibility ? mContext.getResources().getString(R.string.pack_visible) : mContext.getResources().getString(R.string.pack_hidden), Toast.LENGTH_SHORT).show();;
 		CheckBox checkBox = (CheckBox) v;
 		category.setVisible(visibility);
 		checkBox.setChecked(visibility);
 		stickerSet.add(category);
 		int categoryIdx = stickerCategories.indexOf(category);
 		updateLastVisibleIndex(categoryIdx, category);
+		
 	}
 
 	/**
