@@ -98,13 +98,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private static final boolean TEST = false; // TODO: Test flag only, turn off
 												// for Production
 
-	private static final int DIWALI_YEAR = 2014;
-	private static final int DIWALI_MONTH = Calendar.OCTOBER;
-	private static final int DIWALI_DAY = 23;
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP, DIWALI_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP
 	}
 
 	private DialogShowing dialogShowing;
@@ -235,17 +232,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		if (savedInstanceState == null && dialogShowing == null)
 		{
-			if (HikeMessengerApp.isIndianUser() &&  !accountPrefs.getBoolean(HikeMessengerApp.SHOWN_DIWALI_POPUP, false) && isDiwaliDate())
-			{
-				showDiwaliPopup();
-			}
-			else
-			{
+			
 				/*
 				 * Only show app rater if the tutorial is not being shown an the app was just launched i.e not an orientation change
 				 */
 				AppRater.appLaunched(this);
-			}
 		}
 		else if (dialogShowing != null)
 		{
@@ -271,87 +262,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	}
 
-	private void showDiwaliPopup()
-	{
-		dialogShowing = DialogShowing.DIWALI_POPUP;
 
-		HikeDialogListener dialogListener = new HikeDialogListener()
-		{
-			@Override
-			public void positiveClicked(Dialog dialog)
-			{
-				sendDiwaliSticker();
-				dialog.dismiss();
-			}
-
-			@Override
-			public void onSucess(Dialog dialog)
-			{
-			}
-
-			@Override
-			public void neutralClicked(Dialog dialog)
-			{
-			}
-
-			@Override
-			public void negativeClicked(Dialog dialog)
-			{
-				dialog.dismiss();
-			}
-		};
-
-		dialog = HikeDialog.showDialog(this, HikeDialog.DIWALI_DIALOG, dialogListener, null);
-
-		dialog.setOnDismissListener(new OnDismissListener()
-		{
-			@Override
-			public void onDismiss(DialogInterface dialog)
-			{
-				onDismissDiwaliDialog();
-			}
-		});
-
-		dialog.setOnCancelListener(new OnCancelListener()
-		{
-			@Override
-			public void onCancel(DialogInterface dialog)
-			{
-				onDismissDiwaliDialog();
-			}
-		});
-
-		dialog.show();
-	}
-
-	private void sendDiwaliSticker()
-	{
-		Intent intent = IntentManager.getForwardStickerIntent(this, "078_happydiwali.png", StickerManager.HUMANOID);
-		startActivity(intent);
-	}
-
-	private void onDismissDiwaliDialog()
-	{
-		dialogShowing = null;
-
-		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeMessengerApp.SHOWN_DIWALI_POPUP, true);
-	}
-
-	private boolean isDiwaliDate()
-	{
-		Calendar calendar = Calendar.getInstance();
-		int year = calendar.get(Calendar.YEAR);
-		int month = calendar.get(Calendar.MONTH);
-		int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-		if (year == DIWALI_YEAR && month == DIWALI_MONTH && day == DIWALI_DAY)
-		{
-			return true;
-		}
-
-		return false;
-	}
-
+	
 	private void setupMainFragment(Bundle savedInstanceState)
 	{
 		if (savedInstanceState != null) {
@@ -1557,9 +1469,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		switch (dialogShowing)
 		{
-		case DIWALI_POPUP:
-			showDiwaliPopup();
-			break;
 		case SMS_CLIENT:
 			showSMSClientDialog();
 			break;
