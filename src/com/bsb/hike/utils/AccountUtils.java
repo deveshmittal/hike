@@ -86,7 +86,7 @@ public class AccountUtils
 
 	public static final int PRODUCTION_PORT_SSL = 443;
 
-	public static final int STAGING_PORT = 8080;
+	public static final int STAGING_PORT = 80;
 
 	public static final int STAGING_PORT_SSL = 443;
 
@@ -185,23 +185,25 @@ public class AccountUtils
 		HttpConnectionParams.setSoTimeout(params, HikeConstants.SOCKET_TIMEOUT);
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
-
-		boolean sslException = false;
 		if (ssl)
 		{
-			try
-			{
-				KeyStore dummyTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-				dummyTrustStore.load(null, null);
-				SSLSocketFactory sf = new CustomSSLSocketFactory(dummyTrustStore);
-				sf.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
-				schemeRegistry.register(new Scheme("https", sf, port));
-			}
-			catch (Exception e)
-			{
-				sslException = true;
-				schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), PRODUCTION_PORT));
-			}
+			
+				KeyStore dummyTrustStore;
+				try
+				{
+					dummyTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+					dummyTrustStore.load(null, null);
+					SSLSocketFactory sf = new CustomSSLSocketFactory(dummyTrustStore);
+					sf.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+					schemeRegistry.register(new Scheme("https", sf, port));
+					schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), PRODUCTION_PORT));
+					Logger.i("scheme", "all schemes "+schemeRegistry.getSchemeNames().toString());
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					return null;
+				}
 		}
 		else
 		{
@@ -212,31 +214,14 @@ public class AccountUtils
 		HttpClient httpClient = new DefaultHttpClient(cm, params);
 		httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + appVersion);
 
-		mClient = !sslException ? httpClient : null;
+		mClient = httpClient;
 		return httpClient;
 	}
 
 	public static HttpClient getClient(HttpRequestBase request)
 	{
 		HttpClient client = createClient();
-		/*
-		 * if trying to register https on ssl throws exception than we need to change "https" request urls to "http" one.
-		 */
-		if (ssl && client.getConnectionManager().getSchemeRegistry().getSchemeNames().contains("http"))
-		{
-			URI uri = request.getURI();
-			try
-			{
-				request.setURI(new URI("http", uri.getUserInfo(), uri.getHost(), PRODUCTION_PORT, uri.getPath(), uri.getQuery(), uri.getFragment()));
-			}
-			catch (URISyntaxException e)
-			{
-				e.printStackTrace();
-			}
-			Logger.d("SSLException", "Modified URI =" + request.getURI().toString());
-		}
 		return client;
-
 	}
 
 	public static void addUserAgent(URLConnection urlConnection)

@@ -3,9 +3,12 @@ package com.bsb.hike.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -16,19 +19,49 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 public class TimelineActivity extends HikeAppStateBaseFragmentActivity implements Listener
 {
 	UpdatesFragment mainFragment;
+
+	private Handler mHandler = new Handler();
+
+	private TextView friendsTopBarIndicator;
+
+	private SharedPreferences accountPrefs;
+
+	private String[] homePubSubListeners = { HikePubSub.FAVORITE_COUNT_CHANGED };
+
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		super.onEventReceived(type, object);
+		if (HikePubSub.FAVORITE_COUNT_CHANGED.equals(type))
+		{
+			runOnUiThread( new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					updateFriendsNotification(accountPrefs.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0), 0);
+				}
+			});
+		}
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		initialiseTimelineScreen(savedInstanceState);
+		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 	}
 
 	private void initialiseTimelineScreen(Bundle savedInstanceState)
@@ -37,6 +70,7 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 		setContentView(R.layout.timeline);
 		setupMainFragment(savedInstanceState);
 		setupActionBar();
+		HikeMessengerApp.getPubSub().addListeners(this, homePubSubListeners);
 	}
 
 	private void setupActionBar()
@@ -84,6 +118,23 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		getSupportMenuInflater().inflate(R.menu.updates_menu, menu);
+
+		View show_people_view = menu.findItem(R.id.show_people).getActionView();
+		show_people_view.findViewById(R.id.overflow_icon_image).setContentDescription("Favorites in timeline");;
+		friendsTopBarIndicator = (TextView) show_people_view.findViewById(R.id.top_bar_indicator);
+		((ImageView)show_people_view.findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_show_people);
+		updateFriendsNotification(accountPrefs.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0), 0);
+
+		show_people_view.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				Intent intent = new Intent(TimelineActivity.this, PeopleActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+			}
+		});
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -99,18 +150,11 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		Intent intent = null;
 
-		switch (item.getItemId())
+		if(item.getItemId() == R.id.new_update)
 		{
-			case R.id.show_people:
-				intent = new Intent(this, PeopleActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				break;	
-			case R.id.new_update:
-				intent = new Intent(this, StatusUpdate.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				
-				Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
-				break;
+			intent = new Intent(this, StatusUpdate.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
 		}
 
 		if (intent != null)
@@ -152,6 +196,48 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
 		super.onPause();
+	}
+
+	@Override
+	protected void onDestroy()
+	{
+		HikeMessengerApp.getPubSub().removeListeners(this, homePubSubListeners);
+		super.onDestroy();
+	}
+
+	public void updateFriendsNotification(int count, int delayTime)
+	{
+		if (count < 1)
+		{
+			friendsTopBarIndicator.setVisibility(View.GONE);
+		}
+		else
+		{
+			mHandler.postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					if (friendsTopBarIndicator != null)
+					{
+						int count = accountPrefs.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+						if (count > 9)
+						{
+							friendsTopBarIndicator.setVisibility(View.VISIBLE);
+							friendsTopBarIndicator.setText("9+");
+							friendsTopBarIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
+						}
+						else if (count > 0)
+						{
+							friendsTopBarIndicator.setVisibility(View.VISIBLE);
+							friendsTopBarIndicator.setText(String.valueOf(count));
+							friendsTopBarIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
+						}
+					}
+				}
+			}, delayTime);
+		}
 	}
 
 }

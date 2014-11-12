@@ -153,6 +153,7 @@ public class CommsCallback implements Runnable
 						if (running & messageQueue.isEmpty() && completeQueue.isEmpty())
 						{
 							// @TRACE 704=wait for workAvailable
+							Logger.d(TAG, "Callback Thread Waiting on workAvailable");
 							workAvailable.wait();
 						}
 					}
@@ -189,7 +190,7 @@ public class CommsCallback implements Runnable
 							// could arrive before we've
 							// finished the connect logic.
 							message = (MqttPublish) messageQueue.elementAt(0);
-
+							Logger.d(TAG, "removed message from message queue : " + message.getMessage().toString());
 							messageQueue.removeElementAt(0);
 						}
 					}
@@ -233,6 +234,7 @@ public class CommsCallback implements Runnable
 			// @TRACE 705=callback and notify for key={0}
 
 			// Unblock any waiters and if pending complete now set completed
+			Logger.d(TAG, "in handle action complete");
 			token.internalTok.notifyComplete();
 
 			if (!token.internalTok.isNotified())
@@ -260,6 +262,7 @@ public class CommsCallback implements Runnable
 				// is complete
 				clientState.notifyComplete(token);
 			}
+			Logger.d(TAG, "out handle action complete");
 		}
 	}
 
@@ -355,7 +358,7 @@ public class CommsCallback implements Runnable
 					try
 					{
 						// @TRACE 709=wait for spaceAvailable
-
+						Logger.d(TAG, "Waiting on call back Thread on space available");
 						spaceAvailable.wait();
 					}
 					catch (InterruptedException ex)
@@ -365,6 +368,7 @@ public class CommsCallback implements Runnable
 			}
 			if (!quiescing)
 			{
+				Logger.d(TAG, "adding message : " + sendMessage.getMessage().toString());
 				messageQueue.addElement(sendMessage);
 				// Notify the CommsCallback thread that there's work to do...
 				synchronized (workAvailable)
@@ -408,6 +412,7 @@ public class CommsCallback implements Runnable
 		// If quisecing process any pending messages.
 		if (mqttCallback != null)
 		{
+			Logger.d(TAG, "in handle  message for message : " + publishMessage.getMessage().toString());
 			String destName = publishMessage.getTopicName();
 
 			// @TRACE 713=call messageArrived key={0} topic={1}
@@ -422,6 +427,7 @@ public class CommsCallback implements Runnable
 				MqttPubComp pubComp = new MqttPubComp(publishMessage);
 				this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
 			}
+			Logger.d(TAG, "calling callback thread message arrived " + publishMessage.getMessage().toString());
 			mqttCallback.messageArrived(destName, publishMessage.getMessage());
 		}
 	}
