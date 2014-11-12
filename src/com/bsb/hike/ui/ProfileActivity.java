@@ -1539,6 +1539,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 						int unseenUserStatusCount = preferences.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 						Editor editor = preferences.edit();
 						editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, ++unseenUserStatusCount);
+						editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
 						editor.commit();
 						/*
 						 * This would happen in the case where the user has added a self contact and received an mqtt message before saving this to the db.

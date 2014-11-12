@@ -899,9 +899,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					Editor editor = accountPrefs.edit();
-					editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
-					editor.commit();
 					updateHomeOverflowToggleCount(getHomeOverflowCount(accountPrefs, false, false), 0);
 					if (null != overflowAdapter)
 					{
@@ -1142,9 +1139,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					Editor editor = accountPrefs.edit();
-					editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
-					editor.commit();
 					updateHomeOverflowToggleCount(getHomeOverflowCount(accountPrefs, false, false), 0);
 					if (null != overflowAdapter)
 					{
