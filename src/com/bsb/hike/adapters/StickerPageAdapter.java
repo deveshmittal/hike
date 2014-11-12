@@ -180,6 +180,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				viewHolder.text = (TextView) convertView.findViewById(R.id.new_number_stickers);
 				viewHolder.image = (ImageView) convertView.findViewById(R.id.update_btn);
 				viewHolder.progress = (ProgressBar) convertView.findViewById(R.id.download_progress);
+				viewHolder.tickImage = (ImageView) convertView.findViewById(R.id.sticker_placeholder);
 				
 				break;
 			case PLACE_HOLDER:
@@ -207,6 +208,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		case UPDATE:
 			viewHolder.image.setVisibility(View.VISIBLE);
 			viewHolder.progress.setVisibility(View.GONE);
+			viewHolder.tickImage.setVisibility(View.GONE);
 			if(item.getCategoryMoreStickerCount() > 0)
 			{
 				viewHolder.text.setVisibility(View.VISIBLE);
@@ -223,6 +225,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		case DOWNLOADING:
 			viewHolder.progress.setVisibility(View.VISIBLE);
 			viewHolder.text.setVisibility(View.GONE);
+			viewHolder.tickImage.setVisibility(View.GONE);
 			
 			break;
 		case RETRY:
@@ -231,16 +234,18 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			viewHolder.text.setVisibility(View.VISIBLE);
 			viewHolder.progress.setVisibility(View.GONE);
 			viewHolder.text.setText(activity.getResources().getString(R.string.retry_sticker));
-			
+			viewHolder.tickImage.setVisibility(View.GONE);
 			convertView.setOnClickListener(this);
 			
 			break;
 		case DONE:
-			viewHolder.image.setImageBitmap(HikeBitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_done_palette));
-			viewHolder.image.setVisibility(View.VISIBLE);
+			viewHolder.image.setVisibility(View.GONE);
 			viewHolder.text.setVisibility(View.GONE);
 			viewHolder.progress.setVisibility(View.GONE);
+			viewHolder.tickImage.setVisibility(View.VISIBLE);
+			viewHolder.tickImage.setImageBitmap(HikeBitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_done_palette));
 			convertView.setOnClickListener(this);
+			
 			break;
 		case PLACE_HOLDER:
 			viewHolder.image.setVisibility(View.VISIBLE);
@@ -351,6 +356,8 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		ProgressBar progress;
 		
 		int position;
+		
+		ImageView tickImage;
 	}
 	
 }
