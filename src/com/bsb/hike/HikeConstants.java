@@ -1777,6 +1777,8 @@ public class HikeConstants
 		public static final String REMOVE_PIC = "icr";
 		
 		public static final String MULTIPLE_FORWARD = "mm";
+		
+		public static final String TIP = "tip";
 
 	}
 
