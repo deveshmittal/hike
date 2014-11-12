@@ -2525,7 +2525,14 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.NUX_HOME_INVITE_FOOTER, false))
 		{
-			if(inviteFooter!=null)
+			if(displayedConversations.size()!=1)
+			{
+				/*
+				 * If app was in background, and conversations were created then we need to switch off nux mode.
+				 */
+				switchOffNuxMode();
+			}
+			else if(inviteFooter!=null)
 			{
 				inviteFooter.findViewById(R.id.nux_invite_parent).setVisibility(View.VISIBLE);
 			}
