@@ -96,19 +96,21 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 	private boolean nativeSMSOn;
 
+	private boolean nuxInviteMode;
+
 	public FetchFriendsTask(FriendsAdapter friendsAdapter, Context context, List<ContactInfo> friendsList, List<ContactInfo> hikeContactsList, List<ContactInfo> smsContactsList,
 			List<ContactInfo> recentContactsList, List<ContactInfo> friendsStealthList, List<ContactInfo> hikeStealthContactsList, List<ContactInfo> smsStealthContactsList, List<ContactInfo> recentsStealthList, List<ContactInfo> filteredFriendsList,
-			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, boolean fetchSmsContacts, boolean checkFavTypeInComparision, boolean fetchRecents)
+			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, boolean fetchSmsContacts, boolean checkFavTypeInComparision, boolean fetchRecents, boolean nuxInviteMode)
 	{
 		this(friendsAdapter, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, friendsStealthList, hikeStealthContactsList, smsStealthContactsList, recentsStealthList, filteredFriendsList,
-				filteredHikeContactsList, filteredSmsContactsList, null, null, null, null, null, null, false, null, false, fetchSmsContacts, checkFavTypeInComparision, fetchRecents);
+				filteredHikeContactsList, filteredSmsContactsList, null, null, null, null, null, null, false, null, false, fetchSmsContacts, checkFavTypeInComparision, fetchRecents, nuxInviteMode);
 	}
 
 	public FetchFriendsTask(FriendsAdapter friendsAdapter, Context context, List<ContactInfo> friendsList, List<ContactInfo> hikeContactsList, List<ContactInfo> smsContactsList, List<ContactInfo> recentContactsList, 
 			List<ContactInfo> friendsStealthList, List<ContactInfo> hikeStealthContactsList, List<ContactInfo> smsStealthContactsList, List<ContactInfo> recentsStealthList, List<ContactInfo> filteredFriendsList,
 			List<ContactInfo> filteredHikeContactsList, List<ContactInfo> filteredSmsContactsList, List<ContactInfo> groupsList, List<ContactInfo> groupsStealthList,
 			List<ContactInfo> filteredGroupsList, List<ContactInfo> filteredRecentsList, Map<String, ContactInfo> selectedPeople, String sendingMsisdn, boolean fetchGroups, String existingGroupId, boolean creatingOrEditingGrou,
-			boolean fetchSmsContacts, boolean checkFavTypeInComparision, boolean fetchRecents)
+			boolean fetchSmsContacts, boolean checkFavTypeInComparision, boolean fetchRecents, boolean nuxInviteMode)
 	{
 		this.friendsAdapter = friendsAdapter;
 
@@ -144,6 +146,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		this.checkFavTypeInComparision = checkFavTypeInComparision;
 		this.fetchRecents = fetchRecents;
 
+		this.nuxInviteMode = nuxInviteMode;
 		this.stealthMode = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 
 		this.nativeSMSOn = Utils.getSendSmsPref(context);
@@ -404,8 +407,15 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		}
 
 		friendsAdapter.setListFetchedOnce(true);
-
-		friendsAdapter.makeCompleteList(true, true);
+		// We dont need to show contacts in NUX Invite screen
+		if(nuxInviteMode)
+		{
+			friendsAdapter.setEmptyView();
+		}
+		else
+		{
+			friendsAdapter.makeCompleteList(true, true);
+		}
 	}
 
 	private void clearAllLists()

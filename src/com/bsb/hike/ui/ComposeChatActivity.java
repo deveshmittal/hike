@@ -32,6 +32,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -100,6 +101,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private static final int FTUE_FWD = 4;
 
+    private static final int NUX_INVITE_MODE = 5;
+
 	private View multiSelectActionBar, groupChatActionBar;
 
 	private TagEditText tagEditText;
@@ -156,6 +159,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	
 	private boolean deviceDetailsSent;
 
+	private boolean nuxInviteMode;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -176,6 +181,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		createGroup = getIntent().getBooleanExtra(HikeConstants.Extras.CREATE_GROUP, false);
 		isForwardingMessage = getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false);
 		isSharingFile = getIntent().getType() != null;
+		nuxInviteMode = getIntent().getBooleanExtra(HikeConstants.NUX_INVITE_FORWARD, false);
 
 		// Getting the group id. This will be a valid value if the intent
 		// was passed to add group participants.
@@ -314,9 +320,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		listView = (ListView) findViewById(R.id.list);
 		String sendingMsisdn = getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN);
 
-		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, (isForwardingMessage && !isSharingFile), existingGroupId, sendingMsisdn, friendsListFetchedCallback);
-		adapter.setEmptyView(findViewById(android.R.id.empty));
+		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, (isForwardingMessage && !isSharingFile), nuxInviteMode, existingGroupId, sendingMsisdn, friendsListFetchedCallback);
+
+		View emptyView = (nuxInviteMode) ? findViewById(R.id.nux_invite_empty) : findViewById(android.R.id.empty);
+		adapter.setEmptyView(emptyView);
 		adapter.setLoadingView(findViewById(R.id.spinner));
+
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(this);
 		listView.setOnScrollListener(this);
@@ -324,7 +333,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		originalAdapterLength = adapter.getCount();
 
 		initTagEditText();
-		initTips();
+
+		if(!nuxInviteMode)
+		{
+			initTips();
+		}
+
 		if (existingGroupId != null)
 		{
 			MIN_MEMBERS_GROUP_CHAT = 1;
@@ -360,7 +374,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else if (isForwardingMessage && !isSharingFile)
 		{
-			setMode(MULTIPLE_FWD);
+			setMode(nuxInviteMode ? NUX_INVITE_MODE : MULTIPLE_FWD);
 		}
 		else
 		{
@@ -676,6 +690,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				composeCardInflated.setVisibility(View.VISIBLE);
 			setSticker();
 			break;
+		case NUX_INVITE_MODE:
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+			adapter.showCheckBoxAgainstItems(true);
+			tagEditText.clear(false);
+			adapter.removeFilter();
+			adapter.clearAllSelection(true);
+			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
+			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint("");
+			break;
 		}
 		setTitle();
 	}
@@ -897,6 +920,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			title.setText(R.string.new_group);
 		}
+		else if(nuxInviteMode)
+		{
+			title.setText(R.string.invite_friends);
+		}
 		else if (isSharingFile)
 		{
 			title.setText(R.string.share_file);
@@ -934,7 +961,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		multiSelectTitle = (TextView) multiSelectActionBar.findViewById(R.id.title);
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, 1));
 		TextView send = (TextView) multiSelectActionBar.findViewById(R.id.save);
-		if (isForwardingMessage)
+		
+		if(nuxInviteMode)
+		{
+			send.setText(R.string.invite_1);
+		}
+		else if (isForwardingMessage)
 		{
 			send.setText(R.string.send);
 		}
@@ -943,6 +975,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			send.setText(R.string.send);
 			multiSelectActionBar.findViewById(R.id.arrow).setVisibility(View.GONE);
 		}
+
 		sendBtn.setOnClickListener(new OnClickListener()
 		{
 			@Override
@@ -1121,10 +1154,13 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	        	startActivity(intent);
 	        	finish();
 	        }
-		}else{
+		}
+		else
+		{
 			// forwarding it is
 			Intent intent = null;
-			if(arrayList.size()==1){
+			if(arrayList.size()==1)
+			{
 				// forwarding to 1 is special case , we want to create conversation if does not exist and land to recipient
 				intent = Utils.createIntentFromMsisdn(arrayList.get(0).getMsisdn(), false);
 				intent.putExtras(presentIntent);
@@ -1132,7 +1168,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 				finish();
-			}else{
+			}
+			else
+			{
 				// multi forward to multi people
 				if(presentIntent.hasExtra(HikeConstants.Extras.PREV_MSISDN)){
 					// open chat thread from where we initiated
@@ -1146,7 +1184,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				forwardMessageAsPerType(presentIntent, intent,arrayList);
 			}
-
+			if(nuxInviteMode)
+			{
+				mPubSub.publish(HikePubSub.SWITCH_OFF_NUX_MODE, false);
+			}
 		}
 	}
 
@@ -1656,6 +1697,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			ComposeChatActivity.this.finish();
 			Intent intent = new Intent(this, FtueActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+		}
+		else if(composeMode == NUX_INVITE_MODE)
+		{
+			Intent intent = Utils.getHomeActivityIntent(this);
 			startActivity(intent);
 		}
 		super.onBackPressed();

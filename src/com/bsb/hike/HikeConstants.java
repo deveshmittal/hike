@@ -467,6 +467,8 @@ public class HikeConstants
 
 	public static final String BACKUP_PREF = "backupAccount";
 
+    public static final String NUX_BOT = "+hike5+";
+
 	public static final String UNLINK_PREF = "unlinkAccount";
 
 	public static final String DELETE_PREF = "deleteAccount";
@@ -504,8 +506,6 @@ public class HikeConstants
 	public static final String OPERATOR_SMS_ALERT_CHECKED = "opSmsAlertChecked";
 
 	public static final String SINGLE_INVITE_SMS_ALERT_CHECKED = "singleSmsAlertChecked";
-
-	public static final String SHOW_NUX_INVITE_MODE = "showNuxInviteMode";
 	
 	public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
 	
@@ -959,6 +959,12 @@ public class HikeConstants
 	
 	public static final String NUX_STICKERS = "stickers";
 	
+	public static final String SHOW_NUX_INVITE_MODE = "showNuxInviteMode";
+
+	public static final String NUX_HOME_INVITE_FOOTER = "nuxHomeInviteFooter";
+
+	public static final String NUX_INVITE_FORWARD = "nuxInviteForward";
+
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
