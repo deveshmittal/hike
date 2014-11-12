@@ -32,7 +32,7 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	public enum FTState
 	{
 		NOT_STARTED, INITIALIZED, IN_PROGRESS, // DOWNLOADING OR UPLOADING
-		PAUSED, CANCELLED, COMPLETED, ERROR, PAUSING
+		PAUSED, CANCELLED, COMPLETED, ERROR
 	}
 
 	protected static String NETWORK_ERROR_1 = "timed out";
@@ -101,6 +101,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	protected volatile Thread mThread = null;
 
 	protected ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap;
+	
+	protected int pausedProgress ;
 
 	protected FileTransferBase(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, long msgId, HikeFileType hikeFileType)
 	{
@@ -139,31 +141,25 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	{
 		_bytesTransferred = value;
 	}
-
-	protected void saveFileState()
+	
+	protected void saveIntermediateProgress(String uuid)
 	{
-		if (_totalSize <= 0)
-			return;
-		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred);
-		try
-		{
-			FileOutputStream fileOut = new FileOutputStream(stateFile);
-			ObjectOutputStream out = new ObjectOutputStream(fileOut);
-			out.writeObject(fss);
-			out.close();
-			fileOut.close();
-		}
-		catch (IOException i)
-		{
-			i.printStackTrace();
-		}
+		saveFileState(FTState.ERROR, uuid, null);
 	}
 
 	protected void saveFileState(String uuid)
 	{
-		if (_totalSize <= 0)
-			return;
-		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, uuid);
+		saveFileState(uuid, null);
+	}
+
+	protected void saveFileState(String uuid, JSONObject response)
+	{
+		saveFileState(_state, uuid, response);
+	}
+	
+	private void saveFileState(FTState state, String uuid, JSONObject response)
+	{
+		FileSavedState fss = new FileSavedState(state, _totalSize, _bytesTransferred, uuid, response);
 		try
 		{
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
@@ -177,10 +173,27 @@ public abstract class FileTransferBase implements Callable<FTResult>
 			i.printStackTrace();
 		}
 	}
-
-	protected void saveFileState(JSONObject response)
+	
+	protected void saveFileState(File stateFile, FTState state, String uuid, JSONObject response)
 	{
-		FileSavedState fss = new FileSavedState(_state, _totalSize, _bytesTransferred, response);
+		FileSavedState fss = new FileSavedState(state, _totalSize, _bytesTransferred, uuid, response);
+		try
+		{
+			FileOutputStream fileOut = new FileOutputStream(stateFile);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(fss);
+			out.close();
+			fileOut.close();
+		}
+		catch (IOException i)
+		{
+			i.printStackTrace();
+		}
+	}
+	
+	protected void saveFileKeyState(File stateFile, String mFileKey)
+	{
+		FileSavedState fss = new FileSavedState(_state, mFileKey);
 		try
 		{
 			FileOutputStream fileOut = new FileOutputStream(stateFile);
@@ -214,8 +227,13 @@ public abstract class FileTransferBase implements Callable<FTResult>
 
 	protected void deleteStateFile()
 	{
-		if (stateFile != null && stateFile.exists())
-			stateFile.delete();
+		deleteStateFile(stateFile);
+	}
+	
+	protected void deleteStateFile(File file)
+	{
+		if (file != null && file.exists())
+			file.delete();
 	}
 
 	protected void setState(FTState mState)
@@ -305,6 +323,16 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	public Object getUserContext()
 	{
 		return userContext;
+	}
+	
+	public int getPausedProgress()
+	{
+		return this.pausedProgress;
+	}
+
+	public void setPausedProgress(int pausedProgress)
+	{
+		this.pausedProgress = pausedProgress;
 	}
 
 }

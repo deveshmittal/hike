@@ -2,6 +2,7 @@ package com.bsb.hike.adapters;
 
 import java.util.List;
 
+
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.EmptyConversationContactItem;
 import com.bsb.hike.models.EmptyConversationFtueCardItem;
 import com.bsb.hike.models.EmptyConversationItem;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.CreateNewGroupActivity;
@@ -27,7 +29,6 @@ import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.PeopleActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
 
@@ -160,7 +161,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				ContactInfo contactInfo = item.getContactList().get(i);
 				boolean shouldAdd = true;
 				if(item.getType() == EmptyConversationItem.SMS_CONTACTS){
-					if(!ContactUtils.isIndianMobileNumber(contactInfo.getMsisdn()))
+					if(!ContactManager.getInstance().isIndianMobileNumber(contactInfo.getMsisdn()))
 					{
 					   shouldAdd = false;	
 					}

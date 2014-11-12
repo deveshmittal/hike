@@ -139,7 +139,7 @@ public class DownloadStickerTask extends StickerTaskBase
 				return FTResult.FILE_TOO_LARGE;
 			}
 
-			totalNumber = response.optInt(HikeConstants.NUMBER_OF_STICKERS, -1);
+			totalNumber = response.optInt(HikeConstants.TOTAL_STICKERS, -1);
 			reachedEnd = response.optBoolean(HikeConstants.REACHED_STICKER_END);
 			Logger.d(getClass().getSimpleName(), "Reached end? " + reachedEnd);
 			Logger.d(getClass().getSimpleName(), "Sticker count: " + totalNumber);
@@ -226,6 +226,10 @@ public class DownloadStickerTask extends StickerTaskBase
 			Bundle b = new Bundle();
 			b.putSerializable(StickerManager.STICKER_CATEGORY, category);
 			b.putSerializable(StickerManager.STICKER_DOWNLOAD_TYPE, downloadType);
+			if(result == FTResult.FILE_TOO_LARGE)
+			{
+				b.putBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE,true);
+			}
 			i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
 			LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 		}
