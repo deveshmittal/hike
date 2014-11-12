@@ -130,6 +130,7 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity implements On
 					JSONObject jObj = (JSONObject) jsonArray.get(index);
 					String category = jObj.getString(StickerManager.CATEGORY_ID);
 					String stickerId = jObj.getString(StickerManager.STICKER_ID);
+					stickerId = stickerId.toLowerCase();
 
 					int idx = stickerId.lastIndexOf(".");
 					if (idx >= 0)
