@@ -24,6 +24,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -39,6 +41,7 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.VoIPServiceNew;
+import com.google.android.gms.internal.dp;
 //import com.bsb.hike.db.HikeUserDatabase;
 
 public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
@@ -79,6 +82,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	private String mContactName;
 	private String mContactNumber;
 	private ImageView displayPic;
+	private Animation dpAnim; 
+	
 	
 	class CallLengthManager implements Runnable{
 
@@ -91,6 +96,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		    seconds = seconds % 60;
 		    minutes = minutes % 60;
 		    inCallTimer.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
+		    displayPic.clearAnimation();
 		    displayHandler.postDelayed(new CallLengthManager(), 500);
 			
 		}
@@ -254,6 +260,9 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		setContentView(R.layout.incall_layout);
 		displayPic = (ImageView)this.findViewById(R.id.inCallContactPicture1);
 		setDisplayPic();
+		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
+		displayPic.startAnimation(dpAnim);
+//		displayPic.animate();
 		muteButton =(ImageButton)this.findViewById(R.id.muteButton1);
 		muteButton.setOnClickListener(new OnClickListener() {
 			
@@ -293,6 +302,10 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		if (VoIPServiceNew.getVoIPSerivceInstance().client.connectionState != "CONNECTED")
 			inCallTimer.setText(VoIPServiceNew.getVoIPSerivceInstance().client.connectionState);
 		else{
+			displayPic.clearAnimation();
+			Log.d("Animation","Seriously?");
+			dpAnim.cancel();
+			dpAnim.reset();
 			startTime = vService.client.startTime;
 			displayHandler.post(new CallLengthManager());
 		}
@@ -319,6 +332,9 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			String state = (String) object;
 //			inCallTimer.setText(state);
 			if(state == PeerConnection.IceConnectionState.CONNECTED.toString()){
+//				displayPic.clearAnimation();
+				dpAnim.cancel();
+				dpAnim.reset();
 				startTime = System.currentTimeMillis();
 				displayHandler.post(new CallLengthManager() );
 			}

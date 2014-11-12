@@ -27,7 +27,10 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -47,6 +50,8 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 	private String mContactName;
 	private String mContactNumber;
 	private Context prefs;
+	private Animation dpAnim;
+	private FrameLayout avatarLayout;
 	
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -90,7 +95,10 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		r.setStreamType(AudioManager.STREAM_ALARM);
 //		r.play();
 		displayPic = (ImageView)this.findViewById(R.id.voipContactPicture);
+		avatarLayout = (FrameLayout)this.findViewById(R.id.voip_avatar_container);
 		setDisplayPic();
+		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
+		avatarLayout.startAnimation(dpAnim);
 		callNo = (TextView)this.findViewById(R.id.CallerId);
 		callNo.setText(mContactName);
 		acceptCall = (ImageView)this.findViewById(R.id.acceptButton);
@@ -111,6 +119,9 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 				Intent inCallIntent = new Intent(getApplicationContext(),com.bsb.hike.ui.VoIPActivityNew.class);
 				inCallIntent.putExtras(intent);
 				callStarted = true;
+				displayPic.clearAnimation();
+				dpAnim.cancel();
+				dpAnim.reset();
 				startActivity(inCallIntent);
 //				drawInCall();
 				//TODO: CALL OTHER VOIP ACTIVITY
