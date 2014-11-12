@@ -53,13 +53,26 @@
         android:layout_marginLeft="16dp"
         android:layout_marginTop="162dp"
         android:background="@drawable/accept_voip_call" />
-
+    
+    <FrameLayout
+        android:id="@+id/full_voip_avatar_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+		android:layout_centerInParent="true"
+        android:layout_marginTop="5dp"
+        android:contentDescription="ProfileImage" >        
         <ImageView
-        android:id="@+id/fullvoipContactPicture"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_below="@+id/fullPhoneNumberView1"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="69dp"
-        android:background="@drawable/emo_5_tab_selected" />
+            android:layout_width="94dp"
+            android:layout_height="94dp"
+            android:src="@drawable/avatar_stroke" />        
+        <ImageView
+            android:id="@+id/fullvoipContactPicture"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:layout_gravity="center"
+            android:contentDescription="Profile Image"
+            android:onClick="onViewImageClicked"
+            android:src="@drawable/ic_default_avatar_group" />
+    </FrameLayout>
+
 </RelativeLayout>

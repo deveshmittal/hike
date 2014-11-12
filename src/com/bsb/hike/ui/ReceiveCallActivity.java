@@ -30,6 +30,7 @@ import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -50,6 +51,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 	private String mContactNumber;
 	private Context prefs;
 	private Animation dpAnim;
+	private FrameLayout avatarLayout;
 	
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -93,9 +95,10 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		r.setStreamType(AudioManager.STREAM_ALARM);
 //		r.play();
 		displayPic = (ImageView)this.findViewById(R.id.voipContactPicture);
+		avatarLayout = (FrameLayout)this.findViewById(R.id.voip_avatar_container);
 		setDisplayPic();
 		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
-		displayPic.startAnimation(dpAnim);
+		avatarLayout.startAnimation(dpAnim);
 		callNo = (TextView)this.findViewById(R.id.CallerId);
 		callNo.setText(mContactName);
 		acceptCall = (ImageView)this.findViewById(R.id.acceptButton);

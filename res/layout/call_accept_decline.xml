@@ -3,14 +3,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_black_incall" >
+    
+    <FrameLayout
+        android:id="@+id/voip_avatar_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+		android:layout_centerInParent="true"
+        android:layout_marginTop="5dp"
+        android:contentDescription="ProfileImage" >        
+        <ImageView
+            android:layout_width="79dp"
+            android:layout_height="79dp"
+            android:src="@drawable/avatar_stroke" />        
+        <ImageView
+            android:id="@+id/voipContactPicture"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:layout_gravity="center"
+            android:contentDescription="Profile Image"
+            android:onClick="onViewImageClicked"
+            android:src="@drawable/ic_default_avatar_group" />
+    </FrameLayout> 
 
-    <ImageView
-        android:id="@+id/voipContactPicture"
+    <!-- <ImageView
+       android:id="@+id/voipContactPicture"
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:layout_centerInParent="true"
         android:layout_marginTop="5dp"
-        android:background="@drawable/emo_5_tab_selected" />
+        android:background="@drawable/emo_5_tab_selected" /> -->
 
     <ImageView
         android:id="@+id/declineButton"
@@ -36,22 +57,22 @@
         android:scaleType="centerInside"
         android:src="@drawable/greenarrow" />
 
-    <TextView
+    <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/PhoneNumberView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/voipContactPicture"
+        android:layout_above="@+id/voip_avatar_container"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="42dp"
         android:text="INCOMING CALL"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/bubble_beach_2" />
+        android:textColor="@color/white" />
 
-    <TextView
+    <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/CallerId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/voipContactPicture"
+        android:layout_below="@+id/voip_avatar_container"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="29dp"
         android:text="Large Text"
