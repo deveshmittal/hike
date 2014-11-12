@@ -212,7 +212,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	 */
 	private boolean shouldContinue(boolean reachedEnd, int totalNumber, int existingStickerNumber)
 	{
-		if(reachedEnd || totalNumber < 0 || (totalNumber > 0 && existingStickerNumber >= totalNumber))
+		if(reachedEnd || totalNumber < 0 || (totalNumber > 0 && existingStickerNumber == totalNumber))
 		{
 			return false;
 		}

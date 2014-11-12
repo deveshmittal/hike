@@ -51,6 +51,14 @@
         <item>@drawable/ic_smileyexpression_selected</item>
         <item>@drawable/ic_kitty</item>
         <item>@drawable/ic_kitty_selected</item>
+        <item>@drawable/ic_bangalore</item>
+		<item>@drawable/ic_bangalore_selected</item>
+		<item>@drawable/ic_gujarat</item>
+		<item>@drawable/ic_gujarat_selected</item>
+		<item>@drawable/ic_indian</item>
+		<item>@drawable/ic_indian_selected</item>
+		<item>@drawable/ic_kolkata</item>
+		<item>@drawable/ic_kolkata_selected</item>
     </string-array>
 
 </resources>
