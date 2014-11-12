@@ -478,7 +478,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				 */
 				Utils.setupUri(this.getApplicationContext());
 
-				if (accountPrefs.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false) && (accountPrefs.getInt(HikeConstants.HIKE_CONTACTS_COUNT, 0) > 0))
+				boolean showNuxScreen = accountPrefs.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
+				if (showNuxScreen && (accountPrefs.getInt(HikeConstants.HIKE_CONTACTS_COUNT, 0) > 0))
 				{
 					mHandler.removeCallbacks(startNuxScreen);
 					mHandler.postDelayed(startNuxScreen, 2500);
@@ -486,7 +487,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				else
 				{
 					Editor e = accountPrefs.edit();
-					e.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, true);
+					if (showNuxScreen)
+					{
+						e.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, true);
+					}
 					e.putBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
 					e.commit();
 					mHandler.removeCallbacks(startWelcomeScreen);
