@@ -51,12 +51,12 @@
             android:scaleType="centerInside"
             android:background="@android:color/transparent" />
         
-        <com.bsb.hike.ui.utils.RecyclingImageView
+        <ProgressBar
             android:id="@+id/download_progress"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:contentDescription="Progress Bar"
-            android:src="@drawable/ic_spinner_green"
+            android:indeterminateDrawable="@drawable/rotating_green_sticker_settings"
             android:visibility="gone"
             android:layout_gravity="center" />
         

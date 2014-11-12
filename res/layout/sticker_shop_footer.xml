@@ -14,7 +14,7 @@
             android:id="@+id/shop_footer_progress"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_spinner"/>
+            android:indeterminateDrawable="@drawable/rotating_blue"/>
         
     </LinearLayout>
 </LinearLayout>

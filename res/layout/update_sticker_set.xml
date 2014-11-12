@@ -26,12 +26,12 @@
         android:src="@drawable/ic_update_palette"
         android:visibility="gone" />
 
-    <ImageView
+    <ProgressBar
         android:id="@+id/download_progress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:contentDescription="Progress Bar"
-        android:src="@drawable/ic_spinner_update_palette"
+        android:indeterminateDrawable="@drawable/rotating_green"
         android:visibility="gone" />
 
     <com.bsb.hike.view.CustomFontTextView

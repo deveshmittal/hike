@@ -11,6 +11,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -65,7 +66,7 @@ public class StickerShopAdapter extends CursorAdapter
 		
 		ImageView categoryPreviewIcon;
 
-		View downloadProgress;
+		ProgressBar downloadProgress;
 	}
 
 	public StickerShopAdapter(Context context, Cursor cursor, Map<String, StickerCategory> stickerCategoriesMap)
@@ -90,7 +91,7 @@ public class StickerShopAdapter extends CursorAdapter
 		viewholder.stickersPackDetails = (TextView) v.findViewById(R.id.pack_details);
 		viewholder.downloadState = (ImageView) v.findViewById(R.id.category_download_btn);
 		viewholder.categoryPreviewIcon = (ImageView) v.findViewById(R.id.category_icon);
-		viewholder.downloadProgress = v.findViewById(R.id.download_progress_bar);
+		viewholder.downloadProgress = (ProgressBar) v.findViewById(R.id.download_progress_bar);
 		viewholder.categoryPrice = (TextView) v.findViewById(R.id.category_price);
 		viewholder.downloadState.setOnClickListener(mDownloadButtonClickListener);
 		v.setTag(viewholder);
@@ -101,15 +102,13 @@ public class StickerShopAdapter extends CursorAdapter
 	public void bindView(View view, Context context, Cursor cursor)
 	{
 		ViewHolder viewholder = (ViewHolder) view.getTag();
-		viewholder.downloadProgress.setVisibility(View.GONE); //This is being done to clear the spinner animation. 
-		viewholder.downloadProgress.clearAnimation();
 		String categoryId = cursor.getString(idColoumn);
 		String categoryName = cursor.getString(categoryNameColoumn);
 		int totalStickerCount = cursor.getInt(totalStickersCountColoumn);
 		int categorySizeInBytes = cursor.getInt(categorySizeColoumn);
 		viewholder.categoryName.setText(cursor.getString(categoryNameColoumn));
 		stickerOtherIconLoader.loadImage(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(categoryId, StickerManager.PREVIEW_IMAGE_TYPE), viewholder.categoryPreviewIcon, isListFlinging);
-
+		viewholder.downloadProgress.setVisibility(View.GONE);
 		if (totalStickerCount > 0)
 		{
 			String detailsStirng = totalStickerCount == 1 ? context.getResources().getString(R.string.singular_stickers, totalStickerCount)  : context.getResources().getString(R.string.n_stickers, totalStickerCount);
@@ -168,7 +167,6 @@ public class StickerShopAdapter extends CursorAdapter
 			case StickerCategory.DOWNLOADING:
 				viewholder.downloadState.setVisibility(View.GONE);
 				viewholder.downloadProgress.setVisibility(View.VISIBLE);
-				viewholder.downloadProgress.setAnimation(AnimationUtils.loadAnimation(context, R.anim.rotate));
 				viewholder.categoryPrice.setVisibility(View.VISIBLE);
 				viewholder.categoryPrice.setText(context.getResources().getString(R.string.downloading_stk));
 				

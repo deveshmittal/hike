@@ -13,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -180,8 +179,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				convertView.setLayoutParams(ll);
 				viewHolder.text = (TextView) convertView.findViewById(R.id.new_number_stickers);
 				viewHolder.image = (ImageView) convertView.findViewById(R.id.update_btn);
-				viewHolder.progress =  convertView.findViewById(R.id.download_progress);
-				viewHolder.parent = convertView.findViewById(R.id.update_sticker_parent);
+				viewHolder.progress = (ProgressBar) convertView.findViewById(R.id.download_progress);
 				
 				break;
 			case PLACE_HOLDER:
@@ -208,7 +206,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			break;
 		case UPDATE:
 			viewHolder.image.setVisibility(View.VISIBLE);
-			clearAnimation(viewHolder.progress);
+			viewHolder.progress.setVisibility(View.GONE);
 			if(item.getCategoryMoreStickerCount() > 0)
 			{
 				viewHolder.text.setVisibility(View.VISIBLE);
@@ -224,7 +222,6 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			break;
 		case DOWNLOADING:
 			viewHolder.progress.setVisibility(View.VISIBLE);
-			viewHolder.progress.setAnimation(AnimationUtils.loadAnimation(activity, R.anim.rotate));
 			viewHolder.text.setVisibility(View.GONE);
 			
 			break;
@@ -232,7 +229,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			viewHolder.image.setImageBitmap(HikeBitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_retry_sticker));
 			viewHolder.image.setVisibility(View.VISIBLE);
 			viewHolder.text.setVisibility(View.VISIBLE);
-			clearAnimation(viewHolder.progress);
+			viewHolder.progress.setVisibility(View.GONE);
 			viewHolder.text.setText(activity.getResources().getString(R.string.retry_sticker));
 			
 			convertView.setOnClickListener(this);
@@ -242,7 +239,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 			viewHolder.image.setImageBitmap(HikeBitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_done_palette));
 			viewHolder.image.setVisibility(View.VISIBLE);
 			viewHolder.text.setVisibility(View.GONE);
-			clearAnimation(viewHolder.progress);
+			viewHolder.progress.setVisibility(View.GONE);
 			convertView.setOnClickListener(this);
 			break;
 		case PLACE_HOLDER:
@@ -351,22 +348,9 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		
 		TextView text;
 		
-		View progress;
-		
-		View parent;
+		ProgressBar progress;
 		
 		int position;
 	}
 	
-	/**
-	 * Used to clear the spinner animation here
-	 * @param v
-	 */
-	private void clearAnimation(View v)
-	{
-		v.setVisibility(View.GONE);
-		v.clearAnimation();
-	}
-
-
 }
