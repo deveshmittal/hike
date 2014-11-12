@@ -197,7 +197,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		                Log.d("TouchEvent","3 "+( (Float) ( v.getX() ) ).toString()  );
 		                Log.d("TouchEvent","4 "+( (Float) ( avatarLayout.getX() ) ).toString()  );
 		                Log.d("TouchEvent","5 "+( (Float) ( avatarLayout.getTranslationX() ) ).toString()  );
-		                if(((v.getX()<acceptCall.getX())&&(v.getX()>declineCall.getX())))
+		                if((((StartPT.x+mv.x)<(acceptCall.getX()-(avatarLayout.getWidth()/2)))&&((StartPT.x+mv.x)>(declineCall.getX()))))
 		                avatarLayout.setX((int)(StartPT.x+mv.x));
 //		                declineCall.setY((int)(StartPT.y+mv.y));
 		                StartPT = new PointF( avatarLayout.getX(), avatarLayout.getY() );
@@ -207,10 +207,13 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		                Log.d("TouchEvent","Start PT"+( (Float) ( v.getX() ) ).toString()  );
 		                DownPT.y = event.getY();
 		                avatarLayout.clearAnimation();
+//		                avatarLayout.setVisibility(View.INVISIBLE);
 		                StartPT = new PointF( avatarLayout.getX(), avatarLayout.getY() );
 		                break;
 		            case MotionEvent.ACTION_UP :
-		            	float xcoord = v.getX();
+		            	
+		            	PointF mvevent = new PointF( event.getX() - DownPT.x, event.getY() - DownPT.y);
+		            	float xcoord = StartPT.x+mvevent.x;
 		            	if (xcoord<declineCall.getX())
 							{
 		            		

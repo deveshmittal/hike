@@ -159,7 +159,7 @@ public class RTCActivity extends Activity implements WebRtcClient.RTCListener{
 
     mSocketAddress = "http://54.179.186.147/";
     Log.d("DEBUG", "Before initializeAndroidGlobals()");
-    PeerConnectionFactory.initializeAndroidGlobals(this);
+//    PeerConnectionFactory.initializeAndroidGlobals(this,tru);
 //   Set phone to earpiece
    
 
