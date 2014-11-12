@@ -607,7 +607,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		/*
 		 * We need to show update available for hardcoded categories only to upgrading users.
 		 */
-		settings.edit().putBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, true).commit();
 		return Boolean.TRUE;
 	}
 	

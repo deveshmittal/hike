@@ -169,8 +169,6 @@ public class StickerManager
 
 	public static final String CATEGORY_SIZE = "categorySize";
 
-	public static final String SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE = "shownHardcodedCategoryUpdateAvailable";
-	
 	public static final String STICKERS_SIZE_DOWNLOADED = "stickersSizeDownloaded";
 	
 	public static final String PERCENTAGE = "percentage";
@@ -262,15 +260,6 @@ public class StickerManager
 			{
 				StickerManager.getInstance().setStickerUpdateAvailable(DOGGY_CATEGORY, true);
 			}
-		}
-		/*
-		 * We use JUST_SIGNED_UP flag from preferences to explicitly avoid setting stickerUpdateAvailable tru for Humanoid and Expressions.
-		 */
-		if ((!settings.getBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, false)) && (settings.getBoolean(HikeMessengerApp.JUST_SIGNED_UP, false)))
-		{
-			settings.edit().putBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, true).commit();
-			StickerManager.getInstance().setStickerUpdateAvailable(HUMANOID, true);
-			StickerManager.getInstance().setStickerUpdateAvailable(EXPRESSIONS, true);
 		}
 	}
 
