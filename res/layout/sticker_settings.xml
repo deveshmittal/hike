@@ -13,57 +13,58 @@
     <RelativeLayout
         android:id="@+id/reorder_tip"
         android:layout_width="match_parent"
-        android:layout_height="89dp" 
+        android:layout_height="86dp"
+        android:background="#33C27E"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginTop="12dp" 
         android:visibility="gone">
         
-		<View 
-		    android:id="@+id/shadow"
-		    android:layout_height="3dp"
-		    android:layout_width="match_parent"
-		    android:layout_alignParentBottom="true"
-		    android:background="@drawable/shadow_repeating"/>
-		    
-        <ImageView
-            android:id="@+id/reorder_indicator"
-            android:layout_width="58dp"
-            android:layout_height="58dp"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="18dp"
-            android:layout_marginRight="18dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/art_grip" />
-
-        <LinearLayout
-            android:id="@+id/reorder_text_ll"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_alignTop="@id/reorder_indicator"
-            android:layout_alignBottom="@id/reorder_indicator"
-            android:layout_toRightOf="@id/reorder_indicator"
-            android:gravity="center_vertical"
-            android:orientation="vertical" >
-
-            <com.bsb.hike.view.CustomFontTextView
+       	 <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/drag_tip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
+                android:layout_centerInParent="true"
+                android:ellipsize="end"
+                android:paddingLeft="@dimen/sticker_settings_tip_margin"
+                android:paddingRight="@dimen/sticker_settings_tip_margin"
+                android:gravity="center"
+                android:textStyle="normal"
                 android:text="@string/drag_tip_text"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:visibility="visible" />
+       	 
+       	 <LinearLayout 
+       	     android:id="@+id/great_job"
+       	     android:layout_width="wrap_content"
+       	     android:layout_height="wrap_content"
+       	     android:layout_centerInParent="true"
+       	     android:gravity="center"
+       	     android:visibility="gone" 
+       	     android:orientation="horizontal" >
+       	 
+		<ImageView
+        	    android:id="@+id/reorder_indicator"
+            	android:layout_width="wrap_content"
+            	android:layout_height="wrap_content"
+            	android:layout_centerVertical="true"
+            	android:scaleType="centerInside"
+           		android:visibility="visible"
+            	android:src="@drawable/art_tick" />
+		
+		<com.bsb.hike.view.CustomFontTextView 
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:textSize="16sp"
+		    android:gravity="center"
+            android:textStyle="normal"
+            android:layout_marginLeft="12dp"
+            android:textColor="@color/white"
+		    android:text="@string/great_job" />
+</LinearLayout>
 
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/drag_tip_subtext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/drag_tip_subtext"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:textColor="@color/missing_thumbnail"
-                android:textSize="12sp" />
-        </LinearLayout>
     </RelativeLayout>
 
     <com.bsb.hike.DragSortListView.DragSortListView
