@@ -818,18 +818,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		
 		mAdapter = new ConversationsAdapter(getActivity(), displayedConversations, getListView());
 
-		inviteFooter = LayoutInflater.from(getActivity()).inflate(R.layout.nux_invite_footer, null);
-		inviteFooter.findViewById(R.id.nux_invite_now).setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v)
-			{
-				inviteButtonClicked();
-			}
-		});
-
 		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false))
 		{
+			inviteFooter = LayoutInflater.from(getActivity()).inflate(R.layout.nux_invite_footer, null);
+			inviteFooter.findViewById(R.id.nux_invite_now).setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v)
+				{
+					inviteButtonClicked();
+				}
+			});
 			getListView().addFooterView(inviteFooter);
 		}
 
@@ -2526,18 +2525,24 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 	{
 		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeConstants.NUX_HOME_INVITE_FOOTER, false))
 		{
-			inviteFooter.findViewById(R.id.nux_invite_parent).setVisibility(View.VISIBLE);
+			if(inviteFooter!=null)
+			{
+				inviteFooter.findViewById(R.id.nux_invite_parent).setVisibility(View.VISIBLE);
+			}
 		}
 	}
 
 	private void removeInviteFooterView()
 	{
-		inviteFooter.findViewById(R.id.nux_invite_parent).setVisibility(View.GONE);
-		getListView().removeFooterView(inviteFooter);
-		/*
-		 * Need to set adapter again after removing footer view because getListView.getChildCount doesn't update. (Hack)
-		 */
-		setListAdapter(mAdapter);
+		if(inviteFooter!=null)
+		{
+			inviteFooter.findViewById(R.id.nux_invite_parent).setVisibility(View.GONE);
+			getListView().removeFooterView(inviteFooter);
+			/*
+			 * Need to set adapter again after removing footer view because getListView.getChildCount doesn't update. (Hack)
+			 */
+			setListAdapter(mAdapter);
+		}
 	}
 
 	private void inviteButtonClicked()
