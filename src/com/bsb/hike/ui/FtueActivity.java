@@ -57,6 +57,7 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity implements On
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
+		overridePendingTransition(0, 0);
 		super.onCreate(savedInstanceState);
 		if (Utils.requireAuth(this))
 		{
@@ -95,6 +96,13 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity implements On
 
 	}
 
+	@Override
+	protected void onPause()
+	{
+		overridePendingTransition(0, 0);
+		super.onPause();
+	}
+	
 	@Override
 	public void onClick(View v)
 	{
