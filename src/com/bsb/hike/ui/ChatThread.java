@@ -684,7 +684,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		super.onCreate(savedInstanceState);
 
 		/* force the user into the reg-flow process if the token isn't set */
-		if (Utils.requireAuth(this))
+		if (Utils.requireAuth(this) || Utils.showNuxScreen(this))
 		{
 			return;
 		}

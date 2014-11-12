@@ -137,6 +137,7 @@ public class ToastListener implements Listener
 			if (activity instanceof TimelineActivity)
 			{
 				Utils.resetUnseenStatusCount(activity);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 				return;
 			}
 			StatusMessage statusMessage = (StatusMessage) object;

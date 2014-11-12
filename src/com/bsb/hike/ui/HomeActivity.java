@@ -12,6 +12,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
@@ -98,6 +99,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private static final boolean TEST = false; // TODO: Test flag only, turn off
 												// for Production
 
+	private OverflowAdapter overflowAdapter;
 
 	private enum DialogShowing
 	{
@@ -129,8 +131,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private PopupWindow overFlowWindow;
 
 	private TextView topBarIndicator;
-	
-	private TextView timelineTopBarIndicator;
 
 	private Drawable myProfileImage;
 
@@ -163,10 +163,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		if (Utils.requireAuth(this))
+		if (Utils.requireAuth(this) || Utils.showNuxScreen(this))
 		{
 			return;
 		}
+				
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
 		HikeMessengerApp app = (HikeMessengerApp) getApplication();
@@ -190,6 +191,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			initialiseHomeScreen(savedInstanceState);
 		}
+		
 	}
 
 	private void setupActionBar()
@@ -261,8 +263,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
 	}
-
-
 	
 	private void setupMainFragment(Bundle savedInstanceState)
 	{
@@ -320,7 +320,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		super.onNewIntent(intent);
 
-		if (Utils.requireAuth(this))
+		if (Utils.requireAuth(this) || Utils.showNuxScreen(this))
 		{
 			return;
 		}
@@ -363,21 +363,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			public void onClick(View v)
 			{
 				showOverFlowMenu();
-			}
-		});
-		
-		timelineTopBarIndicator = (TextView) menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.top_bar_indicator);
-		menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.overflow_icon_image).setContentDescription("Timeline");
-		((ImageView)menu.findItem(R.id.show_timeline).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_show_timeline);
-		updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 1000);
-		menu.findItem(R.id.show_timeline).getActionView().setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SHOW_TIMELINE_TOP_BAR);
-				Intent intent = new Intent(HomeActivity.this, TimelineActivity.class);
-				startActivity(intent);
+				topBarIndicator.setVisibility(View.GONE);
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, true);
+				editor.commit();
 			}
 		});
 
@@ -785,6 +774,26 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		updateAlert.show();
 	}
 
+	/**
+	 * This method returns sum of timeline status count and hike extras + rewards
+	 * 
+	 * @param accountPrefs
+	 * @param countUsersStatus
+	 *            Whether to include user status count in the total
+	 * @param defaultValue
+	 *            default value for hike extras and rewards if key is not present in shared preferences
+	 * @return
+	 */
+	private int getHomeOverflowCount(SharedPreferences accountPrefs, boolean countUsersStatus, boolean defaultValue)
+	{
+		int timelineCount = Utils.getNotificationCount(accountPrefs, countUsersStatus);
+		if (timelineCount == 0 && accountPrefs.getBoolean(HikeConstants.SHOW_TIMELINE_RED_DOT, true))
+		{
+			timelineCount = 1;
+		}
+		return timelineCount + Utils.updateHomeOverflowToggleCount(accountPrefs, defaultValue);
+	}
+	
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
@@ -797,7 +806,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 0);
+					updateHomeOverflowToggleCount(getHomeOverflowCount(accountPrefs, false, false), 0);
+					if (null != overflowAdapter)
+					{
+						overflowAdapter.notifyDataSetChanged();
+					}
 				}
 			});
 		}
@@ -891,6 +904,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				public void run()
 				{
 					updateOverFlowMenuNotification();
+					if (null != overflowAdapter)
+					{
+						overflowAdapter.notifyDataSetChanged();
+					}
 				}
 			});
 		}
@@ -1029,7 +1046,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 0);
+					updateHomeOverflowToggleCount(getHomeOverflowCount(accountPrefs, false, false), 0);
+					if (null != overflowAdapter)
+					{
+						overflowAdapter.notifyDataSetChanged();
+					}
 				}
 			});
 		}
@@ -1037,8 +1058,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void updateHomeOverflowToggleCount(final int count, int delayTime)
 	{
-
-		if (count < 1)
+		if (accountPrefs.getBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false) || count < 1 || (null != overFlowWindow && overFlowWindow.isShowing()))
 		{
 			topBarIndicator.setVisibility(View.GONE);
 		}
@@ -1055,7 +1075,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 						/*
 						 * Fetching the count again since it could have changed after the delay. 
 						 */
-						int newCount = Utils.updateHomeOverflowToggleCount(accountPrefs);
+						int newCount = getHomeOverflowCount(accountPrefs, false, false);
 						if (newCount < 1)
 						{
 							topBarIndicator.setVisibility(View.GONE);
@@ -1180,6 +1200,94 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		checkNShowNetworkError();
 	}
 
+	public class OverflowAdapter extends ArrayAdapter<OverFlowMenuItem>
+	{
+		private String msisdn;
+
+		public OverflowAdapter(Context context, int resource, int textViewResourceId, List<OverFlowMenuItem> objects, String msisdn)
+		{
+			super(context, resource, textViewResourceId, objects);
+			this.msisdn = msisdn;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent)
+		{
+			if (convertView == null)
+			{
+				convertView = getLayoutInflater().inflate(R.layout.over_flow_menu_item, parent, false);
+			}
+
+			OverFlowMenuItem item = getItem(position);
+
+			TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
+			itemTextView.setText(item.getName());
+
+			ImageView itemImageView = (ImageView) convertView.findViewById(R.id.item_icon);
+			if (item.getKey() == 0)
+			{
+				if (myProfileImage != null)
+				{
+					itemImageView.setImageDrawable(myProfileImage);
+				}
+				else
+				{
+					itemImageView.setScaleType(ScaleType.CENTER_INSIDE);
+					itemImageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
+					itemImageView.setImageResource(R.drawable.ic_default_avatar);
+				}
+				convertView.findViewById(R.id.profile_image_view).setVisibility(View.VISIBLE);
+			}
+			else
+			{
+
+				convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
+			}
+
+			int currentCredits = accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0);
+
+			TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
+			freeSmsCount.setText(Integer.toString(currentCredits));
+			if (item.getKey() == 1)
+			{
+				freeSmsCount.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				freeSmsCount.setVisibility(View.GONE);
+			}
+
+			TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
+			newGamesIndicator.setText("1");
+
+			/*
+			 * Rewards & Games indicator bubble are by default shown even if the keys are not stored in shared pref.
+			 */
+			boolean isGamesClicked = accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, false);
+			boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
+			boolean showTimelineRedDot = accountPrefs.getBoolean(HikeConstants.SHOW_TIMELINE_RED_DOT, true);
+			int count = 0;
+			if (item.getKey() == 7)
+			{
+				count = Utils.getNotificationCount(accountPrefs, false);
+				if (count > 9)
+					newGamesIndicator.setText("9+");
+				else if (count > 0)
+					newGamesIndicator.setText(String.valueOf(count));
+			}
+			if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked) || (item.getKey() == 7 && (count > 0 || showTimelineRedDot)))
+			{
+				newGamesIndicator.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				newGamesIndicator.setVisibility(View.GONE);
+			}
+
+			return convertView;
+		}
+	}
+
 	public void showOverFlowMenu()
 	{
 
@@ -1194,7 +1302,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		 * removing out new chat option for now
 		 */
 		optionsList.add(new OverFlowMenuItem(getString(R.string.new_group), 6));
-		
+
+		optionsList.add(new OverFlowMenuItem(getString(R.string.timeline), 7));
+
 		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
 
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
@@ -1218,7 +1328,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
-		
+
 		optionsList.add(new OverFlowMenuItem(getString(R.string.status), 8));
 
 		addEmailLogItem(optionsList);
@@ -1232,75 +1342,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		overFlowWindow.setContentView(parentView);
 
 		ListView overFlowListView = (ListView) parentView.findViewById(R.id.overflow_menu_list);
-		overFlowListView.setAdapter(new ArrayAdapter<OverFlowMenuItem>(this, R.layout.over_flow_menu_item, R.id.item_title, optionsList)
-		{
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent)
-			{
-				if (convertView == null)
-				{
-					convertView = getLayoutInflater().inflate(R.layout.over_flow_menu_item, parent, false);
-				}
-
-				OverFlowMenuItem item = getItem(position);
-
-				TextView itemTextView = (TextView) convertView.findViewById(R.id.item_title);
-				itemTextView.setText(item.getName());
-
-				ImageView itemImageView = (ImageView) convertView.findViewById(R.id.item_icon);
-				if (item.getKey() == 0)
-				{
-					if (myProfileImage != null)
-					{
-						itemImageView.setImageDrawable(myProfileImage);
-					}
-					else
-					{
-						itemImageView.setScaleType(ScaleType.CENTER_INSIDE);
-						itemImageView.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
-						itemImageView.setImageResource(R.drawable.ic_default_avatar);
-					}
-					convertView.findViewById(R.id.profile_image_view).setVisibility(View.VISIBLE);
-				}
-				else
-				{
-					
-					convertView.findViewById(R.id.profile_image_view).setVisibility(View.GONE);
-				}
-
-				int currentCredits = accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0);
-
-				TextView freeSmsCount = (TextView) convertView.findViewById(R.id.free_sms_count);
-				freeSmsCount.setText(Integer.toString(currentCredits));
-				if (item.getKey() == 1)
-				{
-					freeSmsCount.setVisibility(View.VISIBLE);
-				}
-				else
-				{
-					freeSmsCount.setVisibility(View.GONE);
-				}
-
-				TextView newGamesIndicator = (TextView) convertView.findViewById(R.id.new_games_indicator);
-				newGamesIndicator.setText("1");
-
-				/*
-				 * Rewards & Games indicator bubble are by default shown even if the keys are not stored in shared pref. 
-				 */
-				boolean isGamesClicked = accountPrefs.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, false);
-				boolean isRewardsClicked = accountPrefs.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, false);
-				if ((item.getKey() == 3 && !isGamesClicked) || (item.getKey() == 4 && !isRewardsClicked))
-				{
-					newGamesIndicator.setVisibility(View.VISIBLE);
-				}
-				else
-					newGamesIndicator.setVisibility(View.GONE);
-				
-				
-				return convertView;
-			}
-		});
+		overflowAdapter = new OverflowAdapter(this, R.layout.over_flow_menu_item, R.id.item_title, optionsList, msisdn);
+		overFlowListView.setAdapter(overflowAdapter);
 
 		overFlowListView.setOnItemClickListener(new OnItemClickListener()
 		{
@@ -1340,6 +1383,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					break;
 				case 6:
 					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
+					break;
+				case 7:
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SHOW_TIMELINE_TOP_BAR);
+					editor.putBoolean(HikeConstants.SHOW_TIMELINE_RED_DOT, false);
+					editor.commit();
+					intent = new Intent(HomeActivity.this, TimelineActivity.class);
 					break;
 				case 8:
 					Utils.sendUILogEvent(HikeConstants.LogEvent.STATUS_UPDATE_FROM_OVERFLOW);
@@ -1415,7 +1464,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	public void updateOverFlowMenuNotification()
 	{
-		final int count = Utils.updateHomeOverflowToggleCount(accountPrefs);
+		final int count = getHomeOverflowCount(accountPrefs, false, false);
 		if (topBarIndicator != null)
 		{
 			runOnUiThread(new Runnable()
@@ -1542,42 +1591,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		LockPattern.onLockActivityResult(this, requestCode, resultCode, data);
 		super.onActivityResult(requestCode, resultCode, data);
-	}
-	
-
-	public void updateTimelineNotificationCount(int count, int delayTime)
-	{
-		if (count < 1)
-		{
-			timelineTopBarIndicator.setVisibility(View.GONE);
-		}
-		else
-		{
-			mHandler.postDelayed(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					if (timelineTopBarIndicator != null)
-					{
-						int count = Utils.getNotificationCount(accountPrefs, false);
-						if (count > 9)
-						{
-							timelineTopBarIndicator.setVisibility(View.VISIBLE);
-							timelineTopBarIndicator.setText("9+");
-							timelineTopBarIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
-						}
-						else if (count > 0)
-						{
-							timelineTopBarIndicator.setVisibility(View.VISIBLE);
-							timelineTopBarIndicator.setText(String.valueOf(count));
-							timelineTopBarIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
-						}
-					}
-				}
-			}, delayTime);
-		}
 	}
 
 	private void hikeLogoClicked()

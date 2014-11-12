@@ -14,6 +14,12 @@
 	    android:layout_width="wrap_content" android:layout_height="wrap_content"
 	    android:layout="@layout/welcome_hike_tip" android:inflatedId="@+id/tipMultiForward"/>
 
+    <ViewStub 
+        android:id="@+id/nuxComposeCardStub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout="@layout/nux_compose_card_layout"/>
+    
     <com.bsb.hike.view.TagEditText
         android:id="@+id/composeChatNewGroupTagET"
         android:layout_width="match_parent"

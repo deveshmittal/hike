@@ -505,12 +505,24 @@ public class HikeConstants
 
 	public static final String SINGLE_INVITE_SMS_ALERT_CHECKED = "singleSmsAlertChecked";
 
+	public static final String SHOW_NUX_INVITE_MODE = "showNuxInviteMode";
+	
+	public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
+	
+	public static final String SHOW_NUX_SCREEN = "show_nux_screen";
+		
+	public static final String NUX_STICKER_DETAILS = "nuxStickerDetails";
+	
 	public static final String FTUE_ADD_SMS_ALERT_CHECKED = "ftueSmsAlertChecked";
 
 	public static final String IS_GAMES_ITEM_CLICKED = "isGamesItemClicked";
 
 	public static final String IS_REWARDS_ITEM_CLICKED = "isRewardsItemClicked";
+	
+	public static final String IS_HOME_OVERFLOW_CLICKED = "isHomeOverflowClicked";
 
+	public static final String SHOW_TIMELINE_RED_DOT = "showTimelineRedDot";
+	
 	public static final String IS_OF_ICON_CLICKED = "isOfIconClicked";
 
 	public static final String DONE = "Done";
@@ -943,6 +955,10 @@ public class HikeConstants
 	
 	public static final String SUCCESSFUL_SELECTIONS = "s";
 	
+	public static final String DRAWABLE = "drawable";
+	
+	public static final String NUX_STICKERS = "stickers";
+	
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
@@ -1286,6 +1302,12 @@ public class HikeConstants
 		public static final String DELETED_MESSAGE_TYPE = "deletedMessageType";
 
 		public static final String CURRENT_POSITION = "currentPosition";
+		
+		public static final String FTUE_FORWARD = "ftueForward";
+		
+		public static final String FTUE_STICKER_ID_LIST = "ftueStickerIdsList";
+		
+		public static final String FTUE_STICKER_CATEGORY_LIST = "ftueStickerCategoryList";
 	}
 
 	public static final class LogEvent
@@ -1806,12 +1828,6 @@ public class HikeConstants
 	}
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1, R.string.native_sms_invite_2, R.string.native_sms_invite_3, R.string.native_sms_invite_4, R.string.native_sms_invite_5, R.string.native_sms_invite_6 };
-	
-	public static final int[] MALE_SELECTED_STRINGS = { R.string.male_selected_string_1, R.string.male_selected_string_2, R.string.male_selected_string_3,
-			R.string.male_selected_string_4, R.string.male_selected_string_5 };
-
-	public static final int[] FEMALE_SELECTED_STRINGS = { R.string.female_selected_string_1, R.string.female_selected_string_2, R.string.female_selected_string_3,
-			R.string.female_selected_string_4, R.string.female_selected_string_5 };
 
 	// TODO need to finalize this with AM
 	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;

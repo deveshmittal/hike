@@ -14,12 +14,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.bsb.hike.modules.contactmgr.ContactManager;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -29,9 +29,9 @@ import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewStub;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -42,11 +42,11 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
@@ -55,6 +55,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ComposeChatAdapter;
 import com.bsb.hike.adapters.FriendsAdapter;
 import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
@@ -62,16 +64,15 @@ import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.Sticker;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeService;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -84,8 +85,6 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomTypeFace;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
-import com.google.android.gms.internal.ad;
-import com.google.android.gms.internal.ar;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener, OnScrollListener
 {
@@ -98,6 +97,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private static final int START_CHAT_MODE = 2;
 	
 	private static final int MULTIPLE_FWD = 3;
+
+	private static final int FTUE_FWD = 4;
 
 	private View multiSelectActionBar, groupChatActionBar;
 
@@ -120,6 +121,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private boolean isForwardingMessage;
 
 	private boolean isSharingFile;
+
+	private boolean isFtueFwd;
 
 	private String existingGroupId;
 
@@ -146,6 +149,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private List<ContactInfo> recentContacts;
 	
 	private boolean selectAllMode;
+	
+	private ViewStub composeCard;
+	
+	private View composeCardInflated;
+	
+	private boolean deviceDetailsSent;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -163,6 +172,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
 		app.connectToService();
 
+		isFtueFwd = getIntent().getBooleanExtra(HikeConstants.Extras.FTUE_FORWARD, false);
 		createGroup = getIntent().getBooleanExtra(HikeConstants.Extras.CREATE_GROUP, false);
 		isForwardingMessage = getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false);
 		isSharingFile = getIntent().getType() != null;
@@ -171,6 +181,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		// was passed to add group participants.
 		existingGroupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
+		if (isFtueFwd && savedInstanceState != null)
+		{
+			deviceDetailsSent = savedInstanceState.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
+		}
+		
 		if (!shouldInitiateFileTransfer())
 		{
 			Toast.makeText(this, getString(R.string.max_num_files_reached, FileTransferManager.getInstance(this).getTaskLimit()), Toast.LENGTH_SHORT).show();
@@ -205,9 +220,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	}
 
 	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		outState.putBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT, deviceDetailsSent);
+		super.onSaveInstanceState(outState);
+	}
+	
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if(!showingMultiSelectActionBar)
+		if (!showingMultiSelectActionBar && !isFtueFwd)
 			getSupportMenuInflater().inflate(R.menu.compose_chat_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -307,7 +329,36 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			MIN_MEMBERS_GROUP_CHAT = 1;
 		}
-		if (isForwardingMessage && !isSharingFile)
+
+		if (isFtueFwd)
+		{
+			composeCard = (ViewStub) findViewById(R.id.nuxComposeCardStub);
+			if (composeCardInflated == null)
+			{
+				composeCard.setOnInflateListener(new ViewStub.OnInflateListener()
+				{
+					@Override
+					public void onInflate(ViewStub stub, View inflated)
+					{
+						composeCardInflated = inflated;
+					}
+				});
+				try
+				{
+					composeCard.inflate();
+				}
+				catch (Exception e)
+				{
+
+				}
+			}
+			else
+			{
+				composeCardInflated.setVisibility(View.VISIBLE);
+			}
+			setMode(FTUE_FWD);
+		}
+		else if (isForwardingMessage && !isSharingFile)
 		{
 			setMode(MULTIPLE_FWD);
 		}
@@ -329,6 +380,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		// need to confirm with rishabh --gauravKhanna
 		tagEditText.setMinCharChangeThresholdForTag(8);
 		tagEditText.setSeparator(TagEditText.SEPARATOR_SPACE);
+		tagEditText.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				if (null != composeCardInflated)
+				{
+					composeCardInflated.setVisibility(View.GONE);
+				}
+			}
+		});
 	}
 	
 	private void initTips(){
@@ -468,7 +530,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				return;
 			}
 
-			if (isForwardingMessage)
+			if (isForwardingMessage || isFtueFwd)
 			{
 				// share
 				if(isSharingFile){
@@ -603,9 +665,34 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			// select all bottom text
 			setupForSelectAll();
 			break;
+		case FTUE_FWD:
+			adapter.showCheckBoxAgainstItems(true);
+			tagEditText.clear(false);
+			adapter.removeFilter();
+			adapter.clearAllSelection(true);
+			adapter.toggleShowSMSContacts(false);
+			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
+			if (null != composeCardInflated)
+				composeCardInflated.setVisibility(View.VISIBLE);
+			setSticker();
+			break;
 		}
 		setTitle();
 	}
+	
+	/**
+	 * This is used for nux screen when user taps on sticker that needs to be shown in compose chat screen
+	 */
+	private void setSticker()
+	{
+		String stickerId = getIntent().getStringExtra(StickerManager.STICKER_ID);
+		int idx = stickerId.lastIndexOf(".");
+		String resName = "sticker_"+stickerId.substring(0, idx);
+		Bitmap stickerBitmap = BitmapUtils.getBitmapFromResourceName(getApplicationContext(), resName);
+		ImageView imageView = (ImageView) findViewById(R.id.nuxComposeSticker);
+		imageView.setImageDrawable(HikeBitmapFactory.getBitmapDrawable(stickerBitmap));
+	}
+	
 	private void setupForSelectAll(){
 		View selectAllCont = findViewById(R.id.select_all_container);
 		selectAllCont.setVisibility(View.VISIBLE);
@@ -741,15 +828,47 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			groupChatActionBar = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
 		}
+
 		if (actionBar.getCustomView() == groupChatActionBar)
 		{
 			return;
 		}
+
+		if (isFtueFwd)
+		{
+			View sendBtn = groupChatActionBar.findViewById(R.id.done_container);
+			ImageView arrow = (ImageView) groupChatActionBar.findViewById(R.id.arrow);
+			TextView send = (TextView) groupChatActionBar.findViewById(R.id.post_btn);
+			sendBtn.setVisibility(View.VISIBLE);
+			arrow.setVisibility(View.GONE);
+			
+			send.setText(R.string.skip);
+
+			sendBtn.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					Intent intent = Utils.getHomeActivityIntent(ComposeChatActivity.this);
+					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+					Editor editor = settings.edit();
+					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, true);
+					editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
+					editor.commit();
+					sendDetailsAfterSignup(true);
+					ComposeChatActivity.this.finish();
+					startActivity(intent);
+				}
+			});
+		}
+		else
+		{
+			groupChatActionBar.findViewById(R.id.seprator).setVisibility(View.GONE);
+		}
+
 		View backContainer = groupChatActionBar.findViewById(R.id.back);
 
 		title = (TextView) groupChatActionBar.findViewById(R.id.title);
-		groupChatActionBar.findViewById(R.id.seprator).setVisibility(View.GONE);
-
 		backContainer.setOnClickListener(new OnClickListener()
 		{
 
@@ -790,6 +909,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			title.setText(R.string.add_group);
 		}
+		else if (isFtueFwd)
+		{
+			title.setText(R.string.ftue_sticker_forward_title);
+		}
 		else
 		{
 			title.setText(R.string.new_chat);
@@ -810,16 +933,22 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		multiSelectTitle = (TextView) multiSelectActionBar.findViewById(R.id.title);
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, 1));
-		if(isForwardingMessage){
-			TextView send = (TextView) multiSelectActionBar.findViewById(R.id.save);
+		TextView send = (TextView) multiSelectActionBar.findViewById(R.id.save);
+		if (isForwardingMessage)
+		{
 			send.setText(R.string.send);
+		}
+		else if (isFtueFwd)
+		{
+			send.setText(R.string.send);
+			multiSelectActionBar.findViewById(R.id.arrow).setVisibility(View.GONE);
 		}
 		sendBtn.setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
 			{
-				if (isForwardingMessage)
+				if (isForwardingMessage || isFtueFwd)
 				{
 					forwardConfirmation(adapter.getAllSelectedContacts());
 				}
@@ -889,6 +1018,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			public void onClick(View v)
 			{
 				Utils.sendUILogEvent(HikeConstants.LogEvent.CONFIRM_FORWARD);
+				if(isFtueFwd)
+				{
+					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+					Editor editor = settings.edit();
+					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, false);
+					editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
+					editor.commit();
+					sendDetailsAfterSignup(false);
+				}
 				forwardConfirmDialog.dismiss();
 				forwardMultipleMessages(arrayList);
 			}
@@ -1214,7 +1352,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					intent.putExtra(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
 					sendMessage(convMessage);
 				}else{
-					sendMultiMessages(multipleMessageList,arrayList);
+					sendMultiMessages(multipleMessageList,arrayList,isFtueFwd);
 					if(fileTransferList.isEmpty()){
 						// if it is >0 then onpost execute of PreFileTransferAsycntask will start intent
 						startActivity(intent);
@@ -1338,11 +1476,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		toReturn.addAll(set);
 		return toReturn;
 	}
-	
-	
-	private void sendMultiMessages(ArrayList<ConvMessage> multipleMessageList, ArrayList<ContactInfo> arrayList)
+
+	private void sendMultiMessages(ArrayList<ConvMessage> multipleMessageList, ArrayList<ContactInfo> arrayList ,boolean createChatThread)
 	{
-		MultipleConvMessage multiMessages = new MultipleConvMessage(multipleMessageList, arrayList, System.currentTimeMillis() / 1000);
+		MultipleConvMessage multiMessages = new MultipleConvMessage(multipleMessageList, arrayList, System.currentTimeMillis() / 1000 , createChatThread);
 		mPubSub.publish(HikePubSub.MULTI_MESSAGE_SENT, multiMessages);
 	}
 
@@ -1509,10 +1646,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			setMode(START_CHAT_MODE);
 			return;
 		}
-		else if(composeMode == MULTIPLE_FWD)
+		else if (composeMode == MULTIPLE_FWD)
 		{
 			ComposeChatActivity.this.finish();
 			return;
+		}
+		else if (composeMode == FTUE_FWD)
+		{
+			ComposeChatActivity.this.finish();
+			Intent intent = new Intent(this, FtueActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
 		}
 		super.onBackPressed();
 	}
@@ -1694,4 +1838,25 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		
 	}
+	
+	private void sendDetailsAfterSignup(boolean sendBot)
+    {
+      SharedPreferences accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+      boolean justSignedUp = accountPrefs.getBoolean(HikeMessengerApp.JUST_SIGNED_UP, false);
+      Logger.d("nux","send details after signup");
+      if (justSignedUp)
+      {
+              Logger.d("nux","sendbot ="+sendBot);
+              Editor editor = accountPrefs.edit();
+              editor.remove(HikeMessengerApp.JUST_SIGNED_UP);
+              editor.commit();
+
+              if (!deviceDetailsSent)
+              {
+                      // Request for sending Bot after user skips or sends a sticker from ftue screen
+                      Utils.sendDetailsAfterSignup(this, false, sendBot);
+                      deviceDetailsSent = true;
+              }
+      }
+   }
 }

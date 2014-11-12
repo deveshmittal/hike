@@ -796,16 +796,6 @@
     <string name="num_unread_messages">%1$s Unread Messages</string>
     <string name="one_unread_message">1 Unread Message</string>
     <string name="file_transfer_pop_up_text">Send all files including pdf, ppt, docs upto <b>100MB</b> each. You can also send multiple files in one go!</string>
-    <string name="male_selected_string_1">I haven\'t been this excited about Friday, since last Friday.</string>
-    <string name="male_selected_string_2">Getting married before 20 is like leaving a party before 8!</string>
-    <string name="male_selected_string_3">Listen, smile, agree and do whatever the hell you were gonna do!</string>
-    <string name="male_selected_string_4">Boys speak about 2000 words a day!</string>
-    <string name="male_selected_string_5">Is there an autocorrect that works on life decisions?</string>
-    <string name="female_selected_string_1">My way or the highway!</string>
-    <string name="female_selected_string_2">Well behaved girls rarely make history.</string>
-    <string name="female_selected_string_3">I am size awesome.</string>
-    <string name="female_selected_string_4">Getting married before 20 is like leaving a party before 8!</string>
-    <string name="female_selected_string_5">Girls speak about 7,000 words a day!</string>
     <string name="invite_friends_confirmation_msg">Would you like to invite %1$s of your friends to hike?</string>
     <string name="didnt_get_pin">Didn\'t get the PIN, we will call you</string>
     <string name="maxContactInGroupErr">Max %1$s contacts are allowed in a group</string>
@@ -1230,5 +1220,11 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="singular_stickers">%1$d Sticker</string>
     <string name="pack_visible">Pack visible</string>
     <string name="pack_hidden">Pack hidden</string>
-    
+    <string name="ftue_sticker_screen_title">Hi %1$s</string>
+    <string name ="ftue_sticker_screen_header">Stickers!</string>
+    <string name="ftue_sticker_screen_text">Hike has a ton of stickers. Which one below is your favorite?</string>
+    <string name="ftue_sticker_forward_title">Send to</string>
+    <string name="ftue_sticker_forward_card_text">Great Choice!</string>
+    <string name="ftue_sticker_forward_card_subtext">Try sending this sticker to your friends -</string>
+    <string name="conversation_empty">Tap \'<b>new message</b>\' icon on top\nto start a chat</string>
 </resources>

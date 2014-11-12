@@ -174,6 +174,7 @@ import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.FtueActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -579,6 +580,18 @@ public class Utils
 		return false;
 	}
 
+	public static boolean showNuxScreen(Activity activity)
+	{
+		SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (settings.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false))
+		{
+			activity.startActivity(new Intent(activity, FtueActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+			activity.finish();
+			return true;
+		}
+		return false;
+	}
+	
 	public static void disconnectAndStopService(Activity activity)
 	{
 		// Added these lines to prevent the bad username/password bug.
@@ -3206,7 +3219,6 @@ public class Utils
 	{
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
 
 	public static void resetUnseenFriendRequestCount(Context context)
@@ -4136,17 +4148,17 @@ public class Utils
 	 * Adding this method to compute the overall count for showing in overflow menu on home screen
 	 * 
 	 * @param accountPref
-	 * @param count
+	 * @param defaultValue
 	 * @return
 	 */
-	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref)
+	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref, boolean defaultValue)
 	{
 		int overallCount = 0;
-		if (!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
+		if (!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, defaultValue)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
 		{
 			overallCount++;
 		}
-		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
+		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, defaultValue)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
 		{
 			overallCount++;
 		}
@@ -4162,6 +4174,7 @@ public class Utils
 		{
 			Editor editor = accountPref.edit();
 			editor.putInt(HikeMessengerApp.FRIEND_REQ_COUNT, currentCount);
+			editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
 			editor.commit();
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_COUNT_CHANGED, null);
@@ -4857,6 +4870,41 @@ public class Utils
 	public static int getDeviceOrientation(Context ctx)
 	{
 		return ctx.getResources().getConfiguration().orientation;
+	}
+	
+	public static void sendDetailsAfterSignup(Context context, boolean upgrade, boolean sendBot)
+	{
+		sendDeviceDetails(context, upgrade, sendBot);
+		SharedPreferences accountPrefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP, false))
+		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FB_CLICK);
+		}
+		if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) > -1)
+		{
+			if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+			}
+			else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+			}
+			Editor editor = accountPrefs.edit();
+			editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
+			editor.commit();
+		}
+	}
+
+	private static void sendDeviceDetails(Context context, boolean upgrade, boolean sendBot)
+	{
+		JSONObject obj = getDeviceDetails(context);
+		if (obj != null)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+		}
+		requestAccountInfo(upgrade, sendBot);
+		sendLocaleToServer(context);
 	}
 
 }

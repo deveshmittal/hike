@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.accounts.NetworkErrorException;
@@ -89,7 +90,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, SCANNING_CONTACTS, PIN_VERIFIED, BACKUP_AVAILABLE, RESTORING_BACKUP
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, GENDER, SCANNING_CONTACTS, PIN_VERIFIED, BACKUP_AVAILABLE, RESTORING_BACKUP
 	};
 
 	public class StateValue
@@ -125,10 +126,16 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public static boolean isAlreadyFetchingNumber = false;
 
+	private Birthday birthdate;
+
+	private Boolean isFemale;
+
 	private String userName;
 	
 	private StateValue mStateValue;
 
+	private int numOfHikeContactsCount = 0;
+	
 	private static final String INDIA_ISO = "IN";
 
 	public static final String START_UPLOAD_PROFILE = "start";
@@ -180,9 +187,20 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		this.profilePicSmall = profilePic;
 	}
 
+	public void addBirthdate(Birthday birthdate)
+	{
+		this.birthdate = birthdate;
+	}
+
 	public void addUserName(String name)
 	{
 		this.userName = name;
+	}
+
+	
+	public void addGender(Boolean isFemale)
+	{
+		this.isFemale = isFemale;
 	}
 
 	@Override
@@ -408,7 +426,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		if(userName != null)
 		{
-			publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+			publishProgress(new StateValue(State.GENDER, ""));
+			if(isFemale != null)
+			{
+				publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
+			}
 		}
 
 		/* scan the addressbook */
@@ -448,7 +470,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				}
 				Logger.d("SignupTask", "about to insert addressbook");
 				ContactManager.getInstance().setAddressBookAndBlockList(addressbook, blockList);
-
+				numOfHikeContactsCount = getHikeContactCount(addressbook);
 			}
 			catch (Exception e)
 			{
@@ -494,12 +516,41 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				
+				if (isFemale == null)
+				{
+					/*
+					 * publishing this will cause the the Activity to ask the user for a name and signal us
+					 */
+					publishProgress(new StateValue(State.GENDER, ""));
+					synchronized (this)
+					{
+						this.wait();
+					}
+				}
+				
 				if(getDisplayChild() != SignupActivity.SCANNING_CONTACTS)
 				{
 					publishProgress(new StateValue(State.SCANNING_CONTACTS, ""));
 				}
 				publishProgress(new StateValue(State.PROFILE_IMAGE, START_UPLOAD_PROFILE));
-				AccountUtils.setProfile(userName);
+				JSONObject nuxDetails = AccountUtils.setProfile(userName, birthdate, isFemale.booleanValue());
+				
+				boolean showNuxScreen = false;
+				String nuxStickers = null;
+				if (null != nuxDetails)
+				{
+					showNuxScreen = nuxDetails.optBoolean(HikeConstants.SHOW_NUX_SCREEN);
+					JSONArray nuxStickerDetailsJson = nuxDetails.optJSONArray(HikeConstants.NUX_STICKERS);
+					if (null != nuxStickerDetailsJson)
+					{
+						nuxStickers = nuxStickerDetailsJson.toString();
+					}
+				}
+				Editor editor = settings.edit();
+				editor.putInt(HikeConstants.HIKE_CONTACTS_COUNT, numOfHikeContactsCount);
+				editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, showNuxScreen);
+				editor.putString(HikeConstants.NUX_STICKER_DETAILS, nuxStickers);
+				editor.commit();
 			}
 			catch (InterruptedException e)
 			{
@@ -522,6 +573,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			this.data = null;
 			Editor editor = settings.edit();
 			editor.putString(HikeMessengerApp.NAME_SETTING, userName);
+			editor.putInt(HikeConstants.Extras.GENDER, isFemale ? 2 : 1);
+			if (birthdate != null)
+			{
+				editor.putInt(HikeMessengerApp.BIRTHDAY_DAY, birthdate.day);
+				editor.putInt(HikeMessengerApp.BIRTHDAY_MONTH, birthdate.month);
+				editor.putInt(HikeMessengerApp.BIRTHDAY_YEAR, birthdate.year);
+			}
 			/*
 			 * Setting these values as true for now. They will be reset on upgrades.
 			 */
@@ -596,18 +654,26 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
 		isAlreadyFetchingNumber = false;
 
+		Editor edit = settings.edit();
 		/*
 		 * We show these tips only to upgrading users
 		 */
-		settings.edit().putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true).commit();
+		edit.putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
 		/*
 		 * We show this tip only to new signup users
 		 */
-		settings.edit().putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true).commit();
+		edit.putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true);
 		/*
 		 * We need to show update available for hardcoded categories only to upgrading users.
 		 */
-		settings.edit().putBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, true).commit();
+		edit.putBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, true);
+		
+		/*
+		 * We don't want to show red dot on overflow menu for new users
+		 */
+		edit.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, true);
+		
+		edit.commit();
 		return Boolean.TRUE;
 	}
 	
@@ -616,6 +682,25 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return mStateValue;
 	}
 
+	/**
+	 * This method traverses the contacts list and returns the count of hike contacts in it.
+	 * 
+	 * @param contacts
+	 * @return
+	 */
+	private int getHikeContactCount(List<ContactInfo> contacts)
+	{
+		int numOfHikeContacts = 0;
+		for (ContactInfo contact : contacts)
+		{
+			if (contact.isOnhike())
+			{
+				numOfHikeContacts++;
+			}
+		}
+		return numOfHikeContacts;
+	}
+	
 	@Override
 	protected void onCancelled()
 	{
@@ -695,12 +780,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 
-	public static SignupTask startTask(Activity activity, String userName, Bitmap profilePicSmall)
+	public static SignupTask startTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
 	{
 		getSignupTask(activity);
 		if (!signupTask.isRunning())
 		{
+			signupTask.addGender(isFemale);
 			signupTask.addUserName(userName);
+			signupTask.addBirthdate(birthday);
 			signupTask.addProfilePicPath(null, profilePicSmall);
 			/*
 			 * if we are on signupActivity we should not anymore try to
@@ -722,13 +809,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		return signupTask;
 	}
 	
-	public static SignupTask restartTask(Activity activity, String userName, Bitmap profilePicSmall)
+	public static SignupTask restartTask(Activity activity, String userName, Boolean isFemale, Birthday birthday, Bitmap profilePicSmall)
 	{
 		if (signupTask != null && signupTask.isRunning())
 		{
 			signupTask.cancelTask();
 		}
-		startTask(activity, userName, profilePicSmall);
+		startTask(activity, userName, isFemale, birthday, profilePicSmall);
 		return signupTask;
 	}
 	

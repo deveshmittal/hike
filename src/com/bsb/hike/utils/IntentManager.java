@@ -165,11 +165,18 @@ public class IntentManager
 		return intent;
 	}
 
-	public static Intent getForwardStickerIntent(Context context, String stickerId, String categoryId)
+	public static Intent getForwardStickerIntent(Context context, String stickerId, String categoryId, boolean isFtueFwd)
 	{
 		Utils.sendUILogEvent(HikeConstants.LogEvent.FORWARD_MSG);
 		Intent intent = new Intent(context, ComposeChatActivity.class);
-		intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+		if (isFtueFwd)
+		{
+			intent.putExtra(HikeConstants.Extras.FTUE_FORWARD, true);
+		}
+		else
+		{
+			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+		}
 		JSONArray multipleMsgArray = new JSONArray();
 		try
 		{

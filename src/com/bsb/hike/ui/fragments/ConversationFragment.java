@@ -232,7 +232,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		if (wasViewSetup() && emptyView == null)  /*Adding wasViewSetup() safety check for an NPE here*/
 		{
 			ViewGroup emptyHolder = (ViewGroup) getView().findViewById(R.id.emptyViewHolder);
-			emptyView = LayoutInflater.from(getActivity()).inflate(R.layout.conversation_empty_view, emptyHolder);
+			emptyView = LayoutInflater.from(getActivity()).inflate(R.layout.conversation_empty_view2, emptyHolder);
 			// emptyHolder.addView(emptyView);
 			ListView friendsList = (ListView) getView().findViewById(android.R.id.list);
 			friendsList.setEmptyView(emptyView);
@@ -839,7 +839,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			showingWelcomeHikeConvTip = true;
 			displayedConversations.add(0, new ConversationTip(ConversationTip.WELCOME_HIKE_TIP));
 		}
-		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false) && !hasNoConversation)
+		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false) && displayedConversations.size() > 1)
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_INFO_TIP));
 		}
@@ -1200,6 +1200,13 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						 */
 						movedFromEmptyToNonEmpty();
 					}
+					else if(displayedConversations.size() == 1)
+					{
+						if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false))
+						{
+							displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_INFO_TIP));
+						}
+					}
 					displayedConversations.add(conversation);
 					Collections.sort(displayedConversations, mConversationsComparator);
 
@@ -1515,23 +1522,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 				public void run()
 				{
 					deleteConversation(conversation);
-				}
-			});
-		}
-		else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type))
-		{
-			if (!isAdded())
-			{
-				return;
-			}
-			getActivity().runOnUiThread(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					setEmptyState();
-					setupEmptyView();
 				}
 			});
 		}
@@ -2176,9 +2166,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			newConversationAdded = true;
 			
-			if(displayedConversations.size()==1)
+			if (displayedConversations.size() == 1)
 			{
 				movedFromEmptyToNonEmpty();
+			}
+			else if (displayedConversations.size() == 2)
+			{
+				if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false))
+				{
+					displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_INFO_TIP));
+				}
 			}
 		}
 		conv.clearMessageListAndAddMessage(convMessage);
@@ -2192,10 +2189,6 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	public void movedFromEmptyToNonEmpty()
 	{
-		if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false))
-		{
-			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_INFO_TIP));
-		}
 		if(!HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOWN_WELCOME_TO_HIKE_CARD, false))
 		{
 			HikeSharedPreferenceUtil.getInstance(getActivity()).saveData(HikeMessengerApp.SHOWN_WELCOME_TO_HIKE_CARD, true);

@@ -124,6 +124,11 @@
             android:windowSoftInputMode="adjustPan|stateAlwaysVisible" >
         </activity>
         <activity
+            android:name="com.bsb.hike.ui.FtueActivity"
+            android:label="@string/app_label"
+            android:launchMode="singleTop" >
+        </activity>
+        <activity
             android:name="com.bsb.hike.ui.ChatThread"
             android:label="@string/app_label"
             android:launchMode="singleTop"
