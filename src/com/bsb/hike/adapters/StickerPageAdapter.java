@@ -241,9 +241,8 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		case DONE:
 			viewHolder.image.setImageBitmap(HikeBitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_done_palette));
 			viewHolder.image.setVisibility(View.VISIBLE);
-			viewHolder.text.setVisibility(View.VISIBLE);
+			viewHolder.text.setVisibility(View.GONE);
 			clearAnimation(viewHolder.progress);
-			viewHolder.text.setText(activity.getResources().getString(R.string.see_them));
 			convertView.setOnClickListener(this);
 			break;
 		case PLACE_HOLDER:
