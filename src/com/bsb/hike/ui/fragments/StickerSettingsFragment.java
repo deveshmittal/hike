@@ -442,6 +442,10 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				Bundle b = intent.getBundleExtra(StickerManager.STICKER_DATA_BUNDLE);
 				String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
+				if(category == null)
+				{
+					return;
+				}
 				final boolean failedDueToLargeFile =b.getBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE);
 				if (getActivity() != null)
 				{

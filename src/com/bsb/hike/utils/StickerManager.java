@@ -1100,8 +1100,10 @@ public class StickerManager
 		Bundle b = (Bundle) resultObj;
 		String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 		StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
-		category.setState(StickerCategory.RETRY);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there
-		
+		if(category != null)
+		{
+			category.setState(StickerCategory.RETRY);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there
+		}
 		Intent i = new Intent(StickerManager.STICKERS_FAILED);
 		i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
 		LocalBroadcastManager.getInstance(context).sendBroadcast(i);
