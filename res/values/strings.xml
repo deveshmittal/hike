@@ -1228,7 +1228,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="shop_loading_failed_switch_on">Switch on Mobile data or Wi-Fi</string>
     <string name="singular_packs">%1$d Pack</string>
     <string name="singular_stickers">%1$d Sticker</string>
-    <string name="pack_visible">Pack visible</string>
-    <string name="pack_hidden">Pack hidden</string>
+    <string name="pack_visible">Visible in sticker palette</string>
+    <string name="pack_hidden">Hidden from sticker palette</string>
     
 </resources>
