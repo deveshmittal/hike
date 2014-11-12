@@ -387,6 +387,10 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 	{
+		if(position >= mAdapter.getCount())
+		{
+			return;
+		}
 		StickerCategory category = mAdapter.getItem(position);
 		if(category.getState() == StickerCategory.RETRY && category.isVisible())
 		{
