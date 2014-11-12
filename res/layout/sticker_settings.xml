@@ -95,12 +95,12 @@
    <LinearLayout
         android:id="@+id/update_all_ll"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
+        android:layout_height="48dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="6dp"
-        android:layout_marginLeft="7dp"
-        android:layout_marginRight="7dp"
-      	android:background="@drawable/updateview"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+      	android:background="@drawable/update_stickers_btn_round"
         android:gravity="center"
         android:visibility="gone" >
 
@@ -109,11 +109,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/update_all"
+            android:layout_marginBottom="0.5dp"
             android:textColor="@color/white_100"
-            android:layout_marginTop="1dp"
-            android:layout_marginBottom="3dp"
-            android:layout_marginLeft="2dp"
-            android:layout_marginRight="2dp"
             android:gravity="center"
             android:textSize="14sp" />
     </LinearLayout>
@@ -123,10 +120,10 @@
        android:layout_width="match_parent"
        android:layout_height="99.5dp"
        android:layout_alignParentBottom="true"
-       android:layout_marginBottom="5dp"
-       android:layout_marginLeft="7dp"
-       android:layout_marginRight="7dp"
-       android:background="@drawable/updateview"
+       android:layout_marginBottom="8dp"
+       android:layout_marginLeft="8dp"
+       android:layout_marginRight="8dp"
+       android:background="@drawable/update_stickers_btn_round"
 	   android:visibility="gone">       
        
         <View
@@ -134,19 +131,22 @@
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
             android:background="#5f9f22"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:layout_centerInParent="true" />
         
         <com.bsb.hike.view.CustomFontTextView 
             android:id="@+id/sticker_cost"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="50dp"
             android:textSize="16sp"
             android:textColor="@color/white"
             android:text="@string/sticker_pack_free"
             android:layout_above="@id/divider"
             android:gravity="center"
+            android:textStyle="italic"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="24dp"
+            android:layout_marginRight="18dp"
             android:layout_marginLeft="10dp"/>
         
         <LinearLayout 
@@ -154,7 +154,9 @@
             android:orientation="vertical"
             android:layout_above="@id/divider"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center_vertical"
+            android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/sticker_cost">
                     
             <com.bsb.hike.view.CustomFontTextView 
@@ -162,24 +164,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
-                android:layout_marginLeft="20dp"
-                android:textColor="@color/white"
-                />
+                android:layout_marginLeft="18dp"
+                android:textColor="@color/white" />
             
              <com.bsb.hike.view.CustomFontTextView 
                 android:id="@+id/pack_details"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginBottom="4dp"
+                android:layout_marginLeft="18dp"
                 android:textColor="@color/shop_update_details_color"/>
            </LinearLayout>
            
         <RelativeLayout 
             android:id="@+id/buttons_ll"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="48dp"
             android:layout_below="@id/divider"
             android:gravity="center" >
              

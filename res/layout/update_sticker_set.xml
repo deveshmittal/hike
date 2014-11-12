@@ -22,13 +22,14 @@
         android:layout_marginBottom="6dp"
         android:contentDescription="Update Button"
         android:scaleType="centerInside"
+        android:layout_gravity="center"
         android:src="@drawable/ic_update_palette"
         android:visibility="gone" />
 
     <ImageView
         android:id="@+id/download_progress"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:contentDescription="Progress Bar"
         android:src="@drawable/ic_spinner_update_palette"
         android:visibility="gone" />
