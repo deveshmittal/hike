@@ -1,10 +1,8 @@
 package com.bsb.hike.providers;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.platform.Authenticator;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -74,12 +72,7 @@ public class HikeProvider extends ContentProvider
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder)
 	{
 
-		// TODO : This is a stub. TBD on Auth implementation.
-		if (!Authenticator.getInstance().isTokenValid(uri.getLastPathSegment()))
-		{
-			Logger.d(TAG, "Invalid access token");
-			return null;
-		}
+		// TODO : Authenticate
 
 		Cursor c = null;
 

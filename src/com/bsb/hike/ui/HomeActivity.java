@@ -1412,7 +1412,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					intent = IntentManager.getRewardsIntent(HomeActivity.this);
 					break;
 				case 5:
-					intent = new Intent(HomeActivity.this, SettingsActivity.class);
+					intent = new Intent(HomeActivity.this, HikeAuthActivity.class);
 					break;
 				case 6:
 					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);

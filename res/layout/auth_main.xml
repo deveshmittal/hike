@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:paddingTop="?attr/actionBarSize" >
+
+    <LinearLayout
+        android:id="@+id/auth_info_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:gravity="center_horizontal"
+        android:orientation="vertical" >
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/auth_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/auth_title"
+            android:textSize="17sp"
+            android:textStyle="bold" >
+        </com.bsb.hike.view.CustomFontTextView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:baselineAligned="false"
+            android:gravity="center"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2.5"
+                android:gravity="right" >
+
+                <ImageView
+                    android:id="@+id/auth_app_icon"
+                    android:layout_width="68dp"
+                    android:layout_height="68dp"
+                    android:layout_marginRight="6dp"
+                    android:contentDescription="@string/auth_cd_app_logo"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_launcher" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:gravity="center"
+                android:orientation="vertical" >
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/auth_app_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="Quiz Adda"
+                    android:textColor="@color/standerd_black"
+                    android:textSize="17sp"
+                    android:textStyle="italic" >
+                </com.bsb.hike.view.CustomFontTextView>
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/auth_app_dev"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="Tiny Mogul Games Inc."
+                    android:textColor="@color/dark_grey_drop_shadow"
+                    android:textSize="13sp" >
+                </com.bsb.hike.view.CustomFontTextView>
+            </LinearLayout>
+        </LinearLayout>
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/auth_app_access_to"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="14dp"
+            android:layout_marginTop="38dp"
+            android:gravity="left"
+            android:text="@string/auth_app_access_to"
+            android:textColor="#6cbc37"
+            android:textSize="15sp"
+            android:textStyle="bold" >
+        </com.bsb.hike.view.CustomFontTextView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="right" >
+
+                <ImageView
+                    android:id="@+id/auth_user_avatar"
+                    android:layout_width="@dimen/auth_permission_icon"
+                    android:layout_height="@dimen/auth_permission_icon"
+                    android:layout_marginRight="12dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_signup_nouser" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:gravity="center"
+                android:orientation="vertical" >
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/auth_your_public_profile"
+                    android:textColor="@color/standerd_black"
+                    android:textSize="16sp"
+                    android:textStyle="normal" >
+                </com.bsb.hike.view.CustomFontTextView>
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/auth_app_will_setup_acc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/auth_will_setup_acc"
+                    android:textColor="@color/dark_grey_drop_shadow"
+                    android:textSize="12sp" >
+                </com.bsb.hike.view.CustomFontTextView>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="right" >
+
+                <ImageView
+                    android:id="@+id/auth_contacts_avatar"
+                    android:layout_width="@dimen/auth_permission_icon"
+                    android:layout_height="@dimen/auth_permission_icon"
+                    android:layout_marginRight="12dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_signup_nouser" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:gravity="center"
+                android:orientation="vertical" >
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/auth_contacts_on_hike"
+                    android:textColor="@color/standerd_black"
+                    android:textSize="16sp"
+                    android:textStyle="normal" >
+                </com.bsb.hike.view.CustomFontTextView>
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/auth_needed_for_messaging"
+                    android:textColor="@color/dark_grey_drop_shadow"
+                    android:textSize="12sp" >
+                </com.bsb.hike.view.CustomFontTextView>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/auth_info_layout"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="39dp"
+        android:gravity="bottom"
+        android:orientation="horizontal"
+        android:padding="16dp" >
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center" >
+
+            <Button
+                android:id="@+id/auth_button_deny"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/bg_grey_btn_selector"
+                android:text="@string/auth_button_deny"
+                android:textColor="#8f8f8f"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center" >
+
+            <Button
+                android:id="@+id/auth_button_accept"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/bg_blue_btn_selector"
+                android:text="@string/auth_button_accept"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>
