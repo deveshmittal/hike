@@ -49,8 +49,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	private String callerId;
 	private String dialedId;
 	private ImageButton endCall;
-	private ImageButton acceptCall;
-	private ImageButton declineCall;
+	private ImageView acceptCall;
+	private ImageView declineCall;
 	private ImageButton speakerButton;
 	private ImageButton muteButton;
 	private ImageView speakerSound;
@@ -118,7 +118,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		if(getIntent().hasExtra("callerID")){
 			callerId = getIntent().getStringExtra("callerID");
 			storedId = callerId;
-			ContactInfo contactInfo = ContactManager.getInstance().getContact(callerId,true,true);
+			ContactInfo contactInfo = ContactManager.getInstance().getContactInfoFromPhoneNo(callerId);
 			if (contactInfo != null)
 			{
 				mContactName = contactInfo.getName();
@@ -189,11 +189,13 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		isPlaying = true;
 		setContentView(R.layout.full_call_accept_decline);
 		displayPic = (ImageView)this.findViewById(R.id.fullvoipContactPicture);
+		setDisplayPic();
+		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
 		vActivity = this;
-		callNo = (TextView)this.findViewById(R.id.CallerId);
+		callNo = (TextView)this.findViewById(R.id.fullCallerId);
 //		callNo.setText(HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(callerId).getNameOrMsisdn());
 		callNo.setText(mContactName);
-		acceptCall = (ImageButton)this.findViewById(R.id.fullacceptButton);
+		acceptCall = (ImageView)this.findViewById(R.id.fullacceptButton);
 
 		acceptCall.setOnClickListener(new OnClickListener(){
 
@@ -210,7 +212,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			
 		});
 		
-		declineCall = (ImageButton)this.findViewById(R.id.fulldeclineButton);
+		declineCall = (ImageView)this.findViewById(R.id.fulldeclineButton);
 
 		declineCall.setOnClickListener(new OnClickListener(){
 

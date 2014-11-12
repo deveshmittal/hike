@@ -21,7 +21,6 @@
             android:layout_height="75dp"
             android:layout_gravity="center"
             android:contentDescription="Profile Image"
-            android:onClick="onViewImageClicked"
             android:src="@drawable/ic_default_avatar_group" />
     </FrameLayout> 
 

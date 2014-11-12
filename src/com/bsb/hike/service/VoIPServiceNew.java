@@ -39,6 +39,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	public static VoIPServiceNew vService;
 	public static boolean serviceStarted = false;
 	private static boolean factoryStaticInitialized=false;
+	private static int initialAudioMode;
 	
 	public boolean callConnected = false;
 	private boolean onSpeakers = false;
@@ -53,6 +54,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	    super.onCreate();
 	    vService = this;
 	    Log.d("Vservice", "Creating");
+	    initialAudioMode=((AudioManager)getApplicationContext().getSystemService(Context.AUDIO_SERVICE)).getMode();
 	}
 	
 	public void onConfigurationChanged(Configuration newConfig){
@@ -185,6 +187,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		  if(vService == null)
 			  Log.d("Vservice", "not assigned");
 		  serviceStarted =true;
+		  initialAudioMode=((AudioManager)getApplicationContext().getSystemService(Context.AUDIO_SERVICE)).getMode();
 			
 		  return START_NOT_STICKY;
 	  }
@@ -264,7 +267,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	@Override
 	public void onDestroy(){
 		Log.d("onDestroy", "Destroying");
-		((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setMode(AudioManager.MODE_NORMAL);
+		((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setMode(initialAudioMode);
 		wl.release();
 		super.onDestroy();
 	}
