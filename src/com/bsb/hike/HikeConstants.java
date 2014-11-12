@@ -461,7 +461,7 @@ public class HikeConstants
 	
 	public static final String FTUE_HIKE_SUPPORT = "+hike4+";
 
-	public static final String NUX_BOT = "+914567845678";
+	public static final String NUX_BOT = "+hike5+";
 
 	public static final String UNLINK_PREF = "unlinkAccount";
 
