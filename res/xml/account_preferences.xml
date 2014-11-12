@@ -3,7 +3,7 @@
     android:title="@string/manage_account" >
         
     <com.bsb.hike.view.IconPreference
-            icon="ic_backup"
+            icon="@drawable/ic_backup"
             android:key="backupAccount"
             android:layout="@layout/icon_preference"
             android:summary="Last backup:"
