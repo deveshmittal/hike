@@ -1144,12 +1144,12 @@ public class StickerManager
 		case PALLATE_ICON_TYPE:
 			baseFilePath += PALLATE_ICON + OTHER_ICON_TYPE;
 			bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
-			defaultIconResId = R.drawable.default_sticker_pallete_icon_unselected;
+			defaultIconResId = R.drawable.misc_sticker_placeholder;
 			break;
 		case PALLATE_ICON_SELECTED_TYPE:
 			baseFilePath += PALLATE_ICON_SELECTED + OTHER_ICON_TYPE;
 			bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
-			defaultIconResId = R.drawable.default_sticker_pallete_icon_selected;
+			defaultIconResId = R.drawable.misc_sticker_placeholder_selected;
 			break;
 		case PREVIEW_IMAGE_TYPE:
 			baseFilePath += PREVIEW_IMAGE + OTHER_ICON_TYPE;

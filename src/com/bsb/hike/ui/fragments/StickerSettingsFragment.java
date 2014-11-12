@@ -264,10 +264,8 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 						ImageView tickImage = (ImageView) parent.findViewById(R.id.reorder_indicator);
 						tickImage.setImageResource(R.drawable.art_tick);
 						TextView tipText = (TextView) parent.findViewById(R.id.drag_tip);
-						tipText.setText(getResources().getString(R.string.great_job));
-						tipText.setTextColor(getResources().getColor(R.color.white));
-						((View) parent).findViewById(R.id.drag_tip_subtext).setVisibility(View.GONE);
-						v.setBackgroundColor(getResources().getColor(R.color.sticker_drag_tip_bg_color));
+						tipText.setVisibility(View.GONE);
+						parent.findViewById(R.id.great_job).setVisibility(View.VISIBLE);
 						
 						TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, 0,
 								Animation.ABSOLUTE, -v.getHeight());

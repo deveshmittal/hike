@@ -220,10 +220,8 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	public void downLoadStickerData(final int currentCategoriesCount)
 	{
 		downloadState = DOWNLOADING;
-		final ImageView progressBar = (ImageView) loadingEmptyState.findViewById(R.id.loading_progress_bar);
 		final TextView loadingFailedEmptyStateMainText = (TextView) loadingFailedEmptyState.findViewById(R.id.main_text);
 		final TextView loadingFailedEmptyStateSubText = (TextView) loadingFailedEmptyState.findViewById(R.id.sub_text);
-		progressBar.setAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.rotate));
 		if(currentCategoriesCount == 0)
 		{
 			loadingEmptyState.setVisibility(View.VISIBLE);
@@ -233,7 +231,6 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		else
 		{
 			loadingEmptyState.setVisibility(View.GONE);
-			clearAnimation(progressBar);
 			loadingFailedEmptyState.setVisibility(View.GONE);
 			listview.removeFooterView(downloadFailedFooterView);
 			listview.removeFooterView(loadingFooterView);
@@ -275,7 +272,6 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 						listview.setVisibility(View.VISIBLE);
 						listview.removeFooterView(loadingFooterView);
 						loadingEmptyState.setVisibility(View.GONE);
-						clearAnimation(progressBar);
 						loadingFailedEmptyState.setVisibility(View.GONE);
 						
 						mAdapter.notifyDataSetChanged();
@@ -309,7 +305,6 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 						if(currentCategoriesCount == 0)
 						{
 							loadingEmptyState.setVisibility(View.GONE);
-							clearAnimation(progressBar);
 							loadingFailedEmptyState.setVisibility(View.VISIBLE);
 							
 							if (exception != null && exception.getErrorCode() == StickerException.OUT_OF_SPACE)
@@ -529,12 +524,4 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		LocalBroadcastManager.getInstance(getSherlockActivity()).unregisterReceiver(mMessageReceiver);
 	}
 	
-	/**
-	 * Used to clear the spinner animation here
-	 * @param v
-	 */
-	private void clearAnimation(View v)
-	{
-		v.clearAnimation();
-	}
 }
