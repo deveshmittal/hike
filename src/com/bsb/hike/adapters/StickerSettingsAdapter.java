@@ -12,9 +12,11 @@ import android.view.animation.AnimationUtils;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -22,7 +24,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.DragSortListView.DragSortListView;
 import com.bsb.hike.DragSortListView.DragSortListView.DragSortListener;
 import com.bsb.hike.models.StickerCategory;
-import com.bsb.hike.smartImageLoader.StickerPreviewLoader;
+import com.bsb.hike.smartImageLoader.StickerOtherIconLoader;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.StickerManager;
 
@@ -45,7 +47,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	
 	private int lastVisibleIndex = 0;   //gives the index of last visible category in the stickerCategoriesList
 	
-	private StickerPreviewLoader stickerPreviewLoader;
+	private StickerOtherIconLoader stickerOtherIconLoader;
 
 	public StickerSettingsAdapter(Context context, List<StickerCategory> stickerCategories)
 	{
@@ -53,7 +55,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		this.stickerCategories = stickerCategories;
 		this.mInflater = LayoutInflater.from(mContext);
 		mListMapping = new int[stickerCategories.size()];
-		this.stickerPreviewLoader = new StickerPreviewLoader(context, false);
+		this.stickerOtherIconLoader = new StickerOtherIconLoader(context, false);
 		initialiseMapping(mListMapping, stickerCategories);
 		
 	}
@@ -115,7 +117,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			convertView = mInflater.inflate(R.layout.sticker_settings_list_item, null);
 			viewHolder = new ViewHolder();
 			viewHolder.categoryName = (TextView) convertView.findViewById(R.id.category_name);
-			viewHolder.checkBox = (CheckBox) convertView.findViewById(R.id.category_checkbox);
+			viewHolder.checkBox = (ImageButton) convertView.findViewById(R.id.category_checkbox);
 			viewHolder.categoryPreviewImage = (ImageView) convertView.findViewById(R.id.category_icon);
 			viewHolder.categorySize = (TextView) convertView.findViewById(R.id.category_size);
 			viewHolder.updateAvailable = (TextView) convertView.findViewById(R.id.update_available);
@@ -136,46 +138,69 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		if(category.getTotalStickers() > 0)
 		{
 			viewHolder.categorySize.setVisibility(View.VISIBLE);
-			viewHolder.categorySize.setText(mContext.getString(R.string.n_stickers, category.getTotalStickers()));
+			viewHolder.categorySize.setText(category.getTotalStickers() == 1 ? mContext.getString(R.string.singular_stickers, category.getTotalStickers()) : mContext.getString(R.string.n_stickers, category.getTotalStickers()));
 		}
 		else
 		{
 			viewHolder.categorySize.setVisibility(View.GONE);
 		}
 		
-		if(category.getState() == StickerCategory.UPDATE)
+		int state = category.getState();
+		switch(state)
 		{
-			if(!category.isVisible())
-			{
-				viewHolder.updateAvailable.setTextColor(mContext.getResources().getColor(R.color.shop_update_invisible_color));
-			}
+			case StickerCategory.UPDATE:
+				viewHolder.updateAvailable.setTextColor(category.isVisible() ? mContext.getResources().getColor(R.color.sticker_settings_update_color) : mContext.getResources().getColor(R.color.shop_update_invisible_color));
+				viewHolder.updateAvailable.setVisibility(View.VISIBLE);
+				checkAndDisableCheckBox(category.getCategoryId(), viewHolder.checkBox);
+				
+				break;
+			case StickerCategory.DOWNLOADING:
+				viewHolder.updateAvailable.setTextColor(category.isVisible() ? mContext.getResources().getColor(R.color.sticker_settings_update_color) : mContext.getResources().getColor(R.color.shop_update_invisible_color));
+				viewHolder.updateAvailable.setText(R.string.downloading_sticker);
+				viewHolder.updateAvailable.setVisibility(View.VISIBLE);
+				viewHolder.downloadProgress.setVisibility(View.VISIBLE);
+				viewHolder.checkBox.setVisibility(View.GONE);
+				viewHolder.downloadProgress.setAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate));
+
+				break;
+			case StickerCategory.DONE:
+				showUIForState(state, viewHolder, category.getCategoryId(), category.isVisible());
+				
+				break;
+			case StickerCategory.RETRY:
+				showUIForState(state, viewHolder, category.getCategoryId(), category.isVisible());
+				
+				break;
+			default:
+				viewHolder.updateAvailable.setVisibility(View.GONE);
+				viewHolder.downloadProgress.setVisibility(View.GONE);
+				viewHolder.downloadProgress.clearAnimation();
+				checkAndDisableCheckBox(category.getCategoryId(), viewHolder.checkBox);
+				
+		}
 			
-			viewHolder.updateAvailable.setVisibility(View.VISIBLE);
-			checkAndDisableCheckBox(category.getCategoryId(), viewHolder.checkBox);
-		}
-		
-		else if(category.getState() == StickerCategory.DOWNLOADING)
-		{
-			viewHolder.updateAvailable.setText(R.string.downloading_sticker);
-			viewHolder.updateAvailable.setVisibility(View.VISIBLE);
-			viewHolder.downloadProgress.setVisibility(View.VISIBLE);
-			viewHolder.checkBox.setVisibility(View.GONE);
-			viewHolder.downloadProgress.setAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate));
-		}
-		else
-		{ 
-			viewHolder.updateAvailable.setVisibility(View.GONE);
-			viewHolder.downloadProgress.setVisibility(View.GONE);
-			viewHolder.downloadProgress.clearAnimation();
-			checkAndDisableCheckBox(category.getCategoryId(), viewHolder.checkBox);
-		}
-		
 		viewHolder.checkBox.setTag(category);
 		viewHolder.categoryName.setText(category.getCategoryName());
-		viewHolder.checkBox.setChecked(category.isVisible());
-		stickerPreviewLoader.loadImage(category.getCategoryId() + HikeConstants.DELIMETER + StickerManager.PREVIEW_IMAGE, viewHolder.categoryPreviewImage, isListFlinging);
+		viewHolder.checkBox.setSelected(category.isVisible());
+		stickerOtherIconLoader.loadImage(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(category.getCategoryId(), StickerManager.PREVIEW_IMAGE_TYPE), viewHolder.categoryPreviewImage, isListFlinging);
 		
 		return convertView;
+	}
+
+	/**
+	 * Handles the display of UI for a Settings page list item based on the categoryState 
+	 * @param state
+	 * @param viewHolder
+	 * @param categoryId
+	 */
+	private void showUIForState(int state, ViewHolder viewHolder, String categoryId, boolean isVisible)
+	{
+		viewHolder.updateAvailable.setVisibility(View.VISIBLE);
+		viewHolder.updateAvailable.setText(state == StickerCategory.DONE ? R.string.downloading_sticker : R.string.retry_sticker);
+		viewHolder.updateAvailable.setTextColor(isVisible ? mContext.getResources().getColor(R.color.sticker_settings_update_color) : mContext.getResources().getColor(R.color.shop_update_invisible_color));
+		viewHolder.downloadProgress.setVisibility(View.GONE);
+		viewHolder.downloadProgress.clearAnimation();
+		checkAndDisableCheckBox(categoryId, viewHolder.checkBox);	
 	}
 
 	public void setIsListFlinging(boolean b)
@@ -295,7 +320,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	{
 		TextView categoryName;
 		
-		CheckBox checkBox;
+		ImageButton checkBox;
 		
 		ImageView categoryPreviewImage;
 
@@ -310,13 +335,15 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	public void onClick(View v)
 	{
 		StickerCategory category = (StickerCategory) v.getTag();
-		boolean visibility = !category.isVisible(); 
-		CheckBox checkBox = (CheckBox) v;
+		boolean visibility = !category.isVisible();
+		Toast.makeText(mContext, visibility ? mContext.getResources().getString(R.string.pack_visible) : mContext.getResources().getString(R.string.pack_hidden), Toast.LENGTH_SHORT).show();;
+		ImageButton checkBox = (ImageButton) v;
 		category.setVisible(visibility);
-		checkBox.setChecked(visibility);
+		checkBox.setSelected(visibility);
 		stickerSet.add(category);
 		int categoryIdx = stickerCategories.indexOf(category);
 		updateLastVisibleIndex(categoryIdx, category);
+		StickerManager.getInstance().checkAndSendAnalytics(visibility);
 	}
 
 	/**
@@ -341,16 +368,16 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		return stickerSet;
 	}
 	
-	public StickerPreviewLoader getStickerPreviewLoader()
+	public StickerOtherIconLoader getStickerPreviewLoader()
 	{
-		return stickerPreviewLoader;
+		return stickerOtherIconLoader;
 	}
 	/**
-	 * Hides/makes the checkbox visible conditionally
+	 * Hides/makes the ImageButton visible conditionally
 	 * @param categoryId
 	 * @param cb
 	 */
-	private void checkAndDisableCheckBox(String categoryId, CheckBox cb)
+	private void checkAndDisableCheckBox(String categoryId, ImageButton cb)
 	{
 		if(categoryId.equals(StickerManager.HUMANOID) || categoryId.equals(StickerManager.EXPRESSIONS))
 		{
@@ -366,5 +393,4 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	{
 		return lastVisibleIndex;
 	}
-
 }

@@ -3,7 +3,10 @@ package com.bsb.hike.tasks;
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.widget.Toast;
 
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.db.DBBackupRestore;
 
 public class BackupAccountTask extends AsyncTask<Void, Void, Boolean> implements ActivityCallableTask
@@ -28,13 +31,25 @@ public class BackupAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	@Override
 	protected Boolean doInBackground(Void... unused)
 	{
-		return DBBackupRestore.getInstance(ctx).backupDB();
+		boolean status = DBBackupRestore.getInstance(ctx).backupDB();
+		try
+		{
+			Thread.sleep(HikeConstants.BACKUP_RESTORE_UI_DELAY);
+		}
+		catch (InterruptedException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return status;
 	}
 
 	@Override
 	protected void onPostExecute(Boolean result)
 	{
 		listener.accountBacked(result);
+		final int msgStringId = result ? R.string.backup_successful : R.string.backup_failed;
+		Toast.makeText(ctx, msgStringId, Toast.LENGTH_SHORT).show();
 		isFinished = true;
 	}
 

@@ -17,6 +17,7 @@ import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.NetworkHandler.NetworkType;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.HttpRequestType;
 import com.bsb.hike.modules.stickerdownloadmgr.retry.DefaultRetryPolicy;
 import com.bsb.hike.utils.AccountUtils;
@@ -33,8 +34,9 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	private StickerConstants.DownloadType downloadType;
 	private int stickerDownloadSize;
 	private String taskId;
+	private DownloadSource source;
 
-	protected MultiStickerDownloadTask(Handler handler, Context ctx, String taskId, StickerCategory category, StickerConstants.DownloadType downloadType, IStickerResultListener callback)
+	protected MultiStickerDownloadTask(Handler handler, Context ctx, String taskId, StickerCategory category, StickerConstants.DownloadType downloadType, DownloadSource source, IStickerResultListener callback)
 	{
 		super(handler, ctx, taskId, callback);
 		this.category  = category;
@@ -42,6 +44,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 		this.handler = handler;
 		this.context = ctx;
 		this.taskId = taskId;
+		this.source = source;
 	}
 
 	@Override
@@ -53,6 +56,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 		if (directoryPath == null)
 		{
 			setException(new StickerException(StickerException.DIRECTORY_NOT_EXISTS));
+			Logger.e(StickerDownloadManager.TAG, "Sticker download failed directory does not exist for task : " + taskId);
 			return STResult.DOWNLOAD_FAILED;
 		}
 
@@ -96,6 +100,11 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 				request.put(HikeConstants.STICKER_IDS, existingStickerIds);
 				request.put(HikeConstants.RESOLUTION_ID, Utils.getResolutionId());
 				request.put(HikeConstants.NUMBER_OF_STICKERS, getStickerDownloadSize());
+				if(source != null)
+				{
+					request.put(HikeConstants.DOWNLOAD_SOURCE, source.ordinal());
+				}
+				
 
 				String urlString = AccountUtils.base + "/stickers";
 				if (AccountUtils.ssl)
@@ -109,6 +118,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 				if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)))
 				{
 					setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
+					Logger.e(StickerDownloadManager.TAG, "Sticker download failed null or invalid response for task : " + taskId);
 					return STResult.DOWNLOAD_FAILED;
 				}
 				Logger.d(StickerDownloadManager.TAG,  "Got response for download task : " + taskId + " response : " + response.toString());
@@ -117,6 +127,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 				if (length > Utils.getFreeSpace())
 				{
 					setException(new StickerException(StickerException.OUT_OF_SPACE));
+					Logger.e(StickerDownloadManager.TAG, "Sticker download failed directory out of space for task : " + taskId);
 					return STResult.DOWNLOAD_FAILED;
 				}
 
@@ -148,10 +159,16 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 				}
 
 			}
-			catch (Exception e)
+			catch (StickerException e)
 			{
 				Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
 				setException(e);
+				return STResult.DOWNLOAD_FAILED;
+			}
+			catch (Exception e)
+			{
+				Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
+				setException(new StickerException(e));
 				return STResult.DOWNLOAD_FAILED;
 			}
 
@@ -243,6 +260,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 	{
 		Bundle b = new Bundle();
 		b.putSerializable(StickerManager.CATEGORY_ID, category.getCategoryId());
+		b.putSerializable(HikeConstants.DOWNLOAD_SOURCE, source);
 		if(isProgress)
 		{
 				b.putSerializable(StickerManager.PERCENTAGE, percentage);
@@ -253,13 +271,10 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 			b.putSerializable(StickerManager.STICKER_DOWNLOAD_TYPE, downloadType);
 			if (result != STResult.SUCCESS)
 			{
-				Exception e = getException();
-				if(e != null && e instanceof StickerException)
+				StickerException e = getException();
+				if(e != null && e.getErrorCode() == StickerException.OUT_OF_SPACE)
 				{
-					if(((StickerException) e).getErrorCode() == StickerException.OUT_OF_SPACE)
-					{
-						b.putBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE, true);
-					}
+					b.putBoolean(StickerManager.STICKER_DOWNLOAD_FAILED_FILE_TOO_LARGE, true);
 				}
 				StickerManager.getInstance().stickersDownloadFailed(b);
 			}

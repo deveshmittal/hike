@@ -13,6 +13,11 @@ public class StickerConstants
 		NEW_CATEGORY, UPDATE, MORE_STICKERS
 	}
 	
+	public enum DownloadSource
+	{
+		FIRST_TIME, X_MORE, SHOP, RETRY, SETTINGS
+	}
+	
 	public enum HttpRequestType
 	{
 		POST, GET, HEAD

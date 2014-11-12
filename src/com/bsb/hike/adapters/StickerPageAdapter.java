@@ -22,15 +22,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants.STResult;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.smartImageLoader.StickerLoader;
-import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.utils.RecyclingImageView;
 import com.bsb.hike.utils.StickerManager;
@@ -61,13 +62,16 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 
 	private boolean isListFlinging;
 	
-	public StickerPageAdapter(Activity activity, List<StickerPageAdapterItem> itemList, StickerCategory category, StickerLoader worker)
+	AbsListView absListView;
+	
+	public StickerPageAdapter(Activity activity, List<StickerPageAdapterItem> itemList, StickerCategory category, StickerLoader worker, AbsListView absListView )
 	{
 		this.activity = activity;
 		this.itemList = itemList;
 		this.category = category;
 		this.inflater = LayoutInflater.from(activity);
 		this.stickerLoader = worker;
+		this.absListView = absListView;
 		calculateSizeOfStickerImage();
 	}
 
@@ -120,7 +124,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	{
 		ViewType viewType = ViewType.STICKER;  //Default value.
 		StickerPageAdapterItem item = getItem(position);
-		int itemId = item.getStickerPageAdapterItemId();
+		int itemId = item.getType();
 		switch(itemId)
 		{
 		case StickerPageAdapterItem.STICKER :
@@ -177,6 +181,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				viewHolder.text = (TextView) convertView.findViewById(R.id.new_number_stickers);
 				viewHolder.image = (ImageView) convertView.findViewById(R.id.update_btn);
 				viewHolder.progress =  convertView.findViewById(R.id.download_progress);
+				viewHolder.parent = convertView.findViewById(R.id.update_sticker_parent);
 				
 				break;
 			case PLACE_HOLDER:
@@ -190,13 +195,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		
 		else
 		{
-			try{
-				
 			viewHolder = (ViewHolder) convertView.getTag();
-			}
-			catch(ClassCastException e)
-			{
-			}
 		}
 		
 		switch (viewType)
@@ -204,7 +203,6 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		case STICKER:
 			Sticker sticker = (Sticker) item.getSticker();
 			stickerLoader.loadImage(sticker.getSmallStickerPath(), ((ImageView) convertView), isListFlinging);
-			convertView.setTag(sticker);
 			convertView.setOnClickListener(this);
 				
 			break;
@@ -221,66 +219,44 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 				viewHolder.text.setVisibility(View.GONE);
 			}
 			
-			viewHolder.image.setOnClickListener(new OnClickListener()
-			{
-				@Override
-				public void onClick(View v)
-				{
-					initialiseDownloadStickerTask();
-				}
-			});
+			convertView.setOnClickListener(this);
 
 			break;
 		case DOWNLOADING:
 			viewHolder.progress.setVisibility(View.VISIBLE);
 			viewHolder.progress.setAnimation(AnimationUtils.loadAnimation(activity, R.anim.rotate));
+			viewHolder.text.setVisibility(View.GONE);
 			
 			break;
 		case RETRY:
-			viewHolder.image.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_retry_sticker));
+			viewHolder.image.setImageBitmap(HikeBitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_retry_sticker));
 			viewHolder.image.setVisibility(View.VISIBLE);
 			viewHolder.text.setVisibility(View.VISIBLE);
 			clearAnimation(viewHolder.progress);
 			viewHolder.text.setText(activity.getResources().getString(R.string.retry_sticker));
 			
-			viewHolder.image.setOnClickListener(new View.OnClickListener()
-			{
-				
-				@Override
-				public void onClick(View v)
-				{
-					initialiseDownloadStickerTask();
-				}
-			});
+			convertView.setOnClickListener(this);
 			
 			break;
 		case DONE:
-			viewHolder.image.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_done_palette));
+			viewHolder.image.setImageBitmap(HikeBitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_done_palette));
 			viewHolder.image.setVisibility(View.VISIBLE);
 			viewHolder.text.setVisibility(View.VISIBLE);
 			clearAnimation(viewHolder.progress);
 			viewHolder.text.setText(activity.getResources().getString(R.string.see_them));
-			viewHolder.image.setOnClickListener(new View.OnClickListener()
-			{
-				
-				@Override
-				public void onClick(View v)
-				{
-					// TODO Add method to scroll to the new stickers
-				}
-			});
+			convertView.setOnClickListener(this);
 			break;
 		case PLACE_HOLDER:
 			viewHolder.image.setVisibility(View.VISIBLE);
 			break;
 		}
-
+		viewHolder.position = position;
 		return convertView;
 	}
 
-	private void initialiseDownloadStickerTask()
+	private void initialiseDownloadStickerTask(DownloadSource source)
 	{
-		StickerManager.getInstance().initialiseDownloadStickerTask(category, activity);
+		StickerManager.getInstance().initialiseDownloadStickerTask(category, source, activity);
 		replaceDownloadingatTop();
 	}
 
@@ -289,7 +265,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	 */
 	protected void replaceDownloadingatTop()
 	{
-		if(itemList.size() > 0 && (itemList.get(0).getStickerPageAdapterItemId() != StickerPageAdapterItem.STICKER))
+		if(itemList.size() > 0 && (itemList.get(0).getType() != StickerPageAdapterItem.STICKER))
 		{
 			itemList.remove(0);
 			itemList.add(0, new StickerPageAdapterItem(StickerPageAdapterItem.DOWNLOADING));
@@ -315,15 +291,37 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 	@Override
 	public void onClick(View v)
 	{
-		Sticker sticker = (Sticker) v.getTag();
-		((ChatThread) activity).sendSticker(sticker);
-
-		/* In case sticker is clicked on the recents screen, don't update the UI or recents list. Also if this sticker is disabled don't update the recents UI */
-		if (!category.isCustom())
+		ViewHolder viewHolder = (ViewHolder) v.getTag();
+		int position = viewHolder.position;
+		StickerPageAdapterItem item = (StickerPageAdapterItem) getItem(position); 
+		switch (item.getType())
 		{
-			StickerManager.getInstance().addRecentSticker(sticker);
-			LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(StickerManager.RECENTS_UPDATED).putExtra(StickerManager.RECENT_STICKER_SENT, sticker));
+		case StickerPageAdapterItem.STICKER:
+			Sticker sticker = item.getSticker();
+			String source = category.isCustom() ? StickerManager.FROM_RECENT : StickerManager.FROM_OTHER;
+			((ChatThread) activity).sendSticker(sticker, source);
+
+			/* In case sticker is clicked on the recents screen, don't update the UI or recents list. Also if this sticker is disabled don't update the recents UI */
+			if (!category.isCustom())
+			{
+				StickerManager.getInstance().addRecentSticker(sticker);
+				LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(StickerManager.RECENTS_UPDATED).putExtra(StickerManager.RECENT_STICKER_SENT, sticker));
+			}
+			break;
+		case StickerPageAdapterItem.UPDATE:
+			initialiseDownloadStickerTask(DownloadSource.X_MORE);
+			break;
+		case StickerPageAdapterItem.RETRY:
+			initialiseDownloadStickerTask(DownloadSource.RETRY);
+			break;
+		case StickerPageAdapterItem.DONE:
+			final int count = getCount()-1;
+			absListView.smoothScrollBy(count*sizeEachImage, 300);
+			break;
+		default:
+			break;
 		}
+	
 	}
 
 	public void setIsListFlinging(boolean b)
@@ -355,6 +353,10 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		TextView text;
 		
 		View progress;
+		
+		View parent;
+		
+		int position;
 	}
 	
 	/**

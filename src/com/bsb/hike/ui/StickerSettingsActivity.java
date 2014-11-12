@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -56,6 +57,22 @@ public class StickerSettingsActivity extends HikeAppStateBaseFragmentActivity
 			stickerSettingsFragment = StickerSettingsFragment.newInstance();
 		getSupportFragmentManager().beginTransaction().add(R.id.sticker_settings_parent, stickerSettingsFragment).commit();
 
+	}
+	
+	@Override
+	public void onBackPressed()
+	{
+		if(stickerSettingsFragment != null)
+		{
+			if(stickerSettingsFragment.getIsUpdateAllTapped())
+			{
+				stickerSettingsFragment.hideConfirmAllView();
+				return;
+			}
+		}
+		
+		super.onBackPressed();
+		
 	}
 
 }

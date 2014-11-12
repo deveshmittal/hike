@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants.STResult;
@@ -49,11 +50,12 @@ public class StickerEDImageDownloadTask extends BaseStickerDownloadTask
 		if (dirPath == null)
 		{
 			setException(new StickerException(StickerException.DIRECTORY_NOT_EXISTS));
+			Logger.e(StickerDownloadManager.TAG, "Sticker download failed directory does not exist for task : " + taskId);
 			return STResult.DOWNLOAD_FAILED;
 		}
 		
-		String enableImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT + "/" + StickerManager.PALLATE_ICON_SELECTED + StickerManager.PALETTE_ICON_TYPE;
-		String disableImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT + "/" + StickerManager.PALLATE_ICON + StickerManager.PALETTE_ICON_TYPE;
+		String enableImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT + "/" + StickerManager.PALLATE_ICON_SELECTED + StickerManager.OTHER_ICON_TYPE;
+		String disableImagePath = dirPath + StickerManager.OTHER_STICKER_ASSET_ROOT + "/" + StickerManager.PALLATE_ICON + StickerManager.OTHER_ICON_TYPE;
 		
 		FileOutputStream fos = null;
 		try
@@ -64,6 +66,7 @@ public class StickerEDImageDownloadTask extends BaseStickerDownloadTask
 				if (!otherDir.mkdirs())
 				{
 					setException(new StickerException(StickerException.DIRECTORY_NOT_CREATED));
+					Logger.e(StickerDownloadManager.TAG, "Sticker download failed directory not created for task : " + taskId);
 					return STResult.DOWNLOAD_FAILED;
 				}
 			}
@@ -75,24 +78,36 @@ public class StickerEDImageDownloadTask extends BaseStickerDownloadTask
 			}
 			setDownloadUrl(urlString);
 			
+			Logger.d(StickerDownloadManager.TAG,  "Starting download task : " + taskId + " url : " + urlString );
 			JSONObject response = (JSONObject) download(null, HttpRequestType.GET);
 			if (response == null || !HikeConstants.OK.equals(response.getString(HikeConstants.STATUS)) || !catId.equals(response.getString(StickerManager.CATEGORY_ID)))
 			{
 				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
+				Logger.e(StickerDownloadManager.TAG, "Sticker download failed directory null or invalid response for task : " + taskId);
 				return STResult.DOWNLOAD_FAILED;
 			}
-
+			
+			Logger.d(StickerDownloadManager.TAG,  "Got response for download task : " + taskId + " response : " + response.toString());
 			JSONObject data = response.getJSONObject(HikeConstants.DATA_2);
 
 			String enableImg = data.getString(HikeConstants.ENABLE_IMAGE);
 			String disableImg = data.getString(HikeConstants.DISABLE_IMAGE);
 
+			HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(catId, StickerManager.PALLATE_ICON_SELECTED_TYPE));
+			HikeMessengerApp.getLruCache().remove(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(catId, StickerManager.PALLATE_ICON_TYPE));
 			Utils.saveBase64StringToFile(new File(enableImagePath), enableImg);
 			Utils.saveBase64StringToFile(new File(disableImagePath), disableImg);
 			
 		}
+		catch(StickerException e)
+		{
+			Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
+			setException(e);
+			return STResult.DOWNLOAD_FAILED;
+		}
 		catch(Exception e)
 		{
+			Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
 			setException(new StickerException(e));
 			return STResult.DOWNLOAD_FAILED;
 		}

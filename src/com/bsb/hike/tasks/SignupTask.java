@@ -89,7 +89,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	public enum State
 	{
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, SCANNING_CONTACTS, PIN_VERIFIED, BACKUP_AVAILABLE, RESTORED_BACKUP
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, SCANNING_CONTACTS, PIN_VERIFIED, BACKUP_AVAILABLE, RESTORING_BACKUP
 	};
 
 	public class StateValue
@@ -126,6 +126,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	public static boolean isAlreadyFetchingNumber = false;
 
 	private String userName;
+	
+	private StateValue mStateValue;
 
 	private static final String INDIA_ISO = "IN";
 
@@ -539,53 +541,55 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
-		this.data = null;
-		if (DBBackupRestore.getInstance(context).isBackupAvailable())
-		{
-			publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
-			synchronized (this)
-			{
-				try
-				{
-					this.wait();
-				}
-				catch (InterruptedException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					Logger.d("backup","Interrupted while waiting for user's choice on restore.");
-				}
-			}
-		}
-
-		while (!TextUtils.isEmpty(this.data))
-		{
-			boolean status = DBBackupRestore.getInstance(context).restoreDB();
-			if (status)
-			{
-				HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
-				ContactManager.getInstance().init(context);
-				this.data = null;
-				publishProgress(new StateValue(State.RESTORED_BACKUP,Boolean.TRUE.toString()));
-			}
-			else
-			{
-				publishProgress(new StateValue(State.RESTORED_BACKUP,Boolean.FALSE.toString()));
-			}
-			synchronized (this)
-			{
-				try
-				{
-					this.wait();
-				}
-				catch (InterruptedException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
-				}
-			}
-		}
+//		this.data = null;
+//		if (DBBackupRestore.getInstance(context).isBackupAvailable())
+//		{
+//			publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
+//			synchronized (this)
+//			{
+//				try
+//				{
+//					this.wait();
+//				}
+//				catch (InterruptedException e)
+//				{
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//					Logger.d("backup","Interrupted while waiting for user's choice on restore.");
+//				}
+//			}
+//		}
+//
+//		while (!TextUtils.isEmpty(this.data))
+//		{
+//			this.data = null;
+//			mStateValue = new StateValue(State.RESTORING_BACKUP,null);
+//			boolean status = DBBackupRestore.getInstance(context).restoreDB();
+//			if (status)
+//			{
+//				HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
+//				ContactManager.getInstance().init(context);
+//				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString());
+//			}
+//			else
+//			{
+//				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.FALSE.toString());
+//			}
+//			publishProgress(mStateValue);
+//			synchronized (this)
+//			{
+//				try
+//				{
+//					this.wait();
+//				}
+//				catch (InterruptedException e)
+//				{
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//					Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
+//				}
+//			}
+//		}
 		Logger.d("SignupTask", "Publishing Token_Created");
 
 		/* tell the service to start listening for new messages */
@@ -605,6 +609,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		 */
 		settings.edit().putBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, true).commit();
 		return Boolean.TRUE;
+	}
+	
+	public StateValue getStateValue()
+	{
+		return mStateValue;
 	}
 
 	@Override

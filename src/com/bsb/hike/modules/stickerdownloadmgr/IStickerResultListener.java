@@ -7,7 +7,7 @@ public interface IStickerResultListener
 	public void onSuccess(Object result);
 	
 	
-	public void onFailure(Object result, Throwable exception);
+	public void onFailure(Object result, StickerException exception);
 	
 	
 	public void onProgressUpdated(double percentage);

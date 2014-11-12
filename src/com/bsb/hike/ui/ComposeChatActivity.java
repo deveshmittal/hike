@@ -1185,7 +1185,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						String categoryId = msgExtrasJson.getString(StickerManager.FWD_CATEGORY_ID);
 						String stickerId = msgExtrasJson.getString(StickerManager.FWD_STICKER_ID);
 						Sticker sticker = new Sticker(categoryId, stickerId);
-						multipleMessageList.add(sendSticker(sticker, categoryId, arrayList));
+						multipleMessageList.add(sendSticker(sticker, categoryId, arrayList, StickerManager.FROM_FORWARD));
 						boolean isDis = sticker.isDisabled(sticker, this.getApplicationContext());
 						// add this sticker to recents if this sticker is not disabled
 						if (!isDis)
@@ -1302,9 +1302,22 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
 			Logger.d(getClass().getSimpleName(), "Contained a message: " + msg);
-			ContactInfo contact = (ContactInfo) arrayList.get(0);
-			ConvMessage convMessage = Utils.makeConvMessage(contact.getMsisdn(), msg, contact.isOnhike());
-			sendMessage(convMessage);
+			if(msg == null){
+				Bundle extraText = presentIntent.getExtras();
+				if(extraText.get(Intent.EXTRA_TEXT) != null)
+					msg = extraText.get(Intent.EXTRA_TEXT).toString();
+			}
+			if(msg == null)
+				Toast.makeText(getApplicationContext(), R.string.text_empty_error, Toast.LENGTH_SHORT).show();
+			else
+			{
+				ContactInfo contact = (ContactInfo) arrayList.get(0);
+				if(contact != null)
+				{
+					ConvMessage convMessage = Utils.makeConvMessage(contact.getMsisdn(), msg, contact.isOnhike());
+					sendMessage(convMessage);
+				}
+			}
 		}
 	}
 	
@@ -1548,7 +1561,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
 	}
-	public ConvMessage sendSticker(Sticker sticker, String categoryIdIfUnknown, ArrayList<ContactInfo> arrayList)
+	public ConvMessage sendSticker(Sticker sticker, String categoryIdIfUnknown, ArrayList<ContactInfo> arrayList, String source)
 	{
 		ConvMessage convMessage = Utils.makeConvMessage(((ContactInfo) arrayList.get(0)).getMsisdn(), "Sticker", ((ContactInfo) arrayList.get(0)).isOnhike());
 	
@@ -1559,7 +1572,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			metadata.put(StickerManager.CATEGORY_ID, categoryId);
 
 			metadata.put(StickerManager.STICKER_ID, sticker.getStickerId());
-
+			
+			if(!source.equalsIgnoreCase(StickerManager.FROM_OTHER))
+			{
+				metadata.put(StickerManager.SEND_SOURCE, source);
+			}
 			convMessage.setMetadata(metadata);
 			Logger.d(getClass().getSimpleName(), "metadata: " + metadata.toString());
 		}

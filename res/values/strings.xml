@@ -1187,15 +1187,14 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="my_stickers">My Stickers</string>
     <string name="update_all">UPDATE ALL</string>
     <string name="retry_sticker">RETRY</string>
-    <string name="see_them">SEE THEM</string>
+    <string name="see_them">DONE</string>
     <string name="drag_tip_text">Drag to Reorder Packs</string>
-    <string name="drag_tip_subtext">Tap and drag to reorder your sticker packs</string>
+    <string name="drag_tip_subtext">Tap and drag to reorder your stickers</string>
     <string name="sticker_cancel">CANCEL</string>
     <string name="sticker_confirm">CONFIRM</string>
     <string name="n_more">%1$d MORE</string>
     <string name="n_stickers">%1$d Stickers</string>
     <string name="last_backup">Last backup</string>
-    <string name="never">never</string>
     <string name="creating_backup_message">Creating a backup on your chats. Daily backups occur at 03:00.</string>
     <string name="restore_account">Restore Account</string>
     <string name="account_backup">Account Backup</string>
@@ -1208,11 +1207,28 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="restored_hint">your account and messages</string>
     <string name="restore_error">Something went wrong.</string>
     <string name="restore_error_hint">would you like to retry?</string>
+    <string name="out_of_space">Insufficient memory</string>
+    <string name="backup_successful">Backup created successfully</string>
+    <string name="backup_failed">Backup failed</string>
+    <string name="backup_missing">Backup missing. Tap to backup manually</string>
     <string name="out_of_space">Get More Space</string>
     <string name="sticker_pack_free">FREE</string>
     <string name="n_packs">%1$d Packs</string>
-    <string name="downloading_sticker">DOWNLOAING STICKERS</string>
+    <string name="downloading_sticker">DOWNLOADING STICKERS</string>
     <string name="update_all_fail_string">You cannot update hidden packs.</string>
     <string name="great_job">Great Job</string>
+    <string name="downloading_stk">DOWNLOADING</string>
+    <string name="update_sticker">UPDATE AVAILABLE</string>
+    <string name="text_empty_error">Text Can\'t be empty!</string>
+    <string name="shop_download_failed">Download failed. Tap to retry.</string>
+    <string name="shop_download_failed_out_of_space">Insufficient memory</string>
+    <string name="shop_loading_state">LOADING STICKERS</string>
+    <string name="shop_loading_state_subtext">Patience is recommended</string>
+    <string name="shop_loading_failed_no_internet">NO INTERNET CONNECTION</string>
+    <string name="shop_loading_failed_switch_on">Switch on Mobile data or Wi-Fi</string>
+    <string name="singular_packs">%1$d Pack</string>
+    <string name="singular_stickers">%1$d Sticker</string>
+    <string name="pack_visible">Pack visible</string>
+    <string name="pack_hidden">Pack hidden</string>
     
 </resources>

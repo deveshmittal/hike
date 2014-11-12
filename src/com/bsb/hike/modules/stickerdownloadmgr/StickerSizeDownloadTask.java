@@ -67,12 +67,20 @@ public class StickerSizeDownloadTask extends BaseStickerDownloadTask
 			else
 			{
 				setException(new StickerException(StickerException.NULL_OR_INVALID_RESPONSE));
+				Logger.e(StickerDownloadManager.TAG, "Sticker download failed null or invalid response for task : " + taskId);
 				return STResult.DOWNLOAD_FAILED;
 			}
+		}
+		catch (StickerException e)
+		{
+			setException(e);
+			Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
+			return STResult.DOWNLOAD_FAILED;
 		}
 		catch (Exception e)
 		{
 			setException(new StickerException(e));
+			Logger.e(StickerDownloadManager.TAG, "Sticker download failed for task : " + taskId, e);
 			return STResult.DOWNLOAD_FAILED;
 		}
 	}

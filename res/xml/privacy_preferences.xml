@@ -3,16 +3,16 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/privacy">
 
-<!--     icon="ic_blocked_list" -->
+<!--     icon="@drawable/ic_blocked_list" -->
     <com.bsb.hike.view.IconPreference
-		icon="ic_blocked_list_settings"
+		icon="@drawable/ic_blocked_list_settings"
 		android:layout="@layout/icon_preference"
         android:key="blockedList"
         android:summary="@string/blocked_list_hinttext"
         android:title="@string/blocked_list" />
     
     <com.bsb.hike.view.IconCheckBoxPreference
-        icon="ic_profile_picture"
+        icon="@drawable/ic_profile_picture"
         android:defaultValue="false"
         android:key="profilePicPref"
         android:layout="@layout/icon_preference"
@@ -21,7 +21,7 @@
         android:widgetLayout="@layout/checkbox_widget" />
     
     <com.bsb.hike.view.IconCheckBoxPreference
-        icon="preference_last_seen"
+        icon="@drawable/preference_last_seen"
         android:defaultValue="true"
         android:key="lastSeenPref"
         android:layout="@layout/icon_preference"
@@ -30,7 +30,7 @@
         android:widgetLayout="@layout/checkbox_widget" />
     
     <com.bsb.hike.view.IconCheckBoxPreference
-        icon="ic_ssl"
+        icon="@drawable/ic_ssl"
         android:key="sslPref"
         android:layout="@layout/icon_preference"
         android:summary="@string/ssl_info"
@@ -38,14 +38,14 @@
         android:widgetLayout="@layout/checkbox_widget" />
 
     <com.bsb.hike.view.IconPreference
-        icon="ic_reset_stealth"
+        icon="@drawable/ic_reset_stealth"
         android:key="resetStealthPref"
         android:layout="@layout/icon_preference"
         android:summary="@string/reset_complete_stealth_info"
         android:title="@string/reset_complete_stealth_header" />
      
      <com.bsb.hike.view.IconPreference
-        icon="ic_stealth_icon_reset_password"
+        icon="@drawable/ic_stealth_icon_reset_password"
         android:key="changeStealthPasscode"
         android:layout="@layout/icon_preference"
         android:summary="@string/change_stealth_password_body"

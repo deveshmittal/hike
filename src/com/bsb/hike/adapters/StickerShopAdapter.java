@@ -8,19 +8,18 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.AnimationUtils;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
-import com.bsb.hike.smartImageLoader.StickerLoader;
-import com.bsb.hike.smartImageLoader.StickerPreviewLoader;
+import com.bsb.hike.smartImageLoader.StickerOtherIconLoader;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
@@ -30,7 +29,7 @@ public class StickerShopAdapter extends CursorAdapter
 
 	private Context context;
 
-	private StickerPreviewLoader stickerPreviewLoader;
+	private StickerOtherIconLoader stickerOtherIconLoader;
 	
 	private boolean isListFlinging;
 
@@ -59,6 +58,8 @@ public class StickerShopAdapter extends CursorAdapter
 		TextView totalStickers;
 
 		TextView stickersPackDetails;
+		
+		TextView categoryPrice;
 
 		ImageView downloadState;
 		
@@ -72,7 +73,7 @@ public class StickerShopAdapter extends CursorAdapter
 		super(context, cursor, false);
 		this.context = context;
 		this.layoutInflater = LayoutInflater.from(context);
-		this.stickerPreviewLoader = new StickerPreviewLoader(context, true);
+		this.stickerOtherIconLoader = new StickerOtherIconLoader(context, true);
 		this.idColoumn = cursor.getColumnIndex(DBConstants._ID);
 		this.categoryNameColoumn = cursor.getColumnIndex(DBConstants.CATEGORY_NAME);
 		this.totalStickersCountColoumn = cursor.getColumnIndex(DBConstants.TOTAL_NUMBER);
@@ -90,6 +91,7 @@ public class StickerShopAdapter extends CursorAdapter
 		viewholder.downloadState = (ImageView) v.findViewById(R.id.category_download_btn);
 		viewholder.categoryPreviewIcon = (ImageView) v.findViewById(R.id.category_icon);
 		viewholder.downloadProgress = v.findViewById(R.id.download_progress_bar);
+		viewholder.categoryPrice = (TextView) v.findViewById(R.id.category_price);
 		viewholder.downloadState.setOnClickListener(mDownloadButtonClickListener);
 		v.setTag(viewholder);
 		return v;
@@ -106,11 +108,11 @@ public class StickerShopAdapter extends CursorAdapter
 		int totalStickerCount = cursor.getInt(totalStickersCountColoumn);
 		int categorySizeInBytes = cursor.getInt(categorySizeColoumn);
 		viewholder.categoryName.setText(cursor.getString(categoryNameColoumn));
-		stickerPreviewLoader.loadImage(categoryId + HikeConstants.DELIMETER + StickerManager.PREVIEW_IMAGE, viewholder.categoryPreviewIcon, isListFlinging);
+		stickerOtherIconLoader.loadImage(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(categoryId, StickerManager.PREVIEW_IMAGE_TYPE), viewholder.categoryPreviewIcon, isListFlinging);
 
 		if (totalStickerCount > 0)
 		{
-			String detailsStirng = context.getResources().getString(R.string.n_stickers, totalStickerCount);
+			String detailsStirng = totalStickerCount == 1 ? context.getResources().getString(R.string.singular_stickers, totalStickerCount)  : context.getResources().getString(R.string.n_stickers, totalStickerCount);
 			if (categorySizeInBytes > 0)
 			{
 				detailsStirng += ", " + Utils.getSizeForDisplay(categorySizeInBytes);
@@ -144,38 +146,48 @@ public class StickerShopAdapter extends CursorAdapter
 				if (category.getDownloadedStickersCount() == 0)
 				{
 					viewholder.downloadState.setImageLevel(NOT_DOWNLOADED);
+					viewholder.categoryPrice.setVisibility(View.VISIBLE);
+					viewholder.categoryPrice.setText(context.getResources().getString(R.string.sticker_pack_free));
 				}
 				else
 				{
 					viewholder.downloadState.setImageLevel(FULLY_DOWNLOADED);
+					viewholder.categoryPrice.setVisibility(View.GONE);
 				}
 				break;
 			case StickerCategory.UPDATE:
 				viewholder.downloadState.setImageLevel(UPDATE_AVAILABLE);
+				viewholder.categoryPrice.setVisibility(View.VISIBLE);
+				viewholder.categoryPrice.setText(context.getResources().getString(R.string.update_sticker));
 				break;
 			case StickerCategory.RETRY:
 				viewholder.downloadState.setImageLevel(RETRY);
+				viewholder.categoryPrice.setVisibility(View.VISIBLE);
+				viewholder.categoryPrice.setText(context.getResources().getString(R.string.retry_sticker));
 				break;
 			case StickerCategory.DOWNLOADING:
 				viewholder.downloadState.setVisibility(View.GONE);
 				viewholder.downloadProgress.setVisibility(View.VISIBLE);
 				viewholder.downloadProgress.setAnimation(AnimationUtils.loadAnimation(context, R.anim.rotate));
-				break;
-			default:
+				viewholder.categoryPrice.setVisibility(View.VISIBLE);
+				viewholder.categoryPrice.setText(context.getResources().getString(R.string.downloading_stk));
+				
 				break;
 			}
 		}
 		else
 		{
 			viewholder.downloadState.setImageLevel(NOT_DOWNLOADED);
+			viewholder.categoryPrice.setVisibility(View.VISIBLE);
+			viewholder.categoryPrice.setText(context.getResources().getString(R.string.sticker_pack_free));
 		}
 		viewholder.downloadState.setTag(category);
 	}
 	
 
-	public StickerPreviewLoader getStickerPreviewLoader()
+	public StickerOtherIconLoader getStickerPreviewLoader()
 	{
-		return stickerPreviewLoader;
+		return stickerOtherIconLoader;
 	}
 	
 	public void setIsListFlinging(boolean b)
@@ -199,10 +211,10 @@ public class StickerShopAdapter extends CursorAdapter
 			switch (downloadButton.getDrawable().getLevel())
 			{
 			case NOT_DOWNLOADED:
-				StickerDownloadManager.getInstance(mContext).DownloadEnableDisableImage(mContext, category.getCategoryId(), null);
+				StickerDownloadManager.getInstance(mContext).DownloadEnableDisableImage(category.getCategoryId(), null);
 			case UPDATE_AVAILABLE:
 			case RETRY:
-				StickerManager.getInstance().initialiseDownloadStickerTask(category, mContext);
+				StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.SHOP, mContext);
 				break;
 
 			default:

@@ -25,15 +25,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.R.anim;
 import com.bsb.hike.DragSortListView.DragSortListView;
 import com.bsb.hike.DragSortListView.DragSortListView.DragScrollProfile;
 import com.bsb.hike.DragSortListView.DragSortListView.DropListener;
 import com.bsb.hike.adapters.StickerSettingsAdapter;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -60,6 +63,10 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	private long previousEventTime;
 	
 	private HikeSharedPreferenceUtil prefs;
+	
+	private View footerView;
+	
+	private boolean isUpdateAllTapped = false;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -103,6 +110,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				@Override
 				public void onClick(View v)
 				{
+					isUpdateAllTapped = true;
 					if(shouldAddUpdateView())
 					{
 						updateAll.setVisibility(View.INVISIBLE);
@@ -113,8 +121,15 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 					{
 						Toast.makeText(getActivity(), R.string.update_all_fail_string, Toast.LENGTH_SHORT).show();
 					}
+				
+					mDslv.removeFooterView(footerView);
 				}
 			});
+		}
+		
+		else
+		{
+			mDslv.removeFooterView(footerView);
 		}
 	}
 
@@ -125,7 +140,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		TextView totalStickers = (TextView) parent.findViewById(R.id.pack_details);
 		TextView cancelBtn = (TextView) parent.findViewById(R.id.cancel_btn);
 		TextView confirmBtn = (TextView) parent.findViewById(R.id.confirm_btn);
-		totalPacks.setText(getString(R.string.n_packs, visibleAndUpdateStickerSet.size()));
+		totalPacks.setText(visibleAndUpdateStickerSet.size() == 1 ? getString(R.string.singular_packs, visibleAndUpdateStickerSet.size()) : getString(R.string.n_packs, visibleAndUpdateStickerSet.size()));
 		categoryCost.setText(R.string.sticker_pack_free);
 		
 		displayTotalStickersCount(totalStickers);
@@ -135,7 +150,9 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			@Override
 			public void onClick(View v)
 			{
+				isUpdateAllTapped = false;
 				confirmView.setVisibility(View.GONE);
+				Utils.sendUILogEvent(HikeConstants.LogEvent.UPDATE_ALL_CANCEL_CLICKED);
 			}
 		});
 		
@@ -145,13 +162,12 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			@Override
 			public void onClick(View v)
 			{
+				isUpdateAllTapped = false;
 				for(StickerCategory category : visibleAndUpdateStickerSet)
 				{
-					category.setState(StickerCategory.DOWNLOADING);
-					final DownloadType type = DownloadType.UPDATE;
-					StickerDownloadManager.getInstance(getActivity()).DownloadMultipleStickers(category, type, null);
+					StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.SETTINGS, getSherlockActivity());
 				}
-				
+				Utils.sendUILogEvent(HikeConstants.LogEvent.UPDATE_ALL_CONFIRM_CLICKED);
 				mAdapter.notifyDataSetChanged();
 				confirmView.setVisibility(View.GONE);
 			}
@@ -176,7 +192,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		}
 		if(totalCount > 0)
 		{
-			String text = getActivity().getResources().getString(R.string.n_stickers, totalCount);
+			String text = totalCount == 1 ? getActivity().getResources().getString(R.string.singular_stickers, totalCount) : getActivity().getResources().getString(R.string.n_stickers, totalCount);
 			if(totalSize > 0)
 			{
 				text += ", " + Utils.getSizeForDisplay(totalSize);
@@ -220,7 +236,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	{
 		if(!prefs.getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))  //Showing the tip here
 		{
-			final View parent = getView();
+			final View parent = getView().findViewById(R.id.list_ll);
 			final View v =(View) parent.findViewById(R.id.reorder_tip);
 			v.setVisibility(View.VISIBLE);
 			
@@ -232,6 +248,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 					if(!prefs.getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))
 					{
 						prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
+						Utils.sendUILogEvent(HikeConstants.LogEvent.SEEN_REORDERING_TIP);
 						StickerCategory category = mAdapter.getItem(from);
 						if ((from == to) || (!category.isVisible())) // Dropping at the same position. No need to perform Drop.
 						{
@@ -242,7 +259,8 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 						{
 							return;
 						}
-
+						prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
+						
 						ImageView tickImage = (ImageView) parent.findViewById(R.id.reorder_indicator);
 						tickImage.setImageResource(R.drawable.art_tick);
 						TextView tipText = (TextView) parent.findViewById(R.id.drag_tip);
@@ -250,19 +268,18 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 						tipText.setTextColor(getResources().getColor(R.color.white));
 						((View) parent).findViewById(R.id.drag_tip_subtext).setVisibility(View.GONE);
 						v.setBackgroundColor(getResources().getColor(R.color.sticker_drag_tip_bg_color));
-
+						
 						TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, 0,
 								Animation.ABSOLUTE, -v.getHeight());
 						animation.setDuration(400);
-						animation.setStartOffset(300);
-						mDslv.setAnimation(animation);
-
+						animation.setStartOffset(800);
+						parent.setAnimation(animation);
+						
 						animation.setAnimationListener(new AnimationListener()
 						{
 							@Override
 							public void onAnimationStart(Animation animation)
 							{
-
 							}
 
 							@Override
@@ -294,6 +311,8 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		mAdapter = new StickerSettingsAdapter(getActivity(), stickerCategories);
 		mDslv = (DragSortListView) parent.findViewById(R.id.item_list);
 		//mDslv.setOnScrollListener(this);
+		footerView = getActivity().getLayoutInflater().inflate(R.layout.sticker_settings_footer, null);
+		mDslv.addFooterView(footerView);
 		mDslv.setAdapter(mAdapter);
 		mDslv.setDragScrollProfile(this);
 		mDslv.setClickable(true);
@@ -368,13 +387,25 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 	{
-		// TODO Some method might be added in future over here to handle clicks on list 
+		StickerCategory category = mAdapter.getItem(position);
+		if(category.getState() == StickerCategory.RETRY && category.isVisible())
+		{
+			category.setState(StickerCategory.DOWNLOADING);
+			StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.SETTINGS, getActivity());
+			mAdapter.notifyDataSetChanged();
+		}
+		
+		else
+		{
+			return;
+		}
 	}
 	
 	private void registerListener()
 	{
 		IntentFilter filter = new IntentFilter(StickerManager.STICKERS_UPDATED);
 		filter.addAction(StickerManager.STICKERS_FAILED);
+		filter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
 		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mMessageReceiver, filter);
 	}
 	
@@ -383,7 +414,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
-			if (intent.getAction().equals(StickerManager.STICKERS_UPDATED))
+			if (intent.getAction().equals(StickerManager.STICKERS_UPDATED) || intent.getAction().equals(StickerManager.MORE_STICKERS_DOWNLOADED))
 			{
 				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
 				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
@@ -395,7 +426,6 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 						@Override
 						public void run()
 						{
-							category.setState(StickerCategory.DONE);
 							mAdapter.notifyDataSetChanged();
 
 						}
@@ -435,4 +465,15 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		LocalBroadcastManager.getInstance(getSherlockActivity()).unregisterReceiver(mMessageReceiver);
 	}
 
+	public boolean getIsUpdateAllTapped()
+	{
+		return isUpdateAllTapped;
+	}
+
+	public void hideConfirmAllView()
+	{
+		isUpdateAllTapped = false;
+		View confirmAll = getView().findViewById(R.id.confirmation_ll);
+		confirmAll.setVisibility(View.GONE);
+	}
 }

@@ -20,7 +20,7 @@
                 android:layout_height="54dp"
                 android:gravity="center_vertical"
                 android:paddingLeft="24dp"
-                android:text="@string/image_quality_popup_header"
+                android:text="@string/image_quality_prefs"
                 android:textColor="@color/blue_hike"
                 android:textSize="24sp"
                 android:textStyle="italic" />

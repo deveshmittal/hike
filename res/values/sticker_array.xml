@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="sticker_assets">
+        <item>@drawable/ic_recent_stickers</item>
+        <item>@drawable/ic_recent_stickers_selected</item>
+        <item>@drawable/ic_humanoid</item>
+        <item>@drawable/ic_humanoid_selected</item>
+        <item>@drawable/ic_delhi</item>
+        <item>@drawable/ic_delhi_selected</item>
+        <item>@drawable/ic_mumbai</item>
+        <item>@drawable/ic_mumbai_selected</item>
+        <item>@drawable/ic_kolkatta</item>
+        <item>@drawable/ic_kolkatta_selected</item>
+        <item>@drawable/ic_gujrat</item>
+        <item>@drawable/ic_gujrat_selected</item>
+        <item>@drawable/ic_banglore</item>
+        <item>@drawable/ic_banglore_selected</item>
+        <item>@drawable/ic_hyderabad_selected</item>
+        <item>@drawable/ic_bhopal</item>
+        <item>@drawable/ic_bhopal_selected</item>
+        <item>@drawable/ic_chennai</item>
+        <item>@drawable/ic_chennai_selected</item>
+        <item>@drawable/ic_bihar</item>
+        <item>@drawable/ic_bihar_selected</item>
+        <item>@drawable/ic_kerala</item>
+        <item>@drawable/ic_kerala_selected</item>
+        <item>@drawable/ic_guwahati</item>
+        <item>@drawable/ic_guwahati_selected</item>
+        <item>@drawable/ic_indian</item>
+        <item>@drawable/ic_indian_selected</item>
+        <item>@drawable/ic_expressions</item>
+        <item>@drawable/ic_expressions_selected</item>
+        <item>@drawable/ic_love</item>
+        <item>@drawable/ic_love_selected</item>
+        <item>@drawable/ic_bollywood</item>
+        <item>@drawable/ic_bollywood_selected</item>
+        <item>@drawable/ic_rageface</item>
+        <item>@drawable/ic_rageface_selected</item>
+        <item>@drawable/ic_doggy</item>
+        <item>@drawable/ic_doggy_selected</item>
+        <item>@drawable/ic_jelly</item>
+        <item>@drawable/ic_jelly_selected</item>
+        <item>@drawable/ic_sports</item>
+        <item>@drawable/ic_sports_selected</item>
+        <item>@drawable/ic_humanoid2</item>
+        <item>@drawable/ic_humanoid2_selected</item>
+        <item>@drawable/ic_avtars</item>
+        <item>@drawable/ic_avtars_selected</item>
+        <item>@drawable/ic_smileyexpression</item>
+        <item>@drawable/ic_smileyexpression_selected</item>
+        <item>@drawable/ic_kitty</item>
+        <item>@drawable/ic_kitty_selected</item>
+    </string-array>
+
+</resources>

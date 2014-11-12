@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/update_sticker_parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/art_sticker_shape"
@@ -21,7 +22,7 @@
         android:layout_marginBottom="6dp"
         android:contentDescription="Update Button"
         android:scaleType="centerInside"
-        android:src="@drawable/ic_update"
+        android:src="@drawable/ic_update_palette"
         android:visibility="gone" />
 
     <ImageView
@@ -29,7 +30,7 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:contentDescription="Progress Bar"
-        android:src="@drawable/ic_spinner_green"
+        android:src="@drawable/ic_spinner_update_palette"
         android:visibility="gone" />
 
     <com.bsb.hike.view.CustomFontTextView
@@ -37,9 +38,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="Update Count"
-        android:text="5 MORE"
         android:textColor="@color/standerd_light_grey2"
-        android:textSize="12sp"
+        android:textSize="9sp"
         android:visibility="gone" />
 
 </LinearLayout>

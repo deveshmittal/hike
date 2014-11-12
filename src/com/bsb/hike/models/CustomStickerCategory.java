@@ -29,6 +29,19 @@ public class CustomStickerCategory extends StickerCategory
 		loadStickers();
 	}
 
+	@Override
+	public int getState()
+	{
+		//There is no point having a custom sticker category having a state other than NONE
+		return NONE;
+	}
+	
+	@Override
+	public void setState(int state)
+	{
+		//Overiding custom sticker category state to be always NONE
+		state = NONE;
+	}
 	public CustomStickerCategory(String categoryId, String categoryName, boolean updateAvailable, boolean isVisible, boolean isCustom, boolean isAdded, int catIndex,
 			int totalStickers, int categorySize)
 	{
@@ -159,7 +172,12 @@ public class CustomStickerCategory extends StickerCategory
 		{
 			synchronized (stickerSet)
 			{
-				stickerSet.add(new Sticker(recentCat[i], recentSticker[i]));
+				Sticker s = new Sticker(recentCat[i], recentSticker[i]);
+				File f = new File(s.getSmallStickerPath());
+				if(f.exists())
+				{
+					stickerSet.add(s);
+				}
 			}
 		}
 
