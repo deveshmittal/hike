@@ -195,8 +195,8 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	 */
 	private void showUIForState(int state, ViewHolder viewHolder, String categoryId, boolean isVisible)
 	{
-		viewHolder.updateAvailable.setVisibility(View.VISIBLE);
-		viewHolder.updateAvailable.setText(state == StickerCategory.DONE ? R.string.downloading_sticker : R.string.retry_sticker);
+		viewHolder.updateAvailable.setVisibility(state == StickerCategory.DONE ? View.GONE : View.VISIBLE);
+		viewHolder.updateAvailable.setText(state == StickerCategory.DONE ? R.string.see_them : R.string.retry_sticker);
 		viewHolder.updateAvailable.setTextColor(isVisible ? mContext.getResources().getColor(R.color.sticker_settings_update_color) : mContext.getResources().getColor(R.color.shop_update_invisible_color));
 		viewHolder.downloadProgress.setVisibility(View.GONE);
 		viewHolder.downloadProgress.clearAnimation();
