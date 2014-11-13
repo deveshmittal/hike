@@ -1050,7 +1050,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return;
 		}
 		Logger.d(getClass().getSimpleName(), "Event received: " + type);
-		if ((HikePubSub.MESSAGE_RECEIVED.equals(type)) || (HikePubSub.MESSAGE_SENT.equals(type)))
+		if ((HikePubSub.MESSAGE_RECEIVED.equals(type)) || (HikePubSub.MESSAGE_SENT.equals(type)) || HikePubSub.HIKE_SDK_MESSAGE.equals(type))
 		{
 			Logger.d(getClass().getSimpleName(), "New msg event sent or received.");
 			ConvMessage message = (ConvMessage) object;
