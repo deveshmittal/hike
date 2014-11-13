@@ -4347,19 +4347,60 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 	public void addFileThumbnail(String fileKey, byte[] imageBytes)
 	{
-		ContentValues fileThumbnailValues = getFileThumbnailContentValues(fileKey, imageBytes);
+        ContentValues fileThumbnailValues = new ContentValues();
 
-		mDb.insert(DBConstants.FILE_THUMBNAIL_TABLE, null, fileThumbnailValues);
-	}
+        Cursor c = null;
+        try {
+            c = mDb.query(DBConstants.FILE_THUMBNAIL_TABLE, new String[]{IMAGE}, DBConstants.FILE_KEY + "=?", new String[]{fileKey}, null, null, null);
 
-	private ContentValues getFileThumbnailContentValues(String fileKey, byte[] imageBytes)
-	{
-		ContentValues fileThumbnailValues = new ContentValues();
-		fileThumbnailValues.put(DBConstants.FILE_KEY, fileKey);
-		fileThumbnailValues.put(DBConstants.IMAGE, imageBytes);
 
-		return fileThumbnailValues;
-	}
+            if (!c.moveToFirst()) {
+                fileThumbnailValues.put(DBConstants.FILE_KEY, fileKey);
+                fileThumbnailValues.put(DBConstants.IMAGE, imageBytes);
+                fileThumbnailValues.put(REF_COUNT, 1);
+                mDb.insert(DBConstants.FILE_THUMBNAIL_TABLE, null, fileThumbnailValues);
+            } else {
+                int refCount = c.getInt(c.getColumnIndex(REF_COUNT));
+                fileThumbnailValues.put(REF_COUNT, refCount + 1);
+                mDb.update(DBConstants.FILE_THUMBNAIL_TABLE, fileThumbnailValues, DBConstants.FILE_KEY + "=?", new String[]{fileKey});
+            }
+        }
+        finally {
+            if (c != null)
+            {
+                c.close();
+            }
+        }
+    }
+
+    public void reduceRefCount(String fileKey){
+
+        ContentValues fileThumbnailValues = new ContentValues();
+
+        Cursor c = null;
+        try {
+            c = mDb.query(DBConstants.FILE_THUMBNAIL_TABLE, new String[]{REF_COUNT}, DBConstants.FILE_KEY + "=?", new String[]{fileKey}, null, null, null);
+            if (!c.moveToFirst())
+                return;
+
+            int refCount = c.getInt(c.getColumnIndex(REF_COUNT));
+
+            if (refCount <= 1) {
+                fileThumbnailValues.put(REF_COUNT, refCount - 1);
+                mDb.update(DBConstants.FILE_THUMBNAIL_TABLE, fileThumbnailValues, DBConstants.FILE_KEY + "=?", new String[]{fileKey});
+            } else
+                mDb.delete(DBConstants.FILE_THUMBNAIL_TABLE, DBConstants.FILE_KEY + "=?", new String[]{fileKey});
+
+        }
+        finally {
+            if (c != null)
+            {
+                c.close();
+            }
+        }
+
+    }
+
 
 	public Drawable getFileThumbnail(String fileKey)
 	{
