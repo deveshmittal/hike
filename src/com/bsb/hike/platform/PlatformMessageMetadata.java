@@ -1,16 +1,17 @@
 package com.bsb.hike.platform;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import android.text.TextUtils;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.platform.CardComponent.ImageComponent;
 import com.bsb.hike.platform.CardComponent.MediaComponent;
 import com.bsb.hike.platform.CardComponent.TextComponent;
 import com.bsb.hike.platform.CardComponent.VideoComponent;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlatformMessageMetadata implements HikePlatformConstants {
 	public int layoutId;
@@ -100,8 +101,10 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 			JSONObject obj;
 			try {
 				obj = json.getJSONObject(i);
+                String thumbnail = obj.optString(THUMBNAIL);
+                String key = String.valueOf(thumbnail.hashCode());
 				ImageComponent imageCom = new ImageComponent(
-						obj.optString(TAG), obj.optString(BASE64_STRING),
+						obj.optString(TAG), key,
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
 						obj.optString(MEDIA_SIZE));
 				mediaComponents.add(imageCom);
@@ -119,8 +122,10 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 			JSONObject obj;
 			try {
 				obj = json.getJSONObject(i);
+                String thumbnail = obj.optString(THUMBNAIL);
+                String key = String.valueOf(thumbnail.hashCode());
 				VideoComponent videoCom = new VideoComponent(
-						obj.optString(TAG), obj.optString(BASE64_STRING),
+						obj.optString(TAG), key ,
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
 						obj.optString(MEDIA_SIZE),obj.optString(DURATION));
 				mediaComponents.add(videoCom);
@@ -138,8 +143,8 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 			JSONObject obj;
 			try {
 				obj = json.getJSONObject(i);
-				VideoComponent audioCom = new VideoComponent(
-						obj.optString(TAG), obj.optString(BASE64_STRING),
+				CardComponent.AudioComponent audioCom = new CardComponent.AudioComponent(
+						obj.optString(TAG), obj.optString("key"),
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
 						obj.optString(MEDIA_SIZE),obj.optString(DURATION));
 				mediaComponents.add(audioCom);

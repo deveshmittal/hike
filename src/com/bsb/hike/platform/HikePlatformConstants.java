@@ -12,7 +12,7 @@ public interface HikePlatformConstants {
 	String CONTENT_TYPE = "contentType";
 	String TAG = "tag";
 	String TEXT = "title";
-	String BASE64_STRING = "thumbnail";
+	String THUMBNAIL = "thumbnail";
 	String URL ="url";
 	String MEDIA_SIZE = "size";
 	String DURATION = "duration";
