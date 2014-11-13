@@ -20,6 +20,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.platform.HikeSDKMessageFilter;
 import com.bsb.hike.service.SmsMessageStatusReceiver;
 import com.bsb.hike.utils.Logger;
@@ -400,11 +401,21 @@ public class DbConversationListener implements Listener
         try {
             jsonObject = new JSONObject((String) object);
             JSONObject parseJSON = new JSONObject(jsonObject.optString("message"));
-            List<ConvMessage> listOfMessages = HikeSDKMessageFilter.filterMessage((JSONObject) parseJSON);
-            if(listOfMessages!=null) {
-                HikeConversationsDatabase.getInstance().addConversations(listOfMessages);
-                for(ConvMessage cm : listOfMessages){
-                    mPubSub.publish(HikePubSub.MQTT_PUBLISH, cm.serialize());
+            ArrayList<ConvMessage> listOfMessages= new ArrayList<ConvMessage>(1);
+            ConvMessage convMessage= HikeSDKMessageFilter.filterMessage((JSONObject) parseJSON);
+            listOfMessages.add(convMessage);
+
+            String[] toArray = parseJSON.has(HikePlatformConstants.RECEPIENT) ? parseJSON.getString(HikePlatformConstants.RECEPIENT).split(",") : new String[]{};
+            ArrayList<String> msisdns = ContactManager.getInstance().getMsisdnFromId(toArray);
+            ArrayList<ContactInfo> listOfContacts = new ArrayList<ContactInfo>();
+            for (String msisdn:msisdns){
+                convMessage.setMsisdn(msisdn);
+                listOfContacts.add(new ContactInfo(msisdn, msisdn, null, null,!convMessage.isSMS()));
+            }
+            if(listOfMessages!=null && null != listOfContacts) {
+                HikeConversationsDatabase.getInstance().addConversations(listOfMessages, listOfContacts, true);
+                for(int i = 0; i< listOfContacts.size() ; i++){
+                    mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
 
                 }
             }

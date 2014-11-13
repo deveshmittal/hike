@@ -1,21 +1,23 @@
 package com.bsb.hike.platform;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import android.text.TextUtils;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.platform.CardComponent.ImageComponent;
 import com.bsb.hike.platform.CardComponent.MediaComponent;
 import com.bsb.hike.platform.CardComponent.TextComponent;
 import com.bsb.hike.platform.CardComponent.VideoComponent;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlatformMessageMetadata implements HikePlatformConstants {
 	public int layoutId;
 	public int loveId;
     public String notifText;
+    public List<String> thumbnailIds;
 	
 	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();
 	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();
@@ -100,10 +102,22 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 			JSONObject obj;
 			try {
 				obj = json.getJSONObject(i);
+                String thumbnail = obj.optString(THUMBNAIL);
+                String key = String.valueOf(thumbnail.hashCode());
 				ImageComponent imageCom = new ImageComponent(
-						obj.optString(TAG), obj.optString(BASE64_STRING),
+						obj.optString(TAG), key,
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
 						obj.optString(MEDIA_SIZE));
+
+                if (!TextUtils.isEmpty(obj.optString(THUMBNAIL))) {
+                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
+                    obj.remove(THUMBNAIL);
+                    thumbnailIds.add(imageCom.getKey());
+                }
+                else
+                {
+                    imageCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(imageCom.getKey());
+                }
 				mediaComponents.add(imageCom);
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -119,10 +133,21 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 			JSONObject obj;
 			try {
 				obj = json.getJSONObject(i);
+                String thumbnail = obj.optString(THUMBNAIL);
+                String key = String.valueOf(thumbnail.hashCode());
 				VideoComponent videoCom = new VideoComponent(
-						obj.optString(TAG), obj.optString(BASE64_STRING),
+						obj.optString(TAG), key ,
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
 						obj.optString(MEDIA_SIZE),obj.optString(DURATION));
+                if (!TextUtils.isEmpty(thumbnail)) {
+                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
+                    obj.remove(THUMBNAIL);
+                    thumbnailIds.add(videoCom.getKey());
+                }
+                else
+                {
+                    videoCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(videoCom.getKey());
+                }
 				mediaComponents.add(videoCom);
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -138,8 +163,8 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 			JSONObject obj;
 			try {
 				obj = json.getJSONObject(i);
-				VideoComponent audioCom = new VideoComponent(
-						obj.optString(TAG), obj.optString(BASE64_STRING),
+				CardComponent.AudioComponent audioCom = new CardComponent.AudioComponent(
+						obj.optString(TAG), obj.optString("key"),
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
 						obj.optString(MEDIA_SIZE),obj.optString(DURATION));
 				mediaComponents.add(audioCom);
@@ -174,7 +199,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 		return null;
 	}
 	
-	public String toJSON(){
+	public String JSONtoString(){
 		return json.toString();
 	}
 

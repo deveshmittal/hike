@@ -1,8 +1,7 @@
 package com.bsb.hike.platform;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,12 +10,10 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.smartcache.HikeLruCache;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -29,11 +26,9 @@ import java.util.List;
 public class CardRenderer implements View.OnLongClickListener {
 
     Context mContext;
-    HikeLruCache hikeLruCache;
 
     public CardRenderer(Context context){
         this.mContext = context;
-        hikeLruCache = HikeMessengerApp.getLruCache();
 
     }
 
@@ -191,10 +186,10 @@ public class CardRenderer implements View.OnLongClickListener {
             if (view == null){
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_games_sent, null);
+                    view = inflater.inflate(R.layout.card_layout_video_sent, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
-                    view = inflater.inflate(R.layout.card_layout_games_received, null);
+                    view = inflater.inflate(R.layout.card_layout_video_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
@@ -244,10 +239,10 @@ public class CardRenderer implements View.OnLongClickListener {
             if (view == null){
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_games_sent, null);
+                    view = inflater.inflate(R.layout.card_layout_article_sent, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
-                    view = inflater.inflate(R.layout.card_layout_games_received, null);
+                    view = inflater.inflate(R.layout.card_layout_article_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
@@ -307,13 +302,9 @@ public class CardRenderer implements View.OnLongClickListener {
                 View mediaView = viewHolder.viewHashMap.get(tag);
                 if (mediaView instanceof ImageView) {
                     String data = mediaComponent.getKey();
-                    String base64 = mediaComponent.getBase64();
-                    BitmapDrawable value = hikeLruCache.getBitmapDrawableFromBase64(data, base64);
+                    Drawable value = HikeMessengerApp.getLruCache().getBitmapDrawable(data);
 
-                    if (null == value) {
-                        Bitmap bitmap = HikeBitmapFactory.stringToBitmap(base64);
-                        value = HikeBitmapFactory.getBitmapDrawable(bitmap);
-                    }
+
                     ((ImageView) mediaView).setImageDrawable(value);
 
                 }

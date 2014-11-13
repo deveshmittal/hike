@@ -189,7 +189,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.FILE_THUMBNAIL_TABLE
 				+ " ("
 				+ DBConstants.FILE_KEY + " TEXT PRIMARY KEY, " // File key
-				+ DBConstants.IMAGE + " BLOB" // File thumbnail
+				+ DBConstants.IMAGE + " BLOB," // File thumbnail
+                + REF_COUNT + " INTEGER"      // number of messages using the thumbnail.
 				+ " )";
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.FILE_THUMBNAIL_INDEX + " ON " + DBConstants.FILE_THUMBNAIL_TABLE + " (" + DBConstants.FILE_KEY + " )";
@@ -610,11 +611,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 		
 		/**
-		 * We introduced content here, so love concept came in message table for content shared by people
+		 * We introduced content here, so love concept came in message table for content shared by people.
+         * Ref count is introduced to keep a track on the number of messages where this thumbnail is attached.
 		 */
 		if(oldVersion < 31){
 			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER";
+            String alter2 = "ALTER TABLE " + DBConstants.FILE_THUMBNAIL_TABLE + " ADD COLUMN " + REF_COUNT + " INTEGER AUTOINCR";
+
 			db.execSQL(alter);
+            db.execSQL(alter2);
 		}
 	}
 
@@ -1289,7 +1294,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		insertStatement.bindString(msisdnColumn, conv.getMsisdn());
 		}
         if(conv.getMessageType() == com.bsb.hike.HikeConstants.MESSAGE_TYPE.CONTENT) {
-            insertStatement.bindString(messageMetadataColumn, conv.platformMessageMetadata != null ? conv.platformMessageMetadata.toJSON().toString() : "");
+            insertStatement.bindString(messageMetadataColumn, conv.platformMessageMetadata != null ? conv.platformMessageMetadata.JSONtoString() : "");
 
         }  else
             insertStatement.bindString(messageMetadataColumn, conv.getMetadata() != null ? conv.getMetadata().serialize() : "");
@@ -4254,8 +4259,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 					byte[] imageBytes = Base64.decode(hikeFile.getThumbnailString(), Base64.DEFAULT);
 
-					ContentValues fileThumbnailValues = getFileThumbnailContentValues(hikeFile.getFileKey(), imageBytes);
-					mDb.insert(DBConstants.FILE_THUMBNAIL_TABLE, null, fileThumbnailValues);
+                    addFileThumbnail(hikeFile.getFileKey(), imageBytes);
+
+//					ContentValues fileThumbnailValues = getFileThumbnailContentValues();
+//					mDb.insert(DBConstants.FILE_THUMBNAIL_TABLE, null, fileThumbnailValues);
 
 					fileJson.remove(HikeConstants.THUMBNAIL);
 
@@ -4342,19 +4349,60 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 	public void addFileThumbnail(String fileKey, byte[] imageBytes)
 	{
-		ContentValues fileThumbnailValues = getFileThumbnailContentValues(fileKey, imageBytes);
+        ContentValues fileThumbnailValues = new ContentValues();
 
-		mDb.insert(DBConstants.FILE_THUMBNAIL_TABLE, null, fileThumbnailValues);
-	}
+        Cursor c = null;
+        try {
+            c = mDb.query(DBConstants.FILE_THUMBNAIL_TABLE, new String[]{IMAGE}, DBConstants.FILE_KEY + "=?", new String[]{fileKey}, null, null, null);
 
-	private ContentValues getFileThumbnailContentValues(String fileKey, byte[] imageBytes)
-	{
-		ContentValues fileThumbnailValues = new ContentValues();
-		fileThumbnailValues.put(DBConstants.FILE_KEY, fileKey);
-		fileThumbnailValues.put(DBConstants.IMAGE, imageBytes);
 
-		return fileThumbnailValues;
-	}
+            if (!c.moveToFirst()) {
+                fileThumbnailValues.put(DBConstants.FILE_KEY, fileKey);
+                fileThumbnailValues.put(DBConstants.IMAGE, imageBytes);
+                fileThumbnailValues.put(REF_COUNT, 1);
+                mDb.insert(DBConstants.FILE_THUMBNAIL_TABLE, null, fileThumbnailValues);
+            } else {
+                int refCount = c.getInt(c.getColumnIndex(REF_COUNT));
+                fileThumbnailValues.put(REF_COUNT, refCount + 1);
+                mDb.update(DBConstants.FILE_THUMBNAIL_TABLE, fileThumbnailValues, DBConstants.FILE_KEY + "=?", new String[]{fileKey});
+            }
+        }
+        finally {
+            if (c != null)
+            {
+                c.close();
+            }
+        }
+    }
+
+    public void reduceRefCount(String fileKey){
+
+        ContentValues fileThumbnailValues = new ContentValues();
+
+        Cursor c = null;
+        try {
+            c = mDb.query(DBConstants.FILE_THUMBNAIL_TABLE, new String[]{REF_COUNT}, DBConstants.FILE_KEY + "=?", new String[]{fileKey}, null, null, null);
+            if (!c.moveToFirst())
+                return;
+
+            int refCount = c.getInt(c.getColumnIndex(REF_COUNT));
+
+            if (refCount <= 1) {
+                fileThumbnailValues.put(REF_COUNT, refCount - 1);
+                mDb.update(DBConstants.FILE_THUMBNAIL_TABLE, fileThumbnailValues, DBConstants.FILE_KEY + "=?", new String[]{fileKey});
+            } else
+                mDb.delete(DBConstants.FILE_THUMBNAIL_TABLE, DBConstants.FILE_KEY + "=?", new String[]{fileKey});
+
+        }
+        finally {
+            if (c != null)
+            {
+                c.close();
+            }
+        }
+
+    }
+
 
 	public Drawable getFileThumbnail(String fileKey)
 	{
@@ -4379,6 +4427,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 			}
 		}
 	}
+
+    public byte [] getThumbnail(String fileKey){
+
+        Cursor c = null;
+        try
+        {
+            c = mDb.query(DBConstants.FILE_THUMBNAIL_TABLE, new String[] { DBConstants.IMAGE }, DBConstants.FILE_KEY + "=?", new String[] { fileKey }, null, null, null);
+
+            if (!c.moveToFirst())
+            {
+                return null;
+            }
+
+            return c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
+
+        }
+        finally
+        {
+            if (c != null)
+            {
+                c.close();
+            }
+        }
+
+    }
 
 	public String getReadByValueForMessageID(long msgId)
 	{

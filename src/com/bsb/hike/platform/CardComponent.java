@@ -1,7 +1,5 @@
 package com.bsb.hike.platform;
 
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.smartcache.HikeLruCache;
 import org.json.JSONObject;
 
 public class CardComponent {
@@ -30,20 +28,20 @@ public class CardComponent {
 
 	public static class MediaComponent extends CardComponent {
 		private String key;
-		private String base64;
+		public byte[] thumbnail;
 		private String url;
 		private String type, size, duration;
 
-		public MediaComponent(String tag, String base64, String url,
+
+        public MediaComponent(String tag, String key, String url,
 				String type, String size, String duration) {
 			super(tag);
-            this.base64 = base64;
+            this.key = key;
             this.url = url;
             this.type = type;
             this.size = size;
             this.duration = duration;
-            if (null != base64)
-                this.key = String.valueOf(base64.hashCode());
+
 
 		}
 
@@ -51,9 +49,9 @@ public class CardComponent {
 			return key;
 		}
 
-		public String getBase64() {
-			return base64;
-		}
+        public byte[] getThumbnail() {
+            return thumbnail;
+        }
 
 		public String getUrl() {
 			return url;
@@ -74,27 +72,27 @@ public class CardComponent {
 
 	public static class ImageComponent extends MediaComponent {
 
-		public ImageComponent(String tag, String base64, String url,
-				String type, String size) {
-			super(tag, base64, url, type, size,null);
+		public ImageComponent(String tag, String key, String url,
+                              String type, String size) {
+			super(tag, key, url, type, size,null);
 		}
 
 	}
 
 	public static class VideoComponent extends MediaComponent {
 
-		public VideoComponent(String tag, String base64, String url,
-				String videoType, String size, String duration) {
-			super(tag, base64, url, videoType, size, duration);
+		public VideoComponent(String tag, String key, String url,
+                              String videoType, String size, String duration) {
+			super(tag, key, url, videoType, size, duration);
 		}
 
 	}
 
 	public static class AudioComponent extends MediaComponent {
 
-		public AudioComponent(String tag, String base64, String url,
+		public AudioComponent(String tag,  String url, String key,
 				String type, String size, String duration) {
-			super(tag, base64, url, type, size, duration);
+			super(tag, key, url, type, size, duration);
 		}
 
 	}
