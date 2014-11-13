@@ -189,7 +189,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.FILE_THUMBNAIL_TABLE
 				+ " ("
 				+ DBConstants.FILE_KEY + " TEXT PRIMARY KEY, " // File key
-				+ DBConstants.IMAGE + " BLOB" // File thumbnail
+				+ DBConstants.IMAGE + " BLOB," // File thumbnail
+                + REF_COUNT + " INTEGER"      // number of messages using the thumbnail.
 				+ " )";
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.FILE_THUMBNAIL_INDEX + " ON " + DBConstants.FILE_THUMBNAIL_TABLE + " (" + DBConstants.FILE_KEY + " )";
@@ -610,11 +611,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 		
 		/**
-		 * We introduced content here, so love concept came in message table for content shared by people
+		 * We introduced content here, so love concept came in message table for content shared by people.
+         * Ref count is introduced to keep a track on the number of messages where this thumbnail is attached.
 		 */
 		if(oldVersion < 31){
 			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER";
+            String alter2 = "ALTER TABLE " + DBConstants.FILE_THUMBNAIL_TABLE + " ADD COLUMN " + REF_COUNT + " INTEGER AUTOINCR";
+
 			db.execSQL(alter);
+            db.execSQL(alter2);
 		}
 	}
 
