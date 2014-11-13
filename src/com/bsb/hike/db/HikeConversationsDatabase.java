@@ -4259,8 +4259,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
 					byte[] imageBytes = Base64.decode(hikeFile.getThumbnailString(), Base64.DEFAULT);
 
-					ContentValues fileThumbnailValues = getFileThumbnailContentValues(hikeFile.getFileKey(), imageBytes);
-					mDb.insert(DBConstants.FILE_THUMBNAIL_TABLE, null, fileThumbnailValues);
+                    addFileThumbnail(hikeFile.getFileKey(), imageBytes);
+
+//					ContentValues fileThumbnailValues = getFileThumbnailContentValues();
+//					mDb.insert(DBConstants.FILE_THUMBNAIL_TABLE, null, fileThumbnailValues);
 
 					fileJson.remove(HikeConstants.THUMBNAIL);
 
