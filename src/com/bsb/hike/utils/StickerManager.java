@@ -905,6 +905,7 @@ public class StickerManager
 					}
 					else
 					{
+						Logger.i("StickerMananger", "moveHardcodedStickersToSdcard failed resName = "+resName+" not found");
 						result = false;
 					}
 				}	
