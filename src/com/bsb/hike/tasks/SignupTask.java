@@ -663,10 +663,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		 * We show this tip only to new signup users
 		 */
 		edit.putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true);
-		/*
-		 * We need to show update available for hardcoded categories only to upgrading users.
-		 */
-		edit.putBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, true);
 		
 		/*
 		 * We don't want to show red dot on overflow menu for new users

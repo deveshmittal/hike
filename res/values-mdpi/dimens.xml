@@ -28,4 +28,5 @@
     <dimen name="invite_footer_top_margin">76dp</dimen>
     <dimen name="nux_button_text_margin">16dp</dimen>
     <dimen name="nux_text_text_margin">4dp</dimen>
+    <dimen name="sticker_settings_tip_margin">20dp</dimen>
 </resources>

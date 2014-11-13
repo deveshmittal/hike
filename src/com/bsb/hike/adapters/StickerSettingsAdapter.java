@@ -121,7 +121,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			viewHolder.categoryPreviewImage = (ImageView) convertView.findViewById(R.id.category_icon);
 			viewHolder.categorySize = (TextView) convertView.findViewById(R.id.category_size);
 			viewHolder.updateAvailable = (TextView) convertView.findViewById(R.id.update_available);
-			viewHolder.downloadProgress = convertView.findViewById(R.id.download_progress);
+			viewHolder.downloadProgress = (ProgressBar) convertView.findViewById(R.id.download_progress);
 			viewHolder.checkBox.setOnClickListener(this);
 			convertView.setTag(viewHolder);
 			
@@ -156,11 +156,10 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 				break;
 			case StickerCategory.DOWNLOADING:
 				viewHolder.updateAvailable.setTextColor(category.isVisible() ? mContext.getResources().getColor(R.color.sticker_settings_update_color) : mContext.getResources().getColor(R.color.shop_update_invisible_color));
-				viewHolder.updateAvailable.setText(R.string.downloading_sticker);
+				viewHolder.updateAvailable.setText(R.string.downloading_stk);
 				viewHolder.updateAvailable.setVisibility(View.VISIBLE);
 				viewHolder.downloadProgress.setVisibility(View.VISIBLE);
 				viewHolder.checkBox.setVisibility(View.GONE);
-				viewHolder.downloadProgress.setAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate));
 
 				break;
 			case StickerCategory.DONE:
@@ -174,7 +173,6 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 			default:
 				viewHolder.updateAvailable.setVisibility(View.GONE);
 				viewHolder.downloadProgress.setVisibility(View.GONE);
-				viewHolder.downloadProgress.clearAnimation();
 				checkAndDisableCheckBox(category.getCategoryId(), viewHolder.checkBox);
 				
 		}
@@ -195,11 +193,10 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	 */
 	private void showUIForState(int state, ViewHolder viewHolder, String categoryId, boolean isVisible)
 	{
-		viewHolder.updateAvailable.setVisibility(View.VISIBLE);
-		viewHolder.updateAvailable.setText(state == StickerCategory.DONE ? R.string.downloading_sticker : R.string.retry_sticker);
+		viewHolder.updateAvailable.setVisibility(state == StickerCategory.DONE ? View.GONE : View.VISIBLE);
+		viewHolder.updateAvailable.setText(state == StickerCategory.DONE ? R.string.see_them : R.string.retry_sticker);
 		viewHolder.updateAvailable.setTextColor(isVisible ? mContext.getResources().getColor(R.color.sticker_settings_update_color) : mContext.getResources().getColor(R.color.shop_update_invisible_color));
 		viewHolder.downloadProgress.setVisibility(View.GONE);
-		viewHolder.downloadProgress.clearAnimation();
 		checkAndDisableCheckBox(categoryId, viewHolder.checkBox);	
 	}
 
@@ -328,7 +325,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		
 		TextView categorySize;
 		
-		View downloadProgress;
+		ProgressBar downloadProgress;
 	}
 	
 	@Override
