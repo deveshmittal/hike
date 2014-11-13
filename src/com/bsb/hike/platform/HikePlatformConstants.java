@@ -11,6 +11,7 @@ public interface HikePlatformConstants {
     String INTENT_URI = "intentUri";
 	String CONTENT_TYPE = "contentType";
 	String TAG = "tag";
+    String KEY = "key";
 	String TEXT = "title";
 	String THUMBNAIL = "thumbnail";
 	String URL ="url";
