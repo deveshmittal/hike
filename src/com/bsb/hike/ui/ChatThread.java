@@ -4819,14 +4819,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			// @GM cancelTask has been changed
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+            String key = hikeFile.getFileKey();
 			File file = hikeFile.getFile();
 			if(deleteMediaFromPhone && hikeFile != null)
 			{
 				hikeFile.delete(getApplicationContext());
 			}
+            HikeConversationsDatabase.getInstance().reduceRefCount(key);
 			FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent());
 			mAdapter.notifyDataSetChanged();
 		}
+
+        if (convMessage.getMessageType() == MESSAGE_TYPE.CONTENT){
+            List<String> ids = convMessage.platformMessageMetadata.thumbnailIds;
+            for (String id:ids){
+                HikeConversationsDatabase.getInstance().reduceRefCount(id);
+            }
+        }
+
 	}
 
 	@Override
