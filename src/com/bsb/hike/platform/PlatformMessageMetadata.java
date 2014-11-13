@@ -18,7 +18,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 	public int layoutId;
 	public int loveId;
     public String notifText;
-    public List<String> thumbnailIds;
+    public List<String> thumbnailIds = new ArrayList<String>();
 	
 	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();
 	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();
@@ -110,7 +110,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 				ImageComponent imageCom = new ImageComponent(
 						obj.optString(TAG), key,
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
-						obj.optString(MEDIA_SIZE));
+						obj.optString(MEDIA_SIZE), obj.optString(DURATION));
 
                 if (!TextUtils.isEmpty(obj.optString(THUMBNAIL))) {
                     HikeConversationsDatabase.getInstance().addFileThumbnail(key, Base64.decode(thumbnail, Base64.DEFAULT));

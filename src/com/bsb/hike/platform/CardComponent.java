@@ -73,8 +73,8 @@ public class CardComponent {
 	public static class ImageComponent extends MediaComponent {
 
 		public ImageComponent(String tag, String key, String url,
-                              String type, String size) {
-			super(tag, key, url, type, size,null);
+                              String type, String size, String duration) {
+			super(tag, key, url, type, size,duration);
 		}
 
 	}
