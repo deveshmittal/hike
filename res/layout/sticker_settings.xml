@@ -107,11 +107,12 @@
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/update_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:text="@string/update_all"
             android:layout_marginBottom="0.5dp"
             android:textColor="@color/white_100"
+            android:background="@drawable/sticker_settings_btn_selector"
             android:gravity="center"
             android:textSize="14sp" />
     </LinearLayout>
@@ -119,7 +120,7 @@
    <RelativeLayout 
        android:id="@+id/confirmation_ll"
        android:layout_width="match_parent"
-       android:layout_height="99.5dp"
+       android:layout_height="103.5dp"
        android:layout_alignParentBottom="true"
        android:layout_marginBottom="8dp"
        android:layout_marginLeft="8dp"
@@ -139,7 +140,7 @@
         <com.bsb.hike.view.CustomFontTextView 
             android:id="@+id/sticker_cost"
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
+            android:layout_height="52dp"
             android:textSize="16sp"
             android:textColor="@color/white"
             android:text="@string/sticker_pack_free"
@@ -155,7 +156,7 @@
             android:orientation="vertical"
             android:layout_above="@id/divider"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="52dp"
             android:gravity="center_vertical"
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/sticker_cost">
@@ -180,7 +181,7 @@
         <RelativeLayout 
             android:id="@+id/buttons_ll"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="50dp"
             android:layout_below="@id/divider"
             android:gravity="center" >
              
@@ -200,6 +201,7 @@
                android:gravity="center"
                android:text="@string/sticker_cancel"
                android:textColor="@color/white"
+               android:background="@drawable/sticker_settings_btn_selector"
                android:textSize="14sp" />
 
            <com.bsb.hike.view.CustomFontTextView
@@ -210,6 +212,7 @@
                android:gravity="center"
                android:text="@string/sticker_confirm"
                android:textColor="@color/white"
+               android:background="@drawable/sticker_settings_btn_selector"
                android:textSize="14sp" />
                
            </RelativeLayout>

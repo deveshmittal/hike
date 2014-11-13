@@ -119,7 +119,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		protected Pair<Cursor,Drawable> doInBackground(Void... arg0)
 		{
 			Cursor cursor = HikeConversationsDatabase.getInstance().getCursorForStickerShop();
-			Bitmap bmp = HikeBitmapFactory.decodeResource(getResources(), R.drawable.shop_banner);
+			Bitmap bmp = HikeBitmapFactory.decodeResource(getResources(), R.drawable.art_banner);
 			Drawable dr = HikeBitmapFactory.getBitmapDrawable(getResources(), bmp);
 			return new Pair(cursor, dr);
 		}
