@@ -52,13 +52,52 @@
         <item>@drawable/ic_kitty</item>
         <item>@drawable/ic_kitty_selected</item>
         <item>@drawable/ic_bangalore</item>
-		<item>@drawable/ic_bangalore_selected</item>
-		<item>@drawable/ic_gujarat</item>
-		<item>@drawable/ic_gujarat_selected</item>
-		<item>@drawable/ic_indian</item>
-		<item>@drawable/ic_indian_selected</item>
-		<item>@drawable/ic_kolkata</item>
-		<item>@drawable/ic_kolkata_selected</item>
+        <item>@drawable/ic_bangalore_selected</item>
+        <item>@drawable/ic_gujarat</item>
+        <item>@drawable/ic_gujarat_selected</item>
+        <item>@drawable/ic_indian</item>
+        <item>@drawable/ic_indian_selected</item>
+        <item>@drawable/ic_kolkata</item>
+        <item>@drawable/ic_kolkata_selected</item>
+        
+        
+        <item>@drawable/sticker_006_ka_sakkathmaga</item>
+        <item>@drawable/sticker_003_hyd_mama</item>
+        <item>@drawable/sticker_001_mp_bawa</item>
+        <item>@drawable/sticker_001_tn_eppudi</item>
+        <item>@drawable/sticker_001_bh_kaisanba</item>
+        <item>@drawable/sticker_007_kl_adipoli</item>
+        <item>@drawable/sticker_001_as_kikorisa</item>
+        <item>@drawable/sticker_012_smooch</item>
+        <item>@drawable/sticker_006_amitabh</item>
+        <item>@drawable/sticker_003_rf</item>
+        <item>@drawable/sticker_002_love2</item>
+        <item>@drawable/sticker_003_teasing</item>
+        <item>@drawable/sticker_004_rofl</item>
+        <item>@drawable/sticker_074_sorry</item>
+        <item>@drawable/sticker_006_angry</item>
+        <item>@drawable/sticker_018_whistling</item>
+        <item>@drawable/sticker_069_hi</item>
+        <item>@drawable/sticker_009_dl_bhai</item>
+        <item>@drawable/sticker_010_dl_tumsena</item>
+        <item>@drawable/sticker_006_dl_balleballe</item>
+        <item>@drawable/sticker_001_mb_shaane</item>
+        <item>@drawable/sticker_005_mb_eknumber</item>
+        <item>@drawable/sticker_008_mb_hawaanede</item>
+        <item>@drawable/sticker_001_gj_aehaalo</item>
+        <item>@drawable/sticker_002_gj_kemcho</item>
+        <item>@drawable/sticker_003_gj_majama</item>
+        <item>@drawable/sticker_001_ko_aebhai</item>
+        <item>@drawable/sticker_002_ko_kikorchis</item>
+        <item>@drawable/sticker_006_ko_mojakor</item>
+        <item>@drawable/sticker_042_sahihai</item>
+        <item>@drawable/sticker_047_saale</item>
+        <item>@drawable/sticker_012_item</item>
+        <item>@drawable/sticker_063_boss</item>
+        <item>@drawable/sticker_035_machaa</item>
+        <item>@drawable/sticker_035_machaa</item>
+        <item>@drawable/sticker_002_lol</item>
+        <item>@drawable/sticker_061_lovelips</item>
+        <item>@drawable/sticker_113_whereareyou</item>
     </string-array>
-
 </resources>
