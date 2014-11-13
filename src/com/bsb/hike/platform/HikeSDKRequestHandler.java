@@ -356,12 +356,18 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 				returnExceptionMessageToCaller(msg);
 				return;
 			}
+			// Set STATUS_OK
+			msg.arg2 = HikeSDKResponseCode.STATUS_OK;
 
-			Intent hikeAuthIntent = new Intent(mContext, HikeAuthActivity.class);
-			hikeAuthIntent.putExtra(HikeAuthActivity.MESSAGE_INDEX, Message.obtain(msg));
-			hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			mContext.startActivity(hikeAuthIntent);
-
+			try
+			{
+				msg.replyTo.send(msg);
+			}
+			catch (RemoteException e)
+			{
+				returnExceptionMessageToCaller(msg);
+				e.printStackTrace();
+			}
 		}
 
 	}

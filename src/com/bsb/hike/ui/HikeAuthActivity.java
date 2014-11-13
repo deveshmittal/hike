@@ -445,18 +445,8 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 		{
 			JSONObject jsonObject = new JSONObject(jsonString);
 			String access = jsonObject.getString(HikeSDKConstants.HIKE_REQ_SDK_CLIENT_ACC_TOKEN);
-			access = Integer.toString(access.hashCode());
 			String pkg = jsonObject.getString(HikeSDKConstants.HIKE_REQ_SDK_CLIENT_PKG_NAME);
-			HikeSharedPreferenceUtil prefs = HikeSharedPreferenceUtil.getInstance(argContext, AUTH_SHARED_PREF_NAME);
-			String savedAccess = prefs.getData(pkg, "");
-			if (access.equals(savedAccess))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return verifyRequest(argContext, pkg, access);
 		}
 		catch (JSONException e)
 		{
@@ -469,4 +459,29 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 			return false;
 		}
 	}
+
+	public static boolean verifyRequest(Context argContext, String pkgName, String accessT)
+	{
+		try
+		{
+			String access = Integer.toString(accessT.hashCode());
+			String pkg = pkgName;
+			HikeSharedPreferenceUtil prefs = HikeSharedPreferenceUtil.getInstance(argContext, AUTH_SHARED_PREF_NAME);
+			String savedAccess = prefs.getData(pkg, "");
+			if (access.equals(savedAccess))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		catch (NullPointerException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 }
