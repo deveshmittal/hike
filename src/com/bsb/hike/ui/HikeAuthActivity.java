@@ -140,6 +140,10 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 				}
 			}
 		}
+		else
+		{
+			this.finish();
+		}
 		// We have host application package name. Get its name, dev name and image from package info
 		PackageManager pm = getApplicationContext().getPackageManager();
 		try
