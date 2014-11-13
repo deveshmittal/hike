@@ -10,8 +10,13 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.VoIPServiceNew;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomMovableFrameLayout;
 import com.bsb.hike.HikePubSub;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
@@ -65,7 +70,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 	private Context prefs;
 	private Animation dpAnim;
 	private Animation springAnim;
-	private FrameLayout avatarLayout;
+	private CustomMovableFrameLayout avatarLayout;
 	private LayoutParams dpParams;
 	
 	public void onCreate(Bundle savedInstanceState){
@@ -110,7 +115,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		r.setStreamType(AudioManager.STREAM_ALARM);
 //		r.play();
 		displayPic = (ImageView)this.findViewById(R.id.voipContactPicture);
-		avatarLayout = (FrameLayout)this.findViewById(R.id.voip_avatar_container);
+		avatarLayout = (CustomMovableFrameLayout)this.findViewById(R.id.voip_avatar_container);
 		setDisplayPic();
 		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
 		dpParams = avatarLayout.getLayoutParams();
@@ -195,12 +200,12 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		            case MotionEvent.ACTION_MOVE :
 		                PointF mv = new PointF( event.getX() - DownPT.x, event.getY() - DownPT.y);
 		                Log.d("TouchEvent","3 "+( (Float) ( v.getX() ) ).toString()  );
-		                Log.d("TouchEvent","4 "+( (Float) ( avatarLayout.getX() ) ).toString()  );
+		                Log.d("TouchEvent","4 "+( (Float) ( ((FrameLayout)avatarLayout).getX() ) ).toString()  );
 		                Log.d("TouchEvent","5 "+( (Float) ( avatarLayout.getTranslationX() ) ).toString()  );
 		                if((((StartPT.x+mv.x)<(acceptCall.getX()-(avatarLayout.getWidth()/2)))&&((StartPT.x+mv.x)>(declineCall.getX()))))
-		                avatarLayout.setX((int)(StartPT.x+mv.x));
+		                ((FrameLayout)avatarLayout).setX((int)(StartPT.x+mv.x));
 //		                declineCall.setY((int)(StartPT.y+mv.y));
-		                StartPT = new PointF( avatarLayout.getX(), avatarLayout.getY() );
+		                StartPT = new PointF( ((FrameLayout)avatarLayout).getX(), avatarLayout.getY() );
 		                break;
 		            case MotionEvent.ACTION_DOWN :
 		                DownPT.x = event.getX();
@@ -208,7 +213,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		                DownPT.y = event.getY();
 		                avatarLayout.clearAnimation();
 //		                avatarLayout.setVisibility(View.INVISIBLE);
-		                StartPT = new PointF( avatarLayout.getX(), avatarLayout.getY() );
+		                StartPT = new PointF( ((FrameLayout)avatarLayout).getX(), avatarLayout.getY() );
 		                break;
 		            case MotionEvent.ACTION_UP :
 		            	
@@ -247,38 +252,37 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 							dpAnim.reset();
 							startActivity(inCallIntent);
 							} else {
-								TranslateAnimation ta = new TranslateAnimation(0,(-1) * avatarLayout.getTranslationX(), 0, (-1)*avatarLayout.getTranslationY());
-								ta.setFillAfter(true);
-								ta.setFillEnabled(true);
-								ta.setDuration(150);
-								ta.setRepeatCount(0);
-								avatarLayout.startAnimation(ta);
-								ta.setAnimationListener(new AnimationListener() {
+								AnimatorSet animset = (AnimatorSet)AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.voip_avatar_translator);
+								animset.setTarget(avatarLayout);
+								animset.start();
+								avatarLayout.startAnimation(dpAnim);
+								animset.addListener(new AnimatorListener() {
 									
 									@Override
-									public void onAnimationStart(Animation animation) {
+									public void onAnimationStart(Animator animation) {
 										// TODO Auto-generated method stub
 										
 									}
 									
 									@Override
-									public void onAnimationRepeat(Animation animation) {
+									public void onAnimationRepeat(Animator animation) {
 										// TODO Auto-generated method stub
 										
 									}
 									
 									@Override
-									public void onAnimationEnd(Animation animation) {
-//										avatarLayout.setLayoutParams(dpParams);
-//										avatarLayout.setAnimation(dpAnim);
-										drawAnswerCall();
-//										setContentView(R.layout.call_accept_decline);
+									public void onAnimationEnd(Animator animation) {
+//										avatarLayout.startAnimation(dpAnim);
 										
 									}
-							
+									
+									@Override
+									public void onAnimationCancel(Animator animation) {
+										// TODO Auto-generated method stub
+										
+									}
 								});
-//								springAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.full_voip_button_translate);
-//								avatarLayout.startAnimation(springAnim);
+
 							}
 			                break;
 		            default :
@@ -314,7 +318,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 	private void drawAnswerCall(){
 		setContentView(R.layout.call_accept_decline);
 		displayPic = (ImageView)this.findViewById(R.id.voipContactPicture);
-		avatarLayout = (FrameLayout)this.findViewById(R.id.voip_avatar_container);
+		avatarLayout = (CustomMovableFrameLayout)this.findViewById(R.id.voip_avatar_container);
 		setDisplayPic();
 		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
 		dpParams = avatarLayout.getLayoutParams();

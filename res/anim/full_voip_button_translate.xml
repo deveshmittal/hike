@@ -6,8 +6,8 @@ android:fillAfter="true">
 	<translate 
 	    android:duration="100"
 		android:interpolator="@android:anim/bounce_interpolator"
-	    android:fromXDelta="0"
-	    android:toXDelta="0%p"
+	    android:fromXDelta="0%p"
+	    android:toXDelta="50"
 	    />
 
 </set>
