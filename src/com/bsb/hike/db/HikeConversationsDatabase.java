@@ -1294,7 +1294,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		insertStatement.bindString(msisdnColumn, conv.getMsisdn());
 		}
         if(conv.getMessageType() == com.bsb.hike.HikeConstants.MESSAGE_TYPE.CONTENT) {
-            insertStatement.bindString(messageMetadataColumn, conv.platformMessageMetadata != null ? conv.platformMessageMetadata.toJSON().toString() : "");
+            insertStatement.bindString(messageMetadataColumn, conv.platformMessageMetadata != null ? conv.platformMessageMetadata.JSONtoString() : "");
 
         }  else
             insertStatement.bindString(messageMetadataColumn, conv.getMetadata() != null ? conv.getMetadata().serialize() : "");

@@ -174,7 +174,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 		return null;
 	}
 	
-	public String toJSON(){
+	public String JSONtoString(){
 		return json.toString();
 	}
 
