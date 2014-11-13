@@ -1207,6 +1207,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_LONG).show();
 				}
 				if(multipleMessageList.size() ==0 || arrayList.size()==0){
+					if(fileTransferList.isEmpty()){
+						// if it is >0 then onpost execute of PreFileTransferAsycntask will start intent
+						startActivity(intent);
+						finish();
+					}
 					return;
 				}else if(isSharingFile){
 					ConvMessage convMessage = multipleMessageList.get(0);
