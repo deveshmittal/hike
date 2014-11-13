@@ -415,6 +415,10 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
+			if(!isAdded())
+			{
+				return;
+			}
 			if (intent.getAction().equals(StickerManager.MORE_STICKERS_DOWNLOADED))
 			{
 				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);

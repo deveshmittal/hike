@@ -76,18 +76,18 @@
         {
             "catId": "indian",
             "stickerIds": [ 
-                "008_abeysaale.png",
-                "009_ghanta.png",
+                "042_sahihai.png",
+                "047_saale.png",
                 "012_Item.png",
-                "014_Chalhatt.png",
+                "063_boss.png",
                 "035_machaa.png",
                 "053_aiyo.png"
             ],
             "resourceIds": [
-                "sticker_008_abeysaale",
-                "sticker_009_ghanta",
+                "sticker_042_sahihai",
+                "sticker_047_saale",
                 "sticker_012_item",
-                "sticker_014_chalhatt",
+                "sticker_063_boss",
                 "sticker_035_machaa",
                 "sticker_035_machaa"
             ]
