@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:animateLayoutChanges="true"
     android:layout_height="wrap_content"
     android:background="@color/white"
     android:paddingTop="?attr/actionBarSize" >
@@ -86,7 +87,7 @@
             android:layout_marginTop="38dp"
             android:gravity="left"
             android:text="@string/auth_app_access_to"
-            android:textColor="#6cbc37"
+            android:textColor="@color/blue_hike"
             android:textSize="15sp"
             android:textStyle="bold" >
         </com.bsb.hike.view.CustomFontTextView>
