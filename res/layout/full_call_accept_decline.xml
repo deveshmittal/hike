@@ -24,7 +24,6 @@
             android:layout_height="90dp"
             android:layout_gravity="center"
             android:contentDescription="Profile Image"
-            android:onClick="onViewImageClicked"
             android:src="@drawable/ic_default_avatar_group" />
     </FrameLayout>
 
@@ -51,11 +50,11 @@
 
     <ImageView
         android:id="@+id/fullacceptButton"
-        android:layout_width="26dp"
-        android:layout_height="26dp"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="54dp"
+        android:layout_marginBottom="59dp"
         android:layout_marginRight="34dp"
         android:background="@drawable/greenarrow"
         android:maxHeight="10dp"
@@ -64,13 +63,16 @@
 
     <ImageView
         android:id="@+id/fulldeclineButton"
-        android:layout_width="26dp"
-        android:layout_height="26dp"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_marginBottom="54dp"
+        android:layout_marginBottom="59dp"
         android:layout_marginLeft="34dp"
-        android:background="@drawable/redarrow" />
+        android:background="@drawable/redarrow"
+        android:scaleType="centerInside" />
+    
+
 
     <ImageView
         android:id="@+id/fullcallSlider"
@@ -79,6 +81,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="27dp"
-        android:src="@drawable/callicon" />
+        android:src="@drawable/callicon" 
+        android:background="@drawable/slider_oval"/>
 
 </RelativeLayout>
