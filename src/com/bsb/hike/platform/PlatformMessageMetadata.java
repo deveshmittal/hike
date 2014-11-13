@@ -1,6 +1,7 @@
 package com.bsb.hike.platform;
 
 import android.text.TextUtils;
+import android.util.Base64;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.platform.CardComponent.ImageComponent;
 import com.bsb.hike.platform.CardComponent.MediaComponent;
@@ -112,7 +113,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 						obj.optString(MEDIA_SIZE));
 
                 if (!TextUtils.isEmpty(obj.optString(THUMBNAIL))) {
-                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
+                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, Base64.decode(thumbnail, Base64.DEFAULT));
                     obj.remove(THUMBNAIL);
                     obj.put(KEY, key);
                     thumbnailIds.add(key);
@@ -145,7 +146,8 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
 						obj.optString(MEDIA_SIZE),obj.optString(DURATION));
                 if (!TextUtils.isEmpty(thumbnail)) {
-                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
+                   // HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
+                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, Base64.decode(thumbnail, Base64.DEFAULT));
                     obj.remove(THUMBNAIL);
                     obj.put(KEY, key);
                     thumbnailIds.add(key);
