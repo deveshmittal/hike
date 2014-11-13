@@ -200,10 +200,9 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		return bitmap;
 	}
 
-    public BitmapDrawable getBitmapDrawableFromBase64(String key, String base64){
+    public BitmapDrawable getBitmapDrawable(String key){
 
-        BitmapDrawable value = null;
-
+        BitmapDrawable value;
 
             value = get(key);
 
@@ -214,8 +213,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
                 value = null;
             }
             if (value == null){
-                Bitmap bitmap = HikeBitmapFactory.stringToBitmap(base64);
-                value = HikeBitmapFactory.getBitmapDrawable(bitmap);
+                value = (BitmapDrawable) HikeConversationsDatabase.getInstance().getFileThumbnail(key);
                 putInCache(key, value);
             }
 
