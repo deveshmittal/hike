@@ -4353,7 +4353,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
         Cursor c = null;
         try {
-            c = mDb.query(DBConstants.FILE_THUMBNAIL_TABLE, new String[]{IMAGE}, DBConstants.FILE_KEY + "=?", new String[]{fileKey}, null, null, null);
+            c = mDb.query(DBConstants.FILE_THUMBNAIL_TABLE, new String[]{REF_COUNT}, DBConstants.FILE_KEY + "=?", new String[]{fileKey}, null, null, null);
 
 
             if (!c.moveToFirst()) {
@@ -4387,7 +4387,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
             int refCount = c.getInt(c.getColumnIndex(REF_COUNT));
 
-            if (refCount <= 1) {
+            if (refCount > 1) {
                 fileThumbnailValues.put(REF_COUNT, refCount - 1);
                 mDb.update(DBConstants.FILE_THUMBNAIL_TABLE, fileThumbnailValues, DBConstants.FILE_KEY + "=?", new String[]{fileKey});
             } else

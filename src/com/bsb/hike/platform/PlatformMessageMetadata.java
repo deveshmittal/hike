@@ -1,6 +1,7 @@
 package com.bsb.hike.platform;
 
 import android.text.TextUtils;
+import android.util.Base64;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.platform.CardComponent.ImageComponent;
 import com.bsb.hike.platform.CardComponent.MediaComponent;
@@ -17,7 +18,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 	public int layoutId;
 	public int loveId;
     public String notifText;
-    public List<String> thumbnailIds;
+    public List<String> thumbnailIds = new ArrayList<String>();
 	
 	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();
 	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();
@@ -102,21 +103,24 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 			JSONObject obj;
 			try {
 				obj = json.getJSONObject(i);
+                String key = obj.optString(KEY);
                 String thumbnail = obj.optString(THUMBNAIL);
-                String key = String.valueOf(thumbnail.hashCode());
+                if (!TextUtils.isEmpty(thumbnail))
+                    key = String.valueOf(thumbnail.hashCode());
 				ImageComponent imageCom = new ImageComponent(
 						obj.optString(TAG), key,
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
-						obj.optString(MEDIA_SIZE));
+						obj.optString(MEDIA_SIZE), obj.optString(DURATION));
 
                 if (!TextUtils.isEmpty(obj.optString(THUMBNAIL))) {
-                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
+                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, Base64.decode(thumbnail, Base64.DEFAULT));
                     obj.remove(THUMBNAIL);
-                    thumbnailIds.add(imageCom.getKey());
+                    obj.put(KEY, key);
+                    thumbnailIds.add(key);
                 }
                 else
                 {
-                    imageCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(imageCom.getKey());
+                    imageCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(key);
                 }
 				mediaComponents.add(imageCom);
 			} catch (JSONException e) {
@@ -133,20 +137,24 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 			JSONObject obj;
 			try {
 				obj = json.getJSONObject(i);
+                String key = obj.optString(KEY);
                 String thumbnail = obj.optString(THUMBNAIL);
-                String key = String.valueOf(thumbnail.hashCode());
+                if (!TextUtils.isEmpty(thumbnail))
+                    key = String.valueOf(thumbnail.hashCode());
 				VideoComponent videoCom = new VideoComponent(
 						obj.optString(TAG), key ,
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
 						obj.optString(MEDIA_SIZE),obj.optString(DURATION));
                 if (!TextUtils.isEmpty(thumbnail)) {
-                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
+                   // HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
+                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, Base64.decode(thumbnail, Base64.DEFAULT));
                     obj.remove(THUMBNAIL);
-                    thumbnailIds.add(videoCom.getKey());
+                    obj.put(KEY, key);
+                    thumbnailIds.add(key);
                 }
                 else
                 {
-                    videoCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(videoCom.getKey());
+                    videoCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(key);
                 }
 				mediaComponents.add(videoCom);
 			} catch (JSONException e) {
@@ -164,7 +172,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 			try {
 				obj = json.getJSONObject(i);
 				CardComponent.AudioComponent audioCom = new CardComponent.AudioComponent(
-						obj.optString(TAG), obj.optString("key"),
+						obj.optString(TAG), obj.optString(KEY),
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
 						obj.optString(MEDIA_SIZE),obj.optString(DURATION));
 				mediaComponents.add(audioCom);

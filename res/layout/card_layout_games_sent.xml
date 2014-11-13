@@ -71,7 +71,6 @@
                     android:id="@+id/payment_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
                     android:text="FREE"
                     android:tag="T2"
                     android:textColor="#92ce28"
@@ -87,7 +86,6 @@
                     android:id="@+id/description"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
                     android:textSize="13sp"
                     android:tag="T3"
                     android:textStyle="italic"
@@ -101,7 +99,6 @@
             <TextView
                     android:id="@+id/package_info"
                     android:layout_width="wrap_content"
-                    android:layout_marginTop="5dp"
                     android:gravity="center_horizontal"
                     android:layout_height="wrap_content"
                     android:textColor="#adb1b4"
