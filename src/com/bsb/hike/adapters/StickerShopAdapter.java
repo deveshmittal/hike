@@ -9,12 +9,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.models.StickerCategory;
@@ -103,11 +101,12 @@ public class StickerShopAdapter extends CursorAdapter
 	{
 		ViewHolder viewholder = (ViewHolder) view.getTag();
 		String categoryId = cursor.getString(idColoumn);
-		String categoryName = context.getResources().getString(R.string.pack_rank, cursor.getPosition() + 1);
-		categoryName += " " + cursor.getString(categoryNameColoumn);
+		String displayCategoryName = context.getResources().getString(R.string.pack_rank, cursor.getPosition() + 1);
+		String categoryName = cursor.getString(categoryNameColoumn);
+		displayCategoryName += " " + categoryName;
 		int totalStickerCount = cursor.getInt(totalStickersCountColoumn);
 		int categorySizeInBytes = cursor.getInt(categorySizeColoumn);
-		viewholder.categoryName.setText(categoryName);
+		viewholder.categoryName.setText(displayCategoryName);
 		stickerOtherIconLoader.loadImage(StickerManager.getInstance().getCategoryOtherAssetLoaderKey(categoryId, StickerManager.PREVIEW_IMAGE_TYPE), viewholder.categoryPreviewIcon, isListFlinging);
 		viewholder.downloadProgress.setVisibility(View.GONE);
 		if (totalStickerCount > 0)
