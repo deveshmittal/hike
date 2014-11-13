@@ -251,6 +251,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 				}
 				else
 				{
+					//TODO we should also update stickerCategoriesMap in StickerManager from here as well
 					HikeConversationsDatabase.getInstance().updateStickerCategoriesInDb(resultData);
 				}
 				final Cursor updatedCursor = HikeConversationsDatabase.getInstance().getCursorForStickerShop();
