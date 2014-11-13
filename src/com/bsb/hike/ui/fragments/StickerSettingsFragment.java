@@ -416,23 +416,25 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
+			if(!isAdded())
+			{
+				return;
+			}
 			if (intent.getAction().equals(StickerManager.STICKERS_UPDATED) || intent.getAction().equals(StickerManager.MORE_STICKERS_DOWNLOADED))
 			{
-				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
-				final StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
-				if(getActivity() != null)
+				if(getActivity() == null)
 				{
-					getActivity().runOnUiThread(new Runnable()
-					{
-
-						@Override
-						public void run()
-						{
-							mAdapter.notifyDataSetChanged();
-
-						}
-					});
+					return;
 				}
+				getActivity().runOnUiThread(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						mAdapter.notifyDataSetChanged();
+					}
+				});
 			}
 			
 			else if(intent.getAction().equals(StickerManager.STICKERS_FAILED))
