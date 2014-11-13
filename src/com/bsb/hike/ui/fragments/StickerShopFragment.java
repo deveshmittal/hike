@@ -119,7 +119,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		protected Pair<Cursor,Drawable> doInBackground(Void... arg0)
 		{
 			Cursor cursor = HikeConversationsDatabase.getInstance().getCursorForStickerShop();
-			Bitmap bmp = HikeBitmapFactory.decodeResource(getResources(), R.drawable.shop_banner);
+			Bitmap bmp = HikeBitmapFactory.decodeResource(getResources(), R.drawable.art_banner);
 			Drawable dr = HikeBitmapFactory.getBitmapDrawable(getResources(), bmp);
 			return new Pair(cursor, dr);
 		}
@@ -251,6 +251,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 				}
 				else
 				{
+					//TODO we should also update stickerCategoriesMap in StickerManager from here as well
 					HikeConversationsDatabase.getInstance().updateStickerCategoriesInDb(resultData);
 				}
 				final Cursor updatedCursor = HikeConversationsDatabase.getInstance().getCursorForStickerShop();
@@ -415,6 +416,10 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
+			if(!isAdded())
+			{
+				return;
+			}
 			if (intent.getAction().equals(StickerManager.MORE_STICKERS_DOWNLOADED))
 			{
 				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);

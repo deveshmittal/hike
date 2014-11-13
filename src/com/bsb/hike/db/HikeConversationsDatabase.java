@@ -5697,6 +5697,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.insertWithOnConflict(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
 	}
 	
+	/*
+	 * This method is called from sticker shop call responce.
+	 */
 	public void updateStickerCategoriesInDb(JSONArray jsonArray)
 	{
 		try
@@ -5713,12 +5716,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				ContentValues contentValues = new ContentValues();
 				contentValues.put(DBConstants._ID, catId);
-				int isVisible = 0;
-				if(jsonObj.has(HikeConstants.VISIBLITY))
-				{
-					isVisible = jsonObj.getInt(HikeConstants.VISIBLITY);
-					contentValues.put(DBConstants.IS_VISIBLE, isVisible);
-				}
 				if(jsonObj.has(HikeConstants.CAT_NAME))
 				{
 					contentValues.put(DBConstants.CATEGORY_NAME, jsonObj.getString(HikeConstants.CAT_NAME));
@@ -5732,16 +5729,56 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					contentValues.put(DBConstants.CATEGORY_SIZE, jsonObj.getInt(HikeConstants.SIZE));
 				}
 
-				int rowsAffected = mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { catId });
+				mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { catId });
+				mDb.insertWithOnConflict(DBConstants.STICKER_SHOP_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
+			}
+			mDb.setTransactionSuccessful();
+		}
+		catch (Exception e)
+		{
+			Logger.e(getClass().getSimpleName(), "Exception : ", e);
+			e.printStackTrace();
+		}
+		finally
+		{
+			mDb.endTransaction();
+		}
+	}
+	
+	public void updateStickerCategoriesInDb(Collection<StickerCategory> stickerCategories)
+	{
+		try
+		{
+			mDb.beginTransaction();
+			for (StickerCategory category : stickerCategories)
+			{
+				ContentValues contentValues = new ContentValues();
+				contentValues.put(DBConstants._ID, category.getCategoryId());
+				contentValues.put(DBConstants.CATEGORY_NAME, category.getCategoryName());
+				contentValues.put(DBConstants.TOTAL_NUMBER, category.getTotalStickers());
+				contentValues.put(DBConstants.CATEGORY_SIZE, category.getCategorySize());
+				
+				/*
+				 * stickerShopTable contains only these 4 columns.
+				 */
+				mDb.insertWithOnConflict(DBConstants.STICKER_SHOP_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
+
+				/*
+				 * Adding extra fields as per stickerCategoriesTable
+				 */
+				contentValues.put(DBConstants.IS_VISIBLE, category.isVisible());
+				contentValues.put(DBConstants.CATEGORY_INDEX, category.getCategoryIndex());
+				
+				int rowsAffected = mDb.update(DBConstants.STICKER_CATEGORIES_TABLE, contentValues, DBConstants._ID + "=?", new String[] { category.getCategoryId() });
 				/*
 				 * if row is not there in stickerCategoriesTable and server specifically tells us to switch on the visibility 
 				 * then we need to insert this item in stickerCategoriesTable
 				 */
-				if(isVisible == 1 && rowsAffected == 0)
+				if(category.isVisible() && rowsAffected == 0)
 				{
 					mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
 				}
-				mDb.insertWithOnConflict(DBConstants.STICKER_SHOP_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
+				
 			}
 			mDb.setTransactionSuccessful();
 		}

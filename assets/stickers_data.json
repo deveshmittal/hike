@@ -76,20 +76,22 @@
         {
             "catId": "indian",
             "stickerIds": [ 
-                "008_abeysaale.png",
-                "009_ghanta.png",
+                "042_sahihai.png",
+                "047_saale.png",
                 "012_Item.png",
-                "014_Chalhatt.png",
+                "063_boss.png",
                 "035_machaa.png",
-                "053_aiyo.png"
+                "053_aiyo.png",
+                "040_waah.png"
             ],
             "resourceIds": [
-                "sticker_008_abeysaale",
-                "sticker_009_ghanta",
+                "sticker_042_sahihai",
+                "sticker_047_saale",
                 "sticker_012_item",
-                "sticker_014_chalhatt",
+                "sticker_063_boss",
                 "sticker_035_machaa",
-                "sticker_035_machaa"
+                "sticker_053_aiyo",
+                "sticker_040_waah"
             ]
         },
         {
@@ -122,7 +124,6 @@
             "isVisible": true,
             "isCustom": false,
             "totalStickers":49,
-            "preview": "sticker_003_teasing",
             "pallate_icon": "ic_humanoid",
             "pallate_icon_selected": "ic_humanoid_selected"
         },
@@ -133,7 +134,6 @@
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_006_dl_balleballe",
             "pallate_icon": "ic_delhi",
             "pallate_icon_selected": "ic_delhi_selected"
         },
@@ -144,7 +144,6 @@
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_001_mb_shaane",
             "pallate_icon": "ic_mumbai",
             "pallate_icon_selected": "ic_mumbai_selected"
         },
@@ -155,7 +154,6 @@
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_006_ko_mojakor",
             "pallate_icon": "ic_kolkata",
             "pallate_icon_selected": "ic_kolkata_selected"
         },
@@ -166,7 +164,6 @@
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_002_gj_kemcho",
             "pallate_icon": "ic_gujarat",
             "pallate_icon_selected": "ic_gujarat_selected"
         },
@@ -177,7 +174,7 @@
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_001_ka_machaa",
+            "preview": "sticker_006_ka_sakkathmaga",
             "pallate_icon": "ic_bangalore",
             "pallate_icon_selected": "ic_bangalore_selected"
         },
@@ -188,7 +185,7 @@
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_002_hyd_kirak",
+            "preview": "sticker_003_hyd_mama",
             "pallate_icon": "ic_hyderabad",
             "pallate_icon_selected": "ic_hyderabad_selected"
         },
@@ -210,7 +207,7 @@
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_001_tn_aiyo",
+            "preview": "sticker_001_tn_eppudi",
             "pallate_icon": "ic_chennai",
             "pallate_icon_selected": "ic_chennai_selected"
         },
@@ -232,7 +229,7 @@
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_002_kl_ennathaparipadi",
+            "preview": "sticker_007_kl_adipoli",
             "pallate_icon": "ic_kerala",
             "pallate_icon_selected": "ic_kerala_selected"
         },
@@ -254,7 +251,6 @@
             "isVisible": true,
             "isCustom": false,
             "totalStickers":56,
-            "preview": "sticker_014_chalhatt",
             "pallate_icon": "ic_indian",
             "pallate_icon_selected": "ic_indian_selected"
         },
@@ -265,7 +261,6 @@
             "isVisible": true,
             "isCustom": false,
             "totalStickers":59,
-            "preview": "sticker_002_lol",
             "pallate_icon": "ic_expressions",
             "pallate_icon_selected": "ic_expressions_selected"
         },
