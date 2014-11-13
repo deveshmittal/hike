@@ -47,21 +47,31 @@
                 android:layout_below="@id/sender_details"
                 android:background="@drawable/ic_bubble_white_selector">
 
-            <ImageView
-                    android:id="@+id/card_image"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:tag="I1"
-                    android:src="@drawable/hike_avtar_protip"
-                    android:layout_width="76dp"
-                    android:layout_height="76dp"/>
+            <FrameLayout android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:layout_alignParentRight="true"
+                         android:layout_centerVertical="true"
+                         android:id="@+id/video_image_container">
+                <ImageView
+                        android:id="@+id/card_image"
+                        android:tag="I1"
+                        android:src="@drawable/hike_avtar_protip"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"/>
+
+                <ImageView android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:layout_gravity="center"
+                           android:src="@drawable/ic_status_tip"/>
+
+            </FrameLayout>
 
 
 
             <LinearLayout
                     xmlns:android="http://schemas.android.com/apk/res/android"
                     android:layout_width="wrap_content"
-                    android:layout_toLeftOf="@id/card_image"
+                    android:layout_toLeftOf="@id/video_image_container"
                     android:layout_alignParentLeft="true"
                     android:padding="12dp"
                     android:layout_centerVertical="true"
