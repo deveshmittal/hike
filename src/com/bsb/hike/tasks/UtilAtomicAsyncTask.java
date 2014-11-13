@@ -56,6 +56,7 @@ public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			onPostExecute(null);
 			// We need to be absolutely sure that we are dismissing progress bar at some point
 		}
 

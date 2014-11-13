@@ -36,6 +36,7 @@ import com.bsb.hike.tasks.UtilAtomicAsyncTask.UtilAsyncTaskListener;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSDKConstants;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -273,6 +274,7 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 			@Override
 			public void onFailed()
 			{
+				Logger.d(HikeAuthActivity.class.getCanonicalName(), "on task failed");
 				message.arg2 = HikeSDKResponseCode.STATUS_FAILED;
 				try
 				{
@@ -291,6 +293,7 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 				// response example - {"state":null,"expires_in":5184000,"access_token":"F78SWrzfx-SKNbo2QZZBHA==","token_type":"Bearer"}}
 				try
 				{
+					Logger.d(HikeAuthActivity.class.getCanonicalName(), "on task success");
 					JSONObject responseJSON = new JSONObject(argResponse);
 					JSONObject responseData = responseJSON.getJSONObject("response");
 					if (responseData != null)
@@ -307,12 +310,13 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 					}
 					else
 					{
-						HikeAuthActivity.this.onFailed("Problem in auth process. Please try again.");
+						HikeAuthActivity.this.onFailed("Problem in auth process. Please check client id");
 					}
 				}
 				catch (JSONException e)
 				{
 					e.printStackTrace();
+					HikeAuthActivity.this.onFailed("Problem in auth process. Please check client id");
 				}
 			}
 		});
@@ -423,12 +427,12 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 		try
 		{
 			message.replyTo.send(message);
-			HikeAuthActivity.this.finish();
 		}
 		catch (RemoteException e)
 		{
 			e.printStackTrace();
 		}
+		HikeAuthActivity.this.finish();
 	}
 
 	public Drawable getmAppImage()
