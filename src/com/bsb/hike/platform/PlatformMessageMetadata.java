@@ -102,8 +102,10 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 			JSONObject obj;
 			try {
 				obj = json.getJSONObject(i);
+                String key = obj.optString(KEY);
                 String thumbnail = obj.optString(THUMBNAIL);
-                String key = String.valueOf(thumbnail.hashCode());
+                if (!TextUtils.isEmpty(thumbnail))
+                    key = String.valueOf(thumbnail.hashCode());
 				ImageComponent imageCom = new ImageComponent(
 						obj.optString(TAG), key,
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
@@ -112,11 +114,12 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
                 if (!TextUtils.isEmpty(obj.optString(THUMBNAIL))) {
                     HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
                     obj.remove(THUMBNAIL);
-                    thumbnailIds.add(imageCom.getKey());
+                    obj.put(KEY, key);
+                    thumbnailIds.add(key);
                 }
                 else
                 {
-                    imageCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(imageCom.getKey());
+                    imageCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(key);
                 }
 				mediaComponents.add(imageCom);
 			} catch (JSONException e) {
@@ -133,8 +136,10 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 			JSONObject obj;
 			try {
 				obj = json.getJSONObject(i);
+                String key = obj.optString(KEY);
                 String thumbnail = obj.optString(THUMBNAIL);
-                String key = String.valueOf(thumbnail.hashCode());
+                if (!TextUtils.isEmpty(thumbnail))
+                    key = String.valueOf(thumbnail.hashCode());
 				VideoComponent videoCom = new VideoComponent(
 						obj.optString(TAG), key ,
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
@@ -142,11 +147,12 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
                 if (!TextUtils.isEmpty(thumbnail)) {
                     HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
                     obj.remove(THUMBNAIL);
-                    thumbnailIds.add(videoCom.getKey());
+                    obj.put(KEY, key);
+                    thumbnailIds.add(key);
                 }
                 else
                 {
-                    videoCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(videoCom.getKey());
+                    videoCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(key);
                 }
 				mediaComponents.add(videoCom);
 			} catch (JSONException e) {
@@ -164,7 +170,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 			try {
 				obj = json.getJSONObject(i);
 				CardComponent.AudioComponent audioCom = new CardComponent.AudioComponent(
-						obj.optString(TAG), obj.optString("key"),
+						obj.optString(TAG), obj.optString(KEY),
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
 						obj.optString(MEDIA_SIZE),obj.optString(DURATION));
 				mediaComponents.add(audioCom);
