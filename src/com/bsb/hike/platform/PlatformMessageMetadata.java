@@ -17,6 +17,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 	public int layoutId;
 	public int loveId;
     public String notifText;
+    public List<String> thumbnailIds;
 	
 	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();
 	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();
@@ -107,6 +108,16 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 						obj.optString(TAG), key,
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
 						obj.optString(MEDIA_SIZE));
+
+                if (!TextUtils.isEmpty(obj.optString(THUMBNAIL))) {
+                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
+                    obj.remove(THUMBNAIL);
+                    thumbnailIds.add(imageCom.getKey());
+                }
+                else
+                {
+                    imageCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(imageCom.getKey());
+                }
 				mediaComponents.add(imageCom);
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -128,6 +139,15 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 						obj.optString(TAG), key ,
 						obj.optString(URL), obj.optString(CONTENT_TYPE),
 						obj.optString(MEDIA_SIZE),obj.optString(DURATION));
+                if (!TextUtils.isEmpty(thumbnail)) {
+                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
+                    obj.remove(THUMBNAIL);
+                    thumbnailIds.add(videoCom.getKey());
+                }
+                else
+                {
+                    videoCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(videoCom.getKey());
+                }
 				mediaComponents.add(videoCom);
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block

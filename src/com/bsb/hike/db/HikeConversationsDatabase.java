@@ -4426,6 +4426,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
+    public byte [] getThumbnail(String fileKey){
+
+        Cursor c = null;
+        try
+        {
+            c = mDb.query(DBConstants.FILE_THUMBNAIL_TABLE, new String[] { DBConstants.IMAGE }, DBConstants.FILE_KEY + "=?", new String[] { fileKey }, null, null, null);
+
+            if (!c.moveToFirst())
+            {
+                return null;
+            }
+
+            return c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
+
+        }
+        finally
+        {
+            if (c != null)
+            {
+                c.close();
+            }
+        }
+
+    }
+
 	public String getReadByValueForMessageID(long msgId)
 	{
 		Cursor c = null;
