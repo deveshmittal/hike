@@ -156,7 +156,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 				break;
 			case StickerCategory.DOWNLOADING:
 				viewHolder.updateAvailable.setTextColor(category.isVisible() ? mContext.getResources().getColor(R.color.sticker_settings_update_color) : mContext.getResources().getColor(R.color.shop_update_invisible_color));
-				viewHolder.updateAvailable.setText(R.string.downloading_sticker);
+				viewHolder.updateAvailable.setText(R.string.downloading_stk);
 				viewHolder.updateAvailable.setVisibility(View.VISIBLE);
 				viewHolder.downloadProgress.setVisibility(View.VISIBLE);
 				viewHolder.checkBox.setVisibility(View.GONE);
