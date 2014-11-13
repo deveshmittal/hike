@@ -191,10 +191,10 @@ public class CardRenderer implements View.OnLongClickListener {
             if (view == null){
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_games_sent, null);
+                    view = inflater.inflate(R.layout.card_layout_video_sent, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
-                    view = inflater.inflate(R.layout.card_layout_games_received, null);
+                    view = inflater.inflate(R.layout.card_layout_video_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
@@ -244,10 +244,10 @@ public class CardRenderer implements View.OnLongClickListener {
             if (view == null){
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_games_sent, null);
+                    view = inflater.inflate(R.layout.card_layout_article_sent, null);
                     viewHolder.initializeHolderForSender(view);
                 }else {
-                    view = inflater.inflate(R.layout.card_layout_games_received, null);
+                    view = inflater.inflate(R.layout.card_layout_article_received, null);
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
