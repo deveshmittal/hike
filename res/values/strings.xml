@@ -1181,4 +1181,13 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="wish_you">Wish your friends!</string>
     <string name="messages_sent_succees">Message Sent</string>
     <string name="content_card_tag">CARD</string>
+    <string name="auth_title">Do you want to authorize %1$s \n to use your hike account?</string>
+    <string name="auth_cd_app_logo">Application icon</string>
+    <string name="auth_app_access_to">%1$s will have access to:</string>
+    <string name="auth_your_public_profile">Your public profile</string>
+    <string name="auth_will_setup_acc">This will set up your account on %1$s</string>
+    <string name="auth_contacts_on_hike">Contacts on hike</string>
+    <string name="auth_needed_for_messaging">This is needed for instant messaging</string>
+    <string name="auth_button_deny">Nope</string>
+    <string name="auth_button_accept">Connect</string>
 </resources>

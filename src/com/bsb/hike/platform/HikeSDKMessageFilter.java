@@ -1,6 +1,7 @@
 package com.bsb.hike.platform;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.model.card.HikeCardConstants;
 import com.bsb.hike.models.ConvMessage;
 import org.json.JSONObject;
 
@@ -10,7 +11,7 @@ public class HikeSDKMessageFilter implements HikePlatformConstants{
 
 		ConvMessage convMessage = new ConvMessage();
 
-		convMessage.setMessageType(com.bsb.hike.model.card.CardConstants.CARD_MSG_TYPE.equals(json.optString(MESSAGE_TYPE)) ? HikeConstants.MESSAGE_TYPE.CONTENT
+		convMessage.setMessageType(HikeCardConstants.CARD_MSG_TYPE.equals(json.optString(MESSAGE_TYPE)) ? HikeConstants.MESSAGE_TYPE.CONTENT
 				: HikeConstants.MESSAGE_TYPE.PLAIN_TEXT);
 		convMessage.platformMessageMetadata = new PlatformMessageMetadata(json);
         convMessage.setMessage(convMessage.platformMessageMetadata.notifText);

@@ -48,6 +48,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -171,6 +172,7 @@ import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
+import com.bsb.hike.tasks.UtilAtomicAsyncTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
@@ -3079,6 +3081,18 @@ public class Utils
 		else
 		{
 			asyncTask.execute(hikeHttpRequests);
+		}
+	}
+	
+	public static void executeUtilAtomicTask(UtilAtomicAsyncTask argTask, HttpRequestBase... requests)
+	{
+		if (isHoneycombOrHigher())
+		{
+			argTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requests);
+		}
+		else
+		{
+			argTask.execute(requests);
 		}
 	}
 

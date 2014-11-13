@@ -1,10 +1,10 @@
 package com.bsb.hike.providers;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.platform.Authenticator;
+import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -73,12 +73,41 @@ public class HikeProvider extends ContentProvider
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder)
 	{
+		
+		// Authenticate
+		List<String> uriPathSegments = uri.getPathSegments();
 
-		// TODO : This is a stub. TBD on Auth implementation.
-		if (!Authenticator.getInstance().isTokenValid(uri.getLastPathSegment()))
+		if (uriPathSegments != null)
 		{
-			Logger.d(TAG, "Invalid access token");
-			return null;
+			try
+			{
+				String accessT = uriPathSegments.get(uriPathSegments.size() - 2);
+				String pkgName = uriPathSegments.get(uriPathSegments.size() - 1);
+				if (HikeAuthActivity.verifyRequest(getContext(), pkgName, accessT))
+				{
+					String newUri = "content://" + uri.getAuthority();
+					int segmentsListSize = uriPathSegments.size();
+
+					for (int i = 0; i < segmentsListSize; i++)
+					{
+						if (i == (segmentsListSize - 2))
+						{
+							break;
+						}
+						newUri += "/" + uriPathSegments.get(i);
+					}
+					uri = Uri.parse(newUri);
+				}
+				else
+				{
+					throw new RuntimeException("Required missing authentication!");
+				}
+			}
+			catch (IndexOutOfBoundsException iobe)
+			{
+				iobe.printStackTrace();
+				return null;
+			}
 		}
 
 		Cursor c = null;
@@ -93,21 +122,13 @@ public class HikeProvider extends ContentProvider
 				// For better security, use hard-coded selection columns
 				if (selection == null)
 				{
-					c = hUserDb.rawQuery(
-									"SELECT roundedThumbnailTable.image, users.id " 
-									+ "FROM roundedThumbnailTable " 
-									+ "INNER JOIN users "
-									+ "ON roundedThumbnailTable.msisdn=users.msisdn", null);
+					c = hUserDb.rawQuery("SELECT roundedThumbnailTable.image, users.id " + "FROM roundedThumbnailTable " + "INNER JOIN users "
+							+ "ON roundedThumbnailTable.msisdn=users.msisdn", null);
 				}
 				else
 				{
-					c = hUserDb.rawQuery(
-							"SELECT roundedThumbnailTable.image, users.id" 
-							+ " FROM roundedThumbnailTable " 
-							+ "INNER JOIN users "
-							+ "ON roundedThumbnailTable.msisdn=users.msisdn " 
-							+ "WHERE users.id IN " 
-							+ Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
+					c = hUserDb.rawQuery("SELECT roundedThumbnailTable.image, users.id" + " FROM roundedThumbnailTable " + "INNER JOIN users "
+							+ "ON roundedThumbnailTable.msisdn=users.msisdn " + "WHERE users.id IN " + Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
 				}
 			}
 			catch (SQLiteException e)
@@ -123,21 +144,12 @@ public class HikeProvider extends ContentProvider
 				// For better security, use hard-coded selection columns
 				if (selection == null)
 				{
-					c = hUserDb.rawQuery(
-									"SELECT thumbnails.image, users.id " 
-									+ "FROM thumbnails " 
-									+ "INNER JOIN users " 
-									+ "ON thumbnails.msisdn=users.msisdn", null);
+					c = hUserDb.rawQuery("SELECT thumbnails.image, users.id " + "FROM thumbnails " + "INNER JOIN users " + "ON thumbnails.msisdn=users.msisdn", null);
 				}
 				else
 				{
-					c = hUserDb.rawQuery(
-								"SELECT thumbnails.image, users.id " 
-								+ "FROM thumbnails " 
-								+ "INNER JOIN users " 
-								+ "ON thumbnails.msisdn=users.msisdn "
-								+ "WHERE users.id IN " 
-								+ Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
+					c = hUserDb.rawQuery("SELECT thumbnails.image, users.id " + "FROM thumbnails " + "INNER JOIN users " + "ON thumbnails.msisdn=users.msisdn "
+							+ "WHERE users.id IN " + Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
 				}
 			}
 			catch (SQLiteException e)

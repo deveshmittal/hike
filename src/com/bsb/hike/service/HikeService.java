@@ -144,6 +144,8 @@ public class HikeService extends Service
 	
 	public static final int SDK_REQ_GET_LOGGED_USER_INFO = -14;
 	
+	public static final int SDK_REQ_AUTH_CLIENT = -15;
+	
 	public static final int SDK_REQ_SEND_MESSAGE = -13;
 
 	/************************************************************************/
