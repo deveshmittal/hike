@@ -1218,12 +1218,12 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="shop_loading_failed_switch_on">Switch on Mobile data or Wi-Fi</string>
     <string name="singular_packs">%1$d Pack</string>
     <string name="singular_stickers">%1$d Sticker</string>
-    <string name="ftue_sticker_screen_title">Hi %1$s</string>
+    <string name="ftue_sticker_screen_title">Choose a sticker</string>
     <string name ="ftue_sticker_screen_header">Stickers!</string>
     <string name="ftue_sticker_screen_text">Hike has a ton of stickers. Which one below is your favorite?</string>
     <string name="ftue_sticker_forward_title">Send to</string>
     <string name="ftue_sticker_forward_card_text">Great Choice!</string>
-    <string name="ftue_sticker_forward_card_subtext">Try sending this sticker to your friends -</string>
+    <string name="ftue_sticker_forward_card_subtext">Try sending it to your friends.</string>
     <string name="conversation_empty">Tap \'<b>new message</b>\' icon on top\nto start a chat</string>
     <string name="nux_invite_enter_names">Start entering names of your best friends.</string>
     <string name="invite_footer_header">Who\'s your Bestie?</string>
