@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import java.util.Random;
 import java.util.Set;
 
+import com.bsb.hike.platform.CardComponent;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -4832,9 +4833,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 
         if (convMessage.getMessageType() == MESSAGE_TYPE.CONTENT){
-            List<String> ids = convMessage.platformMessageMetadata.thumbnailIds;
-            for (String id:ids){
-                HikeConversationsDatabase.getInstance().reduceRefCount(id);
+            int numberOfMediaComponents = convMessage.platformMessageMetadata.mediaComponents.size();
+            for (int i = 0; i < numberOfMediaComponents; i++){
+                CardComponent.MediaComponent mediaComponent = convMessage.platformMessageMetadata.mediaComponents.get(i);
+                HikeConversationsDatabase.getInstance().reduceRefCount(mediaComponent.getKey());
             }
         }
 

@@ -206,7 +206,15 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 		}
 		return null;
 	}
-	
+
+	public void addToThumbnailTable(){
+
+        Set<String> thumbnailKeys = thumbnailMap.keySet();
+        for (String key : thumbnailKeys)
+            HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnailMap.get(key));
+
+    }
+
 	public String JSONtoString(){
 		return json.toString();
 	}

@@ -409,9 +409,10 @@ public class DbConversationListener implements Listener
             ArrayList<String> msisdns = ContactManager.getInstance().getMsisdnFromId(toArray);
             ArrayList<ContactInfo> listOfContacts = new ArrayList<ContactInfo>();
             for (String msisdn:msisdns){
-                convMessage.setMsisdn(msisdn);
+                convMessage.platformMessageMetadata.addToThumbnailTable();
                 listOfContacts.add(new ContactInfo(msisdn, msisdn, null, null,!convMessage.isSMS()));
             }
+            convMessage.platformMessageMetadata.thumbnailMap.clear();
             if(listOfMessages!=null && null != listOfContacts) {
                 HikeConversationsDatabase.getInstance().addConversations(listOfMessages, listOfContacts, true);
                 for(int i = 0; i< listOfContacts.size() ; i++){
