@@ -1044,12 +1044,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				Utils.sendUILogEvent(HikeConstants.LogEvent.CONFIRM_FORWARD);
 				if(isFtueFwd)
 				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_STICKER_FORWARD);
 					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 					Editor editor = settings.edit();
 					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, false);
 					editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
 					editor.commit();
 					sendDetailsAfterSignup(false);
+				}
+				if(nuxInviteMode)
+				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_BOT_FORWARD);
 				}
 				forwardConfirmDialog.dismiss();
 				forwardMultipleMessages(arrayList);

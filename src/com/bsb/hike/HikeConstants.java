@@ -1668,6 +1668,19 @@ public class HikeConstants
 		public static final String ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED = "atomicAppHikeExtraClick";
 
 		public static final String ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED = "atomicAppHikeRewardsClick";
+
+		/*
+		 * NUX Events 
+		 */
+		public static final String NUX_STICKER_CLICKED = "nuxStckrClk";
+
+		public static final String NUX_STICKER_FORWARD = "nuxStckrFwd";
+
+		public static final String NUX_INVITE_BUTTON_CLICKED = "nuxInvteBtnClk";
+
+		public static final String NUX_INVITE_SENT = "nuxInvteSent";
+
+		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
 	}
 
 	public static final class MqttMessageTypes

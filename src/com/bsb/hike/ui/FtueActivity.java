@@ -113,7 +113,9 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity implements On
 		Pair<Sticker, Integer> pair = stickers.get(index);
 		Sticker st = pair.first;
 		int stickerResId = pair.second;
-		Intent intent = IntentManager.getForwardStickerIntent(FtueActivity.this, st.getStickerId(), st.getCategoryId(), true);
+		String stId = st.getStickerId();
+		Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_STICKER_CLICKED + "_" + stId);
+		Intent intent = IntentManager.getForwardStickerIntent(FtueActivity.this, stId, st.getCategoryId(), true);
 		intent.putExtra(StickerManager.STICKER_RES_ID, stickerResId);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		FtueActivity.this.finish();

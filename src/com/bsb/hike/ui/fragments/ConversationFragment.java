@@ -2547,6 +2547,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void inviteButtonClicked()
 	{
+		Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_INVITE_BUTTON_CLICKED);
 		Intent intent = new Intent(getActivity(), HikeListActivity.class);
 		intent.putExtra(HikeConstants.NUX_INVITE_FORWARD, true);
 		startActivity(intent);
