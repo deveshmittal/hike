@@ -280,7 +280,7 @@ public class HikePubSub implements Runnable
 
 	public static final String SEND_SMS_PREF_TOGGLED = "sendSmsPrefToggled";
 
-	public static final String FINISHED_AVTAR_UPGRADE = "finshedAvtarDBUpgrade";
+	public static final String FINISHED_UPGRADE_INTENT_SERVICE = "finshedUpgradeIntentService";
 
 	public static final String FTUE_LIST_FETCHED_OR_UPDATED = "ftueListFetchedOrUpdated";
 
