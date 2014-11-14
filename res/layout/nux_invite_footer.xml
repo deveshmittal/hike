@@ -4,22 +4,24 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-<LinearLayout
+<RelativeLayout
     android:id="@+id/nux_invite_parent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
     android:layout_marginTop="@dimen/invite_footer_top_margin"
     android:visibility="gone">
     
 	<ImageView
+	    android:id="@+id/sticker_invite_footer"
+	    android:layout_centerHorizontal="true"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:src="@drawable/art_sticker_whistle"/>
 	
 	<TextView
 	    android:id="@+id/invite_footer_header"
+	    android:layout_centerHorizontal="true"
+	    android:layout_below="@id/sticker_invite_footer"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:paddingTop="20dp"
@@ -29,6 +31,8 @@
 	
 	<TextView
 	    android:id="@+id/invite_footer_subtext"
+	    android:layout_centerHorizontal="true"
+	    android:layout_below="@id/invite_footer_header"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:paddingTop="@dimen/nux_text_text_margin"
@@ -39,8 +43,12 @@
 	
 	<Button
 	    android:id="@+id/nux_invite_now"
-	    android:layout_width="280dp"
+	    android:layout_centerHorizontal="true"
+	    android:layout_below="@id/invite_footer_subtext"
+	    android:layout_width="0dp"
 	    android:layout_height="48dp"
+	    android:layout_alignLeft="@id/invite_footer_header"
+	    android:layout_alignRight="@id/invite_footer_header"
 	    android:layout_marginTop="@dimen/nux_button_text_margin"
 	    android:background="@color/blue_hike"
 	    android:textSize="13sp"
@@ -49,5 +57,5 @@
 	    android:text="@string/invite_now_uppercase" >
 	</Button>
 
-</LinearLayout>
+</RelativeLayout>
 </LinearLayout>
