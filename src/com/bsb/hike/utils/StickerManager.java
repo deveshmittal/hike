@@ -905,6 +905,7 @@ public class StickerManager
 					}
 					else
 					{
+						Logger.i("StickerMananger", "moveHardcodedStickersToSdcard failed resName = "+resName+" not found");
 						result = false;
 					}
 				}	
@@ -1256,7 +1257,7 @@ public class StickerManager
 	public void updateStickerCategoriesMetadata(JSONArray jsonArray)
 	{
 		int length = jsonArray.length();
-		List<StickerCategory> visibleStickerCategories = new ArrayList<>();
+		List<StickerCategory> visibleStickerCategories = new ArrayList<StickerCategory>();
 		int humanoidCategoryIndex = stickerCategoriesMap.get(HUMANOID).getCategoryIndex();
 		for (int i = 0; i < length; i++)
 		{
