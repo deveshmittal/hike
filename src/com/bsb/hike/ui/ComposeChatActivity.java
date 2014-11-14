@@ -708,12 +708,13 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	 */
 	private void setSticker()
 	{
-		String stickerId = getIntent().getStringExtra(StickerManager.STICKER_ID);
-		int idx = stickerId.lastIndexOf(".");
-		String resName = "sticker_"+stickerId.substring(0, idx);
-		Bitmap stickerBitmap = BitmapUtils.getBitmapFromResourceName(getApplicationContext(), resName);
+		int stickerResId = getIntent().getIntExtra(StickerManager.STICKER_RES_ID, 0);
+		if(stickerResId == 0)
+		{
+			return;
+		}
 		ImageView imageView = (ImageView) findViewById(R.id.nuxComposeSticker);
-		imageView.setImageDrawable(HikeBitmapFactory.getBitmapDrawable(stickerBitmap));
+		imageView.setImageResource(stickerResId);
 	}
 	
 	private void setupForSelectAll(){
