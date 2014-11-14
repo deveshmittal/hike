@@ -3,31 +3,33 @@
     android:id="@+id/ftue_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/standerd_background"
     android:gravity="center_horizontal"
     android:orientation="vertical" >
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/nuxCard"
+        style="@style/NuxScreenCardContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="24dp"
-        android:layout_marginTop="28dp" >
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingBottom="15dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="22dp"
+        android:paddingTop="15dp" >
 
         <com.bsb.hike.ui.utils.RecyclingImageView
             android:id="@+id/nuxStickerIcon"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_centerVertical="true"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:src="@drawable/sticker_icon" />
 
         <LinearLayout
             android:id="@+id/text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_toRightOf="@id/nuxStickerIcon"
+            android:layout_marginLeft="22dp"
             android:orientation="vertical" >
 
             <com.bsb.hike.view.CustomFontTextView
@@ -36,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/ftue_sticker_screen_header"
                 android:textColor="@color/black"
-                android:textSize="24sp" />
+                android:textSize="22sp" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/ftue_text2"
@@ -45,9 +47,9 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/ftue_sticker_screen_text"
                 android:textColor="@color/grey"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
         </LinearLayout>
-    </RelativeLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/nuxStickers"
@@ -56,7 +58,7 @@
         android:layout_marginBottom="30dp"
         android:layout_marginLeft="18dp"
         android:layout_marginRight="18dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         android:gravity="center"
         android:orientation="horizontal" >
 
@@ -65,7 +67,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/sticker_001_dl_oye" />
+            android:src="@drawable/sticker_001_as_kikorisa" />
 
         <ImageView
             android:id="@+id/two"
