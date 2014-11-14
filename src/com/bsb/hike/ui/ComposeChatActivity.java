@@ -394,17 +394,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		// need to confirm with rishabh --gauravKhanna
 		tagEditText.setMinCharChangeThresholdForTag(8);
 		tagEditText.setSeparator(TagEditText.SEPARATOR_SPACE);
-		tagEditText.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				if (null != composeCardInflated)
-				{
-					composeCardInflated.setVisibility(View.GONE);
-				}
-			}
-		});
 	}
 	
 	private void initTips(){
@@ -689,6 +678,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			if (null != composeCardInflated)
 				composeCardInflated.setVisibility(View.VISIBLE);
 			setSticker();
+			tagEditText.setVisibility(View.GONE);
 			break;
 		case NUX_INVITE_MODE:
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
