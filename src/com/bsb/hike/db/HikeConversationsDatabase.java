@@ -616,11 +616,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		 */
 		if(oldVersion < 31){
 			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE + " ADD COLUMN " + DBConstants.HIKE_CONV_DB.LOVE_ID_REL + " INTEGER";
-            String alter2 = "ALTER TABLE " + DBConstants.FILE_THUMBNAIL_TABLE + " ADD COLUMN " + REF_COUNT + " INTEGER AUTOINCR";
-
 			db.execSQL(alter);
-            db.execSQL(alter2);
 		}
+
+        if (oldVersion < 32){
+            String alter2 = "ALTER TABLE " + DBConstants.FILE_THUMBNAIL_TABLE + " ADD COLUMN " + REF_COUNT + " INTEGER";
+            db.execSQL(alter2);
+        }
 	}
 
 	private String getStatusTableCreationStatement()
