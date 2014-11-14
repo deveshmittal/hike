@@ -181,7 +181,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		// pub sub thread event to cancel the dialog once the upgrade is done.
 		if ((HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeConstants.UPGRADING, false)))
 		{
-			progDialog = ProgressDialog.show(this, getString(R.string.work_in_progress), getString(R.string.upgrading_to_a_new_and_improvd_hike), true);
+			progDialog = ProgressDialog.show(this, getString(R.string.work_in_progress), getString(R.string.upgrade_string), true);
 			showingProgress = true;
 			HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
 		}
