@@ -76,10 +76,6 @@ public class StickerDownloadManager
 			Logger.d(TAG, "DownloadMultipleStickers task for catId : " + cat.getCategoryId() +  " already exists");
 			return;
 		}
-		if (queue.isTaskAlreadyExist(taskId))
-		{
-			return;
-		}
 		BaseStickerDownloadTask stickerCategoryTask = new MultiStickerDownloadTask(handler, context, taskId, cat, downloadType, source, callback);
 		Request request = new Request(stickerCategoryTask);
 		request.setPrioity(Request.PRIORITY_HIGH);
