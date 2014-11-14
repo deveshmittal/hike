@@ -14,4 +14,7 @@
 	<dimen name="ftue_card_left_margin">18dp</dimen>
 	<dimen name="welcome_artwork_padding">0dp</dimen>
 	<dimen name="welcome_with_love_top">30dp</dimen>
+	<dimen name="invite_footer_top_margin">163dp</dimen>
+	<dimen name="nux_button_text_margin">32dp</dimen>
+	<dimen name="nux_text_text_margin">8dp</dimen>
 </resources>
