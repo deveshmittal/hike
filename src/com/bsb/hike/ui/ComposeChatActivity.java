@@ -1064,9 +1064,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private String getForwardConfirmationText(ArrayList<ContactInfo> arrayList, boolean forwarding)
 	{
 		// multi forward case
-		if(forwarding)
+		if (forwarding)
 		{
-			return arrayList.size() ==1 ? getResources().getString(R.string.forward_to_singular):getResources().getString(R.string.forward_to_plural, arrayList.size());
+			if (isFtueFwd)
+			{
+				return arrayList.size() == 1 ? getResources().getString(R.string.ftue_sticker_forward_confirmation_singular) : getResources().getString(R.string.ftue_sticker_forward_confirmation_plural, arrayList.size());
+			}
+			else
+			{
+				return arrayList.size() == 1 ? getResources().getString(R.string.forward_to_singular) : getResources().getString(R.string.forward_to_plural, arrayList.size());
+			}
 		}
 		StringBuilder sb = new StringBuilder();
 
