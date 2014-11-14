@@ -105,6 +105,8 @@ public class StickerDownloadManager
 		}
 		BaseStickerDownloadTask stickerCategoryTask = new StickerEDImageDownloadTask(handler, context, taskId, categoryId, callback);
 		Request request = new Request(stickerCategoryTask);
+		
+		// Setting priority between sticker shop task and enable_disable icon task
 		request.setPrioity(10);
 		queue.addTask(taskId, request);
 	}
