@@ -353,7 +353,6 @@ public class WebRtcClient {
 			}
 		}
 
-		@Override
 		public void onError() {
 			Logger.d(TAG, "error ocuured");
 		}

@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_black_incall" >
     
-    <FrameLayout
+    <com.bsb.hike.view.CustomMovableFrameLayout
         android:id="@+id/voip_avatar_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,9 +21,8 @@
             android:layout_height="75dp"
             android:layout_gravity="center"
             android:contentDescription="Profile Image"
-            android:onClick="onViewImageClicked"
             android:src="@drawable/ic_default_avatar_group" />
-    </FrameLayout> 
+    </com.bsb.hike.view.CustomMovableFrameLayout> 
 
     <!-- <ImageView
        android:id="@+id/voipContactPicture"
