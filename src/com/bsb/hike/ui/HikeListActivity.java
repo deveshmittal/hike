@@ -560,6 +560,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 				if(nuxInviteMode)
 				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_INVITE_SENT);
 					HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCH_OFF_NUX_MODE, null);
 				}
 

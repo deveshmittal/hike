@@ -107,8 +107,11 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity implements On
 	public void onClick(View v)
 	{
 		Sticker st = (Sticker) v.getTag();
-		Intent intent = IntentManager.getForwardStickerIntent(FtueActivity.this, st.getStickerId(), st.getCategory().getCategoryId(), true);
-		intent.putExtra(StickerManager.STICKER_ID, st.getStickerId());
+		String catId = st.getCategory().getCategoryId();
+		String stId = st.getStickerId();
+		Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_STICKER_CLICKED + "_" + stId);
+		Intent intent = IntentManager.getForwardStickerIntent(FtueActivity.this, stId, catId, true);
+		intent.putExtra(StickerManager.STICKER_ID, stId);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		FtueActivity.this.finish();
 		startActivity(intent);
