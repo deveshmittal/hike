@@ -2502,27 +2502,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 
-		/*
-		 * Only show these tips in a live group conversation or other conversations and is the conversation is not a hike bot conversation.
-		 */
-		boolean isNuxBot = mContactNumber.equals("+914567845678");
+		shouldShowStickerFtueTip();
 		
-		if (isNuxBot || !HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
-		{
-			boolean shownSticker = true;
-			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
-			{
-				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, isNuxBot))
-				{
-					shownSticker = false;
-					showStickerFtueTip();
-				}
-			}
-          
-		}
-		
-		
-
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 
 		shouldRunTimerForHikeOfflineTip = true;
@@ -2661,6 +2642,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		return true;
 	}
 
+	private void shouldShowStickerFtueTip()
+	{
+		/*
+		 * Only show these tips in a live group conversation or other conversations and is the conversation is not a hike bot conversation.
+		 */
+		boolean isNuxBot = mContactNumber.equals(HikeConstants.NUX_BOT);
+		
+		if (isNuxBot || !HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
+		{
+			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
+			{
+				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, isNuxBot))
+				{
+					showStickerFtueTip();
+				}
+			}
+		}
+	}
+	
 	private void showStickerFtueTip()
 	{
 		// if some other tip is visible , make its visibility gone, giving more priority to sticker tip 
@@ -4316,7 +4316,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				@Override
 				public void run()
 				{
-					showStickerFtueTip();
+					shouldShowStickerFtueTip();
 				}
 			});
 		}
