@@ -12,13 +12,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 public class PlatformMessageMetadata implements HikePlatformConstants {
 	public int layoutId;
 	public int loveId;
     public String notifText;
-    public List<String> thumbnailIds = new ArrayList<String>();
+    public HashMap<String, byte[]> thumbnailMap = new HashMap<String, byte[]>();
 	
 	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();
 	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();
@@ -113,10 +115,9 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 						obj.optString(MEDIA_SIZE), obj.optString(DURATION));
 
                 if (!TextUtils.isEmpty(obj.optString(THUMBNAIL))) {
-                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, Base64.decode(thumbnail, Base64.DEFAULT));
+                    thumbnailMap.put(key, Base64.decode(thumbnail, Base64.DEFAULT));
                     obj.remove(THUMBNAIL);
                     obj.put(KEY, key);
-                    thumbnailIds.add(key);
                 }
                 else
                 {
@@ -147,10 +148,9 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 						obj.optString(MEDIA_SIZE),obj.optString(DURATION));
                 if (!TextUtils.isEmpty(thumbnail)) {
                    // HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
-                    HikeConversationsDatabase.getInstance().addFileThumbnail(key, Base64.decode(thumbnail, Base64.DEFAULT));
+                    thumbnailMap.put(key, Base64.decode(thumbnail, Base64.DEFAULT));
                     obj.remove(THUMBNAIL);
                     obj.put(KEY, key);
-                    thumbnailIds.add(key);
                 }
                 else
                 {
