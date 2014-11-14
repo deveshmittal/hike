@@ -35,7 +35,7 @@
             android:textColor="@color/white"
             android:textSize="21sp"
             android:textStyle="bold"
-            hike:font="omnes" />
+            hike:font="roboto" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/tutorial_info"
@@ -59,7 +59,7 @@
             android:background="@drawable/signup_button"
             android:onClick="onClick"
             android:text="@string/next_signup"
-            hike:font="omnes" />
+            hike:font="roboto" />
     </LinearLayout>
 
 </LinearLayout>
