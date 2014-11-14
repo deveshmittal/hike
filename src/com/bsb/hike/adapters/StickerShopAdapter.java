@@ -147,6 +147,7 @@ public class StickerShopAdapter extends CursorAdapter
 					viewholder.downloadState.setImageLevel(NOT_DOWNLOADED);
 					viewholder.categoryPrice.setVisibility(View.VISIBLE);
 					viewholder.categoryPrice.setText(context.getResources().getString(R.string.sticker_pack_free));
+					viewholder.categoryPrice.setTextColor(context.getResources().getColor(R.color.tab_pressed));
 				}
 				else
 				{
@@ -158,17 +159,20 @@ public class StickerShopAdapter extends CursorAdapter
 				viewholder.downloadState.setImageLevel(UPDATE_AVAILABLE);
 				viewholder.categoryPrice.setVisibility(View.VISIBLE);
 				viewholder.categoryPrice.setText(context.getResources().getString(R.string.update_sticker));
+				viewholder.categoryPrice.setTextColor(context.getResources().getColor(R.color.sticker_settings_update_color));
 				break;
 			case StickerCategory.RETRY:
 				viewholder.downloadState.setImageLevel(RETRY);
 				viewholder.categoryPrice.setVisibility(View.VISIBLE);
 				viewholder.categoryPrice.setText(context.getResources().getString(R.string.retry_sticker));
+				viewholder.categoryPrice.setTextColor(context.getResources().getColor(R.color.tab_pressed));
 				break;
 			case StickerCategory.DOWNLOADING:
 				viewholder.downloadState.setVisibility(View.GONE);
 				viewholder.downloadProgress.setVisibility(View.VISIBLE);
 				viewholder.categoryPrice.setVisibility(View.VISIBLE);
 				viewholder.categoryPrice.setText(context.getResources().getString(R.string.downloading_stk));
+				viewholder.categoryPrice.setTextColor(context.getResources().getColor(R.color.tab_pressed));
 				
 				break;
 			}
@@ -178,6 +182,7 @@ public class StickerShopAdapter extends CursorAdapter
 			viewholder.downloadState.setImageLevel(NOT_DOWNLOADED);
 			viewholder.categoryPrice.setVisibility(View.VISIBLE);
 			viewholder.categoryPrice.setText(context.getResources().getString(R.string.sticker_pack_free));
+			viewholder.categoryPrice.setTextColor(context.getResources().getColor(R.color.tab_pressed));
 		}
 		viewholder.downloadState.setTag(category);
 	}

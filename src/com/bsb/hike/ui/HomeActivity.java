@@ -157,7 +157,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
 			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FAVORITE_COUNT_CHANGED, HikePubSub.STEALTH_UNREAD_TIP_CLICKED };
 
-	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
+	private String[] progressPubSubListeners = { HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -179,9 +179,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		// If it's 1, it means we need to show a progress dialog and then wait
 		// for the
 		// pub sub thread event to cancel the dialog once the upgrade is done.
-		if (((accountPrefs.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1) && (accountPrefs.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1)) || TEST)
+		if ((HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeConstants.UPGRADING, false)))
 		{
-			progDialog = ProgressDialog.show(this, getString(R.string.work_in_progress), getString(R.string.upgrading_to_a_new_and_improvd_hike), true);
+			progDialog = ProgressDialog.show(this, getString(R.string.work_in_progress), getString(R.string.upgrade_string), true);
 			showingProgress = true;
 			HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
 		}
@@ -801,7 +801,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 		}
-		else if (type.equals(HikePubSub.FINISHED_AVTAR_UPGRADE))
+		else if (type.equals(HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE))
 		{
 			new Thread(new Runnable()
 			{

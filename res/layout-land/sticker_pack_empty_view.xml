@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="@dimen/sticker_pack_empty_view_margin"
-    android:layout_marginTop="8dp"
-    android:layout_marginBottom="8dp"
+    android:layout_marginTop="6dp"
+    android:layout_marginBottom="6dp"
     android:gravity="center" >
 
     <com.bsb.hike.ui.utils.RecyclingImageView
@@ -82,7 +82,7 @@
             android:layout_width="150dp"
             android:layout_height="36dp"
             android:background="@drawable/download_btn_round"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:textSize="12sp"
             android:text="@string/download_category"
             android:textColor="@color/white" />
