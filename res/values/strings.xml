@@ -1231,6 +1231,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="pack_visible">Visible in sticker palette</string>
     <string name="pack_hidden">Hidden from sticker palette</string>
     <string name="pack_rank">%1$d.</string>
-    <string name="upgrade_string">Just a few moments while we set up sticker shop</string>
+    <string name="hike_upgrade_string">We need a few moments to set up your brand new sticker shop. It won\'t be long</string>
     
 </resources>
