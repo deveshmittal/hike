@@ -1871,7 +1871,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			catch (JSONException je)
 			{
-				Toast.makeText(getApplicationContext(), "Some Error", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), R.string.some_error, Toast.LENGTH_SHORT).show();
 				je.printStackTrace();
 			}
 		}
@@ -5354,7 +5354,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				else
 				{
-					Toast.makeText(getApplicationContext(), "Text Can't be empty!", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(), R.string.text_empty_error, Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
@@ -7631,7 +7631,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 			else
 			{
-				Toast.makeText(ChatThread.this, "Some error occured!", Toast.LENGTH_SHORT).show();
+				Toast.makeText(ChatThread.this, R.string.some_error, Toast.LENGTH_SHORT).show();
 			}
 			return true;
 		default:
