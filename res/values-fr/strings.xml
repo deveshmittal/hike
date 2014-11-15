@@ -1230,5 +1230,5 @@
     <string name="pack_visible">Visible dans la palette des stickers</string>
     <string name="pack_hidden">Masqué dans la palette des stickers</string>
     <string name="pack_rank">%1$d.</string>
-    
+    <string name="hike_upgrade_string">Nous avons besoin de quelques instants pour mettre en place votre nouvelle boutique de l\'autocollant de la marque . Il ne sera pas long</string>
 </resources>

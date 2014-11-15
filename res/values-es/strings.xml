@@ -1230,5 +1230,6 @@
     <string name="pack_visible">Visible en la paleta de pegatinas</string>
     <string name="pack_hidden">Oculta en la paleta de pegatinas</string>
     <string name="pack_rank">%1$d.</string>
+    <string name="hike_upgrade_string">Necesitamos unos minutos para configurar su nueva tienda de la etiqueta engomada. No pasará mucho tiempo </string>
     
 </resources>
