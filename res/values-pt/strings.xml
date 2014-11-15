@@ -1230,5 +1230,5 @@
     <string name="pack_visible">Visível na paleta de adesivos</string>
     <string name="pack_hidden">Oculto da paleta de adesivos</string>
     <string name="pack_rank">%1$d.</string>
-    
+    <string name="hike_upgrade_string">Precisamos de alguns momentos para configurar a sua marca nova loja . Não vai ser longa</string>
 </resources>

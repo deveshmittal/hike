@@ -116,7 +116,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private SharedPreferences accountPrefs;
 
-	private ProgressDialog progDialog;
+	private Dialog progDialog;
 
 	private Dialog updateAlert;
 
@@ -181,7 +181,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		// pub sub thread event to cancel the dialog once the upgrade is done.
 		if ((HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeConstants.UPGRADING, false)))
 		{
-			progDialog = ProgressDialog.show(this, getString(R.string.work_in_progress), getString(R.string.upgrade_string), true);
+			progDialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.HIKE_UPGRADE_DIALOG, null);
 			showingProgress = true;
 			HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
 		}
@@ -1443,6 +1443,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		// TODO Auto-generated method stub
 		super.onConfigurationChanged(newConfig);
 		// handle dialogs here
+		if(progDialog != null && progDialog.isShowing())
+		{
+			progDialog.dismiss();
+			progDialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.HIKE_UPGRADE_DIALOG, null);
+			showingProgress = true;
+			
+		}
 		if (dialogShowing != null)
 		{
 			showAppropriateDialog();

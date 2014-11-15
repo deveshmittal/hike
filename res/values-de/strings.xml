@@ -1230,5 +1230,6 @@
     <string name="pack_visible">In der Stickerauswahl sichtbar</string>
     <string name="pack_hidden">Nicht in der Stickerauswahl sichtbar</string>
     <string name="pack_rank">%1$d.</string>
+    <string name="hike_upgrade_string">Wir brauchen etwas Zeit, um eingerichtet Ihre neue Aufkleber-Shop. Es wird nicht lange dauern</string>
     
 </resources>
