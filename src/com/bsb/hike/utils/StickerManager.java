@@ -1347,7 +1347,8 @@ public class StickerManager
 			return;
 		}
 		category.setVisible(true);
-		category.setCategoryIndex(stickerCategoriesMap.size());
+		int catIdx = HikeConversationsDatabase.getInstance().getMaxStickerCategoryIndex();
+		category.setCategoryIndex(catIdx == -1 ? stickerCategoriesMap.size() : (catIdx + 1));
 		stickerCategoriesMap.put(category.getCategoryId(), category);
 		HikeConversationsDatabase.getInstance().insertInToStickerCategoriesTable(category);
 	}
