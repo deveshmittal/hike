@@ -247,10 +247,9 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				{	
 					if(!prefs.getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))
 					{
-						prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
-						Utils.sendUILogEvent(HikeConstants.LogEvent.SEEN_REORDERING_TIP);
-						StickerCategory category = mAdapter.getItem(from);
-						if ((from == to) || (!category.isVisible())) // Dropping at the same position. No need to perform Drop.
+						StickerCategory category = mAdapter.getDraggedCategory();
+						
+						if ((from == to) || (category == null) ||(!category.isVisible())) // Dropping at the same position. No need to perform Drop.
 						{
 							return;
 						}
@@ -260,6 +259,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 							return;
 						}
 						prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
+						Utils.sendUILogEvent(HikeConstants.LogEvent.SEEN_REORDERING_TIP);
 						
 						ImageView tickImage = (ImageView) parent.findViewById(R.id.reorder_indicator);
 						tickImage.setImageResource(R.drawable.art_tick);
