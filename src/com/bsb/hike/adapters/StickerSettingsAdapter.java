@@ -43,6 +43,8 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	private int lastVisibleIndex = 0;   //gives the index of last visible category in the stickerCategoriesList
 	
 	private StickerOtherIconLoader stickerOtherIconLoader;
+	
+	private StickerCategory draggedCategory = null;
 
 	public StickerSettingsAdapter(Context context, List<StickerCategory> stickerCategories)
 	{
@@ -218,6 +220,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	public void drop(int from, int to)
 	{
 		StickerCategory category = getItem(from);
+		draggedCategory = category;
 		if ((from == to) || (!category.isVisible())) // Dropping at the same position. No need to perform Drop.
 		{
 			return;
@@ -386,5 +389,10 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	public int getLastVisibleIndex()
 	{
 		return lastVisibleIndex;
+	}
+	
+	public StickerCategory getDrggedCategory()
+	{
+		return draggedCategory;
 	}
 }
