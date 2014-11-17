@@ -141,6 +141,7 @@ public class StickerShopAdapter extends CursorAdapter
 			switch (category.getState())
 			{
 			case StickerCategory.NONE:
+			case StickerCategory.DONE_SHOP_SETTINGS:
 			case StickerCategory.DONE:
 				if (category.getDownloadedStickersCount() == 0)
 				{
