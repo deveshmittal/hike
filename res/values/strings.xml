@@ -1227,7 +1227,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="ftue_sticker_forward_card_text">Great Choice!</string>
     <string name="ftue_sticker_forward_card_subtext">Try sending this sticker to your friends -</string>
     <string name="conversation_empty">Tap \'<b>new message</b>\' icon on top\nto start a chat</string>
-    <string name="nux_invite_enter_names">Start entering names of your best friends.</string>
+    <string name="nux_invite_enter_names">Tell us who your best friends are</string>
     <string name="invite_footer_header">Who\'s your Bestie?</string>
     <string name="invite_footer_subtext">Try hike with your best friends. It\'s super fun!</string>
     <string name="invite_now_uppercase">INVITE NOW</string>
