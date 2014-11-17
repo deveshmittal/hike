@@ -973,13 +973,29 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				if (isForwardingMessage || isFtueFwd)
+				if(isFtueFwd)
+				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_STICKER_FORWARD);
+					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+					Editor editor = settings.edit();
+					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, false);
+					editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
+					editor.commit();
+					sendDetailsAfterSignup(false);
+					forwardMultipleMessages(adapter.getAllSelectedContacts());
+				}
+				else if(nuxInviteMode)
+				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_BOT_FORWARD);
+					forwardMultipleMessages(adapter.getAllSelectedContacts());
+				}
+				else if (isForwardingMessage)
 				{
 					forwardConfirmation(adapter.getAllSelectedContacts());
 				}
 				else
 				{
- 				int selected = adapter.getCurrentSelection();
+					int selected = adapter.getCurrentSelection();
 					if (selected < MIN_MEMBERS_GROUP_CHAT)
 					{
 						Toast.makeText(getApplicationContext(), "Select Min " + MIN_MEMBERS_GROUP_CHAT + " member(s) to start group chat", Toast.LENGTH_SHORT).show();
@@ -1042,21 +1058,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.CONFIRM_FORWARD);
-				if(isFtueFwd)
-				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_STICKER_FORWARD);
-					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-					Editor editor = settings.edit();
-					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, false);
-					editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
-					editor.commit();
-					sendDetailsAfterSignup(false);
-				}
-				if(nuxInviteMode)
-				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_BOT_FORWARD);
-				}
 				forwardConfirmDialog.dismiss();
 				forwardMultipleMessages(arrayList);
 			}
@@ -1154,6 +1155,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else
 		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.CONFIRM_FORWARD);
 			// forwarding it is
 			Intent intent = null;
 			if(arrayList.size()==1)
