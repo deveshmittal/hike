@@ -2146,8 +2146,11 @@ public class MqttMessagesManager
 		try {
 			String callerID = jsonObj.getString(HikeConstants.FROM);
 //			Context context = .getApplicationContext();
-			Intent intent = new Intent(HikeService.getContext(),com.bsb.hike.ui.VoIPActivityNew.class);
-//			Intent intent = new Intent(HikeService.getContext(),com.bsb.hike.ui.ReceiveCallActivity.class);
+			Intent intent;
+			if(HikeService.appForegrounded)			
+				intent = new Intent(HikeService.getContext(),com.bsb.hike.ui.ReceiveCallActivity.class);
+			else
+				intent = new Intent(HikeService.getContext(),com.bsb.hike.ui.VoIPActivityNew.class);
 			final Intent serviceIntent = new Intent(HikeService.getContext(),com.bsb.hike.service.VoIPServiceNew.class);
 //			serviceIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

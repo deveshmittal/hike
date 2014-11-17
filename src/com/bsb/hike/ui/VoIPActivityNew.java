@@ -71,7 +71,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	private ImageView declineCall;
 	private ImageView callSlider;
 	private ImageButton speakerButton;
-	private ImageButton muteButton;
+	private ImageView muteButton;
 	private ImageView speakerSound;
 	private ImageView micSlash;
 	private TextView callNo;
@@ -111,6 +111,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	private AnimatorSet animsetDecline;
 	protected Animation sliderRotator;
 	protected float sliderY;
+	private FrameLayout sliderContainer;
 	
 	class CallLengthManager implements Runnable{
 
@@ -146,12 +147,12 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 
 //		                if((((StartPT.x+mv.x)<(acceptCall.getX()-(callSlider.getWidth()/2)))&&((StartPT.x+mv.x)>(declineCall.getX()))))
 		                
-		                (callSlider).setX((int)(StartPT.x+mv.x));
+		                
 		                Log.d("TouchEvent", "getRot"+((Float)callSlider.getRotation()));
 //		                float pivotX = sliderX+callSlider.getTranslationX();
 //		                float pivotY = sliderY+callSlider.getTranslationY();
-		                callSlider.setPivotX(60.0f);
-		                callSlider.setPivotY(60.0f);
+//		                callSlider.setPivotX(60.0f);
+//		                callSlider.setPivotY(60.0f);
 		                Log.d("TouchEvent","Xp"+((Float)callSlider.getPivotX()).toString());
 		                Log.d("TouchEvent","Yp"+((Float)callSlider.getPivotY()).toString());
 //		                Log.d("TouchEvent","5 "+( (Float) ( 120.0f*callSlider.getTranslationX()/(float)(greenX-sliderX) ) ).toString()  );
@@ -159,23 +160,23 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 //		                callSlider.setScaleType(ScaleType.MATRIX);
 //		                matrix.postRotate((float)(120)*(), callSlider.getDrawable().getBounds().width()/2, callSlider.getDrawable().getBounds().height()/2);
 //		                callSlider.setImageMatrix(matrix);
-		                float rotAng = (float)(60)*(callSlider.getTranslationX()/(float)((greenX-sliderX)));
+		                float rotAng = (float)(120)*(sliderContainer.getTranslationX()/(float)((greenX-sliderX)));
 //		                callSlider.setBackgroundResource(R.drawable.slider_oval_red);
-		                if(callSlider.getTranslationX()>0)
+		                if(sliderContainer.getTranslationX()>0)
 		                	callSlider.setBackgroundResource(R.drawable.slider_oval);
 		                else
 		                	callSlider.setBackgroundResource(R.drawable.slider_oval_red);
 		                
-		                if (rotAng < 60 && rotAng > -60){
+		                if (rotAng < 120 && rotAng > -120){
 		                	callSlider.setRotation((-1.0f)*rotAng);
-		                	callSlider.getBackground().setAlpha((int) ( 255.0f / 60 * Math.abs(rotAng)));
+		                	callSlider.getBackground().setAlpha((int) ( 255.0f / 120 * Math.abs(rotAng)));
 		                }
 		                	
-
+		                (sliderContainer).setX((int)(StartPT.x+mv.x));
 		                
 //		                callSlider.getBackground().setAlpha((int)(255.0f * (float) Math.abs(callSlider.getTranslationX()/(float)(greenX-sliderX))));
 //		                Log.d("TouchEvent","6 "+( (Float) ( callSlider.getTranslationX()/(float)(greenX-sliderX) ) ).toString()  );
-		                StartPT = new PointF( (callSlider).getX(), callSlider.getY() );
+		                StartPT = new PointF( (sliderContainer).getX(), sliderContainer.getY() );
 		                break;
 		            case MotionEvent.ACTION_DOWN :
 		                DownPT.x = event.getX();
@@ -185,7 +186,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 //		                callSlider.setVisibility(View.INVISIBLE);
 		                callSlider.clearAnimation();
 //		                callSlider.setRotation(120);
-		                StartPT = new PointF( (callSlider).getX(), callSlider.getY() );
+		                StartPT = new PointF( (sliderContainer).getX(), sliderContainer.getY() );
 		                animsetAccept.end();
 		                animsetDecline.end();
 		                break;
@@ -245,40 +246,39 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 //								Animator sliderRotate = (Animator)AnimatorInflater.loadAnimator(getBaseContext(), R.animator.voip_slider_rotator);
 								
 								AnimatorSet animset = (AnimatorSet)AnimatorInflater.loadAnimator(getBaseContext(), R.animator.voip_avatar_translator);
-								animset.setInterpolator(new OvershootInterpolator(3.0f));
-								animset.setTarget(callSlider);
+								animset.setInterpolator(new OvershootInterpolator(2.5f));
+								animset.setTarget(sliderContainer);
 //								animset.play(sliderRotate).after(sliderTranslate);
 //								callSlider.getRot
 								animset.start();
 //								callSlider.startAnimation(dpAnim);
-								animset.addListener(new AnimatorListener() {
-									
-									@Override
-									public void onAnimationStart(Animator animation) {
-										// TODO Auto-generated method stub
-										
-									}
-									
-									@Override
-									public void onAnimationRepeat(Animator animation) {
-										// TODO Auto-generated method stub
-										
-									}
-									
-									@Override
-									public void onAnimationEnd(Animator animation) {
-//										sliderRotator.reset();
-//										callSlider.setAnimation(sliderRotator);
-//										sliderRotator.start();
-										
-									}
-									
-									@Override
-									public void onAnimationCancel(Animator animation) {
-										// TODO Auto-generated method stub
-										
-									}
-								});
+//								animset.addListener(new AnimatorListener() {
+//									
+//									@Override
+//									public void onAnimationStart(Animator animation) {
+//										// TODO Auto-generated method stub
+//										
+//									}
+//									
+//									@Override
+//									public void onAnimationRepeat(Animator animation) {
+//										// TODO Auto-generated method stub
+//										
+//									}
+//									
+//									@Override
+//									public void onAnimationEnd(Animator animation) {
+////										sliderRotator.reset();
+////										callSlider.setAnimation(sliderRotator);
+////										sliderRotator.start();
+//									}
+//									
+//									@Override
+//									public void onAnimationCancel(Animator animation) {
+//										// TODO Auto-generated method stub
+//										
+//									}
+//								});
 
 							}
 			                break;
@@ -374,6 +374,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		callSlider = (ImageView)this.findViewById(R.id.fullcallSlider);
 		callNo = (TextView)this.findViewById(R.id.fullCallerId);
 		callNo.setText(mContactName);
+		sliderContainer = (FrameLayout)this.findViewById(R.id.voip_slider_container);
 		acceptCall = (ImageView)this.findViewById(R.id.fullacceptButton);
 		
 		acceptCall.setOnClickListener(new OnClickListener(){
@@ -417,17 +418,17 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		        redX = declineCall.getX();
 				greenX = acceptCall.getX();
 				
-				sliderX = (callSlider.getRight()+callSlider.getLeft())/(float)2;
+				sliderX = (sliderContainer.getRight()+sliderContainer.getLeft())/(float)2;
 				sliderY = (callSlider.getTop()+callSlider.getBottom())/2.0f;
-				sliderWidth = callSlider.getRight()-callSlider.getLeft();
+				sliderWidth = sliderContainer.getRight()-sliderContainer.getLeft();
 				Display display = getWindowManager().getDefaultDisplay();
 				Point size = new Point();
 				display.getSize(size);
 				float proportion = (float)(0);
 				
-				float greenStart = ((float)(0.2)*( greenX - (float)callSlider.getRight() ) + (float)callSlider.getRight());
+				float greenStart = ((float)(0.2)*( greenX - (float)sliderContainer.getRight() ) + (float)sliderContainer.getRight());
 				
-				float redStart = ( (float)callSlider.getLeft() - ((float)(0.2)*(  (float)callSlider.getLeft() - (float)declineCall.getRight() )) );
+				float redStart = ( (float)sliderContainer.getLeft() - ((float)(0.2)*(  (float)sliderContainer.getLeft() - (float)declineCall.getRight() )) );
 				
 				Log.d("Difference",((Float)(sliderX)).toString());
 				Log.d("Difference",((Float)(greenX)).toString());
@@ -445,7 +446,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 				callSlider.setAnimation(sliderRotator);
 				sliderRotator.start();
 		        sliderListener = new SliderOnTouchListener();
-				callSlider.setOnTouchListener(sliderListener);
+				sliderContainer.setOnTouchListener(sliderListener);
 				callSlider.getBackground().setAlpha((int) ( 0 ));
 				
 		    }  
@@ -490,7 +491,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
 		displayPic.startAnimation(dpAnim);
 //		displayPic.animate();
-		muteButton =(ImageButton)this.findViewById(R.id.muteButton1);
+		muteButton =(ImageView)this.findViewById(R.id.muteButton1);
 		muteButton.setOnClickListener(new OnClickListener() {
 			
 			@Override

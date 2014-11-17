@@ -10,18 +10,18 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="80dp"
         android:contentDescription="ProfileImage" >
 
         <ImageView
-            android:layout_width="94dp"
-            android:layout_height="94dp"
+            android:layout_width="104dp"
+            android:layout_height="104dp"
             android:src="@drawable/avatar_stroke" />
 
         <ImageView
             android:id="@+id/fullvoipContactPicture"
-            android:layout_width="90dp"
-            android:layout_height="90dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_gravity="center"
             android:contentDescription="Profile Image"
             android:src="@drawable/ic_default_avatar_group" />
@@ -73,15 +73,22 @@
         android:scaleType="centerInside" />
     
 
-
+<FrameLayout
+        android:id="@+id/voip_slider_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="27dp"
+        android:contentDescription="SliderImage" >
     <ImageView
         android:id="@+id/fullcallSlider"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="27dp"
+        android:layout_centerHorizontal="true"        
         android:src="@drawable/callicon" 
         android:background="@drawable/slider_oval"/>
+    </FrameLayout>
 
 </RelativeLayout>
