@@ -235,7 +235,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if (!showingMultiSelectActionBar && !isFtueFwd)
+		if (!showingMultiSelectActionBar && !isFtueFwd && !nuxInviteMode)
 			getSupportMenuInflater().inflate(R.menu.compose_chat_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -920,10 +920,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			title.setText(R.string.new_group);
 		}
-		else if(nuxInviteMode)
-		{
-			title.setText(R.string.invite_friends);
-		}
 		else if (isSharingFile)
 		{
 			title.setText(R.string.share_file);
@@ -962,11 +958,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, 1));
 		TextView send = (TextView) multiSelectActionBar.findViewById(R.id.save);
 		
-		if(nuxInviteMode)
-		{
-			send.setText(R.string.invite_1);
-		}
-		else if (isForwardingMessage)
+		if (isForwardingMessage)
 		{
 			send.setText(R.string.send);
 		}
