@@ -348,6 +348,8 @@ public class ConvMessage
 			if(HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE))){
 				this.messageType  = MESSAGE_TYPE.CONTENT;
 				platformMessageMetadata  = new PlatformMessageMetadata(data.getJSONObject(HikeConstants.METADATA));
+                platformMessageMetadata.addToThumbnailTable();
+                platformMessageMetadata.thumbnailMap.clear();
 			}else{
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
 		}
