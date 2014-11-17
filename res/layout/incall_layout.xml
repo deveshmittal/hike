@@ -69,15 +69,15 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/timerView1"
-        android:text="Large Text"
+        android:text="Name goes here"
         android:layout_marginTop="17dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/white" />
 
     <ImageView
         android:id="@+id/inCallContactPicture1"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_above="@+id/PhoneNumberView1"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="27dp"

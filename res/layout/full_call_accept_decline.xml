@@ -2,13 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_black_incall" >
+    android:background="@drawable/bg_black_incall"
+    android:visibility="visible" >
 
     <FrameLayout
         android:id="@+id/voip_avatar_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_above="@+id/fullPhoneNumberView1"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="80dp"
         android:contentDescription="ProfileImage" >
@@ -31,7 +32,7 @@
         android:id="@+id/fullPhoneNumberView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/voip_avatar_container"
+        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="32dp"
         android:text="INCOMING CALL"
@@ -44,7 +45,7 @@
         android:layout_below="@+id/fullPhoneNumberView1"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="18dp"
-        android:text="Large Text"
+        android:text="NAME GOES HERE"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/white" />
 
@@ -90,5 +91,28 @@
         android:src="@drawable/callicon" 
         android:background="@drawable/slider_oval"/>
     </FrameLayout>
+
+<ImageView
+    android:id="@+id/fullSpeakerButton"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:layout_alignParentBottom="true"
+    android:layout_marginBottom="47dp"
+    android:layout_marginRight="45dp"
+    android:layout_toLeftOf="@+id/voip_slider_container"
+    android:scaleType="centerInside"
+    android:src="@drawable/speaker_off"
+    android:visibility="invisible" />
+
+<ImageView
+    android:id="@+id/fullMicButton"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:layout_alignParentBottom="true"
+    android:layout_marginBottom="47dp"
+    android:layout_marginLeft="45dp"
+    android:layout_toRightOf="@+id/voip_slider_container"
+    android:src="@drawable/voip_mute_off" 
+    android:visibility="invisible"/>
 
 </RelativeLayout>

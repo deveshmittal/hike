@@ -70,7 +70,6 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	private ImageView acceptCall;
 	private ImageView declineCall;
 	private ImageView callSlider;
-	private ImageButton speakerButton;
 	private ImageView muteButton;
 	private ImageView speakerSound;
 	private ImageView micSlash;
@@ -112,6 +111,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	protected Animation sliderRotator;
 	protected float sliderY;
 	private FrameLayout sliderContainer;
+	private ImageView speakerButton;
 	
 	class CallLengthManager implements Runnable{
 
@@ -221,18 +221,6 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 							Vibrator v1 = (Vibrator) getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
 							v1.vibrate(100);
 							intent.putExtras(getIntent().getExtras());
-//							vService = VoIPServiceNew.getVoIPSerivceInstance();
-//							vService.startCall(intent);
-//							intent.removeExtra("callerID");
-//							intent.putExtra("dialedID", callerId);				
-//							Intent inCallIntent = new Intent(getApplicationContext(),com.bsb.hike.ui.VoIPActivityNew.class);
-//							inCallIntent.putExtras(intent);
-//							displayPic.clearAnimation();
-//							dpAnim.cancel();
-//							dpAnim.reset();
-//							startActivity(inCallIntent);
-//							Intent intent = i;
-//							intent.putExtra("decline", false);
 							callConnected = true;				
 							vService = VoIPServiceNew.getVoIPSerivceInstance();
 							vService.startCall(intent);
@@ -484,14 +472,23 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			r.stop();
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		}
+		acceptCall.setVisibility(View.INVISIBLE);
+		declineCall.setVisibility(View.INVISIBLE);
 		screenOff();
-		setContentView(R.layout.incall_layout);
-		displayPic = (ImageView)this.findViewById(R.id.inCallContactPicture1);
-		setDisplayPic();
-		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
-		displayPic.startAnimation(dpAnim);
+		callSlider.setBackgroundResource(R.drawable.slider_oval_red);
+		callSlider.setRotation(0);
+		AnimatorSet animset = (AnimatorSet)AnimatorInflater.loadAnimator(getBaseContext(), R.animator.voip_avatar_translator);
+		animset.setInterpolator(new OvershootInterpolator(2.5f));
+		animset.setTarget(sliderContainer);
+		animset.start();
+//		setContentView(R.layout.incall_layout);
+//		displayPic = (ImageView)this.findViewById(R.id.inCallContactPicture1);
+//		setDisplayPic();
+//		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
+//		displayPic.startAnimation(dpAnim);
 //		displayPic.animate();
-		muteButton =(ImageView)this.findViewById(R.id.muteButton1);
+		muteButton =(ImageView)this.findViewById(R.id.fullMicButton);
+		muteButton.setVisibility(View.VISIBLE);
 		muteButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -501,9 +498,10 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			}
 			
 		});
-		speakerButton = (ImageButton)this.findViewById(R.id.SpeakerButton1);
-		speakerSound = (ImageView)this.findViewById(R.id.speakerSound);
-		micSlash = (ImageView)this.findViewById(R.id.micSlash);
+		speakerButton = (ImageView)this.findViewById(R.id.fullSpeakerButton);
+		speakerButton.setVisibility(View.VISIBLE);
+//		speakerSound = (ImageView)this.findViewById(R.id.speakerSound);
+//		micSlash = (ImageView)this.findViewById(R.id.micSlash);
 		speakerButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -512,21 +510,33 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 				changeSpeakerButton();
 			}
 		});
-		endCall = (ImageButton)this.findViewById(R.id.endCallButton1);
-		endCall.setOnClickListener(new OnClickListener() {
-			
+		sliderContainer.setOnTouchListener(null);
+		sliderContainer.setOnClickListener(new OnClickListener(){
+
 			@Override
-			public void onClick(View v) {
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
 				raiseEndCallToast();
 				VoIPServiceNew.getVoIPSerivceInstance().endCall();
 				finish();
 			}
+			
 		});
+//		endCall = (ImageButton)this.findViewById(R.id.endCallButton1);
+//		endCall.setOnClickListener(new OnClickListener() {
+//			
+//			@Override
+//			public void onClick(View v) {
+//				raiseEndCallToast();
+//				VoIPServiceNew.getVoIPSerivceInstance().endCall();
+//				finish();
+//			}
+//		});
 		
-		inCallCallNo = (TextView)this.findViewById(R.id.PhoneNumberView1);
+//		inCallCallNo = (TextView)this.findViewById(R.id.PhoneNumberView1);
 //		inCallCallNo.setText(HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(storedId).getNameOrMsisdn());
-		inCallCallNo.setText(mContactName);
-		inCallTimer = (TextView)this.findViewById(R.id.timerView1);
+//		inCallCallNo.setText(mContactName);
+		inCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
 		if (VoIPServiceNew.getVoIPSerivceInstance().client.connectionState != "CONNECTED")
 			inCallTimer.setText(VoIPServiceNew.getVoIPSerivceInstance().client.connectionState);
 		else{
@@ -599,10 +609,12 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	
 	private void changeMuteButton() {
 		if(isMute){
-			micSlash.setVisibility(ImageView.VISIBLE);
+			muteButton.setImageResource(R.drawable.voip_mute_mic);
+//			micSlash.setVisibility(ImageView.VISIBLE);
 			isMute = false;
 		} else {
-			micSlash.setVisibility(ImageView.INVISIBLE);
+			muteButton.setImageResource(R.drawable.voip_mute_off);
+//			micSlash.setVisibility(ImageView.INVISIBLE);
 			isMute = true;
 		}
 		
