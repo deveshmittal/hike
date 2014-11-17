@@ -6853,8 +6853,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Logger.d("ViewPager", "Page number: " + pageNum);
 			if (emoticonType == EmoticonType.STICKERS)
 			{
-				StickerCategory category = stickerAdapter.getStickerCategory(pageNum);
-				if(category.getState() == StickerCategory.DONE)
+				StickerCategory category = stickerAdapter.getCategoryForIndex(pageNum);
+				if(category.getState() == StickerCategory.DONE || category.getState() == StickerCategory.DONE_SHOP_SETTINGS)
 				{
 					category.setState(StickerCategory.NONE);
 				}

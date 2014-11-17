@@ -488,19 +488,15 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		return stickerOtherIconLoader;
 	}
 
-	@Override
-	public String getCategoryIdForIndex(int index)
-	{
-		return stickerCategoryList.get(index).getCategoryId();
-	}
-	
 	/**
-	 * Returns Sticker Category object based on position
+	 * Returns Sticker Category object based on index
 	 * @param position
-	 * @return
+	 * @return {@link StickerCategory} Object
 	 */
-	public StickerCategory getStickerCategory(int position)
+	@Override
+	public StickerCategory getCategoryForIndex(int index)
 	{
-		return stickerCategoryList.get(position);
+		return stickerCategoryList.get(index);
 	}
+
 }
