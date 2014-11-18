@@ -231,6 +231,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 		        				vService = VoIPServiceNew.getVoIPSerivceInstance();
 		        				vService.startCall(intent);
 		        				finish();
+		        				overridePendingTransition(0,R.anim.fade_out_animation);
 		        			
 							}
 						else if (xcoord>acceptCall.getX())
@@ -251,6 +252,7 @@ public class ReceiveCallActivity extends Activity implements HikePubSub.Listener
 							dpAnim.cancel();
 							dpAnim.reset();
 							startActivity(inCallIntent);
+							overridePendingTransition(R.anim.fade_in_animation,0);
 							} else {
 								AnimatorSet animset = (AnimatorSet)AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.voip_avatar_translator);
 								animset.setTarget(avatarLayout);

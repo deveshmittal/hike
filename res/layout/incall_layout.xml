@@ -4,17 +4,6 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_black_incall" >
 
-    <TextView
-        android:id="@+id/timerView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/PhoneNumberView1"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="17dp"
-        android:text="CONNECTING"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/bubble_beach_2" />
-
     <ImageButton
         android:id="@+id/SpeakerButton1"
         android:layout_alignParentBottom="true"
@@ -57,27 +46,38 @@
 
     <ImageButton
         android:id="@+id/endCallButton1"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
         android:background="@drawable/cut_call" />
+    
+	<com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/timerView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:text="CONNECTING"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/white" />
 
-    <TextView
+    <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/PhoneNumberView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="Large Text"
+        android:layout_below="@+id/timerView1"
+        android:text="Name goes here"
+        android:layout_marginTop="17dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/bubble_beach_2" />
+        android:textColor="@color/white" />
 
     <ImageView
         android:id="@+id/inCallContactPicture1"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_above="@+id/PhoneNumberView1"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="27dp"

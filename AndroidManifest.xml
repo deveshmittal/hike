@@ -308,6 +308,8 @@
         
          <activity 
              android:name="com.bsb.hike.ui.VoIPActivityNew"
+             android:screenOrientation="portrait"
+   			 android:configChanges="orientation|keyboardHidden"
              android:launchMode="singleTask"
     		 android:taskAffinity=""
     		 android:excludeFromRecents="true"
@@ -320,6 +322,8 @@
          <activity
              android:name="com.bsb.hike.ui.ReceiveCallActivity"
              android:launchMode="singleTask"
+             android:screenOrientation="portrait"
+   			 android:configChanges="orientation|keyboardHidden"	
              android:taskAffinity=""
              android:excludeFromRecents="true"
              android:theme="@style/TranslucentBlack">
