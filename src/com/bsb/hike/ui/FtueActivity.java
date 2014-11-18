@@ -84,11 +84,11 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity implements On
 	{
 		List<Pair<Sticker, Integer>> defaultStickersList = new ArrayList<Pair<Sticker, Integer>>();
 		
-		String defaultStickerIds[] = { "042_sahihai.png", "040_waah.png", "063_boss.png", "006_dl_balleballe.png" };
+		String defaultStickerIds[] = { "042_sahihai.png", "006_dl_balleballe.png", "063_boss.png", "040_waah.png" };
 
-		int defaultStickerResIds[] = { R.drawable.sticker_042_sahihai, R.drawable.sticker_040_waah, R.drawable.sticker_063_boss, R.drawable.sticker_006_dl_balleballe };
+		int defaultStickerResIds[] = { R.drawable.sticker_042_sahihai, R.drawable.sticker_006_dl_balleballe, R.drawable.sticker_063_boss, R.drawable.sticker_040_waah };
 
-		String defaultStickerCategories[] = { "indian" , "indian", "indian", "delhi" };
+		String defaultStickerCategories[] = { "indian" , "delhi", "indian", "indian" };
 		
 		for (int i = 0; i < NUM_OF_STICKERS; i++)
 		{
