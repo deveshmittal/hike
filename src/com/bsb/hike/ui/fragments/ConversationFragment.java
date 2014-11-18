@@ -1224,7 +1224,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 						 */
 						movedFromEmptyToNonEmpty();
 					}
-					else if(displayedConversations.size() == 1)
+					else if(displayedConversations.size() == 2)
 					{
 						if(HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false))
 						{
@@ -2208,7 +2208,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			{
 				movedFromEmptyToNonEmpty();
 			}
-			else if (displayedConversations.size() == 2)
+			else if (displayedConversations.size() == 3)
 			{
 				if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false))
 				{
