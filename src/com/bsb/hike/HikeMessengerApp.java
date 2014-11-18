@@ -523,7 +523,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 			}
 		}
 	}
-
+	
+	/*
+	 * create connection to service if no connection is already made
+	 */
 	public void connectToService()
 	{
 		Logger.d("HikeMessengerApp", "calling connectToService:" + mInitialized);

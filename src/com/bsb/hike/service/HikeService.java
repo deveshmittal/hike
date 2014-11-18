@@ -279,6 +279,13 @@ public class HikeService extends Service
 	{
 		Logger.d("HikeService", "Start MQTT Thread.");
 		mMqttManager.connectOnMqttThread();
+		
+		/*
+		 * Making service connection in onstartcommand so that app can send messages in background
+		 */
+		HikeMessengerApp app = (HikeMessengerApp) getApplication();
+		app.connectToService();
+		
 		Logger.d("HikeService", "Intent is " + intent);
 		if (intent != null && intent.hasExtra(HikeConstants.Extras.SMS_MESSAGE))
 		{
