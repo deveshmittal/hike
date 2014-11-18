@@ -2815,7 +2815,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void addUnkownContactBlockHeader()
 	{
-		if (contactInfo != null && contactInfo.isUnknownContact())
+		if (contactInfo != null && contactInfo.isUnknownContact() && !mContactNumber.equals(HikeConstants.NUX_BOT))
 		{
 			if (messages != null && messages.size() > 0)
 			{

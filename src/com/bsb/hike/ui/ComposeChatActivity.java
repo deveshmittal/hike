@@ -235,7 +235,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if (!showingMultiSelectActionBar && !isFtueFwd)
+		if (!showingMultiSelectActionBar && !isFtueFwd && !nuxInviteMode)
 			getSupportMenuInflater().inflate(R.menu.compose_chat_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -647,7 +647,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.removeFilter();
 			adapter.clearAllSelection(true);
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
-			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint("");
+			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint(R.string.nux_fwd_search_hint);
 			break;
 		}
 		setTitle();
@@ -871,10 +871,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			title.setText(R.string.new_group);
 		}
-		else if(nuxInviteMode)
-		{
-			title.setText(R.string.invite_friends);
-		}
 		else if (isSharingFile)
 		{
 			title.setText(R.string.share_file);
@@ -913,11 +909,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, 1));
 		TextView send = (TextView) multiSelectActionBar.findViewById(R.id.save);
 		
-		if(nuxInviteMode)
-		{
-			send.setText(R.string.invite_1);
-		}
-		else if (isForwardingMessage)
+		if (isForwardingMessage)
 		{
 			send.setText(R.string.send);
 		}
@@ -932,13 +924,29 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				if (isForwardingMessage || isFtueFwd)
+				if(isFtueFwd)
+				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_STICKER_FORWARD);
+					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+					Editor editor = settings.edit();
+					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, false);
+					editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
+					editor.commit();
+					sendDetailsAfterSignup(false);
+					forwardMultipleMessages(adapter.getAllSelectedContacts());
+				}
+				else if(nuxInviteMode)
+				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_BOT_FORWARD);
+					forwardMultipleMessages(adapter.getAllSelectedContacts());
+				}
+				else if (isForwardingMessage)
 				{
 					forwardConfirmation(adapter.getAllSelectedContacts());
 				}
 				else
 				{
- 				int selected = adapter.getCurrentSelection();
+					int selected = adapter.getCurrentSelection();
 					if (selected < MIN_MEMBERS_GROUP_CHAT)
 					{
 						Toast.makeText(getApplicationContext(), "Select Min " + MIN_MEMBERS_GROUP_CHAT + " member(s) to start group chat", Toast.LENGTH_SHORT).show();
@@ -1001,21 +1009,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.CONFIRM_FORWARD);
-				if(isFtueFwd)
-				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_STICKER_FORWARD);
-					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-					Editor editor = settings.edit();
-					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, false);
-					editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
-					editor.commit();
-					sendDetailsAfterSignup(false);
-				}
-				if(nuxInviteMode)
-				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_BOT_FORWARD);
-				}
 				forwardConfirmDialog.dismiss();
 				forwardMultipleMessages(arrayList);
 			}
@@ -1120,6 +1113,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else
 		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.CONFIRM_FORWARD);
 			// forwarding it is
 			Intent intent = null;
 			if(arrayList.size()==1)
