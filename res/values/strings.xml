@@ -1237,4 +1237,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="hike_upgrade_string">We need a few moments to set up your brand new sticker shop. It won\'t be long</string>
     <string name="some_error">Some error occured!</string>
     <string name="nux_fwd_search_hint">Names go here...</string>
+    <string name="recently_joined_hike">RECENTLY JOINED HIKE</string>
 </resources>

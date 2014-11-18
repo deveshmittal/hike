@@ -320,8 +320,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		listView = (ListView) findViewById(R.id.list);
 		String sendingMsisdn = getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN);
 
-		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, (isForwardingMessage && !isSharingFile), nuxInviteMode, existingGroupId, sendingMsisdn, friendsListFetchedCallback);
-
+		boolean fetchRecentlyJoined = HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false) && !isForwardingMessage;
+		
+		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, (isForwardingMessage && !isSharingFile), nuxInviteMode, fetchRecentlyJoined, existingGroupId, sendingMsisdn, friendsListFetchedCallback);
 		View emptyView = (nuxInviteMode) ? findViewById(R.id.nux_invite_empty) : findViewById(android.R.id.empty);
 		adapter.setEmptyView(emptyView);
 		adapter.setLoadingView(findViewById(R.id.spinner));
@@ -407,6 +408,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		// TODO Auto-generated method stub
 		super.onResume();
+		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
 		if(adapter != null)
 		{
 			adapter.getIconLoader().setExitTasksEarly(false);
