@@ -128,6 +128,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private PopupWindow overFlowWindow;
 
+	private TextView newConversationIndicator;
+	
 	private TextView topBarIndicator;
 	
 	private TextView timelineTopBarIndicator;
@@ -376,11 +378,28 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			public void onClick(View v)
 			{
 				Utils.sendUILogEvent(HikeConstants.LogEvent.SHOW_TIMELINE_TOP_BAR);
-				Intent intent = new Intent(HomeActivity.this, TimelineActivity.class);
+				Intent intent = new Intent(HomeActivity.this, TimelineActivity.class); 
 				startActivity(intent);
 			}
 		});
 
+		newConversationIndicator = (TextView) menu.findItem(R.id.new_conversation).getActionView().findViewById(R.id.top_bar_indicator);
+		((ImageView) menu.findItem(R.id.new_conversation).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_new_conversation);
+		showRecentlyJoinedDot(1000);
+
+		menu.findItem(R.id.new_conversation).getActionView().setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
+				Intent intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
+				intent.putExtra(HikeConstants.Extras.EDIT, true);
+				newConversationIndicator.setVisibility(View.GONE);
+				startActivity(intent);
+			}
+		});
+		
 		return true;
 	}
 
@@ -391,11 +410,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		switch (item.getItemId())
 		{
-		case R.id.new_conversation:
-			intent = new Intent(this, ComposeChatActivity.class);
-			intent.putExtra(HikeConstants.Extras.EDIT, true);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
-			break;
 		case android.R.id.home:
 			hikeLogoClicked();
 			break;
@@ -871,6 +885,20 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				return;
 			}
+			
+			Editor editor = accountPrefs.edit();
+			editor.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
+			editor.commit();
+			runOnUiThread(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					showRecentlyJoinedDot(1000);
+				}
+			});
+			
 			String msisdn = (String) object;
 			for (ContactInfo contactInfo : ftueContactsData.getCompleteList())
 			{
@@ -1544,7 +1572,27 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 	
-
+	public void showRecentlyJoinedDot(int delayTime)
+	{
+		mHandler.postDelayed(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				if (accountPrefs.getBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false))
+				{
+					newConversationIndicator.setText(String.valueOf(1));
+					newConversationIndicator.setVisibility(View.VISIBLE);
+					newConversationIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
+				}
+				else
+				{
+					newConversationIndicator.setVisibility(View.GONE);
+				}
+			}
+		}, delayTime);
+	}
+	
 	public void updateTimelineNotificationCount(int count, int delayTime)
 	{
 		if (count < 1)

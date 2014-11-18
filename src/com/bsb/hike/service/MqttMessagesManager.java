@@ -266,10 +266,9 @@ public class MqttMessagesManager
 				ContactManager.getInstance().setHikeJoinTime(msisdn, joinTime);
 			}
 
-			if(appPrefs.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true))
-			{
-				saveStatusMsg(jsonObj, msisdn);
-			}
+			Editor e = this.settings.edit();
+			e.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
+			e.commit();
 		}
 		else
 		{

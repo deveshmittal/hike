@@ -510,6 +510,8 @@ public class HikeConstants
 	public static final String IS_GAMES_ITEM_CLICKED = "isGamesItemClicked";
 
 	public static final String IS_REWARDS_ITEM_CLICKED = "isRewardsItemClicked";
+	
+	public static final String SHOW_RECENTLY_JOINED_DOT = "showRecentlyJoinedDot";
 
 	public static final String IS_OF_ICON_CLICKED = "isOfIconClicked";
 
@@ -657,7 +659,9 @@ public class HikeConstants
 	public static final String MAIL = "support@hike.in";
 	
 	public static final int MAX_RECENTS_TO_SHOW = 10;
-
+	
+	public static final int MAX_RECENTLY_JOINED_HIKE_TO_SHOW = 5;
+	
 	// Had to add this constant since its only available in the android API for
 	// Honeycomb and higher.
 	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
