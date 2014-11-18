@@ -53,6 +53,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	public void onCreate() {
 	    super.onCreate();
 	    vService = this;
+	    HikeService.voipServiceRunning = true;
 	    Log.d("Vservice", "Creating");
 	    initialAudioMode=((AudioManager)getApplicationContext().getSystemService(Context.AUDIO_SERVICE)).getMode();
 	}
@@ -111,7 +112,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 				  mNotificationManager.cancel(notifId);
 			  }
 //		  	VoIPActivityNew.getVoIPActivityInstance().raiseEndCallToast();
-			  VoIPActivityNew.getVoIPActivityInstance().finish();
+//			  VoIPActivityNew.getVoIPActivityInstance().finish();
 			  client.mPubSub.removeListener(HikePubSub.VOIP_HANDSHAKE, client.getMessageHandler());
 			  client.mPubSub.removeListener(HikePubSub.VOIP_TIMEOUT, client.getMessageHandler());
 			  stopSelf();
@@ -155,6 +156,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 //		  VoIPActivityNew.getVoIPActivityInstance().raiseEndCallToast();
 //		  VoIPActivityNew.getVoIPActivityInstance().finish();
 		  Log.d("VOIPSERVICE","6");
+		  HikeService.voipServiceRunning = false;
 		  stopSelf();
 		  Log.d("VOIPSERVICE","7");
 
@@ -182,7 +184,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	  
 	  @Override
 	  public int onStartCommand(Intent intent, int flags, int startId){
-		  
+		  HikeService.voipServiceRunning = true;
 		  vService = getInstance();
 		  if(vService == null)
 			  Log.d("Vservice", "not assigned");
@@ -193,6 +195,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	  }
 	  
 	  public void startUp(Intent intent){
+		  HikeService.voipServiceRunning = true;
 		  NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
 		  mBuilder.setSmallIcon(R.drawable.ic_hike_user);
 		  mBuilder.setContentTitle("In Call");
@@ -269,6 +272,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		Log.d("onDestroy", "Destroying");
 		((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setMode(initialAudioMode);
 		wl.release();
+		HikeService.voipServiceRunning = false;
 		super.onDestroy();
 	}
 	

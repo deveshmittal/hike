@@ -169,6 +169,8 @@ public class HikeService extends Service
 	private static Context context;
 	
 	public static boolean appForegrounded = false;
+	
+	public static boolean voipServiceRunning = false;
 
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
@@ -385,6 +387,9 @@ public class HikeService extends Service
 	{
 		Logger.d("HikeService", "Start MQTT Thread.");
 		mMqttManager.connectOnMqttThread();
+		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
+		app.connectToService();
+		
 		Logger.d("HikeService", "Intent is " + intent);
 		if (intent != null && intent.hasExtra(HikeConstants.Extras.SMS_MESSAGE))
 		{

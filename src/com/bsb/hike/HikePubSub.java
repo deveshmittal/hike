@@ -7,6 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.json.JSONObject;
+
+import android.util.Log;
+
 public class HikePubSub implements Runnable
 {
 	public class Operation
@@ -466,6 +470,9 @@ public class HikePubSub implements Runnable
 
 	public boolean publish(String type, Object o)
 	{
+		if(type.equals(HikePubSub.MQTT_PUBLISH)){
+			Log.d("PUBLISHING", ((JSONObject)o).toString());
+		}
 		Set<Listener> l = listeners.get(type);
 		if (l != null && l.size() >= 0)
 		{

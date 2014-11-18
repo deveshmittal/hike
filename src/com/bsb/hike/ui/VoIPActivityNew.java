@@ -43,6 +43,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.OvershootInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -60,7 +61,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.VoIPServiceNew;
 import com.google.android.gms.internal.dp;
-//import com.bsb.hike.db.HikeUserDatabase;
+
 
 public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 
@@ -111,7 +112,9 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	protected Animation sliderRotator;
 	protected float sliderY;
 	private FrameLayout sliderContainer;
+	private FrameLayout avatarContainer;
 	private ImageView speakerButton;
+	private float delY;
 	
 	class CallLengthManager implements Runnable{
 
@@ -124,7 +127,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		    seconds = seconds % 60;
 		    minutes = minutes % 60;
 		    inCallTimer.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
-		    displayPic.clearAnimation();
+		    avatarContainer.clearAnimation();
 		    displayHandler.postDelayed(new CallLengthManager(), 500);
 			
 		}
@@ -149,19 +152,9 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		                
 		                
 		                Log.d("TouchEvent", "getRot"+((Float)callSlider.getRotation()));
-//		                float pivotX = sliderX+callSlider.getTranslationX();
-//		                float pivotY = sliderY+callSlider.getTranslationY();
-//		                callSlider.setPivotX(60.0f);
-//		                callSlider.setPivotY(60.0f);
 		                Log.d("TouchEvent","Xp"+((Float)callSlider.getPivotX()).toString());
 		                Log.d("TouchEvent","Yp"+((Float)callSlider.getPivotY()).toString());
-//		                Log.d("TouchEvent","5 "+( (Float) ( 120.0f*callSlider.getTranslationX()/(float)(greenX-sliderX) ) ).toString()  );
-//		                Matrix matrix = new Matrix();
-//		                callSlider.setScaleType(ScaleType.MATRIX);
-//		                matrix.postRotate((float)(120)*(), callSlider.getDrawable().getBounds().width()/2, callSlider.getDrawable().getBounds().height()/2);
-//		                callSlider.setImageMatrix(matrix);
 		                float rotAng = (float)(120)*(sliderContainer.getTranslationX()/(float)((greenX-sliderX)));
-//		                callSlider.setBackgroundResource(R.drawable.slider_oval_red);
 		                if(sliderContainer.getTranslationX()>0)
 		                	callSlider.setBackgroundResource(R.drawable.slider_oval);
 		                else
@@ -173,19 +166,13 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		                }
 		                	
 		                (sliderContainer).setX((int)(StartPT.x+mv.x));
-		                
-//		                callSlider.getBackground().setAlpha((int)(255.0f * (float) Math.abs(callSlider.getTranslationX()/(float)(greenX-sliderX))));
-//		                Log.d("TouchEvent","6 "+( (Float) ( callSlider.getTranslationX()/(float)(greenX-sliderX) ) ).toString()  );
 		                StartPT = new PointF( (sliderContainer).getX(), sliderContainer.getY() );
 		                break;
 		            case MotionEvent.ACTION_DOWN :
 		                DownPT.x = event.getX();
 		                Log.d("TouchEvent","Start PT"+( (Float) ( v.getX() ) ).toString()  );
 		                DownPT.y = event.getY();
-		                ;
-//		                callSlider.setVisibility(View.INVISIBLE);
 		                callSlider.clearAnimation();
-//		                callSlider.setRotation(120);
 		                StartPT = new PointF( (sliderContainer).getX(), sliderContainer.getY() );
 		                animsetAccept.end();
 		                animsetDecline.end();
@@ -194,7 +181,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		            	
 		            	PointF mvevent = new PointF( event.getX() - DownPT.x, event.getY() - DownPT.y);
 		            	float xcoord = StartPT.x+mvevent.x;
-		            	if (xcoord<redX)
+		            	if (xcoord<7.0f*redX/6.0f)
 							{
 		            		
 //		        				r.stop();
@@ -203,18 +190,13 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		        				Intent intent = new Intent(getApplicationContext(),com.bsb.hike.service.VoIPServiceNew.class);;
 		        				intent.putExtra("decline", true);	
 		        				intent.putExtras(getIntent().getExtras());
-//		        				vService = VoIPServiceNew.getVoIPSerivceInstance();
-//		        				vService.startCall(intent);
-//		        				finish();
-//			            		Intent intent = i;
-//			    				intent.putExtra("decline", true);
 			    				callConnected = true;
 			    				vService = VoIPServiceNew.getVoIPSerivceInstance();
 			    				vService.startCall(intent);
 			    				finish();
 		        			
 							}
-						else if (xcoord>greenX)
+						else if (xcoord>5.0f*greenX/6.0f)
 							{
 							Intent intent = new Intent(getApplicationContext(),com.bsb.hike.service.VoIPServiceNew.class);
 							intent.putExtra("decline", false);
@@ -230,43 +212,11 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 								animsetDecline.start();
 								callSlider.getBackground().setAlpha(0);
 								callSlider.setRotation(0);
-//								Animator sliderTranslate = 
-//								Animator sliderRotate = (Animator)AnimatorInflater.loadAnimator(getBaseContext(), R.animator.voip_slider_rotator);
-								
 								AnimatorSet animset = (AnimatorSet)AnimatorInflater.loadAnimator(getBaseContext(), R.animator.voip_avatar_translator);
 								animset.setInterpolator(new OvershootInterpolator(2.5f));
 								animset.setTarget(sliderContainer);
-//								animset.play(sliderRotate).after(sliderTranslate);
-//								callSlider.getRot
 								animset.start();
-//								callSlider.startAnimation(dpAnim);
-//								animset.addListener(new AnimatorListener() {
-//									
-//									@Override
-//									public void onAnimationStart(Animator animation) {
-//										// TODO Auto-generated method stub
-//										
-//									}
-//									
-//									@Override
-//									public void onAnimationRepeat(Animator animation) {
-//										// TODO Auto-generated method stub
-//										
-//									}
-//									
-//									@Override
-//									public void onAnimationEnd(Animator animation) {
-////										sliderRotator.reset();
-////										callSlider.setAnimation(sliderRotator);
-////										sliderRotator.start();
-//									}
-//									
-//									@Override
-//									public void onAnimationCancel(Animator animation) {
-//										// TODO Auto-generated method stub
-//										
-//									}
-//								});
+
 
 							}
 			                break;
@@ -356,8 +306,11 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		isPlaying = true;
 		setContentView(R.layout.full_call_accept_decline);
 		displayPic = (ImageView)this.findViewById(R.id.fullvoipContactPicture);
-		setDisplayPic();
+//		setDisplayPic();
+		avatarContainer = (FrameLayout)this.findViewById(R.id.voip_avatar_container);
 		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
+		avatarContainer.setAnimation(dpAnim);
+		dpAnim.start();
 		vActivity = this;
 		callSlider = (ImageView)this.findViewById(R.id.fullcallSlider);
 		callNo = (TextView)this.findViewById(R.id.fullCallerId);
@@ -396,6 +349,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			}
 			
 		});
+		inCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
 		
 		//ADDING ANIMATIONS HERE
 		ViewTreeObserver vto = acceptCall.getViewTreeObserver();  
@@ -436,6 +390,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		        sliderListener = new SliderOnTouchListener();
 				sliderContainer.setOnTouchListener(sliderListener);
 				callSlider.getBackground().setAlpha((int) ( 0 ));
+				delY = callNo.getY()-inCallTimer.getY();
 				
 		    }  
 		}); 
@@ -450,15 +405,29 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		callConnected = true;
 		vActivity = this;
 		vService = VoIPServiceNew.getVoIPSerivceInstance();
+		setContentView(R.layout.full_call_accept_decline);
 		if (VoIPServiceNew.vService == null)
 			Log.d("vService", "NULL HAI!!!");
 		vService.startCall(i);
+		acceptCall = (ImageView)this.findViewById(R.id.fullacceptButton);
+		final ViewTreeObserver vto = acceptCall.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener(){
 
+			@Override
+			public void onGlobalLayout() {				
+//				vto.removeOnGlobalLayoutListener(this);
+
+				delY = callNo.getY()-inCallTimer.getY();
+				
+			}
+			
+		});
 		drawInCall();
 	}
 	
 	public void prepareResume(){
 		vService = VoIPServiceNew.getVoIPSerivceInstance();
+		setContentView(R.layout.full_call_accept_decline);
 		drawInCall();
 	}
 	
@@ -472,15 +441,39 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			r.stop();
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		}
+		acceptCall = (ImageView)this.findViewById(R.id.fullacceptButton);
 		acceptCall.setVisibility(View.INVISIBLE);
+		declineCall = (ImageView)this.findViewById(R.id.fulldeclineButton);
 		declineCall.setVisibility(View.INVISIBLE);
+		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
 		screenOff();
+		callSlider = (ImageView)this.findViewById(R.id.fullcallSlider);
 		callSlider.setBackgroundResource(R.drawable.slider_oval_red);
 		callSlider.setRotation(0);
 		AnimatorSet animset = (AnimatorSet)AnimatorInflater.loadAnimator(getBaseContext(), R.animator.voip_avatar_translator);
 		animset.setInterpolator(new OvershootInterpolator(2.5f));
+		sliderContainer = (FrameLayout)this.findViewById(R.id.voip_slider_container);
 		animset.setTarget(sliderContainer);
 		animset.start();
+		inCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
+		inCallTimer.setText("CONNECTING...");
+		callNo = (TextView)this.findViewById(R.id.fullCallerId);
+		Log.d("delY 1", ((Float)callNo.getY()).toString());
+		Log.d("delY 2", ((Float)inCallTimer.getY()).toString());
+		Log.d("delY 3", ((Float)delY).toString());
+		TranslateAnimation yTranslator  = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, -1*delY);
+		inCallTimer.setVisibility(View.INVISIBLE);
+		yTranslator.setDuration(500);
+		yTranslator.setFillAfter(true);
+		yTranslator.setFillEnabled(true);
+		callNo.setAnimation(yTranslator);
+		yTranslator.start();
+		avatarContainer = (FrameLayout)this.findViewById(R.id.voip_avatar_container);
+		inCallTimer = (TextView)this.findViewById(R.id.fullCallTimer);
+		inCallTimer.setText("CONNECTING...");
+//		inCallTimer.setAlpha(0);
+		Animation timerAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in_animation);
+		inCallTimer.setAnimation(timerAnim);
 //		setContentView(R.layout.incall_layout);
 //		displayPic = (ImageView)this.findViewById(R.id.inCallContactPicture1);
 //		setDisplayPic();
@@ -536,16 +529,22 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 //		inCallCallNo = (TextView)this.findViewById(R.id.PhoneNumberView1);
 //		inCallCallNo.setText(HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(storedId).getNameOrMsisdn());
 //		inCallCallNo.setText(mContactName);
-		inCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
-		if (VoIPServiceNew.getVoIPSerivceInstance().client.connectionState != "CONNECTED")
-			inCallTimer.setText(VoIPServiceNew.getVoIPSerivceInstance().client.connectionState);
+//		inCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
+		if (VoIPServiceNew.getVoIPSerivceInstance().client.connectionState != "CONNECTED"){
+			inCallTimer.setText("CONNECTING...");
+			inCallTimer.setVisibility(View.VISIBLE);
+			timerAnim.start();
+		}
 		else{
-			displayPic.clearAnimation();
+			avatarContainer.clearAnimation();
 			Log.d("Animation","Seriously?");
 			dpAnim.cancel();
 			dpAnim.reset();
 			startTime = vService.client.startTime;
+			inCallTimer.setVisibility(View.VISIBLE);
 			displayHandler.post(new CallLengthManager());
+			
+			timerAnim.start();
 		}
 		
 		
@@ -555,7 +554,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	@Override
 	public void onEventReceived(String type, Object object) {
 		if (type == HikePubSub.VOIP_FINISHED){
-			finish();
+//			finish();
 		}
 		else if(type == HikePubSub.VOIP_HANDSHAKE){
 			try {
@@ -563,8 +562,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 				JSONObject data = (JSONObject) json.get(HikeConstants.DATA);
 				JSONObject metadata = (JSONObject) data.get(HikeConstants.METADATA);
 				String mdType = metadata.getString("type");
-				if (mdType.equals(HikeConstants.MqttMessageTypes.VOIP_END_CALL))
-					finish();
+				if (mdType.equals(HikeConstants.MqttMessageTypes.VOIP_END_CALL));
+//					finish();
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -574,8 +573,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 //			inCallTimer.setText(state);
 			if(state == PeerConnection.IceConnectionState.CONNECTED.toString()){
 //				displayPic.clearAnimation();
-				dpAnim.cancel();
-				dpAnim.reset();
+//				dpAnim.cancel();
+//				dpAnim.reset();
 				startTime = System.currentTimeMillis();
 				displayHandler.post(new CallLengthManager() );
 			}
@@ -664,11 +663,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	  }
 
 
-//	@Override
-//	public void onAccuracyChanged(Sensor sensor, int accuracy) {
-//		// TODO Auto-generated method stub		
-//	}
-	
+
 	private void screenOff(){
 //		Activity activity = getActivity();
 		if(sensorDisabled )
@@ -691,10 +686,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			return;
 		}
 		Log.d("Proximity","Release lock");
-//		logger.debug("Release lock");
 		screenOffLock.release();
 		
-//		PowerManager pm = JitsiApplication.getPowerManager();
 		PowerManager.WakeLock onLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "full_on");
 		onLock.acquire();
 		if(onLock.isHeld())

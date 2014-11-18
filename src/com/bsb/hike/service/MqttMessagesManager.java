@@ -2143,36 +2143,40 @@ public class MqttMessagesManager
 	
 	private void startVOIP( JSONObject jsonObj )
 	{
-		try {
-			String callerID = jsonObj.getString(HikeConstants.FROM);
-//			Context context = .getApplicationContext();
-			Intent intent;
-			if(HikeService.appForegrounded)			
-				intent = new Intent(HikeService.getContext(),com.bsb.hike.ui.ReceiveCallActivity.class);
-			else
-				intent = new Intent(HikeService.getContext(),com.bsb.hike.ui.VoIPActivityNew.class);
-			final Intent serviceIntent = new Intent(HikeService.getContext(),com.bsb.hike.service.VoIPServiceNew.class);
-//			serviceIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			intent.putExtra("callerID", callerID);
-			final Intent i = intent;
-			HikeService.runOnUiThread(new Runnable(){
-				public void run()
-				{
-					HikeService.getContext().startService(serviceIntent);
-				}
-			});
-			HikeService.runOnUiThread(new Runnable(){
-				Intent voipIntent = i;
-				public void run()
-				{
-					HikeService.getContext().startActivity(voipIntent);
-				}
-			});
-			
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(!HikeService.voipServiceRunning){
+			try {
+				String callerID = jsonObj.getString(HikeConstants.FROM);
+	//			Context context = .getApplicationContext();
+				Intent intent;
+				if(HikeService.appForegrounded)			
+					intent = new Intent(HikeService.getContext(),com.bsb.hike.ui.ReceiveCallActivity.class);
+				else
+					intent = new Intent(HikeService.getContext(),com.bsb.hike.ui.VoIPActivityNew.class);
+				final Intent serviceIntent = new Intent(HikeService.getContext(),com.bsb.hike.service.VoIPServiceNew.class);
+	//			serviceIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				intent.putExtra("callerID", callerID);
+				final Intent i = intent;
+				HikeService.runOnUiThread(new Runnable(){
+					public void run()
+					{
+						HikeService.getContext().startService(serviceIntent);
+					}
+				});
+				HikeService.runOnUiThread(new Runnable(){
+					Intent voipIntent = i;
+					public void run()
+					{
+						HikeService.getContext().startActivity(voipIntent);
+					}
+				});
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			//TODO: Handle busy here
 		}
 	}
 

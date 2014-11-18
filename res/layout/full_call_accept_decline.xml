@@ -11,21 +11,19 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/fullPhoneNumberView1"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="80dp"
-        android:contentDescription="ProfileImage" >
+        android:layout_marginTop="90dp"
+        android:contentDescription="ProfileImage"
+        android:background="@drawable/voip_avatar_circle" >
 
-        <ImageView
-            android:layout_width="104dp"
-            android:layout_height="104dp"
-            android:src="@drawable/avatar_stroke" />
 
         <ImageView
             android:id="@+id/fullvoipContactPicture"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="125dp"
+            android:layout_height="125dp"
             android:layout_gravity="center"
+            android:layout_centerVertical="true"
             android:contentDescription="Profile Image"
-            android:src="@drawable/ic_default_avatar_group" />
+            android:src="@drawable/voip_test_dp" />
     </FrameLayout>
 
     <com.bsb.hike.view.CustomFontTextView
@@ -34,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="10dp"
         android:text="INCOMING CALL"
         android:textColor="@color/white" />
 
@@ -44,8 +42,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/fullPhoneNumberView1"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="18dp"
-        android:text="NAME GOES HERE"
+        android:layout_marginTop="0dp"
+        android:text="Samantha"
+        android:textSize="32dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/white" />
 
@@ -55,7 +54,7 @@
         android:layout_height="16dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="59dp"
+        android:layout_marginBottom="49dp"
         android:layout_marginRight="34dp"
         android:background="@drawable/greenarrow"
         android:maxHeight="10dp"
@@ -68,7 +67,7 @@
         android:layout_height="16dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_marginBottom="59dp"
+        android:layout_marginBottom="49dp"
         android:layout_marginLeft="34dp"
         android:background="@drawable/redarrow"
         android:scaleType="centerInside" />
@@ -84,35 +83,46 @@
         android:contentDescription="SliderImage" >
     <ImageView
         android:id="@+id/fullcallSlider"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"        
         android:src="@drawable/callicon" 
         android:background="@drawable/slider_oval"/>
-    </FrameLayout>
+</FrameLayout>
 
 <ImageView
     android:id="@+id/fullSpeakerButton"
-    android:layout_width="40dp"
-    android:layout_height="40dp"
+    android:layout_width="20dp"
+    android:layout_height="20dp"
     android:layout_alignParentBottom="true"
     android:layout_marginBottom="47dp"
-    android:layout_marginRight="45dp"
-    android:layout_toLeftOf="@+id/voip_slider_container"
+    android:layout_marginLeft="45dp"
+    android:layout_toRightOf="@+id/voip_slider_container"
     android:scaleType="centerInside"
     android:src="@drawable/speaker_off"
     android:visibility="invisible" />
 
 <ImageView
     android:id="@+id/fullMicButton"
-    android:layout_width="40dp"
-    android:layout_height="40dp"
+    android:layout_width="20dp"
+    android:layout_height="20dp"
     android:layout_alignParentBottom="true"
     android:layout_marginBottom="47dp"
-    android:layout_marginLeft="45dp"
-    android:layout_toRightOf="@+id/voip_slider_container"
+    android:layout_marginRight="45dp"
+    android:layout_toLeftOf="@+id/voip_slider_container"
     android:src="@drawable/voip_mute_off" 
     android:visibility="invisible"/>
+
+<com.bsb.hike.view.CustomFontTextView
+    android:id="@+id/fullCallTimer"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignTop="@+id/fullCallerId"
+    android:layout_centerHorizontal="true"
+    android:layout_marginTop="15dp"
+    android:text="CALL DURATION GOES HERE"
+    android:visibility="invisible"
+    android:textColor="@color/white" />
 
 </RelativeLayout>

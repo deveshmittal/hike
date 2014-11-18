@@ -27,6 +27,7 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 
 	public HikeServiceConnection(HikeMessengerApp app, Messenger messenger)
 	{
+		Logger.d("HikeServiceConnection", "connection established again");
 		this.mApp = app;
 		this.mMessenger = messenger;
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH, this);
@@ -102,6 +103,7 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
+		Logger.d("Hikemqttmanagernew", "revieved message : " + object.toString());
 		if (mService == null)
 		{
 			Logger.e("HikeServiceConnection", "Unable to publish message ");

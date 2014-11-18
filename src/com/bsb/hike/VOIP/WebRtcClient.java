@@ -189,7 +189,12 @@ public class WebRtcClient {
 		
 //		mPubSub.publish(HikePubSub.VOIP_HANDSHAKE_SENT, message);
 		if( !(message.toString().contains("recvonly")) )
+		{
+			Logger.d("Hikemqttmanagernew", "sending voip message");
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
+			
+		}
+			
 		
 		Log.d("Sent", message.toString());
 	}
@@ -329,7 +334,7 @@ public class WebRtcClient {
 			}
 			if (iceConnectionState == PeerConnection.IceConnectionState.CONNECTED){
 				
-//				startTime = System.currentTimeMillis();
+				startTime = System.currentTimeMillis();
 //				callTimeHandler.post(new CallLengthCalculator());
 			}
 		}
