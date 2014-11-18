@@ -334,11 +334,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		initTagEditText();
 
-		if(!nuxInviteMode)
-		{
-			initTips();
-		}
-
 		if (existingGroupId != null)
 		{
 			MIN_MEMBERS_GROUP_CHAT = 1;
@@ -394,41 +389,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		// need to confirm with rishabh --gauravKhanna
 		tagEditText.setMinCharChangeThresholdForTag(8);
 		tagEditText.setSeparator(TagEditText.SEPARATOR_SPACE);
-	}
-	
-	private void initTips(){
-		initMultiForwardTip();
-	}
-	
-	private void initMultiForwardTip() {
-		// multi forward
-		if (isForwardingMessage && !isSharingFile && !HikeSharedPreferenceUtil.getInstance(getApplicationContext()).getData(HikeConstants.SHOWN_MULTI_FORWARD_TIP, false)) {
-			ViewStub forwardTipViewStub = (ViewStub) findViewById(R.id.tipLayoutViewStub);
-			forwardTipViewStub
-					.setOnInflateListener(new ViewStub.OnInflateListener() {
-
-						@Override
-						public void onInflate(ViewStub stub, final View inflated) {
-							// TODO : set text and icon
-							TextView heading = (TextView) inflated.findViewById(R.id.tip_header);
-							heading.setText(R.string.forward_tip_heading);
-							TextView description = (TextView) inflated.findViewById(R.id.tip_msg);
-							description.setText(R.string.forward_tip_description);
-							
-							inflated.findViewById(R.id.close_tip)
-									.setOnClickListener(new OnClickListener() {
-
-										@Override
-										public void onClick(View v) {
-											inflated.setVisibility(View.GONE);
-											HikeSharedPreferenceUtil.getInstance(getApplicationContext()).saveData(HikeConstants.SHOWN_MULTI_FORWARD_TIP, true);
-										}
-									});
-
-						}
-					});
-			forwardTipViewStub.inflate();
-		}
 	}
 	
 	@Override
