@@ -833,7 +833,7 @@
     <string name="status_updates_proper_casing">Status Updates</string>
     <string name="bigger_better_attachments">Bigger, better attachments</string>
     <string name="introducing_stealth_mode">Introducing Hidden Mode</string>
-    <string name="stealth_mode_popup_msg">You can now hide your private chats from the world and read them only with a password.\n\nTry it now!</string>
+    <string name="stealth_mode_popup_msg">You can now hide your private chats from the world and read them only with a password.</string>
     <string name="quick_setup">Quick Setup</string>
     <string name="stealth_double_tap_tip"><![CDATA[ Your chat has been hidden! Set up a password to access Hidden Mode.<br> <br> <b> Tap on \'hi\' to begin.</b> ]]></string>
     <string name="alp_42447968_cmd_confirm">Confirm</string>
@@ -1231,4 +1231,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="invite_footer_header">Who\'s your Bestie?</string>
     <string name="invite_footer_subtext">Try hike with your best friends. It\'s super fun!</string>
     <string name="invite_now_uppercase">INVITE NOW</string>
+    <string name="nux_fwd_search_hint">Names go here...</string>
 </resources>

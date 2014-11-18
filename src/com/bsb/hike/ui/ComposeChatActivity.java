@@ -697,7 +697,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.removeFilter();
 			adapter.clearAllSelection(true);
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
-			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint("");
+			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint(R.string.nux_fwd_search_hint);
 			break;
 		}
 		setTitle();
