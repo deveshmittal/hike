@@ -18,7 +18,7 @@
 	    android:layout_height="wrap_content"
 	    android:src="@drawable/art_sticker_whistle"/>
 	
-	<TextView
+	<com.bsb.hike.view.CustomFontTextView
 	    android:id="@+id/invite_footer_header"
 	    android:layout_centerHorizontal="true"
 	    android:layout_below="@id/sticker_invite_footer"
@@ -27,9 +27,9 @@
 	    android:paddingTop="20dp"
 	    android:textSize="24sp"
 	    android:text="@string/invite_footer_header" >
-	</TextView>
+	</com.bsb.hike.view.CustomFontTextView>
 	
-	<TextView
+	<com.bsb.hike.view.CustomFontTextView
 	    android:id="@+id/invite_footer_subtext"
 	    android:layout_centerHorizontal="true"
 	    android:layout_below="@id/invite_footer_header"
@@ -39,9 +39,9 @@
 	    android:textSize="14sp"
 	    android:textColor="@color/grey"
 	    android:text="@string/invite_footer_subtext" >
-	</TextView>
+	</com.bsb.hike.view.CustomFontTextView>
 	
-	<Button
+	<com.bsb.hike.view.CustomFontButton
 	    android:id="@+id/nux_invite_now"
 	    android:layout_centerHorizontal="true"
 	    android:layout_below="@id/invite_footer_subtext"
@@ -50,12 +50,13 @@
 	    android:layout_alignLeft="@id/invite_footer_header"
 	    android:layout_alignRight="@id/invite_footer_header"
 	    android:layout_marginTop="@dimen/nux_button_text_margin"
-	    android:background="@color/blue_hike"
-	    android:textSize="13sp"
-	    android:textColor="@color/white"
+	    android:background="@drawable/signup_button"
+	    android:textSize="14sp"
+	    android:textColor="@drawable/signup_btn_text"
 	    android:gravity="center"
-	    android:text="@string/invite_now_uppercase" >
-	</Button>
+	    android:text="@string/invite_now_uppercase"
+	    android:textStyle="bold" >
+	</com.bsb.hike.view.CustomFontButton>
 
 </RelativeLayout>
 </LinearLayout>
