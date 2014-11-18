@@ -1569,10 +1569,10 @@ public class Utils
 	{
 		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		boolean connectUsingSSL = Utils.switchSSLOn(ctx);
-		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), connectUsingSSL);
+		Utils.setupServerURL(settings.getInt(HikeMessengerApp.PRODUCTION_HOST_TOGGLE, AccountUtils._PRODUCTION_HOST), connectUsingSSL);
 	}
 
-	public static void setupServerURL(boolean isProductionServer, boolean ssl)
+	public static void setupServerURL(int whichServer, boolean ssl)
 	{
 		Logger.d("SSL", "Switching SSL on? " + ssl);
 
@@ -1581,11 +1581,9 @@ public class Utils
 
 		String httpString = ssl ? AccountUtils.HTTPS_STRING : AccountUtils.HTTP_STRING;
 
-		AccountUtils.host = isProductionServer ? AccountUtils.PRODUCTION_HOST : AccountUtils.STAGING_HOST;
-		AccountUtils.port = isProductionServer ? (ssl ? AccountUtils.PRODUCTION_PORT_SSL : AccountUtils.PRODUCTION_PORT) : (ssl ? AccountUtils.STAGING_PORT_SSL
-				: AccountUtils.STAGING_PORT);
+		setHostAndPort(whichServer, ssl);
 
-		if (isProductionServer)
+		if (whichServer == AccountUtils._PRODUCTION_HOST)
 		{
 			AccountUtils.base = httpString + AccountUtils.host + "/v1";
 			AccountUtils.baseV2 = httpString + AccountUtils.host + "/v2";
@@ -1598,26 +1596,49 @@ public class Utils
 			AccountUtils.SDK_AUTH_BASE = AccountUtils.SDK_AUTH_BASE_URL_STAGING;
 		}
 
-		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
+		AccountUtils.fileTransferHost = (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST);
 		AccountUtils.fileTransferUploadBase = httpString + AccountUtils.fileTransferHost + ":" + Integer.toString(AccountUtils.port) + "/v1";
 
-		CheckForUpdateTask.UPDATE_CHECK_URL = httpString + (isProductionServer ? CheckForUpdateTask.PRODUCTION_URL : CheckForUpdateTask.STAGING_URL);
+		CheckForUpdateTask.UPDATE_CHECK_URL = httpString + (whichServer == AccountUtils._PRODUCTION_HOST ? CheckForUpdateTask.PRODUCTION_URL : CheckForUpdateTask.STAGING_URL);
 
 		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
 		AccountUtils.fastFileUploadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
-				+ (isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
+				+ (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
 
-		AccountUtils.rewardsUrl = isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE : AccountUtils.REWARDS_STAGING_BASE;
-		AccountUtils.gamesUrl = isProductionServer ? AccountUtils.GAMES_PRODUCTION_BASE : AccountUtils.GAMES_STAGING_BASE;
-		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE : AccountUtils.STICKERS_STAGING_BASE);
-		AccountUtils.h2oTutorialUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.H2O_TUTORIAL_PRODUCTION_BASE : AccountUtils.H2O_TUTORIAL_STAGING_BASE);
+		AccountUtils.rewardsUrl = (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.REWARDS_PRODUCTION_BASE : AccountUtils.REWARDS_STAGING_BASE);
+		AccountUtils.gamesUrl = (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.GAMES_PRODUCTION_BASE : AccountUtils.GAMES_STAGING_BASE);
+		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING + (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.STICKERS_PRODUCTION_BASE : AccountUtils.STICKERS_STAGING_BASE);
+		AccountUtils.h2oTutorialUrl = AccountUtils.HTTP_STRING + (whichServer == AccountUtils._PRODUCTION_HOST ? AccountUtils.H2O_TUTORIAL_PRODUCTION_BASE : AccountUtils.H2O_TUTORIAL_STAGING_BASE);
 		Logger.d("SSL", "Base: " + AccountUtils.base);
 		Logger.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);
 		Logger.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferUploadBase);
 		Logger.d("SSL", "UpdateCheck: " + CheckForUpdateTask.UPDATE_CHECK_URL);
 		Logger.d("SSL", "FTDloadBase: " + AccountUtils.fileTransferBaseDownloadUrl);
 		Logger.d("SSL", "FTViewBase: " + AccountUtils.fileTransferBaseViewUrl);
+	}
+
+	private static void setHostAndPort(int whichServer, boolean ssl)
+	{
+		switch (whichServer)
+		{
+
+		case AccountUtils._PRODUCTION_HOST:
+			AccountUtils.host = AccountUtils.PRODUCTION_HOST;
+			AccountUtils.port = ssl ? AccountUtils.PRODUCTION_PORT_SSL : AccountUtils.PRODUCTION_PORT;
+			break;
+			
+		case AccountUtils._STAGING_HOST:
+			AccountUtils.host = AccountUtils.STAGING_HOST;
+			AccountUtils.port = ssl ? AccountUtils.STAGING_PORT_SSL : AccountUtils.STAGING_PORT;
+			break;
+			
+		case AccountUtils._DEV_STAGING_HOST:
+			AccountUtils.host = AccountUtils.DEV_STAGING_HOST;
+			AccountUtils.port = ssl ? AccountUtils.STAGING_PORT_SSL : AccountUtils.STAGING_PORT;
+			break;
+		}
+
 	}
 
 	public static boolean shouldChangeMessageState(ConvMessage convMessage, int stateOrdinal)
