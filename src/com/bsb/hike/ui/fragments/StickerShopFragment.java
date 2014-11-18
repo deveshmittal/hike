@@ -88,6 +88,11 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	{
 		// TODO Register PubSub Listeners
 		super.onActivityCreated(savedInstanceState);
+		if(StickerManager.getInstance().stickerShopUpdateNeeded())
+		{
+			HikeConversationsDatabase.getInstance().clearStickerShop();
+		}
+		
 		executeFetchCursorTask(new FetchCursorTask());
 		
 		loadingFailedEmptyState.setOnClickListener(new OnClickListener()
@@ -96,7 +101,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 			@Override
 			public void onClick(View v)
 			{
-				downLoadStickerData(mAdapter.isEmpty() ? 0 : mAdapter.getCount() + 1);
+				downLoadStickerData();
 			}
 		});
 	}
@@ -201,15 +206,14 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 			@Override
 			public void onClick(View v)
 			{
-				downLoadStickerData(mAdapter.getCount() + 1);
+				downLoadStickerData();
 			}
 		});
 		
-		if(StickerManager.getInstance().stickerShopUpdateNeeded() || mAdapter.isEmpty())
+		if((mAdapter.getCursor() == null) || mAdapter.getCursor().getCount() == 0)
 		{
 			listview.setVisibility(View.GONE);
-			HikeConversationsDatabase.getInstance().clearStickerShop();
-			downLoadStickerData(0);
+			downLoadStickerData();
 		}
 		else
 		{
@@ -217,8 +221,9 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		}
 	}
 	
-	public void downLoadStickerData(final int currentCategoriesCount)
+	public void downLoadStickerData()
 	{
+		final int currentCategoriesCount = (mAdapter == null) || (mAdapter.getCursor() == null) ? 0 : mAdapter.getCursor().getCount();
 		downloadState = DOWNLOADING;
 		final TextView loadingFailedEmptyStateMainText = (TextView) loadingFailedEmptyState.findViewById(R.id.main_text);
 		final TextView loadingFailedEmptyStateSubText = (TextView) loadingFailedEmptyState.findViewById(R.id.sub_text);
@@ -358,7 +363,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		// TODO Auto-generated method stub
 		if (downloadState == NOT_DOWNLOADING && (!mAdapter.isEmpty()) &&(firstVisibleItem + visibleItemCount)  > (totalItemCount - 5) && StickerManager.getInstance().moreDataAvailableForStickerShop())
 		{
-			downLoadStickerData(mAdapter.getCount() + 1);
+			downLoadStickerData();
 		}
 		
 		if (previousFirstVisibleItem != firstVisibleItem)

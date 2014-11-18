@@ -5759,11 +5759,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				contentValues.put(DBConstants.CATEGORY_SIZE, category.getCategorySize());
 				
 				/*
-				 * stickerShopTable contains only these 4 columns.
-				 */
-				mDb.insertWithOnConflict(DBConstants.STICKER_SHOP_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
-
-				/*
 				 * Adding extra fields as per stickerCategoriesTable
 				 */
 				contentValues.put(DBConstants.IS_VISIBLE, category.isVisible());
@@ -5813,4 +5808,37 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		mDb.delete(DBConstants.STICKER_SHOP_TABLE, null, null);
 	}
+	
+	/**
+	 * Returns the maximum category index from StickerCategories Table
+	 * @return
+	 */
+	public int getMaxStickerCategoryIndex()
+	{
+		Cursor c = null;
+
+		try
+		{
+			c = mDb.query(DBConstants.STICKER_CATEGORIES_TABLE, new String[] { "MAX(" + DBConstants.CATEGORY_INDEX + ")" + "AS " + DBConstants.CATEGORY_INDEX }, null, null, null, null, null, null);
+
+			if (c.moveToFirst())
+			{
+				return c.getInt(c.getColumnIndex(DBConstants.CATEGORY_INDEX));
+			}
+			else
+				return -1;
+		}
+		
+		catch (Exception e)
+		{
+			return -1;
+		}
+		
+		finally
+		{
+			if (c != null)
+				c.close();
+		}
+	}
+
 }

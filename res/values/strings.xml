@@ -1209,7 +1209,7 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="great_job">Great Job</string>
     <string name="downloading_stk">DOWNLOADING</string>
     <string name="update_sticker">UPDATE AVAILABLE</string>
-    <string name="text_empty_error">Text Can\'t be empty!</string>
+    <string name="text_empty_error">Text can\'t be empty!</string>
     <string name="shop_download_failed">Download failed. Tap to retry.</string>
     <string name="shop_download_failed_out_of_space">Insufficient memory</string>
     <string name="shop_loading_state">LOADING STICKERS</string>
@@ -1234,4 +1234,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="pack_visible">Visible in sticker palette</string>
     <string name="pack_hidden">Hidden from sticker palette</string>
     <string name="pack_rank">%1$d.</string>
+    <string name="hike_upgrade_string">We need a few moments to set up your brand new sticker shop. It won\'t be long</string>
+    <string name="some_error">Some error occured!</string>
 </resources>
