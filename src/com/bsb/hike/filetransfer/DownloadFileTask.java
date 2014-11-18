@@ -77,12 +77,15 @@ public class DownloadFileTask extends FileTransferBase
 		{
 			HikeFile hikeFile = ((ConvMessage)userContext).getMetadata().getHikeFiles().get(0);
 			String downLoadUrl = hikeFile.getDownloadURL();
+			boolean isCloudFrontURL = false;
 			if(TextUtils.isEmpty(downLoadUrl))
 				downLoadUrl = (AccountUtils.fileTransferBaseDownloadUrl + fileKey);
-			else if(AccountUtils.ssl)
-				downLoadUrl = downLoadUrl.replace("http", "https");
+			else
+				isCloudFrontURL = true;
 				
 			mUrl = new URL(downLoadUrl);
+			if(isCloudFrontURL && AccountUtils.ssl)
+				mUrl = new URL("https", mUrl.getHost(), mUrl.getPort(), mUrl.getFile());
 
 			FileSavedState fst = FileTransferManager.getInstance(context).getDownloadFileState(mFile, msgId);
 			/* represents this file is either not started or unrecovered error has happened */
@@ -199,7 +202,7 @@ public class DownloadFileTask extends FileTransferBase
 					// while ((numRead = in.read(data, 0, chunkSize)) != -1)
 					int numRead = 0;
 					_state = FTState.IN_PROGRESS;
-					sendProgress();
+					sendBroadcast();
 					do
 					{
 						int byteRead = 0;
@@ -256,7 +259,7 @@ public class DownloadFileTask extends FileTransferBase
 						progressPercentage = (int) ((_bytesTransferred * 100) / _totalSize);
 						// showButton();
 						if(_state != FTState.PAUSED)
-							sendProgress();
+							sendBroadcast();
 					}
 					while (_state == FTState.IN_PROGRESS);
 
@@ -304,7 +307,8 @@ public class DownloadFileTask extends FileTransferBase
 						{
 							Logger.d(getClass().getSimpleName(), "FT Completed");
 							// Added sleep to complete the progress.
-							Thread.sleep(400);
+							//TODO Need to remove sleep and implement in a better way to achieve the progress UX.
+							Thread.sleep(300);
 							// temp file is already deleted
 							_state = FTState.COMPLETED;
 							deleteStateFile();
@@ -411,7 +415,7 @@ public class DownloadFileTask extends FileTransferBase
 		return true;
 	}
 
-	private void sendProgress()
+	private void sendBroadcast()
 	{
 		Logger.d(getClass().getSimpleName(), "sending progress to publish...");
 		Intent intent = new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED);
@@ -483,15 +487,11 @@ public class DownloadFileTask extends FileTransferBase
 		// showButton();
 		this.pausedProgress = -1;
 		if(_state != FTState.PAUSED)
-			sendProgress();
+			sendBroadcast();
 	}
 	
 	private String removeExtraQuotes(String mText){
-		String result = mText;
-		if(mText.startsWith("\"") && mText.endsWith("\"")){
-			result = result.substring(1);
-			result = result.substring(0, result.length() - 1);
-		}
-		return result;
+		mText = mText.replace("\"", "");
+		return mText;
 	}
 }

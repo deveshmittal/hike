@@ -6112,21 +6112,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					@Override
 					public void negativeClicked(Dialog dialog)
 					{
-						// TODO Auto-generated method stub
 
 					}
 
 					@Override
 					public void positiveClicked(Dialog dialog)
 					{
-						// TODO Auto-generated method stub
 
 					}
 
 					@Override
 					public void neutralClicked(Dialog dialog)
 					{
-						// TODO Auto-generated method stub
 
 					}
 				}, (Object[]) new Long[] { (long) 1, selectedFile.length() });

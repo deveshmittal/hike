@@ -378,6 +378,7 @@ public class UploadFileTask extends FileTransferBase
 		}
 		if (picasaUri == null)
 		{
+			// Added isEmpty check instead of null check because in some devices it returns empty string rather than null.
 			if (TextUtils.isEmpty(hikeFile.getSourceFilePath()))
 			{
 				Logger.d("This filepath: ", selectedFile.getPath());
@@ -690,20 +691,18 @@ public class UploadFileTask extends FileTransferBase
 		Logger.d(getClass().getSimpleName(), "Starting Upload from state : " + fst.getFTState().toString());
 		if (fst.getFTState().equals(FTState.NOT_STARTED))
 		{
-			
-			JSONObject responseMd5 = null;
 			try
 			{
 				Logger.d(getClass().getSimpleName(), "Verifying MD5");
-				responseMd5 = verifyMD5(selectedFile);
+				JSONObject responseMd5 = verifyMD5(selectedFile);
+				if(responseMd5 != null)
+					return responseMd5;
 			}
 			catch (Exception e)
 			{
 				Logger.e(getClass().getSimpleName(), "Exception", e);
 				return null;
 			}
-			if(responseMd5 != null)
-				return responseMd5;
 			// here as we are starting new upload, we have to create the new session id
 			X_SESSION_ID = UUID.randomUUID().toString();
 			Logger.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
@@ -753,19 +752,10 @@ public class UploadFileTask extends FileTransferBase
 		RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 		raf.seek(mStart);
 
+		setChunkSize();
 		if (mStart == 0)
 		{
-
-			setChunkSize();
-
 			chunkSize = chunkSize / 5;
-
-		}
-		else
-		{
-
-			setChunkSize();
-
 		}
 		if (chunkSize > length)
 			chunkSize = (int) length;
@@ -888,7 +878,8 @@ public class UploadFileTask extends FileTransferBase
 			break;
 		case IN_PROGRESS:
 			// Added sleep to complete the progress.
-			Thread.sleep(400);
+			//TODO Need to remove sleep and implement in a better way to achieve the progress UX.
+			Thread.sleep(300);
 			Logger.d(getClass().getSimpleName(), "FT Completed");
 			_state = FTState.COMPLETED;
 			deleteStateFile();
@@ -1032,7 +1023,7 @@ public class UploadFileTask extends FileTransferBase
 			{
 				mUrl = new URL(AccountUtils.fileTransferBaseDownloadUrl + fileKey);
 				HttpClient client = new DefaultHttpClient();
-				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 30 * 1000);
+				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10 * 1000);
 				HttpHead head = new HttpHead(mUrl.toString());
 				head.addHeader("Cookie", "user=" + token + ";uid=" + uId);
 	
@@ -1091,7 +1082,7 @@ public class UploadFileTask extends FileTransferBase
 	{
 		HttpClient client = new DefaultHttpClient();
 		client.getParams().setParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, bufferSize);
-		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 30 * 1000);
+		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10 * 1000);
 		// client.getParams().setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
 		client.getParams().setParameter(CoreConnectionPNames.TCP_NODELAY, true);
 		long time = System.currentTimeMillis();
@@ -1120,29 +1111,11 @@ public class UploadFileTask extends FileTransferBase
 			Logger.e(getClass().getSimpleName(), "FT Upload time out error : " + ex.getMessage());
 			return null;
 		}
-		catch (SocketException ex)
-		{
-			ex.printStackTrace();
-			Logger.e(getClass().getSimpleName(), "FT Upload Socket error : " + ex.getMessage());
-			error();
-			res = null;
-			retry = false;
-			return null;
-		}
-		catch (UnknownHostException ex)
-		{
-			ex.printStackTrace();
-			Logger.e(getClass().getSimpleName(), "FT Upload UnknownHost error : " + ex.getMessage());
-			error();
-			res = null;
-			retry = false;
-			return null;
-		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			Logger.e(getClass().getSimpleName(), "FT Upload error : " + e.getMessage());
-			if (e.getMessage() == null)
+			if(e instanceof UnknownHostException || e instanceof SocketException || e.getMessage() == null)
 			{
 				error();
 				res = null;
@@ -1333,7 +1306,7 @@ public class UploadFileTask extends FileTransferBase
 			{
 				mUrl = new URL(AccountUtils.fastFileUploadUrl + fileMD5);
 				HttpClient client = new DefaultHttpClient();
-				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 30 * 1000);
+				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10 * 1000);
 				HttpHead head = new HttpHead(mUrl.toString());
 
 				HttpResponse resp = client.execute(head);
