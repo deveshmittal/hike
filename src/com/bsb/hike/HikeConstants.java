@@ -97,6 +97,8 @@ public class HikeConstants
 
 	public static final String DND_NUMBERS = "dndnumbers";
 
+	public static final String SOURCE = "source";
+
 	public static final String FILES = "files";
 
 	public static final String CONTENT_TYPE = "ct";
@@ -468,6 +470,8 @@ public class HikeConstants
 	public static final String BACKUP_PREF = "backupAccount";
 
     public static final String NUX_BOT = "+hike5+";
+
+    public static final String NUX = "nux";
 
 	public static final String UNLINK_PREF = "unlinkAccount";
 
