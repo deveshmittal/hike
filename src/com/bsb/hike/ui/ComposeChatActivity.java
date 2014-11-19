@@ -1158,7 +1158,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			Utils.sendUILogEvent(HikeConstants.LogEvent.CONFIRM_FORWARD);
 			// forwarding it is
 			Intent intent = null;
-			if(!nuxInviteMode && arrayList.size()==1)
+			if(!nuxInviteMode && !isFtueFwd && arrayList.size()==1)
 			{
 				// forwarding to 1 is special case , we want to create conversation if does not exist and land to recipient
 				intent = Utils.createIntentFromMsisdn(arrayList.get(0).getMsisdn(), false);
@@ -1392,7 +1392,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					intent.putExtra(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
 					sendMessage(convMessage);
 				}else{
-					sendMultiMessages(multipleMessageList,arrayList,isFtueFwd, nuxInviteMode);
+					sendMultiMessages(multipleMessageList,arrayList,isFtueFwd);
 					if(fileTransferList.isEmpty()){
 						// if it is >0 then onpost execute of PreFileTransferAsycntask will start intent
 						startActivity(intent);
@@ -1517,9 +1517,18 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		return toReturn;
 	}
 
-	private void sendMultiMessages(ArrayList<ConvMessage> multipleMessageList, ArrayList<ContactInfo> arrayList ,boolean createChatThread, boolean nuxInviteMode)
+	private void sendMultiMessages(ArrayList<ConvMessage> multipleMessageList, ArrayList<ContactInfo> arrayList ,boolean createChatThread)
 	{
-		MultipleConvMessage multiMessages = new MultipleConvMessage(multipleMessageList, arrayList, System.currentTimeMillis() / 1000 , createChatThread, nuxInviteMode);
+		String source = null;
+		if(nuxInviteMode)
+		{
+			source = HikeConstants.NUX;
+		}
+		else if(isFtueFwd)
+		{
+			source = HikeConstants.STICKER_NUX;
+		}
+		MultipleConvMessage multiMessages = new MultipleConvMessage(multipleMessageList, arrayList, System.currentTimeMillis() / 1000 , createChatThread, source);
 		mPubSub.publish(HikePubSub.MULTI_MESSAGE_SENT, multiMessages);
 	}
 
