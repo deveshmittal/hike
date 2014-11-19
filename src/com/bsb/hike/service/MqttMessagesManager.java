@@ -264,11 +264,10 @@ public class MqttMessagesManager
 			{
 				joinTime = Utils.applyServerTimeOffset(context, joinTime);
 				ContactManager.getInstance().setHikeJoinTime(msisdn, joinTime);
+				Editor e = this.settings.edit();
+				e.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
+				e.commit();
 			}
-
-			Editor e = this.settings.edit();
-			e.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
-			e.commit();
 		}
 		else
 		{

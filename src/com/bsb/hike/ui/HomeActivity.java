@@ -899,9 +899,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				return;
 			}
 			
-			Editor editor = accountPrefs.edit();
-			editor.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
-			editor.commit();
+			String msisdn = (String) object;
+			ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, false);
+			if (contact.getHikeJoinTime() > 0)
+			{
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
+				editor.commit();
+			}
+			
 			runOnUiThread(new Runnable()
 			{
 				
@@ -912,7 +918,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 			
-			String msisdn = (String) object;
 			for (ContactInfo contactInfo : ftueContactsData.getCompleteList())
 			{
 				if (contactInfo.getMsisdn().equals(msisdn))
