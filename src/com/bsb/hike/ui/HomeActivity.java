@@ -1640,9 +1640,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void run()
 			{
-				if (accountPrefs.getBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false))
+				boolean showNujNotif = PreferenceManager.getDefaultSharedPreferences(HomeActivity.this).getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true);
+				if (showNujNotif && accountPrefs.getBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false))
 				{
-					newConversationIndicator.setText(String.valueOf(1));
+					newConversationIndicator.setText("1");
 					newConversationIndicator.setVisibility(View.VISIBLE);
 					newConversationIndicator.startAnimation(Utils.getNotificationIndicatorAnim());
 				}
