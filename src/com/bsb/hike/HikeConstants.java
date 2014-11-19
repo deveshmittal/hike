@@ -473,6 +473,8 @@ public class HikeConstants
 
     public static final String NUX = "nux";
 
+    public static final String STICKER_NUX = "stkNux";
+
 	public static final String UNLINK_PREF = "unlinkAccount";
 
 	public static final String DELETE_PREF = "deleteAccount";
