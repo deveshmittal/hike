@@ -61,9 +61,9 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 	private boolean lastSeenPref;
 	
-	private boolean nuxInviteMode;
+	private boolean showDefaultEmptyList;
 
-	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, boolean fetchRecents, boolean nuxInviteMode, String existingGroupId, String sendingMsisdn, FriendsListFetchedCallback friendsListFetchedCallback)
+	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, boolean fetchRecents, boolean showDefaultEmptyList, String existingGroupId, String sendingMsisdn, FriendsListFetchedCallback friendsListFetchedCallback)
 	{
 		super(context, listView, friendsListFetchedCallback, ContactInfo.lastSeenTimeComparatorWithoutFav);
 		selectedPeople = new HashMap<String, ContactInfo>();
@@ -77,7 +77,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		this.sendingMsisdn = sendingMsisdn;
 		this.fetchGroups = fetchGroups;
 		this.fetchRecents = fetchRecents;
-		this.nuxInviteMode = nuxInviteMode;
+		this.showDefaultEmptyList = showDefaultEmptyList;
 		groupsList = new ArrayList<ContactInfo>(0);
 		groupsStealthList = new ArrayList<ContactInfo>(0);
 		filteredGroupsList = new ArrayList<ContactInfo>(0);
@@ -104,7 +104,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		setLoadingView();
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, friendsStealthList, hikeStealthContactsList,
 				smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, filteredGroupsList, filteredRecentsList,
-				existingParticipants, sendingMsisdn, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true, false, fetchRecents, nuxInviteMode);
+				existingParticipants, sendingMsisdn, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true, false, fetchRecents, showDefaultEmptyList);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
@@ -373,7 +373,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	@Override
 	protected List<List<ContactInfo>> makeOriginalList()
 	{
-		if(nuxInviteMode)
+		if(showDefaultEmptyList)
 		{
 			List<List<ContactInfo>> resultList = new ArrayList<List<ContactInfo>>();
 			return resultList;
