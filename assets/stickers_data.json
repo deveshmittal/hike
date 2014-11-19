@@ -78,19 +78,19 @@
             "stickerIds": [ 
                 "042_sahihai.png",
                 "047_saale.png",
-                "012_Item.png",
+                "033_hawww.png",
                 "063_boss.png",
                 "035_machaa.png",
-                "053_aiyo.png",
+                "069_aiyo.png",
                 "040_waah.png"
             ],
             "resourceIds": [
                 "sticker_042_sahihai",
                 "sticker_047_saale",
-                "sticker_012_item",
+                "sticker_033_hawww",
                 "sticker_063_boss",
                 "sticker_035_machaa",
-                "sticker_053_aiyo",
+                "sticker_069_aiyo",
                 "sticker_040_waah"
             ]
         },
@@ -99,12 +99,12 @@
             "stickerIds": [
                 "002_lol.png",
                 "061_lovelips.png",
-                "113_whereareyou.png"
+                "092_yo.png"
             ],
             "resourceIds": [
                 "sticker_002_lol",
                 "sticker_061_lovelips",
-                "sticker_113_whereareyou"
+                "sticker_092_yo"
             ]
         }
     ],
