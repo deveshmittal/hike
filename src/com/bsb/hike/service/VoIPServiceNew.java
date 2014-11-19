@@ -157,6 +157,12 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 //		  VoIPActivityNew.getVoIPActivityInstance().finish();
 		  Log.d("VOIPSERVICE","6");
 		  HikeService.voipServiceRunning = false;
+		  try {
+			MqttMessagesManager.getInstance(getApplicationContext()).setVoipSystemMessage(client.createStateMessageJSON(), (callerId==null)?dialedId:callerId);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		  stopSelf();
 		  Log.d("VOIPSERVICE","7");
 

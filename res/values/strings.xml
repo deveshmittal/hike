@@ -1180,4 +1180,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="wish_now">Wish now!</string>
     <string name="wish_you">Wish your friends!</string>
     <string name="messages_sent_succees">Message Sent</string>
+    <string name="call_received">Received Call ( %1$s )</string>
 </resources>

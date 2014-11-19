@@ -2157,6 +2157,31 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
 			}
+			
+			else if (infoState == ParticipantInfoState.VOIP_ENDED)
+			{
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
+
+				String msisdn = metadata.getMsisdn();
+				String userMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
+
+				String name;
+				if (isGroupChat)
+				{
+					name = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
+				}
+				else
+				{
+					name = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : Utils.getFirstName(conversation.getLabel());
+				}
+
+				String message = context.getString(R.string.chat_bg_changed, name);
+
+				setTextAndIconForSystemMessages(mainMessage, "voip ended", isDefaultTheme ? R.drawable.ic_change_theme
+						: R.drawable.ic_change_theme_custom);
+
+				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
+			}
 			dayHolder = participantInfoHolder;
 		}
 		else if (viewType == ViewType.UNREAD_COUNT)

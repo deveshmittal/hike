@@ -22,6 +22,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -2143,40 +2145,52 @@ public class MqttMessagesManager
 	
 	private void startVOIP( JSONObject jsonObj )
 	{
-		if(!HikeService.voipServiceRunning){
-			try {
-				String callerID = jsonObj.getString(HikeConstants.FROM);
-	//			Context context = .getApplicationContext();
-				Intent intent;
-				if(HikeService.appForegrounded)			
-					intent = new Intent(HikeService.getContext(),com.bsb.hike.ui.ReceiveCallActivity.class);
-				else
-					intent = new Intent(HikeService.getContext(),com.bsb.hike.ui.VoIPActivityNew.class);
-				final Intent serviceIntent = new Intent(HikeService.getContext(),com.bsb.hike.service.VoIPServiceNew.class);
-	//			serviceIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				intent.putExtra("callerID", callerID);
-				final Intent i = intent;
-				HikeService.runOnUiThread(new Runnable(){
-					public void run()
-					{
-						HikeService.getContext().startService(serviceIntent);
-					}
-				});
-				HikeService.runOnUiThread(new Runnable(){
-					Intent voipIntent = i;
-					public void run()
-					{
-						HikeService.getContext().startActivity(voipIntent);
-					}
-				});
-				
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		boolean onWifi = true;
+		ConnectivityManager connec = (ConnectivityManager) HikeService.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo wifi = connec.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		onWifi = wifi.isConnected();
+		if (onWifi){
+			if(!HikeService.voipServiceRunning){
+				try {
+					String callerID = jsonObj.getString(HikeConstants.FROM);
+		//			Context context = .getApplicationContext();
+					Intent intent;
+					if(HikeService.appForegrounded)			
+						intent = new Intent(context,com.bsb.hike.ui.ReceiveCallActivity.class);
+					else
+						intent = new Intent(context,com.bsb.hike.ui.VoIPActivityNew.class);
+					final Intent serviceIntent = new Intent(HikeService.getContext(),com.bsb.hike.service.VoIPServiceNew.class);
+		//			serviceIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					intent.putExtra("callerID", callerID);
+					final Intent i = intent;
+					HikeService.runOnUiThread(new Runnable(){
+						public void run()
+						{
+							HikeService.getContext().startService(serviceIntent);
+						}
+					});
+					HikeService.runOnUiThread(new Runnable(){
+						Intent voipIntent = i;
+						public void run()
+						{
+							HikeService.getContext().startActivity(voipIntent);
+						}
+					});
+					
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				//TODO: Handle busy here
 			}
 		} else {
-			//TODO: Handle busy here
+			/**TODO: Handle not on wifi here
+			 * Send message to caller that receiver is not on wifi
+			 * Display notif/hm you missed a call
+			 */
+			
 		}
 	}
 
@@ -2362,8 +2376,10 @@ public class MqttMessagesManager
 		{
 			return null;
 		}
+		
+		Log.d("VOIPSTATUSMSG", convMessage.toString());
 
-		convDb.addConversationMessages(convMessage);
+		convDb.addConversationMessages(convMessage);		
 
 		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 
@@ -2626,5 +2642,22 @@ public class MqttMessagesManager
 	{
 		String id = jsonObject.optString(HikeConstants.MESSAGE_ID);
 		return TextUtils.isEmpty(id) || HikeSharedPreferenceUtil.getInstance(context).getData(key, "").equals(id);
+	}
+	
+	public void setVoipSystemMessage(JSONObject jsonObj, String msisdn) throws JSONException{
+		
+		ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
+
+		if (convMessage == null)
+		{
+			return ;
+		}
+		Log.d("VOIPSTATUSMSG", convMessage.toString());
+		
+		convDb.addConversationMessages(convMessage);
+		
+		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+		
+		statusMessagePostProcess(convMessage, jsonObj);
 	}
 }

@@ -4,20 +4,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.PeerConnection;
 
-import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
-import android.animation.Animator.AnimatorListener;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.shapes.Shape;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaPlayer;
@@ -115,6 +109,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	private FrameLayout avatarContainer;
 	private ImageView speakerButton;
 	private float delY;
+	public Vibrator vibrator;
 	
 	class CallLengthManager implements Runnable{
 
@@ -185,8 +180,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 							{
 		            		
 //		        				r.stop();
-		        				Vibrator v1 = (Vibrator) getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
-								v1.vibrate(100);
+		        				vibrator = (Vibrator) getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
+								vibrator.vibrate(100);
 		        				Intent intent = new Intent(getApplicationContext(),com.bsb.hike.service.VoIPServiceNew.class);;
 		        				intent.putExtra("decline", true);	
 		        				intent.putExtras(getIntent().getExtras());
@@ -301,12 +296,19 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 		r = RingtoneManager.getRingtone(getApplicationContext(), notification);
 		r.setStreamType(AudioManager.STREAM_ALARM);
-//		r.play();
-		Log.w("Audio Starting", "Audio Starting");
-		isPlaying = true;
+		if (am.getRingerMode() == AudioManager.RINGER_MODE_NORMAL ){
+//			r.play();
+			isPlaying = true;
+			Log.w("Ringer Starting", "Audio Starting");
+		} else if (am.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
+			vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+			long[] vibTimings = {0,300,1000,1300,2000,2300};
+			if(vibrator.hasVibrator()){
+				vibrator.vibrate(vibTimings, 0);				
+			}
+		}
 		setContentView(R.layout.full_call_accept_decline);
 		displayPic = (ImageView)this.findViewById(R.id.fullvoipContactPicture);
-//		setDisplayPic();
 		avatarContainer = (FrameLayout)this.findViewById(R.id.voip_avatar_container);
 		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
 		avatarContainer.setAnimation(dpAnim);
@@ -441,6 +443,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			r.stop();
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		}
+//		vibrator.cancel();
 		acceptCall = (ImageView)this.findViewById(R.id.fullacceptButton);
 		acceptCall.setVisibility(View.INVISIBLE);
 		declineCall = (ImageView)this.findViewById(R.id.fulldeclineButton);

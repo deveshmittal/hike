@@ -552,4 +552,16 @@ public class WebRtcClient {
 		mPubSub.publish(HikePubSub.VOIP_FINISHED, "Nice Talking" );
 	}
 	
+	public JSONObject createStateMessageJSON() throws JSONException{
+		JSONObject obj = new JSONObject();
+		JSONObject data = new JSONObject();
+		data.put(HikeConstants.MSISDN, storedId);
+		obj.put(HikeConstants.TYPE, "voipEnded");
+		obj.put(HikeConstants.TO, storedId);
+		obj.put("callDuration", "");
+		
+		
+		return obj;		
+	}
+	
 }
