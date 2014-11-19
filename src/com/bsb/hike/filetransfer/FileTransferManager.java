@@ -186,7 +186,7 @@ public class FileTransferManager extends BroadcastReceiver
 			int threadCount = threadNumber.getAndIncrement();
 			Thread t = new Thread(r);
 			// This approach reduces resource competition between the Runnable object's thread and the UI thread.
-			t.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+			t.setPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE + android.os.Process.THREAD_PRIORITY_BACKGROUND);
 			t.setName("FT Thread-" + threadCount);
 			Logger.d(getClass().getSimpleName(), "Running FT thread : " + t.getName());
 			return t;

@@ -9,9 +9,11 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,6 +27,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreConnectionPNames;
@@ -375,7 +378,8 @@ public class UploadFileTask extends FileTransferBase
 		}
 		if (picasaUri == null)
 		{
-			if (hikeFile.getSourceFilePath() == null)
+			// Added isEmpty check instead of null check because in some devices it returns empty string rather than null.
+			if (TextUtils.isEmpty(hikeFile.getSourceFilePath()))
 			{
 				Logger.d("This filepath: ", selectedFile.getPath());
 				Logger.d("Hike filepath: ", Utils.getFileParent(hikeFileType, true));
@@ -407,6 +411,11 @@ public class UploadFileTask extends FileTransferBase
 					hikeFile.setFile(selectedFile);
 				}
 				hikeFile.removeSourceFile();
+				JSONObject metadata = new JSONObject();
+				JSONArray filesArray = new JSONArray();
+				filesArray.put(hikeFile.serialize());
+				metadata.put(HikeConstants.FILES, filesArray);
+				((ConvMessage) userContext).setMetadata(metadata);
 			}
 		}
 		else
@@ -557,14 +566,8 @@ public class UploadFileTask extends FileTransferBase
 			if (_state == FTState.CANCELLED)
 				return FTResult.CANCELLED;
 
-			_state = FTState.IN_PROGRESS;
-			boolean fileWasAlreadyUploaded = true;
-
-			// If we don't have a file key, that means we haven't uploaded the
-			// file to the server yet
 			if (TextUtils.isEmpty(fileKey))
 			{
-				fileWasAlreadyUploaded = false;
 
 				JSONObject response = null;
 				freshStart = true;
@@ -584,25 +587,8 @@ public class UploadFileTask extends FileTransferBase
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 				fileType = fileJSON.optString(HikeConstants.CONTENT_TYPE);
 				fileSize = fileJSON.optInt(HikeConstants.FILE_SIZE);
-				String md5Hash = fileJSON.optString("md5_original");
-				Logger.d(getClass().getSimpleName(), "Server md5 : " + md5Hash);
-				if (md5Hash != null)
-				{
-					String file_md5Hash = Utils.fileToMD5(selectedFile.getPath());
-					Logger.d(getClass().getSimpleName(), "Phone's md5 : " + file_md5Hash);
-					// if (!md5Hash.equals(file_md5Hash))
-					// {
-					// Logger.d(getClass().getSimpleName(), "The md5's are not equal...Deleting the files...");
-					// deleteStateFile();
-					// return FTResult.FAILED_UNRECOVERABLE;
-					// }
-				}
-				// else
-				// {
-				// deleteStateFile();
-				// return FTResult.FAILED_UNRECOVERABLE;
-				// }
-			}
+			}else
+				_state = FTState.IN_PROGRESS;
 
 			JSONObject metadata = new JSONObject();
 			JSONArray filesArray = new JSONArray();
@@ -689,7 +675,8 @@ public class UploadFileTask extends FileTransferBase
 	{
 		int mStart = 0;
 		JSONObject responseJson = null;
-		FileSavedState fst = FileTransferManager.getInstance(context).getUploadFileState(sourceFile, msgId);
+		HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
+		FileSavedState fst = FileTransferManager.getInstance(context).getUploadFileState(hikeFile.getFile(), msgId);
 		setFileTotalSize((int) sourceFile.length());
 		// Bug Fix: 13029
 		setBytesTransferred(fst.getTransferredSize());
@@ -704,6 +691,18 @@ public class UploadFileTask extends FileTransferBase
 		Logger.d(getClass().getSimpleName(), "Starting Upload from state : " + fst.getFTState().toString());
 		if (fst.getFTState().equals(FTState.NOT_STARTED))
 		{
+			try
+			{
+				Logger.d(getClass().getSimpleName(), "Verifying MD5");
+				JSONObject responseMd5 = verifyMD5(selectedFile);
+				if(responseMd5 != null)
+					return responseMd5;
+			}
+			catch (Exception e)
+			{
+				Logger.e(getClass().getSimpleName(), "Exception", e);
+				return null;
+			}
 			// here as we are starting new upload, we have to create the new session id
 			X_SESSION_ID = UUID.randomUUID().toString();
 			Logger.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
@@ -734,6 +733,9 @@ public class UploadFileTask extends FileTransferBase
 			}
 			Logger.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
 		}
+		_state = FTState.IN_PROGRESS;
+		LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
+		
 		long length = sourceFile.length();
 		if (length < 1)
 		{
@@ -751,6 +753,10 @@ public class UploadFileTask extends FileTransferBase
 		raf.seek(mStart);
 
 		setChunkSize();
+		if (mStart == 0)
+		{
+			chunkSize = chunkSize / 5;
+		}
 		if (chunkSize > length)
 			chunkSize = (int) length;
 		setBufferSize();
@@ -760,8 +766,10 @@ public class UploadFileTask extends FileTransferBase
 
 		int start = mStart;
 		int end = (int) length;
-		if (end > (start + chunkSize))
+		if (end >= (start + chunkSize))
 			end = start + chunkSize;
+		else
+			chunkSize = end - start;
 		end--;
 
 		byte[] fileBytes = setupFileBytes(boundaryMesssage, boundary, chunkSize);
@@ -829,6 +837,8 @@ public class UploadFileTask extends FileTransferBase
 					resetAndUpdate = true; // To reset retry logic and update UI
 
 					end = (int) length;
+					setChunkSize();
+					fileBytes = setupFileBytes(boundaryMesssage, boundary, chunkSize);
 					if (end >= (start + chunkSize))
 					{
 						end = start + chunkSize;
@@ -867,6 +877,9 @@ public class UploadFileTask extends FileTransferBase
 			deleteStateFile();
 			break;
 		case IN_PROGRESS:
+			// Added sleep to complete the progress.
+			//TODO Need to remove sleep and implement in a better way to achieve the progress UX.
+			Thread.sleep(300);
 			Logger.d(getClass().getSimpleName(), "FT Completed");
 			_state = FTState.COMPLETED;
 			deleteStateFile();
@@ -994,8 +1007,7 @@ public class UploadFileTask extends FileTransferBase
 		if (TextUtils.isEmpty(fileKey)){
 			msgId = ((ConvMessage) userContext).getMsgID();
 			HikeFile hikeFile = ((ConvMessage) userContext).getMetadata().getHikeFiles().get(0);
-			selectedFile = new File(hikeFile.getFilePath());
-			FileSavedState fst = FileTransferManager.getInstance(context).getUploadFileState(selectedFile, msgId);
+			FileSavedState fst = FileTransferManager.getInstance(context).getUploadFileState(hikeFile.getFile(), msgId);
 			deleteStateFile();
 			if(fst != null && !TextUtils.isEmpty(fst.getFileKey())){
 				fileKey = fst.getFileKey();
@@ -1011,7 +1023,7 @@ public class UploadFileTask extends FileTransferBase
 			{
 				mUrl = new URL(AccountUtils.fileTransferBaseDownloadUrl + fileKey);
 				HttpClient client = new DefaultHttpClient();
-				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
+				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10 * 1000);
 				HttpHead head = new HttpHead(mUrl.toString());
 				head.addHeader("Cookie", "user=" + token + ";uid=" + uId);
 	
@@ -1070,8 +1082,9 @@ public class UploadFileTask extends FileTransferBase
 	{
 		HttpClient client = new DefaultHttpClient();
 		client.getParams().setParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, bufferSize);
-		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 2 * 60 * 1000);
+		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10 * 1000);
 		// client.getParams().setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
+		client.getParams().setParameter(CoreConnectionPNames.TCP_NODELAY, true);
 		long time = System.currentTimeMillis();
 		HttpPost post = new HttpPost(mUrl.toString());
 		String res = null;
@@ -1092,11 +1105,17 @@ public class UploadFileTask extends FileTransferBase
 			resCode = response.getStatusLine().getStatusCode();
 			res = EntityUtils.toString(response.getEntity());
 		}
+		catch (ConnectTimeoutException ex)
+		{
+			ex.printStackTrace();
+			Logger.e(getClass().getSimpleName(), "FT Upload time out error : " + ex.getMessage());
+			return null;
+		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			Logger.e(getClass().getSimpleName(), "FT Upload error : " + e.getMessage());
-			if (e.getMessage() == null)
+			if(e instanceof UnknownHostException || e instanceof SocketException || e.getMessage() == null)
 			{
 				error();
 				res = null;
@@ -1272,5 +1291,63 @@ public class UploadFileTask extends FileTransferBase
 			break;
 		}
 		return imageQuality;
+	}
+	
+	private JSONObject verifyMD5(File mfile) throws Exception
+	{
+		String fileMD5 = Utils.fileToMD5(mfile.getAbsolutePath());
+
+		// If we are not able to verify the md5 validity from the server, fall back to uploading the file
+		final int MAX_RETRY = 3;
+		int retry = 0;
+		while (retry < MAX_RETRY)
+		{
+			try
+			{
+				mUrl = new URL(AccountUtils.fastFileUploadUrl + fileMD5);
+				HttpClient client = new DefaultHttpClient();
+				client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10 * 1000);
+				HttpHead head = new HttpHead(mUrl.toString());
+
+				HttpResponse resp = client.execute(head);
+				int resCode = resp.getStatusLine().getStatusCode();
+				// Make sure the response code is 200.
+				JSONObject responseJson;
+				
+				if (resCode == RESPONSE_OK)
+				{
+					try
+					{
+						responseJson = new JSONObject();
+						JSONObject resData = new JSONObject();
+						resData.put(HikeConstants.FILE_KEY, resp.getFirstHeader(HikeConstants.FILE_KEY).getValue());
+						resData.put(HikeConstants.CONTENT_TYPE, resp.getFirstHeader(HikeConstants.CONTENT_TYPE).getValue());
+						resData.put(HikeConstants.FILE_SIZE, resp.getFirstHeader(HikeConstants.FILE_SIZE).getValue());
+						resData.put(HikeConstants.FILE_NAME, resp.getFirstHeader(HikeConstants.FILE_NAME).getValue());
+						responseJson.put(HikeConstants.DATA_2, resData);
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+						responseJson = null;
+					}
+					return responseJson;
+				}
+				else
+				{
+					return null;
+				}
+			}
+			catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				retry++;
+				Thread.sleep(60 * 1000);
+				if (retry == MAX_RETRY)
+					throw e;
+			}
+		}
+		throw new Exception("Network error.");
 	}
 }
