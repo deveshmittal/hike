@@ -862,7 +862,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			showingWelcomeHikeConvTip = true;
 			displayedConversations.add(0, new ConversationTip(ConversationTip.WELCOME_HIKE_TIP));
 		}
-		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false) && displayedConversations.size() > 1)
+		else if (HikeSharedPreferenceUtil.getInstance(getActivity()).getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false) && displayedConversations.size() > 2)
 		{
 			displayedConversations.add(0, new ConversationTip(ConversationTip.STEALTH_INFO_TIP));
 		}

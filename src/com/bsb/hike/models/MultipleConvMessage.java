@@ -22,6 +22,7 @@ public class MultipleConvMessage
 	private ArrayList<ConvMessage> messageList;
 	private ArrayList<ContactInfo> contactList;
 	private boolean createChatThread;
+	private boolean nuxFwd;
 
 	public ArrayList<ConvMessage> getMessageList()
 	{
@@ -79,12 +80,13 @@ public class MultipleConvMessage
 		this.contactList = contactList;
 	}
 	
-	public MultipleConvMessage(ArrayList<ConvMessage> messageList, ArrayList<ContactInfo> contactList, long timeStamp,boolean createChatThread)
+	public MultipleConvMessage(ArrayList<ConvMessage> messageList, ArrayList<ContactInfo> contactList, long timeStamp,boolean createChatThread, boolean nuxFwd)
 	{
 		this.messageList = messageList;
 		this.timeStamp = timeStamp;
 		this.contactList = contactList;
 		this.createChatThread = createChatThread;
+		this.nuxFwd = nuxFwd;
 	}
 	
 	public JSONObject serialize()
@@ -96,7 +98,14 @@ public class MultipleConvMessage
 		{
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE);
 			object.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.MULTIPLE_FORWARD);
-		
+
+			if(nuxFwd)
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.SOURCE, HikeConstants.NUX);
+				data.put(HikeConstants.METADATA, metadata);
+			}
+
 			data.put(HikeConstants.TIMESTAMP, timeStamp);
 			data.put(HikeConstants.MESSAGE_ID, messageList.get(0).getMsgID());
 			
