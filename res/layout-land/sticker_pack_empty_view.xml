@@ -3,14 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="@dimen/sticker_pack_empty_view_margin"
+    android:layout_marginTop="6dp"
+    android:layout_marginBottom="6dp"
     android:gravity="center" >
 
     <com.bsb.hike.ui.utils.RecyclingImageView
         android:id="@+id/preview_image"
         android:layout_width="125dp"
         android:layout_height="178dp"
-        android:layout_gravity="center_vertical"
-        android:layout_marginRight="30dp"
+        android:layout_marginRight="18dp"
         android:scaleType="centerInside"
         android:src="@drawable/sticker_069_hi" />
 
@@ -41,7 +42,7 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:textColor="@color/white"
-            android:textSize="24sp" />
+            android:textSize="18sp" />
 
         <LinearLayout 
             android:layout_width="wrap_content"
@@ -81,7 +82,7 @@
             android:layout_width="150dp"
             android:layout_height="36dp"
             android:background="@drawable/download_btn_round"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:textSize="12sp"
             android:text="@string/download_category"
             android:textColor="@color/white" />

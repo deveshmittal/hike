@@ -807,6 +807,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_SUPPORT, "hike support");
+		hikeBotNamesMap.put(HikeConstants.NUX_BOT, "Natasha");
 		initHikeLruCache(getApplicationContext());
 		initContactManager();
 		/*
@@ -824,6 +825,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		// turn off future push notifications as soon as the app has
 		// started.
 		// this has to be turned on whenever the upgrade finishes.
+		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.UPGRADING, true);
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		editor.putBoolean(BLOCK_NOTIFICATIONS, true);
 		editor.commit();

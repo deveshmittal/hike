@@ -264,11 +264,9 @@ public class MqttMessagesManager
 			{
 				joinTime = Utils.applyServerTimeOffset(context, joinTime);
 				ContactManager.getInstance().setHikeJoinTime(msisdn, joinTime);
-			}
-
-			if(appPrefs.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true))
-			{
-				saveStatusMsg(jsonObj, msisdn);
+				Editor e = this.settings.edit();
+				e.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
+				e.commit();
 			}
 		}
 		else
@@ -1749,6 +1747,19 @@ public class MqttMessagesManager
 		}
 	}
 
+	private void saveTip(JSONObject jsonObj)
+	{
+		String subType = jsonObj.optString(HikeConstants.SUB_TYPE);
+		if (subType.equals(HikeConstants.STICKER))
+		{
+			Editor editor = settings.edit();
+			if (!settings.contains(HikeMessengerApp.SHOWN_EMOTICON_TIP))
+				editor.putBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false);
+			editor.commit();
+			HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_FTUE_TIP, null);
+		}
+	}
+	
 	/**
 	 * <br>
 	 * This function handles bulk packet</br>
@@ -2139,6 +2150,10 @@ public class MqttMessagesManager
 		{
 			saveBulkMessage(jsonObj);
 		}
+		else if (HikeConstants.MqttMessageTypes.TIP.equals(type))
+		{
+			saveTip(jsonObj);
+		}
 	}
 
 	private void uploadGroupProfileImage(final String groupId, final boolean retryOnce)
@@ -2290,6 +2305,7 @@ public class MqttMessagesManager
 		count++;
 		Editor editor = settings.edit();
 		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, count);
+		editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
 		editor.commit();
 
 		pubSub.publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);

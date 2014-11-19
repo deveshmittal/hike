@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.text.Html;
@@ -13,19 +12,17 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.CustomFontButton;
 import com.bsb.hike.view.CustomFontTextView;
 
 public class HikeDialog
@@ -41,6 +38,8 @@ public class HikeDialog
 	public static final int SHARE_IMAGE_QUALITY_DIALOG = 6;
 
 	public static final int SMS_CLIENT_DIALOG = 7;
+	
+	public static final int HIKE_UPGRADE_DIALOG = 8;
 
 
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
@@ -65,6 +64,8 @@ public class HikeDialog
 			return showImageQualityDialog(context, listener, data);
 		case SMS_CLIENT_DIALOG:
 			return showSMSClientDialog(context, listener, data);
+		case HIKE_UPGRADE_DIALOG:
+			return showHikeUpgradeDialog(context, data);
 		}
 
 		return null;
@@ -422,6 +423,32 @@ public class HikeDialog
 				listener.negativeClicked(dialog);
 			}
 		});
+
+		dialog.show();
+		return dialog;
+	}
+	
+	
+	/**
+	 * This dialog can be used whenever we show an upgrading hike dialog from HomeActivity.
+	 * 
+	 * @param context
+	 * @param data
+	 * @return
+	 */
+	private static Dialog showHikeUpgradeDialog(Context context, Object[] data)
+	{
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.app_update_popup);
+		dialog.setCancelable(false);
+
+		ImageView icon = (ImageView) dialog.findViewById(R.id.dialog_icon);
+		TextView titleTextView = (TextView) dialog.findViewById(R.id.dialog_header_tv);
+		TextView messageTextView = (TextView) dialog.findViewById(R.id.dialog_message_tv);
+
+		icon.setImageBitmap(HikeBitmapFactory.decodeResource(context.getResources(), R.drawable.art_sticker_mac));
+		titleTextView.setText(context.getResources().getString(R.string.sticker_shop));
+		messageTextView.setText(context.getResources().getString(R.string.hike_upgrade_string));
 
 		dialog.show();
 		return dialog;

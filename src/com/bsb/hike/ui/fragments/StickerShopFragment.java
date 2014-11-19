@@ -88,6 +88,11 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 	{
 		// TODO Register PubSub Listeners
 		super.onActivityCreated(savedInstanceState);
+		if(StickerManager.getInstance().stickerShopUpdateNeeded())
+		{
+			HikeConversationsDatabase.getInstance().clearStickerShop();
+		}
+		
 		executeFetchCursorTask(new FetchCursorTask());
 		
 		loadingFailedEmptyState.setOnClickListener(new OnClickListener()
@@ -96,7 +101,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 			@Override
 			public void onClick(View v)
 			{
-				downLoadStickerData(mAdapter.isEmpty() ? 0 : mAdapter.getCount() + 1);
+				downLoadStickerData();
 			}
 		});
 	}
@@ -119,7 +124,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		protected Pair<Cursor,Drawable> doInBackground(Void... arg0)
 		{
 			Cursor cursor = HikeConversationsDatabase.getInstance().getCursorForStickerShop();
-			Bitmap bmp = HikeBitmapFactory.decodeResource(getResources(), R.drawable.shop_banner);
+			Bitmap bmp = HikeBitmapFactory.decodeResource(getResources(), R.drawable.art_banner);
 			Drawable dr = HikeBitmapFactory.getBitmapDrawable(getResources(), bmp);
 			return new Pair(cursor, dr);
 		}
@@ -201,15 +206,14 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 			@Override
 			public void onClick(View v)
 			{
-				downLoadStickerData(mAdapter.getCount() + 1);
+				downLoadStickerData();
 			}
 		});
 		
-		if(StickerManager.getInstance().stickerShopUpdateNeeded() || mAdapter.isEmpty())
+		if((mAdapter.getCursor() == null) || mAdapter.getCursor().getCount() == 0)
 		{
 			listview.setVisibility(View.GONE);
-			HikeConversationsDatabase.getInstance().clearStickerShop();
-			downLoadStickerData(0);
+			downLoadStickerData();
 		}
 		else
 		{
@@ -217,13 +221,12 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		}
 	}
 	
-	public void downLoadStickerData(final int currentCategoriesCount)
+	public void downLoadStickerData()
 	{
+		final int currentCategoriesCount = (mAdapter == null) || (mAdapter.getCursor() == null) ? 0 : mAdapter.getCursor().getCount();
 		downloadState = DOWNLOADING;
-		final ImageView progressBar = (ImageView) loadingEmptyState.findViewById(R.id.loading_progress_bar);
 		final TextView loadingFailedEmptyStateMainText = (TextView) loadingFailedEmptyState.findViewById(R.id.main_text);
 		final TextView loadingFailedEmptyStateSubText = (TextView) loadingFailedEmptyState.findViewById(R.id.sub_text);
-		progressBar.setAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.rotate));
 		if(currentCategoriesCount == 0)
 		{
 			loadingEmptyState.setVisibility(View.VISIBLE);
@@ -233,7 +236,6 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		else
 		{
 			loadingEmptyState.setVisibility(View.GONE);
-			clearAnimation(progressBar);
 			loadingFailedEmptyState.setVisibility(View.GONE);
 			listview.removeFooterView(downloadFailedFooterView);
 			listview.removeFooterView(loadingFooterView);
@@ -254,6 +256,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 				}
 				else
 				{
+					//TODO we should also update stickerCategoriesMap in StickerManager from here as well
 					HikeConversationsDatabase.getInstance().updateStickerCategoriesInDb(resultData);
 				}
 				final Cursor updatedCursor = HikeConversationsDatabase.getInstance().getCursorForStickerShop();
@@ -275,7 +278,6 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 						listview.setVisibility(View.VISIBLE);
 						listview.removeFooterView(loadingFooterView);
 						loadingEmptyState.setVisibility(View.GONE);
-						clearAnimation(progressBar);
 						loadingFailedEmptyState.setVisibility(View.GONE);
 						
 						mAdapter.notifyDataSetChanged();
@@ -309,7 +311,6 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 						if(currentCategoriesCount == 0)
 						{
 							loadingEmptyState.setVisibility(View.GONE);
-							clearAnimation(progressBar);
 							loadingFailedEmptyState.setVisibility(View.VISIBLE);
 							
 							if (exception != null && exception.getErrorCode() == StickerException.OUT_OF_SPACE)
@@ -362,7 +363,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		// TODO Auto-generated method stub
 		if (downloadState == NOT_DOWNLOADING && (!mAdapter.isEmpty()) &&(firstVisibleItem + visibleItemCount)  > (totalItemCount - 5) && StickerManager.getInstance().moreDataAvailableForStickerShop())
 		{
-			downLoadStickerData(mAdapter.getCount() + 1);
+			downLoadStickerData();
 		}
 		
 		if (previousFirstVisibleItem != firstVisibleItem)
@@ -420,6 +421,10 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
+			if(!isAdded())
+			{
+				return;
+			}
 			if (intent.getAction().equals(StickerManager.MORE_STICKERS_DOWNLOADED))
 			{
 				String categoryId = intent.getStringExtra(StickerManager.CATEGORY_ID);
@@ -529,12 +534,4 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 		LocalBroadcastManager.getInstance(getSherlockActivity()).unregisterReceiver(mMessageReceiver);
 	}
 	
-	/**
-	 * Used to clear the spinner animation here
-	 * @param v
-	 */
-	private void clearAnimation(View v)
-	{
-		v.clearAnimation();
-	}
 }

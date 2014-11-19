@@ -32,11 +32,11 @@
             android:scaleType="centerInside"
             android:src="@drawable/sticker_shop_download_drawable_selector" />
 
-       <com.bsb.hike.ui.utils.RecyclingImageView 
+       <ProgressBar 
         android:id="@+id/download_progress_bar"
        	android:layout_width="24dp"
        	android:layout_height="24dp"
-        android:src="@drawable/ic_spinner"
+       	android:indeterminateDrawable="@drawable/rotating_blue"
         android:visibility="gone" />
     </LinearLayout>
 	
@@ -44,8 +44,6 @@
         android:id="@+id/category_description"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_alignBottom="@id/category_icon"
-        android:layout_alignTop="@id/category_icon"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@id/category_download_group"
         android:layout_toRightOf="@id/category_icon"

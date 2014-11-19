@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/list_parent"
+    android:id="@id/drag_handle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="@dimen/sticker_settting_item_height" 
     android:descendantFocusability="blocksDescendants" >
 
     <LinearLayout 
-        android:id="@id/drag_handle"
+        android:id="@+id/parent_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
@@ -51,12 +51,12 @@
             android:scaleType="centerInside"
             android:background="@android:color/transparent" />
         
-        <com.bsb.hike.ui.utils.RecyclingImageView
+        <ProgressBar
             android:id="@+id/download_progress"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:contentDescription="Progress Bar"
-            android:src="@drawable/ic_spinner_green"
+            android:indeterminateDrawable="@drawable/rotating_green_sticker_settings"
             android:visibility="gone"
             android:layout_gravity="center" />
         
@@ -66,11 +66,9 @@
         android:id="@+id/category_description"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_alignTop="@id/category_icon"
-        android:layout_alignBottom="@id/category_icon"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@id/category_checkbox_ll"
-        android:layout_toRightOf="@id/drag_handle"
+        android:layout_toRightOf="@id/parent_view"
         android:gravity="center_vertical"
         android:orientation="vertical" >
 

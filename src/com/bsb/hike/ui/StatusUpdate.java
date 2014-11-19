@@ -522,6 +522,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 				editor.putString(HikeMessengerApp.LAST_STATUS, text);
 				editor.putInt(HikeMessengerApp.LAST_MOOD, moodId);
 				editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, ++unseenUserStatusCount);
+				editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
 				editor.commit();
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MY_STATUS_CHANGED, text);

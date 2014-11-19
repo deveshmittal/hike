@@ -169,8 +169,6 @@ public class StickerManager
 
 	public static final String CATEGORY_SIZE = "categorySize";
 
-	public static final String SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE = "shownHardcodedCategoryUpdateAvailable";
-	
 	public static final String STICKERS_SIZE_DOWNLOADED = "stickersSizeDownloaded";
 	
 	public static final String PERCENTAGE = "percentage";
@@ -192,6 +190,8 @@ public class StickerManager
 	public static final long MINIMUM_FREE_SPACE = 10 * 1024 * 1024;
 
 	public static final String SHOW_STICKER_SHOP_BADGE = "showStickerShopBadge";
+
+	public static final String STICKER_RES_ID = "stickerResId";
 	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
@@ -262,15 +262,6 @@ public class StickerManager
 			{
 				StickerManager.getInstance().setStickerUpdateAvailable(DOGGY_CATEGORY, true);
 			}
-		}
-		/*
-		 * We use JUST_SIGNED_UP flag from preferences to explicitly avoid setting stickerUpdateAvailable tru for Humanoid and Expressions.
-		 */
-		if ((!settings.getBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, false)) && (settings.getBoolean(HikeMessengerApp.JUST_SIGNED_UP, false)))
-		{
-			settings.edit().putBoolean(StickerManager.SHOWN_HARDCODED_CATEGORY_UPDATE_AVAILABLE, true).commit();
-			StickerManager.getInstance().setStickerUpdateAvailable(HUMANOID, true);
-			StickerManager.getInstance().setStickerUpdateAvailable(EXPRESSIONS, true);
 		}
 	}
 
@@ -916,6 +907,7 @@ public class StickerManager
 					}
 					else
 					{
+						Logger.i("StickerMananger", "moveHardcodedStickersToSdcard failed resName = "+resName+" not found");
 						result = false;
 					}
 				}	
@@ -1111,8 +1103,10 @@ public class StickerManager
 		Bundle b = (Bundle) resultObj;
 		String categoryId = (String) b.getSerializable(StickerManager.CATEGORY_ID);
 		StickerCategory category = StickerManager.getInstance().getCategoryForId(categoryId);
-		category.setState(StickerCategory.RETRY);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there
-		
+		if(category != null)
+		{
+			category.setState(StickerCategory.RETRY);  //Doing it here for safety. On orientation change, the stickerAdapter reference can become null, hence the broadcast won't be received there
+		}
 		Intent i = new Intent(StickerManager.STICKERS_FAILED);
 		i.putExtra(StickerManager.STICKER_DATA_BUNDLE, b);
 		LocalBroadcastManager.getInstance(context).sendBroadcast(i);
@@ -1144,12 +1138,12 @@ public class StickerManager
 		case PALLATE_ICON_TYPE:
 			baseFilePath += PALLATE_ICON + OTHER_ICON_TYPE;
 			bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
-			defaultIconResId = R.drawable.default_sticker_pallete_icon_unselected;
+			defaultIconResId = R.drawable.misc_sticker_placeholder;
 			break;
 		case PALLATE_ICON_SELECTED_TYPE:
 			baseFilePath += PALLATE_ICON_SELECTED + OTHER_ICON_TYPE;
 			bitmap = HikeBitmapFactory.decodeFile(baseFilePath);
-			defaultIconResId = R.drawable.default_sticker_pallete_icon_selected;
+			defaultIconResId = R.drawable.misc_sticker_placeholder_selected;
 			break;
 		case PREVIEW_IMAGE_TYPE:
 			baseFilePath += PREVIEW_IMAGE + OTHER_ICON_TYPE;
@@ -1229,42 +1223,44 @@ public class StickerManager
 
 	public void checkAndDownLoadStickerData()
 	{
-		if (!HikeSharedPreferenceUtil.getInstance(context).getData(StickerManager.STICKERS_SIZE_DOWNLOADED, false))
+		if (HikeSharedPreferenceUtil.getInstance(context).getData(StickerManager.STICKERS_SIZE_DOWNLOADED, false))
 		{
-			
-			StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
-			{
-				
-				@Override
-				public void onSuccess(Object result)
-				{
-					// TODO Auto-generated method stub
-					JSONArray resultData = (JSONArray) result;
-					HikeConversationsDatabase.getInstance().updateStickerCategoriesInDb(resultData);
-					HikeSharedPreferenceUtil.getInstance(context).saveData(StickerManager.STICKERS_SIZE_DOWNLOADED, true);
-					updateStickerCategoriesMetadata(resultData);
-				}
-				
-				@Override
-				public void onProgressUpdated(double percentage)
-				{
-					// TODO Auto-generated method stub
-					
-				}
-
-				@Override
-				public void onFailure(Object result, StickerException exception)
-				{
-					// TODO Auto-generated method stub
-					
-				}
-			});
+			return;
 		}
+
+		StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
+		{
+
+			@Override
+			public void onSuccess(Object result)
+			{
+				// TODO Auto-generated method stub
+				JSONArray resultData = (JSONArray) result;
+				updateStickerCategoriesMetadata(resultData);
+				HikeSharedPreferenceUtil.getInstance(context).saveData(StickerManager.STICKERS_SIZE_DOWNLOADED, true);
+			}
+
+			@Override
+			public void onProgressUpdated(double percentage)
+			{
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onFailure(Object result, StickerException exception)
+			{
+				// TODO Auto-generated method stub
+
+			}
+		});
 	}
 	
 	public void updateStickerCategoriesMetadata(JSONArray jsonArray)
 	{
 		int length = jsonArray.length();
+		List<StickerCategory> visibleStickerCategories = new ArrayList<StickerCategory>();
+		int humanoidCategoryIndex = stickerCategoriesMap.get(HUMANOID).getCategoryIndex();
 		for (int i = 0; i < length; i++)
 		{
 			JSONObject jsonObj  = jsonArray.optJSONObject(i);
@@ -1273,26 +1269,54 @@ public class StickerManager
 				String catId = jsonObj.optString(StickerManager.CATEGORY_ID);
 				
 				StickerCategory category = stickerCategoriesMap.get(catId);
-				if(category != null)
+				if(category == null)
 				{
-					if(jsonObj.has(HikeConstants.VISIBLITY))
-					{
-						int visibility = jsonObj.optInt(HikeConstants.VISIBLITY);
-						if(visibility == 1)
-							category.setVisible(true);
-						else
-							category.setVisible(false);
-					}
-					if(!jsonObj.has(HikeConstants.NUMBER_OF_STICKERS) || !jsonObj.has(HikeConstants.SIZE))
-					{
-						return;
-					}
-					category.setTotalStickers(jsonObj.optInt(HikeConstants.NUMBER_OF_STICKERS));
-					category.setCategorySize(jsonObj.optInt(HikeConstants.SIZE));
+					category = new StickerCategory(catId);
 				}
 				
+				if(jsonObj.has(HikeConstants.CAT_NAME))
+				{
+					category.setCategoryName(jsonObj.optString(HikeConstants.CAT_NAME, ""));
+				}
+				
+				if (jsonObj.has(HikeConstants.VISIBLITY))
+				{
+					boolean isVisible = jsonObj.optInt(HikeConstants.VISIBLITY) == 1;
+					category.setVisible(isVisible);
+					if (category.isVisible())
+					{
+						stickerCategoriesMap.put(catId, category);
+					}
+					visibleStickerCategories.add(category);
+					category.setCategoryIndex(humanoidCategoryIndex + visibleStickerCategories.size());
+				}
+				if (jsonObj.has(HikeConstants.NUMBER_OF_STICKERS))
+				{
+					category.setTotalStickers(jsonObj.optInt(HikeConstants.NUMBER_OF_STICKERS, 0));
+				}
+				
+				if (jsonObj.has(HikeConstants.SIZE))
+				{
+					category.setCategorySize(jsonObj.optInt(HikeConstants.SIZE, 0));
+				}
 			}
 		}
+		if(!visibleStickerCategories.isEmpty())
+		{
+			//Updating category index for all other sticker categories as well
+			for (StickerCategory stickerCategory : stickerCategoriesMap.values())
+			{
+				if(visibleStickerCategories.contains(stickerCategory) || stickerCategory.isCustom() || stickerCategory.getCategoryId().equals(HUMANOID))
+				{
+					continue;
+				}
+				int currentIndex = stickerCategory.getCategoryIndex();
+				stickerCategory.setCategoryIndex(currentIndex + visibleStickerCategories.size());
+			}
+		}
+		
+		HikeConversationsDatabase.getInstance().updateStickerCategoriesInDb(stickerCategoriesMap.values());
+		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
 	}
 	
 	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, Context context)
@@ -1325,7 +1349,8 @@ public class StickerManager
 			return;
 		}
 		category.setVisible(true);
-		category.setCategoryIndex(stickerCategoriesMap.size());
+		int catIdx = HikeConversationsDatabase.getInstance().getMaxStickerCategoryIndex();
+		category.setCategoryIndex(catIdx == -1 ? stickerCategoriesMap.size() : (catIdx + 1));
 		stickerCategoriesMap.put(category.getCategoryId(), category);
 		HikeConversationsDatabase.getInstance().insertInToStickerCategoriesTable(category);
 	}

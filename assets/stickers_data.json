@@ -6,7 +6,7 @@
                 "002_love2.png",
                 "003_teasing.png",
                 "004_rofl.png",
-                "005_bored.png",
+                "074_sorry.png",
                 "006_angry.png",
                 "018_Whistling.png",
                 "069_hi.png"
@@ -15,7 +15,7 @@
                 "sticker_002_love2",
                 "sticker_003_teasing",
                 "sticker_004_rofl",
-                "sticker_005_bored",
+                "sticker_074_sorry",
                 "sticker_006_angry",
                 "sticker_018_whistling",
                 "sticker_069_hi"
@@ -24,14 +24,14 @@
         {
             "catId": "delhi",
             "stickerIds": [
-                "008_dl_bhai.png",
-                "009_dl_tumsena.png",
-                "001_dl_oye.png"
+                "009_dl_bhai.png",
+                "010_dl_tumsena.png",
+                "006_dl_balleballe.png"
             ],
             "resourceIds": [
-                "sticker_008_dl_bhai",
-                "sticker_009_dl_tumsena",
-                "sticker_001_dl_oye"
+                "sticker_009_dl_bhai",
+                "sticker_010_dl_tumsena",
+                "sticker_006_dl_balleballe"
             ]
         },
         {
@@ -48,7 +48,7 @@
             ]
         },
         {
-            "catId": "gujrat",
+            "catId": "gujarat",
             "stickerIds": [
                 "001_gj_aehaalo.png",
                 "002_gj_kemcho.png",
@@ -61,37 +61,37 @@
             ]
         },
         {
-            "catId": "kolkatta",
+            "catId": "kolkata",
             "stickerIds": [
-                "001_ko_kikorchis.png",
-                "003_ko_khillikorchi.png",
-                "009_ko_paglu.png"
+                "001_ko_aebhai.png",
+                "002_ko_kikorchis.png",
+                "006_ko_mojakor.png"
             ],
             "resourceIds": [
-                "sticker_001_ko_kikorchis",
-                "sticker_002_gj_kemcho",
-                "sticker_009_ko_paglu"
+                "sticker_001_ko_aebhai",
+                "sticker_002_ko_kikorchis",
+                "sticker_006_ko_mojakor"
             ]
         },
         {
             "catId": "indian",
             "stickerIds": [ 
-                "007_pakaamat.png",
-                "008_abeysaale.png",
-                "009_ghanta.png",
-                "012_Item.png",
-                "014_Chalhatt.png",
+                "042_sahihai.png",
+                "047_saale.png",
+                "033_hawww.png",
+                "063_boss.png",
                 "035_machaa.png",
-                "053_aiyo.png"
+                "069_aiyo.png",
+                "040_waah.png"
             ],
             "resourceIds": [
-                "sticker_007_pakaamat",
-                "sticker_008_abeysaale",
-                "sticker_009_ghanta",
-                "sticker_012_item",
-                "sticker_014_chalhatt",
+                "sticker_042_sahihai",
+                "sticker_047_saale",
+                "sticker_033_hawww",
+                "sticker_063_boss",
                 "sticker_035_machaa",
-                "sticker_053_aiyo"
+                "sticker_069_aiyo",
+                "sticker_040_waah"
             ]
         },
         {
@@ -99,12 +99,12 @@
             "stickerIds": [
                 "002_lol.png",
                 "061_lovelips.png",
-                "113_whereareyou.png"
+                "092_yo.png"
             ],
             "resourceIds": [
                 "sticker_002_lol",
                 "sticker_061_lovelips",
-                "sticker_113_whereareyou"
+                "sticker_092_yo"
             ]
         }
     ],
@@ -124,7 +124,6 @@
             "isVisible": true,
             "isCustom": false,
             "totalStickers":49,
-            "preview": "sticker_003_teasing",
             "pallate_icon": "ic_humanoid",
             "pallate_icon_selected": "ic_humanoid_selected"
         },
@@ -135,7 +134,6 @@
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_001_dl_oye",
             "pallate_icon": "ic_delhi",
             "pallate_icon_selected": "ic_delhi_selected"
         },
@@ -146,57 +144,54 @@
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_001_mb_shaane",
             "pallate_icon": "ic_mumbai",
             "pallate_icon_selected": "ic_mumbai_selected"
         },
         {
-            "catId": "kolkatta",
+            "catId": "kolkata",
             "categoryName": "Bong Connection",
-            "downloadPref": "kolkattaDownloadShown",
+            "downloadPref": "kolkataDownloadShown",
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_001_ko_kikorchis",
-            "pallate_icon": "ic_kolkatta",
-            "pallate_icon_selected": "ic_kolkatta_selected"
+            "pallate_icon": "ic_kolkata",
+            "pallate_icon_selected": "ic_kolkata_selected"
         },
         {
-            "catId": "gujrat",
+            "catId": "gujarat",
             "categoryName": "Aapno Gujarat",
-            "downloadPref": "gujratDownloadShown",
+            "downloadPref": "gujaratDownloadShown",
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_002_gj_kemcho",
-            "pallate_icon": "ic_gujrat",
-            "pallate_icon_selected": "ic_gujrat_selected"
+            "pallate_icon": "ic_gujarat",
+            "pallate_icon_selected": "ic_gujarat_selected"
         },
         {
-            "catId": "banglore",
-            "categoryName": "Banglore",
-            "downloadPref": "bangloreDownloadShown",
+            "catId": "bangalore",
+            "categoryName": "Enjoy Maadi",
+            "downloadPref": "bangaloreDownloadShown",
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_001_ka_machaa",
-            "pallate_icon": "ic_banglore",
-            "pallate_icon_selected": "ic_banglore_selected"
+            "preview": "sticker_006_ka_sakkathmaga",
+            "pallate_icon": "ic_bangalore",
+            "pallate_icon_selected": "ic_bangalore_selected"
         },
         {
             "catId": "hyderabad",
-            "categoryName": "Hyderabad",
+            "categoryName": "Hyderabadi Ishtyle",
             "downloadPref": "hyderabadDownloadShown",
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_002_hyd_kirak",
+            "preview": "sticker_003_hyd_mama",
             "pallate_icon": "ic_hyderabad",
             "pallate_icon_selected": "ic_hyderabad_selected"
         },
         {
             "catId": "bhopal",
-            "categoryName": "Bhopal",
+            "categoryName": "Bhannaat Bahukal",
             "downloadPref": "bhopalDownloadShown",
             "isVisible": false,
             "isCustom": false,
@@ -212,7 +207,7 @@
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_001_tn_aiyo",
+            "preview": "sticker_001_tn_eppudi",
             "pallate_icon": "ic_chennai",
             "pallate_icon_selected": "ic_chennai_selected"
         },
@@ -223,7 +218,7 @@
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_003_teasing",
+            "preview": "sticker_001_bh_kaisanba",
             "pallate_icon": "ic_bihar",
             "pallate_icon_selected": "ic_bihar_selected"
         },
@@ -234,7 +229,7 @@
             "isVisible": false,
             "isCustom": false,
             "totalStickers":12,
-            "preview": "sticker_002_kl_ennathaparipadi",
+            "preview": "sticker_007_kl_adipoli",
             "pallate_icon": "ic_kerala",
             "pallate_icon_selected": "ic_kerala_selected"
         },
@@ -256,7 +251,6 @@
             "isVisible": true,
             "isCustom": false,
             "totalStickers":56,
-            "preview": "sticker_014_chalhatt",
             "pallate_icon": "ic_indian",
             "pallate_icon_selected": "ic_indian_selected"
         },
@@ -267,13 +261,12 @@
             "isVisible": true,
             "isCustom": false,
             "totalStickers":59,
-            "preview": "sticker_002_lol",
             "pallate_icon": "ic_expressions",
             "pallate_icon_selected": "ic_expressions_selected"
         },
         {
             "catId": "love",
-            "categoryName": "Love You Forever",
+            "categoryName": "Love You",
             "downloadPref": "loveDownloadShown",
             "isVisible": true,
             "isCustom": false,
@@ -295,7 +288,7 @@
         },
         {
             "catId": "rageface",
-            "categoryName": "What's Your Rage Face?",
+            "categoryName": "Rageface",
             "downloadPref": "ragefaceDownloadShown",
             "isVisible": true,
             "isCustom": false,
