@@ -416,7 +416,8 @@ public class DbConversationListener implements Listener
             convMessage.platformMessageMetadata.addThumbnailsToMetadata();
             if(listOfMessages!=null && null != listOfContacts) {
                 HikeConversationsDatabase.getInstance().addConversations(listOfMessages, listOfContacts, true);
-                for(int i = 0; i< listOfContacts.size() ; i++){
+                for (String msisdn:msisdns){
+                    convMessage.setMsisdn(msisdn);
                     mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
 
                 }
