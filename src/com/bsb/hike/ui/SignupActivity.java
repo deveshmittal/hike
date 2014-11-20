@@ -288,7 +288,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			mActivityState = new ActivityState();
 		}
 
-		mTask = SignupTask.startTask(this, mActivityState.userName, mActivityState.isFemale, mActivityState.birthday, mActivityState.profileBitmap);
 		setupActionBar();
 		if (savedInstanceState != null)
 		{
@@ -328,14 +327,14 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				break;
 			case BACKUP_FOUND:
 			case RESTORING_BACKUP:
-				if (mTask.getStateValue() == null || mTask.getStateValue().state != State.RESTORING_BACKUP)
-				{
-					prepareLayoutForBackupFound(savedInstanceState);
-				}
-				else
-				{
-					prepareLayoutForRestoringAnimation(savedInstanceState);
-				}
+//				if (mTask.getStateValue() == null || mTask.getStateValue().state != State.RESTORING_BACKUP)
+//				{
+//					prepareLayoutForBackupFound(savedInstanceState);
+//				}
+//				else
+//				{
+//					prepareLayoutForRestoringAnimation(savedInstanceState);
+//				}
 				break;
 			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
@@ -346,6 +345,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			{
 				showErrorMsg();
 			}
+			mTask = SignupTask.startTask(this, mActivityState.userName, mActivityState.isFemale, mActivityState.birthday, mActivityState.profileBitmap);
 		}
 		else
 		{
