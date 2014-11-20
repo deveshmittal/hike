@@ -3,11 +3,15 @@ package com.bsb.hike.tasks;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.json.JSONObject;
 
-import com.bsb.hike.utils.AccountUtils;
-
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.os.AsyncTask;
 import android.view.View;
 import android.widget.ProgressBar;
+
+import com.bsb.hike.utils.AccountUtils;
 
 public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String>
 {
@@ -16,10 +20,15 @@ public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String
 
 	private UtilAsyncTaskListener mListener;
 
-	public UtilAtomicAsyncTask(ProgressBar argProgressBar, UtilAsyncTaskListener listener)
+	private Activity mActivity;
+
+	private ProgressDialog progressDialog;
+
+	public UtilAtomicAsyncTask(Activity argActivity, ProgressBar argProgressBar, UtilAsyncTaskListener listener)
 	{
 		mProgressBar = argProgressBar;
 		mListener = listener;
+		mActivity = argActivity;
 	}
 
 	@Override
@@ -30,6 +39,20 @@ public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String
 		{
 			mProgressBar.setVisibility(View.VISIBLE);
 		}
+		progressDialog = new ProgressDialog(mActivity);
+		progressDialog.setCancelable(true);
+		progressDialog.setCanceledOnTouchOutside(false);
+		progressDialog.setMessage("Please wait while we get you connected");
+		progressDialog.setOnCancelListener(new OnCancelListener()
+		{
+			@Override
+			public void onCancel(DialogInterface dialog)
+			{
+				UtilAtomicAsyncTask.this.onPostExecute(null);
+				UtilAtomicAsyncTask.this.cancel(true);
+			}
+		});
+		progressDialog.show();
 	}
 
 	@Override
@@ -56,7 +79,6 @@ public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			onPostExecute(null);
 			// We need to be absolutely sure that we are dismissing progress bar at some point
 		}
 
@@ -67,6 +89,16 @@ public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String
 	protected void onPostExecute(String result)
 	{
 		super.onPostExecute(result);
+
+		if (UtilAtomicAsyncTask.this.isCancelled())
+		{
+			return;
+		}
+		
+		if (progressDialog != null)
+		{
+			progressDialog.dismiss();
+		}
 
 		if (mProgressBar != null)
 		{
@@ -84,6 +116,8 @@ public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String
 				mListener.onComplete(result);
 			}
 		}
+
+		mActivity = null;
 	}
 
 	public interface UtilAsyncTaskListener

@@ -464,11 +464,6 @@ public class HikeService extends Service
 			contactsReceived = null;
 		}
 
-		if (mHikeUtilLooper != null)
-		{
-			mHikeUtilLooper.quit();
-		}
-
 		if (manualContactSyncTrigger != null)
 		{
 			unregisterReceiver(manualContactSyncTrigger);

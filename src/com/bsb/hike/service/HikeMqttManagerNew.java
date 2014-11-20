@@ -1548,9 +1548,15 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 
 		}
 	}
+
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
+
+		if (mMessenger == null)
+		{
+			init();
+		}
 
 		Message msg;
 		if (HikePubSub.TOKEN_CREATED.equals(type))
