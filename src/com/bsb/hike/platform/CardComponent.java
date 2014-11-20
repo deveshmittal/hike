@@ -28,7 +28,7 @@ public class CardComponent {
 
 	public static class MediaComponent extends CardComponent {
 		private String key;
-		public byte[] thumbnail;
+		private String thumbnail;
 		private String url;
 		private String type, size, duration;
 
@@ -49,7 +49,7 @@ public class CardComponent {
 			return key;
 		}
 
-        public byte[] getThumbnail() {
+        public String getThumbnail() {
             return thumbnail;
         }
 
@@ -57,7 +57,11 @@ public class CardComponent {
 			return url;
 		}
 
-		public String getDuration() {
+        public void setThumbnail(String thumbnail) {
+            this.thumbnail = thumbnail;
+        }
+
+        public String getDuration() {
 			return duration;
 		}
 
