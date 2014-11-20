@@ -14,6 +14,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.view.CustomFontTextView;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -230,6 +231,10 @@ public class CardRenderer implements View.OnLongClickListener {
 
             cardCallToActions(actionComponents, viewHolder);
             cardDataFiller(textComponents, mediaComponents, viewHolder);
+            boolean isGamesAppInstalled = convMessage.platformMessageMetadata.isInstalled;
+            if (!isGamesAppInstalled) {
+                gameInstalledTextFiller(viewHolder);
+            }
 
 
         }
@@ -290,7 +295,7 @@ public class CardRenderer implements View.OnLongClickListener {
             String tag = textComponent.getTag();
             if (!TextUtils.isEmpty(tag)) {
 
-                TextView tv = (TextView) viewHolder.viewHashMap.get(tag);
+                CustomFontTextView tv = (CustomFontTextView) viewHolder.viewHashMap.get(tag);
                 tv.setText(textComponent.getText());
             }
         }
@@ -312,6 +317,13 @@ public class CardRenderer implements View.OnLongClickListener {
             }
         }
 
+    }
+
+    private void gameInstalledTextFiller(ViewHolder viewHolder) {
+        if (viewHolder.viewHashMap.containsKey("T4")) {
+            CustomFontTextView cardInstalledText = (CustomFontTextView) viewHolder.viewHashMap.get("T4");
+            cardInstalledText.setText("Get it on play store");
+        }
     }
 
     @Override

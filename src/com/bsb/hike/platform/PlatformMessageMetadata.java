@@ -1,5 +1,6 @@
 package com.bsb.hike.platform;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Base64;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -7,6 +8,7 @@ import com.bsb.hike.platform.CardComponent.ImageComponent;
 import com.bsb.hike.platform.CardComponent.MediaComponent;
 import com.bsb.hike.platform.CardComponent.TextComponent;
 import com.bsb.hike.platform.CardComponent.VideoComponent;
+import com.bsb.hike.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,18 +22,20 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 	public int layoutId;
 	public int loveId;
     public String notifText;
+    Context mContext;
+    public boolean isInstalled;
     public HashMap<String, byte[]> thumbnailMap = new HashMap<String, byte[]>();
 	
 	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();
 	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();
     public ArrayList<CardComponent.ActionComponent> actionComponents = new ArrayList<CardComponent.ActionComponent>();
 	private JSONObject json;
-	public PlatformMessageMetadata(String jsonString) throws JSONException {
-		this(new JSONObject(jsonString));
+	public PlatformMessageMetadata(String jsonString, Context context) throws JSONException {
+		this(new JSONObject(jsonString), context);
 	}
-	public PlatformMessageMetadata(JSONObject json) {
+	public PlatformMessageMetadata(JSONObject json, Context context) {
 		this.json = json;
-
+        this.mContext = context;
 	
 		
 		if (json.has(DATA)) {
@@ -40,6 +44,13 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
                 layoutId = getInt(data, LAYOUT_ID);
                 loveId = getInt(data, LOVE_ID);
                 notifText = getString(data, NOTIF_TEXT);
+
+                if (data.has(CHANNEL_SOURCE)){
+                    String channelSource = data.optString(CHANNEL_SOURCE);
+                    isInstalled = Utils.isPackageInstalled(mContext, channelSource);
+
+                }
+
 				if (data.has(ASSETS)) {
 					JSONObject assets = data.getJSONObject(ASSETS);
 					if (assets.has(TEXTS)) {
@@ -119,10 +130,6 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
                     obj.remove(THUMBNAIL);
                     obj.put(KEY, key);
                 }
-                else
-                {
-                    imageCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(key);
-                }
 				mediaComponents.add(imageCom);
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -152,10 +159,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
                     obj.remove(THUMBNAIL);
                     obj.put(KEY, key);
                 }
-                else
-                {
-                    videoCom.thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(key);
-                }
+
 				mediaComponents.add(videoCom);
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -215,7 +219,63 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 
     }
 
-	public String JSONtoString(){
+    public void addThumbnailsToMetadata() {
+        if (json.has(DATA)) {
+            try {
+                JSONObject data = json.getJSONObject(DATA);
+                if (data.has(ASSETS)) {
+                    JSONObject assets = data.getJSONObject(ASSETS);
+                    if (assets.has(IMAGES)) {
+                        addThumbnailToImages(assets, IMAGES);
+                    }
+                    if (assets.has(VIDEOS)) {
+                        addThumbnailToImages(assets, VIDEOS);
+                    }
+                    for (MediaComponent mediaComponent : mediaComponents) {
+                        String base64 = getBase64FromDb(mediaComponent.getKey());
+                        if (!TextUtils.isEmpty(base64))
+                            mediaComponent.setThumbnail(base64);
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    private void addThumbnailToImages(JSONObject assets, String addTo) {
+        JSONArray imagesItems = null;
+        try {
+            imagesItems = assets.getJSONArray(addTo);
+
+            int length = imagesItems.length();
+            for (int i = 0; i < length; i++) {
+                JSONObject obj = imagesItems.getJSONObject(i);
+                String key = obj.optString(KEY);
+                String base64 = getBase64FromDb(key);
+                if (!TextUtils.isEmpty(base64))
+                    obj.put(THUMBNAIL, base64);
+
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getBase64FromDb(String key) {
+        if (!TextUtils.isEmpty(key)) {
+            byte[] thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(key);
+
+            if (null != thumbnail) {
+                String base64 = Base64.encodeToString(thumbnail, Base64.NO_WRAP);
+                return base64;
+            }
+        }
+        return "";
+    }
+
+    public String JSONtoString(){
 		return json.toString();
 	}
 
