@@ -280,7 +280,7 @@ public class HikePubSub implements Runnable
 
 	public static final String SEND_SMS_PREF_TOGGLED = "sendSmsPrefToggled";
 
-	public static final String FINISHED_AVTAR_UPGRADE = "finshedAvtarDBUpgrade";
+	public static final String FINISHED_UPGRADE_INTENT_SERVICE = "finshedUpgradeIntentService";
 
 	public static final String FTUE_LIST_FETCHED_OR_UPDATED = "ftueListFetchedOrUpdated";
 
@@ -381,6 +381,8 @@ public class HikePubSub implements Runnable
 	public static final String LATEST_PIN_DELETED = "lastPinDeleted";
 	
 	public static final String UNREAD_PIN_COUNT_RESET = "pinCountReset";
+
+	public static final String STICKER_CATEGORY_MAP_UPDATED = "stickerCategoryMapUpdated";
 
 	private final Thread mThread;
 
