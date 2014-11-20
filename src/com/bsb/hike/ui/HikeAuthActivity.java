@@ -336,8 +336,8 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 		params.add(new BasicNameValuePair("response_type", "token"));
 		params.add(new BasicNameValuePair("client_id", mAppId));
 		params.add(new BasicNameValuePair("scope", "publish_actions"));
-		params.add(new BasicNameValuePair("package_name", "com.test.test"));
-		params.add(new BasicNameValuePair("sha1", "test_sha1"));
+		params.add(new BasicNameValuePair("package_name", "test_package_ame"));
+		params.add(new BasicNameValuePair("sha1", "test_sh1"));
 
 		String paramString = URLEncodedUtils.format(params, "utf-8");
 
@@ -346,7 +346,7 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 		HttpGet httpGet = new HttpGet(authUrl);
 
 		httpGet.addHeader(new BasicHeader("Content-type", "text/plain"));
-		httpGet.addHeader(new BasicHeader("cookie", "uid=UjqYpC7Yd0X_Uuus; token=zncTlZzgNDo="));
+		httpGet.addHeader(new BasicHeader("cookie", "uid=UZtZkaEMFSBRwmys;token=EeEKpHJzesU="));
 
 		authTask = new UtilAtomicAsyncTask(HikeAuthActivity.this, null, new UtilAsyncTaskListener()
 		{
