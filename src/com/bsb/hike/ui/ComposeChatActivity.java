@@ -1207,7 +1207,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						ConvMessage convMessage = new ConvMessage();
 						convMessage.contentLove = new ContentLove();
 						convMessage.contentLove.loveId = loveId;
-						convMessage.platformMessageMetadata = new PlatformMessageMetadata(metadata);
+						convMessage.platformMessageMetadata = new PlatformMessageMetadata(metadata, getApplicationContext());
 						multipleMessageList.add(convMessage);
 					}
 					/*

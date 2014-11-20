@@ -2122,7 +2122,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
                             // as we will be changing msisdn and hike status while inserting in DB
                             ConvMessage convMessage = Utils.makeConvMessage(mContactNumber, "test", isConversationOnHike());
                             convMessage.setMessageType(MESSAGE_TYPE.CONTENT);
-                            convMessage.platformMessageMetadata = new PlatformMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA));
+                            convMessage.platformMessageMetadata = new PlatformMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA), getApplicationContext());
+                            convMessage.platformMessageMetadata.addThumbnailsToMetadata();
                             convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
 
                             sendMessage(convMessage);

@@ -402,7 +402,7 @@ public class DbConversationListener implements Listener
             jsonObject = new JSONObject((String) object);
             JSONObject parseJSON = new JSONObject(jsonObject.optString("message"));
             ArrayList<ConvMessage> listOfMessages= new ArrayList<ConvMessage>(1);
-            ConvMessage convMessage= HikeSDKMessageFilter.filterMessage((JSONObject) parseJSON);
+            ConvMessage convMessage= HikeSDKMessageFilter.filterMessage((JSONObject) parseJSON, context);
             listOfMessages.add(convMessage);
 
             String[] toArray = parseJSON.has(HikePlatformConstants.RECEPIENT) ? parseJSON.getString(HikePlatformConstants.RECEPIENT).split(",") : new String[]{};
@@ -413,9 +413,11 @@ public class DbConversationListener implements Listener
                 listOfContacts.add(new ContactInfo(msisdn, msisdn, null, null,!convMessage.isSMS()));
             }
             convMessage.platformMessageMetadata.thumbnailMap.clear();
+            convMessage.platformMessageMetadata.addThumbnailsToMetadata();
             if(listOfMessages!=null && null != listOfContacts) {
                 HikeConversationsDatabase.getInstance().addConversations(listOfMessages, listOfContacts, true);
-                for(int i = 0; i< listOfContacts.size() ; i++){
+                for (String msisdn:msisdns){
+                    convMessage.setMsisdn(msisdn);
                     mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
 
                 }

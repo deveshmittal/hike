@@ -23,4 +23,5 @@ public interface HikePlatformConstants {
 	String RECEPIENT = "to";
 	String MESSAGE_TYPE = "t";
     String ANDROID_INTENT = "android";
+    String CHANNEL_SOURCE = "channelSource";
 }
