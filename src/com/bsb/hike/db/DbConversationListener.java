@@ -413,6 +413,7 @@ public class DbConversationListener implements Listener
                 listOfContacts.add(new ContactInfo(msisdn, msisdn, null, null,!convMessage.isSMS()));
             }
             convMessage.platformMessageMetadata.thumbnailMap.clear();
+            convMessage.platformMessageMetadata.addThumbnailsToMetadata();
             if(listOfMessages!=null && null != listOfContacts) {
                 HikeConversationsDatabase.getInstance().addConversations(listOfMessages, listOfContacts, true);
                 for(int i = 0; i< listOfContacts.size() ; i++){
