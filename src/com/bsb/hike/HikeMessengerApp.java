@@ -675,7 +675,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 		if (!currentAppVersion.equals(actualAppVersion))
 		{
-			Utils.resetUpdateParams(settings);
+			if (!currentAppVersion.equals(""))
+			{
+				Utils.resetUpdateParams(settings);
+			}
 
 			/*
 			 * Updating the app version.

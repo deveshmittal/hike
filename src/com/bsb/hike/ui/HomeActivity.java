@@ -373,6 +373,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		});
 
 		newConversationIndicator = (TextView) menu.findItem(R.id.new_conversation).getActionView().findViewById(R.id.top_bar_indicator);
+		menu.findItem(R.id.new_conversation).getActionView().findViewById(R.id.overflow_icon_image).setContentDescription("Start a new chat");
 		((ImageView) menu.findItem(R.id.new_conversation).getActionView().findViewById(R.id.overflow_icon_image)).setImageResource(R.drawable.ic_new_conversation);
 		showRecentlyJoinedDot(1000);
 
@@ -901,7 +902,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			
 			String msisdn = (String) object;
 			ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, false);
-			if (contact.getHikeJoinTime() > 0)
+			if (contact.getHikeJoinTime() > 0 && !contact.isUnknownContact())
 			{
 				Editor editor = accountPrefs.edit();
 				editor.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);

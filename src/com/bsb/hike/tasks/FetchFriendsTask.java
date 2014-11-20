@@ -226,14 +226,13 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 			}
 			FavoriteType favoriteType = contactInfo.getFavoriteType();
 
+			addToRecentlyJoinedIfNeeded(contactInfo);
 			if (shouldAddToFavorites(favoriteType))
 			{
 				friendTaskList.add(contactInfo);
 			}
 			else
-			{
-				addToRecentlyJoinedIfNeeded(contactInfo);
-				
+			{	
 				if (null != contactInfo.getName())
 				{
 					if (contactInfo.isOnhike())
@@ -272,7 +271,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 		}
 		
 		hikeTaskList.removeAll(recentlyJoinedTaskList);
-		
+		friendTaskList.removeAll(recentlyJoinedTaskList);
 		
 		if (removeExistingParticipants)
 		{
@@ -314,7 +313,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 	private void addToRecentlyJoinedIfNeeded(ContactInfo contactInfo)
 	{
-		if(fetchRecentlyJoined && contactInfo.isOnhike())
+		if(fetchRecentlyJoined && contactInfo.isOnhike() && !contactInfo.isUnknownContact())
 		{
 			if(stealthMode != HikeConstants.STEALTH_ON && HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
 			{
