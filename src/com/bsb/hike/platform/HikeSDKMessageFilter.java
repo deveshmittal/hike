@@ -11,7 +11,7 @@ public class HikeSDKMessageFilter implements HikePlatformConstants{
 		try{
 
 		ConvMessage convMessage = new ConvMessage();
-
+        convMessage.setIsSent(true);
 		convMessage.setMessageType(HikeCardConstants.CARD_MSG_TYPE.equals(json.optString(MESSAGE_TYPE)) ? HikeConstants.MESSAGE_TYPE.CONTENT
 				: HikeConstants.MESSAGE_TYPE.PLAIN_TEXT);
 		convMessage.platformMessageMetadata = new PlatformMessageMetadata(json, context);

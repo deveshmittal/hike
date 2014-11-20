@@ -107,6 +107,8 @@ public class ConvMessage
 		this.isFileTransferMessage = isFileTransferMessage;
 	}
 
+    public void setIsSent(boolean isSent){this.mIsSent = isSent;}
+
 	public boolean isStickerMessage()
 	{
 		return isStickerMessage;
