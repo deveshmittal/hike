@@ -268,6 +268,11 @@ public class MqttMessagesManager
 				e.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
 				e.commit();
 			}
+			
+			if (appPrefs.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true))
+			{
+				saveStatusMsg(jsonObj, msisdn, false);
+			}
 		}
 		else
 		{
@@ -2327,6 +2332,11 @@ public class MqttMessagesManager
 
 	private ConvMessage saveStatusMsg(JSONObject jsonObj, String msisdn) throws JSONException
 	{
+		return saveStatusMsg(jsonObj, msisdn, true);
+	}
+	
+	private ConvMessage saveStatusMsg(JSONObject jsonObj, String msisdn, boolean addInConversation) throws JSONException
+	{
 		if (isBulkMessage)
 		{
 			ConvMessage convMessage = saveStatusMsgBulk(jsonObj, msisdn);
@@ -2340,7 +2350,10 @@ public class MqttMessagesManager
 			return null;
 		}
 
-		convDb.addConversationMessages(convMessage);
+		if (addInConversation)
+		{
+			convDb.addConversationMessages(convMessage);
+		}
 
 		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 
