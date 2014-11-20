@@ -149,15 +149,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private HikeTip.TipType tipTypeShowing;
 
 	private FetchContactsTask fetchContactsTask;
-	
+
 	private ConversationFragment mainFragment;
-	
+
 	private Handler mHandler = new Handler();
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
-			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FAVORITE_COUNT_CHANGED, HikePubSub.STEALTH_UNREAD_TIP_CLICKED };
+			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FAVORITE_COUNT_CHANGED,
+			HikePubSub.STEALTH_UNREAD_TIP_CLICKED,HikePubSub. FTUE_LIST_FETCHED_OR_UPDATED };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
 
@@ -1119,6 +1120,15 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					updateTimelineNotificationCount(Utils.getNotificationCount(accountPrefs, false), 0);
 				}
 			});
+		}
+		else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type))
+		{
+			// If auth request is pending, take the user to hike connect activity instead of home screen
+			if (accountPrefs.getBoolean(HikeMessengerApp.PENDING_SDK_AUTH, false))
+			{
+				accountPrefs.edit().putBoolean(HikeMessengerApp.PENDING_SDK_AUTH, false);
+				HomeActivity.this.startActivity(new Intent(HomeActivity.this, HikeAuthActivity.class));
+			}
 		}
 	}
 

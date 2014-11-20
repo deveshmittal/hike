@@ -11,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Window;
@@ -69,6 +71,14 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 
 	private String userContactId;
 
+	private UtilAtomicAsyncTask authTask;
+
+	private HikeSharedPreferenceUtil settingPref;
+
+	private boolean isInitialized;
+
+	private boolean isRoutedToSignUp;
+
 	/** The Constant MESSAGE_INDEX. Used for passing messages between activities */
 	public static final String MESSAGE_INDEX = "MESSAGE_INDEX";
 
@@ -77,6 +87,10 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 	private static final String PATH_AUTHORIZE = "authorize";
 
 	private static final String AUTH_SHARED_PREF_NAME = "364i5j6b3oj4";
+
+	private static final String IS_SENT_FOR_SIGNUP_KEY = "IS_SENT_FOR_SIGNUP_KEY";
+
+	public static boolean bypassAuthHttp = false;
 
 	/*
 	 * (non-Javadoc)
@@ -93,19 +107,83 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.auth_main);
+		if (savedInstanceState != null)
+		{
+			if (savedInstanceState.getBoolean(IS_SENT_FOR_SIGNUP_KEY, false))
+			{
+				HikeAuthActivity.this.finish();
+				return;
+			}
 
-		ContactInfo contactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
+			message = (Message) savedInstanceState.getParcelable(MESSAGE_INDEX);
+		}
 
-		userContactId = contactInfo.getMsisdn() + ProfileActivity.PROFILE_ROUND_SUFFIX;
+		settingPref = HikeSharedPreferenceUtil.getInstance(getApplicationContext(), HikeMessengerApp.ACCOUNT_SETTINGS);
+	}
 
-		profileImageLoader = new IconLoader(this, getResources().getDimensionPixelSize(R.dimen.auth_permission_icon));
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
 
-		retrieveContent();
+		if (isRoutedToSignUp && (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false)) && (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null))
+		{
+			this.finish();
+			return;
+		}
 
-		setupActionBar();
+		if (isUserSignedUp() && !isInitialized)
+		{
+			setContentView(R.layout.auth_main);
 
-		bindContents();
+			ContactInfo contactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
+
+			userContactId = contactInfo.getMsisdn() + ProfileActivity.PROFILE_ROUND_SUFFIX;
+
+			profileImageLoader = new IconLoader(this, getResources().getDimensionPixelSize(R.dimen.auth_permission_icon));
+
+			retrieveContent();
+
+			setupActionBar();
+
+			bindContents();
+
+			settingPref.saveData(HikeMessengerApp.PENDING_SDK_AUTH, false);
+
+			isInitialized = true;
+		}
+		else
+		{
+			isRoutedToSignUp = true;
+			settingPref.saveData(HikeMessengerApp.PENDING_SDK_AUTH, true);
+			return;
+		}
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		outState.putBoolean(IS_SENT_FOR_SIGNUP_KEY, true);
+
+		outState.putParcelable(MESSAGE_INDEX, getIntent().getParcelableExtra(MESSAGE_INDEX));
+
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState)
+	{
+		super.onRestoreInstanceState(savedInstanceState);
+		if (savedInstanceState != null)
+		{
+			if (savedInstanceState.getBoolean(IS_SENT_FOR_SIGNUP_KEY, false))
+			{
+				HikeAuthActivity.this.finish();
+				return;
+			}
+
+			message = (Message) savedInstanceState.getParcelable(MESSAGE_INDEX);
+		}
 	}
 
 	/**
@@ -113,7 +191,10 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 	 */
 	private void retrieveContent()
 	{
-		message = (Message) getIntent().getParcelableExtra(MESSAGE_INDEX);
+		if (message == null)
+		{
+			message = (Message) getIntent().getParcelableExtra(MESSAGE_INDEX);
+		}
 
 		if (message != null)
 		{
@@ -144,6 +225,7 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 		else
 		{
 			this.finish();
+			return;
 		}
 		// We have host application package name. Get its name, dev name and image from package info
 		PackageManager pm = getApplicationContext().getPackageManager();
@@ -266,7 +348,7 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 		httpGet.addHeader(new BasicHeader("Content-type", "text/plain"));
 		httpGet.addHeader(new BasicHeader("cookie", "uid=UjqYpC7Yd0X_Uuus; token=zncTlZzgNDo="));
 
-		UtilAtomicAsyncTask authTask = new UtilAtomicAsyncTask(null, new UtilAsyncTaskListener()
+		authTask = new UtilAtomicAsyncTask(HikeAuthActivity.this, null, new UtilAsyncTaskListener()
 		{
 
 			private HikeSharedPreferenceUtil prefs;
@@ -274,17 +356,27 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 			@Override
 			public void onFailed()
 			{
+
 				Logger.d(HikeAuthActivity.class.getCanonicalName(), "on task failed");
-				message.arg2 = HikeSDKResponseCode.STATUS_FAILED;
-				try
+
+				if (bypassAuthHttp)
 				{
-					message.replyTo.send(message);
+					String expiresIn = "12341";
+					String accessToken = "ashjfbqiywgr13irb";
+
+					prefs = HikeSharedPreferenceUtil.getInstance(getApplicationContext(), AUTH_SHARED_PREF_NAME);
+					prefs.saveData(mAppPackage, Integer.toString(accessToken.hashCode()));
+
+					HikeMessengerApp.getPubSub().publish(HikePubSub.AUTH_TOKEN_RECEIVED, accessToken);
+
+					HikeAuthActivity.this.finish();
 				}
-				catch (RemoteException e)
+				else
 				{
-					e.printStackTrace();
+					// display a toast and request user to relog
+					Toast.makeText(getApplicationContext(), "Request failed. Please make sure you have access to the Internet.", Toast.LENGTH_LONG).show();
 				}
-				HikeAuthActivity.this.finish();
+
 			}
 
 			@Override
@@ -322,7 +414,17 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 		});
 
 		Utils.executeUtilAtomicTask(authTask, httpGet);
+	}
 
+	@Override
+	protected void onStop()
+	{
+		if (authTask != null && !authTask.isCancelled())
+		{
+			authTask.cancel(false);
+		}
+
+		super.onStop();
 	}
 
 	/**
@@ -416,21 +518,24 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 	 */
 	public void onFailed(String argMessage)
 	{
-		message.arg2 = HikeSDKResponseCode.STATUS_FAILED;
-
-		Bundle messageBundle = new Bundle();
-
-		messageBundle.putString(HikeSDKConstants.HIKE_REQ_DATA_ID, argMessage);
-
-		message.setData(messageBundle);
-
-		try
+		if (message != null)
 		{
-			message.replyTo.send(message);
-		}
-		catch (RemoteException e)
-		{
-			e.printStackTrace();
+			message.arg2 = HikeSDKResponseCode.STATUS_FAILED;
+
+			Bundle messageBundle = new Bundle();
+
+			messageBundle.putString(HikeSDKConstants.HIKE_REQ_DATA_ID, argMessage);
+
+			message.setData(messageBundle);
+
+			try
+			{
+				message.replyTo.send(message);
+			}
+			catch (RemoteException e)
+			{
+				e.printStackTrace();
+			}
 		}
 		HikeAuthActivity.this.finish();
 	}
@@ -490,6 +595,31 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	public boolean isUserSignedUp()
+	{
+		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
+		{
+			if (!isRoutedToSignUp)
+			{
+				HikeAuthActivity.this.startActivity(new Intent(HikeAuthActivity.this, WelcomeActivity.class));
+				isRoutedToSignUp = true;
+			}
+			return false;
+		}
+
+		if (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null)
+		{
+			if (!isRoutedToSignUp)
+			{
+				HikeAuthActivity.this.startActivity(new Intent(HikeAuthActivity.this, SignupActivity.class));
+				isRoutedToSignUp = true;
+			}
+			return false;
+		}
+
+		return true;
 	}
 
 }
