@@ -204,12 +204,18 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	}
 
 	@Override
+	protected void onPreExecute()
+	{
+		isRunning = true;
+		super.onPreExecute();
+	}
+	
+	@Override
 	protected Boolean doInBackground(Void... unused)
 	{
 		deletePreviouslySavedProfileImages();
 		Logger.e("SignupTask", "FETCHING NUMBER? " + isAlreadyFetchingNumber);
 		isPinError = false;
-		isRunning = true;
 		SharedPreferences settings = this.context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		boolean ab_scanned = settings.getBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, false);
