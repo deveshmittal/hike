@@ -294,7 +294,7 @@ public class ConvMessage
 				
 	}
 
-	public ConvMessage(JSONObject obj) throws JSONException
+	public ConvMessage(JSONObject obj, Context context) throws JSONException
 	{
 		this.mMsisdn = obj.getString(obj.has(HikeConstants.TO) ? HikeConstants.TO : HikeConstants.FROM); /*
 																										 * represents msg is coming from another client
@@ -347,7 +347,7 @@ public class ConvMessage
 			// TODO : We should parse metadata based on message type, so doing now for content, we should clean the else part sometime
 			if(HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE))){
 				this.messageType  = MESSAGE_TYPE.CONTENT;
-				platformMessageMetadata  = new PlatformMessageMetadata(data.getJSONObject(HikeConstants.METADATA));
+				platformMessageMetadata  = new PlatformMessageMetadata(data.getJSONObject(HikeConstants.METADATA), context);
                 platformMessageMetadata.addToThumbnailTable();
                 platformMessageMetadata.thumbnailMap.clear();
 			}else{

@@ -402,7 +402,7 @@ public class DbConversationListener implements Listener
             jsonObject = new JSONObject((String) object);
             JSONObject parseJSON = new JSONObject(jsonObject.optString("message"));
             ArrayList<ConvMessage> listOfMessages= new ArrayList<ConvMessage>(1);
-            ConvMessage convMessage= HikeSDKMessageFilter.filterMessage((JSONObject) parseJSON);
+            ConvMessage convMessage= HikeSDKMessageFilter.filterMessage((JSONObject) parseJSON, context);
             listOfMessages.add(convMessage);
 
             String[] toArray = parseJSON.has(HikePlatformConstants.RECEPIENT) ? parseJSON.getString(HikePlatformConstants.RECEPIENT).split(",") : new String[]{};

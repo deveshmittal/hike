@@ -1,5 +1,6 @@
 package com.bsb.hike.platform;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Base64;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -7,6 +8,7 @@ import com.bsb.hike.platform.CardComponent.ImageComponent;
 import com.bsb.hike.platform.CardComponent.MediaComponent;
 import com.bsb.hike.platform.CardComponent.TextComponent;
 import com.bsb.hike.platform.CardComponent.VideoComponent;
+import com.bsb.hike.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,18 +22,20 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
 	public int layoutId;
 	public int loveId;
     public String notifText;
+    Context mContext;
+    public boolean isInstalled;
     public HashMap<String, byte[]> thumbnailMap = new HashMap<String, byte[]>();
 	
 	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();
 	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();
     public ArrayList<CardComponent.ActionComponent> actionComponents = new ArrayList<CardComponent.ActionComponent>();
 	private JSONObject json;
-	public PlatformMessageMetadata(String jsonString) throws JSONException {
-		this(new JSONObject(jsonString));
+	public PlatformMessageMetadata(String jsonString, Context context) throws JSONException {
+		this(new JSONObject(jsonString), context);
 	}
-	public PlatformMessageMetadata(JSONObject json) {
+	public PlatformMessageMetadata(JSONObject json, Context context) {
 		this.json = json;
-
+        this.mContext = context;
 	
 		
 		if (json.has(DATA)) {
@@ -40,6 +44,13 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
                 layoutId = getInt(data, LAYOUT_ID);
                 loveId = getInt(data, LOVE_ID);
                 notifText = getString(data, NOTIF_TEXT);
+
+                if (data.has(CHANNEL_SOURCE)){
+                    String channelSource = data.optString(CHANNEL_SOURCE);
+                    isInstalled = Utils.isPackageInstalled(mContext, channelSource);
+
+                }
+
 				if (data.has(ASSETS)) {
 					JSONObject assets = data.getJSONObject(ASSETS);
 					if (assets.has(TEXTS)) {

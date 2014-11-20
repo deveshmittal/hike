@@ -91,7 +91,7 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 
 	private void writeToNativeSMSDb(Context context, JSONObject msg) throws JSONException
 	{
-		ConvMessage convMessage = new ConvMessage(msg);
+		ConvMessage convMessage = new ConvMessage(msg, context);
 
 		ContentValues values = new ContentValues();
 		values.put(HikeConstants.SMSNative.NUMBER, convMessage.getMsisdn());
