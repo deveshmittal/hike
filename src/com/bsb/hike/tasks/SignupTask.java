@@ -480,6 +480,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			}
 
 			Editor editor = settings.edit();
+			editor.putInt(HikeConstants.HIKE_CONTACTS_COUNT, numOfHikeContactsCount);
 			editor.putBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, true);
 			editor.putBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, true);
 			editor.commit();
@@ -547,7 +548,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 				Editor editor = settings.edit();
-				editor.putInt(HikeConstants.HIKE_CONTACTS_COUNT, numOfHikeContactsCount);
 				editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, showNuxScreen);
 				editor.putString(HikeConstants.NUX_STICKER_DETAILS, nuxStickers);
 				editor.commit();
