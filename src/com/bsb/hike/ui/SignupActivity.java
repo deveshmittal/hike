@@ -476,6 +476,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				editor.remove(HikeMessengerApp.TEMP_COUNTRY_CODE);
 				editor.commit();
 
+				HikeMessengerApp.setIndianUser(isIndianUser);
 				/*
 				 * Update the urls to use ssl or not.
 				 */

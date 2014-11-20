@@ -715,7 +715,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		String twitterTokenSecret = settings.getString(HikeMessengerApp.TWITTER_TOKEN_SECRET, "");
 		makeTwitterInstance(twitterToken, twitterTokenSecret);
 
-		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.INDIA_COUNTRY_CODE);
+		setIndianUser(settings.getString(COUNTRY_CODE, "").equals(HikeConstants.INDIA_COUNTRY_CODE));
 
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -914,6 +914,11 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static boolean isIndianUser()
 	{
 		return isIndianUser;
+	}
+
+	public static void setIndianUser(boolean val)
+	{
+		isIndianUser = val;
 	}
 
 	public static void makeTwitterInstance(String token, String tokenSecret)
