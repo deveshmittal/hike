@@ -313,7 +313,7 @@ public class FetchFriendsTask extends AsyncTask<Void, Void, Void>
 
 	private void addToRecentlyJoinedIfNeeded(ContactInfo contactInfo)
 	{
-		if(fetchRecentlyJoined && contactInfo.isOnhike())
+		if(fetchRecentlyJoined && contactInfo.isOnhike() && !contactInfo.isUnknownContact())
 		{
 			if(stealthMode != HikeConstants.STEALTH_ON && HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
 			{
