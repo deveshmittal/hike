@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,7 +30,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Messenger;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
 
@@ -37,13 +37,12 @@ import com.bsb.hike.GCMIntentService;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.Sticker;
-import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -51,8 +50,6 @@ import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -163,8 +160,6 @@ public class HikeService extends Service
 
 	private Looper mContactHandlerLooper;
 
-	private StickerManager sm;
-
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -216,6 +211,8 @@ public class HikeService extends Service
 		mContactHandlerLooper = contactHandlerThread.getLooper();
 		mContactsChangedHandler = new Handler(mContactHandlerLooper);
 		mContactsChanged = new ContactsChanged(this);
+		
+		//scheduleNextAccountBackup();
 
 		/*
 		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of
@@ -274,104 +271,9 @@ public class HikeService extends Service
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
-		setupStickers();
 	}
 
-	private void setupStickers()
-	{
-		sm = StickerManager.getInstance();
-		// move stickers from external to internal if not done
-		sm.init(getApplicationContext());
-		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		if(!settings.getBoolean(StickerManager.RECENT_STICKER_SERIALIZATION_LOGIC_CORRECTED, false)){
-			sm.updateRecentStickerFile(settings);
-		}
-		
-		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
-		/*
-		 * If we had earlier removed bollywood stickers we need to display them again.
-		 */
-		if (settings.contains(StickerManager.SHOW_BOLLYWOOD_STICKERS))
-		{
-			sm.setupBollywoodCategoryVisibility(settings);
-		}
-
-		sm.setupStickerCategoryList(settings);
-		/*
-		* This preference has been used here because of a prepopulated recent sticker enhancement
-		* it will delete all the default stickers as we are adding some more default stickers 
-		*/
-		if (!preferenceManager.contains(StickerManager.REMOVE_DEFAULT_CAT_STICKERS))
-		{
-			sm.deleteDefaultDownloadedExpressionsStickers();
-			sm.deleteDefaultDownloadedStickers();
-			
-			Editor editor = preferenceManager.edit();
-			editor.putBoolean(StickerManager.REMOVE_DEFAULT_CAT_STICKERS, true);
-			editor.commit();
-		}
-		sm.loadRecentStickers();
-
-		/*
-		 * This preference has been used here because of a bug where we were inserting this key in the settings preference
-		 */
-		if (!preferenceManager.contains(StickerManager.REMOVE_HUMANOID_STICKERS))
-		{
-			sm.removeHumanoidSticker();
-		}
-		
-		if (!preferenceManager.getBoolean(StickerManager.EXPRESSIONS_CATEGORY_INSERT_TO_DB, false))
-		{
-			sm.insertExpressionsCategory();
-		}
-
-		if (!preferenceManager.getBoolean(StickerManager.HUMANOID_CATEGORY_INSERT_TO_DB, false))
-		{
-			sm.insertHumanoidCategory();
-		}
-
-		if (!settings.getBoolean(StickerManager.RESET_REACHED_END_FOR_DEFAULT_STICKERS, false))
-		{
-			sm.resetReachedEndForDefaultStickers();
-		}
-
-		if (!settings.getBoolean(StickerManager.ADD_NO_MEDIA_FILE_FOR_STICKERS, false))
-		{
-			sm.addNoMediaFilesToStickerDirectories();
-		}
-		/*
-		 * Adding these preferences since they are used in the load more stickers logic.
-		 */
-		if (!settings.getBoolean(StickerManager.CORRECT_DEFAULT_STICKER_DIALOG_PREFERENCES, false))
-		{
-			sm.setDialoguePref();
-		}
-
-		if (!settings.getBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, false))
-		{
-			sm.deleteDefaultDownloadedStickers();
-			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_STICKER, true).commit();
-		}
-		/*
-		 * this code path will be for users upgrading to the build where we make expressions a default loaded category
-		 */
-		if (!settings.getBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, false))
-		{
-			sm.deleteDefaultDownloadedExpressionsStickers();
-			settings.edit().putBoolean(StickerManager.DELETE_DEFAULT_DOWNLOADED_EXPRESSIONS_STICKER, true).commit();
-
-			if (sm.checkIfStickerCategoryExists(StickerCategoryId.doggy.name()))
-			{
-				HikeConversationsDatabase.getInstance().stickerUpdateAvailable(StickerCategoryId.doggy.name());
-				StickerManager.getInstance().setStickerUpdateAvailable(StickerCategoryId.doggy.name(), true);
-			}
-			else
-			{
-				HikeConversationsDatabase.getInstance().removeStickerCategory(StickerCategoryId.doggy.name());
-			}
-			StickerManager.getInstance().removeStickersFromRecents(StickerCategoryId.doggy.name(), sm.OLD_HARDCODED_STICKER_IDS_DOGGY);
-		}
-	}
+	
 	
 	@Override
 	public int onStartCommand(final Intent intent, int flags, final int startId)
@@ -449,8 +351,6 @@ public class HikeService extends Service
 			unregisterReceiver(sendRai);
 			sendRai = null;
 		}
-		sm.getStickerCategoryList().clear();
-		sm.getRecentStickerList().clear();
 
 		if (postGreenBlueDetails != null)
 		{
@@ -705,6 +605,11 @@ public class HikeService extends Service
 					Logger.d(getClass().getSimpleName(), "Send successful");
 					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 					editor.putBoolean(HikeMessengerApp.DEVICE_DETAILS_SENT, true);
+					if (response != null)
+					{
+						String backupToken = response.optString("backup_token");
+						editor.putString(HikeMessengerApp.BACKUP_TOKEN_SETTING, backupToken);
+					}
 					editor.commit();
 				}
 
@@ -807,6 +712,40 @@ public class HikeService extends Service
 			sendBroadcast(new Intent(HikeService.POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION));
 		}
 	};
+	
+	private Runnable BackupAccountRunnable = new Runnable()
+	{
+		@Override
+		public void run()
+		{
+			DBBackupRestore.getInstance(HikeService.this).backupDB();
+			scheduleNextAccountBackup();
+		}
+	};
+	
+	private void scheduleNextAccountBackup()
+	{
+		long MaxBackupDelay = 24 * 60 * 60 * 1000; // 24 Hours
+		long lastBackup = DBBackupRestore.getInstance(HikeService.this).getLastBackupTime();
+
+		long scheduleTime = 0;
+		if ((System.currentTimeMillis() - lastBackup) > MaxBackupDelay)
+		{
+			scheduleTime = 0;
+		}
+		else
+		{
+			Calendar c = Calendar.getInstance();
+			c.add(Calendar.DAY_OF_MONTH, 1);
+			c.set(Calendar.HOUR_OF_DAY, 3);
+			c.set(Calendar.MINUTE, 0);
+			c.set(Calendar.SECOND, 0);
+			c.set(Calendar.MILLISECOND, 0);
+			scheduleTime = (c.getTimeInMillis() - System.currentTimeMillis());
+
+		}
+		postRunnableWithDelay(BackupAccountRunnable, scheduleTime);
+	}
 
 	private void scheduleNextManualContactSync()
 	{

@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="852"
-    android:versionName="3.3.5.2" >
+    android:versionCode="890"
+    android:versionName="3.5.0" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -167,10 +167,7 @@
             android:name="com.bsb.hike.ui.WebViewActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
-        <activity
-            android:name="com.bsb.hike.ui.Tutorial"
-            android:launchMode="singleTop" >
-        </activity>
+       
         <activity
             android:name="com.bsb.hike.ui.ShareLocation"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -204,6 +201,12 @@
         <activity android:name="com.bsb.hike.ui.GallerySelectionViewer" >
         </activity>
         <activity android:name="com.bsb.hike.ui.CountrySelectActivity" >
+        </activity>
+        <activity android:name="com.bsb.hike.ui.StickerShopActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+        <activity android:name="com.bsb.hike.ui.StickerSettingsActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
         <activity
             android:name="com.bsb.hike.ui.FileSelectActivity"

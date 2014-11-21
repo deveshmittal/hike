@@ -228,6 +228,8 @@ public class HikeConstants
 	public static final String CRICKET_MOODS = "cmoods";
 
 	public static final String COUNT = "c";
+	
+	public static final String UPDATED_SIZE = "s";
 
 	public static final String DEFAULT_SMS_CLIENT_TUTORIAL = "dsctutorial";
 
@@ -238,6 +240,8 @@ public class HikeConstants
 	public static final String RESOLUTION_ID = "resId";
 
 	public static final String NUMBER_OF_STICKERS = "nos";
+	
+	public static final String DOWNLOAD_SOURCE = "dsrc";
 	
 	public static final String TOTAL_STICKERS = "totalStickers";
 
@@ -461,6 +465,8 @@ public class HikeConstants
 	
 	public static final String FTUE_HIKE_SUPPORT = "+hike4+";
 
+	public static final String BACKUP_PREF = "backupAccount";
+
 	public static final String UNLINK_PREF = "unlinkAccount";
 
 	public static final String DELETE_PREF = "deleteAccount";
@@ -484,6 +490,8 @@ public class HikeConstants
 	public static final String H2O_NOTIF_BOOLEAN_PREF = "hikeOfflineNotificationPref";
 
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
+	
+	public static final String UPGRADING = "upgrading";
 
 	public static final String UPGRADE_MSG_HASH_GROUP_READBY = "upgradeMsgHashGroupReadby";
 	
@@ -573,6 +581,8 @@ public class HikeConstants
 	public static final int CALL_ME_WAIT_TIME = 150 * 1000;
 
 	public static final int NETWORK_ERROR_POP_UP_TIME = 120 * 1000;
+
+	public static final int BACKUP_RESTORE_UI_DELAY = 2 * 1000; 
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 
@@ -739,6 +749,8 @@ public class HikeConstants
 	public static final int SHOW_CREDITS_AFTER_NUM = 10;
 
 	public static final String HIKE_MEDIA_DIRECTORY_ROOT = Environment.getExternalStorageDirectory() + "/Hike/Media";
+
+	public static final String HIKE_BACKUP_DIRECTORY_ROOT = Environment.getExternalStorageDirectory() + "/Hike/Backup";
 
 	public static final String PROFILE_ROOT = "/hike Profile Images";
 
@@ -1044,6 +1056,8 @@ public class HikeConstants
 		public static final String URL_TO_LOAD = "urlToLoad";
 
 		public static final String TITLE = "title";
+		
+		public static final String WEBVIEW_ALLOW_LOCATION = "allocLoc";
 
 		public static final String FIRST_TIME_USER = "firstTimeUser";
 
@@ -1564,6 +1578,19 @@ public class HikeConstants
 		
 		public static final String PIN_HISTORY_VIA_PIN_CLICK = "pinHistoryViaPinClick";
 		
+		public static final String STICKER_BTN_CLICKED = "stickerBtnClicked";
+		
+		public static final String STICKER_SETTING_BTN_CLICKED = "stickerSettingBtnClicked";
+		
+		public static final String SEEN_REORDERING_TIP = "seenReorderingTip";
+		
+		public static final String UPDATE_ALL_CONFIRM_CLICKED = "updateAllConfirmClicked";
+		
+		public static final String UPDATE_ALL_CANCEL_CLICKED = "updateAllCancelClicked";
+		
+		public static final String STICKER_CHECK_BOX_CLICKED = "stickerChkBoxClicked";
+		
+		public static final String STICKER_UNCHECK_BOX_CLICKED = "stickerUnchkBoxClicked";
 		/*
 		 * Settings screen <screen> = settingsS <event> = notifNUJEnabled, notifH2OEnabled, notifNUJDisabled, notifH2ODisabled
 		 */
@@ -1884,9 +1911,38 @@ public class HikeConstants
 	public static final int ATOMIC_APP_TIP_HIKE_REWARDS = 11;
 
 	public static final int SHARED_MEDIA_TYPE = 1;
+
+	public static enum STResult
+	{
+		SUCCESS, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, SERVER_ERROR, CARD_UNMOUNT, NO_SD_CARD, FILE_EXPIRED
+	}
 	
+	public static final String PREVIEW_IMAGE = "previewimg";
+	public static final String ENABLE_IMAGE = "enableimg";
+	public static final String DISABLE_IMAGE = "disableimg";
+	public static final String SIZE = "size";	
 	public static final int NORMAL_MESSAGE_TYPE = 0;
 	public static final int MULTI_FORWARD_MESSAGE_TYPE = 1;
 	public static final int SHARED_PIN_TYPE = 2;
 	public static final String SHOWN_MULTI_FORWARD_TIP = "shownMultiForwardTip";
+
+	public static final String VISIBLITY = "visibility";
+
+	public static final String INDEX = "index";
+	
+	public static final String CAT_NAME = "name";
+	
+	public static final String DELIMETER = ":";
+		
+	public static final String HIKE_EXTRAS_NAME = "hike_extras_name";
+	
+	public static final String HIKE_EXTRAS_URL = "hike_extras_url";
+	
+	public static final String REWARDS_NAME = "rewards_name";
+		
+	public static final String REWARDS_URL = "rewards_url";
+
+	public static final String SHOP = "shop";
+
+	public static final String BADGE = "badge";
 }

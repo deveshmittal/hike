@@ -117,17 +117,17 @@ public class AccountUtils
 
 	public static String fileTransferBaseViewUrl = FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION;
 
-	public static final String REWARDS_PRODUCTION_BASE = "hike.in/rewards/android/";
+	public static final String REWARDS_PRODUCTION_BASE = "hike.in/rewards/";
 
-	public static final String REWARDS_STAGING_BASE = "staging.im.hike.in/rewards/android/";
+	public static final String REWARDS_STAGING_BASE = "staging.im.hike.in/rewards/";
 
-	public static String rewardsUrl = HTTP_STRING + REWARDS_PRODUCTION_BASE;
+	public static String rewardsUrl = REWARDS_PRODUCTION_BASE;
 
-	public static final String GAMES_PRODUCTION_BASE = "hike.in/games/android/";
+	public static final String GAMES_PRODUCTION_BASE = "hike.in/games/";
 
-	public static final String GAMES_STAGING_BASE = "staging.im.hike.in/games/android/";
+	public static final String GAMES_STAGING_BASE = "staging.im.hike.in/games/";
 
-	public static String gamesUrl = HTTP_STRING + GAMES_PRODUCTION_BASE;
+	public static String gamesUrl = GAMES_PRODUCTION_BASE;
 
 	public static final String STICKERS_PRODUCTION_BASE = "hike.in/s/%1$s/%2$s";
 
@@ -366,12 +366,15 @@ public class AccountUtils
 		public int all_invitee_joined;
 
 		public String country_code;
+		
+		public String backupToken;
 
-		public AccountInfo(String token, String msisdn, String uid, int smsCredits, int all_invitee, int all_invitee_joined, String country_code)
+		public AccountInfo(String token, String msisdn, String uid, String backupToken, int smsCredits, int all_invitee, int all_invitee_joined, String country_code)
 		{
 			this.token = token;
 			this.msisdn = msisdn;
 			this.uid = uid;
+			this.backupToken = backupToken;
 			this.smsCredits = smsCredits;
 			this.all_invitee = all_invitee;
 			this.all_invitee_joined = all_invitee_joined;
@@ -475,22 +478,23 @@ public class AccountUtils
 		if ("fail".equals(obj.optString("stat")))
 		{
 			if (pin != null)
-				return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0, null);
+				return new AccountUtils.AccountInfo(null, null, null, null, -1, 0, 0, null);
 			/*
 			 * represents normal account creation , when user is on wifi and account creation failed
 			 */
-			return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0, null);
+			return new AccountUtils.AccountInfo(null, null, null, null, -1, 0, 0, null);
 		}
 		String token = obj.optString("token");
 		String msisdn = obj.optString("msisdn");
 		String uid = obj.optString("uid");
+		String backupToken = obj.optString("backup_token");
 		int smsCredits = obj.optInt(HikeConstants.MqttMessageTypes.SMS_CREDITS);
 		int all_invitee = obj.optInt(HikeConstants.ALL_INVITEE_2);
 		int all_invitee_joined = obj.optInt(HikeConstants.ALL_INVITEE_JOINED_2);
 		String country_code = obj.optString("country_code");
 
 		Logger.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
-		return new AccountUtils.AccountInfo(token, msisdn, uid, smsCredits, all_invitee, all_invitee_joined, country_code);
+		return new AccountUtils.AccountInfo(token, msisdn, uid, backupToken, smsCredits, all_invitee, all_invitee_joined, country_code);
 	}
 
 	public static void processMicromaxLogs(boolean isMmxPreload,String deviceId,JSONObject data,Context context) throws JSONException
@@ -835,7 +839,7 @@ public class AccountUtils
 			 * We need the response to save the id of the status.
 			 */
 			if (requestType == RequestType.STATUS_UPDATE || requestType == RequestType.HIKE_JOIN_TIME || requestType == RequestType.PROFILE_PIC
-					|| requestType == RequestType.SOCIAL_POST)
+					|| requestType == RequestType.SOCIAL_POST || requestType == RequestType.OTHER)
 			{
 				hikeHttpRequest.setResponse(obj);
 			}

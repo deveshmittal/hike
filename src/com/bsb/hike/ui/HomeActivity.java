@@ -58,12 +58,14 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
+import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.FtueContactsData;
@@ -83,7 +85,6 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.HikeTip.TipType;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
@@ -97,13 +98,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private static final boolean TEST = false; // TODO: Test flag only, turn off
 												// for Production
 
-	private static final int DIWALI_YEAR = 2014;
-	private static final int DIWALI_MONTH = Calendar.OCTOBER;
-	private static final int DIWALI_DAY = 23;
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP, DIWALI_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP
 	}
 
 	private DialogShowing dialogShowing;
@@ -118,7 +116,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private SharedPreferences accountPrefs;
 
-	private ProgressDialog progDialog;
+	private Dialog progDialog;
 
 	private Dialog updateAlert;
 
@@ -159,7 +157,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
 			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FAVORITE_COUNT_CHANGED, HikePubSub.STEALTH_UNREAD_TIP_CLICKED };
 
-	private String[] progressPubSubListeners = { HikePubSub.FINISHED_AVTAR_UPGRADE };
+	private String[] progressPubSubListeners = { HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -181,9 +179,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		// If it's 1, it means we need to show a progress dialog and then wait
 		// for the
 		// pub sub thread event to cancel the dialog once the upgrade is done.
-		if (((accountPrefs.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1) && (accountPrefs.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1)) || TEST)
+		if ((HikeSharedPreferenceUtil.getInstance(HomeActivity.this).getData(HikeConstants.UPGRADING, false)))
 		{
-			progDialog = ProgressDialog.show(this, getString(R.string.work_in_progress), getString(R.string.upgrading_to_a_new_and_improvd_hike), true);
+			progDialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.HIKE_UPGRADE_DIALOG, null);
 			showingProgress = true;
 			HikeMessengerApp.getPubSub().addListeners(this, progressPubSubListeners);
 		}
@@ -234,17 +232,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		if (savedInstanceState == null && dialogShowing == null)
 		{
-			if (HikeMessengerApp.isIndianUser() &&  !accountPrefs.getBoolean(HikeMessengerApp.SHOWN_DIWALI_POPUP, false) && isDiwaliDate())
-			{
-				showDiwaliPopup();
-			}
-			else
-			{
+			
 				/*
 				 * Only show app rater if the tutorial is not being shown an the app was just launched i.e not an orientation change
 				 */
 				AppRater.appLaunched(this);
-			}
 		}
 		else if (dialogShowing != null)
 		{
@@ -270,87 +262,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	}
 
-	private void showDiwaliPopup()
-	{
-		dialogShowing = DialogShowing.DIWALI_POPUP;
 
-		HikeDialogListener dialogListener = new HikeDialogListener()
-		{
-			@Override
-			public void positiveClicked(Dialog dialog)
-			{
-				sendDiwaliSticker();
-				dialog.dismiss();
-			}
-
-			@Override
-			public void onSucess(Dialog dialog)
-			{
-			}
-
-			@Override
-			public void neutralClicked(Dialog dialog)
-			{
-			}
-
-			@Override
-			public void negativeClicked(Dialog dialog)
-			{
-				dialog.dismiss();
-			}
-		};
-
-		dialog = HikeDialog.showDialog(this, HikeDialog.DIWALI_DIALOG, dialogListener, null);
-
-		dialog.setOnDismissListener(new OnDismissListener()
-		{
-			@Override
-			public void onDismiss(DialogInterface dialog)
-			{
-				onDismissDiwaliDialog();
-			}
-		});
-
-		dialog.setOnCancelListener(new OnCancelListener()
-		{
-			@Override
-			public void onCancel(DialogInterface dialog)
-			{
-				onDismissDiwaliDialog();
-			}
-		});
-
-		dialog.show();
-	}
-
-	private void sendDiwaliSticker()
-	{
-		Intent intent = IntentManager.getForwardStickerIntent(this, "078_happydiwali.png", StickerCategoryId.humanoid.name());
-		startActivity(intent);
-	}
-
-	private void onDismissDiwaliDialog()
-	{
-		dialogShowing = null;
-
-		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeMessengerApp.SHOWN_DIWALI_POPUP, true);
-	}
-
-	private boolean isDiwaliDate()
-	{
-		Calendar calendar = Calendar.getInstance();
-		int year = calendar.get(Calendar.YEAR);
-		int month = calendar.get(Calendar.MONTH);
-		int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-		if (year == DIWALI_YEAR && month == DIWALI_MONTH && day == DIWALI_DAY)
-		{
-			return true;
-		}
-
-		return false;
-	}
-
+	
 	private void setupMainFragment(Bundle savedInstanceState)
 	{
 		if (savedInstanceState != null) {
@@ -888,7 +801,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 		}
-		else if (type.equals(HikePubSub.FINISHED_AVTAR_UPGRADE))
+		else if (type.equals(HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE))
 		{
 			new Thread(new Runnable()
 			{
@@ -1284,9 +1197,24 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		
 		optionsList.add(new OverFlowMenuItem(getString(R.string.invite_friends), 2));
 
+		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
+		{
+			String hikeExtrasName = accountPrefs.getString(HikeConstants.HIKE_EXTRAS_NAME, getApplicationContext().getString(R.string.hike_extras));
+					                       
+			if(!TextUtils.isEmpty(hikeExtrasName))
+			{
+				optionsList.add(new OverFlowMenuItem(hikeExtrasName, 3));
+			}
+		}
+		
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
 		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.rewards), 4));
+			String rewards_name = accountPrefs.getString(HikeConstants.REWARDS_NAME, getApplicationContext().getString(R.string.rewards));
+												
+			if(!TextUtils.isEmpty(rewards_name))
+			{
+				optionsList.add(new OverFlowMenuItem(rewards_name, 4));
+			}
 		}
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
@@ -1420,7 +1348,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 9:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
-					break;	
+					break;
 				}
 
 				if (intent != null)
@@ -1460,7 +1388,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void addEmailLogItem(List<OverFlowMenuItem> overFlowMenuItems)
 	{
-		overFlowMenuItems.add(new OverFlowMenuItem("Send logs", 9));
+		if (AppConfig.SHOW_SEND_LOGS_OPTION)
+		{
+			overFlowMenuItems.add(new OverFlowMenuItem("Send logs", 9));
+		}
 	}
 
 	@Override
@@ -1512,6 +1443,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		// TODO Auto-generated method stub
 		super.onConfigurationChanged(newConfig);
 		// handle dialogs here
+		if(progDialog != null && progDialog.isShowing())
+		{
+			progDialog.dismiss();
+			progDialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.HIKE_UPGRADE_DIALOG, null);
+			showingProgress = true;
+			
+		}
 		if (dialogShowing != null)
 		{
 			showAppropriateDialog();
@@ -1538,9 +1476,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		switch (dialogShowing)
 		{
-		case DIWALI_POPUP:
-			showDiwaliPopup();
-			break;
 		case SMS_CLIENT:
 			showSMSClientDialog();
 			break;
