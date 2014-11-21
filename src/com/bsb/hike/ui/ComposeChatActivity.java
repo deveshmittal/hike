@@ -381,6 +381,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		adapter.setIsCreatingOrEditingGroup(this.composeMode == CREATE_GROUP_MODE);
 
 		adapter.executeFetchTask();
+		
+		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
 	}
 
 	private void initTagEditText()
@@ -409,7 +411,6 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	{
 		// TODO Auto-generated method stub
 		super.onResume();
-		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
 		if(adapter != null)
 		{
 			adapter.getIconLoader().setExitTasksEarly(false);
