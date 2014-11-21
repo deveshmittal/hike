@@ -901,17 +901,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			}
 			
 			String msisdn = (String) object;
-			ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, false);
-			if (contact.getHikeJoinTime() > 0 && !contact.isUnknownContact())
-			{
-				Editor editor = accountPrefs.edit();
-				editor.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
-				editor.commit();
-			}
 			
 			runOnUiThread(new Runnable()
 			{
-				
 				@Override
 				public void run()
 				{

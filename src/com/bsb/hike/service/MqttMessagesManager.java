@@ -259,19 +259,28 @@ public class MqttMessagesManager
 
 		if (joined)
 		{
-
 			if (joinTime > 0)
 			{
 				joinTime = Utils.applyServerTimeOffset(context, joinTime);
 				ContactManager.getInstance().setHikeJoinTime(msisdn, joinTime);
-				Editor e = this.settings.edit();
-				e.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
-				e.commit();
+				
+				ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, false);
+				if (contact.getHikeJoinTime() > 0 && !contact.isUnknownContact())
+				{
+					Editor e = this.settings.edit();
+					e.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
+					e.commit();
+				}
 			}
 			
 			if (appPrefs.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true))
 			{
-				saveStatusMsg(jsonObj, msisdn, false);
+				ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
+				
+				if (convMessage != null && !isBulkMessage)
+				{
+					this.pubSub.publish(HikePubSub.USER_JOINED_NOTIFICATION, convMessage);
+				}
 			}
 		}
 		else
@@ -2329,40 +2338,30 @@ public class MqttMessagesManager
 		 */
 		return convDb.updateMsgStatus(msgID, status.ordinal(), msisdn);
 	}
-
-	private ConvMessage saveStatusMsg(JSONObject jsonObj, String msisdn) throws JSONException
-	{
-		return saveStatusMsg(jsonObj, msisdn, true);
-	}
 	
-	private ConvMessage saveStatusMsg(JSONObject jsonObj, String msisdn, boolean addInConversation) throws JSONException
+	private ConvMessage saveStatusMsg(JSONObject jsonObj, String msisdn) throws JSONException
 	{
 		if (isBulkMessage)
 		{
 			ConvMessage convMessage = saveStatusMsgBulk(jsonObj, msisdn);
 			return convMessage;
 		}
-
 		ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
-
+		
 		if (convMessage == null)
 		{
 			return null;
 		}
-
-		if (addInConversation)
-		{
-			convDb.addConversationMessages(convMessage);
-		}
-
+		
+		convDb.addConversationMessages(convMessage);
+		
 		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
-
+		
 		statusMessagePostProcess(convMessage, jsonObj);
-
+		
 		return convMessage;
-
 	}
-
+	
 	private ConvMessage saveStatusMsgBulk(JSONObject jsonObj, String msisdn) throws JSONException
 	{
 		ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
