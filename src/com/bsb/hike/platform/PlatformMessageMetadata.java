@@ -21,7 +21,8 @@ import java.util.Set;
 public class PlatformMessageMetadata implements HikePlatformConstants {
 	public int layoutId;
 	public int loveId;
-    public String notifText;
+    public String notifText = "";
+    public String channelSource = "";
     Context mContext;
     public boolean isInstalled;
     public HashMap<String, byte[]> thumbnailMap = new HashMap<String, byte[]>();
@@ -46,7 +47,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
                 notifText = getString(data, NOTIF_TEXT);
 
                 if (data.has(CHANNEL_SOURCE)){
-                    String channelSource = data.optString(CHANNEL_SOURCE);
+                    channelSource = data.optString(CHANNEL_SOURCE);
                     isInstalled = Utils.isPackageInstalled(mContext, channelSource);
 
                 }
