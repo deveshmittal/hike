@@ -1,128 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg_black_incall"
-    android:visibility="visible" >
+    android:layout_height="match_parent" 
+    android:background="@color/transparent">
 
-    <FrameLayout
-        android:id="@+id/voip_avatar_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/fullPhoneNumberView1"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="90dp"
-        android:contentDescription="ProfileImage"
-        android:background="@drawable/voip_avatar_circle" >
+    <RelativeLayout
+        android:id="@+id/full_voip_inner_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_black_incall"
+        android:visibility="visible" >
 
+        <FrameLayout
+            android:id="@+id/full_small_dp_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="27dp"
+            android:layout_marginTop="5dp" >
+
+            <ImageView
+                android:id="@+id/full_small_dp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:contentDescription="Profile Image"
+                android:src="@drawable/voip_test_dp"
+                android:visibility="invisible" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/voip_avatar_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/fullPhoneNumberView1"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="90dp"
+            android:background="@drawable/voip_avatar_circle"
+            android:contentDescription="ProfileImage" >
+
+            <ImageView
+                android:id="@+id/fullvoipContactPicture"
+                android:layout_width="125dp"
+                android:layout_height="125dp"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center"
+                android:contentDescription="Profile Image"
+                android:src="@drawable/voip_test_dp" />
+        </FrameLayout>
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/fullPhoneNumberView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:text="INCOMING CALL"
+            android:textColor="@color/white" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/fullCallerId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/fullPhoneNumberView1"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="0dp"
+            android:text="Samantha"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white"
+            android:textSize="32dp" />
 
         <ImageView
-            android:id="@+id/fullvoipContactPicture"
-            android:layout_width="125dp"
-            android:layout_height="125dp"
-            android:layout_gravity="center"
-            android:layout_centerVertical="true"
-            android:contentDescription="Profile Image"
-            android:src="@drawable/voip_test_dp" />
-    </FrameLayout>
+            android:id="@+id/fullacceptButton"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="49dp"
+            android:layout_marginRight="34dp"
+            android:background="@drawable/greenarrow"
+            android:maxHeight="10dp"
+            android:maxWidth="10dp"
+            android:scaleType="centerInside" />
 
-    <com.bsb.hike.view.CustomFontTextView
-        android:id="@+id/fullPhoneNumberView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
-        android:text="INCOMING CALL"
-        android:textColor="@color/white" />
+        <ImageView
+            android:id="@+id/fulldeclineButton"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="49dp"
+            android:layout_marginLeft="34dp"
+            android:background="@drawable/redarrow"
+            android:scaleType="centerInside" />
 
-    <com.bsb.hike.view.CustomFontTextView
-        android:id="@+id/fullCallerId"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/fullPhoneNumberView1"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="0dp"
-        android:text="Samantha"
-        android:textSize="32dp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/white" />
+        <FrameLayout
+            android:id="@+id/voip_slider_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="27dp"
+            android:contentDescription="SliderImage" >
 
-    <ImageView
-        android:id="@+id/fullacceptButton"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="49dp"
-        android:layout_marginRight="34dp"
-        android:background="@drawable/greenarrow"
-        android:maxHeight="10dp"
-        android:maxWidth="10dp"
-        android:scaleType="centerInside" />
+            <ImageView
+                android:id="@+id/fullcallSlider"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/slider_oval"
+                android:src="@drawable/callicon" />
+        </FrameLayout>
 
-    <ImageView
-        android:id="@+id/fulldeclineButton"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginBottom="49dp"
-        android:layout_marginLeft="34dp"
-        android:background="@drawable/redarrow"
-        android:scaleType="centerInside" />
-    
+        <FrameLayout
+            android:id="@+id/fullSpeakerButtonFrame"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="37dp"
+            android:layout_marginLeft="40dp"
+            android:layout_toRightOf="@+id/voip_slider_container" >
 
-<FrameLayout
-        android:id="@+id/voip_slider_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="27dp"
-        android:contentDescription="SliderImage" >
-    <ImageView
-        android:id="@+id/fullcallSlider"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"        
-        android:src="@drawable/callicon" 
-        android:background="@drawable/slider_oval"/>
-</FrameLayout>
+            <ImageView
+                android:id="@+id/fullSpeakerButton"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="left|center_vertical"
+                android:scaleType="centerInside"
+                android:src="@drawable/speaker_on"
+                android:visibility="invisible" />
 
-<ImageView
-    android:id="@+id/fullSpeakerButton"
-    android:layout_width="20dp"
-    android:layout_height="20dp"
-    android:layout_alignParentBottom="true"
-    android:layout_marginBottom="47dp"
-    android:layout_marginLeft="45dp"
-    android:layout_toRightOf="@+id/voip_slider_container"
-    android:scaleType="centerInside"
-    android:src="@drawable/speaker_off"
-    android:visibility="invisible" />
+            <ImageView
+                android:id="@+id/fullSpeakerSound"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:scaleType="centerInside"
+                android:src="@drawable/speaker_sound"
+                android:visibility="invisible" />
+        </FrameLayout>
 
-<ImageView
-    android:id="@+id/fullMicButton"
-    android:layout_width="20dp"
-    android:layout_height="20dp"
-    android:layout_alignParentBottom="true"
-    android:layout_marginBottom="47dp"
-    android:layout_marginRight="45dp"
-    android:layout_toLeftOf="@+id/voip_slider_container"
-    android:src="@drawable/voip_mute_off" 
-    android:visibility="invisible"/>
+        <FrameLayout
+            android:id="@+id/fullMicButtonFrame"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="37dp"
+            android:layout_marginRight="35dp"
+            android:layout_toLeftOf="@+id/voip_slider_container" >
 
-<com.bsb.hike.view.CustomFontTextView
-    android:id="@+id/fullCallTimer"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignTop="@+id/fullCallerId"
-    android:layout_centerHorizontal="true"
-    android:layout_marginTop="15dp"
-    android:text="CALL DURATION GOES HERE"
-    android:visibility="invisible"
-    android:textColor="@color/white" />
+            <ImageView
+                android:id="@+id/fullMicButton"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/voip_mute_off"
+                android:visibility="invisible" />
+        </FrameLayout>
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/fullCallTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/fullCallerId"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:text="CALL DURATION GOES HERE"
+            android:textColor="@color/white"
+            android:visibility="invisible" />
+    </RelativeLayout>
 
 </RelativeLayout>
