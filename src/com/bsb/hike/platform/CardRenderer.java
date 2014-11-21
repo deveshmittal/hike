@@ -335,7 +335,7 @@ public class CardRenderer implements View.OnLongClickListener {
     private void gameInstalledTextFiller(ViewHolder viewHolder) {
         if (viewHolder.viewHashMap.containsKey("T4")) {
             CustomFontTextView cardInstalledText = (CustomFontTextView) viewHolder.viewHashMap.get("T4");
-            cardInstalledText.setText("Get it on play store");
+            cardInstalledText.setText("INSTALL");
         }
     }
 

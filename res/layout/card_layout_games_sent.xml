@@ -30,7 +30,7 @@
             android:tag="@string/content_card_tag"
             android:layout_marginRight="@dimen/chat_bubble_edge_spacing"
             android:layout_marginTop="3dp"
-            android:background="@drawable/ic_bubble_white_sent"
+            android:background="@drawable/content_card_selector_sent"
             android:orientation="vertical"
              >
 
@@ -45,27 +45,27 @@
                 android:layout_height="match_parent"/>
 
 
-        <LinearLayout
+        <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_toLeftOf="@id/card_image"
                 android:layout_alignParentLeft="true"
                 android:paddingLeft="12dp"
                 android:paddingRight="12dp"
                 android:gravity="center_vertical"
-                android:layout_centerVertical="true"
                 android:id="@+id/text_container"
-                android:orientation="vertical"
                 android:layout_height="92dp"
                 >
+
+
+
 
             <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Dadi vs Jellies"
                     android:textStyle="bold"
                     android:tag="T1"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="#292929"
                     android:singleLine="true"
                     android:ellipsize="end"
@@ -75,13 +75,15 @@
                     android:id="@+id/payment_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="FREE"
+                    android:layout_marginLeft="5dp"
+                    android:layout_alignBottom="@id/title"
+                    android:layout_toRightOf="@id/title"
                     android:tag="T2"
+                    android:singleLine="true"
                     android:textColor="#92ce28"
                     android:textSize="11sp"
-                    android:singleLine="true"
-                    android:ellipsize="end"
                     />
+
 
 
 
@@ -91,28 +93,30 @@
                     android:layout_height="wrap_content"
                     android:textSize="13sp"
                     android:tag="T3"
+                    android:layout_below="@id/title"
                     android:textColor="#7a7c7d"
-                    android:text="Everyone's favourite Dadi"
                     android:layout_gravity="center_vertical"
                     android:singleLine="true"
                     android:ellipsize="end"
                     />
 
             <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/package_info"
                     android:layout_width="wrap_content"
-                    android:gravity="center_horizontal"
+                    android:gravity="center"
+                    android:padding="5dp"
                     android:layout_height="wrap_content"
-                    android:textColor="#adb1b4"
+                    android:textColor="#ffffff"
+                    android:background="@drawable/greenbtnhike"
                     android:tag="T4"
-                    android:textSize="10sp"
-                    android:text="Get it on play store"
+                    android:layout_marginTop="5dp"
+                    android:layout_below="@id/description"
+                    android:textSize="14sp"
                     android:enabled="false"
                     android:singleLine="true"
                     android:ellipsize="end"
                     />
 
-        </LinearLayout>
+        </RelativeLayout>
 
     </RelativeLayout>
 
