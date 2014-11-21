@@ -15,6 +15,8 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.view.CustomFontTextView;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -177,7 +179,7 @@ public class CardRenderer implements View.OnLongClickListener {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            cardCallToActions(actionComponents, viewHolder);
+            cardCallToActions(actionComponents, viewHolder, true, "");
             cardDataFiller(textComponents, mediaComponents, viewHolder);
 
         }
@@ -202,7 +204,7 @@ public class CardRenderer implements View.OnLongClickListener {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            cardCallToActions(actionComponents, viewHolder);
+            cardCallToActions(actionComponents, viewHolder, true, "");
             cardDataFiller(textComponents, mediaComponents, viewHolder);
 
         }
@@ -229,12 +231,13 @@ public class CardRenderer implements View.OnLongClickListener {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            cardCallToActions(actionComponents, viewHolder);
             cardDataFiller(textComponents, mediaComponents, viewHolder);
+            String channelSource = convMessage.platformMessageMetadata.channelSource;
             boolean isGamesAppInstalled = convMessage.platformMessageMetadata.isInstalled;
             if (!isGamesAppInstalled) {
                 gameInstalledTextFiller(viewHolder);
             }
+            cardCallToActions(actionComponents, viewHolder, isGamesAppInstalled, channelSource);
 
 
         }
@@ -259,7 +262,7 @@ public class CardRenderer implements View.OnLongClickListener {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            cardCallToActions(actionComponents, viewHolder);
+            cardCallToActions(actionComponents, viewHolder, true, "");
             cardDataFiller(textComponents, mediaComponents, viewHolder);
 
         }
@@ -267,24 +270,34 @@ public class CardRenderer implements View.OnLongClickListener {
         return view;
     }
 
-    private void cardCallToActions(ArrayList<CardComponent.ActionComponent> actionComponents, ViewHolder viewHolder) {
-        for (final CardComponent.ActionComponent actionComponent : actionComponents) {
-            String tag = actionComponent.getTag();
-            if (!TextUtils.isEmpty(tag)) {
 
-                View actionView =  viewHolder.viewHashMap.get(tag);
+
+    private void cardCallToActions(ArrayList<CardComponent.ActionComponent> actionComponents, ViewHolder viewHolder, final boolean isAppInstalled, final String channelSource) {
+        for (final CardComponent.ActionComponent actionComponent : actionComponents) {
+            final String tag = actionComponent.getTag();
+            if (!TextUtils.isEmpty(tag)) {
+                View actionView = viewHolder.viewHashMap.get(tag);
                 actionView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         try {
-                            CardController.callToAction(actionComponent.getAndroidIntent(), mContext);
+                            if (tag.equalsIgnoreCase("CARD") && !isAppInstalled) {
+                                JSONObject jsonObject = new JSONObject();
+                                jsonObject.put(HikePlatformConstants.INTENT_URI,"https://play.google.com/store/apps/details?id=" + channelSource);
+                                CardController.callToAction(jsonObject, mContext);
+                            } else {
+                                CardController.callToAction(actionComponent.getAndroidIntent(), mContext);
+                            }
                         } catch (URISyntaxException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
                 });
 
                 actionView.setOnLongClickListener(this);
+
             }
         }
     }

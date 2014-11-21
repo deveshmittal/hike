@@ -418,6 +418,7 @@ public class DbConversationListener implements Listener
                 HikeConversationsDatabase.getInstance().addConversations(listOfMessages, listOfContacts, true);
                 for (String msisdn:msisdns){
                     convMessage.setMsisdn(msisdn);
+                    mPubSub.publish(HikePubSub.HIKE_SDK_MESSAGE_SENT, convMessage);
                     mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
 
                 }
