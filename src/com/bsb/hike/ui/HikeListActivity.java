@@ -557,12 +557,11 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				{
 					Utils.sendUILogEvent(HikeConstants.LogEvent.SELECT_ALL_INVITE);
 				}
-
 				if(nuxInviteMode)
 				{
 					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_INVITE_SENT);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCH_OFF_NUX_MODE, null);
 				}
+				HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCH_OFF_NUX_MODE, null);
 
 				Toast.makeText(getApplicationContext(), selectedContacts.size() > 1 ? R.string.invites_sent : R.string.invite_sent, Toast.LENGTH_SHORT).show();
 				finish();
@@ -693,6 +692,11 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 						getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.COUNTRY_CODE, HikeConstants.INDIA_COUNTRY_CODE));
 				Logger.d(getClass().getSimpleName(), "Inviting " + msisdn);
 				Utils.sendInvite(msisdn, this);
+				if(nuxInviteMode)
+				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_INVITE_SENT);
+				}
+				HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCH_OFF_NUX_MODE, null);
 				Toast.makeText(this, R.string.invite_sent, Toast.LENGTH_SHORT).show();
 			}
 			finish();
