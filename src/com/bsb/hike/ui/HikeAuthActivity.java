@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -47,7 +48,7 @@ import com.bsb.hike.utils.Utils;
  * @author AtulM
  * 
  */
-public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
+public class HikeAuthActivity extends SherlockActivity
 {
 
 	/** The host name. */
@@ -374,7 +375,7 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 				else
 				{
 					// display a toast and request user to relog
-					Toast.makeText(getApplicationContext(), "Request failed. Please make sure you have access to the Internet.", Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), "Connection failed. Please try again.", Toast.LENGTH_LONG).show();
 				}
 
 			}
@@ -390,6 +391,11 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 					JSONObject responseData = responseJSON.getJSONObject("response");
 					if (responseData != null)
 					{
+						if (responseData.has("error"))
+						{
+							onFailed();
+							return;
+						}
 						String expiresIn = responseData.getString("expires_in");
 						String accessToken = responseData.getString("access_token");
 
@@ -402,13 +408,15 @@ public class HikeAuthActivity extends HikeAppStateBaseFragmentActivity
 					}
 					else
 					{
-						HikeAuthActivity.this.onFailed("Problem in auth process. Please check client id");
+						onFailed();
+						return;
 					}
 				}
 				catch (JSONException e)
 				{
 					e.printStackTrace();
-					HikeAuthActivity.this.onFailed("Problem in auth process. Please check client id");
+					onFailed();
+					return;
 				}
 			}
 		});
