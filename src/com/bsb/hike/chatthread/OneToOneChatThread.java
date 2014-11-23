@@ -43,7 +43,13 @@ public class OneToOneChatThread extends ChatThread {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Logger.i(TAG, "menu item click" + item.getItemId());
-		return chatThreadActionBar.onOptionsItemSelected(item) ? true :  super.onOptionsItemSelected(item);
+		switch (item.getItemId()) {
+		case R.id.chat_bg:
+			showThemePicker();
+			return true;
+		}
+		return chatThreadActionBar.onOptionsItemSelected(item) ? true : super
+				.onOptionsItemSelected(item);
 	}
 
 	private List<OverFlowMenuItem> getOverFlowItems() {
