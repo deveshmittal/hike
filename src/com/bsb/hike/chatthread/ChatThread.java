@@ -3,12 +3,13 @@ package com.bsb.hike.chatthread;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.R;
+import com.bsb.hike.chatthread.ThemePicker.ThemePickerListener;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -17,12 +18,14 @@ import com.bsb.hike.utils.Utils;
  * @generated
  */
 
-public class ChatThread implements OverflowItemClickListener,View.OnClickListener {
+public class ChatThread implements OverflowItemClickListener,View.OnClickListener, ThemePickerListener,BackPressListener {
 
 	protected ChatThreadActivity activity;
+	protected ThemePicker themePicker;
 
 	public ChatThread(ChatThreadActivity activity) {
 		this.activity = activity;
+		
 		init();
 	}
 
@@ -63,12 +66,18 @@ public class ChatThread implements OverflowItemClickListener,View.OnClickListene
 	}
 
 	public boolean onOptionsItemSelected(MenuItem item) {
+		
 		return false;
 	}
 
 	@Override
-	public void itemClicked(OverFlowMenuItem parameter) {
-
+	public void itemClicked(OverFlowMenuItem item) {
+		switch(item.uniqueness){
+		case R.string.clear_chat:
+			break;
+		case R.string.email_chat:
+			break;
+		}
 	}
 
 	protected String getString(int stringId) {
@@ -111,5 +120,39 @@ public class ChatThread implements OverflowItemClickListener,View.OnClickListene
 		}
 		
 	}
+	
+	protected void showThemePicker(){
+		if(themePicker == null){
+			themePicker = new ThemePicker(activity, this);
+		}
+		themePicker.showThemePicker(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 0, 0, activity.findViewById(R.id.cb_anchor), null);
+	}
+
+	@Override
+	public void themeClicked(ChatTheme theme) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void themeSelected(ChatTheme theme) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void themeCancelled() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean onBackPressed() {
+		if(themePicker!=null && themePicker.isShowing()){
+			return themePicker.onBackPressed();
+		}
+		return false;
+	}
+	
 
 }
