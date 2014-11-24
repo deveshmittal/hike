@@ -10,33 +10,35 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.sdk.HikeSDKResponseCode;
+import com.bsb.hike.service.HikeService;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.UtilAtomicAsyncTask;
 import com.bsb.hike.tasks.UtilAtomicAsyncTask.UtilAsyncTaskListener;
-import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSDKConstants;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -48,7 +50,7 @@ import com.bsb.hike.utils.Utils;
  * @author AtulM
  * 
  */
-public class HikeAuthActivity extends SherlockActivity
+public class HikeAuthActivity extends Activity
 {
 
 	/** The host name. */
@@ -104,7 +106,7 @@ public class HikeAuthActivity extends SherlockActivity
 		/*
 		 * Making the action bar transparent for custom theming.
 		 */
-		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+		// requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 
 		super.onCreate(savedInstanceState);
 
@@ -147,7 +149,7 @@ public class HikeAuthActivity extends SherlockActivity
 
 			setupActionBar();
 
-			bindContents();
+			bindContentsAndActions();
 
 			settingPref.saveData(HikeMessengerApp.PENDING_SDK_AUTH, false);
 
@@ -247,10 +249,35 @@ public class HikeAuthActivity extends SherlockActivity
 	/**
 	 * Bind data and actions.
 	 */
-	private void bindContents()
+	private void bindContentsAndActions()
 	{
+		Animation fadeIn = new AlphaAnimation(0, 1);
+		fadeIn.setInterpolator(new DecelerateInterpolator());
+		fadeIn.setDuration(1000);
+
+		findViewById(R.id.auth_splash_content).startAnimation(fadeIn);
+
 		try
 		{
+
+			new Handler().postDelayed(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					findViewById(R.id.auth_info).setVisibility(View.VISIBLE);
+				}
+			}, 2000);
+
+			new Handler().postDelayed(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					findViewById(R.id.auth_splash).setVisibility(View.GONE);
+				}
+			}, 2200);
+
 			// Set title
 			((TextView) findViewById(R.id.auth_title)).setText(String.format(getApplicationContext().getString(R.string.auth_title), mAppName));
 
@@ -292,14 +319,10 @@ public class HikeAuthActivity extends SherlockActivity
 				public void onClick(View v)
 				{
 					message.arg2 = HikeSDKResponseCode.STATUS_FAILED;
-					try
-					{
-						message.replyTo.send(message);
-					}
-					catch (RemoteException e)
-					{
-						e.printStackTrace();
-					}
+					HikeService.mHikeSDKRequestHandler.handleMessage(message);
+					// Logger.d(HikeAuthActivity.class.getCanonicalName(), "message" + message.toString() + " replyto: " + message.replyTo.toString());
+					// message.replyTo.send(message);
+					Logger.d(HikeAuthActivity.class.getCanonicalName(), "shutting auth activity successfully!");
 					HikeAuthActivity.this.finish();
 				}
 			});
@@ -317,11 +340,11 @@ public class HikeAuthActivity extends SherlockActivity
 	 */
 	private void setupActionBar()
 	{
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setHomeButtonEnabled(false);
-		actionBar.setLogo(R.drawable.home_screen_top_bar_logo);
-		actionBar.setDisplayHomeAsUpEnabled(false);
-		actionBar.setDisplayShowTitleEnabled(false);
+		// ActionBar actionBar = getSupportActionBar();
+		// actionBar.setHomeButtonEnabled(false);
+		// actionBar.setLogo(R.drawable.home_screen_top_bar_logo);
+		// actionBar.setDisplayHomeAsUpEnabled(false);
+		// actionBar.setDisplayShowTitleEnabled(false);
 	}
 
 	/**
@@ -526,6 +549,8 @@ public class HikeAuthActivity extends SherlockActivity
 	 */
 	public void onFailed(String argMessage)
 	{
+		Logger.d(HikeAuthActivity.class.getCanonicalName(), "onfailed is called");
+
 		if (message != null)
 		{
 			message.arg2 = HikeSDKResponseCode.STATUS_FAILED;
@@ -539,6 +564,7 @@ public class HikeAuthActivity extends SherlockActivity
 			try
 			{
 				message.replyTo.send(message);
+				Logger.d(HikeAuthActivity.class.getCanonicalName(), "shutting auth activity successfully!");
 			}
 			catch (RemoteException e)
 			{
@@ -628,6 +654,20 @@ public class HikeAuthActivity extends SherlockActivity
 		}
 
 		return true;
+	}
+
+	@Override
+	protected void onPause()
+	{
+		overridePendingTransition(0, 0);
+		super.onPause();
+	}
+
+	@Override
+	public void onBackPressed()
+	{
+		onFailed("Declined");
+		super.onBackPressed();
 	}
 
 }

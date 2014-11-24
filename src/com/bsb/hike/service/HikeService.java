@@ -179,7 +179,7 @@ public class HikeService extends Service
 
 	private StickerManager sm;
 
-	private HikeSDKRequestHandler mHikeSDKRequestHandler;
+	public static HikeSDKRequestHandler mHikeSDKRequestHandler;
 
 	private Messenger mSDKRequestMessenger;
 	

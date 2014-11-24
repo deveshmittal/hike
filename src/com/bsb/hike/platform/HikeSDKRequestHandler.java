@@ -30,6 +30,7 @@ import com.bsb.hike.sdk.HikeSDKResponseCode;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.utils.HikeSDKConstants;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -77,6 +78,14 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 	{
 		super.handleMessage(msg);
 
+		Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "Handle message: Verifying!");
+
+		if (msg.arg2 == HikeSDKResponseCode.STATUS_FAILED)
+		{
+			returnExceptionMessageToCaller(msg);
+			return;
+		}
+		
 		if (!HikeAuthActivity.verifyRequest(mContext, msg))
 		{
 			cachedMessage = Message.obtain(msg);
@@ -86,6 +95,9 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 			mContext.startActivity(hikeAuthIntent);
 			return;
 		}
+		Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "Handle message: Verified!");
+
+		Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "message.what== " + msg.what);
 
 		if (msg.what == HikeService.SDK_REQ_GET_LOGGED_USER_INFO)
 		{
@@ -145,6 +157,7 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 			{
 				returnExceptionMessageToCaller(msg);
 				e.printStackTrace();
+				return;
 			}
 
 			reqUserInfoBundle.putString(HikeSDKConstants.HIKE_REQ_DATA_ID, reqUserInfoResponseJSON.toString());
@@ -162,6 +175,7 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 			{
 				returnExceptionMessageToCaller(msg);
 				e.printStackTrace();
+				return;
 			}
 
 		}
@@ -285,6 +299,7 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 			{
 				returnExceptionMessageToCaller(msg);
 				e.printStackTrace();
+				return;
 			}
 
 			reqGetFriendsBundle.putString(HikeSDKConstants.HIKE_REQ_DATA_ID, responseJSON.toString());
@@ -302,6 +317,7 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 			{
 				returnExceptionMessageToCaller(msg);
 				e.printStackTrace();
+				return;
 			}
 
 		}
@@ -344,6 +360,7 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 			{
 				returnExceptionMessageToCaller(msg);
 				e.printStackTrace();
+				return;
 			}
 
 		}
@@ -367,7 +384,13 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 			{
 				returnExceptionMessageToCaller(msg);
 				e.printStackTrace();
+				return;
 			}
+		}
+		else
+		{
+			returnExceptionMessageToCaller(msg);
+			return;
 		}
 
 	}
@@ -414,6 +437,7 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 				{
 					returnExceptionMessageToCaller(cachedMessage);
 					cachedMessage = null;
+					return;
 				}
 			}
 		}
