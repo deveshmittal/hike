@@ -2,9 +2,7 @@ package com.bsb.hike.chatthread;
 
 import android.content.res.Resources;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -23,7 +21,7 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 
 public class ThemePicker extends PopUpLayout implements BackPressListener,
-		OnTouchListener, OnDismissListener {
+		OnDismissListener {
 	private static final String TAG = "themepicker";
 
 	public static interface ThemePickerListener {
