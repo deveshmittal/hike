@@ -25,14 +25,16 @@ public abstract class PopUpLayout {
 	}
 
 	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
+	 * It should return view which you want to show inside popup window, it will
+	 * be called every time you call showPopUpWindow
 	 */
 
 	public abstract View getView();
 
+	/**
+	 * do processing to inflate your view, it will be called again and again
+	 * whenever showPopUpWindow is called
+	 */
 	public abstract void initView();
 
 	/**
@@ -42,15 +44,16 @@ public abstract class PopUpLayout {
 	 * @ordered
 	 */
 
-	protected void showPopUpWindow(int width, int height, View viewToShow,
-			View anchor, Context context) {
-		showPopUpWindow(width, height, 0, 0, viewToShow, anchor, context);
+	protected void showPopUpWindow(int width, int height, View anchor,
+			Context context) {
+		showPopUpWindow(width, height, 0, 0, anchor, context);
 	}
 
 	protected void showPopUpWindow(int width, int height, int xoffset,
-			int yoffset, View viewToShow, View anchor, Context context) {
-		if(popup==null){
-		getPopUpWindow(width, height, viewToShow, context);
+			int yoffset, View anchor, Context context) {
+		initView();
+		if (popup == null) {
+			getPopUpWindow(width, height, getView(), context);
 		}
 		popup.showAsDropDown(anchor, xoffset, yoffset);
 	}
@@ -74,7 +77,7 @@ public abstract class PopUpLayout {
 	 */
 
 	public void updateDimension(int width, int height) {
-		if (popup != null && popup.isShowing()) {
+		if (isShowing()) {
 			popup.update(width, height);
 		}
 	}
