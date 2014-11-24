@@ -1,5 +1,6 @@
 package com.bsb.hike.chatthread;
 
+import android.content.Context;
 import android.view.View;
 
 
@@ -25,8 +26,8 @@ public class EmoticonLayout extends PopUpLayout
 	 * <!--  end-user-doc  -->
 	 * @generated
 	 */
-	public EmoticonLayout(){
-		super();
+	public EmoticonLayout(Context context){
+		super(context);
 	}
 
 	@Override

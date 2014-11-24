@@ -2,15 +2,17 @@ package com.bsb.hike.chatthread;
 
 import java.util.List;
 
-import com.bsb.hike.R;
-
 import android.content.Context;
+import android.text.method.HideReturnsTransformationMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.bsb.hike.R;
 
 public class OverFlowMenuLayout extends PopUpLayout {
 	private Context context;
@@ -20,29 +22,12 @@ public class OverFlowMenuLayout extends PopUpLayout {
 
 	public OverFlowMenuLayout(List<OverFlowMenuItem> overflowItems,
 			OverflowItemClickListener listener, Context context) {
+		super(context);
 		this.overflowItems = overflowItems;
 		this.listener = listener;
 		this.context = context;
 	}
 
-	public void showPopUpWindow(int width, int height, View anchor) {
-		showPopUpWindow(width, height, 0, 0, anchor);
-	}
-
-	public void showPopUpWindow(int width, int height, int xOffset,
-			int yOffset, View anchor) {
-		if (viewToShow == null) {
-			initView();
-		}
-		if (popup == null) {
-			getPopUpWindow(width, height, viewToShow, context);
-			popup.setBackgroundDrawable(context.getResources().getDrawable(
-					android.R.color.transparent));
-			popup.setOutsideTouchable(true);
-			popup.setFocusable(true);
-		}
-		popup.showAsDropDown(anchor, xOffset, yOffset);
-	}
 
 	@Override
 	public View getView() {
@@ -52,13 +37,15 @@ public class OverFlowMenuLayout extends PopUpLayout {
 	@Override
 	public void initView() {
 		// TODO : Copypasted code from chat thread, make separate layout file
+		if(viewToShow!=null){
+			return;
+		}
 		viewToShow = LayoutInflater.from(context).inflate(
 				R.layout.overflow_menu, null);
 		ListView overFlowListView = (ListView) viewToShow
 				.findViewById(R.id.overflow_menu_list);
 		overFlowListView.setAdapter(new ArrayAdapter<OverFlowMenuItem>(context,
 				0, 0, overflowItems) {
-
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				if (convertView == null) {

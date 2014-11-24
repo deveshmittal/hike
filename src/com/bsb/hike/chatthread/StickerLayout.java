@@ -1,5 +1,6 @@
 package com.bsb.hike.chatthread;
 
+import android.content.Context;
 import android.view.View;
 
 
@@ -25,8 +26,8 @@ public class StickerLayout extends PopUpLayout
 	 * <!--  end-user-doc  -->
 	 * @generated
 	 */
-	public StickerLayout(){
-		super();
+	public StickerLayout(Context context){
+		super(context);
 	}
 
 	@Override
