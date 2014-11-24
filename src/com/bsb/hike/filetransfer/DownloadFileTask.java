@@ -87,10 +87,13 @@ public class DownloadFileTask extends FileTransferBase
 			if(isCloudFrontURL && AccountUtils.ssl)
 				mUrl = new URL("https", mUrl.getHost(), mUrl.getPort(), mUrl.getFile());
 
+			this.analyticEvents =  FTAnalyticEvents.getAnalyticEvents(FileTransferManager.getInstance(context).getAnalyticFile(hikeFile.getFile(), msgId));
 			FileSavedState fst = FileTransferManager.getInstance(context).getDownloadFileState(mFile, msgId);
 			/* represents this file is either not started or unrecovered error has happened */
 			if (fst.getFTState().equals(FTState.NOT_STARTED) || fst.getFTState().equals(FTState.CANCELLED))
 			{
+				this.analyticEvents.mAttachementType = FTAnalyticEvents.DOWNLOAD_ATTACHEMENT;
+				this.analyticEvents.mNetwork = FileTransferManager.getInstance(context).getNetworkTypeString();
 				Logger.d(getClass().getSimpleName(), "File state : " + fst.getFTState());
 				raf = new RandomAccessFile(tempDownloadedFile, "rw");
 				// TransferredBytes should always be set. It might be need for calculating percentage
@@ -100,6 +103,7 @@ public class DownloadFileTask extends FileTransferBase
 			else if (fst.getFTState().equals(FTState.PAUSED) || fst.getFTState().equals(FTState.ERROR))
 			{
 				Logger.d(getClass().getSimpleName(), "File state : " + fst.getFTState());
+				this.analyticEvents.mRetryCount += 1;
 				raf = new RandomAccessFile(tempDownloadedFile, "rw");
 				// Restoring the bytes transferred(downloaded) previously.
 				setBytesTransferred((int) raf.length());
@@ -199,6 +203,7 @@ public class DownloadFileTask extends FileTransferBase
 					setChunkSize();
 
 					byte data[] = new byte[chunkSize];
+					analyticEvents.saveAnalyticEvent(FileTransferManager.getInstance(context).getAnalyticFile(mFile, msgId));
 					// while ((numRead = in.read(data, 0, chunkSize)) != -1)
 					int numRead = 0;
 					_state = FTState.IN_PROGRESS;
@@ -319,6 +324,7 @@ public class DownloadFileTask extends FileTransferBase
 						_state = FTState.PAUSED;
 						Logger.d(getClass().getSimpleName(), "FT PAUSED");
 						saveFileState(null);
+						analyticEvents.saveAnalyticEvent(FileTransferManager.getInstance(context).getAnalyticFile(mFile, msgId));
 						retry = false;
 						break;
 					default:

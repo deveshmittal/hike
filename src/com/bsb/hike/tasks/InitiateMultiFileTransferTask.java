@@ -25,12 +25,15 @@ public class InitiateMultiFileTransferTask extends AsyncTask<Void, Void, Void>
 
 	private boolean onHike;
 
-	public InitiateMultiFileTransferTask(Context context, ArrayList<Pair<String, String>> fileDetails, String msisdn, boolean onHike)
+	private int attachementType;
+
+	public InitiateMultiFileTransferTask(Context context, ArrayList<Pair<String, String>> fileDetails, String msisdn, boolean onHike, int attachementType)
 	{
 		this.context = context.getApplicationContext();
 		this.fileDetails = fileDetails;
 		this.msisdn = msisdn;
 		this.onHike = onHike;
+		this.attachementType = attachementType;
 	}
 
 	public String getMsisdn()
@@ -69,7 +72,7 @@ public class InitiateMultiFileTransferTask extends AsyncTask<Void, Void, Void>
 			{
 				return;
 			}
-			FileTransferManager.getInstance(context).uploadFile(msisdn, file, null, fileType, hikeFileType, false, false, onHike, -1);
+			FileTransferManager.getInstance(context).uploadFile(msisdn, file, null, fileType, hikeFileType, false, false, onHike, -1, attachementType);
 		}
 	}
 }

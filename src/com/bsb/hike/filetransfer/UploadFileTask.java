@@ -109,9 +109,11 @@ public class UploadFileTask extends FileTransferBase
 	private ArrayList<ConvMessage> messageList;
 	
 	private boolean isMultiMsg;
+	
+	private int mAttachementType;
 
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile,
-			String fileKey, String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
+			String fileKey, String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration, int attachement)
 	{
 		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType, token, uId);
 		this.msisdn = msisdn;
@@ -123,11 +125,12 @@ public class UploadFileTask extends FileTransferBase
 		this.isRecipientOnhike = isRecipientOnHike;
 		this.fileKey = fileKey;
 		_state = FTState.INITIALIZED;
+		this.mAttachementType = attachement;
 		createConvMessage();
 	}
 	
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, ArrayList<ContactInfo> contactList, File sourceFile,
-			String fileKey, String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration)
+			String fileKey, String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration, int attachement)
 	{
 		super(handler, fileTaskMap, ctx, sourceFile, -1, hikeFileType, token, uId);
 		this.contactList = contactList;
@@ -140,6 +143,7 @@ public class UploadFileTask extends FileTransferBase
 		this.isRecipientOnhike = isRecipientOnHike;
 		this.fileKey = fileKey;
 		_state = FTState.INITIALIZED;
+		this.mAttachementType = attachement;
 		createConvMessage();
 	}
 
@@ -170,7 +174,7 @@ public class UploadFileTask extends FileTransferBase
 	}
 
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, Uri picasaUri,
-			HikeFileType hikeFileType, String msisdn, boolean isRecipientOnHike)
+			HikeFileType hikeFileType, String msisdn, boolean isRecipientOnHike, int attachement)
 	{
 		super(handler, fileTaskMap, ctx, null, -1, null, token, uId);
 		this.picasaUri = picasaUri;
@@ -178,6 +182,7 @@ public class UploadFileTask extends FileTransferBase
 		this.msisdn = msisdn;
 		this.isRecipientOnhike = isRecipientOnHike;
 		_state = FTState.INITIALIZED;
+		this.mAttachementType = attachement;
 		createConvMessage();
 	}
 
@@ -491,7 +496,10 @@ public class UploadFileTask extends FileTransferBase
 		fileType = hikeFile.getFileTypeString();
 		hikeFileType = hikeFile.getHikeFileType();
 
-		stateFile = getStateFile((ConvMessage) userContext);
+		ConvMessage msg = (ConvMessage) userContext;
+		stateFile = getStateFile(msg);
+		File lofFile = FileTransferManager.getInstance(context).getAnalyticFile(msg.getMetadata().getHikeFiles().get(0).getFile(), msg.getMsgID());
+		this.analyticEvents =  FTAnalyticEvents.getAnalyticEvents(lofFile);
 		Logger.d(getClass().getSimpleName(), "Upload state bin file :: " + fileName + ".bin." + ((ConvMessage) userContext).getMsgID());
 	}
 
@@ -706,6 +714,9 @@ public class UploadFileTask extends FileTransferBase
 			// here as we are starting new upload, we have to create the new session id
 			X_SESSION_ID = UUID.randomUUID().toString();
 			Logger.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
+			this.analyticEvents.mAttachementType = this.mAttachementType;
+			this.analyticEvents.mNetwork = FileTransferManager.getInstance(context).getNetworkTypeString();
+
 		}
 		else if (fst.getFTState().equals(FTState.PAUSED) || fst.getFTState().equals(FTState.ERROR))
 		{
@@ -732,6 +743,7 @@ public class UploadFileTask extends FileTransferBase
 				mStart = 0;
 			}
 			Logger.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
+			this.analyticEvents.mRetryCount += 1;
 		}
 		_state = FTState.IN_PROGRESS;
 		LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
@@ -773,6 +785,7 @@ public class UploadFileTask extends FileTransferBase
 		end--;
 
 		byte[] fileBytes = setupFileBytes(boundaryMesssage, boundary, chunkSize);
+		this.analyticEvents.saveAnalyticEvent(FileTransferManager.getInstance(context).getAnalyticFile(sourceFile, msgId));
 
 		while (end < length && responseJson == null)
 		{
@@ -892,6 +905,7 @@ public class UploadFileTask extends FileTransferBase
 				saveFileState(X_SESSION_ID,responseJson);
 			else
 				saveFileState(X_SESSION_ID);
+			this.analyticEvents.saveAnalyticEvent(FileTransferManager.getInstance(context).getAnalyticFile(sourceFile, msgId));
 			break;
 		default:
 			break;
