@@ -14,7 +14,9 @@
         <include layout="@layout/pin_signup_item" />
 
         <include layout="@layout/name_signup_item" />
-
+        
+        <include layout="@layout/gender_signup_item" />
+        
         <include layout="@layout/scanning_contacts_item" />
 
         <include layout="@layout/backup_found" />

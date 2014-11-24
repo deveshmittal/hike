@@ -45,9 +45,10 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	private IconLoader iconloader;
 
 	private boolean fetchGroups;
-	
 
 	private boolean fetchRecents;
+	
+	private boolean fetchRecentlyJoined;
 
 	private String existingGroupId;
 
@@ -61,8 +62,9 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 	private boolean lastSeenPref;
 	
+	private boolean showDefaultEmptyList;
 
-	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, boolean fetchRecents, String existingGroupId, String sendingMsisdn, FriendsListFetchedCallback friendsListFetchedCallback)
+	public ComposeChatAdapter(Context context, ListView listView, boolean fetchGroups, boolean fetchRecents, boolean showDefaultEmptyList, boolean fetchRecentlyJoined, String existingGroupId, String sendingMsisdn, FriendsListFetchedCallback friendsListFetchedCallback)
 	{
 		super(context, listView, friendsListFetchedCallback, ContactInfo.lastSeenTimeComparatorWithoutFav);
 		selectedPeople = new HashMap<String, ContactInfo>();
@@ -76,9 +78,13 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		this.sendingMsisdn = sendingMsisdn;
 		this.fetchGroups = fetchGroups;
 		this.fetchRecents = fetchRecents;
+		this.showDefaultEmptyList = showDefaultEmptyList;
+		this.fetchRecentlyJoined = fetchRecentlyJoined;
+		
 		groupsList = new ArrayList<ContactInfo>(0);
 		groupsStealthList = new ArrayList<ContactInfo>(0);
 		filteredGroupsList = new ArrayList<ContactInfo>(0);
+		
 
 		recentContactsList = new ArrayList<ContactInfo>(0);
 		recentStealthContactsList = new ArrayList<ContactInfo>(0);
@@ -100,9 +106,9 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	public void executeFetchTask()
 	{
 		setLoadingView();
-		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, friendsStealthList, hikeStealthContactsList,
-				smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, filteredGroupsList, filteredRecentsList,
-				existingParticipants, sendingMsisdn, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true, false, fetchRecents);
+		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList,recentlyJoinedHikeContactsList, friendsStealthList, hikeStealthContactsList,
+				smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, filteredGroupsList, filteredRecentsList,filteredRecentlyJoinedHikeContactsList,
+				existingParticipants, sendingMsisdn, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true, false, fetchRecents , fetchRecentlyJoined, showDefaultEmptyList);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
@@ -369,6 +375,20 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	}
 
 	@Override
+	protected List<List<ContactInfo>> makeOriginalList()
+	{
+		if(showDefaultEmptyList)
+		{
+			List<List<ContactInfo>> resultList = new ArrayList<List<ContactInfo>>();
+			return resultList;
+		}
+		else
+		{
+			return super.makeOriginalList();
+		}
+	}
+
+	@Override
 	public void makeCompleteList(boolean filtered)
 	{
 		makeCompleteList(filtered, false);
@@ -389,6 +409,16 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 			return;
 		}
 
+		if(fetchRecentlyJoined && !recentlyJoinedHikeContactsList.isEmpty())
+		{
+			ContactInfo recentsSection = new ContactInfo(SECTION_ID, Integer.toString(filteredRecentlyJoinedHikeContactsList.size()), context.getString(R.string.recently_joined_hike), RECENTLY_JOINED);
+			if (filteredRecentlyJoinedHikeContactsList.size() > 0)
+			{
+				completeList.add(recentsSection);
+				completeList.addAll(filteredRecentlyJoinedHikeContactsList);
+			}
+		}
+		
 		// hack for header, as we are using pinnedSectionListView
 		if(fetchRecents && !recentContactsList.isEmpty())
 		{
@@ -498,11 +528,11 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	}
 
 	@Override
-	protected void makeFilteredList(CharSequence constraint, List<ContactInfo> friendList, List<ContactInfo> hikeContactList, List<ContactInfo> smsList)
+	protected void makeFilteredList(CharSequence constraint, List<List<ContactInfo>> resultList)
 	{
 		// TODO Auto-generated method stub
 
-		super.makeFilteredList(constraint, friendList, hikeContactList, smsList);
+		super.makeFilteredList(constraint, resultList);
 		// to add new section and number for user typed number
 		String text = constraint.toString();
 		if (isIntegers(text))
@@ -605,7 +635,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 	{
 		if(select)
 		{
-			selectAllFromList(friendsList,recentContactsList,hikeContactsList,groupsList);
+			selectAllFromList(friendsList,recentContactsList,recentlyJoinedHikeContactsList,hikeContactsList,groupsList);
 			
 		}
 		else

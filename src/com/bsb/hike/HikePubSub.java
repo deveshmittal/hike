@@ -383,6 +383,12 @@ public class HikePubSub implements Runnable
 	public static final String UNREAD_PIN_COUNT_RESET = "pinCountReset";
 
 	public static final String STICKER_CATEGORY_MAP_UPDATED = "stickerCategoryMapUpdated";
+	
+	public static final String STICKER_FTUE_TIP = "stickerFtueTip";
+
+	public static final String SWITCH_OFF_NUX_MODE = "switchOffNuxMode";
+	
+	public static final String USER_JOINED_NOTIFICATION = "userJoinedNotification";
 
 	private final Thread mThread;
 

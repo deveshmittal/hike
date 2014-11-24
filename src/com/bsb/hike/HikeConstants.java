@@ -97,6 +97,8 @@ public class HikeConstants
 
 	public static final String DND_NUMBERS = "dndnumbers";
 
+	public static final String SOURCE = "source";
+
 	public static final String FILES = "files";
 
 	public static final String CONTENT_TYPE = "ct";
@@ -467,6 +469,12 @@ public class HikeConstants
 
 	public static final String BACKUP_PREF = "backupAccount";
 
+    public static final String NUX_BOT = "+hike5+";
+
+    public static final String NUX = "nux";
+
+    public static final String STICKER_NUX = "stkNux";
+
 	public static final String UNLINK_PREF = "unlinkAccount";
 
 	public static final String DELETE_PREF = "deleteAccount";
@@ -506,13 +514,25 @@ public class HikeConstants
 	public static final String OPERATOR_SMS_ALERT_CHECKED = "opSmsAlertChecked";
 
 	public static final String SINGLE_INVITE_SMS_ALERT_CHECKED = "singleSmsAlertChecked";
-
+	
+	public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
+	
+	public static final String SHOW_NUX_SCREEN = "show_nux_screen";
+		
+	public static final String NUX_STICKER_DETAILS = "nuxStickerDetails";
+	
 	public static final String FTUE_ADD_SMS_ALERT_CHECKED = "ftueSmsAlertChecked";
 
 	public static final String IS_GAMES_ITEM_CLICKED = "isGamesItemClicked";
 
 	public static final String IS_REWARDS_ITEM_CLICKED = "isRewardsItemClicked";
+	
+	public static final String IS_HOME_OVERFLOW_CLICKED = "isHomeOverflowClicked";
 
+	public static final String SHOW_RECENTLY_JOINED_DOT = "showRecentlyJoinedDot";
+
+	public static final String SHOW_TIMELINE_RED_DOT = "showTimelineRedDot";
+	
 	public static final String IS_OF_ICON_CLICKED = "isOfIconClicked";
 
 	public static final String DONE = "Done";
@@ -659,7 +679,9 @@ public class HikeConstants
 	public static final String MAIL = "support@hike.in";
 	
 	public static final int MAX_RECENTS_TO_SHOW = 10;
-
+	
+	public static final int MAX_RECENTLY_JOINED_HIKE_TO_SHOW = 5;
+	
 	// Had to add this constant since its only available in the android API for
 	// Honeycomb and higher.
 	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
@@ -945,6 +967,16 @@ public class HikeConstants
 	
 	public static final String SUCCESSFUL_SELECTIONS = "s";
 	
+	public static final String DRAWABLE = "drawable";
+	
+	public static final String NUX_STICKERS = "stickers";
+	
+	public static final String SHOW_NUX_INVITE_MODE = "showNuxInviteMode";
+
+	public static final String NUX_HOME_INVITE_FOOTER = "nuxHomeInviteFooter";
+
+	public static final String NUX_INVITE_FORWARD = "nuxInviteForward";
+
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
@@ -1288,6 +1320,12 @@ public class HikeConstants
 		public static final String DELETED_MESSAGE_TYPE = "deletedMessageType";
 
 		public static final String CURRENT_POSITION = "currentPosition";
+		
+		public static final String FTUE_FORWARD = "ftueForward";
+		
+		public static final String FTUE_STICKER_ID_LIST = "ftueStickerIdsList";
+		
+		public static final String FTUE_STICKER_CATEGORY_LIST = "ftueStickerCategoryList";
 	}
 
 	public static final class LogEvent
@@ -1642,6 +1680,19 @@ public class HikeConstants
 		public static final String ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED = "atomicAppHikeExtraClick";
 
 		public static final String ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED = "atomicAppHikeRewardsClick";
+
+		/*
+		 * NUX Events 
+		 */
+		public static final String NUX_STICKER_CLICKED = "nuxStckrClk";
+
+		public static final String NUX_STICKER_FORWARD = "nuxStckrFwd";
+
+		public static final String NUX_INVITE_BUTTON_CLICKED = "nuxInvteBtnClk";
+
+		public static final String NUX_INVITE_SENT = "nuxInvteSent";
+
+		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
 	}
 
 	public static final class MqttMessageTypes
@@ -1757,6 +1808,8 @@ public class HikeConstants
 		public static final String REMOVE_PIC = "icr";
 		
 		public static final String MULTIPLE_FORWARD = "mm";
+		
+		public static final String TIP = "tip";
 
 	}
 
@@ -1808,12 +1861,6 @@ public class HikeConstants
 	}
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1, R.string.native_sms_invite_2, R.string.native_sms_invite_3, R.string.native_sms_invite_4, R.string.native_sms_invite_5, R.string.native_sms_invite_6 };
-	
-	public static final int[] MALE_SELECTED_STRINGS = { R.string.male_selected_string_1, R.string.male_selected_string_2, R.string.male_selected_string_3,
-			R.string.male_selected_string_4, R.string.male_selected_string_5 };
-
-	public static final int[] FEMALE_SELECTED_STRINGS = { R.string.female_selected_string_1, R.string.female_selected_string_2, R.string.female_selected_string_3,
-			R.string.female_selected_string_4, R.string.female_selected_string_5 };
 
 	// TODO need to finalize this with AM
 	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;

@@ -2,6 +2,7 @@ package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -79,6 +80,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	public static final String CONTACT_PHONE_NUM = "--126";
 
 	public static final String RECENT_PHONE_NUM = "-128";
+	
+	public static final String RECENTLY_JOINED = "-129";
 
 	public enum ViewType
 	{
@@ -96,6 +99,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	protected List<ContactInfo> smsContactsList;
 	
 	protected List<ContactInfo> recentContactsList;
+	
+	protected List<ContactInfo> recentlyJoinedHikeContactsList;
 
 	protected List<ContactInfo> friendsStealthList;
 
@@ -104,13 +109,15 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	protected List<ContactInfo> smsStealthContactsList;
 
 	protected List<ContactInfo> recentStealthContactsList;
-
+	
 	protected List<ContactInfo> filteredFriendsList;
 
 	protected List<ContactInfo> filteredHikeContactsList;
 
 	protected List<ContactInfo> filteredSmsContactsList;
 
+	protected List<ContactInfo> filteredRecentlyJoinedHikeContactsList;
+	
 	protected List<ContactInfo> groupsList;
 
 	protected List<ContactInfo> groupsStealthList;
@@ -181,15 +188,16 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		friendsList = new ArrayList<ContactInfo>(0);
 		hikeContactsList = new ArrayList<ContactInfo>(0);
 		smsContactsList = new ArrayList<ContactInfo>(0);
+		recentlyJoinedHikeContactsList = new ArrayList<ContactInfo>(0);
 		
 		friendsStealthList = new ArrayList<ContactInfo>(0);
 		hikeStealthContactsList = new ArrayList<ContactInfo>(0);
 		smsStealthContactsList = new ArrayList<ContactInfo>(0);
-
+		
 		filteredFriendsList = new ArrayList<ContactInfo>(0);
 		filteredHikeContactsList = new ArrayList<ContactInfo>(0);
 		filteredSmsContactsList = new ArrayList<ContactInfo>(0);
-		
+		filteredRecentlyJoinedHikeContactsList = new ArrayList<ContactInfo>(0);
 		lastStatusMessagesMap = new HashMap<String, StatusMessage>();
 
 		listFetchedOnce = false;
@@ -198,8 +206,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 	public void executeFetchTask()
 	{
 		setLoadingView();
-		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, friendsStealthList, hikeStealthContactsList,
-				smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, false, true, false);
+		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList, recentlyJoinedHikeContactsList,friendsStealthList, hikeStealthContactsList,
+				smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, false, true, false, false, false);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
@@ -236,6 +244,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 				List<ContactInfo> filteredSmsContactsList = new ArrayList<ContactInfo>();
 				List<ContactInfo> filteredGroupList = new ArrayList<ContactInfo>();
 				List<ContactInfo> filteredRecentsList = new ArrayList<ContactInfo>();
+				List<ContactInfo> filteredRecentlyJoinedList = new ArrayList<ContactInfo>();
 
 				filterList(friendsList, filteredFriendsList, textToBeFiltered);
 				filterList(hikeContactsList, filteredHikeContactsList, textToBeFiltered);
@@ -251,12 +260,17 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 					filterList(recentContactsList, filteredRecentsList, textToBeFiltered);
 				}
 
+				if(recentlyJoinedHikeContactsList != null && !recentlyJoinedHikeContactsList.isEmpty())
+				{
+					filterList(recentlyJoinedHikeContactsList, filteredRecentlyJoinedList, textToBeFiltered);
+				}
 				List<List<ContactInfo>> resultList = new ArrayList<List<ContactInfo>>(3);
 				resultList.add(filteredFriendsList);
 				resultList.add(filteredHikeContactsList);
 				resultList.add(filteredSmsContactsList);
 				resultList.add(filteredGroupList);
 				resultList.add(filteredRecentsList);
+				resultList.add(filteredRecentlyJoinedList);
 
 				results.values = resultList;
 				isFiltered = true;
@@ -319,20 +333,13 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		{
 			List<List<ContactInfo>> resultList = (List<List<ContactInfo>>) results.values;
 
-			makeFilteredList(constraint, resultList.get(0), resultList.get(1), resultList.get(2));
+			makeFilteredList(constraint, resultList);
 
-			if (groupsList != null && !groupsList.isEmpty())
+			if(recentlyJoinedHikeContactsList != null && !recentlyJoinedHikeContactsList.isEmpty())
 			{
-				filteredGroupsList.clear();
-				filteredGroupsList.addAll(resultList.get(3));
+				filteredRecentlyJoinedHikeContactsList.clear();
+				filteredRecentlyJoinedHikeContactsList.addAll(resultList.get(5));
 			}
-			
-			if (recentContactsList != null && !recentContactsList.isEmpty())
-			{
-				filteredRecentsList.clear();
-				filteredRecentsList.addAll(resultList.get(4));
-			}
-
 			makeCompleteList(true);
 		}
 	}
@@ -345,21 +352,46 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		resultList.add(smsContactsList);
 		resultList.add(groupsList);
 		resultList.add(recentContactsList);
+		resultList.add(recentlyJoinedHikeContactsList);
 
 		return resultList;
 	}
 
-	protected void makeFilteredList(CharSequence constraint, List<ContactInfo> friendList, List<ContactInfo> hikeContactList, List<ContactInfo> smsList)
+	protected void makeFilteredList(CharSequence constraint, List<List<ContactInfo>> resultList)
 	{
+		int listsSize = resultList.size();
+
 		filteredFriendsList.clear();
-		filteredFriendsList.addAll(friendList);
+		if(listsSize > 0)
+		{
+			filteredFriendsList.addAll(resultList.get(0));
+		}
 
 		filteredHikeContactsList.clear();
-		filteredHikeContactsList.addAll(hikeContactList);
+		if(listsSize > 1)
+		{
+			filteredHikeContactsList.addAll(resultList.get(1));
+		}
 
 		filteredSmsContactsList.clear();
-		filteredSmsContactsList.addAll(smsList);
+		if(listsSize > 2)
+		{
+			filteredSmsContactsList.addAll(resultList.get(2));
+		}
 
+		if (groupsList != null && !groupsList.isEmpty())
+		{
+			filteredGroupsList.clear();
+			if(listsSize > 3)
+				filteredGroupsList.addAll(resultList.get(3));
+		}
+
+		if (recentContactsList != null && !recentContactsList.isEmpty())
+		{
+			filteredRecentsList.clear();
+			if(listsSize > 4)
+				filteredRecentsList.addAll(resultList.get(4));
+		}
 	}
 
 	public void makeCompleteList(boolean filtered)
@@ -1450,7 +1482,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener, Pinn
 		}
 	}
 
-	protected void setEmptyView()
+	public void setEmptyView()
 	{
 		if (emptyView != null)
 		{
