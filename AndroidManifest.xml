@@ -188,8 +188,7 @@
         </activity>
         <activity android:name="com.bsb.hike.ui.HikeAuthActivity" 
             android:configChanges="orientation"
-            android:noHistory="true"
-            android:excludeFromRecents="true"  >
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"  >
         </activity>
         <activity
             android:name="com.bsb.hike.ui.TwitterAuthActivity"
