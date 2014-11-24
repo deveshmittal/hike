@@ -1,8 +1,14 @@
 package com.bsb.hike.chatthread;
 
+import com.bsb.hike.utils.Logger;
+
 import android.content.Context;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
+import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.FrameLayout;
 import android.widget.PopupWindow;
 
 /**
@@ -11,7 +17,7 @@ import android.widget.PopupWindow;
  * @generated
  */
 
-public abstract class PopUpLayout {
+public abstract class PopUpLayout implements OnTouchListener {
 
 	protected PopupWindow popup;
 	protected Context context;
@@ -61,6 +67,25 @@ public abstract class PopUpLayout {
 	public void showPopUpWindowNoDismiss(int xoffset, int yoffset, View anchor) {
 		showPopUpWindow(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
 				xoffset, yoffset, anchor);
+
+		// This is a workaround for not to dismiss popup window if anywhere out
+		// side is touched, for layout below we have made our popup with
+		// MATCH_PARENT but for action bar, we have to do following
+		// it will give us call back in on touch with
+		// action_outside event, so we can return true to eat that event
+		// BUT Point to note here is : even though the pop up is not dismissed,
+		// view behind it will still get onclick event
+		FrameLayout viewParent = (FrameLayout) getView().getParent();
+		WindowManager.LayoutParams lp = (WindowManager.LayoutParams) viewParent
+				.getLayoutParams();
+		lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+
+		WindowManager windowManager = (WindowManager) context
+				.getSystemService(context.WINDOW_SERVICE);
+		windowManager.updateViewLayout(viewParent, lp);
+
+		getView().setTag("dummy");
+		popup.setTouchInterceptor(this);
 	}
 
 	/**
@@ -134,5 +159,10 @@ public abstract class PopUpLayout {
 		if (isShowing()) {
 			popup.dismiss();
 		}
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		return event.getAction() == MotionEvent.ACTION_OUTSIDE;
 	}
 }
