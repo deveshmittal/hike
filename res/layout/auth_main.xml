@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:background="@color/black_alpha_3" >
+    android:background="#88000000" >
 
     <LinearLayout
         android:id="@+id/auth_splash"
@@ -20,8 +20,7 @@
             android:layout_height="match_parent"
             android:background="@android:color/transparent"
             android:gravity="center"
-            android:orientation="vertical"
-             >
+            android:orientation="vertical">
 
             <ImageView
                 android:layout_width="50dp"

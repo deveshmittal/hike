@@ -8,6 +8,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.ConnectedAppsActivity;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HikePreferences;
@@ -151,5 +152,10 @@ public class IntentManager
 
 		intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 		return intent;
+	}
+
+	public static void openConnectedApps(Context appContext)
+	{
+		appContext.startActivity(new Intent(appContext, ConnectedAppsActivity.class));
 	}
 }

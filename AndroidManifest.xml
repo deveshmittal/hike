@@ -186,9 +186,14 @@
         </activity>
         <activity android:name="com.bsb.hike.ui.SettingsActivity" >
         </activity>
+        <activity android:name="com.bsb.hike.ui.ConnectedAppsActivity"
+            android:configChanges="orientation" >
+        </activity>
         <activity android:name="com.bsb.hike.ui.HikeAuthActivity" 
             android:configChanges="orientation"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"  >
+            android:noHistory="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"  >
         </activity>
         <activity
             android:name="com.bsb.hike.ui.TwitterAuthActivity"

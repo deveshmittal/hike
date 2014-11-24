@@ -82,6 +82,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		{
 			items.add(getString(R.string.sms));
 		}
+		items.add(getString(R.string.connected_apps));		
 		items.add(getString(R.string.manage_account));
 		items.add(getString(R.string.privacy));
 		items.add(getString(R.string.help));
@@ -92,6 +93,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		itemsSummary.add(getString(R.string.notifications_hintext));
 		itemsSummary.add(getString(R.string.media_settings_hinttext));
 		itemsSummary.add(getString(R.string.sms_setting_hinttext));
+		itemsSummary.add(getString(R.string.connected_apps_hinttext));
 		itemsSummary.add(getString(R.string.account_hintttext));
 		itemsSummary.add(getString(R.string.privacy_setting_hinttext));
 		itemsSummary.add(getString(R.string.help_hinttext));
@@ -101,6 +103,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		itemIcons.add(R.drawable.ic_notifications_settings);
 		itemIcons.add(R.drawable.ic_auto_download_media_settings);
 		itemIcons.add(R.drawable.ic_sms_settings);
+		itemIcons.add(R.drawable.ic_conn_apps);
 		itemIcons.add(R.drawable.ic_account_settings);
 		itemIcons.add(R.drawable.ic_privacy_settings);
 		itemIcons.add(R.drawable.ic_help_settings);
@@ -267,12 +270,15 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			IntentManager.openSettingSMS(this);
 			break;
 		case 4:
-			IntentManager.openSettingAccount(this);
+			IntentManager.openConnectedApps(this);
 			break;
 		case 5:
-			IntentManager.openSettingPrivacy(this);
+			IntentManager.openSettingAccount(this);
 			break;
 		case 6:
+			IntentManager.openSettingPrivacy(this);
+			break;
+		case 7:
 			IntentManager.openSettingHelp(this);
 			break;
 		}

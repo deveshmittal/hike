@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp" >
+
+    <ImageView
+        android:id="@+id/image_view_conn_app_pkg"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_alignParentLeft="true"
+        android:scaleType="fitXY"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_launcher" />
+
+    <Button
+        android:id="@+id/button_conn_app"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="@color/dark_grey_drop_shadow"
+        android:maxLines="1"
+        android:padding="5dp"
+        android:text="DISCONNECT"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:textStyle="normal" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/image_view_conn_app_pkg"
+        android:layout_toLeftOf="@+id/button_conn_app"
+        android:orientation="vertical" >
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/text_view_conn_app_title"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="bottom"
+            android:maxLines="1"
+            android:text="Some application"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            android:textStyle="italic" >
+        </com.bsb.hike.view.CustomFontTextView>
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/text_view_conn_app_since"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:text="Since 5th Jan, 2014"
+            android:textColor="@color/dark_grey_drop_shadow"
+            android:textSize="13sp"
+            android:textStyle="bold" >
+        </com.bsb.hike.view.CustomFontTextView>
+    </LinearLayout>
+
+</RelativeLayout>

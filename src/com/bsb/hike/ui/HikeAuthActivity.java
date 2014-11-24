@@ -89,7 +89,9 @@ public class HikeAuthActivity extends Activity
 
 	private static final String PATH_AUTHORIZE = "authorize";
 
-	private static final String AUTH_SHARED_PREF_NAME = "364i5j6b3oj4";
+	public static final String AUTH_SHARED_PREF_NAME = "364i5j6b3oj4";
+
+	public static final String AUTH_SHARED_PREF_PKG_KEY = "ilugasdgi2";
 
 	private static final String IS_SENT_FOR_SIGNUP_KEY = "IS_SENT_FOR_SIGNUP_KEY";
 
@@ -146,8 +148,6 @@ public class HikeAuthActivity extends Activity
 			profileImageLoader = new IconLoader(this, getResources().getDimensionPixelSize(R.dimen.auth_permission_icon));
 
 			retrieveContent();
-
-			setupActionBar();
 
 			bindContentsAndActions();
 
@@ -336,18 +336,6 @@ public class HikeAuthActivity extends Activity
 	}
 
 	/**
-	 * Setup action bar. Show only hi icon here.
-	 */
-	private void setupActionBar()
-	{
-		// ActionBar actionBar = getSupportActionBar();
-		// actionBar.setHomeButtonEnabled(false);
-		// actionBar.setLogo(R.drawable.home_screen_top_bar_logo);
-		// actionBar.setDisplayHomeAsUpEnabled(false);
-		// actionBar.setDisplayShowTitleEnabled(false);
-	}
-
-	/**
 	 * Request access token from hike api.
 	 */
 	public void requestAccess()
@@ -424,6 +412,10 @@ public class HikeAuthActivity extends Activity
 
 						prefs = HikeSharedPreferenceUtil.getInstance(getApplicationContext(), AUTH_SHARED_PREF_NAME);
 						prefs.saveData(mAppPackage, Integer.toString(accessToken.hashCode()));
+						long timestamp = System.currentTimeMillis();
+						prefs.saveData(AUTH_SHARED_PREF_PKG_KEY,
+								TextUtils.isEmpty(prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")) ? mAppPackage + ":" + timestamp : prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "") + ","
+										+ mAppPackage + ":" + timestamp);
 
 						HikeMessengerApp.getPubSub().publish(HikePubSub.AUTH_TOKEN_RECEIVED, accessToken);
 

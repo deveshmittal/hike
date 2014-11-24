@@ -1190,4 +1190,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="auth_needed_for_messaging">This is needed for instant messaging</string>
     <string name="auth_button_deny">Nope</string>
     <string name="auth_button_accept">Connect</string>
+    <string name="connected_apps">Connected apps</string>
+    <string name="connected_apps_hinttext">Details on applications connected with hike</string>
 </resources>
