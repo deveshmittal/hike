@@ -5,10 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -42,6 +40,7 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 	private ActionMode actionMode;
 	private ChatTheme currentSelected;
 	private ThemePickerListener listener;
+	private boolean listenerInvoked = false;
 
 	public ThemePicker(SherlockFragmentActivity sherlockFragmentActivity,
 			ThemePickerListener listener) {
@@ -157,7 +156,7 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 
 		@Override
 		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-			Logger.i(TAG, "on prepare action mode");
+			Logger.i(TAG, "on prepare actionmode");
 			View saveThemeBtn = mode.getCustomView().findViewById(
 					R.id.done_container);
 
@@ -174,11 +173,12 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 			actionMode = null;
 			dismiss();
 			// we are not getting click event of close button in action bar, so
-			// if action bar is closed because of click there, we fallback on
-			// currentSelected
-			// currentSelected becomes null if we click on done button in action bar
-			if (currentSelected != null) {
+			// if action bar is closed because of click there, we fallback
+			// onlistenerInvoked listenerInvoked becomes true if we click on
+			// done button in action bar
+			if (!listenerInvoked) {
 				listener.themeCancelled();
+				listenerInvoked = false;
 			}
 		}
 
@@ -236,7 +236,7 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 	public void onClick(View arg0) {
 		if (arg0.getId() == R.id.done_container) {
 			listener.themeSelected(currentSelected);
-			currentSelected = null;
+			listenerInvoked = true;
 			dismiss();
 		}
 	}
