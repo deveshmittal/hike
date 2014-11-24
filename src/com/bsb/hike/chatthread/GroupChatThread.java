@@ -69,12 +69,16 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener {
 		List<OverFlowMenuItem> list = new ArrayList<OverFlowMenuItem>();
 		list.add(new OverFlowMenuItem(getString(R.string.group_profile), 0, 0,
 				R.string.group_profile));
-		
+
 		for (OverFlowMenuItem item : super.getOverFlowMenuItems()) {
 			list.add(item);
 		}
-		list.add(new OverFlowMenuItem(isMuted() ? getString(R.string.unmute_group) : getString(R.string.mute_group), 0, 0, R.string.mute_group));
-		list.add(new OverFlowMenuItem(getString(R.string.chat_theme_small), 0, 0, R.string.chat_theme));
+		list.add(new OverFlowMenuItem(
+				isMuted() ? getString(R.string.unmute_group)
+						: getString(R.string.mute_group), 0, 0,
+				R.string.mute_group));
+		list.add(new OverFlowMenuItem(getString(R.string.chat_theme_small), 0,
+				0, R.string.chat_theme));
 		return list;
 	}
 
@@ -84,5 +88,13 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener {
 	}
 	private boolean isMuted(){
 		return false;
+	}
+
+	@Override
+	public void itemClicked(OverFlowMenuItem item) {
+		if(item.uniqueness == R.string.chat_theme){
+			showThemePicker();
+		}
+		super.itemClicked(item);
 	}
 }
