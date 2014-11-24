@@ -35,7 +35,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	private String dialedId;
 	private int notifId = 10000;
 	private NotificationManager mNotificationManager;
-	private Boolean rejectCall;
+	private boolean rejectCall;
 	public static VoIPServiceNew vService;
 	public static boolean serviceStarted = false;
 	private static boolean factoryStaticInitialized=false;
@@ -47,9 +47,8 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	private boolean run = true;
 	private PowerManager pm;
 	private PowerManager.WakeLock wl;
+	private boolean callNotified;
 
-//	android:background="@android:drawable/dialog_frame"
-	
 	public void onCreate() {
 	    super.onCreate();
 	    vService = this;
@@ -152,17 +151,22 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		  if (mNotificationManager != null){
 			  mNotificationManager.cancel(notifId);
 		  }
-		  Log.d("VOIPSERVICE","5");			
-//		  VoIPActivityNew.getVoIPActivityInstance().raiseEndCallToast();
-//		  VoIPActivityNew.getVoIPActivityInstance().finish();
+		  Log.d("VOIPSERVICE","5");
+
+		  if(!callNotified){
+			  try {
+					MqttMessagesManager.getInstance(getApplicationContext()).setVoipSystemMessage(client.createStateMessageJSON(), (callerId==null)?dialedId:callerId);
+			  } catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+			  }
+			  callNotified = true;
+		  }
+		  
+		  sendBroadcast(new Intent("FinishVoipActivities"));
+
 		  Log.d("VOIPSERVICE","6");
-		  HikeService.voipServiceRunning = false;
-		  try {
-			MqttMessagesManager.getInstance(getApplicationContext()).setVoipSystemMessage(client.createStateMessageJSON(), (callerId==null)?dialedId:callerId);
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		  HikeService.voipServiceRunning = false;		
 		  stopSelf();
 		  Log.d("VOIPSERVICE","7");
 
@@ -211,7 +215,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		  
 		  manufacturer = Build.MANUFACTURER;
 		  mContext = getApplicationContext();
-		  if(manufacturer.equalsIgnoreCase("samsung"))
+		  if(manufacturer.equalsIgnoreCase("samsung")||manufacturer.equalsIgnoreCase("karbonn"))
 			  ((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setMode(AudioManager.MODE_IN_COMMUNICATION);
 		  else
 			  ((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setMode(AudioManager.MODE_IN_CALL);
@@ -221,7 +225,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		  ((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setParameters("noise_suppression=off");
 		  ((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setMicrophoneMute(false);
 		  if(!factoryStaticInitialized)
-			  factoryStaticInitialized=PeerConnectionFactory.initializeAndroidGlobals(this);
+			  factoryStaticInitialized=PeerConnectionFactory.initializeAndroidGlobals(this, true, false, null);
 		  client = new WebRtcClient(this);
 		  Intent resultIntent = new Intent(this, com.bsb.hike.ui.VoIPActivityNew.class);
 		  if(intent.getExtras() != null){
@@ -308,7 +312,6 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		if (onSpeakers){
 			((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setSpeakerphoneOn(false);
 			onSpeakers = false;
-		} else {
 			((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setSpeakerphoneOn(true);
 			onSpeakers = true;
 		}
@@ -317,6 +320,12 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 	@Override
 	public void onRemoveRemoteStream(MediaStream lMS) {
 		// TODO Auto-generated method stub
+		
+	}
+
+	public void notOnWifi() {
+		Log.d("DialogBulderVoip", "Service");
+		VoIPActivityNew.getVoIPActivityInstance().calleeNotOnWifi();
 		
 	}
 

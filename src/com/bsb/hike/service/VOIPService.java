@@ -124,7 +124,7 @@ public class VOIPService extends Service implements com.bsb.hike.VOIP.WebRtcClie
 
     mSocketAddress = "http://54.179.186.147/";
     Log.d("DEBUG", "Before initializeAndroidGlobals()");
-    PeerConnectionFactory.initializeAndroidGlobals(this);
+    PeerConnectionFactory.initializeAndroidGlobals(this, true,false, null);
 //   Set phone to earpiece
    
 
@@ -382,5 +382,11 @@ public void declineCall()
 		  aud1.stop();
 		  aud1.release();
 	  }
+
+	@Override
+	public void notOnWifi() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

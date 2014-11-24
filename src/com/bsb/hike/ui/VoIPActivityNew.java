@@ -7,8 +7,12 @@ import org.webrtc.PeerConnection;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
@@ -34,8 +38,10 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
@@ -120,6 +126,14 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	protected AnimatorSet DPReposition;
 	private RelativeLayout innerLayout;
 	
+	private final BroadcastReceiver endCallReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+              finish();                                   
+        }
+	};
+	protected TextView preCallTimer;
+	
 	class CallLengthManager implements Runnable{
 
 		@Override
@@ -133,6 +147,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		    inCallTimer.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
 		    avatarContainer.clearAnimation();
 		    displayHandler.postDelayed(new CallLengthManager(), 500);
+		    DPReposition.end();
 			
 		}
 		
@@ -234,6 +249,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		vActivity = this;
+		registerReceiver(endCallReceiver, new IntentFilter("FinishVoipActivites"));
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		mPubSub.addListener(HikePubSub.VOIP_HANDSHAKE, this);
 		mPubSub.addListener(HikePubSub.VOIP_CALL_STATUS_CHANGED, this);
@@ -321,7 +337,6 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		avatarContainer = (FrameLayout)this.findViewById(R.id.voip_avatar_container);
 		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
 		avatarContainer.setAnimation(dpAnim);
-		dpAnim.start();
 		vActivity = this;
 		callSlider = (ImageView)this.findViewById(R.id.fullcallSlider);
 		callNo = (TextView)this.findViewById(R.id.fullCallerId);
@@ -360,7 +375,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			}
 			
 		});
-		inCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
+		preCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
+		innerLayout  = (RelativeLayout) this.findViewById(R.id.full_voip_inner_layout);
 		
 		//ADDING ANIMATIONS HERE
 		ViewTreeObserver vto = acceptCall.getViewTreeObserver();  
@@ -401,8 +417,78 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		        sliderListener = new SliderOnTouchListener();
 				sliderContainer.setOnTouchListener(sliderListener);
 				callSlider.getBackground().setAlpha((int) ( 0 ));
-				delY = callNo.getY()-inCallTimer.getY();
+				delY = callNo.getY()-preCallTimer.getY();
+				Animation fadeIn = AnimationUtils.loadAnimation(getBaseContext(), R.anim.call_fade_in);
+				if(!dpMoveStarted){
+					innerLayout.setAnimation(fadeIn);
+					yTranslator  = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, -1000, Animation.RELATIVE_TO_SELF, 0);
+					yTranslator.setInterpolator(new DecelerateInterpolator());
+					yTranslator.setDuration(1000);
+					yTranslator.setFillAfter(true);
+					yTranslator.setFillEnabled(true);
+					avatarContainer.setAnimation(yTranslator);
+					yTranslator.setAnimationListener(new AnimationListener() {
+						
+						@Override
+						public void onAnimationStart(Animation animation) {
+							// TODO Auto-generated method stub
+							
+						}
+						
+						@Override
+						public void onAnimationRepeat(Animation animation) {
+							// TODO Auto-generated method stub
+							
+						}
+						
+						@Override
+						public void onAnimationEnd(Animation animation) {
+							avatarContainer.clearAnimation();
+							avatarContainer.setAnimation(dpAnim);
+							dpAnim.start();
+							
+						}
+					});
+					yTranslator.start();
 				
+					fadeIn.setAnimationListener(new AnimationListener() {
+						
+						@Override
+						public void onAnimationStart(Animation animation) {
+							
+							
+						}
+						
+						@Override
+						public void onAnimationRepeat(Animation animation) {
+							// TODO Auto-generated method stub
+							
+						}
+						
+						@Override
+						public void onAnimationEnd(Animation animation) {
+							preCallTimer.setVisibility(View.VISIBLE);
+							callSlider.setVisibility(View.VISIBLE);
+							sliderContainer.setVisibility(View.VISIBLE);
+							callNo.setVisibility(View.VISIBLE);
+							Animation sliderFadeIn = AnimationUtils.loadAnimation(getBaseContext(), R.anim.call_fade_in);
+							callSlider.setAnimation(sliderFadeIn);
+							Animation textFadeIn = AnimationUtils.loadAnimation(getBaseContext(), R.anim.call_fade_in);
+							textFadeIn.setFillAfter(true);
+							textFadeIn.setFillEnabled(true);
+							sliderFadeIn.setFillAfter(true);
+							sliderFadeIn.setFillEnabled(true);
+							preCallTimer.setAnimation(textFadeIn);
+							callNo.setAnimation(textFadeIn);
+							sliderFadeIn.start();
+							textFadeIn.start();
+							
+							
+						}
+					});
+					fadeIn.start();
+					dpMoveStarted = true;
+				}
 		    }  
 		}); 
 		
@@ -422,7 +508,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		vService.startCall(i);
 		acceptCall = (ImageView)this.findViewById(R.id.fullacceptButton);
 		callNo = (TextView)this.findViewById(R.id.fullCallerId);
-		inCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
+		
 		miniAvatar = (FrameLayout)this.findViewById(R.id.full_small_dp_container);
 		avatarContainer = (FrameLayout)this.findViewById(R.id.voip_avatar_container);
 		displayPic = (ImageView)this.findViewById(R.id.fullvoipContactPicture);
@@ -434,6 +520,9 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			@Override
 			public void onGlobalLayout() {				
 //				vto.removeOnGlobalLayoutListener(this);
+				preCallTimer = (TextView)findViewById(R.id.fullPhoneNumberView1);
+				preCallTimer.setVisibility(View.INVISIBLE);
+				inCallTimer = (TextView)findViewById(R.id.fullCallTimer);
 				if (!translationStarted){
 					delY = callNo.getY()-inCallTimer.getY();
 					yTranslator  = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, delY);
@@ -441,14 +530,17 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 					yTranslator.setFillAfter(true);
 					yTranslator.setFillEnabled(true);
 					callNo.setAnimation(yTranslator);
+					preCallTimer = (TextView)findViewById(R.id.fullPhoneNumberView1);
+					preCallTimer.setVisibility(View.INVISIBLE);
 					yTranslator.start();
 					
 					translationStarted = true;
 				}
 				float x = miniAvatar.getX();
 				float y = miniAvatar.getY();
+				callSlider.setVisibility(View.VISIBLE);
+				sliderContainer.setVisibility(View.VISIBLE);
 				
-				//TODO:PUT ANIMATION HERE
 				if(!dpMoveStarted){
 					avatarContainer.setScaleX(0.28f);
 					avatarContainer.setScaleY(0.28f);
@@ -457,6 +549,23 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 					dpMoveStarted = true;
 					Animation fadeIn = AnimationUtils.loadAnimation(getBaseContext(), R.anim.call_fade_in);
 					innerLayout.setAnimation(fadeIn);
+					fadeIn.setAnimationListener(new AnimationListener() {
+						
+						@Override
+						public void onAnimationStart(Animation animation) {
+								
+						}
+						
+						@Override
+						public void onAnimationRepeat(Animation animation) {
+							
+						}
+						
+						@Override
+						public void onAnimationEnd(Animation animation) {
+														
+						}
+					});
 					fadeIn.start();
 					DPReposition = (AnimatorSet) AnimatorInflater.loadAnimator(getBaseContext(), R.animator.dp_translate_scale_anim);
 					DPReposition.setTarget(avatarContainer);
@@ -487,6 +596,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 //		vibrator.cancel();
 		acceptCall = (ImageView)this.findViewById(R.id.fullacceptButton);
 		acceptCall.setVisibility(View.INVISIBLE);
+		preCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
+		preCallTimer.setVisibility(View.INVISIBLE);
 		
 		declineCall = (ImageView)this.findViewById(R.id.fulldeclineButton);
 		declineCall.setVisibility(View.INVISIBLE);
@@ -502,24 +613,19 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		sliderContainer = (FrameLayout)this.findViewById(R.id.voip_slider_container);
 		animset.setTarget(sliderContainer);
 		animset.start();
-		inCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
-		inCallTimer.setText("CONNECTING...");
+
 		callNo = (TextView)this.findViewById(R.id.fullCallerId);
-		Log.d("empty", "    ");
-		Log.d("empty", "    ");
-		Log.d("empty", "    ");
-		Log.d("delY 1", ((Float)callNo.getY()).toString());
-		Log.d("delY 2", ((Float)inCallTimer.getY()).toString());
-		Log.d("delY 3", ((Float)delY).toString());
 		if(!translationStarted){
 			yTranslator  = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, -1*delY);
 			yTranslator.setDuration(500);
 			yTranslator.setFillAfter(true);
 			yTranslator.setFillEnabled(true);
+			preCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
+			preCallTimer.setAlpha(0.0f);
+			preCallTimer.setVisibility(View.INVISIBLE);
 			callNo.setAnimation(yTranslator);
 			yTranslator.start();
 		}
-		inCallTimer.setVisibility(View.INVISIBLE);
 		callNo.setText(mContactName);
 		avatarContainer = (FrameLayout)this.findViewById(R.id.voip_avatar_container);
 		inCallTimer = (TextView)this.findViewById(R.id.fullCallTimer);
@@ -608,6 +714,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		else{
 			avatarContainer.clearAnimation();
 			Log.d("Animation","Seriously?");
+			avatarContainer.clearAnimation();
 			dpAnim.cancel();
 			dpAnim.reset();
 			startTime = vService.client.startTime;
@@ -666,6 +773,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		mPubSub.removeListener(HikePubSub.VOIP_HANDSHAKE, this);
 		mPubSub.removeListener(HikePubSub.VOIP_CALL_STATUS_CHANGED, this);
 		mPubSub.removeListener(HikePubSub.VOIP_DURATION, this);
+		unregisterReceiver(endCallReceiver);
 		screenOn();
 		((AudioManager) getSystemService(Context.AUDIO_SERVICE)).setMode(AudioManager.MODE_NORMAL);
 //		screenOffLock.release();
@@ -723,6 +831,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	    // Register a listener for the sensor.
 	    super.onResume();
 //	    mSensorManager.registerListener(this, mProximity, SensorManager.SENSOR_DELAY_NORMAL);
+	    registerReceiver(endCallReceiver, new IntentFilter("FinishVoipActivities"));
 	  }
 
 	
@@ -791,5 +900,56 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			displayPic.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true));
 		}
 	}
+
+
+	public void calleeNotOnWifi() {
+		
+		Log.d("DialogBulderVoip", "activity");
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				new AlertDialog.Builder(VoIPActivityNew.getVoIPActivityInstance())
+			    .setTitle("Callee Not on Wifi")
+			    .setMessage("Your friend is not on Wifi. Would you like us to send a message to show up?")
+			    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+			        public void onClick(DialogInterface dialog, int which) { 
+			        	try {
+			        		JSONObject message = new JSONObject();
+			        		JSONObject data = new JSONObject();
+			        		
+			        		
+			        		
+			        		message.put(HikeConstants.TO, dialedId);
+			        		message.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE);
+			        		data.put(HikeConstants.MESSAGE_ID, 3745);
+			        		
+			        		data.put("hm", "WIFI PE AAJA!!!");
+			        		long time = (long) System.currentTimeMillis();
+							data.put(HikeConstants.TIMESTAMP, time);
+							message.put(HikeConstants.DATA,data);
+							HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
+			        		
+			        	} catch (JSONException e) {
+			        		e.printStackTrace();
+			        	}
+			        }
+			     })
+			    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+			        public void onClick(DialogInterface dialog, int which) { 
+			            // do nothing
+			        }
+			     })
+			    .setIcon(android.R.drawable.ic_dialog_alert)
+			     .show();
+				
+			}
+		});
+		
+		
+	}
+
+
+
 	
 }

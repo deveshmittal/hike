@@ -56,7 +56,8 @@
             android:layout_centerVertical="true"
             android:layout_marginTop="10dp"
             android:text="INCOMING CALL"
-            android:textColor="@color/white" />
+            android:textColor="@color/white" 
+            android:visibility="invisible"/>
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/fullCallerId"
@@ -68,7 +69,8 @@
             android:text="Samantha"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/white"
-            android:textSize="32dp" />
+            android:textSize="32dp"
+            android:visibility="invisible" />
 
         <ImageView
             android:id="@+id/fullacceptButton"
@@ -101,7 +103,8 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="27dp"
-            android:contentDescription="SliderImage" >
+            android:contentDescription="SliderImage"
+            android:visibility="invisible" >
 
             <ImageView
                 android:id="@+id/fullcallSlider"
@@ -110,7 +113,8 @@
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
                 android:background="@drawable/slider_oval"
-                android:src="@drawable/callicon" />
+                android:src="@drawable/callicon" 
+                android:visibility="invisible" />
         </FrameLayout>
 
         <FrameLayout

@@ -393,5 +393,11 @@ public void onRemoveRemoteStream(MediaStream lMS) {
 	
 }
 
+@Override
+public void notOnWifi() {
+	// TODO Auto-generated method stub
+	
+}
+
 
 } 

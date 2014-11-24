@@ -37,6 +37,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.VOIP.WebRtcClient;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
@@ -2190,6 +2191,34 @@ public class MqttMessagesManager
 			 * Send message to caller that receiver is not on wifi
 			 * Display notif/hm you missed a call
 			 */
+			try {
+//				String callerID = jsonObj.getString(HikeConstants.FROM);
+//				JSONObject notOnWifiJSON = new JSONObject();
+//				JSONObject metadata = new JSONObject();
+//				JSONObject data = new JSONObject();
+//				
+//				notOnWifiJSON.put(HikeConstants.TO, callerID);				
+//				notOnWifiJSON.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE);
+//				notOnWifiJSON.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.VOIP_HANDSHAKE);
+//				
+//				data.put("hm", "you shouldn't see it as call. catch aaryaman@hike.in");
+//				
+//				metadata.put("type", "notOnWifi");
+//				metadata.put("vpl", "");
+//				
+//				data.put("md", metadata);
+//				data.put("hm", "you shouldn't see it as call. catch aaryaman@hike.in");
+//				data.put(HikeConstants.MESSAGE_ID, 1865);
+//				long time = (long) System.currentTimeMillis();
+//				data.put(HikeConstants.TIMESTAMP, time);
+//				
+//				notOnWifiJSON.put(HikeConstants.DATA, data);
+				WebRtcClient.sendMessage(jsonObj.getString(HikeConstants.FROM), "notOnWifi", null);
+//				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, notOnWifiJSON);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		}
 	}

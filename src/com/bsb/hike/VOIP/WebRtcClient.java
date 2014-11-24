@@ -42,8 +42,8 @@ public class WebRtcClient {
 	private final static String TAG = WebRtcClient.class.getSimpleName();
 	private String storedId;
 	public HikePubSub mPubSub;
-	private Random random = new Random();
-	private int index = random.nextInt(10000);
+	private static Random random = new Random();
+	private static int index = random.nextInt(10000);
 	public boolean answerpressed = false;
 	private Boolean callReceived = false;
 	private Handler mHandler = new Handler();
@@ -90,6 +90,8 @@ public class WebRtcClient {
 		Boolean isConnected();
 
 		void onRemoveRemoteStream(MediaStream lMS);
+
+		void notOnWifi();
 	}
 
 	private interface Command {
@@ -165,8 +167,20 @@ public class WebRtcClient {
 			mListener.closeActivity();
 		}
 	}
+	
+	private class CalleeNotOnWifiCommand implements Command{
 
-	public void sendMessage(String to, String type, JSONObject payload)
+		@Override
+		public void execute(String peerId, JSONObject payload)
+				throws JSONException {
+			Log.d("DialogBulderVoip", "client1");
+			mListener.notOnWifi();
+			
+		}
+		
+	}
+
+	public static void sendMessage(String to, String type, JSONObject payload)
 			throws JSONException {
 		JSONObject message = new JSONObject();
 		JSONObject voipSubPayload = new JSONObject();
@@ -211,6 +225,7 @@ public class WebRtcClient {
 			commandMap.put("candidate", new AddIceCandidateCommand());
 			commandMap.put(HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE, new EndCallCommand());
 			commandMap.put(HikeConstants.MqttMessageTypes.VOIP_END_CALL, new EndCallCommand());
+			commandMap.put("notOnWifi", new CalleeNotOnWifiCommand());
 			
 		//	DONE: change HikePubSub.MESSAGE_SENT to correct PubSubHandler
 			mPubSub.addListener(HikePubSub.VOIP_HANDSHAKE, this);
@@ -239,7 +254,7 @@ public class WebRtcClient {
 				Log.d("HELLO", "7");
 				JSONObject voipSubPayload = null;
 				Log.d("HELLO", "8");
-				if (!((payload_type.equals("init") || (payload_type.equals(HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE))) )) {
+				if (!((payload_type.equalsIgnoreCase("notonwifi") || payload_type.equals("init") || (payload_type.equals(HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE))) )) {
 					voipSubPayload = voipPayload.getJSONObject("payload");
 					Log.d("HELLO", "9");
 				}
@@ -411,7 +426,7 @@ public class WebRtcClient {
 			Log.d("NewPeer", "lms=" + " pc=" );
 			try
 			{
-				if(!pc.addStream(lMS, mediaConstraints))
+				if(!pc.addStream(lMS))
 				{
 					Logger.d("NewPeer", "addstream to peer failed");
 				}
@@ -487,7 +502,7 @@ public class WebRtcClient {
 		Integer x = rand.nextInt();
 		lMS = factory.createLocalMediaStream("ARDAMS"+x);
 		Log.d("libjingle StreamName",lMS.label());
-		lMS.addTrack(factory.createAudioTrack("ARDAMS"+x+"a0"/*, factory.createAudioSource(new MediaConstraints())*/));
+		lMS.addTrack(factory.createAudioTrack("ARDAMS"+x+"a0", factory.createAudioSource(new MediaConstraints())));
 		Log.d("camera added", "cameraadded");
 
 		mListener.onLocalStream(lMS);
