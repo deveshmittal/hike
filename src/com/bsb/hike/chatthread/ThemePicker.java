@@ -40,41 +40,37 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 
 	public ThemePicker(SherlockFragmentActivity sherlockFragmentActivity,
 			ThemePickerListener listener) {
+		super(sherlockFragmentActivity.getApplicationContext());
 		this.sherlockFragmentActivity = sherlockFragmentActivity;
 		this.listener = listener;
 	}
 
-	public void showThemePicker(int width, int height, View anchor,
-			ChatTheme currentTheme) {
-
+	/**
+	 * This method calls {@link #showThemePicker(int, int, View, ChatTheme)}
+	 * with offset as 0
+	 */
+	public void showThemePicker(View anchor, ChatTheme currentTheme) {
+		showThemePicker(0, 0, anchor, currentTheme);
 	}
 
-	public void showThemePicker(int width, int height, int xoffset,
-			int yoffset, View anchor, ChatTheme currentTheme) {
+	/**
+	 * This method shows theme picker and changes action bar as per theme picker
+	 * requirement , internally it uses
+	 * {@link #showPopUpWindowNoDismiss(int, int, View)}
+	 * 
+	 * @param xoffset
+	 * @param yoffset
+	 * @param anchor
+	 * @param currentTheme
+	 */
+	public void showThemePicker(int xoffset, int yoffset, View anchor,
+			ChatTheme currentTheme) {
 		Logger.i(TAG, "show theme picker");
 		// do processing
 		if (actionMode == null) {
 			sherlockFragmentActivity.startActionMode(actionmodeCallback);
 		}
-		if (viewToDisplay == null) {
-			initView();
-		}
-		if (popup == null) {
-			getPopUpWindow(width, height, viewToDisplay,
-					sherlockFragmentActivity);
-			
-
-		}
-		Logger.i(TAG, "show theme picker " + popup);
-
-		popup.setWidth(width);
-		popup.setHeight(height);
-		popup.showAsDropDown(anchor, xoffset, yoffset);
-		popup.setFocusable(true);
-		popup.setTouchInterceptor(this);
-		popup.setBackgroundDrawable(sherlockFragmentActivity.getResources()
-				.getDrawable(android.R.color.transparent));
-		popup.setOnDismissListener(this);
+		showPopUpWindowNoDismiss(xoffset, yoffset, anchor);
 
 	}
 
@@ -83,8 +79,15 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 		return viewToDisplay;
 	}
 
+	/**
+	 * This methos inflates view needed to show theme picker, if view is
+	 * inflated already (not null) We simply return
+	 */
 	@Override
 	public void initView() {
+		if (viewToDisplay != null) {
+			return;
+		}
 		View parentView = viewToDisplay = sherlockFragmentActivity
 				.getLayoutInflater().inflate(R.layout.chat_backgrounds, null);
 
@@ -141,8 +144,9 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 					int position, long id) {
 				currentSelected = ChatTheme.values()[position];
 				gridAdapter.notifyDataSetChanged();
-				Logger.d("ChatThread",
-						"Calling setchattheme from showThemePicker onItemClick");
+				Logger.d(TAG,
+						"Calling setchattheme from showThemePicker onItemClick "
+								+ currentSelected.name());
 				listener.themeClicked(currentSelected);
 			}
 		});
@@ -207,16 +211,8 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 	}
 
 	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-		if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-			return true;
-		}
-		return false;
-	}
-
-	@Override
 	public void onDismiss() {
-//		actionMode.finish();
+		// actionMode.finish();
 	}
 
 }
