@@ -125,7 +125,7 @@ public class ChatThread implements OverflowItemClickListener,View.OnClickListene
 		if(themePicker == null){
 			themePicker = new ThemePicker(activity, this);
 		}
-		themePicker.showThemePicker(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 0, 0, activity.findViewById(R.id.cb_anchor), null);
+		themePicker.showThemePicker(activity.findViewById(R.id.cb_anchor), null);
 	}
 
 	@Override
