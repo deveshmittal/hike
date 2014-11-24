@@ -73,5 +73,15 @@ public class OverFlowMenuLayout extends PopUpLayout {
 				return convertView;
 			}
 		});
+		overFlowListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				
+				listener.itemClicked((OverFlowMenuItem) arg0.getAdapter().getItem(arg2));
+				dismiss();
+			}
+		});
 	}
 }
