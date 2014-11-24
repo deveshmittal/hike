@@ -3,6 +3,11 @@ package com.bsb.hike.chatthread;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -21,7 +26,7 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 
 public class ThemePicker extends PopUpLayout implements BackPressListener,
-		OnDismissListener {
+		OnDismissListener, OnTouchListener, OnClickListener {
 	private static final String TAG = "themepicker";
 
 	public static interface ThemePickerListener {
@@ -67,11 +72,9 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 			ChatTheme currentTheme) {
 		Logger.i(TAG, "show theme picker");
 		// do processing
-		if (actionMode == null) {
-			sherlockFragmentActivity.startActionMode(actionmodeCallback);
-		}
+		sherlockFragmentActivity.startActionMode(actionmodeCallback);
 		showPopUpWindowNoDismiss(xoffset, yoffset, anchor);
-
+		popup.setOnDismissListener(this);
 	}
 
 	@Override
@@ -144,9 +147,6 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 					int position, long id) {
 				currentSelected = ChatTheme.values()[position];
 				gridAdapter.notifyDataSetChanged();
-				Logger.d(TAG,
-						"Calling setchattheme from showThemePicker onItemClick "
-								+ currentSelected.name());
 				listener.themeClicked(currentSelected);
 			}
 		});
@@ -158,20 +158,36 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 		@Override
 		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
 			Logger.i(TAG, "on prepare action mode");
-			return false;
+			View saveThemeBtn = mode.getCustomView().findViewById(
+					R.id.done_container);
+
+			saveThemeBtn.startAnimation(AnimationUtils.loadAnimation(
+					sherlockFragmentActivity, R.anim.scale_in));
+
+			saveThemeBtn.setOnClickListener(ThemePicker.this);
+			return true;
 		}
 
 		@Override
 		public void onDestroyActionMode(ActionMode mode) {
 			Logger.i(TAG, "on destroy actionmode");
 			actionMode = null;
-			popup.dismiss();
+			dismiss();
+			// we are not getting click event of close button in action bar, so
+			// if action bar is closed because of click there, we fallback on
+			// currentSelected
+			// currentSelected becomes null if we click on done button in action bar
+			if (currentSelected != null) {
+				listener.themeCancelled();
+			}
 		}
 
 		@Override
 		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
 			Logger.i(TAG, "on create action mode");
 			actionMode = mode;
+			mode.setCustomView(LayoutInflater.from(sherlockFragmentActivity)
+					.inflate(R.layout.chat_theme_action_bar, null));
 			return true;
 		}
 
@@ -185,7 +201,7 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 	@Override
 	public boolean onBackPressed() {
 		if (isShowing()) {
-			popup.dismiss();
+			actionMode.finish();
 			return true;
 		}
 		return false;
@@ -212,7 +228,17 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 
 	@Override
 	public void onDismiss() {
-		// actionMode.finish();
+		if (actionMode != null)
+			actionMode.finish();
+	}
+
+	@Override
+	public void onClick(View arg0) {
+		if (arg0.getId() == R.id.done_container) {
+			listener.themeSelected(currentSelected);
+			currentSelected = null;
+			dismiss();
+		}
 	}
 
 }
