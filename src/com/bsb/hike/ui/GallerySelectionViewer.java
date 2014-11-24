@@ -38,6 +38,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.adapters.GalleryAdapter;
+import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.models.GalleryItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.GalleryImageLoader;
@@ -254,7 +255,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 						@Override
 						public void onSucess(Dialog dialog)
 						{
-							fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+							fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike, FTAnalyticEvents.GALLERY_ATTACHEMENT);
 							Utils.executeAsyncTask(fileTransferTask);
 							progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
 							dialog.dismiss();
@@ -284,7 +285,7 @@ public class GallerySelectionViewer extends HikeAppStateBaseFragmentActivity imp
 				}
 				else
 				{
-					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike, FTAnalyticEvents.GALLERY_ATTACHEMENT);
 					Utils.executeAsyncTask(fileTransferTask);
 					progressDialog = ProgressDialog.show(GallerySelectionViewer.this, null, getResources().getString(R.string.multi_file_creation));
 				}
