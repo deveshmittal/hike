@@ -19,117 +19,116 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_below="@id/day_stub"
+            android:layout_below="@+id/day_container"
             android:paddingBottom="2.5dp" >
 
-    <RelativeLayout
-            android:id="@+id/message_container"
-            android:layout_width="273dp"
-            android:layout_height="92dp"
-            android:layout_alignParentRight="true"
-            android:tag="@string/content_card_tag"
-            android:layout_marginRight="@dimen/chat_bubble_edge_spacing"
-            android:layout_marginTop="3dp"
-            android:background="@drawable/content_card_selector_sent"
-            android:orientation="vertical"
-             >
-
-        <ImageView
-                android:id="@+id/card_image"
-                android:layout_alignParentRight="true"
-                android:tag="I1"
-                android:layout_centerVertical="true"
-                android:src="@drawable/hike_avtar_protip"
-                android:layout_width="92dp"
-                android:scaleType="fitXY"
-                android:layout_height="match_parent"/>
-
-
         <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_toLeftOf="@id/card_image"
-                android:layout_alignParentLeft="true"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp"
-                android:gravity="center_vertical"
-                android:id="@+id/text_container"
+                android:id="@+id/message_container"
+                android:layout_width="273dp"
                 android:layout_height="92dp"
-                >
+                android:layout_alignParentRight="true"
+                android:tag="@string/content_card_tag"
+                android:layout_marginRight="@dimen/chat_bubble_edge_spacing"
+                android:layout_marginTop="3dp"
+                android:background="@drawable/content_card_selector_sent"
+                 >
+
+            <ImageView
+                    android:id="@+id/card_image"
+                    android:layout_alignParentRight="true"
+                    android:tag="I1"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/hike_avtar_protip"
+                    android:layout_width="92dp"
+                    android:scaleType="fitXY"
+                    android:layout_height="match_parent"/>
 
 
-
-
-            <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/title"
+            <RelativeLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:tag="T1"
-                    android:textSize="15sp"
-                    android:textColor="#292929"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    />
-
-            <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/payment_info"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_alignBottom="@id/title"
-                    android:layout_toRightOf="@id/title"
-                    android:tag="T2"
-                    android:singleLine="true"
-                    android:textColor="#92ce28"
-                    android:textSize="11sp"
-                    />
+                    android:layout_toLeftOf="@id/card_image"
+                    android:layout_alignParentLeft="true"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp"
+                    android:gravity="center_vertical"
+                    android:id="@+id/text_container"
+                    android:layout_height="92dp"
+                    >
 
 
 
 
-            <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/description"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="13sp"
-                    android:tag="T3"
-                    android:layout_below="@id/title"
-                    android:textColor="#7a7c7d"
-                    android:layout_gravity="center_vertical"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    />
+                <com.bsb.hike.view.CustomFontTextView
+                        android:id="@+id/title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:tag="T1"
+                        android:textSize="15sp"
+                        android:textColor="#292929"
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        />
 
-            <com.bsb.hike.view.CustomFontTextView
-                    android:layout_width="wrap_content"
-                    android:gravity="center"
-                    android:padding="5dp"
-                    android:layout_height="wrap_content"
-                    android:textColor="#ffffff"
-                    android:background="@drawable/greenbtnhike"
-                    android:tag="T4"
-                    android:layout_marginTop="5dp"
-                    android:layout_below="@id/description"
-                    android:textSize="14sp"
-                    android:enabled="false"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    />
+                <com.bsb.hike.view.CustomFontTextView
+                        android:id="@+id/payment_info"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_alignBottom="@id/title"
+                        android:layout_toRightOf="@id/title"
+                        android:tag="T2"
+                        android:singleLine="true"
+                        android:textColor="#92ce28"
+                        android:textSize="11sp"
+                        />
+
+
+
+
+                <com.bsb.hike.view.CustomFontTextView
+                        android:id="@+id/description"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="13sp"
+                        android:tag="T3"
+                        android:layout_below="@id/title"
+                        android:textColor="#7a7c7d"
+                        android:layout_gravity="center_vertical"
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        />
+
+                <com.bsb.hike.view.CustomFontTextView
+                        android:layout_width="wrap_content"
+                        android:gravity="center"
+                        android:padding="5dp"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ffffff"
+                        android:background="@drawable/greenbtnhike"
+                        android:tag="T4"
+                        android:layout_marginTop="5dp"
+                        android:layout_below="@id/description"
+                        android:textSize="14sp"
+                        android:enabled="false"
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        />
+
+            </RelativeLayout>
 
         </RelativeLayout>
 
+        <include
+                android:id="@+id/time_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/message_container"
+                android:layout_marginRight="@dimen/chat_bubble_time_edge_spacing"
+                android:layout_marginTop="4dp"
+                layout="@layout/message_time_status_ext" />
     </RelativeLayout>
-
-    <include
-            android:id="@+id/time_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_below="@id/message_container"
-            android:layout_marginRight="@dimen/chat_bubble_time_edge_spacing"
-            android:layout_marginTop="4dp"
-            layout="@layout/message_time_status_ext" />
-        </RelativeLayout>
 
     <include
             android:layout_width="match_parent"
