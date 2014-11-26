@@ -280,7 +280,7 @@ public class HikePubSub implements Runnable
 
 	public static final String SEND_SMS_PREF_TOGGLED = "sendSmsPrefToggled";
 
-	public static final String FINISHED_AVTAR_UPGRADE = "finshedAvtarDBUpgrade";
+	public static final String FINISHED_UPGRADE_INTENT_SERVICE = "finshedUpgradeIntentService";
 
 	public static final String FTUE_LIST_FETCHED_OR_UPDATED = "ftueListFetchedOrUpdated";
 
@@ -388,6 +388,14 @@ public class HikePubSub implements Runnable
 	
 	public static final String AUTH_TOKEN_RECEIVED = "authTokenReceived";
 	
+	public static final String STICKER_CATEGORY_MAP_UPDATED = "stickerCategoryMapUpdated";
+	
+	public static final String STICKER_FTUE_TIP = "stickerFtueTip";
+
+	public static final String SWITCH_OFF_NUX_MODE = "switchOffNuxMode";
+	
+	public static final String USER_JOINED_NOTIFICATION = "userJoinedNotification";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

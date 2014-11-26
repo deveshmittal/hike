@@ -3,7 +3,6 @@ package com.bsb.hike.ui;
 import java.util.ArrayList;
 
 import android.content.Intent;
-import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -15,10 +14,12 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -33,7 +34,6 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.IntentManager;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -162,6 +162,19 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 				case VERSION:
 					TextView appVersion = (TextView) convertView.findViewById(R.id.app_version);
+					
+					
+
+					if (AppConfig.ALLOW_STAGING_TOGGLE)
+					{
+						LinearLayout ll_build_branch_version = (LinearLayout) convertView.findViewById(R.id.ll_commitId_branch_version);
+						ll_build_branch_version.setVisibility(View.VISIBLE);
+						TextView tv_build_number = (TextView) convertView.findViewById(R.id.tv_last_commit_hash);
+						tv_build_number.setText(AppConfig.COMMIT_ID);
+
+						TextView tv_branch_name = (TextView) convertView.findViewById(R.id.tv_branch_name);
+						tv_branch_name.setText(AppConfig.BRANCH_NAME);
+					}
 					try
 					{
 						appVersion.setText(getString(R.string.app_version, getPackageManager().getPackageInfo(getPackageName(), 0).versionName));

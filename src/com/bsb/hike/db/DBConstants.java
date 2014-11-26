@@ -144,13 +144,11 @@ public interface DBConstants
 
 	public static final String IS_HIKE_MESSAGE = "isHikeMessage";
 
-	public static final String STICKERS_TABLE = "stickersTable";
-
+	public static final String STICKER_CATEGORIES_TABLE = "stickerCategoriesTable";
+	
 	public static final String CATEGORY_ID = "categoryId";
 
 	public static final String TOTAL_NUMBER = "totalNum";
-
-	public static final String REACHED_END = "reachedEnd";
 
 	public static final String UPDATE_AVAILABLE = "updateAvailable";
 
@@ -207,8 +205,6 @@ public interface DBConstants
 	
 	public static final String IS_SENT = "isSent";
 	
-	
-	
 	public static interface HIKE_CONV_DB{
 		// CHANNEL TABLE -> _id,channel_id,name,visibility,index 
 		public static final String CHANNEL_TABLE = "channel";
@@ -248,4 +244,18 @@ public interface DBConstants
 		
 		public static final String CONTENT_ID_INDEX = "contentTableContentIdIndex";
 	}
+
+	public static final String CATEGORY_NAME = "categoryName";
+
+	public static final String IS_VISIBLE = "isVisible";
+
+	public static final String IS_CUSTOM = "isCustom";
+
+	public static final String IS_ADDED = "isAdded";
+
+	public static final String CATEGORY_INDEX = "catIndex";
+
+	public static final String CATEGORY_SIZE = "categorySize";
+
+	public static final String STICKER_SHOP_TABLE = "stickerShopTable";
 }

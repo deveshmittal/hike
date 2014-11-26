@@ -263,6 +263,14 @@
                     android:scaleType="centerInside"
                     android:src="@drawable/sticker_btn_selector" />
 
+                <ViewStub
+                    android:id="@+id/pulsatingDotViewStub"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignTop="@id/sticker_btn"
+                    android:layout_marginLeft="20dp"
+                    android:layout="@layout/pulsating_dot" />
+
                 <LinearLayout
                     android:id="@+id/tb_layout"
                     android:layout_width="match_parent"

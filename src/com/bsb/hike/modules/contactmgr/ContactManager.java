@@ -107,6 +107,10 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		hDb = new HikeUserDatabase(ctx);
 		persistenceCache = new PersistenceCache(hDb);
 		transientCache = new TransientCache(hDb);
+
+		// Called to set name for group whose group name is empty (group created by ios) , we cannot do this inside persistence cache load memory because at taht point transient
+		// and persistence cache have not been initialized completely
+		persistenceCache.updateGroupNames();
 	}
 
 	/**

@@ -16,12 +16,12 @@ import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.google.android.gms.internal.co;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 public class IntentManager
@@ -107,13 +107,28 @@ public class IntentManager
 	public static Intent getGamingIntent(Context context)
 	{
 		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		Intent intent = new Intent(context.getApplicationContext(), WebViewActivity.class);
-		intent.putExtra(HikeConstants.Extras.GAMES_PAGE, true);
-		/*
-		 * using the same token as rewards token, as per DK sir's mail
-		 */
-		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.gamesUrl + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
-		intent.putExtra(HikeConstants.Extras.TITLE, context.getString(R.string.hike_extras));
+		Intent intent = new Intent(context.getApplicationContext(), WebViewActivity.class);		
+		String hikeExtrasUrl = prefs.getString(HikeConstants.HIKE_EXTRAS_URL, AccountUtils.gamesUrl);
+		               
+		if(!TextUtils.isEmpty(hikeExtrasUrl))                   
+		{
+			if(Utils.switchSSLOn(context))
+			{
+				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.HTTPS_STRING + hikeExtrasUrl + HikeConstants.ANDROID + "/" +  prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));				
+			}
+			else
+			{
+				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.HTTP_STRING + hikeExtrasUrl + HikeConstants.ANDROID + "/" +  prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
+			}
+		}
+		               
+		String hikeExtrasName = prefs.getString(HikeConstants.HIKE_EXTRAS_NAME, context.getString(R.string.hike_extras));
+		
+		if(!TextUtils.isEmpty(hikeExtrasName))
+		{
+			intent.putExtra(HikeConstants.Extras.TITLE, hikeExtrasName);
+		}
+		
 		return intent;
 	}
 
@@ -126,23 +141,48 @@ public class IntentManager
 	{
 		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Intent intent = new Intent(context.getApplicationContext(), WebViewActivity.class);
-		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.rewardsUrl + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
-		intent.putExtra(HikeConstants.Extras.TITLE, context.getString(R.string.rewards));
+		String rewards_url = prefs.getString(HikeConstants.REWARDS_URL, AccountUtils.rewardsUrl);
+		
+		if(!TextUtils.isEmpty(rewards_url))
+		{
+			if(Utils.switchSSLOn(context))  
+			{
+				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.HTTPS_STRING + rewards_url + HikeConstants.ANDROID + "/" + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
+			}
+			else
+			{
+				 intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.HTTP_STRING + rewards_url + HikeConstants.ANDROID + "/" + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));				
+			}				
+		}
+				
+		String rewards_name = prefs.getString(HikeConstants.REWARDS_NAME, context.getString(R.string.rewards));
+		
+		if(!TextUtils.isEmpty(rewards_name))
+		{
+			intent.putExtra(HikeConstants.Extras.TITLE, rewards_name);
+		}
+		intent.putExtra(HikeConstants.Extras.WEBVIEW_ALLOW_LOCATION, true);
+		
 		return intent;
 	}
 
-	public static Intent getForwardStickerIntent(Context context, String stickerId, String categoryId)
+	public static Intent getForwardStickerIntent(Context context, String stickerId, String categoryId, boolean isFtueFwd)
 	{
-		Utils.sendUILogEvent(HikeConstants.LogEvent.FORWARD_MSG);
 		Intent intent = new Intent(context, ComposeChatActivity.class);
-		intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+		if (isFtueFwd)
+		{
+			intent.putExtra(HikeConstants.Extras.FTUE_FORWARD, true);
+		}
+		else
+		{
+			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
+		}
 		JSONArray multipleMsgArray = new JSONArray();
 		try
 		{
 			JSONObject multiMsgFwdObject = new JSONObject();
 			multiMsgFwdObject.putOpt(StickerManager.FWD_CATEGORY_ID, categoryId);
 			multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_ID, stickerId);
-			multiMsgFwdObject.putOpt(StickerManager.FWD_STICKER_INDEX, -1);
 			multipleMsgArray.put(multiMsgFwdObject);
 		}
 		catch (JSONException e)
