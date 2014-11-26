@@ -793,7 +793,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 	private void updateAccountBackupPrefView()
 	{
 		Preference preference = getPreferenceScreen().findPreference(HikeConstants.BACKUP_PREF);
-		getPreferenceScreen().removePreference(preference);
 		long lastBackupTime = DBBackupRestore.getInstance(getApplicationContext()).getLastBackupTime();
 		if (lastBackupTime > 0)
 		{

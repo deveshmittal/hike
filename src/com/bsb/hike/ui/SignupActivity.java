@@ -1412,21 +1412,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		scaleUp.setDuration(400);
 		scaleUp.setFillAfter(true);
 		
-		scaleUp.setAnimationListener(new AnimationListener()
-		{
-			public void onAnimationStart(Animation animation)
-			{}
-			
-			public void onAnimationRepeat(Animation animation)
-			{}
-			
-			@Override
-			public void onAnimationEnd(Animation animation)
-			{
-				mTask.addUserInput(null);
-			}
-		});
-		
 		restoreItems.startAnimation(itemsRemove);
 		restoreSuccess.startAnimation(scaleUp);
 	}
