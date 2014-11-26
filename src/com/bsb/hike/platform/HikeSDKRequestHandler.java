@@ -43,13 +43,27 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 {
 	private Context mContext;
 
-	private Message cachedMessage;
+	private static Message cachedMessage;
 
 	private String cachedToken;
 
-	public HikeSDKRequestHandler(Context argContext, Looper looper)
+	private Handler authUIHandler;
+
+	public HikeSDKRequestHandler(final Context argContext, Looper looper)
 	{
 		super(looper);
+		authUIHandler = new Handler()
+		{
+			public void handleMessage(android.os.Message msg)
+			{
+				Logger.d("THREAD", Thread.currentThread().getName());
+				Intent hikeAuthIntent = new Intent(argContext, HikeAuthActivity.class);
+				hikeAuthIntent.putExtra(HikeAuthActivity.MESSAGE_INDEX, Message.obtain(msg));
+				hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				argContext.startActivity(hikeAuthIntent);
+			};
+		};
+
 		mContext = argContext;
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.AUTH_TOKEN_RECEIVED, HikeSDKRequestHandler.this);
 	}
@@ -64,6 +78,7 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 		argMessage.arg2 = HikeSDKResponseCode.STATUS_EXCEPTION;
 		try
 		{
+			Logger.i("hikesdk", argMessage.replyTo.hashCode() + "");
 			argMessage.replyTo.send(argMessage);
 		}
 		catch (RemoteException e)
@@ -85,14 +100,11 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 			returnExceptionMessageToCaller(msg);
 			return;
 		}
-		
+
 		if (!HikeAuthActivity.verifyRequest(mContext, msg))
 		{
 			cachedMessage = Message.obtain(msg);
-			Intent hikeAuthIntent = new Intent(mContext, HikeAuthActivity.class);
-			hikeAuthIntent.putExtra(HikeAuthActivity.MESSAGE_INDEX, Message.obtain(msg));
-			hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			mContext.startActivity(hikeAuthIntent);
+			authUIHandler.sendMessage(Message.obtain(msg));
 			return;
 		}
 		Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "Handle message: Verified!");

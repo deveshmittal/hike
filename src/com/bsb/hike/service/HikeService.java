@@ -28,7 +28,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
@@ -50,6 +52,7 @@ import com.bsb.hike.service.HikeMqttManagerNew.IncomingHandler;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
+import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -87,7 +90,7 @@ public class HikeService extends Service
 				boolean contactsChanged = ContactManager.getInstance().syncUpdates(this.context);
 
 				HikeMessengerApp.syncingContacts = false;
-				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNCED, new Boolean[] {manualSync, contactsChanged});
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNCED, new Boolean[] { manualSync, contactsChanged });
 			}
 
 		}
@@ -301,29 +304,28 @@ public class HikeService extends Service
 		 * Make hike utility thread
 		 */
 		HandlerThread hikeUtilHandlerThread = new HandlerThread("HIKE_UTIL");
-		
-		
+
 		hikeUtilHandlerThread.start();
-		
+
 		/**
 		 * Extract utility looper
 		 */
-		mHikeUtilLooper = Looper.myLooper();
-		
+		mHikeUtilLooper = hikeUtilHandlerThread.getLooper();
+
 		/**
 		 * Make SDK request handler with utility looper
 		 */
-		mHikeSDKRequestHandler = new HikeSDKRequestHandler(HikeService.this.getApplicationContext(), mHikeUtilLooper);
-		
+		mHikeSDKRequestHandler = new HikeSDKRequestHandler(HikeService.this.getApplicationContext(), hikeUtilHandlerThread.getLooper());
+
 		mSDKRequestMessenger = new Messenger(mHikeSDKRequestHandler);
-		
+
 		/**
 		 * Make contact changed handler with utility looper
 		 */
 		mContactsChangedHandler = new Handler(mHikeUtilLooper);
-		
+
 		mContactsChanged = new ContactsChanged(HikeService.this);
-		
+
 	}
 
 	private void setupStickers()
@@ -533,7 +535,30 @@ public class HikeService extends Service
 	@Override
 	public IBinder onBind(Intent intent)
 	{
+		try
+		{
+			mSDKRequestMessenger.getBinder().linkToDeath(new IBinder.DeathRecipient()
+			{
+
+				@Override
+				public void binderDied()
+				{
+					Logger.e(HikeService.class.getCanonicalName(), "BINDER DEATH!!!!");
+				}
+			}, 0);
+		}
+		catch (RemoteException e)
+		{
+			e.printStackTrace();
+		}
 		return mSDKRequestMessenger.getBinder();
+	}
+
+	@Override
+	public boolean onUnbind(Intent intent)
+	{
+		Logger.d("HikeService - ONUNBIND", "" + intent.getAction());
+		return super.onUnbind(intent);
 	}
 
 	/************************************************************************/
