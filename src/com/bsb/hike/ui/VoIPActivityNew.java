@@ -13,9 +13,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.graphics.drawable.Drawable;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaPlayer;
@@ -39,29 +43,25 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
-import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ImageView.ScaleType;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.VoIPServiceNew;
-import com.google.android.gms.internal.dp;
+import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 
 
 public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
@@ -488,6 +488,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 					});
 					fadeIn.start();
 					dpMoveStarted = true;
+					DPReposition = (AnimatorSet) AnimatorInflater.loadAnimator(getBaseContext(), R.animator.dp_translate_scale_anim);
 				}
 		    }  
 		}); 
@@ -580,6 +581,23 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	public void prepareResume(){
 		vService = VoIPServiceNew.getVoIPSerivceInstance();
 		setContentView(R.layout.full_call_accept_decline);
+		sliderContainer = (FrameLayout) this.findViewById(R.id.voip_slider_container);
+		callSlider = (ImageView)this.findViewById(R.id.fullcallSlider);
+		sliderContainer.setVisibility(View.VISIBLE);
+		callSlider.setVisibility(View.VISIBLE);
+		callNo = (TextView)this.findViewById(R.id.fullCallerId);
+		ViewTreeObserver vto = callSlider.getViewTreeObserver();
+		preCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			
+			@Override
+			public void onGlobalLayout() {
+				
+				callNo.setTop(preCallTimer.getTop());
+				
+			}
+		});
+		
 		drawInCall();
 	}
 	
@@ -634,8 +652,9 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		Animation timerAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in_animation);
 		inCallTimer.setAnimation(timerAnim);
 //		setContentView(R.layout.incall_layout);
+		displayPic = (ImageView)this.findViewById(R.id.fullvoipContactPicture);
 //		displayPic = (ImageView)this.findViewById(R.id.inCallContactPicture1);
-//		setDisplayPic();
+		setDisplayPic();
 //		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
 //		displayPic.startAnimation(dpAnim);
 //		displayPic.animate();
@@ -885,20 +904,24 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			return;
 		}
 
-		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true);
+//		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true);
+		int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.voip_avatar_size);
+		(new ProfilePicImageLoader(this, mBigImageSize)).loadImage(mContactNumber+"pp", displayPic, false, false, true);
+		Bitmap img = getRoundedShape(((BitmapDrawable)displayPic.getDrawable()).getBitmap());
+		displayPic.setImageBitmap(img);
 		Log.d("ContactNumber",mContactNumber);
-		if (drawable != null)
-		{
-			displayPic.setScaleType(ScaleType.FIT_CENTER);
-			displayPic.setImageDrawable(drawable);
-			displayPic.setBackgroundDrawable(null);
-		}
-		else
-		{
-			displayPic.setScaleType(ScaleType.CENTER_INSIDE);
-			displayPic.setImageResource(R.drawable.ic_default_avatar);
-			displayPic.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true));
-		}
+//		if (drawable != null)
+//		{
+//			displayPic.setScaleType(ScaleType.FIT_CENTER);
+//			displayPic.setImageDrawable(drawable);
+//			displayPic.setBackgroundDrawable(null);
+//		}
+//		else
+//		{
+//			displayPic.setScaleType(ScaleType.CENTER_INSIDE);
+//			displayPic.setImageResource(R.drawable.ic_default_avatar);
+//			displayPic.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true));
+//		}
 	}
 
 
@@ -909,7 +932,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			
 			@Override
 			public void run() {
-				new AlertDialog.Builder(VoIPActivityNew.getVoIPActivityInstance())
+				new AlertDialog.Builder(VoIPActivityNew.this)
 			    .setTitle("Callee Not on Wifi")
 			    .setMessage("Your friend is not on Wifi. Would you like us to send a message to show up?")
 			    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -945,8 +968,30 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 				
 			}
 		});
-		
-		
+	}
+	
+	
+	public Bitmap getRoundedShape(Bitmap scaleBitmapImage) {
+	    float targetWidth = 125.0f*1.5f;
+	    float targetHeight = 125.0f*1.5f;
+	    Bitmap targetBitmap = Bitmap.createBitmap((int)targetWidth, 
+	                        (int)targetHeight,Bitmap.Config.ARGB_8888);
+
+	    Canvas canvas = new Canvas(targetBitmap);
+	    Path path = new Path();
+	    path.addCircle(((float) targetWidth - 1) / 2,
+	        ((float) targetHeight - 1) / 2,
+	        (Math.min(((float) targetWidth), 
+	        ((float) targetHeight)) / 2),
+	        Path.Direction.CCW);
+
+	    canvas.clipPath(path);
+	    Bitmap sourceBitmap = scaleBitmapImage;
+	    canvas.drawBitmap(sourceBitmap, 
+	        new Rect(0, 0, sourceBitmap.getWidth(),
+	        sourceBitmap.getHeight()), 
+	        new Rect(0, 0, (int)targetWidth, (int)targetHeight), null);
+	    return targetBitmap;
 	}
 
 

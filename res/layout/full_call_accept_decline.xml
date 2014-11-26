@@ -35,10 +35,16 @@
             android:layout_above="@+id/fullPhoneNumberView1"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="90dp"
-            android:background="@drawable/voip_avatar_circle"
             android:contentDescription="ProfileImage" >
 
-            <ImageView
+            
+            <ImageView 
+                android:layout_width="127dp"
+                android:layout_height="127dp"
+                android:layout_gravity="center"
+                android:src="@drawable/voip_avatar_circle"
+                />
+            <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/fullvoipContactPicture"
                 android:layout_width="125dp"
                 android:layout_height="125dp"
@@ -56,6 +62,7 @@
             android:layout_centerVertical="true"
             android:layout_marginTop="10dp"
             android:text="INCOMING CALL"
+            android:textStyle="italic"
             android:textColor="@color/white" 
             android:visibility="invisible"/>
 
@@ -67,15 +74,15 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="0dp"
             android:text="Samantha"
-            android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/white"
-            android:textSize="32dp"
+            android:textStyle="italic"
+            android:textSize="25dp"
             android:visibility="invisible" />
 
         <ImageView
             android:id="@+id/fullacceptButton"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:layout_marginBottom="49dp"
@@ -87,8 +94,8 @@
 
         <ImageView
             android:id="@+id/fulldeclineButton"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_marginBottom="49dp"
@@ -102,7 +109,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="27dp"
+            android:layout_marginBottom="25dp"
             android:contentDescription="SliderImage"
             android:visibility="invisible" >
 
@@ -122,14 +129,14 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="37dp"
-            android:layout_marginLeft="40dp"
+            android:layout_marginBottom="35dp"
+            android:layout_marginLeft="55dp"
             android:layout_toRightOf="@+id/voip_slider_container" >
 
             <ImageView
                 android:id="@+id/fullSpeakerButton"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:layout_gravity="left|center_vertical"
                 android:scaleType="centerInside"
                 android:src="@drawable/speaker_on"
@@ -137,8 +144,8 @@
 
             <ImageView
                 android:id="@+id/fullSpeakerSound"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:layout_gravity="center"
                 android:scaleType="centerInside"
                 android:src="@drawable/speaker_sound"
@@ -150,14 +157,14 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="37dp"
-            android:layout_marginRight="35dp"
+            android:layout_marginBottom="35dp"
+            android:layout_marginRight="50dp"
             android:layout_toLeftOf="@+id/voip_slider_container" >
 
             <ImageView
                 android:id="@+id/fullMicButton"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:layout_gravity="center"
                 android:src="@drawable/voip_mute_off"
                 android:visibility="invisible" />
@@ -172,6 +179,7 @@
             android:layout_marginTop="20dp"
             android:text="CALL DURATION GOES HERE"
             android:textColor="@color/white"
+            android:textStyle="italic"
             android:visibility="invisible" />
     </RelativeLayout>
 

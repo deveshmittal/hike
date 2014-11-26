@@ -2156,9 +2156,9 @@ public class MqttMessagesManager
 					String callerID = jsonObj.getString(HikeConstants.FROM);
 		//			Context context = .getApplicationContext();
 					Intent intent;
-					if(HikeService.appForegrounded)			
-						intent = new Intent(context,com.bsb.hike.ui.ReceiveCallActivity.class);
-					else
+//					if(HikeService.appForegrounded)			
+//						intent = new Intent(context,com.bsb.hike.ui.ReceiveCallActivity.class);
+//					else
 						intent = new Intent(context,com.bsb.hike.ui.VoIPActivityNew.class);
 					final Intent serviceIntent = new Intent(HikeService.getContext(),com.bsb.hike.service.VoIPServiceNew.class);
 		//			serviceIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -2192,29 +2192,9 @@ public class MqttMessagesManager
 			 * Display notif/hm you missed a call
 			 */
 			try {
-//				String callerID = jsonObj.getString(HikeConstants.FROM);
-//				JSONObject notOnWifiJSON = new JSONObject();
-//				JSONObject metadata = new JSONObject();
-//				JSONObject data = new JSONObject();
-//				
-//				notOnWifiJSON.put(HikeConstants.TO, callerID);				
-//				notOnWifiJSON.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE);
-//				notOnWifiJSON.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.VOIP_HANDSHAKE);
-//				
-//				data.put("hm", "you shouldn't see it as call. catch aaryaman@hike.in");
-//				
-//				metadata.put("type", "notOnWifi");
-//				metadata.put("vpl", "");
-//				
-//				data.put("md", metadata);
-//				data.put("hm", "you shouldn't see it as call. catch aaryaman@hike.in");
-//				data.put(HikeConstants.MESSAGE_ID, 1865);
-//				long time = (long) System.currentTimeMillis();
-//				data.put(HikeConstants.TIMESTAMP, time);
-//				
-//				notOnWifiJSON.put(HikeConstants.DATA, data);
+
 				WebRtcClient.sendMessage(jsonObj.getString(HikeConstants.FROM), "notOnWifi", null);
-//				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, notOnWifiJSON);
+				
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
