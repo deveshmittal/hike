@@ -6134,7 +6134,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				default:
 					break;
 			}
-			if (selectedFile != null && requestCode == HikeConstants.IMAGE_CAPTURE_CODE && !HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeConstants.REMEMBER_IMAGE_CHOICE, false))
+			if (selectedFile != null && requestCode == HikeConstants.IMAGE_CAPTURE_CODE)
 			{
 				final String fPath = filePath;
 				final int atType = attachementType;
