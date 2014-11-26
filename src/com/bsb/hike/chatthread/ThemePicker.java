@@ -144,9 +144,12 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view,
 					int position, long id) {
-				currentSelected = ChatTheme.values()[position];
+				ChatTheme selected = ChatTheme.values()[position];
 				gridAdapter.notifyDataSetChanged();
-				listener.themeClicked(currentSelected);
+				if(selected != currentSelected){
+				listener.themeClicked(selected);
+				}
+				currentSelected = selected;
 			}
 		});
 
