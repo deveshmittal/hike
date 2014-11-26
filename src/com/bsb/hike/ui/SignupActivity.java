@@ -327,14 +327,14 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				break;
 			case BACKUP_FOUND:
 			case RESTORING_BACKUP:
-//				if (mTask.getStateValue() == null || mTask.getStateValue().state != State.RESTORING_BACKUP)
-//				{
-//					prepareLayoutForBackupFound(savedInstanceState);
-//				}
-//				else
-//				{
-//					prepareLayoutForRestoringAnimation(savedInstanceState);
-//				}
+				if (mTask.getStateValue() == null || mTask.getStateValue().state != State.RESTORING_BACKUP)
+				{
+					prepareLayoutForBackupFound(savedInstanceState);
+				}
+				else
+				{
+					prepareLayoutForRestoringAnimation(savedInstanceState);
+				}
 				break;
 			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
