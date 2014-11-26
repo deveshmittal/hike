@@ -1231,35 +1231,38 @@ public class Utils
 		return bao.toByteArray();
 	}
 
-	public static String getRealPathFromUri(Uri contentUri, Activity activity)
+	// If source is local file path then previous getRealPathFromUri implementation (which uses deprecated manage query) provides null, So adding this implementation to solve the issue.
+	public static String getRealPathFromUri(Uri uri, Context mContext)
 	{
-		String filePath = null;
-		String[] proj = { MediaStore.Images.Media.DATA };
+		String result = null;
 		Cursor cursor = null;
-		// The query can throw exception if is doesn't know the specified projections. This needs to be put in a try-catch block.
 		try
 		{
-			cursor = activity.managedQuery(contentUri, proj, null, null, null);
+		    cursor = mContext.getContentResolver().query(uri, null, null, null, null);
+		    if (cursor == null) {
+		        result = uri.getPath();
+		    } else {
+		        if(cursor.moveToFirst())
+		        {
+		        	int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+			        result = cursor.getString(idx);
+		        }
+		        else
+		        {
+		        	result = null;
+		        }
+		    }
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		if (cursor == null || cursor.getCount() == 0)
+		finally
 		{
-			// return null;
+			if(cursor != null)
+				cursor.close();
 		}
-		else
-		{
-			int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-			cursor.moveToFirst();
-			filePath = cursor.getString(column_index);
-		}
-		if (filePath == null)
-		{
-			filePath = FilePath.getPath(activity.getBaseContext(), contentUri);
-		}
-		return filePath;
+	    return result;
 	}
 
 	public static enum ExternalStorageState
