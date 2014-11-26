@@ -63,7 +63,7 @@ public class ProfilePicImageLoader extends ImageWorker
 	{
 		Bitmap bitmap = null;
 		String idd = id;
-		int idx = id.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
+		int idx = id.lastIndexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
 		if (idx > 0)
 			idd = id.substring(0, idx);
 
