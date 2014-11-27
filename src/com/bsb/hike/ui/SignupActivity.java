@@ -1217,6 +1217,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		artProfile.setVisibility(View.INVISIBLE);
 		artProfile.startAnimation(profileAnimSet);
 		
+		// Starting up the dots animation
+		setupDotsAnimation(smileyOffset,smileyDuration);
+		
 		// Animation setup for restore and skip buttons
 		AlphaAnimation restoreAlphaAnimation = new AlphaAnimation(0.0f, 1.0f);
 		restoreAlphaAnimation.setDuration(restoreDuration);
@@ -1294,7 +1297,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		
 		artProfile.setVisibility(View.INVISIBLE);
 		artProfile.startAnimation(profileAnimSet);
-		
+
+		// Starting up the dots animation
+		setupDotsAnimation(smileyOffset,smileyDuration);
+
 		// Animation setup for restore and skip buttons
 		AlphaAnimation fadeOutAnimation = new AlphaAnimation(1.0f, 0.0f);
 		fadeOutAnimation.setDuration(restoreDuration);
@@ -1323,6 +1329,59 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		textBackup.startAnimation(fadeOutAnimation);
 		textView.setVisibility(View.INVISIBLE);
 		textView.startAnimation(fadeOutAnimation);
+	}
+	
+	private void setupDotsAnimation(long smileyOffset, long smileyDuration)
+	{
+		long animationDuation = 50;
+		
+		final View dot0 = (View) backupFoundLayout.findViewById(R.id.dot_right);
+		final View dot1 = (View) backupFoundLayout.findViewById(R.id.dot_left);
+		final View dot2 = (View) backupFoundLayout.findViewById(R.id.dot_top);
+		
+		ShapeDrawable circle0 = new ShapeDrawable(new OvalShape());
+		circle0.getPaint().setColor(this.getResources().getColor(R.color.restoring_red));
+		dot0.setBackgroundDrawable(circle0);
+		ShapeDrawable circle1 = new ShapeDrawable(new OvalShape());
+		circle1.getPaint().setColor(this.getResources().getColor(R.color.restoring_orange));
+		dot1.setBackgroundDrawable(circle1);
+		ShapeDrawable circle2 = new ShapeDrawable(new OvalShape());
+		circle2.getPaint().setColor(this.getResources().getColor(R.color.restoring_green));
+		dot2.setBackgroundDrawable(circle2);
+		
+		AlphaAnimation dotIn = new AlphaAnimation(0, 1);
+		dotIn.setDuration(animationDuation);
+		AlphaAnimation dotOut = new AlphaAnimation(1, 0);
+		dotOut.setDuration(animationDuation);
+		dotOut.setStartOffset(animationDuation);
+		AnimationSet dot0Anim = new AnimationSet(true);
+		dot0Anim.addAnimation(dotIn);
+		dot0Anim.addAnimation(dotOut);
+		dot0Anim.setStartOffset(smileyOffset + smileyDuration - 50);
+		dot0.startAnimation(dot0Anim);
+	
+		AlphaAnimation dot1In = new AlphaAnimation(0, 1);
+		dot1In.setDuration(animationDuation);
+		AlphaAnimation dot1Out = new AlphaAnimation(1, 0);
+		dot1Out.setDuration(animationDuation);
+		dot1Out.setStartOffset(animationDuation);
+		AnimationSet dot1Anim = new AnimationSet(true);
+		dot1Anim.addAnimation(dot1In);
+		dot1Anim.addAnimation(dot1Out);
+		dot1Anim.setStartOffset(smileyOffset + 2*smileyDuration - 50);
+		dot1.startAnimation(dot1Anim);
+
+		
+		AlphaAnimation dot2In = new AlphaAnimation(0, 1);
+		dot2In.setDuration(animationDuation);
+		AlphaAnimation dot2Out = new AlphaAnimation(1, 0);
+		dot2Out.setDuration(animationDuation);
+		dot2Out.setStartOffset(animationDuation);
+		AnimationSet dot2Anim = new AnimationSet(true);
+		dot2Anim.addAnimation(dot2In);
+		dot2Anim.addAnimation(dot2Out);
+		dot2Anim.setStartOffset(smileyOffset + 3*smileyDuration - 50);
+		dot2.startAnimation(dot2Anim);
 	}
 
 	private void initializeRestore()
