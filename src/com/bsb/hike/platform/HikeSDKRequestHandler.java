@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -57,10 +58,11 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 			public void handleMessage(android.os.Message msg)
 			{
 				Logger.d("THREAD", Thread.currentThread().getName());
-				Intent hikeAuthIntent = new Intent(argContext, HikeAuthActivity.class);
+				Intent hikeAuthIntent = new Intent("com.bsb.hike.ui.HikeAuthActivity");
 				hikeAuthIntent.putExtra(HikeAuthActivity.MESSAGE_INDEX, Message.obtain(msg));
 				hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				argContext.startActivity(hikeAuthIntent);
+				
 			};
 		};
 
@@ -101,12 +103,22 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 			return;
 		}
 
-		if (!HikeAuthActivity.verifyRequest(mContext, msg))
+		if (!HikeAuthActivity.verifyRequest(mContext, Message.obtain(msg)))
 		{
+			try
+			{
+				Thread.sleep(2000);
+			}
+			catch (InterruptedException e1)
+			{
+				e1.printStackTrace();
+			}
+			
 			cachedMessage = Message.obtain(msg);
 			authUIHandler.sendMessage(Message.obtain(msg));
 			return;
 		}
+		
 		Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "Handle message: Verified!");
 
 		Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "message.what== " + msg.what);
