@@ -237,29 +237,18 @@ public class WebRtcClient {
 		@Override
 		public void onEventReceived(String type, Object object) {
 			//if(HikePubSub.VOIP_HANDSHAKE.equals(type)) {
-			Log.d("HELLO", "1");
 			try {
-				Log.d("HELLO", "1");
 				JSONObject payload = (JSONObject) object;
-				Log.d("HELLO", "2");
 				String from = payload.getString(HikeConstants.FROM);
-				Log.d("HELLO", "3");
 				JSONObject data = payload.getJSONObject(HikeConstants.DATA);
-				Log.d("HELLO", "4");
 				JSONObject metadata=data.getJSONObject(HikeConstants.METADATA);
-				Log.d("HELLO", "5");
 				JSONObject voipPayload = metadata.getJSONObject(HikeConstants.VOIP_PAYLOAD);
-				Log.d("HELLO", "6");
 				String payload_type = metadata.getString("type");
-				Log.d("HELLO", "7");
 				JSONObject voipSubPayload = null;
-				Log.d("HELLO", "8");
 				if (!((payload_type.equalsIgnoreCase("notonwifi") || payload_type.equals("init") || (payload_type.equals(HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE))) )) {
 					voipSubPayload = voipPayload.getJSONObject("payload");
-					Log.d("HELLO", "9");
 				}
 				executeCommand(from,payload_type,voipSubPayload);
-				Log.d("HELLO", "10");
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -268,24 +257,17 @@ public class WebRtcClient {
 		public void executeCommand(String from, String payloadType, JSONObject voipSubPayload) throws JSONException
 		{
 			// if peer is unknown, try to add him
-			Log.d("Hii", "1");
 			if (!peers.containsKey(from)) {
 				// if MAX_PEER is reach, ignore the call
-				Log.d("Hii", "2");
-				int endPoint = findEndPoint();
-				Log.d("Hii", "3");
-				if (endPoint != MAX_PEER) {
-					Log.d("Hii", "4");
-					storedId = from;
-					Log.d("Hii", "5");
-					addPeer(from, endPoint);
-					Log.d("Hii", "6");
-	
+				if ( ! HikeConstants.MqttMessageTypes.VOIP_CALL_DECLINE.equals(payloadType) ){
+					int endPoint = findEndPoint();
+					if (endPoint != MAX_PEER) {
+						storedId = from;
+						addPeer(from, endPoint);
+					}
 					commandMap.get(payloadType).execute(from, voipSubPayload);
-					Log.d("Hii", "7");
 				}
 			} else {
-				Log.d("Hii", "8");
 				commandMap.get(payloadType).execute(from, voipSubPayload);
 			}
 		}

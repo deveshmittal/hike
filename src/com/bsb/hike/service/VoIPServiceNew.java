@@ -312,6 +312,7 @@ public class VoIPServiceNew extends Service implements com.bsb.hike.VOIP.WebRtcC
 		if (onSpeakers){
 			((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setSpeakerphoneOn(false);
 			onSpeakers = false;
+		} else {
 			((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE)).setSpeakerphoneOn(true);
 			onSpeakers = true;
 		}
