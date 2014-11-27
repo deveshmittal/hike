@@ -137,6 +137,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	private final BroadcastReceiver endCallReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+        	  sliderContainer.setOnTouchListener(null);
               finish();                                   
         }
 	};
@@ -598,6 +599,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		callNo = (TextView)this.findViewById(R.id.fullCallerId);
 		ViewTreeObserver vto = callSlider.getViewTreeObserver();
 		preCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
+		DPReposition = (AnimatorSet) AnimatorInflater.loadAnimator(getBaseContext(), R.animator.dp_translate_scale_anim);
 		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 			
 			@Override
@@ -796,10 +798,10 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 //			if (am.)
 //			am.abandonAudioFocus(afChangeListener);
 		}
+		unregisterReceiver(endCallReceiver);
 		mPubSub.removeListener(HikePubSub.VOIP_HANDSHAKE, this);
 		mPubSub.removeListener(HikePubSub.VOIP_CALL_STATUS_CHANGED, this);
 		mPubSub.removeListener(HikePubSub.VOIP_DURATION, this);
-		unregisterReceiver(endCallReceiver);
 		screenOn();
 		((AudioManager) getSystemService(Context.AUDIO_SERVICE)).setMode(AudioManager.MODE_NORMAL);
 //		screenOffLock.release();

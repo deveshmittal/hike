@@ -2163,7 +2163,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				String message = context.getString(R.string.chat_bg_changed, name);
 
-				setTextAndIconForSystemMessages(mainMessage, "voip ended", isDefaultTheme ? R.drawable.ic_change_theme
+				setTextAndIconForSystemMessages(mainMessage, "VoIP Call", isDefaultTheme ? R.drawable.ic_change_theme
 						: R.drawable.ic_change_theme_custom);
 
 				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
