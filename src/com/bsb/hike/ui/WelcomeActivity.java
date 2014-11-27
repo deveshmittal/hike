@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
@@ -103,7 +104,10 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	public void onHikeIconClicked(View v)
 	{
-		changeHost();
+		if (AppConfig.ALLOW_STAGING_TOGGLE)
+		{
+			changeHost();
+		}
 	}
 
 	private void changeHost()

@@ -21,7 +21,8 @@ public class MultipleConvMessage
 	
 	private ArrayList<ConvMessage> messageList;
 	private ArrayList<ContactInfo> contactList;
-	
+	private boolean createChatThread;
+	private String source;
 
 	public ArrayList<ConvMessage> getMessageList()
 	{
@@ -55,6 +56,16 @@ public class MultipleConvMessage
 		this.timeStamp = timeStamp;
 	}
 	
+	public void setCreateChatThread(boolean val)
+	{
+		this.createChatThread = val;
+	}
+	
+	public boolean getCreateChatThread()
+	{
+		return createChatThread;
+	}
+	
 	public MultipleConvMessage(ArrayList<ConvMessage> messageList, ArrayList<ContactInfo> contactList)
 	{
 		this.messageList = messageList;
@@ -68,6 +79,16 @@ public class MultipleConvMessage
 		this.timeStamp = timeStamp;
 		this.contactList = contactList;
 	}
+	
+	public MultipleConvMessage(ArrayList<ConvMessage> messageList, ArrayList<ContactInfo> contactList, long timeStamp,boolean createChatThread, String source)
+	{
+		this.messageList = messageList;
+		this.timeStamp = timeStamp;
+		this.contactList = contactList;
+		this.createChatThread = createChatThread;
+		this.source = source;
+	}
+	
 	public JSONObject serialize()
 	{
 		JSONObject object = new JSONObject();
@@ -77,7 +98,14 @@ public class MultipleConvMessage
 		{
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE);
 			object.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.MULTIPLE_FORWARD);
-		
+
+			if(source!=null)
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.SOURCE, source);
+				data.put(HikeConstants.METADATA, metadata);
+			}
+
 			data.put(HikeConstants.TIMESTAMP, timeStamp);
 			data.put(HikeConstants.MESSAGE_ID, messageList.get(0).getMsgID());
 			

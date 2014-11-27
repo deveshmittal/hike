@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.text.Html;
@@ -13,19 +12,18 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.R;
 import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.CustomFontButton;
 import com.bsb.hike.view.CustomFontTextView;
 
 public class HikeDialog
@@ -41,8 +39,9 @@ public class HikeDialog
 	public static final int SHARE_IMAGE_QUALITY_DIALOG = 6;
 
 	public static final int SMS_CLIENT_DIALOG = 7;
+	
+	public static final int HIKE_UPGRADE_DIALOG = 8;
 
-	public static final int DIWALI_DIALOG = 8;
 
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
 	{
@@ -66,8 +65,8 @@ public class HikeDialog
 			return showImageQualityDialog(context, listener, data);
 		case SMS_CLIENT_DIALOG:
 			return showSMSClientDialog(context, listener, data);
-		case DIWALI_DIALOG:
-			return showDiwaliDialog(context, listener);
+		case HIKE_UPGRADE_DIALOG:
+			return showHikeUpgradeDialog(context, data);
 		}
 
 		return null;
@@ -231,7 +230,7 @@ public class HikeDialog
 		dialog.setCanceledOnTouchOutside(true);
 		SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		final Editor editor = appPrefs.edit();
-		int quality = appPrefs.getInt(HikeConstants.IMAGE_QUALITY, ImageQuality.QUALITY_DEFAULT);
+		int quality = ImageQuality.QUALITY_DEFAULT;
 		final LinearLayout small_ll = (LinearLayout) dialog.findViewById(R.id.hike_small_container);
 		final LinearLayout medium_ll = (LinearLayout) dialog.findViewById(R.id.hike_medium_container);
 		final LinearLayout original_ll = (LinearLayout) dialog.findViewById(R.id.hike_original_container);
@@ -242,7 +241,6 @@ public class HikeDialog
 		CustomFontTextView smallSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_small_cftv);
 		CustomFontTextView mediumSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_medium_cftv);
 		CustomFontTextView originalSize = (CustomFontTextView) dialog.findViewById(R.id.image_quality_original_cftv);
-		Button always = (Button) dialog.findViewById(R.id.btn_always);
 		Button once = (Button) dialog.findViewById(R.id.btn_just_once);
 		
 		if(data!=null)
@@ -251,10 +249,6 @@ public class HikeDialog
 			int smallsz,mediumsz,originalsz;
 			if(dataBundle.length>0)
 				{
-				if(dataBundle[0]!=1)
-					header.setText(context.getString(R.string.image_quality_send) + " " + dataBundle[0] + " " + context.getString(R.string.image_quality_files_as));
-				else
-					header.setText(context.getString(R.string.image_quality_send) + " " + dataBundle[0] + " " + context.getString(R.string.image_quality_file_as));				
 				
 				originalsz = dataBundle[1].intValue();
 				smallsz = (int) (dataBundle[0] * HikeConstants.IMAGE_SIZE_SMALL);
@@ -296,11 +290,6 @@ public class HikeDialog
 				case R.id.hike_original_container:
 					showImageQualityOption(ImageQuality.QUALITY_ORIGINAL, small, medium, original);
 					break;
-				case R.id.btn_always:
-					saveImageQualitySettings(editor, small, medium, original);
-					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, true);
-					callOnSucess(listener, dialog);
-					break;
 				case R.id.btn_just_once:
 					saveImageQualitySettings(editor, small, medium, original);
 					HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REMEMBER_IMAGE_CHOICE, false);
@@ -313,7 +302,6 @@ public class HikeDialog
 		small_ll.setOnClickListener(imageQualityDialogOnClickListener);
 		medium_ll.setOnClickListener(imageQualityDialogOnClickListener);
 		original_ll.setOnClickListener(imageQualityDialogOnClickListener);
-		always.setOnClickListener(imageQualityDialogOnClickListener);
 		once.setOnClickListener(imageQualityDialogOnClickListener);
 
 		dialog.show();
@@ -440,38 +428,33 @@ public class HikeDialog
 		dialog.show();
 		return dialog;
 	}
-
-	private static Dialog showDiwaliDialog(Context context, final HikeDialogListener listener)
+	
+	
+	/**
+	 * This dialog can be used whenever we show an upgrading hike dialog from HomeActivity.
+	 * 
+	 * @param context
+	 * @param data
+	 * @return
+	 */
+	private static Dialog showHikeUpgradeDialog(Context context, Object[] data)
 	{
 		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.diwali_popup);
-		dialog.setCancelable(true);
+		dialog.setContentView(R.layout.app_update_popup);
+		dialog.setCancelable(false);
 
-		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
-		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
+		ImageView icon = (ImageView) dialog.findViewById(R.id.dialog_icon);
+		TextView titleTextView = (TextView) dialog.findViewById(R.id.dialog_header_tv);
+		TextView messageTextView = (TextView) dialog.findViewById(R.id.dialog_message_tv);
 
-		okBtn.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				listener.positiveClicked(dialog);
-			}
-		});
-
-		cancelBtn.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				listener.negativeClicked(dialog);
-			}
-		});
+		icon.setImageBitmap(HikeBitmapFactory.decodeResource(context.getResources(), R.drawable.art_sticker_mac));
+		titleTextView.setText(context.getResources().getString(R.string.sticker_shop));
+		messageTextView.setText(context.getResources().getString(R.string.hike_upgrade_string));
 
 		dialog.show();
-
 		return dialog;
 	}
+
 
 	public static interface HikeDialogListener
 	{

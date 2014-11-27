@@ -100,6 +100,8 @@ public class HikeConstants
 
 	public static final String DND_NUMBERS = "dndnumbers";
 
+	public static final String SOURCE = "source";
+
 	public static final String FILES = "files";
 
 	public static final String CONTENT_TYPE = "ct";
@@ -231,6 +233,8 @@ public class HikeConstants
 	public static final String CRICKET_MOODS = "cmoods";
 
 	public static final String COUNT = "c";
+	
+	public static final String UPDATED_SIZE = "s";
 
 	public static final String DEFAULT_SMS_CLIENT_TUTORIAL = "dsctutorial";
 
@@ -241,6 +245,8 @@ public class HikeConstants
 	public static final String RESOLUTION_ID = "resId";
 
 	public static final String NUMBER_OF_STICKERS = "nos";
+	
+	public static final String DOWNLOAD_SOURCE = "dsrc";
 	
 	public static final String TOTAL_STICKERS = "totalStickers";
 
@@ -464,6 +470,14 @@ public class HikeConstants
 	
 	public static final String FTUE_HIKE_SUPPORT = "+hike4+";
 
+	public static final String BACKUP_PREF = "backupAccount";
+
+    public static final String NUX_BOT = "+hike5+";
+
+    public static final String NUX = "nux";
+
+    public static final String STICKER_NUX = "stkNux";
+
 	public static final String UNLINK_PREF = "unlinkAccount";
 
 	public static final String DELETE_PREF = "deleteAccount";
@@ -487,6 +501,8 @@ public class HikeConstants
 	public static final String H2O_NOTIF_BOOLEAN_PREF = "hikeOfflineNotificationPref";
 
 	public static final String UPGRADE_AVATAR_PROGRESS_USER = "upgradeAvtarProgressUser";
+	
+	public static final String UPGRADING = "upgrading";
 
 	public static final String UPGRADE_MSG_HASH_GROUP_READBY = "upgradeMsgHashGroupReadby";
 	
@@ -501,13 +517,25 @@ public class HikeConstants
 	public static final String OPERATOR_SMS_ALERT_CHECKED = "opSmsAlertChecked";
 
 	public static final String SINGLE_INVITE_SMS_ALERT_CHECKED = "singleSmsAlertChecked";
-
+	
+	public static final String HIKE_CONTACTS_COUNT = "hikeContactsCount";
+	
+	public static final String SHOW_NUX_SCREEN = "show_nux_screen";
+		
+	public static final String NUX_STICKER_DETAILS = "nuxStickerDetails";
+	
 	public static final String FTUE_ADD_SMS_ALERT_CHECKED = "ftueSmsAlertChecked";
 
 	public static final String IS_GAMES_ITEM_CLICKED = "isGamesItemClicked";
 
 	public static final String IS_REWARDS_ITEM_CLICKED = "isRewardsItemClicked";
+	
+	public static final String IS_HOME_OVERFLOW_CLICKED = "isHomeOverflowClicked";
 
+	public static final String SHOW_RECENTLY_JOINED_DOT = "showRecentlyJoinedDot";
+
+	public static final String SHOW_TIMELINE_RED_DOT = "showTimelineRedDot";
+	
 	public static final String IS_OF_ICON_CLICKED = "isOfIconClicked";
 
 	public static final String DONE = "Done";
@@ -576,6 +604,8 @@ public class HikeConstants
 	public static final int CALL_ME_WAIT_TIME = 150 * 1000;
 
 	public static final int NETWORK_ERROR_POP_UP_TIME = 120 * 1000;
+
+	public static final int BACKUP_RESTORE_UI_DELAY = 2 * 1000; 
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 
@@ -652,7 +682,9 @@ public class HikeConstants
 	public static final String MAIL = "support@hike.in";
 	
 	public static final int MAX_RECENTS_TO_SHOW = 10;
-
+	
+	public static final int MAX_RECENTLY_JOINED_HIKE_TO_SHOW = 5;
+	
 	// Had to add this constant since its only available in the android API for
 	// Honeycomb and higher.
 	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
@@ -742,6 +774,8 @@ public class HikeConstants
 	public static final int SHOW_CREDITS_AFTER_NUM = 10;
 
 	public static final String HIKE_MEDIA_DIRECTORY_ROOT = Environment.getExternalStorageDirectory() + "/Hike/Media";
+
+	public static final String HIKE_BACKUP_DIRECTORY_ROOT = Environment.getExternalStorageDirectory() + "/Hike/Backup";
 
 	public static final String PROFILE_ROOT = "/hike Profile Images";
 
@@ -936,6 +970,16 @@ public class HikeConstants
 	
 	public static final String SUCCESSFUL_SELECTIONS = "s";
 	
+	public static final String DRAWABLE = "drawable";
+	
+	public static final String NUX_STICKERS = "stickers";
+	
+	public static final String SHOW_NUX_INVITE_MODE = "showNuxInviteMode";
+
+	public static final String NUX_HOME_INVITE_FOOTER = "nuxHomeInviteFooter";
+
+	public static final String NUX_INVITE_FORWARD = "nuxInviteForward";
+
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
@@ -1045,6 +1089,8 @@ public class HikeConstants
 		public static final String URL_TO_LOAD = "urlToLoad";
 
 		public static final String TITLE = "title";
+		
+		public static final String WEBVIEW_ALLOW_LOCATION = "allocLoc";
 
 		public static final String FIRST_TIME_USER = "firstTimeUser";
 
@@ -1277,6 +1323,12 @@ public class HikeConstants
 		public static final String DELETED_MESSAGE_TYPE = "deletedMessageType";
 
 		public static final String CURRENT_POSITION = "currentPosition";
+		
+		public static final String FTUE_FORWARD = "ftueForward";
+		
+		public static final String FTUE_STICKER_ID_LIST = "ftueStickerIdsList";
+		
+		public static final String FTUE_STICKER_CATEGORY_LIST = "ftueStickerCategoryList";
 	}
 
 	public static final class LogEvent
@@ -1565,6 +1617,19 @@ public class HikeConstants
 		
 		public static final String PIN_HISTORY_VIA_PIN_CLICK = "pinHistoryViaPinClick";
 		
+		public static final String STICKER_BTN_CLICKED = "stickerBtnClicked";
+		
+		public static final String STICKER_SETTING_BTN_CLICKED = "stickerSettingBtnClicked";
+		
+		public static final String SEEN_REORDERING_TIP = "seenReorderingTip";
+		
+		public static final String UPDATE_ALL_CONFIRM_CLICKED = "updateAllConfirmClicked";
+		
+		public static final String UPDATE_ALL_CANCEL_CLICKED = "updateAllCancelClicked";
+		
+		public static final String STICKER_CHECK_BOX_CLICKED = "stickerChkBoxClicked";
+		
+		public static final String STICKER_UNCHECK_BOX_CLICKED = "stickerUnchkBoxClicked";
 		/*
 		 * Settings screen <screen> = settingsS <event> = notifNUJEnabled, notifH2OEnabled, notifNUJDisabled, notifH2ODisabled
 		 */
@@ -1618,6 +1683,19 @@ public class HikeConstants
 		public static final String ATOMIC_APP_TIP_HIKE_EXTRA_CLICKED = "atomicAppHikeExtraClick";
 
 		public static final String ATOMIC_APP_TIP_HIKE_REWARDS_CLICKED = "atomicAppHikeRewardsClick";
+
+		/*
+		 * NUX Events 
+		 */
+		public static final String NUX_STICKER_CLICKED = "nuxStckrClk";
+
+		public static final String NUX_STICKER_FORWARD = "nuxStckrFwd";
+
+		public static final String NUX_INVITE_BUTTON_CLICKED = "nuxInvteBtnClk";
+
+		public static final String NUX_INVITE_SENT = "nuxInvteSent";
+
+		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
 	}
 
 	public static final class MqttMessageTypes
@@ -1733,6 +1811,8 @@ public class HikeConstants
 		public static final String REMOVE_PIC = "icr";
 		
 		public static final String MULTIPLE_FORWARD = "mm";
+		
+		public static final String TIP = "tip";
 
 		public static final String VOIP_HANDSHAKE = "vhs";
 		
@@ -1794,12 +1874,6 @@ public class HikeConstants
 	}
 
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1, R.string.native_sms_invite_2, R.string.native_sms_invite_3, R.string.native_sms_invite_4, R.string.native_sms_invite_5, R.string.native_sms_invite_6 };
-	
-	public static final int[] MALE_SELECTED_STRINGS = { R.string.male_selected_string_1, R.string.male_selected_string_2, R.string.male_selected_string_3,
-			R.string.male_selected_string_4, R.string.male_selected_string_5 };
-
-	public static final int[] FEMALE_SELECTED_STRINGS = { R.string.female_selected_string_1, R.string.female_selected_string_2, R.string.female_selected_string_3,
-			R.string.female_selected_string_4, R.string.female_selected_string_5 };
 
 	// TODO need to finalize this with AM
 	public static final int FRIENDS_LIMIT_MAGIC_NUMBER = 8;
@@ -1895,9 +1969,38 @@ public class HikeConstants
 	public static final int ATOMIC_APP_TIP_HIKE_REWARDS = 11;
 
 	public static final int SHARED_MEDIA_TYPE = 1;
+
+	public static enum STResult
+	{
+		SUCCESS, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, SERVER_ERROR, CARD_UNMOUNT, NO_SD_CARD, FILE_EXPIRED
+	}
 	
+	public static final String PREVIEW_IMAGE = "previewimg";
+	public static final String ENABLE_IMAGE = "enableimg";
+	public static final String DISABLE_IMAGE = "disableimg";
+	public static final String SIZE = "size";	
 	public static final int NORMAL_MESSAGE_TYPE = 0;
 	public static final int MULTI_FORWARD_MESSAGE_TYPE = 1;
 	public static final int SHARED_PIN_TYPE = 2;
 	public static final String SHOWN_MULTI_FORWARD_TIP = "shownMultiForwardTip";
+
+	public static final String VISIBLITY = "visibility";
+
+	public static final String INDEX = "index";
+	
+	public static final String CAT_NAME = "name";
+	
+	public static final String DELIMETER = ":";
+		
+	public static final String HIKE_EXTRAS_NAME = "hike_extras_name";
+	
+	public static final String HIKE_EXTRAS_URL = "hike_extras_url";
+	
+	public static final String REWARDS_NAME = "rewards_name";
+		
+	public static final String REWARDS_URL = "rewards_url";
+
+	public static final String SHOP = "shop";
+
+	public static final String BADGE = "badge";
 }

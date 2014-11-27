@@ -142,7 +142,7 @@ public class DbConversationListener implements Listener
 		{
 			MultipleConvMessage multiConvMessages = (MultipleConvMessage) object;
 
-			mConversationDb.addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),false);
+			mConversationDb.addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),multiConvMessages.getCreateChatThread());
 			// after DB insertion, we need to update conversation UI , so sending event which contains all contacts and last message for each contact
 			multiConvMessages.sendPubSubForConvScreenMultiMessage();
 			// publishing mqtt packet

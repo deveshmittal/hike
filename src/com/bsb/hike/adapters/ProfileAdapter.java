@@ -677,7 +677,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.subText.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
 			}
 
-			Linkify.addLinks(viewHolder.text, Linkify.ALL);
+			Linkify.addLinks(viewHolder.subText, Linkify.ALL);
 			viewHolder.text.setMovementMethod(null);
 
 			viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(true, context));

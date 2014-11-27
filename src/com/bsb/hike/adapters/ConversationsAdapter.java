@@ -947,6 +947,10 @@ public class ConversationsAdapter extends BaseAdapter
 				View view = listView.getChildAt(i);
 				int indexOfData = listView.getFirstVisiblePosition() + i;
 
+				if(indexOfData >= getCount())
+				{
+					return;
+				}
 				ViewType viewType = ViewType.values()[getItemViewType(indexOfData)];
 				/*
 				 * Since tips cannot have custom avatars, we simply skip these cases.

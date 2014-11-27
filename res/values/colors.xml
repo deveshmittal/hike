@@ -165,7 +165,7 @@
     <color name="update_no_btn">#73716d</color>
     <color name="chat_thread_default_bg">#e8e3d8</color>
     <color name="actionbar_text">#faf8f2</color>
-    <color name="sticker_emoticon_divider">#3d000000</color>
+    <color name="sticker_emoticon_divider">#1F1F21</color>
     <color name="almost_white">#fffffc</color>
     <color name="updates_bg">#e7e2d6</color>
     <color name="updates_text">#292d2e</color>
@@ -362,5 +362,21 @@
     <color name="diwali_popup_divider">#b51f30</color>
     <color name="diwali_popup_txt">#febcbc</color>
     <color name="diwali_popup_btn_pressed">#33000000</color>
+    <color name="restoring_red">#fe6565</color>
+    <color name="restoring_orange">#ffbc3c</color>
+    <color name="restoring_green">#38e5be</color>
+    <color name="restore_success_green">#69dd71</color>
+    <color name="shop_icon_default_color">#2C2D31</color>
+    <color name="shop_icon_color">#008fe1</color>
+    <color name="erase_key_color">#434748</color>
+    <color name="shop_banner_bg">#39354c</color>
+    <color name="sticker_settings_update_color">#60B141</color>
+    <color name="white_100">#FFFFFFFF</color>
+    <color name="sticker_shop_update_color">#F260B141</color>
+    <color name="shop_update_details_color">#C4EF94</color>
+    <color name="shop_update_invisible_color">#cccccc</color>
+    <color name="sticker_pallete_bg_color">#555555</color>
+    <color name="sticker_drag_tip_bg_color">#34d5b1</color>
+    <color name="black_10">#1A000000</color>
 </resources>
 	
