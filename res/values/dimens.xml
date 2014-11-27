@@ -161,5 +161,5 @@
 	<dimen name="welcome_with_love_top">30dp</dimen>
 	<dimen name="diwali_popup_width">290dp</dimen>
 	<dimen name="diwali_popup_height">380dp</dimen>
-	<dimen name="voip_avatar_size">100dp</dimen>
+	<dimen name="voip_avatar_size">125dp</dimen>
 </resources>

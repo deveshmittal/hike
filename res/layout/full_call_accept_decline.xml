@@ -35,21 +35,21 @@
             android:layout_above="@+id/fullPhoneNumberView1"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="90dp"
-            android:contentDescription="ProfileImage" >
-
-            
-            <ImageView 
-                android:layout_width="127dp"
-                android:layout_height="127dp"
+            android:contentDescription="ProfileImage"
+            android:background="@drawable/voip_avatar_circle"
+             >
+            <ImageView
+                android:layout_width="126dp"
+                android:layout_height="126dp"
                 android:layout_gravity="center"
-                android:src="@drawable/voip_avatar_circle"
-                />
+                android:src="@drawable/voip_avatar_circle" />
+      
             <com.bsb.hike.ui.utils.RecyclingImageView
                 android:id="@+id/fullvoipContactPicture"
                 android:layout_width="125dp"
-                android:layout_height="125dp"
-                android:layout_centerVertical="true"
+                android:layout_height="125dp"             
                 android:layout_gravity="center"
+                android:scaleType="centerInside"
                 android:contentDescription="Profile Image"
                 android:src="@drawable/voip_test_dp" />
         </FrameLayout>
@@ -146,6 +146,7 @@
                 android:id="@+id/fullSpeakerSound"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
+                android:layout_marginLeft="4dp"
                 android:layout_gravity="center"
                 android:scaleType="centerInside"
                 android:src="@drawable/speaker_sound"

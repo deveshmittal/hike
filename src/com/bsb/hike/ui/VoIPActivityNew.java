@@ -20,6 +20,8 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaPlayer;
@@ -32,6 +34,7 @@ import android.os.PowerManager;
 import android.os.Vibrator;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
@@ -44,12 +47,15 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
+import android.view.animation.BounceInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
+import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,6 +64,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.VoIPServiceNew;
@@ -147,6 +155,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		    inCallTimer.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
 		    avatarContainer.clearAnimation();
 		    displayHandler.postDelayed(new CallLengthManager(), 500);
+		    inCallTimer.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+		    
 		    DPReposition.end();
 			
 		}
@@ -619,7 +629,16 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 		
 		declineCall = (ImageView)this.findViewById(R.id.fulldeclineButton);
 		declineCall.setVisibility(View.INVISIBLE);
-		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
+		//dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
+		ScaleAnimation scaleAnim = new ScaleAnimation(1.15f, 0.75f, 1.15f, 0.75f, 0.5f, 0.5f);
+		scaleAnim.setInterpolator(new BounceInterpolator());
+		scaleAnim.setDuration(600);
+		scaleAnim.setRepeatCount(Animation.INFINITE);
+		scaleAnim.setRepeatMode(Animation.REVERSE);
+		
+		dpAnim = scaleAnim;
+		
+		
 		screenOff();
 		callSlider = (ImageView)this.findViewById(R.id.fullcallSlider);
 //		callSlider.setClickable(true);
@@ -654,10 +673,10 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 //		setContentView(R.layout.incall_layout);
 		displayPic = (ImageView)this.findViewById(R.id.fullvoipContactPicture);
 //		displayPic = (ImageView)this.findViewById(R.id.inCallContactPicture1);
-		setDisplayPic();
-//		dpAnim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.voip_dp_bounce);
-//		displayPic.startAnimation(dpAnim);
-//		displayPic.animate();
+//		setDisplayPic();
+
+		
+
 		muteFrame = (FrameLayout) this.findViewById(R.id.fullMicButtonFrame);
 		muteButton =(ImageView)this.findViewById(R.id.fullMicButton);
 		muteButton.setVisibility(View.VISIBLE);
@@ -710,25 +729,12 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 
 			
 		});
-//		endCall = (ImageButton)this.findViewById(R.id.endCallButton1);
-//		endCall.setOnClickListener(new OnClickListener() {
-//			
-//			@Override
-//			public void onClick(View v) {
-//				raiseEndCallToast();
-//				VoIPServiceNew.getVoIPSerivceInstance().endCall();
-//				finish();
-//			}
-//		});
-		
-//		inCallCallNo = (TextView)this.findViewById(R.id.PhoneNumberView1);
-//		inCallCallNo.setText(HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(storedId).getNameOrMsisdn());
-//		inCallCallNo.setText(mContactName);
-//		inCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
+
+
 		if (VoIPServiceNew.getVoIPSerivceInstance().client.connectionState != "CONNECTED"){
 			inCallTimer.setText("CONNECTING...");
 			inCallTimer.setVisibility(View.VISIBLE);
-			timerAnim.start();
+			timerAnim.start();			
 		}
 		else{
 			avatarContainer.clearAnimation();
@@ -771,6 +777,7 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 //				displayPic.clearAnimation();
 //				dpAnim.cancel();
 //				dpAnim.reset();
+				
 				startTime = System.currentTimeMillis();
 				displayHandler.post(new CallLengthManager() );
 			}
@@ -903,25 +910,28 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 			Log.d("displayPic","is Null");
 			return;
 		}
+		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true);
+		int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.voip_avatar_size);		
+		(new ProfilePicImageLoader(this, mBigImageSize)).loadImage(mContactNumber+"pp", displayPic, false, false, false);
+		
+		
+//		Log.d("ContactNumber",mContactNumber);
+		if (drawable != null)
+		{
 
-//		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true);
-		int mBigImageSize = getResources().getDimensionPixelSize(R.dimen.voip_avatar_size);
-		(new ProfilePicImageLoader(this, mBigImageSize)).loadImage(mContactNumber+"pp", displayPic, false, false, true);
-		Bitmap img = getRoundedShape(((BitmapDrawable)displayPic.getDrawable()).getBitmap());
-		displayPic.setImageBitmap(img);
-		Log.d("ContactNumber",mContactNumber);
-//		if (drawable != null)
-//		{
+			(new ProfilePicImageLoader(this, mBigImageSize)).loadImage(mContactNumber+"pp", displayPic, false, false, true);
+			displayPic.setImageBitmap(HikeBitmapFactory.getCircularBitmap(((BitmapDrawable)displayPic.getDrawable()).getBitmap()));
+			displayPic.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true));
 //			displayPic.setScaleType(ScaleType.FIT_CENTER);
 //			displayPic.setImageDrawable(drawable);
 //			displayPic.setBackgroundDrawable(null);
-//		}
-//		else
-//		{
-//			displayPic.setScaleType(ScaleType.CENTER_INSIDE);
-//			displayPic.setImageResource(R.drawable.ic_default_avatar);
-//			displayPic.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true));
-//		}
+		}
+		else
+		{
+			displayPic.setScaleType(ScaleType.CENTER_INSIDE);
+			displayPic.setImageResource(R.drawable.ic_default_avatar);
+			displayPic.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true));
+		}
 	}
 
 
@@ -972,8 +982,8 @@ public class VoIPActivityNew extends Activity implements HikePubSub.Listener{
 	
 	
 	public Bitmap getRoundedShape(Bitmap scaleBitmapImage) {
-	    float targetWidth = 125.0f*1.5f;
-	    float targetHeight = 125.0f*1.5f;
+	    float targetWidth = getResources().getDimensionPixelSize(R.dimen.voip_avatar_size);;
+	    float targetHeight = getResources().getDimensionPixelSize(R.dimen.voip_avatar_size);;
 	    Bitmap targetBitmap = Bitmap.createBitmap((int)targetWidth, 
 	                        (int)targetHeight,Bitmap.Config.ARGB_8888);
 
