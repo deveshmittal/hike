@@ -2015,7 +2015,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				else
 				{
-					initiateFileTransferFromIntentData(fileType, filePath, fileKey, isRecording, recordingDuration);
+					int attachmentType = FTAnalyticEvents.OTHER_ATTACHEMENT;
+					/*
+					 * Added to know the attachment type when selected from file. 
+					 */
+					if(intent.hasExtra(FTAnalyticEvents.FT_ATTACHEMENT_TYPE))
+						attachmentType = FTAnalyticEvents.FILE_ATTACHEMENT;
+					initiateFileTransferFromIntentData(fileType, filePath, fileKey, isRecording, recordingDuration, attachmentType);
 				}
 
 				// Making sure the file does not get forwarded again on
@@ -2183,10 +2189,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void initiateFileTransferFromIntentData(String fileType, String filePath)
 	{
-		initiateFileTransferFromIntentData(fileType, filePath, null, false, -1);
+		initiateFileTransferFromIntentData(fileType, filePath, null, false, -1, FTAnalyticEvents.OTHER_ATTACHEMENT);
 	}
 
-	private void initiateFileTransferFromIntentData(String fileType, String filePath, String fileKey, boolean isRecording, long recordingDuration)
+	private void initiateFileTransferFromIntentData(String fileType, String filePath, String fileKey, boolean isRecording, long recordingDuration, int attachementType)
 	{
 		HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
 
@@ -2198,7 +2204,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else
 		{
-			initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true, FTAnalyticEvents.OTHER_ATTACHEMENT);
+			initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true, attachementType);
 		}
 
 	}

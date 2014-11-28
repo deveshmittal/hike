@@ -2551,14 +2551,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				animatedProgress = (float) chunkSize;
 				animatedProgress = animatedProgress / fss.getTotalSize() ;
 			}
-			
-			holder.circularProgress.resetProgress();
+			if(holder.circularProgress.getRelatedMsgId() == -1)
+				holder.circularProgress.resetProgress();
 			if (Utils.isHoneycombOrHigher()){
 				holder.circularProgress.stopAnimation();
-				holder.circularProgress.setAnimatedProgress(0, (int) (animatedProgress * 100), 6 * 1000, msgId);
+				holder.circularProgress.setAnimatedProgress(0, (int) (animatedProgress * 100), 6 * 1000);
 			}else{
 				holder.circularProgress.setProgress(animatedProgress);
 			}
+			holder.circularProgress.setRelatedMsgId(msgId);
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}
@@ -2578,9 +2579,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				if (Utils.isHoneycombOrHigher())
 				{
 					if(holder.circularProgress.getCurrentProgress() < (0.95f) && progress == 100){
-						holder.circularProgress.setAnimatedProgress((int) (holder.circularProgress.getCurrentProgress() * 100), progress, 300, msgId);
+						holder.circularProgress.setAnimatedProgress((int) (holder.circularProgress.getCurrentProgress() * 100), progress, 300);
 					}else
-						holder.circularProgress.setAnimatedProgress(progress, progress + (int) (animatedProgress * 100), 6 * 1000, msgId);
+						holder.circularProgress.setAnimatedProgress(progress, progress + (int) (animatedProgress * 100), 6 * 1000);
 				}
 			}
 			holder.circularProgress.setVisibility(View.VISIBLE);

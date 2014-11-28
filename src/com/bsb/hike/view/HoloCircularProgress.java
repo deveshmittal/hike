@@ -652,8 +652,10 @@ public class HoloCircularProgress extends View {
 	}
 	
 	private ObjectAnimator animation;
+
+	private long msgId = -1;
 	
-	public synchronized void setAnimatedProgress(int start, int target, int duration, long id)
+	public synchronized void setAnimatedProgress(int start, int target, int duration)
 	{
 		if (Utils.isHoneycombOrHigher())
 		{
@@ -706,5 +708,15 @@ public class HoloCircularProgress extends View {
 	public float getCurrentProgress()
 	{
 		return mProgress;
+	}
+
+	public long getRelatedMsgId()
+	{
+		return msgId;
+	}
+
+	public void setRelatedMsgId(long id)
+	{
+		this.msgId = id;
 	}
 }
