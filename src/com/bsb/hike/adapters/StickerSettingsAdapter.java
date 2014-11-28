@@ -43,6 +43,8 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	private int lastVisibleIndex = 0;   //gives the index of last visible category in the stickerCategoriesList
 	
 	private StickerOtherIconLoader stickerOtherIconLoader;
+	
+	private StickerCategory draggedCategory = null;
 
 	public StickerSettingsAdapter(Context context, List<StickerCategory> stickerCategories)
 	{
@@ -159,6 +161,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 				viewHolder.checkBox.setVisibility(View.GONE);
 
 				break;
+			case StickerCategory.DONE_SHOP_SETTINGS:  //To be treated as same
 			case StickerCategory.DONE:
 				showUIForState(state, viewHolder, category.getCategoryId(), category.isVisible());
 				
@@ -190,7 +193,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	 */
 	private void showUIForState(int state, ViewHolder viewHolder, String categoryId, boolean isVisible)
 	{
-		viewHolder.updateAvailable.setVisibility(state == StickerCategory.DONE ? View.GONE : View.VISIBLE);
+		viewHolder.updateAvailable.setVisibility((state == StickerCategory.DONE || state == StickerCategory.DONE_SHOP_SETTINGS ) ? View.GONE : View.VISIBLE);
 		viewHolder.updateAvailable.setText(state == StickerCategory.DONE ? R.string.see_them : R.string.retry_sticker);
 		viewHolder.updateAvailable.setTextColor(isVisible ? mContext.getResources().getColor(R.color.sticker_settings_update_color) : mContext.getResources().getColor(R.color.shop_update_invisible_color));
 		viewHolder.downloadProgress.setVisibility(View.GONE);
@@ -218,6 +221,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	public void drop(int from, int to)
 	{
 		StickerCategory category = getItem(from);
+		draggedCategory = category;
 		if ((from == to) || (!category.isVisible())) // Dropping at the same position. No need to perform Drop.
 		{
 			return;
@@ -386,5 +390,10 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 	public int getLastVisibleIndex()
 	{
 		return lastVisibleIndex;
+	}
+	
+	public StickerCategory getDrggedCategory()
+	{
+		return draggedCategory;
 	}
 }
