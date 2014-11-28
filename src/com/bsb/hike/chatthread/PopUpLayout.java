@@ -10,6 +10,7 @@ import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
+import android.widget.PopupWindow.OnDismissListener;
 
 /**
  * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -26,18 +27,6 @@ public abstract class PopUpLayout implements OnTouchListener {
 		this.context = context;
 	}
 
-	/**
-	 * It should return view which you want to show
-	 * 
-	 */
-
-	public abstract View getView();
-
-	/**
-	 * do processing to inflate your view, it will be called again and again
-	 * whenever showPopUpWindow is called
-	 */
-	public abstract void initView();
 
 	/**
 	 * this method calls {@link #showPopUpWindow(int, int, int, int, View)}
@@ -47,8 +36,8 @@ public abstract class PopUpLayout implements OnTouchListener {
 	 * @ordered
 	 */
 
-	public void showPopUpWindow(int width, int height, View anchor) {
-		showPopUpWindow(width, height, 0, 0, anchor);
+	public void showPopUpWindow(int width, int height, View anchor,View view) {
+		showPopUpWindow(width, height, 0, 0, anchor,view);
 	}
 
 	/**
@@ -64,9 +53,9 @@ public abstract class PopUpLayout implements OnTouchListener {
 	 * @param anchor
 	 * @param context
 	 */
-	public void showPopUpWindowNoDismiss(int xoffset, int yoffset, View anchor) {
+	public void showPopUpWindowNoDismiss(int xoffset, int yoffset, View anchor,View view) {
 		showPopUpWindow(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
-				xoffset, yoffset, anchor);
+				xoffset, yoffset, anchor,view);
 
 		// This is a workaround for not to dismiss popup window if anywhere out
 		// side is touched, for layout below we have made our popup with
@@ -75,7 +64,7 @@ public abstract class PopUpLayout implements OnTouchListener {
 		// action_outside event, so we can return true to eat that event
 		// BUT Point to note here is : even though the pop up is not dismissed,
 		// view behind it will still get onclick event
-		FrameLayout viewParent = (FrameLayout) getView().getParent();
+		FrameLayout viewParent = (FrameLayout) view.getParent();
 		WindowManager.LayoutParams lp = (WindowManager.LayoutParams) viewParent
 				.getLayoutParams();
 		lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -84,7 +73,6 @@ public abstract class PopUpLayout implements OnTouchListener {
 				.getSystemService(context.WINDOW_SERVICE);
 		windowManager.updateViewLayout(viewParent, lp);
 
-		getView().setTag("dummy");
 		popup.setTouchInterceptor(this);
 	}
 
@@ -100,10 +88,9 @@ public abstract class PopUpLayout implements OnTouchListener {
 	 * @param anchor
 	 */
 	public void showPopUpWindow(int width, int height, int xoffset,
-			int yoffset, View anchor) {
-		initView();
+			int yoffset, View anchor,View view) {
 		if (popup == null) {
-			initPopUpWindow(width, height, getView(), context);
+			initPopUpWindow(width, height, view, context);
 		}
 
 		popup.showAsDropDown(anchor, xoffset, yoffset);
@@ -164,5 +151,9 @@ public abstract class PopUpLayout implements OnTouchListener {
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		return event.getAction() == MotionEvent.ACTION_OUTSIDE;
+	}
+	
+	public void setOnDismissListener(OnDismissListener onDismissListener){
+		popup.setOnDismissListener(onDismissListener);
 	}
 }
