@@ -18,7 +18,7 @@ import android.widget.PopupWindow.OnDismissListener;
  * @generated
  */
 
-public abstract class PopUpLayout implements OnTouchListener {
+public  class PopUpLayout implements OnTouchListener {
 
 	protected PopupWindow popup;
 	protected Context context;

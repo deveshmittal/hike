@@ -4,7 +4,6 @@ import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
@@ -23,8 +22,9 @@ import com.bsb.hike.R;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 
-public class ThemePicker extends PopUpLayout implements BackPressListener,
-		OnDismissListener, OnTouchListener, OnClickListener {
+public class ThemePicker implements BackPressListener, OnDismissListener,
+		OnClickListener {
+
 	private static final String TAG = "themepicker";
 
 	public static interface ThemePickerListener {
@@ -41,12 +41,13 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 	private ChatTheme currentSelected;
 	private ThemePickerListener listener;
 	private boolean listenerInvoked = false;
+	private PopUpLayout popUpLayout;
 
 	public ThemePicker(SherlockFragmentActivity sherlockFragmentActivity,
 			ThemePickerListener listener) {
-		super(sherlockFragmentActivity.getApplicationContext());
 		this.sherlockFragmentActivity = sherlockFragmentActivity;
 		this.listener = listener;
+		this.popUpLayout = new PopUpLayout(sherlockFragmentActivity.getApplicationContext());
 	}
 
 	/**
@@ -72,11 +73,12 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 		Logger.i(TAG, "show theme picker");
 		// do processing
 		sherlockFragmentActivity.startActionMode(actionmodeCallback);
-		showPopUpWindowNoDismiss(xoffset, yoffset, anchor);
-		popup.setOnDismissListener(this);
+		initView();
+		popUpLayout.showPopUpWindowNoDismiss(xoffset, yoffset, anchor,
+				getView());
+		popUpLayout.setOnDismissListener(this);
 	}
 
-	@Override
 	public View getView() {
 		return viewToDisplay;
 	}
@@ -85,7 +87,6 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 	 * This methos inflates view needed to show theme picker, if view is
 	 * inflated already (not null) We simply return
 	 */
-	@Override
 	public void initView() {
 		if (viewToDisplay != null) {
 			return;
@@ -146,8 +147,8 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 					int position, long id) {
 				ChatTheme selected = ChatTheme.values()[position];
 				gridAdapter.notifyDataSetChanged();
-				if(selected != currentSelected){
-				listener.themeClicked(selected);
+				if (selected != currentSelected) {
+					listener.themeClicked(selected);
 				}
 				currentSelected = selected;
 			}
@@ -174,7 +175,7 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 		public void onDestroyActionMode(ActionMode mode) {
 			Logger.i(TAG, "on destroy actionmode");
 			actionMode = null;
-			dismiss();
+			popUpLayout.dismiss();
 			// we are not getting click event of close button in action bar, so
 			// if action bar is closed because of click there, we fallback
 			// onlistenerInvoked listenerInvoked becomes true if we click on
@@ -203,7 +204,7 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 
 	@Override
 	public boolean onBackPressed() {
-		if (isShowing()) {
+		if (popUpLayout.isShowing()) {
 			actionMode.finish();
 			return true;
 		}
@@ -240,8 +241,12 @@ public class ThemePicker extends PopUpLayout implements BackPressListener,
 		if (arg0.getId() == R.id.done_container) {
 			listener.themeSelected(currentSelected);
 			listenerInvoked = true;
-			dismiss();
+			popUpLayout.dismiss();
 		}
+	}
+
+	public boolean isShowing() {
+		return popUpLayout.isShowing();
 	}
 
 }
