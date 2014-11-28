@@ -1059,6 +1059,8 @@ public class HikeConstants
 
 		public static final String GENDER = "gender";
 
+		public static final String RESTORE_STATUS = "restoreStatus";
+
 		public static final String OVERLAY_SHOWING = "overlayShowing";
 
 		public static final String GROUP_CHAT = "groupChat";

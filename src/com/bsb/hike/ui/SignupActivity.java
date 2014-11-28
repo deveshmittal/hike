@@ -234,6 +234,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		public Boolean isFemale = null;
 
 		public Birthday birthday = null;
+		
+		public String restoreStatus = null;
 	}
 	
 	private class ViewProperties
@@ -326,15 +328,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				prepareLayoutForScanning(savedInstanceState);
 				break;
 			case BACKUP_FOUND:
+				prepareLayoutForBackupFound(savedInstanceState);
+				break;
 			case RESTORING_BACKUP:
-				if (mTask.getStateValue() == null || mTask.getStateValue().state != State.RESTORING_BACKUP)
-				{
-					prepareLayoutForBackupFound(savedInstanceState);
-				}
-				else
-				{
-					prepareLayoutForRestoringAnimation(savedInstanceState);
-				}
+				prepareLayoutForRestoringAnimation(savedInstanceState,null);
 				break;
 			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
@@ -1075,15 +1072,20 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 	}
 	
-	private void prepareLayoutForRestoringAnimation(Bundle savedInstanceState)
+	private void prepareLayoutForRestoringAnimation(Bundle savedInstanceState, StateValue stateValue)
 	{
 		nextBtnContainer.setVisibility(View.GONE);
 		setupActionBarTitle();
 		String restoreStatus = null;
-		if (mTask.getStateValue() != null)
+		if (savedInstanceState != null && savedInstanceState.containsKey(HikeConstants.Extras.RESTORE_STATUS))
 		{
-			restoreStatus = mTask.getStateValue().value;
+			restoreStatus = savedInstanceState.getString(HikeConstants.Extras.RESTORE_STATUS);
 		}
+		else if (stateValue != null)
+		{
+			restoreStatus = stateValue.value;
+		}
+		mActivityState.restoreStatus = restoreStatus;
 		
 		if (TextUtils.isEmpty(restoreStatus))
 		{
@@ -1091,7 +1093,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			TextView hint = (TextView) restoringBackupLayout.findViewById(R.id.txt_restore_hint);
 			title.setText(R.string.restoring___);
 			hint.setText(R.string.restoring____hint);
-			if (savedInstanceState == null)
+			if (savedInstanceState == null && stateValue == null)
 			{
 				onRestoreAnimation();
 			}
@@ -1319,7 +1321,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			public void onAnimationEnd(Animation animation)
 			{
 				viewFlipper.setDisplayedChild(RESTORING_BACKUP);
-				prepareLayoutForRestoringAnimation(null);
+				prepareLayoutForRestoringAnimation(null,null);
 			}
 		});
 		
@@ -1386,7 +1388,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private void initializeRestore()
 	{
-		finishPreRestoreAnimation();
 		sdCardProp = new ViewProperties();
 		ImageView sdCard = (ImageView) backupFoundLayout.findViewById(R.id.sd_card);
 		int [] screenLocation = new int[2];
@@ -1395,6 +1396,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		sdCardProp.top = screenLocation[1];
 		sdCardProp.width = sdCard.getWidth();
 		sdCardProp.height = sdCard.getHeight();
+		finishPreRestoreAnimation();
 	}
 	private void onRestoreAnimation()
 	{
@@ -1816,6 +1818,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			outState.putBoolean(HikeConstants.Extras.GENDER, mActivityState.isFemale);
 		}
+		outState.putString(HikeConstants.Extras.RESTORE_STATUS, mActivityState.restoreStatus);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -2024,7 +2027,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			}
 			break;
 		case RESTORING_BACKUP:
-			prepareLayoutForRestoringAnimation(null);
+			if (viewFlipper.getDisplayedChild() != RESTORING_BACKUP)
+			{
+				viewFlipper.setDisplayedChild(RESTORING_BACKUP);
+			}
+			prepareLayoutForRestoringAnimation(null,stateValue);
 			break;
 		}
 		setListeners();

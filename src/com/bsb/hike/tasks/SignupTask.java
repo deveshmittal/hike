@@ -132,8 +132,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	private String userName;
 	
-	private StateValue mStateValue;
-
 	private int numOfHikeContactsCount = 0;
 	
 	private static final String INDIA_ISO = "IN";
@@ -630,13 +628,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			while (!TextUtils.isEmpty(this.data))
 			{
 				this.data = null;
-				mStateValue = new StateValue(State.RESTORING_BACKUP,null);
 				boolean status = DBBackupRestore.getInstance(context).restoreDB();
 				if (status)
 				{
 					HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
 					ContactManager.getInstance().init(context);
-					mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString());
 					synchronized (this)
 					{
 						try
@@ -648,7 +644,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 							e.printStackTrace();
 						}
 					}
-					publishProgress(mStateValue);
+					publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString()));
 					synchronized (this)
 					{
 						try
@@ -663,8 +659,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				}
 				else
 				{
-					mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.FALSE.toString());
-					publishProgress(mStateValue);
+					publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.FALSE.toString()));
 					synchronized (this)
 					{
 						try
@@ -677,6 +672,10 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 							Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
 						}
 					}
+				}
+				if (!TextUtils.isEmpty(this.data))
+				{
+					publishProgress(new StateValue(State.RESTORING_BACKUP,null));
 				}
 			}
 			this.data = null;
@@ -707,11 +706,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		edit.commit();
 		return Boolean.TRUE;
-	}
-	
-	public StateValue getStateValue()
-	{
-		return mStateValue;
 	}
 
 	/**
