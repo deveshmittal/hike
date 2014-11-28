@@ -372,6 +372,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 		case GENDER:
 		case SCANNING_CONTACTS:
+		case BACKUP_FOUND:
+		case RESTORING_BACKUP:
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 			break;
 		default:
@@ -1439,7 +1441,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 						
 						restoreProgress.setVisibility(View.VISIBLE);
 						setupOnRestoreProgress();
-						mTask.addUserInput("true");
 					}
 				});
 				sdCardAnimationSet.addAnimation(sdCardTranslateAnimation);
@@ -1652,6 +1653,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		@Override
 		public void onClick(View v)
 		{
+			mTask.addUserInput("true");
 			initializeRestore();
 		}
 	};

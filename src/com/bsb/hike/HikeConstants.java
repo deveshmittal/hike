@@ -602,7 +602,7 @@ public class HikeConstants
 
 	public static final int NETWORK_ERROR_POP_UP_TIME = 120 * 1000;
 
-	public static final int BACKUP_RESTORE_UI_DELAY = 2 * 1000; 
+	public static final int BACKUP_RESTORE_UI_DELAY = 3 * 1000; 
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 

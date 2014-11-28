@@ -629,21 +629,21 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			{
 				this.data = null;
 				boolean status = DBBackupRestore.getInstance(context).restoreDB();
+				synchronized (this)
+				{
+					try
+					{
+						this.wait(HikeConstants.BACKUP_RESTORE_UI_DELAY);
+					}
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+				}
 				if (status)
 				{
 					HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
 					ContactManager.getInstance().init(context);
-					synchronized (this)
-					{
-						try
-						{
-							this.wait(HikeConstants.BACKUP_RESTORE_UI_DELAY);
-						}
-						catch (InterruptedException e)
-						{
-							e.printStackTrace();
-						}
-					}
 					publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString()));
 					synchronized (this)
 					{
@@ -680,7 +680,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			}
 			this.data = null;
 			Editor editor = settings.edit();
-			editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+			editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false);
 			editor.commit();
 		}
 		Logger.d("SignupTask", "Publishing Token_Created");
