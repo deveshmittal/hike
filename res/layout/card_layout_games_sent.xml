@@ -37,11 +37,11 @@
                     android:id="@+id/card_image"
                     android:layout_alignParentRight="true"
                     android:tag="I1"
-                    android:layout_centerVertical="true"
+                    android:layout_centerInParent="true"
                     android:src="@drawable/hike_avtar_protip"
                     android:layout_width="92dp"
                     android:scaleType="fitXY"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="92dp"/>
 
 
             <RelativeLayout

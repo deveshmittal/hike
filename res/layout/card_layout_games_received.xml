@@ -51,8 +51,9 @@
             <ImageView
                     android:id="@+id/card_image"
                     android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
+                    android:layout_centerInParent="true"
                     android:tag="I1"
+                    android:scaleType="fitXY"
                     android:src="@drawable/hike_avtar_protip"
                     android:layout_width="92dp"
                     android:layout_height="92dp"/>
