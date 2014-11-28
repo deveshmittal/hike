@@ -105,15 +105,6 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 
 		if (!HikeAuthActivity.verifyRequest(mContext, Message.obtain(msg)))
 		{
-			try
-			{
-				Thread.sleep(2000);
-			}
-			catch (InterruptedException e1)
-			{
-				e1.printStackTrace();
-			}
-			
 			cachedMessage = Message.obtain(msg);
 			authUIHandler.sendMessage(Message.obtain(msg));
 			return;
