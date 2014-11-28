@@ -210,6 +210,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	private TextView postText;
 	
 	private ViewProperties sdCardProp;
+	
+	private boolean restoreInitialized = false;
 
 	private class ActivityState
 	{
@@ -1323,6 +1325,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			public void onAnimationEnd(Animation animation)
 			{
 				viewFlipper.setDisplayedChild(RESTORING_BACKUP);
+				restoreInitialized = false;
 				prepareLayoutForRestoringAnimation(null,null);
 			}
 		});
@@ -1390,6 +1393,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private void initializeRestore()
 	{
+		restoreInitialized = true;
 		sdCardProp = new ViewProperties();
 		ImageView sdCard = (ImageView) backupFoundLayout.findViewById(R.id.sd_card);
 		int [] screenLocation = new int[2];
@@ -1654,7 +1658,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		public void onClick(View v)
 		{
 			mTask.addUserInput("true");
-			initializeRestore();
 		}
 	};
 
@@ -1802,7 +1805,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		Session session = Session.getActiveSession();
 		Session.saveSession(session, outState);
 
-		outState.putInt(HikeConstants.Extras.SIGNUP_PART, viewFlipper.getDisplayedChild());
+		int displayedChild = viewFlipper.getDisplayedChild();
+		if (restoreInitialized)
+		{
+			if (displayedChild == BACKUP_FOUND || displayedChild == RESTORING_BACKUP)
+				displayedChild = RESTORING_BACKUP;
+		}
+		outState.putInt(HikeConstants.Extras.SIGNUP_PART, displayedChild);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout != null && loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, errorDialog != null);
 		if (enterEditText != null)
@@ -2029,11 +2038,18 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			}
 			break;
 		case RESTORING_BACKUP:
-			if (viewFlipper.getDisplayedChild() != RESTORING_BACKUP)
+			if (viewFlipper.getDisplayedChild() == BACKUP_FOUND)
 			{
-				viewFlipper.setDisplayedChild(RESTORING_BACKUP);
+				initializeRestore();
 			}
-			prepareLayoutForRestoringAnimation(null,stateValue);
+			else
+			{
+				if (viewFlipper.getDisplayedChild() != RESTORING_BACKUP)
+				{
+					viewFlipper.setDisplayedChild(RESTORING_BACKUP);
+				}
+				prepareLayoutForRestoringAnimation(null,stateValue);
+			}
 			break;
 		}
 		setListeners();
