@@ -1851,7 +1851,7 @@ public class HikeConstants
 	}
 	
 	public static interface ConvMessagePacketKeys{
-		public static final String CONTENT_TYPE = "content";
+		public static final String CONTENT_TYPE = "c";
 		public static final String PIN_TYPE = "pin";
 		public static final String LOVE_ID = "loveID";
 	}
