@@ -1452,6 +1452,8 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	
 	private void onRestoreSuccessAnimation()
 	{
+		long uiDelay = HikeConstants.BACKUP_RESTORE_UI_DELAY;
+		uiDelay = 0;
 		View restoreItems = (View) restoringBackupLayout.findViewById(R.id.restore_items);
 		ImageView restoreSuccess = (ImageView) restoringBackupLayout.findViewById(R.id.restore_success);
 		
@@ -1461,13 +1463,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		itemsRemove.addAnimation(fadeout);
 		itemsRemove.addAnimation(scaleDown);
 		itemsRemove.setInterpolator(new DecelerateInterpolator());
-		itemsRemove.setStartOffset(HikeConstants.BACKUP_RESTORE_UI_DELAY);
+		itemsRemove.setStartOffset(uiDelay);
 		itemsRemove.setDuration(400);
 		itemsRemove.setFillAfter(true);
 		
 		ScaleAnimation scaleUp = new ScaleAnimation(0, 1, 0, 1, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
 		scaleUp.setInterpolator(new OvershootInterpolator());
-		scaleUp.setStartOffset(200 + HikeConstants.BACKUP_RESTORE_UI_DELAY);
+		scaleUp.setStartOffset(200 + uiDelay);
 		scaleUp.setDuration(400);
 		scaleUp.setFillAfter(true);
 		

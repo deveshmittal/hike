@@ -634,6 +634,17 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
 				ContactManager.getInstance().init(context);
 				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString());
+				synchronized (this)
+				{
+					try
+					{
+						this.wait(HikeConstants.BACKUP_RESTORE_UI_DELAY);
+					}
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+				}
 				publishProgress(mStateValue);
 				synchronized (this)
 				{
@@ -643,9 +654,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 					catch (InterruptedException e)
 					{
-						// TODO Auto-generated catch block
 						e.printStackTrace();
-						Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
 					}
 				}
 			}
@@ -661,7 +670,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 					catch (InterruptedException e)
 					{
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 						Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
 					}
