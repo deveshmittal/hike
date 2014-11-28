@@ -8,36 +8,44 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
 
-public class OverFlowMenuLayout extends PopUpLayout {
-	private Context context;
-	private List<OverFlowMenuItem> overflowItems;
-	private OverflowItemClickListener listener;
-	private View viewToShow;
+public class OverFlowMenuLayout implements OnItemClickListener {
+	protected Context context;
+	protected List<OverFlowMenuItem> overflowItems;
+	protected OverflowItemClickListener listener;
+	protected View viewToShow;
+	protected PopUpLayout popUpLayout;
 
+	/**
+	 * This class is made to show overflow menu items, by default it populates
+	 * listview of items you want o display, if some other view is required,
+	 * extend this class and override initview and getview
+	 * 
+	 * @param overflowItems
+	 * @param listener
+	 * @param context
+	 */
 	public OverFlowMenuLayout(List<OverFlowMenuItem> overflowItems,
 			OverflowItemClickListener listener, Context context) {
-		super(context);
 		this.overflowItems = overflowItems;
 		this.listener = listener;
 		this.context = context;
+		popUpLayout = new PopUpLayout(context);
 	}
 
-
-	@Override
 	public View getView() {
 		return viewToShow;
 	}
 
-	@Override
 	public void initView() {
 		// TODO : Copypasted code from chat thread, make separate layout file
-		if(viewToShow!=null){
+		if (viewToShow != null) {
 			return;
 		}
 		viewToShow = LayoutInflater.from(context).inflate(
@@ -73,15 +81,24 @@ public class OverFlowMenuLayout extends PopUpLayout {
 				return convertView;
 			}
 		});
-		overFlowListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		overFlowListView.setOnItemClickListener(this);
+	}
 
-			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-					long arg3) {
-				
-				listener.itemClicked((OverFlowMenuItem) arg0.getAdapter().getItem(arg2));
-				dismiss();
-			}
-		});
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+
+		listener.itemClicked((OverFlowMenuItem) arg0.getAdapter().getItem(arg2));
+		popUpLayout.dismiss();
+	}
+
+	public void showOverflowMenu(int width, int height, View anchor) {
+		showOverflowMenu(width, height, 0, 0, anchor);
+	}
+
+	public void showOverflowMenu(int width, int height, int xOffset,
+			int yOffset, View anchor) {
+		initView();
+		popUpLayout.showPopUpWindow(width, height, xOffset, yOffset, anchor,
+				getView());
 	}
 }
