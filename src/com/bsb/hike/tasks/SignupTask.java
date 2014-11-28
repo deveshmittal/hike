@@ -221,6 +221,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		boolean ab_scanned = settings.getBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, false);
 		boolean canPullInSms = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
 		String name = settings.getString(HikeMessengerApp.NAME_SETTING, null);
+		Boolean restored = settings.getBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false);
 
 		if (isCancelled())
 		{
@@ -605,63 +606,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
-		this.data = null;
-		if (DBBackupRestore.getInstance(context).isBackupAvailable())
-		{
-			publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
-			synchronized (this)
-			{
-				try
-				{
-					this.wait();
-				}
-				catch (InterruptedException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					Logger.d("backup","Interrupted while waiting for user's choice on restore.");
-				}
-			}
-		}
-
-		while (!TextUtils.isEmpty(this.data))
+		if (!restored)
 		{
 			this.data = null;
-			mStateValue = new StateValue(State.RESTORING_BACKUP,null);
-			boolean status = DBBackupRestore.getInstance(context).restoreDB();
-			if (status)
+			if (DBBackupRestore.getInstance(context).isBackupAvailable())
 			{
-				HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
-				ContactManager.getInstance().init(context);
-				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString());
-				synchronized (this)
-				{
-					try
-					{
-						this.wait(HikeConstants.BACKUP_RESTORE_UI_DELAY);
-					}
-					catch (InterruptedException e)
-					{
-						e.printStackTrace();
-					}
-				}
-				publishProgress(mStateValue);
-				synchronized (this)
-				{
-					try
-					{
-						this.wait(3000);
-					}
-					catch (InterruptedException e)
-					{
-						e.printStackTrace();
-					}
-				}
-			}
-			else
-			{
-				mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.FALSE.toString());
-				publishProgress(mStateValue);
+				publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
 				synchronized (this)
 				{
 					try
@@ -670,11 +620,69 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 					catch (InterruptedException e)
 					{
+						// TODO Auto-generated catch block
 						e.printStackTrace();
-						Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
+						Logger.d("backup","Interrupted while waiting for user's choice on restore.");
 					}
 				}
 			}
+	
+			while (!TextUtils.isEmpty(this.data))
+			{
+				this.data = null;
+				mStateValue = new StateValue(State.RESTORING_BACKUP,null);
+				boolean status = DBBackupRestore.getInstance(context).restoreDB();
+				if (status)
+				{
+					HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
+					ContactManager.getInstance().init(context);
+					mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString());
+					synchronized (this)
+					{
+						try
+						{
+							this.wait(HikeConstants.BACKUP_RESTORE_UI_DELAY);
+						}
+						catch (InterruptedException e)
+						{
+							e.printStackTrace();
+						}
+					}
+					publishProgress(mStateValue);
+					synchronized (this)
+					{
+						try
+						{
+							this.wait(3000);
+						}
+						catch (InterruptedException e)
+						{
+							e.printStackTrace();
+						}
+					}
+				}
+				else
+				{
+					mStateValue = new StateValue(State.RESTORING_BACKUP,Boolean.FALSE.toString());
+					publishProgress(mStateValue);
+					synchronized (this)
+					{
+						try
+						{
+							this.wait();
+						}
+						catch (InterruptedException e)
+						{
+							e.printStackTrace();
+							Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
+						}
+					}
+				}
+			}
+			this.data = null;
+			Editor editor = settings.edit();
+			editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+			editor.commit();
 		}
 		Logger.d("SignupTask", "Publishing Token_Created");
 
