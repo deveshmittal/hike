@@ -27,10 +27,12 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -111,6 +113,10 @@ public class UploadFileTask extends FileTransferBase
 	private boolean isMultiMsg;
 	
 	private int mAttachementType;
+
+	private HttpClient client;
+
+	private HttpContext httpContext = HttpClientContext.create();
 
 	protected UploadFileTask(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, String token, String uId, String msisdn, File sourceFile,
 			String fileKey, String fileType, HikeFileType hikeFileType, boolean isRecording, boolean isForwardMsg, boolean isRecipientOnHike, long recordingDuration, int attachement)
@@ -1094,11 +1100,14 @@ public class UploadFileTask extends FileTransferBase
 
 	private String send(String contentRange, byte[] fileBytes)
 	{
-		HttpClient client = new DefaultHttpClient();
-		client.getParams().setParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, bufferSize);
-		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10 * 1000);
-		// client.getParams().setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
-		client.getParams().setParameter(CoreConnectionPNames.TCP_NODELAY, true);
+		if(client == null)
+		{
+			client = new DefaultHttpClient();
+			client.getParams().setParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, bufferSize);
+			client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10 * 1000);
+			client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 60 * 1000);
+			client.getParams().setParameter(CoreConnectionPNames.TCP_NODELAY, true);
+		}
 		long time = System.currentTimeMillis();
 		HttpPost post = new HttpPost(mUrl.toString());
 		String res = null;
@@ -1115,7 +1124,7 @@ public class UploadFileTask extends FileTransferBase
 			post.setHeader("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
 
 			post.setEntity(new ByteArrayEntity(fileBytes));
-			HttpResponse response = client.execute(post);
+			HttpResponse response = client.execute(post, httpContext);
 			resCode = response.getStatusLine().getStatusCode();
 			res = EntityUtils.toString(response.getEntity());
 		}
