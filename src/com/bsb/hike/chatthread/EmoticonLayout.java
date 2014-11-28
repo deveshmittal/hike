@@ -10,8 +10,9 @@ import android.view.View;
  * @generated
  */
 
-public class EmoticonLayout extends PopUpLayout
+public class EmoticonLayout
 {
+	private Context context;
 	/**
 	 * <!-- begin-user-doc -->
 	 * <!--  end-user-doc  -->
@@ -27,16 +28,14 @@ public class EmoticonLayout extends PopUpLayout
 	 * @generated
 	 */
 	public EmoticonLayout(Context context){
-		super(context);
+		this.context = context;
 	}
 
-	@Override
 	public View getView() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public void initView() {
 		// TODO Auto-generated method stub
 		
