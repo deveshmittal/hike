@@ -290,6 +290,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 						intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.MSISDN));
 						intent.putExtra(HikeConstants.Extras.FILE_PATH, file.getAbsolutePath());
 						intent.putExtra(HikeConstants.Extras.FILE_TYPE, item.getMimeType());
+						intent.putExtra(FTAnalyticEvents.FT_ATTACHEMENT_TYPE, FTAnalyticEvents.FILE_ATTACHEMENT);
 						intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						startActivity(intent);
 					}

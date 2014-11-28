@@ -547,6 +547,11 @@ public class UploadFileTask extends FileTransferBase
 				{
 
 				}
+				/*
+				 * Setting event in case of forward when file key is validated.
+				 */
+				this.analyticEvents.mAttachementType = this.mAttachementType;
+				this.analyticEvents.mNetwork = FileTransferManager.getInstance(context).getNetworkTypeString();
 			}
 			else
 			{
@@ -603,6 +608,10 @@ public class UploadFileTask extends FileTransferBase
 				fileSize = fileJSON.optInt(HikeConstants.FILE_SIZE);
 			}else
 				_state = FTState.IN_PROGRESS;
+			/*
+			 * Saving analytic event before publishing the mqtt message.
+			 */
+			this.analyticEvents.saveAnalyticEvent(FileTransferManager.getInstance(context).getAnalyticFile(selectedFile, msgId));
 
 			JSONObject metadata = new JSONObject();
 			JSONArray filesArray = new JSONArray();
@@ -705,6 +714,8 @@ public class UploadFileTask extends FileTransferBase
 		Logger.d(getClass().getSimpleName(), "Starting Upload from state : " + fst.getFTState().toString());
 		if (fst.getFTState().equals(FTState.NOT_STARTED))
 		{
+			this.analyticEvents.mAttachementType = this.mAttachementType;
+			this.analyticEvents.mNetwork = FileTransferManager.getInstance(context).getNetworkTypeString();
 			try
 			{
 				Logger.d(getClass().getSimpleName(), "Verifying MD5");
@@ -720,9 +731,6 @@ public class UploadFileTask extends FileTransferBase
 			// here as we are starting new upload, we have to create the new session id
 			X_SESSION_ID = UUID.randomUUID().toString();
 			Logger.d(getClass().getSimpleName(), "SESSION_ID: " + X_SESSION_ID);
-			this.analyticEvents.mAttachementType = this.mAttachementType;
-			this.analyticEvents.mNetwork = FileTransferManager.getInstance(context).getNetworkTypeString();
-
 		}
 		else if (fst.getFTState().equals(FTState.PAUSED) || fst.getFTState().equals(FTState.ERROR))
 		{
