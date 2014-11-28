@@ -2,6 +2,7 @@ package com.bsb.hike.platform;
 
 public interface HikePlatformConstants {
 	String DATA = "d";
+    String METADATA = "md";
 	String ASSETS = "assets";
 	String TEXTS = "textLinks";
 	String IMAGES = "images";
@@ -10,8 +11,10 @@ public interface HikePlatformConstants {
 	String ACTIONS = "actions";
     String INTENT_URI = "intentUri";
 	String CONTENT_TYPE = "contentType";
+    String VERSION = "version";
 	String TAG = "tag";
     String KEY = "key";
+    String SUBTYPE = "st";
 	String TEXT = "title";
 	String THUMBNAIL = "thumbnail";
 	String URL ="url";
