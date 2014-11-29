@@ -289,11 +289,15 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 	}
 
-	class IncomingHandler extends Handler
+	static class IncomingHandler extends Handler
 	{
-		public IncomingHandler(Looper looper)
+		
+		private static ArrayList<HikeMqttManagerNew> mqttManagers=new ArrayList<HikeMqttManagerNew>();
+		
+		public IncomingHandler(Looper looper, HikeMqttManagerNew m)
 		{
 			super(looper);
+			mqttManagers.add(m);
 		}
 
 		@Override
@@ -305,15 +309,17 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				{
 				case HikeService.MSG_APP_PUBLISH:
 					Bundle bundle = msg.getData();
+					int mqttIndex=bundle.getInt("mqttIndex", 0);
 					String message = bundle.getString(HikeConstants.MESSAGE);
 					long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
-					send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis(), msg.arg2), msg.arg1);
+					mqttManagers.get(mqttIndex).send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
 				case 12341: // just for testing
 					Bundle b = msg.getData();
+					int mqttInd=b.getInt("mqttIndex", 0);
 					String m = b.getString(HikeConstants.MESSAGE);
 					long mId = b.getLong(HikeConstants.MESSAGE_ID, -1);
-					send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis(), msg.arg2), msg.arg1);
+					mqttManagers.get(mqttInd).send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
 				}
 			}
@@ -324,11 +330,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 	}
 
-	public HikeMqttManagerNew(Context ctx)
+	public HikeMqttManagerNew(Context ctx,String AccNum)
 	{
 		context = ctx;
 		cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS+AccNum, 0);
 
 		password = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
@@ -352,7 +358,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		mqttHandlerThread.start();
 		mMqttHandlerLooper = mqttHandlerThread.getLooper();
 		mqttThreadHandler = new Handler(mMqttHandlerLooper);
-		mMessenger = new Messenger(new IncomingHandler(mMqttHandlerLooper));
+		mMessenger = new Messenger(new IncomingHandler(mMqttHandlerLooper,this));
 		// register for Screen ON, Network Connection Change
 		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);

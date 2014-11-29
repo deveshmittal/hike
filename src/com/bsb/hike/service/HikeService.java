@@ -3,6 +3,7 @@ package com.bsb.hike.service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
@@ -148,7 +149,7 @@ public class HikeService extends Service
 
 	private PostSignupProfilePic postSignupProfilePic;
 
-	private HikeMqttManagerNew mMqttManager;
+	private ArrayList<HikeMqttManagerNew> mMqttManager;
 
 	private SendRai sendRai;
 
@@ -169,6 +170,8 @@ public class HikeService extends Service
 	public static boolean appForegrounded = false;
 	
 	public static boolean voipServiceRunning = false;
+	
+	public static int numOfAcc=2;
 
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
@@ -180,6 +183,8 @@ public class HikeService extends Service
 	public void onCreate()
 	{
 		super.onCreate();
+		
+		mMqttManager=new ArrayList<HikeMqttManagerNew>();
 
 		Logger.d("TestUpdate", "Service started");
 
@@ -200,8 +205,17 @@ public class HikeService extends Service
 
 		// reset status variable to initial state
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
-		mMqttManager = new HikeMqttManagerNew(getApplicationContext());
-		mMqttManager.init();
+		
+		SharedPreferences.Editor editor=getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS+"1", 0).edit();
+		editor.putString(HikeMessengerApp.TOKEN_SETTING, "EKFyDus64uw=");
+		editor.putString(HikeMessengerApp.UID_SETTING, "VAmaj-V-i1eRHdGm");
+		editor.putString(HikeMessengerApp.MSISDN_SETTING, "+918826680992");
+		editor.commit();
+		
+		for(int i=0;i<numOfAcc;i++){
+			mMqttManager.add(new HikeMqttManagerNew(getApplicationContext(),i==0?"":String.valueOf(i)));
+			mMqttManager.get(i).init();
+		}
 
 		/*
 		 * notify android that our service represents a user visible action, so it should not be killable. In order to do so, we need to show a notification so the user understands
@@ -290,7 +304,10 @@ public class HikeService extends Service
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{
 		Logger.d("HikeService", "Start MQTT Thread.");
-		mMqttManager.connectOnMqttThread();
+		
+		for(int i=0;i<numOfAcc;i++)
+			mMqttManager.get(i).connectOnMqttThread();
+		
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
 		app.connectToService();
 		
@@ -322,7 +339,8 @@ public class HikeService extends Service
 		super.onDestroy();
 		Logger.i("HikeService", "onDestroy.  Shutting down service");
 
-		mMqttManager.destroyMqtt();
+		for(int i=0;i<numOfAcc;i++)
+			mMqttManager.get(i).destroyMqtt();
 		this.mMqttManager = null;
 		// inform the app that the app has successfully disconnected
 		if (contactsReceived != null)
@@ -403,7 +421,7 @@ public class HikeService extends Service
 	@Override
 	public IBinder onBind(Intent intent)
 	{
-		return mMqttManager.getMessenger().getBinder();
+		return mMqttManager.get(0).getMessenger().getBinder();
 	}
 
 	/************************************************************************/
