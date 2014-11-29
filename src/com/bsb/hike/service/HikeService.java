@@ -211,7 +211,7 @@ public class HikeService extends Service
 		mContactsChangedHandler = new Handler(mContactHandlerLooper);
 		mContactsChanged = new ContactsChanged(this);
 		
-		//scheduleNextAccountBackup();
+		scheduleNextAccountBackup();
 
 		/*
 		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of

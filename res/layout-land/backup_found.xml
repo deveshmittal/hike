@@ -51,21 +51,24 @@
                 android:layout_width="8dp"
                 android:layout_height="8dp"
                 android:layout_alignParentLeft="true"
-                android:layout_marginTop="33dp" />
+                android:layout_marginTop="33dp"
+                android:visibility="invisible" />
 
             <View
                 android:id="@+id/dot_top"
                 android:layout_width="8dp"
                 android:layout_height="8dp"
                 android:layout_alignParentTop="true"
-                android:layout_marginLeft="47dp" />
+                android:layout_marginLeft="47dp"
+                android:visibility="invisible" />
 
             <View
                 android:id="@+id/dot_right"
                 android:layout_width="8dp"
                 android:layout_height="8dp"
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="39dp" />
+                android:layout_marginTop="39dp"
+                android:visibility="invisible" />
         </RelativeLayout>
 
         <ImageView

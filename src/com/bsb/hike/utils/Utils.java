@@ -578,6 +578,14 @@ public class Utils
 			return true;
 		}
 
+		if (!settings.getBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false))
+		{
+			disconnectAndStopService(activity);
+			activity.startActivity(new Intent(activity, SignupActivity.class));
+			activity.finish();
+			return true;
+		}
+		
 		return false;
 	}
 
