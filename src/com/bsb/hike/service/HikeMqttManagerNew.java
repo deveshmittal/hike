@@ -173,6 +173,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private volatile int retryCount = 0;
 	
 	private static final String UNRESOLVED_EXCEPTION = "unresolved";
+	
+	private int accountNumber=0;
 
 	// constants used to define MQTT connection status, this is used by external classes and hardly of any use internally
 	public enum MQTTConnectionStatus
@@ -331,15 +333,17 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 	}
 
-	public HikeMqttManagerNew(Context ctx,String AccNum)
+	public HikeMqttManagerNew(Context ctx,int AccNum)
 	{
 		context = ctx;
 		cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-
-		password = settings.getString(HikeMessengerApp.TOKEN_SETTING+AccNum, null);
-		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING+AccNum, null);
-		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING+AccNum, null) + ":" + HikeConstants.APP_API_VERSION + ":" + true;
+		
+		accountNumber=AccNum;
+		String acc= AccNum==0?"":String.valueOf(AccNum);
+		password = settings.getString(HikeMessengerApp.TOKEN_SETTING+acc, null);
+		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING+acc, null);
+		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING+acc, null) + ":" + HikeConstants.APP_API_VERSION + ":" + true;
 
 		persistence = HikeMqttPersistence.getInstance();
 		mqttMessageManager = MqttMessagesManager.getInstance(context);
@@ -947,7 +951,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						String messageBody = new String(bytes, "UTF-8");
 						Logger.i(TAG, "messageArrived called " + messageBody);
 						JSONObject jsonObj = new JSONObject(messageBody);
-						mqttMessageManager.saveMqttMessage(jsonObj);
+						mqttMessageManager.saveMqttMessage(jsonObj, accountNumber);
 					}
 					catch (JSONException e)
 					{
@@ -1451,7 +1455,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				data.put("msgs", bulkMsgArray);
 				bulkPacket.put(HikeConstants.DATA, data);
 				bulkPacket.put(HikeConstants.TIMESTAMP, System.currentTimeMillis());
-				mqttMessageManager.saveMqttMessage(bulkPacket);
+				mqttMessageManager.saveMqttMessage(bulkPacket, 0); // change zero as per requirement
 
 			}
 			catch (JSONException e)

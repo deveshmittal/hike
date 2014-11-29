@@ -1794,7 +1794,7 @@ public class MqttMessagesManager
 	 * @throws JSONException
 	 */
 
-	public void saveBulkMessage(JSONObject bulkObj) throws JSONException
+	public void saveBulkMessage(JSONObject bulkObj, int accNum) throws JSONException
 	{
 		boolean shouldFallBackToNormal = false;
 		JSONObject bulkMessages = bulkObj.optJSONObject(HikeConstants.DATA);
@@ -1831,7 +1831,7 @@ public class MqttMessagesManager
 						JSONObject jsonObj = msgArray.optJSONObject(i++);
 						if (jsonObj != null)
 						{
-							saveMqttMessage(jsonObj);
+							saveMqttMessage(jsonObj, accNum);
 						}
 					}
 					Logger.d("BulkProcess", "going on");
@@ -1869,7 +1869,7 @@ public class MqttMessagesManager
 						JSONObject jsonObj = msgArray.optJSONObject(i++);
 						if (jsonObj != null)
 						{
-							saveMqttMessage(jsonObj);
+							saveMqttMessage(jsonObj, accNum);
 						}
 					}
 				}
@@ -1973,8 +1973,15 @@ public class MqttMessagesManager
 	{
 		messageList.add(convMessage);
 	}
+	
+	private void updateChatThreadAccountMap(String msisdn, int accNum){
+		if(!HikeMessengerApp.chatThreadAccountMap.containsKey(msisdn) || HikeMessengerApp.chatThreadAccountMap.get(msisdn)!= accNum){
+			HikeMessengerApp.chatThreadAccountMap.put(msisdn, accNum);
+			//TODO: add to database
+		}
+	}
 
-	public void saveMqttMessage(JSONObject jsonObj) throws JSONException
+	public void saveMqttMessage(JSONObject jsonObj, int accNum) throws JSONException
 	{
 		String type = jsonObj.optString(HikeConstants.TYPE);
 		Log.d("VOIP", type+" received");
@@ -2061,6 +2068,7 @@ public class MqttMessagesManager
 			{
 				saveMessage(jsonObj);
 			}
+			updateChatThreadAccountMap(jsonObj.getString(HikeConstants.FROM), accNum);
 		}
 		else if (HikeConstants.MqttMessageTypes.DELIVERY_REPORT.equals(type)) // Message
 		// delivered
@@ -2196,7 +2204,7 @@ public class MqttMessagesManager
 		}
 		else if (HikeConstants.MqttMessageTypes.BULK_MESSAGE.equals(type))
 		{
-			saveBulkMessage(jsonObj);
+			saveBulkMessage(jsonObj, accNum);
 		}
 		
 		else if (HikeConstants.MqttMessageTypes.TIP.equals(type))

@@ -448,6 +448,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static Map<String, Pair<Integer, Long>> lastSeenFriendsMap;
 
 	public static HashMap<String, String> hikeBotNamesMap;
+	
+	public static HashMap<String, Integer> chatThreadAccountMap; // which hike account is being used for each conversation
 
 	public static volatile boolean networkError;
 
@@ -494,6 +496,11 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		if (HikeMessengerApp.lastSeenFriendsMap == null)
 		{
 			HikeMessengerApp.lastSeenFriendsMap = new HashMap<String, Pair<Integer, Long>>();
+		}
+		
+		if (HikeMessengerApp.chatThreadAccountMap == null)
+		{
+			HikeMessengerApp.chatThreadAccountMap = new HashMap<String, Integer>();
 		}
 	}
 

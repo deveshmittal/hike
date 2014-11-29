@@ -213,7 +213,7 @@ public class HikeService extends Service
 		editor.commit();
 		
 		for(int i=0;i<numOfAcc;i++){
-			mMqttManager.add(new HikeMqttManagerNew(getApplicationContext(),i==0?"":String.valueOf(i)));
+			mMqttManager.add(new HikeMqttManagerNew(getApplicationContext(),i));
 			mMqttManager.get(i).init();
 		}
 
@@ -320,7 +320,7 @@ public class HikeService extends Service
 				JSONObject msg = new JSONObject(s);
 				Logger.d("HikeService", "Intent contained SMS message " + msg.getString(HikeConstants.TYPE));
 				MqttMessagesManager mgr = MqttMessagesManager.getInstance(this);
-				mgr.saveMqttMessage(msg);
+				mgr.saveMqttMessage(msg,0);
 			}
 			catch (JSONException e)
 			{
