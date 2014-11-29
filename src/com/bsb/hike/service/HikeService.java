@@ -206,10 +206,10 @@ public class HikeService extends Service
 		// reset status variable to initial state
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
 		
-		SharedPreferences.Editor editor=getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS+"1", 0).edit();
-		editor.putString(HikeMessengerApp.TOKEN_SETTING, "EKFyDus64uw=");
-		editor.putString(HikeMessengerApp.UID_SETTING, "VAmaj-V-i1eRHdGm");
-		editor.putString(HikeMessengerApp.MSISDN_SETTING, "+918826680992");
+		SharedPreferences.Editor editor=getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+		editor.putString(HikeMessengerApp.TOKEN_SETTING+"1", "EKFyDus64uw=");
+		editor.putString(HikeMessengerApp.UID_SETTING+"1", "VAmaj-V-i1eRHdGm");
+		editor.putString(HikeMessengerApp.MSISDN_SETTING+"1", "+918826680992");
 		editor.commit();
 		
 		for(int i=0;i<numOfAcc;i++){

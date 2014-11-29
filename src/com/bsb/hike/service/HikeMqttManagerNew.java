@@ -42,6 +42,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
@@ -334,11 +335,11 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	{
 		context = ctx;
 		cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS+AccNum, 0);
+		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		password = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
-		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING, null) + ":" + HikeConstants.APP_API_VERSION + ":" + true;
+		password = settings.getString(HikeMessengerApp.TOKEN_SETTING+AccNum, null);
+		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING+AccNum, null);
+		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING+AccNum, null) + ":" + HikeConstants.APP_API_VERSION + ":" + true;
 
 		persistence = HikeMqttPersistence.getInstance();
 		mqttMessageManager = MqttMessagesManager.getInstance(context);
@@ -346,6 +347,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		connChkRunnable = new ConnectionCheckRunnable();
 		disConnectRunnable = new DisconnectRunnable();
 		activityChkRunnable = new ActivityCheckRunnable();
+		Log.d("HikeMqttManagerNew", "Starting mqtt");
 	}
 
 	/*
@@ -368,7 +370,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		context.registerReceiver(this, filter);
 		LocalBroadcastManager.getInstance(context).registerReceiver(this, filter);
 		setServerUris();
-//		 mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
+//		mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
 	}
 
 	private boolean isNetworkAvailable()
@@ -402,7 +404,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		if (!TextUtils.isEmpty(brokerHost))
 		{
 			brokerHostName = brokerHost;
-			brokerPortNumber = settings.getInt(HikeMessengerApp.BROKER_PORT, 8080);
+			brokerPortNumber = settings.getInt(HikeMessengerApp.BROKER_PORT, 1883);
 			return;
 		}
 
@@ -1396,7 +1398,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				@Override
 				public void run()
 				{
-					testVoIP();
+					testMsg();
 				}
 			});
 			t.setName("Test Thread");
@@ -1497,7 +1499,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		{
 			int count = 0;
 			String myMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
-			String msisdn = "+919582974797";
+			String msisdn = "+917769926357";
 
 			if (myMsisdn != null)
 			{
@@ -1506,7 +1508,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					return;
 				}
 			}
-			for (int i = 0; i < 50; i++)
+			for (int i = 0; i < 5; i++)
 			{
 				count++;
 				Random rand = new Random();
