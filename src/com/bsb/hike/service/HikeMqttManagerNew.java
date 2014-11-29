@@ -312,15 +312,29 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				{
 				case HikeService.MSG_APP_PUBLISH:
 					Bundle bundle = msg.getData();
-					int mqttIndex=bundle.getInt("mqttIndex", 0);
 					String message = bundle.getString(HikeConstants.MESSAGE);
+					String to=new JSONObject(message).optString(HikeConstants.TO);
+					int mqttIndex=0;
+					if(to != null){
+						if(!HikeMessengerApp.chatThreadAccountMap.containsKey(to)){
+							//TODO: retrieve from database
+						}
+						mqttIndex=HikeMessengerApp.chatThreadAccountMap.get(to);
+					}
 					long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
 					mqttManagers.get(mqttIndex).send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
 				case 12341: // just for testing
 					Bundle b = msg.getData();
-					int mqttInd=b.getInt("mqttIndex", 0);
 					String m = b.getString(HikeConstants.MESSAGE);
+					String _to=new JSONObject(m).optString(HikeConstants.TO);
+					int mqttInd=0;
+					if(_to != null){
+						if(!HikeMessengerApp.chatThreadAccountMap.containsKey(_to)){
+							//TODO: retrieve from database
+						}
+						mqttInd=HikeMessengerApp.chatThreadAccountMap.get(_to);
+					}
 					long mId = b.getLong(HikeConstants.MESSAGE_ID, -1);
 					mqttManagers.get(mqttInd).send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
