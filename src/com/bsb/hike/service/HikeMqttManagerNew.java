@@ -48,6 +48,7 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.HikePacket;
@@ -317,7 +318,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					int mqttIndex=0;
 					if(to != null){
 						if(!HikeMessengerApp.chatThreadAccountMap.containsKey(to)){
-							//TODO: retrieve from database
+							HikeMessengerApp.chatThreadAccountMap.put(to,HikeConversationsDatabase.getInstance().getAccountFromMsisdn(to));
 						}
 						mqttIndex=HikeMessengerApp.chatThreadAccountMap.get(to);
 					}
@@ -331,7 +332,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					int mqttInd=0;
 					if(_to != null){
 						if(!HikeMessengerApp.chatThreadAccountMap.containsKey(_to)){
-							//TODO: retrieve from database
+							HikeMessengerApp.chatThreadAccountMap.put(_to,HikeConversationsDatabase.getInstance().getAccountFromMsisdn(_to));
 						}
 						mqttInd=HikeMessengerApp.chatThreadAccountMap.get(_to);
 					}

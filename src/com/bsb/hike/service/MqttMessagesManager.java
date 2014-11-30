@@ -1977,7 +1977,7 @@ public class MqttMessagesManager
 	private void updateChatThreadAccountMap(String msisdn, int accNum){
 		if(!HikeMessengerApp.chatThreadAccountMap.containsKey(msisdn) || HikeMessengerApp.chatThreadAccountMap.get(msisdn)!= accNum){
 			HikeMessengerApp.chatThreadAccountMap.put(msisdn, accNum);
-			//TODO: add to database
+			HikeConversationsDatabase.getInstance().updateAccountForMsisdn(msisdn, accNum);
 		}
 	}
 
@@ -2068,7 +2068,11 @@ public class MqttMessagesManager
 			{
 				saveMessage(jsonObj);
 			}
-			updateChatThreadAccountMap(jsonObj.getString(HikeConstants.FROM), accNum);
+			String to=jsonObj.optString(HikeConstants.TO);
+			if(!to.equals("") && to.charAt(0)!='+')
+				updateChatThreadAccountMap(to, accNum);
+			else
+				updateChatThreadAccountMap(jsonObj.getString(HikeConstants.FROM), accNum);
 		}
 		else if (HikeConstants.MqttMessageTypes.DELIVERY_REPORT.equals(type)) // Message
 		// delivered
