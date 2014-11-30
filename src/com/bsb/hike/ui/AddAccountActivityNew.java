@@ -9,6 +9,7 @@ import com.bsb.hike.utils.Utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.View;
@@ -24,14 +25,7 @@ public class AddAccountActivityNew extends Activity {
 	private Button finishbtn;
 	private String msisdn;
 	private SharedPreferences settings;
-	protected AccountInfo newAcc;
-	
-	private class networkRunnable implements Runnable {
-		public void run() {
-			
-		}
-	} 
-	
+	protected AccountInfo newAcc;	
 	
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -41,9 +35,6 @@ public class AddAccountActivityNew extends Activity {
 		num = (EditText) findViewById(R.id.addAccountNum);
 		finishbtn = (Button) findViewById(R.id.addAccountFinishButton);
 		
-		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
-		StrictMode.setThreadPolicy(policy); 
 //		final String msisdn;
 		nextbtn.setOnClickListener(new OnClickListener() 
 		
@@ -52,18 +43,19 @@ public class AddAccountActivityNew extends Activity {
 			@Override
 			public void onClick(View arg0) {
 				msisdn = num.getText().toString();
-				Thread validateThread = new Thread (new Runnable() {
-					
-					@Override
-					public void run() {
-
-						AccountUtils.validateNumber(num.getText().toString());
-						nextbtn.setVisibility(View.GONE);
-						finishbtn.setVisibility(View.VISIBLE);
-						
-					}
-				});
-				validateThread.run();
+//				Thread validateThread = new Thread (new Runnable() {
+//					
+//					@Override
+//					public void run() {
+//
+//						AccountUtils.validateNumber(num.getText().toString());
+//						nextbtn.setVisibility(View.GONE);
+//						finishbtn.setVisibility(View.VISIBLE);
+//						
+//					}
+//				});
+//				validateThread.run();
+				new ExtraAccountNumberValidateTask().execute(msisdn);
 				
 				
 			}
@@ -74,23 +66,60 @@ public class AddAccountActivityNew extends Activity {
 			public void onClick(View v) {
 			newAcc = AccountUtils.addExtraAccount(AddAccountActivityNew.this, num.getText().toString(), msisdn);
 			settings = AddAccountActivityNew.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);	
-			Thread validateThread = new Thread (new Runnable() {
-				
-				@Override
-				public void run() {
-
-					Utils.addAccountCredentials(AddAccountActivityNew.this, newAcc, settings, settings.edit());
-					
-				}
-			});
-			validateThread.run();
-			
-			finish();
-				
+//			Thread validateThread = new Thread (new Runnable() {
+//				
+//				@Override
+//				public void run() {
+//
+//					Utils.addAccountCredentials(AddAccountActivityNew.this, newAcc, settings, settings.edit());
+//					
+//				}
+//			});
+//			validateThread.run();
+//			
+//			finish();
+//				
+//			}
+//		});
+			new AddExtraCredential().execute();
 			}
 		});
 		
+	}
+	
+	
+	private class ExtraAccountNumberValidateTask extends AsyncTask<String, Void, Void> {
+
+
+		@Override
+		protected Void doInBackground(String... params) {
+			// TODO Auto-generated method stub
+			AccountUtils.validateNumber(params[0]);
+			return null;
+		}
 		
+		@Override
+		protected void onPostExecute(Void v) {
+			nextbtn.setVisibility(View.GONE);
+			finishbtn.setVisibility(View.VISIBLE);
+			
+		}
+
+	}
+	
+	private class AddExtraCredential extends AsyncTask<Void, Void, Void>{
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			Utils.addAccountCredentials(AddAccountActivityNew.this, newAcc, settings, settings.edit());
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void v) {
+			AddAccountActivityNew.this.finish();
+			
+		}
 	}
 
 }
