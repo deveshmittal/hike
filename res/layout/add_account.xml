@@ -11,7 +11,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginLeft="41dp"
         android:layout_marginTop="70dp"
-        android:text="Phone Number" />
+        android:text="Register New Number!" />
 
     <Button
         android:id="@+id/addAccountButton"
@@ -35,7 +35,7 @@
     <com.bsb.hike.view.CustomFontEditText
                 android:id="@+id/addAccountNum"
                 android:layout_width="186dp"
-                android:layout_height="20dp"
+                android:layout_height="40dp"
                 android:layout_marginTop="180dp"
 		        android:layout_centerHorizontal="true"
                 android:background="@drawable/bg_country_picker_selector"

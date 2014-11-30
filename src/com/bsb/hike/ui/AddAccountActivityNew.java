@@ -104,6 +104,8 @@ public class AddAccountActivityNew extends Activity {
 		protected void onPostExecute(Void v) {
 			nextbtn.setVisibility(View.GONE);
 			finishbtn.setVisibility(View.VISIBLE);
+			num.setText("");
+			num.setHint("PIN");
 			
 		}
 
@@ -122,7 +124,7 @@ public class AddAccountActivityNew extends Activity {
 		protected void onPostExecute(Void v) {
 			Utils.addAccountCredentials(AddAccountActivityNew.this, newAcc, settings, settings.edit());
 			android.os.Process.killProcess(android.os.Process.myPid());
-			AddAccountActivityNew.this.finish();
+//			AddAccountActivityNew.this.finish();
 			
 		}
 	}
