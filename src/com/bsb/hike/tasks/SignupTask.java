@@ -93,7 +93,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE, GENDER, SCANNING_CONTACTS, PIN_VERIFIED, BACKUP_AVAILABLE, RESTORING_BACKUP
 	};
 
-	public class StateValue
+	public static class StateValue
 	{
 		public State state;
 

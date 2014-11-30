@@ -171,7 +171,7 @@ public class HikeService extends Service
 	
 	public static boolean voipServiceRunning = false;
 	
-	public static int numOfAcc=2;
+	public static int numOfAcc;
 
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
@@ -205,17 +205,6 @@ public class HikeService extends Service
 
 		// reset status variable to initial state
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
-		
-		SharedPreferences.Editor editor=getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-		editor.putString(HikeMessengerApp.TOKEN_SETTING+"1", "EKFyDus64uw=");
-		editor.putString(HikeMessengerApp.UID_SETTING+"1", "VAmaj-V-i1eRHdGm");
-		editor.putString(HikeMessengerApp.MSISDN_SETTING+"1", "+918826680992");
-		editor.commit();
-		
-		for(int i=0;i<numOfAcc;i++){
-			mMqttManager.add(new HikeMqttManagerNew(getApplicationContext(),i));
-			mMqttManager.get(i).init();
-		}
 
 		/*
 		 * notify android that our service represents a user visible action, so it should not be killable. In order to do so, we need to show a notification so the user understands
@@ -304,6 +293,13 @@ public class HikeService extends Service
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{
 		Logger.d("HikeService", "Start MQTT Thread.");
+		
+		numOfAcc= getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,Context.MODE_PRIVATE).getInt(HikeMessengerApp.TOTAL_ACCOUNTS,1);
+		
+		for(int i=0;i<numOfAcc;i++){
+			mMqttManager.add(new HikeMqttManagerNew(getApplicationContext(),i));
+			mMqttManager.get(i).init();
+		}
 		
 		for(int i=0;i<numOfAcc;i++)
 			mMqttManager.get(i).connectOnMqttThread();

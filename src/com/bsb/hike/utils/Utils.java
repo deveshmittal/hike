@@ -171,6 +171,7 @@ import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.HikeService;
+import com.bsb.hike.tasks.AddAccountTask;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
@@ -546,6 +547,19 @@ public class Utils
 		editor.putInt(HikeMessengerApp.INVITED_JOINED, accountInfo.all_invitee_joined);
 		editor.putString(HikeMessengerApp.COUNTRY_CODE, accountInfo.country_code);
 		editor.commit();
+	}
+	
+	public static void addAccountCredentials(Context context,AccountInfo accountInfo, SharedPreferences settings, SharedPreferences.Editor editor){
+		
+		int acc_no = settings.getInt(HikeMessengerApp.TOTAL_ACCOUNTS, 1);
+				
+		editor.putString(HikeMessengerApp.MSISDN_SETTING+String.valueOf(acc_no), accountInfo.msisdn);
+		editor.putString(HikeMessengerApp.TOKEN_SETTING+String.valueOf(acc_no), accountInfo.token);
+		editor.putString(HikeMessengerApp.UID_SETTING+String.valueOf(acc_no), accountInfo.uid);
+		editor.putInt(HikeMessengerApp.TOTAL_ACCOUNTS, ++acc_no);
+		editor.commit();
+		Intent intent=new Intent(context,com.bsb.hike.service.HikeService.class);
+		context.startService(intent); // start service to re-initialize data
 	}
 
 	/*
@@ -4939,6 +4953,18 @@ public class Utils
 		}
 		requestAccountInfo(upgrade, sendBot);
 		sendLocaleToServer(context);
+	}
+
+	public static void executeAddAccountTask(AddAccountTask addAccountTask) {
+		if (isHoneycombOrHigher())
+		{
+			addAccountTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
+		else
+		{
+			addAccountTask.execute();
+		}
+		
 	}
 
 }

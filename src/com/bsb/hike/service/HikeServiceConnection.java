@@ -103,7 +103,8 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
-		Logger.d("Hikemqttmanagernew", "revieved message : " + object.toString());
+		if(object!=null)
+			Logger.d("Hikemqttmanagernew", "revieved message : " + object.toString());
 		if (mService == null)
 		{
 			Logger.e("HikeServiceConnection", "Unable to publish message ");
