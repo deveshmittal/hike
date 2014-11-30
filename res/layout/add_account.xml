@@ -7,10 +7,10 @@
         android:id="@+id/addAccountText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="41dp"
-        android:layout_marginTop="138dp"
+        android:layout_marginTop="70dp"
         android:text="Phone Number" />
 
     <Button
@@ -36,7 +36,8 @@
                 android:id="@+id/addAccountNum"
                 android:layout_width="186dp"
                 android:layout_height="20dp"
-                android:layout_alignParentRight="true"
+                android:layout_marginTop="180dp"
+		        android:layout_centerHorizontal="true"
                 android:background="@drawable/bg_country_picker_selector"
                 android:ems="10"
                 android:hint="@string/phone_num"

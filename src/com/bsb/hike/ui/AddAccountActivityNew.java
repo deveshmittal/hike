@@ -60,11 +60,13 @@ public class AddAccountActivityNew extends Activity {
 				
 			}
 		});
+		
+		
 		finishbtn.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-			newAcc = AccountUtils.addExtraAccount(AddAccountActivityNew.this, num.getText().toString(), msisdn);
+			
 			settings = AddAccountActivityNew.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);	
 //			Thread validateThread = new Thread (new Runnable() {
 //				
@@ -111,12 +113,15 @@ public class AddAccountActivityNew extends Activity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			Utils.addAccountCredentials(AddAccountActivityNew.this, newAcc, settings, settings.edit());
+			newAcc = AccountUtils.addExtraAccount(AddAccountActivityNew.this, num.getText().toString(), msisdn);
+			
 			return null;
 		}
 		
 		@Override
 		protected void onPostExecute(Void v) {
+			Utils.addAccountCredentials(AddAccountActivityNew.this, newAcc, settings, settings.edit());
+			android.os.Process.killProcess(android.os.Process.myPid());
 			AddAccountActivityNew.this.finish();
 			
 		}
