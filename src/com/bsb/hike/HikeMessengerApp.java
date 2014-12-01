@@ -678,7 +678,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 		if (!currentAppVersion.equals(actualAppVersion))
 		{
-			Utils.resetUpdateParams(settings);
+			if (!currentAppVersion.equals(""))
+			{
+				Utils.resetUpdateParams(settings);
+			}
 
 			/*
 			 * Updating the app version.
@@ -715,7 +718,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		String twitterTokenSecret = settings.getString(HikeMessengerApp.TWITTER_TOKEN_SECRET, "");
 		makeTwitterInstance(twitterToken, twitterTokenSecret);
 
-		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.INDIA_COUNTRY_CODE);
+		setIndianUser(settings.getString(COUNTRY_CODE, "").equals(HikeConstants.INDIA_COUNTRY_CODE));
 
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -810,6 +813,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_SUPPORT, "hike support");
+		hikeBotNamesMap.put(HikeConstants.NUX_BOT, "Natasha");
 		initHikeLruCache(getApplicationContext());
 		initContactManager();
 		/*
@@ -913,6 +917,11 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static boolean isIndianUser()
 	{
 		return isIndianUser;
+	}
+
+	public static void setIndianUser(boolean val)
+	{
+		isIndianUser = val;
 	}
 
 	public static void makeTwitterInstance(String token, String tokenSecret)
