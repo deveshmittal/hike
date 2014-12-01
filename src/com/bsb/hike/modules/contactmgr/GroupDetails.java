@@ -6,18 +6,41 @@ import com.bsb.hike.utils.PairModified;
 
 public class GroupDetails
 {
+	private String groupId;
 
 	private String groupName;
 
+	private boolean isGroupAlive;
+
 	private ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns;
 
-	GroupDetails(String grpName, ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns)
+	private long timestamp;
+
+	GroupDetails(String groupId, String grpName, boolean alive, ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns)
 	{
-		this.groupName = grpName;
-		this.lastMsisdns = lastMsisdns;
+		this(groupId, grpName, alive, lastMsisdns, 0);
 	}
 
-	String getGroupName()
+	GroupDetails(String groupId, String grpName, boolean alive, ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns, long timestamp)
+	{
+		this.groupId = groupId;
+		this.groupName = grpName;
+		this.isGroupAlive = alive;
+		this.lastMsisdns = lastMsisdns;
+		this.timestamp = timestamp;
+	}
+
+	public String getGroupId()
+	{
+		return groupId;
+	}
+
+	void setGroupId(String groupId)
+	{
+		this.groupId = groupId;
+	}
+
+	public String getGroupName()
 	{
 		return groupName;
 	}
@@ -27,7 +50,17 @@ public class GroupDetails
 		groupName = grpName;
 	}
 
-	ConcurrentLinkedQueue<PairModified<String, String>> getLastMsisdns()
+	public boolean isGroupAlive()
+	{
+		return isGroupAlive;
+	}
+
+	void setIsGroupAlive(boolean alive)
+	{
+		isGroupAlive = alive;
+	}
+
+	public ConcurrentLinkedQueue<PairModified<String, String>> getLastMsisdns()
 	{
 		return lastMsisdns;
 	}
@@ -35,6 +68,16 @@ public class GroupDetails
 	void setLastMsisdns(ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns)
 	{
 		this.lastMsisdns = lastMsisdns;
+	}
+
+	public long getTimestamp()
+	{
+		return timestamp;
+	}
+
+	void setTimestamp(long timestamp)
+	{
+		this.timestamp = timestamp;
 	}
 
 	void setName(String msisdn, String name)
@@ -51,7 +94,7 @@ public class GroupDetails
 		}
 	}
 
-	String getName(String msisdn)
+	public String getName(String msisdn)
 	{
 		if (null != lastMsisdns)
 		{

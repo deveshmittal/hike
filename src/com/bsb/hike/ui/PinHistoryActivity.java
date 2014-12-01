@@ -1,13 +1,15 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-
-import org.json.JSONException;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -27,6 +29,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
@@ -40,7 +43,6 @@ import com.bsb.hike.adapters.PinHistoryAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -74,7 +76,7 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 	
 	private TextView mActionModeTitle;
 		
-	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED};
+	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED, HikePubSub.BULK_MESSAGE_RECEIVED};
 
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -190,6 +192,8 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 			getSupportMenuInflater().inflate(R.menu.multi_select_chat_menu, menu);
 			
 			menu.findItem(R.id.forward_msgs).setVisible(false);
+			
+			menu.findItem(R.id.copy_msgs).setVisible(true);
 		}
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -213,6 +217,11 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 	@Override
 	public void onBackPressed()
 	{
+		if(isActionModeOn)
+		{
+			destroyActionMode();
+			return;
+		}
 		super.onBackPressed();
 	}
 		
@@ -284,29 +293,31 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 		
 		if(HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
-			final ConvMessage convMsg = (ConvMessage)object;
+			final ConvMessage convMsg = (ConvMessage)object;			
+			handleIncomingPin(convMsg);			
+		}
+		else if(HikePubSub.BULK_MESSAGE_RECEIVED.equals(type))
+		{
+			HashMap<String, LinkedList<ConvMessage>> messageListMap = (HashMap<String, LinkedList<ConvMessage>>) object;
+			final LinkedList<ConvMessage> messageList = messageListMap.get(msisdn);
 			
-			if(convMsg.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			if(messageList != null)
 			{
-				String msisdn = convMsg.getMsisdn();
-				
-				if(msisdn != null && msisdn.equals(this.msisdn))
+				List<ConvMessage> pinsOnly = new ArrayList<ConvMessage>();
+
+				for (final ConvMessage message : messageList)
 				{
-					
-					if(pinAdapter != null)
+					if(message.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 					{
-						runOnUiThread(new Runnable() 
-						{						
-							@Override
-							public void run() 
-							{
-								pinAdapter.addPinMessage(convMsg);
-								pinAdapter.notifyDataSetChanged();							
-							}
-						});
+						String msisdn = message.getMsisdn();
+						
+						if(msisdn != null && msisdn.equals(this.msisdn))
+						{
+							pinsOnly.add(message);
+						}
 					}
 				}
-				Utils.resetPinUnreadCount(mConversation);
+				handleBulkPins(pinsOnly);
 			}
 		}
 	}
@@ -480,6 +491,21 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 			deleteConfirmDialog.show();
 			return true;
 			
+		case R.id.copy_msgs:
+			Collections.sort(selectedPinIds);
+			StringBuilder pinStr = new StringBuilder();
+			int size = selectedPinIds.size();
+			
+			for (int i = 0; i < size; i++)
+			{
+				pinStr.append(pinAdapter.getSelectedPinsMap().get(selectedPinIds.get(i)).getMessage());
+				pinStr.append("\n");				
+			}
+			Utils.setClipboardText(pinStr.toString(), getApplicationContext());
+			Toast.makeText(PinHistoryActivity.this, R.string.copied, Toast.LENGTH_SHORT).show();
+			destroyActionMode();
+			return true;
+
 		default:
 			destroyActionMode();
 		return false;
@@ -493,7 +519,11 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 	 */
 	private void removeMessage(ArrayList<Long> selectedPinIds)
 	{
-		HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD, selectedPinIds);
+		Bundle bundle = new Bundle();
+		bundle.putString(HikeConstants.Extras.MSISDN, msisdn);
+		bundle.putInt(HikeConstants.Extras.DELETED_MESSAGE_TYPE, HikeConstants.SHARED_PIN_TYPE);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_MESSAGE, new Pair<ArrayList<Long>, Bundle>(selectedPinIds, bundle));
+		
 		
 		final HashMap<Long, ConvMessage> selectedMessagesMap = pinAdapter.getSelectedPinsMap();
 
@@ -508,5 +538,47 @@ public class PinHistoryActivity extends HikeAppStateBaseFragmentActivity impleme
 		{
 			pinAdapter.removeMessage(selectedMessagesMap.get(selectedPinIds.get(i)));
 		}
-	}	
+	}
+	
+	private void handleIncomingPin(final ConvMessage convMsg)
+	{
+		if(convMsg.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+		{
+			String msisdn = convMsg.getMsisdn();
+			
+			if(msisdn != null && msisdn.equals(this.msisdn))
+			{
+				
+				if(pinAdapter != null)
+				{
+					runOnUiThread(new Runnable() 
+					{						
+						@Override
+						public void run() 
+						{
+							pinAdapter.addPinMessage(convMsg);
+							pinAdapter.notifyDataSetChanged();							
+						}
+					});
+				}
+			}
+			Utils.resetPinUnreadCount(mConversation);
+		}
+	}
+	
+	private void handleBulkPins(final List<ConvMessage> pinList)
+	{
+		if(pinAdapter != null)
+		{
+			runOnUiThread(new Runnable() 
+			{						
+				@Override
+				public void run() 
+				{
+					pinAdapter.addPins(pinList);
+				}
+			});
+			Utils.resetPinUnreadCount(mConversation);
+		}
+	}
 }

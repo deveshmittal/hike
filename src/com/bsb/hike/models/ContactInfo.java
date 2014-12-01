@@ -236,7 +236,7 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
     
 	public String getFirstNameAndSurname()
 	{
-		if(TextUtils.isEmpty(name))
+		if(name==null || TextUtils.isEmpty(name))
 		{
 			return this.msisdn;
 		}
@@ -321,6 +321,8 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 	public FavoriteType getFavoriteType()
 	{
 		int n = getNum(3, 5);
+		if (7 == n)
+			return null;
 		return FavoriteType.values()[n];
 	}
 
@@ -438,6 +440,7 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		this.lastMessaged = lastMessaged;
 		this.hikeJoinTime = hikeJoinTime;
 		setNum(6, 7, 2);
+		setNum(3, 5, 7);
 	}
 
 	public ContactInfo(ContactInfo contactInfo)

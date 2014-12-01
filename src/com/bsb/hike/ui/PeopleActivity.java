@@ -82,7 +82,6 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		getSupportMenuInflater().inflate(R.menu.friends_menu, menu);
 		
 		final SearchView searchView = new SearchView(getSupportActionBar().getThemedContext());
 		searchView.setQueryHint(getString(R.string.search_hint));
@@ -124,30 +123,6 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 		return super.onPrepareOptionsMenu(menu);
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item)
-	{
-		Intent intent = null;
-
-		switch (item.getItemId())
-		{
-		case R.id.show_timeline:
-			intent = new Intent(this, TimelineActivity.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			break;	
-		}
-
-		if (intent != null)
-		{
-			startActivity(intent);
-			return true;
-		}
-		else
-		{
-			return super.onOptionsItemSelected(item);
-		}
-	}
-
 	private OnQueryTextListener onQueryTextListener = new OnQueryTextListener()
 	{
 
@@ -184,14 +159,14 @@ public class PeopleActivity extends HikeAppStateBaseFragmentActivity implements 
 		/*
 		 * Ensuring we reset when leaving the activity as well, since we might receive a request when we were in this activity.
 		 */
-		Utils.resetOverflowCountHomeScreen(this);
+		Utils.resetUnseenFriendRequestCount(this);
 		super.onStop();
 	}
 
 	@Override
 	protected void onResume()
 	{
-		Utils.resetOverflowCountHomeScreen(this);
+		Utils.resetUnseenFriendRequestCount(this);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 		super.onResume();
 	}

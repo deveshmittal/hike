@@ -58,11 +58,22 @@ class HikeUserDatabase extends SQLiteOpenHelper
 	@Override
 	public void onCreate(SQLiteDatabase db)
 	{
-		String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.USERS_TABLE + " ( " + DBConstants.ID + " STRING , " + DBConstants.NAME + " TEXT, " + DBConstants.MSISDN
-				+ " TEXT COLLATE nocase, " + DBConstants.ONHIKE + " INTEGER, " + DBConstants.PHONE + " TEXT, " + DBConstants.HAS_CUSTOM_PHOTO + " INTEGER, "
-				+ DBConstants.OVERLAY_DISMISSED + " INTEGER, " + DBConstants.MSISDN_TYPE + " STRING, " + DBConstants.LAST_MESSAGED + " INTEGER, " + DBConstants.HIKE_JOIN_TIME
-				+ " INTEGER DEFAULT 0, " + DBConstants.LAST_SEEN + " INTEGER DEFAULT -1, " + DBConstants.IS_OFFLINE + " INTEGER DEFAULT 1, " + DBConstants.INVITE_TIMESTAMP
-				+ " INTEGER DEFAULT 0" + " )";
+		String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.USERS_TABLE
+				+ " ( "
+				+ DBConstants.ID + " STRING , " // Contact ID. Not used.
+				+ DBConstants.NAME + " TEXT, " // Contact name
+				+ DBConstants.MSISDN + " TEXT COLLATE nocase, " // Contact normalised msisdn
+				+ DBConstants.ONHIKE + " INTEGER, " // Contact's on hike status
+				+ DBConstants.PHONE + " TEXT, " // Contact's phone number in the user's contacts DB
+				+ DBConstants.HAS_CUSTOM_PHOTO + " INTEGER, " // Whether the contact has a custom avatar or not. Not used
+				+ DBConstants.OVERLAY_DISMISSED + " INTEGER, "
+				+ DBConstants.MSISDN_TYPE + " STRING, " // The msisdn type
+				+ DBConstants.LAST_MESSAGED + " INTEGER, " // When this user was last messaged
+				+ DBConstants.HIKE_JOIN_TIME + " INTEGER DEFAULT 0, " // When this user joined hike
+				+ DBConstants.LAST_SEEN + " INTEGER DEFAULT -1, " // When this user was last seen on hike
+				+ DBConstants.IS_OFFLINE + " INTEGER DEFAULT 1, " // Whether this user is online or not
+				+ DBConstants.INVITE_TIMESTAMP + " INTEGER DEFAULT 0" // When this user was last invited.
+				+ " )";
 
 		db.execSQL(create);
 
@@ -993,7 +1004,23 @@ class HikeUserDatabase extends SQLiteOpenHelper
 			c = mReadDb.rawQuery("SELECT " + DBConstants.ID + ", " + DBConstants.NAME + ", " + DBConstants.MSISDN + ", " + DBConstants.PHONE + ", " + DBConstants.LAST_MESSAGED
 					+ ", " + DBConstants.MSISDN_TYPE + ", " + DBConstants.ONHIKE + ", " + DBConstants.HAS_CUSTOM_PHOTO + ", " + DBConstants.HIKE_JOIN_TIME + ", "
 					+ DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE + ", " + DBConstants.INVITE_TIMESTAMP + " from " + DBConstants.USERS_TABLE, null);
-			contacts = extractContactInfo(c);
+
+			Map<String, FavoriteType> favTypeMap = getFavoriteMap();
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			while (c.moveToNext())
+			{
+				String msisdn = c.getString(msisdnIdx);
+				if (TextUtils.isEmpty(msisdn))
+				{
+					continue;
+				}
+				ContactInfo contact = processContact(c);
+				if (favTypeMap.containsKey(contact.getMsisdn()))
+				{
+					contact.setFavoriteType(favTypeMap.get(contact.getMsisdn()));
+				}
+				contacts.add(contact);
+			}
 			return contacts;
 		}
 		finally
@@ -2069,6 +2096,21 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		return msisdns;
 	}
 
+	/*
+	 * This is done because we set msisdntype as ftuecontact and if they are in contact manager then it's get changed for other places as well and we dont want that so creating a
+	 * duplicate copy for ftue contacts
+	 */
+	private List<ContactInfo> getDuplicateContactsForFtue(List<ContactInfo> contacts)
+	{
+		List<ContactInfo> duplicateContacts = new ArrayList<ContactInfo>();
+		for (ContactInfo contact : contacts)
+		{
+			ContactInfo duplicate = new ContactInfo(contact);
+			duplicateContacts.add(duplicate);
+		}
+		return duplicateContacts;
+	}
+
 	FtueContactsData getFTUEContacts(SharedPreferences preferences)
 	{
 		FtueContactsData ftueContactsData = new FtueContactsData();
@@ -2084,9 +2126,10 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		 */
 		Set<String> recommendedContactsSelection = Utils.getServerRecommendedContactsSelection(preferences.getString(HikeMessengerApp.SERVER_RECOMMENDED_CONTACTS, null), myMsisdn);
 		Logger.d("getFTUEContacts", "recommendedContactsSelection = " + recommendedContactsSelection);
-		if (!recommendedContactsSelection.isEmpty())
+		if (null != recommendedContactsSelection && !recommendedContactsSelection.isEmpty())
 		{
-			List<ContactInfo> recommendedContacts = HikeMessengerApp.getContactManager().getHikeContacts(limit * 2, recommendedContactsSelection, null, myMsisdn);
+			List<ContactInfo> recommendedContacts = getDuplicateContactsForFtue(HikeMessengerApp.getContactManager().getHikeContacts(limit * 2, recommendedContactsSelection, null,
+					myMsisdn));
 			if (recommendedContacts.size() >= limit)
 			{
 				ftueContactsData.getHikeContacts().addAll(recommendedContacts.subList(0, limit));
@@ -2106,7 +2149,8 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		 */
 		if (limit > 0)
 		{
-			List<ContactInfo> friendList = HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.FRIEND, HikeConstants.ON_HIKE_VALUE, myMsisdn);
+			List<ContactInfo> friendList = getDuplicateContactsForFtue(HikeMessengerApp.getContactManager().getContactsOfFavoriteType(FavoriteType.FRIEND,
+					HikeConstants.ON_HIKE_VALUE, myMsisdn, false, true));
 			for (ContactInfo contactInfo : friendList)
 			{
 				if (!Utils.isListContainsMsisdn(ftueContactsData.getHikeContacts(), contactInfo.getMsisdn()))
@@ -2135,7 +2179,7 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		if (limit > 0)
 		{
 			Set<String> currentSelection = getQueryableNumbersString(ftueContactsData.getHikeContacts());
-			List<ContactInfo> hikeContacts = HikeMessengerApp.getContactManager().getHikeContacts(limit * 2, null, currentSelection, myMsisdn);
+			List<ContactInfo> hikeContacts = getDuplicateContactsForFtue(HikeMessengerApp.getContactManager().getHikeContacts(limit * 2, null, currentSelection, myMsisdn));
 			if (hikeContacts.size() >= limit)
 			{
 				ftueContactsData.getHikeContacts().addAll(hikeContacts.subList(0, limit));
@@ -2160,7 +2204,7 @@ class HikeUserDatabase extends SQLiteOpenHelper
 		 */
 		if (limit > 0)
 		{
-			List<ContactInfo> nonHikeContacts = HikeMessengerApp.getContactManager().getNonHikeMostContactedContacts(limit * 4);
+			List<ContactInfo> nonHikeContacts = getDuplicateContactsForFtue(HikeMessengerApp.getContactManager().getNonHikeMostContactedContacts(limit * 4));
 			ftueContactsData.setTotalSmsContactsCount(getNonHikeContactsCount());
 
 			if (nonHikeContacts.size() >= limit)

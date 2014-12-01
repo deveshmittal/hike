@@ -26,7 +26,7 @@
     <dimen name="sub_text_size">14sp</dimen>
     <dimen name="top_btn_padding">0dp</dimen>
     <dimen name="emoticon_pallete">228dp</dimen>
-    <dimen name="sticker_padding">5dp</dimen>
+    <dimen name="sticker_padding">16dp</dimen>
     <dimen name="emoticon_pager_padding">5dp</dimen>
     <dimen name="protip_btn_padding">37dp</dimen>
     <dimen name="status_btn_padding">20dp</dimen>
@@ -150,5 +150,23 @@
 	<dimen name="logo_top_margin">90dp</dimen>
 	<dimen name="welcome_bottom_margin">25dp</dimen>
 	<dimen name="empty_tutorial_margin">20dp</dimen>
-	
+	<dimen name="horizontal_page_margin">16dp</dimen>
+	<dimen name="profile_shared_media_item_size">72dp</dimen>
+	<dimen name="thumbnail_margin_right">2dp</dimen>
+	<dimen name="sm_leftmargin">16dp</dimen>
+	<dimen name="sm_rightmargin">53dp</dimen>
+	<dimen name="top_margin_shared_content">8dp</dimen>
+	<dimen name="shared_media_top_margin_hike_bot">3dp</dimen>
+	<dimen name="avatar_profile_size">66dp</dimen>
+	<dimen name="welcome_with_love_top">30dp</dimen>
+	<dimen name="diwali_popup_width">290dp</dimen>
+	<dimen name="diwali_popup_height">380dp</dimen>
+	<dimen name="sticker_settting_item_height">86dp</dimen>
+	<dimen name="sticker_pack_empty_view_margin">18dp</dimen>
+	<dimen name="sticker_grid_horizontal_padding">8dp</dimen>
+	<dimen name="drag_shadow_height">8dp</dimen>
+	<dimen name="invite_footer_top_margin">163dp</dimen>
+	<dimen name="nux_button_text_margin">32dp</dimen>
+	<dimen name="nux_text_text_margin">8dp</dimen>
+	<dimen name="sticker_settings_tip_margin">18dp</dimen>
 </resources>

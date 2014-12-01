@@ -442,6 +442,13 @@
 	    <item name="android:background">@drawable/bg_updates_white</item>
 	</style>
 	
+	<style name="NuxScreenCardContainer">
+	    <item name="android:layout_marginLeft">@dimen/updates_margin</item>
+	    <item name="android:layout_marginRight">@dimen/updates_margin</item>
+	    <item name="android:layout_marginTop">@dimen/updates_margin_top</item>
+	    <item name="android:background">@drawable/bg_sticker_card_white</item>
+	</style>
+	
 	<style name="AvatarStyle">
 	    <item name="android:layout_width">match_parent</item>
 	    <item name="android:layout_height">match_parent</item>
@@ -690,4 +697,13 @@
         <item name="android:background">@drawable/pins_bg_read_selector</item>
 	</style>
 	
+	<style name="DiwaliPopupButton">
+	    <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@null</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/diwali_popup_btn_txt</item>
+	</style>
 </resources>

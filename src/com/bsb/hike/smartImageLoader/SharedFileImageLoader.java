@@ -51,7 +51,7 @@ public class SharedFileImageLoader extends ImageWorker
 		Bitmap thumbnail = null;
 		if (isImage)
 		{
-			thumbnail = HikeBitmapFactory.scaleDownBitmap(destFilePath, fileSize, fileSize, Bitmap.Config.RGB_565, false, false);
+			thumbnail = HikeBitmapFactory.scaleDownBitmap(destFilePath, fileSize, fileSize, Bitmap.Config.RGB_565, true, false);
 			thumbnail = Utils.getRotatedBitmap(destFilePath, thumbnail);
 		}
 		else

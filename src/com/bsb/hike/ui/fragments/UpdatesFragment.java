@@ -93,9 +93,7 @@ public class UpdatesFragment extends SherlockListFragment implements OnScrollLis
 		super.onPause();
 		if (centralTimelineAdapter != null)
 		{
-			centralTimelineAdapter.getTimelineImageLoader().setPauseWork(false);
 			centralTimelineAdapter.getTimelineImageLoader().setExitTasksEarly(true);
-			centralTimelineAdapter.getIconImageLoader().setPauseWork(false);
 			centralTimelineAdapter.getIconImageLoader().setExitTasksEarly(true);
 		}
 	}

@@ -5,8 +5,10 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,15 +16,23 @@ import org.json.JSONObject;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract.Data;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewStub;
+import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -31,15 +41,23 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ComposeChatAdapter;
 import com.bsb.hike.adapters.FriendsAdapter;
 import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
@@ -47,11 +65,15 @@ import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.MultipleConvMessage;
+import com.bsb.hike.models.Sticker;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -61,16 +83,25 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomTypeFace;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
 
 public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implements TagEditorListener, OnItemClickListener, HikePubSub.Listener, OnScrollListener
 {
+	private static final String SELECT_ALL_MSISDN="all";
+	
 	private static int MIN_MEMBERS_GROUP_CHAT = 2;
 
 	private static final int CREATE_GROUP_MODE = 1;
 
 	private static final int START_CHAT_MODE = 2;
+	
+	private static final int MULTIPLE_FWD = 3;
+
+	private static final int FTUE_FWD = 4;
+
+    private static final int NUX_INVITE_MODE = 5;
 
 	private View multiSelectActionBar, groupChatActionBar;
 
@@ -94,22 +125,41 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 	private boolean isSharingFile;
 
+	private boolean isFtueFwd;
+
 	private String existingGroupId;
 
 	private volatile InitiateMultiFileTransferTask fileTransferTask;
+	private PreFileTransferAsycntask prefileTransferTask;
 
 	private ProgressDialog progressDialog;
 
 	private LastSeenScheduler lastSeenScheduler;
 
 	private String[] hikePubSubListeners = { HikePubSub.MULTI_FILE_TASK_FINISHED, HikePubSub.APP_FOREGROUNDED, HikePubSub.LAST_SEEN_TIME_UPDATED,
-			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED };
+			HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, HikePubSub.CONTACT_SYNC_STARTED, HikePubSub.CONTACT_SYNCED };
 
 	private int previousFirstVisibleItem;
 
 	private int velocity;
 
 	private long previousEventTime;
+	
+	private HikePubSub mPubSub;
+
+	private boolean showingMultiSelectActionBar = false;
+	
+	private List<ContactInfo> recentContacts;
+	
+	private boolean selectAllMode;
+	
+	private ViewStub composeCard;
+	
+	private View composeCardInflated;
+	
+	private boolean deviceDetailsSent;
+
+	private boolean nuxInviteMode;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -127,14 +177,21 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
 		app.connectToService();
 
+		isFtueFwd = getIntent().getBooleanExtra(HikeConstants.Extras.FTUE_FORWARD, false);
 		createGroup = getIntent().getBooleanExtra(HikeConstants.Extras.CREATE_GROUP, false);
 		isForwardingMessage = getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false);
 		isSharingFile = getIntent().getType() != null;
+		nuxInviteMode = getIntent().getBooleanExtra(HikeConstants.NUX_INVITE_FORWARD, false);
 
 		// Getting the group id. This will be a valid value if the intent
 		// was passed to add group participants.
 		existingGroupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
+		if (isFtueFwd && savedInstanceState != null)
+		{
+			deviceDetailsSent = savedInstanceState.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
+		}
+		
 		if (!shouldInitiateFileTransfer())
 		{
 			Toast.makeText(this, getString(R.string.max_num_files_reached, FileTransferManager.getInstance(this).getTaskLimit()), Toast.LENGTH_SHORT).show();
@@ -150,6 +207,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			fileTransferTask = (InitiateMultiFileTransferTask) object;
 			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
+		}else if( object instanceof PreFileTransferAsycntask){
+			prefileTransferTask = (PreFileTransferAsycntask) object;
+			progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
 		}
 
 		if (Intent.ACTION_SEND.equals(getIntent().getAction()) || Intent.ACTION_SENDTO.equals(getIntent().getAction())
@@ -161,9 +221,45 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		setActionBar();
 
 		init();
-
-		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
+		mPubSub = HikeMessengerApp.getPubSub();
+		mPubSub.addListeners(this, hikePubSubListeners);
 	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		outState.putBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT, deviceDetailsSent);
+		super.onSaveInstanceState(outState);
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		if (!showingMultiSelectActionBar && !isFtueFwd && !nuxInviteMode)
+			getSupportMenuInflater().inflate(R.menu.compose_chat_menu, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		if(item.getItemId() == R.id.refresh_contacts)
+		{
+			if(HikeMessengerApp.syncingContacts)
+				return super.onOptionsItemSelected(item);
+			if(!Utils.isUserOnline(this))
+			{
+				Utils.showNetworkUnavailableDialog(this);
+				return super.onOptionsItemSelected(item);
+			}
+			Intent contactSyncIntent = new Intent(HikeService.MQTT_CONTACT_SYNC_ACTION);
+			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
+			sendBroadcast(contactSyncIntent);
+			Utils.sendUILogEvent(HikeConstants.LogEvent.COMPOSE_REFRESH_CONTACTS);
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
 
 	private boolean shouldInitiateFileTransfer()
 	{
@@ -222,10 +318,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private void init()
 	{
 		listView = (ListView) findViewById(R.id.list);
+		String sendingMsisdn = getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN);
 
-		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, existingGroupId, friendsListFetchedCallback);
-		adapter.setEmptyView(findViewById(android.R.id.empty));
+		boolean showNujNotif = PreferenceManager.getDefaultSharedPreferences(ComposeChatActivity.this).getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true);
+		boolean fetchRecentlyJoined = HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false) && !isForwardingMessage && showNujNotif && !isFtueFwd;
+		
+		adapter = new ComposeChatAdapter(this, listView, isForwardingMessage, (isForwardingMessage && !isSharingFile), nuxInviteMode, fetchRecentlyJoined, existingGroupId, sendingMsisdn, friendsListFetchedCallback);
+		View emptyView = (nuxInviteMode) ? findViewById(R.id.nux_invite_empty) : findViewById(android.R.id.empty);
+		adapter.setEmptyView(emptyView);
 		adapter.setLoadingView(findViewById(R.id.spinner));
+
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(this);
 		listView.setOnScrollListener(this);
@@ -238,11 +340,49 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			MIN_MEMBERS_GROUP_CHAT = 1;
 		}
-		setMode(getIntent().hasExtra(HikeConstants.Extras.GROUP_ID) || existingGroupId != null ? CREATE_GROUP_MODE : START_CHAT_MODE);
 
+		if (isFtueFwd)
+		{
+			composeCard = (ViewStub) findViewById(R.id.nuxComposeCardStub);
+			if (composeCardInflated == null)
+			{
+				composeCard.setOnInflateListener(new ViewStub.OnInflateListener()
+				{
+					@Override
+					public void onInflate(ViewStub stub, View inflated)
+					{
+						composeCardInflated = inflated;
+					}
+				});
+				try
+				{
+					composeCard.inflate();
+				}
+				catch (Exception e)
+				{
+
+				}
+			}
+			else
+			{
+				composeCardInflated.setVisibility(View.VISIBLE);
+			}
+			setMode(FTUE_FWD);
+		}
+		else if (isForwardingMessage && !isSharingFile)
+		{
+			setMode(nuxInviteMode ? NUX_INVITE_MODE : MULTIPLE_FWD);
+		}
+		else
+		{
+			setMode(getIntent().hasExtra(HikeConstants.Extras.GROUP_ID) || existingGroupId != null ? CREATE_GROUP_MODE : START_CHAT_MODE);
+		}
+		
 		adapter.setIsCreatingOrEditingGroup(this.composeMode == CREATE_GROUP_MODE);
 
 		adapter.executeFetchTask();
+		
+		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
 	}
 
 	private void initTagEditText()
@@ -254,7 +394,30 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		tagEditText.setMinCharChangeThresholdForTag(8);
 		tagEditText.setSeparator(TagEditText.SEPARATOR_SPACE);
 	}
-
+	
+	@Override
+	protected void onPause()
+	{
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(adapter != null)
+		{
+			adapter.getIconLoader().setExitTasksEarly(true);
+		}
+	}
+	
+	@Override
+	protected void onResume()
+	{
+		// TODO Auto-generated method stub
+		super.onResume();
+		if(adapter != null)
+		{
+			adapter.getIconLoader().setExitTasksEarly(false);
+			adapter.notifyDataSetChanged();
+		}
+	}
+	
 	@Override
 	public void onDestroy()
 	{
@@ -280,6 +443,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		if (fileTransferTask != null)
 		{
 			return fileTransferTask;
+		}
+		else if(prefileTransferTask!=null){
+			return prefileTransferTask;
 		}
 		else
 		{
@@ -331,39 +497,38 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				return;
 			}
 
-			if (isForwardingMessage)
+			if (isForwardingMessage || isFtueFwd)
 			{
-				// if(contactInfo == null)
-				// {
-				// String msisdn = getNormalisedMsisdn();
-				// contactInfo = new ContactInfo(msisdn, msisdn, msisdn, msisdn);
-				// }
-
-				final CustomAlertDialog forwardConfirmDialog = new CustomAlertDialog(this);
-				if (isSharingFile)
-				{
-					forwardConfirmDialog.setHeader(R.string.share);
-					forwardConfirmDialog.setBody(getString(R.string.share_with, contactInfo.getNameOrMsisdn()));
+				// share
+				if(isSharingFile){
+					ArrayList<ContactInfo> list = new ArrayList<ContactInfo>();list.add(contactInfo);
+					forwardConfirmation(list);
+					return;
 				}
-				else
+				// for SMS users, append SMS text with name
+				int viewtype = adapter.getItemViewType(arg2);
+				if (contactInfo.getName() == null)
 				{
-					forwardConfirmDialog.setHeader(R.string.forward);
-					forwardConfirmDialog.setBody(getString(R.string.forward_to, contactInfo.getNameOrMsisdn()));
+					contactInfo.setName(contactInfo.getMsisdn());
 				}
-				View.OnClickListener dialogOkClickListener = new View.OnClickListener()
-				{
-
-					@Override
-					public void onClick(View v)
-					{
-						forwardConfirmDialog.dismiss();
-						forwardMessageTo(contactInfo);
+				
+				if(selectAllMode){
+					tagEditText.clear(false);
+					if(adapter.isContactAdded(contactInfo)){
+						adapter.removeContact(contactInfo);
+					}else{
+						adapter.addContact(contactInfo);
 					}
-				};
-
-				forwardConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
-				forwardConfirmDialog.setCancelButton(R.string.cancel);
-				forwardConfirmDialog.show();
+					int selected = adapter.getSelectedContactCount();
+					if(selected>0){
+					tagEditText.toggleTag(getString(selected==1 ? R.string.selected_contacts_count_singular : R.string.selected_contacts_count_plural,selected), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
+					}else{
+						((CheckBox)findViewById(R.id.select_all_cb)).setChecked(false); // very rare case
+					}
+				}else{
+				String name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
+				tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
+				}
 			}
 			else
 			{
@@ -388,10 +553,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	@Override
 	public void tagRemoved(Object data, String uniqueNess)
 	{
-		adapter.removeContact((ContactInfo) data);
+		if(selectAllMode){
+		((CheckBox) findViewById(R.id.select_all_cb)).setChecked(false);;
+		}else{
+			if(data instanceof ContactInfo){
+				adapter.removeContact((ContactInfo) data);
+			}
+		}
 		if (adapter.getCurrentSelection() == 0)
 		{
 			setActionBar();
+			invalidateOptionsMenu();
 		}
 		else
 		{
@@ -402,11 +574,20 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	@Override
 	public void tagAdded(Object data, String uniqueNess)
 	{
+		String dataString = null;
+		if(data instanceof ContactInfo){
 		adapter.addContact((ContactInfo) data);
-		int selectedCount = adapter.getCurrentSelection();
-		setupMultiSelectActionBar();
+		}else if(data instanceof String)
+		{
+			dataString = (String) data;
+		}
 
+		setupMultiSelectActionBar();
+		invalidateOptionsMenu();
+		
+		int selectedCount = adapter.getCurrentSelection();
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, selectedCount));
+		
 	}
 
 	@Override
@@ -441,8 +622,89 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.removeFilter();
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_chat_mode);
 			return;
+		case MULTIPLE_FWD:
+			// createGroupHeader.setVisibility(View.GONE);
+			adapter.showCheckBoxAgainstItems(true);
+			tagEditText.clear(false);
+			adapter.removeFilter();
+			adapter.clearAllSelection(true);
+			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
+			// select all bottom text
+			setupForSelectAll();
+			break;
+		case FTUE_FWD:
+			adapter.showCheckBoxAgainstItems(true);
+			tagEditText.clear(false);
+			adapter.removeFilter();
+			adapter.clearAllSelection(true);
+			adapter.toggleShowSMSContacts(false);
+			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
+			if (null != composeCardInflated)
+				composeCardInflated.setVisibility(View.VISIBLE);
+			setSticker();
+			tagEditText.setVisibility(View.GONE);
+			break;
+		case NUX_INVITE_MODE:
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+			adapter.showCheckBoxAgainstItems(true);
+			tagEditText.clear(false);
+			adapter.removeFilter();
+			adapter.clearAllSelection(true);
+			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
+			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint(R.string.nux_fwd_search_hint);
+			break;
 		}
 		setTitle();
+	}
+	
+	/**
+	 * This is used for nux screen when user taps on sticker that needs to be shown in compose chat screen
+	 */
+	private void setSticker()
+	{
+		int stickerResId = getIntent().getIntExtra(StickerManager.STICKER_RES_ID, 0);
+		if(stickerResId == 0)
+		{
+			return;
+		}
+		ImageView imageView = (ImageView) findViewById(R.id.nuxComposeSticker);
+		imageView.setImageResource(stickerResId);
+	}
+	
+	private void setupForSelectAll(){
+		View selectAllCont = findViewById(R.id.select_all_container);
+		selectAllCont.setVisibility(View.VISIBLE);
+		final TextView tv = (TextView) selectAllCont.findViewById(R.id.select_all_text);
+		tv.setText(getString(R.string.select_all_hike));
+		CheckBox cb = (CheckBox) selectAllCont.findViewById(R.id.select_all_cb);
+		cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if(isChecked){
+					// call adapter select all
+					selectAllMode = true;
+					tv.setText(getString(R.string.unselect_all_hike));
+					adapter.clearAllSelection(true);
+					adapter.selectAllContacts(true);
+					tagEditText.clear(false);
+					int selected = adapter.getSelectedContactCount();
+					tagEditText.toggleTag( getString(selected <=1 ? R.string.selected_contacts_count_singular : R.string.selected_contacts_count_plural,selected), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SELECT_ALL_HIKE_CONTACTS);
+				}else{
+					// call adapter unselect all
+					selectAllMode = false;
+					tv.setText(getString(R.string.select_all_hike));
+					adapter.selectAllContacts(false);
+					tagEditText.clear(true);
+					setActionBar();
+					invalidateOptionsMenu();
+					
+				}
+				
+			}
+		});
+		
 	}
 
 	private void createGroup(ArrayList<ContactInfo> selectedContactList)
@@ -468,7 +730,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		for (ContactInfo particpant : selectedContactList)
 		{
 			GroupParticipant groupParticipant = new GroupParticipant(particpant);
-			participantList.put(particpant.getMsisdn(), new PairModified<GroupParticipant, String>(groupParticipant, null));
+			participantList.put(particpant.getMsisdn(), new PairModified<GroupParticipant, String>(groupParticipant, groupParticipant.getContactInfo().getNameOrMsisdn()));
 		}
 		ContactInfo userContactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 
@@ -477,7 +739,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		Logger.d(getClass().getSimpleName(), "Creating group: " + groupId);
 		HikeConversationsDatabase mConversationDb = HikeConversationsDatabase.getInstance();
-		mConversationDb.addGroupParticipants(groupId, groupConversation.getGroupParticipantList());
+		mConversationDb.addRemoveGroupParticipants(groupId, groupConversation.getGroupParticipantList(), false);
 		if (newGroup)
 		{
 			mConversationDb.addConversation(groupConversation.getMsisdn(), false, groupName, groupConversation.getGroupOwner());
@@ -490,8 +752,9 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			// if its a new group
 			JSONObject gcjPacket = groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
 			gcjPacket.put(HikeConstants.NEW_GROUP, newGroup);
-
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, new ConvMessage(gcjPacket, groupConversation, this, true));
+			ConvMessage msg = new ConvMessage(gcjPacket, groupConversation, this, true);
+			ContactManager.getInstance().updateGroupRecency(groupId, msg.getTimestamp());
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, msg);
 		}
 		catch (JSONException e)
 		{
@@ -543,10 +806,44 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		{
 			groupChatActionBar = LayoutInflater.from(this).inflate(R.layout.compose_action_bar, null);
 		}
+
 		if (actionBar.getCustomView() == groupChatActionBar)
 		{
 			return;
 		}
+
+		if (isFtueFwd)
+		{
+			View sendBtn = groupChatActionBar.findViewById(R.id.done_container);
+			ImageView arrow = (ImageView) groupChatActionBar.findViewById(R.id.arrow);
+			TextView send = (TextView) groupChatActionBar.findViewById(R.id.post_btn);
+			sendBtn.setVisibility(View.VISIBLE);
+			arrow.setVisibility(View.GONE);
+			
+			send.setText(R.string.skip);
+
+			sendBtn.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					Intent intent = Utils.getHomeActivityIntent(ComposeChatActivity.this);
+					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+					Editor editor = settings.edit();
+					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, true);
+					editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
+					editor.commit();
+					sendDetailsAfterSignup(true);
+					ComposeChatActivity.this.finish();
+					startActivity(intent);
+				}
+			});
+		}
+		else
+		{
+			groupChatActionBar.findViewById(R.id.seprator).setVisibility(View.GONE);
+		}
+
 		View backContainer = groupChatActionBar.findViewById(R.id.back);
 
 		title = (TextView) groupChatActionBar.findViewById(R.id.title);
@@ -561,8 +858,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 		});
 		setTitle();
+		if(HikeMessengerApp.syncingContacts)
+		{
+			// For showing progress bar when activity is closed and opened again
+			showProgressBarContactsSync(View.VISIBLE);
+		}
 
 		actionBar.setCustomView(groupChatActionBar);
+
+		showingMultiSelectActionBar = false;
 	}
 
 	private void setTitle()
@@ -582,6 +886,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		else if (!TextUtils.isEmpty(existingGroupId))
 		{
 			title.setText(R.string.add_group);
+		}
+		else if (isFtueFwd)
+		{
+			title.setText(R.string.ftue_sticker_forward_title);
 		}
 		else
 		{
@@ -603,19 +911,53 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 		multiSelectTitle = (TextView) multiSelectActionBar.findViewById(R.id.title);
 		multiSelectTitle.setText(getString(R.string.gallery_num_selected, 1));
+		TextView send = (TextView) multiSelectActionBar.findViewById(R.id.save);
+		
+		if (isForwardingMessage)
+		{
+			send.setText(R.string.send);
+		}
+		else if (isFtueFwd)
+		{
+			send.setText(R.string.send);
+			multiSelectActionBar.findViewById(R.id.arrow).setVisibility(View.GONE);
+		}
 
 		sendBtn.setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
 			{
-				int selected = adapter.getCurrentSelection();
-				if (selected < MIN_MEMBERS_GROUP_CHAT)
+				if(isFtueFwd)
 				{
-					Toast.makeText(getApplicationContext(), "Select Min " + MIN_MEMBERS_GROUP_CHAT + " member(s) to start group chat", Toast.LENGTH_SHORT).show();
-					return;
+					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_STICKER_FORWARD);
+					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+					Editor editor = settings.edit();
+					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, false);
+					editor.putBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
+					editor.commit();
+					sendDetailsAfterSignup(false);
+					forwardMultipleMessages(adapter.getAllSelectedContacts());
 				}
-				createGroup(adapter.getAllSelectedContacts());
+				else if(nuxInviteMode)
+				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_BOT_FORWARD);
+					forwardMultipleMessages(adapter.getAllSelectedContacts());
+				}
+				else if (isForwardingMessage)
+				{
+					forwardConfirmation(adapter.getAllSelectedContacts());
+				}
+				else
+				{
+					int selected = adapter.getCurrentSelection();
+					if (selected < MIN_MEMBERS_GROUP_CHAT)
+					{
+						Toast.makeText(getApplicationContext(), "Select Min " + MIN_MEMBERS_GROUP_CHAT + " member(s) to start group chat", Toast.LENGTH_SHORT).show();
+						return;
+					}
+					createGroup(adapter.getAllSelectedContacts());
+				}
 			}
 		});
 
@@ -625,10 +967,22 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				setMode(CREATE_GROUP_MODE);
+				setMode(composeMode);
+				if(selectAllMode)
+				{
+					View selectAllCont = findViewById(R.id.select_all_container);
+					CheckBox cb = (CheckBox) selectAllCont.findViewById(R.id.select_all_cb);
+					cb.setChecked(false);
+				}
 				setActionBar();
+				invalidateOptionsMenu();
 			}
 		});
+
+		if(HikeMessengerApp.syncingContacts)
+		{
+			showProgressBarContactsSync(View.VISIBLE);
+		}
 		actionBar.setCustomView(multiSelectActionBar);
 
 		Animation slideIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_left_noalpha);
@@ -636,15 +990,172 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		slideIn.setDuration(200);
 		closeBtn.startAnimation(slideIn);
 		sendBtn.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_in));
+
+		showingMultiSelectActionBar = true;
 	}
 
-	private void forwardMessageTo(ContactInfo contactInfo)
+	private void forwardConfirmation(final ArrayList<ContactInfo> arrayList)
+	{
+		final CustomAlertDialog forwardConfirmDialog = new CustomAlertDialog(this);
+		if (isSharingFile)
+		{
+			forwardConfirmDialog.setHeader(R.string.share);
+			forwardConfirmDialog.setBody(getForwardConfirmationText(arrayList, false));
+		}
+		else
+		{
+			forwardConfirmDialog.setHeader(R.string.forward);
+			forwardConfirmDialog.setBody(getForwardConfirmationText(arrayList, true));
+		}
+		View.OnClickListener dialogOkClickListener = new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				forwardConfirmDialog.dismiss();
+				forwardMultipleMessages(arrayList);
+			}
+		};
+
+		forwardConfirmDialog.setOkButton(R.string.ok, dialogOkClickListener);
+		forwardConfirmDialog.setCancelButton(R.string.cancel);
+		forwardConfirmDialog.show();
+	}
+	
+	private String getForwardConfirmationText(ArrayList<ContactInfo> arrayList, boolean forwarding)
+	{
+		// multi forward case
+		if (forwarding)
+		{
+			if (isFtueFwd)
+			{
+				return arrayList.size() == 1 ? getResources().getString(R.string.ftue_sticker_forward_confirmation_singular) : getResources().getString(R.string.ftue_sticker_forward_confirmation_plural, arrayList.size());
+			}
+			else
+			{
+				return arrayList.size() == 1 ? getResources().getString(R.string.forward_to_singular) : getResources().getString(R.string.forward_to_plural, arrayList.size());
+			}
+		}
+		StringBuilder sb = new StringBuilder();
+
+		int lastIndex = arrayList.size()-1;
+
+		boolean moreNamesThanMaxCount = false;
+		if (lastIndex < 0)
+		{
+			lastIndex = 0;
+		}
+		else if (lastIndex == 1)
+		{
+			/*
+			 * We increment the last index if its one since we can accommodate another name in this case.
+			 */
+			//lastIndex++;
+			moreNamesThanMaxCount = true;
+		}
+		else if (lastIndex > 0)
+		{
+			moreNamesThanMaxCount = true;
+		}
+
+		for (int i = arrayList.size() - 1; i >= lastIndex; i--)
+		{
+			sb.append(arrayList.get(i).getFirstName());
+			if (i > lastIndex + 1)
+			{
+				sb.append(", ");
+			}
+			else if (i == lastIndex + 1)
+			{
+				if (moreNamesThanMaxCount)
+				{
+					sb.append(", ");
+				}
+				else
+				{
+					sb.append(" and ");
+				}
+			}
+		}
+		String readByString = sb.toString();
+		if (moreNamesThanMaxCount)
+		{
+			
+				return getResources().getString(R.string.share_with_names_numbers, readByString, lastIndex);
+			
+		}
+		else
+		{
+			
+				return getResources().getString(R.string.share_with, readByString);
+			
+			
+		}
+	}
+
+	private void forwardMultipleMessages(ArrayList<ContactInfo> arrayList)
 	{
 		Intent presentIntent = getIntent();
+		if(isSharingFile){
+	        Intent intent = Utils.createIntentFromContactInfo(arrayList.get(0), true);
+	        intent.setClass(this, ChatThread.class);
+	        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	        String type = presentIntent.getType();
+	        forwardMessageAsPerType(presentIntent, intent,arrayList);
 
-		Intent intent = Utils.createIntentFromContactInfo(contactInfo, true);
-		intent.setClass(this, ChatThread.class);
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	        /*
+	         * If the intent action is ACTION_SEND_MULTIPLE then we don't need to start the activity here
+	         * since we start an async task for initiating the file upload and an activity is started when
+	         * that async task finishes execution.
+	         */
+	        if (!Intent.ACTION_SEND_MULTIPLE.equals(presentIntent.getAction()))
+	        {
+	        	startActivity(intent);
+	        	finish();
+	        }
+		}
+		else
+		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.CONFIRM_FORWARD);
+			// forwarding it is
+			Intent intent = null;
+			if(!nuxInviteMode && !isFtueFwd && arrayList.size()==1)
+			{
+				// forwarding to 1 is special case , we want to create conversation if does not exist and land to recipient
+				intent = Utils.createIntentFromMsisdn(arrayList.get(0).getMsisdn(), false);
+				intent.putExtras(presentIntent);
+				intent.setClass(this, ChatThread.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+				finish();
+			}
+			else
+			{
+				// multi forward to multi people
+				if(presentIntent.hasExtra(HikeConstants.Extras.PREV_MSISDN)){
+					// open chat thread from where we initiated
+					String id = presentIntent.getStringExtra(HikeConstants.Extras.PREV_MSISDN);
+					intent = Utils.createIntentFromMsisdn(id, false);
+					intent.setClass(this, ChatThread.class);
+				}else{
+					//home activity
+					intent = Utils.getHomeActivityIntent(this);
+				}
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				forwardMessageAsPerType(presentIntent, intent,arrayList);
+			}
+			if(nuxInviteMode)
+			{
+				mPubSub.publish(HikePubSub.SWITCH_OFF_NUX_MODE, false);
+			}
+		}
+	}
+
+	private void forwardMessageAsPerType(Intent presentIntent, Intent intent, ArrayList<ContactInfo> arrayList)
+	{
+		// update contact info sequence as per conversation ordering
+		arrayList = updateContactInfoOrdering(arrayList);
 		String type = presentIntent.getType();
 
 		if (Intent.ACTION_SEND_MULTIPLE.equals(presentIntent.getAction()))
@@ -694,6 +1205,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						Toast.makeText(ComposeChatActivity.this, R.string.max_file_size, Toast.LENGTH_SHORT).show();
 					}
 
+					ContactInfo contactInfo = arrayList.get(0);
 					String msisdn = Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo.getId() : contactInfo.getMsisdn();
 					boolean onHike = contactInfo.isOnhike();
 
@@ -711,71 +1223,284 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 			}
 		}
-		else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY) || presentIntent.hasExtra(StickerManager.FWD_CATEGORY_ID)
-				|| presentIntent.hasExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT))
+		else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY) )
 		{
 			intent.putExtras(presentIntent);
+		}else if (presentIntent.hasExtra(StickerManager.FWD_CATEGORY_ID))
+		{
+			intent.putExtras(presentIntent);
+		}else if ( presentIntent.hasExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT))
+		{
+			ArrayList<FileTransferData> fileTransferList = new ArrayList<ComposeChatActivity.FileTransferData>();
+			ArrayList<ConvMessage> multipleMessageList = new ArrayList<ConvMessage>();
+			String jsonString = presentIntent.getStringExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT);
+			try
+			{
+				JSONArray multipleMsgFwdArray = new JSONArray(jsonString);
+				int msgCount = multipleMsgFwdArray.length();
+				for (int i = 0; i < msgCount; i++)
+				{
+					JSONObject msgExtrasJson = (JSONObject) multipleMsgFwdArray.get(i);
+					if (msgExtrasJson.has(HikeConstants.Extras.MSG))
+					{
+						String msg = msgExtrasJson.getString(HikeConstants.Extras.MSG);
+						// as we will be changing msisdn and hike status while inserting in DB
+						ConvMessage convMessage = Utils.makeConvMessage(null, msg, true);
+						//sendMessage(convMessage);
+						multipleMessageList.add(convMessage);
+					}else if(msgExtrasJson.has(HikeConstants.Extras.POKE)){
+						// as we will be changing msisdn and hike status while inserting in DB
+						ConvMessage convMessage = Utils.makeConvMessage(null, getString(R.string.poke_msg), true);
+						JSONObject metadata = new JSONObject();
+						try
+						{
+							metadata.put(HikeConstants.POKE, true);
+							convMessage.setMetadata(metadata);
+						}
+						catch (JSONException e)
+						{
+							Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
+						}
+						multipleMessageList.add(convMessage);
+					}
+					else if (msgExtrasJson.has(HikeConstants.Extras.FILE_PATH))
+					{
+						String fileKey = null;
+						if (msgExtrasJson.has(HikeConstants.Extras.FILE_KEY))
+						{
+							fileKey = msgExtrasJson.getString(HikeConstants.Extras.FILE_KEY);
+						}
+						else
+						{
+						}
+						String filePath = msgExtrasJson.getString(HikeConstants.Extras.FILE_PATH);
+						String fileType = msgExtrasJson.getString(HikeConstants.Extras.FILE_TYPE);
+
+						boolean isRecording = false;
+						long recordingDuration = -1;
+						if (msgExtrasJson.has(HikeConstants.Extras.RECORDING_TIME))
+						{
+							recordingDuration = msgExtrasJson.getLong(HikeConstants.Extras.RECORDING_TIME);
+							isRecording = true;
+							fileType = HikeConstants.VOICE_MESSAGE_CONTENT_TYPE;
+						}
+
+						HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
+
+						if (Utils.isPicasaUri(filePath))
+						{
+							FileTransferManager.getInstance(getApplicationContext()).uploadFile(Uri.parse(filePath), hikeFileType, ((ContactInfo)arrayList.get(0)).getMsisdn(), ((ContactInfo)arrayList.get(0)).isOnhike());
+						}
+						else
+						{
+							FileTransferData fileData = initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true, arrayList);
+							if(fileData!=null){
+								fileTransferList.add(fileData);
+							}
+						}
+					}
+					else if (msgExtrasJson.has(HikeConstants.Extras.LATITUDE) && msgExtrasJson.has(HikeConstants.Extras.LONGITUDE)
+							&& msgExtrasJson.has(HikeConstants.Extras.ZOOM_LEVEL))
+					{
+						String fileKey = null;
+						double latitude = msgExtrasJson.getDouble(HikeConstants.Extras.LATITUDE);
+						double longitude = msgExtrasJson.getDouble(HikeConstants.Extras.LONGITUDE);
+						int zoomLevel = msgExtrasJson.getInt(HikeConstants.Extras.ZOOM_LEVEL);
+						initialiseLocationTransfer(latitude, longitude, zoomLevel,arrayList);
+					}
+					else if (msgExtrasJson.has(HikeConstants.Extras.CONTACT_METADATA))
+					{
+						try
+						{
+							JSONObject contactJson = new JSONObject(msgExtrasJson.getString(HikeConstants.Extras.CONTACT_METADATA));
+							initialiseContactTransfer(contactJson,arrayList);
+						}
+						catch (JSONException e)
+						{
+							e.printStackTrace();
+						}
+					}
+					else if (msgExtrasJson.has(StickerManager.FWD_CATEGORY_ID))
+					{
+						String categoryId = msgExtrasJson.getString(StickerManager.FWD_CATEGORY_ID);
+						String stickerId = msgExtrasJson.getString(StickerManager.FWD_STICKER_ID);
+						Sticker sticker = new Sticker(categoryId, stickerId);
+						multipleMessageList.add(sendSticker(sticker, categoryId, arrayList, StickerManager.FROM_FORWARD));
+						boolean isDis = sticker.isDisabled(sticker, this.getApplicationContext());
+						// add this sticker to recents if this sticker is not disabled
+						if (!isDis)
+							StickerManager.getInstance().addRecentSticker(sticker);
+						/*
+						 * Making sure the sticker is not forwarded again on orientation change
+						 */
+						presentIntent.removeExtra(StickerManager.FWD_CATEGORY_ID);
+					}
+					/*
+					 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
+					 */
+				}
+				if(!fileTransferList.isEmpty()){
+					prefileTransferTask = new PreFileTransferAsycntask(fileTransferList,intent);
+					Utils.executeAsyncTask(prefileTransferTask);
+				}else{
+					// if file trasfer started then it will show toast
+					Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_LONG).show();
+				}
+				if(multipleMessageList.size() ==0 || arrayList.size()==0){
+					return;
+				}else if(isSharingFile){
+					ConvMessage convMessage = multipleMessageList.get(0);
+					convMessage.setMsisdn(arrayList.get(0).getMsisdn());
+					intent.putExtra(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
+					sendMessage(convMessage);
+				}else{
+					sendMultiMessages(multipleMessageList,arrayList,isFtueFwd);
+					if(fileTransferList.isEmpty()){
+						// if it is >0 then onpost execute of PreFileTransferAsycntask will start intent
+						startActivity(intent);
+						finish();
+					}
+				}
+				
+			}
+			catch (JSONException e)
+			{
+				Logger.e(getClass().getSimpleName(), "Invalid JSON Array", e);
+			}
+			presentIntent.removeExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT);
 		}
 		else if (type != null && presentIntent.hasExtra(Intent.EXTRA_STREAM))
 		{
+			Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
 			if (type.startsWith(HikeConstants.SHARE_CONTACT_CONTENT_TYPE))
 			{
-				// TODO need to handle this case of contact sharing
-				Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
-				return;
-			}
-			Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
-			Logger.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
-			fileUri = Utils.makePicasaUri(fileUri);
-			String fileUriStart = "file:";
-			String fileUriString = fileUri.toString();
-			String filePath;
-			if (Utils.isPicasaUri(fileUriString))
-			{
-				filePath = fileUriString;
-			}
-			else if (fileUriString.startsWith(fileUriStart))
-			{
-				File selectedFile = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
-				/*
-				 * Done to fix the issue in a few Sony devices.
-				 */
-				filePath = selectedFile.getAbsolutePath();
+				String lookupKey = fileUri.getLastPathSegment();
+
+        		String[] projection = new String[] { Data.CONTACT_ID };
+        		String selection = Data.LOOKUP_KEY + " =?";
+        		String[] selectionArgs = new String[] { lookupKey };
+
+        		Cursor c = getContentResolver().query(Data.CONTENT_URI, projection, selection, selectionArgs, null);
+
+        		int contactIdIdx = c.getColumnIndex(Data.CONTACT_ID);
+        		String contactId = null;
+        		while(c.moveToNext())
+        		{
+        			contactId = c.getString(contactIdIdx);
+        			if(!TextUtils.isEmpty(contactId))
+        				break;
+        		}
+        		intent.putExtra(HikeConstants.Extras.CONTACT_ID, contactId);
+        		intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
 			}
 			else
 			{
-				filePath = Utils.getRealPathFromUri(fileUri, this);
+				Logger.d(getClass().getSimpleName(), "File path uri: " + fileUri.toString());
+				fileUri = Utils.makePicasaUri(fileUri);
+				String fileUriStart = "file:";
+				String fileUriString = fileUri.toString();
+				String filePath;
+				if (Utils.isPicasaUri(fileUriString))
+				{
+					filePath = fileUriString;
+				}
+				else if (fileUriString.startsWith(fileUriStart))
+				{
+					File selectedFile = new File(URI.create(Utils.replaceUrlSpaces(fileUriString)));
+					/*
+					 * Done to fix the issue in a few Sony devices.
+					 */
+					filePath = selectedFile.getAbsolutePath();
+				}
+				else
+				{
+					filePath = Utils.getRealPathFromUri(fileUri, this);
+				}
+	
+				if (TextUtils.isEmpty(filePath))
+				{
+					Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+					return;
+				}
+	
+				File file = new File(filePath);
+				if (file.length() > HikeConstants.MAX_FILE_SIZE)
+				{
+					Toast.makeText(ComposeChatActivity.this, R.string.max_file_size, Toast.LENGTH_SHORT).show();
+					return;
+				}
+	
+				type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Utils.getFileExtension(filePath));
+				if (type == null)
+					type = presentIntent.getType();
+	
+				intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
+				intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
 			}
-
-			if (TextUtils.isEmpty(filePath))
-			{
-				Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
-				return;
-			}
-
-			File file = new File(filePath);
-			if (file.length() > HikeConstants.MAX_FILE_SIZE)
-			{
-				Toast.makeText(ComposeChatActivity.this, R.string.max_file_size, Toast.LENGTH_SHORT).show();
-				return;
-			}
-
-			type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Utils.getFileExtension(filePath));
-			if (type == null)
-				type = presentIntent.getType();
-
-			intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
-			intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
 		}
 		else if (presentIntent.hasExtra(Intent.EXTRA_TEXT) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
 		{
 			String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
 			Logger.d(getClass().getSimpleName(), "Contained a message: " + msg);
-			intent.putExtra(HikeConstants.Extras.MSG, msg);
+			if(msg == null){
+				Bundle extraText = presentIntent.getExtras();
+				if(extraText.get(Intent.EXTRA_TEXT) != null)
+					msg = extraText.get(Intent.EXTRA_TEXT).toString();
+			}
+			if(msg == null)
+				Toast.makeText(getApplicationContext(), R.string.text_empty_error, Toast.LENGTH_SHORT).show();
+			else
+			{
+				ContactInfo contact = (ContactInfo) arrayList.get(0);
+				if(contact != null)
+				{
+					ConvMessage convMessage = Utils.makeConvMessage(contact.getMsisdn(), msg, contact.isOnhike());
+					sendMessage(convMessage);
+				}
+			}
 		}
-		startActivity(intent);
-		finish();
 	}
+	
+	private ArrayList<ContactInfo> updateContactInfoOrdering(ArrayList<ContactInfo> arrayList){
+		Set<ContactInfo> set = new HashSet<ContactInfo>(arrayList);
+		ArrayList<ContactInfo> toReturn = new ArrayList<ContactInfo>();
+		List<ContactInfo> conversations = getRecentContacts();
+		int total = conversations.size();
+		// we want to maintain ordering, conversations on home screen must appear in same order they were before multi forward
+		// we are adding from last to first , so that when db entry is made timestamp for last is less than first
+		for(int i=0;i<total;i++){
+			ContactInfo contactInfo = conversations.get(i);
+			if(set.contains(contactInfo)){
+				toReturn.add(contactInfo);
+				set.remove(contactInfo);
+			}
+		}
+		toReturn.addAll(set);
+		return toReturn;
+	}
+
+	private void sendMultiMessages(ArrayList<ConvMessage> multipleMessageList, ArrayList<ContactInfo> arrayList ,boolean createChatThread)
+	{
+		String source = null;
+		if(nuxInviteMode)
+		{
+			source = HikeConstants.NUX;
+		}
+		else if(isFtueFwd)
+		{
+			source = HikeConstants.STICKER_NUX;
+		}
+		MultipleConvMessage multiMessages = new MultipleConvMessage(multipleMessageList, arrayList, System.currentTimeMillis() / 1000 , createChatThread, source);
+		mPubSub.publish(HikePubSub.MULTI_MESSAGE_SENT, multiMessages);
+	}
+
+	private void sendMessage(ConvMessage convMessage)
+	{
+		
+		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
+		
+	}
+	
 
 	@Override
 	public void onEventReceived(String type, Object object)
@@ -870,6 +1595,53 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 
 			});
 		}
+		else if(HikePubSub.CONTACT_SYNC_STARTED.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					// For showing auto/manual sync progress bar when already on the activity
+					showProgressBarContactsSync(View.VISIBLE);
+				}
+
+			});
+		}
+		else if (HikePubSub.CONTACT_SYNCED.equals(type))
+		{
+			Boolean[] ret = (Boolean[]) object;
+			final boolean contactsChanged = ret[1];
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					// Dont repopulate list if no sync changes
+					if(contactsChanged)
+						adapter.executeFetchTask();
+					showProgressBarContactsSync(View.GONE);
+				}
+
+			});
+		}
+	}
+
+	private void showProgressBarContactsSync(int value)
+	{
+		ProgressBar progress_bar = null;
+		if(groupChatActionBar!=null)
+		{
+			progress_bar = (ProgressBar)groupChatActionBar.findViewById(R.id.loading_progress);
+			progress_bar.setVisibility(value);
+		}
+		if(multiSelectActionBar!=null)
+		{
+			progress_bar = (ProgressBar)multiSelectActionBar.findViewById(R.id.loading_progress);
+			progress_bar.setVisibility(value);
+		}
 	}
 
 	@Override
@@ -884,6 +1656,23 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			}
 			setMode(START_CHAT_MODE);
 			return;
+		}
+		else if (composeMode == MULTIPLE_FWD)
+		{
+			ComposeChatActivity.this.finish();
+			return;
+		}
+		else if (composeMode == FTUE_FWD)
+		{
+			ComposeChatActivity.this.finish();
+			Intent intent = new Intent(this, FtueActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+		}
+		else if(composeMode == NUX_INVITE_MODE)
+		{
+			Intent intent = Utils.getHomeActivityIntent(this);
+			startActivity(intent);
 		}
 		super.onBackPressed();
 	}
@@ -932,4 +1721,158 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
 	}
+	public ConvMessage sendSticker(Sticker sticker, String categoryIdIfUnknown, ArrayList<ContactInfo> arrayList, String source)
+	{
+		ConvMessage convMessage = Utils.makeConvMessage(((ContactInfo) arrayList.get(0)).getMsisdn(), "Sticker", ((ContactInfo) arrayList.get(0)).isOnhike());
+	
+		JSONObject metadata = new JSONObject();
+		try
+		{
+			String categoryId = sticker.getCategoryId();
+			metadata.put(StickerManager.CATEGORY_ID, categoryId);
+
+			metadata.put(StickerManager.STICKER_ID, sticker.getStickerId());
+			
+			if(!source.equalsIgnoreCase(StickerManager.FROM_OTHER))
+			{
+				metadata.put(StickerManager.SEND_SOURCE, source);
+			}
+			convMessage.setMetadata(metadata);
+			Logger.d(getClass().getSimpleName(), "metadata: " + metadata.toString());
+		}
+		catch (JSONException e)
+		{
+			Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
+		}
+		return convMessage;
+		//sendMessage(convMessage);
+	}
+	private FileTransferData initialiseFileTransfer(String filePath, String fileKey, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration,
+			boolean isForwardingFile, ArrayList<ContactInfo> arrayList)
+	{
+		clearTempData();
+		if (filePath == null)
+		{
+			Toast.makeText(getApplicationContext(), R.string.unknown_msg, Toast.LENGTH_SHORT).show();
+			return null;
+		}
+		File file = new File(filePath);
+		Logger.d(getClass().getSimpleName(), "File size: " + file.length() + " File name: " + file.getName());
+
+		if (HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
+		{
+			Toast.makeText(getApplicationContext(), R.string.max_file_size, Toast.LENGTH_SHORT).show();
+			return null;
+		}
+		return new FileTransferData(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, isForwardingFile, arrayList, file);
+	}
+	private void clearTempData()
+	{
+		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+		editor.remove(HikeMessengerApp.TEMP_NAME);
+		editor.remove(HikeMessengerApp.TEMP_NUM);
+		editor.commit();
+	}
+	private void initialiseLocationTransfer(double latitude, double longitude, int zoomLevel, ArrayList<ContactInfo> arrayList)
+	{
+		clearTempData();
+		for(ContactInfo contactInfo:arrayList){
+		FileTransferManager.getInstance(getApplicationContext()).uploadLocation(contactInfo.getMsisdn(), latitude, longitude, zoomLevel, ((ContactInfo)arrayList.get(0)).isOnhike());
+		}
+	}
+	private void initialiseContactTransfer(JSONObject contactJson, ArrayList<ContactInfo> arrayList)
+	{
+		for(ContactInfo contactInfo:arrayList){
+		FileTransferManager.getInstance(getApplicationContext()).uploadContact(contactInfo.getMsisdn(), contactJson, (((ContactInfo)arrayList.get(0)).isOnhike()));
+		}
+	}
+
+	
+	List<ContactInfo> getRecentContacts()
+	{
+		if(recentContacts == null)
+		{
+			recentContacts = ContactManager.getInstance().getAllConversationContactsSorted(false, true);
+			Collections.reverse(recentContacts);
+		}
+		return recentContacts;
+	}
+	
+	private static class FileTransferData{
+		String filePath,fileKey,fileType;
+		HikeFileType hikeFileType;
+		boolean isRecording,isForwardingFile;
+		long recordingDuration;
+		ArrayList<ContactInfo> arrayList;
+		File file;
+		public FileTransferData(String filePath, String fileKey, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration,
+				boolean isForwardingFile, ArrayList<ContactInfo> arrayList,File file){
+				this.filePath = filePath;
+				this.fileKey = fileKey;
+				this.hikeFileType = hikeFileType;
+				this.fileType = fileType;
+				this.isRecording = isRecording;
+				this.recordingDuration = recordingDuration;
+				this.arrayList = arrayList;
+				this.file = file;
+			}
+	}
+	private class PreFileTransferAsycntask extends AsyncTask<Void, Void, Void>{
+		
+		ArrayList<FileTransferData> files;
+		Intent intent;
+		PreFileTransferAsycntask(ArrayList<FileTransferData> files,Intent intent){
+			this.files = files;
+			this.intent = intent;
+		}
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			progressDialog = ProgressDialog.show(ComposeChatActivity.this, null, getResources().getString(R.string.multi_file_creation));
+		}
+		@Override
+		protected Void doInBackground(Void... params) {
+			for(FileTransferData file:files){
+			FileTransferManager.getInstance(getApplicationContext()).uploadFile(file.arrayList, file.file, file.fileKey, file.fileType, file.hikeFileType, file.isRecording, file.isForwardingFile,
+					((ContactInfo)file.arrayList.get(0)).isOnhike(), file.recordingDuration);
+			}
+			return null;
+		}
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+			Toast.makeText(getApplicationContext(), getString(R.string.messages_sent_succees), Toast.LENGTH_LONG).show();
+			super.onPostExecute(result);
+			if(progressDialog!=null){
+			progressDialog.dismiss();
+			progressDialog = null;
+			}
+			startActivity(intent);
+			finish();
+			prefileTransferTask=null;
+		}
+		
+	}
+	
+	private void sendDetailsAfterSignup(boolean sendBot)
+    {
+      SharedPreferences accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+      boolean justSignedUp = accountPrefs.getBoolean(HikeMessengerApp.JUST_SIGNED_UP, false);
+      Logger.d("nux","send details after signup");
+      if (justSignedUp)
+      {
+              Logger.d("nux","sendbot ="+sendBot);
+              Editor editor = accountPrefs.edit();
+              editor.remove(HikeMessengerApp.JUST_SIGNED_UP);
+              editor.commit();
+
+              if (!deviceDetailsSent)
+              {
+                      // Request for sending Bot after user skips or sends a sticker from ftue screen
+                      Utils.sendDetailsAfterSignup(this, false, sendBot);
+                      deviceDetailsSent = true;
+              }
+      }
+   }
 }

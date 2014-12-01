@@ -146,6 +146,18 @@ public class Conversation implements Comparable<Conversation>
 		this.messages.add(message);
 	}
 
+	/**
+	 * We add just the last message to the message-list because only 
+	 * the last message is shown in the conversation list view at home
+	 * @param message Incoming ConvMessage object
+	 */
+	public void clearMessageListAndAddMessage(ConvMessage message)
+	{		
+		this.messages.clear();
+		
+		this.messages.add(message);
+	}
+	
 	public int getUnreadCount()
 	{
 		return unreadCount;
@@ -278,12 +290,16 @@ public class Conversation implements Comparable<Conversation>
 		 * sample json : {'pin':{'id':'1','unreadCount':'1','toShow':'true','timestamp':'XXX','displayed':'false'} }
 		 */
 		JSONObject jsonObject;
+		
+		String groupId;
 
-		public MetaData(String jsonString) throws JSONException
+		public MetaData(String jsonString, String groupId) throws JSONException
 		{
 			if (jsonString != null)
 			{
 				jsonObject = new JSONObject(jsonString);
+				
+				this.groupId = groupId;
 			}
 			else
 			{
@@ -406,5 +422,9 @@ public class Conversation implements Comparable<Conversation>
 			return jsonObject.toString();
 		}
 
+		public String getGroupId()
+		{
+			return groupId;
+		}
 	}
 }

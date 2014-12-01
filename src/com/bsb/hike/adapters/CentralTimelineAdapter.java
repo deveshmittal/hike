@@ -734,8 +734,6 @@ public class CentralTimelineAdapter extends BaseAdapter
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		bigPicImageLoader.setPauseWork(isListFlinging);
-		iconImageLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{

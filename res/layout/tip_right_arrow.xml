@@ -27,38 +27,22 @@
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/tip_header"
                 style="@style/TipHeader"
+                android:textSize="24dp"
                 android:text="@string/status_update_tip_header" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/tip_msg"
                 style="@style/TipBody"
+                android:textSize="12dp"
                 android:text="@string/status_update_tip_msg" />
         </LinearLayout>
 
         <RelativeLayout
-            android:layout_width="104dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/tip_content"
             android:layout_alignBottom="@id/tip_content"
             android:layout_alignParentRight="true" >
-
-            <ImageView
-                android:layout_centerInParent="true"
-                android:id="@+id/arrow_pointer"
-                android:layout_width="47dp"
-                android:layout_height="wrap_content"
-                android:paddingTop="10dp"
-    			android:layout_alignParentLeft="true"
-                android:scaleType="fitStart"
-                android:src="@drawable/ftue_up_arrow" />
-
-            <View
-                android:id="@+id/close_divider"
-                android:layout_width="1dp"
-                android:layout_height="32dp"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@id/arrow_pointer"
-                android:background="@color/tip_green_divider_color" />
 
             <ImageView
                 android:id="@+id/close_tip"
@@ -68,6 +52,24 @@
                 android:background="@drawable/popup_button_bg_selector"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_tip_cross" />
+
+            <View
+                android:id="@+id/close_divider"
+                android:layout_width="1dp"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/close_tip"
+                android:background="@color/tip_green_divider_color" />
+
+            <ImageView
+                android:layout_centerInParent="true"
+                android:id="@+id/arrow_pointer"
+                android:layout_width="47dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="10dp"
+                android:scaleType="fitStart"
+                android:layout_toLeftOf="@id/close_divider"
+                android:src="@drawable/ftue_up_arrow" />
         </RelativeLayout>
     </RelativeLayout>
 </LinearLayout>

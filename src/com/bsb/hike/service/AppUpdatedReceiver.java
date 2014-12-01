@@ -61,7 +61,6 @@ public class AppUpdatedReceiver extends BroadcastReceiver
 				Editor editor = prefs.edit();
 				editor.putString(HikeMessengerApp.COUNTRY_CODE, HikeConstants.INDIA_COUNTRY_CODE);
 				editor.commit();
-				StickerManager.setStickersForIndianUsers(true, prefs);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.REFRESH_RECENTS, null);
 			}
 

@@ -35,6 +35,12 @@ public class HikePubSub implements Runnable
 	 * broadcast when the sender sends the message (click the send button in chat thread view)
 	 */
 	public static final String MESSAGE_SENT = "messagesent";
+	
+	public static final String MULTI_MESSAGE_SENT = "multimessagesent";
+	
+	public static final String MULTI_MESSAGE_DB_INSERTED = "multimessagedbinserted";
+
+	public static final String MULTI_FILE_UPLOADED = "multiFileUploaded";
 
 	public static final String MESSAGE_DELIVERED = "messageDelivered"; // represents
 																		// that
@@ -92,6 +98,8 @@ public class HikePubSub implements Runnable
 	 * broadcast when the server receives the message and replies with a confirmation
 	 */
 	public static final String SERVER_RECEIVED_MSG = "serverReceivedMsg";
+	
+	public static final String SERVER_RECEIVED_MULTI_MSG = "serverReceivedMultiMsg";
 
 	/*
 	 * broadcast when a message is received from the sender but before it's been written our DB
@@ -141,6 +149,8 @@ public class HikePubSub implements Runnable
 	public static final String INVITE_TOKEN_ADDED = "inviteTokenAdded";
 
 	public static final String CONTACT_ADDED = "contactAdded";
+	
+	public static final String CONTACT_DELETED = "contactDeleted";
 
 	public static final String UPLOAD_FINISHED = "uploadFinished";
 
@@ -163,8 +173,6 @@ public class HikePubSub implements Runnable
 	public static final String FAVORITE_TOGGLED = "favoriteToggled";
 
 	public static final String AUTO_RECOMMENDED_FAVORITES_ADDED = "autoRecommendedFavoritesAdded";
-
-	public static final String REMOVE_MESSAGE_FROM_CHAT_THREAD = "removeMessageFromChatThread";
 
 	public static final String SOCIAL_AUTH_COMPLETED = "socialAuthCompleted";
 
@@ -254,8 +262,6 @@ public class HikePubSub implements Runnable
 
 	public static final String SHOW_IMAGE = "showImage";
 
-	public static final String RESET_UNREAD_COUNT = "resetUnreadCount";
-
 	public static final String PUSH_FILE_DOWNLOADED = "pushFileDownloaded";
 
 	public static final String PUSH_AVATAR_DOWNLOADED = "pushAvtarDownloaded";
@@ -274,7 +280,7 @@ public class HikePubSub implements Runnable
 
 	public static final String SEND_SMS_PREF_TOGGLED = "sendSmsPrefToggled";
 
-	public static final String FINISHED_AVTAR_UPGRADE = "finshedAvtarDBUpgrade";
+	public static final String FINISHED_UPGRADE_INTENT_SERVICE = "finshedUpgradeIntentService";
 
 	public static final String FTUE_LIST_FETCHED_OR_UPDATED = "ftueListFetchedOrUpdated";
 
@@ -342,7 +348,7 @@ public class HikePubSub implements Runnable
 
 	public static final String ATOMIC_POPUP_WITH_PUSH = "atomicPopupShowPush";
 
-	public static final String REMOVE_START_NEW_CHAT_TIP = "removeStartNewChatTip";
+	public static final String REMOVE_STEALTH_INFO_TIP = "removeStealthInfoTip";
 
 	public static final String REMOVE_STEALTH_UNREAD_TIP = "removeStealthUnreadTip";
 
@@ -356,8 +362,16 @@ public class HikePubSub implements Runnable
 	
 	public static final String UPDATE_PIN_METADATA = "pinUpdated";
 
+	public static final String HIKE_SHARED_FILE_DELETED = "hikeSharedFileDeleted";
+
+	public static final String ClOSE_PHOTO_VIEWER_FRAGMENT = "closePhotoViewerFragment";
+
 	public static String FRIEND_REQ_COUNT_RESET = "resetFriendRequest";
 	
+	public static final String CONTACT_SYNC_STARTED = "contactSyncStarted";
+
+	public static final String FAVORITE_COUNT_CHANGED = "favoriteCountChanged";
+
 	public static String HIKE_TO_OFFLINE_PUSH = "hikeToOfflinePush";
 
 	public static String PROFILE_UPDATE_FINISH = "profileUpdateFinish";
@@ -365,6 +379,16 @@ public class HikePubSub implements Runnable
 	public static final String CONV_META_DATA_UPDATED = "convMetaDataUpdated";
 	
 	public static final String LATEST_PIN_DELETED = "lastPinDeleted";
+	
+	public static final String UNREAD_PIN_COUNT_RESET = "pinCountReset";
+
+	public static final String STICKER_CATEGORY_MAP_UPDATED = "stickerCategoryMapUpdated";
+	
+	public static final String STICKER_FTUE_TIP = "stickerFtueTip";
+
+	public static final String SWITCH_OFF_NUX_MODE = "switchOffNuxMode";
+	
+	public static final String USER_JOINED_NOTIFICATION = "userJoinedNotification";
 
 	private final Thread mThread;
 

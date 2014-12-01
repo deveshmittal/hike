@@ -36,7 +36,6 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Protip;
@@ -51,7 +50,6 @@ import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 
 public class ToastListener implements Listener
 {
@@ -68,7 +66,12 @@ public class ToastListener implements Listener
 			HikePubSub.NEW_ACTIVITY, HikePubSub.CONNECTION_STATUS, HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED, HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED, HikePubSub.UPDATE_PUSH, HikePubSub.APPLICATIONS_PUSH,
 			HikePubSub.SHOW_FREE_INVITE_SMS, HikePubSub.STEALTH_POPUP_WITH_PUSH, HikePubSub.HIKE_TO_OFFLINE_PUSH, HikePubSub.ATOMIC_POPUP_WITH_PUSH,
-			HikePubSub.BULK_MESSAGE_NOTIFICATION };
+			HikePubSub.BULK_MESSAGE_NOTIFICATION , HikePubSub.USER_JOINED_NOTIFICATION};
+
+	/**
+	 * Used to check whether NUJ/RUJ message notifications are disabled
+	 */
+	private SharedPreferences mDefaultPreferences;
 
 	public ToastListener(Context context)
 	{
@@ -76,6 +79,7 @@ public class ToastListener implements Listener
 		this.toaster = new HikeNotification(context);
 		this.context = context;
 		mCurrentUnnotifiedStatus = MQTTConnectionStatus.NOT_CONNECTED;
+		mDefaultPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 	}
 
 	@Override
@@ -115,6 +119,7 @@ public class ToastListener implements Listener
 			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
 			if (activity instanceof PeopleActivity)
 			{
+				Utils.resetUnseenFriendRequestCount(activity);
 				return;
 			}
 			if (HikeMessengerApp.isStealthMsisdn(contactInfo.getMsisdn()))
@@ -132,6 +137,7 @@ public class ToastListener implements Listener
 			if (activity instanceof TimelineActivity)
 			{
 				Utils.resetUnseenStatusCount(activity);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 				return;
 			}
 			StatusMessage statusMessage = (StatusMessage) object;
@@ -206,14 +212,8 @@ public class ToastListener implements Listener
 				{
 					contactInfo = HikeMessengerApp.getContactManager().getContact(message.getMsisdn(), true, true);
 				}
-				
-				// TODO : Commented this because for FT messages we get 2 packets from PubSub,
-				// 1. Message received (with the thumbnail)
-				// 2. Push file downloaded
-				// The above two results in duplicate notifications being displayed
-				// X - Sent you a Photo
-				// X - Sent you a Photo
-				// toaster.notifyMessage(contactInfo, message, true, bigPicture);
+
+				 toaster.notifyMessage(contactInfo, message, true, bigPicture);
 			}
 		}
 		else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type))
@@ -394,7 +394,7 @@ public class ToastListener implements Listener
 
 			}
 		}
-		else if (HikePubSub.BULK_MESSAGE_NOTIFICATION.equals(type) || HikePubSub.MESSAGE_RECEIVED.equals(type))
+		else if (HikePubSub.BULK_MESSAGE_NOTIFICATION.equals(type) || HikePubSub.MESSAGE_RECEIVED.equals(type) || HikePubSub.USER_JOINED_NOTIFICATION.equals(type))
 		{
 			// Received bulk message map (msisdn - ConvMessage(s) pairs)
 			LinkedList<ConvMessage> messageList = null;
@@ -471,6 +471,20 @@ public class ToastListener implements Listener
 						Logger.d(getClass().getSimpleName(), "Group has been muted");
 						continue;
 					}
+
+					if (message.getParticipantInfoState() != null && message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN
+							&& (!mDefaultPreferences.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true)))
+
+					{
+						// User has disabled NUJ/RUJ message notifications
+						continue;
+					}
+
+					if (message.getParticipantInfoState() != null && message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
+							&& message.getMetadata().isNewGroup())
+					{
+						continue;
+					}
 					if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED
 							|| message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || message.getParticipantInfoState() == ParticipantInfoState.CHAT_BACKGROUND)
 					{
@@ -503,11 +517,10 @@ public class ToastListener implements Listener
 						}
 					}
 				}
-				if (!filteredMessageList.isEmpty())
-				{
-					this.toaster.notifySummaryMessage(filteredMessageList);
-				}
-			
+			}
+			if (!filteredMessageList.isEmpty())
+			{
+				this.toaster.notifySummaryMessage(filteredMessageList);
 			}
 			// Remove unused references
 			filteredMessageList.clear();
@@ -543,8 +556,10 @@ public class ToastListener implements Listener
 			{
 				if (hikeFile.getHikeFileType() == HikeFileType.IMAGE && hikeFile.wasFileDownloaded() && hikeFile.getThumbnail() != null)
 				{
-					final String filePath = hikeFile.getFilePath(); // check
-					bigPictureImage = HikeBitmapFactory.decodeBitmapFromFile(filePath, Bitmap.Config.RGB_565);
+					final String filePath = hikeFile.getFilePath();
+					
+					bigPictureImage = HikeBitmapFactory.scaleDownBitmap(filePath, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, HikeConstants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX,
+							Bitmap.Config.RGB_565, true, false);
 				}
 			}
 
@@ -554,36 +569,10 @@ public class ToastListener implements Listener
 		if (convMessage.isStickerMessage())
 		{
 			final Sticker sticker = convMessage.getMetadata().getSticker();
-			/*
-			 * If this is the first category, then the sticker are a part of the app bundle itself
-			 */
-			if (sticker.isDefaultSticker())
+			final String filePath = sticker.getStickerPath(context);
+			if (!TextUtils.isEmpty(filePath))
 			{
-				int resourceId = 0;
-
-				if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
-				{
-					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[sticker.getStickerIndex()];
-				}
-				else if (StickerCategoryId.expressions.equals(sticker.getCategory().categoryId))
-				{
-					resourceId = StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS[sticker.getStickerIndex()];
-				}
-
-				if (resourceId > 0)
-				{
-					final Drawable dr = context.getResources().getDrawable(resourceId);
-					bigPictureImage = HikeBitmapFactory.drawableToBitmap(dr, Bitmap.Config.ARGB_8888);
-				}
-
-			}
-			else
-			{
-				final String filePath = sticker.getStickerPath(context);
-				if (!TextUtils.isEmpty(filePath))
-				{
-					bigPictureImage = HikeBitmapFactory.decodeFile(filePath);
-				}
+				bigPictureImage = HikeBitmapFactory.decodeFile(filePath);
 			}
 		}
 		return bigPictureImage;

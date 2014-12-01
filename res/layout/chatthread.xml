@@ -263,6 +263,14 @@
                     android:scaleType="centerInside"
                     android:src="@drawable/sticker_btn_selector" />
 
+                <ViewStub
+                    android:id="@+id/pulsatingDotViewStub"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignTop="@id/sticker_btn"
+                    android:layout_marginLeft="20dp"
+                    android:layout="@layout/pulsating_dot" />
+
                 <LinearLayout
                     android:id="@+id/tb_layout"
                     android:layout_width="match_parent"
@@ -282,12 +290,12 @@
 
                         <com.bsb.hike.view.CustomFontEditText
                             android:id="@+id/msg_compose"
+                            android:contentDescription="Textbox in chat thread"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="0.9"
                             android:background="@null"
                             android:gravity="center_vertical"
-                            android:hint="@string/type_to_compose"
                             android:imeOptions="actionSend"
                             android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
                             android:lineSpacingExtra="1dp"

@@ -4,6 +4,7 @@
     android:layout_height="fill_parent" >
 
     <ProgressBar
+        android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -18,14 +19,40 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <Button
-            android:id="@+id/play_media"
+        <LinearLayout
+            android:id="@+id/file_missing_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:background="@color/white"
-            android:text="Play"
-            android:textColor="@color/black"
+            android:gravity="center_horizontal"
+            android:visibility="gone"
+            android:orientation="vertical" >
+
+            <ImageView
+                android:id="@+id/file_missing_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_file_missing" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/file_missing_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:text="@string/file_missing_caps"
+                android:textSize="12sp"
+                android:textColor="#c6cacc" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/play_media"
+            android:layout_width="73dp"
+            android:layout_height="73dp"
+            android:background="@drawable/play_icon_background_circle"
+            android:layout_centerInParent="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_play_video"
             android:visibility="gone" />
     </RelativeLayout>
 

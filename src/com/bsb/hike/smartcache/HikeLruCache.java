@@ -277,7 +277,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable> implements Hi
 		{
 			int idx = key.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
 			if (idx > 0)
-				key = key.substring(0, idx);
+				key = new String(key.substring(0, idx));
 			BitmapDrawable bd = (BitmapDrawable) ContactManager.getInstance().getIcon(key, rounded);
 			if (bd != null)
 			{
@@ -305,7 +305,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable> implements Hi
 		else
 			return b;
 	}
-
+	
 	public boolean deleteIconForMSISDN(String msisdn)
 	{
         boolean rowsDeleted = ContactManager.getInstance().removeIcon(msisdn);

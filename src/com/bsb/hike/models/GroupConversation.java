@@ -74,7 +74,13 @@ public class GroupConversation extends Conversation
 			PairModified<GroupParticipant, String> grpPair = this.groupParticipantList.get(contact.getMsisdn());
 			if (null != grpPair)
 			{
-				grpPair.getFirst().setContactInfo(contact);
+				GroupParticipant grpParticipant = grpPair.getFirst();
+				contact.setOnhike(grpParticipant.getContactInfo().isOnhike());
+				grpParticipant.setContactInfo(contact);
+				if(null != contact.getName())
+				{
+					grpPair.setSecond(contact.getName());
+				}
 			}
 		}
 
@@ -117,21 +123,39 @@ public class GroupConversation extends Conversation
 		return groupParticipantList;
 	}
 
-	public GroupParticipant getGroupParticipant(String msisdn)
+	public PairModified<GroupParticipant, String> getGroupParticipant(String msisdn)
 	{
-		return groupParticipantList.containsKey(msisdn) ? groupParticipantList.get(msisdn).getFirst() : new GroupParticipant(new ContactInfo(msisdn, msisdn, msisdn, msisdn));
+		return groupParticipantList.containsKey(msisdn) ? groupParticipantList.get(msisdn) : new PairModified<GroupParticipant, String>(new GroupParticipant(new ContactInfo(
+				msisdn, msisdn, msisdn, msisdn)), msisdn);
 	}
 
 	public String getGroupParticipantFirstName(String msisdn)
 	{
-		ContactInfo contact = HikeMessengerApp.getContactManager().getContact(msisdn, true, false);
-		String name = HikeMessengerApp.getContactManager().getName(getMsisdn(), contact.getMsisdn());
+		String name = null;
+
+		if (null != groupParticipantList)
+		{
+			PairModified<GroupParticipant, String> grpPair = groupParticipantList.get(msisdn);
+			if (null != grpPair)
+			{
+				name = grpPair.getSecond();
+			}
+		}
+		
+		/*
+		 * If groupParticipantsList is not loaded(in case of conversation screen as we load group members when we enter into GC) then we get name from contact manager
+		 */
+		if (null == name)
+		{
+			HikeMessengerApp.getContactManager().getContact(msisdn, true, false);
+			name = HikeMessengerApp.getContactManager().getName(getMsisdn(), msisdn);
+		}
 		return Utils.getFirstName(name);
 	}
-	
+
 	public String getGroupParticipantFirstNameAndSurname(String msisdn)
 	{
-		return getGroupParticipant(msisdn).getContactInfo().getFirstNameAndSurname();
+		return getGroupParticipant(msisdn).getSecond();
 	}
 
 	public String getLabel()
@@ -191,7 +215,7 @@ public class GroupConversation extends Conversation
 				for (Entry<String, PairModified<GroupParticipant, String>> participant : groupParticipantList.entrySet())
 				{
 					JSONObject nameMsisdn = new JSONObject();
-					nameMsisdn.put(HikeConstants.NAME, participant.getValue().getFirst().getContactInfo().getName());
+					nameMsisdn.put(HikeConstants.NAME, participant.getValue().getSecond());
 					nameMsisdn.put(HikeConstants.MSISDN, participant.getKey());
 					array.put(nameMsisdn);
 				}

@@ -1,6 +1,7 @@
 package com.bsb.hike.modules.contactmgr;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -17,11 +18,11 @@ import android.database.DatabaseUtils;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.Utils;
 
@@ -188,19 +189,35 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			PairModified<ContactInfo, Integer> contactPair = transientContacts.get(msisdn);
-			if (null != contactPair)
+			if (Utils.isGroupConversation(msisdn))
 			{
-				contactPair.setSecond(contactPair.getSecond() - 1);
-				if (contactPair.getSecond() == 0)
+				removeGroup(msisdn);
+			}
+			else
+			{
+				PairModified<ContactInfo, Integer> contactPair = transientContacts.get(msisdn);
+				if (null != contactPair)
 				{
-					transientContacts.remove(msisdn);
+					contactPair.setSecond(contactPair.getSecond() - 1);
+					if (contactPair.getSecond() == 0)
+					{
+						transientContacts.remove(msisdn);
+					}
 				}
 			}
 		}
 		finally
 		{
 			writeLock.unlock();
+		}
+	}
+
+	private void removeGroupParticipantFromCache(String groupId, String msisdn)
+	{
+		Map<String, PairModified<GroupParticipant, String>> groupParticipantsList = groupParticipants.get(groupId);
+		if (null != groupParticipantsList)
+		{
+			groupParticipantsList.remove(msisdn);
 		}
 	}
 
@@ -215,11 +232,48 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
-			Map<String, PairModified<GroupParticipant, String>> groupParticipantsList = groupParticipants.get(groupId);
-			if (null != groupParticipantsList)
+			removeGroupParticipantFromCache(groupId, msisdn);
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	/**
+	 * Removes multiple from group participants from the {@link #groupParticipants} map
+	 * 
+	 * @param groupId
+	 * @param msisdns
+	 */
+	void removeGroupParticipants(String groupId, Collection<String> msisdns)
+	{
+		writeLock.lock();
+		try
+		{
+			for (String msisdn : msisdns)
 			{
-				groupParticipantsList.remove(msisdn);
+				removeGroupParticipantFromCache(groupId, msisdn);
 			}
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+
+	}
+
+	/**
+	 * This method removes the group entry given by the parameter <code>groupId</code> from the {@link #groupParticipants} map
+	 * 
+	 * @param groupId
+	 */
+	void removeGroup(String groupId)
+	{
+		writeLock.lock();
+		try
+		{
+			groupParticipants.remove(groupId);
 		}
 		finally
 		{
@@ -237,6 +291,18 @@ public class TransientCache extends ContactsCache
 		writeLock.lock();
 		try
 		{
+			for(Map<String, PairModified<GroupParticipant, String>> groupParticipantMap : groupParticipants.values())
+			{
+				if(groupParticipantMap.containsKey(contact.getMsisdn()))
+				{
+					PairModified<GroupParticipant, String> grpParticipant = groupParticipantMap.get(contact.getMsisdn());
+					grpParticipant.getFirst().setContactInfo(contact);
+					if(null != contact.getName())
+					{
+						grpParticipant.setSecond(contact.getName());
+					}
+				}
+			}
 			if (transientContacts.containsKey(contact.getMsisdn()))
 			{
 				PairModified<ContactInfo, Integer> contactPair = transientContacts.get(contact.getMsisdn());
@@ -247,7 +313,6 @@ public class TransientCache extends ContactsCache
 				// if contact not found to be updated then add in the transient cache and we should set allContactsLoaded to false because if all contacts are loaded even then we
 				// can't find some contacts in cache that means some new contacts have been added in addressbook
 				insertContact(contact);
-				allContactsLoaded = false;
 			}
 		}
 		finally
@@ -375,8 +440,12 @@ public class TransientCache extends ContactsCache
 			Map<String, PairModified<GroupParticipant, String>> groupParticipantMap = groupParticipants.get(grpId);
 			if (null != groupParticipantMap)
 			{
-				GroupParticipant grpParticipant = groupParticipantMap.get(msisdn).getFirst();
-				groupParticipantMap.put(msisdn, new PairModified<GroupParticipant, String>(grpParticipant, name));
+				PairModified<GroupParticipant, String> grpParticipantPair = groupParticipantMap.get(msisdn);
+				if (null != grpParticipantPair)
+				{
+					GroupParticipant grpParticipant = grpParticipantPair.getFirst();
+					groupParticipantMap.put(msisdn, new PairModified<GroupParticipant, String>(grpParticipant, name));
+				}
 			}
 		}
 		finally
@@ -409,6 +478,10 @@ public class TransientCache extends ContactsCache
 				if (null == contactPair)
 				{
 					contactPair = new PairModified<ContactInfo, Integer>(contact, 1);
+				}
+				else
+				{
+					contactPair.setFirst(contact);
 				}
 				temp.put(msisdn, contactPair);
 
@@ -627,7 +700,7 @@ public class TransientCache extends ContactsCache
 					String msisdn = mapEntry.getKey();
 					ContactInfo contactInfo = mapEntry.getValue().getFirst();
 					if (null != msisdnsIn && msisdnsIn.contains(msisdn) && (null != msisdnsNotIn && !msisdnsNotIn.contains(msisdn))
-							&& (null != myMsisdn && !msisdn.equals(myMsisdn)) && contactInfo.isOnhike())
+							&& (null != myMsisdn && !msisdn.equals(myMsisdn)) && contactInfo.isOnhike() && !contactInfo.isUnknownContact())
 					{
 						contacts.add(contactInfo);
 						limit--;
@@ -854,28 +927,6 @@ public class TransientCache extends ContactsCache
 	}
 
 	/**
-	 * Updates the contact by setting the name to null and move it from saved to unsaved contacts map
-	 * 
-	 * @param contact
-	 */
-	void contactDeleted(ContactInfo contact)
-	{
-		writeLock.lock();
-		try
-		{
-			PairModified<ContactInfo, Integer> contactPair = transientContacts.get(contact.getMsisdn());
-			if (null != contactPair)
-			{
-				contactPair.getFirst().setName(null);
-			}
-		}
-		finally
-		{
-			writeLock.unlock();
-		}
-	}
-
-	/**
 	 * clears the transient memory
 	 */
 	void clearMemory()
@@ -914,21 +965,39 @@ public class TransientCache extends ContactsCache
 	Pair<Map<String, PairModified<GroupParticipant, String>>, List<String>> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly,
 			boolean fetchParticipants)
 	{
-		Map<String, PairModified<GroupParticipant, String>> groupParticipantsMap = null;
-		readLock.lock();
-		try
+		if (!notShownStatusMsgOnly)
 		{
-			groupParticipantsMap = groupParticipants.get(groupId);
-			if (null != groupParticipantsMap)
+			readLock.lock();
+			try
 			{
-				return new Pair<Map<String, PairModified<GroupParticipant, String>>, List<String>>(groupParticipantsMap, null);
+				Map<String, PairModified<GroupParticipant, String>> groupParticipantsMap = groupParticipants.get(groupId);
+				if (null != groupParticipantsMap)
+				{
+					Map<String, PairModified<GroupParticipant, String>> grpParticipants = new HashMap<String, PairModified<GroupParticipant, String>>();
+					for (Entry<String, PairModified<GroupParticipant, String>> mapEntry : groupParticipantsMap.entrySet())
+					{
+						String msisdn = mapEntry.getKey();
+						GroupParticipant grp = mapEntry.getValue().getFirst();
+						if (!activeOnly)
+						{
+							grpParticipants.put(msisdn, mapEntry.getValue());
+						}
+						else
+						{
+							if (!grp.hasLeft())
+							{
+								grpParticipants.put(msisdn, mapEntry.getValue());
+							}
+						}
+					}
+					return new Pair<Map<String, PairModified<GroupParticipant, String>>, List<String>>(grpParticipants, null);
+				}
+			}
+			finally
+			{
+				readLock.unlock();
 			}
 		}
-		finally
-		{
-			readLock.unlock();
-		}
-
 		return HikeConversationsDatabase.getInstance().getGroupParticipants(groupId, activeOnly, notShownStatusMsgOnly);
 	}
 
@@ -969,10 +1038,21 @@ public class TransientCache extends ContactsCache
 		readLock.lock();
 		try
 		{
-			Map<String, PairModified<GroupParticipant, String>> g = groupParticipants.get(groupId);
-			if (null != g)
+			int size = 0;
+			Map<String, PairModified<GroupParticipant, String>> grpParticipantsMap = groupParticipants.get(groupId);
+			if (null != grpParticipantsMap)
 			{
-				return g.size();
+				for (Entry<String, PairModified<GroupParticipant, String>> mapEntry : grpParticipantsMap.entrySet())
+				{
+					PairModified<GroupParticipant, String> grpPair = mapEntry.getValue();
+					if (null != grpPair)
+					{
+						GroupParticipant grp = grpPair.getFirst();
+						if (!grp.hasLeft())
+							size++;
+					}
+				}
+				return size;
 			}
 		}
 		finally
@@ -1023,11 +1103,20 @@ public class TransientCache extends ContactsCache
 			if ((blockedMsisdns.contains(contact.getMsisdn())))
 			{
 				blockedUserList.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(true), contact));
+				blockedMsisdns.remove(contact.getMsisdn());
 			}
 			else
 			{
 				allUserList.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(false), contact));
 			}
+		}
+
+		for (String ms : blockedMsisdns)
+		{
+			String name = ms;
+			if (HikeMessengerApp.hikeBotNamesMap.containsKey(ms))
+				name = HikeMessengerApp.hikeBotNamesMap.get(ms);
+			blockedUserList.add(new Pair<AtomicBoolean, ContactInfo>(new AtomicBoolean(true), new ContactInfo(ms, ms, name, ms)));
 		}
 		blockedUserList.addAll(allUserList);
 		return blockedUserList;

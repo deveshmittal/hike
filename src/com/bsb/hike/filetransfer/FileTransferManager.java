@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.Thread.State;
+import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,6 +39,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.Logger;
@@ -331,6 +333,23 @@ public class FileTransferManager extends BroadcastReceiver
 		task.setFutureTask(ft);
 		pool.execute(ft);
 	}
+	
+	public void uploadFile(ArrayList<ContactInfo> contactList, File sourceFile, String fileKey, String fileType, HikeFileType hikeFileType, boolean isRec, boolean isForwardMsg, boolean isRecipientOnHike,
+			long recordingDuration)
+	{
+		if(taskOverflowLimitAchieved())
+			return;
+		
+		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
+		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
+		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, contactList, sourceFile, fileKey, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike,
+				recordingDuration);
+		// UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, convMessage, isRecipientOnHike);
+		MyFutureTask ft = new MyFutureTask(task);
+		task.setFutureTask(ft);
+		pool.execute(ft);
+	}
 
 	public void uploadFile(ConvMessage convMessage, boolean isRecipientOnHike)
 	{
@@ -491,7 +510,7 @@ public class FileTransferManager extends BroadcastReceiver
 	// this will be used when user deletes account or unlink account
 	public void deleteAllFTRFiles()
 	{
-		if (HIKE_TEMP_DIR != null)
+		if (HIKE_TEMP_DIR != null && HIKE_TEMP_DIR.listFiles() != null)
 			for (File f : HIKE_TEMP_DIR.listFiles())
 			{
 				if (f != null)

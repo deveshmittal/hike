@@ -86,7 +86,7 @@ public class AccountUtils
 
 	public static final int PRODUCTION_PORT_SSL = 443;
 
-	public static final int STAGING_PORT = 8080;
+	public static final int STAGING_PORT = 80;
 
 	public static final int STAGING_PORT_SSL = 443;
 
@@ -116,17 +116,17 @@ public class AccountUtils
 
 	public static String fileTransferBaseViewUrl = FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION;
 
-	public static final String REWARDS_PRODUCTION_BASE = "hike.in/rewards/android/";
+	public static final String REWARDS_PRODUCTION_BASE = "hike.in/rewards/";
 
-	public static final String REWARDS_STAGING_BASE = "staging.im.hike.in/rewards/android/";
+	public static final String REWARDS_STAGING_BASE = "staging.im.hike.in/rewards/";
 
-	public static String rewardsUrl = HTTP_STRING + REWARDS_PRODUCTION_BASE;
+	public static String rewardsUrl = REWARDS_PRODUCTION_BASE;
 
-	public static final String GAMES_PRODUCTION_BASE = "hike.in/games/android/";
+	public static final String GAMES_PRODUCTION_BASE = "hike.in/games/";
 
-	public static final String GAMES_STAGING_BASE = "staging.im.hike.in/games/android/";
+	public static final String GAMES_STAGING_BASE = "staging.im.hike.in/games/";
 
-	public static String gamesUrl = HTTP_STRING + GAMES_PRODUCTION_BASE;
+	public static String gamesUrl = GAMES_PRODUCTION_BASE;
 
 	public static final String STICKERS_PRODUCTION_BASE = "hike.in/s/%1$s/%2$s";
 
@@ -185,23 +185,25 @@ public class AccountUtils
 		HttpConnectionParams.setSoTimeout(params, HikeConstants.SOCKET_TIMEOUT);
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
-
-		boolean sslException = false;
 		if (ssl)
 		{
-			try
-			{
-				KeyStore dummyTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-				dummyTrustStore.load(null, null);
-				SSLSocketFactory sf = new CustomSSLSocketFactory(dummyTrustStore);
-				sf.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
-				schemeRegistry.register(new Scheme("https", sf, port));
-			}
-			catch (Exception e)
-			{
-				sslException = true;
-				schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), PRODUCTION_PORT));
-			}
+			
+				KeyStore dummyTrustStore;
+				try
+				{
+					dummyTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+					dummyTrustStore.load(null, null);
+					SSLSocketFactory sf = new CustomSSLSocketFactory(dummyTrustStore);
+					sf.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+					schemeRegistry.register(new Scheme("https", sf, port));
+					schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), PRODUCTION_PORT));
+					Logger.i("scheme", "all schemes "+schemeRegistry.getSchemeNames().toString());
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					return null;
+				}
 		}
 		else
 		{
@@ -212,31 +214,14 @@ public class AccountUtils
 		HttpClient httpClient = new DefaultHttpClient(cm, params);
 		httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + appVersion);
 
-		mClient = !sslException ? httpClient : null;
+		mClient = httpClient;
 		return httpClient;
 	}
 
 	public static HttpClient getClient(HttpRequestBase request)
 	{
 		HttpClient client = createClient();
-		/*
-		 * if trying to register https on ssl throws exception than we need to change "https" request urls to "http" one.
-		 */
-		if (ssl && client.getConnectionManager().getSchemeRegistry().getSchemeNames().contains("http"))
-		{
-			URI uri = request.getURI();
-			try
-			{
-				request.setURI(new URI("http", uri.getUserInfo(), uri.getHost(), PRODUCTION_PORT, uri.getPath(), uri.getQuery(), uri.getFragment()));
-			}
-			catch (URISyntaxException e)
-			{
-				e.printStackTrace();
-			}
-			Logger.d("SSLException", "Modified URI =" + request.getURI().toString());
-		}
 		return client;
-
 	}
 
 	public static void addUserAgent(URLConnection urlConnection)
@@ -380,12 +365,15 @@ public class AccountUtils
 		public int all_invitee_joined;
 
 		public String country_code;
+		
+		public String backupToken;
 
-		public AccountInfo(String token, String msisdn, String uid, int smsCredits, int all_invitee, int all_invitee_joined, String country_code)
+		public AccountInfo(String token, String msisdn, String uid, String backupToken, int smsCredits, int all_invitee, int all_invitee_joined, String country_code)
 		{
 			this.token = token;
 			this.msisdn = msisdn;
 			this.uid = uid;
+			this.backupToken = backupToken;
 			this.smsCredits = smsCredits;
 			this.all_invitee = all_invitee;
 			this.all_invitee_joined = all_invitee_joined;
@@ -475,22 +463,23 @@ public class AccountUtils
 		if ("fail".equals(obj.optString("stat")))
 		{
 			if (pin != null)
-				return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0, null);
+				return new AccountUtils.AccountInfo(null, null, null, null, -1, 0, 0, null);
 			/*
 			 * represents normal account creation , when user is on wifi and account creation failed
 			 */
-			return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0, null);
+			return new AccountUtils.AccountInfo(null, null, null, null, -1, 0, 0, null);
 		}
 		String token = obj.optString("token");
 		String msisdn = obj.optString("msisdn");
 		String uid = obj.optString("uid");
+		String backupToken = obj.optString("backup_token");
 		int smsCredits = obj.optInt(HikeConstants.MqttMessageTypes.SMS_CREDITS);
 		int all_invitee = obj.optInt(HikeConstants.ALL_INVITEE_2);
 		int all_invitee_joined = obj.optInt(HikeConstants.ALL_INVITEE_JOINED_2);
 		String country_code = obj.optString("country_code");
 
 		Logger.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
-		return new AccountUtils.AccountInfo(token, msisdn, uid, smsCredits, all_invitee, all_invitee_joined, country_code);
+		return new AccountUtils.AccountInfo(token, msisdn, uid, backupToken, smsCredits, all_invitee, all_invitee_joined, country_code);
 	}
 
 	public static String validateNumber(String number)
@@ -543,7 +532,7 @@ public class AccountUtils
 		// Assert.assertTrue("Token is empty", !TextUtils.isEmpty(mToken));
 	}
 
-	public static void setProfile(String name) throws NetworkErrorException, IllegalStateException
+	public static JSONObject setProfile(String name, Birthday birthdate, boolean isFemale) throws NetworkErrorException, IllegalStateException
 	{
 		HttpPost httppost = new HttpPost(base + "/account/profile");
 		addToken(httppost);
@@ -552,6 +541,21 @@ public class AccountUtils
 		try
 		{
 			data.put("name", name);
+			data.put("gender", isFemale ? "f" : "m");
+			if (birthdate != null)
+			{
+				JSONObject bday = new JSONObject();
+				if(birthdate.day != 0)
+				{
+					bday.put("day", birthdate.day);
+				}
+				if(birthdate.month != 0)
+				{
+					bday.put("month", birthdate.month);
+				}
+				bday.put("year", birthdate.year);
+				data.put("dob", bday);
+			}
 			data.put("screen", "signup");
 
 			AbstractHttpEntity entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
@@ -562,14 +566,17 @@ public class AccountUtils
 			{
 				throw new NetworkErrorException("Unable to set name");
 			}
+			return obj;
 		}
 		catch (JSONException e)
 		{
 			Logger.wtf("AccountUtils", "Unable to encode name as JSON");
+			return null;
 		}
 		catch (UnsupportedEncodingException e)
 		{
 			Logger.wtf("AccountUtils", "Unable to encode name");
+			return null;
 		}
 	}
 
@@ -810,7 +817,7 @@ public class AccountUtils
 			 * We need the response to save the id of the status.
 			 */
 			if (requestType == RequestType.STATUS_UPDATE || requestType == RequestType.HIKE_JOIN_TIME || requestType == RequestType.PROFILE_PIC
-					|| requestType == RequestType.SOCIAL_POST)
+					|| requestType == RequestType.SOCIAL_POST || requestType == RequestType.OTHER)
 			{
 				hikeHttpRequest.setResponse(obj);
 			}

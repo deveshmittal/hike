@@ -1,5 +1,6 @@
 package com.bsb.hike.adapters;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +16,9 @@ import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.smartImageLoader.SharedFileImageLoader;
 
 public class HikeSharedFileAdapter extends BaseAdapter
@@ -31,14 +34,19 @@ public class HikeSharedFileAdapter extends BaseAdapter
 
 	private int sizeOfImage;
 
-	private Map<Long, HikeSharedFile> selectedItems;
+	private HashSet<Long> selectedItems;
 
 	private int selectedItemPostion = -1;
 
 	private boolean selectedScreen = false;
 
-	public HikeSharedFileAdapter(Context context, List<HikeSharedFile> sharedFilesList, int sizeOfImage, Map<Long, HikeSharedFile> selectedItems, boolean selectedScreen)
+	public static String IMAGE_TAG = "image";
+	
+	private Context context;
+	
+	public HikeSharedFileAdapter(Context context, List<HikeSharedFile> sharedFilesList, int sizeOfImage, HashSet<Long> selectedItems, boolean selectedScreen)
 	{
+		this.context = context;
 		this.layoutInflater = LayoutInflater.from(context);
 		this.sharedFilesList = sharedFilesList;
 		this.sizeOfImage = sizeOfImage;
@@ -47,6 +55,7 @@ public class HikeSharedFileAdapter extends BaseAdapter
 
 		this.thumbnailLoader = new SharedFileImageLoader(context, sizeOfImage);
 		this.thumbnailLoader.setDontSetBackground(true);
+		thumbnailLoader.setDefaultDrawable(context.getResources().getDrawable(R.drawable.ic_file_thumbnail_missing));
 	}
 
 	@Override
@@ -102,12 +111,28 @@ public class HikeSharedFileAdapter extends BaseAdapter
 
 		holder.galleryName.setVisibility(View.GONE);
 		if (galleryItem != null)
-		{
+		{	View time_view = convertView.findViewById(R.id.vid_time_layout);
 			holder.galleryThumb.setImageDrawable(null);
-			
-			thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), holder.galleryThumb, isListFlinging);
-
-			holder.galleryThumb.setScaleType(ScaleType.CENTER_CROP);
+			if(galleryItem.exactFilePathFileExists())
+			{
+				thumbnailLoader.loadImage(galleryItem.getImageLoaderKey(false), holder.galleryThumb, isListFlinging);
+				holder.galleryThumb.setScaleType(ScaleType.CENTER_CROP);
+				
+				if (galleryItem.getHikeFileType() == HikeFileType.VIDEO)
+				{
+					time_view.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					time_view.setVisibility(View.GONE);
+				}
+			}
+			else
+			{
+				time_view.setVisibility(View.GONE);
+				holder.galleryThumb.setScaleType(ScaleType.CENTER_INSIDE);
+				holder.galleryThumb.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_file_missing));
+			}
 		}
 		else
 		{
@@ -115,7 +140,7 @@ public class HikeSharedFileAdapter extends BaseAdapter
 			holder.galleryThumb.setImageResource(R.drawable.ic_add_more);
 		}
 
-		if ((selectedItems != null && selectedItems.containsKey(galleryItem.getMsgId())) || selectedItemPostion == position)
+		if ((selectedItems != null && selectedItems.contains(galleryItem.getMsgId())) || selectedItemPostion == position)
 		{
 			holder.selected.setSelected(true);
 		}
@@ -141,12 +166,16 @@ public class HikeSharedFileAdapter extends BaseAdapter
 		boolean notify = b != isListFlinging;
 
 		isListFlinging = b;
-		thumbnailLoader.setPauseWork(isListFlinging);
 
 		if (notify && !isListFlinging)
 		{
 			notifyDataSetChanged();
 		}
 
+	}
+	
+	public SharedFileImageLoader getSharedFileImageLoader()
+	{
+		return thumbnailLoader;
 	}
 }

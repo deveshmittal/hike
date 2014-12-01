@@ -58,6 +58,7 @@ import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
 
@@ -84,6 +85,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String MESSAGES_SETTING = "messageid";
 
 	public static final String UID_SETTING = "uid";
+
+	public static final String BACKUP_TOKEN_SETTING = "backup_token";
 
 	public static final String UPDATE_SETTING = "update";
 
@@ -249,8 +252,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_WALKIE_TALKIE_TIP = "shownWalkieTalkieTip";
 
-	public static final String SHOWN_STATUS_TIP = "shownStatusTip";
-
 	public static final String SHOWN_LAST_SEEN_TIP = "shownLastSeenTip";
 
 	public static final String PROTIP_WAIT_TIME = "protipWaitTime";
@@ -266,8 +267,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String SHOWN_NATIVE_INFO_POPUP = "shownNativeInfoPopup";
 
 	public static final String INVITED_FACEBOOK_FRIENDS_IDS = "invitedFacebookFriendsIds";
-
-	public static final String NOTIFIED_NO_STATUS = "notifiedNoStatus";
 
 	public static final String SERVER_RECOMMENDED_CONTACTS = "serverRecommendedContacts";
 
@@ -347,7 +346,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String SHOWN_WELCOME_HIKE_TIP = "shownWelcomeHikeTip";
 
-	public static final String SHOW_START_NEW_CHAT_TIP = "showStartNewChatTip";
+	public static final String SHOW_STEALTH_INFO_TIP = "showStealthInfoTip";
 
 	public static final String SHOW_STEALTH_UNREAD_TIP = "showStelathUnreadTip";
 
@@ -385,6 +384,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ATOMIC_POP_UP_HTTP = "http";
 	
+	public static final String ATOMIC_POP_UP_APP_GENERIC = "app";
+	
+	public static final String ATOMIC_POP_UP_APP_GENERIC_WHAT = "appWhat";
+	
 	public static final String ATOMIC_POP_UP_HTTP_URL = "httpUrl";
 	
 	public static final String ATOMIC_POP_UP_NOTIF_MESSAGE = "apuNotifMessage";
@@ -398,6 +401,18 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String ATOMIC_POP_UP_HEADER_CHAT = "apuHeaderChat";
 
 	public static final String ATOMIC_POP_UP_MESSAGE_CHAT = "apuMessageChat";
+
+	public static final String SHOWN_DIWALI_POPUP = "shownDiwaliPopup";
+	
+	public static final String SHOWN_SHOP_ICON_BLUE = "shownShopIconBlue";
+	
+	public static final String IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN = "showCategoryReordering";
+	
+	public static final String STICKED_BTN_CLICKED_FIRST_TIME = "stickerBtnClickedFirstTime";
+	
+	public static final String STICKER_SETTING_CHECK_BOX_CLICKED = "stickerSettingCheckBoxClicked";
+	
+	public static final String STICKER_SETTING_UNCHECK_BOX_CLICKED = "stickerSettingUnCheckBoxClicked";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 
@@ -435,7 +450,11 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static volatile boolean networkError;
 
+	public static volatile boolean syncingContacts = false;
+
 	public Handler appStateHandler;
+	
+	private StickerManager sm;
 
 	class IncomingHandler extends Handler
 	{
@@ -656,7 +675,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 		if (!currentAppVersion.equals(actualAppVersion))
 		{
-			Utils.resetUpdateParams(settings);
+			if (!currentAppVersion.equals(""))
+			{
+				Utils.resetUpdateParams(settings);
+			}
 
 			/*
 			 * Updating the app version.
@@ -670,22 +692,22 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		// onUpgrade() calls being triggered in the respective databases.
 		HikeConversationsDatabase.init(this);
 
+		sm = StickerManager.getInstance();
+		sm.init(getApplicationContext());
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
 		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || 
-				settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1 || settings.getInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, -1) == 1 || TEST)
+				settings.getInt(HikeConstants.UPGRADE_MSG_HASH_GROUP_READBY, -1) == 1 || settings.getInt(HikeConstants.UPGRADE_FOR_DATABASE_VERSION_28, -1) == 1 || 
+				settings.getInt(StickerManager.MOVED_HARDCODED_STICKERS_TO_SDCARD, 1) == 1 || settings.getInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 1) == 1 || TEST)
 		{
-			// turn off future push notifications as soon as the app has
-			// started.
-			// this has to be turned on whenever the upgrade finishes.
-			Editor editor = settings.edit();
-			editor.putBoolean(BLOCK_NOTIFICATIONS, true);
-			editor.commit();
-
-			Intent msgIntent = new Intent(this, UpgradeIntentService.class);
-			startService(msgIntent);
+			startUpdgradeIntent();
 		}
 
+		if(settings.getInt(StickerManager.UPGRADE_FOR_STICKER_SHOP_VERSION_1, 1) == 2)
+		{
+			sm.doInitialSetup();
+		}
+		
 		HikeMqttPersistence.init(this);
 		SmileyParser.init(this);
 
@@ -693,7 +715,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		String twitterTokenSecret = settings.getString(HikeMessengerApp.TWITTER_TOKEN_SECRET, "");
 		makeTwitterInstance(twitterToken, twitterTokenSecret);
 
-		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.INDIA_COUNTRY_CODE);
+		setIndianUser(settings.getString(COUNTRY_CODE, "").equals(HikeConstants.INDIA_COUNTRY_CODE));
 
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -773,24 +795,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		}
 
 		/*
-		 * We will increase the unseen status count by one if the user has not posted any updates and if we have never notified the user of this before.
-		 */
-		if (!settings.contains(NOTIFIED_NO_STATUS))
-		{
-			String lastStatus = settings.getString(HikeMessengerApp.LAST_STATUS, "");
-
-			Editor editor = settings.edit();
-			if (TextUtils.isEmpty(lastStatus))
-			{
-				int count = settings.getInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
-				count++;
-				editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, count);
-			}
-			editor.putBoolean(NOTIFIED_NO_STATUS, true);
-			editor.commit();
-		}
-
-		/*
 		 * Replacing GB keys' strings.
 		 */
 		if (!settings.contains(GREENBLUE_DETAILS_SENT))
@@ -806,6 +810,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		hikeBotNamesMap.put(HikeConstants.FTUE_GAMING_MSISDN, "Games on hike");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_DAILY, "hike daily");
 		hikeBotNamesMap.put(HikeConstants.FTUE_HIKE_SUPPORT, "hike support");
+		hikeBotNamesMap.put(HikeConstants.NUX_BOT, "Natasha");
 		initHikeLruCache(getApplicationContext());
 		initContactManager();
 		/*
@@ -816,6 +821,20 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		appStateHandler = new Handler();
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
+	}
+	
+	public void startUpdgradeIntent()
+	{
+		// turn off future push notifications as soon as the app has
+		// started.
+		// this has to be turned on whenever the upgrade finishes.
+		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.UPGRADING, true);
+		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+		editor.putBoolean(BLOCK_NOTIFICATIONS, true);
+		editor.commit();
+
+		Intent msgIntent = new Intent(this, UpgradeIntentService.class);
+		startService(msgIntent);
 	}
 
 	private void replaceGBKeys()
@@ -895,6 +914,11 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static boolean isIndianUser()
 	{
 		return isIndianUser;
+	}
+
+	public static void setIndianUser(boolean val)
+	{
+		isIndianUser = val;
 	}
 
 	public static void makeTwitterInstance(String token, String tokenSecret)

@@ -13,7 +13,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,6 +48,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -87,6 +90,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -96,13 +100,16 @@ import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.tasks.DownloadSingleStickerTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
+import com.bsb.hike.ui.utils.HashSpanWatcher;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -110,7 +117,6 @@ import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.StickerManager.StickerCategoryId;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.HoloCircularProgress;
@@ -274,8 +280,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	private int lastSentMessagePosition = -1;
 
 	private VoiceMessagePlayer voiceMessagePlayer;
-
-	private String statusIdForTip;
 
 	private long msgIdForSdrTip = -1;
 
@@ -753,73 +757,30 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			stickerHolder.loader.setVisibility(View.GONE);
 			Sticker sticker = metadata.getSticker();
 			setSenderDetails(convMessage, position, stickerHolder, true);
-			/*
-			 * If this is the default category, then the sticker are part of the app bundle itself
-			 */
-			if (sticker.getStickerIndex() != -1)
+			String categoryId = sticker.getCategoryId();
+			String stickerId = sticker.getStickerId();
+
+			String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(categoryId) + HikeConstants.LARGE_STICKER_ROOT;
+			File stickerImage = null;
+			if (categoryDirPath != null)
 			{
-				stickerHolder.image.setVisibility(View.VISIBLE);
-				if (StickerCategoryId.expressions.equals(sticker.getCategory().categoryId))
-				{
-					// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
-					int idx = sticker.getStickerIndex();
-					if (idx >= 0)
-						setDefaultSticker(stickerHolder.image, StickerManager.getInstance().LOCAL_STICKER_RES_IDS_EXPRESSIONS[idx]);
-				}
-				else if (StickerCategoryId.humanoid.equals(sticker.getCategory().categoryId))
-				{
-					// TODO : this logic has to change, we should not calculate stuff based on sticker index but stickerId
-					int idx = sticker.getStickerIndex();
-					if (idx >= 0)
-						setDefaultSticker(stickerHolder.image, StickerManager.getInstance().LOCAL_STICKER_RES_IDS_HUMANOID[idx]);
-				}
+				stickerImage = new File(categoryDirPath, stickerId);
 			}
-			else
+
+			String key = categoryId + stickerId;
+
+			if (stickerImage != null && stickerImage.exists())
 			{
-				String categoryId;
-				/*
-				 * If the category is an unknown one, we have the category id stored in the metadata.
-				 */
-				if (sticker.getCategory().categoryId == StickerCategoryId.unknown)
+				Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
+				if (stickerDrawable != null)
 				{
-					categoryId = metadata.getUnknownStickerCategory();
-				}
-				else
-				{
-					categoryId = sticker.getCategory().categoryId.name();
-				}
-				String stickerId = sticker.getStickerId();
-
-				String categoryDirPath = StickerManager.getInstance().getStickerDirectoryForCategoryId(context, categoryId) + HikeConstants.LARGE_STICKER_ROOT;
-				File stickerImage = null;
-				if (categoryDirPath != null)
-				{
-					stickerImage = new File(categoryDirPath, stickerId);
-				}
-
-				String key = categoryId + stickerId;
-				boolean downloadingSticker = StickerManager.getInstance().isStickerDownloading(key);
-
-				if (stickerImage != null && stickerImage.exists() && !downloadingSticker)
-				{
-					Drawable stickerDrawable = HikeMessengerApp.getLruCache().getSticker(stickerImage.getPath());
-					if (stickerDrawable != null)
-					{
-						stickerHolder.placeHolder.setBackgroundResource(0);
-						stickerHolder.image.setVisibility(View.VISIBLE);
-						// largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
-						stickerHolder.image.setImageDrawable(stickerDrawable);
-						// holder.stickerImage.setImageDrawable(IconCacheManager
-						// .getInstance().getSticker(context,
-						// stickerImage.getPath()));
-					}
-					else
-					{
-						stickerHolder.loader.setVisibility(View.VISIBLE);
-						stickerHolder.placeHolder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
-						stickerHolder.image.setVisibility(View.GONE);
-						stickerHolder.image.setImageDrawable(null);
-					}
+					stickerHolder.placeHolder.setBackgroundResource(0);
+					stickerHolder.image.setVisibility(View.VISIBLE);
+					// largeStickerLoader.loadImage(stickerImage.getPath(), holder.stickerImage, isListFlinging);
+					stickerHolder.image.setImageDrawable(stickerDrawable);
+					// holder.stickerImage.setImageDrawable(IconCacheManager
+					// .getInstance().getSticker(context,
+					// stickerImage.getPath()));
 				}
 				else
 				{
@@ -827,17 +788,45 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					stickerHolder.placeHolder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
 					stickerHolder.image.setVisibility(View.GONE);
 					stickerHolder.image.setImageDrawable(null);
-
-					/*
-					 * Download the sticker if not already downloading.
-					 */
-					if (!downloadingSticker)
-					{
-						DownloadSingleStickerTask downloadSingleStickerTask = new DownloadSingleStickerTask(context, categoryId, stickerId);
-						StickerManager.getInstance().insertTask(key, downloadSingleStickerTask);
-						Utils.executeFtResultAsyncTask(downloadSingleStickerTask);
-					}
 				}
+			}
+			else
+			{
+				stickerHolder.loader.setVisibility(View.VISIBLE);
+				stickerHolder.placeHolder.setBackgroundResource(R.drawable.bg_sticker_placeholder);
+				stickerHolder.image.setVisibility(View.GONE);
+				stickerHolder.image.setImageDrawable(null);
+
+				StickerDownloadManager.getInstance(context).DownloadSingleSticker(categoryId, stickerId, new IStickerResultListener()
+				{
+
+					@Override
+					public void onSuccess(Object result)
+					{
+						// TODO Auto-generated method stub
+						HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_DOWNLOADED, null);
+
+					}
+
+					@Override
+					public void onProgressUpdated(double percentage)
+					{
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onFailure(Object result, StickerException exception)
+					{
+						if(result == null)
+						{
+							return ;
+						}
+						String largeStickerPath = (String) result;
+						(new File(largeStickerPath)).delete();
+					}
+				});
+				
 			}
 			setTimeNStatus(position, stickerHolder, true, stickerHolder.placeHolder);
 			setSelection(convMessage, stickerHolder.selectedStateOverlay);
@@ -1161,7 +1150,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 				RelativeLayout.LayoutParams fileThumbParams = (RelativeLayout.LayoutParams) videoHolder.fileThumb.getLayoutParams();
 
-				if (showThumbnail)
+				if (showThumbnail && thumbnail != null)
 				{
 					videoHolder.fileThumb.setScaleType(ScaleType.CENTER);
 					fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
@@ -1321,7 +1310,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				
 				RelativeLayout.LayoutParams fileThumbParams = (RelativeLayout.LayoutParams) imageHolder.fileThumb.getLayoutParams();
 
-				if (showThumbnail)
+				if (showThumbnail && thumbnail != null)
 				{
 					imageHolder.fileThumb.setScaleType(ScaleType.CENTER_CROP);
 					fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
@@ -2428,7 +2417,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				String number = null;
 				String name = ((GroupConversation) conversation).getGroupParticipantFirstName(convMessage.getGroupParticipantMsisdn());
-				if (((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
+				if (((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getFirst().getContactInfo().isUnknownContact())
 				{
 					number = convMessage.getGroupParticipantMsisdn();
 				}
@@ -2515,6 +2504,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 			showTransferInitialization(holder, hikeFile);
 			break;
+		case ERROR:
 		case PAUSED:
 			holder.ftAction.setImageResource(retryImage);
 			holder.ftAction.setVisibility(View.VISIBLE);
@@ -2522,7 +2512,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			showTransferProgress(holder, fss, msgId, hikeFile, isSent);
 			break;
 		case CANCELLED:
-		case ERROR:
 			holder.ftAction.setImageResource(retryImage);
 			holder.ftAction.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
@@ -2550,11 +2539,24 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		int progress = FileTransferManager.getInstance(context).getFTProgress(msgId, hikeFile.getFile(), isSent);
 		int chunkSize = FileTransferManager.getInstance(context).getChunkSize(msgId);
-		if (fss.getTotalSize() <= 0 && isSent)
+		if (fss.getTotalSize() <= 0 && isSent && fss.getFTState() != FTState.ERROR)
 		{
 			showTransferInitialization(holder, hikeFile);
-		}else if((fss.getTransferredSize() == 0 && fss.getFTState() == FTState.IN_PROGRESS)){
-			holder.circularProgress.setProgress(5 * 0.01f);
+		}
+		else if(fss.getFTState() == FTState.IN_PROGRESS && fss.getTransferredSize() == 0)
+		{
+			float fakeProgress = 5 * 0.01f;
+			
+			if (fss.getTotalSize() > 0)
+			{
+				fakeProgress = (float) chunkSize;
+				fakeProgress /= fss.getTotalSize();
+				if (fakeProgress > 5 * 0.01f)
+				{
+					fakeProgress = 5 * 0.01f;
+				}
+			}
+			holder.circularProgress.setProgress(fakeProgress);
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}
@@ -2601,8 +2603,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		fileThumb.getLayoutParams().width = pixels;
 		// fileThumb.setBackgroundColor(context.getResources().getColor(R.color.file_message_item_bg))
 		fileThumb.setBackgroundResource(R.drawable.bg_file_thumb);
-		;
-		fileThumb.setImageResource(0);
+		/*
+		 * When setting default media thumb to image view, need to remove the previous drawable of that view in case of view is re-used by adapter.
+		 * Fogbugz Id : 37212
+		 */
+		fileThumb.setImageDrawable(null);
 	}
 
 	View.OnClickListener contactClick = new OnClickListener()
@@ -2613,8 +2618,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			final ConvMessage message = (ConvMessage) v.getTag();
 			ArrayList<String> optionsList = new ArrayList<String>();
 			String number = null;
-			final String name = ((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().getName();
-			if (((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().isUnknownContact())
+			final String name = ((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getSecond();
+			if (((GroupConversation) conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getFirst().getContactInfo().isUnknownContact())
 			{
 				number = message.getGroupParticipantMsisdn();
 				optionsList.add(context.getString(R.string.add_to_contacts));
@@ -2927,16 +2932,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			messageInfo.setVisibility(View.VISIBLE);
 			messageInfo.setTextColor(context.getResources().getColor(isDefaultTheme ? R.color.list_item_subtext : R.color.white));
 			setReadByForGroup(message, messageInfo);
-			updateViewWindowForReadBy(message);
-		}
-	}
-
-	private void updateViewWindowForReadBy(ConvMessage message)
-	{
-		ConvMessage lastMessage = getItem(getCount() - 1);
-		if (lastMessage.getMsgID() == message.getMsgID())
-		{
-			chatThread.updateViewWindowForReadBy();
 		}
 	}
 
@@ -3150,21 +3145,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private void openFile(HikeFile hikeFile, ConvMessage convMessage, View parent)
 	{
-		File receivedFile = hikeFile.getFile();
 		Logger.d(getClass().getSimpleName(), "Opening file");
 		Intent openFile = new Intent(Intent.ACTION_VIEW);
-		if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+		switch (hikeFile.getHikeFileType())
 		{
+		case LOCATION:
 			String uri = String.format(Locale.US, "geo:%1$f,%2$f?z=%3$d&q=%1$f,%2$f", hikeFile.getLatitude(), hikeFile.getLongitude(), hikeFile.getZoomLevel());
 			openFile.setData(Uri.parse(uri));
-		}
-		else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
-		{
+			break;
+		case CONTACT:	
 			saveContact(hikeFile);
 			return;
-		}
-		else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
-		{
+		case AUDIO_RECORDING :
 			String fileKey = hikeFile.getFileKey();
 
 			ImageView recAction = (ImageView) parent.findViewById(R.id.action);
@@ -3209,18 +3201,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				voiceMessagePlayer.playMessage(hikeFile);
 			}
 			return;
-		}
-		else
-		{
-			Bundle arguments = new Bundle();
-			ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
-			hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn() , convMessage.getTimestamp()));
-			arguments.putParcelableArrayList(HikeConstants.Extras.SHARED_FILE_ITEMS, hsf);
-			arguments.putInt(HikeConstants.MEDIA_POSITION, hsf.size()-1);
-			arguments.putBoolean(HikeConstants.FROM_CHAT_THREAD, true);
-			arguments.putString(HikeConstants.Extras.MSISDN, convMessage.getMsisdn());
-			PhotoViewerFragment.openPhoto(R.id.chatThreadParentLayout, context, arguments);
-			
+		case IMAGE:
+		case VIDEO:
+			if(hikeFile.exactFilePathFileExists())
+			{
+				chatThread.hideKeyBoardIfVisible();
+				ArrayList<HikeSharedFile> hsf = new ArrayList<HikeSharedFile>();
+				hsf.add(new HikeSharedFile(hikeFile.serialize(), hikeFile.isSent(), convMessage.getMsgID(), convMessage.getMsisdn(), convMessage.getTimestamp(), convMessage
+						.getGroupParticipantMsisdn()));
+				PhotoViewerFragment.openPhoto(R.id.chatThreadParentLayout, context, hsf, true, conversation);
+			}
+			else
+			{
+				Toast.makeText(context, R.string.unable_to_open, Toast.LENGTH_SHORT).show();
+			}
+			return;
+		
+		
+		default:
+			HikeFile.openFile(hikeFile, context);
 			return;
 		}
 		try
@@ -3817,19 +3816,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			try
 			{
+				int duration = mediaPlayer.getDuration();
+				
 				switch (playerState)
 				{
 				case PLAYING:
 				case PAUSED:
 					int progress = 0;
-					if (mediaPlayer.getDuration() > 0)
-						progress = (mediaPlayer.getCurrentPosition() * 100) / mediaPlayer.getDuration();
+					if (duration > 0)
+						progress = (mediaPlayer.getCurrentPosition() * 100) / duration;
 					((HoloCircularProgress) durationProgress).setProgress(progress * 0.01f);
 					Utils.setupFormattedTime(durationTxt, mediaPlayer.getCurrentPosition() / 1000);
 					break;
 				case STOPPED:
 					((HoloCircularProgress) durationProgress).setProgress(0.00f);
-					Utils.setupFormattedTime(durationTxt, mediaPlayer.getDuration() / 1000);
+					Utils.setupFormattedTime(durationTxt, duration / 1000);
 					break;
 
 				}
@@ -3852,6 +3853,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	public IconLoader getIconImageLoader()
 	{
 		return iconLoader;
+	}
+	
+	public HighQualityThumbLoader getHighQualityThumbLoader()
+	{
+		return hqThumbLoader;
 	}
 
 	public void toggleSelection(ConvMessage convMsg)
@@ -4118,7 +4124,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				chatThread.shouldRunTimerForHikeOfflineTip = true;
 				chatThread.hideHikeToOfflineTip();
 				updateFirstPendingConvMessage();
-				chatThread.updateLastSeen();
 			}
 		});
 	}
@@ -4205,39 +4210,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			statusHolder.container.setEnabled(false);
 		}
-
-		boolean showTip = false;
-		boolean shownStatusTip = preferences.getBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, false);
-
-		if (!shownStatusTip)
-		{
-			if (chatThread.tipView == null)
-			{
-				showTip = true;
-			}
-			else
-			{
-				Object tag = chatThread.tipView.getTag();
-				if(tag instanceof TipType){
-				TipType tipType = (TipType) tag;
-				if (tipType == TipType.STATUS && statusMessage.getMappedId().equals(statusIdForTip))
-				{
-					showTip = true;
-				}
-				}
-			}
-		}
-
-		if (showTip)
-		{
-			chatThread.tipView = v.findViewById(R.id.status_tip);
-			statusIdForTip = statusMessage.getMappedId();
-			HikeTip.showTip(chatThread, TipType.STATUS, chatThread.tipView, Utils.getFirstName(conversation.getLabel()));
-		}
-		else
-		{
-			v.findViewById(R.id.status_tip).setVisibility(View.GONE);
-		}
 	}
 
 	private void fillPinTextData(StatusViewHolder statusHolder, ConvMessage convMessage, View v)
@@ -4272,13 +4244,37 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	public void setIsListFlinging(boolean isFling)
 	{
+		Logger.d("scroll", "Message Adapter set list flinging " + isFling);
 		boolean notify = isFling != isListFlinging;
-
+		Logger.d("scroll", "Message Adapter notify " + notify);
 		isListFlinging = isFling;
-		hqThumbLoader.setPauseWork(isListFlinging);
 		
-		if(notify){
+		if(notify && !isListFlinging){
 			notifyDataSetChanged();
 		}
+	}
+	
+	public boolean containsMediaMessage(ArrayList<Long> msgIds)
+	{
+		/*
+		 * Iterating in reverse order since its more likely the user wants to know about latest messages.
+		 */
+		int lastIndex = msgIds.size() - 1;
+		for (int i = lastIndex; i >= 0; i--)
+		{
+			long msgId = msgIds.get(i);
+			for (ConvMessage convMessage : convMessages)
+			{
+				if (convMessage.getMsgID() == msgId && convMessage.isFileTransferMessage())
+				{
+					HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+					if(hikeFile.getHikeFileType() == HikeFileType.IMAGE || hikeFile.getHikeFileType() == HikeFileType.VIDEO)
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 }

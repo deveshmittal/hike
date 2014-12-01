@@ -52,12 +52,16 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -75,8 +79,8 @@ import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.Typeface;
 import android.graphics.Shader.TileMode;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -164,11 +168,14 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.FtueActivity;
+import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -347,6 +354,17 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
 	}
+	
+	public static Intent createIntentFromMsisdn(String msisdnOrGroupId, boolean openKeyBoard)
+	{
+		Intent intent = new Intent();
+
+		// If the contact info was made using a group conversation, then the
+		// Group ID is in the contact ID
+		intent.putExtra(HikeConstants.Extras.MSISDN, msisdnOrGroupId);
+		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
+		return intent;
+	}
 
 	/** Create a File for saving an image or video */
 	public static File getOutputMediaFile(HikeFileType type, String orgFileName, boolean isSent)
@@ -521,6 +539,7 @@ public class Utils
 		editor.putString(HikeMessengerApp.MSISDN_SETTING, accountInfo.msisdn);
 		editor.putString(HikeMessengerApp.TOKEN_SETTING, accountInfo.token);
 		editor.putString(HikeMessengerApp.UID_SETTING, accountInfo.uid);
+		editor.putString(HikeMessengerApp.BACKUP_TOKEN_SETTING, accountInfo.backupToken);
 		editor.putInt(HikeMessengerApp.SMS_SETTING, accountInfo.smsCredits);
 		editor.putInt(HikeMessengerApp.INVITED, accountInfo.all_invitee);
 		editor.putInt(HikeMessengerApp.INVITED_JOINED, accountInfo.all_invitee_joined);
@@ -562,6 +581,18 @@ public class Utils
 		return false;
 	}
 
+	public static boolean showNuxScreen(Activity activity)
+	{
+		SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (settings.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false))
+		{
+			activity.startActivity(new Intent(activity, FtueActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+			activity.finish();
+			return true;
+		}
+		return false;
+	}
+	
 	public static void disconnectAndStopService(Activity activity)
 	{
 		// Added these lines to prevent the bad username/password bug.
@@ -643,7 +674,7 @@ public class Utils
 
 	public static boolean isGroupConversation(String msisdn)
 	{
-		return !msisdn.startsWith("+");
+		return msisdn!=null && !msisdn.startsWith("+");
 	}
 
 	public static String defaultGroupName(List<PairModified<GroupParticipant, String>> participantList)
@@ -1289,7 +1320,17 @@ public class Utils
 	public static double getFreeSpace()
 	{
 		StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-		double sdAvailSize = (double) stat.getAvailableBlocks() * (double) stat.getBlockSize();
+		double sdAvailSize = 0.0;
+		if(isJELLY_BEAN_MR2OrHigher())
+		{
+			 sdAvailSize = (double) stat.getAvailableBlocksLong() * (double) stat.getBlockSizeLong();
+		}
+		else
+		{
+			sdAvailSize = (double) stat.getAvailableBlocks() * (double) stat.getBlockSize();
+		}
+		Logger.d("StickerSize", "get available blocks : " + (double) stat.getAvailableBlocks() + "  get block size : " + (double) stat.getBlockSize());
+		
 		return sdAvailSize;
 	}
 
@@ -1524,8 +1565,8 @@ public class Utils
 		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
 
-		AccountUtils.rewardsUrl = httpString + (isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE : AccountUtils.REWARDS_STAGING_BASE);
-		AccountUtils.gamesUrl = httpString + (isProductionServer ? AccountUtils.GAMES_PRODUCTION_BASE : AccountUtils.GAMES_STAGING_BASE);
+		AccountUtils.rewardsUrl = isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE : AccountUtils.REWARDS_STAGING_BASE;
+		AccountUtils.gamesUrl = isProductionServer ? AccountUtils.GAMES_PRODUCTION_BASE : AccountUtils.GAMES_STAGING_BASE;
 		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE : AccountUtils.STICKERS_STAGING_BASE);
 		AccountUtils.h2oTutorialUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.H2O_TUTORIAL_PRODUCTION_BASE : AccountUtils.H2O_TUTORIAL_STAGING_BASE);
 		Logger.d("SSL", "Base: " + AccountUtils.base);
@@ -2087,7 +2128,15 @@ public class Utils
 			return false;
 		}
 		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		return (cm != null && cm.getActiveNetworkInfo() != null && (cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI));
+		try
+		{
+			return (cm != null && cm.getActiveNetworkInfo() != null && (cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI));
+		}
+		catch (NullPointerException e)
+		{
+			// TODO Auto-generated catch block
+			return false;
+		}
 	}
 
 	public static boolean renameTempProfileImage(String msisdn)
@@ -2270,6 +2319,13 @@ public class Utils
 		return items;
 	}
 
+	/**
+	 * Get unseen status, user-status and friend request count
+	 * 
+	 * @param accountPrefs Account settings shared preference
+	 * @param countUsersStatus Whether to include user status count in the total
+	 * @return
+	 */
 	public static int getNotificationCount(SharedPreferences accountPrefs, boolean countUsersStatus)
 	{
 		int notificationCount = 0;
@@ -2281,6 +2337,8 @@ public class Utils
 			notificationCount += accountPrefs.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 		}
 
+		int frCount = accountPrefs.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
+		notificationCount += frCount;
 		return notificationCount;
 	}
 
@@ -2975,7 +3033,12 @@ public class Utils
 
 		return jObject;
 	}
-
+	
+	public static boolean isGingerbreadOrHigher()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD;
+	}
+	
 	public static boolean isHoneycombOrHigher()
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
@@ -2985,7 +3048,11 @@ public class Utils
 	{
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 	}
-
+	
+	public static boolean isJELLY_BEAN_MR2OrHigher()
+	{
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2;
+	}
 	public static void executeAsyncTask(AsyncTask<Void, Void, Void> asyncTask)
 	{
 		if (isHoneycombOrHigher())
@@ -3153,16 +3220,15 @@ public class Utils
 	{
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
 
-	public static void resetOverflowCountHomeScreen(Context context)
+	public static void resetUnseenFriendRequestCount(Context context)
 	{
 		if (HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.FRIEND_REQ_COUNT, 0) > 0)
 		{
 			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 		}
-		HikeMessengerApp.getPubSub().publish(HikePubSub.FRIEND_REQ_COUNT_RESET, null);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_COUNT_CHANGED, null);
 	}
 
 	public static boolean shouldIncrementCounter(ConvMessage convMessage)
@@ -3440,12 +3506,12 @@ public class Utils
 		jsonObject.put(HikeConstants.PIXEL_DENSITY_MULTIPLIER, pdm);
 	}
 
-	public static ConvMessage makeConvMessage(Conversation mConversation, String msisdn, String message, boolean isOnhike)
+	public static ConvMessage makeConvMessage(String msisdn, String message, boolean isOnhike)
 	{
-		return makeConvMessage(mConversation, msisdn, message, isOnhike, State.SENT_UNCONFIRMED);
+		return makeConvMessage(msisdn, message, isOnhike, State.SENT_UNCONFIRMED);
 	}
 
-	public static ConvMessage makeConvMessage(Conversation mConversation, String msisdn, String message, boolean isOnhike, State state)
+	public static ConvMessage makeConvMessage(String msisdn, String message, boolean isOnhike, State state)
 	{
 		long time = (long) System.currentTimeMillis() / 1000;
 		ConvMessage convMessage = new ConvMessage(message, msisdn, time, state);
@@ -3669,6 +3735,11 @@ public class Utils
 
 	public static Drawable getAvatarDrawableForNotificationOrShortcut(Context context, String msisdn, boolean isPin)
 	{
+		if(msisdn.equals(context.getString(R.string.app_name)) || msisdn.equals(HikeNotification.HIKE_STEALTH_MESSAGE_KEY))
+		{
+			return context.getResources().getDrawable(R.drawable.hike_avtar_protip);
+		}
+		
 		Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn);
 
 		if (isPin || drawable == null)
@@ -3811,7 +3882,7 @@ public class Utils
 
 		Logger.i("sound", "playing sound " + soundId);
 		MediaPlayer mp = new MediaPlayer();
-		mp.setAudioStreamType(AudioManager.STREAM_RING);
+		mp.setAudioStreamType(AudioManager.STREAM_SYSTEM);
 		Resources res = context.getResources();
 		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
 
@@ -3836,18 +3907,18 @@ public class Utils
 		}
 		catch (IllegalArgumentException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			mp.release();
 		}
 		catch (IllegalStateException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			mp.release();
 		}
 		catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			mp.release();
 		}
 	}
 
@@ -3862,6 +3933,50 @@ public class Utils
 		catch (Exception e)
 		{
 			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Plays non-ducking sound from given Uri. Plays on {@link android.Media.AudioManager#STREAM_SYSTEM AudioManager.STREAM_SYSTEM} to enable non-ducking playback.
+	 * 
+	 * @param context
+	 * @param soundUri
+	 */
+	public static void playSound(Context context, Uri soundUri)
+	{
+		MediaPlayer mp = new MediaPlayer();
+		mp.setAudioStreamType(AudioManager.STREAM_SYSTEM);
+		try
+		{
+			mp.setDataSource(context, soundUri);
+
+			mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
+			{
+
+				@Override
+				public void onCompletion(MediaPlayer mp)
+				{
+					mp.release();
+				}
+			});
+			mp.prepare();
+			mp.start();
+
+		}
+		catch (IllegalArgumentException e)
+		{
+			e.printStackTrace();
+			mp.release();
+		}
+		catch (IllegalStateException e)
+		{
+			e.printStackTrace();
+			mp.release();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			mp.release();
 		}
 	}
 
@@ -4034,30 +4149,24 @@ public class Utils
 	 * Adding this method to compute the overall count for showing in overflow menu on home screen
 	 * 
 	 * @param accountPref
-	 * @param count
+	 * @param defaultValue
 	 * @return
 	 */
-	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref)
+	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref, boolean defaultValue)
 	{
 		int overallCount = 0;
-		if (!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
+		if (!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, defaultValue)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
 		{
 			overallCount++;
 		}
-		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
+		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, defaultValue)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
 		{
 			overallCount++;
 		}
-		int frCount = accountPref.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
-		if (frCount > 0)
-		{
-			overallCount += frCount;
-		}
-
 		return overallCount;
 	}
 
-	public static void incrementOrDecrementHomeOverflowCount(SharedPreferences accountPref, int count)
+	public static void incrementOrDecrementFriendRequestCount(SharedPreferences accountPref, int count)
 	{
 		int currentCount = accountPref.getInt(HikeMessengerApp.FRIEND_REQ_COUNT, 0);
 
@@ -4066,9 +4175,10 @@ public class Utils
 		{
 			Editor editor = accountPref.edit();
 			editor.putInt(HikeMessengerApp.FRIEND_REQ_COUNT, currentCount);
+			editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
 			editor.commit();
 		}
-
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_COUNT_CHANGED, null);
 	}
 
 	public static boolean isPackageInstalled(Context context, String packageName)
@@ -4448,23 +4558,29 @@ public class Utils
 	// added for db query
 	public static String getMsisdnStatement(Collection<String> msisdnList)
 	{
-		StringBuilder sb = new StringBuilder("(");
-		if (null != msisdnList)
+		if (null == msisdnList)
 		{
+			return null;
+		}
+		else
+		{
+			if (msisdnList.isEmpty())
+			{
+				return null;
+			}
+			StringBuilder sb = new StringBuilder("(");
 			for (String msisdn : msisdnList)
 			{
 				sb.append(DatabaseUtils.sqlEscapeString(msisdn));
 				sb.append(",");
 			}
+			int idx = sb.lastIndexOf(",");
+			if (idx >= 0)
+				sb.replace(idx, sb.length(), ")");
+			else
+				sb.append(")");
+			return sb.toString();
 		}
-
-		int idx = sb.lastIndexOf(",");
-		if (idx >= 0)
-			sb.replace(idx, sb.length(), ")");
-		else
-			sb.append(")");
-
-		return sb.toString();
 	}
 
 	public static void startWebViewActivity(Context context, String url, String title)
@@ -4514,12 +4630,135 @@ public class Utils
 				e.printStackTrace();
 			}
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, conv);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.UNREAD_PIN_COUNT_RESET, conv);
 		}
 	}	
 	
+	public static void handleFileForwardObject(JSONObject multiMsgFwdObject, HikeFile hikeFile) throws JSONException
+	{
+		multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
+		if (hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+		{
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.ZOOM_LEVEL, hikeFile.getZoomLevel());
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.LATITUDE, hikeFile.getLatitude());
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.LONGITUDE, hikeFile.getLongitude());
+		}
+		else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
+		{
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.CONTACT_METADATA, hikeFile.serialize().toString());
+		}
+		else
+		{
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
+			multiMsgFwdObject.putOpt(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
+			if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING)
+			{
+				multiMsgFwdObject.putOpt(HikeConstants.Extras.RECORDING_TIME, hikeFile.getRecordingDuration());
+			}
+		}
+
+	}
+	
+	public static String getFormattedDate(Context context, long timestamp)
+	{
+		Date date = new Date(timestamp * 1000);
+		String format;
+		if (android.text.format.DateFormat.is24HourFormat(context))
+		{
+			format = "d MMM ''yy";
+		}
+		else
+		{
+			format = "d MMM ''yy";
+		}
+
+		DateFormat df = new SimpleDateFormat(format);
+		return df.format(date);
+	}
+	
+	public static String getFormattedTime(boolean pretty, Context context, long timestamp)
+	{
+		Date date = new Date(timestamp * 1000);
+		if (pretty)
+		{
+			PrettyTime p = new PrettyTime();
+			return p.format(date);
+		}
+		else
+		{
+			String format;
+			if (android.text.format.DateFormat.is24HourFormat(context))
+			{
+				format = "HH:mm";
+			}
+			else
+			{
+				format = "h:mm aaa";
+			}
+
+			DateFormat df = new SimpleDateFormat(format);
+			return df.format(date);
+		}
+	}
+
+	public static Pair<String[], String[]> getMsisdnToNameArray(Conversation conversation)
+	{
+		if (conversation instanceof GroupConversation)
+		{
+			Map<String, PairModified<GroupParticipant, String>> groupParticipants = ((GroupConversation) conversation).getGroupParticipantList();
+			String[] msisdnArray = new String[groupParticipants.size()];
+			String[] nameArray = new String[groupParticipants.size()];
+
+			int i = 0;
+			for (PairModified<GroupParticipant, String> groupParticipant : groupParticipants.values())
+			{
+				msisdnArray[i] = groupParticipant.getFirst().getContactInfo().getMsisdn();
+				nameArray[i++] = groupParticipant.getSecond();
+			}
+			return new Pair<String[], String[]>(msisdnArray, nameArray);
+		}
+		return new Pair<String[], String[]>(null, null);
+	}
+	
+	public static String formatFileSize(long size)
+	{
+		if (size < 1024)
+		{
+			return String.format("%d B", size);
+		}
+		else if (size < 1024 * 1024)
+		{
+			return String.format("%.1f KB", size / 1024.0f);
+		}
+		else if (size < 1024 * 1024 * 1024)
+		{
+			return String.format("%.1f MB", size / 1024.0f / 1024.0f);
+		}
+		else
+		{
+			return String.format("%.1f GB", size / 1024.0f / 1024.0f / 1024.0f);
+		}
+	}
+
+
+	public static AlertDialog showNetworkUnavailableDialog(Context context)
+	{
+		final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setMessage(R.string.no_internet_try_again);
+		builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which)
+			{
+				dialog.dismiss();
+			}
+		});
+		AlertDialog dialog = builder.create();
+		dialog.show();
+		return dialog;
+	}
+	
 	public static Bitmap createBlurredImage (Bitmap originalBitmap, Context context)
 	{
-		final int BLUR_RADIUS = 10;
+		final int BLUR_RADIUS = 8;
 		if(hasJellyBeanMR1()){
 			Bitmap output = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
 	
@@ -4538,4 +4777,135 @@ public class Utils
 		}
 		return null;
 	}
+	
+	/**
+	 * 
+	 * @param c
+	 * 	 - contact info object
+	 * @param myMsisdn
+	 * 	 - self msisdn
+	 * @return
+	 * 	<br>false if</br>
+	 * 
+	 * 	   <li> contact msisdn equals myMsisdn</li>
+	 * 	   <li> contact favorite state is FRIENDS</li>
+	 *     <li> contact favorite state is REQUEST_RECIEVED</li>
+	 *     <li> contact favorite state is REQUEST_RECIEVED_REJECTED</li>
+	 *     
+	 *  <p>true otherwise</p>
+	 */
+	public static boolean shouldDeleteIcon(ContactInfo c, String myMsisdn)
+	{
+		String msisdn = c.getMsisdn();
+		if(msisdn.equalsIgnoreCase(myMsisdn) || c.getFavoriteType().equals(FavoriteType.FRIEND) || c.getFavoriteType().equals(FavoriteType.REQUEST_RECEIVED) || c.getFavoriteType().equals(FavoriteType.REQUEST_RECEIVED_REJECTED))
+		{
+			return false;
+		}
+		return true;
+	}
+	
+	@SuppressWarnings("deprecation")
+	public static void setClipboardText(String str, Context context)
+	{
+		if(isHoneycombOrHigher())
+		{
+			ClipboardManager clipboard = (ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);
+			ClipData clip = ClipData.newPlainText("", str);
+			clipboard.setPrimaryClip(clip);
+		}
+		else
+		{
+			android.text.ClipboardManager clipboard = (android.text.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+			clipboard.setText(str);
+		}
+	}
+		
+	/**
+	 * This method is used to remove a contact as a favorite based on existing favorite type. It returns either FavoriteType.REQUEST_RECEIVED_REJECTED or FavoriteType.NOT_FRIEND
+	 * @param contactInfo
+	 */
+	
+	public static FavoriteType checkAndUnfriendContact(ContactInfo contactInfo)
+	{
+		FavoriteType favoriteType;
+		if (contactInfo.getFavoriteType() == FavoriteType.FRIEND)
+		{
+			favoriteType = FavoriteType.REQUEST_RECEIVED_REJECTED;
+		}
+		else
+		{
+			favoriteType = FavoriteType.NOT_FRIEND;
+		}
+		
+		Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(contactInfo, favoriteType);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteRemoved);
+		return favoriteType;
+	}
+	
+	public static String loadJSONFromAsset(Context context, String jsonFileName)
+	{
+		String json = null;
+		try
+		{
+			InputStream is = context.getAssets().open(jsonFileName + ".json");
+			int size = is.available();
+			byte[] buffer = new byte[size];
+			is.read(buffer);
+			is.close();
+			json = new String(buffer, "UTF-8");
+
+		}
+		catch (IOException ex)
+		{
+			ex.printStackTrace();
+			return null;
+		}
+		return json;
+	}
+	
+	/**
+	 * Returns the device Orientation as either ORIENTATION_PORTRAIT or ORIENTATION_LANDSCAPE
+	 * @param ctx
+	 * @return ORIENTATION_PORTRAIT or ORIENTATION_LANDSCAPE
+	 */
+	public static int getDeviceOrientation(Context ctx)
+	{
+		return ctx.getResources().getConfiguration().orientation;
+	}
+	
+	public static void sendDetailsAfterSignup(Context context, boolean upgrade, boolean sendBot)
+	{
+		sendDeviceDetails(context, upgrade, sendBot);
+		SharedPreferences accountPrefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP, false))
+		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FB_CLICK);
+		}
+		if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) > -1)
+		{
+			if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+			}
+			else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+			}
+			Editor editor = accountPrefs.edit();
+			editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
+			editor.commit();
+		}
+	}
+
+	private static void sendDeviceDetails(Context context, boolean upgrade, boolean sendBot)
+	{
+		JSONObject obj = getDeviceDetails(context);
+		if (obj != null)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+		}
+		requestAccountInfo(upgrade, sendBot);
+		sendLocaleToServer(context);
+	}
+
 }
