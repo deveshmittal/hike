@@ -25,25 +25,29 @@ public class StickerDownloadManager
 	
 	public static final String TAG = "StickerDownloadManager";
 
-	private StickerDownloadManager(Context ctx)
+	private StickerDownloadManager()
 	{
-		queue = new RequestQueue();
-		context = ctx;
-		handler = new Handler(context.getMainLooper());
-		networkHandler = new NetworkHandler(ctx, queue);
 	}
 
-	public static StickerDownloadManager getInstance(Context context)
+	public static StickerDownloadManager getInstance()
 	{
 		if (_instance == null)
 		{
 			synchronized (StickerDownloadManager.class)
 			{
 				if (_instance == null)
-					_instance = new StickerDownloadManager(context.getApplicationContext());
+					_instance = new StickerDownloadManager();
 			}
 		}
 		return _instance;
+	}
+	
+	public void init(Context context)
+	{
+		queue = new RequestQueue();
+		this.context = context;
+		handler = new Handler(context.getMainLooper());
+		networkHandler = new NetworkHandler(context, queue);
 	}
 
 	/*

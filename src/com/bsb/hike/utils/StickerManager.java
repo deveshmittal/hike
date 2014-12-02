@@ -1162,10 +1162,10 @@ public class StickerManager
 				{
 				case PALLATE_ICON_TYPE:
 				case PALLATE_ICON_SELECTED_TYPE:
-					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(categoryId, null);
+					StickerDownloadManager.getInstance().DownloadEnableDisableImage(categoryId, null);
 					break;
 				case PREVIEW_IMAGE_TYPE:
-					StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(categoryId, null);
+					StickerDownloadManager.getInstance().DownloadStickerPreviewImage(categoryId, null);
 					break;
 				default:
 					break;
@@ -1228,7 +1228,7 @@ public class StickerManager
 			return;
 		}
 
-		StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
+		StickerDownloadManager.getInstance().DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
 		{
 
 			@Override
@@ -1336,7 +1336,7 @@ public class StickerManager
 			{
 				downloadType = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
 			}
-			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, downloadType, source, null);
+			StickerDownloadManager.getInstance().DownloadMultipleStickers(category, downloadType, source, null);
 		}
 		saveCategoryAsVisible(category);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
