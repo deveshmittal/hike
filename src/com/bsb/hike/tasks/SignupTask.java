@@ -650,7 +650,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				}
 				if (status)
 				{
-					HikeConversationsDatabase.getInstance().resetConversationsStealthStatus();
 					ContactManager.getInstance().init(context);
 					publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString()));
 				}

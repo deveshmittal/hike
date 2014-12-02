@@ -152,6 +152,7 @@ public class DBBackupRestore
 			e.printStackTrace();
 			return false;
 		}
+		state.restorePrefs(mContext);
 		postRestoreSetup(state);
 		time = System.currentTimeMillis() - time;
 		Logger.d(getClass().getSimpleName(), "Restore complete!! in " + time / 1000 + "." + time % 1000 + "s");
@@ -297,6 +298,7 @@ public class DBBackupRestore
 	private boolean updateBackupState()
 	{
 		BackupState state = new BackupState(dbNames[0], DBConstants.CONVERSATIONS_DATABASE_VERSION);
+		state.backupPrefs(mContext);
 		File backupStateFile = getBackupStateFile();
 		FileOutputStream fileOut = null;
 		ObjectOutputStream out = null;
