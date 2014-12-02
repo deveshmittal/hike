@@ -673,9 +673,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				}
 			}
 			this.data = null;
-			Editor editor = settings.edit();
-			editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
-			editor.commit();
+			if (!isCancelled())
+			{
+				Editor editor = settings.edit();
+				editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+				editor.commit();
+			}
 		}
 		Logger.d("SignupTask", "Publishing Token_Created");
 
