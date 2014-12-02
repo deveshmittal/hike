@@ -78,7 +78,7 @@ public class DBBackupRestore
 			e.printStackTrace();
 			return false;
 		}
-		if (!updateBackupState())
+		if (!updateBackupState(null))
 		{
 			return false;
 		}
@@ -295,10 +295,13 @@ public class DBBackupRestore
 		return new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT, BACKUP);
 	}
 	
-	private boolean updateBackupState()
+	private boolean updateBackupState(BackupState state)
 	{
-		BackupState state = new BackupState(dbNames[0], DBConstants.CONVERSATIONS_DATABASE_VERSION);
-		state.backupPrefs(mContext);
+		if (state == null)
+		{
+			state = new BackupState(dbNames[0], DBConstants.CONVERSATIONS_DATABASE_VERSION);
+			state.backupPrefs(mContext);
+		}
 		File backupStateFile = getBackupStateFile();
 		FileOutputStream fileOut = null;
 		ObjectOutputStream out = null;
@@ -353,6 +356,13 @@ public class DBBackupRestore
 			closeChannelsAndStreams(fileIn,in);
 		}
 		return state;
+	}
+	
+	public boolean updatePrefs()
+	{
+		BackupState state = getBackupState();
+		state.backupPrefs(mContext);
+		return updateBackupState(state);
 	}
 
 }
