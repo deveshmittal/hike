@@ -564,7 +564,7 @@ public class UploadFileTask extends FileTransferBase
 		
 		try 
 		{
-			mTestUtil.writeDataToFile("APP," +  msgId + "," + "UPLOAD-PREP-TIME" + "," + Long.toString(diffTime) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() +
+			mTestUtil.writeDataToFile("FT," +  msgId + "," + "UPLOAD-PREP-TIME" + "," + Long.toString(diffTime) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() +
 					"," + mFile.getName() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
 		}
 		catch (RemoteException e1) 
@@ -627,7 +627,7 @@ public class UploadFileTask extends FileTransferBase
 			long lastTime = mTestUtil.getTimestampForMsgid(msgId);
 			long _currTime = System.currentTimeMillis();
 			long difTime = _currTime - lastTime;
-			mTestUtil.writeDataToFile("APP," +  msgId + "," + "UPLOAD-TIME" + "," + Long.toString(difTime) +
+			mTestUtil.writeDataToFile("FT," +  msgId + "," + "UPLOAD-TIME" + "," + Long.toString(difTime) +
 			"," + Long.toString(_currTime) + "," + mFile.getName() + "," + fileKey + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));		
 
 			JSONObject metadata = new JSONObject();
