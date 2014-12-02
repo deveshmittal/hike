@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/backup_found_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="horizontal" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:layout_width="94dp"
+            android:layout_height="85dp" >
+
+            <ImageView
+                android:id="@+id/art_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="39dp"
+                android:layout_marginTop="18dp"
+                android:src="@drawable/art_profile" />
+
+            <ImageView
+                android:id="@+id/art_conversation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/art_profile"
+                android:layout_marginBottom="19dp"
+                android:layout_marginLeft="14dp"
+                android:src="@drawable/art_conversation" />
+
+            <ImageView
+                android:id="@+id/art_smiley"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="12dp"
+                android:src="@drawable/art_smiley" />
+
+            <View
+                android:id="@+id/dot_left"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_alignParentLeft="true"
+                android:layout_marginTop="33dp" />
+
+            <View
+                android:id="@+id/dot_top"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="47dp" />
+
+            <View
+                android:id="@+id/dot_right"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="39dp" />
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/sd_card"
+            android:layout_width="72dp"
+            android:layout_height="92dp"
+            android:layout_marginTop="12dp"
+            android:src="@drawable/art_sdcard" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/txt_backup_title"
+            style="@style/SignupHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Backup found"
+            android:textSize="24dp" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/txt_backup_hint"
+            style="@style/SignupHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="would you like to restore your account?"
+            android:textColor="@color/black_45"
+            android:textSize="15dp" />
+
+        <Button
+            android:id="@+id/btn_restore"
+            android:layout_width="212dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="30dp"
+            android:background="@color/blue_hike"
+            android:text="RESTORE"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+</LinearLayout>

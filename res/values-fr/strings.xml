@@ -2,14 +2,14 @@
 <resources>
 
     <string name="app_name">hike</string>
-    <string name="app_label"> hike</string>
+    <string name="app_label"> hike</string>
     <string name="invite">Prévenir un ami</string>
     <string name="deleteconversations">Supprimer toutes les conversations</string>
     <string name="send">Envoyer</string>
     <string name="type_to_compose">Taper pour rédiger</string>
     <string name="delete">Delete</string>
     <string name="cancel">Annuler</string>
-    <string name="delete_all_question">Veux-tu vraiment supprimer toutes tes conversations ?</string>
+    <string name="delete_all_question">Veux-tu vraiment supprimer toutes tes conversations ?</string>
     <string name="forward">Transférer</string>
     <string name="copy">Copier</string>
     <string name="preferences">Préférences</string>
@@ -17,8 +17,8 @@
     <string name="delete_account_failed">hike couldn\'t delete your account. Please try again.</string>
     <string name="hike_network_connection">Connexion réseau</string>
     <string name="notconnected_data_disabled">Boss, you\'ve got to turn on data to experience hike!</string>
-    <string name="notconnected_no_internet">Hé, vérifie ta connexion !</string>
-    <string name="already_hike_user">Bonne nouvelle ! Ton ami(e) est déjà sur hike !</string>
+    <string name="notconnected_no_internet">Hé, vérifie ta connexion !</string>
+    <string name="already_hike_user">Bonne nouvelle ! Ton ami(e) est déjà sur hike !</string>
     <string name="block_users">Bloquer utilisateurs</string>
     <string name="profile_title">Profil</string>
     <string name="updating_profile">Mise à jour profil</string>
@@ -31,7 +31,7 @@
     <string name="sending_feedback_failed">Impossible d\'envoyer l\'avis</string>
     <string name="feedback_hint">We\'d love to hear from you...</string>
     <string name="block_overlay_message">You\'ve blocked %1$s.  Unblock and continue hiking.</string>
-    <string name="how_hike_feel">Ton avis sur hike ?</string>
+    <string name="how_hike_feel">Ton avis sur hike ?</string>
     <string name="feedback_success">Merci d\'avoir donné ton avis !</string>
     <string name="phone_num">N° de téléphone</string>
     <string name="pin">PIN</string>
@@ -51,7 +51,7 @@
     <string name="leave_group">Quit. groupe</string>
     <string name="group_chat_end">Ce tchat groupé est terminé.</string>
     <string name="group_info">Infos groupe</string>
-    <string name="tap_group_info">Infos groupe : touche ce bouton.</string>
+    <string name="tap_group_info">Infos groupe : touche ce bouton.</string>
     <string name="invite_all_to_hike">Invite des membres par SMS sur hike</string>
     <string name="friend_joined_hike_no_creds">%1$s just joined hike because of you. Great job!</string>
     <string name="friend_joined_hike_with_creds">%1$s just joined hike because of you. Great job! As promised, here are your additional 50 free SMS for bringing a friend. To see your total free SMS, tap here.</string>
@@ -75,8 +75,8 @@
     <string name="block_owner">Bloquer propriét. groupe</string>
     <string name="unblock_owner">Débloquer propriét. groupe</string>
     <string name="no_thanks">+ tard</string>
-    <string name="tap_to_message">Msg à cette personne : toucher ici</string>
-    <string name="tap_to_add">Ajouter personne : toucher ici</string>
+    <string name="tap_to_message">Msg à cette personne : toucher ici</string>
+    <string name="tap_to_add">Ajouter personne : toucher ici</string>
     <string name="call">Appeler</string>
     <string name="we_have_gc">Touche le menu pour tchater en groupe.</string>
     <string name="upload_failed">Envoi de fichier impossible. Vérif. paramètres réseau.</string>
@@ -105,8 +105,8 @@
     <string name="preview">Aperçu</string>
     <string name="error_recording">Impossible d\'enregistrer le son.</string>
     <string name="done_rec">Enregistrement OK</string>
-    <string name="tap_to_record">ENREG. : TOUCHER</string>
-    <string name="tap_to_play">LECT. : TOUCHER</string>
+    <string name="tap_to_record">ENREG. : TOUCHER</string>
+    <string name="tap_to_play">LECT. : TOUCHER</string>
     <string name="playing">LECTURE</string>
     <string name="home">Accueil</string>
     <string name="free_messaging_txt">Messagerie gratuite</string>
@@ -116,7 +116,7 @@
     <string name="credit_to_balance">Rs.10 credited\nto your balance</string>
     <string name="free_sms_month">50 free SMS\nevery month</string>
     <string name="reward">Récompense</string>
-    <string name="claimed_so_far">Points obtenus :</string>
+    <string name="claimed_so_far">Points obtenus :</string>
     <string name="rewards_disclaimer">You can claim a reward once it’s more than Rs.50.\nMore about Rewards in our FAQs.</string>
     <string name="hike_to_hike_free_always">Gratuit, toujours et partout</string>
     <string name="hike_to_sms">Also message friends not on hike\nfor free with Free hike SMS</string>
@@ -131,8 +131,8 @@
     <string name="quit">Quitter</string>
     <string name="update_app">Mise à j.</string>
     <string name="delete_confirmation">Veux-tu supprimer définitivement ton compte ?</string>
-    <string name="unlink_facebook_confirmation">Veux-tu désassocier ton compte Facebook de hike ?</string>
-    <string name="unlink_twitter_confirmation">Veux-tu désassocier ton compte Twitter de hike ?</string>
+    <string name="unlink_facebook_confirmation">Veux-tu désassocier ton compte Facebook de hike ?</string>
+    <string name="unlink_twitter_confirmation">Veux-tu désassocier ton compte Twitter de hike ?</string>
     <string name="unlink">Désassoc.</string>
     <string name="no_favorite">You have no favorites.\nTap plus below to add.</string>
     <string name="plus">plus</string>
@@ -153,7 +153,7 @@
     <string name="intro_hike_thread">%1$s is on hike</string>
     <string name="intro_sms_thread">Send %1$s free SMS</string>
     <string name="morning_message">Good morning, %1$s</string>
-    <string name="day_message">Bonne journée !</string>
+    <string name="day_message">Bonne journée !</string>
     <string name="night_message">Bonne nuit. Dors bien.</string>
     <string name="saving_social">Enreg. identifiants</string>
     <string name="hike_hike">hike vers hike</string>
@@ -161,8 +161,8 @@
     <string name="unlimited">Illimité</string>
     <string name="connected">Connecté</string>
     <string name="posted">Publié</string>
-    <string name="confirm_unlink_fb">Veux-tu supprimer l\'association de ton compte Facebook ?</string>
-    <string name="confirm_unlink_twitter">Veux-tu supprimer l\'association de ton compte Twitter ?</string>
+    <string name="confirm_unlink_fb">Veux-tu supprimer l\'association de ton compte Facebook ?</string>
+    <string name="confirm_unlink_twitter">Veux-tu supprimer l\'association de ton compte Twitter ?</string>
     <string name="social_unlink_success">Ton compte n\'est plus associé.</string>
     <string name="social_unlinking">Désassociation du compte...</string>
     <string name="contact_selected_already">Ce numéro figure déjà dans le groupe.</string>
@@ -193,9 +193,9 @@
     <string name="other_subtext">Recevoir URL d\'invit.</string>
     <string name="facebook_msg">Hey, I\'m using hike, this awesome new messaging app. Check it out at http://hike.in</string>
     <string name="gps_disabled">Pour te localiser avec précision, active le GPS.</string>
-    <string name="twitter_post_success">Publié sur ton journal !</string>
+    <string name="twitter_post_success">Publié sur ton journal !</string>
     <string name="twitter_post_fail">Impossible de publier sur ton journal.</string>
-    <string name="fb_post_success">Message publié sur ton mur !</string>
+    <string name="fb_post_success">Message publié sur ton mur !</string>
     <string name="fb_post_fail">Impossible de publier sur ton mur.</string>
     <string name="vibrate">Vibration</string>
     <string name="vibrate_msg">Vibrer si nouveau message</string>
@@ -260,10 +260,10 @@
     <string name="select_invite_contacts">Choisis les contacts à inviter</string>
     <string name="invites_sent">Invitations envoyées</string>
     <string name="select_location">Choisis un lieu à partager</string>
-    <string name="hike_version">Version hike :</string>
-    <string name="device_name">Nom appareil :</string>
-    <string name="android_version">Version d\'Android :</string>
-    <string name="msisdn">N° téléphone :</string>
+    <string name="hike_version">Version hike :</string>
+    <string name="device_name">Nom appareil :</string>
+    <string name="android_version">Version d\'Android :</string>
+    <string name="msisdn">N° téléphone :</string>
     <string name="tap_to_invite">Invit. sur hike</string>
     <string name="file_transferring">Patientez pendant le transfert du fichier.</string>
     <string name="unobfuscated_map_api">AIzaSyBvWmHyGeeDjPkJR1xJnWCnUiWTfwciSLw</string>
@@ -299,7 +299,7 @@
     <string name="with_love">Appli conçue en Inde</string>
     <string name="love">Pour toi</string>
     <string name="remove_from_group">Retirer du groupe</string>
-    <string name="leave_group_confirm">Veux-tu vraiment quitter ce groupe ?</string>
+    <string name="leave_group_confirm">Veux-tu vraiment quitter ce groupe ?</string>
     <string name="remove_confirm">Are you sure you want to remove %1$s from the group?</string>
     <string name="no">Non</string>
     <string name="location_disabled">Impossible de te localiser. Vérifie tes réglages.</string>
@@ -376,7 +376,7 @@
     <string name="male">Homme</string>
     <string name="female">Femme</string>
     <string name="you">Toi</string>
-    <string name="ready_to_hike">Direction hike !</string>
+    <string name="ready_to_hike">Direction hike !</string>
     <string name="happy_messaging">Bons messages !</string>
     <string name="intro_info">Messaging hike friends is free &amp; unlimited.</string>
     <string name="hike_msg">Message hike...</string>
@@ -387,7 +387,7 @@
     <string name="call_not_free_body">Il se peut que ton opérateur te facture cet appel.</string>
     <string name="no_credits_gc">You\'ve run out of free SMS.  SMS users will no longer receive your messages.</string>
     <string name="delete_status">Suppr. mise à jour</string>
-    <string name="delete_status_confirmation">Veux-tu vraiment supprimer cette mise à jour ?</string>
+    <string name="delete_status_confirmation">Veux-tu vraiment supprimer cette mise à jour ?</string>
     <string name="delete_status_error">Impossible de supprimer ta mise à jour de statut. Vérifie ta connexion réseau et réessaie plus tard.</string>
     <string name="deleting_status">Suppr. mise à jour...</string>
     <string name="on_hike_since">on hike since %1$s</string>
@@ -417,7 +417,7 @@
     <string name="confirmed_friend">a rejoint tes amis</string>
     <string name="confirmed_friend_info">Tu vois les mises à jour de %1$s, et réciproquement.</string>
     <string name="accepted_friend_request_info">Tu vois les mises à jour de %1$s, et réciproquement.</string>
-    <string name="no_hike">Inviter d\'autres amis sur hike ?</string>
+    <string name="no_hike">Inviter d\'autres amis sur hike ?</string>
     <string name="rename_group">Renommer le groupe</string>
     <string name="no_contacts_hike">Tu n\'as pas de contacts sur hike</string>
     <string name="update_status_fail">Mise à jour impossible. Vérifie ta connexion réseau et réessaie plus tard.</string>
@@ -428,7 +428,7 @@
     <string name="file_expire">Ce fichier n\'existe plus.</string>
     <string name="friends_on_hike_tut_info">Touche le bouton pour voir tes amis sur hike</string>
     <string name="facebook_description">I started using hike, a simple, beautiful messaging app that\'s absolutely free.\n\nhike comes with some hilarious emoticons. You can also post Status Updates to your close circle of friends! Think of it like BBM but much, much better!\n\nGet it now and say good bye to plain boring SMS.\n\nGet hike: http://get.hike.in</string>
-    <string name="invite_message">Salut ! Procure-toi hike 2.0. La messagerie mondiale gratuite. Avec mises à jour du statut et humeurs :) - http://get.hike.in/</string>
+    <string name="invite_message">Salut ! Procure-toi hike 2.0. La messagerie mondiale gratuite. Avec mises à jour du statut et humeurs :) - http://get.hike.in/</string>
     <string name="error_setting_profile">Erreur de réglage sur ton image de profil.</string>
     <string name="mood_tweet_error">Les humeurs sur Twitter sont limitées à 130 caractères.</string>
     <string name="new_string">Nouveau</string>
@@ -448,7 +448,7 @@
     <string name="importing_sms_info">Laisse-nous un instant pour importer tes messages dans hike.</string>
     <string name="gc_fallback_offline">Tu dois être en ligne pour envoyer ce message</string>
     <string name="stickers">Stickers</string>
-    <string name="sticker_download_failed">Oups ! Le téléchargement a échoué. Touche pour réessayer.</string>
+    <string name="sticker_download_failed">Oups ! Le téléchargement a échoué. Touche pour réessayer.</string>
     <string name="updating_set">Mise à jour de l\'ensemble</string>
     <string name="downloading_category">Téléchargement nouveaux stickers</string>
     <string name="download">Download</string>
@@ -464,7 +464,7 @@
     <string name="walkie_talkie_tip">Tap here to use hike\'s new Walkie Talkie!</string>
     <string name="last_seen_tip">Seul ton cercle d\'amis sait à quand remonte ta dern. connex.</string>
     <string name="dismiss">Ignorer</string>
-    <string name="tutorial_sticker_header">Les stickers sont là !</string>
+    <string name="tutorial_sticker_header">Les stickers sont là !</string>
     <string name="tutorial_sticker_info">Express yourself better\nwith new hike stickers.</string>
     <string name="tutorial_friends_header">Bienvenue sur hike</string>
     <string name="tutorial_friends_info">Now share status updates\nwith your circle of friends.</string>
@@ -514,7 +514,7 @@
     <string name="invite_sms">Invitation SMS</string>
     <string name="system_health_error">Active le navigateur de ton téléphone pour consulter l\'état du système</string>
     <string name="email_error">Une messagerie e-mail doit être configurée sur l\'appareil pour continuer</string>
-    <string name="added_as_hike_friend_info">Veux-tu faire de même ?</string>
+    <string name="added_as_hike_friend_info">Veux-tu faire de même ?</string>
     <string name="added_as_hike_friend">T\'a ajouté(e) à son cercle d\'amis</string>
     <string name="friend_request_accepted">Vous pourrez désormais voir vos mises à jour respectives.</string>
     <string name="friend_request_accepted_name">You will now be able to see updates from %1$s here.</string>
@@ -579,7 +579,7 @@
     <string name="accepted_request">Accepted your friend request. You will now be able to see updates from %1$s</string>
     <string name="edit_group_name">Modifier nom du groupe</string>
     <string name="invite_name_to_hike">Invite %1$s to hike</string>
-    <string name="you_no_updates">Aucune mise à jour ! Donne de tes nouvelles à tes amis</string>
+    <string name="you_no_updates">Aucune mise à jour ! Donne de tes nouvelles à tes amis</string>
     <string name="tap_hold_participant">Tap and hold on participant\'s name to see more options</string>
     <string name="add_as_friend_notification">%1$s added you as a friend</string>
     <string name="add_as_friend_notification_line">T\'a ajouté(e) comme ami(e)</string>
@@ -636,10 +636,10 @@
     <string name="downloading_string">Téléchargement...</string>
     <string name="friends_ftue_item_label">Ajouter des amis</string>
     <string name="updates_are_fun_with_friends">Updates are more fun with friends. We\'ve found some of them that you can add to hike.</string>
-    <string name="no_status">Nouveau ! Tu peux mettre ton statut à jour dans hike ! Essaie tout de suite.</string>
+    <string name="no_status">Nouveau ! Tu peux mettre ton statut à jour dans hike ! Essaie tout de suite.</string>
     <string name="post">Publier</string>
     <string name="post_a_mood">Publier une mise à jour</string>
-    <string name="mood_update">Nouveau : les mises à jour de statut</string>
+    <string name="mood_update">Nouveau : les mises à jour de statut</string>
     <string name="invite_contacts">Inviter des contacts</string>
     <string name="no_credits">You\'ve run out of free SMS. Invite %1$s to get some more!</string>
     <string name="ftue_add_prompt_invite">Looks like %1$s is not on hike yet! Invite %1$s to hike. Standard operator SMS rates apply.</string>
@@ -659,7 +659,7 @@
     <string name="error_capture_video">Erreur de capture vidéo</string>
     <string name="free_invite_header">Invitations SMS gratuites</string>
     <string name="free_invite_body">Et maintenant, invite des amis par SMS. C\'est gratuit :)</string>
-    <string name="sticker_ftue_body">Essayez nos nouveaux stickers !</string>
+    <string name="sticker_ftue_body">Essayez nos nouveaux stickers !</string>
     <string name="select_all">Select all (%1$d)</string>
     <string name="deselect_all">Deselect all (%1$d)</string>
     <string name="humanoid2_category">Toi et moi</string>
@@ -696,8 +696,8 @@
     <string name="merry_christmas_msg">Celebrate the month\nof love! We have a\ngift for you...</string>
     <string name="open_it_up">Ouvre le cadeau</string>
     <string name="device">Appareil</string>
-    <string name="valentine_nudge_header">Parle donc d\'amour !</string>
-    <string name="valentine_nudge_body">Envoie un cœur en touchant la conversation deux fois !</string>
+    <string name="valentine_nudge_header">Parle donc d\'amour !</string>
+    <string name="valentine_nudge_body">Envoie un cœur en touchant la conversation deux fois !</string>
     <string name="valentine_nudge_button">Génial</string>
     <string name="confirm_delete_msg_header">Supprimer message</string>
     <string name="confirm_delete_msgs_header">Supprimer messages.</string>
@@ -745,7 +745,7 @@
     <string name="tell_us_more">Dis-nous en plus</string>
     <string name="add_friend_popup_msg">Tu peux envoyer un message à qui tu veux, mais seuls tes favoris peuvent voir ta dernière connexion et tes mises à jour de statut. Choisis-les bien !</string>
     <string name="start_adding">Commence à ajouter des amis</string>
-    <string name="how_young_are_you">Quel âge as-tu ?</string>
+    <string name="how_young_are_you">Quel âge as-tu ?</string>
     <string name="your_name">Ton nom</string>
     <string name="contacts_synced">Contacts synchronisés</string>
     <string name="contacts_sync_started">"Contacts sync started"</string>
@@ -797,14 +797,14 @@
     <string name="one_unread_message">1 Unread Message</string>
     <string name="file_transfer_pop_up_text">Send all files including pdf, ppt, docs upto <b>100MB</b> each. You can also send multiple files in one go!</string>
     <string name="male_selected_string_1">I haven\'t been this excited about Friday, since last Friday.</string>
-    <string name="male_selected_string_2">Se marier avant 20 ans, c\'est comme quitter une fête avant 20 heures !</string>
+    <string name="male_selected_string_2">Se marier avant 20 ans, c\'est comme quitter une fête avant 20 heures !</string>
     <string name="male_selected_string_3">Listen, smile, agree and do whatever the hell you were gonna do!</string>
     <string name="male_selected_string_4">Les hommes prononcent environ 2 000 mots par jour !</string>
     <string name="male_selected_string_5">Is there an autocorrect that works on life decisions?</string>
     <string name="female_selected_string_1">My way or the highway!</string>
     <string name="female_selected_string_2">Well behaved girls rarely make history.</string>
     <string name="female_selected_string_3">I am size awesome.</string>
-    <string name="female_selected_string_4">Se marier avant 20 ans, c\'est comme quitter une fête avant 20 heures !</string>
+    <string name="female_selected_string_4">Se marier avant 20 ans, c\'est comme quitter une fête avant 20 heures !</string>
     <string name="female_selected_string_5">Girls speak about 7,000 words a day!</string>
     <string name="invite_friends_confirmation_msg">Would you like to invite %1$s of your friends to hike?</string>
     <string name="didnt_get_pin">Didn\'t get the PIN, we will call you</string>
@@ -832,7 +832,7 @@
     <string name="favorites_on_hike_tut">Favoris sur hike</string>
     <string name="start_adding_favorites">Ajoute tes premiers favoris</string>
     <string name="favorites_upper_case">FAVORIS</string>
-    <string name="sent_favorite_request_tab">partage désormais sa dernière connexion et ses mises à jour de statut. Veux-tu en faire autant ?</string>
+    <string name="sent_favorite_request_tab">partage désormais sa dernière connexion et ses mises à jour de statut. Veux-tu en faire autant ?</string>
     <string name="ftue_favorites_tap_dismiss_favorite_suggest">Touche ici pour rejeter les suggestions de favoris</string>
     <string name="last_seen_favorite_info">Turning off last seen will hide your favorites\' last seen status from you as well</string>
     <string name="favorites_ftue_item_label">Ajouter des favoris</string>
@@ -848,7 +848,7 @@
     <string name="stealth_double_tap_tip"><![CDATA[ Your chat has been hidden! Set up a password to access Hidden Mode.<br> <br> <b> Tap on \'hi\' to begin.</b> ]]></string>
     <string name="alp_42447968_cmd_confirm">Confirmer</string>
     <string name="alp_42447968_cmd_continue">Continuer</string>
-    <string name="alp_42447968_cmd_forgot_pattern">Schéma oublié ?</string>
+    <string name="alp_42447968_cmd_forgot_pattern">Schéma oublié ?</string>
     <string name="alp_42447968_cmd_retry">Réessayer</string>
     <string name="alp_42447968_loading">Chargement...</string>
     <string name="alp_42447968_lockscreen_access_pattern_cell_added">Téléphone ajouté</string>
@@ -876,10 +876,10 @@
     <string name="stealth_notification_message">Tu as une nouvelle alerte</string>
     <string name="stealth_notification_messages">Tu as reçu des alertes</string>
     <string name="retry">Réessayer</string>
-    <string name="reset_complete_stealth_header">Reset Hidden Mode</string>
-    <string name="reset_complete_stealth_info">Tu as oublié ton mot de passe ? Réinitialise le mode caché. Tous les tchats cachés seront supprimés.</string>
-    <string name="initiate_reset_stealth_header">Reset Hidden Mode</string>
-    <string name="initiate_reset_stealth_body">Le mode caché sera réinitialisé dans 30 minutes. Tous les tchats cachés seront supprimés ! Continuer ?</string>
+    <string name="reset_complete_stealth_header">Réinitialiser mode caché</string>
+    <string name="reset_complete_stealth_info">Tu as oublié ton mot de passe ? Réinitialise le mode caché. Tous les tchats cachés seront supprimés.</string>
+    <string name="initiate_reset_stealth_header">Réinitialiser mode caché</string>
+    <string name="initiate_reset_stealth_body">Le mode caché sera réinitialisé dans 30 minutes. Tous les tchats cachés seront supprimés ! Continuer ?</string>
     <string name="resetting_complete_stealth_header">Réinitialisation du mode caché</string>
     <string name="resetting_complete_stealth_info">Touche pour annuler</string>
     <string name="reset_stealth_tip"><![CDATA[
@@ -949,7 +949,7 @@
     <string name="camera_upper_case">APPAREIL PHOTO</string>
     <string name="new_stickers_available">Tap to download new stickers</string>
     <string name="sticker_tip_msg">touche pour voir les stickers.</string>
-    <string name="ftue_hike_contact_card_header">Hé, tu as %1$d connaissances sur hike. Tchate avec elles !</string>
+    <string name="ftue_hike_contact_card_header">Hé, tu as %1$d connaissances sur hike. Tchate avec elles !</string>
     <string name="see_all_upper_caps">VOIR TOUT</string>
     <string name="skip_upper_caps">PASSER</string>
     <string name="welcome_to_hike">Bienvenue sur hike</string>
@@ -980,16 +980,16 @@
     <string name="thingsIndianSay">Ce qu\'on dit en Inde</string>
     <string name="loveyouforever">Amour pour toujours</string>
     <string name="sportmaniacs">Mordus de sport</string>
-    <string name="meawmiley">Miaou ! C\'est moi Miley !</string>
+    <string name="meawmiley">Miaou ! C\'est moi Miley !</string>
     <string name="snuggles">Adorable Boubouille</string>
     <string name="recent_empty_string">Les stickers les plus utilisés s\'afficheront ici</string>
     <string name="recent_icon_text">Les émoticônes les plus utilisés s\'afficheront ici</string>
-    <string name="native_sms_invite_1">Hé ! Retrouve-moi sur la messagerie hike !\n C\'est la seule appli de messagerie qui vient d\'Inde ! Télécharge-la maintenant sur http://hike.in/ - Hike c\'est trop cool !</string>
+    <string name="native_sms_invite_1">Hé ! Retrouve-moi sur la messagerie hike !\n C\'est la seule appli de messagerie qui vient d\'Inde ! Télécharge-la maintenant sur http://hike.in/ - Hike c\'est trop cool !</string>
     <string name="native_sms_invite_2">Hé ! Essaie donc la messagerie hike. Tu peux envoyer des documents, des PPT, des MP3 jusqu\'à 100 Mo par pièce jointe ! Télécharge-la sur http://hike.in/ - Hike c\'est trop cool !</string>
     <string name="native_sms_invite_3">Hé ! Essaie donc la messagerie hike. Elle propose des stickers géniaux et des thèmes de tchat renversants ! Télécharge-la - http://hike.in/ - Hike c\'est trop cool !</string>
     <string name="native_sms_invite_4">Hé ! Essaie donc la messagerie hike. Elle te permet de ne montrer ta Dernière connexion qu\'à certains amis. Télécharge-la sur http://hike.in/ - Hike c\'est trop cool !</string>
     <string name="native_sms_invite_5">Hé ! Essaie donc la messagerie hike. Tu peux masquer tes tchats privés si tu veux ! Télécharge-la sur http://hike.in/ - Hike c\'est trop cool !</string>
-    <string name="native_sms_invite_6">Hé ! Essaie donc la messagerie hike. Tu peux tchater avec des amis qui ne sont pas connectés ! Télécharge-la sur http://hike.in/ - Hike c\'est trop cool !</string>
+    <string name="native_sms_invite_6">Hé ! Essaie donc la messagerie hike. Tu peux tchater avec des amis qui ne sont pas connectés ! Télécharge-la sur http://hike.in/ - Hike c\'est trop cool !</string>
     <string name="new_chat_tip_msg">touche pour rédiger</string>
     <string name="ftue_status_update_card_header">Exprime-toi</string>
     <string name="ftue_status_update_card_msg">Touche ici pour publier la mise à jour de ton statut. Seuls tes favoris peuvent la voir.</string>
@@ -1019,7 +1019,7 @@
      <string name="reciever_is_offline">%1$s est hors ligne</string>
      <string name="send_uppercase">ENVOI</string>
      <string name="hike_offline_mode_msg">sera envoyé au format %1$d SMS</string>
-     <string name="messages_sent">Messages envoyés !</string>
+     <string name="messages_sent">Messages envoyés !</string>
      <string name="hike_offline_messages_sent_msg">Il te reste %1$d SMS gratuit</string>
      <string name="always">Toujours</string>
      <string name="just_once">Juste une fois</string>
@@ -1064,19 +1064,19 @@
      <string name="send_sms_file_msg">t\'a envoyé un fichier</string>
     <string name="use_this_quality_for_sending_images">Utilise cette qualité d\'image pour les envois</string>
     <string name="select_all_confirmation_header">Inviter tous</string>
-    <string name="select_all_confirmation_msg">Envoyer des invitations à télécharger hike à %1$d contacts ?</string>
+    <string name="select_all_confirmation_msg">Envoyer des invitations à télécharger hike à %1$d contacts ?</string>
     <string name="change_password_from_privacy">Modifier le mot de passe depuis les paramètres de confidentialité</string>
     <string name="hike_offline_caps">hike hors ligne</string>
     <string-array name="chat_thread_empty_state_tutorial_text">
         <item>#CommencerQQCH</item>
-        <item>C\'est toujours une bonne idée de dire bonjour :)</item>
-        <item>Dis quelque chose de génial !</item>
+        <item>C\'est toujours une bonne idée de dire bonjour :)</item>
+        <item>Dis quelque chose de génial !</item>
         <item>Socialise-toi</item>
         <item>J\'accepte les emojis et les stickers en guise de bonjour :)</item>
-        <item>Dis quelque chose avant que la batterie ne soit à plat !</item>
-        <item>Un petit mot suffit !</item>
-        <item>Pour commencer, même un mot suffit !</item>
-        <item>Heureusement que je ne suis pas timide sur le tchat ! Je vais parler...</item>
+        <item>Dis quelque chose avant que la batterie ne soit à plat !</item>
+        <item>Un petit mot suffit !</item>
+        <item>Pour commencer, même un mot suffit !</item>
+        <item>Heureusement que je ne suis pas timide sur le tchat ! Je vais parler...</item>
         <item>Dans de nombreuses cultures, le silence est considéré comme  une impolitesse.</item>
         <item>Si seulement il y avait un moyen de commencer un tchat. Oh mais...</item>
         <item>@string/chatThreadNudgeTutorialText</item>
@@ -1107,7 +1107,7 @@
     <string name="confirm_delete_pin_header">Supprimer épingle</string>
     <string name="confirm_delete_pin">Tu veux vraiment supprimer cette épingle ?</string>
     <string name="confirm_delete_pins_header">Supprimer épingles</string>
-    <string name="confirm_delete_pins">Tu veux vraiment supprimer ces %1$s épingles ?</string>    
+    <string name="confirm_delete_pins">Tu veux vraiment supprimer ces %1$s épingles ?</string>    
     <string name="shared_media">Fichiers multimédia partagés</string>
     <string name="add_btn">AJOUTER</string>
     <string name="not_now">PLUS TARD</string>
@@ -1120,9 +1120,9 @@
     <string name="shared_cont_pa">CONTENU PARTAGÉ</string>
     <string name="no_internet_try_again">Pas de connexion Internet. Réessaie plus tard.</string>
     <string name="refresh">Actualiser</string>
-    <string name="user_back_on_hike">%1$s vient d\'arriver sur hike. Dis-lui bonjour !</string>
-    <string name="joined_hike_new">%1$s vient d\'arriver sur hike. Dis-lui bonjour !</string>
-    <string name="joined_hike">%1$s vient d\'arriver sur hike. Dis-lui bonjour !</string>
+    <string name="user_back_on_hike">%1$s est sur le tout nouveau hike ! Dis-lui bonjour !</string>
+    <string name="joined_hike_new">%1$s vient d\'arriver sur hike. Dis-lui bonjour !</string>
+    <string name="joined_hike">%1$s vient d\'arriver sur hike. Dis-lui bonjour !</string>
     <string name="team_hike">hike</string>
     <string name="add_fav_msg">partage désormais sa dernière connexion et ses mises à jour de statut. Veux-tu en faire autant ?</string>
     <string name="add_people">AJOUTER UN MEMBRE</string>
@@ -1142,12 +1142,12 @@
     <string name="shared_files">Fichiers</string>
     <string name="tap_save_contact">Enregistrer contact</string>
     <string name="image_settings_tip_text">Paramètres de l\'image</string>
-    <string name="image_settings_tip_subtext">Petite. Moyenne. Taille d\'origine</string>
+    <string name="image_settings_tip_subtext">Normale. Optimale. Sans compression</string>
     <string name="settings_media">Multimédia</string>
     <string name="media_settings_hinttext">Paramètres photo, vidéo et audio</string>
-    <string name="image_quality_small">Petite</string>
-    <string name="image_quality_medium">Moyenne</string>
-	<string name="image_quality_original">Originale</string>    
+    <string name="image_quality_small">Normal</string>
+    <string name="image_quality_medium">Optimale</string>
+	<string name="image_quality_original">Sans compression</string>    
     <string name="image_quality_send">Envoyer</string>
 	<string name="image_quality_files_as">fichiers au format</string>
 	<string name="image_quality_popup_header">Choisir la qualité d\'image</string>
@@ -1159,22 +1159,76 @@
     <string name="no_file_profile">Les fichiers apparaissent ici</string>
     <string name="num_new_conversations">%1$s conversations</string>
     <string name="notifications_contact_join_title">Un contact rejoint hike...</string>
-    <string name="share_with_names_numbers">Partager avec %1$s et %2$d autres ?</string>
-    <string name="forward_to_names_numbers">Envoyer message à %1$s et %2$d autres ?</string>
+    <string name="share_with_names_numbers">Partager avec %1$s et %2$d autres ?</string>
+    <string name="forward_to_names_numbers">Envoyer message à %1$s et %2$d autres ?</string>
 	<string name="select_all_hike">Sélectionner tous les contacts hike</string>
 	<string name="unselect_all_hike">Désélectionner tous les contacts hike</string>
     <string name="recent_chats">TCHATS RÉCENTS</string>
-    <string name="messages_sent_succees">Messages envoyés</string>
     <string name="new_chat_compose_hint">Recherche par nom ou numéro</string>
     <string name="forward_tip_heading">Le partage facile</string>
     <string name="forward_tip_description">Transfère maintenant plusieurs contacts à la fois</string>
     <string name="pin_notif_text">a déposé une épingle</string>
     <string name="welcome_to">Bienvenue dans</string>
-    <string name="small_fastest">très rapide</string>
-    <string name="medium_faster">rapide</string>
+    <string name="small_fastest">rapide</string>
+    <string name="medium_faster">moyenne</string>
     <string name="original_slow">normale</string>
-    <string name="forward_to_plural">Envoyer message à %1$s contacts ?</string>
-    <string name="forward_to_singular">Envoyer message à 1 contact ?</string>
+    <string name="forward_to_plural">Envoyer message à %1$s contacts ?</string>
+    <string name="forward_to_singular">Envoyer message à 1 contact ?</string>
     <string name="selected_contacts_count_plural">%1$s contacts</string>
     <string name="selected_contacts_count_singular">%1$s contact</string>
+    <string name="wish_now">Envoie tes vœux maintenant !</string>
+    <string name="wish_you">{{75c7f5367b9ade87d036e23d1d4b81d8}}</string>
+    <string name="messages_sent_succees">Message envoyé</string>
+    <string name="new_stickers">NOUVEAU</string>
+    <string name="download_category">TÉLÉCHARGER</string>
+    <string name="wish_you">Envoie des vœux à tes amis</string>
+    <string name="sticker_shop">Boutique de stickers</string>
+    <string name="my_stickers">Mes stickers</string>
+    <string name="update_all">METTRE À JOUR TOUT</string>
+    <string name="retry_sticker">RÉESSAYER</string>
+    <string name="see_them">TERMINÉ</string>
+    <string name="drag_tip_text">Pour réorganiser tes collections de stickers, appuie longuement sur une collection</string>
+    <string name="drag_tip_subtext">Touche et fais glisser pour réorganiser tes stickers</string>
+    <string name="sticker_cancel">ANNULER</string>
+    <string name="sticker_confirm">CONFIRMER</string>
+    <string name="n_more">%1$d DE PLUS</string>
+    <string name="n_stickers">%1$d stickers</string>
+    <string name="last_backup">Dernière sauvegarde</string>
+    <string name="creating_backup_message">Création d\'une sauvegarde de tes chats. Les sauvegardes quotidiennes ont lieu à 3 h 00.</string>
+    <string name="restore_account">Restaurer le compte</string>
+    <string name="account_backup">Sauvegarde du compte</string>
+    <string name="backup_found">Sauvegarde trouvée</string>
+    <string name="backup_found_hint">Veux-tu restaurer ton compte ?</string>
+    <string name="restore">RESTAURER</string>
+    <string name="restoring...">Restauration...</string>
+    <string name="restoring..._hint">patience, l\'opération est parfois longue</string>
+    <string name="restored">Restauré</string>
+    <string name="restored_hint">ton compte et tes messages</string>
+    <string name="restore_error">Il y a eu un problème.</string>
+    <string name="restore_error_hint">veux-tu réessayer ?</string>
+    <string name="out_of_space">{{8b43bfe9cc188da5aa1ec06ae7865bc7}}</string>
+    <string name="backup_successful">Création de la sauvegarde réussie</string>
+    <string name="backup_failed">Échec de la sauvegarde</string>
+    <string name="backup_missing">Sauvegarde manquante. Touche pour sauvegarder manuellement</string>
+    <string name="out_of_space">Obtiens plus d\'espace</string>
+    <string name="sticker_pack_free">GRATUIT</string>
+    <string name="n_packs">%1$d collections</string>
+    <string name="downloading_sticker">TÉLÉCHARGEMENT DE STICKERS</string>
+    <string name="update_all_fail_string">Tu ne peux pas mettre à jour les collections masquées.</string>
+    <string name="great_job">Super boulot</string>
+    <string name="downloading_stk">TÉLÉCHARGEMENT...</string>
+    <string name="update_sticker">MISE À JOUR DISPONIBLE</string>
+    <string name="text_empty_error">Le texte ne peut être vide</string>
+    <string name="shop_download_failed">Le téléchargement a échoué. Touche pour réessayer.</string>
+    <string name="shop_download_failed_out_of_space">Mémoire insuffisante</string>
+    <string name="shop_loading_state">CHARGEMENT DES STICKERS</string>
+    <string name="shop_loading_state_subtext">La patience est recommandée</string>
+    <string name="shop_loading_failed_no_internet">AUCUNE CONNEXION INTERNET</string>
+    <string name="shop_loading_failed_switch_on">Passer aux données mobiles ou au Wi-Fi</string>
+    <string name="singular_packs">%1$d collection</string>
+    <string name="singular_stickers">%1$d sticker</string>
+    <string name="pack_visible">Visible dans la palette des stickers</string>
+    <string name="pack_hidden">Masqué dans la palette des stickers</string>
+    <string name="pack_rank">%1$d.</string>
+    <string name="hike_upgrade_string">Nous avons besoin de quelques instants pour mettre en place votre nouvelle boutique de l\'autocollant de la marque . Il ne sera pas long</string>
 </resources>

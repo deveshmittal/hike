@@ -51,7 +51,7 @@ import com.bsb.hike.utils.Utils;
 public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 {
 
-	public static final String PROFILE_PIC_SUFFIX = "pp";
+	public static final String PROFILE_PIC_SUFFIX = "profilePic";
 	
 	public static final String PROFILE_ROUND_SUFFIX = "round";
 	
@@ -677,7 +677,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 				viewHolder.subText.setText(smileyParser.addSmileySpans(statusMessage.getText(), true));
 			}
 
-			Linkify.addLinks(viewHolder.text, Linkify.ALL);
+			Linkify.addLinks(viewHolder.subText, Linkify.ALL);
 			viewHolder.text.setMovementMethod(null);
 
 			viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(true, context));
