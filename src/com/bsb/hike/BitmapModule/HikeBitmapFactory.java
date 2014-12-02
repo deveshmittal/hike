@@ -153,21 +153,15 @@ public class HikeBitmapFactory
 		{
 			Matrix m = new Matrix();
 			m.setRotate(degrees, (float) b.getWidth() / 2, (float) b.getHeight() / 2);
-			try
+
+			Bitmap b2 = createBitmap(b, 0, 0, b.getWidth(), b.getHeight(), m, true);
+			if (b2 != null)
 			{
-				Bitmap b2 = createBitmap(b, 0, 0, b.getWidth(), b.getHeight(), m, true);
-				if (b2 != null)
+				if (b != b2)
 				{
-					if (b != b2)
-					{
-						b.recycle();
-						b = b2;
-					}
+					b.recycle();
+					b = b2;
 				}
-			}
-			catch (OutOfMemoryError e)
-			{
-				Logger.e("Utils", "Out of memory", e);
 			}
 		}
 		return b;
@@ -603,8 +597,8 @@ public class HikeBitmapFactory
 		catch (OutOfMemoryError e)
 		{
 			Logger.wtf(TAG, "Out of Memory");
-
-			System.gc();
+			
+			HikeMessengerApp.getLruCache().trim(HikeLruCache.HALF_SIZE);
 
 			try
 			{
@@ -640,7 +634,7 @@ public class HikeBitmapFactory
 		{
 			Logger.wtf(TAG, "Out of Memory");
 
-			System.gc();
+			HikeMessengerApp.getLruCache().trim(HikeLruCache.HALF_SIZE);
 
 			try
 			{
@@ -675,7 +669,7 @@ public class HikeBitmapFactory
 		{
 			Logger.wtf(TAG, "Out of Memory");
 
-			System.gc();
+			HikeMessengerApp.getLruCache().trim(HikeLruCache.HALF_SIZE);
 
 			try
 			{
@@ -710,7 +704,7 @@ public class HikeBitmapFactory
 		{
 			Logger.wtf(TAG, "Out of Memory");
 
-			System.gc();
+			HikeMessengerApp.getLruCache().trim(HikeLruCache.HALF_SIZE);
 
 			try
 			{
@@ -745,7 +739,7 @@ public class HikeBitmapFactory
 		{
 			Logger.wtf(TAG, "Out of Memory");
 
-			System.gc();
+			HikeMessengerApp.getLruCache().trim(HikeLruCache.HALF_SIZE);
 
 			try
 			{
@@ -780,7 +774,7 @@ public class HikeBitmapFactory
 		{
 			Logger.wtf(TAG, "Out of Memory");
 
-			System.gc();
+			HikeMessengerApp.getLruCache().trim(HikeLruCache.HALF_SIZE);
 
 			try
 			{
@@ -815,7 +809,7 @@ public class HikeBitmapFactory
 		{
 			Logger.wtf(TAG, "Out of Memory");
 
-			System.gc();
+			HikeMessengerApp.getLruCache().trim(HikeLruCache.HALF_SIZE);
 
 			try
 			{
@@ -850,7 +844,7 @@ public class HikeBitmapFactory
 		{
 			Logger.wtf(TAG, "Out of Memory");
 
-			System.gc();
+			HikeMessengerApp.getLruCache().trim(HikeLruCache.HALF_SIZE);
 
 			try
 			{
@@ -884,8 +878,8 @@ public class HikeBitmapFactory
 		catch (OutOfMemoryError e)
 		{
 			Logger.wtf(TAG, "Out of Memory");
-
-			System.gc();
+			
+			HikeMessengerApp.getLruCache().trim(HikeLruCache.HALF_SIZE);
 
 			try
 			{
@@ -920,7 +914,7 @@ public class HikeBitmapFactory
 		{
 			Logger.wtf(TAG, "Out of Memory");
 
-			System.gc();
+			HikeMessengerApp.getLruCache().trim(HikeLruCache.HALF_SIZE);
 
 			try
 			{
@@ -1038,5 +1032,4 @@ public class HikeBitmapFactory
 			}
 		}
 	}
-
 }

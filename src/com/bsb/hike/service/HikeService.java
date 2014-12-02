@@ -42,6 +42,7 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -158,6 +159,8 @@ public class HikeService extends Service
 	private ContactsChanged mContactsChanged;
 
 	private Looper mContactHandlerLooper;
+	
+	private static final String TRIM_TAG = "TrimToSize";
 
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
@@ -897,6 +900,52 @@ public class HikeService extends Service
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
 			Utils.executeHttpTask(hikeHTTPTask, profilePicRequest);
 		}
+	}
+	
+	/**
+	 * @see http://developer.android.com/reference/android/content/ComponentCallbacks2.html#onTrimMemory(int)
+	 */
+	@Override
+	public void onTrimMemory(int level)
+	{
+		// TODO Auto-generated method stub
+		super.onTrimMemory(level);
+		
+		Logger.i(TRIM_TAG, "On Trim Memory callback called");
+		if (null == HikeMessengerApp.getLruCache())
+		{
+			return;
+		}
+
+		if (level >= TRIM_MEMORY_MODERATE)
+		{
+			Logger.i(TRIM_TAG, "On Trim Memory callback called with trim memory moderate, releasing all resources");
+			HikeMessengerApp.getLruCache().clearIconCache();
+		}
+		else if (level >= TRIM_MEMORY_BACKGROUND)
+		{
+			Logger.i(TRIM_TAG, "On Trim Memory callback called with trim memory background, releasing half of resources");
+			HikeMessengerApp.getLruCache().trim(HikeLruCache.HALF_SIZE);
+		}
+	}
+	
+	/**
+	 * @see http://developer.android.com/reference/android/content/ComponentCallbacks.html#onLowMemory()
+	 */
+	@Override
+	public void onLowMemory()
+	{
+		// TODO Auto-generated method stub
+		super.onLowMemory();
+		
+		Logger.i(TRIM_TAG, "On Low Memory callback called");
+		if (null == HikeMessengerApp.getLruCache())
+		{
+			return;
+		}
+		Logger.i(TRIM_TAG, "On Low Memory callback evicting all");
+		HikeMessengerApp.getLruCache().clearIconCache();
+		
 	}
 
 }

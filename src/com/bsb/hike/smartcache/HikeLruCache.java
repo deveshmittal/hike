@@ -19,6 +19,8 @@ import android.os.Build.VERSION_CODES;
 import android.provider.MediaStore;
 import android.support.v4.util.LruCache;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
@@ -31,7 +33,7 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.MySoftReference;
 
-public class HikeLruCache extends LruCache<String, BitmapDrawable>
+public class HikeLruCache extends LruCache<String, BitmapDrawable> implements HikePubSub.Listener
 {
 
 	// Default memory cache size in kilobytes
@@ -52,6 +54,8 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	protected Resources mResources;
 
 	private Context context;
+	
+	public static final short HALF_SIZE = 2;
 
 	/**
 	 * A holder class that contains cache parameters.
@@ -103,6 +107,8 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	}
 
 	private final Set<MySoftReference<Bitmap>> reusableBitmaps;
+	
+	private String[] pubSubListeners = {HikePubSub.APP_BACKGROUNDED};
 
 	public HikeLruCache(ImageCacheParams cacheParams, Context context)
 	{
@@ -110,6 +116,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		reusableBitmaps = Utils.canInBitmap() ? Collections.synchronizedSet(new HashSet<MySoftReference<Bitmap>>()) : null;
 		this.context = context;
 		this.mResources = context.getResources();
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
 	public static HikeLruCache getInstance(ImageCacheParams cacheParams, Context context)
@@ -317,6 +324,21 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	public void clearIconCache()
 	{
 		evictAll();
+		System.gc();
+	}
+	
+	/**
+	 * 
+	 * @param fraction
+	 * 	-- fraction to which cache should be reduced
+	 * 
+	 * <p>For example in case value of fraction is 5 then max size of cache before this function returns will be 
+	 * size()/5</p>
+	 */
+	public void trim(short fraction)
+	{
+		trimToSize(size()/fraction);
+		System.gc();
 	}
 
 	public Drawable getSticker(String path)
@@ -343,5 +365,20 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	public void removeItemForKey(String key)
 	{
 		remove(key);
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		// TODO Auto-generated method stub
+		if(HikePubSub.APP_BACKGROUNDED.equals(type))
+		{
+			
+			/**
+			 * clear LRU cache on getting this event
+			 */
+			clearIconCache();
+		}
+		
 	}
 }
