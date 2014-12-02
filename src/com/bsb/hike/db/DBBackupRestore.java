@@ -200,6 +200,7 @@ public class DBBackupRestore
 		{
 			HikeConversationsDatabase.getInstance().clearTable(table);
 		}
+		HikeConversationsDatabase.getInstance().upgradeForStickerShopVersion1();
 	}
 
 	private void closeChannelsAndStreams(Closeable... closeables)
