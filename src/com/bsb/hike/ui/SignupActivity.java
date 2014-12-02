@@ -2036,6 +2036,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				viewFlipper.setDisplayedChild(BACKUP_FOUND);
 				prepareLayoutForBackupFound(null);
 			}
+			setWindowSoftInputState();
 			break;
 		case RESTORING_BACKUP:
 			if (viewFlipper.getDisplayedChild() == BACKUP_FOUND)
