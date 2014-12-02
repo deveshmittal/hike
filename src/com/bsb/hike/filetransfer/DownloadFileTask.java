@@ -304,7 +304,7 @@ public class DownloadFileTask extends FileTransferBase
 							long startTime = mTestUtil.getTimestampForMsgid(msgId);
 							long endTime = System.currentTimeMillis(); 
 							long ftDwnldTime = endTime - startTime;
-							mTestUtil.writeDataToFile("APP" + "," +  msgId + "," + "DOWNLOAD-TIME" + "," + 
+							mTestUtil.writeDataToFile("FT" + "," +  msgId + "," + "DOWNLOAD-TIME" + "," + 
 							Long.toString(ftDwnldTime) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + 
 							mFile.getName() + "," + fileKey + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
 
