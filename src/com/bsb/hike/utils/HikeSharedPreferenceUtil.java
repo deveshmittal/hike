@@ -19,7 +19,6 @@ public class HikeSharedPreferenceUtil
 
 	private static HashMap<String, HikeSharedPreferenceUtil> hikePrefsMap = new HashMap<String, HikeSharedPreferenceUtil>();
 
-
 	private static HikeSharedPreferenceUtil initializeHikeSharedPref(Context context, String argSharedPrefName)
 	{
 		HikeSharedPreferenceUtil hikeSharedPreferenceUtil = null;

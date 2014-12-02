@@ -72,7 +72,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.settings);
 		profileImageLoader = new IconLoader(this, getResources().getDimensionPixelSize(R.dimen.avatar_profile_size));
-				
+
 		ArrayList<String> items = new ArrayList<String>();
 
 		items.add(getString(R.string.notifications));
@@ -180,8 +180,6 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 				case VERSION:
 					TextView appVersion = (TextView) convertView.findViewById(R.id.app_version);
-					
-					
 
 					if (AppConfig.ALLOW_STAGING_TOGGLE)
 					{
@@ -208,13 +206,13 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			}
 
 		};
-		
+
 		ListView settingsList = (ListView) findViewById(R.id.settings_content);
 		addProfileHeaderView(settingsList);
 		settingsList.setAdapter(listAdapter);
 		settingsList.setOnItemClickListener(this);
 		setupActionBar();
-		
+
 		HikeMessengerApp.getPubSub().addListeners(this, profilePubSubListeners);
 	}
 
@@ -222,23 +220,23 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 	{
 		View header = getLayoutInflater().inflate(R.layout.profile_header_other, null);
 		header.findViewById(R.id.remove_fav).setVisibility(View.GONE);
-		profileImgView = (ImageView)header.findViewById(R.id.profile_image);
-		statusMood = (ImageView)header.findViewById(R.id.status_mood);
-		nameView = (TextView)header.findViewById(R.id.name);
-		statusView = (TextView)header.findViewById(R.id.subtext);
+		profileImgView = (ImageView) header.findViewById(R.id.profile_image);
+		statusMood = (ImageView) header.findViewById(R.id.status_mood);
+		nameView = (TextView) header.findViewById(R.id.name);
+		statusView = (TextView) header.findViewById(R.id.subtext);
 		contactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 		msisdn = contactInfo.getMsisdn();
-		
+
 		// set name and status
 		setNameInHeader(nameView);
 
 		addProfileImgInHeader();
-		
+
 		addStatusInHeader();
-		
+
 		settingsList.addHeaderView(header, null, false);
 	}
-	
+
 	private void setNameInHeader(TextView nameTextView)
 	{
 		// TODO Auto-generated method stub
@@ -259,7 +257,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_IMAGE, arguments);
 	}
-	
+
 	private void setupActionBar()
 	{
 		ActionBar actionBar = getSupportActionBar();
@@ -368,19 +366,20 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		// set profile picture
 		profileImageLoader.loadImage(mappedId, profileImgView, false, false, true);
 
-		ImageViewerInfo imageViewerInfo = new ImageViewerInfo(contactInfo.getMsisdn() + ProfileActivity.PROFILE_PIC_SUFFIX, null, false, !ContactManager.getInstance().hasIcon(contactInfo.getMsisdn()));
+		ImageViewerInfo imageViewerInfo = new ImageViewerInfo(contactInfo.getMsisdn() + ProfileActivity.PROFILE_PIC_SUFFIX, null, false, !ContactManager.getInstance().hasIcon(
+				contactInfo.getMsisdn()));
 		profileImgView.setTag(imageViewerInfo);
 	}
-	
+
 	private void addStatusInHeader()
 	{
 		// get hike status
-		StatusMessageType[] statusMessagesTypesToFetch = {StatusMessageType.TEXT};
+		StatusMessageType[] statusMessagesTypesToFetch = { StatusMessageType.TEXT };
 		StatusMessage status = HikeConversationsDatabase.getInstance().getLastStatusMessage(statusMessagesTypesToFetch, contactInfo);
-				
-		if(status != null)
+
+		if (status != null)
 		{
-			if (status.hasMood()) 
+			if (status.hasMood())
 			{
 				statusMood.setVisibility(View.VISIBLE);
 				statusMood.setImageResource(EmoticonConstants.moodMapping.get(status.getMoodId()));
@@ -389,13 +388,13 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			{
 				statusMood.setVisibility(View.GONE);
 			}
-			statusView.setText(SmileyParser.getInstance().addSmileySpans(status.getText(), true));			
+			statusView.setText(SmileyParser.getInstance().addSmileySpans(status.getText(), true));
 		}
 		else
 		{
-			status = new StatusMessage(HikeConstants.JOINED_HIKE_STATUS_ID, null, contactInfo.getMsisdn(), contactInfo.getName(),
-				getString(R.string.joined_hike_update), StatusMessageType.JOINED_HIKE, contactInfo.getHikeJoinTime());
-		
+			status = new StatusMessage(HikeConstants.JOINED_HIKE_STATUS_ID, null, contactInfo.getMsisdn(), contactInfo.getName(), getString(R.string.joined_hike_update),
+					StatusMessageType.JOINED_HIKE, contactInfo.getHikeJoinTime());
+
 			if (status.getTimeStamp() == 0)
 			{
 				statusView.setText(status.getText());
@@ -406,7 +405,7 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			}
 		}
 	}
-	
+
 	@Override
 	public void onEventReceived(final String type, Object object)
 	{
@@ -432,21 +431,21 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		}
 		else if (HikePubSub.STATUS_MESSAGE_RECEIVED.equals(type))
 		{
-			StatusMessage status = (StatusMessage)object;
-			
-			if(status.getStatusMessageType()==StatusMessageType.PROFILE_PIC)
+			StatusMessage status = (StatusMessage) object;
+
+			if (status.getStatusMessageType() == StatusMessageType.PROFILE_PIC)
 			{
 				return;
 			}
-			
-			if(status.getMsisdn().equals(msisdn))
+
+			if (status.getMsisdn().equals(msisdn))
 			{
-				runOnUiThread(new Runnable() 
-				{				
+				runOnUiThread(new Runnable()
+				{
 					@Override
-					public void run() 
+					public void run()
 					{
-						addStatusInHeader();					
+						addStatusInHeader();
 					}
 				});
 			}
@@ -466,23 +465,22 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 			});
 		}
 	}
-	
-	@Override
-	protected void onDestroy() 
-	{
-		HikeMessengerApp.getPubSub().removeListeners(this, profilePubSubListeners);
-		
-		super.onDestroy();
-	}
-	
 
 	@Override
-	public void onClick(View v) 
+	protected void onDestroy()
+	{
+		HikeMessengerApp.getPubSub().removeListeners(this, profilePubSubListeners);
+
+		super.onDestroy();
+	}
+
+	@Override
+	public void onClick(View v)
 	{
 		Intent intent = new Intent(SettingsActivity.this, ProfileActivity.class);
 		startActivity(intent);
 	}
-	
+
 	public void openTimeline(View v)
 	{
 		Intent intent = new Intent();
