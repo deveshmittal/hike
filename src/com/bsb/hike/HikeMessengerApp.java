@@ -45,6 +45,7 @@ import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
@@ -694,6 +695,9 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 		sm = StickerManager.getInstance();
 		sm.init(getApplicationContext());
+		
+		initStickerDownloadManager();
+		
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
 		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || 
@@ -868,6 +872,12 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	{
 		conMgr = ContactManager.getInstance();
 		conMgr.init(getApplicationContext());
+	}
+	
+	private void initStickerDownloadManager()
+	{
+		StickerDownloadManager sdm = StickerDownloadManager.getInstance();
+		sdm.init(getApplicationContext());
 	}
 
 	public static ContactManager getContactManager()

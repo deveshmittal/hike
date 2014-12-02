@@ -214,7 +214,7 @@ public class StickerShopAdapter extends CursorAdapter
 			switch (downloadButton.getDrawable().getLevel())
 			{
 			case NOT_DOWNLOADED:
-				StickerDownloadManager.getInstance(mContext).DownloadEnableDisableImage(category.getCategoryId(), null);
+				StickerDownloadManager.getInstance().DownloadEnableDisableImage(category.getCategoryId(), null);
 			case UPDATE_AVAILABLE:
 			case RETRY:
 				StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.SHOP, mContext);
