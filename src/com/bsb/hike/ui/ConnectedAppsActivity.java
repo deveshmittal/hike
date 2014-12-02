@@ -1,5 +1,9 @@
 package com.bsb.hike.ui;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -21,8 +25,6 @@ import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 {
 	private HikeSharedPreferenceUtil authPrefs;
-
-	private String numberOfApps;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -95,9 +97,11 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 
 					((TextView) convertView.findViewById(R.id.text_view_conn_app_title)).setText(appName);
 
-					((TextView) convertView.findViewById(R.id.text_view_conn_app_since)).setText("Since " + pkgInfo[1]);
+					((TextView) convertView.findViewById(R.id.text_view_conn_app_since)).setText("ver " + packageInfo.versionName);
 
 					((ImageView) convertView.findViewById(R.id.image_view_conn_app_pkg)).setImageDrawable(appIcon);
+
+					((ImageView) convertView.findViewById(R.id.image_view_disconn_app)).setOnClickListener(new DisconnectAppOnClickListener(connectedPkgs[position]));
 
 				}
 				catch (PackageManager.NameNotFoundException e)
@@ -140,9 +144,61 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 			}
 		};
 
-		((TextView) findViewById(R.id.text_view_connected_apps_numbers)).setText(connectedAppsAdapter.getCount() + " APPS");
+		((TextView) findViewById(R.id.text_view_connected_apps_numbers)).setText(connectedAppsAdapter.getCount() + " apps connected to hike");
 
 		((ListView) findViewById(R.id.list_view_connected_apps)).setAdapter(connectedAppsAdapter);
 
+	}
+
+	class DisconnectAppOnClickListener implements View.OnClickListener
+	{
+
+		private String mAppPkgName;
+
+		public DisconnectAppOnClickListener(String argAppPkgName)
+		{
+			mAppPkgName = argAppPkgName;
+		}
+
+		private DisconnectAppOnClickListener()
+		{
+
+		}
+
+		@Override
+		public void onClick(View v)
+		{
+			String connectedPkgCSV = authPrefs.getData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, "");
+			if (TextUtils.isEmpty(connectedPkgCSV))
+			{
+				// Not possible
+			}
+			else
+			{
+				String[] connectedPkgs = connectedPkgCSV.split(",");
+				List<String> connectedPkgsList = new ArrayList<String>(Arrays.asList(connectedPkgs));
+				for (String pkg : connectedPkgs)
+				{
+					String[] pkgInfo = pkg.split(":");
+					if (pkgInfo[0].equals(mAppPkgName.split(":")[0]))
+					{
+						connectedPkgsList.remove(pkg);
+					}
+				}
+
+				String outputCSV = "";
+				for (String pkg : connectedPkgsList)
+				{
+					outputCSV += TextUtils.isEmpty(outputCSV) ? pkg : "," + pkg;
+				}
+
+				authPrefs.saveData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, outputCSV);
+				
+				authPrefs.removeData(mAppPkgName.split(":")[0]);
+
+				bindContentAndActions();
+			}
+
+		}
 	}
 }

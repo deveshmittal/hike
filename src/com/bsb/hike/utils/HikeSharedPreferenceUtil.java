@@ -135,4 +135,9 @@ public class HikeSharedPreferenceUtil
 		editor.clear();
 		editor.commit();
 	}
+
+	public SharedPreferences getPref()
+	{
+		return hikeSharedPreferences;
+	}
 }

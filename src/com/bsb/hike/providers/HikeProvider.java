@@ -3,8 +3,12 @@ package com.bsb.hike.providers;
 import java.util.Arrays;
 import java.util.List;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.db.DBConstants;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.HikeAuthActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -73,7 +77,7 @@ public class HikeProvider extends ContentProvider
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder)
 	{
-		
+
 		// Authenticate
 		List<String> uriPathSegments = uri.getPathSegments();
 
@@ -127,8 +131,25 @@ public class HikeProvider extends ContentProvider
 				}
 				else
 				{
-					c = hUserDb.rawQuery("SELECT roundedThumbnailTable.image, users.id" + " FROM roundedThumbnailTable " + "INNER JOIN users "
-							+ "ON roundedThumbnailTable.msisdn=users.msisdn " + "WHERE users.id IN " + Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
+					if (selectionArgs != null && selectionArgs.length > 0)
+					{
+						// TODO:Improve this. Make it more generic
+						if (selectionArgs[0].equals("-1"))
+						{
+							// self avatar request
+							ContactInfo contactInfo = Utils.getUserContactInfo(HikeSharedPreferenceUtil.getInstance(getContext(), HikeMessengerApp.ACCOUNT_SETTINGS).getPref());
+							c = ContactManager
+									.getInstance()
+									.getReadableDatabase()
+									.query(DBConstants.ROUNDED_THUMBNAIL_TABLE, new String[] { DBConstants.IMAGE }, DBConstants.MSISDN + "=?",
+											new String[] { contactInfo.getMsisdn() }, null, null, null);
+						}
+						else
+						{
+							c = hUserDb.rawQuery("SELECT roundedThumbnailTable.image, users.id" + " FROM roundedThumbnailTable " + "INNER JOIN users "
+									+ "ON roundedThumbnailTable.msisdn=users.msisdn " + "WHERE users.id IN " + Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
+						}
+					}
 				}
 			}
 			catch (SQLiteException e)
@@ -148,8 +169,25 @@ public class HikeProvider extends ContentProvider
 				}
 				else
 				{
-					c = hUserDb.rawQuery("SELECT thumbnails.image, users.id " + "FROM thumbnails " + "INNER JOIN users " + "ON thumbnails.msisdn=users.msisdn "
-							+ "WHERE users.id IN " + Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
+					if (selectionArgs != null && selectionArgs.length > 0)
+					{
+						// TODO:Improve this. Make it more generic
+						if (selectionArgs[0].equals("-1"))
+						{
+							// self avatar request
+							ContactInfo contactInfo = Utils.getUserContactInfo(HikeSharedPreferenceUtil.getInstance(getContext(), HikeMessengerApp.ACCOUNT_SETTINGS).getPref());
+							c = ContactManager
+									.getInstance()
+									.getReadableDatabase()
+									.query(DBConstants.THUMBNAILS_TABLE, new String[] { DBConstants.IMAGE }, DBConstants.MSISDN + "=?", new String[] { contactInfo.getMsisdn() },
+											null, null, null);
+						}
+						else
+						{
+							c = hUserDb.rawQuery("SELECT thumbnails.image, users.id " + "FROM thumbnails " + "INNER JOIN users " + "ON thumbnails.msisdn=users.msisdn "
+									+ "WHERE users.id IN " + Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
+						}
+					}
 				}
 			}
 			catch (SQLiteException e)

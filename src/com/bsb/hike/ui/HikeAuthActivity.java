@@ -105,11 +105,6 @@ public class HikeAuthActivity extends Activity
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		/*
-		 * Making the action bar transparent for custom theming.
-		 */
-		// requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-
 		super.onCreate(savedInstanceState);
 
 		if (savedInstanceState != null)
@@ -411,11 +406,16 @@ public class HikeAuthActivity extends Activity
 						String accessToken = responseData.getString("access_token");
 
 						prefs = HikeSharedPreferenceUtil.getInstance(getApplicationContext(), AUTH_SHARED_PREF_NAME);
+
+						if (TextUtils.isEmpty(prefs.getData(mAppPackage, "")))
+						{
+							long timestamp = System.currentTimeMillis();
+							prefs.saveData(AUTH_SHARED_PREF_PKG_KEY,
+									TextUtils.isEmpty(prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")) ? mAppPackage + ":" + timestamp : prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "") + ","
+											+ mAppPackage + ":" + timestamp);
+						}
+
 						prefs.saveData(mAppPackage, Integer.toString(accessToken.hashCode()));
-						long timestamp = System.currentTimeMillis();
-						prefs.saveData(AUTH_SHARED_PREF_PKG_KEY,
-								TextUtils.isEmpty(prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")) ? mAppPackage + ":" + timestamp : prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "") + ","
-										+ mAppPackage + ":" + timestamp);
 
 						HikeMessengerApp.getPubSub().publish(HikePubSub.AUTH_TOKEN_RECEIVED, accessToken);
 

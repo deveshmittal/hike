@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,6 +34,7 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -40,23 +42,25 @@ import com.bsb.hike.utils.Utils;
 public class SettingsActivity extends HikeAppStateBaseFragmentActivity implements OnItemClickListener, OnClickListener
 {
 	private ContactInfo contactInfo;
-	
+
 	private String msisdn;
-	
+
 	private ImageView profileImgView;
-	
+
 	private ImageView statusMood;
-	
+
 	private TextView nameView;
-	
+
 	private TextView statusView;
 
 	private String profileName;
-	
+
 	private IconLoader profileImageLoader;
-	
+
 	private String[] profilePubSubListeners = { HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.ICON_CHANGED, HikePubSub.PROFILE_UPDATE_FINISH };
-	
+
+	private boolean isConnectedAppsPresent;
+
 	private enum ViewType
 	{
 		SETTINGS, VERSION
@@ -82,7 +86,15 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		{
 			items.add(getString(R.string.sms));
 		}
-		items.add(getString(R.string.connected_apps));		
+
+		// Check for connect apps in shared pref
+		isConnectedAppsPresent = (!(TextUtils.isEmpty(HikeSharedPreferenceUtil.getInstance(getApplicationContext(), HikeAuthActivity.AUTH_SHARED_PREF_NAME).getData(
+				HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, ""))));
+
+		if (isConnectedAppsPresent)
+		{
+			items.add(getString(R.string.connected_apps));
+		}
 		items.add(getString(R.string.manage_account));
 		items.add(getString(R.string.privacy));
 		items.add(getString(R.string.help));
@@ -93,7 +105,10 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		itemsSummary.add(getString(R.string.notifications_hintext));
 		itemsSummary.add(getString(R.string.media_settings_hinttext));
 		itemsSummary.add(getString(R.string.sms_setting_hinttext));
-		itemsSummary.add(getString(R.string.connected_apps_hinttext));
+		if (isConnectedAppsPresent)
+		{
+			itemsSummary.add(getString(R.string.connected_apps_hinttext));
+		}
 		itemsSummary.add(getString(R.string.account_hintttext));
 		itemsSummary.add(getString(R.string.privacy_setting_hinttext));
 		itemsSummary.add(getString(R.string.help_hinttext));
@@ -103,7 +118,10 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 		itemIcons.add(R.drawable.ic_notifications_settings);
 		itemIcons.add(R.drawable.ic_auto_download_media_settings);
 		itemIcons.add(R.drawable.ic_sms_settings);
-		itemIcons.add(R.drawable.ic_conn_apps);
+		if (isConnectedAppsPresent)
+		{
+			itemIcons.add(R.drawable.ic_conn_apps);
+		}
 		itemIcons.add(R.drawable.ic_account_settings);
 		itemIcons.add(R.drawable.ic_privacy_settings);
 		itemIcons.add(R.drawable.ic_help_settings);
@@ -269,55 +287,80 @@ public class SettingsActivity extends HikeAppStateBaseFragmentActivity implement
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
-		Intent intent = null;
-		switch (position)
+		if (isConnectedAppsPresent)
 		{
-		case 1:
-			IntentManager.openSettingNotification(this);
-			break;
-
-		case 2:
-			IntentManager.openSettingMedia(this);
-			break;
-		case 3:
-			IntentManager.openSettingSMS(this);
-			break;
-		case 4:
-			IntentManager.openConnectedApps(this);
-			break;
-		case 5:
-			IntentManager.openSettingAccount(this);
-			break;
-		case 6:
-			IntentManager.openSettingPrivacy(this);
-			break;
-		case 7:
-			IntentManager.openSettingHelp(this);
-			break;
+			switch (position)
+			{
+			case 1:
+				IntentManager.openSettingNotification(this);
+				break;
+			case 2:
+				IntentManager.openSettingMedia(this);
+				break;
+			case 3:
+				IntentManager.openSettingSMS(this);
+				break;
+			case 4:
+				IntentManager.openConnectedApps(this);
+				break;
+			case 5:
+				IntentManager.openSettingAccount(this);
+				break;
+			case 6:
+				IntentManager.openSettingPrivacy(this);
+				break;
+			case 7:
+				IntentManager.openSettingHelp(this);
+				break;
+			}
+		}
+		else
+		{
+			switch (position)
+			{
+			case 1:
+				IntentManager.openSettingNotification(this);
+				break;
+			case 2:
+				IntentManager.openSettingMedia(this);
+				break;
+			case 3:
+				IntentManager.openSettingSMS(this);
+				break;
+			case 4:
+				IntentManager.openSettingAccount(this);
+				break;
+			case 5:
+				IntentManager.openSettingPrivacy(this);
+				break;
+			case 6:
+				IntentManager.openSettingHelp(this);
+				break;
+			}
 		}
 	}
-	
+
 	public void onBackPressed()
 	{
-		if(removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
+		if (removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG))
 		{
 			return;
-		}	
+		}
 		super.onBackPressed();
 	}
-	
+
 	@Override
 	public boolean removeFragment(String tag)
 	{
 		boolean isRemoved = super.removeFragment(tag);
-		
-		if(isRemoved)
+
+		if (isRemoved)
 		{
 			setupActionBar();
 		}
 		return isRemoved;
 	}
-	
+
 	private void addProfileImgInHeader()
 	{
 		String mappedId = contactInfo.getMsisdn() + ProfileActivity.PROFILE_ROUND_SUFFIX;

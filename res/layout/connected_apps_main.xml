@@ -9,13 +9,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="left"
-        android:paddingBottom="12dp"
+        android:paddingBottom="10dp"
         android:paddingLeft="15dp"
-        android:paddingTop="12dp"
-        android:text="13 APPS"
+        android:paddingTop="10dp"
         android:textColor="@color/blue_hike"
-        android:textSize="17sp"
-        android:textStyle="italic" >
+        android:textSize="15sp"
+        android:textStyle="bold" >
     </com.bsb.hike.view.CustomFontTextView>
 
     <View
@@ -29,6 +28,7 @@
         android:id="@+id/list_view_connected_apps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:scrollbars="none"
         android:divider="@color/dark_grey_drop_shadow"
         android:dividerHeight="1px"
         android:paddingLeft="15dp"
