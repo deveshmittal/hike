@@ -232,6 +232,8 @@ public class HikeConstants
 	public static final String COUNT = "c";
 	
 	public static final String UPDATED_SIZE = "s";
+	
+	public static final String PALLETE_POSITION = "idx";
 
 	public static final String DEFAULT_SMS_CLIENT_TUTORIAL = "dsctutorial";
 
@@ -1990,4 +1992,6 @@ public class HikeConstants
 	public static final String SHOP = "shop";
 
 	public static final String BADGE = "badge";
+	
+	public static final String ADD_CATEGORY = "addCat";
 }

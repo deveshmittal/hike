@@ -5840,5 +5840,26 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				c.close();
 		}
 	}
+	
+	/**
+	 * Returns true if category is inserted.
+	 * @param category
+	 * @return 
+	 */
+	public boolean insertNewCategoryInPallete(StickerCategory category)
+	{
+		int rowId = -1;
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants._ID, category.getCategoryId());
+		contentValues.put(DBConstants.CATEGORY_NAME, category.getCategoryName());
+		contentValues.put(DBConstants.TOTAL_NUMBER, category.getTotalStickers());
+		contentValues.put(DBConstants.CATEGORY_SIZE, category.getCategorySize());
+		contentValues.put(DBConstants.IS_VISIBLE, category.isVisible());
+		contentValues.put(DBConstants.CATEGORY_INDEX, category.getCategoryIndex());
+
+		rowId = (int) mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
+
+		return rowId < 0 ? false : true;
+	}
 
 }
