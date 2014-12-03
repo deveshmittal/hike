@@ -195,6 +195,8 @@ public class StickerManager
 	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
+	public static final int DEFAULT_POSITION = 3;
+	
 	public FilenameFilter stickerFileFilter = new FilenameFilter()
 	{
 		@Override
@@ -1069,7 +1071,7 @@ public class StickerManager
 		category.updateDownloadedStickersCount();
 		if(downloadSource == DownloadSource.SHOP || downloadSource == DownloadSource.SETTINGS)
 		{
-			category.setState(StickerCategory.NONE);
+			category.setState(StickerCategory.DONE_SHOP_SETTINGS);
 		}
 		else
 		{
@@ -1410,5 +1412,61 @@ public class StickerManager
 				Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_UNCHECK_BOX_CLICKED);
 			}
 		}
+	}
+	
+	/**
+	 * This method is used for adding a new sticker category in pallete on the fly. The category is placed at a position in the pallete if specified, else at the end
+	 * 
+	 * @param categoryId
+	 * @param categoryName
+	 * @param stickerCount
+	 * @param categorySize
+	 * @param position
+	 */
+	public void addNewCategoryInPallete(StickerCategory stickerCategory)
+	{
+		if (stickerCategoriesMap.containsKey(stickerCategory.getCategoryId()))
+		{
+			/**
+			 * Discard the add packet.
+			 */
+			return;
+		}
+
+		boolean isCategoryInserted = HikeConversationsDatabase.getInstance().insertNewCategoryInPallete(stickerCategory);
+		/**
+		 * If isCategoryInserted is false, we simply return, since it's a duplicate category
+		 */
+		if (!isCategoryInserted)
+		{
+			return;
+		}
+
+		ArrayList<StickerCategory> updateCategories = new ArrayList<StickerCategory>();
+		/**
+		 * Incrementing the index of other categories by 1 to accommodate the new category in between
+		 */
+
+		for (StickerCategory category : stickerCategoriesMap.values())
+		{
+			if (category.getCategoryIndex() < stickerCategory.getCategoryIndex())
+			{
+				continue;
+			}
+
+			category.setCategoryIndex(category.getCategoryIndex() + 1);
+			updateCategories.add(category);
+		}
+
+		stickerCategoriesMap.put(stickerCategory.getCategoryId(), stickerCategory);
+		HikeConversationsDatabase.getInstance().updateStickerCategoriesInDb(updateCategories);
+		/**
+		 * Now download the Enable disable images as well as preview image
+		 */
+		StickerDownloadManager.getInstance().DownloadEnableDisableImage(stickerCategory.getCategoryId(), null);
+		StickerDownloadManager.getInstance().DownloadStickerPreviewImage(stickerCategory.getCategoryId(), null);
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
+
 	}
 }
