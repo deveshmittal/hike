@@ -306,7 +306,7 @@ public class DownloadFileTask extends FileTransferBase
 							long ftDwnldTime = endTime - startTime;
 							mTestUtil.writeDataToFile("FT" + "," +  msgId + "," + "DOWNLOAD-TIME" + "," + 
 							Long.toString(ftDwnldTime) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() + "," + 
-							mFile.getName() + "," + fileKey + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
+							mFile.getName() +  "," + mFile.length()/1000 + "kb " + "," + fileKey + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
 
 							Logger.d(getClass().getSimpleName(), "FT Completed");
 							// temp file is already deleted

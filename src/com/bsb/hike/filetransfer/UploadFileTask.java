@@ -565,7 +565,7 @@ public class UploadFileTask extends FileTransferBase
 		try 
 		{
 			mTestUtil.writeDataToFile("FT," +  msgId + "," + "UPLOAD-PREP-TIME" + "," + Long.toString(diffTime) + "," + HikeTestUtil.getCurrentTimeInMilliseconds() +
-					"," + mFile.getName() + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
+					"," + mFile.getName() + "," + "Original size: " + mFile.length()/1000 + "kb " + "," + "Compressed size: " + selectedFile.length()/1000 + "kb " + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));
 		}
 		catch (RemoteException e1) 
 		{
@@ -628,7 +628,7 @@ public class UploadFileTask extends FileTransferBase
 			long _currTime = System.currentTimeMillis();
 			long difTime = _currTime - lastTime;
 			mTestUtil.writeDataToFile("FT," +  msgId + "," + "UPLOAD-TIME" + "," + Long.toString(difTime) +
-			"," + Long.toString(_currTime) + "," + mFile.getName() + "," + fileKey + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));		
+			"," + Long.toString(_currTime) + "," + mFile.getName() +  "," + "Original size :" + mFile.length()/1000 + "kb " + "," + "Compressed size :" + selectedFile.length()/1000 + "kb " + "," + fileKey + "," + mTestUtil.getMessageDelay() + "," + Utils.getCellLocation(context));		
 
 			JSONObject metadata = new JSONObject();
 			JSONArray filesArray = new JSONArray();
