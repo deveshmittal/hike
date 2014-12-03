@@ -1195,6 +1195,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (attachmentWindow != null && attachmentWindow.isShowing())
 		{
+			((View)findViewById(R.id.tb_layout)).findViewById(R.id.emo_btn).setSelected(false);
+			findViewById(R.id.sticker_btn).setSelected(false);
 			dismissPopupWindow();
 			attachmentWindow = null;
 			return;
@@ -6646,10 +6648,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					View shopIconViewGroup = eraseKey;
 					if (emoticonType == EmoticonType.STICKERS)
 					{
+						v.setSelected(false);
 						// view not changed , exit with dismiss dialog
 						dismissPopupWindow();
 						return;
 					}
+					v.setSelected(true);
+					((View)findViewById(R.id.tb_layout)).findViewById(R.id.emo_btn).setSelected(false);
 					resetAtomicPopUpKey(HikeMessengerApp.ATOMIC_POP_UP_STICKER);
 					if (tipView != null)
 					{
@@ -6668,6 +6673,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					shopIconViewGroup.setVisibility(View.VISIBLE);
 					shopIcon.setImageResource(R.drawable.ic_sticker_shop);
+					shopIcon.setBackgroundResource(R.drawable.sticker_shop_selector);
 					shopIconViewGroup.setBackgroundResource(R.color.sticker_pallete_bg_color);
 					if(!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 					{
@@ -6698,9 +6704,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					if (emoticonType == EmoticonType.EMOTICON)
 					{
+						v.setSelected(false);
 						dismissPopupWindow();
 						return;
 					}
+					v.setSelected(true);
+					findViewById(R.id.sticker_btn).setSelected(false);
 					int offset = 0;
 					int emoticonsListSize = 0;
 					tabDrawables = new int[] { R.drawable.emo_recent, R.drawable.emo_tab_1_selector, R.drawable.emo_tab_2_selector, R.drawable.emo_tab_3_selector,
@@ -6730,6 +6739,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					eraseKey.setVisibility(View.VISIBLE);
 					eraseKey.setBackgroundResource(R.color.sticker_pallete_bg_color);
 					shopIcon.setImageResource(R.drawable.ic_erase);
+					shopIcon.setBackgroundResource(R.drawable.erase_key_selector);
 					eraseKey.setOnClickListener(new OnClickListener()
 					{
 
@@ -6771,6 +6781,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						resizeMainheight(0, false);
 						emoticonType = null;
 						attachmentWindow = null;
+						v.setSelected(false);
 					}
 				});
 				// attachmentWindow.showAsDropDown(anchor, 0, 0);
@@ -6833,7 +6844,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private boolean eatOuterTouchEmoticonPallete(int eventX, int viewId)
 	{
-		View st = findViewById(viewId);
+		View st = null;
+		if (viewId == R.id.emo_btn)
+		{
+			st = ((View) findViewById(R.id.tb_layout)).findViewById(R.id.emo_btn);
+		}
+		else
+		{
+			st = findViewById(viewId);
+		}
 		int[] xy = new int[2];
 		st.getLocationInWindow(xy);
 		// touch over sticker
