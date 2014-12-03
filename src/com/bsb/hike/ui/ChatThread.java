@@ -1196,6 +1196,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			findViewById(R.id.sticker_btn).setSelected(false);
 			dismissPopupWindow();
 			attachmentWindow = null;
+			findViewById(R.id.chat_emo_btn).setSelected(false);
+			findViewById(R.id.sticker_btn).setSelected(false);
 			return;
 		}
 
@@ -4520,11 +4522,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mComposeView.setHint("0 Free SMS left...");
 			mComposeView.setEnabled(false);
 			findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
-			findViewById(R.id.emo_btn).setVisibility(View.GONE);
+			findViewById(R.id.chat_emo_btn).setVisibility(View.GONE);
 		}
 		else
 		{
-			findViewById(R.id.emo_btn).setVisibility(View.VISIBLE);
+			findViewById(R.id.chat_emo_btn).setVisibility(View.VISIBLE);
 		}
 
 		boolean show = mConversationDb.wasOverlayDismissed(mConversation.getMsisdn());
@@ -4534,7 +4536,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		if (!(mConversation instanceof GroupConversation))
 		{
-			findViewById(R.id.emo_btn).setEnabled(false);
+			findViewById(R.id.chat_emo_btn).setEnabled(false);
 			findViewById(R.id.sticker_btn).setEnabled(false);
 		}
 		if (tipView != null && tipView.getVisibility() == View.VISIBLE)
@@ -4561,9 +4563,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			mComposeView.setEnabled(true);
 		}
 		findViewById((mConversation instanceof GroupConversation) ? R.id.group_info_layout : R.id.info_layout).setVisibility(View.GONE);
-		findViewById(R.id.emo_btn).setVisibility(View.VISIBLE);
+		findViewById(R.id.chat_emo_btn).setVisibility(View.VISIBLE);
 
-		findViewById(R.id.emo_btn).setEnabled(true);
+		findViewById(R.id.chat_emo_btn).setEnabled(true);
 		findViewById(R.id.sticker_btn).setEnabled(true);
 
 		if (!blockOverlay)
@@ -5360,7 +5362,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
 		mComposeView.addTextChangedListener(new EmoticonTextWatcher());
 		mComposeView.requestFocus();
-		content.findViewById(R.id.emo_btn).setOnClickListener(new OnClickListener()
+		content.findViewById(R.id.chat_emo_btn).setOnClickListener(new OnClickListener()
 		{
 
 			@Override
@@ -6741,7 +6743,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	public void onEmoticonBtnClicked(final View v, int whichSubcategory, boolean backPressed)
 	{
 		// it is possible that window token is null when activity is rotated, will occur rarely
-		View anchor = findViewById(R.id.chatThreadParentLayout);
+		final View anchor = findViewById(R.id.chatThreadParentLayout);
 		if (anchor.getWindowToken() != null)
 		{
 			if (showingChatThemePicker)
@@ -6765,6 +6767,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					if (emoticonType == EmoticonType.STICKERS)
 					{
 						v.setSelected(false);
+
 						// view not changed , exit with dismiss dialog
 						dismissPopupWindow();
 						return;
@@ -6940,13 +6943,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							boolean stickerTouch = eatOuterTouchEmoticonPallete(eventX, R.id.sticker_btn);
 							if (stickerTouch)
 								return true;
-							boolean emoTouch = eatOuterTouchEmoticonPallete(eventX, R.id.emo_btn);
+							boolean emoTouch = eatOuterTouchEmoticonPallete(eventX, R.id.chat_emo_btn);
 							if (emoTouch)
 								return true;
 							boolean recordingTouch = eatOuterTouchEmoticonPallete(eventX, R.id.send_message);
 							if (recordingTouch)
 								return true;
-
 							return false;
 						}
 
@@ -7079,7 +7081,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		((GroupConversation) mConversation).setGroupAlive(alive);
 		this.mSendBtn.setEnabled(false);
 		this.mComposeView.setVisibility(alive ? View.VISIBLE : View.INVISIBLE);
-		findViewById(R.id.emo_btn).setEnabled(alive ? true : false);
+		findViewById(R.id.chat_emo_btn).setEnabled(alive ? true : false);
 		findViewById(R.id.sticker_btn).setEnabled(alive ? true : false);
 		if (emoticonLayout != null && emoticonLayout.getVisibility() == View.VISIBLE)
 		{
