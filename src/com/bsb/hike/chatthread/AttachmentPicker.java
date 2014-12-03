@@ -3,12 +3,28 @@ package com.bsb.hike.chatthread;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bsb.hike.R;
-
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
+import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.Logger;
 
 public class AttachmentPicker extends OverFlowMenuLayout {
+
+	private static final String tag = "attachmentPicker";
 
 	public static final int CAMERA = 313;
 	public static final int GALLARY = 314;
@@ -16,9 +32,10 @@ public class AttachmentPicker extends OverFlowMenuLayout {
 	public static final int VIDEO = 316;
 	public static final int FILE = 317;
 	public static final int CONTACT = 318;
-	public static final int LOCATOIN = 318;
+	public static final int LOCATOIN = 319;
 
 	private boolean startRespectiveActivities;
+	private Activity activity;
 
 	/**
 	 * 
@@ -49,9 +66,11 @@ public class AttachmentPicker extends OverFlowMenuLayout {
 	 *            and request code will be constants given above
 	 */
 	public AttachmentPicker(OverflowItemClickListener listener,
-			Context context, boolean startRespectiveActivities) {
-		this(null, listener, context, startRespectiveActivities);
-
+			Activity activity, boolean startRespectiveActivities) {
+		this(null, listener, activity.getApplicationContext(),
+				startRespectiveActivities);
+		this.activity = activity;
+		initDefaultAttachmentList();
 	}
 
 	private void initDefaultAttachmentList() {
@@ -66,18 +85,110 @@ public class AttachmentPicker extends OverFlowMenuLayout {
 				R.drawable.ic_attach_video, VIDEO));
 		items.add(new OverFlowMenuItem(getString(R.string.file), 0,
 				R.drawable.ic_attach_file, FILE));
+		if (context.getPackageManager().hasSystemFeature(
+				PackageManager.FEATURE_LOCATION)) {
+			items.add(new OverFlowMenuItem(getString(R.string.location_option),
+					0, R.drawable.ic_attach_location, LOCATOIN));
+		}
 		this.overflowItems = items;
 	}
 
 	@Override
 	public View getView() {
-		// TODO Auto-generated method stub
-		return null;
+		return viewToShow;
 	}
 
 	@Override
 	public void initView() {
-		// viewToShow;
+		// we lazily inflate and
+		if (viewToShow != null) {
+			return;
+		}
+
+		View parentView = viewToShow = LayoutInflater.from(context).inflate(
+				R.layout.attachments, null);
+
+		GridView attachmentsGridView = (GridView) parentView
+				.findViewById(R.id.attachment_grid);
+		attachmentsGridView.setAdapter(new ArrayAdapter<OverFlowMenuItem>(
+				context, R.layout.attachment_item, R.id.text, overflowItems) {
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if (convertView == null) {
+					convertView = LayoutInflater.from(context).inflate(
+							R.layout.attachment_item, parent, false);
+				}
+				OverFlowMenuItem menuItem = getItem(position);
+
+				ImageView attachmentImageView = (ImageView) convertView
+						.findViewById(R.id.attachment_icon);
+				TextView attachmentTextView = (TextView) convertView
+						.findViewById(R.id.text);
+
+				attachmentImageView.setImageResource(menuItem.drawableId);
+				attachmentTextView.setText(menuItem.text);
+
+				return convertView;
+			}
+		});
+
+		attachmentsGridView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view,
+					int position, long id) {
+				popUpLayout.dismiss();
+
+				OverFlowMenuItem item = overflowItems.get(position);
+				if (!startRespectiveActivities) {
+					listener.itemClicked(item);
+					return;
+				}
+
+				// Start respective activities
+				int requestCode = -1;
+				Intent pickIntent = null;
+				switch (item.uniqueness) {
+				case CAMERA:
+					requestCode = HikeConstants.IMAGE_CAPTURE_CODE;
+					pickIntent = IntentManager.getImageCaptureIntent(context);
+					break;
+
+				case VIDEO:
+					requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
+					pickIntent = IntentManager.getVideoRecordingIntent();
+					break;
+
+				case AUDIO:
+					requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
+					// showAudioDialog();
+					break;
+
+				case LOCATOIN:
+					requestCode = HikeConstants.SHARE_LOCATION_CODE;
+					pickIntent = IntentManager.getLocationPickerIntent(context);
+					break;
+
+				case CONTACT:
+					requestCode = HikeConstants.SHARE_CONTACT_CODE;
+					pickIntent = IntentManager.getContactPickerIntent();
+					break;
+
+				case FILE:
+					listener.itemClicked(item);
+					break;
+				case GALLARY:
+					listener.itemClicked(item);
+					break;
+				}
+				if (pickIntent != null) {
+					activity.startActivityForResult(pickIntent, requestCode);
+				} else {
+					Logger.e(tag, "intent is null !!");
+				}
+			}
+		});
 
 	}
 
