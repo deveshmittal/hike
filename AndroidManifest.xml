@@ -328,7 +328,14 @@
                 <action android:name="com.android.vending.INSTALL_REFERRER" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".service.AlarmBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="com.bsb.hike.START_ALARM" />
+            </intent-filter>
+        </receiver>
 
+        <service android:name=".service.SimpleWakefulService" >
+        </service>
     </application>
 
 </manifest>
