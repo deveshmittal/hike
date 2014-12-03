@@ -1619,7 +1619,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 11:
 					AlertDialog alertDialog = new AlertDialog.Builder(ChatThread.this).create();
 					alertDialog.setTitle("Message counter");
-					alertDialog.setMessage("Enter number of hike messages to be sent(1-50)");
+					alertDialog.setMessage("Enter number of hike messages to be sent(0-2000)");
 					alertDialog.setIcon(R.drawable.ic_launcher);
 
 					final EditText input = new EditText(ChatThread.this);
@@ -1633,14 +1633,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						public void onClick(DialogInterface dialog, int which)
 						{
-							if(input.getText().length() > 0)
+							if(input.getText().length() >= 0)
 							{
 								String value = input.getText().toString();
 								hike_message_counter = Integer.valueOf(value);
 								
-								if(hike_message_counter >HikeTestUtil.HIKE_MESSAGE_COUNTER_MAX || hike_message_counter <= 0)
+								if(hike_message_counter > HikeTestUtil.HIKE_MESSAGE_COUNTER_MAX || hike_message_counter < 0)
 								{
-									Toast toast = Toast.makeText(getApplicationContext(), "Value should be between 1-50.", Toast.LENGTH_SHORT);
+									Toast toast = Toast.makeText(getApplicationContext(), "Value should be between 0-2000.", Toast.LENGTH_SHORT);
 									toast.show();	
 									hike_message_counter = HikeTestUtil.HIKE_MESSAGE_COUNTER_DEFAULT;
 								}

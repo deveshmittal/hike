@@ -37,7 +37,7 @@ public class HikeTestUtil
 
 	public static final int HIKE_MESSAGE_DELAY_MIN = 100; 
 
-	public static final int HIKE_MESSAGE_COUNTER_MAX = 50;	
+	public static final int HIKE_MESSAGE_COUNTER_MAX = 2000;	
 	
 	private static int msg_delay = HIKE_MESSAGE_DELAY_DEFAULT; 
 	
