@@ -182,5 +182,9 @@ public class ChatThreadActionBar {
 	public void setOverFloeClickListener(OverflowItemClickListener parameter) {
 		// TODO implement me
 	}
+	
+	public void showOverflowMenu(int width, int height,int xOffset,int yOffset, View anchor){
+		overFlowMenuLayout.show(width, height, xOffset, yOffset, anchor);
+	}
 
 }
