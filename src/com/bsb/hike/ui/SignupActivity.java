@@ -1552,7 +1552,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				dotOut.setDuration(100);
 				dotOut.setStartOffset(200);
 				RotateAnimation dotStay = new RotateAnimation(0, 360);
-				dotStay.setDuration(400);
+				dotStay.setDuration(400 + 200);
 				dotStay.setStartOffset(300);
 				AnimationSet dot = new AnimationSet(true);
 				dot.addAnimation(dotIn);
@@ -1596,7 +1596,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				dotOut.setDuration(100);
 				dotOut.setStartOffset(200);
 				RotateAnimation dotStay = new RotateAnimation(0, 360);
-				dotStay.setDuration(200);
+				dotStay.setDuration(200 + 200);
 				dotStay.setStartOffset(300);
 				AnimationSet dot = new AnimationSet(true);
 				dot.addAnimation(dotIn);
@@ -1638,9 +1638,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
 				dotOut.setDuration(100);
 				dotOut.setStartOffset(200);
+				RotateAnimation dotStay = new RotateAnimation(0, 360);
+				dotStay.setDuration(0 + 200);
+				dotStay.setStartOffset(300);
 				AnimationSet dot = new AnimationSet(true);
 				dot.addAnimation(dotIn);
 				dot.addAnimation(dotOut);
+				dot.addAnimation(dotStay);
 				dot.setAnimationListener(this);
 				dot.setStartOffset(400);
 				dot2.startAnimation(dot);
