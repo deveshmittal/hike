@@ -22,13 +22,9 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -105,6 +101,22 @@ public class HikeAuthActivity extends Activity
 
 	private final byte STATE_CONNECTED = 3;
 
+	private TextView auth_title;
+
+	private TextView auth_app_name;
+
+	private TextView auth_app_dev;
+
+	private ImageView auth_app_icon;
+
+	private TextView textViewDropdown;
+
+	private TextView auth_app_will_setup_acc;
+
+	private Button auth_button_accept;
+
+	private Button auth_button_deny;
+
 	public static boolean bypassAuthHttp = false;
 
 	/*
@@ -156,6 +168,8 @@ public class HikeAuthActivity extends Activity
 
 			retrieveContent();
 
+			initVar();
+
 			bindContentsAndActions();
 
 			settingPref.saveData(HikeMessengerApp.PENDING_SDK_AUTH, false);
@@ -168,6 +182,28 @@ public class HikeAuthActivity extends Activity
 			settingPref.saveData(HikeMessengerApp.PENDING_SDK_AUTH, true);
 			return;
 		}
+	}
+
+	/**
+	 * Initialize variables and references
+	 */
+	private void initVar()
+	{
+		auth_title = ((TextView) findViewById(R.id.auth_title));
+
+		auth_app_name = ((TextView) findViewById(R.id.auth_app_name));
+
+		auth_app_dev = ((TextView) findViewById(R.id.auth_app_dev));
+
+		auth_app_icon = ((ImageView) findViewById(R.id.auth_app_icon));
+
+		textViewDropdown = ((TextView) findViewById(R.id.auth_app_access_to));
+
+		auth_app_will_setup_acc = ((TextView) findViewById(R.id.auth_app_will_setup_acc));
+
+		auth_button_accept = ((Button) findViewById(R.id.auth_button_accept));
+
+		auth_button_deny = ((Button) findViewById(R.id.auth_button_deny));
 	}
 
 	@Override
@@ -261,20 +297,18 @@ public class HikeAuthActivity extends Activity
 		try
 		{
 			// Set title
-			((TextView) findViewById(R.id.auth_title)).setText(String.format(getApplicationContext().getString(R.string.auth_title), mAppName));
+			auth_title.setText(String.format(getApplicationContext().getString(R.string.auth_title), mAppName));
 
 			// Set app name
-			((TextView) findViewById(R.id.auth_app_name)).setText(mAppName);
+			auth_app_name.setText(mAppName);
 
 			// Set app version
-			((TextView) findViewById(R.id.auth_app_dev)).setText(mAppVersion);
+			auth_app_dev.setText(mAppVersion);
 
 			// Set app icon
-			((ImageView) findViewById(R.id.auth_app_icon)).setImageDrawable(mAppIconLogo);
+			auth_app_icon.setImageDrawable(mAppIconLogo);
 
 			// Set "will have access to" text
-			TextView textViewDropdown = ((TextView) findViewById(R.id.auth_app_access_to));
-
 			textViewDropdown.setText(String.format(getApplicationContext().getString(R.string.auth_app_access_to), mAppName));
 
 			textViewDropdown.setOnClickListener(new View.OnClickListener()
@@ -299,7 +333,7 @@ public class HikeAuthActivity extends Activity
 			});
 
 			// Set "will setup account on" text
-			((TextView) findViewById(R.id.auth_app_will_setup_acc)).setText(String.format(getApplicationContext().getString(R.string.auth_will_setup_acc), mAppName));
+			auth_app_will_setup_acc.setText(String.format(getApplicationContext().getString(R.string.auth_will_setup_acc), mAppName));
 
 			// Set user avatar
 			profileImageLoader.loadImage(userContactId, ((ImageView) findViewById(R.id.auth_user_avatar)), false, false, true);
@@ -308,7 +342,7 @@ public class HikeAuthActivity extends Activity
 			profileImageLoader.loadImage("nullround", ((ImageView) findViewById(R.id.auth_contacts_avatar)), false, false, true);
 
 			// Set "connect" button event
-			((Button) findViewById(R.id.auth_button_accept)).setOnClickListener(new View.OnClickListener()
+			auth_button_accept.setOnClickListener(new View.OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
@@ -318,7 +352,7 @@ public class HikeAuthActivity extends Activity
 			});
 
 			// Set "declined" button event
-			((Button) findViewById(R.id.auth_button_deny)).setOnClickListener(new View.OnClickListener()
+			auth_button_deny.setOnClickListener(new View.OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
@@ -679,18 +713,19 @@ public class HikeAuthActivity extends Activity
 		findViewById(R.id.auth_app_access_to).setVisibility(View.GONE);
 		findViewById(R.id.auth_info_layout).setVisibility(View.GONE);
 		findViewById(R.id.auth_button_deny_layout).setVisibility(View.GONE);
+		
+		//Hack to improve UX
 		new Handler().postDelayed(new Runnable()
 		{
-			
+
 			@Override
 			public void run()
 			{
-				((TextView) findViewById(R.id.auth_button_accept)).setText("Connecting...");
+				((TextView) findViewById(R.id.auth_button_accept)).setText(getString(R.string.auth_state_connecting));
 			}
 		}, 500);
-		
 		findViewById(R.id.layout_conn_state).setVisibility(View.VISIBLE);
-		((TextView) findViewById(R.id.text_conn_state)).setText("Please wait while we connect you");
+		((TextView) findViewById(R.id.text_conn_state)).setText(getString(R.string.auth_please_wait_connect));
 		findViewById(R.id.image_conn_state).setVisibility(View.GONE);
 		findViewById(R.id.progress_bar_conn_state).setVisibility(View.VISIBLE);
 	}
@@ -698,14 +733,14 @@ public class HikeAuthActivity extends Activity
 	public void displayConnectedState()
 	{
 		CURRENT_STATE = STATE_CONNECTED;
-		findViewById(R.id.auth_title).setVisibility(View.GONE);
+		auth_title.setVisibility(View.GONE);
 		findViewById(R.id.layout_app_info).setVisibility(View.GONE);
 		findViewById(R.id.auth_app_access_to).setVisibility(View.GONE);
 		findViewById(R.id.auth_info_layout).setVisibility(View.GONE);
 		findViewById(R.id.auth_button_deny_layout).setVisibility(View.GONE);
 		findViewById(R.id.auth_buttons_layout).setVisibility(View.GONE);
-		((TextView) findViewById(R.id.auth_button_accept)).setText("DONE");
-		((TextView) findViewById(R.id.auth_button_accept)).setOnClickListener(new View.OnClickListener()
+		auth_button_accept.setText(getString(R.string.auth_done));
+		auth_button_accept.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
@@ -715,7 +750,6 @@ public class HikeAuthActivity extends Activity
 		});
 		new Handler().postDelayed(new Runnable()
 		{
-			
 			@Override
 			public void run()
 			{
@@ -725,21 +759,21 @@ public class HikeAuthActivity extends Activity
 		findViewById(R.id.layout_conn_state).setVisibility(View.VISIBLE);
 		((TextView) findViewById(R.id.text_conn_state)).setText(String.format(getApplicationContext().getString(R.string.auth_connected_to_hike), mAppName));
 		findViewById(R.id.image_conn_state).setVisibility(View.VISIBLE);
-		((ImageView)findViewById(R.id.image_conn_state)).setImageResource(R.drawable.ic_tick_auth);
+		((ImageView) findViewById(R.id.image_conn_state)).setImageResource(R.drawable.ic_tick_auth);
 		findViewById(R.id.progress_bar_conn_state).setVisibility(View.GONE);
 	}
 
 	public void displayRetryConnectionState()
 	{
 		CURRENT_STATE = STATE_RETRY_CONNECTION;
-		findViewById(R.id.auth_title).setVisibility(View.GONE);
+		auth_title.setVisibility(View.GONE);
 		findViewById(R.id.layout_app_info).setVisibility(View.GONE);
 		findViewById(R.id.auth_app_access_to).setVisibility(View.GONE);
 		findViewById(R.id.auth_info_layout).setVisibility(View.GONE);
 		findViewById(R.id.auth_button_deny_layout).setVisibility(View.VISIBLE);
-		((TextView) findViewById(R.id.auth_button_deny)).setText("Cancel");
-		((TextView) findViewById(R.id.auth_button_accept)).setText("Retry");
-		((TextView) findViewById(R.id.auth_button_deny)).setOnClickListener(new View.OnClickListener()
+		auth_button_deny.setText(getString(R.string.auth_cancel));
+		auth_button_accept.setText(getString(R.string.auth_retry));
+		auth_button_deny.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
@@ -747,7 +781,7 @@ public class HikeAuthActivity extends Activity
 				HikeAuthActivity.this.finish();
 			}
 		});
-		((TextView) findViewById(R.id.auth_button_accept)).setOnClickListener(new View.OnClickListener()
+		auth_button_accept.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
@@ -756,10 +790,9 @@ public class HikeAuthActivity extends Activity
 			}
 		});
 		findViewById(R.id.layout_conn_state).setVisibility(View.VISIBLE);
-		((TextView) findViewById(R.id.text_conn_state)).setText("Something went wrong.");
+		((TextView) findViewById(R.id.text_conn_state)).setText(getString(R.string.auth_went_wrong));
 		findViewById(R.id.image_conn_state).setVisibility(View.VISIBLE);
-		((ImageView)findViewById(R.id.image_conn_state)).setImageResource(R.drawable.ic_error);
+		((ImageView) findViewById(R.id.image_conn_state)).setImageResource(R.drawable.ic_error);
 		findViewById(R.id.progress_bar_conn_state).setVisibility(View.GONE);
 	}
-
 }
