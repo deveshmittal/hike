@@ -1198,7 +1198,6 @@
     <string name="account_backup">Konto-Datensicherung</string>
     <string name="backup_found">Datensicherung gefunden</string>
     <string name="backup_found_hint">Möchtest du dein Konto wiederherstellen?</string>
-    <string name="restore">WIEDERHERSTELLEN</string>
     <string name="restoring...">Wird wiederhergestellt...</string>
     <string name="restoring..._hint">Bitte warten. Dieser Vorgang könnte einen Augenblick dauern.</string>
     <string name="restored">Wiederhergestellt</string>

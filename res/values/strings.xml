@@ -1189,7 +1189,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="account_backup">Account Backup</string>
     <string name="backup_found">Backup found</string>
     <string name="backup_found_hint">would you like to restore your account?</string>
-    <string name="restore">RESTORE</string>
     <string name="restoring...">Restoring...</string>
     <string name="restoring..._hint">please wait, this may take a while</string>
     <string name="restored">Restored</string>
@@ -1238,4 +1237,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="nux_fwd_search_hint">Names go here...</string>
     <string name="recently_joined_hike">RECENTLY JOINED HIKE</string>
     <string name="creating_backup_message">Creating a backup of your account. Daily backups occur at 3:00 AM</string>
+    <string name="restore">Restore</string>
 </resources>

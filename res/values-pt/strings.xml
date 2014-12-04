@@ -1198,7 +1198,6 @@
     <string name="account_backup">Backup da conta</string>
     <string name="backup_found">Backup encontrado</string>
     <string name="backup_found_hint">deseja restaurar a conta?</string>
-    <string name="restore">RESTAURAR</string>
     <string name="restoring...">Restaurando...</string>
     <string name="restoring..._hint">aguarde, pode demorar um pouco</string>
     <string name="restored">Restaurado</string>

@@ -1198,7 +1198,6 @@
     <string name="account_backup">खाते का बैकअप</string>
     <string name="backup_found">बैकअप मिला है</string>
     <string name="backup_found_hint">क्या आप अपना खाता बहाल करना चाहेंगे?</string>
-    <string name="restore">बहाल करें</string>
     <string name="restoring...">बहाल हो रहा है...</string>
     <string name="restoring..._hint">कृपया प्रतीक्षा करें, इसमें कुछ समय लग सकता है</string>
     <string name="restored">बहाल किए गए</string>

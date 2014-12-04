@@ -1198,7 +1198,6 @@
     <string name="account_backup">Резервная копия аккаунта</string>
     <string name="backup_found">Найдена резервная копия.</string>
     <string name="backup_found_hint">Восстановить ваш аккаунт?</string>
-    <string name="restore">ВОССТАНОВИТЬ</string>
     <string name="restoring...">Восстановление...</string>
     <string name="restoring..._hint">пожалуйста, немного подождите</string>
     <string name="restored">Ваш аккаунт и сообщения</string>
