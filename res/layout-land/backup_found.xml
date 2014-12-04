@@ -109,8 +109,9 @@
             android:layout_height="48dp"
             android:layout_marginTop="30dp"
             android:background="@color/blue_hike"
-            android:text="RESTORE"
-            android:textColor="@color/white" />
+            android:text="@string/restore"
+            android:textColor="@color/white"
+            android:textSize="14dp" />
     </LinearLayout>
 
 </LinearLayout>

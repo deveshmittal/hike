@@ -1185,7 +1185,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="n_more">%1$d MORE</string>
     <string name="n_stickers">%1$d Stickers</string>
     <string name="last_backup">Last backup</string>
-    <string name="creating_backup_message">Creating a backup of your chats. Daily backups occur at 3:00 AM</string>
     <string name="restore_account">Restore Account</string>
     <string name="account_backup">Account Backup</string>
     <string name="backup_found">Backup found</string>
@@ -1238,4 +1237,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="some_error">Some error occured!</string>
     <string name="nux_fwd_search_hint">Names go here...</string>
     <string name="recently_joined_hike">RECENTLY JOINED HIKE</string>
+    <string name="creating_backup_message">Creating a backup of your account. Daily backups occur at 3:00 AM</string>
 </resources>

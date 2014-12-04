@@ -16,7 +16,7 @@
 
         <RelativeLayout
             android:id="@+id/restore_items"
-            android:layout_width="252dp"
+            android:layout_width="244dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="12dp"
             android:gravity="center" >

@@ -1194,7 +1194,6 @@
     <string name="n_more">%1$d DE PLUS</string>
     <string name="n_stickers">%1$d stickers</string>
     <string name="last_backup">Dernière sauvegarde</string>
-    <string name="creating_backup_message">Création d\'une sauvegarde de tes chats. Les sauvegardes quotidiennes ont lieu à 3 h 00.</string>
     <string name="restore_account">Restaurer le compte</string>
     <string name="account_backup">Sauvegarde du compte</string>
     <string name="backup_found">Sauvegarde trouvée</string>

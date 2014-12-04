@@ -1194,7 +1194,6 @@
     <string name="n_more">%1$d MEHR</string>
     <string name="n_stickers">%1$d Sticker</string>
     <string name="last_backup">Letzte Datensicherung</string>
-    <string name="creating_backup_message">Es wird eine Sicherungskopie deiner Chats erstellt. Die täglichen Datensicherungen werden um 3 Uhr durchgeführt.</string>
     <string name="restore_account">Konto wiederherstellen</string>
     <string name="account_backup">Konto-Datensicherung</string>
     <string name="backup_found">Datensicherung gefunden</string>
