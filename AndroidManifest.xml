@@ -197,7 +197,7 @@
             android:screenOrientation="portrait"
             android:noHistory="true"
             android:excludeFromRecents="true"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"  >
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"  >
             <intent-filter>
 			    <action android:name="com.bsb.hike.ui.HikeAuthActivity" />
 			    <category android:name="android.intent.category.DEFAULT" />

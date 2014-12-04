@@ -40,9 +40,9 @@
             android:gravity="bottom"
             android:maxLines="1"
             android:text="Some application"
-            android:textColor="@color/black"
+            android:textColor="@color/standerd_black"
             android:textSize="17sp"
-            android:textStyle="italic" >
+            android:textStyle="normal" >
         </com.bsb.hike.view.CustomFontTextView>
 
         <com.bsb.hike.view.CustomFontTextView
@@ -54,7 +54,7 @@
             android:text="Since 5th Jan, 2014"
             android:textColor="@color/dark_grey_drop_shadow"
             android:textSize="13sp"
-            android:textStyle="bold" >
+            android:textStyle="normal" >
         </com.bsb.hike.view.CustomFontTextView>
     </LinearLayout>
 

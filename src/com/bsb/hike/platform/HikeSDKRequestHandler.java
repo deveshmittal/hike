@@ -61,6 +61,7 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 				Intent hikeAuthIntent = new Intent("com.bsb.hike.ui.HikeAuthActivity");
 				hikeAuthIntent.putExtra(HikeAuthActivity.MESSAGE_INDEX, Message.obtain(msg));
 				hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 				argContext.startActivity(hikeAuthIntent);
 				
 			};

@@ -246,33 +246,8 @@ public class HikeAuthActivity extends Activity
 	 */
 	private void bindContentsAndActions()
 	{
-		Animation fadeIn = new AlphaAnimation(0, 1);
-		fadeIn.setInterpolator(new DecelerateInterpolator());
-		fadeIn.setDuration(1000);
-
-		findViewById(R.id.auth_splash_content).startAnimation(fadeIn);
-
 		try
 		{
-
-			new Handler().postDelayed(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					findViewById(R.id.auth_info).setVisibility(View.VISIBLE);
-				}
-			}, 2000);
-
-			new Handler().postDelayed(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					findViewById(R.id.auth_splash).setVisibility(View.GONE);
-				}
-			}, 2200);
-
 			// Set title
 			((TextView) findViewById(R.id.auth_title)).setText(String.format(getApplicationContext().getString(R.string.auth_title), mAppName));
 
@@ -286,7 +261,30 @@ public class HikeAuthActivity extends Activity
 			((ImageView) findViewById(R.id.auth_app_icon)).setImageDrawable(mAppIconLogo);
 
 			// Set "will have access to" text
-			((TextView) findViewById(R.id.auth_app_access_to)).setText(String.format(getApplicationContext().getString(R.string.auth_app_access_to), mAppName));
+			TextView textViewDropdown = ((TextView) findViewById(R.id.auth_app_access_to));
+
+			textViewDropdown.setText(String.format(getApplicationContext().getString(R.string.auth_app_access_to), mAppName));
+
+			textViewDropdown.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					TextView dropdown = ((TextView) findViewById(R.id.auth_app_access_to));
+					if (dropdown.getTag().equals("0"))
+					{
+						dropdown.setCompoundDrawablesWithIntrinsicBounds(getApplicationContext().getResources().getDrawable(R.drawable.arrowup), null, null, null);
+						dropdown.setTag("1");
+						findViewById(R.id.auth_info_layout).setVisibility(View.VISIBLE);
+					}
+					else
+					{
+						dropdown.setCompoundDrawablesWithIntrinsicBounds(getApplicationContext().getResources().getDrawable(R.drawable.arrowdown), null, null, null);
+						dropdown.setTag("0");
+						findViewById(R.id.auth_info_layout).setVisibility(View.GONE);
+					}
+				}
+			});
 
 			// Set "will setup account on" text
 			((TextView) findViewById(R.id.auth_app_will_setup_acc)).setText(String.format(getApplicationContext().getString(R.string.auth_will_setup_acc), mAppName));
@@ -411,8 +409,8 @@ public class HikeAuthActivity extends Activity
 						{
 							long timestamp = System.currentTimeMillis();
 							prefs.saveData(AUTH_SHARED_PREF_PKG_KEY,
-									TextUtils.isEmpty(prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")) ? mAppPackage + ":" + timestamp : prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "") + ","
-											+ mAppPackage + ":" + timestamp);
+									TextUtils.isEmpty(prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")) ? mAppPackage + ":" + timestamp : prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")
+											+ "," + mAppPackage + ":" + timestamp);
 						}
 
 						prefs.saveData(mAppPackage, Integer.toString(accessToken.hashCode()));
