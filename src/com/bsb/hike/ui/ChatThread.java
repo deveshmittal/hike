@@ -7386,6 +7386,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					public void run()
 					{
+						/**
+						 * We were getting an NPE here.
+						 */
+						if(iconPageIndicator == null)
+						{
+							return;
+						}
+						
 						iconPageIndicator.notifyDataSetChanged();
 					}
 				});
