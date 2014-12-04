@@ -39,10 +39,11 @@
             </com.bsb.hike.view.CustomFontTextView>
 
             <LinearLayout
+                android:id="@+id/layout_app_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
                 android:layout_marginBottom="20dp"
+                android:layout_marginTop="20dp"
                 android:animateLayoutChanges="true"
                 android:baselineAligned="false"
                 android:gravity="center"
@@ -92,6 +93,42 @@
                         android:textSize="13sp" >
                     </com.bsb.hike.view.CustomFontTextView>
                 </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_conn_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone" >
+
+                <ProgressBar
+                    android:id="@+id/progress_bar_conn_state"
+                    style="@android:style/Widget.Holo.Light.ProgressBar.Large"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true" />
+
+                <ImageView
+                    android:id="@+id/image_conn_state"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_launcher" />
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/text_conn_state"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="13dp"
+                    android:gravity="center"
+                    android:textColor="@color/standerd_black"
+                    android:textSize="16sp"
+                    android:textStyle="normal" >
+                </com.bsb.hike.view.CustomFontTextView>
             </LinearLayout>
 
             <View
@@ -227,12 +264,15 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:animateLayoutChanges="true"
                 android:baselineAligned="false"
+                android:id="@+id/auth_buttons_layout"
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:padding="16dp" >
 
                 <LinearLayout
+                    android:id="@+id/auth_button_deny_layout"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="1"
@@ -251,6 +291,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/auth_button_accept_layout"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="1"

@@ -1248,4 +1248,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="some_error">Some error occured!</string>
     <string name="nux_fwd_search_hint">Names go here...</string>
     <string name="recently_joined_hike">RECENTLY JOINED HIKE</string>
+    <string name="auth_connected_to_hike">%1$s connected to hike</string>
 </resources>

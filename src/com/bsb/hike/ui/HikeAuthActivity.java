@@ -22,11 +22,11 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.DecelerateInterpolator;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -95,6 +95,16 @@ public class HikeAuthActivity extends Activity
 
 	private static final String IS_SENT_FOR_SIGNUP_KEY = "IS_SENT_FOR_SIGNUP_KEY";
 
+	private byte CURRENT_STATE = 0;
+
+	private final byte STATE_NORMAL = 0;
+
+	private final byte STATE_IS_CONNECTING = 1;
+
+	private final byte STATE_RETRY_CONNECTION = 2;
+
+	private final byte STATE_CONNECTED = 3;
+
 	public static boolean bypassAuthHttp = false;
 
 	/*
@@ -119,6 +129,8 @@ public class HikeAuthActivity extends Activity
 		}
 
 		settingPref = HikeSharedPreferenceUtil.getInstance(getApplicationContext(), HikeMessengerApp.ACCOUNT_SETTINGS);
+
+		CURRENT_STATE = STATE_NORMAL;
 	}
 
 	@Override
@@ -313,8 +325,6 @@ public class HikeAuthActivity extends Activity
 				{
 					message.arg2 = HikeSDKResponseCode.STATUS_FAILED;
 					HikeService.mHikeSDKRequestHandler.handleMessage(message);
-					// Logger.d(HikeAuthActivity.class.getCanonicalName(), "message" + message.toString() + " replyto: " + message.replyTo.toString());
-					// message.replyTo.send(message);
 					Logger.d(HikeAuthActivity.class.getCanonicalName(), "shutting auth activity successfully!");
 					HikeAuthActivity.this.finish();
 				}
@@ -333,6 +343,8 @@ public class HikeAuthActivity extends Activity
 	 */
 	public void requestAccess()
 	{
+
+		displayIsConnectingState();
 
 		String authUrl = BASE_URL + PATH_AUTHORIZE;
 
@@ -353,7 +365,7 @@ public class HikeAuthActivity extends Activity
 		httpGet.addHeader(new BasicHeader("Content-type", "text/plain"));
 		httpGet.addHeader(new BasicHeader("cookie", "uid=UZtZkaEMFSBRwmys;token=EeEKpHJzesU="));
 
-		authTask = new UtilAtomicAsyncTask(HikeAuthActivity.this, null, new UtilAsyncTaskListener()
+		authTask = new UtilAtomicAsyncTask(HikeAuthActivity.this, null, false, new UtilAsyncTaskListener()
 		{
 
 			private HikeSharedPreferenceUtil prefs;
@@ -378,10 +390,8 @@ public class HikeAuthActivity extends Activity
 				}
 				else
 				{
-					// display a toast and request user to relog
-					Toast.makeText(getApplicationContext(), "Connection failed. Please try again.", Toast.LENGTH_LONG).show();
+					displayRetryConnectionState();
 				}
-
 			}
 
 			@Override
@@ -417,7 +427,7 @@ public class HikeAuthActivity extends Activity
 
 						HikeMessengerApp.getPubSub().publish(HikePubSub.AUTH_TOKEN_RECEIVED, accessToken);
 
-						HikeAuthActivity.this.finish();
+						displayConnectedState();
 					}
 					else
 					{
@@ -658,6 +668,98 @@ public class HikeAuthActivity extends Activity
 	{
 		onFailed("Declined");
 		super.onBackPressed();
+	}
+
+	public void displayIsConnectingState()
+	{
+		CURRENT_STATE = STATE_IS_CONNECTING;
+		((TextView) findViewById(R.id.auth_button_accept)).setText("");
+		findViewById(R.id.auth_title).setVisibility(View.GONE);
+		findViewById(R.id.layout_app_info).setVisibility(View.GONE);
+		findViewById(R.id.auth_app_access_to).setVisibility(View.GONE);
+		findViewById(R.id.auth_info_layout).setVisibility(View.GONE);
+		findViewById(R.id.auth_button_deny_layout).setVisibility(View.GONE);
+		new Handler().postDelayed(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				((TextView) findViewById(R.id.auth_button_accept)).setText("Connecting...");
+			}
+		}, 500);
+		
+		findViewById(R.id.layout_conn_state).setVisibility(View.VISIBLE);
+		((TextView) findViewById(R.id.text_conn_state)).setText("Please wait while we connect you");
+		findViewById(R.id.image_conn_state).setVisibility(View.GONE);
+		findViewById(R.id.progress_bar_conn_state).setVisibility(View.VISIBLE);
+	}
+
+	public void displayConnectedState()
+	{
+		CURRENT_STATE = STATE_CONNECTED;
+		findViewById(R.id.auth_title).setVisibility(View.GONE);
+		findViewById(R.id.layout_app_info).setVisibility(View.GONE);
+		findViewById(R.id.auth_app_access_to).setVisibility(View.GONE);
+		findViewById(R.id.auth_info_layout).setVisibility(View.GONE);
+		findViewById(R.id.auth_button_deny_layout).setVisibility(View.GONE);
+		findViewById(R.id.auth_buttons_layout).setVisibility(View.GONE);
+		((TextView) findViewById(R.id.auth_button_accept)).setText("DONE");
+		((TextView) findViewById(R.id.auth_button_accept)).setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				HikeAuthActivity.this.finish();
+			}
+		});
+		new Handler().postDelayed(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				HikeAuthActivity.this.finish();
+			}
+		}, 2500);
+		findViewById(R.id.layout_conn_state).setVisibility(View.VISIBLE);
+		((TextView) findViewById(R.id.text_conn_state)).setText(String.format(getApplicationContext().getString(R.string.auth_connected_to_hike), mAppName));
+		findViewById(R.id.image_conn_state).setVisibility(View.VISIBLE);
+		((ImageView)findViewById(R.id.image_conn_state)).setImageResource(R.drawable.ic_tick_auth);
+		findViewById(R.id.progress_bar_conn_state).setVisibility(View.GONE);
+	}
+
+	public void displayRetryConnectionState()
+	{
+		CURRENT_STATE = STATE_RETRY_CONNECTION;
+		findViewById(R.id.auth_title).setVisibility(View.GONE);
+		findViewById(R.id.layout_app_info).setVisibility(View.GONE);
+		findViewById(R.id.auth_app_access_to).setVisibility(View.GONE);
+		findViewById(R.id.auth_info_layout).setVisibility(View.GONE);
+		findViewById(R.id.auth_button_deny_layout).setVisibility(View.VISIBLE);
+		((TextView) findViewById(R.id.auth_button_deny)).setText("Cancel");
+		((TextView) findViewById(R.id.auth_button_accept)).setText("Retry");
+		((TextView) findViewById(R.id.auth_button_deny)).setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				HikeAuthActivity.this.finish();
+			}
+		});
+		((TextView) findViewById(R.id.auth_button_accept)).setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				requestAccess();
+			}
+		});
+		findViewById(R.id.layout_conn_state).setVisibility(View.VISIBLE);
+		((TextView) findViewById(R.id.text_conn_state)).setText("Something went wrong.");
+		findViewById(R.id.image_conn_state).setVisibility(View.VISIBLE);
+		((ImageView)findViewById(R.id.image_conn_state)).setImageResource(R.drawable.ic_error);
+		findViewById(R.id.progress_bar_conn_state).setVisibility(View.GONE);
 	}
 
 }

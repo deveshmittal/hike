@@ -16,7 +16,7 @@ import com.bsb.hike.utils.AccountUtils;
 public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String>
 {
 
-	private ProgressBar mProgressBar;
+	private View mProgressBarIndicator;
 
 	private UtilAsyncTaskListener mListener;
 
@@ -24,42 +24,58 @@ public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String
 
 	private ProgressDialog progressDialog;
 
-	public UtilAtomicAsyncTask(Activity argActivity, ProgressBar argProgressBar, UtilAsyncTaskListener listener)
+	private boolean mShowProgressDialog;
+
+	public UtilAtomicAsyncTask(Activity argActivity, View argProgressBar, boolean showProgressDialog, UtilAsyncTaskListener listener)
 	{
-		mProgressBar = argProgressBar;
+		mProgressBarIndicator = argProgressBar;
 		mListener = listener;
 		mActivity = argActivity;
+		mShowProgressDialog = showProgressDialog;
 	}
 
 	@Override
 	protected void onPreExecute()
 	{
 		super.onPreExecute();
-		if (mProgressBar != null)
+		if (mProgressBarIndicator != null)
 		{
-			mProgressBar.setVisibility(View.VISIBLE);
+			mProgressBarIndicator.setVisibility(View.VISIBLE);
 		}
-		progressDialog = new ProgressDialog(mActivity);
-		progressDialog.setCancelable(true);
-		progressDialog.setCanceledOnTouchOutside(false);
-		progressDialog.setMessage("Please wait while we get you connected");
-		progressDialog.setOnCancelListener(new OnCancelListener()
+
+		if (mShowProgressDialog)
 		{
-			@Override
-			public void onCancel(DialogInterface dialog)
+			progressDialog = new ProgressDialog(mActivity);
+			progressDialog.setCancelable(true);
+			progressDialog.setCanceledOnTouchOutside(false);
+			progressDialog.setMessage("Please wait while we get you connected");
+			progressDialog.setOnCancelListener(new OnCancelListener()
 			{
-				UtilAtomicAsyncTask.this.onPostExecute(null);
-				UtilAtomicAsyncTask.this.cancel(true);
-			}
-		});
-		progressDialog.show();
+				@Override
+				public void onCancel(DialogInterface dialog)
+				{
+					UtilAtomicAsyncTask.this.onPostExecute(null);
+					UtilAtomicAsyncTask.this.cancel(true);
+				}
+			});
+			progressDialog.show();
+		}
 	}
 
 	@Override
 	protected String doInBackground(HttpRequestBase... params)
 	{
+		
+		try
+		{
+			Thread.sleep(4000);
+		}
+		catch (InterruptedException e1)
+		{
+			e1.printStackTrace();
+		}
+		
 		// for now, assuming only one request is present in the request array
-
 		HttpRequestBase httpRequest;
 
 		if (params != null)
@@ -94,15 +110,15 @@ public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String
 		{
 			return;
 		}
-		
+
 		if (progressDialog != null)
 		{
 			progressDialog.dismiss();
 		}
 
-		if (mProgressBar != null)
+		if (mProgressBarIndicator != null)
 		{
-			mProgressBar.setVisibility(View.GONE);
+			mProgressBarIndicator.setVisibility(View.GONE);
 		}
 
 		if (mListener != null)
