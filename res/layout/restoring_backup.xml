@@ -107,15 +107,17 @@
         android:src="@drawable/art_tick"
         android:visibility="invisible" />
 
-    <Button
+    <com.bsb.hike.view.CustomFontButton
         android:id="@+id/btn_retry"
-        android:layout_width="212dp"
+        android:layout_width="180dp"
         android:layout_height="48dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="260dp"
-        android:background="@color/blue_hike"
-        android:text="RETRY"
-        android:textColor="@color/white"
+        android:background="@drawable/signup_button"
+        android:text="@string/retry"
+        android:textColor="@drawable/signup_btn_text"
+        android:textSize="15sp"
+        android:textStyle="bold|italic"
         android:visibility="invisible" />
 
 </RelativeLayout>

@@ -68,6 +68,7 @@ public class DBBackupRestore
 					return false;
 
 				File backup = getDBBackupFile(dbCopy.getName());
+				Logger.d(getClass().getSimpleName(), "encrypting with key: " + backupToken);
 				CBCEncryption.encryptFile(dbCopy, backup, backupToken);
 				dbCopy.delete();
 			}
@@ -78,7 +79,7 @@ public class DBBackupRestore
 			e.printStackTrace();
 			return false;
 		}
-		if (!updateBackupState())
+		if (!updateBackupState(null))
 		{
 			return false;
 		}
@@ -141,6 +142,7 @@ public class DBBackupRestore
 				File currentDB = getCurrentDBFile(fileName);
 				File dbCopy = getDBCopyFile(currentDB.getName());
 				File backup = getDBBackupFile(dbCopy.getName());
+				Logger.d(getClass().getSimpleName(), "decrypting with key: " + backupToken);
 				CBCEncryption.decryptFile(backup, dbCopy, backupToken);
 				importDatabase(dbCopy);
 				dbCopy.delete();
@@ -152,6 +154,7 @@ public class DBBackupRestore
 			e.printStackTrace();
 			return false;
 		}
+		state.restorePrefs(mContext);
 		postRestoreSetup(state);
 		time = System.currentTimeMillis() - time;
 		Logger.d(getClass().getSimpleName(), "Restore complete!! in " + time / 1000 + "." + time % 1000 + "s");
@@ -200,6 +203,7 @@ public class DBBackupRestore
 		{
 			HikeConversationsDatabase.getInstance().clearTable(table);
 		}
+		HikeConversationsDatabase.getInstance().upgradeForStickerShopVersion1();
 	}
 
 	private void closeChannelsAndStreams(Closeable... closeables)
@@ -228,11 +232,15 @@ public class DBBackupRestore
 			if (!backup.exists())
 				return false;
 		}
-		if(!getBackupStateFile().exists())
+		BackupState state = getBackupState();
+		if (state != null)
 		{
-			return false;
+			if (state.getBackupTime() > 0)
+			{
+				return true;
+			}
 		}
-		return true;
+		return false;
 	}
 
 	public long getLastBackupTime()
@@ -293,9 +301,13 @@ public class DBBackupRestore
 		return new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT, BACKUP);
 	}
 	
-	private boolean updateBackupState()
+	private boolean updateBackupState(BackupState state)
 	{
-		BackupState state = new BackupState(dbNames[0], DBConstants.CONVERSATIONS_DATABASE_VERSION);
+		if (state == null)
+		{
+			state = new BackupState(dbNames[0], DBConstants.CONVERSATIONS_DATABASE_VERSION);
+			state.backupPrefs(mContext);
+		}
 		File backupStateFile = getBackupStateFile();
 		FileOutputStream fileOut = null;
 		ObjectOutputStream out = null;
@@ -350,6 +362,13 @@ public class DBBackupRestore
 			closeChannelsAndStreams(fileIn,in);
 		}
 		return state;
+	}
+	
+	public boolean updatePrefs()
+	{
+		BackupState state = getBackupState();
+		state.backupPrefs(mContext);
+		return updateBackupState(state);
 	}
 
 }

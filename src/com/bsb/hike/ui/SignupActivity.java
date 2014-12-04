@@ -1224,7 +1224,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		artProfile.startAnimation(profileAnimSet);
 		
 		// Starting up the dots animation
-		setupDotsAnimation(smileyOffset,smileyDuration);
+		setupDotsAnimation(smileyOffset,smileyDuration,0);
 		
 		// Animation setup for restore and skip buttons
 		AlphaAnimation restoreAlphaAnimation = new AlphaAnimation(0.0f, 1.0f);
@@ -1305,7 +1305,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		artProfile.startAnimation(profileAnimSet);
 
 		// Starting up the dots animation
-		setupDotsAnimation(smileyOffset,smileyDuration);
+		setupDotsAnimation(smileyOffset,smileyDuration,smileyDuration);
 
 		// Animation setup for restore and skip buttons
 		AlphaAnimation fadeOutAnimation = new AlphaAnimation(1.0f, 0.0f);
@@ -1338,7 +1338,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		textView.startAnimation(fadeOutAnimation);
 	}
 	
-	private void setupDotsAnimation(long smileyOffset, long smileyDuration)
+	private void setupDotsAnimation(long smileyOffset, long smileyDuration, long onsetTime)
 	{
 		long animationDuation = 50;
 		
@@ -1364,7 +1364,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		AnimationSet dot0Anim = new AnimationSet(true);
 		dot0Anim.addAnimation(dotIn);
 		dot0Anim.addAnimation(dotOut);
-		dot0Anim.setStartOffset(smileyOffset + smileyDuration - 50);
+		dot0Anim.setStartOffset(smileyOffset + smileyDuration - 50 - onsetTime);
 		dot0.startAnimation(dot0Anim);
 	
 		AlphaAnimation dot1In = new AlphaAnimation(0, 1);
@@ -1375,7 +1375,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		AnimationSet dot1Anim = new AnimationSet(true);
 		dot1Anim.addAnimation(dot1In);
 		dot1Anim.addAnimation(dot1Out);
-		dot1Anim.setStartOffset(smileyOffset + 2*smileyDuration - 50);
+		dot1Anim.setStartOffset(smileyOffset + 2*smileyDuration - 50 - onsetTime);
 		dot1.startAnimation(dot1Anim);
 
 		
@@ -1387,7 +1387,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		AnimationSet dot2Anim = new AnimationSet(true);
 		dot2Anim.addAnimation(dot2In);
 		dot2Anim.addAnimation(dot2Out);
-		dot2Anim.setStartOffset(smileyOffset + 3*smileyDuration - 50);
+		dot2Anim.setStartOffset(smileyOffset + 3*smileyDuration - 50 - onsetTime);
 		dot2.startAnimation(dot2Anim);
 	}
 
@@ -1552,7 +1552,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				dotOut.setDuration(100);
 				dotOut.setStartOffset(200);
 				RotateAnimation dotStay = new RotateAnimation(0, 360);
-				dotStay.setDuration(400);
+				dotStay.setDuration(400 + 200);
 				dotStay.setStartOffset(300);
 				AnimationSet dot = new AnimationSet(true);
 				dot.addAnimation(dotIn);
@@ -1596,7 +1596,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				dotOut.setDuration(100);
 				dotOut.setStartOffset(200);
 				RotateAnimation dotStay = new RotateAnimation(0, 360);
-				dotStay.setDuration(200);
+				dotStay.setDuration(200 + 200);
 				dotStay.setStartOffset(300);
 				AnimationSet dot = new AnimationSet(true);
 				dot.addAnimation(dotIn);
@@ -1638,9 +1638,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				AlphaAnimation dotOut = new AlphaAnimation(1, 0);
 				dotOut.setDuration(100);
 				dotOut.setStartOffset(200);
+				RotateAnimation dotStay = new RotateAnimation(0, 360);
+				dotStay.setDuration(0 + 200);
+				dotStay.setStartOffset(300);
 				AnimationSet dot = new AnimationSet(true);
 				dot.addAnimation(dotIn);
 				dot.addAnimation(dotOut);
+				dot.addAnimation(dotStay);
 				dot.setAnimationListener(this);
 				dot.setStartOffset(400);
 				dot2.startAnimation(dot);
@@ -2036,6 +2040,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				viewFlipper.setDisplayedChild(BACKUP_FOUND);
 				prepareLayoutForBackupFound(null);
 			}
+			setWindowSoftInputState();
 			break;
 		case RESTORING_BACKUP:
 			if (viewFlipper.getDisplayedChild() == BACKUP_FOUND)

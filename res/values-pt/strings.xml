@@ -1194,12 +1194,10 @@
     <string name="n_more">MAIS %1$d</string>
     <string name="n_stickers">%1$d adesivos</string>
     <string name="last_backup">Último backup</string>
-    <string name="creating_backup_message">Criando um backup das conversas. Os backups diários são realizados às 03h00.</string>
     <string name="restore_account">Restaurar conta</string>
     <string name="account_backup">Backup da conta</string>
     <string name="backup_found">Backup encontrado</string>
     <string name="backup_found_hint">deseja restaurar a conta?</string>
-    <string name="restore">RESTAURAR</string>
     <string name="restoring...">Restaurando...</string>
     <string name="restoring..._hint">aguarde, pode demorar um pouco</string>
     <string name="restored">Restaurado</string>

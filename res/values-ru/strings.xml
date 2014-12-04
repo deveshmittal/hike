@@ -1194,12 +1194,10 @@
     <string name="n_more">ЕЩЕ %1$d</string>
     <string name="n_stickers">%1$d стик.</string>
     <string name="last_backup">Последняя резервная копия</string>
-    <string name="creating_backup_message">Создание резервных копий ваших чатов. Это происходит ежедневно в 03:00.</string>
     <string name="restore_account">Восстановите аккаунт</string>
     <string name="account_backup">Резервная копия аккаунта</string>
     <string name="backup_found">Найдена резервная копия.</string>
     <string name="backup_found_hint">Восстановить ваш аккаунт?</string>
-    <string name="restore">ВОССТАНОВИТЬ</string>
     <string name="restoring...">Восстановление...</string>
     <string name="restoring..._hint">пожалуйста, немного подождите</string>
     <string name="restored">Ваш аккаунт и сообщения</string>

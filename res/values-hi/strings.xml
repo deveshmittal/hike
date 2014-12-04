@@ -1194,12 +1194,10 @@
     <string name="n_more">%1$d अधिक</string>
     <string name="n_stickers">%1$d स्टिकर</string>
     <string name="last_backup">पिछला बैकअप</string>
-    <string name="creating_backup_message">आपकी चैट का बैकअप बनाया जा रहा है। दैनिक बैकअप 03:00 बजे होते हैं।</string>
     <string name="restore_account">खाता बहाल करें</string>
     <string name="account_backup">खाते का बैकअप</string>
     <string name="backup_found">बैकअप मिला है</string>
     <string name="backup_found_hint">क्या आप अपना खाता बहाल करना चाहेंगे?</string>
-    <string name="restore">बहाल करें</string>
     <string name="restoring...">बहाल हो रहा है...</string>
     <string name="restoring..._hint">कृपया प्रतीक्षा करें, इसमें कुछ समय लग सकता है</string>
     <string name="restored">बहाल किए गए</string>

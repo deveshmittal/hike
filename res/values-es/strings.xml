@@ -1194,12 +1194,10 @@
     <string name="n_more">%1$d MÁS</string>
     <string name="n_stickers">%1$d pegatinas</string>
     <string name="last_backup">Última copia de seguridad</string>
-    <string name="creating_backup_message">Estamos haciendo una copia de seguridad de tus conversaciones. Las copias se realizan todos los días a las 3:00.</string>
     <string name="restore_account">Restaurar cuenta</string>
     <string name="account_backup">Copia de seguridad de la cuenta</string>
     <string name="backup_found">Copia de seguridad encontrada</string>
     <string name="backup_found_hint">¿Quieres restaurar tu cuenta?</string>
-    <string name="restore">RESTAURAR</string>
     <string name="restoring...">Restaurando...</string>
     <string name="restoring..._hint">Espera, esta operación puede tardar un rato</string>
     <string name="restored">Restaurada</string>
