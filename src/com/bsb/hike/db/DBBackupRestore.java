@@ -68,6 +68,7 @@ public class DBBackupRestore
 					return false;
 
 				File backup = getDBBackupFile(dbCopy.getName());
+				Logger.d(getClass().getSimpleName(), "encrypting with key: " + backupToken);
 				CBCEncryption.encryptFile(dbCopy, backup, backupToken);
 				dbCopy.delete();
 			}
@@ -141,6 +142,7 @@ public class DBBackupRestore
 				File currentDB = getCurrentDBFile(fileName);
 				File dbCopy = getDBCopyFile(currentDB.getName());
 				File backup = getDBBackupFile(dbCopy.getName());
+				Logger.d(getClass().getSimpleName(), "decrypting with key: " + backupToken);
 				CBCEncryption.decryptFile(backup, dbCopy, backupToken);
 				importDatabase(dbCopy);
 				dbCopy.delete();
@@ -230,11 +232,15 @@ public class DBBackupRestore
 			if (!backup.exists())
 				return false;
 		}
-		if(!getBackupStateFile().exists())
+		BackupState state = getBackupState();
+		if (state != null)
 		{
-			return false;
+			if (state.getBackupTime() > 0)
+			{
+				return true;
+			}
 		}
-		return true;
+		return false;
 	}
 
 	public long getLastBackupTime()
