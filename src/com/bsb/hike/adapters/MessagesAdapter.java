@@ -588,7 +588,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		View v = convertView;
 		// Applicable to all kinds of messages
         if (type >= viewTypeCount){
-            v = mChatThreadCardRenderer.getView(v, convMessage);
+            v = mChatThreadCardRenderer.getView(v, convMessage, parent);
             DetailViewHolder holder = (DetailViewHolder) v.getTag();
             dayHolder = holder;
             setSenderDetails(convMessage, position, holder, false);
