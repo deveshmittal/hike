@@ -16,6 +16,7 @@
             android:id="@+id/overlay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/day_container"
             android:paddingBottom="2.5dp" >
 
         <include
@@ -37,7 +38,7 @@
 
         <RelativeLayout
                 android:id="@+id/message_container"
-                android:layout_width="300dp"
+                android:layout_width="273dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="3dp"
                 android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
@@ -45,24 +46,25 @@
                 android:tag="@string/content_card_tag"
                 android:layout_toRightOf="@id/avatar_container"
                 android:layout_below="@id/sender_details"
-                android:background="@drawable/ic_bubble_white_selector">
+                android:background="@drawable/content_card_received">
 
-            <FrameLayout android:layout_width="wrap_content"
-                         android:layout_height="wrap_content"
+            <FrameLayout android:layout_width="92dp"
+                         android:layout_height="76dp"
                          android:layout_alignParentRight="true"
                          android:layout_centerVertical="true"
                          android:id="@+id/video_image_container">
                 <ImageView
                         android:id="@+id/card_image"
                         android:tag="I1"
+                        android:scaleType="fitXY"
                         android:src="@drawable/hike_avtar_protip"
-                        android:layout_width="76dp"
-                        android:layout_height="76dp"/>
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
 
                 <ImageView android:layout_width="wrap_content"
                            android:layout_height="wrap_content"
                            android:layout_gravity="center"
-                           android:src="@drawable/ic_status_tip"/>
+                           android:src="@drawable/ic_videoicon"/>
 
             </FrameLayout>
 
@@ -80,12 +82,12 @@
                     android:layout_height="wrap_content"
                     >
 
-                <TextView
+                <com.bsb.hike.view.CustomFontTextView
                         android:id="@+id/title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="Dadi vs Jellies"
+                        android:visibility="gone"
                         android:textStyle="bold"
                         android:tag="T1"
                         android:textSize="14sp"
@@ -97,6 +99,7 @@
                 <LinearLayout android:layout_width="wrap_content"
                               android:layout_height="wrap_content"
                               android:layout_marginTop="5dp"
+                              android:gravity="center_vertical"
                               android:orientation="horizontal">
 
                     <ImageView
@@ -104,10 +107,11 @@
                             android:layout_alignParentRight="true"
                             android:layout_centerVertical="true"
                             android:tag="I2"
-                            android:src="@drawable/hike_avtar_protip"
+                            android:visibility="gone"
                             android:layout_width="14dp"
                             android:layout_height="14dp"/>
-                    <TextView
+
+                    <com.bsb.hike.view.CustomFontTextView
                             android:id="@+id/description"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -116,7 +120,7 @@
                             android:layout_marginLeft="5dp"
                             android:textStyle="italic"
                             android:textColor="#7a7c7d"
-                            android:text="Everyone's favourite Dadi"
+                            android:visibility="gone"
                             android:layout_gravity="center_vertical"
                             android:singleLine="true"
                             android:ellipsize="end"
