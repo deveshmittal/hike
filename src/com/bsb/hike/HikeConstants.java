@@ -1649,6 +1649,11 @@ public class HikeConstants
 		public static final String GALLERY_SELECTION = "gallery";
 
 		/*
+		 * File transfer success and failure event.
+		 */
+		public static final String FILE_TRANSFER_STATUS = "ftStatus";
+
+		/*
 		 * Atomic tips click events
 		 */
 		public static final String ATOMIC_FAVOURITES_TIP_CLICKED = "atomicFavTClick";

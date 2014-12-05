@@ -1,8 +1,6 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
-
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -61,6 +59,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
@@ -161,6 +160,7 @@ import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
+import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -2045,7 +2045,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 				else
 				{
-					initiateFileTransferFromIntentData(fileType, filePath, fileKey, isRecording, recordingDuration);
+					int attachmentType = FTAnalyticEvents.OTHER_ATTACHEMENT;
+					/*
+					 * Added to know the attachment type when selected from file. 
+					 */
+					if(intent.hasExtra(FTAnalyticEvents.FT_ATTACHEMENT_TYPE))
+						attachmentType = FTAnalyticEvents.FILE_ATTACHEMENT;
+					initiateFileTransferFromIntentData(fileType, filePath, fileKey, isRecording, recordingDuration, attachmentType);
 				}
 
 				// Making sure the file does not get forwarded again on
@@ -2113,7 +2119,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							}
 							else
 							{
-								initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true);
+								initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true, FTAnalyticEvents.OTHER_ATTACHEMENT);
 							}
 						}
 						else if (msgExtrasJson.has(HikeConstants.Extras.LATITUDE) && msgExtrasJson.has(HikeConstants.Extras.LONGITUDE)
@@ -2213,10 +2219,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void initiateFileTransferFromIntentData(String fileType, String filePath)
 	{
-		initiateFileTransferFromIntentData(fileType, filePath, null, false, -1);
+		initiateFileTransferFromIntentData(fileType, filePath, null, false, -1, FTAnalyticEvents.OTHER_ATTACHEMENT);
 	}
 
-	private void initiateFileTransferFromIntentData(String fileType, String filePath, String fileKey, boolean isRecording, long recordingDuration)
+	private void initiateFileTransferFromIntentData(String fileType, String filePath, String fileKey, boolean isRecording, long recordingDuration, int attachementType)
 	{
 		HikeFileType hikeFileType = HikeFileType.fromString(fileType, isRecording);
 
@@ -2228,7 +2234,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else
 		{
-			initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true);
+			initialiseFileTransfer(filePath, fileKey, hikeFileType, fileType, isRecording, recordingDuration, true, attachementType);
 		}
 
 	}
@@ -4882,7 +4888,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			{
 				hikeFile.delete(getApplicationContext());
 			}
-			FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent());
+			FileTransferManager.getInstance(getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent(), hikeFile.getFileSize());
 			mAdapter.notifyDataSetChanged();
 		}
 	}
@@ -5499,7 +5505,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 0:
 					requestCode = HikeConstants.IMAGE_CAPTURE_CODE;
 					pickIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-					selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null, true);
+					File selectedDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
+					if (!selectedDir.exists())
+					{
+						if (!selectedDir.mkdirs())
+						{
+							Logger.d(getClass().getSimpleName(), "failed to create directory");
+							return;
+						}
+					}
+					String fileName = Utils.getOriginalFile(HikeFileType.IMAGE, null);
+					selectedFile = new File(selectedDir.getPath() + File.separator + fileName); 
 
 					pickIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFile));
 					/*
@@ -5853,7 +5869,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				{
 					return;
 				}
-				initialiseFileTransfer(selectedFile.getPath(), null, HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true, recordedTime, false);
+				initialiseFileTransfer(selectedFile.getPath(), null, HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true, recordedTime, false, FTAnalyticEvents.AUDIO_ATTACHEMENT);
 			}
 		});
 
@@ -6093,7 +6109,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				return;
 			}
 
-			HikeFileType hikeFileType = (requestCode == HikeConstants.IMAGE_TRANSFER_CODE || requestCode == HikeConstants.IMAGE_CAPTURE_CODE) ? HikeFileType.IMAGE
+			final HikeFileType hikeFileType = (requestCode == HikeConstants.IMAGE_TRANSFER_CODE || requestCode == HikeConstants.IMAGE_CAPTURE_CODE) ? HikeFileType.IMAGE
 					: requestCode == HikeConstants.VIDEO_TRANSFER_CODE ? HikeFileType.VIDEO : HikeFileType.AUDIO;
 
 			String filePath = null;
@@ -6124,6 +6140,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					clearTempData();
 					return;
 				}
+				// Added this to avoid twice upload on capturing image from camera. 
+				//Issue is happening on device Samsung Ace.GT-S5830i due to "onActivityResult" called twice for image capture.
+				else if(requestCode == HikeConstants.IMAGE_CAPTURE_CODE)
+				{
+					if(selectedFile == null || !selectedFile.exists())
+						return;
+				}
 				else
 				{
 					String fileUriStart = "file://";
@@ -6143,7 +6166,59 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					Logger.d(getClass().getSimpleName(), "File path: " + filePath);
 				}
 			}
-			initialiseFileTransfer(filePath, null, hikeFileType, null, false, -1, false);
+
+			int attachementType = FTAnalyticEvents.OTHER_ATTACHEMENT;
+			switch (requestCode)
+			{
+				case HikeConstants.IMAGE_CAPTURE_CODE:
+					attachementType = FTAnalyticEvents.CAMERA_ATTACHEMENT;
+					break;
+				case HikeConstants.IMAGE_TRANSFER_CODE:
+					attachementType = FTAnalyticEvents.GALLERY_ATTACHEMENT;
+					break;
+				case HikeConstants.VIDEO_TRANSFER_CODE:
+					attachementType = FTAnalyticEvents.VIDEO_ATTACHEMENT;
+					break;
+				case HikeConstants.AUDIO_TRANSFER_CODE:
+					attachementType = FTAnalyticEvents.AUDIO_ATTACHEMENT;
+					break;
+				default:
+					break;
+			}
+			if (selectedFile != null && requestCode == HikeConstants.IMAGE_CAPTURE_CODE)
+			{
+				final String fPath = filePath;
+				final int atType = attachementType;
+				
+				HikeDialog.showDialog(ChatThread.this, HikeDialog.SHARE_IMAGE_QUALITY_DIALOG, new HikeDialog.HikeDialogListener()
+				{
+					@Override
+					public void onSucess(Dialog dialog)
+					{
+						initialiseFileTransfer(fPath, null, hikeFileType, null, false, -1, false, atType);
+						dialog.dismiss();
+					}
+
+					@Override
+					public void negativeClicked(Dialog dialog)
+					{
+
+					}
+
+					@Override
+					public void positiveClicked(Dialog dialog)
+					{
+
+					}
+
+					@Override
+					public void neutralClicked(Dialog dialog)
+					{
+
+					}
+				}, (Object[]) new Long[] { (long) 1, selectedFile.length() });
+			}else
+				initialiseFileTransfer(filePath, null, hikeFileType, null, false, -1, false, attachementType);
 		}
 		else if (requestCode == HikeConstants.SHARE_LOCATION_CODE && resultCode == RESULT_OK)
 		{
@@ -6438,7 +6513,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	}
 
 	private void initialiseFileTransfer(String filePath, String fileKey, HikeFileType hikeFileType, String fileType, boolean isRecording, long recordingDuration,
-			boolean isForwardingFile)
+			boolean isForwardingFile, int attachementType)
 	{
 		clearTempData();
 		if (filePath == null)
@@ -6455,7 +6530,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			return;
 		}
 		FileTransferManager.getInstance(getApplicationContext()).uploadFile(mContactNumber, file, fileKey, fileType, hikeFileType, isRecording, isForwardingFile,
-				mConversation.isOnhike(), recordingDuration);
+				mConversation.isOnhike(), recordingDuration, attachementType);
 	}
 
 	private void initialiseLocationTransfer(double latitude, double longitude, int zoomLevel)
@@ -7713,7 +7788,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				case 0:
 					HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
 					File file = hikeFile.getFile();
-					FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(), file, message.isSent());
+					FileTransferManager.getInstance(getApplicationContext()).cancelTask(message.getMsgID(), file, message.isSent(), hikeFile.getFileSize());
 					mAdapter.notifyDataSetChanged();
 					destroyActionMode();
 					break;
