@@ -38,96 +38,100 @@
 
         <RelativeLayout
             android:id="@+id/message_container"
-            android:layout_width="271dp"
-            android:layout_height="wrap_content"
+            android:layout_width="273dp"
+            android:layout_height="92dp"
             android:layout_marginBottom="3dp"
             android:layout_marginLeft="@dimen/chat_bubble_edge_spacing"
             android:layout_marginTop="3dp"
             android:tag="@string/content_card_tag"
             android:layout_toRightOf="@id/avatar_container"
             android:layout_below="@id/sender_details"
-            android:background="@drawable/ic_bubble_gray_recieved">
+            android:background="@drawable/content_card_received">
 
+            <ImageView
+                    android:id="@+id/card_image"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
+                    android:tag="I1"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/hike_avtar_protip"
+                    android:layout_width="92dp"
+                    android:layout_height="92dp"/>
 
-                <ImageView
-                        android:id="@+id/card_image"
-                        android:tag="I1"
-                        android:layout_marginLeft="17dp"
-                        android:layout_marginTop="7dp"
-                        android:scaleType="fitXY"
-                        android:visibility="gone"
-                        android:layout_width="74.5dp"
-                        android:layout_height="74.5dp"/>
 
 
             <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_toRightOf="@id/card_image"
-                    android:padding="12dp"
+                    android:layout_width="wrap_content"
+                    android:layout_toLeftOf="@id/card_image"
+                    android:layout_alignParentLeft="true"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp"
+                    android:gravity="center_vertical"
                     android:id="@+id/text_container"
-                    android:layout_height="wrap_content"
+                    android:layout_height="92dp"
                     >
+
+
 
 
                 <com.bsb.hike.view.CustomFontTextView
                         android:id="@+id/title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Dadi vs Jellies"
-                        android:textStyle="bold|italic"
+                        android:textStyle="bold"
                         android:tag="T1"
-                        android:textSize="14sp"
-                        android:visibility="gone"
-                        android:textColor="#ffffff"
-                        android:maxLines="3"
+                        android:textSize="15sp"
+                        android:textColor="#292929"
+                        android:singleLine="true"
                         android:ellipsize="end"
                         />
+
+                <com.bsb.hike.view.CustomFontTextView
+                        android:id="@+id/payment_info"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_alignBottom="@id/title"
+                        android:layout_toRightOf="@id/title"
+                        android:tag="T2"
+                        android:singleLine="true"
+                        android:textColor="#92ce28"
+                        android:textSize="11sp"
+                        />
+
+
 
 
                 <com.bsb.hike.view.CustomFontTextView
                         android:id="@+id/description"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="14sp"
-                        android:layout_marginTop="2dp"
-                        android:tag="T2"
-                        android:textStyle="italic"
-                        android:visibility="gone"
+                        android:textSize="13sp"
+                        android:tag="T3"
                         android:layout_below="@id/title"
-                        android:text="get a Chai Cup "
-                        android:textColor="#ffffff"
+                        android:textColor="#7a7c7d"
                         android:layout_gravity="center_vertical"
-                        android:maxLines="3"
+                        android:singleLine="true"
                         android:ellipsize="end"
                         />
 
                 <com.bsb.hike.view.CustomFontTextView
                         android:layout_width="wrap_content"
-                        android:text="FREE"
                         android:gravity="center"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
-                        android:layout_height="24dp"
-                        android:visibility="gone"
+                        android:padding="5dp"
+                        android:layout_height="wrap_content"
                         android:textColor="#ffffff"
-                        android:background="@drawable/game_card_green_btn"
-                        android:tag="T3"
-                        android:textStyle="bold|italic"
-                        android:layout_marginTop="6dp"
+                        android:background="@drawable/greenbtnhike"
+                        android:tag="T4"
+                        android:layout_marginTop="5dp"
                         android:layout_below="@id/description"
-                        android:textSize="12sp"
+                        android:textSize="14sp"
+                        android:enabled="false"
                         android:singleLine="true"
                         android:ellipsize="end"
                         />
 
             </RelativeLayout>
-
-            <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentTop="true"
-                    android:src="@drawable/art_joystick"/>
 
 
          </RelativeLayout>

@@ -6,31 +6,30 @@
                 android:descendantFocusability="blocksDescendants"
                 android:gravity="center_vertical|right"
                 android:minHeight="30dp"
-                android:paddingBottom="4dp">
+                android:paddingBottom="4dp" >
 
     <ViewStub
             android:id="@+id/day_stub"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout="@layout/message_day_container"/>
+            android:layout="@layout/message_day_container" />
 
     <RelativeLayout
             android:id="@+id/overlay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_below="@id/day_container"
-            android:paddingBottom="2.5dp">
+            android:paddingBottom="2.5dp" >
 
         <RelativeLayout
                 android:id="@+id/message_container"
-                android:layout_width="273dp"
-                android:layout_height="92dp"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:tag="@string/content_card_tag"
                 android:layout_marginRight="@dimen/chat_bubble_edge_spacing"
                 android:layout_marginTop="3dp"
-                android:background="@drawable/content_card_selector_sent"
+                android:background="@drawable/ic_bubble_green_selector"
                 android:orientation="vertical"
                 >
 
@@ -48,21 +47,20 @@
                     android:layout_width="wrap_content"
                     android:layout_toLeftOf="@id/card_image"
                     android:layout_alignParentLeft="true"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"
+                    android:padding="12dp"
                     android:layout_centerVertical="true"
                     android:id="@+id/text_container"
                     android:orientation="vertical"
                     android:layout_height="wrap_content"
                     >
 
-                <com.bsb.hike.view.CustomFontTextView
+                <TextView
                         android:id="@+id/title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="Dadi vs Jellies"
                         android:textStyle="bold"
                         android:tag="T1"
-                        android:visibility="gone"
                         android:textSize="14sp"
                         android:textColor="#292929"
                         android:maxLines="2"
@@ -72,7 +70,6 @@
                 <LinearLayout android:layout_width="wrap_content"
                               android:layout_height="wrap_content"
                               android:layout_marginTop="5dp"
-                              android:gravity="center_vertical"
                               android:orientation="horizontal">
 
                     <ImageView
@@ -80,27 +77,26 @@
                             android:layout_alignParentRight="true"
                             android:layout_centerVertical="true"
                             android:tag="I2"
-                            android:visibility="gone"
+                            android:src="@drawable/hike_avtar_protip"
                             android:layout_width="14dp"
                             android:layout_height="14dp"/>
-
-                    <com.bsb.hike.view.CustomFontTextView
+                    <TextView
                             android:id="@+id/description"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="13sp"
                             android:tag="T2"
-                            android:visibility="gone"
                             android:layout_marginLeft="5dp"
                             android:textStyle="italic"
                             android:textColor="#7a7c7d"
+                            android:text="Everyone's favourite Dadi"
                             android:layout_gravity="center_vertical"
                             android:singleLine="true"
                             android:ellipsize="end"
                             />
                 </LinearLayout>
 
-                <com.bsb.hike.view.CustomFontTextView
+                <TextView
                         android:id="@+id/package_info"
                         android:layout_width="wrap_content"
                         android:layout_marginTop="5dp"
@@ -108,9 +104,9 @@
                         android:layout_height="wrap_content"
                         android:textColor="#adb1b4"
                         android:tag="T3"
-                        android:visibility="gone"
                         android:textSize="10sp"
                         android:textStyle="italic"
+                        android:text="Get it on play store"
                         android:enabled="false"
                         android:singleLine="true"
                         android:ellipsize="end"
@@ -128,7 +124,7 @@
                 android:layout_below="@id/message_container"
                 android:layout_marginRight="@dimen/chat_bubble_time_edge_spacing"
                 android:layout_marginTop="4dp"
-                layout="@layout/message_time_status_ext"/>
+                layout="@layout/message_time_status_ext" />
     </RelativeLayout>
 
     <include
@@ -136,7 +132,7 @@
             android:layout_height="match_parent"
             android:layout_alignBottom="@id/overlay"
             android:layout_alignTop="@id/overlay"
-            layout="@layout/message_overlay"/>
+            layout="@layout/message_overlay" />
 
     <ViewStub
             android:id="@+id/message_info_stub"
@@ -144,6 +140,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_below="@id/overlay"
-            android:layout="@layout/message_sent_info"/>
+            android:layout="@layout/message_sent_info" />
 
 </RelativeLayout>
