@@ -98,6 +98,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewStub;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
@@ -186,6 +187,7 @@ import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
@@ -328,6 +330,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private View hikeToOfflineTipview;
 	
 	private TextView topUnreadPinsIndicator;
+	
+	private ViewStub pulsatingDot;
+	
+	private View pulsatingDotInflated;
 
 	private int HIKE_TO_OFFLINE_TIP_STATE_1 = 1;
 
@@ -356,7 +362,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
 			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA,HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT,HikePubSub.CONV_META_DATA_UPDATED, 
-			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED };
+			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED, HikePubSub.STICKER_FTUE_TIP };
 
 	private EmoticonType emoticonType;
 
@@ -684,7 +690,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		super.onCreate(savedInstanceState);
 
 		/* force the user into the reg-flow process if the token isn't set */
-		if (Utils.requireAuth(this))
+		if (Utils.requireAuth(this) || Utils.showNuxScreen(this))
 		{
 			return;
 		}
@@ -860,7 +866,31 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		Logger.i("chatthread", "on create end");
 
 	}
+	
+	private void startPulsatingDotAnimation()
+	{
+		new Handler().postDelayed(new Runnable()
+		{
 
+			@Override
+			public void run()
+			{
+				ImageView ringView1 = (ImageView) findViewById(R.id.ring1);
+				ringView1.startAnimation(HikeAnimationFactory.getPulsatingDotAnimation(0));
+			}
+		}, 0);
+
+		new Handler().postDelayed(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				ImageView ringView2 = (ImageView) findViewById(R.id.ring2);
+				ringView2.startAnimation(HikeAnimationFactory.getPulsatingDotAnimation(0));
+			}
+		}, 1500);
+	}
+	
 	private boolean showImpMessageIfRequired()
 	{
 		if (mConversation instanceof GroupConversation && mConversation.getMetaData() != null && mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
@@ -2478,25 +2508,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			}
 		}
 
-		/*
-		 * Only show these tips in a live group conversation or other conversations and is the conversation is not a hike bot conversation.
-		 */
-		if (!HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
-		{
-			boolean shownSticker = true;
-			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
-			{
-				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false))
-				{
-					shownSticker = false;
-					showStickerFtueTip();
-				}
-			}
-          
-		}
+		shouldShowStickerFtueTip();
 		
-		
-
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 
 		shouldRunTimerForHikeOfflineTip = true;
@@ -2635,37 +2648,57 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		return true;
 	}
 
+	private void shouldShowStickerFtueTip()
+	{
+		/*
+		 * Only show these tips in a live group conversation or other conversations and is the conversation is not a hike bot conversation.
+		 */
+		boolean isNuxBot = mContactNumber.equals(HikeConstants.NUX_BOT);
+		
+		if (isNuxBot || !HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
+		{
+			if (!(mConversation instanceof GroupConversation) || ((GroupConversation) mConversation).getIsGroupAlive())
+			{
+				if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, isNuxBot))
+				{
+					showStickerFtueTip();
+				}
+			}
+		}
+	}
+	
 	private void showStickerFtueTip()
 	{
 		// if some other tip is visible , make its visibility gone, giving more priority to sticker tip 
 		if(tipView!=null){
 			tipView.setVisibility(View.GONE);
 		}
-		tipView = findViewById(R.id.emoticon_tip);
-		tipView.setVisibility(View.VISIBLE);
-		tipView.setOnTouchListener(new OnTouchListener()
+		
+		if (pulsatingDotInflated == null)
 		{
-			@Override
-			public boolean onTouch(View arg0, MotionEvent arg1)
+			pulsatingDot = (ViewStub) findViewById(R.id.pulsatingDotViewStub);
+			pulsatingDot.setOnInflateListener(new ViewStub.OnInflateListener()
 			{
-				// disabling on touch gesture for sticker ftue tip
-				// so that we do not send an unnecessary nudge on a
-				// double tap on tipview.
-				return true;
+				@Override
+				public void onInflate(ViewStub stub, View inflated)
+				{
+					pulsatingDotInflated = inflated;
+				}
+			});
+			try
+			{
+				pulsatingDot.inflate();
 			}
-		});
-		tipView.setTag(TipType.EMOTICON);
+			catch (Exception e)
+			{
 
-		ImageView closeIcon = (ImageView) tipView.findViewById(R.id.close_tip);
-		closeIcon.setOnClickListener(new View.OnClickListener()
+			}
+		}
+		else
 		{
-
-			@Override
-			public void onClick(View v)
-			{
-				HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
-			}
-		});
+			pulsatingDotInflated.setVisibility(View.VISIBLE);
+		}
+		startPulsatingDotAnimation();
 	}
 	
 	private void showPinFtueTip()
@@ -2788,7 +2821,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void addUnkownContactBlockHeader()
 	{
-		if (contactInfo != null && contactInfo.isUnknownContact())
+		if (contactInfo != null && contactInfo.isUnknownContact() && !mContactNumber.equals(HikeConstants.NUX_BOT))
 		{
 			if (messages != null && messages.size() > 0)
 			{
@@ -4280,6 +4313,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						stickerAdapter.notifyDataSetChanged();
 					}
 				});
+		}
+		else if (HikePubSub.STICKER_FTUE_TIP.equals(type))
+		{
+			runOnUiThread(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					shouldShowStickerFtueTip();
+				}
+			});
 		}
 	}
 
@@ -6622,6 +6667,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			/*
 			 * Added this code to prevent the sticker ftue tip from showing up if the user has already used stickers.
 			 */
+			if (null != pulsatingDotInflated)
+			{
+				pulsatingDotInflated.setVisibility(View.GONE);
+			}
 			Editor editor = prefs.edit();
 			editor.putBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
 			editor.commit();
@@ -6879,8 +6928,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Logger.d("ViewPager", "Page number: " + pageNum);
 			if (emoticonType == EmoticonType.STICKERS)
 			{
-				StickerCategory category = stickerAdapter.getStickerCategory(pageNum);
-				if(category.getState() == StickerCategory.DONE)
+				StickerCategory category = stickerAdapter.getCategoryForIndex(pageNum);
+				if(category.getState() == StickerCategory.DONE || category.getState() == StickerCategory.DONE_SHOP_SETTINGS)
 				{
 					category.setState(StickerCategory.NONE);
 				}
@@ -7668,6 +7717,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			catch (JSONException e)
 			{
 				Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
+			}
+			if(HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false) && mContactNumber.equals(HikeConstants.NUX_BOT))
+			{
+				intent.putExtra(HikeConstants.NUX_INVITE_FORWARD, true);
 			}
 			intent.putExtra(HikeConstants.Extras.MULTIPLE_MSG_OBJECT, multipleMsgArray.toString());
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);

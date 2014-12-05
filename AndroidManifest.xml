@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="893"
-    android:versionName="3.5.0.42" >
+    android:versionCode="911"
+    android:versionName="3.5.1" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -122,6 +122,11 @@
             android:label="@string/app_label"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan|stateAlwaysVisible" >
+        </activity>
+        <activity
+            android:name="com.bsb.hike.ui.FtueActivity"
+            android:label="@string/app_label"
+            android:launchMode="singleTop" >
         </activity>
         <activity
             android:name="com.bsb.hike.ui.ChatThread"
@@ -323,7 +328,14 @@
                 <action android:name="com.android.vending.INSTALL_REFERRER" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".service.AlarmBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="com.bsb.hike.START_ALARM" />
+            </intent-filter>
+        </receiver>
 
+        <service android:name=".service.SimpleWakefulService" >
+        </service>
     </application>
 
 </manifest>

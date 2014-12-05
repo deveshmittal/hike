@@ -92,6 +92,7 @@ import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -152,6 +153,7 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -174,6 +176,8 @@ import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.FtueActivity;
+import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -579,6 +583,18 @@ public class Utils
 		return false;
 	}
 
+	public static boolean showNuxScreen(Activity activity)
+	{
+		SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (settings.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false))
+		{
+			activity.startActivity(new Intent(activity, FtueActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+			activity.finish();
+			return true;
+		}
+		return false;
+	}
+	
 	public static void disconnectAndStopService(Activity activity)
 	{
 		// Added these lines to prevent the bad username/password bug.
@@ -3210,7 +3226,6 @@ public class Utils
 	{
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
 
 	public static void resetUnseenFriendRequestCount(Context context)
@@ -4140,17 +4155,17 @@ public class Utils
 	 * Adding this method to compute the overall count for showing in overflow menu on home screen
 	 * 
 	 * @param accountPref
-	 * @param count
+	 * @param defaultValue
 	 * @return
 	 */
-	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref)
+	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref, boolean defaultValue)
 	{
 		int overallCount = 0;
-		if (!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
+		if (!(accountPref.getBoolean(HikeConstants.IS_GAMES_ITEM_CLICKED, defaultValue)) && accountPref.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
 		{
 			overallCount++;
 		}
-		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
+		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, defaultValue)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
 		{
 			overallCount++;
 		}
@@ -4166,6 +4181,7 @@ public class Utils
 		{
 			Editor editor = accountPref.edit();
 			editor.putInt(HikeMessengerApp.FRIEND_REQ_COUNT, currentCount);
+			editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
 			editor.commit();
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_COUNT_CHANGED, null);
@@ -4861,6 +4877,97 @@ public class Utils
 	public static int getDeviceOrientation(Context ctx)
 	{
 		return ctx.getResources().getConfiguration().orientation;
+	}
+	
+	/**
+	 * Fetches the network connection using connectivity manager
+	 * @param context
+	 * @return
+	 * <li>-1 in case of no network</li>
+	 * <li> 0 in case of unknown network</li>
+	 * <li> 1 in case of wifi</li>
+	 * <li> 2 in case of 2g</li>
+	 * <li> 3 in case of 3g</li>
+	 * <li> 4 in case of 4g</li>
+	 *     
+	 */
+	public static short getNetworkType(Context context)
+	{
+		int networkType = -1;
+		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		// Contains all the information about current connection
+		NetworkInfo info = cm.getActiveNetworkInfo();
+		if (info != null)
+		{
+			if (!info.isConnected())
+				return -1;
+			// If device is connected via WiFi
+			if (info.getType() == ConnectivityManager.TYPE_WIFI)
+				return 1; // return 1024 * 1024;
+			else
+				networkType = info.getSubtype();
+		}
+
+		// There are following types of mobile networks
+		switch (networkType)
+		{
+		case TelephonyManager.NETWORK_TYPE_HSUPA: // ~ 1-23 Mbps
+		case TelephonyManager.NETWORK_TYPE_LTE: // ~ 10+ Mbps // API level 11
+		case TelephonyManager.NETWORK_TYPE_HSPAP: // ~ 10-20 Mbps // API level 13
+		case TelephonyManager.NETWORK_TYPE_EVDO_B: // ~ 5 Mbps // API level 9
+			return 4;
+		case TelephonyManager.NETWORK_TYPE_EVDO_0: // ~ 400-1000 kbps
+		case TelephonyManager.NETWORK_TYPE_EVDO_A: // ~ 600-1400 kbps
+		case TelephonyManager.NETWORK_TYPE_HSDPA: // ~ 2-14 Mbps
+		case TelephonyManager.NETWORK_TYPE_HSPA: // ~ 700-1700 kbps
+		case TelephonyManager.NETWORK_TYPE_UMTS: // ~ 400-7000 kbps
+		case TelephonyManager.NETWORK_TYPE_EHRPD: // ~ 1-2 Mbps // API level 11
+			return 3;
+		case TelephonyManager.NETWORK_TYPE_1xRTT: // ~ 50-100 kbps
+		case TelephonyManager.NETWORK_TYPE_CDMA: // ~ 14-64 kbps
+		case TelephonyManager.NETWORK_TYPE_EDGE: // ~ 50-100 kbps
+		case TelephonyManager.NETWORK_TYPE_GPRS: // ~ 100 kbps
+		case TelephonyManager.NETWORK_TYPE_IDEN: // ~25 kbps // API level 8
+			return 2;
+		case TelephonyManager.NETWORK_TYPE_UNKNOWN:
+		default:
+			return 0;
+		}
+	}
+
+	public static void sendDetailsAfterSignup(Context context, boolean upgrade, boolean sendBot)
+	{
+		sendDeviceDetails(context, upgrade, sendBot);
+		SharedPreferences accountPrefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP, false))
+		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FB_CLICK);
+		}
+		if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) > -1)
+		{
+			if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+			}
+			else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+			}
+			Editor editor = accountPrefs.edit();
+			editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
+			editor.commit();
+		}
+	}
+
+	private static void sendDeviceDetails(Context context, boolean upgrade, boolean sendBot)
+	{
+		JSONObject obj = getDeviceDetails(context);
+		if (obj != null)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+		}
+		requestAccountInfo(upgrade, sendBot);
+		sendLocaleToServer(context);
 	}
 
 }

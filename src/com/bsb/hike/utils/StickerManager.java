@@ -190,6 +190,8 @@ public class StickerManager
 	public static final long MINIMUM_FREE_SPACE = 10 * 1024 * 1024;
 
 	public static final String SHOW_STICKER_SHOP_BADGE = "showStickerShopBadge";
+
+	public static final String STICKER_RES_ID = "stickerResId";
 	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
@@ -1067,7 +1069,7 @@ public class StickerManager
 		category.updateDownloadedStickersCount();
 		if(downloadSource == DownloadSource.SHOP || downloadSource == DownloadSource.SETTINGS)
 		{
-			category.setState(StickerCategory.NONE);
+			category.setState(StickerCategory.DONE_SHOP_SETTINGS);
 		}
 		else
 		{

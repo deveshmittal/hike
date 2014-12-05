@@ -211,7 +211,7 @@ public abstract class ImageWorker
 
 	private void setDefaultAvatar(ImageView imageView, String data)
 	{
-		int idx = data.indexOf(ROUND_SUFFIX);
+		int idx = data.lastIndexOf(ROUND_SUFFIX);
 		boolean rounded = false;
 		if (idx > 0)
 		{
@@ -220,7 +220,7 @@ public abstract class ImageWorker
 		}
 		else
 		{
-			int idx1 = data.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
+			int idx1 = data.lastIndexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
 			if (idx1 > 0)
 				data = new String(data.substring(0, idx1));
 		}
