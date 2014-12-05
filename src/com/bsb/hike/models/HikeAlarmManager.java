@@ -5,6 +5,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
+import com.bsb.hike.utils.Utils;
+
 /**
  * A AlarmManager Utility class to set alarms at specific times to perform functions.
  * 
@@ -76,11 +78,28 @@ public class HikeAlarmManager
 
 		if (WillWakeCPU)
 		{
-			mAlarmManager.set(AlarmManager.RTC_WAKEUP, time, mPendingIntent);
+			if (Utils.isKitkatOrHigher())
+			{
+				mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, time, mPendingIntent);
+			}
+			else
+			{
+
+				mAlarmManager.set(AlarmManager.RTC_WAKEUP, time, mPendingIntent);
+			}
 		}
 
 		else
 		{
+
+			if (Utils.isKitkatOrHigher())
+			{
+				mAlarmManager.setExact(AlarmManager.RTC, time, mPendingIntent);
+			}
+			else
+			{
+				mAlarmManager.set(AlarmManager.RTC, time, mPendingIntent);
+			}
 			mAlarmManager.set(AlarmManager.RTC, time, mPendingIntent);
 		}
 	}
