@@ -273,6 +273,10 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if (!TextUtils.isEmpty(festivePopupType))
 		{
 			ViewStub festiveView = (ViewStub) findViewById(R.id.festive_view_stub);
+			if(festivePopupType.equals(FestivePopup.NEW_YEAR_POPUP))
+			{
+				festiveView.setLayoutResource(R.layout.new_year_popup);
+			}
 			festiveView.setOnInflateListener(new ViewStub.OnInflateListener()
 			{
 				@Override
