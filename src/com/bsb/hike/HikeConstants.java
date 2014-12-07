@@ -949,6 +949,8 @@ public class HikeConstants
 	
 	public static final String SHOW_STEALTH_POPUP = "stlthrmd";
 	
+	public static final String FESTIVE_POPUP = "festive";
+
 	public static final String SHOW_FESTIVE_POPUP = "showFestivePopup";
 
 	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
