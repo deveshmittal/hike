@@ -43,6 +43,7 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -94,8 +95,10 @@ public class HikeNotification
 	private final SharedPreferences sharedPreferences;
 
 	private HikeNotificationMsgStack hikeNotifMsgStack;
+	
+	private static HikeNotification hikeNotificationInstance;
 
-	public HikeNotification(final Context context)
+	private HikeNotification(final Context context)
 	{
 		this.context = context;
 		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -113,6 +116,15 @@ public class HikeNotification
 			NOTIF_SOUND_DEFAULT = res.getString(R.string.notif_sound_default);
 			NOTIF_SOUND_HIKE = res.getString(R.string.notif_sound_Hike);
 		}
+	}
+	
+	public static HikeNotification getInstance(Context context)
+	{
+		if(hikeNotificationInstance == null)
+		{
+			hikeNotificationInstance = new HikeNotification(context.getApplicationContext());
+		}
+		return hikeNotificationInstance;
 	}
 
 	public void notifySMSPopup(final String bodyString)
@@ -498,6 +510,14 @@ public class HikeNotification
 	{
 		hikeNotifMsgStack.addConvMessageList(convMessagesList);
 
+		showNotificationForCurrentMsgStack(hikeNotifMsgStack.forceBlockNotificationSound());
+	}
+	
+	/**
+	 * Sends a notification for all the currently added messages in hikeNotifMsgStack
+	 */
+	public void showNotificationForCurrentMsgStack(boolean shouldNotPlaySound)
+	{
 		hikeNotifMsgStack.invalidateConvMsgList();
 
 		boolean isSingleMsisdn = hikeNotifMsgStack.isFromSingleMsisdn();
@@ -525,7 +545,7 @@ public class HikeNotification
 					showNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 							hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 							hikeNotifMsgStack.getNotificationBigText(), convMessage.getMsisdn(), bigPictureImage, !convMessage.isStickerMessage(), false, false,
-							hikeNotifMsgStack.getNotificationSubText(), null, false);
+							hikeNotifMsgStack.getNotificationSubText(), null, shouldNotPlaySound);
 					return;
 				}
 			}
@@ -536,7 +556,7 @@ public class HikeNotification
 			showBigTextStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 					hikeNotifMsgStack.getNotificationBigText(), isSingleMsisdn ? hikeNotifMsgStack.lastAddedMsisdn : "bulk", hikeNotifMsgStack.getNotificationSubText(),
-					avatarDrawable, hikeNotifMsgStack.forceBlockNotificationSound());
+					avatarDrawable, shouldNotPlaySound);
 
 		}
 		else
@@ -544,7 +564,7 @@ public class HikeNotification
 			showInboxStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
 					hikeNotifMsgStack.getNotificationBigText(), isSingleMsisdn ? hikeNotifMsgStack.lastAddedMsisdn : "bulk", hikeNotifMsgStack.getNotificationSubText(),
-					avatarDrawable, hikeNotifMsgStack.getBigTextList(), hikeNotifMsgStack.forceBlockNotificationSound());
+					avatarDrawable, hikeNotifMsgStack.getBigTextList(), shouldNotPlaySound);
 		}
 
 	}
@@ -1156,5 +1176,11 @@ public class HikeNotification
 		mBuilder.setDeleteIntent(pendingIntent);
 
 		return mBuilder;
+	}
+
+	public long getNextRetryNotificationTime()
+	{
+		long currTime = System.currentTimeMillis();
+		return currTime + HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.RETRY_NOTIFICATION_COOL_OFF_TIME, HikeConstants.DEFAULT_RETRY_NOTIF_TIME);
 	}
 }

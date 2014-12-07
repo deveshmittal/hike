@@ -1,5 +1,8 @@
 package com.bsb.hike.models;
 
+import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.utils.Logger;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -29,11 +32,15 @@ public class HikeAlarmManager
 	// Declare all the request code here .Should be unique.//
 
 	public static final int REQUESTCODE_NOTIFICATION_PRELOAD = 4567;
+	
+	public static final int REQUESTCODE_RETRY_LOCAL_NOTIFICATION = 4568;
 
 	public static final int REQUESTCODE_DEFAULT = 0;
 
 	// ******************************************************//
 	public static final String INTENT_EXTRA = "intent_extra";
+	
+	public static final String LOG_TAG = "HikeAlarmManager";
 
 	/**
 	 * 
@@ -157,10 +164,15 @@ public class HikeAlarmManager
 
 		int requestCode = intent.getIntExtra(HikeAlarmManager.INTENT_EXTRA, HikeAlarmManager.REQUESTCODE_DEFAULT);
 
+		Logger.i(LOG_TAG, "processTasks called with request Code "+requestCode+ "time = "+System.currentTimeMillis());
+		
 		switch (requestCode)
 		{
 		case HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD:
 			// PreloadNotificationSchedular.performActionWhenAlarmReceived(context);
+			break;
+		case HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION:
+			HikeNotification.getInstance(context).showNotificationForCurrentMsgStack(true);
 			break;
 		default:
 
