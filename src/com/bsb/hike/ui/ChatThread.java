@@ -6755,7 +6755,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					
 					if(!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 					{
-						shopIconViewGroup.setBackgroundResource(R.color.shop_icon_color);
+						View animatedBackground = emoticonLayout.findViewById(R.id.animated_backgroud);
+						animatedBackground.setVisibility(View.VISIBLE);
+						animatedBackground.startAnimation(HikeAnimationFactory.getScaleOutBackgroundAnimation());
+
+						shopIcon.setAnimation(HikeAnimationFactory.getStickerShopIconAnimation());
 					}
 					
 					shopIconViewGroup.setOnClickListener(new View.OnClickListener()
