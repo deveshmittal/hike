@@ -58,6 +58,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeConstants;
@@ -75,6 +76,7 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.tasks.SendLogsTask;
@@ -82,6 +84,7 @@ import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
+import com.bsb.hike.utils.FestivePopup;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.StickerManager;
@@ -103,7 +106,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private enum DialogShowing
 	{
-		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING, UPGRADE_POPUP, FREE_INVITE_POPUP, STEALTH_FTUE_POPUP, STEALTH_FTUE_EMPTY_STATE_POPUP, FESTIVE_POPUP
 	}
 
 	private DialogShowing dialogShowing;
@@ -153,6 +156,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private ConversationFragment mainFragment;
 	
 	private Handler mHandler = new Handler();
+
+	private SnowFallView snowFallView;
 
 	private String[] homePubSubListeners = { HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
@@ -264,8 +269,44 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
 
+		final String festivePopupType = accountPrefs.getString(HikeConstants.SHOW_FESTIVE_POPUP, "");
+		if (!TextUtils.isEmpty(festivePopupType))
+		{
+			ViewStub festiveView = (ViewStub) findViewById(R.id.festive_view_stub);
+			festiveView.setOnInflateListener(new ViewStub.OnInflateListener()
+			{
+				@Override
+				public void onInflate(ViewStub stub, View inflated)
+				{
+					setupFestiveView();
+				}
+			});
+			festiveView.inflate();
+		}
+
 	}
 	
+	private void setupFestiveView()
+	{
+		Utils.blockOrientationChange(HomeActivity.this);
+		dialogShowing = DialogShowing.FESTIVE_POPUP;
+		findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
+		getSupportActionBar().hide();
+
+		if(snowFallView == null)
+		{
+			mHandler.postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					snowFallView = FestivePopup.startAndSetSnowFallView(HomeActivity.this);
+				}
+			}, 300);
+		}
+	}
+
 	private void setupMainFragment(Bundle savedInstanceState)
 	{
 		if (savedInstanceState != null) {
@@ -276,6 +317,20 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.home_screen, mainFragment).commit();
 		
+	}
+
+	public void onFestiveModeBgClick(View v)
+	{
+		return;
+	}
+
+	public void showActionBarAfterFestivePopup()
+	{
+		dialogShowing = null;
+		// Bringing back action bar & unblocking orientation
+		findViewById(R.id.action_bar_img).setVisibility(View.GONE);
+		getSupportActionBar().show();
+		Utils.unblockOrientationChange(this);
 	}
 
 	private void showStealthFtueTip(final boolean isSetPasswordTip)

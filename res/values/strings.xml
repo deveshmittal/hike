@@ -1238,4 +1238,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="some_error">Some error occured!</string>
     <string name="nux_fwd_search_hint">Names go here...</string>
     <string name="recently_joined_hike">RECENTLY JOINED HIKE</string>
+    <string name="merry_christmas">Merry Christmas</string>
+    <string name="send_sticker_joy">Send a sticker to share joy</string>
 </resources>
