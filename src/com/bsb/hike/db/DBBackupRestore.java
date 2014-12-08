@@ -273,6 +273,7 @@ public class DBBackupRestore
 			dbCopy.delete();
 			backup.delete();
 		}
+		deleteTempFiles();
 	}
 
 	private File getCurrentDBFile(String dbName)
