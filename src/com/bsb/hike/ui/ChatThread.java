@@ -6673,11 +6673,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					shopIconViewGroup.setVisibility(View.VISIBLE);
 					shopIcon.setImageResource(R.drawable.ic_sticker_shop);
-					shopIcon.setBackgroundResource(R.drawable.sticker_shop_selector);
-					shopIconViewGroup.setBackgroundResource(R.color.sticker_pallete_bg_color);
+
 					if(!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 					{
-						shopIconViewGroup.setBackgroundResource(R.color.shop_icon_color);
+						View animatedBackground = emoticonLayout.findViewById(R.id.animated_backgroud);
+						animatedBackground.setVisibility(View.VISIBLE);
+						animatedBackground.startAnimation(HikeAnimationFactory.getScaleOutBackgroundAnimation());
+
+						shopIcon.setAnimation(HikeAnimationFactory.getStickerShopIconAnimation());
 					}
 					
 					shopIconViewGroup.setOnClickListener(new View.OnClickListener()
