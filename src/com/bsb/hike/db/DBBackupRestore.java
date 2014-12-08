@@ -12,6 +12,7 @@ import java.nio.channels.FileChannel;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -69,6 +70,10 @@ public class DBBackupRestore
 
 				File backup = getDBBackupFile(dbCopy.getName());
 				Logger.d(getClass().getSimpleName(), "encrypting with key: " + backupToken);
+				if (TextUtils.isEmpty(backupToken))
+				{
+					throw new Exception("Backup Token is empty");
+				}
 				CBCEncryption.encryptFile(dbCopy, backup, backupToken);
 				dbCopy.delete();
 			}
@@ -143,6 +148,10 @@ public class DBBackupRestore
 				File dbCopy = getDBCopyFile(currentDB.getName());
 				File backup = getDBBackupFile(dbCopy.getName());
 				Logger.d(getClass().getSimpleName(), "decrypting with key: " + backupToken);
+				if (TextUtils.isEmpty(backupToken))
+				{
+					throw new Exception("Backup Token is empty");
+				}
 				CBCEncryption.decryptFile(backup, dbCopy, backupToken);
 				importDatabase(dbCopy);
 				dbCopy.delete();
