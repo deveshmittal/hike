@@ -17,7 +17,6 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -39,7 +38,7 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
-@SuppressLint("SimpleDateFormat")
+
 public class UserLogInfo {
 
 	static Context context;
@@ -60,93 +59,12 @@ public class UserLogInfo {
 	private static final String APPLICATION_NAME = "an";
 	private static final String INSTALL_TIME = "it";
 
-	private static SecretKeySpec secretKey;
-	private static byte[] key;
-	private static String initV = "0011223344556677";
-	private static String decryptedString;
-	private static String encryptedString;
-
-	public static void setKey(String myKey) {
-
-		MessageDigest sha = null;
-		try {
-			key = myKey.getBytes("UTF-8");
-			System.out.println(key.length);
-			sha = MessageDigest.getInstance("MD5");
-			key = sha.digest(key);
-			// key = Arrays.copyOf(key, 16); // use only first 128 bit
-			System.out.println(key.length);
-
-			StringBuffer hexString = new StringBuffer();
-			for (int i = 0; i < key.length; i++)
-				hexString.append(Integer.toHexString(0xFF & key[i]));
-			System.out.println(hexString.toString());
-
-			System.out.println(Base64.encode(key, 0));
-			secretKey = new SecretKeySpec(key, "AES");
-
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
-	public static String getDecryptedString() {
-		return decryptedString;
-	}
-
-	public static void setDecryptedString(String decryptedString) {
-		decryptedString = decryptedString;
-	}
-
-	public static String getEncryptedString() {
-		return encryptedString;
-	}
-
-	public static void setEncryptedString(String encryptedString) {
-		encryptedString = encryptedString;
-	}
-
-	public static String encrypt(String strToEncrypt) {
-		String hello = null;
-		try {
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-			IvParameterSpec iv = new IvParameterSpec(initV.getBytes("UTF-8"));
-			cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);
-			hello = new String(Base64.encode(
-					cipher.doFinal(strToEncrypt.getBytes("UTF-8")),
-					Base64.NO_WRAP));
-			setEncryptedString(hello);
-		} catch (Exception e) {
-			System.out.println("Error while encrypting: " + e.toString());
-		}
-		return hello;
-	}
-
-	public static String decrypt(String strToDecrypt) {
-		try {
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-			IvParameterSpec iv = new IvParameterSpec(initV.getBytes("UTF-8"));
-			cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
-			setDecryptedString(new String(cipher.doFinal(Base64.decode(
-					strToDecrypt, 0))));
-		} catch (Exception e) {
-			System.out.println("Error while decrypting: " + e.toString());
-		}
-		return null;
-	}
-
 	public static class AppLogPojo {
 		String packageName;
 		String applicationName;
 		long installTime;
 
 		public AppLogPojo() {
-			// TODO Auto-generated constructor stub
 		}
 	}
 
@@ -171,7 +89,7 @@ public class UserLogInfo {
 
 	}
 
-	public static JSONArray getJsonArray(ArrayList<AppLogPojo> arrayAL)
+	public static JSONArray getJSONAppArray(ArrayList<AppLogPojo> arrayAL)
 			throws JSONException {
 		JSONArray jsonArray = new JSONArray();
 		for (AppLogPojo AL : arrayAL) {
@@ -191,17 +109,17 @@ public class UserLogInfo {
 				HikeMessengerApp.MSISDN_SETTING, "");
 		// salt this will be replaced by backup_token
 		final String salt = "umangjeet";
-		AESEncryption.makeKey(key + salt, "MD5");
-		AESEncryption.encrypt(jsonArray.toString());
 		JSONObject jsonObj = new JSONObject();
-		String jsonKey = null;
-		switch(flag){
-			case(APP_ANALYTICS_FLAG) : jsonKey = HikeConstants.APP_LOG_ANALYTICS; break;
-			case(CALL_ANALYTICS_FLAG) : jsonKey = HikeConstants.CALL_LOG_ANALYTICS; break;
-			case(LOCATION_ANALYTICS_FLAG) : jsonKey = HikeConstants.LOCATION_LOG_ANALYTICS; break;
-		}
+		
 		try {
-			jsonObj.putOpt(jsonKey, encrypt(jsonArray.toString()));
+			String jsonKey = null;
+			switch(flag){
+				case(APP_ANALYTICS_FLAG) : jsonKey = HikeConstants.APP_LOG_ANALYTICS; break;
+				case(CALL_ANALYTICS_FLAG) : jsonKey = HikeConstants.CALL_LOG_ANALYTICS; break;
+				case(LOCATION_ANALYTICS_FLAG) : jsonKey = HikeConstants.LOCATION_LOG_ANALYTICS; break;
+			}
+			AESEncryption.makeKey(key + salt, "MD5");
+			jsonObj.putOpt(jsonKey, AESEncryption.encrypt(jsonArray.toString()));
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			Logger.d(TAG, e.toString());
@@ -213,27 +131,19 @@ public class UserLogInfo {
 
 	public static void sendLogs(Context ctx, int flags) throws JSONException {
 		context = ctx;
-		JSONArray ja = new JSONArray();
-		for (int i = 0; i < 3; i++) {
-			JSONObject jo = new JSONObject();
-			jo.put(APPLICATION_NAME, "abc");
-			jo.put(PACKAGE_NAME, "kad");
-			jo.put(INSTALL_TIME, 19283089);
-			ja.put(jo);
-		}
 
+		//JSONObject jsonObj = encryptJSON(getJsonArray(getAllAppLogs(ctx)), APP_ANALYTICS_FLAG);
 		// JSONObject jsonObj = encryptJSON(ja);
 		JSONObject jsonObj = getAllCallLogs(context.getContentResolver());
 
-		HikeHttpRequest appLogRequest = new HikeHttpRequest("/cl",
-				RequestType.USER_LOG_UPDATE,
+		HikeHttpRequest appLogRequest = new HikeHttpRequest("/" + HikeConstants.APP_LOG_ANALYTICS, RequestType.OTHER,
 				new HikeHttpRequest.HikeHttpCallback() {
 					public void onFailure() {
 						Log.d("UmangX", "fucked");
 					}
 
 					public void onSuccess(JSONObject response) {
-						Log.d("UmangX Helo", response.toString());
+						Log.d("UmangX Hello", response.toString());
 					}
 
 				});
@@ -350,45 +260,42 @@ public class UserLogInfo {
 
 			}
 
-			JSONArray callSmsJsonArray = new JSONArray();
-			Iterator<Entry<String, Map<String, Integer>>> entries = callLogsMap
-					.entrySet().iterator();
-			while (entries.hasNext()) {
-				Map.Entry entry = (Map.Entry) entries.next();
-				String key = (String) entry.getKey();
-				Map<String, Integer> value = (Map<String, Integer>) entry
-						.getValue();
-				JSONObject callSmsJsonObj = new JSONObject(value);
-				try {
-					callSmsJsonObj.putOpt(PHONE_NUMBER, key);
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			JSONArray callSmsJsonArray = getJSONCallArray(callLogsMap);
+			
+			
+			jo = encryptJSON(callSmsJsonArray, CALL_ANALYTICS_FLAG);
 
-				callSmsJsonArray.put(callSmsJsonObj);
-			}
-			Log.d("Umang", " system millis: " + callSmsJsonArray.toString()
-					+ " " + callLogsMap.toString());
-
-			final String key = "+919015215290";
-			final String salt = "umangjeet";
-			final String strPssword = key + salt;
-			setKey(strPssword);
-			encrypt(callSmsJsonArray.toString());
-			jo = new JSONObject();
-			try {
-				jo.putOpt("cl", encrypt(callSmsJsonArray.toString()));
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			Log.d("Umang", jo.toString());
+			
 
 		} finally {
 			cur.close();
 		}
 		return jo;
+	}
+	
+	public static JSONArray getJSONCallArray(Map<String, Map<String, Integer>> callLogsMap){
+		JSONArray callSmsJsonArray = new JSONArray();
+		Iterator<Entry<String, Map<String, Integer>>> entries = callLogsMap
+				.entrySet().iterator();
+		while (entries.hasNext()) {
+			Map.Entry entry = (Map.Entry) entries.next();
+			String key = (String) entry.getKey();
+			Map<String, Integer> value = (Map<String, Integer>) entry
+					.getValue();
+			JSONObject callSmsJsonObj = new JSONObject(value);
+			try {
+				callSmsJsonObj.putOpt(PHONE_NUMBER, key);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			callSmsJsonArray.put(callSmsJsonObj);
+		}
+		Log.d("Umang", " system millis: " + callSmsJsonArray.toString()
+				+ " " + callLogsMap.toString());
+		return callSmsJsonArray;
+		
 	}
 
 }

@@ -784,7 +784,6 @@ public class AccountUtils
 				break;
 
 			case STATUS_UPDATE:			
-			case USER_LOG_UPDATE:	
 			case SOCIAL_POST:
 			case OTHER:
 				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
