@@ -337,6 +337,22 @@ public class HikeAuthActivity extends Activity
 					}
 				}
 			});
+			
+			
+			new Handler().postDelayed(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					if (textViewDropdown.getTag().equals("0"))
+					{
+						textViewDropdown.setCompoundDrawablesWithIntrinsicBounds(getApplicationContext().getResources().getDrawable(R.drawable.arrowup), null, null, null);
+						textViewDropdown.setTag("1");
+						findViewById(R.id.auth_info_layout).setVisibility(View.VISIBLE);
+					}
+				}
+			}, 2000);
 
 			// Set "will setup account on" text
 			auth_app_will_setup_acc.setText(String.format(getApplicationContext().getString(R.string.auth_will_setup_acc), mAppName));
