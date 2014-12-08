@@ -739,7 +739,8 @@ public class HikeAuthActivity extends Activity
 			@Override
 			public void run()
 			{
-				((TextView) findViewById(R.id.auth_button_accept)).setText(getString(R.string.auth_state_connecting));
+				auth_button_accept.setText(getString(R.string.auth_state_connecting));
+				auth_button_accept.setOnClickListener(null);
 			}
 		}, 500);
 		findViewById(R.id.layout_conn_state).setVisibility(View.VISIBLE);
