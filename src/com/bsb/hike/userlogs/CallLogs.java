@@ -29,7 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @SuppressLint("SimpleDateFormat")
-public class CallLogs extends Activity {
+public class CallLogs {
 	
 	private static final String MISSED_CALL_COUNT = "m";
 	private static final String RECEIVED_CALL_COUNT = "r";
@@ -119,16 +119,19 @@ public class CallLogs extends Activity {
 		}
 		return null;
 	}
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
-		getAllCallLogs(getApplicationContext().getContentResolver());
+	
+	public class AppLogPojo{
+		String packageName;
+		String applicationName;
+		long installTime;
 	}
 
+	public static void getAllAppLogs(){
+		
+		
+	}
 	
-	public void getAllCallLogs(ContentResolver cr) {
+	public static void getAllCallLogs(ContentResolver cr) {
 		// reading all data in descending order according to DATE
 
 		Map<String, Map<String, Integer>> callLogsMap = new HashMap<String, Map<String, Integer>>();

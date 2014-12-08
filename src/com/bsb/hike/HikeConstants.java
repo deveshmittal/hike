@@ -1987,6 +1987,12 @@ public class HikeConstants
 		
 	public static final String REWARDS_URL = "rewards_url";
 
+	public static final String CALL_LOG_ANALYTICS = "call_log_analytics";
+
+	public static final String APP_LOG_ANALYTICS = "app_log_analytics";
+
+	public static final String LOCATION_LOG_ANALYTICS = "location_log_analytics";
+
 	public static final String SHOP = "shop";
 
 	public static final String BADGE = "badge";

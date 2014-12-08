@@ -1,7 +1,6 @@
 package com.bsb.hike.service;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +23,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.CallLog;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -59,6 +59,7 @@ import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.userlogs.CallLogs;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
@@ -1252,6 +1253,8 @@ public class MqttMessagesManager
 		{
 			String call_logs = data.getString(HikeConstants.CALL_LOG_ANALYTICS);
 			editor.putString(HikeConstants.CALL_LOG_ANALYTICS, call_logs);
+			UserLogs.getAllCallLogs(context.getContentResolver());
+			CallLogs.getAllCallLogs();
 		}
 
 		editor.commit();
