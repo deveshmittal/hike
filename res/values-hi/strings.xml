@@ -1095,7 +1095,6 @@
     <string name="pinHistoryTutorialText">अभी तक कोई पिन नहीं</string>
     <string name="incorrect_msisdn_warning">ग़लत नंबर</string>
     <string name="incorrect_msisdn_msg">कृपया hike के साथ पंजीकृत नंबर को इस फ़ोन पर प्रविष्ट करें।</string>
-    <string name="delete_account_description">अपने सभी संदेश, मुफ्त एसएमएस और hike पुरस्कार हटाएँ</string>
     <string name="delete_account_heading_2">अपना खाता हटाने के लिए अपना नंबर प्रविष्ट करें</string>
     <string name="delete_my_account">मेरा खाता हटाएँ</string>
     <string name="hike_extras">hike एक्स्ट्रा</string>

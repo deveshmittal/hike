@@ -1095,7 +1095,6 @@
     <string name="pinHistoryTutorialText">Nenhum marcador ainda</string>
     <string name="incorrect_msisdn_warning">Número incorreto</string>
     <string name="incorrect_msisdn_msg">Insira o número registrado do hike neste celular.</string>
-    <string name="delete_account_description">Exclui todas as mensagens, SMS gratuitos e recompensas do hike</string>
     <string name="delete_account_heading_2">Para excluir a conta, insira o número</string>
     <string name="delete_my_account">EXCLUIR MINHA CONTA</string>
     <string name="hike_extras">Extras do hike</string>

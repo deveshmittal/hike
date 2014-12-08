@@ -1695,6 +1695,17 @@ public class HikeConstants
 		public static final String NUX_INVITE_SENT = "nuxInvteSent";
 
 		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
+		
+		/*
+		 * Account Backup Events
+		 */
+		public static final String BACKUP = "backupClk";
+
+		public static final String BACKUP_RESTORE = "backupRestoreClk";
+
+		public static final String BACKUP_RESTORE_RETRY = "backupRestoreRetryClk";
+
+		public static final String BACKUP_RESTORE_SKIP = "backupRestoreSkipClk";
 	}
 
 	public static final class MqttMessageTypes

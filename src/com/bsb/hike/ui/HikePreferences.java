@@ -335,6 +335,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (!task.isFinished())
 		{
 			mTask = task;
+			String title = getString(R.string.account);
 			String message = "";
 			switch (blockingTaskType)
 			{
@@ -348,13 +349,14 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				message = getString(R.string.social_unlinking);
 				break;
 			case BACKUP_ACCOUNT:
+				title = getString(R.string.account_backup);
 				message = getString(R.string.creating_backup_message);
 				break;
 
 			default:
 				return;
 			}
-			mDialog = ProgressDialog.show(this, getString(R.string.account), message);
+			mDialog = ProgressDialog.show(this, title, message);
 		}
 	}
 
@@ -378,6 +380,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (preference.getKey().equals(HikeConstants.BACKUP_PREF))
 		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.BACKUP);
 			BackupAccountTask task = new BackupAccountTask(getApplicationContext(), HikePreferences.this);
 			blockingTaskType = BlockingTaskType.BACKUP_ACCOUNT;
 			setBlockingTask(task);
@@ -797,7 +800,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (lastBackupTime > 0)
 		{
 			String lastBackup = getResources().getString(R.string.last_backup);
-			String time = Utils.getFormattedDateTimeFromTimestamp(lastBackupTime/1000, getResources().getConfiguration().locale);
+			String time = Utils.getFormattedDateTimeWOSecondsFromTimestamp(lastBackupTime/1000, getResources().getConfiguration().locale);
 			preference.setSummary(lastBackup + ": " + time);
 		}
 		else

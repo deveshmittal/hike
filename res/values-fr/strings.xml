@@ -1095,7 +1095,6 @@
     <string name="pinHistoryTutorialText">Pas encore d\'épingle</string>
     <string name="incorrect_msisdn_warning">Numéro incorrect</string>
     <string name="incorrect_msisdn_msg">Entre le numéro enregistré avec hike sur ce téléphone.</string>
-    <string name="delete_account_description">Supprime tous tes messages, SMS gratuits et récompenses hike</string>
     <string name="delete_account_heading_2">Pour supprimer ton compte, entre ton numéro</string>
     <string name="delete_my_account">SUPPRIMER MON COMPTE</string>
     <string name="hike_extras">Bonus hike</string>

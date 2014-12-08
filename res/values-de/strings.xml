@@ -1095,7 +1095,6 @@
     <string name="pinHistoryTutorialText">Noch keine PINs</string>
     <string name="incorrect_msisdn_warning">Falsche Nummer</string>
     <string name="incorrect_msisdn_msg">Bitte gib die Nummer ein, die du bei der Registrierung von hike auf diesem Handy angegeben hast.</string>
-    <string name="delete_account_description">All deine Nachrichten, Frei-SMS und hike-Belohnungen gelöscht</string>
     <string name="delete_account_heading_2">Zum Löschen deines Kontos gib bitte deine Nummer ein</string>
     <string name="delete_my_account">MEIN KONTO LÖSCHEN</string>
     <string name="hike_extras">hike Extras</string>

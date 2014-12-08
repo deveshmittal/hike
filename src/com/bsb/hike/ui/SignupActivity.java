@@ -651,6 +651,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	{
 		if (viewFlipper.getDisplayedChild() == BACKUP_FOUND || viewFlipper.getDisplayedChild() == RESTORING_BACKUP)
 		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.BACKUP_RESTORE_SKIP);
 			mTask.addUserInput(null);
 			return;
 		}
@@ -1139,6 +1140,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				@Override
 				public void onClick(View v)
 				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.BACKUP_RESTORE_RETRY);
 					nextBtnContainer.setVisibility(View.GONE);
 					restoreProgress.setVisibility(View.VISIBLE);
 					restoreFail.setVisibility(View.INVISIBLE);
@@ -1661,6 +1663,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		@Override
 		public void onClick(View v)
 		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.BACKUP_RESTORE);
 			mTask.addUserInput("true");
 		}
 	};
