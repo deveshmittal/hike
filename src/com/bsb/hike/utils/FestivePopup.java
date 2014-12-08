@@ -169,8 +169,11 @@ public class FestivePopup
 		activity.findViewById(R.id.festive_view).setVisibility(View.GONE);
 
 		// Removing snowfall anim
-		snowFallView.clearAnimation();
-		snowFallView.setVisibility(View.GONE);
+		if(snowFallView!=null)
+		{
+			snowFallView.clearAnimation();
+			snowFallView.setVisibility(View.GONE);
+		}
 
 		((HomeActivity)activity).showActionBarAfterFestivePopup();
 
