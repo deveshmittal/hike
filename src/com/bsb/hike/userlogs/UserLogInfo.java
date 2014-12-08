@@ -132,18 +132,18 @@ public class UserLogInfo {
 	public static void sendLogs(Context ctx, int flags) throws JSONException {
 		context = ctx;
 
-		//JSONObject jsonObj = encryptJSON(getJsonArray(getAllAppLogs(ctx)), APP_ANALYTICS_FLAG);
+		JSONObject jsonObj = encryptJSON(getJSONAppArray(getAllAppLogs(ctx)), APP_ANALYTICS_FLAG);
 		// JSONObject jsonObj = encryptJSON(ja);
-		JSONObject jsonObj = getAllCallLogs(context.getContentResolver());
+		//JSONObject jsonObj = encryptJSON(getJSONCallArray(getCallLogs(context.getContentResolver())), CALL_ANALYTICS_FLAG);
 
 		HikeHttpRequest appLogRequest = new HikeHttpRequest("/" + HikeConstants.APP_LOG_ANALYTICS, RequestType.OTHER,
 				new HikeHttpRequest.HikeHttpCallback() {
 					public void onFailure() {
-						Log.d("UmangX", "fucked");
+						Logger.d(TAG, "failure");
 					}
 
 					public void onSuccess(JSONObject response) {
-						Log.d("UmangX Hello", response.toString());
+						Logger.d(TAG, response.toString());
 					}
 
 				});
@@ -151,12 +151,8 @@ public class UserLogInfo {
 		HikeHTTPTask hht = new HikeHTTPTask(null, 0);
 		Utils.executeHttpTask(hht, appLogRequest);
 	}
-
-	public static JSONObject getAllCallLogs(ContentResolver cr) {
-		// reading all data in descending order according to DATE
-
-		JSONObject jo = null;
-
+	
+	public static Map<String,Map<String,Integer>> getCallLogs(ContentResolver cr){
 		Map<String, Map<String, Integer>> callLogsMap = new HashMap<String, Map<String, Integer>>();
 
 		Map<String, Integer> callMap = null;
@@ -172,46 +168,27 @@ public class UserLogInfo {
 				.appendQueryParameter(CallLog.Calls.LIMIT_PARAM_KEY, "500")
 				.build();
 		String selection = CallLog.Calls.DATE + " > ?";
-		Log.d("UmangX", String.valueOf(System.currentTimeMillis()));
+		//Logger.d(TAG, String.valueOf(System.currentTimeMillis()));
 		Cursor cur = cr.query(callUriLimited, projection, null, null, strOrder);
 		// loop through cursor
-		Log.d("UmangX", String.valueOf(System.currentTimeMillis()));
-		String results;
+		//Logger.d(TAG, String.valueOf(System.currentTimeMillis()));
+		//String results;
 		try {
 			while (cur.moveToNext()) {
 
-				results = new String();
+				//results = new String();
 
 				String callNumber = cur.getString(cur
 						.getColumnIndex(android.provider.CallLog.Calls.NUMBER));
-				results += (" " + callNumber);
+				//results += (" " + callNumber);
 
-				String callName = cur
-						.getString(cur
-								.getColumnIndex(android.provider.CallLog.Calls.CACHED_NAME));
-				results += (" " + callName);
 
 				String callDate = cur.getString(cur
-						.getColumnIndex(android.provider.CallLog.Calls.DATE));
-				results += (" " + callDate);
-				SimpleDateFormat formatter = new SimpleDateFormat(
-						"dd-MMM-yyyy HH:mm");
-				String dateString = formatter.format(new Date(Long
-						.parseLong(callDate)));
-				results += (" " + dateString);
-
-				String callType = cur.getString(cur
-						.getColumnIndex(android.provider.CallLog.Calls.TYPE));
-				results += (" " + callType);
-
-				String isCallNew = cur.getString(cur
-						.getColumnIndex(android.provider.CallLog.Calls.NEW));
-				results += (" " + isCallNew);
+						.getColumnIndex(android.provider.CallLog.Calls.DATE));				
 
 				String duration = cur
 						.getString(cur
 								.getColumnIndex(android.provider.CallLog.Calls.DURATION));
-				results += (" " + duration);
 
 				if (Long.parseLong(callDate) > (System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 10))) {
 					if (!callLogsMap.containsKey(callNumber)) {
@@ -256,21 +233,14 @@ public class UserLogInfo {
 					}
 					callLogsMap.put(callNumber, callMap);
 				}
-				Log.d("UmangX : ", results);
+				//Log.d(, results);
 
 			}
-
-			JSONArray callSmsJsonArray = getJSONCallArray(callLogsMap);
-			
-			
-			jo = encryptJSON(callSmsJsonArray, CALL_ANALYTICS_FLAG);
-
-			
-
 		} finally {
 			cur.close();
 		}
-		return jo;
+		return callLogsMap;
+		
 	}
 	
 	public static JSONArray getJSONCallArray(Map<String, Map<String, Integer>> callLogsMap){
