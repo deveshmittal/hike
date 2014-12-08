@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
@@ -143,6 +144,8 @@ public class HikeAuthActivity extends Activity
 		settingPref = HikeSharedPreferenceUtil.getInstance(getApplicationContext(), HikeMessengerApp.ACCOUNT_SETTINGS);
 
 		CURRENT_STATE = STATE_NORMAL;
+		
+		Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_AUTH_DIALOG_VIEWED);
 	}
 
 	@Override
@@ -347,6 +350,7 @@ public class HikeAuthActivity extends Activity
 				@Override
 				public void onClick(View v)
 				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_AUTH_DIALOG_CONNECT);
 					requestAccess();
 				}
 			});
@@ -357,6 +361,7 @@ public class HikeAuthActivity extends Activity
 				@Override
 				public void onClick(View v)
 				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_AUTH_DIALOG_DECLINED);
 					message.arg2 = HikeSDKResponseCode.STATUS_FAILED;
 					HikeService.mHikeSDKRequestHandler.handleMessage(message);
 					Logger.d(HikeAuthActivity.class.getCanonicalName(), "shutting auth activity successfully!");
@@ -753,6 +758,7 @@ public class HikeAuthActivity extends Activity
 		findViewById(R.id.image_conn_state).setVisibility(View.VISIBLE);
 		((ImageView) findViewById(R.id.image_conn_state)).setImageResource(R.drawable.ic_tick_auth);
 		findViewById(R.id.progress_bar_conn_state).setVisibility(View.GONE);
+		Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_AUTH_SUCCESS);
 	}
 
 	public void displayRetryConnectionState()
@@ -786,5 +792,6 @@ public class HikeAuthActivity extends Activity
 		findViewById(R.id.image_conn_state).setVisibility(View.VISIBLE);
 		((ImageView) findViewById(R.id.image_conn_state)).setImageResource(R.drawable.ic_error);
 		findViewById(R.id.progress_bar_conn_state).setVisibility(View.GONE);
+		Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_AUTH_FAILURE);
 	}
 }

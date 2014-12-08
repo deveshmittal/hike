@@ -1693,6 +1693,28 @@ public class HikeConstants
 		public static final String NUX_INVITE_SENT = "nuxInvteSent";
 
 		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
+		
+		/*
+		 * Platform Events
+		 */
+		public static final String SDK_AUTH_DIALOG_VIEWED = "sdkAuthDialogViewed";
+		
+		public static final String SDK_AUTH_DIALOG_DECLINED = "sdkAuthDialogDeclined";
+		
+		public static final String SDK_AUTH_DIALOG_CONNECT = "sdkAuthDialogConnect";
+		
+		public static final String SDK_AUTH_FAILURE = "sdkAuthFailure";
+		
+		public static final String SDK_AUTH_SUCCESS = "sdkAuthSuccess";
+		
+		public static final String SDK_SEND_MESSAGE = "sdkSendMessage";
+		
+		public static final String SDK_INSTALL_HIKE_MESSENGER = "sdkDialogInstallHikeMessenger";
+		
+		public static final String SDK_INSTALL_HIKE_ACCEPT = "sdkInstallHikeAccept";
+		
+		public static final String SDK_INSTALL_HIKE_DECLINE = "sdkInstallHikeDeclined";
+		
 	}
 
 	public static final class MqttMessageTypes

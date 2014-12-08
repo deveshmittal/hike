@@ -8,7 +8,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,6 +19,7 @@ import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
@@ -63,7 +63,7 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 				hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 				argContext.startActivity(hikeAuthIntent);
-				
+
 			};
 		};
 
@@ -110,7 +110,7 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 			authUIHandler.sendMessage(Message.obtain(msg));
 			return;
 		}
-		
+
 		Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "Handle message: Verified!");
 
 		Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "message.what== " + msg.what);
@@ -125,6 +125,8 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 				returnExceptionMessageToCaller(msg);
 				return;
 			}
+
+			postAnalyticsEvents(reqUserInfoBundle);
 
 			// User info is saved in shared preferences
 			SharedPreferences preferences = mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);
@@ -205,6 +207,8 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 				returnExceptionMessageToCaller(msg);
 				return;
 			}
+
+			postAnalyticsEvents(reqGetFriendsBundle);
 
 			JSONObject reqGetFriendsData = null;
 
@@ -339,6 +343,9 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 		}
 		else if (msg.what == HikeService.SDK_REQ_SEND_MESSAGE)
 		{
+
+			Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_SEND_MESSAGE);
+
 			Bundle reqSendMessageBundle = msg.getData();
 
 			if (reqSendMessageBundle == null)
@@ -346,6 +353,8 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 				returnExceptionMessageToCaller(msg);
 				return;
 			}
+
+			postAnalyticsEvents(reqSendMessageBundle);
 
 			HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_SDK_MESSAGE, reqSendMessageBundle.get(HikeSDKConstants.HIKE_REQ_DATA_ID));
 
@@ -382,13 +391,16 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 		}
 		else if (msg.what == HikeService.SDK_REQ_AUTH_CLIENT)
 		{
-			Bundle reqSendMessageBundle = msg.getData();
+			Bundle reqAuthClientBundle = msg.getData();
 
-			if (reqSendMessageBundle == null)
+			if (reqAuthClientBundle == null)
 			{
 				returnExceptionMessageToCaller(msg);
 				return;
 			}
+			
+			postAnalyticsEvents(reqAuthClientBundle);
+			
 			// Set STATUS_OK
 			msg.arg2 = HikeSDKResponseCode.STATUS_OK;
 
@@ -409,6 +421,35 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 			return;
 		}
 
+	}
+
+	private void postAnalyticsEvents(Bundle argBundle)
+	{
+		String requestData = argBundle.getString(HikeSDKConstants.HIKE_REQ_DATA_ID);
+		if (requestData == null)
+		{
+			return;
+		}
+		else
+		{
+			try
+			{
+				JSONObject requestJSON = new JSONObject(requestData);
+				if (!TextUtils.isEmpty(requestJSON.optString(HikeSDKConstants.PREF_HIKE_SDK_INSTALL_CLICKED_KEY)))
+				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_INSTALL_HIKE_ACCEPT);
+				}
+				if (!TextUtils.isEmpty(requestJSON.optString(HikeSDKConstants.PREF_HIKE_SDK_INSTALL_DENIED_KEY)))
+				{
+					Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_INSTALL_HIKE_DECLINE);
+				}
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+				return;
+			}
+		}
 	}
 
 	@Override
