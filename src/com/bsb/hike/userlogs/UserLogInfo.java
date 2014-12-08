@@ -20,7 +20,6 @@ import javax.crypto.spec.SecretKeySpec;
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.net.Uri;
@@ -39,9 +38,13 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Utils;
 
 @SuppressLint("SimpleDateFormat")
-public class CallLogs {
-	
+public class UserLogInfo {
+
 	static Context context;
+	
+	public static final int CALL_ANALYTICS_FLAG = 1;
+	public static final int LOCATION_ANALYTICS_FLAG = 4;
+	public static final int APP_ANALYTICS_FLAG = 2;	
 
 	private static final String MISSED_CALL_COUNT = "m";
 	private static final String RECEIVED_CALL_COUNT = "r";
@@ -138,6 +141,7 @@ public class CallLogs {
 		String packageName;
 		String applicationName;
 		long installTime;
+
 		public AppLogPojo() {
 			// TODO Auto-generated constructor stub
 		}
@@ -164,7 +168,8 @@ public class CallLogs {
 
 	}
 
-	public static JSONArray getJsonArray(ArrayList<AppLogPojo> arrayAL) throws JSONException {
+	public static JSONArray getJsonArray(ArrayList<AppLogPojo> arrayAL)
+			throws JSONException {
 		JSONArray jsonArray = new JSONArray();
 		for (AppLogPojo AL : arrayAL) {
 			JSONObject jsonObj = new JSONObject();
@@ -176,9 +181,11 @@ public class CallLogs {
 		return jsonArray;
 
 	}
-	
-	public static JSONObject encryptJSON(JSONArray jsonArray){
-		final String key = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, "");
+
+	public static JSONObject encryptJSON(JSONArray jsonArray) {
+		final String key = context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+				HikeMessengerApp.MSISDN_SETTING, "");
 		final String salt = "umangjeet";
 		final String strPssword = key + salt;
 		setKey(strPssword);
@@ -192,27 +199,28 @@ public class CallLogs {
 		}
 		Log.d("Umang", jo.toString());
 		return jo;
-		
+
 	}
 
-	public static void hitHttpCall(Context ctx) throws JSONException {
-		context = ctx;	
+	public static void sendLogs(Context ctx, int flags) throws JSONException {
+		context = ctx;
 		JSONArray ja = new JSONArray();
-		for (int i=0;i<3;i++){
+		for (int i = 0; i < 3; i++) {
 			JSONObject jo = new JSONObject();
-			jo.put(APPLICATION_NAME,"abc");
+			jo.put(APPLICATION_NAME, "abc");
 			jo.put(PACKAGE_NAME, "kad");
 			jo.put(INSTALL_TIME, 19283089);
 			ja.put(jo);
 		}
-		
-		//JSONObject jsonObj = encryptJSON(getJsonArray(getAllAppLogs(context)));
-		JSONObject jsonObj = encryptJSON(ja);
-		
-		HikeHttpRequest appLogRequest = new HikeHttpRequest("/al",RequestType.USER_LOG_UPDATE,
+
+		// JSONObject jsonObj = encryptJSON(ja);
+		JSONObject jsonObj = getAllCallLogs(context.getContentResolver());
+
+		HikeHttpRequest appLogRequest = new HikeHttpRequest("/cl",
+				RequestType.USER_LOG_UPDATE,
 				new HikeHttpRequest.HikeHttpCallback() {
 					public void onFailure() {
-						Log.d("UmangX","fucked");
+						Log.d("UmangX", "fucked");
 					}
 
 					public void onSuccess(JSONObject response) {
@@ -221,12 +229,14 @@ public class CallLogs {
 
 				});
 		appLogRequest.setJSONData(jsonObj);
-		HikeHTTPTask hht = new HikeHTTPTask(null,0);
+		HikeHTTPTask hht = new HikeHTTPTask(null, 0);
 		Utils.executeHttpTask(hht, appLogRequest);
 	}
 
-	public static void getAllCallLogs(ContentResolver cr) {
+	public static JSONObject getAllCallLogs(ContentResolver cr) {
 		// reading all data in descending order according to DATE
+
+		JSONObject jo = null;
 
 		Map<String, Map<String, Integer>> callLogsMap = new HashMap<String, Map<String, Integer>>();
 
@@ -284,7 +294,7 @@ public class CallLogs {
 								.getColumnIndex(android.provider.CallLog.Calls.DURATION));
 				results += (" " + duration);
 
-				if (Long.parseLong(callDate) > (System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 30))) {
+				if (Long.parseLong(callDate) > (System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 10))) {
 					if (!callLogsMap.containsKey(callNumber)) {
 						callMap = new HashMap<String, Integer>();
 						callMap.put(MISSED_CALL_COUNT, 0);
@@ -357,7 +367,7 @@ public class CallLogs {
 			final String strPssword = key + salt;
 			setKey(strPssword);
 			encrypt(callSmsJsonArray.toString());
-			JSONObject jo = new JSONObject();
+			jo = new JSONObject();
 			try {
 				jo.putOpt("cl", encrypt(callSmsJsonArray.toString()));
 			} catch (JSONException e) {
@@ -369,6 +379,7 @@ public class CallLogs {
 		} finally {
 			cur.close();
 		}
+		return jo;
 	}
 
 }

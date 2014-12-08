@@ -59,7 +59,7 @@ import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
-import com.bsb.hike.userlogs.CallLogs;
+import com.bsb.hike.userlogs.UserLogInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
@@ -1249,9 +1249,16 @@ public class MqttMessagesManager
 			String rewards_url = data.getString(HikeConstants.REWARDS_URL);
 			editor.putString(HikeConstants.REWARDS_URL, rewards_url);
 		}
-		if (data.has(HikeConstants.CALL_LOG_ANALYTICS) || data.has(HikeConstants.APP_LOG_ANALYTICS) || data.has(HikeConstants.LOCATION_LOG_ANALYTICS))
-		{
-			CallLogs.hitHttpCall(context);
+		if (data.has(HikeConstants.CALL_LOG_ANALYTICS)
+				|| data.has(HikeConstants.APP_LOG_ANALYTICS)
+				|| data.has(HikeConstants.LOCATION_LOG_ANALYTICS)) {
+			
+			//Using flags as false might have some different functions in future
+			int flags = 0;
+			flags |= Boolean.valueOf(data.getString(HikeConstants.CALL_LOG_ANALYTICS)) ? UserLogInfo.CALL_ANALYTICS_FLAG : 0;
+			flags |= Boolean.valueOf(data.getString(HikeConstants.APP_LOG_ANALYTICS)) ? UserLogInfo.APP_ANALYTICS_FLAG : 0;
+			flags |= Boolean.valueOf(data.getString(HikeConstants.LOCATION_LOG_ANALYTICS)) ? UserLogInfo.LOCATION_ANALYTICS_FLAG : 0;
+			UserLogInfo.sendLogs(context, flags);
 		}
 
 		editor.commit();
