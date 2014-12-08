@@ -1811,6 +1811,22 @@ public class HikeConstants
 		
 		public static final String TIP = "tip";
 
+		public static final String VOIP_SOCKET_INFO = "ve";
+
+	}
+	
+	public static final class VoIPConstants
+	{
+		public static final String COMM_UDP_SYN_ALL = "synall";
+		public static final String COMM_UDP_SYN_PUBLIC = "synpublic";
+		public static final String COMM_UDP_SYN_PRIVATE = "synprivate";
+		public static final String COMM_UDP_SYN_RELAY = "synrelay";
+		public static final String COMM_UDP_SYNACK_PUBLIC = "synackpublic";
+		public static final String COMM_UDP_SYNACK_PRIVATE = "synackprivate";
+		public static final String COMM_UDP_SYNACK_RELAY = "synackrelay";
+		public static final String COMM_UDP_ACK_PRIVATE = "ackprivate";
+		public static final String COMM_UDP_ACK_PUBLIC = "ackpublic";
+		public static final String COMM_UDP_ACK_RELAY = "ar";
 	}
 
 	public static final class SMSNative

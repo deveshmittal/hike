@@ -27,12 +27,14 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.VoIPActivity;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
@@ -68,6 +70,7 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.voip.VoIPCaller;
 
 /**
  * 
@@ -2019,7 +2022,31 @@ public class MqttMessagesManager
 		// from
 		// server
 		{
-			if (isBulkMessage)
+			// VoIP checks
+			if (jsonObj.has(HikeConstants.SUB_TYPE)) {
+
+				if (jsonObj.getString(HikeConstants.SUB_TYPE).equals(HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO)) {
+					// VoIPCaller voipCaller = VoIPCaller.getInstance(context);
+					// voipCaller.setPartnerInfo(jsonObj);
+					// voipCaller.establishConnection();
+					
+					Log.d(VoIPActivity.logTag, "Receiving socket info..");
+					JSONObject metadataJSON = jsonObj.getJSONObject(HikeConstants.DATA).getJSONObject(HikeConstants.METADATA);
+					Intent i = new Intent(context, VoIPActivity.class);
+					i.putExtra("action", "setpartnerinfo");
+					i.putExtra("msisdn", jsonObj.getString(HikeConstants.FROM));
+					i.putExtra("internalIP", metadataJSON.getString("internalIP"));
+					i.putExtra("internalPort", metadataJSON.getInt("internalPort"));
+					i.putExtra("externalIP", metadataJSON.getString("externalIP"));
+					i.putExtra("externalPort", metadataJSON.getInt("externalPort"));
+					i.putExtra("initiator", metadataJSON.getBoolean("initiator"));
+					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+					context.startActivity(i);
+
+				}
+				
+			}
+			else if (isBulkMessage)
 			{
 				saveMessageBulk(jsonObj);
 			}
