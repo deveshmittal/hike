@@ -1,5 +1,7 @@
 package com.bsb.hike.ui;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,6 +38,7 @@ import com.bsb.hike.service.HikeService;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.UtilAtomicAsyncTask;
 import com.bsb.hike.tasks.UtilAtomicAsyncTask.UtilAsyncTaskListener;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSDKConstants;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -82,7 +85,7 @@ public class HikeAuthActivity extends Activity
 	/** The Constant MESSAGE_INDEX. Used for passing messages between activities */
 	public static final String MESSAGE_INDEX = "MESSAGE_INDEX";
 
-	private static final String BASE_URL = "http://staging2.im.hike.in:5000/o/oauth2/";
+	private static final String BASE_URL = "http://stagingoauth.im.hike.in/o/oauth2/";
 
 	private static final String PATH_AUTHORIZE = "authorize";
 
@@ -392,10 +395,20 @@ public class HikeAuthActivity extends Activity
 		params.add(new BasicNameValuePair("response_type", "token"));
 		params.add(new BasicNameValuePair("client_id", mAppId));
 		params.add(new BasicNameValuePair("scope", "publish_actions"));
-		params.add(new BasicNameValuePair("package_name", "test_package_ame"));
-		params.add(new BasicNameValuePair("sha1", "test_sh1"));
+		params.add(new BasicNameValuePair("package_name", "com.bsb.jellies"));
+		params.add(new BasicNameValuePair("sha1", "test_sha1"));
 
-		String paramString = URLEncodedUtils.format(params, "utf-8");
+		String paramString = URLEncodedUtils.format(params, "UTF-8");
+		try
+		{
+			paramString = URLDecoder.decode(paramString, "UTF-8");
+		}
+		catch (UnsupportedEncodingException e1)
+		{
+			e1.printStackTrace();
+			displayRetryConnectionState();
+			return;
+		}
 
 		authUrl += "?" + paramString;
 

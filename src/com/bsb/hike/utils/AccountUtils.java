@@ -42,6 +42,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
@@ -526,6 +527,16 @@ public class AccountUtils
 			throw new IllegalStateException("Token is null");
 		}
 		req.addHeader("Cookie", "user=" + mToken + "; UID=" + mUid);
+	}
+	
+	public static void addTokenForAuthReq(HttpRequestBase req) throws IllegalStateException
+	{
+		assertIfTokenNull();
+		if (TextUtils.isEmpty(mToken))
+		{
+			throw new IllegalStateException("Token is null");
+		}
+		req.addHeader(new BasicHeader("cookie", "uid="+mUid+";token="+mToken));
 	}
 
 	private static void assertIfTokenNull()
