@@ -88,6 +88,9 @@ public class FestivePopup
 				@Override
 				public void run()
 				{
+					activity.findViewById(R.id.snowman_footer).setVisibility(View.VISIBLE);
+					addMoveUpAnimation(activity.findViewById(R.id.snowman_footer));
+
 					snowFallView.setVisibility(View.VISIBLE);
 					AlphaAnimation alphaAnim = new AlphaAnimation(0.1f, 1f);
 					AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1f);
@@ -109,6 +112,9 @@ public class FestivePopup
 				@Override
 				public void run()
 				{
+					activity.findViewById(R.id.snowman_footer).setVisibility(View.VISIBLE);
+					addMoveUpAnimation(activity.findViewById(R.id.snowman_footer));
+
 					setupFestivePopup(activity);
 				}
 			}, 2000);
@@ -119,10 +125,12 @@ public class FestivePopup
 
 	public static void setupFestivePopup(final Activity activity)
 	{
-		activity.findViewById(R.id.festive_view).setVisibility(View.VISIBLE);
-		
 		setStickerIdAndCatId();
-		addFallAnimation(activity.findViewById(R.id.xmas_popup_parent));
+
+		activity.findViewById(R.id.festive_popup_parent).setVisibility(View.VISIBLE);
+
+		addFallAnimation(activity.findViewById(R.id.festive_popup_parent));
+
 		activity.findViewById(R.id.btn_ok).setOnClickListener(new View.OnClickListener() {
 			
 			@Override
@@ -143,6 +151,14 @@ public class FestivePopup
 		});
 	}
 	
+	private static void addMoveUpAnimation(View view)
+	{
+		Animation anim = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, 0, Animation.RELATIVE_TO_PARENT, 0,
+		                                        Animation.RELATIVE_TO_PARENT, 1, Animation.RELATIVE_TO_PARENT, 0);
+		anim.setDuration(1600);
+		view.startAnimation(anim);
+	}
+
 	private static void addFallAnimation(View view)
 	{
 		AnimationSet boxFallAnimSet = new AnimationSet(true);
