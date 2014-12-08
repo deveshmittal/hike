@@ -282,7 +282,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void onInflate(ViewStub stub, View inflated)
 				{
-					setupFestiveView();
+					setupFestiveView(festivePopupType);
 				}
 			});
 			festiveView.inflate();
@@ -290,12 +290,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	}
 	
-	private void setupFestiveView()
+	private void setupFestiveView(String type)
 	{
 		Utils.blockOrientationChange(HomeActivity.this);
 		dialogShowing = DialogShowing.FESTIVE_POPUP;
 		findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
 		getSupportActionBar().hide();
+
+		FestivePopup.setPopupType(type);
 
 		if(snowFallView == null)
 		{
