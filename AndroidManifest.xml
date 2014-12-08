@@ -333,7 +333,13 @@
                 <action android:name="com.bsb.hike.START_ALARM" />
             </intent-filter>
         </receiver>
-
+	 <receiver
+            android:name=".service.ConnectionChangeReceiver"
+            android:label="NetworkConnection" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
         <service android:name=".service.SimpleWakefulService" >
         </service>
     </application>
