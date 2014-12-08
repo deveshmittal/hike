@@ -1494,8 +1494,8 @@ public class MqttMessagesManager
 			stickerCategory.setCategoryName(categoryName);
 			stickerCategory.setTotalStickers(stickerCount == -1 ? 0 : stickerCount);
 			stickerCategory.setCategorySize(categorySize == -1 ? 0 : categorySize);
-			int pos = (position == -1 ? (HikeConversationsDatabase.getInstance().getMaxStickerCategoryIndex() + 1) : position);
-			pos = (pos == -1 ? StickerManager.DEFAULT_POSITION : pos);
+			int pos = (position < 1 ? (HikeConversationsDatabase.getInstance().getMaxStickerCategoryIndex() + 1) : position);
+			pos = (pos < 1 ? StickerManager.DEFAULT_POSITION : pos);
 			stickerCategory.setCategoryIndex(pos);  //Choosing it's index based on the above logic
 			stickerCategory.setUpdateAvailable(true);  //To show the green badge on category
 			stickerCategory.setVisible(true);	//To make it visible in pallete
