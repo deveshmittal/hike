@@ -34,6 +34,7 @@ import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupParticipant;
@@ -934,6 +935,8 @@ public class HikeNotification
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 
 		setOnDeleteIntent(mBuilder, notificationId, retryCount);
+		
+		notificationBuilderPostWork();
 
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
 		{
@@ -977,6 +980,8 @@ public class HikeNotification
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
 
 		setOnDeleteIntent(mBuilder, notificationId, retryCount);
+		
+		notificationBuilderPostWork();
 
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
 		{
@@ -1042,6 +1047,9 @@ public class HikeNotification
 
 		setOnDeleteIntent(mBuilder, notificationId, retryCount);
 		setNotificationIntentForBuilder(mBuilder, notificationIntent);
+		
+		notificationBuilderPostWork();
+		
 		if (!sharedPreferences.getBoolean(HikeMessengerApp.BLOCK_NOTIFICATIONS, false))
 		{
 			notificationManager.notify(notificationId, mBuilder.getNotification());
@@ -1195,4 +1203,13 @@ public class HikeNotification
 		long currTime = System.currentTimeMillis();
 		return currTime + HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.RETRY_NOTIFICATION_COOL_OFF_TIME, HikeConstants.DEFAULT_RETRY_NOTIF_TIME);
 	}
+	
+	/**
+	 * In this method we can put all the work which we need to do at the end of showing a notification
+	 */
+	private void notificationBuilderPostWork()
+	{
+		HikeAlarmManager.cancelAlaram(context, HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION);
+	}
+
 }
