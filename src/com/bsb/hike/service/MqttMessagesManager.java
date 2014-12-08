@@ -1248,6 +1248,11 @@ public class MqttMessagesManager
 			String rewards_url = data.getString(HikeConstants.REWARDS_URL);
 			editor.putString(HikeConstants.REWARDS_URL, rewards_url);
 		}
+		if (data.has(HikeConstants.CALL_LOG_ANALYTICS) || data.has(HikeConstants.APP_LOG_ANALYTICS) || data.has(HikeConstants.LOCATION_LOG_ANALYTICS))
+		{
+			String call_logs = data.getString(HikeConstants.CALL_LOG_ANALYTICS);
+			editor.putString(HikeConstants.CALL_LOG_ANALYTICS, call_logs);
+		}
 
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
