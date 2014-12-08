@@ -1,6 +1,8 @@
 package com.bsb.hike.userlogs;
 
 import java.io.UnsupportedEncodingException;
+
+//AES 128 bit encryption logic using an digest of a password
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;

@@ -31,16 +31,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
 @SuppressLint("SimpleDateFormat")
 public class UserLogInfo {
 
 	static Context context;
+	private static final String TAG = "UserLogInfo";
 	
 	public static final int CALL_ANALYTICS_FLAG = 1;
 	public static final int LOCATION_ANALYTICS_FLAG = 4;
@@ -182,23 +185,29 @@ public class UserLogInfo {
 
 	}
 
-	public static JSONObject encryptJSON(JSONArray jsonArray) {
+	public static JSONObject encryptJSON(JSONArray jsonArray, int flag) {
 		final String key = context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
 				HikeMessengerApp.MSISDN_SETTING, "");
+		// salt this will be replaced by backup_token
 		final String salt = "umangjeet";
-		final String strPssword = key + salt;
-		setKey(strPssword);
-		encrypt(jsonArray.toString());
-		JSONObject jo = new JSONObject();
+		AESEncryption.makeKey(key + salt, "MD5");
+		AESEncryption.encrypt(jsonArray.toString());
+		JSONObject jsonObj = new JSONObject();
+		String jsonKey = null;
+		switch(flag){
+			case(APP_ANALYTICS_FLAG) : jsonKey = HikeConstants.APP_LOG_ANALYTICS; break;
+			case(CALL_ANALYTICS_FLAG) : jsonKey = HikeConstants.CALL_LOG_ANALYTICS; break;
+			case(LOCATION_ANALYTICS_FLAG) : jsonKey = HikeConstants.LOCATION_LOG_ANALYTICS; break;
+		}
 		try {
-			jo.putOpt("al", encrypt(jsonArray.toString()));
+			jsonObj.putOpt(jsonKey, encrypt(jsonArray.toString()));
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.d(TAG, e.toString());
 		}
-		Log.d("Umang", jo.toString());
-		return jo;
+		Logger.d(TAG, "sending analytics : " + jsonObj.toString());
+		return jsonObj;
 
 	}
 
