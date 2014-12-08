@@ -1992,4 +1992,6 @@ public class HikeConstants
 	public static final String BADGE = "badge";
 
 	public static final long DEFAULT_RETRY_NOTIF_TIME = 10 * 1000;
+
+	public static final String RETRY_COUNT = "retryCount";
 }

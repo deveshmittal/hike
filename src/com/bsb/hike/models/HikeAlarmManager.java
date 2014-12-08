@@ -1,5 +1,6 @@
 package com.bsb.hike.models;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.utils.Logger;
 
@@ -163,8 +164,9 @@ public class HikeAlarmManager
 	{
 
 		int requestCode = intent.getIntExtra(HikeAlarmManager.INTENT_EXTRA, HikeAlarmManager.REQUESTCODE_DEFAULT);
-
-		Logger.i(LOG_TAG, "processTasks called with request Code "+requestCode+ "time = "+System.currentTimeMillis());
+		int retryCount  = intent.getExtras().getInt(HikeConstants.RETRY_COUNT, 0);
+		
+		Logger.i(LOG_TAG, "processTasks called with request Code "+requestCode+ "time = "+System.currentTimeMillis() +" retryCount = "+retryCount);
 		
 		switch (requestCode)
 		{
@@ -172,7 +174,7 @@ public class HikeAlarmManager
 			// PreloadNotificationSchedular.performActionWhenAlarmReceived(context);
 			break;
 		case HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION:
-			HikeNotification.getInstance(context).showNotificationForCurrentMsgStack(true);
+			HikeNotification.getInstance(context).showNotificationForCurrentMsgStack(true, retryCount);
 			break;
 		default:
 
