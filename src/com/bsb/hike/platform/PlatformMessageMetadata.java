@@ -19,63 +19,68 @@ import java.util.List;
 import java.util.Set;
 
 public class PlatformMessageMetadata implements HikePlatformConstants {
-	public int layoutId;
-	public int loveId;
+    public int layoutId;
+    public int loveId;
     public String notifText = "";
     public String channelSource = "";
-    Context mContext;
+    public int version;
     public boolean isInstalled;
     public HashMap<String, byte[]> thumbnailMap = new HashMap<String, byte[]>();
-	
-	public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();
-	public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();
+    public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();
+    public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();
     public ArrayList<CardComponent.ActionComponent> actionComponents = new ArrayList<CardComponent.ActionComponent>();
-	private JSONObject json;
-	public PlatformMessageMetadata(String jsonString, Context context) throws JSONException {
-		this(new JSONObject(jsonString), context);
-	}
-	public PlatformMessageMetadata(JSONObject json, Context context) {
-		this.json = json;
+    public String clickTrackUrl = "";
+    Context mContext;
+    private JSONObject json;
+
+    public PlatformMessageMetadata(String jsonString, Context context) throws JSONException {
+        this(new JSONObject(jsonString), context);
+    }
+
+    public PlatformMessageMetadata(JSONObject metadata, Context context) {
+        this.json = metadata;
         this.mContext = context;
-	
-		
-		if (json.has(DATA)) {
-			try {
-				JSONObject data = json.getJSONObject(DATA);
-                layoutId = getInt(data, LAYOUT_ID);
-                loveId = getInt(data, LOVE_ID);
-                notifText = getString(data, NOTIF_TEXT);
 
-                if (data.has(CHANNEL_SOURCE)){
-                    channelSource = data.optString(CHANNEL_SOURCE);
-                    isInstalled = Utils.isPackageInstalled(mContext, channelSource);
+        try {
 
+            version = getInt(metadata, VERSION);
+            layoutId = getInt(metadata, LAYOUT_ID);
+            loveId = getInt(metadata, LOVE_ID);
+            notifText = getString(metadata, NOTIF_TEXT);
+            clickTrackUrl = getString(metadata, CLICK_TRACK_URL);
+
+            if (metadata.has(CHANNEL_SOURCE)) {
+                channelSource = metadata.optString(CHANNEL_SOURCE);
+                isInstalled = Utils.isPackageInstalled(mContext, channelSource);
+
+            }
+
+            if (metadata.has(ASSETS)) {
+                JSONObject assets = metadata.optJSONObject(ASSETS);
+                if (assets.has(TEXTS)) {
+                    parseTextComponents(assets.getJSONArray(TEXTS));
+                }
+                if (assets.has(IMAGES)) {
+                    parseImageComponents(assets.getJSONArray(IMAGES));
+                }
+                if (assets.has(VIDEOS)) {
+                    parseVideoComponents(assets.getJSONArray(VIDEOS));
+                }
+                if (assets.has(AUDIO)) {
+                    parseAudioComponents(assets.getJSONArray(AUDIO));
+                }
+                if (assets.has(ACTIONS)) {
+                    parseActionComponents(assets.getJSONArray(ACTIONS));
                 }
 
-				if (data.has(ASSETS)) {
-					JSONObject assets = data.getJSONObject(ASSETS);
-					if (assets.has(TEXTS)) {
-						parseTextComponents(assets.getJSONArray(TEXTS));
-					}
-					if (assets.has(IMAGES)) {
-						parseImageComponents(assets.getJSONArray(IMAGES));
-					}
-					if(assets.has(VIDEOS)){
-						parseVideoComponents(assets.getJSONArray(VIDEOS));
-					}
-					if(assets.has(AUDIO)){
-						parseAudioComponents(assets.getJSONArray(AUDIO));
-					}
-                    if(assets.has(ACTIONS)){
-                        parseActionComponents(assets.getJSONArray(ACTIONS));
-                    }
+            }
 
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
 
     private void parseActionComponents(JSONArray jsonArray) {
 
@@ -96,123 +101,124 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
     }
 
     private void parseTextComponents(JSONArray json) {
-		int total = json.length();
+        int total = json.length();
 
-		for (int i = 0; i < total; i++) {
-			try {
-				JSONObject obj = json.getJSONObject(i);
-				TextComponent textCom = new TextComponent(obj.optString(TAG),
-						obj.optString(TEXT));
-				textComponents.add(textCom);
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
+        for (int i = 0; i < total; i++) {
+            try {
+                JSONObject obj = json.getJSONObject(i);
+                TextComponent textCom = new TextComponent(obj.optString(TAG),
+                        obj.optString(TEXT));
+                textComponents.add(textCom);
+            } catch (JSONException e) {
+// TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
 
-	private void parseImageComponents(JSONArray json) {
-		int total = json.length();
-		for (int i = 0; i < total; i++) {
-			JSONObject obj;
-			try {
-				obj = json.getJSONObject(i);
+    private void parseImageComponents(JSONArray json) {
+        int total = json.length();
+        for (int i = 0; i < total; i++) {
+            JSONObject obj;
+            try {
+                obj = json.getJSONObject(i);
                 String key = obj.optString(KEY);
                 String thumbnail = obj.optString(THUMBNAIL);
-                if (!TextUtils.isEmpty(thumbnail))
+                if (!TextUtils.isEmpty(thumbnail) && TextUtils.isEmpty(key))
                     key = String.valueOf(thumbnail.hashCode());
-				ImageComponent imageCom = new ImageComponent(
-						obj.optString(TAG), key,
-						obj.optString(URL), obj.optString(CONTENT_TYPE),
-						obj.optString(MEDIA_SIZE), obj.optString(DURATION));
+                ImageComponent imageCom = new ImageComponent(
+                        obj.optString(TAG), key,
+                        obj.optString(URL), obj.optString(CONTENT_TYPE),
+                        obj.optString(MEDIA_SIZE), obj.optString(DURATION));
 
-                if (!TextUtils.isEmpty(obj.optString(THUMBNAIL))) {
-                    thumbnailMap.put(key, Base64.decode(thumbnail, Base64.DEFAULT));
-                    obj.remove(THUMBNAIL);
-                    obj.put(KEY, key);
-                }
-				mediaComponents.add(imageCom);
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-		}
-	}
-	
-	private void parseVideoComponents(JSONArray json) {
-		int total = json.length();
-		for (int i = 0; i < total; i++) {
-			JSONObject obj;
-			try {
-				obj = json.getJSONObject(i);
-                String key = obj.optString(KEY);
-                String thumbnail = obj.optString(THUMBNAIL);
-                if (!TextUtils.isEmpty(thumbnail))
-                    key = String.valueOf(thumbnail.hashCode());
-				VideoComponent videoCom = new VideoComponent(
-						obj.optString(TAG), key ,
-						obj.optString(URL), obj.optString(CONTENT_TYPE),
-						obj.optString(MEDIA_SIZE),obj.optString(DURATION));
                 if (!TextUtils.isEmpty(thumbnail)) {
-                   // HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
+                    thumbnailMap.put(key, Base64.decode(thumbnail, Base64.DEFAULT));
+                    obj.remove(THUMBNAIL);
+                    obj.put(KEY, key);
+                }
+                mediaComponents.add(imageCom);
+            } catch (JSONException e) {
+// TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    private void parseVideoComponents(JSONArray json) {
+        int total = json.length();
+        for (int i = 0; i < total; i++) {
+            JSONObject obj;
+            try {
+                obj = json.getJSONObject(i);
+                String key = obj.optString(KEY);
+                String thumbnail = obj.optString(THUMBNAIL);
+                if (!TextUtils.isEmpty(thumbnail) && TextUtils.isEmpty(key))
+                    key = String.valueOf(thumbnail.hashCode());
+                VideoComponent videoCom = new VideoComponent(
+                        obj.optString(TAG), key,
+                        obj.optString(URL), obj.optString(CONTENT_TYPE),
+                        obj.optString(MEDIA_SIZE), obj.optString(DURATION));
+                if (!TextUtils.isEmpty(thumbnail)) {
+                    // HikeConversationsDatabase.getInstance().addFileThumbnail(key, thumbnail.getBytes());
                     thumbnailMap.put(key, Base64.decode(thumbnail, Base64.DEFAULT));
                     obj.remove(THUMBNAIL);
                     obj.put(KEY, key);
                 }
 
-				mediaComponents.add(videoCom);
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+                mediaComponents.add(videoCom);
+            } catch (JSONException e) {
+// TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
-		}
-	}
-	
-	private void parseAudioComponents(JSONArray json) {
-		int total = json.length();
-		for (int i = 0; i < total; i++) {
-			JSONObject obj;
-			try {
-				obj = json.getJSONObject(i);
-				CardComponent.AudioComponent audioCom = new CardComponent.AudioComponent(
-						obj.optString(TAG), obj.optString(KEY),
-						obj.optString(URL), obj.optString(CONTENT_TYPE),
-						obj.optString(MEDIA_SIZE),obj.optString(DURATION));
-				mediaComponents.add(audioCom);
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+        }
+    }
 
-		}
-	}
-	
-	private int getInt(JSONObject json,String key){
-		if(json.has(key)){
-			try {
-				return json.getInt(key);
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return 0;
-	}
-	private String getString(JSONObject json,String key){
-		if(json.has(key)){
-			try {
-				return json.getString(key);
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
+    private void parseAudioComponents(JSONArray json) {
+        int total = json.length();
+        for (int i = 0; i < total; i++) {
+            JSONObject obj;
+            try {
+                obj = json.getJSONObject(i);
+                CardComponent.AudioComponent audioCom = new CardComponent.AudioComponent(
+                        obj.optString(TAG), obj.optString(KEY),
+                        obj.optString(URL), obj.optString(CONTENT_TYPE),
+                        obj.optString(MEDIA_SIZE), obj.optString(DURATION));
+                mediaComponents.add(audioCom);
+            } catch (JSONException e) {
+// TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
-	public void addToThumbnailTable(){
+        }
+    }
+
+    private int getInt(JSONObject json, String key) {
+        if (json.has(key)) {
+            try {
+                return json.getInt(key);
+            } catch (JSONException e) {
+// TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    private String getString(JSONObject json, String key) {
+        if (json.has(key)) {
+            try {
+                return json.getString(key);
+            } catch (JSONException e) {
+// TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public void addToThumbnailTable() {
 
         Set<String> thumbnailKeys = thumbnailMap.keySet();
         for (String key : thumbnailKeys)
@@ -221,22 +227,20 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
     }
 
     public void addThumbnailsToMetadata() {
-        if (json.has(DATA)) {
+
+        if (json.has(ASSETS)) {
             try {
-                JSONObject data = json.getJSONObject(DATA);
-                if (data.has(ASSETS)) {
-                    JSONObject assets = data.getJSONObject(ASSETS);
-                    if (assets.has(IMAGES)) {
-                        addThumbnailToImages(assets, IMAGES);
-                    }
-                    if (assets.has(VIDEOS)) {
-                        addThumbnailToImages(assets, VIDEOS);
-                    }
-                    for (MediaComponent mediaComponent : mediaComponents) {
-                        String base64 = getBase64FromDb(mediaComponent.getKey());
-                        if (!TextUtils.isEmpty(base64))
-                            mediaComponent.setThumbnail(base64);
-                    }
+                JSONObject assets = json.getJSONObject(ASSETS);
+                if (assets.has(IMAGES)) {
+                    addThumbnailToImages(assets, IMAGES);
+                }
+                if (assets.has(VIDEOS)) {
+                    addThumbnailToImages(assets, VIDEOS);
+                }
+                for (MediaComponent mediaComponent : mediaComponents) {
+                    String base64 = getBase64FromDb(mediaComponent.getKey());
+                    if (!TextUtils.isEmpty(base64))
+                        mediaComponent.setThumbnail(base64);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -264,6 +268,49 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
         }
     }
 
+    public void changeCallToAction(){
+
+        if (json.has(ASSETS)) {
+            try {
+                JSONObject assets = json.getJSONObject(ASSETS);
+                if (assets.has(ACTIONS)) {
+                    JSONArray actions = assets.getJSONArray(ACTIONS);
+                    int len = actions.length();
+
+                    for (int i = 0; i < len; i++) {
+                        JSONObject obj = actions.getJSONObject(i);
+                        String tag = obj.optString(TAG);
+
+                        if (!TextUtils.isEmpty(tag) && tag.equals("CARD") && obj.has(ANDROID_INTENT)){
+
+                            JSONObject androidIntent = obj.optJSONObject(ANDROID_INTENT);
+                            androidIntent.remove(INTENT_URI);
+                            androidIntent.put(INTENT_URI, channelSource);
+
+                        }
+
+                        for (CardComponent.ActionComponent actionComponent : actionComponents) {
+                            String data = actionComponent.getTag();
+                            if (!TextUtils.isEmpty(data) && data.equals("CARD")) {
+                                JSONObject androidIntent = actionComponent.getAndroidIntent();
+                                androidIntent.remove(INTENT_URI);
+                                androidIntent.put(INTENT_URI, channelSource);
+                            }
+                        }
+
+
+
+                    }
+
+                }
+            }catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
     private String getBase64FromDb(String key) {
         if (!TextUtils.isEmpty(key)) {
             byte[] thumbnail = HikeConversationsDatabase.getInstance().getThumbnail(key);
@@ -276,11 +323,11 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
         return "";
     }
 
-    public String JSONtoString(){
-		return json.toString();
-	}
+    public String JSONtoString() {
+        return json.toString();
+    }
 
-    public JSONObject getJSON (){
+    public JSONObject getJSON() {
         return json;
     }
 }
