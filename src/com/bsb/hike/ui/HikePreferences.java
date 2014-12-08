@@ -797,7 +797,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (lastBackupTime > 0)
 		{
 			String lastBackup = getResources().getString(R.string.last_backup);
-			String time = Utils.getFormattedDateTimeFromTimestamp(lastBackupTime/1000, getResources().getConfiguration().locale);
+			String time = Utils.getFormattedDateTimeWOSecondsFromTimestamp(lastBackupTime/1000, getResources().getConfiguration().locale);
 			preference.setSummary(lastBackup + ": " + time);
 		}
 		else

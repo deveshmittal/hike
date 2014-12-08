@@ -3356,6 +3356,15 @@ public class Utils
 		calendar.setTimeInMillis(milliSeconds * 1000);
 		return formatter.format(calendar.getTime());
 	}
+	
+	public static String getFormattedDateTimeWOSecondsFromTimestamp(long milliSeconds, Locale current)
+	{
+		String dateFormat = "dd/MM/yyyy hh:mm a";
+		DateFormat formatter = new SimpleDateFormat(dateFormat, current);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(milliSeconds * 1000);
+		return formatter.format(calendar.getTime());
+	}
 
 	public static void sendUILogEvent(String key)
 	{
