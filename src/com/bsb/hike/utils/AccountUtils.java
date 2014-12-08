@@ -783,12 +783,14 @@ public class AccountUtils
 				entity = new FileEntity(new File(hikeHttpRequest.getFilePath()), "");
 				break;
 
-			case STATUS_UPDATE:
+			case STATUS_UPDATE:			
+			case USER_LOG_UPDATE:	
 			case SOCIAL_POST:
 			case OTHER:
 				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
 				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
 				break;
+				
 
 			case DELETE_STATUS:
 				requestBase = new HttpDelete(base + hikeHttpRequest.getPath());

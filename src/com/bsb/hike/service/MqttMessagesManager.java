@@ -1251,10 +1251,7 @@ public class MqttMessagesManager
 		}
 		if (data.has(HikeConstants.CALL_LOG_ANALYTICS) || data.has(HikeConstants.APP_LOG_ANALYTICS) || data.has(HikeConstants.LOCATION_LOG_ANALYTICS))
 		{
-			String call_logs = data.getString(HikeConstants.CALL_LOG_ANALYTICS);
-			editor.putString(HikeConstants.CALL_LOG_ANALYTICS, call_logs);
-			UserLogs.getAllCallLogs(context.getContentResolver());
-			CallLogs.getAllCallLogs();
+			CallLogs.hitHttpCall(context);
 		}
 
 		editor.commit();
