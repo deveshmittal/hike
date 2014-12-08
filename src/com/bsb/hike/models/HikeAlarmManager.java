@@ -76,32 +76,16 @@ public class HikeAlarmManager
 
 		PendingIntent mPendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		if (WillWakeCPU)
+		if (Utils.isKitkatOrHigher())
 		{
-			if (Utils.isKitkatOrHigher())
-			{
-				mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, time, mPendingIntent);
-			}
-			else
-			{
-
-				mAlarmManager.set(AlarmManager.RTC_WAKEUP, time, mPendingIntent);
-			}
+			mAlarmManager.setExact(WillWakeCPU ? AlarmManager.RTC_WAKEUP : AlarmManager.RTC, time, mPendingIntent);
 		}
-
 		else
 		{
 
-			if (Utils.isKitkatOrHigher())
-			{
-				mAlarmManager.setExact(AlarmManager.RTC, time, mPendingIntent);
-			}
-			else
-			{
-				mAlarmManager.set(AlarmManager.RTC, time, mPendingIntent);
-			}
-			mAlarmManager.set(AlarmManager.RTC, time, mPendingIntent);
+			mAlarmManager.set(WillWakeCPU ? AlarmManager.RTC_WAKEUP : AlarmManager.RTC, time, mPendingIntent);
 		}
+
 	}
 
 	/**
