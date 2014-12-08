@@ -1095,7 +1095,6 @@
     <string name="pinHistoryTutorialText">Еще нет булавок</string>
     <string name="incorrect_msisdn_warning">Неправильный номер</string>
     <string name="incorrect_msisdn_msg">Введите номер, зарегистрированный с hike на этом телефоне.</string>
-    <string name="delete_account_description">Удаляет все ваши сообщения, бесплатные SMS и награды hike</string>
     <string name="delete_account_heading_2">Чтобы удалить свою учетную запись, введите свой номер</string>
     <string name="delete_my_account">УДАЛИТЬ МОЮ УЧЕТНУЮ ЗАПИСЬ</string>
     <string name="hike_extras">Доп. возможности hike</string>
