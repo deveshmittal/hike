@@ -734,20 +734,12 @@ public class HikeAuthActivity extends Activity
 	{
 		CURRENT_STATE = STATE_CONNECTED;
 		auth_title.setVisibility(View.GONE);
+		auth_button_accept.setVisibility(View.GONE);
 		findViewById(R.id.layout_app_info).setVisibility(View.GONE);
 		findViewById(R.id.auth_app_access_to).setVisibility(View.GONE);
 		findViewById(R.id.auth_info_layout).setVisibility(View.GONE);
 		findViewById(R.id.auth_button_deny_layout).setVisibility(View.GONE);
 		findViewById(R.id.auth_buttons_layout).setVisibility(View.GONE);
-		auth_button_accept.setText(getString(R.string.auth_done));
-		auth_button_accept.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				HikeAuthActivity.this.finish();
-			}
-		});
 		new Handler().postDelayed(new Runnable()
 		{
 			@Override
