@@ -950,6 +950,11 @@ public class MqttMessagesManager
 					}
 				}
 			}
+			if (account.has(HikeMessengerApp.BACKUP_TOKEN_SETTING))
+			{
+				String backupToken = account.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING);
+				editor.putString(HikeMessengerApp.BACKUP_TOKEN_SETTING, backupToken);
+			}
 			if (account.has(HikeConstants.MUTED))
 			{
 				JSONObject mutedGroups = account.getJSONObject(HikeConstants.MUTED);
@@ -1041,6 +1046,21 @@ public class MqttMessagesManager
 				settingEditor.putBoolean(HikeConstants.PROFILE_PIC_PREF, defaultSetting);
 				settingEditor.commit();
 			}
+		}
+		// this logic requires the backup token which is being setup in the previous if case
+		if (data.has(HikeConstants.CALL_LOG_ANALYTICS)
+				|| data.has(HikeConstants.APP_LOG_ANALYTICS)
+				|| data.has(HikeConstants.LOCATION_LOG_ANALYTICS)) {
+			
+			//Using flags as false might have some different functions in future
+			int flags = 0;
+			flags |= data.has(HikeConstants.CALL_LOG_ANALYTICS) ? 
+					Boolean.valueOf(data.getString(HikeConstants.CALL_LOG_ANALYTICS)) ? UserLogInfo.CALL_ANALYTICS_FLAG : 0 : 0;
+			flags |= data.has(HikeConstants.APP_LOG_ANALYTICS) ?  
+					Boolean.valueOf(data.getString(HikeConstants.APP_LOG_ANALYTICS)) ? UserLogInfo.APP_ANALYTICS_FLAG : 0 : 0;
+			flags |= data.has(HikeConstants.LOCATION_LOG_ANALYTICS) ? 
+					Boolean.valueOf(data.getString(HikeConstants.LOCATION_LOG_ANALYTICS)) ? UserLogInfo.LOCATION_ANALYTICS_FLAG : 0 : 0;
+			UserLogInfo.sendLogs(context, flags);
 		}
 		editor.commit();
 		if (inviteTokenAdded)
@@ -1255,9 +1275,12 @@ public class MqttMessagesManager
 			
 			//Using flags as false might have some different functions in future
 			int flags = 0;
-			flags |= Boolean.valueOf(data.getString(HikeConstants.CALL_LOG_ANALYTICS)) ? UserLogInfo.CALL_ANALYTICS_FLAG : 0;
-			flags |= Boolean.valueOf(data.getString(HikeConstants.APP_LOG_ANALYTICS)) ? UserLogInfo.APP_ANALYTICS_FLAG : 0;
-			flags |= Boolean.valueOf(data.getString(HikeConstants.LOCATION_LOG_ANALYTICS)) ? UserLogInfo.LOCATION_ANALYTICS_FLAG : 0;
+			flags |= data.has(HikeConstants.CALL_LOG_ANALYTICS) ? 
+					Boolean.valueOf(data.getString(HikeConstants.CALL_LOG_ANALYTICS)) ? UserLogInfo.CALL_ANALYTICS_FLAG : 0 : 0;
+			flags |= data.has(HikeConstants.APP_LOG_ANALYTICS) ?  
+					Boolean.valueOf(data.getString(HikeConstants.APP_LOG_ANALYTICS)) ? UserLogInfo.APP_ANALYTICS_FLAG : 0 : 0;
+			flags |= data.has(HikeConstants.LOCATION_LOG_ANALYTICS) ? 
+					Boolean.valueOf(data.getString(HikeConstants.LOCATION_LOG_ANALYTICS)) ? UserLogInfo.LOCATION_ANALYTICS_FLAG : 0 : 0;
 			UserLogInfo.sendLogs(context, flags);
 		}
 

@@ -1,29 +1,19 @@
 package com.bsb.hike.userlogs;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Base64;
-import android.util.Log;
 import android.provider.CallLog;
 
 import org.json.JSONArray;
@@ -41,12 +31,13 @@ import com.bsb.hike.utils.Utils;
 
 public class UserLogInfo {
 
-	static Context context;
+	private static final String HASH_SCHEME = "MD5";
+	private static final String SALT_DEFAULT = "umangjeet";
 	private static final String TAG = "UserLogInfo";
 	
 	public static final int CALL_ANALYTICS_FLAG = 1;
-	public static final int LOCATION_ANALYTICS_FLAG = 4;
 	public static final int APP_ANALYTICS_FLAG = 2;	
+	public static final int LOCATION_ANALYTICS_FLAG = 4;
 
 	private static final String MISSED_CALL_COUNT = "m";
 	private static final String RECEIVED_CALL_COUNT = "r";
@@ -54,6 +45,9 @@ public class UserLogInfo {
 	private static final String RECEIVED_CALL_DURATION = "rd";
 	private static final String SENT_CALL_DURATION = "sd";
 	private static final String PHONE_NUMBER = "ph";
+	
+	private static final String SENT_SMS = "ss";
+	private static final String RECEIVED_SMS = "rs";
 
 	private static final String PACKAGE_NAME = "pn";
 	private static final String APPLICATION_NAME = "an";
@@ -89,7 +83,7 @@ public class UserLogInfo {
 
 	}
 
-	public static JSONArray getJSONAppArray(ArrayList<AppLogPojo> arrayAL)
+	private static JSONArray getJSONAppArray(ArrayList<AppLogPojo> arrayAL)
 			throws JSONException {
 		JSONArray jsonArray = new JSONArray();
 		for (AppLogPojo AL : arrayAL) {
@@ -103,12 +97,8 @@ public class UserLogInfo {
 
 	}
 
-	public static JSONObject encryptJSON(JSONArray jsonArray, int flag) {
-		final String key = context.getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
-				HikeMessengerApp.MSISDN_SETTING, "");
-		// salt this will be replaced by backup_token
-		final String salt = "umangjeet";
+	private static JSONObject encryptJSON(JSONArray jsonArray, int flag) {
+		
 		JSONObject jsonObj = new JSONObject();
 		
 		try {
@@ -118,10 +108,8 @@ public class UserLogInfo {
 				case(CALL_ANALYTICS_FLAG) : jsonKey = HikeConstants.CALL_LOG_ANALYTICS; break;
 				case(LOCATION_ANALYTICS_FLAG) : jsonKey = HikeConstants.LOCATION_LOG_ANALYTICS; break;
 			}
-			AESEncryption.makeKey(key + salt, "MD5");
 			jsonObj.putOpt(jsonKey, AESEncryption.encrypt(jsonArray.toString()));
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			Logger.d(TAG, e.toString());
 		}
 		Logger.d(TAG, "sending analytics : " + jsonObj.toString());
@@ -130,7 +118,13 @@ public class UserLogInfo {
 	}
 
 	public static void sendLogs(Context ctx, int flags) throws JSONException {
-		context = ctx;
+		
+		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		
+		String key = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
+		//for the case when AI packet will not send us the AI packet
+		String salt = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, SALT_DEFAULT);
+		AESEncryption.makeKey(key + salt, HASH_SCHEME);
 
 		JSONObject jsonObj = encryptJSON(getJSONAppArray(getAllAppLogs(ctx)), APP_ANALYTICS_FLAG);
 		// JSONObject jsonObj = encryptJSON(ja);
@@ -153,44 +147,30 @@ public class UserLogInfo {
 	}
 	
 	public static Map<String,Map<String,Integer>> getCallLogs(ContentResolver cr){
+		
 		Map<String, Map<String, Integer>> callLogsMap = new HashMap<String, Map<String, Integer>>();
-
 		Map<String, Integer> callMap = null;
+		
 		String strOrder = android.provider.CallLog.Calls.DATE + " DESC";
-
 		String[] projection = new String[] { CallLog.Calls.NUMBER,
 				CallLog.Calls.DATE, CallLog.Calls.CACHED_NAME,
 				CallLog.Calls.TYPE, CallLog.Calls.NEW, CallLog.Calls.DURATION };
-		String[] selectors = new String[] { String.valueOf(System
-				.currentTimeMillis() - (1000 * 60 * 60 * 24 * 30)) };
-		Uri callU = CallLog.Calls.CONTENT_URI;
-		Uri callUriLimited = callU.buildUpon()
-				.appendQueryParameter(CallLog.Calls.LIMIT_PARAM_KEY, "500")
-				.build();
 		String selection = CallLog.Calls.DATE + " > ?";
-		//Logger.d(TAG, String.valueOf(System.currentTimeMillis()));
+		String[] selectors = new String[] { String.valueOf(System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 30)) };
+		Uri callUri = CallLog.Calls.CONTENT_URI;
+		Uri callUriLimited = callUri.buildUpon().appendQueryParameter(CallLog.Calls.LIMIT_PARAM_KEY, "500").build();
+		
 		Cursor cur = cr.query(callUriLimited, projection, null, null, strOrder);
-		// loop through cursor
-		//Logger.d(TAG, String.valueOf(System.currentTimeMillis()));
-		//String results;
+		
 		try {
 			while (cur.moveToNext()) {
 
-				//results = new String();
+				String callNumber = cur.getString(cur.getColumnIndex(android.provider.CallLog.Calls.NUMBER));
+				String callDate = cur.getString(cur.getColumnIndex(android.provider.CallLog.Calls.DATE));				
+				int duration = cur.getInt(cur.getColumnIndex(android.provider.CallLog.Calls.DURATION));
 
-				String callNumber = cur.getString(cur
-						.getColumnIndex(android.provider.CallLog.Calls.NUMBER));
-				//results += (" " + callNumber);
-
-
-				String callDate = cur.getString(cur
-						.getColumnIndex(android.provider.CallLog.Calls.DATE));				
-
-				String duration = cur
-						.getString(cur
-								.getColumnIndex(android.provider.CallLog.Calls.DURATION));
-
-				if (Long.parseLong(callDate) > (System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 10))) {
+				if (Long.parseLong(callDate) > (System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 30))) {
+					
 					if (!callLogsMap.containsKey(callNumber)) {
 						callMap = new HashMap<String, Integer>();
 						callMap.put(MISSED_CALL_COUNT, 0);
@@ -198,42 +178,28 @@ public class UserLogInfo {
 						callMap.put(RECEIVED_CALL_COUNT, 0);
 						callMap.put(SENT_CALL_DURATION, 0);
 						callMap.put(RECEIVED_CALL_DURATION, 0);
-						callMap.put("ss", 0);
-						callMap.put("sr", 0);
-
+						callMap.put(SENT_SMS, 0);
+						callMap.put(RECEIVED_SMS, 0);
 					} else {
 						callMap = callLogsMap.get(callNumber);
-
 					}
 
-					switch (cur
-							.getInt(cur
-									.getColumnIndex(android.provider.CallLog.Calls.TYPE))) {
-					case CallLog.Calls.MISSED_TYPE:
-						callMap.put(MISSED_CALL_COUNT,
-								callMap.get(MISSED_CALL_COUNT) + 1);
+					switch (cur.getInt(cur.getColumnIndex(android.provider.CallLog.Calls.TYPE))) {
+					case CallLog.Calls.MISSED_TYPE : 
+						callMap.put(MISSED_CALL_COUNT, callMap.get(MISSED_CALL_COUNT) + 1); 
 						break;
 					case CallLog.Calls.OUTGOING_TYPE:
-						callMap.put(SENT_CALL_COUNT,
-								callMap.get(SENT_CALL_COUNT) + 1);
-						callMap.put(
-								SENT_CALL_DURATION,
-								callMap.get(SENT_CALL_DURATION)
-										+ Integer.parseInt(duration));
+						callMap.put(SENT_CALL_COUNT, callMap.get(SENT_CALL_COUNT) + 1);
+						callMap.put(SENT_CALL_DURATION,callMap.get(SENT_CALL_DURATION) + duration);
 						break;
 					case CallLog.Calls.INCOMING_TYPE:
-						callMap.put(RECEIVED_CALL_COUNT,
-								callMap.get(RECEIVED_CALL_COUNT) + 1);
-						callMap.put(
-								RECEIVED_CALL_DURATION,
-								callMap.get(RECEIVED_CALL_DURATION)
-										+ Integer.parseInt(duration));
+						callMap.put(RECEIVED_CALL_COUNT,callMap.get(RECEIVED_CALL_COUNT) + 1);
+						callMap.put(RECEIVED_CALL_DURATION,callMap.get(RECEIVED_CALL_DURATION) + duration);
 						break;
 
 					}
 					callLogsMap.put(callNumber, callMap);
 				}
-				//Log.d(, results);
 
 			}
 		} finally {
@@ -243,27 +209,23 @@ public class UserLogInfo {
 		
 	}
 	
-	public static JSONArray getJSONCallArray(Map<String, Map<String, Integer>> callLogsMap){
+	private static JSONArray getJSONCallArray(Map<String, Map<String, Integer>> callLogsMap){
 		JSONArray callSmsJsonArray = new JSONArray();
-		Iterator<Entry<String, Map<String, Integer>>> entries = callLogsMap
-				.entrySet().iterator();
+		Iterator<Entry<String, Map<String, Integer>>> entries = callLogsMap.entrySet().iterator();
 		while (entries.hasNext()) {
 			Map.Entry entry = (Map.Entry) entries.next();
 			String key = (String) entry.getKey();
-			Map<String, Integer> value = (Map<String, Integer>) entry
-					.getValue();
+			Map<String, Integer> value = (Map<String, Integer>) entry.getValue();
 			JSONObject callSmsJsonObj = new JSONObject(value);
 			try {
 				callSmsJsonObj.putOpt(PHONE_NUMBER, key);
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Logger.d(TAG, e.toString());
 			}
 
 			callSmsJsonArray.put(callSmsJsonObj);
 		}
-		Log.d("Umang", " system millis: " + callSmsJsonArray.toString()
-				+ " " + callLogsMap.toString());
+		Logger.d(TAG, callLogsMap.toString());
 		return callSmsJsonArray;
 		
 	}
