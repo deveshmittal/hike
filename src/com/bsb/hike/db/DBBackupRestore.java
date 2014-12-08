@@ -282,6 +282,7 @@ public class DBBackupRestore
 			dbCopy.delete();
 			backup.delete();
 		}
+		getBackupStateFile().delete();
 		deleteTempFiles();
 	}
 

@@ -335,6 +335,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		if (!task.isFinished())
 		{
 			mTask = task;
+			String title = getString(R.string.account);
 			String message = "";
 			switch (blockingTaskType)
 			{
@@ -348,13 +349,14 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				message = getString(R.string.social_unlinking);
 				break;
 			case BACKUP_ACCOUNT:
+				title = getString(R.string.account_backup);
 				message = getString(R.string.creating_backup_message);
 				break;
 
 			default:
 				return;
 			}
-			mDialog = ProgressDialog.show(this, getString(R.string.account), message);
+			mDialog = ProgressDialog.show(this, title, message);
 		}
 	}
 
