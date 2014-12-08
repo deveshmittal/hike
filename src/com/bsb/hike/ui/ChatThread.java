@@ -18,6 +18,7 @@ import java.util.Random;
 import java.util.Set;
 
 import com.bsb.hike.platform.CardComponent;
+import com.bsb.hike.platform.CardConstants;
 import com.bsb.hike.platform.PlatformMessageMetadata;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -2125,6 +2126,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
                             convMessage.platformMessageMetadata = new PlatformMessageMetadata(msgExtrasJson.optString(HikeConstants.METADATA), getApplicationContext());
                             convMessage.platformMessageMetadata.addThumbnailsToMetadata();
                             convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
+
+                            if(convMessage.platformMessageMetadata.layoutId == CardConstants.GAMES_CARD_LAYOUT)
+                             convMessage.platformMessageMetadata.changeCallToAction();
 
                             sendMessage(convMessage);
 

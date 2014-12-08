@@ -1,7 +1,8 @@
 package com.bsb.hike.platform;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
@@ -30,7 +32,7 @@ public class CardRenderer implements View.OnLongClickListener {
 
     Context mContext;
 
-    public CardRenderer(Context context){
+    public CardRenderer(Context context) {
         this.mContext = context;
 
     }
@@ -43,12 +45,11 @@ public class CardRenderer implements View.OnLongClickListener {
     private static final int GAMES_CARD_LAYOUT_RECEIVED = 5;
     private static final int ARTICLE_CARD_LAYOUT_SENT = 6;
     private static final int ARTICLE_CARD_LAYOUT_RECEIVED = 7;
+    private static final int COLOR_CARD_LAYOUT_SENT = 8;
+    private static final int COLOR_CARD_LAYOUT_RECEIVED = 9;
 
 
-
-
-    public static class ViewHolder extends MessagesAdapter.DetailViewHolder
-    {
+    public static class ViewHolder extends MessagesAdapter.DetailViewHolder {
 
         HashMap<String, View> viewHashMap;
 
@@ -84,13 +85,13 @@ public class CardRenderer implements View.OnLongClickListener {
 
         }
 
-        public void initializeHolderForSender(View view){
+        public void initializeHolderForSender(View view) {
 
             messageInfoStub = (ViewStub) view.findViewById(R.id.message_info_stub);
 
         }
 
-        public void initializeHolderForReceiver(View view){
+        public void initializeHolderForReceiver(View view) {
 
             senderDetails = view.findViewById(R.id.sender_details);
             senderName = (TextView) view.findViewById(R.id.sender_name);
@@ -125,11 +126,13 @@ public class CardRenderer implements View.OnLongClickListener {
 
                 case 4:
                     return ARTICLE_CARD_LAYOUT_SENT;
+
+                case 5:
+                    return COLOR_CARD_LAYOUT_SENT;
+
             }
 
-        }
-        else
-        {
+        } else {
             switch (cardType) {
                 case 1:
                     return IMAGE_CARD_LAYOUT_RECEIVED;
@@ -142,6 +145,10 @@ public class CardRenderer implements View.OnLongClickListener {
 
                 case 4:
                     return ARTICLE_CARD_LAYOUT_RECEIVED;
+
+                case 5:
+                    return COLOR_CARD_LAYOUT_RECEIVED;
+
             }
 
         }
@@ -149,7 +156,7 @@ public class CardRenderer implements View.OnLongClickListener {
 
     }
 
-    public View getView(View view, ConvMessage convMessage){
+    public View getView(View view, ConvMessage convMessage, ViewGroup parent) {
 
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -158,112 +165,117 @@ public class CardRenderer implements View.OnLongClickListener {
         List<CardComponent.MediaComponent> mediaComponents = convMessage.platformMessageMetadata.mediaComponents;
         ArrayList<CardComponent.ActionComponent> actionComponents = convMessage.platformMessageMetadata.actionComponents;
 
-        if (cardType == CardConstants.IMAGE_CARD_LAYOUT)
-        {
+        if (cardType == CardConstants.IMAGE_CARD_LAYOUT) {
             ViewHolder viewHolder;
-            if (view == null){
+            if (view == null) {
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_games_sent, null);
+                    view = inflater.inflate(R.layout.card_layout_games_sent, parent, false);
                     viewHolder.initializeHolderForSender(view);
-                }else {
-                    view = inflater.inflate(R.layout.card_layout_games_received, null);
+                } else {
+                    view = inflater.inflate(R.layout.card_layout_games_received, parent, false);
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
 
                 view.setTag(viewHolder);
-            }
-            else
-            {
+            } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            cardCallToActions(actionComponents, viewHolder, true, "");
-            cardDataFiller(textComponents, mediaComponents, viewHolder);
+            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
+            cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
 
-        }
-        else if (cardType == CardConstants.VIDEO_CARD_LAYOUT)
-        {
+        } else if (cardType == CardConstants.VIDEO_CARD_LAYOUT) {
             ViewHolder viewHolder;
-            if (view == null){
+            if (view == null) {
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_video_sent, null);
+                    view = inflater.inflate(R.layout.card_layout_video_sent, parent, false);
                     viewHolder.initializeHolderForSender(view);
-                }else {
-                    view = inflater.inflate(R.layout.card_layout_video_received, null);
+                } else {
+                    view = inflater.inflate(R.layout.card_layout_video_received, parent, false);
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
 
                 view.setTag(viewHolder);
-            }
-            else
-            {
+            } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            cardCallToActions(actionComponents, viewHolder, true, "");
-            cardDataFiller(textComponents, mediaComponents, viewHolder);
+            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
+            cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
 
-        }
-        else if (cardType == CardConstants.GAMES_CARD_LAYOUT)
-        {
+        } else if (cardType == CardConstants.GAMES_CARD_LAYOUT) {
             ViewHolder viewHolder;
-            if (view == null){
+            if (view == null) {
                 viewHolder = new ViewHolder();
 
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_games_sent, null);
+                    view = inflater.inflate(R.layout.card_layout_games_sent, parent, false);
                     viewHolder.initializeHolderForSender(view);
-                }else {
-                    view = inflater.inflate(R.layout.card_layout_games_received, null);
+                } else {
+                    view = inflater.inflate(R.layout.card_layout_games_received, parent, false);
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
 
                 view.setTag(viewHolder);
 
-            }
-            else
-            {
+            } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            cardDataFiller(textComponents, mediaComponents, viewHolder);
+            cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
             String channelSource = convMessage.platformMessageMetadata.channelSource;
             boolean isGamesAppInstalled = convMessage.platformMessageMetadata.isInstalled;
             if (!isGamesAppInstalled) {
                 gameInstalledTextFiller(viewHolder);
             }
-            cardCallToActions(actionComponents, viewHolder, isGamesAppInstalled, channelSource);
+            cardCallToActions(cardType, actionComponents, viewHolder, isGamesAppInstalled, channelSource);
 
 
-        }
-        else if (cardType == CardConstants.ARTICLE_CARD_LAYOUT)
-        {
+        } else if (cardType == CardConstants.ARTICLE_CARD_LAYOUT) {
             ViewHolder viewHolder;
-            if (view == null){
+            if (view == null) {
                 viewHolder = new ViewHolder();
                 if (convMessage.isSent()) {
-                    view = inflater.inflate(R.layout.card_layout_article_sent, null);
+                    view = inflater.inflate(R.layout.card_layout_article_sent, parent, false);
                     viewHolder.initializeHolderForSender(view);
-                }else {
-                    view = inflater.inflate(R.layout.card_layout_article_received, null);
+                } else {
+                    view = inflater.inflate(R.layout.card_layout_article_received, parent, false);
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
 
                 view.setTag(viewHolder);
-            }
-            else
-            {
+            } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            cardCallToActions(actionComponents, viewHolder, true, "");
-            cardDataFiller(textComponents, mediaComponents, viewHolder);
+            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
+            cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
+
+        } if (cardType == CardConstants.COLOR_CARD_LAYOUT) {
+            ViewHolder viewHolder;
+            if (view == null) {
+                viewHolder = new ViewHolder();
+                if (convMessage.isSent()) {
+                    view = inflater.inflate(R.layout.card_layout_color_sent, parent, false);
+                    viewHolder.initializeHolderForSender(view);
+                } else {
+                    view = inflater.inflate(R.layout.card_layout_color_received, parent, false);
+                    viewHolder.initializeHolderForReceiver(view);
+                }
+                viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
+
+                view.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) view.getTag();
+            }
+            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
+            cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
 
         }
 
@@ -271,8 +283,7 @@ public class CardRenderer implements View.OnLongClickListener {
     }
 
 
-
-    private void cardCallToActions(ArrayList<CardComponent.ActionComponent> actionComponents, ViewHolder viewHolder, final boolean isAppInstalled, final String channelSource) {
+    private void cardCallToActions(final int cardType, ArrayList<CardComponent.ActionComponent> actionComponents, ViewHolder viewHolder, final boolean isAppInstalled, final String channelSource) {
         for (final CardComponent.ActionComponent actionComponent : actionComponents) {
             final String tag = actionComponent.getTag();
             if (!TextUtils.isEmpty(tag)) {
@@ -281,12 +292,16 @@ public class CardRenderer implements View.OnLongClickListener {
                     @Override
                     public void onClick(View v) {
                         try {
-                            if (tag.equalsIgnoreCase("CARD") && !isAppInstalled) {
-                                JSONObject jsonObject = new JSONObject();
-                                jsonObject.put(HikePlatformConstants.INTENT_URI,"https://play.google.com/store/apps/details?id=" + channelSource);
-                                CardController.callToAction(jsonObject, mContext);
+                            if (cardType == CardConstants.GAMES_CARD_LAYOUT) {
+                                if (tag.equalsIgnoreCase("CARD") && !isAppInstalled) {
+                                    JSONObject jsonObject = new JSONObject();
+                                    jsonObject.put(HikePlatformConstants.INTENT_URI, "https://play.google.com/store/apps/details?id=" + channelSource);
+                                    CardController.callToAction(jsonObject, mContext);
+                                } else {
+                                    CardController.callToAction(actionComponent.getAndroidIntent(), mContext);
+                                }
                             } else {
-                                CardController.callToAction(actionComponent.getAndroidIntent(), mContext);
+                                CardController.callToActionWebView(actionComponent.getAndroidIntent(), mContext);
                             }
                         } catch (URISyntaxException e) {
                             e.printStackTrace();
@@ -303,27 +318,40 @@ public class CardRenderer implements View.OnLongClickListener {
     }
 
 
-    private void cardDataFiller(List<CardComponent.TextComponent> textComponents, List<CardComponent.MediaComponent> mediaComponents, ViewHolder viewHolder) {
+    private void cardDataFiller(int cardType, List<CardComponent.TextComponent> textComponents, List<CardComponent.MediaComponent> mediaComponents, ViewHolder viewHolder) {
         for (CardComponent.TextComponent textComponent : textComponents) {
             String tag = textComponent.getTag();
             if (!TextUtils.isEmpty(tag)) {
 
-                CustomFontTextView tv = (CustomFontTextView) viewHolder.viewHashMap.get(tag);
-                tv.setText(textComponent.getText());
+                TextView tv = (TextView) viewHolder.viewHashMap.get(tag);
+                if (null != tv) {
+                    tv.setVisibility(View.VISIBLE);
+                    tv.setText(textComponent.getText());
+                }
             }
+
         }
+
 
         for (CardComponent.MediaComponent mediaComponent : mediaComponents) {
             String tag = mediaComponent.getTag();
 
             if (!TextUtils.isEmpty(tag)) {
                 View mediaView = viewHolder.viewHashMap.get(tag);
-                if (mediaView instanceof ImageView) {
+                if (null != mediaView && mediaView instanceof ImageView) {
+
+                    mediaView.setVisibility(View.VISIBLE);
                     String data = mediaComponent.getKey();
-                    Drawable value = HikeMessengerApp.getLruCache().getBitmapDrawable(data);
+                    BitmapDrawable value = HikeMessengerApp.getLruCache().getBitmapDrawable(data);
+
+                    if (tag.equals("I1") && cardType == CardConstants.GAMES_CARD_LAYOUT) {
+                        Bitmap bitmap = HikeBitmapFactory.getRoundedRectangleBitmap(value, 28.0f);
+                        ((ImageView) mediaView).setImageBitmap(bitmap);
+                    }else
+                        ((ImageView) mediaView).setImageDrawable(value);
 
 
-                    ((ImageView) mediaView).setImageDrawable(value);
+
 
                 }
 
@@ -332,10 +360,12 @@ public class CardRenderer implements View.OnLongClickListener {
 
     }
 
+
     private void gameInstalledTextFiller(ViewHolder viewHolder) {
-        if (viewHolder.viewHashMap.containsKey("T4")) {
-            CustomFontTextView cardInstalledText = (CustomFontTextView) viewHolder.viewHashMap.get("T4");
-            cardInstalledText.setText("INSTALL");
+        if (viewHolder.viewHashMap.containsKey("T3")) {
+            CustomFontTextView cardInstalledText = (CustomFontTextView) viewHolder.viewHashMap.get("T3");
+            cardInstalledText.setVisibility(View.VISIBLE);
+            cardInstalledText.setText("FREE INSTALL");
         }
     }
 

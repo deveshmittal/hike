@@ -27,4 +27,5 @@ public interface HikePlatformConstants {
 	String MESSAGE_TYPE = "t";
     String ANDROID_INTENT = "android";
     String CHANNEL_SOURCE = "channelSource";
+    String CLICK_TRACK_URL = "clickTrackURL";
 }

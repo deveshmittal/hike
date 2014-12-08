@@ -24,12 +24,13 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
     public String notifText = "";
     public String channelSource = "";
     public int version;
-    Context mContext;
     public boolean isInstalled;
     public HashMap<String, byte[]> thumbnailMap = new HashMap<String, byte[]>();
     public List<TextComponent> textComponents = new ArrayList<CardComponent.TextComponent>();
     public List<MediaComponent> mediaComponents = new ArrayList<CardComponent.MediaComponent>();
     public ArrayList<CardComponent.ActionComponent> actionComponents = new ArrayList<CardComponent.ActionComponent>();
+    public String clickTrackUrl = "";
+    Context mContext;
     private JSONObject json;
 
     public PlatformMessageMetadata(String jsonString, Context context) throws JSONException {
@@ -46,6 +47,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
             layoutId = getInt(metadata, LAYOUT_ID);
             loveId = getInt(metadata, LOVE_ID);
             notifText = getString(metadata, NOTIF_TEXT);
+            clickTrackUrl = getString(metadata, CLICK_TRACK_URL);
 
             if (metadata.has(CHANNEL_SOURCE)) {
                 channelSource = metadata.optString(CHANNEL_SOURCE);
@@ -129,7 +131,7 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
                         obj.optString(URL), obj.optString(CONTENT_TYPE),
                         obj.optString(MEDIA_SIZE), obj.optString(DURATION));
 
-                if (!TextUtils.isEmpty(obj.optString(THUMBNAIL))) {
+                if (!TextUtils.isEmpty(thumbnail)) {
                     thumbnailMap.put(key, Base64.decode(thumbnail, Base64.DEFAULT));
                     obj.remove(THUMBNAIL);
                     obj.put(KEY, key);
@@ -264,6 +266,49 @@ public class PlatformMessageMetadata implements HikePlatformConstants {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public void changeCallToAction(){
+
+        if (json.has(ASSETS)) {
+            try {
+                JSONObject assets = json.getJSONObject(ASSETS);
+                if (assets.has(ACTIONS)) {
+                    JSONArray actions = assets.getJSONArray(ACTIONS);
+                    int len = actions.length();
+
+                    for (int i = 0; i < len; i++) {
+                        JSONObject obj = actions.getJSONObject(i);
+                        String tag = obj.optString(TAG);
+
+                        if (!TextUtils.isEmpty(tag) && tag.equals("CARD") && obj.has(ANDROID_INTENT)){
+
+                            JSONObject androidIntent = obj.optJSONObject(ANDROID_INTENT);
+                            androidIntent.remove(INTENT_URI);
+                            androidIntent.put(INTENT_URI, channelSource);
+
+                        }
+
+                        for (CardComponent.ActionComponent actionComponent : actionComponents) {
+                            String data = actionComponent.getTag();
+                            if (!TextUtils.isEmpty(data) && data.equals("CARD")) {
+                                JSONObject androidIntent = actionComponent.getAndroidIntent();
+                                androidIntent.remove(INTENT_URI);
+                                androidIntent.put(INTENT_URI, channelSource);
+                            }
+                        }
+
+
+
+                    }
+
+                }
+            }catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
     }
 
     private String getBase64FromDb(String key) {
