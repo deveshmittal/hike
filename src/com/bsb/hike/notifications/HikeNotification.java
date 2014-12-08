@@ -918,7 +918,8 @@ public class HikeNotification
 		}
 	}
 
-	private void showBigTextStyleNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text,
+	//  Changed from private to public as to show notification to the user before the user has signed up.It is called from ToastListener class
+	public void showBigTextStyleNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text,
 			final String key, final String message, final String msisdn, String subMessage, Drawable argAvatarDrawable, boolean shouldNotPlaySound)
 	{
 

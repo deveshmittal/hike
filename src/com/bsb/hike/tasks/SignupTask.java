@@ -112,7 +112,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	private SMSReceiver receiver;
 
-	private static SignupTask signupTask;
+	public static SignupTask signupTask;
 
 	private OnSignupTaskProgressUpdate onSignupTaskProgressUpdate;
 
