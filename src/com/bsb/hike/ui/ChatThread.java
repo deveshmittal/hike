@@ -6708,7 +6708,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			emoticonViewPager = emoticonViewPager == null ? (ViewPager) emoticonLayout.findViewById(R.id.emoticon_pager) : emoticonViewPager;
 
 			View eraseKey = emoticonLayout.findViewById(R.id.erase_key);
-			ImageView shopIcon = (ImageView) emoticonLayout.findViewById(R.id.erase_key_image);
+			final ImageView shopIcon = (ImageView) emoticonLayout.findViewById(R.id.erase_key_image);
 			if(v.getId() == R.id.sticker_btn && HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))  //The shop icon would be blue unless the user clicks on it once
 			{
 				emoticonLayout.findViewById(R.id.sticker_shop_badge).setVisibility(View.VISIBLE);
@@ -6775,6 +6775,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							if(!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 							{
 								HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
+								View animatedBackground = emoticonLayout.findViewById(R.id.animated_backgroud);
+								animatedBackground.setVisibility(View.GONE);
+								animatedBackground.clearAnimation();
+								shopIcon.clearAnimation();
 							}
 							if(HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))  //The shop icon would be blue unless the user clicks on it once
 							{
