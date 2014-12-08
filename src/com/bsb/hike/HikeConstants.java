@@ -1994,4 +1994,6 @@ public class HikeConstants
 	public static final long DEFAULT_RETRY_NOTIF_TIME = 10 * 1000;
 
 	public static final String RETRY_COUNT = "retryCount";
+	
+	public static final String REPLY_NOTIFICATION_RETRY_TIMER = "rnrt";
 }
