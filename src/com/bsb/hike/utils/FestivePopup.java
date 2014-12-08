@@ -26,9 +26,30 @@ public class FestivePopup
 
 	public static final String NEW_YEAR_POPUP = "newyear";
 
-	private static String stickerId = "042_sahihai.png";
+	private static String stickerId;
 
-	private static String categoryId = "indian";
+	private static String categoryId;
+
+	private static String popupType;
+
+	public static void setPopupType(String type)
+	{
+		popupType = type;
+	}
+
+	public  static void setStickerIdAndCatId()
+	{
+		if(popupType.equals(NEW_YEAR_POPUP))
+		{
+			stickerId = "008_hikinnewyear";
+			categoryId = "festive";
+		}
+		else
+		{
+			stickerId = "002_merryxmas.png";
+			categoryId = "festive";
+		}
+	}
 
 	public static SnowFallView startAndSetSnowFallView(final Activity activity)
 	{
@@ -100,6 +121,7 @@ public class FestivePopup
 	{
 		activity.findViewById(R.id.festive_view).setVisibility(View.VISIBLE);
 		
+		setStickerIdAndCatId();
 		addFallAnimation(activity.findViewById(R.id.xmas_popup_parent));
 		activity.findViewById(R.id.btn_ok).setOnClickListener(new View.OnClickListener() {
 			
