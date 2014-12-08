@@ -39,7 +39,7 @@ public class NotificationDismissedReceiver extends BroadcastReceiver
 					Intent retryNotificationIntent = new Intent();
 					retryNotificationIntent.putExtra(HikeConstants.RETRY_COUNT, retryCount+1);
 					HikeAlarmManager.setAlarmwithIntent(context, HikeNotification.getInstance(context).getNextRetryNotificationTime(),
-							HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION, true, retryNotificationIntent);
+							HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION, false, retryNotificationIntent);
 				}
 			}
 		}
