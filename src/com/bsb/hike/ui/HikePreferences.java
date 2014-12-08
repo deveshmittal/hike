@@ -380,6 +380,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (preference.getKey().equals(HikeConstants.BACKUP_PREF))
 		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.BACKUP);
 			BackupAccountTask task = new BackupAccountTask(getApplicationContext(), HikePreferences.this);
 			blockingTaskType = BlockingTaskType.BACKUP_ACCOUNT;
 			setBlockingTask(task);
