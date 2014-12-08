@@ -846,7 +846,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 
 		chatThreadReceiver = new ChatThreadReceiver();
-		LocalBroadcastManager.getInstance(this).registerReceiver(chatThreadReceiver, new IntentFilter(StickerManager.STICKERS_UPDATED));
+		IntentFilter intentFilter = new IntentFilter(StickerManager.STICKERS_UPDATED);
+		intentFilter.addAction(StickerManager.MORE_STICKERS_DOWNLOADED);
+		intentFilter.addAction(StickerManager.STICKERS_DOWNLOADED);
+		LocalBroadcastManager.getInstance(this).registerReceiver(chatThreadReceiver, intentFilter);
 
 		screenOffBR = new ScreenOffReceiver();
 		registerReceiver(screenOffBR, new IntentFilter(Intent.ACTION_SCREEN_OFF));
@@ -7383,7 +7386,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
-			if (intent.getAction().equals(StickerManager.STICKERS_UPDATED))
+			if (intent.getAction().equals(StickerManager.STICKERS_UPDATED) || intent.getAction().equals(StickerManager.MORE_STICKERS_DOWNLOADED) || intent.getAction().equals(StickerManager.STICKERS_DOWNLOADED))
 			{
 				runOnUiThread(new Runnable()
 				{

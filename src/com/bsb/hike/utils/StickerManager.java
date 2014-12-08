@@ -1323,7 +1323,8 @@ public class StickerManager
 	
 	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, Context context)
 	{
-		initialiseDownloadStickerTask(category, source, null, context);
+		DownloadType downloadType = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
+		initialiseDownloadStickerTask(category, source, downloadType, context);
 	}
 	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, DownloadType downloadType, Context context)
 	{
@@ -1334,10 +1335,6 @@ public class StickerManager
 		if(category.getTotalStickers() == 0 || category.getDownloadedStickersCount() < category.getTotalStickers())
 		{
 			category.setState(StickerCategory.DOWNLOADING);
-			if(downloadType== null)
-			{
-				downloadType = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
-			}
 			StickerDownloadManager.getInstance().DownloadMultipleStickers(category, downloadType, source, null);
 		}
 		saveCategoryAsVisible(category);
