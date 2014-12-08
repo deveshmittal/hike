@@ -8,6 +8,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
@@ -162,14 +163,14 @@ public class FestivePopup
 	private static void addFallAnimation(View view)
 	{
 		AnimationSet boxFallAnimSet = new AnimationSet(true);
-		boxFallAnimSet.setInterpolator(new AccelerateInterpolator(1.5f));
+		boxFallAnimSet.setInterpolator(new DecelerateInterpolator(1.5f));
 
 		AlphaAnimation aa1 = new AlphaAnimation(0f, 1f);
 		aa1.setDuration(350);
 		boxFallAnimSet.addAnimation(aa1);
 
-		Animation boxFallAnim = new TranslateAnimation(0, 0, -400 * Utils.densityMultiplier, -13 * Utils.densityMultiplier);
-		boxFallAnim.setDuration(600);
+		Animation boxFallAnim = new TranslateAnimation(0, 0, -400 * Utils.densityMultiplier, 0);
+		boxFallAnim.setDuration(900);
 		boxFallAnimSet.addAnimation(boxFallAnim);
 
 		view.startAnimation(boxFallAnimSet);
