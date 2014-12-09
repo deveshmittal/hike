@@ -34,24 +34,6 @@ public class FestivePopup
 
 	public static final String NEW_YEAR_POPUP = "newyear";
 
-	private static String stickerId;
-
-	private static String categoryId;
-
-	public  static void setStickerIdAndCatId(String popupType)
-	{
-		if(popupType.equals(NEW_YEAR_POPUP))
-		{
-			stickerId = "008_hikinnewyear";
-			categoryId = "festive";
-		}
-		else
-		{
-			stickerId = "002_merryxmas.png";
-			categoryId = "festive";
-		}
-	}
-
 	public static SnowFallView startAndSetSnowFallView(final Activity activity, final String popupType)
 	{
 		if (activity == null)
@@ -138,8 +120,6 @@ public class FestivePopup
 
 	public static void setupFestivePopup(final Activity activity, String popupType)
 	{
-		setStickerIdAndCatId(popupType);
-
 		activity.findViewById(R.id.festive_popup_parent).setVisibility(View.VISIBLE);
 
 		addFallAnimation(activity.findViewById(R.id.festive_popup_parent));
@@ -149,7 +129,8 @@ public class FestivePopup
 			@Override
 			public void onClick(View v) {
 				stopFestiveAnimAndPopup(activity);
-				Intent intent = IntentManager.getForwardStickerIntent(activity, stickerId, categoryId, false);
+
+				Intent intent = IntentManager.getForwardStickerIntent(activity, getStickerId(popupType), getCatId(popupType), false);
 				intent.putExtra(HikeConstants.Extras.SELECT_ALL_INITIALLY, true);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				activity.startActivity(intent);
@@ -163,7 +144,17 @@ public class FestivePopup
 			}
 		});
 	}
-	
+
+	private static String getStickerId(String popupType)
+	{
+		return (popupType.equals(NEW_YEAR_POPUP)) ? "008_hikinnewyear" : "002_merryxmas.png";
+	}
+
+	private static String getCatId(String popupType)
+	{
+		return "festive";
+	}
+
 	private static void addMoveUpAnimation(View view)
 	{
 		Animation anim = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, 0, Animation.RELATIVE_TO_PARENT, 0,
