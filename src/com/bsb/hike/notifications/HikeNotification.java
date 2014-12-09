@@ -1,6 +1,8 @@
 package com.bsb.hike.notifications;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -1200,8 +1202,28 @@ public class HikeNotification
 
 	public long getNextRetryNotificationTime()
 	{
-		long currTime = System.currentTimeMillis();
-		return currTime + HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.RETRY_NOTIFICATION_COOL_OFF_TIME, HikeConstants.DEFAULT_RETRY_NOTIF_TIME);
+		long nextRetryTime = System.currentTimeMillis() + HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.RETRY_NOTIFICATION_COOL_OFF_TIME, HikeConstants.DEFAULT_RETRY_NOTIF_TIME);
+		
+		/*
+		 * We have a sleep state from 12am - 8am. If the timer is finished in this time frame then 
+		 * we wait for the sleep state to get over before showing the local push.
+		 */
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_YEAR, 1);
+		
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		long nextDay12AM = calendar.getTimeInMillis();
+		
+		calendar.set(Calendar.HOUR_OF_DAY, 8);
+		long nextDay8AM = calendar.getTimeInMillis();
+		if(nextRetryTime >= nextDay12AM && nextRetryTime <= nextDay8AM)
+		{
+			nextRetryTime = nextDay8AM;
+		}
+		Logger.i("HikeNotification", "currtime = "+ System.currentTimeMillis() + "  nextDay12AM = "+nextDay12AM+ "  nextDay8AM = "+nextDay8AM + " finalRetryTime = "+ nextRetryTime);
+		return nextRetryTime;
 	}
 	
 	/**

@@ -33,12 +33,13 @@ public class NotificationDismissedReceiver extends BroadcastReceiver
 				 //Right now we retry only once.
 				if (retryCount < 1 && !HikeNotificationMsgStack.getInstance(context).isEmpty())
 				{
+					long retryTime = HikeNotification.getInstance(context).getNextRetryNotificationTime();
 					Logger.i("NotificationDismissedReceiver", "NotificationDismissedReceiver called alarm time = "
-							+ HikeNotification.getInstance(context).getNextRetryNotificationTime() + "retryCount = "+retryCount);
+							+retryTime  + "retryCount = "+retryCount);
 					
 					Intent retryNotificationIntent = new Intent();
 					retryNotificationIntent.putExtra(HikeConstants.RETRY_COUNT, retryCount+1);
-					HikeAlarmManager.setAlarmwithIntent(context, HikeNotification.getInstance(context).getNextRetryNotificationTime(),
+					HikeAlarmManager.setAlarmwithIntent(context, retryTime,
 							HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION, false, retryNotificationIntent);
 				}
 			}
