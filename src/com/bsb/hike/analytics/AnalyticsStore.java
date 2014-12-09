@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
-import java.util.Random;
 
 import org.json.JSONObject;
 
@@ -34,29 +33,26 @@ class AnalyticsStore implements Runnable
 	private FileWriter fileWriter = null;
 	
 	private String currentFileName;
-		
-	private Random randGenerator = null;
-		
+				
 	/**
 	 * Constructor
 	 * @param context application context
 	 */
 	public AnalyticsStore(Context context)
 	{
-		this.context = context;
-		
-		randGenerator = new Random();
-						
+		this.context = context.getApplicationContext();
+								
 		currentFileName = getNewFileName();
 	}
 	
 	/**
-	 * Returns the file name which is a concatenation of filename and a random number
+	 * Returns the file name which is a concatenation of filename and current system time
 	 * @return name of the file
 	 */
 	private String getNewFileName()
 	{
-		 return currentFileName = AnalyticsConstants.EVENT_FILE_NAME + randGenerator.nextInt() + AnalyticsConstants.FILE_EXTENSION;
+		 return currentFileName = AnalyticsConstants.EVENT_FILE_NAME + Long.toString(System.currentTimeMillis()) + 
+				 AnalyticsConstants.FILE_EXTENSION;
 	}
 	
 	/**
