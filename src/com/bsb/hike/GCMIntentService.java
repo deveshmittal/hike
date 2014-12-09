@@ -97,12 +97,12 @@ public class GCMIntentService extends GCMBaseIntentService
 			{
 			case HikeConstants.REGISTEM_GCM_BEFORE_SIGNUP:
 				prefs.saveData(HikeMessengerApp.GCM_ID_SENT_PRELOAD, false);
-				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikeService.SEND_TO_SERVER_ACTION));
+				LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(HikeService.SEND_TO_SERVER_ACTION));
 
 				break;
 			case HikeConstants.REGISTEM_GCM_AFTER_SIGNUP:
 				prefs.saveData(HikeMessengerApp.GCM_ID_SENT, false);
-				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikeService.SEND_TO_SERVER_ACTION));
+				LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(HikeService.SEND_TO_SERVER_ACTION));
 
 				break;
 			}

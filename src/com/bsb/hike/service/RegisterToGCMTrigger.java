@@ -38,7 +38,7 @@ public class RegisterToGCMTrigger extends BroadcastReceiver
 			else
 			{
 				Intent in = new Intent(HikeService.SEND_TO_SERVER_ACTION);
-				LocalBroadcastManager.getInstance(context).sendBroadcast(in);
+				LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(in);
 			}
 		}
 		catch (UnsupportedOperationException e)

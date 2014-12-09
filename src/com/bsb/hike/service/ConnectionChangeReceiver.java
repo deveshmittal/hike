@@ -17,8 +17,8 @@ import com.bsb.hike.utils.Utils;
 
 public class ConnectionChangeReceiver extends BroadcastReceiver
 {
-	
-	private static final String TAG="NETWORK CHANGED";
+
+	private static final String TAG = "NETWORK CHANGED";
 
 	@Override
 	public void onReceive(Context context, Intent intent)
@@ -37,12 +37,11 @@ public class ConnectionChangeReceiver extends BroadcastReceiver
 
 		// GCM_ID_SENT_PRELOAD=true,UserAuth=false,UserOnline=true;GooglePlayServices Installed---->Best Case Scenario
 
-		if (Utils.isUserOnline(context) && (!Utils.isUserAuthenticated(context)) && !mprefs.getData(HikeMessengerApp.GCM_ID_SENT_PRELOAD, false)
-				&& Utils.checkPlayServices(context))
+		if (Utils.isUserOnline(context) && (!Utils.isUserAuthenticated(context)) && !mprefs.getData(HikeMessengerApp.GCM_ID_SENT_PRELOAD, false))
 		{
 			Intent in = new Intent(HikeService.REGISTER_TO_GCM_ACTION);
 			mprefs.saveData(HikeConstants.REGISTER_GCM_SIGNUP, HikeConstants.REGISTEM_GCM_BEFORE_SIGNUP);
-			LocalBroadcastManager.getInstance(context).sendBroadcast(in);
+			LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(in);
 		}
 	}
 

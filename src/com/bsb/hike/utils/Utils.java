@@ -4968,15 +4968,6 @@ public class Utils
 		sendLocaleToServer(context);
 	}
 	
-	public static boolean checkPlayServices(Context context)
-	{
-		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
-		if (resultCode != ConnectionResult.SUCCESS)
-		{
-			return false;
-		}
-		return true;
-	}
 
 	public static void disableNetworkListner(Context context)
 	{
