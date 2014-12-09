@@ -1,7 +1,6 @@
 package com.bsb.hike.platform;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -11,11 +10,11 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontTextView;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,6 +30,7 @@ import java.util.List;
 public class CardRenderer implements View.OnLongClickListener {
 
     Context mContext;
+    String cardName, actionText;
 
     public CardRenderer(Context context) {
         this.mContext = context;
@@ -183,8 +183,8 @@ public class CardRenderer implements View.OnLongClickListener {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
             cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
+            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
 
         } else if (cardType == CardConstants.VIDEO_CARD_LAYOUT) {
             ViewHolder viewHolder;
@@ -203,9 +203,9 @@ public class CardRenderer implements View.OnLongClickListener {
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
-
-            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
             cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
+            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
+
 
         } else if (cardType == CardConstants.GAMES_CARD_LAYOUT) {
             ViewHolder viewHolder;
@@ -233,7 +233,7 @@ public class CardRenderer implements View.OnLongClickListener {
             if (!isGamesAppInstalled) {
                 gameInstalledTextFiller(viewHolder);
             }
-            cardCallToActions(cardType, actionComponents, viewHolder, isGamesAppInstalled, channelSource);
+            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
 
 
         } else if (cardType == CardConstants.ARTICLE_CARD_LAYOUT) {
@@ -253,9 +253,9 @@ public class CardRenderer implements View.OnLongClickListener {
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
-
-            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
             cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
+            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
+
 
         } if (cardType == CardConstants.COLOR_CARD_LAYOUT) {
             ViewHolder viewHolder;
@@ -274,12 +274,26 @@ public class CardRenderer implements View.OnLongClickListener {
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
-            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
             cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
+            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
+            forwardCallAction(convMessage, view);
+
 
         }
 
         return view;
+    }
+
+    private void forwardCallAction(final ConvMessage convMessage , View view) {
+
+        view.findViewById(R.id.forward_switch).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CardController.forwardCalltoAction(mContext, convMessage);
+            }
+        });
+
+
     }
 
 
@@ -292,10 +306,12 @@ public class CardRenderer implements View.OnLongClickListener {
                     @Override
                     public void onClick(View v) {
                         try {
+                            sendLogEvent();
                             if (cardType == CardConstants.GAMES_CARD_LAYOUT) {
+
                                 if (tag.equalsIgnoreCase("CARD") && !isAppInstalled) {
                                     JSONObject jsonObject = new JSONObject();
-                                    jsonObject.put(HikePlatformConstants.INTENT_URI, "https://play.google.com/store/apps/details?id=" + channelSource);
+                                    jsonObject.put(HikePlatformConstants.INTENT_URI, CardConstants.PLAY_STORE_TEXT + channelSource);
                                     CardController.callToAction(jsonObject, mContext);
                                 } else {
                                     CardController.callToAction(actionComponent.getAndroidIntent(), mContext);
@@ -317,12 +333,25 @@ public class CardRenderer implements View.OnLongClickListener {
         }
     }
 
+    private void sendLogEvent() throws JSONException {
+        JSONObject analytics = new JSONObject();
+        analytics.put(CardConstants.CARD_NAME, cardName);
+        analytics.put(CardConstants.ACTION_TEXT, actionText);
+        Utils.sendLogEvent(analytics);
+    }
+
 
     private void cardDataFiller(int cardType, List<CardComponent.TextComponent> textComponents, List<CardComponent.MediaComponent> mediaComponents, ViewHolder viewHolder) {
         for (CardComponent.TextComponent textComponent : textComponents) {
             String tag = textComponent.getTag();
             if (!TextUtils.isEmpty(tag)) {
 
+                if (tag.equals("T1")){
+                    cardName = textComponent.getText();
+                }
+                if (tag.equals("T3")){
+                    actionText = textComponent.getText();
+                }
                 TextView tv = (TextView) viewHolder.viewHashMap.get(tag);
                 if (null != tv) {
                     tv.setVisibility(View.VISIBLE);
@@ -344,14 +373,7 @@ public class CardRenderer implements View.OnLongClickListener {
                     String data = mediaComponent.getKey();
                     BitmapDrawable value = HikeMessengerApp.getLruCache().getBitmapDrawable(data);
 
-                    if (tag.equals("I1") && cardType == CardConstants.GAMES_CARD_LAYOUT) {
-                        Bitmap bitmap = HikeBitmapFactory.getRoundedRectangleBitmap(value, 28.0f);
-                        ((ImageView) mediaView).setImageBitmap(bitmap);
-                    }else
-                        ((ImageView) mediaView).setImageDrawable(value);
-
-
-
+                    ((ImageView) mediaView).setImageDrawable(value);
 
                 }
 
@@ -365,7 +387,12 @@ public class CardRenderer implements View.OnLongClickListener {
         if (viewHolder.viewHashMap.containsKey("T3")) {
             CustomFontTextView cardInstalledText = (CustomFontTextView) viewHolder.viewHashMap.get("T3");
             cardInstalledText.setVisibility(View.VISIBLE);
-            cardInstalledText.setText("FREE INSTALL");
+            cardInstalledText.setText(mContext.getString(R.string.install_text));
+        }
+        if (viewHolder.viewHashMap.containsKey("T2")) {
+            CustomFontTextView cardInstalledSubtext = (CustomFontTextView) viewHolder.viewHashMap.get("T2");
+            cardInstalledSubtext.setVisibility(View.VISIBLE);
+            cardInstalledSubtext.setText(mContext.getString(R.string.install_description));
         }
     }
 
