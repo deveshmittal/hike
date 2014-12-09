@@ -437,11 +437,17 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 				JSONObject requestJSON = new JSONObject(requestData);
 				if (!TextUtils.isEmpty(requestJSON.optString(HikeSDKConstants.PREF_HIKE_SDK_INSTALL_CLICKED_KEY)))
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_INSTALL_HIKE_ACCEPT);
+					JSONObject analyticsJSON = new JSONObject();
+					analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_INSTALL_HIKE_ACCEPT);
+					analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, requestJSON.getString(HikeSDKConstants.HIKE_REQ_SDK_CLIENT_PKG_NAME));
+					Utils.sendLogEvent(analyticsJSON);
 				}
 				if (!TextUtils.isEmpty(requestJSON.optString(HikeSDKConstants.PREF_HIKE_SDK_INSTALL_DENIED_KEY)))
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_INSTALL_HIKE_DECLINE);
+					JSONObject analyticsJSON = new JSONObject();
+					analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_INSTALL_HIKE_DECLINE);
+					analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, requestJSON.getString(HikeSDKConstants.HIKE_REQ_SDK_CLIENT_PKG_NAME));
+					Utils.sendLogEvent(analyticsJSON);
 				}
 			}
 			catch (JSONException e)

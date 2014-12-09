@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Dialog;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -23,9 +26,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.HikeSDKConstants;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Utils;
 
 public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 {
@@ -202,6 +208,21 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 				authPrefs.saveData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, outputCSV);
 
 				authPrefs.removeData(mAppPkgName.split(":")[0]);
+
+				try
+				{
+					JSONObject analyticsJSON = new JSONObject();
+
+					analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_DISCONNECT_APP);
+
+					analyticsJSON.put("third_party_app_pkg", mAppPkgName.split(":")[0]);
+
+					Utils.sendLogEvent(analyticsJSON);
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
 
 				bindContentAndActions();
 			}

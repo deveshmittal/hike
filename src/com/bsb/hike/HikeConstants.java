@@ -1326,6 +1326,10 @@ public class HikeConstants
 		public static final String FTUE_STICKER_ID_LIST = "ftueStickerIdsList";
 		
 		public static final String FTUE_STICKER_CATEGORY_LIST = "ftueStickerCategoryList";
+		
+		public static final String SDK_THIRD_PARTY_PKG = "third_party_app_pkg";
+		
+		public static final String SDK_CONNECTION_TYPE = "connection_type";
 	}
 
 	public static final class LogEvent
@@ -1714,6 +1718,8 @@ public class HikeConstants
 		public static final String SDK_INSTALL_HIKE_ACCEPT = "sdkInstallHikeAccept";
 		
 		public static final String SDK_INSTALL_HIKE_DECLINE = "sdkInstallHikeDeclined";
+		
+		public static final String SDK_DISCONNECT_APP = "sdkDisconnectApp";
 		
 	}
 

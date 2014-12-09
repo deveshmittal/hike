@@ -32,6 +32,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.sdk.HikeSDKResponseCode;
 import com.bsb.hike.service.HikeService;
@@ -163,8 +164,6 @@ public class HikeAuthActivity extends Activity
 		settingPref = HikeSharedPreferenceUtil.getInstance(getApplicationContext(), HikeMessengerApp.ACCOUNT_SETTINGS);
 
 		CURRENT_STATE = STATE_NORMAL;
-
-		Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_AUTH_DIALOG_VIEWED);
 	}
 
 	@Override
@@ -189,6 +188,18 @@ public class HikeAuthActivity extends Activity
 			profileImageLoader = new IconLoader(this, getResources().getDimensionPixelSize(R.dimen.auth_permission_icon));
 
 			retrieveContent();
+
+			try
+			{
+				JSONObject analyticsJSON = new JSONObject();
+				analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_VIEWED);
+				analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+				Utils.sendLogEvent(analyticsJSON);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
 
 			initVar();
 
@@ -228,19 +239,19 @@ public class HikeAuthActivity extends Activity
 		auth_button_deny = ((Button) findViewById(R.id.auth_button_deny));
 
 		layout_app_info = findViewById(R.id.layout_app_info);
-		
+
 		auth_info_layout = findViewById(R.id.auth_info_layout);
-		
+
 		auth_button_deny_layout = findViewById(R.id.auth_button_deny_layout);
-		
+
 		auth_buttons_layout = findViewById(R.id.auth_buttons_layout);
-		
+
 		layout_conn_state = findViewById(R.id.layout_conn_state);
-		
+
 		text_conn_state = ((TextView) findViewById(R.id.text_conn_state));
-		
+
 		progress_bar_conn_state = findViewById(R.id.progress_bar_conn_state);
-		
+
 		image_conn_state = ((ImageView) findViewById(R.id.image_conn_state));
 	}
 
@@ -403,7 +414,17 @@ public class HikeAuthActivity extends Activity
 				@Override
 				public void onClick(View v)
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_AUTH_DIALOG_CONNECT);
+					try
+					{
+						JSONObject analyticsJSON = new JSONObject();
+						analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_CONNECT);
+						analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+						Utils.sendLogEvent(analyticsJSON);
+					}
+					catch (JSONException e)
+					{
+						e.printStackTrace();
+					}
 					requestAccess();
 				}
 			});
@@ -414,7 +435,17 @@ public class HikeAuthActivity extends Activity
 				@Override
 				public void onClick(View v)
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_AUTH_DIALOG_DECLINED);
+					try
+					{
+						JSONObject analyticsJSON = new JSONObject();
+						analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_DECLINED);
+						analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+						Utils.sendLogEvent(analyticsJSON);
+					}
+					catch (JSONException e)
+					{
+						e.printStackTrace();
+					}
 					message.arg2 = HikeSDKResponseCode.STATUS_FAILED;
 					HikeService.mHikeSDKRequestHandler.handleMessage(message);
 					Logger.d(HikeAuthActivity.class.getCanonicalName(), "shutting auth activity successfully!");
@@ -445,7 +476,7 @@ public class HikeAuthActivity extends Activity
 		params.add(new BasicNameValuePair("response_type", "token"));
 		params.add(new BasicNameValuePair("client_id", mAppId));
 		params.add(new BasicNameValuePair("scope", "publish_actions"));
-		params.add(new BasicNameValuePair("package_name", "com.bsb.jellies"));
+		params.add(new BasicNameValuePair("package_name", mAppPackage));
 		params.add(new BasicNameValuePair("sha1", "test_sha1"));
 
 		String paramString = URLEncodedUtils.format(params, "UTF-8");
@@ -489,8 +520,8 @@ public class HikeAuthActivity extends Activity
 					{
 						long timestamp = System.currentTimeMillis();
 						prefs.saveData(AUTH_SHARED_PREF_PKG_KEY,
-								TextUtils.isEmpty(prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")) ? mAppPackage + ":" + timestamp : prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")
-										+ "," + mAppPackage + ":" + timestamp);
+								TextUtils.isEmpty(prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")) ? mAppPackage + ":" + timestamp : prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "") + ","
+										+ mAppPackage + ":" + timestamp);
 					}
 
 					prefs.saveData(mAppPackage, Integer.toString(accessToken.hashCode()));
@@ -812,7 +843,7 @@ public class HikeAuthActivity extends Activity
 		CURRENT_STATE = STATE_CONNECTED;
 		auth_title.setVisibility(View.GONE);
 		auth_button_accept.setVisibility(View.GONE);
-		
+
 		layout_app_info.setVisibility(View.GONE);
 		layout_app_info.setVisibility(View.GONE);
 		auth_info_layout.setVisibility(View.GONE);
@@ -831,7 +862,18 @@ public class HikeAuthActivity extends Activity
 		image_conn_state.setVisibility(View.VISIBLE);
 		image_conn_state.setImageResource(R.drawable.ic_tick_auth);
 		progress_bar_conn_state.setVisibility(View.GONE);
-		Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_AUTH_SUCCESS);
+		try
+		{
+			JSONObject analyticsJSON = new JSONObject();
+			analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_SUCCESS);
+			analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+			analyticsJSON.put(HikeConstants.Extras.SDK_CONNECTION_TYPE, FileTransferManager.getInstance(getApplicationContext()).getNetworkType());
+			Utils.sendLogEvent(analyticsJSON);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public void displayRetryConnectionState()
@@ -865,6 +907,17 @@ public class HikeAuthActivity extends Activity
 		image_conn_state.setVisibility(View.VISIBLE);
 		image_conn_state.setImageResource(R.drawable.ic_error);
 		progress_bar_conn_state.setVisibility(View.GONE);
-		Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_AUTH_FAILURE);
+		try
+		{
+			JSONObject analyticsJSON = new JSONObject();
+			analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_FAILURE);
+			analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+			analyticsJSON.put(HikeConstants.Extras.SDK_CONNECTION_TYPE, FileTransferManager.getInstance(getApplicationContext()).getNetworkType());
+			Utils.sendLogEvent(analyticsJSON);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
