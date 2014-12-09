@@ -272,20 +272,27 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		final String festivePopupType = accountPrefs.getString(HikeConstants.SHOW_FESTIVE_POPUP, "");
 		if (!TextUtils.isEmpty(festivePopupType))
 		{
-			ViewStub festiveView = (ViewStub) findViewById(R.id.festive_view_stub);
-			if(festivePopupType.equals(FestivePopup.NEW_YEAR_POPUP))
+			if(FestivePopup.isPastFestiveDate(festivePopupType))
 			{
-				festiveView.setLayoutResource(R.layout.new_year_popup);
+				HikeSharedPreferenceUtil.getInstance(this).removeData(HikeConstants.SHOW_FESTIVE_POPUP);
 			}
-			festiveView.setOnInflateListener(new ViewStub.OnInflateListener()
+			else
 			{
-				@Override
-				public void onInflate(ViewStub stub, View inflated)
+				ViewStub festiveView = (ViewStub) findViewById(R.id.festive_view_stub);
+				if(festivePopupType.equals(FestivePopup.NEW_YEAR_POPUP))
 				{
-					setupFestiveView(festivePopupType);
+					festiveView.setLayoutResource(R.layout.new_year_popup);
 				}
-			});
-			festiveView.inflate();
+				festiveView.setOnInflateListener(new ViewStub.OnInflateListener()
+				{
+					@Override
+					public void onInflate(ViewStub stub, View inflated)
+					{
+						setupFestiveView(festivePopupType);
+					}
+				});
+				festiveView.inflate();
+			}
 		}
 
 	}

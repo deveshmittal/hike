@@ -1,5 +1,10 @@
 package com.bsb.hike.utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
@@ -21,6 +26,8 @@ import com.bsb.hike.ui.HomeActivity;
 
 public class FestivePopup
 {	
+	private static final String TAG = "FestivePopup";
+
 	public static SnowFallView snowFallView; 
 	
 	public static final String XMAS_POPUP = "xmas";
@@ -188,5 +195,32 @@ public class FestivePopup
 		((HomeActivity)activity).showActionBarAfterFestivePopup();
 
 		HikeSharedPreferenceUtil.getInstance(activity).removeData(HikeConstants.SHOW_FESTIVE_POPUP);
+	}
+
+	public static boolean isPastFestiveDate(String type)
+	{
+		String xmasDate = "2014-12-25";
+		String newYearsDate = "2015-01-01";
+		String festive = type.equals(NEW_YEAR_POPUP) ? newYearsDate : xmasDate;
+
+		Date currentDate, festiveDate;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String current = sdf.format(Calendar.getInstance().getTime());
+
+		try
+		{
+			festiveDate = sdf.parse(festive);
+			currentDate = sdf.parse(current);
+
+			if(currentDate.after(festiveDate))
+	        {
+				return true;
+	        }
+		}
+		catch (ParseException e)
+		{
+			Logger.d(TAG, "Error parsing date : " + e);
+		}
+        return false;
 	}
 }
