@@ -593,7 +593,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
             dayHolder = holder;
             setSenderDetails(convMessage, position, holder, false);
             //setBubbleColor(convMessage, holder.messageContainer);
-            setTimeNStatus(position, holder, false, holder.messageContainer);
+            setTimeNStatus(position, holder, true, holder.messageContainer);
             setSelection(convMessage, holder.selectedStateOverlay);
         }  else
             viewType = ViewType.values()[type];
