@@ -1190,4 +1190,9 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="auth_needed_for_messaging">This is needed for instant messaging</string>
     <string name="auth_button_deny">Nope</string>
     <string name="auth_button_accept">Connect</string>
+    <string name="install_text">FREE INSTALL</string>
+    <string name="play_text">PLAY</string>
+    <string name="install_description">Hey, try out this awesome game I have been playing!</string>
+    <string name="play_description">Are you playing this? Best game ever! Play and help me out.</string>
+
 </resources>
