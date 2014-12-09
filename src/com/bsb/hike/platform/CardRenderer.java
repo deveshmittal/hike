@@ -233,7 +233,7 @@ public class CardRenderer implements View.OnLongClickListener {
             if (!isGamesAppInstalled) {
                 gameInstalledTextFiller(viewHolder);
             }
-            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
+            cardCallToActions(cardType, actionComponents, viewHolder, isGamesAppInstalled, "");
 
 
         } else if (cardType == CardConstants.ARTICLE_CARD_LAYOUT) {
@@ -342,6 +342,7 @@ public class CardRenderer implements View.OnLongClickListener {
 
 
     private void cardDataFiller(int cardType, List<CardComponent.TextComponent> textComponents, List<CardComponent.MediaComponent> mediaComponents, ViewHolder viewHolder) {
+
         for (CardComponent.TextComponent textComponent : textComponents) {
             String tag = textComponent.getTag();
             if (!TextUtils.isEmpty(tag)) {

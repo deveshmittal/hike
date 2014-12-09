@@ -2160,8 +2160,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
                             convMessage.setMessage(convMessage.platformMessageMetadata.notifText);
 
                             if(convMessage.platformMessageMetadata.layoutId == CardConstants.GAMES_CARD_LAYOUT)
-                             convMessage.platformMessageMetadata.changeCallToAction();
-
+                          //  convMessage.platformMessageMetadata.changeCallToAction();
                             sendMessage(convMessage);
 
                         }
