@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import android.app.Dialog;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -12,9 +13,13 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -152,8 +157,11 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 
 	class DisconnectAppOnClickListener implements View.OnClickListener
 	{
-
 		private String mAppPkgName;
+
+		private Dialog mDialog;
+
+		private View clickedView;
 
 		public DisconnectAppOnClickListener(String argAppPkgName)
 		{
@@ -165,8 +173,7 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 
 		}
 
-		@Override
-		public void onClick(View v)
+		private void disconnectApp()
 		{
 			String connectedPkgCSV = authPrefs.getData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, "");
 			if (TextUtils.isEmpty(connectedPkgCSV))
@@ -193,12 +200,45 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 				}
 
 				authPrefs.saveData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, outputCSV);
-				
+
 				authPrefs.removeData(mAppPkgName.split(":")[0]);
 
 				bindContentAndActions();
 			}
+		}
 
+		@Override
+		public void onClick(View v)
+		{
+			clickedView = v;
+			mDialog = HikeDialog.showDialog(ConnectedAppsActivity.this,// this is fine since HikeDialog does not keep any instance with itself
+					HikeDialog.HIKE_GENERIC_CONFIRM_DIALOG, new HikeDialog.HikeDialogListener()
+					{
+						@Override
+						public void positiveClicked(Dialog dialog)
+						{
+							disconnectApp();
+						}
+
+						@Override
+						public void onSucess(Dialog dialog)
+						{
+							// Do nothing
+						}
+
+						@Override
+						public void neutralClicked(Dialog dialog)
+						{
+							// Do nothing
+						}
+
+						@Override
+						public void negativeClicked(Dialog dialog)
+						{
+							mDialog.dismiss();
+						}
+					}, (Object) null);
+			mDialog.show();
 		}
 	}
 }

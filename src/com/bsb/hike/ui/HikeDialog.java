@@ -1,26 +1,28 @@
 package com.bsb.hike.ui;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.test.MainActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontTextView;
@@ -34,13 +36,14 @@ public class HikeDialog
 	public static final int RESET_STEALTH_DIALOG = 4;
 
 	public static final int STEALTH_FTUE_EMPTY_STATE_DIALOG = 5;
-	
+
 	public static final int SHARE_IMAGE_QUALITY_DIALOG = 6;
 
 	public static final int SMS_CLIENT_DIALOG = 7;
-	
+
 	public static final int HIKE_UPGRADE_DIALOG = 8;
 
+	public static final int HIKE_GENERIC_CONFIRM_DIALOG = 9;
 
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
 	{
@@ -66,10 +69,47 @@ public class HikeDialog
 			return showSMSClientDialog(context, listener, data);
 		case HIKE_UPGRADE_DIALOG:
 			return showHikeUpgradeDialog(context, data);
+		case HIKE_GENERIC_CONFIRM_DIALOG:
+			return getGenericConfirmationDialog(context, listener);
 		}
 
 		return null;
 
+	}
+
+	/**
+	 * Returns dialog instance with no title, description set as "Are you sure?" and positive/negative button as Yes/No respectively. <br>
+	 * <br>
+	 * TODO:Make this further generic by passing strings in data array.
+	 * 
+	 * @param context
+	 * @param listener
+	 * @return
+	 */
+	private static Dialog getGenericConfirmationDialog(Context context, final HikeDialogListener listener)
+	{
+		final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+
+		// set dialog message
+		alertDialogBuilder.setMessage(context.getString(R.string.are_you_sure)).setCancelable(false)
+				.setPositiveButton(context.getString(R.string.yes), new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int id)
+					{
+						listener.positiveClicked(null);
+					}
+				}).setNegativeButton(context.getString(R.string.no), new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int id)
+					{
+						listener.negativeClicked(null);
+					}
+				});
+
+		// create alert dialog
+		AlertDialog alertDialog = alertDialogBuilder.create();
+
+		return alertDialog;
 	}
 
 	private static Dialog showAddedAsFavoriteDialog(Context context, final HikeDialogListener listener, Object... data)

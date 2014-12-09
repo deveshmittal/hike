@@ -1248,9 +1248,9 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="some_error">Some error occured!</string>
     <string name="nux_fwd_search_hint">Names go here...</string>
     <string name="recently_joined_hike">RECENTLY JOINED HIKE</string>
-    <string name="auth_connected_to_hike">%1$s connected to hike</string>
+    <string name="auth_connected_to_hike">%1$s connected to hike!</string>
     <string name="auth_state_connecting">Connecting...</string>
-    <string name="auth_please_wait_connect">Please wait while we connect you</string>
+    <string name="auth_please_wait_connect">Please wait while we connect you...</string>
     <string name="auth_done">DONE</string>
     <string name="auth_cancel">Cancel</string>
     <string name="auth_retry">Retry</string>

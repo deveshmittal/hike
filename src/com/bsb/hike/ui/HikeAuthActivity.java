@@ -121,6 +121,22 @@ public class HikeAuthActivity extends Activity
 
 	private Button auth_button_deny;
 
+	private View layout_app_info;
+
+	private View auth_info_layout;
+
+	private View auth_button_deny_layout;
+
+	private View auth_buttons_layout;
+
+	private View layout_conn_state;
+
+	private TextView text_conn_state;
+
+	private ImageView image_conn_state;
+
+	private View progress_bar_conn_state;
+
 	public static boolean bypassAuthHttp = false;
 
 	/*
@@ -147,7 +163,7 @@ public class HikeAuthActivity extends Activity
 		settingPref = HikeSharedPreferenceUtil.getInstance(getApplicationContext(), HikeMessengerApp.ACCOUNT_SETTINGS);
 
 		CURRENT_STATE = STATE_NORMAL;
-		
+
 		Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_AUTH_DIALOG_VIEWED);
 	}
 
@@ -210,6 +226,22 @@ public class HikeAuthActivity extends Activity
 		auth_button_accept = ((Button) findViewById(R.id.auth_button_accept));
 
 		auth_button_deny = ((Button) findViewById(R.id.auth_button_deny));
+
+		layout_app_info = findViewById(R.id.layout_app_info);
+		
+		auth_info_layout = findViewById(R.id.auth_info_layout);
+		
+		auth_button_deny_layout = findViewById(R.id.auth_button_deny_layout);
+		
+		auth_buttons_layout = findViewById(R.id.auth_buttons_layout);
+		
+		layout_conn_state = findViewById(R.id.layout_conn_state);
+		
+		text_conn_state = ((TextView) findViewById(R.id.text_conn_state));
+		
+		progress_bar_conn_state = findViewById(R.id.progress_bar_conn_state);
+		
+		image_conn_state = ((ImageView) findViewById(R.id.image_conn_state));
 	}
 
 	@Override
@@ -337,19 +369,21 @@ public class HikeAuthActivity extends Activity
 					}
 				}
 			});
-			
-			
+
 			new Handler().postDelayed(new Runnable()
 			{
-				
+
 				@Override
 				public void run()
 				{
 					if (textViewDropdown.getTag().equals("0"))
 					{
-						textViewDropdown.setCompoundDrawablesWithIntrinsicBounds(getApplicationContext().getResources().getDrawable(R.drawable.arrowup), null, null, null);
-						textViewDropdown.setTag("1");
-						findViewById(R.id.auth_info_layout).setVisibility(View.VISIBLE);
+						if (CURRENT_STATE == STATE_NORMAL)
+						{
+							textViewDropdown.setCompoundDrawablesWithIntrinsicBounds(getApplicationContext().getResources().getDrawable(R.drawable.arrowup), null, null, null);
+							textViewDropdown.setTag("1");
+							findViewById(R.id.auth_info_layout).setVisibility(View.VISIBLE);
+						}
 					}
 				}
 			}, 2000);
@@ -450,11 +484,20 @@ public class HikeAuthActivity extends Activity
 					String accessToken = "ashjfbqiywgr13irb";
 
 					prefs = HikeSharedPreferenceUtil.getInstance(getApplicationContext(), AUTH_SHARED_PREF_NAME);
+
+					if (TextUtils.isEmpty(prefs.getData(mAppPackage, "")))
+					{
+						long timestamp = System.currentTimeMillis();
+						prefs.saveData(AUTH_SHARED_PREF_PKG_KEY,
+								TextUtils.isEmpty(prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")) ? mAppPackage + ":" + timestamp : prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")
+										+ "," + mAppPackage + ":" + timestamp);
+					}
+
 					prefs.saveData(mAppPackage, Integer.toString(accessToken.hashCode()));
 
 					HikeMessengerApp.getPubSub().publish(HikePubSub.AUTH_TOKEN_RECEIVED, accessToken);
 
-					HikeAuthActivity.this.finish();
+					displayConnectedState();
 				}
 				else
 				{
@@ -741,17 +784,16 @@ public class HikeAuthActivity extends Activity
 	public void displayIsConnectingState()
 	{
 		CURRENT_STATE = STATE_IS_CONNECTING;
-		((TextView) findViewById(R.id.auth_button_accept)).setText("");
-		findViewById(R.id.auth_title).setVisibility(View.GONE);
-		findViewById(R.id.layout_app_info).setVisibility(View.GONE);
-		findViewById(R.id.auth_app_access_to).setVisibility(View.GONE);
-		findViewById(R.id.auth_info_layout).setVisibility(View.GONE);
-		findViewById(R.id.auth_button_deny_layout).setVisibility(View.GONE);
-		
-		//Hack to improve UX
+		auth_button_accept.setText("");
+		auth_title.setVisibility(View.GONE);
+		layout_app_info.setVisibility(View.GONE);
+		textViewDropdown.setVisibility(View.GONE);
+		auth_info_layout.setVisibility(View.GONE);
+		auth_button_deny_layout.setVisibility(View.GONE);
+
+		// Hack to improve UX
 		new Handler().postDelayed(new Runnable()
 		{
-
 			@Override
 			public void run()
 			{
@@ -759,10 +801,10 @@ public class HikeAuthActivity extends Activity
 				auth_button_accept.setOnClickListener(null);
 			}
 		}, 500);
-		findViewById(R.id.layout_conn_state).setVisibility(View.VISIBLE);
-		((TextView) findViewById(R.id.text_conn_state)).setText(getString(R.string.auth_please_wait_connect));
-		findViewById(R.id.image_conn_state).setVisibility(View.GONE);
-		findViewById(R.id.progress_bar_conn_state).setVisibility(View.VISIBLE);
+		layout_conn_state.setVisibility(View.VISIBLE);
+		text_conn_state.setText(getString(R.string.auth_please_wait_connect));
+		image_conn_state.setVisibility(View.GONE);
+		progress_bar_conn_state.setVisibility(View.VISIBLE);
 	}
 
 	public void displayConnectedState()
@@ -770,11 +812,12 @@ public class HikeAuthActivity extends Activity
 		CURRENT_STATE = STATE_CONNECTED;
 		auth_title.setVisibility(View.GONE);
 		auth_button_accept.setVisibility(View.GONE);
-		findViewById(R.id.layout_app_info).setVisibility(View.GONE);
-		findViewById(R.id.auth_app_access_to).setVisibility(View.GONE);
-		findViewById(R.id.auth_info_layout).setVisibility(View.GONE);
-		findViewById(R.id.auth_button_deny_layout).setVisibility(View.GONE);
-		findViewById(R.id.auth_buttons_layout).setVisibility(View.GONE);
+		
+		layout_app_info.setVisibility(View.GONE);
+		layout_app_info.setVisibility(View.GONE);
+		auth_info_layout.setVisibility(View.GONE);
+		auth_button_deny_layout.setVisibility(View.GONE);
+		auth_buttons_layout.setVisibility(View.GONE);
 		new Handler().postDelayed(new Runnable()
 		{
 			@Override
@@ -783,11 +826,11 @@ public class HikeAuthActivity extends Activity
 				HikeAuthActivity.this.finish();
 			}
 		}, 2500);
-		findViewById(R.id.layout_conn_state).setVisibility(View.VISIBLE);
-		((TextView) findViewById(R.id.text_conn_state)).setText(String.format(getApplicationContext().getString(R.string.auth_connected_to_hike), mAppName));
-		findViewById(R.id.image_conn_state).setVisibility(View.VISIBLE);
-		((ImageView) findViewById(R.id.image_conn_state)).setImageResource(R.drawable.ic_tick_auth);
-		findViewById(R.id.progress_bar_conn_state).setVisibility(View.GONE);
+		layout_conn_state.setVisibility(View.VISIBLE);
+		text_conn_state.setText(String.format(getApplicationContext().getString(R.string.auth_connected_to_hike), mAppName));
+		image_conn_state.setVisibility(View.VISIBLE);
+		image_conn_state.setImageResource(R.drawable.ic_tick_auth);
+		progress_bar_conn_state.setVisibility(View.GONE);
 		Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_AUTH_SUCCESS);
 	}
 
@@ -795,10 +838,10 @@ public class HikeAuthActivity extends Activity
 	{
 		CURRENT_STATE = STATE_RETRY_CONNECTION;
 		auth_title.setVisibility(View.GONE);
-		findViewById(R.id.layout_app_info).setVisibility(View.GONE);
-		findViewById(R.id.auth_app_access_to).setVisibility(View.GONE);
-		findViewById(R.id.auth_info_layout).setVisibility(View.GONE);
-		findViewById(R.id.auth_button_deny_layout).setVisibility(View.VISIBLE);
+		layout_app_info.setVisibility(View.GONE);
+		textViewDropdown.setVisibility(View.GONE);
+		auth_info_layout.setVisibility(View.GONE);
+		auth_button_deny_layout.setVisibility(View.VISIBLE);
 		auth_button_deny.setText(getString(R.string.auth_cancel));
 		auth_button_accept.setText(getString(R.string.auth_retry));
 		auth_button_deny.setOnClickListener(new View.OnClickListener()
@@ -817,11 +860,11 @@ public class HikeAuthActivity extends Activity
 				requestAccess();
 			}
 		});
-		findViewById(R.id.layout_conn_state).setVisibility(View.VISIBLE);
-		((TextView) findViewById(R.id.text_conn_state)).setText(getString(R.string.auth_went_wrong));
-		findViewById(R.id.image_conn_state).setVisibility(View.VISIBLE);
-		((ImageView) findViewById(R.id.image_conn_state)).setImageResource(R.drawable.ic_error);
-		findViewById(R.id.progress_bar_conn_state).setVisibility(View.GONE);
+		layout_conn_state.setVisibility(View.VISIBLE);
+		text_conn_state.setText(getString(R.string.auth_went_wrong));
+		image_conn_state.setVisibility(View.VISIBLE);
+		image_conn_state.setImageResource(R.drawable.ic_error);
+		progress_bar_conn_state.setVisibility(View.GONE);
 		Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_AUTH_FAILURE);
 	}
 }
