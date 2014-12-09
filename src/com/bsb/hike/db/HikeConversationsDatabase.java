@@ -4112,14 +4112,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				int totalStickers = c.getInt(c.getColumnIndex(DBConstants.TOTAL_NUMBER));
 
 				StickerCategory s;
-				if(!isCustom)
+				/**
+				 * Making sure that Recents category is added as CustomStickerCategory only. 
+				 * This is being done to avoid ClassCast exception on the PlayStore. 
+				 */
+				if(isCustom || categoryId.equals(StickerManager.RECENT))
 				{
-					s = new StickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, totalStickers,
+					s = new CustomStickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, totalStickers,
 						categorySize);
 				}
 				else
 				{
-					s = new CustomStickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, totalStickers,
+					s = new StickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, totalStickers,
 							categorySize);
 				}
 				stickerDataMap.put(categoryId, s);

@@ -514,17 +514,29 @@ public class StickerManager
 
 	public void saveCustomCategories()
 	{
-		saveSortedListForCategory(RECENT);
+		saveSortedListForCategory(StickerManager.RECENT);
 	}
 	
 	public void saveSortedListForCategory(String catId)
 	{
-		CustomStickerCategory customCategory = ((CustomStickerCategory) stickerCategoriesMap.get(catId));
-		if(customCategory == null)
+		StickerCategory customCategory = stickerCategoriesMap.get(catId);
+
+		if (customCategory == null)
 		{
 			return;
 		}
-		Set<Sticker> list = customCategory.getStickerSet();
+
+		/**
+		 * Putting an instance of check here to avoid ClassCastException.
+		 */
+
+		if (!(customCategory instanceof CustomStickerCategory))
+		{
+			Logger.d("StickerManager", "Inside saveSortedListforCategory : " + customCategory.getCategoryName() + " is not CustomStickerCategory");
+			return;
+		}
+
+		Set<Sticker> list = ((CustomStickerCategory) customCategory).getStickerSet();
 		try
 		{
 			if (list.size() == 0)
