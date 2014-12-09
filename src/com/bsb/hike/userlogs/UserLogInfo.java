@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.net.Uri;
 import android.provider.CallLog;
 
@@ -161,7 +162,7 @@ public class UserLogInfo {
 		Cursor cur = cr.query(callUriLimited, projection, null, null, strOrder);
 		
 		try {
-			while (cur.moveToNext()) {
+			while (cur != null && cur.moveToNext()) {
 
 				String callNumber = cur.getString(cur.getColumnIndex(android.provider.CallLog.Calls.NUMBER));
 				String callDate = cur.getString(cur.getColumnIndex(android.provider.CallLog.Calls.DATE));				
@@ -200,8 +201,10 @@ public class UserLogInfo {
 				}
 
 			}
+		} catch (Exception e) {
+			Logger.d(TAG, e.toString());
 		} finally {
-			cur.close();
+			if (cur != null) cur.close();
 		}
 		return callLogsMap;
 		

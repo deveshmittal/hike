@@ -20,7 +20,7 @@ public class AESEncryption {
 	private final static String encryptionAlgo  = "AES";
 	private static SecretKeySpec secretKey;
 	private static byte[] key;
-	private static String initV = "0011223344556677";
+	private final static String initV = "0011223344556677";
 	private static String decryptedString;
 	private static String encryptedString;
 
