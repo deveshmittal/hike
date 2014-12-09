@@ -86,7 +86,9 @@ public class HikeAuthActivity extends Activity
 	/** The Constant MESSAGE_INDEX. Used for passing messages between activities */
 	public static final String MESSAGE_INDEX = "MESSAGE_INDEX";
 
-	private static final String BASE_URL = "http://stagingoauth.im.hike.in/o/oauth2/";
+	private static final String BASE_URL_STAGING = "http://stagingoauth.im.hike.in/o/oauth2/";
+	
+	private static final String BASE_URL_PROD = "http://oauth.hike.in/o/oauth2/";
 
 	private static final String PATH_AUTHORIZE = "authorize";
 
@@ -469,7 +471,7 @@ public class HikeAuthActivity extends Activity
 
 		displayIsConnectingState();
 
-		String authUrl = BASE_URL + PATH_AUTHORIZE;
+		String authUrl = BASE_URL_PROD + PATH_AUTHORIZE;
 
 		List<BasicNameValuePair> params = new LinkedList<BasicNameValuePair>();
 
@@ -496,7 +498,11 @@ public class HikeAuthActivity extends Activity
 		HttpGet httpGet = new HttpGet(authUrl);
 
 		httpGet.addHeader(new BasicHeader("Content-type", "text/plain"));
-		httpGet.addHeader(new BasicHeader("cookie", "uid=UZtZkaEMFSBRwmys;token=EeEKpHJzesU="));
+		
+		//use if baseurl is of staging server
+//		httpGet.addHeader(new BasicHeader("cookie", "uid=UZtZkaEMFSBRwmys;token=EeEKpHJzesU="));
+		
+		AccountUtils.addTokenForAuthReq(httpGet);
 
 		authTask = new UtilAtomicAsyncTask(HikeAuthActivity.this, null, false, new UtilAsyncTaskListener()
 		{
