@@ -3,6 +3,7 @@ package com.bsb.hike.models;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -174,6 +175,7 @@ public class HikeAlarmManager
 			int retryCount  = intent.getExtras().getInt(HikeConstants.RETRY_COUNT, 0);
 			Logger.i(LOG_TAG, "processTasks called with request Code "+requestCode+ "time = "+System.currentTimeMillis() +" retryCount = "+retryCount);
 			
+			Utils.sendUILogEvent(HikeConstants.LogEvent.RETRY_NOTIFICATION_SENT);
 			HikeNotification.getInstance(context).showNotificationForCurrentMsgStack(true, retryCount);
 			break;
 		default:

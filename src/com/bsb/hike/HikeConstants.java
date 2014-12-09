@@ -1693,6 +1693,8 @@ public class HikeConstants
 		public static final String NUX_INVITE_SENT = "nuxInvteSent";
 
 		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
+
+		public static final String RETRY_NOTIFICATION_SENT = "retryNotificationSent";
 	}
 
 	public static final class MqttMessageTypes
