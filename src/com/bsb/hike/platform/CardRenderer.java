@@ -289,7 +289,7 @@ public class CardRenderer implements View.OnLongClickListener {
         view.findViewById(R.id.forward_switch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                CardController.forwardCalltoAction(mContext, convMessage);
+                CardController.forwardCalltoAction(mContext, convMessage);
             }
         });
 
