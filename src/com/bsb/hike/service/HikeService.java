@@ -43,6 +43,7 @@ import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
@@ -191,6 +192,9 @@ public class HikeService extends Service
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
 		mMqttManager = new HikeMqttManagerNew(getApplicationContext());
 		mMqttManager.init();
+		
+		initStickerDownloadManager();
+		
 
 		/*
 		 * notify android that our service represents a user visible action, so it should not be killable. In order to do so, we need to show a notification so the user understands
@@ -897,6 +901,11 @@ public class HikeService extends Service
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
 			Utils.executeHttpTask(hikeHTTPTask, profilePicRequest);
 		}
+	}
+	
+	private void initStickerDownloadManager()
+	{
+		StickerDownloadManager.init(getApplicationContext());
 	}
 
 }
