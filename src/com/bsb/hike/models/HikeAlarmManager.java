@@ -164,9 +164,6 @@ public class HikeAlarmManager
 	{
 
 		int requestCode = intent.getIntExtra(HikeAlarmManager.INTENT_EXTRA, HikeAlarmManager.REQUESTCODE_DEFAULT);
-		int retryCount  = intent.getExtras().getInt(HikeConstants.RETRY_COUNT, 0);
-		
-		Logger.i(LOG_TAG, "processTasks called with request Code "+requestCode+ "time = "+System.currentTimeMillis() +" retryCount = "+retryCount);
 		
 		switch (requestCode)
 		{
@@ -174,6 +171,9 @@ public class HikeAlarmManager
 			// PreloadNotificationSchedular.performActionWhenAlarmReceived(context);
 			break;
 		case HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION:
+			int retryCount  = intent.getExtras().getInt(HikeConstants.RETRY_COUNT, 0);
+			Logger.i(LOG_TAG, "processTasks called with request Code "+requestCode+ "time = "+System.currentTimeMillis() +" retryCount = "+retryCount);
+			
 			HikeNotification.getInstance(context).showNotificationForCurrentMsgStack(true, retryCount);
 			break;
 		default:
