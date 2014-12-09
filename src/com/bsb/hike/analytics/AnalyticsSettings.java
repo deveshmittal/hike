@@ -14,7 +14,7 @@ class AnalyticsSettings
 	
 	public AnalyticsSettings(Context context)
 	{
-		this.context = context;
+		this.context = context.getApplicationContext();
 	}
 	
 	public static void configureAnalyticsService(Context context, int maxFileSize, long whenToSend, boolean isServiceEnabled)	
