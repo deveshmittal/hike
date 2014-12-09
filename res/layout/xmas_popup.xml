@@ -19,13 +19,13 @@
 	    android:layout_width="@dimen/diwali_popup_width"
 	    android:layout_height="@dimen/diwali_popup_height"
 	    android:layout_gravity="center"
-	    android:background="@drawable/bg_diwali_popup"
+	    android:background="@drawable/bg_pattern_repeat"
 	    android:visibility="gone" >
 	
 	    <LinearLayout
 	        android:id="@+id/button_container"
 	        android:layout_width="match_parent"
-	        android:layout_height="45dp"
+	        android:layout_height="48dp"
 	        android:layout_alignParentBottom="true"
 	        android:orientation="horizontal" >
 	
@@ -33,7 +33,7 @@
 	            android:id="@+id/btn_ok"
 	            style="@style/DiwaliPopupButton"
 	            android:background="@drawable/diwali_popup_right_btn"
-	            android:textColor="@color/diwali_popup_btn_ok_txt"
+	            android:textColor="@color/white"
 	            android:text="@string/wish_now"
 	            android:textStyle="bold|italic" />
 	    </LinearLayout>
@@ -41,16 +41,19 @@
 	    <View
 	        android:id="@+id/divider"
 	        android:layout_width="match_parent"
-	        android:layout_height="1dp"
+	        android:layout_height="0.5dp"
+	        android:layout_marginLeft="8dp"
+	        android:layout_marginRight="8dp"
 	        android:layout_above="@id/button_container"
-	        android:background="@color/diwali_popup_divider" />
+	        android:alpha="0.2"
+	        android:background="@color/black" />
 
 	    <LinearLayout
 	        android:id="@+id/festive_popup_body"
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent"
 	        android:layout_above="@id/divider"
-	        android:background="@drawable/pattern_bg_diwali_popup"
+	        android:background="@drawable/bg_pattern_repeat"
 	        android:padding="15dp"
 	        android:gravity="center"
 	        android:orientation="vertical" >
@@ -72,25 +75,25 @@
 	            android:layout_height="wrap_content"
 	            android:text="@string/send_sticker_joy"
 	            android:textColor="@color/white"
-	            android:textSize="16dp" />
+	            android:textSize="14dp" />
 	
 	        <ImageView
 	            android:id="@+id/sticker_popup_image"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:layout_marginTop="25dp"
+	            android:layout_marginTop="18dp"
 	            android:src="@drawable/merryxmas" />
 	    </LinearLayout>
 
 	    <ImageButton
             android:id="@+id/btn_cancel"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:scaleType="centerInside"
             android:layout_alignParentRight="true"
             android:background="@null"
-            android:layout_marginTop="5dp"
-            android:layout_marginRight="5dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="7dp"
             android:src="@drawable/ic_cross_popup" />
 	
 	</RelativeLayout>

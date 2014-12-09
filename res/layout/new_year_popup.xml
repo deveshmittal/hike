@@ -15,7 +15,7 @@
 	    <LinearLayout
 	        android:id="@+id/button_container"
 	        android:layout_width="match_parent"
-	        android:layout_height="45dp"
+	        android:layout_height="48dp"
 	        android:layout_alignParentBottom="true"
 	        android:orientation="horizontal" >
 	
@@ -31,7 +31,9 @@
 	    <View
 	        android:id="@+id/divider"
 	        android:layout_width="match_parent"
-	        android:layout_height="1dp"
+	        android:layout_height="0.5dp"
+	        android:layout_marginLeft="8dp"
+	        android:layout_marginRight="8dp"
 	        android:layout_above="@id/button_container"
 	        android:alpha="0.2"
 	        android:background="@color/black" />
@@ -61,13 +63,13 @@
 	            android:layout_height="wrap_content"
 	            android:text="@string/send_sticker_joy"
 	            android:textColor="@color/white"
-	            android:textSize="16dp" />
+	            android:textSize="14dp" />
 	
 	        <ImageView
 	            android:id="@+id/sticker_popup_image"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:layout_marginTop="25dp"
+	            android:layout_marginTop="18dp"
 	            android:src="@drawable/hikinnewyear" />
 	    </LinearLayout>
 
@@ -78,8 +80,8 @@
             android:scaleType="centerInside"
             android:layout_alignParentRight="true"
             android:background="@null"
-            android:layout_marginTop="5dp"
-            android:layout_marginRight="5dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="7dp"
             android:src="@drawable/ic_cross_popup" />
 	
 	</RelativeLayout>
