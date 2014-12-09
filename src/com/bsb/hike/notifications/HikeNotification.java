@@ -1209,7 +1209,7 @@ public class HikeNotification
 	 */
 	private void notificationBuilderPostWork()
 	{
-		HikeAlarmManager.cancelAlaram(context, HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION);
+		HikeAlarmManager.cancelAlarm(context, HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION);
 	}
 
 }

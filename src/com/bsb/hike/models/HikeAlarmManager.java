@@ -139,7 +139,7 @@ public class HikeAlarmManager
 	 * @see <a href = "http://developer.android.com/reference/android/app/AlarmManager.html#cancel(android.app.PendingIntent)"> CancelAlarm </a>
 	 */
 
-	public static void cancelAlaram(Context context, int requestCode)
+	public static void cancelAlarm(Context context, int requestCode)
 	{
 		AlarmManager mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
