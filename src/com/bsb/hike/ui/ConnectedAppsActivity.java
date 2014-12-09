@@ -117,6 +117,7 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 				}
 				catch (PackageManager.NameNotFoundException e)
 				{
+					disconnectApp(connectedPkgs[position]);
 					e.printStackTrace();
 				}
 				catch (ArrayIndexOutOfBoundsException e)
@@ -179,55 +180,6 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 
 		}
 
-		private void disconnectApp()
-		{
-			String connectedPkgCSV = authPrefs.getData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, "");
-			if (TextUtils.isEmpty(connectedPkgCSV))
-			{
-				// Not possible
-			}
-			else
-			{
-				String[] connectedPkgs = connectedPkgCSV.split(",");
-				List<String> connectedPkgsList = new ArrayList<String>(Arrays.asList(connectedPkgs));
-				for (String pkg : connectedPkgs)
-				{
-					String[] pkgInfo = pkg.split(":");
-					if (pkgInfo[0].equals(mAppPkgName.split(":")[0]))
-					{
-						connectedPkgsList.remove(pkg);
-					}
-				}
-
-				String outputCSV = "";
-				for (String pkg : connectedPkgsList)
-				{
-					outputCSV += TextUtils.isEmpty(outputCSV) ? pkg : "," + pkg;
-				}
-
-				authPrefs.saveData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, outputCSV);
-
-				authPrefs.removeData(mAppPkgName.split(":")[0]);
-
-				try
-				{
-					JSONObject analyticsJSON = new JSONObject();
-
-					analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_DISCONNECT_APP);
-
-					analyticsJSON.put("third_party_app_pkg", mAppPkgName.split(":")[0]);
-
-					Utils.sendLogEvent(analyticsJSON);
-				}
-				catch (JSONException e)
-				{
-					e.printStackTrace();
-				}
-
-				bindContentAndActions();
-			}
-		}
-
 		@Override
 		public void onClick(View v)
 		{
@@ -238,7 +190,7 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 						@Override
 						public void positiveClicked(Dialog dialog)
 						{
-							disconnectApp();
+							disconnectApp(mAppPkgName);
 						}
 
 						@Override
@@ -260,6 +212,55 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 						}
 					}, (Object) null);
 			mDialog.show();
+		}
+	}
+	
+	private void disconnectApp(String appPkgName)
+	{
+		String connectedPkgCSV = authPrefs.getData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, "");
+		if (TextUtils.isEmpty(connectedPkgCSV))
+		{
+			// Not possible
+		}
+		else
+		{
+			String[] connectedPkgs = connectedPkgCSV.split(",");
+			List<String> connectedPkgsList = new ArrayList<String>(Arrays.asList(connectedPkgs));
+			for (String pkg : connectedPkgs)
+			{
+				String[] pkgInfo = pkg.split(":");
+				if (pkgInfo[0].equals(appPkgName.split(":")[0]))
+				{
+					connectedPkgsList.remove(pkg);
+				}
+			}
+
+			String outputCSV = "";
+			for (String pkg : connectedPkgsList)
+			{
+				outputCSV += TextUtils.isEmpty(outputCSV) ? pkg : "," + pkg;
+			}
+
+			authPrefs.saveData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, outputCSV);
+
+			authPrefs.removeData(appPkgName.split(":")[0]);
+
+			try
+			{
+				JSONObject analyticsJSON = new JSONObject();
+
+				analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_DISCONNECT_APP);
+
+				analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, appPkgName.split(":")[0]);
+
+				Utils.sendLogEvent(analyticsJSON);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+
+			bindContentAndActions();
 		}
 	}
 }
