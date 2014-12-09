@@ -130,7 +130,7 @@ public class FestivePopup
 			@Override
 			public void onClick(View v) {
 				stopFestiveAnimAndPopup(activity);
-
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FESTIVE_POPUP_WISH);
 				Intent intent = IntentManager.getForwardStickerIntent(activity, getStickerId(popupType), getCatId(popupType), false);
 				intent.putExtra(HikeConstants.Extras.SELECT_ALL_INITIALLY, true);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -141,6 +141,7 @@ public class FestivePopup
 			
 			@Override
 			public void onClick(View v) {
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FESTIVE_POPUP_DISMISS);
 				stopFestiveAnimAndPopup(activity);
 			}
 		});

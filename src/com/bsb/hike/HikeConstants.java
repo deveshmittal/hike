@@ -1712,6 +1712,13 @@ public class HikeConstants
 		public static final String NUX_INVITE_SENT = "nuxInvteSent";
 
 		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
+
+		/*
+		 * Festive Popup events
+		 */
+		public static final String FESTIVE_POPUP_WISH = "fstvepopwish";
+
+		public static final String FESTIVE_POPUP_DISMISS = "fstvepopdsmss";
 	}
 
 	public static final class MqttMessageTypes
