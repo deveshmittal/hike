@@ -119,7 +119,7 @@ public class HikeNotification
 		}
 	}
 	
-	public static HikeNotification getInstance(Context context)
+	public static synchronized HikeNotification getInstance(Context context)
 	{
 		if(hikeNotificationInstance == null)
 		{
