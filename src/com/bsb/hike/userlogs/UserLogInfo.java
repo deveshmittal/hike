@@ -12,6 +12,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.provider.CallLog;
 
@@ -133,8 +135,8 @@ public class UserLogInfo {
 
 	private static JSONObject getEncryptedJSON(Context ctx, JSONArray jsonLogArray, int flag) throws JSONException {
 		
-		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		
+
+		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);	
 		String key = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
 		//for the case when AI packet will not send us the backup Token
 		String salt = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, "");
@@ -161,6 +163,16 @@ public class UserLogInfo {
 		return jsonLogArray;
 	}
 
+	private static JSONArray getJSONLocationArray(Context ctx) throws JSONException {
+		LocationManager lm = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
+		Location l = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put(HikeConstants.LONGITUDE, l.getLongitude());
+		jsonObj.put(HikeConstants.LATITUDE, l.getLatitude());
+		jsonObj.put("rd",l.getAccuracy());
+		return new JSONArray().put(jsonObj);
+	}
+	
 	public static void sendLogs(Context ctx, int flags) throws JSONException {
 		
 		JSONArray jsonLogArray = getJSONLogArray(ctx, flags);	
