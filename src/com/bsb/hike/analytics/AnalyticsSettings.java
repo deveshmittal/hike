@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.bsb.hike.analytics;
 
 import android.content.Context;

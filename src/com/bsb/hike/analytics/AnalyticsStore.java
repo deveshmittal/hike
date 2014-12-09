@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.bsb.hike.analytics;
 
 import java.io.File;
@@ -68,7 +65,7 @@ class AnalyticsStore implements Runnable
 	 */
 	public void deleteEvents(EventPriority priority)
 	{
-		
+		//TODO:: Implementation of events deletion goes here. 
 	}
 	
 	/**

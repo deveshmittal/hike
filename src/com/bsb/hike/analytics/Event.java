@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.bsb.hike.analytics;
 
 import org.json.JSONException;
