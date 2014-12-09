@@ -268,7 +268,7 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		BitmapDrawable b = get(cacheKey);
 		if (b == null)
 		{
-			int idx = key.indexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
+			int idx = key.lastIndexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
 			if (idx > 0)
 				key = new String(key.substring(0, idx));
 			BitmapDrawable bd = (BitmapDrawable) ContactManager.getInstance().getIcon(key, rounded);

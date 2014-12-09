@@ -51,7 +51,7 @@ import com.bsb.hike.utils.Utils;
 public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 {
 
-	public static final String PROFILE_PIC_SUFFIX = "pp";
+	public static final String PROFILE_PIC_SUFFIX = "profilePic";
 	
 	public static final String PROFILE_ROUND_SUFFIX = "round";
 	

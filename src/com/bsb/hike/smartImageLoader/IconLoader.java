@@ -73,7 +73,7 @@ public class IconLoader extends ImageWorker
 		BitmapDrawable bd = this.getImageCache().get(id);
 		if (bd != null)
 			return bd.getBitmap();
-		int idx = id.indexOf(ROUND_SUFFIX);
+		int idx = id.lastIndexOf(ROUND_SUFFIX);
 		boolean rounded = false;
 		if (idx > 0)
 		{

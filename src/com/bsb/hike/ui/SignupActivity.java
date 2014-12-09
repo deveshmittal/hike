@@ -74,6 +74,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.Birthday;
@@ -483,6 +484,14 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				Utils.setupUri(this.getApplicationContext());
 
 				boolean showNuxScreen = accountPrefs.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
+				/*
+				 * If backup is available we don't want to show nux screen to user and also we don't need bot msgs to prompt user for forwarding sticker
+				 */
+				if (!DBBackupRestore.getInstance(this).isBackupAvailable())
+				{
+					showNuxScreen = false;
+				}
+				
 				if (showNuxScreen && (accountPrefs.getInt(HikeConstants.HIKE_CONTACTS_COUNT, 0) > 0))
 				{
 					mHandler.removeCallbacks(startNuxScreen);
