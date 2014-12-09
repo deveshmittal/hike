@@ -68,7 +68,14 @@ public class FestivePopup
 			alphaAnim.setDuration(1400);
 			activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
 			RelativeLayout layout = (RelativeLayout) activity.findViewById(R.id.parent_layout);
-			snowFallView = new SnowFallView(activity);
+			if(popupType.equals(NEW_YEAR_POPUP))
+			{
+				snowFallView = new SnowFallView(activity, true);
+			}
+			else
+			{
+				snowFallView = new SnowFallView(activity);
+			}
 			snowFallView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 			snowFallView.setVisibility(View.GONE);
 			layout.addView(snowFallView, 4);

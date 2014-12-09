@@ -24,25 +24,43 @@ public class SnowFallView extends View
 
 	private int[][] coords;
 
-	private final Drawable snow_flake;
+	private Drawable snow_flake;
 
-	private final Drawable snow_flake_large;
+	private Drawable snow_flake_large;
 
-	private final Drawable snow_flake_trans;
+	private Drawable snow_flake_trans;
 
 	public SnowFallView(Context context)
+	{
+		this(context, false);
+	}
+
+	public SnowFallView(Context context, boolean useConfettiAssets)
 	{
 		super(context);
 		setFocusable(true);
 		setFocusableInTouchMode(true);
 
-		snow_flake = context.getResources().getDrawable(R.drawable.snow_flake);
+		setAssets(context, useConfettiAssets);
+	}
+
+	private void setAssets(Context context, boolean useConfettiAssets)
+	{
+		if(useConfettiAssets)
+		{
+			snow_flake = context.getResources().getDrawable(R.drawable.green_confetti);
+			snow_flake_large = context.getResources().getDrawable(R.drawable.yellow_confetti);
+			snow_flake_trans = context.getResources().getDrawable(R.drawable.indigo_confetti);
+		}
+		else
+		{
+			snow_flake = context.getResources().getDrawable(R.drawable.snow_flake);
+			snow_flake_large = context.getResources().getDrawable(R.drawable.snow_flake_large);
+			snow_flake_trans = context.getResources().getDrawable(R.drawable.snow_flake_trans);
+		}
+
 		snow_flake.setBounds(0, 0, snow_flake.getIntrinsicWidth(), snow_flake.getIntrinsicHeight());
-
-		snow_flake_large = context.getResources().getDrawable(R.drawable.snow_flake_large);
 		snow_flake_large.setBounds(0, 0, snow_flake_large.getIntrinsicWidth(), snow_flake_large.getIntrinsicHeight());
-
-		snow_flake_trans = context.getResources().getDrawable(R.drawable.snow_flake_trans);
 		snow_flake_trans.setBounds(0, 0, snow_flake_trans.getIntrinsicWidth(), snow_flake_trans.getIntrinsicHeight());
 	}
 
