@@ -54,36 +54,55 @@ public class UserLogInfo {
 	private static final String INSTALL_TIME = "it";
 
 	public static class AppLogPojo {
-		String packageName;
-		String applicationName;
-		long installTime;
+		final String packageName;
+		final String applicationName;
+		final long installTime;
 
-		public AppLogPojo() {
+		public AppLogPojo(String packageName, String applicationName, long installTime) {
+			this.packageName = packageName;
+			this.applicationName = applicationName;
+			this.installTime = installTime;
+		}
+	}
+	
+	public static class CallLogPojo {
+		final int missedCallCount;
+		final int receivedCallCount;
+		final int sentCallCount;
+		final int sentCallDuration;
+		final int receivedCallDuration;
+
+		public CallLogPojo(int missedCallCount, int receivedCallCount, int sentCallCount, 
+				int sentCallDuration, int receivedCallDuration) {
+			this.missedCallCount = missedCallCount;
+			this.receivedCallCount = receivedCallCount;
+			this.sentCallCount = sentCallCount;
+			this.sentCallDuration = sentCallDuration;
+			this.receivedCallDuration = receivedCallDuration;
 		}
 	}
 
-	public static ArrayList<AppLogPojo> getAppLogs(Context context) {
-		ArrayList<AppLogPojo> res = new ArrayList<AppLogPojo>();
-		List<PackageInfo> packs = context.getPackageManager()
-				.getInstalledPackages(0);
-		for (int i = 0; i < packs.size(); i++) {
-			PackageInfo p = packs.get(i);
-			if (p.versionName == null) {
+	public static List<AppLogPojo> getAppLogs(Context ctx) {
+		
+		List<AppLogPojo> appLogList = new ArrayList<AppLogPojo>();
+		List<PackageInfo> packInfoList = ctx.getPackageManager().getInstalledPackages(0);
+		
+		for(PackageInfo pi : packInfoList){
+			
+			if (pi.versionName == null)
 				continue;
-			}
-			AppLogPojo newInfo = new AppLogPojo();
-			newInfo.applicationName = p.applicationInfo.loadLabel(
-					context.getPackageManager()).toString();
-			newInfo.installTime = new File(p.applicationInfo.sourceDir)
-					.lastModified();
-			newInfo.packageName = p.packageName;
-			res.add(newInfo);
+			AppLogPojo appLog = new AppLogPojo(
+					pi.packageName,
+					pi.applicationInfo.loadLabel(ctx.getPackageManager()).toString(),
+					new File(pi.applicationInfo.sourceDir).lastModified());
+			appLogList.add(appLog);
+			
 		}
-		return res;
+		return appLogList;
 
 	}
 
-	private static JSONArray getJSONAppArray(ArrayList<AppLogPojo> arrayAL)
+	private static JSONArray getJSONAppArray(List<AppLogPojo> arrayAL)
 			throws JSONException {
 		JSONArray jsonArray = new JSONArray();
 		for (AppLogPojo AL : arrayAL) {
@@ -164,50 +183,52 @@ public class UserLogInfo {
 		ContentResolver cr = ctx.getContentResolver();
 		Cursor cur = cr.query(callUriLimited, projection, null, null, strOrder);
 		
-		try {
-			while (cur != null && cur.moveToNext()) {
-
-				String callNumber = cur.getString(cur.getColumnIndex(android.provider.CallLog.Calls.NUMBER));
-				String callDate = cur.getString(cur.getColumnIndex(android.provider.CallLog.Calls.DATE));				
-				int duration = cur.getInt(cur.getColumnIndex(android.provider.CallLog.Calls.DURATION));
-
-				if (Long.parseLong(callDate) > (System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 30))) {
-					
-					if (!callLogsMap.containsKey(callNumber)) {
-						callMap = new HashMap<String, Integer>();
-						callMap.put(MISSED_CALL_COUNT, 0);
-						callMap.put(SENT_CALL_COUNT, 0);
-						callMap.put(RECEIVED_CALL_COUNT, 0);
-						callMap.put(SENT_CALL_DURATION, 0);
-						callMap.put(RECEIVED_CALL_DURATION, 0);
-						callMap.put(SENT_SMS, 0);
-						callMap.put(RECEIVED_SMS, 0);
-					} else {
-						callMap = callLogsMap.get(callNumber);
+		if (cur != null) { 
+			try {
+				while (cur.moveToNext()) {
+	
+					String callNumber = cur.getString(cur.getColumnIndex(android.provider.CallLog.Calls.NUMBER));
+					String callDate = cur.getString(cur.getColumnIndex(android.provider.CallLog.Calls.DATE));				
+					int duration = cur.getInt(cur.getColumnIndex(android.provider.CallLog.Calls.DURATION));
+	
+					if (Long.parseLong(callDate) > (System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 30))) {
+						
+						if (!callLogsMap.containsKey(callNumber)) {
+							callMap = new HashMap<String, Integer>();
+							callMap.put(MISSED_CALL_COUNT, 0);
+							callMap.put(SENT_CALL_COUNT, 0);
+							callMap.put(RECEIVED_CALL_COUNT, 0);
+							callMap.put(SENT_CALL_DURATION, 0);
+							callMap.put(RECEIVED_CALL_DURATION, 0);
+							callMap.put(SENT_SMS, 0);
+							callMap.put(RECEIVED_SMS, 0);
+						} else {
+							callMap = callLogsMap.get(callNumber);
+						}
+	
+						switch (cur.getInt(cur.getColumnIndex(android.provider.CallLog.Calls.TYPE))) {
+						case CallLog.Calls.MISSED_TYPE : 
+							callMap.put(MISSED_CALL_COUNT, callMap.get(MISSED_CALL_COUNT) + 1); 
+							break;
+						case CallLog.Calls.OUTGOING_TYPE:
+							callMap.put(SENT_CALL_COUNT, callMap.get(SENT_CALL_COUNT) + 1);
+							callMap.put(SENT_CALL_DURATION,callMap.get(SENT_CALL_DURATION) + duration);
+							break;
+						case CallLog.Calls.INCOMING_TYPE:
+							callMap.put(RECEIVED_CALL_COUNT,callMap.get(RECEIVED_CALL_COUNT) + 1);
+							callMap.put(RECEIVED_CALL_DURATION,callMap.get(RECEIVED_CALL_DURATION) + duration);
+							break;
+	
+						}
+						callLogsMap.put(callNumber, callMap);
 					}
-
-					switch (cur.getInt(cur.getColumnIndex(android.provider.CallLog.Calls.TYPE))) {
-					case CallLog.Calls.MISSED_TYPE : 
-						callMap.put(MISSED_CALL_COUNT, callMap.get(MISSED_CALL_COUNT) + 1); 
-						break;
-					case CallLog.Calls.OUTGOING_TYPE:
-						callMap.put(SENT_CALL_COUNT, callMap.get(SENT_CALL_COUNT) + 1);
-						callMap.put(SENT_CALL_DURATION,callMap.get(SENT_CALL_DURATION) + duration);
-						break;
-					case CallLog.Calls.INCOMING_TYPE:
-						callMap.put(RECEIVED_CALL_COUNT,callMap.get(RECEIVED_CALL_COUNT) + 1);
-						callMap.put(RECEIVED_CALL_DURATION,callMap.get(RECEIVED_CALL_DURATION) + duration);
-						break;
-
-					}
-					callLogsMap.put(callNumber, callMap);
+	
 				}
-
+			} catch (Exception e) {
+				Logger.d(TAG, e.toString());
+			} finally {
+				cur.close();
 			}
-		} catch (Exception e) {
-			Logger.d(TAG, e.toString());
-		} finally {
-			if (cur != null) cur.close();
 		}
 		return callLogsMap;
 		
