@@ -459,6 +459,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public Handler appStateHandler;
 	
 	private StickerManager sm;
+	
+	RegisterToGCMTrigger mmRegisterToGCMTrigger = null;
+
+	SendGCMIdToServerTrigger mmGcmIdToServerTrigger = null;
 
 	class IncomingHandler extends Handler
 	{
@@ -834,9 +838,7 @@ public void onTrimMemory(int level)
 		registerReceivers();
 	}
 	
-	RegisterToGCMTrigger mmRegisterToGCMTrigger = null;
-
-	SendGCMIdToServerTrigger mmGcmIdToServerTrigger = null;
+	
 
 	private void registerReceivers()
 	{

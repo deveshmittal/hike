@@ -99,7 +99,7 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 
 	};
 
-	private  void sentToServer(Context context)
+	private void sentToServer(Context context)
 	{
 		Logger.d(getClass().getSimpleName(), "Sending GCM ID");
 		final String regId = GCMRegistrar.getRegistrationId(context);
@@ -191,7 +191,6 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 			}
 			break;
 		default:
-			mHikeHandler.onDestroy();
 
 		}
 
@@ -211,14 +210,12 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 				if (response != null)
 				{
 					mprefs.saveData(HikeMessengerApp.GCM_ID_SENT_PRELOAD, true);
-					
-					/** Sample String 
-					// String x = System.currentTimeMillis() + 60000 + "";
-					// String y = System.currentTimeMillis() + 180000 + "";
-					// String r = "{  'notification_schedule':[{'timestamp':'" + x + "','incentive_id':'1','title':'hello hike','text':'20 free smms'},{'timestamp':'" + y
-					// + "','incentive_id':'2','title':'hello hike2','text':'50 free smms'}],'stat':'ok'}";
-				
-					*/
+
+					/**
+					 * Sample String // String x = System.currentTimeMillis() + 60000 + ""; // String y = System.currentTimeMillis() + 180000 + ""; // String r =
+					 * "{  'notification_schedule':[{'timestamp':'" + x + "','incentive_id':'1','title':'hello hike','text':'20 free smms'},{'timestamp':'" + y // +
+					 * "','incentive_id':'2','title':'hello hike2','text':'50 free smms'}],'stat':'ok'}";
+					 */
 					mprefs.saveData(PreloadNotificationSchedular.NOTIFICATION_TIMELINE, response.toString());
 
 					PreloadNotificationSchedular.scheduleNextAlarm(context);
@@ -240,7 +237,6 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 				break;
 
 			}
-			mHikeHandler.onDestroy();
 
 		}
 
