@@ -22,26 +22,17 @@
             android:layout_below="@+id/day_container"
             android:paddingBottom="2.5dp" >
 
-        <FrameLayout
+        <LinearLayout
                 android:id="@+id/message_container"
                 android:layout_width="273dp"
                 android:layout_height="92dp"
+                android:orientation="vertical"
                 android:layout_alignParentRight="true"
                 android:tag="@string/content_card_tag"
                 android:layout_marginRight="@dimen/chat_bubble_edge_spacing"
                 android:layout_marginTop="3dp"
                 android:background="@drawable/content_card_selector_sent"
                 >
-
-            <ImageView
-                    android:id="@+id/card_image"
-                    android:layout_alignParentRight="true"
-                    android:tag="I1"
-                    android:layout_centerInParent="true"
-                    android:layout_width="match_parent"
-                    android:scaleType="fitXY"
-                    android:layout_height="match_parent"/>
-
 
             <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
@@ -50,8 +41,31 @@
                       android:textColor="@color/black"
                       android:text="Testing for quotes "/>
 
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center"
+                      android:textSize="14sp"
+                      android:textColor="@color/black"
+                      android:text="Testing for quotes  "/>
 
-        </FrameLayout>
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center"
+                      android:textSize="14sp"
+                      android:textColor="@color/black"
+                      android:text="Testing for quotes  "/>
+
+            <ImageView
+                    android:id="@+id/forward_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/actionbar_ic_forward"
+                    android:layout_gravity="bottom|right"/>
+
+
+        </LinearLayout>
 
         <include
                 android:id="@+id/time_status"

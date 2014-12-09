@@ -14,7 +14,7 @@ public class CardComponent {
 	
 
 	public static class TextComponent extends CardComponent {
-		private String text;
+		public String text;
 
 		public String getText() {
 			return text;

@@ -1721,6 +1721,11 @@ public class HikeConstants
 		
 		public static final String SDK_DISCONNECT_APP = "sdkDisconnectApp";
 		
+        /*
+		 * Content Card events
+		 */
+        public static final String CONTENT_CARD_TAPPED = "contentCardTapped";
+
 	}
 
 	public static final class MqttMessageTypes
