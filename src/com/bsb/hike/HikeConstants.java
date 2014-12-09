@@ -1649,6 +1649,11 @@ public class HikeConstants
 		public static final String GALLERY_SELECTION = "gallery";
 
 		/*
+		 * File transfer success and failure event.
+		 */
+		public static final String FILE_TRANSFER_STATUS = "ftStatus";
+
+		/*
 		 * Atomic tips click events
 		 */
 		public static final String ATOMIC_FAVOURITES_TIP_CLICKED = "atomicFavTClick";
@@ -1990,4 +1995,15 @@ public class HikeConstants
 	public static final String SHOP = "shop";
 
 	public static final String BADGE = "badge";
+	
+	// Intent send to register gcm before and after signup
+	public static final String REGISTER_GCM_SIGNUP = "register_gcm_signup";
+	
+	public static final int REGISTEM_GCM_BEFORE_SIGNUP = 345;
+	
+	public static final int REGISTEM_GCM_AFTER_SIGNUP = 346;
+	
+	public static final String INCENTIVE_ID = "incentive_id";
+	
+	public static final String GCM_ID = "gcm_id";
 }

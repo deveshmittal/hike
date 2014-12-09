@@ -19,7 +19,7 @@ public class HikeHandlerUtil
 	 *         A static object for making the class singleton and synchronized.
 	 * 
 	 */
-	private static HikeHandlerUtil mHikeHandlerUtil = new HikeHandlerUtil();
+	private static final HikeHandlerUtil mHikeHandlerUtil = new HikeHandlerUtil();
 
 	private HikeHandlerUtil()
 	{
@@ -87,6 +87,5 @@ public class HikeHandlerUtil
 		mHandler = null;
 		mHandlerThread = null;
 
-		mHikeHandlerUtil = null;
 	}
 }
