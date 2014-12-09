@@ -13,15 +13,15 @@ import com.bsb.hike.utils.Logger;
 
 public class StickerDownloadManager
 {
-	private Context context;
+	private static Context context;
 
-	RequestQueue queue;
+	private static RequestQueue queue;
 
 	public static StickerDownloadManager _instance = null;
 
-	private Handler handler;
+	private static Handler handler;
 	
-	private NetworkHandler networkHandler;
+	private static NetworkHandler networkHandler;
 	
 	public static final String TAG = "StickerDownloadManager";
 
@@ -31,6 +31,18 @@ public class StickerDownloadManager
 
 	public static StickerDownloadManager getInstance()
 	{
+		if(_instance == null)
+		{
+			throw new RuntimeException("SDM not initialized");
+		}
+		else
+		{
+			return _instance;
+		}
+	}
+	
+	public static void init(Context ctx)
+	{
 		if (_instance == null)
 		{
 			synchronized (StickerDownloadManager.class)
@@ -39,13 +51,9 @@ public class StickerDownloadManager
 					_instance = new StickerDownloadManager();
 			}
 		}
-		return _instance;
-	}
-	
-	public void init(Context context)
-	{
+		
 		queue = new RequestQueue();
-		this.context = context;
+		context = ctx;
 		handler = new Handler(context.getMainLooper());
 		networkHandler = new NetworkHandler(context, queue);
 	}

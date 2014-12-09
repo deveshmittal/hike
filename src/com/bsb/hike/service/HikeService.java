@@ -905,8 +905,7 @@ public class HikeService extends Service
 	
 	private void initStickerDownloadManager()
 	{
-		StickerDownloadManager sdm = StickerDownloadManager.getInstance();
-		sdm.init(getApplicationContext());
+		StickerDownloadManager.init(getApplicationContext());
 	}
 
 }
