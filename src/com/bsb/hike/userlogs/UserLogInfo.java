@@ -13,7 +13,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.database.Cursor;
-import android.database.CursorIndexOutOfBoundsException;
 import android.net.Uri;
 import android.provider.CallLog;
 
@@ -63,7 +62,7 @@ public class UserLogInfo {
 		}
 	}
 
-	public static ArrayList<AppLogPojo> getAllAppLogs(Context context) {
+	public static ArrayList<AppLogPojo> getAppLogs(Context context) {
 		ArrayList<AppLogPojo> res = new ArrayList<AppLogPojo>();
 		List<PackageInfo> packs = context.getPackageManager()
 				.getInstalledPackages(0);
@@ -97,24 +96,31 @@ public class UserLogInfo {
 		return jsonArray;
 
 	}
-
-	private static JSONObject encryptJSON(JSONArray jsonArray, int flag) {
-		
-		JSONObject jsonObj = new JSONObject();
-		
-		try {
-			String jsonKey = null;
-			switch(flag){
-				case(APP_ANALYTICS_FLAG) : jsonKey = HikeConstants.APP_LOG_ANALYTICS; break;
-				case(CALL_ANALYTICS_FLAG) : jsonKey = HikeConstants.CALL_LOG_ANALYTICS; break;
-				case(LOCATION_ANALYTICS_FLAG) : jsonKey = HikeConstants.LOCATION_LOG_ANALYTICS; break;
-			}
-			jsonObj.putOpt(jsonKey, AESEncryption.encrypt(jsonArray.toString()));
-		} catch (JSONException e) {
-			Logger.d(TAG, e.toString());
+	
+	private static String getLogKey(int flag) {
+		String jsonKey = null;
+		switch (flag) {
+			case (APP_ANALYTICS_FLAG): jsonKey = HikeConstants.APP_LOG_ANALYTICS; break;
+			case (CALL_ANALYTICS_FLAG): jsonKey = HikeConstants.CALL_LOG_ANALYTICS; break;
+			case (LOCATION_ANALYTICS_FLAG): jsonKey = HikeConstants.LOCATION_LOG_ANALYTICS; break;
 		}
-		Logger.d(TAG, "sending analytics : " + jsonObj.toString());
-		return jsonObj;
+		return jsonKey;
+	}
+
+	private static JSONObject getEncryptedJSON(Context ctx, int flag) throws JSONException {
+		
+		JSONArray jsonLogArray = null;
+		switch(flag){
+			case APP_ANALYTICS_FLAG : jsonLogArray = getJSONAppArray(getAppLogs(ctx)); break;
+			case CALL_ANALYTICS_FLAG : jsonLogArray = getJSONCallArray(getCallLogs(ctx)); break;
+			//case LOCATION_ANALYTICS_FLAG : jsArray = getJSONAppArray(getAllAppLogs(ctx)); break;	
+		}
+		
+		JSONObject jsonLogObj = new JSONObject();
+		jsonLogObj.putOpt(getLogKey(flag), AESEncryption.encrypt(jsonLogArray.toString()));
+		
+		Logger.d(TAG, "sending analytics : " + jsonLogObj.toString());
+		return jsonLogObj;
 
 	}
 
@@ -126,12 +132,8 @@ public class UserLogInfo {
 		//for the case when AI packet will not send us the AI packet
 		String salt = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, SALT_DEFAULT);
 		AESEncryption.makeKey(key + salt, HASH_SCHEME);
-
-		JSONObject jsonObj = encryptJSON(getJSONAppArray(getAllAppLogs(ctx)), APP_ANALYTICS_FLAG);
-		// JSONObject jsonObj = encryptJSON(ja);
-		//JSONObject jsonObj = encryptJSON(getJSONCallArray(getCallLogs(context.getContentResolver())), CALL_ANALYTICS_FLAG);
-
-		HikeHttpRequest appLogRequest = new HikeHttpRequest("/" + HikeConstants.APP_LOG_ANALYTICS, RequestType.OTHER,
+		
+		HikeHttpRequest userLogRequest = new HikeHttpRequest("/" + getLogKey(flags), RequestType.OTHER,
 				new HikeHttpRequest.HikeHttpCallback() {
 					public void onFailure() {
 						Logger.d(TAG, "failure");
@@ -142,12 +144,12 @@ public class UserLogInfo {
 					}
 
 				});
-		appLogRequest.setJSONData(jsonObj);
+		userLogRequest.setJSONData(getEncryptedJSON(ctx, flags));
 		HikeHTTPTask hht = new HikeHTTPTask(null, 0);
-		Utils.executeHttpTask(hht, appLogRequest);
+		Utils.executeHttpTask(hht, userLogRequest);
 	}
 	
-	public static Map<String,Map<String,Integer>> getCallLogs(ContentResolver cr){
+	public static Map<String,Map<String,Integer>> getCallLogs(Context ctx){
 		
 		Map<String, Map<String, Integer>> callLogsMap = new HashMap<String, Map<String, Integer>>();
 		Map<String, Integer> callMap = null;
@@ -159,6 +161,7 @@ public class UserLogInfo {
 		Uri callUri = CallLog.Calls.CONTENT_URI;
 		Uri callUriLimited = callUri.buildUpon().appendQueryParameter(CallLog.Calls.LIMIT_PARAM_KEY, "500").build();
 		
+		ContentResolver cr = ctx.getContentResolver();
 		Cursor cur = cr.query(callUriLimited, projection, null, null, strOrder);
 		
 		try {
