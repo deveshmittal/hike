@@ -152,9 +152,7 @@ public class UserLogInfo {
 		Map<String, Integer> callMap = null;
 		
 		String strOrder = android.provider.CallLog.Calls.DATE + " DESC";
-		String[] projection = new String[] { CallLog.Calls.NUMBER,
-				CallLog.Calls.DATE, CallLog.Calls.CACHED_NAME,
-				CallLog.Calls.TYPE, CallLog.Calls.NEW, CallLog.Calls.DURATION };
+		String[] projection = new String[] { CallLog.Calls.NUMBER, CallLog.Calls.DATE, CallLog.Calls.TYPE, CallLog.Calls.DURATION };
 		String selection = CallLog.Calls.DATE + " > ?";
 		String[] selectors = new String[] { String.valueOf(System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 30)) };
 		Uri callUri = CallLog.Calls.CONTENT_URI;
