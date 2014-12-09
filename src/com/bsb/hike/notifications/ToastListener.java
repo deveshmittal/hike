@@ -76,7 +76,7 @@ public class ToastListener implements Listener
 	public ToastListener(Context context)
 	{
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
-		this.toaster = new HikeNotification(context);
+		this.toaster = HikeNotification.getInstance(context);
 		this.context = context;
 		mCurrentUnnotifiedStatus = MQTTConnectionStatus.NOT_CONNECTED;
 		mDefaultPreferences = PreferenceManager.getDefaultSharedPreferences(context);

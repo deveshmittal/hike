@@ -70,6 +70,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.FtueContactsData;
+import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -605,6 +606,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		super.onResume();
 		checkNShowNetworkError();
+		HikeAlarmManager.cancelAlarm(HomeActivity.this, HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
 	}
 

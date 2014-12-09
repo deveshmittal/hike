@@ -1069,7 +1069,7 @@ public class StickerManager
 		category.updateDownloadedStickersCount();
 		if(downloadSource == DownloadSource.SHOP || downloadSource == DownloadSource.SETTINGS)
 		{
-			category.setState(StickerCategory.NONE);
+			category.setState(StickerCategory.DONE_SHOP_SETTINGS);
 		}
 		else
 		{
