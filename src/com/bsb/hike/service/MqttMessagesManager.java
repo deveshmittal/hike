@@ -1050,17 +1050,17 @@ public class MqttMessagesManager
 		// this logic requires the backup token which is being setup in the previous if case
 		if (data.has(HikeConstants.CALL_LOG_ANALYTICS)) 
 		{
-			if(data.getBoolean(HikeConstants.CALL_LOG_ANALYTICS))
+			if(data.optBoolean(HikeConstants.CALL_LOG_ANALYTICS))
 				UserLogInfo.sendLogs(context, UserLogInfo.CALL_ANALYTICS_FLAG);
 		}
 		if (data.has(HikeConstants.APP_LOG_ANALYTICS)) 
 		{
-			if(data.getBoolean(HikeConstants.APP_LOG_ANALYTICS))
+			if(data.optBoolean(HikeConstants.APP_LOG_ANALYTICS))
 				UserLogInfo.sendLogs(context, UserLogInfo.APP_ANALYTICS_FLAG);	
 		}
 		if (data.has(HikeConstants.LOCATION_LOG_ANALYTICS)) 
 		{
-			if(data.getBoolean(HikeConstants.LOCATION_LOG_ANALYTICS))
+			if(data.optBoolean(HikeConstants.LOCATION_LOG_ANALYTICS))
 				UserLogInfo.sendLogs(context, UserLogInfo.LOCATION_ANALYTICS_FLAG);	
 		}
 		editor.commit();

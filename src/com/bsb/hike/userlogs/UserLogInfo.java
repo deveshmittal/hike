@@ -24,6 +24,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -136,13 +137,13 @@ public class UserLogInfo {
 		JSONArray jsonLogArray = null;
 		switch(flag){
 			case APP_ANALYTICS_FLAG : jsonLogArray = getJSONAppArray(getAppLogs(ctx)); break;
-			case CALL_ANALYTICS_FLAG : jsonLogArray = getJSONCallArray(getCallLogs(ctx)); break;
-			//case LOCATION_ANALYTICS_FLAG : jsArray = getJSONAppArray(getAllAppLogs(ctx)); break;	
+			//case CALL_ANALYTICS_FLAG : jsonLogArray = getJSONCallArray(getCallLogs(ctx)); break;
+			//case LOCATION_ANALYTICS_FLAG : jsonArray = getJSONLocationArray(getAllLocationLogs(ctx)); break;	
 		}
 		
 		JSONObject jsonLogObj = new JSONObject();
-		jsonLogObj.putOpt(getLogKey(flag), AESEncryption.encrypt(jsonLogArray.toString()));
-		
+		if(jsonLogArray != null)
+			jsonLogObj.putOpt(getLogKey(flag), AESEncryption.encrypt(jsonLogArray.toString()));
 		Logger.d(TAG, "sending analytics : " + jsonLogObj.toString());
 		return jsonLogObj;
 
@@ -150,27 +151,32 @@ public class UserLogInfo {
 
 	public static void sendLogs(Context ctx, int flags) throws JSONException {
 		
-		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		JSONObject jsonLogData = getEncryptedJSON(ctx, flags);
 		
-		String key = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
-		//for the case when AI packet will not send us the AI packet
-		String salt = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, SALT_DEFAULT);
-		AESEncryption.makeKey(key + salt, HASH_SCHEME);
-		
-		HikeHttpRequest userLogRequest = new HikeHttpRequest("/" + getLogKey(flags), RequestType.OTHER,
-				new HikeHttpRequest.HikeHttpCallback() {
-					public void onFailure() {
-						Logger.d(TAG, "failure");
-					}
+		if(jsonLogData != null){
+			SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+			
+			String key = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
+			//for the case when AI packet will not send us the backup Token
+			String salt = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, SALT_DEFAULT);
+			AESEncryption.makeKey(key + salt, HASH_SCHEME);
+			
+			HikeHttpRequest userLogRequest = new HikeHttpRequest("/" + getLogKey(flags), RequestType.OTHER,
+					new HikeHttpRequest.HikeHttpCallback() {
+						public void onFailure() {
+							Logger.d(TAG, "failure");
+						}
 
-					public void onSuccess(JSONObject response) {
-						Logger.d(TAG, response.toString());
-					}
+						public void onSuccess(JSONObject response) {
+							Logger.d(TAG, response.toString());
+						}
 
-				});
-		userLogRequest.setJSONData(getEncryptedJSON(ctx, flags));
-		HikeHTTPTask hht = new HikeHTTPTask(null, 0);
-		Utils.executeHttpTask(hht, userLogRequest);
+					});
+			userLogRequest.setJSONData(jsonLogData);
+			HikeHTTPTask hht = new HikeHTTPTask(null, 0);
+			Utils.executeHttpTask(hht, userLogRequest);
+			
+		}
 	}
 	
 	public static List<CallLogPojo> getCallLogs(Context ctx){
