@@ -290,14 +290,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	}
 	
-	private void setupFestiveView(String type)
+	private void setupFestiveView(final String type)
 	{
 		Utils.blockOrientationChange(HomeActivity.this);
 		dialogShowing = DialogShowing.FESTIVE_POPUP;
 		findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
 		getSupportActionBar().hide();
-
-		FestivePopup.setPopupType(type);
 
 		if(snowFallView == null)
 		{
@@ -307,7 +305,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					snowFallView = FestivePopup.startAndSetSnowFallView(HomeActivity.this);
+					snowFallView = FestivePopup.startAndSetSnowFallView(HomeActivity.this, type);
 				}
 			}, 300);
 		}

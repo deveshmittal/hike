@@ -31,14 +31,7 @@ public class FestivePopup
 
 	private static String categoryId;
 
-	private static String popupType;
-
-	public static void setPopupType(String type)
-	{
-		popupType = type;
-	}
-
-	public  static void setStickerIdAndCatId()
+	public  static void setStickerIdAndCatId(String popupType)
 	{
 		if(popupType.equals(NEW_YEAR_POPUP))
 		{
@@ -52,7 +45,7 @@ public class FestivePopup
 		}
 	}
 
-	public static SnowFallView startAndSetSnowFallView(final Activity activity)
+	public static SnowFallView startAndSetSnowFallView(final Activity activity, final String popupType)
 	{
 		if (activity == null)
 		{
@@ -79,7 +72,7 @@ public class FestivePopup
 				@Override
 				public void run()
 				{
-					setupFestivePopup(activity);
+					setupFestivePopup(activity, popupType);
 				}
 			}, 2800);
 
@@ -116,7 +109,7 @@ public class FestivePopup
 					activity.findViewById(R.id.snowman_footer).setVisibility(View.VISIBLE);
 					addMoveUpAnimation(activity.findViewById(R.id.snowman_footer));
 
-					setupFestivePopup(activity);
+					setupFestivePopup(activity, popupType);
 				}
 			}, 2000);
 			return null;
@@ -124,9 +117,9 @@ public class FestivePopup
 
 	}
 
-	public static void setupFestivePopup(final Activity activity)
+	public static void setupFestivePopup(final Activity activity, String popupType)
 	{
-		setStickerIdAndCatId();
+		setStickerIdAndCatId(popupType);
 
 		activity.findViewById(R.id.festive_popup_parent).setVisibility(View.VISIBLE);
 
