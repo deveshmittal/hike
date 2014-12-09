@@ -3,7 +3,6 @@ package com.bsb.hike.userlogs;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,6 +37,10 @@ public class UserLogInfo {
 	public static final int CALL_ANALYTICS_FLAG = 1;
 	public static final int APP_ANALYTICS_FLAG = 2;	
 	public static final int LOCATION_ANALYTICS_FLAG = 4;
+	
+	private static final long milliSecInDay = 1000 * 60 * 60 * 24;
+	private static final int DAYS_TO_LOG = 30;
+	private static final int MAX_CURSOR_LIMIT = 500;
 
 	private static final String MISSED_CALL_COUNT = "m";
 	private static final String RECEIVED_CALL_COUNT = "r";
@@ -66,14 +69,16 @@ public class UserLogInfo {
 	}
 	
 	public static class CallLogPojo {
-		final int missedCallCount;
-		final int receivedCallCount;
-		final int sentCallCount;
-		final int sentCallDuration;
-		final int receivedCallDuration;
+		final String phoneNumber;
+		int missedCallCount;
+		int receivedCallCount;
+		int sentCallCount;
+		int sentCallDuration;
+		int receivedCallDuration;
 
-		public CallLogPojo(int missedCallCount, int receivedCallCount, int sentCallCount, 
-				int sentCallDuration, int receivedCallDuration) {
+		public CallLogPojo(String phoneNumber, int missedCallCount, int receivedCallCount, 
+				int sentCallCount, int sentCallDuration, int receivedCallDuration) {
+			this.phoneNumber = phoneNumber;
 			this.missedCallCount = missedCallCount;
 			this.receivedCallCount = receivedCallCount;
 			this.sentCallCount = sentCallCount;
@@ -168,17 +173,19 @@ public class UserLogInfo {
 		Utils.executeHttpTask(hht, userLogRequest);
 	}
 	
-	public static Map<String,Map<String,Integer>> getCallLogs(Context ctx){
+	public static List<CallLogPojo> getCallLogs(Context ctx){
 		
-		Map<String, Map<String, Integer>> callLogsMap = new HashMap<String, Map<String, Integer>>();
-		Map<String, Integer> callMap = null;
+		//Map is being used to store and retrieve values multiple times
+		Map<String, CallLogPojo> callLogMap = new HashMap<String, CallLogPojo>();
 		
 		String strOrder = android.provider.CallLog.Calls.DATE + " DESC";
 		String[] projection = new String[] { CallLog.Calls.NUMBER, CallLog.Calls.DATE, CallLog.Calls.TYPE, CallLog.Calls.DURATION };
 		String selection = CallLog.Calls.DATE + " > ?";
 		String[] selectors = new String[] { String.valueOf(System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 30)) };
 		Uri callUri = CallLog.Calls.CONTENT_URI;
-		Uri callUriLimited = callUri.buildUpon().appendQueryParameter(CallLog.Calls.LIMIT_PARAM_KEY, "500").build();
+		Uri callUriLimited = callUri.buildUpon()
+				.appendQueryParameter(CallLog.Calls.LIMIT_PARAM_KEY, String.valueOf(MAX_CURSOR_LIMIT))
+				.build();
 		
 		ContentResolver cr = ctx.getContentResolver();
 		Cursor cur = cr.query(callUriLimited, projection, null, null, strOrder);
@@ -191,36 +198,31 @@ public class UserLogInfo {
 					String callDate = cur.getString(cur.getColumnIndex(android.provider.CallLog.Calls.DATE));				
 					int duration = cur.getInt(cur.getColumnIndex(android.provider.CallLog.Calls.DURATION));
 	
-					if (Long.parseLong(callDate) > (System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 30))) {
+					if (Long.parseLong(callDate) > (System.currentTimeMillis() - (milliSecInDay * DAYS_TO_LOG))) {
+
+						CallLogPojo callLog = null;
 						
-						if (!callLogsMap.containsKey(callNumber)) {
-							callMap = new HashMap<String, Integer>();
-							callMap.put(MISSED_CALL_COUNT, 0);
-							callMap.put(SENT_CALL_COUNT, 0);
-							callMap.put(RECEIVED_CALL_COUNT, 0);
-							callMap.put(SENT_CALL_DURATION, 0);
-							callMap.put(RECEIVED_CALL_DURATION, 0);
-							callMap.put(SENT_SMS, 0);
-							callMap.put(RECEIVED_SMS, 0);
+						if(callLogMap.containsKey(callNumber)){
+							callLog = callLogMap.get(callNumber);
 						} else {
-							callMap = callLogsMap.get(callNumber);
+							callLog = new CallLogPojo(callNumber,0,0,0,0,0);
 						}
 	
 						switch (cur.getInt(cur.getColumnIndex(android.provider.CallLog.Calls.TYPE))) {
 						case CallLog.Calls.MISSED_TYPE : 
-							callMap.put(MISSED_CALL_COUNT, callMap.get(MISSED_CALL_COUNT) + 1); 
+							callLog.missedCallCount++;
 							break;
-						case CallLog.Calls.OUTGOING_TYPE:
-							callMap.put(SENT_CALL_COUNT, callMap.get(SENT_CALL_COUNT) + 1);
-							callMap.put(SENT_CALL_DURATION,callMap.get(SENT_CALL_DURATION) + duration);
+						case CallLog.Calls.OUTGOING_TYPE :
+							callLog.sentCallCount++;
+							callLog.sentCallDuration += duration;
 							break;
-						case CallLog.Calls.INCOMING_TYPE:
-							callMap.put(RECEIVED_CALL_COUNT,callMap.get(RECEIVED_CALL_COUNT) + 1);
-							callMap.put(RECEIVED_CALL_DURATION,callMap.get(RECEIVED_CALL_DURATION) + duration);
+						case CallLog.Calls.INCOMING_TYPE : 
+							callLog.receivedCallCount++;
+							callLog.receivedCallDuration += duration;
 							break;
 	
 						}
-						callLogsMap.put(callNumber, callMap);
+						callLogMap.put(callNumber, callLog);
 					}
 	
 				}
@@ -230,29 +232,29 @@ public class UserLogInfo {
 				cur.close();
 			}
 		}
-		return callLogsMap;
+		
+		List<CallLogPojo> callLogList = new ArrayList<CallLogPojo>(callLogMap.size());
+		for (Entry<String, CallLogPojo> entry : callLogMap.entrySet()) {
+	        callLogList.add(entry.getValue());
+	    }
+		return callLogList;
 		
 	}
 	
-	private static JSONArray getJSONCallArray(Map<String, Map<String, Integer>> callLogsMap){
-		JSONArray callSmsJsonArray = new JSONArray();
-		Iterator<Entry<String, Map<String, Integer>>> entries = callLogsMap.entrySet().iterator();
-		while (entries.hasNext()) {
-			Map.Entry entry = (Map.Entry) entries.next();
-			String key = (String) entry.getKey();
-			Map<String, Integer> value = (Map<String, Integer>) entry.getValue();
-			JSONObject callSmsJsonObj = new JSONObject(value);
-			try {
-				callSmsJsonObj.putOpt(PHONE_NUMBER, key);
-			} catch (JSONException e) {
-				Logger.d(TAG, e.toString());
-			}
-
-			callSmsJsonArray.put(callSmsJsonObj);
+	private static JSONArray getJSONCallArray(List<CallLogPojo> callLogList) throws JSONException {
+		JSONArray callJsonArray = new JSONArray();
+		for(CallLogPojo callLog : callLogList){
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.putOpt(PHONE_NUMBER, callLog.phoneNumber);
+			jsonObj.putOpt(MISSED_CALL_COUNT, callLog.missedCallCount);
+			jsonObj.putOpt(SENT_CALL_COUNT, callLog.sentCallCount);
+			jsonObj.putOpt(RECEIVED_CALL_COUNT, callLog.receivedCallCount);
+			jsonObj.putOpt(SENT_CALL_DURATION, callLog.sentCallDuration);
+			jsonObj.putOpt(RECEIVED_CALL_DURATION, callLog.receivedCallDuration);
+			callJsonArray.put(jsonObj);
 		}
-		Logger.d(TAG, callLogsMap.toString());
-		return callSmsJsonArray;
-		
+		Logger.d(TAG, callJsonArray.toString());
+		return callJsonArray;
 	}
 
 }
