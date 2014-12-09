@@ -96,8 +96,11 @@ public class FestivePopup
 				@Override
 				public void run()
 				{
-					activity.findViewById(R.id.snowman_footer).setVisibility(View.VISIBLE);
-					addMoveUpAnimation(activity.findViewById(R.id.snowman_footer));
+					if(popupType.equals(XMAS_POPUP))
+					{
+						activity.findViewById(R.id.snowman_footer).setVisibility(View.VISIBLE);
+						addMoveUpAnimation(activity.findViewById(R.id.snowman_footer));
+					}
 
 					snowFallView.setVisibility(View.VISIBLE);
 					AlphaAnimation alphaAnim = new AlphaAnimation(0.1f, 1f);
@@ -120,9 +123,11 @@ public class FestivePopup
 				@Override
 				public void run()
 				{
-					activity.findViewById(R.id.snowman_footer).setVisibility(View.VISIBLE);
-					addMoveUpAnimation(activity.findViewById(R.id.snowman_footer));
-
+					if(popupType.equals(XMAS_POPUP))
+					{
+						activity.findViewById(R.id.snowman_footer).setVisibility(View.VISIBLE);
+						addMoveUpAnimation(activity.findViewById(R.id.snowman_footer));
+					}
 					setupFestivePopup(activity, popupType);
 				}
 			}, 2000);

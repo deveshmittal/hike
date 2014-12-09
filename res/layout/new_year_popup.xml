@@ -4,16 +4,6 @@
    	android:layout_width="match_parent"
  	android:layout_height="match_parent" >
 
-   <ImageView 
-    	android:id="@+id/snowman_footer"
-  		android:layout_width="wrap_content"
-  		android:layout_height="match_parent"
-  		android:scaleType="fitEnd"
-  		android:layout_gravity="bottom"
-		android:src="@drawable/art_snow_new_year"
-		android:visibility="gone" >
-	</ImageView>
-
 	<RelativeLayout 
 	    android:id="@+id/festive_popup_parent"
 	    android:layout_width="@dimen/diwali_popup_width"
