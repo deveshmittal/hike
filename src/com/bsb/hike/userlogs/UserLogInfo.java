@@ -13,6 +13,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.provider.CallLog;
 
@@ -132,7 +134,7 @@ public class UserLogInfo {
 		switch(flag){
 			case APP_ANALYTICS_FLAG : jsonLogArray = getJSONAppArray(getAppLogs(ctx)); break;
 			case CALL_ANALYTICS_FLAG : jsonLogArray = getJSONCallArray(getCallLogs(ctx)); break;
-			//case LOCATION_ANALYTICS_FLAG : jsArray = getJSONAppArray(getAllAppLogs(ctx)); break;	
+			case LOCATION_ANALYTICS_FLAG : jsonLogArray = getJSONLocationArray(ctx); break;	
 		}
 		
 		JSONObject jsonLogObj = new JSONObject();
@@ -142,7 +144,17 @@ public class UserLogInfo {
 		return jsonLogObj;
 
 	}
-
+	
+	private static JSONArray getJSONLocationArray(Context ctx) throws JSONException {
+		LocationManager lm = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
+		Location l = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put(HikeConstants.LONGITUDE, l.getLongitude());
+		jsonObj.put(HikeConstants.LATITUDE, l.getLatitude());
+		jsonObj.put("rd",l.getAccuracy());
+		return new JSONArray().put(jsonObj);
+	}
+	
 	public static void sendLogs(Context ctx, int flags) throws JSONException {
 		
 		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
