@@ -17,6 +17,7 @@
             android:id="@+id/overlay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/day_container"
             android:paddingBottom="2.5dp" >
 
         <include
