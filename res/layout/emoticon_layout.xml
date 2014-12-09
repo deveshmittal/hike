@@ -24,7 +24,6 @@
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_below="@id/divider"
-            android:background="@drawable/sticker_shop_selector"
             android:orientation="vertical"
             android:visibility="gone" >
 
