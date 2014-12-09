@@ -16,7 +16,7 @@ public class HAManager
 	
 	private Context context = null;
 	
-	private ArrayList<Event> eventslist;
+	private ArrayList<Event> eventsList;
 	
 	private AnalyticsStore store = null;
 	
@@ -35,9 +35,9 @@ public class HAManager
 	 */
 	public HAManager(Context context) 
 	{
-		this.context = context;
+		this.context = context.getApplicationContext();
 		
-		eventslist = new ArrayList<Event>();
+		eventsList = new ArrayList<Event>();
 		
 		store = new AnalyticsStore(context);					
 	}
@@ -62,13 +62,13 @@ public class HAManager
 	 */
 	public void recordEvent(Event event)
 	{
-		eventslist.add(event);
+		eventsList.add(event);
 		
-		if(eventslist.size() >= AnalyticsConstants.MAX_EVENTS_IN_MEMORY)
+		if(eventsList.size() >= AnalyticsConstants.MAX_EVENTS_IN_MEMORY)
 		{			
-			store.setEventsToDump(eventslist);
+			store.setEventsToDump(eventsList);
 			
-			eventslist.clear();
+			eventsList.clear();
 			
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "writer thread started!");
 			

@@ -137,7 +137,7 @@ class AnalyticsStore implements Runnable
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Writing event...");
 				JSONObject json = Event.toJson(e);	
-				fileWriter.write(json + "\n");
+				fileWriter.write(json + AnalyticsConstants.NEW_LINE);
 			}
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to the file!");
 			eventList.clear();

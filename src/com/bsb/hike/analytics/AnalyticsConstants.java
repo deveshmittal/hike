@@ -18,6 +18,8 @@ class AnalyticsConstants
 	
 	public static final String EVENT_FILE_PATH = Environment.getExternalStorageDirectory() + "/";
 	
+	public static final String NEW_LINE = "\n";
+	
 	public static final String EVENT_FILE_NAME = "EventData";
 	
 	public static final String FILE_EXTENSION = ".txt";
