@@ -53,6 +53,8 @@ import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.ui.HikeAuthActivity;
+import com.bsb.hike.ui.SignupActivity;
+import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
@@ -196,8 +198,15 @@ public class HikeService extends Service
 	{
 		super.onCreate();
 
-		HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED, null);
 		
+		if (!isUserSignedUp())
+		{
+			initializeAndAssignUtilityThread();
+			return;
+		}
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED, null);
+
 		HikeService.this.sendBroadcast(new Intent(HikeService.SEND_RAI_TO_SERVER_ACTION));
 
 		Logger.d("TestUpdate", "Service started");
@@ -296,6 +305,28 @@ public class HikeService extends Service
 		}
 	}
 
+	public boolean isUserSignedUp()
+	{
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(getApplicationContext());
+		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
+		{
+			Intent i = new Intent(getApplicationContext(), WelcomeActivity.class);
+			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			getApplicationContext().startActivity(i);
+			return false;
+		}
+
+		if (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null)
+		{
+			Intent i = new Intent(getApplicationContext(), SignupActivity.class);
+			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			getApplicationContext().startActivity(i);
+			return false;
+		}
+
+		return true;
+	}
+
 	private void initializeAndAssignUtilityThread()
 	{
 		/**
@@ -359,8 +390,11 @@ public class HikeService extends Service
 		super.onDestroy();
 		Logger.i("HikeService", "onDestroy.  Shutting down service");
 
-		mMqttManager.destroyMqtt();
-		this.mMqttManager = null;
+		if(mMqttManager != null)
+		{
+			mMqttManager.destroyMqtt();
+			this.mMqttManager = null;
+		}
 		// inform the app that the app has successfully disconnected
 		if (contactsReceived != null)
 		{
