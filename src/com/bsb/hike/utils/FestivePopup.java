@@ -30,11 +30,11 @@ public class FestivePopup
 
 	public static SnowFallView snowFallView; 
 	
-	public static final String XMAS_POPUP = "xmas";
+	public static final int XMAS_POPUP = 0;
 
-	public static final String NEW_YEAR_POPUP = "newyear";
+	public static final int NEW_YEAR_POPUP = 1;
 
-	public static SnowFallView startAndSetSnowFallView(final Activity activity, final String popupType)
+	public static SnowFallView startAndSetSnowFallView(final Activity activity, final int popupType)
 	{
 		if (activity == null)
 		{
@@ -50,7 +50,7 @@ public class FestivePopup
 			alphaAnim.setDuration(1400);
 			activity.findViewById(R.id.chat_bg_ftue_fade).startAnimation(alphaAnim); // dim
 			RelativeLayout layout = (RelativeLayout) activity.findViewById(R.id.parent_layout);
-			if(popupType.equals(NEW_YEAR_POPUP))
+			if(popupType == NEW_YEAR_POPUP)
 			{
 				snowFallView = new SnowFallView(activity, true);
 			}
@@ -78,8 +78,9 @@ public class FestivePopup
 				@Override
 				public void run()
 				{
-					if(popupType.equals(XMAS_POPUP))
+					if(popupType == XMAS_POPUP)
 					{
+						Logger.d("deepanshu","xmas popup");
 						activity.findViewById(R.id.snowman_footer).setVisibility(View.VISIBLE);
 						addMoveUpAnimation(activity.findViewById(R.id.snowman_footer));
 					}
@@ -105,7 +106,7 @@ public class FestivePopup
 				@Override
 				public void run()
 				{
-					if(popupType.equals(XMAS_POPUP))
+					if(popupType == XMAS_POPUP)
 					{
 						activity.findViewById(R.id.snowman_footer).setVisibility(View.VISIBLE);
 						addMoveUpAnimation(activity.findViewById(R.id.snowman_footer));
@@ -118,7 +119,7 @@ public class FestivePopup
 
 	}
 
-	public static void setupFestivePopup(final Activity activity, String popupType)
+	public static void setupFestivePopup(final Activity activity, final int popupType)
 	{
 		activity.findViewById(R.id.festive_popup_parent).setVisibility(View.VISIBLE);
 
@@ -145,12 +146,12 @@ public class FestivePopup
 		});
 	}
 
-	private static String getStickerId(String popupType)
+	private static String getStickerId(int popupType)
 	{
-		return (popupType.equals(NEW_YEAR_POPUP)) ? "008_hikinnewyear" : "002_merryxmas.png";
+		return (popupType == NEW_YEAR_POPUP) ? "008_hikinnewyear" : "002_merryxmas.png";
 	}
 
-	private static String getCatId(String popupType)
+	private static String getCatId(int popupType)
 	{
 		return "festive";
 	}
@@ -200,11 +201,11 @@ public class FestivePopup
 		HikeSharedPreferenceUtil.getInstance(activity).removeData(HikeConstants.SHOW_FESTIVE_POPUP);
 	}
 
-	public static boolean isPastFestiveDate(String type)
+	public static boolean isPastFestiveDate(int type)
 	{
 		String xmasDate = "2014-12-25";
 		String newYearsDate = "2015-01-01";
-		String festive = type.equals(NEW_YEAR_POPUP) ? newYearsDate : xmasDate;
+		String festive = (type == NEW_YEAR_POPUP) ? newYearsDate : xmasDate;
 
 		Date currentDate, festiveDate;
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

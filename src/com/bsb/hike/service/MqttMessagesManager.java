@@ -63,6 +63,7 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
+import com.bsb.hike.utils.FestivePopup;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
@@ -1793,8 +1794,20 @@ public class MqttMessagesManager
 		else if(subType.equals(HikeConstants.FESTIVE_POPUP))
 		{
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
-			String type = data.optString(HikeConstants.SUB_TYPE);
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, type);  
+			String festiveType = data.optString(HikeConstants.POPUP_SUBTYPE);
+			int type = -1;
+			if(HikeConstants.NEW_YEAR_POPUP.equals(festiveType))
+			{
+				type = FestivePopup.NEW_YEAR_POPUP;
+			}
+			else if(HikeConstants.XMAS_POPUP.equals(festiveType))
+			{
+				type = FestivePopup.XMAS_POPUP;
+			}
+			if(type!=-1)
+			{
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, type);
+			}
 		}
 		else
 		{

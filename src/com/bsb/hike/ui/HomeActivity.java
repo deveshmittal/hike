@@ -268,9 +268,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
-
-		final String festivePopupType = accountPrefs.getString(HikeConstants.SHOW_FESTIVE_POPUP, "");
-		if (!TextUtils.isEmpty(festivePopupType))
+		final int festivePopupType = accountPrefs.getInt(HikeConstants.SHOW_FESTIVE_POPUP, -1);
+		if (festivePopupType != -1)
 		{
 			if(FestivePopup.isPastFestiveDate(festivePopupType))
 			{
@@ -279,7 +278,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			else
 			{
 				ViewStub festiveView = (ViewStub) findViewById(R.id.festive_view_stub);
-				if(festivePopupType.equals(FestivePopup.NEW_YEAR_POPUP))
+				if(festivePopupType == FestivePopup.NEW_YEAR_POPUP)
 				{
 					festiveView.setLayoutResource(R.layout.new_year_popup);
 				}
@@ -288,7 +287,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					@Override
 					public void onInflate(ViewStub stub, View inflated)
 					{
-						setupFestiveView(festivePopupType);
+						startFestiveView(festivePopupType);
 					}
 				});
 				festiveView.inflate();
@@ -297,7 +296,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	}
 	
-	private void setupFestiveView(final String type)
+	private void startFestiveView(final int type)
 	{
 		Utils.blockOrientationChange(HomeActivity.this);
 		dialogShowing = DialogShowing.FESTIVE_POPUP;
