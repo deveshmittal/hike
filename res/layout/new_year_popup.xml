@@ -6,8 +6,8 @@
 
 	<RelativeLayout 
 	    android:id="@+id/festive_popup_parent"
-	    android:layout_width="@dimen/diwali_popup_width"
-	    android:layout_height="@dimen/diwali_popup_height"
+	    android:layout_width="@dimen/festive_popup_width"
+	    android:layout_height="@dimen/festive_popup_height"
 	    android:layout_gravity="center"
 	    android:background="@color/happy_new_year_popup"
 	    android:visibility="gone" >
