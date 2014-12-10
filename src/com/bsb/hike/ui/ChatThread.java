@@ -6756,9 +6756,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						View animatedBackground = emoticonLayout.findViewById(R.id.animated_backgroud);
 						animatedBackground.setVisibility(View.VISIBLE);
-						animatedBackground.startAnimation(HikeAnimationFactory.getScaleOutBackgroundAnimation());
+						Animation anim = AnimationUtils.loadAnimation(this, R.anim.scale_out_from_mid);
+						animatedBackground.startAnimation(anim);
 
-						shopIcon.setAnimation(HikeAnimationFactory.getStickerShopIconAnimation());
+						shopIcon.setAnimation(HikeAnimationFactory.getStickerShopIconAnimation(this));
 					}
 					else
 					{
