@@ -309,20 +309,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 			super(looper);
 		}
 
-		void returnExceptionMessageToCaller(Message argMessage)
-		{
-			argMessage.arg2 = HikeSDKResponseCode.STATUS_EXCEPTION;
-			try
-			{
-				argMessage.replyTo.send(argMessage);
-			}
-			catch (RemoteException e)
-			{
-				e.printStackTrace();
-			}
-			return;
-		}
-
 		@Override
 		public void handleMessage(Message msg)
 		{

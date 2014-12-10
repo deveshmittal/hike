@@ -139,17 +139,17 @@ public class HikeService extends Service
 	public static final int MQTT_NOTIFICATION_UPDATE = 2;
 
 	public static final String POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION = "com.bsb.hike.POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION";
-	
+
 	/************************************************************************/
 	/* SDK Request Ids */
 	/************************************************************************/
-	
+
 	public static final int SDK_REQ_GET_USERS = -11;
-	
+
 	public static final int SDK_REQ_GET_LOGGED_USER_INFO = -14;
-	
+
 	public static final int SDK_REQ_AUTH_CLIENT = -15;
-	
+
 	public static final int SDK_REQ_SEND_MESSAGE = -13;
 
 	/************************************************************************/
@@ -186,7 +186,9 @@ public class HikeService extends Service
 	public static HikeSDKRequestHandler mHikeSDKRequestHandler;
 
 	private Messenger mSDKRequestMessenger;
-	
+
+	private boolean isInitialized = false;
+
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -196,9 +198,11 @@ public class HikeService extends Service
 	@Override
 	public void onCreate()
 	{
-		super.onCreate();
+		if (!isInitialized)
+		{
+			super.onCreate();
+		}
 
-		
 		if (!isUserSignedUp())
 		{
 			initializeAndAssignUtilityThread();
@@ -243,7 +247,6 @@ public class HikeService extends Service
 		 * Intent notificationIntent = new Intent(this, MessagesList.class); PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 		 * notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent); startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 		 */
-
 		initializeAndAssignUtilityThread();
 
 		/*
@@ -303,6 +306,8 @@ public class HikeService extends Service
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
+		
+		isInitialized = true;
 	}
 
 	public boolean isUserSignedUp()
@@ -356,10 +361,16 @@ public class HikeService extends Service
 		mContactsChanged = new ContactsChanged(HikeService.this);
 
 	}
-	
+
 	@Override
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{
+		
+		if(!isInitialized)
+		{
+			onCreate();
+		}
+		
 		Logger.d("HikeService", "Start MQTT Thread.");
 		mMqttManager.connectOnMqttThread();
 		Logger.d("HikeService", "Intent is " + intent);
@@ -390,7 +401,7 @@ public class HikeService extends Service
 		super.onDestroy();
 		Logger.i("HikeService", "onDestroy.  Shutting down service");
 
-		if(mMqttManager != null)
+		if (mMqttManager != null)
 		{
 			mMqttManager.destroyMqtt();
 			this.mMqttManager = null;

@@ -174,7 +174,7 @@ import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
-import com.bsb.hike.tasks.UtilAtomicAsyncTask;
+import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.FtueActivity;
 import com.bsb.hike.ui.ComposeChatActivity;
@@ -566,7 +566,6 @@ public class Utils
 
 		if (!settings.getBoolean(HikeMessengerApp.ACCEPT_TERMS, false))
 		{
-			disconnectAndStopService(activity);
 			activity.startActivity(new Intent(activity, WelcomeActivity.class));
 			activity.finish();
 			return true;
@@ -574,7 +573,6 @@ public class Utils
 
 		if (settings.getString(HikeMessengerApp.NAME_SETTING, null) == null)
 		{
-			disconnectAndStopService(activity);
 			activity.startActivity(new Intent(activity, SignupActivity.class));
 			activity.finish();
 			return true;
@@ -593,14 +591,6 @@ public class Utils
 			return true;
 		}
 		return false;
-	}
-	
-	public static void disconnectAndStopService(Activity activity)
-	{
-		// Added these lines to prevent the bad username/password bug.
-		HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
-		app.setServiceAsDisconnected();
-		activity.stopService(new Intent(activity, HikeService.class));
 	}
 	
 	public static void stopService(Context argContext)
@@ -3120,7 +3110,7 @@ public class Utils
 		}
 	}
 	
-	public static void executeUtilAtomicTask(UtilAtomicAsyncTask argTask, HttpRequestBase... requests)
+	public static void executeAuthSDKTask(AuthSDKAsyncTask argTask, HttpRequestBase... requests)
 	{
 		if (isHoneycombOrHigher())
 		{

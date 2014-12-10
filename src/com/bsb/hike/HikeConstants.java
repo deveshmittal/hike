@@ -976,6 +976,8 @@ public class HikeConstants
 	public static final String NUX_HOME_INVITE_FOOTER = "nuxHomeInviteFooter";
 
 	public static final String NUX_INVITE_FORWARD = "nuxInviteForward";
+	
+	public static final String SELF_HIKE_ID = "-1";
 
 	public static final class ResultCodes
 	{

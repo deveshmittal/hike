@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
@@ -28,14 +29,17 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSDKConstants;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
 
-public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
+public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener
 {
 	private HikeSharedPreferenceUtil authPrefs;
+
+	private ArrayList<ConnectedApp> connectedAppList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -48,7 +52,44 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 
 		setupActionBar();
 
+		initData();
+
 		bindContentAndActions();
+	}
+
+	private void initData()
+	{
+		connectedAppList = new ArrayList<ConnectedApp>();
+
+		String connectedPkgCSV = authPrefs.getData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, "");
+
+		String[] connectedPkgs = connectedPkgCSV.split(",");
+
+		// We have host application package name. Get its name and image from package info
+		PackageManager pm = getApplicationContext().getPackageManager();
+
+		for (String connPkg : connectedPkgs)
+		{
+			ConnectedApp connApp = new ConnectedApp();
+
+			String[] pkgInfo = connPkg.split(":");
+
+			try
+			{
+				PackageInfo packageInfo = pm.getPackageInfo(pkgInfo[0], PackageManager.GET_ACTIVITIES);
+				connApp.setTitle(packageInfo.applicationInfo.loadLabel(getApplicationContext().getPackageManager()).toString());
+				connApp.setAppIcon(packageInfo.applicationInfo.loadIcon(pm));
+				connApp.setPackageName(connPkg);
+				connApp.setVersion(packageInfo.versionName);
+			}
+			catch (PackageManager.NameNotFoundException e)
+			{
+				e.printStackTrace();
+			}
+
+			connectedAppList.add(connApp);
+		}
+
 	}
 
 	/**
@@ -84,8 +125,6 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 
 		BaseAdapter connectedAppsAdapter = new BaseAdapter()
 		{
-			private String[] connectedPkgs;
-
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent)
 			{
@@ -94,31 +133,22 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 					convertView = inflater.inflate(R.layout.connected_apps_list_item, null);
 				}
 
-				String[] pkgInfo = connectedPkgs[position].split(":");
-
 				// We have host application package name. Get its name and image from package info
-				PackageManager pm = getApplicationContext().getPackageManager();
 				try
 				{
-					PackageInfo packageInfo = pm.getPackageInfo(pkgInfo[0], PackageManager.GET_ACTIVITIES);
 
-					String appName = packageInfo.applicationInfo.loadLabel(getApplicationContext().getPackageManager()).toString();
+					((TextView) convertView.findViewById(R.id.text_view_conn_app_title)).setText(connectedAppList.get(position).getTitle());
 
-					Drawable appIcon = packageInfo.applicationInfo.loadIcon(pm);
+					((TextView) convertView.findViewById(R.id.text_view_conn_app_since)).setText("ver " + connectedAppList.get(position).getVersion());
 
-					((TextView) convertView.findViewById(R.id.text_view_conn_app_title)).setText(appName);
+					((ImageView) convertView.findViewById(R.id.image_view_conn_app_pkg)).setImageDrawable(connectedAppList.get(position).getAppIcon());
 
-					((TextView) convertView.findViewById(R.id.text_view_conn_app_since)).setText("ver " + packageInfo.versionName);
+					ImageView image_view_disconn_app = ((ImageView) convertView.findViewById(R.id.image_view_disconn_app));
 
-					((ImageView) convertView.findViewById(R.id.image_view_conn_app_pkg)).setImageDrawable(appIcon);
+					image_view_disconn_app.setTag(connectedAppList.get(position).getPackageName());
 
-					((ImageView) convertView.findViewById(R.id.image_view_disconn_app)).setOnClickListener(new DisconnectAppOnClickListener(connectedPkgs[position]));
+					image_view_disconn_app.setOnClickListener(ConnectedAppsActivity.this);
 
-				}
-				catch (PackageManager.NameNotFoundException e)
-				{
-					disconnectApp(connectedPkgs[position]);
-					e.printStackTrace();
 				}
 				catch (ArrayIndexOutOfBoundsException e)
 				{
@@ -143,16 +173,7 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 			@Override
 			public int getCount()
 			{
-				String connectedPkgCSV = authPrefs.getData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, "");
-				if (TextUtils.isEmpty(connectedPkgCSV))
-				{
-					return 0;
-				}
-				else
-				{
-					connectedPkgs = connectedPkgCSV.split(",");
-					return connectedPkgs.length;
-				}
+				return connectedAppList.size();
 			}
 		};
 
@@ -162,56 +183,6 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 
 	}
 
-	class DisconnectAppOnClickListener implements View.OnClickListener
-	{
-		private String mAppPkgName;
-
-		private Dialog mDialog;
-
-		public DisconnectAppOnClickListener(String argAppPkgName)
-		{
-			mAppPkgName = argAppPkgName;
-		}
-
-		private DisconnectAppOnClickListener()
-		{
-			//Do nothing
-		}
-
-		@Override
-		public void onClick(View v)
-		{
-			mDialog = HikeDialog.showDialog(ConnectedAppsActivity.this,// this is fine since HikeDialog does not keep any instance with itself
-					HikeDialog.HIKE_GENERIC_CONFIRM_DIALOG, new HikeDialog.HikeDialogListener()
-					{
-						@Override
-						public void positiveClicked(Dialog dialog)
-						{
-							disconnectApp(mAppPkgName);
-						}
-
-						@Override
-						public void onSucess(Dialog dialog)
-						{
-							// Do nothing
-						}
-
-						@Override
-						public void neutralClicked(Dialog dialog)
-						{
-							// Do nothing
-						}
-
-						@Override
-						public void negativeClicked(Dialog dialog)
-						{
-							mDialog.dismiss();
-						}
-					}, (Object) null);
-			mDialog.show();
-		}
-	}
-	
 	private void disconnectApp(String appPkgName)
 	{
 		String connectedPkgCSV = authPrefs.getData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, "");
@@ -258,6 +229,98 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 			}
 
 			bindContentAndActions();
+		}
+	}
+
+	@Override
+	public void onClick(View v)
+	{
+		try
+		{
+			final String pkg = (String) v.getTag();
+			final CustomAlertDialog alertDialog = new CustomAlertDialog(ConnectedAppsActivity.this);
+			alertDialog.setTitle(null);
+			alertDialog.setBody(getString(R.string.are_you_sure));
+			alertDialog.setOkButton(getString(R.string.yes), new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					disconnectApp(pkg);
+				}
+			});
+			alertDialog.setCancelButton(getString(R.string.cancel), new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					alertDialog.dismiss();
+				}
+			});
+			alertDialog.show();
+		}
+		catch (ClassCastException cce)
+		{
+			cce.printStackTrace();
+		}
+	}
+
+	/**
+	 * Model class
+	 * 
+	 * @author Atul M
+	 * 
+	 */
+	class ConnectedApp
+	{
+		private String packageName;
+
+		private String title;
+
+		private Drawable appIcon;
+
+		private String version;
+
+		public String getPackageName()
+		{
+			return packageName;
+		}
+
+		public void setPackageName(String packageName)
+		{
+			this.packageName = packageName;
+		}
+
+		public String getTitle()
+		{
+			return title;
+		}
+
+		public void setTitle(String title)
+		{
+			this.title = title;
+		}
+
+		public Drawable getAppIcon()
+		{
+			return appIcon;
+		}
+
+		public void setAppIcon(Drawable appIcon)
+		{
+			this.appIcon = appIcon;
+		}
+
+		public String getVersion()
+		{
+			return version;
+		}
+
+		public void setVersion(String version)
+		{
+			this.version = version;
 		}
 	}
 }

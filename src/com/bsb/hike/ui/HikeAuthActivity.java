@@ -37,8 +37,8 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.sdk.HikeSDKResponseCode;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.smartImageLoader.IconLoader;
-import com.bsb.hike.tasks.UtilAtomicAsyncTask;
-import com.bsb.hike.tasks.UtilAtomicAsyncTask.UtilAsyncTaskListener;
+import com.bsb.hike.tasks.AuthSDKAsyncTask;
+import com.bsb.hike.tasks.AuthSDKAsyncTask.AuthAsyncTaskListener;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSDKConstants;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -75,7 +75,7 @@ public class HikeAuthActivity extends Activity
 
 	private String userContactId;
 
-	private UtilAtomicAsyncTask authTask;
+	private AuthSDKAsyncTask authTask;
 
 	private HikeSharedPreferenceUtil settingPref;
 
@@ -86,17 +86,13 @@ public class HikeAuthActivity extends Activity
 	/** The Constant MESSAGE_INDEX. Used for passing messages between activities */
 	public static final String MESSAGE_INDEX = "MESSAGE_INDEX";
 
-	private static final String BASE_URL_STAGING = "http://stagingoauth.im.hike.in/o/oauth2/";
-
-	private static final String BASE_URL_PROD = "http://oauth.hike.in/o/oauth2/";
-
-	private static final String PATH_AUTHORIZE = "authorize";
-
 	public static final String AUTH_SHARED_PREF_NAME = "364i5j6b3oj4";
 
 	public static final String AUTH_SHARED_PREF_PKG_KEY = "ilugasdgi2";
 
 	private static final String IS_SENT_FOR_SIGNUP_KEY = "IS_SENT_FOR_SIGNUP_KEY";
+
+	private static final long MIN_LOADING_TIME = 4 * 1000;
 
 	private byte CURRENT_STATE = 0;
 
@@ -142,7 +138,9 @@ public class HikeAuthActivity extends Activity
 
 	private boolean isStaging = false;
 
-	public static boolean bypassAuthHttp = false;
+	private boolean bypassAuthHttp = false;
+
+	private long connectingTimestamp;
 
 	/*
 	 * (non-Javadoc)
@@ -478,21 +476,21 @@ public class HikeAuthActivity extends Activity
 
 		if (isStaging)
 		{
-			authUrl = BASE_URL_STAGING + PATH_AUTHORIZE;
-			params.add(new BasicNameValuePair("response_type", "token"));
-			params.add(new BasicNameValuePair("client_id", "VIVTB9Y18EOCw7d-:VIVTqNY18EOCw7d_.apps.hike.in"));
-			params.add(new BasicNameValuePair("scope", "publish_actions"));
-			params.add(new BasicNameValuePair("package_name", "com.bsb.jellies"));
-			params.add(new BasicNameValuePair("sha1", "test_sha1"));
+			authUrl = AccountUtils.SDK_AUTH_BASE_URL_STAGING + AccountUtils.SDK_AUTH_PATH_AUTHORIZE;
+			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_RESPONSE_TYPE, "token"));
+			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_CLIENT_ID, "VIVTB9Y18EOCw7d-:VIVTqNY18EOCw7d_.apps.hike.in"));
+			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_SCOPE, "publish_actions"));
+			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_PACKAGE_NAME, "com.bsb.jellies"));
+			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_SHA1, "test_sha1"));
 		}
 		else
 		{
-			authUrl = BASE_URL_PROD + PATH_AUTHORIZE;
-			params.add(new BasicNameValuePair("response_type", "token"));
-			params.add(new BasicNameValuePair("client_id", mAppId));
-			params.add(new BasicNameValuePair("scope", "publish_actions"));
-			params.add(new BasicNameValuePair("package_name", mAppPackage));
-			params.add(new BasicNameValuePair("sha1", "test_sha1"));
+			authUrl = AccountUtils.SDK_AUTH_BASE_URL_PROD + AccountUtils.SDK_AUTH_PATH_AUTHORIZE;
+			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_RESPONSE_TYPE, "token"));
+			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_CLIENT_ID, mAppId));
+			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_SCOPE, "publish_actions"));
+			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_PACKAGE_NAME, mAppPackage));
+			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_SHA1, "test_sha1"));
 		}
 
 		String paramString = URLEncodedUtils.format(params, "UTF-8");
@@ -523,7 +521,7 @@ public class HikeAuthActivity extends Activity
 			AccountUtils.addTokenForAuthReq(httpGet);
 		}
 
-		authTask = new UtilAtomicAsyncTask(HikeAuthActivity.this, null, false, new UtilAsyncTaskListener()
+		authTask = new AuthSDKAsyncTask(HikeAuthActivity.this, null, false, new AuthAsyncTaskListener()
 		{
 
 			private HikeSharedPreferenceUtil prefs;
@@ -611,7 +609,7 @@ public class HikeAuthActivity extends Activity
 			}
 		});
 
-		Utils.executeUtilAtomicTask(authTask, httpGet);
+		Utils.executeAuthSDKTask(authTask, httpGet);
 	}
 
 	@Override
@@ -840,6 +838,7 @@ public class HikeAuthActivity extends Activity
 	public void displayIsConnectingState()
 	{
 		CURRENT_STATE = STATE_IS_CONNECTING;
+		connectingTimestamp = System.currentTimeMillis();
 		auth_button_accept.setText("");
 		auth_title.setVisibility(View.GONE);
 		layout_app_info.setVisibility(View.GONE);
@@ -866,9 +865,22 @@ public class HikeAuthActivity extends Activity
 	public void displayConnectedState()
 	{
 		CURRENT_STATE = STATE_CONNECTED;
+		long timestampDiff = System.currentTimeMillis() - connectingTimestamp;
+		if (timestampDiff < MIN_LOADING_TIME)
+		{
+			new Handler().postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					displayConnectedState();
+				}
+			}, timestampDiff);
+			return;
+		}
 		auth_title.setVisibility(View.GONE);
 		auth_button_accept.setVisibility(View.GONE);
-
 		layout_app_info.setVisibility(View.GONE);
 		layout_app_info.setVisibility(View.GONE);
 		auth_info_layout.setVisibility(View.GONE);
@@ -904,6 +916,20 @@ public class HikeAuthActivity extends Activity
 	public void displayRetryConnectionState()
 	{
 		CURRENT_STATE = STATE_RETRY_CONNECTION;
+		long timestampDiff = System.currentTimeMillis() - connectingTimestamp;
+		if (timestampDiff < MIN_LOADING_TIME)
+		{
+			new Handler().postDelayed(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					displayRetryConnectionState();
+				}
+			}, timestampDiff);
+			return;
+		}
 		auth_title.setVisibility(View.GONE);
 		layout_app_info.setVisibility(View.GONE);
 		textViewDropdown.setVisibility(View.GONE);

@@ -3,6 +3,7 @@ package com.bsb.hike.providers;
 import java.util.Arrays;
 import java.util.List;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.models.ContactInfo;
@@ -126,15 +127,16 @@ public class HikeProvider extends ContentProvider
 				// For better security, use hard-coded selection columns
 				if (selection == null)
 				{
-					c = hUserDb.rawQuery("SELECT roundedThumbnailTable.image, users.id " + "FROM roundedThumbnailTable " + "INNER JOIN users "
-							+ "ON roundedThumbnailTable.msisdn=users.msisdn", null);
+					c = hUserDb.rawQuery("SELECT " + DBConstants.ROUNDED_THUMBNAIL_TABLE + "." + DBConstants.IMAGE + ", " + DBConstants.USERS_TABLE + "." + DBConstants.ID + " "
+							+ "FROM " + DBConstants.ROUNDED_THUMBNAIL_TABLE + " " + "INNER JOIN " + DBConstants.USERS_TABLE + " " + "ON " + DBConstants.ROUNDED_THUMBNAIL_TABLE
+							+ "." + DBConstants.MSISDN + "=" + DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + "", null);
 				}
 				else
 				{
 					if (selectionArgs != null && selectionArgs.length > 0)
 					{
 						// TODO:Improve this. Make it more generic
-						if (selectionArgs[0].equals("-1"))
+						if (selectionArgs[0].equals(HikeConstants.SELF_HIKE_ID))
 						{
 							// self avatar request
 							ContactInfo contactInfo = Utils.getUserContactInfo(HikeSharedPreferenceUtil.getInstance(getContext(), HikeMessengerApp.ACCOUNT_SETTINGS).getPref());
@@ -146,8 +148,10 @@ public class HikeProvider extends ContentProvider
 						}
 						else
 						{
-							c = hUserDb.rawQuery("SELECT roundedThumbnailTable.image, users.id" + " FROM roundedThumbnailTable " + "INNER JOIN users "
-									+ "ON roundedThumbnailTable.msisdn=users.msisdn " + "WHERE users.id IN " + Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
+							c = hUserDb.rawQuery("SELECT " + DBConstants.ROUNDED_THUMBNAIL_TABLE + "." + DBConstants.IMAGE + ", " + DBConstants.USERS_TABLE + "." + DBConstants.ID
+									+ "" + " FROM " + DBConstants.ROUNDED_THUMBNAIL_TABLE + " " + "INNER JOIN " + DBConstants.USERS_TABLE + " " + "ON "
+									+ DBConstants.ROUNDED_THUMBNAIL_TABLE + "." + DBConstants.MSISDN + "=" + DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + " " + "WHERE "
+									+ DBConstants.USERS_TABLE + "." + DBConstants.ID + " IN " + Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
 						}
 					}
 				}
@@ -165,14 +169,16 @@ public class HikeProvider extends ContentProvider
 				// For better security, use hard-coded selection columns
 				if (selection == null)
 				{
-					c = hUserDb.rawQuery("SELECT thumbnails.image, users.id " + "FROM thumbnails " + "INNER JOIN users " + "ON thumbnails.msisdn=users.msisdn", null);
+					c = hUserDb.rawQuery("SELECT " + DBConstants.THUMBNAILS_TABLE + "." + DBConstants.IMAGE + ", " + DBConstants.USERS_TABLE + "." + DBConstants.ID + " " + "FROM "
+							+ DBConstants.THUMBNAILS_TABLE + " " + "INNER JOIN " + DBConstants.USERS_TABLE + " " + "ON " + DBConstants.THUMBNAILS_TABLE + "." + DBConstants.MSISDN
+							+ "=" + DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + "", null);
 				}
 				else
 				{
 					if (selectionArgs != null && selectionArgs.length > 0)
 					{
 						// TODO:Improve this. Make it more generic
-						if (selectionArgs[0].equals("-1"))
+						if (selectionArgs[0].equals(HikeConstants.SELF_HIKE_ID))
 						{
 							// self avatar request
 							ContactInfo contactInfo = Utils.getUserContactInfo(HikeSharedPreferenceUtil.getInstance(getContext(), HikeMessengerApp.ACCOUNT_SETTINGS).getPref());
@@ -184,8 +190,10 @@ public class HikeProvider extends ContentProvider
 						}
 						else
 						{
-							c = hUserDb.rawQuery("SELECT thumbnails.image, users.id " + "FROM thumbnails " + "INNER JOIN users " + "ON thumbnails.msisdn=users.msisdn "
-									+ "WHERE users.id IN " + Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
+							c = hUserDb.rawQuery("SELECT " + DBConstants.THUMBNAILS_TABLE + "." + DBConstants.IMAGE + ", " + DBConstants.USERS_TABLE + "." + DBConstants.ID + " "
+									+ "FROM " + DBConstants.THUMBNAILS_TABLE + " " + "INNER JOIN " + DBConstants.USERS_TABLE + " " + "ON " + DBConstants.THUMBNAILS_TABLE + "."
+									+ DBConstants.MSISDN + "=" + DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + " " + "WHERE " + DBConstants.USERS_TABLE + "."
+									+ DBConstants.ID + " IN " + Utils.getMsisdnStatement(Arrays.asList(selectionArgs)), null);
 						}
 					}
 				}
