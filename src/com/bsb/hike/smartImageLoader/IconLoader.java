@@ -6,6 +6,7 @@ import android.graphics.drawable.BitmapDrawable;
 
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.ui.ProfileActivity;
 
 public class IconLoader extends ImageWorker
 {
@@ -73,7 +74,7 @@ public class IconLoader extends ImageWorker
 		BitmapDrawable bd = this.getImageCache().get(id);
 		if (bd != null)
 			return bd.getBitmap();
-		int idx = id.lastIndexOf(ROUND_SUFFIX);
+		int idx = id.lastIndexOf(ProfileActivity.PROFILE_ROUND_SUFFIX);
 		boolean rounded = false;
 		if (idx > 0)
 		{

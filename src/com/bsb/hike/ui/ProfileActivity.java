@@ -91,6 +91,7 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -171,12 +172,14 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public static final String ORIENTATION_FLAG = "of";
 	
-	public static final String PROFILE_PIC_SUFFIX = "pp";
-
 	private ProfileItem.ProfileSharedMedia sharedMediaItem;
 	
 	private ProfileItem.ProfileSharedContent sharedContentItem;
 
+	public static final String PROFILE_PIC_SUFFIX = "profilePic";
+
+	public static final String PROFILE_ROUND_SUFFIX = "round";
+	
 	private static enum ProfileType
 	{
 		USER_PROFILE, // The user profile screen
@@ -237,8 +240,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public SmileyParser smileyParser;
 	
-	public static final String PROFILE_ROUND_SUFFIX = "round";
-
 	private static final String TAG = "Profile_Activity";
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
