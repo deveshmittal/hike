@@ -344,8 +344,6 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 		else if (msg.what == HikeService.SDK_REQ_SEND_MESSAGE)
 		{
 
-			Utils.sendUILogEvent(HikeConstants.LogEvent.SDK_SEND_MESSAGE);
-
 			Bundle reqSendMessageBundle = msg.getData();
 
 			if (reqSendMessageBundle == null)

@@ -168,8 +168,6 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 
 		private Dialog mDialog;
 
-		private View clickedView;
-
 		public DisconnectAppOnClickListener(String argAppPkgName)
 		{
 			mAppPkgName = argAppPkgName;
@@ -177,13 +175,12 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity
 
 		private DisconnectAppOnClickListener()
 		{
-
+			//Do nothing
 		}
 
 		@Override
 		public void onClick(View v)
 		{
-			clickedView = v;
 			mDialog = HikeDialog.showDialog(ConnectedAppsActivity.this,// this is fine since HikeDialog does not keep any instance with itself
 					HikeDialog.HIKE_GENERIC_CONFIRM_DIALOG, new HikeDialog.HikeDialogListener()
 					{
