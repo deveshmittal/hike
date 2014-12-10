@@ -18,30 +18,13 @@ import android.util.Base64;
 public class AESEncryption {
 	private final static String TAG = "AESEncryption";
 	private final static String encryptionAlgo  = "AES";
-	private static SecretKeySpec secretKey;
-	private static byte[] key;
+	private SecretKeySpec secretKey;
+	private byte[] key;
 	private final static String initV = "0011223344556677";
-	private static String decryptedString;
-	private static String encryptedString;
+	private String decryptedString;
+	private String encryptedString;
 
-	public static String getDecryptedString() {
-		return decryptedString;
-	}
-
-	private static void setDecryptedString(String decrypted) {
-		decryptedString = decrypted;
-	}
-
-	public static String getEncryptedString() {
-		return encryptedString;
-	}
-
-	private static void setEncryptedString(String encrypted) {
-		encryptedString = encrypted;
-	}
-	
-	public static SecretKeySpec makeKey(String password, String algorithm) {
-
+	public AESEncryption(String password, String algorithm){
 		MessageDigest sha = null;
 		try {
 			key = password.getBytes("UTF-8");
@@ -62,12 +45,25 @@ public class AESEncryption {
 		} catch (UnsupportedEncodingException e) {
 			Logger.d(TAG, e.toString());
 		}
-		return secretKey;
-
+	}
+	
+	public String getDecryptedString() {
+		return decryptedString;
 	}
 
+	private void setDecryptedString(String decrypted) {
+		decryptedString = decrypted;
+	}
+
+	public String getEncryptedString() {
+		return encryptedString;
+	}
+
+	private void setEncryptedString(String encrypted) {
+		encryptedString = encrypted;
+	}
 	
-	public static String encrypt(String strToEncrypt) {
+	public String encrypt(String strToEncrypt) {
 		String encrypted = null;
 		try {
 			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -83,7 +79,7 @@ public class AESEncryption {
 		return encrypted;
 	}
 
-	public static String decrypt(String strToDecrypt) {
+	public String decrypt(String strToDecrypt) {
 		String decrypted = null;
 		try {
 			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");

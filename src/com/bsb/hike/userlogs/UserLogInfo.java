@@ -32,7 +32,6 @@ import com.bsb.hike.utils.Utils;
 public class UserLogInfo {
 
 	private static final String HASH_SCHEME = "MD5";
-	private static final String SALT_DEFAULT = "umangjeet";
 	private static final String TAG = "UserLogInfo";
 	
 	public static final int CALL_ANALYTICS_FLAG = 1;
@@ -108,14 +107,14 @@ public class UserLogInfo {
 
 	}
 
-	private static JSONArray getJSONAppArray(List<AppLogPojo> arrayAL)
+	private static JSONArray getJSONAppArray(List<AppLogPojo> appLogList)
 			throws JSONException {
 		JSONArray jsonArray = new JSONArray();
-		for (AppLogPojo AL : arrayAL) {
+		for (AppLogPojo appLog : appLogList) {
 			JSONObject jsonObj = new JSONObject();
-			jsonObj.putOpt(APPLICATION_NAME, AL.applicationName);
-			jsonObj.putOpt(PACKAGE_NAME, AL.applicationName);
-			jsonObj.putOpt(INSTALL_TIME, AL.installTime);
+			jsonObj.putOpt(APPLICATION_NAME, appLog.applicationName);
+			jsonObj.putOpt(PACKAGE_NAME, appLog.applicationName);
+			jsonObj.putOpt(INSTALL_TIME, appLog.installTime);
 			jsonArray.put(jsonObj);
 		}
 		return jsonArray;
@@ -132,51 +131,61 @@ public class UserLogInfo {
 		return jsonKey;
 	}
 
-	private static JSONObject getEncryptedJSON(Context ctx, int flag) throws JSONException {
+	private static JSONObject getEncryptedJSON(Context ctx, JSONArray jsonLogArray, int flag) throws JSONException {
 		
+		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		
+		String key = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
+		//for the case when AI packet will not send us the backup Token
+		String salt = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, "");
+		// if salt or key is empty, we do not send anything
+		if(salt.equals("") || key.equals(""))
+			return null;
+		
+		AESEncryption aesObj = new AESEncryption(key + salt, HASH_SCHEME);
+		JSONObject jsonLogObj = new JSONObject();
+		jsonLogObj.putOpt(getLogKey(flag), aesObj.encrypt(jsonLogArray.toString()));
+		Logger.d(TAG, "sending analytics : " + jsonLogObj.toString());
+		
+		return jsonLogObj;
+
+	}
+	
+	private static JSONArray getJSONLogArray(Context ctx, int flag) throws JSONException{	
 		JSONArray jsonLogArray = null;
 		switch(flag){
 			case APP_ANALYTICS_FLAG : jsonLogArray = getJSONAppArray(getAppLogs(ctx)); break;
 			//case CALL_ANALYTICS_FLAG : jsonLogArray = getJSONCallArray(getCallLogs(ctx)); break;
 			//case LOCATION_ANALYTICS_FLAG : jsonArray = getJSONLocationArray(getAllLocationLogs(ctx)); break;	
 		}
-		
-		JSONObject jsonLogObj = new JSONObject();
-		if(jsonLogArray != null)
-			jsonLogObj.putOpt(getLogKey(flag), AESEncryption.encrypt(jsonLogArray.toString()));
-		Logger.d(TAG, "sending analytics : " + jsonLogObj.toString());
-		return jsonLogObj;
-
+		return jsonLogArray;
 	}
 
 	public static void sendLogs(Context ctx, int flags) throws JSONException {
 		
-		JSONObject jsonLogData = getEncryptedJSON(ctx, flags);
-		
-		if(jsonLogData != null){
-			SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		JSONArray jsonLogArray = getJSONLogArray(ctx, flags);	
+		// if nothing is logged we do not send anything
+		if(jsonLogArray != null){		
+			JSONObject jsonLogObj = getEncryptedJSON(ctx, jsonLogArray, flags);
 			
-			String key = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
-			//for the case when AI packet will not send us the backup Token
-			String salt = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, SALT_DEFAULT);
-			AESEncryption.makeKey(key + salt, HASH_SCHEME);
-			
-			HikeHttpRequest userLogRequest = new HikeHttpRequest("/" + getLogKey(flags), RequestType.OTHER,
-					new HikeHttpRequest.HikeHttpCallback() {
-						public void onFailure() {
-							Logger.d(TAG, "failure");
-						}
+			if(jsonLogObj != null) {
+				HikeHttpRequest userLogRequest = new HikeHttpRequest("/" + getLogKey(flags), 
+						RequestType.OTHER, new HikeHttpRequest.HikeHttpCallback() {
+							public void onFailure() {
+								Logger.d(TAG, "failure");
+							}
 
-						public void onSuccess(JSONObject response) {
-							Logger.d(TAG, response.toString());
-						}
+							public void onSuccess(JSONObject response) {
+								Logger.d(TAG, response.toString());
+							}
 
-					});
-			userLogRequest.setJSONData(jsonLogData);
-			HikeHTTPTask hht = new HikeHTTPTask(null, 0);
-			Utils.executeHttpTask(hht, userLogRequest);
-			
+						});
+				userLogRequest.setJSONData(getEncryptedJSON(ctx, jsonLogArray, flags));
+				HikeHTTPTask userLogHttpTask = new HikeHTTPTask(null, 0);
+				Utils.executeHttpTask(userLogHttpTask, userLogRequest);
+			}
 		}
+		
 	}
 	
 	public static List<CallLogPojo> getCallLogs(Context ctx){
