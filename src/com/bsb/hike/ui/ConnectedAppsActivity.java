@@ -7,7 +7,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Dialog;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -17,13 +16,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -31,16 +26,29 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
-import com.bsb.hike.utils.HikeSDKConstants;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
 
+/**
+ * This class is reponsible for displaying "Connected apps" screen in Settings. Also takes care of underlying functionality.
+ * 
+ * @author AtulM
+ * 
+ */
 public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity implements OnClickListener
 {
+
+	/** The auth prefs. */
 	private HikeSharedPreferenceUtil authPrefs;
 
+	/** The connected app list. */
 	private ArrayList<ConnectedApp> connectedAppList;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.bsb.hike.utils.HikeAppStateBaseFragmentActivity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -57,6 +65,9 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 		bindContentAndActions();
 	}
 
+	/**
+	 * Initializes the data.
+	 */
 	private void initData()
 	{
 		connectedAppList = new ArrayList<ConnectedApp>();
@@ -119,6 +130,9 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 		actionBar.setCustomView(actionBarView);
 	}
 
+	/**
+	 * Bind content and actions.
+	 */
 	private void bindContentAndActions()
 	{
 		final LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
@@ -183,6 +197,12 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 
 	}
 
+	/**
+	 * Disconnect application
+	 * 
+	 * @param appPkgName
+	 *            the app pkg name
+	 */
 	private void disconnectApp(String appPkgName)
 	{
 		String connectedPkgCSV = authPrefs.getData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, "");
@@ -232,6 +252,11 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.view.View.OnClickListener#onClick(android.view.View)
+	 */
 	@Override
 	public void onClick(View v)
 	{
@@ -268,56 +293,104 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 	}
 
 	/**
-	 * Model class
+	 * Model class.
 	 * 
 	 * @author Atul M
-	 * 
 	 */
 	class ConnectedApp
 	{
+
+		/** The package name. */
 		private String packageName;
 
+		/** The title. */
 		private String title;
 
+		/** The app icon. */
 		private Drawable appIcon;
 
+		/** The version. */
 		private String version;
 
+		/**
+		 * Gets the package name.
+		 * 
+		 * @return the package name
+		 */
 		public String getPackageName()
 		{
 			return packageName;
 		}
 
+		/**
+		 * Sets the package name.
+		 * 
+		 * @param packageName
+		 *            the new package name
+		 */
 		public void setPackageName(String packageName)
 		{
 			this.packageName = packageName;
 		}
 
+		/**
+		 * Gets the title.
+		 * 
+		 * @return the title
+		 */
 		public String getTitle()
 		{
 			return title;
 		}
 
+		/**
+		 * Sets the title.
+		 * 
+		 * @param title
+		 *            the new title
+		 */
 		public void setTitle(String title)
 		{
 			this.title = title;
 		}
 
+		/**
+		 * Gets the app icon.
+		 * 
+		 * @return the app icon
+		 */
 		public Drawable getAppIcon()
 		{
 			return appIcon;
 		}
 
+		/**
+		 * Sets the app icon.
+		 * 
+		 * @param appIcon
+		 *            the new app icon
+		 */
 		public void setAppIcon(Drawable appIcon)
 		{
 			this.appIcon = appIcon;
 		}
 
+		/**
+		 * Gets the version.
+		 * 
+		 * @return the version
+		 */
 		public String getVersion()
 		{
 			return version;
 		}
 
+		/**
+		 * Sets the version.
+		 * 
+		 * @param version
+		 *            the new version
+		 */
 		public void setVersion(String version)
 		{
 			this.version = version;

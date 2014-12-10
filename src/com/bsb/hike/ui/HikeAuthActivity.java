@@ -53,20 +53,14 @@ import com.bsb.hike.utils.Utils;
  */
 public class HikeAuthActivity extends Activity
 {
-
-	/** The host name. */
 	private String mAppName;
 
-	/** The host dev name. */
 	private String mAppVersion;
 
-	/** The host image */
 	private Drawable mAppIconLogo;
 
-	/** The app id. */
 	private String mAppId;
 
-	/** The app package. */
 	private String mAppPackage;
 
 	private Message message;
@@ -94,14 +88,19 @@ public class HikeAuthActivity extends Activity
 
 	private static final long MIN_LOADING_TIME = 4 * 1000;
 
+	/** The current state. */
 	private byte CURRENT_STATE = 0;
 
+	/** The state normal. */
 	private final byte STATE_NORMAL = 0;
 
+	/** The state is connecting. */
 	private final byte STATE_IS_CONNECTING = 1;
 
+	/** The state retry connection. */
 	private final byte STATE_RETRY_CONNECTION = 2;
 
+	/** The state connected. */
 	private final byte STATE_CONNECTED = 3;
 
 	private TextView auth_title;
@@ -136,8 +135,12 @@ public class HikeAuthActivity extends Activity
 
 	private View progress_bar_conn_state;
 
+	/** Toggle staging/prod url for auth call */
 	private boolean isStaging = false;
 
+	/**
+	 * Dont make call to server. Generate token in code.
+	 */
 	private boolean bypassAuthHttp = false;
 
 	private long connectingTimestamp;
@@ -168,6 +171,11 @@ public class HikeAuthActivity extends Activity
 		CURRENT_STATE = STATE_NORMAL;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onResume()
+	 */
 	@Override
 	protected void onResume()
 	{
@@ -220,7 +228,7 @@ public class HikeAuthActivity extends Activity
 	}
 
 	/**
-	 * Initialize variables and references
+	 * Initialize variables and references.
 	 */
 	private void initVar()
 	{
@@ -257,6 +265,11 @@ public class HikeAuthActivity extends Activity
 		image_conn_state = ((ImageView) findViewById(R.id.image_conn_state));
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onSaveInstanceState(android.os.Bundle)
+	 */
 	@Override
 	protected void onSaveInstanceState(Bundle outState)
 	{
@@ -267,6 +280,11 @@ public class HikeAuthActivity extends Activity
 		super.onSaveInstanceState(outState);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onRestoreInstanceState(android.os.Bundle)
+	 */
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState)
 	{
@@ -612,6 +630,11 @@ public class HikeAuthActivity extends Activity
 		Utils.executeAuthSDKTask(authTask, httpGet);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onStop()
+	 */
 	@Override
 	protected void onStop()
 	{
@@ -657,8 +680,8 @@ public class HikeAuthActivity extends Activity
 	/**
 	 * Sets the app dev name.
 	 * 
-	 * @param mAppVersion
-	 *            the new app dev name
+	 * @param mAppDevName
+	 *            the new m app dev name
 	 */
 	public void setmAppDevName(String mAppDevName)
 	{
@@ -708,9 +731,10 @@ public class HikeAuthActivity extends Activity
 	}
 
 	/**
-	 * Called whenever there is an exception/failure in auth process
+	 * Called whenever there is an exception/failure in auth process.
 	 * 
 	 * @param argMessage
+	 *            the arg message
 	 */
 	public void onFailed(String argMessage)
 	{
@@ -739,16 +763,36 @@ public class HikeAuthActivity extends Activity
 		HikeAuthActivity.this.finish();
 	}
 
+	/**
+	 * Gets the m app image.
+	 * 
+	 * @return the m app image
+	 */
 	public Drawable getmAppImage()
 	{
 		return mAppIconLogo;
 	}
 
+	/**
+	 * Sets the m app image.
+	 * 
+	 * @param mAppImage
+	 *            the new m app image
+	 */
 	public void setmAppImage(Drawable mAppImage)
 	{
 		this.mAppIconLogo = mAppImage;
 	}
 
+	/**
+	 * Verify request.
+	 * 
+	 * @param argContext
+	 *            the arg context
+	 * @param argMessage
+	 *            the arg message
+	 * @return true, if successful
+	 */
 	public static boolean verifyRequest(Context argContext, Message argMessage)
 	{
 		Bundle messageData = argMessage.getData();
@@ -772,6 +816,17 @@ public class HikeAuthActivity extends Activity
 		}
 	}
 
+	/**
+	 * Verify request.
+	 * 
+	 * @param argContext
+	 *            the arg context
+	 * @param pkgName
+	 *            the pkg name
+	 * @param accessT
+	 *            the access t
+	 * @return true, if successful
+	 */
 	public static boolean verifyRequest(Context argContext, String pkgName, String accessT)
 	{
 		try
@@ -796,6 +851,11 @@ public class HikeAuthActivity extends Activity
 		}
 	}
 
+	/**
+	 * Checks if is user signed up.
+	 * 
+	 * @return true, if is user signed up
+	 */
 	public boolean isUserSignedUp()
 	{
 		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
@@ -821,6 +881,11 @@ public class HikeAuthActivity extends Activity
 		return true;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onPause()
+	 */
 	@Override
 	protected void onPause()
 	{
@@ -828,6 +893,11 @@ public class HikeAuthActivity extends Activity
 		super.onPause();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onBackPressed()
+	 */
 	@Override
 	public void onBackPressed()
 	{
@@ -835,6 +905,9 @@ public class HikeAuthActivity extends Activity
 		super.onBackPressed();
 	}
 
+	/**
+	 * Display is connecting state.
+	 */
 	public void displayIsConnectingState()
 	{
 		CURRENT_STATE = STATE_IS_CONNECTING;
@@ -862,6 +935,9 @@ public class HikeAuthActivity extends Activity
 		progress_bar_conn_state.setVisibility(View.VISIBLE);
 	}
 
+	/**
+	 * Display connected state.
+	 */
 	public void displayConnectedState()
 	{
 		CURRENT_STATE = STATE_CONNECTED;
@@ -913,6 +989,9 @@ public class HikeAuthActivity extends Activity
 		}
 	}
 
+	/**
+	 * Display retry connection state.
+	 */
 	public void displayRetryConnectionState()
 	{
 		CURRENT_STATE = STATE_RETRY_CONNECTION;

@@ -42,14 +42,22 @@ import com.bsb.hike.utils.Utils;
  */
 public class HikeSDKRequestHandler extends Handler implements Listener
 {
+	
 	private Context mContext;
 
+	/** The cached message. */
 	private static Message cachedMessage;
 
 	private String cachedToken;
 
 	private Handler authUIHandler;
 
+	/**
+	 * Instantiates a new hike sdk request handler.
+	 *
+	 * @param argContext the arg context
+	 * @param looper the looper
+	 */
 	public HikeSDKRequestHandler(final Context argContext, Looper looper)
 	{
 		super(looper);
@@ -72,9 +80,9 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 	}
 
 	/**
-	 * Return error/failed operation message back to caller messenger
-	 * 
-	 * @param argMessage
+	 * Return error/failed operation message back to caller messenger.
+	 *
+	 * @param argMessage the arg message
 	 */
 	private void returnExceptionMessageToCaller(Message argMessage)
 	{
@@ -91,6 +99,9 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 		return;
 	}
 
+	/* (non-Javadoc)
+	 * @see android.os.Handler#handleMessage(android.os.Message)
+	 */
 	@Override
 	public void handleMessage(Message msg)
 	{
@@ -359,6 +370,12 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 		}
 	}
 
+	/**
+	 * Checks if is message valid.
+	 *
+	 * @param msg the msg
+	 * @return true, if is message valid
+	 */
 	private boolean isMessageValid(Message msg)
 	{
 		Bundle messageBundle = msg.getData();
@@ -373,6 +390,12 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 		return true;
 	}
 
+	/**
+	 * Handle exception.
+	 *
+	 * @param msg the msg
+	 * @param e the e
+	 */
 	private void handleException(Message msg, Exception e)
 	{
 		returnExceptionMessageToCaller(msg);
@@ -380,6 +403,11 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 		return;
 	}
 
+	/**
+	 * Post analytics events.
+	 *
+	 * @param argBundle the arg bundle
+	 */
 	private void postAnalyticsEvents(Bundle argBundle)
 	{
 		String requestData = argBundle.getString(HikeSDKConstants.HIKE_REQ_DATA_ID);
@@ -415,6 +443,9 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see com.bsb.hike.HikePubSub.Listener#onEventReceived(java.lang.String, java.lang.Object)
+	 */
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
