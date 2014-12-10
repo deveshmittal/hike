@@ -347,6 +347,8 @@ public class HikeConstants
 
 	public static final String PACKAGE = "pkg";
 
+	public static final String POPUP_SUBTYPE = "pst";
+
 	public static final String SIGNUP_IC = "signupIc";
 
 	public static final String DEVICE_KEY = "device_key";
@@ -951,6 +953,14 @@ public class HikeConstants
 	
 	public static final String SHOW_STEALTH_POPUP = "stlthrmd";
 	
+	public static final String FESTIVE_POPUP = "festive";
+
+	public static final String SHOW_FESTIVE_POPUP = "showFestivePopup";
+
+	public static final String XMAS_POPUP = "xmas";
+
+	public static final String NEW_YEAR_POPUP = "newyear";
+
 	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
 
 
@@ -1328,6 +1338,8 @@ public class HikeConstants
 		public static final String FTUE_STICKER_ID_LIST = "ftueStickerIdsList";
 		
 		public static final String FTUE_STICKER_CATEGORY_LIST = "ftueStickerCategoryList";
+
+		public static final String SELECT_ALL_INITIALLY = "selectAllInitially";
 	}
 
 	public static final class LogEvent
@@ -1700,6 +1712,13 @@ public class HikeConstants
 		public static final String NUX_INVITE_SENT = "nuxInvteSent";
 
 		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
+
+		/*
+		 * Festive Popup events
+		 */
+		public static final String FESTIVE_POPUP_WISH = "fstvepopwish";
+
+		public static final String FESTIVE_POPUP_DISMISS = "fstvepopdsmss";
 	}
 
 	public static final class MqttMessageTypes

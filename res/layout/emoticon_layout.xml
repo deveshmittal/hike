@@ -27,14 +27,22 @@
             android:orientation="vertical"
             android:visibility="gone" >
 
-            <ImageView
+            <View
+                android:id="@+id/animated_backgroud"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:background="@drawable/sticker_shop_icon_bg"/>
+
+             <ImageView
                 android:id="@+id/erase_key_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_sticker_shop" />
             
-             <ImageView
+            <ImageView
                 android:id="@+id/sticker_shop_badge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

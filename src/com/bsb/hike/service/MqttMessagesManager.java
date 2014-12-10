@@ -63,6 +63,7 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
+import com.bsb.hike.utils.FestivePopup;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
@@ -1748,7 +1749,8 @@ public class MqttMessagesManager
 
 	private void savePopup(JSONObject jsonObj) throws JSONException
 	{
-		if (jsonObj.getString(HikeConstants.SUB_TYPE).equals(HikeConstants.SHOW_STEALTH_POPUP))
+		String subType = jsonObj.getString(HikeConstants.SUB_TYPE);
+		if (subType.equals(HikeConstants.SHOW_STEALTH_POPUP))
 		{
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
 			String id = data.optString(HikeConstants.MESSAGE_ID);
@@ -1787,6 +1789,24 @@ public class MqttMessagesManager
 					bundle.putString(HikeConstants.Extras.STEALTH_PUSH_HEADER, header);
 					this.pubSub.publish(HikePubSub.STEALTH_POPUP_WITH_PUSH, bundle);
 				}
+			}
+		}
+		else if(subType.equals(HikeConstants.FESTIVE_POPUP))
+		{
+			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+			String festiveType = data.optString(HikeConstants.POPUP_SUBTYPE);
+			int type = -1;
+			if(HikeConstants.NEW_YEAR_POPUP.equals(festiveType))
+			{
+				type = FestivePopup.NEW_YEAR_POPUP;
+			}
+			else if(HikeConstants.XMAS_POPUP.equals(festiveType))
+			{
+				type = FestivePopup.XMAS_POPUP;
+			}
+			if(type!=-1)
+			{
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, type);
 			}
 		}
 		else
