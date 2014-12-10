@@ -38,16 +38,11 @@ public class DBBackupRestore
 
 	private static final String[] resetTableNames = { DBConstants.STICKER_SHOP_TABLE, DBConstants.STICKER_CATEGORIES_TABLE };
 
-	private String backupToken;
-
 	private Context mContext;
 
 	private DBBackupRestore(Context context)
 	{
 		this.mContext = context;
-		SharedPreferences settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		backupToken = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, null);
-		Logger.d("gaurav","backupToken :" + backupToken);
 	}
 
 	/**
@@ -86,6 +81,7 @@ public class DBBackupRestore
 					return false;
 
 				File backup = getDBBackupFile(dbCopy.getName());
+				String backupToken = getBackupToken();
 				Logger.d(getClass().getSimpleName(), "encrypting with key: " + backupToken);
 				if (TextUtils.isEmpty(backupToken))
 				{
@@ -176,6 +172,7 @@ public class DBBackupRestore
 				File currentDB = getCurrentDBFile(fileName);
 				File dbCopy = getDBCopyFile(currentDB.getName());
 				File backup = getDBBackupFile(dbCopy.getName());
+				String backupToken = getBackupToken();
 				Logger.d(getClass().getSimpleName(), "decrypting with key: " + backupToken);
 				if (TextUtils.isEmpty(backupToken))
 				{
@@ -234,6 +231,13 @@ public class DBBackupRestore
 		}
 		time = System.currentTimeMillis() - time;
 		Logger.d(getClass().getSimpleName(), "DB import complete!! in " + time / 1000 + "." + time % 1000 + "s");
+	}
+	
+	private String getBackupToken()
+	{
+		SharedPreferences settings = mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String backupToken = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, null);
+		return backupToken;
 	}
 
 	private void postRestoreSetup(BackupState state)
