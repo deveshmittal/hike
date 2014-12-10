@@ -157,7 +157,7 @@ public class UserLogInfo {
 		switch(flag){
 			case APP_ANALYTICS_FLAG : jsonLogArray = getJSONAppArray(getAppLogs(ctx)); break;
 			//case CALL_ANALYTICS_FLAG : jsonLogArray = getJSONCallArray(getCallLogs(ctx)); break;
-			//case LOCATION_ANALYTICS_FLAG : jsonArray = getJSONLocationArray(getAllLocationLogs(ctx)); break;	
+			case LOCATION_ANALYTICS_FLAG : jsonLogArray = getJSONLocationArray(ctx); break;	
 		}
 		return jsonLogArray;
 	}
