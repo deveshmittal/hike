@@ -135,7 +135,6 @@ public class UserLogInfo {
 
 	private static JSONObject getEncryptedJSON(Context ctx, JSONArray jsonLogArray, int flag) throws JSONException {
 		
-
 		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);	
 		String key = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
 		//for the case when AI packet will not send us the backup Token
