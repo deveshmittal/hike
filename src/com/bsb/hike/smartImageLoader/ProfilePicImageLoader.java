@@ -10,6 +10,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ProfileAdapter;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -63,7 +64,7 @@ public class ProfilePicImageLoader extends ImageWorker
 	{
 		Bitmap bitmap = null;
 		String idd = id;
-		int idx = id.lastIndexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
+		int idx = id.lastIndexOf(ProfileActivity.PROFILE_PIC_SUFFIX);
 		if (idx > 0)
 			idd = id.substring(0, idx);
 
