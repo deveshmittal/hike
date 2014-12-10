@@ -1209,20 +1209,21 @@ public class HikeNotification
 		 * we wait for the sleep state to get over before showing the local push.
 		 */
 		Calendar calendar = Calendar.getInstance();
+		long toDay12AM = Utils.getTimeInMillis(calendar, 0, 0, 0);
+		long toDay8AM = Utils.getTimeInMillis(calendar, 8, 0, 0);
+		
 		calendar.add(Calendar.DAY_OF_YEAR, 1);
-		
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		long nextDay12AM = calendar.getTimeInMillis();
-		
-		calendar.set(Calendar.HOUR_OF_DAY, 8);
-		long nextDay8AM = calendar.getTimeInMillis();
-		if(nextRetryTime >= nextDay12AM && nextRetryTime <= nextDay8AM)
+		long nextDay12AM = Utils.getTimeInMillis(calendar, 0, 0, 0);
+		long nextDay8AM = Utils.getTimeInMillis(calendar, 8, 0, 0);
+		if(nextRetryTime >= toDay12AM && nextRetryTime < toDay8AM)
+		{
+			nextRetryTime = toDay8AM;
+		}
+		else if(nextRetryTime >= nextDay12AM && nextRetryTime < nextDay8AM)
 		{
 			nextRetryTime = nextDay8AM;
 		}
-		Logger.i("HikeNotification", "currtime = "+ System.currentTimeMillis() + "  nextDay12AM = "+nextDay12AM+ "  nextDay8AM = "+nextDay8AM + " finalRetryTime = "+ nextRetryTime);
+		Logger.i("HikeNotification", "currtime = "+ System.currentTimeMillis() + "  nextDay12AM = "+nextDay12AM+ "  nextDay8AM = "+nextDay8AM + "  toDay8AM = "+toDay8AM + " finalRetryTime = "+ nextRetryTime);
 		return nextRetryTime;
 	}
 	

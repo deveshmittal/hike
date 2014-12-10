@@ -4965,5 +4965,19 @@ public class Utils
 		requestAccountInfo(upgrade, sendBot);
 		sendLocaleToServer(context);
 	}
+	
+	/**
+	 * @param calendar
+	 * @param hour   hour value in 24 hour format eg. 2PM = 14
+	 * @param minutes
+	 * @param seconds
+	 */
+	public static long getTimeInMillis(Calendar calendar, int hour, int minutes, int seconds)
+	{
+		calendar.set(Calendar.HOUR_OF_DAY, hour);
+		calendar.set(Calendar.MINUTE, minutes);
+		calendar.set(Calendar.SECOND, seconds);
+		return calendar.getTimeInMillis();
+	}
 
 }
