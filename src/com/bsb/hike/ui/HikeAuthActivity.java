@@ -87,7 +87,7 @@ public class HikeAuthActivity extends Activity
 	public static final String MESSAGE_INDEX = "MESSAGE_INDEX";
 
 	private static final String BASE_URL_STAGING = "http://stagingoauth.im.hike.in/o/oauth2/";
-	
+
 	private static final String BASE_URL_PROD = "http://oauth.hike.in/o/oauth2/";
 
 	private static final String PATH_AUTHORIZE = "authorize";
@@ -139,6 +139,8 @@ public class HikeAuthActivity extends Activity
 	private ImageView image_conn_state;
 
 	private View progress_bar_conn_state;
+
+	private boolean isStaging = false;
 
 	public static boolean bypassAuthHttp = false;
 
@@ -471,15 +473,27 @@ public class HikeAuthActivity extends Activity
 
 		displayIsConnectingState();
 
-		String authUrl = BASE_URL_PROD + PATH_AUTHORIZE;
-
+		String authUrl = "";
 		List<BasicNameValuePair> params = new LinkedList<BasicNameValuePair>();
 
-		params.add(new BasicNameValuePair("response_type", "token"));
-		params.add(new BasicNameValuePair("client_id", mAppId));
-		params.add(new BasicNameValuePair("scope", "publish_actions"));
-		params.add(new BasicNameValuePair("package_name", mAppPackage));
-		params.add(new BasicNameValuePair("sha1", "test_sha1"));
+		if (isStaging)
+		{
+			authUrl = BASE_URL_STAGING + PATH_AUTHORIZE;
+			params.add(new BasicNameValuePair("response_type", "token"));
+			params.add(new BasicNameValuePair("client_id", "VIVTB9Y18EOCw7d-:VIVTqNY18EOCw7d_.apps.hike.in"));
+			params.add(new BasicNameValuePair("scope", "publish_actions"));
+			params.add(new BasicNameValuePair("package_name", "com.bsb.jellies"));
+			params.add(new BasicNameValuePair("sha1", "test_sha1"));
+		}
+		else
+		{
+			authUrl = BASE_URL_PROD + PATH_AUTHORIZE;
+			params.add(new BasicNameValuePair("response_type", "token"));
+			params.add(new BasicNameValuePair("client_id", mAppId));
+			params.add(new BasicNameValuePair("scope", "publish_actions"));
+			params.add(new BasicNameValuePair("package_name", mAppPackage));
+			params.add(new BasicNameValuePair("sha1", "test_sha1"));
+		}
 
 		String paramString = URLEncodedUtils.format(params, "UTF-8");
 		try
@@ -498,11 +512,16 @@ public class HikeAuthActivity extends Activity
 		HttpGet httpGet = new HttpGet(authUrl);
 
 		httpGet.addHeader(new BasicHeader("Content-type", "text/plain"));
-		
-		//use if baseurl is of staging server
-//		httpGet.addHeader(new BasicHeader("cookie", "uid=UZtZkaEMFSBRwmys;token=EeEKpHJzesU="));
-		
-		AccountUtils.addTokenForAuthReq(httpGet);
+
+		if (isStaging)
+		{
+			// use if baseurl is of staging server
+			httpGet.addHeader(new BasicHeader("cookie", "uid=UZtZkaEMFSBRwmys;token=EeEKpHJzesU="));
+		}
+		else
+		{
+			AccountUtils.addTokenForAuthReq(httpGet);
+		}
 
 		authTask = new UtilAtomicAsyncTask(HikeAuthActivity.this, null, false, new UtilAsyncTaskListener()
 		{
