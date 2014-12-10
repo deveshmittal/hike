@@ -57,6 +57,22 @@ public class UserLogInfo {
 	private static final String PACKAGE_NAME = "pn";
 	private static final String APPLICATION_NAME = "an";
 	private static final String INSTALL_TIME = "it";
+	
+	private static final String LATITUDE = "lat";
+	private static final String LONGITUDE = "long";
+	private static final String RADIUS = "rd";
+	
+	public static class LocLogPojo{
+		final double latitude;
+		final double longitude;
+		final float radius;
+		
+		public LocLogPojo(double latitude, double longitude, float radius){
+			this.latitude = latitude;
+			this.longitude = longitude;
+			this.radius = radius;
+		}
+	}
 
 	public static class AppLogPojo {
 		final String packageName;
@@ -157,12 +173,43 @@ public class UserLogInfo {
 		switch(flag){
 			case APP_ANALYTICS_FLAG : jsonLogArray = getJSONAppArray(getAppLogs(ctx)); break;
 			//case CALL_ANALYTICS_FLAG : jsonLogArray = getJSONCallArray(getCallLogs(ctx)); break;
-			case LOCATION_ANALYTICS_FLAG : jsonLogArray = getJSONLocationArray(ctx); break;	
+			case LOCATION_ANALYTICS_FLAG : jsonLogArray = getJSONLocArray(getLocLogs(ctx)); break;	
 		}
 		return jsonLogArray;
 	}
+	
+	private static JSONArray getJSONLocArray(List<LocLogPojo> locLogList) throws JSONException{
+		JSONArray locJsonArray = new JSONArray();
+		for(LocLogPojo locLog : locLogList){
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.putOpt(LATITUDE, locLog.latitude);
+			jsonObj.putOpt(LONGITUDE, locLog.longitude);
+			jsonObj.putOpt(RADIUS, locLog.radius);
+			locJsonArray.put(jsonObj);
+		}
+		Logger.d(TAG, locJsonArray.toString());
+		return locJsonArray;
+	}
+	
+	private static List<LocLogPojo> getLocLogs(Context ctx){
+		Location bestLocation = null;
+		LocationManager locManager = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
+		for(String provider : locManager.getProviders(true)){
+			Location location = locManager.getLastKnownLocation(provider);
+			if(location == null)
+				continue;
+			if (bestLocation == null || location.getAccuracy() < bestLocation.getAccuracy()){
+				bestLocation = location;
+			}
+		}
+		LocLogPojo locLog = new LocLogPojo(bestLocation.getLatitude(), 
+				bestLocation.getLongitude(), bestLocation.getAccuracy());
+		List<LocLogPojo> locLogList = new ArrayList<LocLogPojo>();
+		locLogList.add(locLog);
+		return locLogList;
+	}
 
-	private static JSONArray getJSONLocationArray(Context ctx) throws JSONException {
+	private static JSONArray getJSONLocArray(Context ctx) throws JSONException {
 		LocationManager lm = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
 		Location l = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 		JSONObject jsonObj = new JSONObject();
