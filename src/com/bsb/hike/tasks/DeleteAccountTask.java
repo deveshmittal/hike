@@ -61,6 +61,10 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		try
 		{
 			AccountUtils.deleteOrUnlinkAccount(this.delete);
+			if (delete)
+			{
+				DBBackupRestore.getInstance(ctx).deleteAllFiles();
+			}
 
 			// Unregister from GCM service
 			GCMRegistrar.unregister(ctx.getApplicationContext());
@@ -69,10 +73,6 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			app.disconnectFromService();
 			ctx.stopService(new Intent(ctx, HikeService.class));
 
-			if (delete)
-			{
-				DBBackupRestore.getInstance(ctx).deleteAllFiles();
-			}
 			ContactManager.getInstance().deleteAll();
 			convDb.deleteAll();
 			HikeMessengerApp.getLruCache().clearIconCache();
