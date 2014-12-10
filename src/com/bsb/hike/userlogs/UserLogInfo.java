@@ -204,21 +204,11 @@ public class UserLogInfo {
 		}
 		LocLogPojo locLog = new LocLogPojo(bestLocation.getLatitude(), 
 				bestLocation.getLongitude(), bestLocation.getAccuracy());
-		List<LocLogPojo> locLogList = new ArrayList<LocLogPojo>();
+		List<LocLogPojo> locLogList = new ArrayList<LocLogPojo>(1);
 		locLogList.add(locLog);
 		return locLogList;
 	}
 
-	private static JSONArray getJSONLocArray(Context ctx) throws JSONException {
-		LocationManager lm = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
-		Location l = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		JSONObject jsonObj = new JSONObject();
-		jsonObj.put(HikeConstants.LONGITUDE, l.getLongitude());
-		jsonObj.put(HikeConstants.LATITUDE, l.getLatitude());
-		jsonObj.put("rd",l.getAccuracy());
-		return new JSONArray().put(jsonObj);
-	}
-	
 	public static void sendLogs(Context ctx, int flags) throws JSONException {
 		
 		JSONArray jsonLogArray = getJSONLogArray(ctx, flags);	
