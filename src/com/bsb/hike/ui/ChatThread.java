@@ -1,29 +1,5 @@
 package com.bsb.hike.ui;
 
-import java.io.File;
-
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Pattern;
-import java.util.Random;
-import java.util.Set;
-
-import com.bsb.hike.platform.CardComponent;
-import com.bsb.hike.platform.CardConstants;
-import com.bsb.hike.platform.PlatformMessageMetadata;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorDescription;
@@ -31,17 +7,8 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.NotificationManager;
-import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
-import android.content.ContentProviderOperation;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.DialogInterface;
+import android.content.*;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.OperationApplicationException;
-import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -51,25 +18,16 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnErrorListener;
 import android.media.MediaRecorder.OnInfoListener;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.RemoteException;
+import android.os.*;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
-import android.provider.ContactsContract.CommonDataKinds.Email;
-import android.provider.ContactsContract.CommonDataKinds.Event;
-import android.provider.ContactsContract.CommonDataKinds.Phone;
-import android.provider.ContactsContract.CommonDataKinds.StructuredName;
-import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
+import android.provider.ContactsContract.CommonDataKinds.*;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
@@ -78,83 +36,42 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.text.ClipboardManager;
-import android.text.Editable;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.TextUtils;
-import android.text.TextWatcher;
+import android.text.*;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.util.Pair;
-import android.view.GestureDetector;
+import android.view.*;
 import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewStub;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.view.ViewConfiguration;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.view.WindowManager.BadTokenException;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
+import android.view.animation.*;
 import android.view.animation.Animation.AnimationListener;
-import android.view.animation.AnimationSet;
-import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AbsListView;
+import android.widget.*;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.GridView;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
-import android.widget.RelativeLayout;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
-
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
+import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.EmoticonType;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.adapters.AccountAdapter;
-import com.bsb.hike.adapters.EmoticonAdapter;
-import com.bsb.hike.adapters.MessagesAdapter;
-import com.bsb.hike.adapters.StickerAdapter;
-import com.bsb.hike.adapters.UpdateAdapter;
+import com.bsb.hike.adapters.*;
 import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
@@ -164,54 +81,41 @@ import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
-import com.bsb.hike.models.AccountData;
-import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.*;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
-import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.Conversation.MetaData;
-import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.models.GroupTypingNotification;
-import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.OverFlowMenuItem;
-import com.bsb.hike.models.Sticker;
-import com.bsb.hike.models.StickerCategory;
-import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.animationModule.HikeAnimationFactory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.platform.CardComponent;
+import com.bsb.hike.platform.CardConstants;
+import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.utils.HashSpanWatcher;
-import com.bsb.hike.utils.ChatTheme;
-import com.bsb.hike.utils.ContactDialog;
-import com.bsb.hike.utils.CustomAlertDialog;
-import com.bsb.hike.utils.EmoticonConstants;
-import com.bsb.hike.utils.EmoticonTextWatcher;
-import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
-import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.HikeTip;
+import com.bsb.hike.utils.*;
 import com.bsb.hike.utils.HikeTip.TipType;
-import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.PairModified;
-import com.bsb.hike.utils.SmileyParser;
-import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomFontEditText;
 import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 public class ChatThread extends HikeAppStateBaseFragmentActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener,
 		FinishableEvent, OnTouchListener, OnScrollListener, OnItemLongClickListener, BackKeyListener, EmoticonClickListener
@@ -356,7 +260,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
 			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA,HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT,HikePubSub.CONV_META_DATA_UPDATED, 
-			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED, HikePubSub.STICKER_FTUE_TIP,HikePubSub.HIKE_SDK_MESSAGE_SENT  };
+			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED, HikePubSub.STICKER_FTUE_TIP,HikePubSub.HIKE_SDK_MESSAGE_SENT,HikePubSub.SAVE_MESSAGE_DB_CALL_FINISHED};
 
 	private EmoticonType emoticonType;
 
@@ -386,6 +290,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private static boolean recording = false;
 
+    private volatile boolean dbCallFinished = true;
 	/*
 	 * Made this public so that its accessible to this activity's adapter
 	 */
@@ -1775,7 +1680,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private void sendMessage(ConvMessage convMessage,boolean playPinAnim)
 	{
 		addMessage(convMessage,playPinAnim);
-
+        dbCallFinished = false;
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
@@ -3415,7 +3320,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			Logger.w("ChatThread", "received message when contactNumber is null type=" + type + " object=" + object);
 			return;
 		}
-
+        if(HikePubSub.SAVE_MESSAGE_DB_CALL_FINISHED.equals(type)){
+               dbCallFinished = true;
+        }  else
 		if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
 			final ConvMessage message = (ConvMessage) object;
@@ -3597,6 +3504,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		}
 		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))
 		{
+            if(true){}
 			long msgId = ((Long) object).longValue();
 			setStateAndUpdateView(msgId, true);
 		}
@@ -7116,7 +7024,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	@Override
 	public void onScroll(AbsListView view, final int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
-		if (!reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
+		if (dbCallFinished && !reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
 		{
 			final int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
 
