@@ -1791,23 +1791,13 @@ public class MqttMessagesManager
 				}
 			}
 		}
-		else if(subType.equals(HikeConstants.FESTIVE_POPUP))
+		else if(subType.equals(HikeConstants.XMAS_POPUP))
 		{
-			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
-			String festiveType = data.optString(HikeConstants.POPUP_SUBTYPE);
-			int type = -1;
-			if(HikeConstants.NEW_YEAR_POPUP.equals(festiveType))
-			{
-				type = FestivePopup.NEW_YEAR_POPUP;
-			}
-			else if(HikeConstants.XMAS_POPUP.equals(festiveType))
-			{
-				type = FestivePopup.XMAS_POPUP;
-			}
-			if(type!=-1)
-			{
-				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, type);
-			}
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.XMAS_POPUP);
+		}
+		else if(subType.equals(HikeConstants.NEW_YEAR_POPUP))
+		{
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.NEW_YEAR_POPUP);
 		}
 		else
 		{
