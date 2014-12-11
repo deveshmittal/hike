@@ -26,7 +26,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -399,6 +401,27 @@ public class HikeAuthActivity extends Activity
 			// Invalid layout file. Not usually possible.
 			npe.printStackTrace();
 		}
+
+		((ImageView) findViewById(R.id.auth_hike_logo)).setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				if (AppConfig.ALLOW_STAGING_TOGGLE)
+				{
+					if (bypassAuthHttp == true)
+					{
+						bypassAuthHttp = false;
+						Toast.makeText(HikeAuthActivity.this.getApplicationContext(), "Auth enabled", Toast.LENGTH_SHORT).show();
+					}
+					else
+					{
+						bypassAuthHttp = true;
+						Toast.makeText(HikeAuthActivity.this.getApplicationContext(), "Auth bypassed", Toast.LENGTH_SHORT).show();
+					}
+				}
+			}
+		});
 	}
 
 	/**
@@ -410,7 +433,7 @@ public class HikeAuthActivity extends Activity
 		displayIsConnectingState();
 
 		String authUrl = AccountUtils.SDK_AUTH_BASE + AccountUtils.SDK_AUTH_PATH_AUTHORIZE;
-		
+
 		List<BasicNameValuePair> params = new LinkedList<BasicNameValuePair>();
 
 		if (AccountUtils.SDK_AUTH_BASE.equals(AccountUtils.SDK_AUTH_BASE_URL_STAGING))
@@ -850,7 +873,7 @@ public class HikeAuthActivity extends Activity
 				{
 					runOnUiThread(new Runnable()
 					{
-						
+
 						@Override
 						public void run()
 						{
@@ -875,11 +898,11 @@ public class HikeAuthActivity extends Activity
 			{
 				runOnUiThread(new Runnable()
 				{
-					
+
 					@Override
 					public void run()
 					{
-						HikeAuthActivity.this.finish();						
+						HikeAuthActivity.this.finish();
 					}
 				});
 			}
