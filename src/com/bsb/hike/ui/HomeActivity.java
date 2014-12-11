@@ -1233,7 +1233,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_MENU)
 			{
-				if (ftueAddFriendWindow != null && ftueAddFriendWindow.getVisibility() == View.VISIBLE)
+				if ((ftueAddFriendWindow != null && ftueAddFriendWindow.getVisibility() == View.VISIBLE) || dialogShowing!=null)
 				{
 					return true;
 				}
