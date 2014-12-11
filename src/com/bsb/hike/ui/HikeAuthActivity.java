@@ -19,6 +19,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -135,7 +136,7 @@ public class HikeAuthActivity extends Activity
 
 	private long connectingTimestamp;
 
-	private static Handler stateHandler = new Handler();
+	private static Handler stateHandler;
 
 	/*
 	 * (non-Javadoc)
@@ -148,6 +149,8 @@ public class HikeAuthActivity extends Activity
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.auth_main);
+
+		stateHandler = new Handler(Looper.getMainLooper());
 
 		ContactInfo contactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 
@@ -320,24 +323,15 @@ public class HikeAuthActivity extends Activity
 				@Override
 				public void run()
 				{
-					runOnUiThread(new Runnable()
+					if (textViewDropdown != null && textViewDropdown.getTag().equals("0"))
 					{
-
-						@Override
-						public void run()
+						if (CURRENT_STATE == STATE_NORMAL)
 						{
-							if (textViewDropdown.getTag().equals("0"))
-							{
-								if (CURRENT_STATE == STATE_NORMAL)
-								{
-									textViewDropdown.setCompoundDrawablesWithIntrinsicBounds(getApplicationContext().getResources().getDrawable(R.drawable.arrowup), null, null,
-											null);
-									textViewDropdown.setTag("1");
-									findViewById(R.id.auth_info_layout).setVisibility(View.VISIBLE);
-								}
-							}
+							textViewDropdown.setCompoundDrawablesWithIntrinsicBounds(getApplicationContext().getResources().getDrawable(R.drawable.arrowup), null, null, null);
+							textViewDropdown.setTag("1");
+							findViewById(R.id.auth_info_layout).setVisibility(View.VISIBLE);
 						}
-					});
+					}
 				}
 			}, 2000);
 
@@ -822,6 +816,11 @@ public class HikeAuthActivity extends Activity
 	public void displayIsConnectingState()
 	{
 		CURRENT_STATE = STATE_IS_CONNECTING;
+		
+		if (auth_title == null)
+		{
+			return;
+		}
 		connectingTimestamp = System.currentTimeMillis();
 		auth_button_accept.setText("");
 		auth_title.setVisibility(View.GONE);
@@ -836,16 +835,11 @@ public class HikeAuthActivity extends Activity
 			@Override
 			public void run()
 			{
-				runOnUiThread(new Runnable()
+				if (auth_button_accept != null)
 				{
-
-					@Override
-					public void run()
-					{
-						auth_button_accept.setText(getString(R.string.auth_state_connecting));
-						auth_button_accept.setOnClickListener(null);
-					}
-				});
+					auth_button_accept.setText(getString(R.string.auth_state_connecting));
+					auth_button_accept.setOnClickListener(null);
+				}
 			}
 		}, 500);
 		layout_conn_state.setVisibility(View.VISIBLE);
@@ -865,21 +859,17 @@ public class HikeAuthActivity extends Activity
 		{
 			stateHandler.postDelayed(new Runnable()
 			{
-
 				@Override
 				public void run()
 				{
-					runOnUiThread(new Runnable()
-					{
-
-						@Override
-						public void run()
-						{
-							displayConnectedState();
-						}
-					});
+					displayConnectedState();
 				}
 			}, timestampDiff);
+			return;
+		}
+
+		if (auth_title == null)
+		{
 			return;
 		}
 		auth_title.setVisibility(View.GONE);
@@ -894,15 +884,11 @@ public class HikeAuthActivity extends Activity
 			@Override
 			public void run()
 			{
-				runOnUiThread(new Runnable()
+				if (auth_title == null)
 				{
-
-					@Override
-					public void run()
-					{
-						HikeAuthActivity.this.finish();
-					}
-				});
+					return;
+				}
+				HikeAuthActivity.this.finish();
 			}
 		}, 2500);
 		layout_conn_state.setVisibility(View.VISIBLE);
@@ -930,6 +916,10 @@ public class HikeAuthActivity extends Activity
 	public void displayRetryConnectionState()
 	{
 		CURRENT_STATE = STATE_RETRY_CONNECTION;
+		if (auth_title == null)
+		{
+			return;
+		}
 		long timestampDiff = System.currentTimeMillis() - connectingTimestamp;
 		if (timestampDiff < MIN_LOADING_TIME)
 		{
@@ -939,15 +929,7 @@ public class HikeAuthActivity extends Activity
 				@Override
 				public void run()
 				{
-					runOnUiThread(new Runnable()
-					{
-
-						@Override
-						public void run()
-						{
-							displayRetryConnectionState();
-						}
-					});
+					displayRetryConnectionState();
 				}
 			}, timestampDiff);
 			return;
@@ -964,6 +946,10 @@ public class HikeAuthActivity extends Activity
 			@Override
 			public void onClick(View v)
 			{
+				if (auth_title == null)
+				{
+					return;
+				}
 				HikeAuthActivity.this.finish();
 			}
 		});
