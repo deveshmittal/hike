@@ -4,13 +4,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Build;
-import android.telephony.TelephonyManager;
+import android.os.AsyncTask.Status;
 
 import com.bsb.hike.GCMIntentService;
 import com.bsb.hike.HikeConstants;
@@ -44,6 +40,14 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 
 	Context context = null;
 
+	
+	/**
+	 * 
+	 * This class is called when a SMS/Network change occurs preactivation.So has to maintain a single reference so that we can maintain the status  of the  task.
+	 */
+	
+	private static HikeHTTPTask hikeHTTPTask = null;
+
 	@Override
 	public void onReceive(Context context, Intent intent)
 	{
@@ -59,8 +63,7 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 		// if (mHikeHandler != null)
 		mHikeHandler.startHandlerThread();
 
-		sentToServer(context);
-
+		scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME, mGcmIdToServer);
 	}
 
 	private void scheduleNextSendToServerAction(String lastBackOffTimePref, Runnable postRunnableReference)
@@ -77,7 +80,6 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 
 		mHikeHandler.removeRunnable(postRunnableReference);
 		mHikeHandler.postRunnableWithDelay(postRunnableReference, lastBackOffTime * 1000);
-
 		mprefs.saveData(lastBackOffTimePref, lastBackOffTime);
 	}
 
@@ -101,6 +103,10 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 
 	private void sentToServer(Context context)
 	{
+		if (hikeHTTPTask != null && hikeHTTPTask.getStatus() == Status.RUNNING)
+		{
+			return;
+		}
 		Logger.d(getClass().getSimpleName(), "Sending GCM ID");
 		final String regId = GCMRegistrar.getRegistrationId(context);
 
@@ -116,7 +122,7 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 		Logger.d(getClass().getSimpleName(), "GCM id was not sent. Sending now");
 		HikeHttpRequest hikeHttpRequest = null;
 		JSONObject request = null;
-		HikeHTTPTask hikeHTTPTask = null;
+
 		switch (mprefs.getData(HikeConstants.REGISTER_GCM_SIGNUP, 0))
 		{
 		case HikeConstants.REGISTEM_GCM_AFTER_SIGNUP:
@@ -143,13 +149,14 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 					Logger.d(getClass().getSimpleName(), "Invalid JSON", e);
 				}
 				hikeHTTPTask = new HikeHTTPTask(null, 0);
-
 				hikeHttpRequest.setJSONData(request);
 
 				if (Utils.isUserOnline(context))
 				{
+
 					Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
 				}
+
 				else
 				{
 					mmHikeHttpCallback.onFailure();
@@ -182,6 +189,7 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 
 				if (Utils.isUserOnline(context))
 				{
+
 					Utils.executeHttpTask(hikeHTTPTask, hikeHttpRequest);
 				}
 				else
@@ -233,7 +241,6 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 			case HikeConstants.REGISTEM_GCM_AFTER_SIGNUP:
 
 				mprefs.saveData(HikeMessengerApp.GCM_ID_SENT, true);
-
 				break;
 
 			}
@@ -242,8 +249,10 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 
 		public void onFailure()
 		{
+
 			Logger.d(SendGCMIdToServerTrigger.this.getClass().getSimpleName(), "Send unsuccessful");
 			scheduleNextSendToServerAction(HikeMessengerApp.LAST_BACK_OFF_TIME, mGcmIdToServer);
+
 		}
 
 	};
