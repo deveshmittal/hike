@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
@@ -30,7 +31,6 @@ import java.util.List;
 public class CardRenderer implements View.OnLongClickListener {
 
     Context mContext;
-    String cardName, actionText;
 
     public CardRenderer(Context context) {
         this.mContext = context;
@@ -293,7 +293,8 @@ public class CardRenderer implements View.OnLongClickListener {
     }
 
 
-    private void cardCallToActions(final int cardType, ArrayList<CardComponent.ActionComponent> actionComponents, ViewHolder viewHolder, final boolean isAppInstalled, final String channelSource) {
+
+    private void cardCallToActions(final int cardType, ArrayList<CardComponent.ActionComponent> actionComponents, final List<CardComponent.TextComponent> textComponents, final ViewHolder viewHolder, final boolean isAppInstalled, final String channelSource) {
         for (final CardComponent.ActionComponent actionComponent : actionComponents) {
             final String tag = actionComponent.getTag();
             if (!TextUtils.isEmpty(tag)) {
@@ -302,10 +303,26 @@ public class CardRenderer implements View.OnLongClickListener {
                     @Override
                     public void onClick(View v) {
                         try {
-                            sendLogEvent();
+                            String cardName = "";
+                            String actionText = "";
+                            for (CardComponent.TextComponent textComponent : textComponents) {
+                                String tag = textComponent.getTag();
+                                if (!TextUtils.isEmpty(tag)) {
+
+                                    if (tag.equals("T1")){
+                                        cardName = textComponent.getText();
+                                    }
+                                    if (tag.equals("T3")){
+                                        actionText = textComponent.getText();
+                                    }
+                                }
+
+                            }
+                            sendLogEvent(cardName, actionText);
+
                             if (cardType == CardConstants.GAMES_CARD_LAYOUT) {
 
-                                if (tag.equalsIgnoreCase("CARD") && !isAppInstalled) {
+                                if (tag.equalsIgnoreCase(mContext.getString(R.string.content_card_tag)) && !isAppInstalled) {
                                     JSONObject jsonObject = new JSONObject();
                                     jsonObject.put(HikePlatformConstants.INTENT_URI, CardConstants.PLAY_STORE_TEXT + channelSource);
                                     CardController.callToAction(jsonObject, mContext);
@@ -329,10 +346,11 @@ public class CardRenderer implements View.OnLongClickListener {
         }
     }
 
-    private void sendLogEvent() throws JSONException {
+    private void sendLogEvent(String cardName, String actionText) throws JSONException {
         JSONObject analytics = new JSONObject();
         analytics.put(CardConstants.CARD_NAME, cardName);
         analytics.put(CardConstants.ACTION_TEXT, actionText);
+        analytics.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.CONTENT_CARD_TAPPED);
         Utils.sendLogEvent(analytics);
     }
 
@@ -343,12 +361,6 @@ public class CardRenderer implements View.OnLongClickListener {
             String tag = textComponent.getTag();
             if (!TextUtils.isEmpty(tag)) {
 
-                if (tag.equals("T1")){
-                    cardName = textComponent.getText();
-                }
-                if (tag.equals("T3")){
-                    actionText = textComponent.getText();
-                }
                 TextView tv = (TextView) viewHolder.viewHashMap.get(tag);
                 if (null != tv) {
                     tv.setVisibility(View.VISIBLE);
