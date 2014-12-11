@@ -502,10 +502,9 @@ public class HikeAuthActivity extends Activity
 
 					if (TextUtils.isEmpty(prefs.getData(mAppPackage, "")))
 					{
-						long timestamp = System.currentTimeMillis();
 						prefs.saveData(AUTH_SHARED_PREF_PKG_KEY,
-								TextUtils.isEmpty(prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")) ? mAppPackage + ":" + timestamp : prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "") + ","
-										+ mAppPackage + ":" + timestamp);
+								TextUtils.isEmpty(prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")) ? mAppPackage + ":" + expiresIn : prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "") + ","
+										+ mAppPackage + ":" + expiresIn);
 					}
 
 					prefs.saveData(mAppPackage, Integer.toString(accessToken.hashCode()));
@@ -543,10 +542,9 @@ public class HikeAuthActivity extends Activity
 
 						if (TextUtils.isEmpty(prefs.getData(mAppPackage, "")))
 						{
-							long timestamp = System.currentTimeMillis();
 							prefs.saveData(AUTH_SHARED_PREF_PKG_KEY,
-									TextUtils.isEmpty(prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")) ? mAppPackage + ":" + timestamp : prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")
-											+ "," + mAppPackage + ":" + timestamp);
+									TextUtils.isEmpty(prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")) ? mAppPackage + ":" + expiresIn : prefs.getData(AUTH_SHARED_PREF_PKG_KEY, "")
+											+ "," + mAppPackage + ":" + expiresIn);
 						}
 
 						prefs.saveData(mAppPackage, Integer.toString(accessToken.hashCode()));

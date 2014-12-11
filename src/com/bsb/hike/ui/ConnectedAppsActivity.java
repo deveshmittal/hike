@@ -27,6 +27,7 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.R.string;
 import com.bsb.hike.models.ConnectedApp;
 
 /**
@@ -43,6 +44,12 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 
 	/** The connected app list. */
 	private ArrayList<ConnectedApp> connectedAppList;
+
+	private ListView listView;
+
+	private BaseAdapter connectedAppsAdapter;
+
+	private TextView text_view_connected_apps_numbers;
 
 	/*
 	 * (non-Javadoc)
@@ -137,7 +144,7 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 	{
 		final LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
 
-		BaseAdapter connectedAppsAdapter = new BaseAdapter()
+		connectedAppsAdapter = new BaseAdapter()
 		{
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent)
@@ -159,7 +166,7 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 
 					ImageView image_view_disconn_app = ((ImageView) convertView.findViewById(R.id.image_view_disconn_app));
 
-					image_view_disconn_app.setTag(connectedAppList.get(position).getPackageName());
+					image_view_disconn_app.setTag(position);
 
 					image_view_disconn_app.setOnClickListener(ConnectedAppsActivity.this);
 
@@ -191,48 +198,48 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 			}
 		};
 
-		((TextView) findViewById(R.id.text_view_connected_apps_numbers)).setText(connectedAppsAdapter.getCount() > 1 ? String.format(getString(R.string.connected_apps_to_hike),
-				connectedAppsAdapter.getCount()) : getString(R.string.connected_app_to_hike));
+		text_view_connected_apps_numbers = ((TextView) findViewById(R.id.text_view_connected_apps_numbers));
+		text_view_connected_apps_numbers.setText(connectedAppsAdapter.getCount() == 1 ? String.format(getString(R.string.connected_apps_to_hike), connectedAppsAdapter.getCount())
+				: getString(R.string.connected_app_to_hike));
 
-		((ListView) findViewById(R.id.list_view_connected_apps)).setAdapter(connectedAppsAdapter);
-
+		listView = ((ListView) findViewById(R.id.list_view_connected_apps));
+		listView.setAdapter(connectedAppsAdapter);
 	}
 
 	/**
 	 * Disconnect application
 	 * 
-	 * @param appPkgName
-	 *            the app pkg name
+	 * @param index
 	 */
-	private void disconnectApp(String appPkgName)
+	private void disconnectApp(int index)
 	{
+		ConnectedApp disconnAppObj = connectedAppList.remove(index);
+
 		String connectedPkgCSV = authPrefs.getData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, "");
+
 		if (TextUtils.isEmpty(connectedPkgCSV))
 		{
 			// Not possible
 		}
 		else
 		{
-			String[] connectedPkgs = connectedPkgCSV.split(",");
-			List<String> connectedPkgsList = new ArrayList<String>(Arrays.asList(connectedPkgs));
-			for (String pkg : connectedPkgs)
+			StringBuilder sb = null;
+
+			for (ConnectedApp app : connectedAppList)
 			{
-				String[] pkgInfo = pkg.split(":");
-				if (pkgInfo[0].equals(appPkgName.split(":")[0]))
+				if (sb == null)
 				{
-					connectedPkgsList.remove(pkg);
+					sb = new StringBuilder(app.getPackageName());
+				}
+				else
+				{
+					sb.append("," + app.getPackageName());
 				}
 			}
 
-			String outputCSV = "";
-			for (String pkg : connectedPkgsList)
-			{
-				outputCSV += TextUtils.isEmpty(outputCSV) ? pkg : "," + pkg;
-			}
+			authPrefs.saveData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, sb.toString());
 
-			authPrefs.saveData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, outputCSV);
-
-			authPrefs.removeData(appPkgName.split(":")[0]);
+			authPrefs.removeData(disconnAppObj.getTitle());
 
 			try
 			{
@@ -240,7 +247,7 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 
 				analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_DISCONNECT_APP);
 
-				analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, appPkgName.split(":")[0]);
+				analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, disconnAppObj.getTitle());
 
 				Utils.sendLogEvent(analyticsJSON);
 			}
@@ -249,7 +256,7 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 				e.printStackTrace();
 			}
 
-			bindContentAndActions();
+			invalidateUI();
 		}
 	}
 
@@ -263,22 +270,21 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 	{
 		try
 		{
-			final String pkg = (String) v.getTag();
+			final int position = (Integer) v.getTag();
 			final CustomAlertDialog alertDialog = new CustomAlertDialog(ConnectedAppsActivity.this);
-			alertDialog.setTitle(null);
-			alertDialog.setBody(getString(R.string.are_you_sure));
+			alertDialog.setHeader(getString(R.string.are_you_sure));
+			alertDialog.setBody(getString(R.string.confirm_disconnect_app));
 			alertDialog.setOkButton(getString(R.string.yes), new OnClickListener()
 			{
-
 				@Override
 				public void onClick(View v)
 				{
-					disconnectApp(pkg);
+					disconnectApp(position);
+					alertDialog.dismiss();
 				}
 			});
 			alertDialog.setCancelButton(getString(R.string.cancel), new OnClickListener()
 			{
-
 				@Override
 				public void onClick(View v)
 				{
@@ -293,4 +299,13 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 		}
 	}
 
+	/**
+	 * Refresh UI
+	 */
+	private void invalidateUI()
+	{
+		connectedAppsAdapter.notifyDataSetChanged();
+		text_view_connected_apps_numbers.setText(connectedAppsAdapter.getCount() == 1 ? String.format(getString(R.string.connected_apps_to_hike), connectedAppsAdapter.getCount())
+				: getString(R.string.connected_app_to_hike));
+	}
 }
