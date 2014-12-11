@@ -1081,15 +1081,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 		}
-		else if (HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED.equals(type))
-		{
-			// If auth request is pending, take the user to hike connect activity instead of home screen
-			if (accountPrefs.getBoolean(HikeMessengerApp.PENDING_SDK_AUTH, false))
-			{
-				accountPrefs.edit().putBoolean(HikeMessengerApp.PENDING_SDK_AUTH, false);
-				HomeActivity.this.startActivity(new Intent(HomeActivity.this, HikeAuthActivity.class));
-			}
-		}
 	}
 
 	private void updateHomeOverflowToggleCount(final int count, int delayTime)

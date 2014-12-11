@@ -109,8 +109,6 @@ public class HikeService extends Service
 
 	public static final int MSG_APP_CONN_STATUS = 6;
 
-	public static final int MSG_APP_INVALID_TOKEN = 7;
-
 	protected Messenger mApp;
 
 	/************************************************************************/
@@ -187,8 +185,6 @@ public class HikeService extends Service
 
 	private Messenger mSDKRequestMessenger;
 
-	private boolean isInitialized = false;
-
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -198,10 +194,7 @@ public class HikeService extends Service
 	@Override
 	public void onCreate()
 	{
-		if (!isInitialized)
-		{
-			super.onCreate();
-		}
+		super.onCreate();
 
 		if (!isUserSignedUp())
 		{
@@ -307,7 +300,6 @@ public class HikeService extends Service
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
 		
-		isInitialized = true;
 	}
 
 	public boolean isUserSignedUp()
@@ -365,12 +357,6 @@ public class HikeService extends Service
 	@Override
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{
-		
-		if(!isInitialized)
-		{
-			onCreate();
-		}
-		
 		Logger.d("HikeService", "Start MQTT Thread.");
 		mMqttManager.connectOnMqttThread();
 		Logger.d("HikeService", "Intent is " + intent);

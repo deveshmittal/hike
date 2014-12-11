@@ -178,6 +178,7 @@ import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.FtueActivity;
 import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -356,7 +357,7 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
 	}
-	
+
 	public static Intent createIntentFromMsisdn(String msisdnOrGroupId, boolean openKeyBoard)
 	{
 		Intent intent = new Intent();
@@ -591,11 +592,6 @@ public class Utils
 			return true;
 		}
 		return false;
-	}
-	
-	public static void stopService(Context argContext)
-	{
-		argContext.stopService(new Intent(argContext, HikeService.class));
 	}
 
 	public static String formatNo(String msisdn)
@@ -1546,11 +1542,13 @@ public class Utils
 		{
 			AccountUtils.base = httpString + AccountUtils.host + "/v1";
 			AccountUtils.baseV2 = httpString + AccountUtils.host + "/v2";
+			AccountUtils.SDK_AUTH_BASE = AccountUtils.SDK_AUTH_BASE_URL_PROD;
 		}
 		else
 		{
 			AccountUtils.base = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v1";
 			AccountUtils.baseV2 = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v2";
+			AccountUtils.SDK_AUTH_BASE = AccountUtils.SDK_AUTH_BASE_URL_STAGING;
 		}
 
 		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
@@ -4915,6 +4913,37 @@ public class Utils
 		}
 		requestAccountInfo(upgrade, sendBot);
 		sendLocaleToServer(context);
+	}
+
+	/**
+	 * Checks if is user signed up. Works with application context.
+	 * 
+	 * @return true, if is user signed up
+	 */
+	public static boolean requireAuth(Context appContext, boolean allowOpeningActivity)
+	{
+		appContext = appContext.getApplicationContext();
+
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(appContext);
+
+		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
+		{
+			if (allowOpeningActivity)
+			{
+				IntentManager.openWelcomeActivity(appContext);
+			}
+			return false;
+		}
+
+		if (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null)
+		{
+			if (allowOpeningActivity)
+			{
+				IntentManager.openSignupActivity(appContext);
+			}
+			return false;
+		}
+		return true;
 	}
 
 }

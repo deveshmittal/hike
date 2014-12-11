@@ -158,6 +158,8 @@ public class AccountUtils
 
 	public static final String SDK_AUTH_BASE_URL_PROD = "http://oauth.hike.in/o/oauth2/";
 	
+	public static String SDK_AUTH_BASE = SDK_AUTH_BASE_URL_PROD;
+	
 	public static final String SDK_AUTH_PATH_AUTHORIZE = "authorize";
 	
 	public static final String SDK_AUTH_PARAM_RESPONSE_TYPE = "response_type";

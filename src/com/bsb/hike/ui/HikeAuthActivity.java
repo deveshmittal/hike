@@ -14,7 +14,6 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -71,20 +70,12 @@ public class HikeAuthActivity extends Activity
 
 	private AuthSDKAsyncTask authTask;
 
-	private HikeSharedPreferenceUtil settingPref;
-
-	private boolean isInitialized;
-
-	private boolean isRoutedToSignUp;
-
 	/** The Constant MESSAGE_INDEX. Used for passing messages between activities */
 	public static final String MESSAGE_INDEX = "MESSAGE_INDEX";
 
 	public static final String AUTH_SHARED_PREF_NAME = "364i5j6b3oj4";
 
 	public static final String AUTH_SHARED_PREF_PKG_KEY = "ilugasdgi2";
-
-	private static final String IS_SENT_FOR_SIGNUP_KEY = "IS_SENT_FOR_SIGNUP_KEY";
 
 	private static final long MIN_LOADING_TIME = 4 * 1000;
 
@@ -135,15 +126,14 @@ public class HikeAuthActivity extends Activity
 
 	private View progress_bar_conn_state;
 
-	/** Toggle staging/prod url for auth call */
-	private boolean isStaging = false;
-
 	/**
 	 * Dont make call to server. Generate token in code.
 	 */
 	private boolean bypassAuthHttp = false;
 
 	private long connectingTimestamp;
+
+	private static Handler stateHandler = new Handler();
 
 	/*
 	 * (non-Javadoc)
@@ -155,76 +145,33 @@ public class HikeAuthActivity extends Activity
 	{
 		super.onCreate(savedInstanceState);
 
-		if (savedInstanceState != null)
-		{
-			if (savedInstanceState.getBoolean(IS_SENT_FOR_SIGNUP_KEY, false))
-			{
-				HikeAuthActivity.this.finish();
-				return;
-			}
+		setContentView(R.layout.auth_main);
 
-			message = (Message) savedInstanceState.getParcelable(MESSAGE_INDEX);
+		ContactInfo contactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
+
+		userContactId = contactInfo.getMsisdn() + ProfileActivity.PROFILE_ROUND_SUFFIX;
+
+		profileImageLoader = new IconLoader(this, getResources().getDimensionPixelSize(R.dimen.auth_permission_icon));
+
+		retrieveContent();
+
+		try
+		{
+			JSONObject analyticsJSON = new JSONObject();
+			analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_VIEWED);
+			analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+			Utils.sendLogEvent(analyticsJSON);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
 		}
 
-		settingPref = HikeSharedPreferenceUtil.getInstance(getApplicationContext(), HikeMessengerApp.ACCOUNT_SETTINGS);
+		initVar();
+
+		bindContentsAndActions();
 
 		CURRENT_STATE = STATE_NORMAL;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.app.Activity#onResume()
-	 */
-	@Override
-	protected void onResume()
-	{
-		super.onResume();
-
-		if (isRoutedToSignUp && (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false)) && (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null))
-		{
-			this.finish();
-			return;
-		}
-
-		if (isUserSignedUp() && !isInitialized)
-		{
-			setContentView(R.layout.auth_main);
-
-			ContactInfo contactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
-
-			userContactId = contactInfo.getMsisdn() + ProfileActivity.PROFILE_ROUND_SUFFIX;
-
-			profileImageLoader = new IconLoader(this, getResources().getDimensionPixelSize(R.dimen.auth_permission_icon));
-
-			retrieveContent();
-
-			try
-			{
-				JSONObject analyticsJSON = new JSONObject();
-				analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_VIEWED);
-				analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
-				Utils.sendLogEvent(analyticsJSON);
-			}
-			catch (JSONException e)
-			{
-				e.printStackTrace();
-			}
-
-			initVar();
-
-			bindContentsAndActions();
-
-			settingPref.saveData(HikeMessengerApp.PENDING_SDK_AUTH, false);
-
-			isInitialized = true;
-		}
-		else
-		{
-			isRoutedToSignUp = true;
-			settingPref.saveData(HikeMessengerApp.PENDING_SDK_AUTH, true);
-			return;
-		}
 	}
 
 	/**
@@ -263,42 +210,6 @@ public class HikeAuthActivity extends Activity
 		progress_bar_conn_state = findViewById(R.id.progress_bar_conn_state);
 
 		image_conn_state = ((ImageView) findViewById(R.id.image_conn_state));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.app.Activity#onSaveInstanceState(android.os.Bundle)
-	 */
-	@Override
-	protected void onSaveInstanceState(Bundle outState)
-	{
-		outState.putBoolean(IS_SENT_FOR_SIGNUP_KEY, true);
-
-		outState.putParcelable(MESSAGE_INDEX, getIntent().getParcelableExtra(MESSAGE_INDEX));
-
-		super.onSaveInstanceState(outState);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.app.Activity#onRestoreInstanceState(android.os.Bundle)
-	 */
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState)
-	{
-		super.onRestoreInstanceState(savedInstanceState);
-		if (savedInstanceState != null)
-		{
-			if (savedInstanceState.getBoolean(IS_SENT_FOR_SIGNUP_KEY, false))
-			{
-				HikeAuthActivity.this.finish();
-				return;
-			}
-
-			message = (Message) savedInstanceState.getParcelable(MESSAGE_INDEX);
-		}
 	}
 
 	/**
@@ -401,21 +312,30 @@ public class HikeAuthActivity extends Activity
 				}
 			});
 
-			new Handler().postDelayed(new Runnable()
+			stateHandler.postDelayed(new Runnable()
 			{
 
 				@Override
 				public void run()
 				{
-					if (textViewDropdown.getTag().equals("0"))
+					runOnUiThread(new Runnable()
 					{
-						if (CURRENT_STATE == STATE_NORMAL)
+
+						@Override
+						public void run()
 						{
-							textViewDropdown.setCompoundDrawablesWithIntrinsicBounds(getApplicationContext().getResources().getDrawable(R.drawable.arrowup), null, null, null);
-							textViewDropdown.setTag("1");
-							findViewById(R.id.auth_info_layout).setVisibility(View.VISIBLE);
+							if (textViewDropdown.getTag().equals("0"))
+							{
+								if (CURRENT_STATE == STATE_NORMAL)
+								{
+									textViewDropdown.setCompoundDrawablesWithIntrinsicBounds(getApplicationContext().getResources().getDrawable(R.drawable.arrowup), null, null,
+											null);
+									textViewDropdown.setTag("1");
+									findViewById(R.id.auth_info_layout).setVisibility(View.VISIBLE);
+								}
+							}
 						}
-					}
+					});
 				}
 			}, 2000);
 
@@ -489,12 +409,12 @@ public class HikeAuthActivity extends Activity
 
 		displayIsConnectingState();
 
-		String authUrl = "";
+		String authUrl = AccountUtils.SDK_AUTH_BASE + AccountUtils.SDK_AUTH_PATH_AUTHORIZE;
+		
 		List<BasicNameValuePair> params = new LinkedList<BasicNameValuePair>();
 
-		if (isStaging)
+		if (AccountUtils.SDK_AUTH_BASE.equals(AccountUtils.SDK_AUTH_BASE_URL_STAGING))
 		{
-			authUrl = AccountUtils.SDK_AUTH_BASE_URL_STAGING + AccountUtils.SDK_AUTH_PATH_AUTHORIZE;
 			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_RESPONSE_TYPE, "token"));
 			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_CLIENT_ID, "VIVTB9Y18EOCw7d-:VIVTqNY18EOCw7d_.apps.hike.in"));
 			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_SCOPE, "publish_actions"));
@@ -503,7 +423,7 @@ public class HikeAuthActivity extends Activity
 		}
 		else
 		{
-			authUrl = AccountUtils.SDK_AUTH_BASE_URL_PROD + AccountUtils.SDK_AUTH_PATH_AUTHORIZE;
+			authUrl = AccountUtils.SDK_AUTH_BASE + AccountUtils.SDK_AUTH_PATH_AUTHORIZE;
 			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_RESPONSE_TYPE, "token"));
 			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_CLIENT_ID, mAppId));
 			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_SCOPE, "publish_actions"));
@@ -529,7 +449,7 @@ public class HikeAuthActivity extends Activity
 
 		httpGet.addHeader(new BasicHeader("Content-type", "text/plain"));
 
-		if (isStaging)
+		if (AccountUtils.SDK_AUTH_BASE.equals(AccountUtils.SDK_AUTH_BASE_URL_STAGING))
 		{
 			// use if baseurl is of staging server
 			httpGet.addHeader(new BasicHeader("cookie", "uid=UZtZkaEMFSBRwmys;token=EeEKpHJzesU="));
@@ -851,36 +771,6 @@ public class HikeAuthActivity extends Activity
 		}
 	}
 
-	/**
-	 * Checks if is user signed up.
-	 * 
-	 * @return true, if is user signed up
-	 */
-	public boolean isUserSignedUp()
-	{
-		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
-		{
-			if (!isRoutedToSignUp)
-			{
-				HikeAuthActivity.this.startActivity(new Intent(HikeAuthActivity.this, WelcomeActivity.class));
-				isRoutedToSignUp = true;
-			}
-			return false;
-		}
-
-		if (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null)
-		{
-			if (!isRoutedToSignUp)
-			{
-				HikeAuthActivity.this.startActivity(new Intent(HikeAuthActivity.this, SignupActivity.class));
-				isRoutedToSignUp = true;
-			}
-			return false;
-		}
-
-		return true;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -920,13 +810,21 @@ public class HikeAuthActivity extends Activity
 		auth_button_deny_layout.setVisibility(View.GONE);
 
 		// Hack to improve UX
-		new Handler().postDelayed(new Runnable()
+		stateHandler.postDelayed(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				auth_button_accept.setText(getString(R.string.auth_state_connecting));
-				auth_button_accept.setOnClickListener(null);
+				runOnUiThread(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						auth_button_accept.setText(getString(R.string.auth_state_connecting));
+						auth_button_accept.setOnClickListener(null);
+					}
+				});
 			}
 		}, 500);
 		layout_conn_state.setVisibility(View.VISIBLE);
@@ -944,13 +842,21 @@ public class HikeAuthActivity extends Activity
 		long timestampDiff = System.currentTimeMillis() - connectingTimestamp;
 		if (timestampDiff < MIN_LOADING_TIME)
 		{
-			new Handler().postDelayed(new Runnable()
+			stateHandler.postDelayed(new Runnable()
 			{
 
 				@Override
 				public void run()
 				{
-					displayConnectedState();
+					runOnUiThread(new Runnable()
+					{
+						
+						@Override
+						public void run()
+						{
+							displayConnectedState();
+						}
+					});
 				}
 			}, timestampDiff);
 			return;
@@ -962,12 +868,20 @@ public class HikeAuthActivity extends Activity
 		auth_info_layout.setVisibility(View.GONE);
 		auth_button_deny_layout.setVisibility(View.GONE);
 		auth_buttons_layout.setVisibility(View.GONE);
-		new Handler().postDelayed(new Runnable()
+		stateHandler.postDelayed(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				HikeAuthActivity.this.finish();
+				runOnUiThread(new Runnable()
+				{
+					
+					@Override
+					public void run()
+					{
+						HikeAuthActivity.this.finish();						
+					}
+				});
 			}
 		}, 2500);
 		layout_conn_state.setVisibility(View.VISIBLE);
@@ -998,13 +912,21 @@ public class HikeAuthActivity extends Activity
 		long timestampDiff = System.currentTimeMillis() - connectingTimestamp;
 		if (timestampDiff < MIN_LOADING_TIME)
 		{
-			new Handler().postDelayed(new Runnable()
+			stateHandler.postDelayed(new Runnable()
 			{
 
 				@Override
 				public void run()
 				{
-					displayRetryConnectionState();
+					runOnUiThread(new Runnable()
+					{
+
+						@Override
+						public void run()
+						{
+							displayRetryConnectionState();
+						}
+					});
 				}
 			}, timestampDiff);
 			return;

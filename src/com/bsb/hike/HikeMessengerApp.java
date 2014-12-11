@@ -36,7 +36,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Pair;
 
@@ -51,7 +50,6 @@ import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.UpgradeIntentService;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
-import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -103,8 +101,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ACCEPT_TERMS = "acceptterms";
 	
-	public static final String PENDING_SDK_AUTH = "pendingSDKAuth";
-
 	public static final String CONNECTED_ONCE = "connectedonce";
 
 	public static final String MESSAGES_LIST_TOOLTIP_DISMISSED = "messageslist_tooltip";
@@ -475,11 +471,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 				MQTTConnectionStatus status = MQTTConnectionStatus.values()[s];
 				mPubSubInstance.publish(HikePubSub.CONNECTION_STATUS, status);
 				break;
-			case HikeService.MSG_APP_INVALID_TOKEN:
-				Logger.d("HikeMessengerApp", "received invalid token message from service");
-				HikeMessengerApp.this.setServiceAsDisconnected();
-				HikeMessengerApp.this.stopService(new Intent(HikeMessengerApp.this, HikeService.class));
-				HikeMessengerApp.this.startActivity(new Intent(HikeMessengerApp.this, WelcomeActivity.class));
 			}
 		}
 	}

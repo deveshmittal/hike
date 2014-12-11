@@ -31,6 +31,7 @@ import com.bsb.hike.sdk.HikeSDKResponseCode;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.utils.HikeSDKConstants;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -65,13 +66,11 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 		{
 			public void handleMessage(android.os.Message msg)
 			{
-				Logger.d("THREAD", Thread.currentThread().getName());
-				Intent hikeAuthIntent = new Intent("com.bsb.hike.ui.HikeAuthActivity");
-				hikeAuthIntent.putExtra(HikeAuthActivity.MESSAGE_INDEX, Message.obtain(msg));
-				hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-				argContext.startActivity(hikeAuthIntent);
-
+				if (!Utils.requireAuth(mContext, true))
+				{
+					return;
+				}
+				IntentManager.openHikeSDKAuth(mContext, Message.obtain(msg));
 			};
 		};
 

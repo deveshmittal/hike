@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -28,6 +27,7 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.models.ConnectedApp;
 
 /**
  * This class is reponsible for displaying "Connected apps" screen in Settings. Also takes care of underlying functionality.
@@ -191,7 +191,8 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 			}
 		};
 
-		((TextView) findViewById(R.id.text_view_connected_apps_numbers)).setText(connectedAppsAdapter.getCount() + " apps connected to hike");
+		((TextView) findViewById(R.id.text_view_connected_apps_numbers)).setText(connectedAppsAdapter.getCount() > 1 ? String.format(getString(R.string.connected_apps_to_hike),
+				connectedAppsAdapter.getCount()) : getString(R.string.connected_app_to_hike));
 
 		((ListView) findViewById(R.id.list_view_connected_apps)).setAdapter(connectedAppsAdapter);
 
@@ -292,108 +293,4 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 		}
 	}
 
-	/**
-	 * Model class.
-	 * 
-	 * @author Atul M
-	 */
-	class ConnectedApp
-	{
-
-		/** The package name. */
-		private String packageName;
-
-		/** The title. */
-		private String title;
-
-		/** The app icon. */
-		private Drawable appIcon;
-
-		/** The version. */
-		private String version;
-
-		/**
-		 * Gets the package name.
-		 * 
-		 * @return the package name
-		 */
-		public String getPackageName()
-		{
-			return packageName;
-		}
-
-		/**
-		 * Sets the package name.
-		 * 
-		 * @param packageName
-		 *            the new package name
-		 */
-		public void setPackageName(String packageName)
-		{
-			this.packageName = packageName;
-		}
-
-		/**
-		 * Gets the title.
-		 * 
-		 * @return the title
-		 */
-		public String getTitle()
-		{
-			return title;
-		}
-
-		/**
-		 * Sets the title.
-		 * 
-		 * @param title
-		 *            the new title
-		 */
-		public void setTitle(String title)
-		{
-			this.title = title;
-		}
-
-		/**
-		 * Gets the app icon.
-		 * 
-		 * @return the app icon
-		 */
-		public Drawable getAppIcon()
-		{
-			return appIcon;
-		}
-
-		/**
-		 * Sets the app icon.
-		 * 
-		 * @param appIcon
-		 *            the new app icon
-		 */
-		public void setAppIcon(Drawable appIcon)
-		{
-			this.appIcon = appIcon;
-		}
-
-		/**
-		 * Gets the version.
-		 * 
-		 * @return the version
-		 */
-		public String getVersion()
-		{
-			return version;
-		}
-
-		/**
-		 * Sets the version.
-		 * 
-		 * @param version
-		 *            the new version
-		 */
-		public void setVersion(String version)
-		{
-			this.version = version;
-		}
-	}
 }
