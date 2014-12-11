@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:ordering="sequentially">
+   <set >
+       <objectAnimator 
+        android:propertyName="TranslationX"
+        android:duration="500"
+        android:valueTo="0.0"
+        android:valueType="floatType"
+        android:interpolator="@android:anim/accelerate_interpolator">
+        
+    </objectAnimator>
+    
+    <objectAnimator 
+        android:propertyName="TranslationY"
+        android:duration="500"
+        android:valueTo="0.0"
+        android:valueType="floatType">
+        
+    </objectAnimator>
+    
+    <objectAnimator 
+        android:propertyName="scaleX"
+        android:duration="500"
+        android:valueTo="1.0"
+        android:valueType="floatType"
+    ></objectAnimator>
+    
+    <objectAnimator 
+        android:propertyName="scaleY"
+        android:duration="500"
+        android:valueTo="1.0"
+        android:valueType="floatType"
+        ></objectAnimator>
+	</set>
+	<set android:ordering="together">
+	    <objectAnimator 
+	        android:propertyName="scaleX"
+	        android:duration="600"
+    		android:valueFrom="1.15"    
+    		android:interpolator="@android:anim/bounce_interpolator"
+    		android:valueTo="1.0"
+    		android:valueType="floatType"
+    		android:repeatCount="infinite"
+    		android:repeatMode="reverse">
+	        
+	    </objectAnimator>
+	    <objectAnimator 
+	        android:propertyName="scaleY"
+	        android:duration="600"
+    		android:valueFrom="1.15"    
+    		android:interpolator="@android:anim/bounce_interpolator"
+    		android:valueTo="1.0"
+    		android:valueType="floatType"    
+    		
+    		android:repeatCount="infinite"
+    		android:repeatMode="reverse">
+	        
+	    </objectAnimator>
+	</set>
+</set>

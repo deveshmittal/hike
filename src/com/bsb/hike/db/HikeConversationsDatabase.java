@@ -58,11 +58,14 @@ import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
-import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.modules.contactmgr.ConversationMsisdns;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
@@ -227,6 +230,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CHAT_BG_INDEX + " ON " + DBConstants.CHAT_BG_TABLE + " (" + DBConstants.MSISDN + ")";
 		db.execSQL(sql);
 		sql = getStickerShopTableCreateQuery();
+		db.execSQL(sql);
+		
+		sql = "CREATE TABLE IF NOT EXISTS "+ DBConstants.CONVERSATION_ACCOUNT_TABLE 
+				+ " ("
+				+ DBConstants.MSISDN + " TEXT UNIQUE, "
+				+ DBConstants.ACC_ID + " INTEGER"
+				+ ")";
 		db.execSQL(sql);
 	}
 
@@ -5840,5 +5850,64 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				c.close();
 		}
 	}
+	
+	public int getAccountFromMsisdn(String msisdn){
+		Cursor c = null;
+		
+		try{
+			c = mDb.query(DBConstants.CONVERSATION_ACCOUNT_TABLE,new String[] { (DBConstants.ACC_ID) }, DBConstants.MSISDN+"=" + msisdn , null, null, null, null);
+			
+			if ( c.moveToFirst() ){
+				return c.getInt(c.getColumnIndex(DBConstants.ACC_ID));
+			}
+			else
+				return 0;
+		}
+		
+		catch (Exception e){
+			return 0;
+		}
+				
+		finally{
+			if ( c!= null )
+				c.close();
+		}
+	}
+	
+	public void updateAccountForMsisdn(String msisdn, int acc_no){
+		try
+		{
+			mDb.beginTransaction();
+			ContentValues contentValues = new ContentValues();
+			contentValues.put(DBConstants.MSISDN, msisdn);
+			contentValues.put(DBConstants.ACC_ID, acc_no);
+			
+			/*
+			 * Adding extra fields as per stickerCategoriesTable
+			 */
+			
+			int rowsAffected = mDb.update(DBConstants.CONVERSATION_ACCOUNT_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] { msisdn });
+			/*
+			 * if row is not there in stickerCategoriesTable and server specifically tells us to switch on the visibility 
+			 * then we need to insert this item in stickerCategoriesTable
+			 */
+			if(rowsAffected == 0)
+			{
+				mDb.insert(DBConstants.CONVERSATION_ACCOUNT_TABLE, null, contentValues);
+			}
+			mDb.setTransactionSuccessful();
+		}
+		catch (Exception e)
+		{
+			Logger.e(getClass().getSimpleName(), "Exception : ", e);
+			e.printStackTrace();
+		}
+		finally
+		{
+			mDb.endTransaction();
+		}
+	}
+	
+	
 
 }

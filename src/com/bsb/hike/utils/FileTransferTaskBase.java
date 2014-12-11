@@ -6,9 +6,9 @@ import org.apache.http.entity.AbstractHttpEntity;
 
 import android.os.AsyncTask;
 
-import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.http.CustomByteArrayEntity;
 import com.bsb.hike.http.CustomFileEntity;
 

@@ -42,11 +42,13 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.HikePacket;
@@ -172,6 +174,8 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 	private volatile int retryCount = 0;
 	
 	private static final String UNRESOLVED_EXCEPTION = "unresolved";
+	
+	private int accountNumber=0;
 
 	// constants used to define MQTT connection status, this is used by external classes and hardly of any use internally
 	public enum MQTTConnectionStatus
@@ -289,11 +293,15 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 	}
 
-	class IncomingHandler extends Handler
+	static class IncomingHandler extends Handler
 	{
-		public IncomingHandler(Looper looper)
+		
+		private static ArrayList<HikeMqttManagerNew> mqttManagers=new ArrayList<HikeMqttManagerNew>();
+		
+		public IncomingHandler(Looper looper, HikeMqttManagerNew m)
 		{
 			super(looper);
+			mqttManagers.add(m);
 		}
 
 		@Override
@@ -306,14 +314,30 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				case HikeService.MSG_APP_PUBLISH:
 					Bundle bundle = msg.getData();
 					String message = bundle.getString(HikeConstants.MESSAGE);
+					String to=new JSONObject(message).optString(HikeConstants.TO);
+					int mqttIndex=0;
+					if(to != null){
+						if(!HikeMessengerApp.chatThreadAccountMap.containsKey(to)){
+							HikeMessengerApp.chatThreadAccountMap.put(to,HikeConversationsDatabase.getInstance().getAccountFromMsisdn(to));
+						}
+						mqttIndex=HikeMessengerApp.chatThreadAccountMap.get(to);
+					}
 					long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
-					send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis(), msg.arg2), msg.arg1);
+					mqttManagers.get(mqttIndex).send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
 				case 12341: // just for testing
 					Bundle b = msg.getData();
 					String m = b.getString(HikeConstants.MESSAGE);
+					String _to=new JSONObject(m).optString(HikeConstants.TO);
+					int mqttInd=0;
+					if(_to != null){
+						if(!HikeMessengerApp.chatThreadAccountMap.containsKey(_to)){
+							HikeMessengerApp.chatThreadAccountMap.put(_to,HikeConversationsDatabase.getInstance().getAccountFromMsisdn(_to));
+						}
+						mqttInd=HikeMessengerApp.chatThreadAccountMap.get(_to);
+					}
 					long mId = b.getLong(HikeConstants.MESSAGE_ID, -1);
-					send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis(), msg.arg2), msg.arg1);
+					mqttManagers.get(mqttInd).send(new HikePacket(m.getBytes(), mId, System.currentTimeMillis(), msg.arg2), msg.arg1);
 					break;
 				}
 			}
@@ -324,15 +348,17 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		}
 	}
 
-	public HikeMqttManagerNew(Context ctx)
+	public HikeMqttManagerNew(Context ctx,int AccNum)
 	{
 		context = ctx;
 		cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-
-		password = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
-		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING, null) + ":" + HikeConstants.APP_API_VERSION + ":" + true;
+		
+		accountNumber=AccNum;
+		String acc= AccNum==0?"":String.valueOf(AccNum);
+		password = settings.getString(HikeMessengerApp.TOKEN_SETTING+acc, null);
+		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING+acc, null);
+		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING+acc, null) + ":" + HikeConstants.APP_API_VERSION + ":" + true;
 
 		persistence = HikeMqttPersistence.getInstance();
 		mqttMessageManager = MqttMessagesManager.getInstance(context);
@@ -340,6 +366,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		connChkRunnable = new ConnectionCheckRunnable();
 		disConnectRunnable = new DisconnectRunnable();
 		activityChkRunnable = new ActivityCheckRunnable();
+		Log.d("HikeMqttManagerNew", "Starting mqtt");
 	}
 
 	/*
@@ -352,7 +379,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		mqttHandlerThread.start();
 		mMqttHandlerLooper = mqttHandlerThread.getLooper();
 		mqttThreadHandler = new Handler(mMqttHandlerLooper);
-		mMessenger = new Messenger(new IncomingHandler(mMqttHandlerLooper));
+		mMessenger = new Messenger(new IncomingHandler(mMqttHandlerLooper,this));
 		// register for Screen ON, Network Connection Change
 		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -362,7 +389,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		context.registerReceiver(this, filter);
 		LocalBroadcastManager.getInstance(context).registerReceiver(this, filter);
 		setServerUris();
-		// mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
+//		mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
 	}
 
 	private boolean isNetworkAvailable()
@@ -396,7 +423,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 		if (!TextUtils.isEmpty(brokerHost))
 		{
 			brokerHostName = brokerHost;
-			brokerPortNumber = settings.getInt(HikeMessengerApp.BROKER_PORT, 8080);
+			brokerPortNumber = settings.getInt(HikeMessengerApp.BROKER_PORT, 1883);
 			return;
 		}
 
@@ -939,7 +966,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 						String messageBody = new String(bytes, "UTF-8");
 						Logger.i(TAG, "messageArrived called " + messageBody);
 						JSONObject jsonObj = new JSONObject(messageBody);
-						mqttMessageManager.saveMqttMessage(jsonObj);
+						mqttMessageManager.saveMqttMessage(jsonObj, accountNumber);
 					}
 					catch (JSONException e)
 					{
@@ -1390,7 +1417,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				@Override
 				public void run()
 				{
-					testUj();
+					testMsg();
 				}
 			});
 			t.setName("Test Thread");
@@ -1443,7 +1470,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 				data.put("msgs", bulkMsgArray);
 				bulkPacket.put(HikeConstants.DATA, data);
 				bulkPacket.put(HikeConstants.TIMESTAMP, System.currentTimeMillis());
-				mqttMessageManager.saveMqttMessage(bulkPacket);
+				mqttMessageManager.saveMqttMessage(bulkPacket, 0); // change zero as per requirement
 
 			}
 			catch (JSONException e)
@@ -1454,11 +1481,44 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 
 		}
 
+		private void testVoIP()
+		{
+			String msMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+			String msisdn = "+919582974797";
+			String data = "{ \"f\": "+msisdn+",\"t\": \"vcall\",\"d\":{\"ts\": "+System.currentTimeMillis()+"}}";
+			Message msg = Message.obtain();
+			msg.what = 12341;
+			Bundle bundle = new Bundle();
+			bundle.putString(HikeConstants.MESSAGE, data);
+			msg.setData(bundle);
+			msg.replyTo = mMessenger;
+			try
+			{
+				mMessenger.send(msg);
+				Thread.sleep(20);
+			}
+			catch (RemoteException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch (InterruptedException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch (Exception e)
+			{
+
+			}
+			
+		}
+		
 		private void testMsg()
 		{
 			int count = 0;
 			String myMsisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
-			String msisdn = "+919582974797";
+			String msisdn = "+917769926357";
 
 			if (myMsisdn != null)
 			{
@@ -1467,7 +1527,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver
 					return;
 				}
 			}
-			for (int i = 0; i < 50; i++)
+			for (int i = 0; i < 5; i++)
 			{
 				count++;
 				Random rand = new Random();

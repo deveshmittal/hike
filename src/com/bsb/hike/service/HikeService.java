@@ -3,6 +3,7 @@ package com.bsb.hike.service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +50,7 @@ import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -147,17 +149,29 @@ public class HikeService extends Service
 
 	private PostSignupProfilePic postSignupProfilePic;
 
-	private HikeMqttManagerNew mMqttManager;
+	private ArrayList<HikeMqttManagerNew> mMqttManager;
 
 	private SendRai sendRai;
 
 	private ContactListChangeIntentReceiver contactsReceived;
 
 	private Handler mContactsChangedHandler;
+	
+	private static Handler voipHandler;
 
 	private ContactsChanged mContactsChanged;
 
 	private Looper mContactHandlerLooper;
+
+	private StickerManager sm;
+	
+	private static Context context;
+	
+	public static boolean appForegrounded = false;
+	
+	public static boolean voipServiceRunning = false;
+	
+	public static int numOfAcc;
 
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
@@ -169,6 +183,8 @@ public class HikeService extends Service
 	public void onCreate()
 	{
 		super.onCreate();
+		
+		mMqttManager=new ArrayList<HikeMqttManagerNew>();
 
 		Logger.d("TestUpdate", "Service started");
 
@@ -189,8 +205,6 @@ public class HikeService extends Service
 
 		// reset status variable to initial state
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
-		mMqttManager = new HikeMqttManagerNew(getApplicationContext());
-		mMqttManager.init();
 
 		/*
 		 * notify android that our service represents a user visible action, so it should not be killable. In order to do so, we need to show a notification so the user understands
@@ -210,6 +224,7 @@ public class HikeService extends Service
 		mContactHandlerLooper = contactHandlerThread.getLooper();
 		mContactsChangedHandler = new Handler(mContactHandlerLooper);
 		mContactsChanged = new ContactsChanged(this);
+		voipHandler = new Handler();
 		
 		//scheduleNextAccountBackup();
 
@@ -278,7 +293,20 @@ public class HikeService extends Service
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{
 		Logger.d("HikeService", "Start MQTT Thread.");
-		mMqttManager.connectOnMqttThread();
+		
+		numOfAcc= getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,Context.MODE_PRIVATE).getInt(HikeMessengerApp.TOTAL_ACCOUNTS,1);
+		
+		for(int i=0;i<numOfAcc;i++){
+			mMqttManager.add(new HikeMqttManagerNew(getApplicationContext(),i));
+			mMqttManager.get(i).init();
+		}
+		
+		for(int i=0;i<numOfAcc;i++)
+			mMqttManager.get(i).connectOnMqttThread();
+		
+		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
+		app.connectToService();
+		
 		Logger.d("HikeService", "Intent is " + intent);
 		if (intent != null && intent.hasExtra(HikeConstants.Extras.SMS_MESSAGE))
 		{
@@ -288,7 +316,7 @@ public class HikeService extends Service
 				JSONObject msg = new JSONObject(s);
 				Logger.d("HikeService", "Intent contained SMS message " + msg.getString(HikeConstants.TYPE));
 				MqttMessagesManager mgr = MqttMessagesManager.getInstance(this);
-				mgr.saveMqttMessage(msg);
+				mgr.saveMqttMessage(msg,0);
 			}
 			catch (JSONException e)
 			{
@@ -307,7 +335,8 @@ public class HikeService extends Service
 		super.onDestroy();
 		Logger.i("HikeService", "onDestroy.  Shutting down service");
 
-		mMqttManager.destroyMqtt();
+		for(int i=0;i<numOfAcc;i++)
+			mMqttManager.get(i).destroyMqtt();
 		this.mMqttManager = null;
 		// inform the app that the app has successfully disconnected
 		if (contactsReceived != null)
@@ -388,7 +417,7 @@ public class HikeService extends Service
 	@Override
 	public IBinder onBind(Intent intent)
 	{
-		return mMqttManager.getMessenger().getBinder();
+		return mMqttManager.get(0).getMessenger().getBinder();
 	}
 
 	/************************************************************************/
@@ -897,6 +926,16 @@ public class HikeService extends Service
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
 			Utils.executeHttpTask(hikeHTTPTask, profilePicRequest);
 		}
+	}
+	
+	public static Context getContext()
+	{
+		return context;
+	}
+
+	public static void runOnUiThread(Runnable runnable) {
+		voipHandler.post(runnable);
+		
 	}
 
 }

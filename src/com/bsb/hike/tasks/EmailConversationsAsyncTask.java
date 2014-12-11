@@ -24,10 +24,10 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.Utils;
 
 public class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]>

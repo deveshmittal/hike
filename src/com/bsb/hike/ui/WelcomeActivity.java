@@ -17,9 +17,10 @@ import android.widget.Toast;
 
 import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.WelcomeTutorial;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeConstants.WelcomeTutorial;
+import com.bsb.hike.tasks.AddAccountTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.AccountUtils;
@@ -43,10 +44,17 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	SignupTask mTask; 
 	
+	AddAccountTask accTask;
+	
+	boolean addAcc;
+	
 	@Override
 	public void onCreate(Bundle savedState)
 	{
 		super.onCreate(savedState);
+		
+		addAcc= this.getIntent().getBooleanExtra("AdditionalAcc", false);
+		
 		setContentView(R.layout.welcomescreen);
 
 		Utils.setupServerURL(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.PRODUCTION, true),
@@ -142,7 +150,10 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 			tcText.setEnabled(false);
 			loadingLayout.setVisibility(View.VISIBLE);
 			mAcceptButton.setVisibility(View.GONE);
-			mTask = SignupTask.startTask(this);
+			if(addAcc)
+				accTask=AddAccountTask.startTask(this);
+			else
+				mTask = SignupTask.startTask(this);
 		}
 	}
 
@@ -168,7 +179,11 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 		else if (value.state == SignupTask.State.MSISDN)
 		{
-			Intent intent = new Intent(this, SignupActivity.class);
+			Intent intent;
+			if(addAcc)
+				intent=new Intent(this, AddAccountActivity.class);
+			else
+				intent=new Intent(this, SignupActivity.class);
 			if (TextUtils.isEmpty(value.value))
 			{
 				intent.putExtra(HikeConstants.Extras.MSISDN, false);
@@ -188,8 +203,11 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 	public void onBackPressed()
 	{
 		if (mTask != null)
-		{
-			mTask.cancelTask();
+		{	
+			if(addAcc)
+				accTask.cancelTask();
+			else
+				mTask.cancelTask();
 		}
 		super.onBackPressed();
 	}

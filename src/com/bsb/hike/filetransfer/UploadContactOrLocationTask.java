@@ -29,12 +29,12 @@ import android.util.Base64;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.CustomByteArrayEntity;
 import com.bsb.hike.models.ConvMessage;

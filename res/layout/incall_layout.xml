@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_black_incall" >
+
+    <ImageButton
+        android:id="@+id/SpeakerButton1"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="55dp"
+        android:layout_marginLeft="35dp"
+        android:background="@drawable/speaker_on"
+  		android:layout_width="20dp"
+   		android:layout_height="25dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp" />
+
+    <ImageButton
+        android:id="@+id/muteButton1"
+        android:layout_width="18dp"
+        android:layout_height="25dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/SpeakerButton1"
+        android:layout_marginRight="35dp"
+        android:background="@drawable/voip_mute_mic"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp" />
+
+    <ImageView
+        android:id="@+id/speakerSound"
+        android:layout_width="10dp"
+        android:layout_height="25dp"
+        android:layout_alignBottom="@+id/SpeakerButton1"
+        android:layout_marginLeft="60dp"
+        android:background="@drawable/speaker_sound" />
+
+    <ImageView
+        android:id="@+id/micSlash"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="51dp"
+        android:layout_marginRight="29dp"
+        android:src="@drawable/voip_mute_on" />
+
+    <ImageButton
+        android:id="@+id/endCallButton1"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/cut_call" />
+    
+	<com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/timerView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:text="CONNECTING"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/white" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/PhoneNumberView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/timerView1"
+        android:text="Name goes here"
+        android:layout_marginTop="17dp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/white" />
+
+    <ImageView
+        android:id="@+id/inCallContactPicture1"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_above="@+id/PhoneNumberView1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="27dp"
+        android:src="@drawable/a"
+        android:background="@color/white"
+        android:padding="1dp" />
+
+</RelativeLayout>

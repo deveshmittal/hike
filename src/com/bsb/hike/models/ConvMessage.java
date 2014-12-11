@@ -146,7 +146,7 @@ public class ConvMessage
 		PARTICIPANT_LEFT, // The participant has left
 		PARTICIPANT_JOINED, // The participant has joined
 		GROUP_END, // Group chat has ended
-		USER_OPT_IN, DND_USER, USER_JOIN, CHANGED_GROUP_NAME, CHANGED_GROUP_IMAGE, BLOCK_INTERNATIONAL_SMS, INTRO_MESSAGE, STATUS_MESSAGE, CHAT_BACKGROUND;
+		USER_OPT_IN, DND_USER, USER_JOIN, CHANGED_GROUP_NAME, CHANGED_GROUP_IMAGE, BLOCK_INTERNATIONAL_SMS, INTRO_MESSAGE, STATUS_MESSAGE, CHAT_BACKGROUND, VOIP_ENDED;
 
 		public static ParticipantInfoState fromJSON(JSONObject obj)
 		{
@@ -198,6 +198,10 @@ public class ConvMessage
 			else if (HikeConstants.MqttMessageTypes.CHAT_BACKGROUD.equals(type))
 			{
 				return CHAT_BACKGROUND;
+			} 
+			else if ("voipEnded".equals(type))
+			{
+				return ParticipantInfoState.VOIP_ENDED;
 			}
 			return NO_INFO;
 		}
@@ -450,6 +454,9 @@ public class ConvMessage
 				this.mMessage = context.getString(R.string.chat_bg_changed, nameString);
 				;
 			}
+			break;
+		case VOIP_ENDED:
+			this.mMessage = String.format(context.getString(R.string.call_received), obj.getString("callDuration"));
 			break;
 		}
 		setState(isSelfGenerated ? State.RECEIVED_READ : State.RECEIVED_UNREAD);

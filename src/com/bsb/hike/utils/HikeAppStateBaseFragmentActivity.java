@@ -8,10 +8,10 @@ import android.support.v4.app.FragmentTransaction;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeMessengerApp.CurrentState;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.ui.fragments.ImageViewerFragment;
 
 public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity implements Listener

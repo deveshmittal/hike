@@ -27,6 +27,7 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 
 	public HikeServiceConnection(HikeMessengerApp app, Messenger messenger)
 	{
+		Logger.d("HikeServiceConnection", "connection established again");
 		this.mApp = app;
 		this.mMessenger = messenger;
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH, this);
@@ -102,6 +103,8 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
+		if(object!=null)
+			Logger.d("Hikemqttmanagernew", "revieved message : " + object.toString());
 		if (mService == null)
 		{
 			Logger.e("HikeServiceConnection", "Unable to publish message ");
@@ -130,7 +133,7 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 			/*
 			 * if this is a message, then grab the messageId out of the json object so we can get confirmation of success/failure
 			 */
-			if (HikeConstants.MqttMessageTypes.MESSAGE.equals(o.optString(HikeConstants.TYPE)) || (HikeConstants.MqttMessageTypes.INVITE.equals(o.optString(HikeConstants.TYPE))))
+			if ((HikeConstants.MqttMessageTypes.MESSAGE.equals(o.optString(HikeConstants.TYPE)) || (HikeConstants.MqttMessageTypes.INVITE.equals(o.optString(HikeConstants.TYPE)))) /*&& (!( (HikeConstants.MqttMessageTypes.VOIP_HANDSHAKE.equals(o.optString(HikeConstants.SUB_TYPE))) || (HikeConstants.MqttMessageTypes.VOIP_CALL.equals(o.optString(HikeConstants.SUB_TYPE)))))*/)
 			{
 				JSONObject json = o.optJSONObject(HikeConstants.DATA);
 				long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));

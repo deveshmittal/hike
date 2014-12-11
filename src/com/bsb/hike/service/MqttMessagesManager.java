@@ -17,22 +17,27 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.VOIP.WebRtcClient;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
@@ -40,21 +45,21 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
-import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HikePreferences;
@@ -519,6 +524,12 @@ public class MqttMessagesManager
 		}
 	}
 
+	
+	private void saveVOIPHandshake(JSONObject jsonObj)
+	{
+		this.pubSub.publish(HikePubSub.VOIP_HANDSHAKE, jsonObj);
+	}
+	
 	/**
 	 * This function pre-process on message of type "m" like make convMessage object , set metadata and timestamp
 	 * 
@@ -1783,7 +1794,7 @@ public class MqttMessagesManager
 	 * @throws JSONException
 	 */
 
-	public void saveBulkMessage(JSONObject bulkObj) throws JSONException
+	public void saveBulkMessage(JSONObject bulkObj, int accNum) throws JSONException
 	{
 		boolean shouldFallBackToNormal = false;
 		JSONObject bulkMessages = bulkObj.optJSONObject(HikeConstants.DATA);
@@ -1820,7 +1831,7 @@ public class MqttMessagesManager
 						JSONObject jsonObj = msgArray.optJSONObject(i++);
 						if (jsonObj != null)
 						{
-							saveMqttMessage(jsonObj);
+							saveMqttMessage(jsonObj, accNum);
 						}
 					}
 					Logger.d("BulkProcess", "going on");
@@ -1858,7 +1869,7 @@ public class MqttMessagesManager
 						JSONObject jsonObj = msgArray.optJSONObject(i++);
 						if (jsonObj != null)
 						{
-							saveMqttMessage(jsonObj);
+							saveMqttMessage(jsonObj, accNum);
 						}
 					}
 				}
@@ -1962,10 +1973,18 @@ public class MqttMessagesManager
 	{
 		messageList.add(convMessage);
 	}
+	
+	private void updateChatThreadAccountMap(String msisdn, int accNum){
+		if(!HikeMessengerApp.chatThreadAccountMap.containsKey(msisdn) || HikeMessengerApp.chatThreadAccountMap.get(msisdn)!= accNum){
+			HikeMessengerApp.chatThreadAccountMap.put(msisdn, accNum);
+			HikeConversationsDatabase.getInstance().updateAccountForMsisdn(msisdn, accNum);
+		}
+	}
 
-	public void saveMqttMessage(JSONObject jsonObj) throws JSONException
+	public void saveMqttMessage(JSONObject jsonObj, int accNum) throws JSONException
 	{
 		String type = jsonObj.optString(HikeConstants.TYPE);
+		Log.d("VOIP", type+" received");
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{
 			saveIcon(jsonObj);
@@ -2019,7 +2038,29 @@ public class MqttMessagesManager
 		// from
 		// server
 		{
-			if (isBulkMessage)
+
+			if(jsonObj.has(HikeConstants.SUB_TYPE) ){
+				String subtype = jsonObj.getString(HikeConstants.SUB_TYPE);  
+				if(HikeConstants.MqttMessageTypes.VOIP_CALL.equals(subtype))
+				{
+					// DONE: Start VOIP APP
+					startVOIP(jsonObj);
+				}
+				else if(HikeConstants.MqttMessageTypes.VOIP_HANDSHAKE.equals(subtype))
+				{
+					//TODO: PASS MESSAGE TO VOIP APP
+					saveVOIPHandshake(jsonObj);
+				}
+				else if(isBulkMessage)	
+				{
+					saveMessageBulk(jsonObj);
+				}
+				else
+				{
+					saveMessage(jsonObj);
+				}
+			}
+			else if(isBulkMessage)
 			{
 				saveMessageBulk(jsonObj);
 			}
@@ -2027,6 +2068,11 @@ public class MqttMessagesManager
 			{
 				saveMessage(jsonObj);
 			}
+			String to=jsonObj.optString(HikeConstants.TO);
+			if(!to.equals("") && to.charAt(0)!='+')
+				updateChatThreadAccountMap(to, accNum);
+			else
+				updateChatThreadAccountMap(jsonObj.getString(HikeConstants.FROM), accNum);
 		}
 		else if (HikeConstants.MqttMessageTypes.DELIVERY_REPORT.equals(type)) // Message
 		// delivered
@@ -2162,12 +2208,72 @@ public class MqttMessagesManager
 		}
 		else if (HikeConstants.MqttMessageTypes.BULK_MESSAGE.equals(type))
 		{
-			saveBulkMessage(jsonObj);
+			saveBulkMessage(jsonObj, accNum);
 		}
+		
 		else if (HikeConstants.MqttMessageTypes.TIP.equals(type))
 		{
 			saveTip(jsonObj);
 		}
+	}
+	
+	private void startVOIP( JSONObject jsonObj )
+	{
+		boolean onWifi = true;
+		ConnectivityManager connec = (ConnectivityManager) HikeService.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo wifi = connec.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		onWifi = wifi.isConnected();
+		if (onWifi){
+			if(!HikeService.voipServiceRunning){
+				try {
+					String callerID = jsonObj.getString(HikeConstants.FROM);
+		//			Context context = .getApplicationContext();
+					Intent intent;
+//					if(HikeService.appForegrounded)			
+//						intent = new Intent(context,com.bsb.hike.ui.ReceiveCallActivity.class);
+//					else
+						intent = new Intent(context,com.bsb.hike.ui.VoIPActivityNew.class);
+					final Intent serviceIntent = new Intent(HikeService.getContext(),com.bsb.hike.service.VoIPServiceNew.class);
+		//			serviceIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					intent.putExtra("callerID", callerID);
+					final Intent i = intent;
+					HikeService.runOnUiThread(new Runnable(){
+						public void run()
+						{
+							HikeService.getContext().startService(serviceIntent);
+						}
+					});
+					HikeService.runOnUiThread(new Runnable(){
+						Intent voipIntent = i;
+						public void run()
+						{
+							HikeService.getContext().startActivity(voipIntent);
+						}
+					});
+					
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				//TODO: Handle busy here
+			}
+		} else {
+			/**TODO: Handle not on wifi here
+			 * Send message to caller that receiver is not on wifi
+			 * Display notif/hm you missed a call
+			 */
+			try {
+
+				WebRtcClient.sendMessage(jsonObj.getString(HikeConstants.FROM), "notOnWifi", null);
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+			
 	}
 
 	private void uploadGroupProfileImage(final String groupId, final boolean retryOnce)
@@ -2353,8 +2459,10 @@ public class MqttMessagesManager
 			return null;
 		}
 		
-		convDb.addConversationMessages(convMessage);
-		
+		Log.d("VOIPSTATUSMSG", convMessage.toString());
+
+		convDb.addConversationMessages(convMessage);		
+
 		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		
 		statusMessagePostProcess(convMessage, jsonObj);
@@ -2615,5 +2723,22 @@ public class MqttMessagesManager
 	{
 		String id = jsonObject.optString(HikeConstants.MESSAGE_ID);
 		return TextUtils.isEmpty(id) || HikeSharedPreferenceUtil.getInstance(context).getData(key, "").equals(id);
+	}
+	
+	public void setVoipSystemMessage(JSONObject jsonObj, String msisdn) throws JSONException{
+		
+		ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
+
+		if (convMessage == null)
+		{
+			return ;
+		}
+		Log.d("VOIPSTATUSMSG", convMessage.toString());
+		
+		convDb.addConversationMessages(convMessage);
+		
+		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+		
+		statusMessagePostProcess(convMessage, jsonObj);
 	}
 }

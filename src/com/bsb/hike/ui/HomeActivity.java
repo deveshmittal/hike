@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
@@ -63,9 +64,9 @@ import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -75,9 +76,13 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.models.OverFlowMenuItem;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.tasks.AddAccountTask;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
-import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.tasks.SendLogsTask;
+import com.bsb.hike.tasks.SignupTask;
+import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.AccountUtils;
@@ -88,8 +93,11 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.HikeTip.TipType;
 
 public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Listener
 {
@@ -1356,6 +1364,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		optionsList.add(new OverFlowMenuItem(getString(R.string.settings), 5));
 
 		optionsList.add(new OverFlowMenuItem(getString(R.string.status), 8));
+		
+		optionsList.add(new OverFlowMenuItem("Add Account", 10));
 
 		addEmailLogItem(optionsList);
 
@@ -1423,6 +1433,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				case 9:
 					SendLogsTask logsTask = new SendLogsTask(HomeActivity.this);
 					Utils.executeAsyncTask(logsTask);
+					break;
+				case 10:
+					Intent _intent = new Intent(HomeActivity.this, AddAccountActivityNew.class);
+					_intent.putExtra("AdditionalAcc", true);
+					HomeActivity.this.startActivity(_intent);
+					
+//					Intent _intent = new Intent(HomeActivity.this, WebViewActivity.class);
+//					_intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, HikeConstants.T_AND_C_URL);
+//					_intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.terms_privacy));
+//					startActivity(_intent);
 					break;
 				}
 

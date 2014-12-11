@@ -24,6 +24,8 @@ public class DBConstants
 	public static final String GROUP_MEMBERS_TABLE = "groupMembers";
 
 	public static final String GROUP_INFO_TABLE = "groupInfo";
+	
+	public static final String CONVERSATION_ACCOUNT_TABLE = "lastMsisdnUsed";
 
 	/* Table Constants */
 
@@ -215,4 +217,6 @@ public class DBConstants
 	public static final String CATEGORY_SIZE = "categorySize";
 
 	public static final String STICKER_SHOP_TABLE = "stickerShopTable";
+
+	public static final String ACC_ID = "accountLastMessaged";
 }

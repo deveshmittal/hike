@@ -75,19 +75,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileSavedState;
-import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
+import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.models.ContactInfoData;
-import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -96,14 +92,18 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.HikeSharedFile;
 import com.bsb.hike.models.MessageMetadata;
-import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
 import com.bsb.hike.models.StatusMessage;
-import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
 import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
+import com.bsb.hike.models.ContactInfoData.DataType;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
@@ -111,6 +111,7 @@ import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
 import com.bsb.hike.ui.utils.HashSpanWatcher;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeTip;
@@ -118,6 +119,7 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.HoloCircularProgress;
 
@@ -2137,6 +2139,31 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				String message = context.getString(R.string.chat_bg_changed, name);
 
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, name), isDefaultTheme ? R.drawable.ic_change_theme
+						: R.drawable.ic_change_theme_custom);
+
+				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
+			}
+			
+			else if (infoState == ParticipantInfoState.VOIP_ENDED)
+			{
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
+
+				String msisdn = metadata.getMsisdn();
+				String userMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
+
+				String name;
+				if (isGroupChat)
+				{
+					name = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : ((GroupConversation) conversation).getGroupParticipantFirstName(msisdn);
+				}
+				else
+				{
+					name = userMsisdn.equals(msisdn) ? context.getString(R.string.you) : Utils.getFirstName(conversation.getLabel());
+				}
+
+				String message = context.getString(R.string.chat_bg_changed, name);
+
+				setTextAndIconForSystemMessages(mainMessage, "VoIP Call", isDefaultTheme ? R.drawable.ic_change_theme
 						: R.drawable.ic_change_theme_custom);
 
 				((ViewGroup) participantInfoHolder.container).addView(mainMessage);

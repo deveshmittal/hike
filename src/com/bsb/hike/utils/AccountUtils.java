@@ -66,8 +66,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.http.CustomSSLSocketFactory;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
-import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.http.HttpPatch;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.Birthday;
 import com.bsb.hike.models.ContactInfo;
 
@@ -961,5 +961,162 @@ public class AccountUtils
 	public static void setNoTransform(URLConnection urlConnection)
 	{
 		urlConnection.setRequestProperty("Cache-Control", "no-transform");
+	}
+	
+	public static AccountInfo addAccount(Context context, String pin, String unAuthMSISDN)
+	{
+		HttpPost httppost = new HttpPost(base + "/account");
+		AbstractHttpEntity entity = null;
+		JSONObject data = new JSONObject();
+		try
+		{
+			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+
+			String osVersion = Build.VERSION.RELEASE;
+			String deviceId = "";
+
+			try
+			{
+				deviceId = Utils.getHashedDeviceId(Secure.getString(context.getContentResolver(), Secure.ANDROID_ID));
+				Logger.d("AccountUtils", "Android ID is " + Secure.ANDROID_ID);
+			}
+			catch (NoSuchAlgorithmException e1)
+			{
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			String os = HikeConstants.ANDROID;
+			String carrier = manager.getNetworkOperatorName();
+			String device = Build.MANUFACTURER + " " + Build.MODEL;
+			String appVersion = "";
+			try
+			{
+				appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+			}
+			catch (NameNotFoundException e)
+			{
+				Logger.e("AccountUtils", "Unable to get app version");
+			}
+
+			String deviceKey = manager.getDeviceId();
+
+			data.put("set_cookie", "0");
+			data.put("devicetype", os);
+			data.put(HikeConstants.LogEvent.OS, os);
+			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
+			data.put("deviceid", deviceId);
+			data.put("devicetoken", deviceId);
+			data.put("deviceversion", device);
+			data.put(HikeConstants.DEVICE_KEY, deviceKey);
+			data.put("appversion", appVersion);
+			data.put("invite_token", context.getSharedPreferences(HikeMessengerApp.REFERRAL, Context.MODE_PRIVATE).getString("utm_source", ""));
+
+			if (pin != null)
+			{
+				data.put("msisdn", unAuthMSISDN);
+				data.put("pin", pin);
+			}
+			Utils.addCommonDeviceDetails(data, context);
+
+			Logger.d("AccountUtils", "Creating Account " + data.toString());
+			entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
+			entity.setContentType("application/json");
+			httppost.setEntity(entity);
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			Logger.wtf("AccountUtils", "creating a string entity from an entry string threw!", e);
+		}
+		catch (JSONException e)
+		{
+			Logger.wtf("AccountUtils", "creating a string entity from an entry string threw!", e);
+		}
+		httppost.setEntity(entity);
+
+		JSONObject obj = executeRequest(httppost);
+		if ((obj == null))
+		{
+			Logger.w("HTTP", "Unable to create account");
+			// raise an exception?
+			return null;
+		}
+
+		Logger.d("AccountUtils", "AccountCreation " + obj.toString());
+		if ("fail".equals(obj.optString("stat")))
+		{
+			if (pin != null)
+				return new AccountUtils.AccountInfo(null, null, null, null, -1, 0, 0, null);
+			/*
+			 * represents normal account creation , when user is on wifi and account creation failed
+			 */
+			return new AccountUtils.AccountInfo(null, null, null, null, -1, 0, 0, null);
+		}
+		String token = obj.optString("token");
+		String msisdn = obj.optString("msisdn");
+		String uid = obj.optString("uid");
+		String backupToken = obj.optString("backup_token");
+		int smsCredits = obj.optInt(HikeConstants.MqttMessageTypes.SMS_CREDITS);
+		int all_invitee = obj.optInt(HikeConstants.ALL_INVITEE_2);
+		int all_invitee_joined = obj.optInt(HikeConstants.ALL_INVITEE_JOINED_2);
+		String country_code = obj.optString("country_code");
+
+		Logger.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
+		return new AccountUtils.AccountInfo(token, msisdn, uid, backupToken, smsCredits, all_invitee, all_invitee_joined, country_code);
+	}
+	
+	public static AccountInfo addExtraAccount(Context context, String pin, String msisdn1){
+		HttpPost httppost = new HttpPost(base + "/account");
+		AbstractHttpEntity entity = null;
+		JSONObject data = new JSONObject();
+		try {
+			data.put("msisdn", msisdn1);
+			data.put("pin", pin);
+			entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
+			entity.setContentType("application/json");
+			httppost.setEntity(entity);
+			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		httppost.setEntity(entity);
+
+		JSONObject obj = executeRequest(httppost);
+		if ((obj == null))
+		{
+			Logger.w("HTTP", "Unable to create account");
+			// raise an exception?
+			return null;
+		}
+
+		Logger.d("AccountUtils", "AccountCreation " + obj.toString());
+		if ("fail".equals(obj.optString("stat")))
+		{
+			if (pin != null)
+				return new AccountUtils.AccountInfo(null, null, null, null, -1, 0, 0, null);
+			/*
+			 * represents normal account creation , when user is on wifi and account creation failed
+			 */
+			return new AccountUtils.AccountInfo(null, null, null, null, -1, 0, 0, null);
+		}
+		
+		String token = obj.optString("token");
+		String msisdn = obj.optString("msisdn");
+		String uid = obj.optString("uid");
+		String backupToken = obj.optString("backup_token");
+		int smsCredits = obj.optInt(HikeConstants.MqttMessageTypes.SMS_CREDITS);
+		int all_invitee = obj.optInt(HikeConstants.ALL_INVITEE_2);
+		int all_invitee_joined = obj.optInt(HikeConstants.ALL_INVITEE_JOINED_2);
+		String country_code = obj.optString("country_code");
+		
+		
+
+		Logger.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
+		return new AccountUtils.AccountInfo(token, msisdn, uid, backupToken, smsCredits, all_invitee, all_invitee_joined, country_code);
+		
+		
 	}
 }

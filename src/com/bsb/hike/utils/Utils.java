@@ -118,6 +118,7 @@ import android.text.TextWatcher;
 import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -141,35 +142,36 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.FTResult;
-import com.bsb.hike.HikeConstants.ImageQuality;
-import com.bsb.hike.HikeConstants.SMSSyncState;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.HikeConstants.FTResult;
+import com.bsb.hike.HikeConstants.ImageQuality;
+import com.bsb.hike.HikeConstants.SMSSyncState;
+import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ContactInfoData;
-import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.ContactInfoData.DataType;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.HikeService;
+import com.bsb.hike.tasks.AddAccountTask;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
@@ -545,6 +547,19 @@ public class Utils
 		editor.putInt(HikeMessengerApp.INVITED_JOINED, accountInfo.all_invitee_joined);
 		editor.putString(HikeMessengerApp.COUNTRY_CODE, accountInfo.country_code);
 		editor.commit();
+	}
+	
+	public static void addAccountCredentials(Context context,AccountInfo accountInfo, SharedPreferences settings, SharedPreferences.Editor editor){
+		
+		int acc_no = settings.getInt(HikeMessengerApp.TOTAL_ACCOUNTS, 1);
+				
+		editor.putString(HikeMessengerApp.MSISDN_SETTING+String.valueOf(acc_no), accountInfo.msisdn);
+		editor.putString(HikeMessengerApp.TOKEN_SETTING+String.valueOf(acc_no), accountInfo.token);
+		editor.putString(HikeMessengerApp.UID_SETTING+String.valueOf(acc_no), accountInfo.uid);
+		editor.putInt(HikeMessengerApp.TOTAL_ACCOUNTS, ++acc_no);
+		editor.commit();
+		Intent intent=new Intent(context,com.bsb.hike.service.HikeService.class);
+		context.startService(intent); // start service to re-initialize data
 	}
 
 	/*
@@ -2624,11 +2639,13 @@ public class Utils
 				object.put(HikeConstants.DATA, data);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_FOREGROUNDED, null);
+				HikeService.appForegrounded = true;
 			}
 			else if (!dueToConnect)
 			{
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.APP_BACKGROUNDED, null);
+				HikeService.appForegrounded = false;
 			}
 			else
 			{
@@ -3269,10 +3286,29 @@ public class Utils
 		Toast.makeText(activity, R.string.shortcut_created, Toast.LENGTH_SHORT).show();
 	}
 
+
 	public static void onCallClicked(Activity activity, final String mContactNumber)
 	{
 		final Activity mActivity = activity;
 		final SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		
+		final JSONObject json = new JSONObject();
+		final JSONObject data = new JSONObject();
+		
+		try {
+			json.put(HikeConstants.TO, mContactNumber);
+			Random random = new Random();
+			int index = random.nextInt(10000);
+			data.put(HikeConstants.MESSAGE_ID, ++index);
+			data.put("hm", "You just missed a call from me");
+			json.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE);
+			json.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.VOIP_CALL);
+			json.put(HikeConstants.DATA, data);
+			Log.d("VOIP CALL JSON", json.toString());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		if (!settings.getBoolean(HikeConstants.NO_CALL_ALERT_CHECKED, false))
 		{
@@ -3307,13 +3343,18 @@ public class Utils
 
 			btnOk.setOnClickListener(new OnClickListener()
 			{
-
+//			TODO: Aaryaman: Launch rtcActivity instead
 				@Override
 				public void onClick(View v)
 				{
 					Utils.logEvent(mActivity, HikeConstants.LogEvent.MENU_CALL);
-					Intent callIntent = new Intent(Intent.ACTION_CALL);
-					callIntent.setData(Uri.parse("tel:" + mContactNumber));
+					Intent callIntent = new Intent(mActivity.getApplicationContext(),com.bsb.hike.ui.VoIPActivityNew.class);
+					callIntent.putExtra("dialedID", mContactNumber);
+//					callIntent.setData(Uri.parse("tel:" + mContactNumber));
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, json);
+					Intent serviceIntent = new Intent(mActivity.getApplicationContext(),com.bsb.hike.service.VoIPServiceNew.class);
+					System.gc();
+					mActivity.startService(serviceIntent);
 					mActivity.startActivity(callIntent);
 					dialog.dismiss();
 				}
@@ -3333,10 +3374,16 @@ public class Utils
 		}
 		else
 		{
-			Utils.logEvent(activity, HikeConstants.LogEvent.MENU_CALL);
-			Intent callIntent = new Intent(Intent.ACTION_CALL);
-			callIntent.setData(Uri.parse("tel:" + mContactNumber));
-			activity.startActivity(callIntent);
+			Utils.logEvent(mActivity, HikeConstants.LogEvent.MENU_CALL);
+			Intent callIntent = new Intent(mActivity.getApplicationContext(),com.bsb.hike.ui.VoIPActivityNew.class);
+			callIntent.putExtra("dialedID", mContactNumber);
+//			callIntent.setData(Uri.parse("tel:" + mContactNumber));
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, json);
+			Intent serviceIntent = new Intent(mActivity.getApplicationContext(),com.bsb.hike.service.VoIPServiceNew.class);
+			System.gc();
+			mActivity.startService(serviceIntent);
+			mActivity.startActivity(callIntent);
+//			dialog.dismiss();
 		}
 	}
 
@@ -4906,6 +4953,18 @@ public class Utils
 		}
 		requestAccountInfo(upgrade, sendBot);
 		sendLocaleToServer(context);
+	}
+
+	public static void executeAddAccountTask(AddAccountTask addAccountTask) {
+		if (isHoneycombOrHigher())
+		{
+			addAccountTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
+		else
+		{
+			addAccountTask.execute();
+		}
+		
 	}
 
 }

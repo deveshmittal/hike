@@ -1,10 +1,15 @@
 package com.bsb.hike.ui;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -15,13 +20,13 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.tasks.DeleteAccountTask.DeleteAccountListener;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.HikeMessengerApp;;
 
 public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements DeleteAccountListener
 {
@@ -126,6 +131,37 @@ public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements D
 		countryName.setText(intent.getStringExtra(CountrySelectActivity.RESULT_COUNTRY_NAME));
 		countryCode.setText(intent.getStringExtra(CountrySelectActivity.RESULT_COUNTRY_CODE));
 	}
+	
+	private void deleteAcc(final int index){
+		phoneNum.setBackgroundResource(R.drawable.bg_country_picker_selector);
+		final CustomAlertDialog firstConfirmDialog = new CustomAlertDialog(this);
+		firstConfirmDialog.setHeader(R.string.are_you_sure);
+		firstConfirmDialog.setBody(R.string.delete_confirm_msg_1);				
+		View.OnClickListener firstDialogContinueClickListener = new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				firstConfirmDialog.dismiss();
+				task = new DeleteAccountTask(DeleteAccount.this, true, getApplicationContext(),index);
+
+				Utils.executeBoolResultAsyncTask(task);
+				showProgressDialog();
+			}
+		};
+
+		View.OnClickListener firstDialogOnCancelListener = new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				firstConfirmDialog.dismiss();
+			}
+		};
+		firstConfirmDialog.setOkButton(R.string.confirm, firstDialogContinueClickListener);
+		firstConfirmDialog.setCancelButton(R.string.cancel, firstDialogOnCancelListener);
+		firstConfirmDialog.show();
+	}
 
 	public void deleteAccountClicked(View v)
 	{
@@ -164,35 +200,26 @@ public class DeleteAccount extends HikeAppStateBaseFragmentActivity implements D
 				correctMSISDNConfirmDialog.show();
 			}
 			else
-			{
-				phoneNum.setBackgroundResource(R.drawable.bg_country_picker_selector);
-				final CustomAlertDialog firstConfirmDialog = new CustomAlertDialog(this);
-				firstConfirmDialog.setHeader(R.string.are_you_sure);
-				firstConfirmDialog.setBody(R.string.delete_confirm_msg_1);				
-				View.OnClickListener firstDialogContinueClickListener = new View.OnClickListener()
-				{
-					@Override
-					public void onClick(View v)
-					{
-						firstConfirmDialog.dismiss();
-						task = new DeleteAccountTask(DeleteAccount.this, true, getApplicationContext());
-
-						Utils.executeBoolResultAsyncTask(task);
-						showProgressDialog();
+			{	
+				SharedPreferences accDet=this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);
+				int total=accDet.getInt(HikeMessengerApp.TOTAL_ACCOUNTS, 1);
+				if(total>1){
+					String[] accList=new String[total];
+					for(int i=0;i<total;i++){
+						accList[i]=accDet.getString(HikeMessengerApp.MSISDN_SETTING+(i==0?"":String.valueOf(i)), "");
 					}
-				};
-
-				View.OnClickListener firstDialogOnCancelListener = new View.OnClickListener()
-				{
-					@Override
-					public void onClick(View v)
-					{
-						firstConfirmDialog.dismiss();
-					}
-				};
-				firstConfirmDialog.setOkButton(R.string.confirm, firstDialogContinueClickListener);
-				firstConfirmDialog.setCancelButton(R.string.cancel, firstDialogOnCancelListener);
-				firstConfirmDialog.show();
+				    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				    builder.setTitle("")
+				           .setItems(accList, new DialogInterface.OnClickListener() {
+				               public void onClick(DialogInterface dialog, int which) {
+				            	   deleteAcc(which);
+				           }
+				    });
+				    builder.create().show();
+				}
+				else{
+					deleteAcc(0);
+				}
 			}
 		}
 	}

@@ -50,6 +50,7 @@ import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.service.UpgradeIntentService;
+import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
 import com.bsb.hike.ui.WelcomeActivity;
@@ -89,6 +90,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String BACKUP_TOKEN_SETTING = "backup_token";
 
 	public static final String UPDATE_SETTING = "update";
+	
+	public static final String TOTAL_ACCOUNTS = "totalAccounts";
 
 	public static final String ANALYTICS = "analytics";
 
@@ -447,6 +450,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static Map<String, Pair<Integer, Long>> lastSeenFriendsMap;
 
 	public static HashMap<String, String> hikeBotNamesMap;
+	
+	public static HashMap<String, Integer> chatThreadAccountMap; // which hike account is being used for each conversation
 
 	public static volatile boolean networkError;
 
@@ -493,6 +498,11 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		if (HikeMessengerApp.lastSeenFriendsMap == null)
 		{
 			HikeMessengerApp.lastSeenFriendsMap = new HashMap<String, Pair<Integer, Long>>();
+		}
+		
+		if (HikeMessengerApp.chatThreadAccountMap == null)
+		{
+			HikeMessengerApp.chatThreadAccountMap = new HashMap<String, Integer>();
 		}
 	}
 

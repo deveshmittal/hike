@@ -42,8 +42,8 @@ import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.db.DbException;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.FtueContactsData;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
