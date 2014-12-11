@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.location.Location;
@@ -164,10 +165,10 @@ public class UserLogInfo {
 
 	private static JSONObject getEncryptedJSON(Context ctx, JSONArray jsonLogArray, int flag) throws JSONException {
 		
-		HikeSharedPreferenceUtil sharedPref = HikeSharedPreferenceUtil.getInstance(ctx);
-		String key = sharedPref.getData(HikeMessengerApp.ACCOUNT_SETTINGS, null);	
+		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);	
+		String key = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		//for the case when AI packet will not send us the backup Token
-		String salt = sharedPref.getData(HikeMessengerApp.BACKUP_TOKEN_SETTING, null);
+		String salt = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, null);
 		// if salt or key is empty, we do not send anything
 		if(salt == null|| key == null)
 			return null;
