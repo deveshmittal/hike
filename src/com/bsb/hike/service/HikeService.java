@@ -46,6 +46,7 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.HikeSDKRequestHandler;
 import com.bsb.hike.service.HikeMqttManagerNew.IncomingHandler;
@@ -178,8 +179,6 @@ public class HikeService extends Service
 
 	private ContactsChanged mContactsChanged;
 
-	private Looper mHikeUtilLooper;
-
 	private StickerManager sm;
 
 	public static HikeSDKRequestHandler mHikeSDKRequestHandler;
@@ -199,7 +198,7 @@ public class HikeService extends Service
 
 		if (!isUserSignedUp())
 		{
-			initializeAndAssignUtilityThread();
+			assignUtilityThread();
 			return;
 		}
 
@@ -244,7 +243,7 @@ public class HikeService extends Service
 		 * Intent notificationIntent = new Intent(this, MessagesList.class); PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 		 * notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent); startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 		 */
-		initializeAndAssignUtilityThread();
+		assignUtilityThread();
 
 		/*
 		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of
@@ -328,24 +327,17 @@ public class HikeService extends Service
 		return true;
 	}
 
-	private void initializeAndAssignUtilityThread()
+	private void assignUtilityThread()
 	{
-		/**
-		 * Make hike utility thread
-		 */
-		HandlerThread hikeUtilHandlerThread = new HandlerThread("HIKE_UTIL");
-
-		hikeUtilHandlerThread.start();
-
 		/**
 		 * Extract utility looper
 		 */
-		mHikeUtilLooper = hikeUtilHandlerThread.getLooper();
+		Looper mHikeUtilLooper = HikeHandlerUtil.getInstance().getLooper();
 
 		/**
 		 * Make SDK request handler with utility looper
 		 */
-		mHikeSDKRequestHandler = new HikeSDKRequestHandler(HikeService.this.getApplicationContext(), hikeUtilHandlerThread.getLooper());
+		mHikeSDKRequestHandler = new HikeSDKRequestHandler(HikeService.this.getApplicationContext(), mHikeUtilLooper);
 
 		mSDKRequestMessenger = new Messenger(mHikeSDKRequestHandler);
 

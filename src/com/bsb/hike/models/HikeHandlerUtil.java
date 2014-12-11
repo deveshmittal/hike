@@ -2,6 +2,7 @@ package com.bsb.hike.models;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 
 import com.bsb.hike.utils.Utils;
 
@@ -43,6 +44,17 @@ public class HikeHandlerUtil
 
 		}
 
+	}
+
+	/**
+	 * Returns looper of hike utility thread. Use this to attach additional handlers to the utility thread
+	 * 
+	 * @return Utility thread looper
+	 */
+	public Looper getLooper()
+	{
+		startHandlerThread();
+		return mHandlerThread.getLooper();
 	}
 
 	/**
