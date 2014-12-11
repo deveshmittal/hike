@@ -109,6 +109,8 @@ public class AccountUtils
 	public static final String FILE_TRANSFER_DOWNLOAD_BASE = "/user/ft/";
 
 	public static String fileTransferBaseDownloadUrl = base + FILE_TRANSFER_DOWNLOAD_BASE;
+	
+	public static String fastFileUploadUrl = base + FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 
 	public static String partialfileTransferBaseUrl = base + "/user/pft";
 

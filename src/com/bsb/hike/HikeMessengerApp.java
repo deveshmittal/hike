@@ -674,6 +674,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 		sm = StickerManager.getInstance();
 		sm.init(getApplicationContext());
+		
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
 		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || 
@@ -849,7 +850,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		conMgr = ContactManager.getInstance();
 		conMgr.init(getApplicationContext());
 	}
-
+	
 	public static ContactManager getContactManager()
 	{
 		return conMgr;
