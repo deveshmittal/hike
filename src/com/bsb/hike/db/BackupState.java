@@ -17,12 +17,14 @@ public class BackupState implements Serializable
 	private int _dbVersion;
 
 	private long _backupTime;
-	
+
 	private String stealthPattern;
-	
+
 	private boolean stealthModeSetupDone;
-	
+
 	private boolean shownFirstUnmarkStealthToast;
+
+	private boolean showStealthInfoTip;
 
 	public BackupState(String db, int version)
 	{
@@ -40,22 +42,24 @@ public class BackupState implements Serializable
 	{
 		return _backupTime;
 	}
-	
+
 	public boolean backupPrefs(Context context)
 	{
 		HikeSharedPreferenceUtil prefUtil = HikeSharedPreferenceUtil.getInstance(context);
 		stealthPattern = prefUtil.getData(HikeMessengerApp.STEALTH_ENCRYPTED_PATTERN, "");
 		stealthModeSetupDone = prefUtil.getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false);
-		shownFirstUnmarkStealthToast = prefUtil.getData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, false);
+		shownFirstUnmarkStealthToast = prefUtil.getData(HikeMessengerApp.SHOWN_FIRST_UNMARK_STEALTH_TOAST, false);
+		showStealthInfoTip = prefUtil.getData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, false);
 		return true;
 	}
-	
+
 	public boolean restorePrefs(Context context)
 	{
 		HikeSharedPreferenceUtil prefUtil = HikeSharedPreferenceUtil.getInstance(context);
 		prefUtil.saveData(HikeMessengerApp.STEALTH_ENCRYPTED_PATTERN, stealthPattern);
 		prefUtil.saveData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, stealthModeSetupDone);
-		prefUtil.saveData(HikeMessengerApp.STEALTH_MODE_SETUP_DONE, shownFirstUnmarkStealthToast);
+		prefUtil.saveData(HikeMessengerApp.SHOWN_FIRST_UNMARK_STEALTH_TOAST, shownFirstUnmarkStealthToast);
+		prefUtil.saveData(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, showStealthInfoTip);
 		return true;
 	}
 
