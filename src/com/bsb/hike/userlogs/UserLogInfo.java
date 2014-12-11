@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.location.Location;
@@ -72,6 +71,14 @@ public class UserLogInfo {
 			this.longitude = longitude;
 			this.radius = radius;
 		}
+		
+		public JSONObject toJSON() throws JSONException{
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.putOpt(LATITUDE, this.latitude);
+			jsonObj.putOpt(LONGITUDE,this.longitude);
+			jsonObj.putOpt(RADIUS, this.radius);
+			return jsonObj;
+		}
 	}
 
 	public static class AppLogPojo {
@@ -84,6 +91,7 @@ public class UserLogInfo {
 			this.applicationName = applicationName;
 			this.installTime = installTime;
 		}
+		
 	}
 	
 	public static class CallLogPojo {
@@ -181,11 +189,7 @@ public class UserLogInfo {
 	private static JSONArray getJSONLocArray(List<LocLogPojo> locLogList) throws JSONException{
 		JSONArray locJsonArray = new JSONArray();
 		for(LocLogPojo locLog : locLogList){
-			JSONObject jsonObj = new JSONObject();
-			jsonObj.putOpt(LATITUDE, locLog.latitude);
-			jsonObj.putOpt(LONGITUDE, locLog.longitude);
-			jsonObj.putOpt(RADIUS, locLog.radius);
-			locJsonArray.put(jsonObj);
+			locJsonArray.put(locLog.toJSON());
 		}
 		Logger.d(TAG, locJsonArray.toString());
 		return locJsonArray;
