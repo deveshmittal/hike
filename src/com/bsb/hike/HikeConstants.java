@@ -1813,6 +1813,10 @@ public class HikeConstants
 
 		public static final String VOIP_SOCKET_INFO = "ve";
 
+		public static final String MESSAGE_VOIP_0 = "v0";
+
+		public static final String MESSAGE_VOIP_1 = "v1";
+
 	}
 	
 	public static final class VoIPConstants

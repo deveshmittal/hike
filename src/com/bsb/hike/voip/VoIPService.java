@@ -20,7 +20,10 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -45,7 +48,7 @@ import com.bsb.hike.voip.protobuf.VoIPSerializer;
 
 public class VoIPService extends Service {
 	
-	public static final String ICEServerName = "174.37.122.202";
+	public static final String ICEServerName = "54.255.209.97";
 	public static final int ICEServerPort = 9999;
 
 	private final IBinder myBinder = new LocalBinder();
@@ -55,7 +58,7 @@ public class VoIPService extends Service {
 	private final int HEARTBEAT_TIMEOUT = HEARTBEAT_INTERVAL * 10;
 	private final int MAX_SAMPLES_BUFFER = 3;
 
-	private int localBitrate = 6000;
+	private int localBitrate = 12000;
 	private boolean cryptoEnabled = true;
 	private Messenger mMessenger;
 	private boolean connectionEstablished = false;
@@ -72,6 +75,7 @@ public class VoIPService extends Service {
 	private boolean mute = false;
 	private boolean audioStarted = false;
 	private int droppedDecodedPackets = 0;
+	private int gain = 0;
 	
 	private OpusWrapper opusWrapper;
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToDecodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
@@ -145,14 +149,16 @@ public class VoIPService extends Service {
 	}
 	
 	public void stop() {
-		if (keepRunning == false)
+		if (keepRunning == false) {
+			Log.w(VoIPActivity.logTag, "Trying to stop a stopped service?");
 			return;
+		}
 		
 		keepRunning = false;
 		sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_CALL);
 		Log.d(VoIPCaller.logTag, "Bytes sent: " + totalBytesSent + 
-				", voice sent: " + rawVoiceSent + ", bytes received: " + totalBytesReceived +
-				", dropped decoded packets: " + droppedDecodedPackets);
+				"\nVoice sent: " + rawVoiceSent + "\nBytes received: " + totalBytesReceived +
+				"\nDropped decoded packets: " + droppedDecodedPackets);
 	}
 	
 	public void hangUp() {
@@ -463,6 +469,12 @@ public class VoIPService extends Service {
 	}
 	
 	private void startPlayBack() {
+		
+		// Set audio gain
+		SharedPreferences preferences = getSharedPreferences(HikeMessengerApp.VOIP_SETTINGS, Context.MODE_PRIVATE);
+		gain = preferences.getInt(HikeMessengerApp.VOIP_AUDIO_GAIN, 0);
+		opusWrapper.setDecoderGain(gain);
+		
 		new Thread(new Runnable() {
 			
 			@Override
@@ -485,7 +497,7 @@ public class VoIPService extends Service {
 							size = Math.min(minBufSizePlayback, dp.getLength() - index);
 							speaker.write(dp.getData(), index, size);
 							// Log.d(VoIPCaller.logTag, "Playing data of length: " + size);
-							index += minBufSizePlayback; // TODO should be += size?
+							index += size; 
 						}
 					} else {
 						synchronized (decodedBuffersQueue) {
@@ -745,6 +757,9 @@ public class VoIPService extends Service {
 	
 	private void addPacketToAckWaitQueue(VoIPDataPacket dp) {
 		synchronized (ackWaitQueue) {
+			if (ackWaitQueue.containsKey(dp.getPacketNumber()))
+				return;
+
 			ackWaitQueue.put(dp.getPacketNumber(), dp);
 		}
 	}
@@ -833,9 +848,9 @@ public class VoIPService extends Service {
 	}
 
 	public int adjustBitrate(int delta) {
-		if (delta > 0 && localBitrate < 64000)
+		if (delta > 0 && localBitrate + delta < 64000)
 			localBitrate += delta;
-		if (delta < 0 && localBitrate > 4000)
+		if (delta < 0 && localBitrate + delta >= 3000)
 			localBitrate += delta;
 		opusWrapper.setEncoderBitrate(localBitrate);
 		sendHandlerMessage(VoIPActivity.MSG_CURRENT_BITRATE);
@@ -844,6 +859,25 @@ public class VoIPService extends Service {
 	
 	public int getBitrate() {
 		return localBitrate;
+	}
+	
+	public void adjustGain(int gainDelta) {
+		if (gainDelta > 0 && gain > 5000)
+			return;
+		if (gainDelta < 0 && gain < -5000)
+			return;
+		gain += gainDelta;
+		opusWrapper.setDecoderGain(gain);
+		
+		// Save the gain preference
+		SharedPreferences preferences = getSharedPreferences(HikeMessengerApp.VOIP_SETTINGS, Context.MODE_PRIVATE);
+		Editor edit = preferences.edit();
+		edit.putInt(HikeMessengerApp.VOIP_AUDIO_GAIN, gain);
+		edit.commit();
+	}
+	
+	public boolean isConnected() {
+		return connectionEstablished;
 	}
 	
 	public void retrieveExternalSocket() {
@@ -894,10 +928,6 @@ public class VoIPService extends Service {
 						}
 					}
 
-					if (continueSending == true) {
-						Log.d(VoIPActivity.logTag, "Unable to retrieve external socket.");
-					}
-
 				} catch (SocketException e) {
 					Log.d(VoIPActivity.logTag, "SocketException: " + e.toString());
 				} catch (UnknownHostException e) {
@@ -912,9 +942,10 @@ public class VoIPService extends Service {
 					} catch (JSONException e) {
 						Log.d(VoIPActivity.logTag, "JSONException: " + e.toString());
 					}
-				else
+				else {
 					Log.d(VoIPActivity.logTag, "Failed to retrieve external socket.");
-				
+					sendHandlerMessage(VoIPActivity.MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE);
+				}
 			}
 		});
 		
@@ -954,11 +985,12 @@ public class VoIPService extends Service {
 		JSONObject data = new JSONObject();
 		data.put(HikeConstants.MESSAGE_ID, new Random().nextInt(10000));	// TODO: possibly needs to changed
 		data.put(HikeConstants.HIKE_MESSAGE, "--External Socket Info--\n" + socketData.toString()); // TODO: Create a new mqttmessagetype instead?
+		data.put(HikeConstants.TIMESTAMP, System.currentTimeMillis() / 1000); 
 		data.put(HikeConstants.METADATA, socketData);
 
 		JSONObject message = new JSONObject();
 		message.put(HikeConstants.TO, clientPartner.getPhoneNumber());
-		message.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE);
+		message.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0);
 		message.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO);
 		message.put(HikeConstants.DATA, data);
 		

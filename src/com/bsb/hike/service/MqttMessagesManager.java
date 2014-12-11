@@ -1969,6 +1969,7 @@ public class MqttMessagesManager
 	public void saveMqttMessage(JSONObject jsonObj) throws JSONException
 	{
 		String type = jsonObj.optString(HikeConstants.TYPE);
+		Log.d(VoIPActivity.logTag, "Received message of type: " + type);  // TODO: Remove me!
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{
 			saveIcon(jsonObj);
@@ -2016,12 +2017,11 @@ public class MqttMessagesManager
 		// end
 		{
 			saveGCEnd(jsonObj);
-		}
-		else if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type)) // Message
-		// received
-		// from
-		// server
-		{
+		} 
+		else if (HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0.equals(type) ||
+				HikeConstants.MqttMessageTypes.MESSAGE_VOIP_1.equals(type)) {
+
+			Log.d(VoIPActivity.logTag, "Received VoIP Message");
 			// VoIP checks
 			if (jsonObj.has(HikeConstants.SUB_TYPE)) {
 
@@ -2044,9 +2044,14 @@ public class MqttMessagesManager
 					context.startActivity(i);
 
 				}
-				
 			}
-			else if (isBulkMessage)
+		}
+		else if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type)) // Message
+		// received
+		// from
+		// server
+		{
+			if (isBulkMessage)
 			{
 				saveMessageBulk(jsonObj);
 			}
