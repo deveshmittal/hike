@@ -29,7 +29,7 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 		 * no name setting, so don't bother pulling in SMS's yet or The user doesn't want us pulling in his SMS.
 		 */
 
-		System.out.println("Current time is " + System.currentTimeMillis());
+		Logger.d("HikeMessageReceiver" , System.currentTimeMillis()+"");
 		Logger.d("HikeMessageReceiver", "message received");
 
 		// If the User is not authenticated and the GCMID is not sent to the server and the user is connected.
