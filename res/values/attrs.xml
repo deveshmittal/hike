@@ -11,37 +11,61 @@
         <attr name="marker_visible" format="boolean"></attr>
         <attr name="android:gravity"></attr>
     </declare-styleable>
-    
     <declare-styleable name="Theme">
-        <attr name="circularProgressBarStyle" format="reference"></attr>        
+        <attr name="circularProgressBarStyle" format="reference"></attr>
     </declare-styleable>
-    
+
     <attr name="font" format="string" />
-<declare-styleable name="DragSortListView">
-    <attr name="collapsed_height" format="dimension" />
-    <attr name="drag_scroll_start" format="float" />
-    <attr name="max_drag_scroll_speed" format="float" />
-    <attr name="float_background_color" format="color" />
-    <attr name="remove_mode">
-      <enum name="clickRemove" value="0" />
-      <enum name="flingRemove" value="1" />
-    </attr>
-    <attr name="track_drag_sort" format="boolean"/>
-    <attr name="float_alpha" format="float"/>
-    <attr name="slide_shuffle_speed" format="float"/>
-    <attr name="remove_animation_duration" format="integer"/>
-    <attr name="drop_animation_duration" format="integer"/>
-    <attr name="drag_enabled" format="boolean" />
-    <attr name="sort_enabled" format="boolean" />
-    <attr name="remove_enabled" format="boolean" />
-    <attr name="drag_start_mode">
-      <enum name="onDown" value="0" />
-      <enum name="onMove" value="1" />
-      <enum name="onLongPress" value="2"/>
-    </attr>
-    <attr name="drag_handle_id" format="integer" />
-    <attr name="fling_handle_id" format="integer" />
-    <attr name="click_remove_id" format="integer" />
-    <attr name="use_default_controller" format="boolean" />
-  </declare-styleable>
+
+    <declare-styleable name="DragSortListView">
+        <attr name="collapsed_height" format="dimension" />
+        <attr name="drag_scroll_start" format="float" />
+        <attr name="max_drag_scroll_speed" format="float" />
+        <attr name="float_background_color" format="color" />
+        <attr name="remove_mode">
+            <enum name="clickRemove" value="0" />
+            <enum name="flingRemove" value="1" />
+        </attr>
+        <attr name="track_drag_sort" format="boolean" />
+        <attr name="float_alpha" format="float" />
+        <attr name="slide_shuffle_speed" format="float" />
+        <attr name="remove_animation_duration" format="integer" />
+        <attr name="drop_animation_duration" format="integer" />
+        <attr name="drag_enabled" format="boolean" />
+        <attr name="sort_enabled" format="boolean" />
+        <attr name="remove_enabled" format="boolean" />
+        <attr name="drag_start_mode">
+            <enum name="onDown" value="0" />
+            <enum name="onMove" value="1" />
+            <enum name="onLongPress" value="2" />
+        </attr>
+        <attr name="drag_handle_id" format="integer" />
+        <attr name="fling_handle_id" format="integer" />
+        <attr name="click_remove_id" format="integer" />
+        <attr name="use_default_controller" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="RoundedImageView">
+        <attr name="riv_corner_radius" format="dimension" />
+        <attr name="riv_border_width" format="dimension" />
+        <attr name="riv_border_color" format="color" />
+        <attr name="riv_mutate_background" format="boolean" />
+        <attr name="riv_oval" format="boolean" />
+        <attr name="android:scaleType" />
+        <attr name="riv_tile_mode">
+            <enum name="clamp" value="0" />
+            <enum name="repeat" value="1" />
+            <enum name="mirror" value="2" />
+        </attr>
+        <attr name="riv_tile_mode_x">
+            <enum name="clamp" value="0" />
+            <enum name="repeat" value="1" />
+            <enum name="mirror" value="2" />
+        </attr>
+        <attr name="riv_tile_mode_y">
+            <enum name="clamp" value="0" />
+            <enum name="repeat" value="1" />
+            <enum name="mirror" value="2" />
+        </attr>
+    </declare-styleable>
+
 </resources>

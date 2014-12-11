@@ -48,6 +48,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -175,9 +176,11 @@ import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
+import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.FtueActivity;
 import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -356,7 +359,7 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
 	}
-	
+
 	public static Intent createIntentFromMsisdn(String msisdnOrGroupId, boolean openKeyBoard)
 	{
 		Intent intent = new Intent();
@@ -566,7 +569,6 @@ public class Utils
 
 		if (!settings.getBoolean(HikeMessengerApp.ACCEPT_TERMS, false))
 		{
-			disconnectAndStopService(activity);
 			activity.startActivity(new Intent(activity, WelcomeActivity.class));
 			activity.finish();
 			return true;
@@ -574,7 +576,6 @@ public class Utils
 
 		if (settings.getString(HikeMessengerApp.NAME_SETTING, null) == null)
 		{
-			disconnectAndStopService(activity);
 			activity.startActivity(new Intent(activity, SignupActivity.class));
 			activity.finish();
 			return true;
@@ -593,14 +594,6 @@ public class Utils
 			return true;
 		}
 		return false;
-	}
-	
-	public static void disconnectAndStopService(Activity activity)
-	{
-		// Added these lines to prevent the bad username/password bug.
-		HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
-		app.disconnectFromService();
-		activity.stopService(new Intent(activity, HikeService.class));
 	}
 
 	public static String formatNo(String msisdn)
@@ -1247,35 +1240,38 @@ public class Utils
 		return bao.toByteArray();
 	}
 
-	public static String getRealPathFromUri(Uri contentUri, Activity activity)
+	// If source is local file path then previous getRealPathFromUri implementation (which uses deprecated manage query) provides null, So adding this implementation to solve the issue.
+	public static String getRealPathFromUri(Uri uri, Context mContext)
 	{
-		String filePath = null;
-		String[] proj = { MediaStore.Images.Media.DATA };
+		String result = null;
 		Cursor cursor = null;
-		// The query can throw exception if is doesn't know the specified projections. This needs to be put in a try-catch block.
 		try
 		{
-			cursor = activity.managedQuery(contentUri, proj, null, null, null);
+		    cursor = mContext.getContentResolver().query(uri, null, null, null, null);
+		    if (cursor == null) {
+		        result = uri.getPath();
+		    } else {
+		        if(cursor.moveToFirst())
+		        {
+		        	int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+			        result = cursor.getString(idx);
+		        }
+		        else
+		        {
+		        	result = null;
+		        }
+		    }
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		if (cursor == null || cursor.getCount() == 0)
+		finally
 		{
-			// return null;
+			if(cursor != null)
+				cursor.close();
 		}
-		else
-		{
-			int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-			cursor.moveToFirst();
-			filePath = cursor.getString(column_index);
-		}
-		if (filePath == null)
-		{
-			filePath = FilePath.getPath(activity.getBaseContext(), contentUri);
-		}
-		return filePath;
+	    return result;
 	}
 
 	public static enum ExternalStorageState
@@ -1551,11 +1547,13 @@ public class Utils
 		{
 			AccountUtils.base = httpString + AccountUtils.host + "/v1";
 			AccountUtils.baseV2 = httpString + AccountUtils.host + "/v2";
+			AccountUtils.SDK_AUTH_BASE = AccountUtils.SDK_AUTH_BASE_URL_PROD;
 		}
 		else
 		{
 			AccountUtils.base = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v1";
 			AccountUtils.baseV2 = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v2";
+			AccountUtils.SDK_AUTH_BASE = AccountUtils.SDK_AUTH_BASE_URL_STAGING;
 		}
 
 		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
@@ -1564,6 +1562,7 @@ public class Utils
 		CheckForUpdateTask.UPDATE_CHECK_URL = httpString + (isProductionServer ? CheckForUpdateTask.PRODUCTION_URL : CheckForUpdateTask.STAGING_URL);
 
 		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
+		AccountUtils.fastFileUploadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
 
@@ -3112,6 +3111,18 @@ public class Utils
 		else
 		{
 			asyncTask.execute(hikeHttpRequests);
+		}
+	}
+	
+	public static void executeAuthSDKTask(AuthSDKAsyncTask argTask, HttpRequestBase... requests)
+	{
+		if (isHoneycombOrHigher())
+		{
+			argTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requests);
+		}
+		else
+		{
+			argTask.execute(requests);
 		}
 	}
 
@@ -4964,6 +4975,37 @@ public class Utils
 		}
 		requestAccountInfo(upgrade, sendBot);
 		sendLocaleToServer(context);
+	}
+
+	/**
+	 * Checks if is user signed up. Works with application context.
+	 * 
+	 * @return true, if is user signed up
+	 */
+	public static boolean requireAuth(Context appContext, boolean allowOpeningActivity)
+	{
+		appContext = appContext.getApplicationContext();
+
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(appContext);
+
+		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
+		{
+			if (allowOpeningActivity)
+			{
+				IntentManager.openWelcomeActivity(appContext);
+			}
+			return false;
+		}
+
+		if (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null)
+		{
+			if (allowOpeningActivity)
+			{
+				IntentManager.openSignupActivity(appContext);
+			}
+			return false;
+		}
+		return true;
 	}
 
 }

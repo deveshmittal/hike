@@ -21,6 +21,7 @@ import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
 import com.facebook.Session;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -51,7 +52,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	protected Boolean doInBackground(Void... unused)
 	{
 		FileTransferManager.getInstance(ctx).shutDownAll();
-		StickerDownloadManager.getInstance(ctx).shutDownAll();
+		StickerDownloadManager.getInstance().shutDownAll();
 		HikeConversationsDatabase convDb = HikeConversationsDatabase.getInstance();
 		Editor editor = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
 		Editor appPrefEditor = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
@@ -66,7 +67,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			GCMRegistrar.unregister(ctx.getApplicationContext());
 
 			HikeMessengerApp app = (HikeMessengerApp) ctx.getApplicationContext();
-			app.disconnectFromService();
+			app.setServiceAsDisconnected();
 			ctx.stopService(new Intent(ctx, HikeService.class));
 
 			if (delete)

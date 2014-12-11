@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -28,7 +29,10 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
 
@@ -42,13 +46,21 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.platform.HikeSDKRequestHandler;
+import com.bsb.hike.service.HikeMqttManagerNew.IncomingHandler;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
+import com.bsb.hike.ui.HikeAuthActivity;
+import com.bsb.hike.ui.SignupActivity;
+import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -81,7 +93,7 @@ public class HikeService extends Service
 				boolean contactsChanged = ContactManager.getInstance().syncUpdates(this.context);
 
 				HikeMessengerApp.syncingContacts = false;
-				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNCED, new Boolean[] {manualSync, contactsChanged});
+				HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_SYNCED, new Boolean[] { manualSync, contactsChanged });
 			}
 
 		}
@@ -98,8 +110,6 @@ public class HikeService extends Service
 	public static final int MSG_APP_MESSAGE_STATUS = 5;
 
 	public static final int MSG_APP_CONN_STATUS = 6;
-
-	public static final int MSG_APP_INVALID_TOKEN = 7;
 
 	protected Messenger mApp;
 
@@ -131,6 +141,18 @@ public class HikeService extends Service
 	public static final String POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION = "com.bsb.hike.POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION";
 
 	/************************************************************************/
+	/* SDK Request Ids */
+	/************************************************************************/
+
+	public static final int SDK_REQ_GET_USERS = -11;
+
+	public static final int SDK_REQ_GET_LOGGED_USER_INFO = -14;
+
+	public static final int SDK_REQ_AUTH_CLIENT = -15;
+
+	public static final int SDK_REQ_SEND_MESSAGE = -13;
+
+	/************************************************************************/
 	/* VARIABLES - other local variables */
 	/************************************************************************/
 
@@ -157,7 +179,11 @@ public class HikeService extends Service
 
 	private ContactsChanged mContactsChanged;
 
-	private Looper mContactHandlerLooper;
+	private StickerManager sm;
+
+	public static HikeSDKRequestHandler mHikeSDKRequestHandler;
+
+	private Messenger mSDKRequestMessenger;
 
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
@@ -169,6 +195,16 @@ public class HikeService extends Service
 	public void onCreate()
 	{
 		super.onCreate();
+
+		if (!isUserSignedUp())
+		{
+			assignUtilityThread();
+			return;
+		}
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED, null);
+
+		HikeService.this.sendBroadcast(new Intent(HikeService.SEND_RAI_TO_SERVER_ACTION));
 
 		Logger.d("TestUpdate", "Service started");
 
@@ -191,6 +227,9 @@ public class HikeService extends Service
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
 		mMqttManager = new HikeMqttManagerNew(getApplicationContext());
 		mMqttManager.init();
+		
+		initStickerDownloadManager();
+		
 
 		/*
 		 * notify android that our service represents a user visible action, so it should not be killable. In order to do so, we need to show a notification so the user understands
@@ -204,14 +243,7 @@ public class HikeService extends Service
 		 * Intent notificationIntent = new Intent(this, MessagesList.class); PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 		 * notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent); startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 		 */
-
-		HandlerThread contactHandlerThread = new HandlerThread("");
-		contactHandlerThread.start();
-		mContactHandlerLooper = contactHandlerThread.getLooper();
-		mContactsChangedHandler = new Handler(mContactHandlerLooper);
-		mContactsChanged = new ContactsChanged(this);
-		
-		//scheduleNextAccountBackup();
+		assignUtilityThread();
 
 		/*
 		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of
@@ -270,10 +302,54 @@ public class HikeService extends Service
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
+		
 	}
 
-	
-	
+	public boolean isUserSignedUp()
+	{
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(getApplicationContext());
+		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
+		{
+			Intent i = new Intent(getApplicationContext(), WelcomeActivity.class);
+			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			getApplicationContext().startActivity(i);
+			return false;
+		}
+
+		if (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null)
+		{
+			Intent i = new Intent(getApplicationContext(), SignupActivity.class);
+			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			getApplicationContext().startActivity(i);
+			return false;
+		}
+
+		return true;
+	}
+
+	private void assignUtilityThread()
+	{
+		/**
+		 * Extract utility looper
+		 */
+		Looper mHikeUtilLooper = HikeHandlerUtil.getInstance().getLooper();
+
+		/**
+		 * Make SDK request handler with utility looper
+		 */
+		mHikeSDKRequestHandler = new HikeSDKRequestHandler(HikeService.this.getApplicationContext(), mHikeUtilLooper);
+
+		mSDKRequestMessenger = new Messenger(mHikeSDKRequestHandler);
+
+		/**
+		 * Make contact changed handler with utility looper
+		 */
+		mContactsChangedHandler = new Handler(mHikeUtilLooper);
+
+		mContactsChanged = new ContactsChanged(HikeService.this);
+
+	}
+
 	@Override
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{
@@ -307,18 +383,16 @@ public class HikeService extends Service
 		super.onDestroy();
 		Logger.i("HikeService", "onDestroy.  Shutting down service");
 
-		mMqttManager.destroyMqtt();
-		this.mMqttManager = null;
+		if (mMqttManager != null)
+		{
+			mMqttManager.destroyMqtt();
+			this.mMqttManager = null;
+		}
 		// inform the app that the app has successfully disconnected
 		if (contactsReceived != null)
 		{
 			getContentResolver().unregisterContentObserver(contactsReceived);
 			contactsReceived = null;
-		}
-
-		if (mContactHandlerLooper != null)
-		{
-			mContactHandlerLooper.quit();
 		}
 
 		if (manualContactSyncTrigger != null)
@@ -388,7 +462,30 @@ public class HikeService extends Service
 	@Override
 	public IBinder onBind(Intent intent)
 	{
-		return mMqttManager.getMessenger().getBinder();
+		try
+		{
+			mSDKRequestMessenger.getBinder().linkToDeath(new IBinder.DeathRecipient()
+			{
+
+				@Override
+				public void binderDied()
+				{
+					Logger.e(HikeService.class.getCanonicalName(), "BINDER DEATH!!!!");
+				}
+			}, 0);
+		}
+		catch (RemoteException e)
+		{
+			e.printStackTrace();
+		}
+		return mSDKRequestMessenger.getBinder();
+	}
+
+	@Override
+	public boolean onUnbind(Intent intent)
+	{
+		Logger.d("HikeService - ONUNBIND", "" + intent.getAction());
+		return super.onUnbind(intent);
 	}
 
 	/************************************************************************/
@@ -412,14 +509,17 @@ public class HikeService extends Service
 				Logger.d(getClass().getSimpleName(),"Contact Syncing already going on");
 			else
 			{
-				mContactsChanged.manualSync = manualSync;
-				HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
-				long delay = manualSync ? 0L: HikeConstants.CONTACT_UPDATE_TIMEOUT;
-				HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, delay);
-				// Schedule the next manual sync to happed 24 hours from now.
-				scheduleNextManualContactSync();
-
-				manualSync = false;
+				if(mContactsChanged!=null)
+				{
+					mContactsChanged.manualSync = manualSync;
+					HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
+					long delay = manualSync ? 0L: HikeConstants.CONTACT_UPDATE_TIMEOUT;
+					HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, delay);
+					// Schedule the next manual sync to happed 24 hours from now.
+					scheduleNextManualContactSync();
+	
+					manualSync = false;
+				}
 			}
 		}
 	}
@@ -897,6 +997,11 @@ public class HikeService extends Service
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
 			Utils.executeHttpTask(hikeHTTPTask, profilePicRequest);
 		}
+	}
+	
+	private void initStickerDownloadManager()
+	{
+		StickerDownloadManager.init(getApplicationContext());
 	}
 
 }

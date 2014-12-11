@@ -53,6 +53,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
@@ -63,6 +64,7 @@ import com.bsb.hike.adapters.FriendsAdapter;
 import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -74,6 +76,9 @@ import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.service.HikeService;
+import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.platform.ContentLove;
+import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -1214,7 +1219,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						return;
 					}
 
-					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+					fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike, FTAnalyticEvents.OTHER_ATTACHEMENT);
 					Utils.executeAsyncTask(fileTransferTask);
 
 					progressDialog = ProgressDialog.show(this, null, getResources().getString(R.string.multi_file_creation));
@@ -1334,6 +1339,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 						 * Making sure the sticker is not forwarded again on orientation change
 						 */
 						presentIntent.removeExtra(StickerManager.FWD_CATEGORY_ID);
+					}else if(msgExtrasJson.optInt(MESSAGE_TYPE.MESSAGE_TYPE) == MESSAGE_TYPE.CONTENT){
+						// CONTENT Message
+						String metadata = msgExtrasJson.optString(HikeConstants.METADATA);
+						int loveId = msgExtrasJson.optInt(HikeConstants.ConvMessagePacketKeys.LOVE_ID);
+						loveId = loveId==0 ? -1 : loveId;
+						ConvMessage convMessage = new ConvMessage();
+						convMessage.contentLove = new ContentLove();
+						convMessage.contentLove.loveId = loveId;
+						convMessage.platformMessageMetadata = new PlatformMessageMetadata(metadata, getApplicationContext());
+						multipleMessageList.add(convMessage);
 					}
 					/*
 					 * Since the message was not forwarded, we check if we have any drafts saved for this conversation, if we do we enter it in the compose box.
@@ -1840,7 +1855,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		protected Void doInBackground(Void... params) {
 			for(FileTransferData file:files){
 			FileTransferManager.getInstance(getApplicationContext()).uploadFile(file.arrayList, file.file, file.fileKey, file.fileType, file.hikeFileType, file.isRecording, file.isForwardingFile,
-					((ContactInfo)file.arrayList.get(0)).isOnhike(), file.recordingDuration);
+					((ContactInfo)file.arrayList.get(0)).isOnhike(), file.recordingDuration,  FTAnalyticEvents.OTHER_ATTACHEMENT);
 			}
 			return null;
 		}

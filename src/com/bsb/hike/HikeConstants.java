@@ -232,6 +232,8 @@ public class HikeConstants
 	public static final String COUNT = "c";
 	
 	public static final String UPDATED_SIZE = "s";
+	
+	public static final String PALLETE_POSITION = "idx";
 
 	public static final String DEFAULT_SMS_CLIENT_TUTORIAL = "dsctutorial";
 
@@ -976,6 +978,8 @@ public class HikeConstants
 	public static final String NUX_HOME_INVITE_FOOTER = "nuxHomeInviteFooter";
 
 	public static final String NUX_INVITE_FORWARD = "nuxInviteForward";
+	
+	public static final String SELF_HIKE_ID = "-1";
 
 	public static final class ResultCodes
 	{
@@ -1326,6 +1330,10 @@ public class HikeConstants
 		public static final String FTUE_STICKER_ID_LIST = "ftueStickerIdsList";
 		
 		public static final String FTUE_STICKER_CATEGORY_LIST = "ftueStickerCategoryList";
+		
+		public static final String SDK_THIRD_PARTY_PKG = "third_party_app_pkg";
+		
+		public static final String SDK_CONNECTION_TYPE = "connection_type";
 	}
 
 	public static final class LogEvent
@@ -1649,6 +1657,11 @@ public class HikeConstants
 		public static final String GALLERY_SELECTION = "gallery";
 
 		/*
+		 * File transfer success and failure event.
+		 */
+		public static final String FILE_TRANSFER_STATUS = "ftStatus";
+
+		/*
 		 * Atomic tips click events
 		 */
 		public static final String ATOMIC_FAVOURITES_TIP_CLICKED = "atomicFavTClick";
@@ -1693,6 +1706,35 @@ public class HikeConstants
 		public static final String NUX_INVITE_SENT = "nuxInvteSent";
 
 		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
+		
+		/*
+		 * Platform Events
+		 */
+		public static final String SDK_AUTH_DIALOG_VIEWED = "sdkAuthDialogViewed";
+		
+		public static final String SDK_AUTH_DIALOG_DECLINED = "sdkAuthDialogDeclined";
+		
+		public static final String SDK_AUTH_DIALOG_CONNECT = "sdkAuthDialogConnect";
+		
+		public static final String SDK_AUTH_FAILURE = "sdkAuthFailure";
+		
+		public static final String SDK_AUTH_SUCCESS = "sdkAuthSuccess";
+		
+		public static final String SDK_SEND_MESSAGE = "sdkSendMessage";
+		
+		public static final String SDK_INSTALL_HIKE_MESSENGER = "sdkDialogInstallHikeMessenger";
+		
+		public static final String SDK_INSTALL_HIKE_ACCEPT = "sdkInstallHikeAccept";
+		
+		public static final String SDK_INSTALL_HIKE_DECLINE = "sdkInstallHikeDeclined";
+		
+		public static final String SDK_DISCONNECT_APP = "sdkDisconnectApp";
+		
+        /*
+		 * Content Card events
+		 */
+        public static final String CONTENT_CARD_TAPPED = "contentCardTapped";
+
 	}
 
 	public static final class MqttMessageTypes
@@ -1915,9 +1957,19 @@ public class HikeConstants
 
 	public static class MESSAGE_TYPE
 	{
+		public static final String MESSAGE_TYPE = "messageType";
+				
 		public static final int PLAIN_TEXT = 0;
 
 		public static final int TEXT_PIN = 1;
+		
+		public static final int CONTENT = 2;
+	}
+	
+	public static interface ConvMessagePacketKeys{
+		public static final String CONTENT_TYPE = "c";
+		public static final String PIN_TYPE = "pin";
+		public static final String LOVE_ID = "loveID";
 	}
 	
 	public static class HASH_MESSAGE_TYPE
@@ -1990,4 +2042,6 @@ public class HikeConstants
 	public static final String SHOP = "shop";
 
 	public static final String BADGE = "badge";
+	
+	public static final String ADD_CATEGORY = "addCat";
 }

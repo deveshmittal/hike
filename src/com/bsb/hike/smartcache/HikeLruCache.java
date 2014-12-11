@@ -19,6 +19,7 @@ import android.os.Build.VERSION_CODES;
 import android.provider.MediaStore;
 import android.support.v4.util.LruCache;
 
+import android.util.Base64;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
@@ -26,7 +27,9 @@ import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.customClasses.MySoftReference;
@@ -199,6 +202,27 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 		return bitmap;
 	}
 
+    public BitmapDrawable getBitmapDrawable(String key){
+
+        BitmapDrawable value;
+
+            value = get(key);
+
+            // if bitmap is found in cache and is recyclyed, remove this from cache and make thread get new Bitmap
+            if (null != value && value.getBitmap().isRecycled())
+            {
+                remove(key);
+                value = null;
+            }
+            if (value == null){
+                value = (BitmapDrawable) HikeConversationsDatabase.getInstance().getFileThumbnail(key);
+                putInCache(key, value);
+            }
+
+        return value;
+
+    }
+
 	/**
 	 * @param candidate
 	 *            - Bitmap to check
@@ -264,11 +288,11 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 
 	public BitmapDrawable getIconFromCache(String key, boolean rounded)
 	{
-		String cacheKey = rounded ? key + IconLoader.ROUND_SUFFIX : key;
+		String cacheKey = rounded ? key + ProfileActivity.PROFILE_ROUND_SUFFIX : key;
 		BitmapDrawable b = get(cacheKey);
 		if (b == null)
 		{
-			int idx = key.lastIndexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
+			int idx = key.lastIndexOf(ProfileActivity.PROFILE_PIC_SUFFIX);
 			if (idx > 0)
 				key = new String(key.substring(0, idx));
 			BitmapDrawable bd = (BitmapDrawable) ContactManager.getInstance().getIcon(key, rounded);
@@ -309,8 +333,8 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 	public void clearIconForMSISDN(String msisdn)
 	{
 		remove(msisdn);
-		remove(msisdn + ProfileAdapter.PROFILE_PIC_SUFFIX);
-		remove(msisdn + IconLoader.ROUND_SUFFIX);
+		remove(msisdn + ProfileActivity.PROFILE_PIC_SUFFIX);
+		remove(msisdn + ProfileActivity.PROFILE_ROUND_SUFFIX);
 
 	}
 
