@@ -180,7 +180,7 @@ public class UserLogInfo {
 							}
 
 						});
-				userLogRequest.setJSONData(getEncryptedJSON(ctx, jsonLogArray, flags));
+				userLogRequest.setJSONData(jsonLogObj);
 				HikeHTTPTask userLogHttpTask = new HikeHTTPTask(null, 0);
 				Utils.executeHttpTask(userLogHttpTask, userLogRequest);
 			}
