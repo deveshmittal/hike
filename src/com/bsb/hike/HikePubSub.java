@@ -377,8 +377,6 @@ public class HikePubSub implements Runnable
 	public static String PROFILE_UPDATE_FINISH = "profileUpdateFinish";
 
 	public static String HIKE_SDK_MESSAGE = "hikeSDKMessage";
-
-    public static String HIKE_SDK_MESSAGE_SENT = "hikeSDKMessageSent";
 	
 	public static final String CONV_META_DATA_UPDATED = "convMetaDataUpdated";
 	
