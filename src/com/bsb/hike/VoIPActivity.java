@@ -29,11 +29,17 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.OvershootInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -85,6 +91,9 @@ public class VoIPActivity extends Activity {
 				break;
 			case MSG_AUDIO_START:
 				showMessage("Starting audio.");
+				if (clientSelf.isInitiator()) {
+					// TODO: Display call timer etc. 
+				}
 				break;
 			case MSG_ENCRYPTION_INITIALIZED:
 				showMessage("Encryption initialized.");
@@ -204,6 +213,7 @@ public class VoIPActivity extends Activity {
 			clientSelf.setInitiator(true);
 			clientPartner.setInitiator(false);
 			Log.d(logTag, "Making outgoing call to: " + clientPartner.getPhoneNumber());
+			drawAsCaller();
 		}
 
 		if (action.equals("setpartnerinfo")) {
@@ -221,27 +231,11 @@ public class VoIPActivity extends Activity {
 			} else {
 				// We have already sent our socket info to partner
 				// And now they have sent us their's, so let's establish connection
+				drawAsCallee();
 				voipService.establishConnection();
 			}
-			
-			// Get the other party's contact information
-			ContactInfo contactInfo = ContactManager.getInstance().getContact(clientPartner.getPhoneNumber());
-			if (contactInfo != null)
-			{
-				mContactName = contactInfo.getName();
-				if( mContactName == null)
-				{
-					mContactName = clientPartner.getPhoneNumber();
-					Log.d("contactName", mContactName);
-				}
-			}
-			
 		}
-		if(clientSelf.isInitiator()){
-			// TODO: i am caller stub goes here
-		} else {
-			//TODO: I am callee part goes here
-		}
+		
 	}
 
 	private void startService() {
@@ -258,8 +252,8 @@ public class VoIPActivity extends Activity {
 	}
 
 	private void setButtonHandlers() {
-		Button closeButton = (Button) findViewById(R.id.btn_close);
-		closeButton.setOnClickListener(new OnClickListener() {
+		ImageView closeView = (ImageView) findViewById(R.id.fullcallSlider);
+		closeView.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -267,7 +261,7 @@ public class VoIPActivity extends Activity {
 				voipService.hangUp();
 			}
 		});
-
+/*
 		Button answerButton = (Button) findViewById(R.id.btn_answer);
 		answerButton.setOnClickListener(new OnClickListener() {
 
@@ -287,42 +281,45 @@ public class VoIPActivity extends Activity {
 					voipService.rejectIncomingCall();
 			}
 		});
-
-		final Button muteButton = (Button) findViewById(R.id.btn_mute);
-		muteButton.setOnClickListener(new OnClickListener() {
+*/
+		final ImageView muteLayout = (ImageView) findViewById(R.id.fullMicButton);
+		muteLayout.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
+				ImageView muteButton =(ImageView)VoIPActivity.this.findViewById(R.id.fullMicButton);
+				
 				if (mute == false) {
 					mute = true;
-					muteButton.setText("Mute On");
+					muteButton.setImageResource(R.drawable.voip_mute);
 					voipService.setMute(mute);
 				} else {
 					mute = false;
-					muteButton.setText("Mute Off");
+					muteButton.setImageResource(R.drawable.voip_mute);
 					voipService.setMute(mute);
 				}
 			}
 		});
 
-		final Button speakerButton = (Button) findViewById(R.id.btn_speaker);
-		speakerButton.setOnClickListener(new OnClickListener() {
+		final ImageView speakerView = (ImageView) findViewById(R.id.fullSpeakerSound);
+		speakerView.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
+				
 				if (speaker == false) {
 					speaker = true;
-					speakerButton.setText("Speaker On");
+					speakerView.setImageResource(R.drawable.voip_speaker_mute);
 				} else {
 					speaker = false;
-					speakerButton.setText("Speaker Off");
+					speakerView.setImageResource(R.drawable.voip_speaker);
 				}
 
 				AudioManager audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 				audiomanager.setSpeakerphoneOn(speaker);
 			}
 		});
-
+/*
 		final Button increaseBRButton = (Button) findViewById(R.id.btn_increase_bitrate);
 		increaseBRButton.setOnClickListener(new OnClickListener() {
 
@@ -340,7 +337,7 @@ public class VoIPActivity extends Activity {
 				voipService.adjustBitrate(-2000);
 			}
 		});
-
+*/
 	}
 
 	private void shutdown() {
@@ -430,8 +427,8 @@ public class VoIPActivity extends Activity {
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
 		}
 	};
-	public View callSlider;
-	public View sliderContainer;
+	public ImageView callSlider;
+	public FrameLayout sliderContainer;
 	private AnimatorSet DPReposition;
 	private AnimatorSet animsetAccept;
 	private AnimatorSet animsetDecline;
@@ -441,22 +438,100 @@ public class VoIPActivity extends Activity {
 	private FrameLayout avatarContainer;
 	private TextView callNo;
 	private ImageView acceptCall;
+	private ImageView declineCall;
+	private TextView inCallTimer;
+	protected boolean startAnimPlayed = false;
 
 	public void drawAsCallee(){
-
+		//TODO: Play ringtone
+		getCallerInfo();
 	}
 
+	private void getCallerInfo() {
+
+		// Get the other party's contact information
+		ContactInfo contactInfo = ContactManager.getInstance().getContact(clientPartner.getPhoneNumber());
+		if (contactInfo != null)
+		{
+			mContactName = contactInfo.getName();
+			if( mContactName == null)
+			{
+				mContactName = clientPartner.getPhoneNumber();
+				Log.d("contactName", mContactName);
+			}
+		}
+
+	}
 	public void drawAsCaller(){
-		//TODO: Play ringtone
+		//TODO: Play dialertone
 		
+		getCallerInfo();
+		Log.d(logTag, "Setting view for caller.");
 		displayPic = (ImageView)this.findViewById(R.id.fullvoipContactPicture);
 		avatarContainer = (FrameLayout)this.findViewById(R.id.voip_avatar_container);
 		callSlider = (ImageView)this.findViewById(R.id.fullcallSlider);
 		callNo = (TextView)this.findViewById(R.id.fullCallerId);
 		callNo.setText(mContactName);
 		sliderContainer = (FrameLayout)this.findViewById(R.id.voip_slider_container);
+		sliderContainer.setVisibility(View.VISIBLE);
+		callSlider.setVisibility(View.VISIBLE);
+		callSlider.setBackgroundResource(R.drawable.slider_oval_red);
+		callSlider.setRotation(0);
+		callSlider.setImageResource(R.drawable.cut_call);
 		startSliderAnimation(sliderContainer);
 		acceptCall = (ImageView)this.findViewById(R.id.fullacceptButton);
+		declineCall = (ImageView)this.findViewById(R.id.fulldeclineButton);
+		acceptCall.setVisibility(View.INVISIBLE);
+		declineCall.setVisibility(View.INVISIBLE);
+		ImageView speakerView = (ImageView) this.findViewById(R.id.fullSpeakerSound);
+		speakerView.setVisibility(View.VISIBLE);
+		ImageView muteView = (ImageView) this.findViewById(R.id.fullMicButton);
+		muteView.setVisibility(View.VISIBLE);
+		final TextView preCallTimer = (TextView)this.findViewById(R.id.fullPhoneNumberView1);
+		preCallTimer.setVisibility(View.INVISIBLE);
+		inCallTimer = (TextView)this.findViewById(R.id.fullCallTimer);
+		inCallTimer.setText("CONNECTING...");
+		int[] location = new int[2];
+		inCallTimer.getLocationOnScreen(location);
+		Log.w(logTag, location[0]+" "+location[1]);
+		final ViewTreeObserver vto = inCallTimer.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+
+			@Override
+			public void onGlobalLayout() {
+				float delY = callNo.getY()-inCallTimer.getY();
+				if(!startAnimPlayed ){
+					
+//					Log.w(logTag,((Float)delY).toString() + " " + inCallTimer.getY() + " " + callNo.getY());
+					TranslateAnimation yTranslator  = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, 
+							delY);
+					yTranslator.setDuration(500);
+					yTranslator.setFillAfter(true);
+					yTranslator.setFillEnabled(true);
+					callNo.setAnimation(yTranslator);		// y-translate phone number.
+					inCallTimer.setVisibility(View.VISIBLE);
+					Animation fadeIn = AnimationUtils.loadAnimation(getBaseContext(), R.anim.call_fade_in);
+					RelativeLayout innerLayout = (RelativeLayout) VoIPActivity.this.findViewById(R.id.full_voip_inner_layout);
+					innerLayout.setAnimation(fadeIn);
+					Log.w(logTag, "Starting animations..");
+					startCallerDPAnimation();				
+					yTranslator.start();
+					fadeIn.start();
+					startAnimPlayed = true;
+				}
+			}
+			
+		});
+		
+//		TextView inCallTimer = (TextView)findViewById(R.id.fullCallTimer);
+//		float delY = callNo.getY()-inCallTimer.getY();
+//		TranslateAnimation nameTranslator  = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, delY);
+//		nameTranslator.setDuration(500);
+//		nameTranslator.setFillAfter(true);
+//		nameTranslator.setFillEnabled(true);
+
+		
+		
 		
 	}
 
@@ -477,7 +552,7 @@ public class VoIPActivity extends Activity {
 				Log.d("TouchEvent", "getRot"+((Float)callSlider.getRotation()));
 				Log.d("TouchEvent","Xp"+((Float)callSlider.getPivotX()).toString());
 				Log.d("TouchEvent","Yp"+((Float)callSlider.getPivotY()).toString());
-				float rotAng = (float)(120)*(sliderContainer.getTranslationX()/(float)((greenX-sliderX)));
+				float rotAng = (float)(120)*(sliderContainer.getTranslationX()/(float)((acceptCall.getX()-((callSlider.getLeft()+callSlider.getRight())/2.0f))));
 				if(sliderContainer.getTranslationX()>0)
 					callSlider.setBackgroundResource(R.drawable.slider_oval);
 				else
@@ -509,12 +584,12 @@ public class VoIPActivity extends Activity {
 			case MotionEvent.ACTION_UP :
 				PointF mvevent = new PointF( event.getX() - DownPT.x, event.getY() - DownPT.y);
 				float xcoord = StartPT.x+mvevent.x;
-				if (xcoord<7.0f*redX/6.0f)		//decline call
+				if (xcoord<7.0f*declineCall.getX()/6.0f)		//decline call
 				{
 					if (clientSelf.isInitiator() == false)
 						voipService.rejectIncomingCall();
 				}
-				else if (xcoord>5.0f*greenX/6.0f)		//accept call
+				else if (xcoord>5.0f*acceptCall.getX()/6.0f)		//accept call
 				{
 					if (clientSelf.isInitiator() == false)
 						voipService.startAudio();
@@ -539,6 +614,13 @@ public class VoIPActivity extends Activity {
 	{
 		if(apiLevel>=11)
 		{
+			ImageView miniAvatar = (ImageView)this.findViewById(R.id.full_small_dp);
+			float x = miniAvatar.getX();
+			float y = miniAvatar.getY();
+			avatarContainer.setScaleX(0.28f);
+			avatarContainer.setScaleY(0.28f);
+			avatarContainer.setX(x);
+			avatarContainer.setY(y);
 			DPReposition = (AnimatorSet) AnimatorInflater.loadAnimator(getBaseContext(), R.animator.dp_translate_scale_anim);
 			DPReposition.setTarget(avatarContainer);
 			DPReposition.start();}
@@ -551,7 +633,7 @@ public class VoIPActivity extends Activity {
 	{
 		if(apiLevel>=11)
 		{
-			float greenStart = ((float)(0.2)*( greenX - (float)sliderContainer.getRight() ) + (float)sliderContainer.getRight());
+			float greenStart = ((float)(0.2)*( acceptCall.getX() - (float)sliderContainer.getRight() ) + (float)sliderContainer.getRight());
 
 			float redStart = ( (float)sliderContainer.getLeft() - ((float)(0.2)*(  (float)sliderContainer.getLeft() - (float)declineCall.getRight() )) );
 
@@ -578,7 +660,8 @@ public class VoIPActivity extends Activity {
 			animset.setInterpolator(new OvershootInterpolator(2.2f));
 			animset.setTarget(v);
 			animset.start();
-			if((!voipService.isConnected()) && (!clientSelf.isInitiator()))
+			
+			if(!clientSelf.isInitiator())
 			{
 				sliderRotator = (ObjectAnimator)AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.voip_slider_rotator);
 				sliderRotator.setTarget(callSlider);

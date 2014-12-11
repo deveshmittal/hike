@@ -332,6 +332,7 @@
 
         <activity
             android:name=".VoIPActivity"
+            android:theme="@style/TranslucentBlack"
             android:label="@string/title_activity_vo_ip" >
         </activity>
         
