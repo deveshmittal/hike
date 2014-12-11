@@ -444,6 +444,10 @@ public class DBBackupRestore
 	public boolean updatePrefs()
 	{
 		BackupState state = getBackupState();
+		if (state == null)
+		{
+			state = new BackupState(dbNames[0], DBConstants.CONVERSATIONS_DATABASE_VERSION);
+		}
 		state.backupPrefs(mContext);
 		return updateBackupState(state);
 	}
