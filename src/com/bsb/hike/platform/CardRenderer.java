@@ -177,14 +177,14 @@ public class CardRenderer implements View.OnLongClickListener {
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
-
                 view.setTag(viewHolder);
+                cardCallToActions(cardType, actionComponents, textComponents, viewHolder, true, "");
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
             cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
-            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
+
 
         } else if (cardType == CardConstants.VIDEO_CARD_LAYOUT) {
             ViewHolder viewHolder;
@@ -198,13 +198,12 @@ public class CardRenderer implements View.OnLongClickListener {
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
-
+                cardCallToActions(cardType, actionComponents, textComponents, viewHolder, true, "");
                 view.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
             cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
-            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
 
 
         } else if (cardType == CardConstants.GAMES_CARD_LAYOUT) {
@@ -220,7 +219,12 @@ public class CardRenderer implements View.OnLongClickListener {
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
-
+                boolean isGamesAppInstalled = convMessage.platformMessageMetadata.isInstalled;
+                if (!isGamesAppInstalled) {
+                    gameInstalledTextFiller(viewHolder);
+                }
+                String channelSource = convMessage.platformMessageMetadata.channelSource;
+                cardCallToActions(cardType, actionComponents, textComponents, viewHolder, isGamesAppInstalled, channelSource);
                 view.setTag(viewHolder);
 
             } else {
@@ -228,12 +232,6 @@ public class CardRenderer implements View.OnLongClickListener {
             }
 
             cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
-            String channelSource = convMessage.platformMessageMetadata.channelSource;
-            boolean isGamesAppInstalled = convMessage.platformMessageMetadata.isInstalled;
-            if (!isGamesAppInstalled) {
-                gameInstalledTextFiller(viewHolder);
-            }
-            cardCallToActions(cardType, actionComponents, viewHolder, isGamesAppInstalled, "");
 
 
         } else if (cardType == CardConstants.ARTICLE_CARD_LAYOUT) {
@@ -248,13 +246,12 @@ public class CardRenderer implements View.OnLongClickListener {
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
-
+                cardCallToActions(cardType, actionComponents,textComponents, viewHolder, true, "");
                 view.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
             cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
-            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
 
 
         } if (cardType == CardConstants.COLOR_CARD_LAYOUT) {
@@ -269,15 +266,14 @@ public class CardRenderer implements View.OnLongClickListener {
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
-
+                cardCallToActions(cardType, actionComponents,textComponents, viewHolder, true, "");
                 view.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
             cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
-            cardCallToActions(cardType, actionComponents, viewHolder, true, "");
-            forwardCallAction(convMessage, view);
 
+            forwardCallAction(convMessage, view);
 
         }
 
