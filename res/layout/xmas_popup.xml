@@ -88,8 +88,8 @@
             android:scaleType="centerInside"
             android:layout_alignParentRight="true"
             android:background="@null"
-            android:layout_marginTop="7dp"
-            android:layout_marginRight="7dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginRight="3dp"
             android:src="@drawable/ic_cross_popup" />
 	
 	</RelativeLayout>
