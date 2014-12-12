@@ -23,6 +23,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.CallLog;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -59,6 +60,7 @@ import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.userlogs.UserLogInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
@@ -963,6 +965,11 @@ public class MqttMessagesManager
 					}
 				}
 			}
+			if (account.has(HikeMessengerApp.BACKUP_TOKEN_SETTING))
+			{
+				String backupToken = account.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING);
+				editor.putString(HikeMessengerApp.BACKUP_TOKEN_SETTING, backupToken);
+			}
 			if (account.has(HikeConstants.MUTED))
 			{
 				JSONObject mutedGroups = account.getJSONObject(HikeConstants.MUTED);
@@ -1055,6 +1062,20 @@ public class MqttMessagesManager
 				settingEditor.commit();
 			}
 		}
+		// this logic requires the backup token which is being setup in the previous if case
+		if(data.optBoolean(HikeConstants.CALL_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.CALL_ANALYTICS_FLAG);
+		}
+		if(data.optBoolean(HikeConstants.LOCATION_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.LOCATION_ANALYTICS_FLAG);
+		}
+		if(data.optBoolean(HikeConstants.APP_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.APP_ANALYTICS_FLAG);
+		}
+		
 		editor.commit();
 		if (inviteTokenAdded)
 		{
@@ -1261,6 +1282,18 @@ public class MqttMessagesManager
 		{
 			String rewards_url = data.getString(HikeConstants.REWARDS_URL);
 			editor.putString(HikeConstants.REWARDS_URL, rewards_url);
+		}
+		if(data.optBoolean(HikeConstants.CALL_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.CALL_ANALYTICS_FLAG);
+		}
+		if(data.optBoolean(HikeConstants.LOCATION_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.LOCATION_ANALYTICS_FLAG);
+		}
+		if(data.optBoolean(HikeConstants.APP_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.APP_ANALYTICS_FLAG);
 		}
 
 		editor.commit();
