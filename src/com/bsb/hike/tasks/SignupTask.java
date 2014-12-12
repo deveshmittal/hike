@@ -592,6 +592,10 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			editor.putBoolean(HikeMessengerApp.UPGRADE_RAI_SENT, true);
 			editor.commit();
 		}
+		else
+		{
+			userName = name;
+		}
 
 		/* set the name */
 		publishProgress(new StateValue(State.NAME, userName));

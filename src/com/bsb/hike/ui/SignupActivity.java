@@ -151,19 +151,19 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 
 	private boolean msisdnErrorDuringSignup = false;
 	
-	public static final int RESTORING_BACKUP = 6;
+	public static final int RESTORING_BACKUP = 7;
 
-	public static final int BACKUP_FOUND = 5;
+	public static final int BACKUP_FOUND = 6;
 
-	public static final int SCANNING_CONTACTS = 4;
+	public static final int SCANNING_CONTACTS = 5;
 
-	public static final int GENDER = 3;
+	public static final int GENDER = 4;
 
-	public static final int NAME = 2;
+	public static final int NAME = 3;
 
-	public static final int PIN = 1;
+	public static final int PIN = 2;
 
-	public static final int NUMBER = 0;
+	public static final int NUMBER = 1;
 
 	private String countryCode;
 
@@ -348,14 +348,18 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		}
 		else
 		{
-			if (getIntent().getBooleanExtra(HikeConstants.Extras.MSISDN, false))
+			if (getIntent().hasExtra(HikeConstants.Extras.MSISDN))
 			{
-				viewFlipper.setDisplayedChild(NAME);
-				prepareLayoutForGettingName(savedInstanceState, false);
-			}
-			else
-			{
-				prepareLayoutForFetchingNumber();
+				if (getIntent().getBooleanExtra(HikeConstants.Extras.MSISDN, false))
+				{
+					viewFlipper.setDisplayedChild(NAME);
+					prepareLayoutForGettingName(savedInstanceState, false);
+				}
+				else
+				{
+					viewFlipper.setDisplayedChild(NUMBER);
+					prepareLayoutForFetchingNumber();
+				}
 			}
 
 			mTask = SignupTask.startTask(this);
@@ -376,6 +380,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		case SCANNING_CONTACTS:
 		case BACKUP_FOUND:
 		case RESTORING_BACKUP:
+		case 0:
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 			break;
 		default:
@@ -879,6 +884,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		countryPicker.setEnabled(true);
 		selectedCountryPicker.setEnabled(true);
 		enterEditText.setEnabled(true);
+		enterEditText.requestFocus();
 
 		Utils.setupCountryCodeData(this, countryCode, countryPicker, selectedCountryName, countriesArray, countriesMap, codesMap, languageMap);
 		TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
@@ -1039,6 +1045,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			fbBtn.setText(R.string.connected);
 		}
 		nextBtnContainer.setVisibility(View.VISIBLE);
+		setupActionBarTitle();
 	}
 
 	private void prepareLayoutForGender(Bundle savedInstanceState)
@@ -1897,6 +1904,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		case MSISDN:
 			if (TextUtils.isEmpty(value))
 			{
+				viewFlipper.setDisplayedChild(NUMBER);
 				prepareLayoutForFetchingNumber();
 			}
 			else
@@ -1907,18 +1915,6 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 					String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
 					Utils.removeLargerProfileImageForMsisdn(msisdn);
 				}
-				if (value.equals(HikeConstants.DONE))
-				{
-					removeAnimation();
-				}
-				/* yay, got the actual MSISDN */
-				viewFlipper.setDisplayedChild(NAME);
-				prepareLayoutForGettingName(null, false);
-				if (value.equals(HikeConstants.DONE))
-				{
-					setAnimation();
-				}
-
 			}
 			break;
 		case PULLING_PIN:
@@ -1974,14 +1970,15 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		case NAME:
 			if (TextUtils.isEmpty(value))
 			{
+				viewFlipper.setDisplayedChild(NAME);
 				prepareLayoutForGettingName(null, true);
 			}
 			break;
 		case GENDER:
 			if (TextUtils.isEmpty(value))
 			{
-				prepareLayoutForGender(null);
 				viewFlipper.setDisplayedChild(GENDER);
+				prepareLayoutForGender(null);
 			}
 			break;
 		case SCANNING_CONTACTS:

@@ -3,14 +3,14 @@
     android:id="@+id/restoring_backup_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="50dp"
-    android:gravity="center_horizontal|top"
+    android:layout_marginBottom="12dp"
+    android:gravity="center"
     android:orientation="vertical" >
 
     <LinearLayout
+        android:id="@+id/restore_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="40dp"
+        android:layout_height="300dp"
         android:gravity="center_horizontal|top"
         android:orientation="vertical" >
 
@@ -35,7 +35,7 @@
             android:id="@+id/restore_items"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="55dp"
+            android:layout_marginTop="72dp"
             android:gravity="center_horizontal" >
 
             <ImageView
@@ -100,24 +100,23 @@
         android:id="@+id/restore_success"
         android:layout_width="75dp"
         android:layout_height="75dp"
+        android:layout_alignTop="@id/restore_layout"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="154dp"
+        android:layout_marginTop="128dp"
         android:background="@drawable/bg_restore_success"
         android:scaleType="center"
-        android:src="@drawable/art_tick"
-        android:visibility="invisible" />
+        android:src="@drawable/art_tick" />
 
     <com.bsb.hike.view.CustomFontButton
         android:id="@+id/btn_retry"
         android:layout_width="180dp"
         android:layout_height="48dp"
+        android:layout_below="@id/restore_layout"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="260dp"
         android:background="@drawable/signup_button"
         android:text="@string/retry"
         android:textColor="@drawable/signup_btn_text"
         android:textSize="15sp"
-        android:textStyle="bold|italic"
-        android:visibility="invisible" />
+        android:textStyle="bold|italic" />
 
 </RelativeLayout>
