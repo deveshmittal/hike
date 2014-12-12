@@ -112,6 +112,10 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 	private SMSReceiver receiver;
 
+	/**
+	 * Making this public for preactivation case.We don't want to show any notification while the user is
+	 *  signing up.So making this public to achieve the same
+	 */
 	public static SignupTask signupTask;
 
 	private OnSignupTaskProgressUpdate onSignupTaskProgressUpdate;

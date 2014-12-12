@@ -25,7 +25,7 @@ public class RegisterToGCMTrigger extends BroadcastReceiver
 			GCMRegistrar.checkManifest(context);
 			final String regId = GCMRegistrar.getRegistrationId(context);
 
-			if ("".equals(regId))
+			if (regId.isEmpty())
 			{
 				/*
 				 * Since we are registering again, we should clear this preference

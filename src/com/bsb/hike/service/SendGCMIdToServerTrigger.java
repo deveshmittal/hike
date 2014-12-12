@@ -110,7 +110,7 @@ public class SendGCMIdToServerTrigger extends BroadcastReceiver
 		Logger.d(getClass().getSimpleName(), "Sending GCM ID");
 		final String regId = GCMRegistrar.getRegistrationId(context);
 
-		if ("".equals(regId))
+		if (regId.isEmpty())
 		{
 			Intent in = new Intent(HikeService.REGISTER_TO_GCM_ACTION);
 			context.sendBroadcast(in);

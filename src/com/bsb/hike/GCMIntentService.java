@@ -24,6 +24,8 @@ public class GCMIntentService extends GCMBaseIntentService
 	public static final String DEV_TOKEN = "dev_token";
 	
 	public static final String NOTIFICATION="notification";
+	
+	public static final String CONSTANT="1";
 
 	private HikeSharedPreferenceUtil prefs;
 
@@ -65,7 +67,7 @@ public class GCMIntentService extends GCMBaseIntentService
 		String reconnectVal = intent.getStringExtra("pushReconnect");
 		boolean reconnect = false;
 		Logger.d(getClass().getSimpleName(), "Server sent packet pushReconnect : " + reconnectVal);
-		if ("1".equals(reconnectVal))
+		if (CONSTANT.equals(reconnectVal))
 			reconnect = true;
 		String jsonString = intent.getStringExtra(HikeConstants.Extras.OFFLINE_PUSH_KEY);
 		if (null != jsonString && jsonString.length() > 0)

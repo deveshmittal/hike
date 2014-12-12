@@ -36,6 +36,8 @@ public class PreloadNotificationSchedular
 	private static final String TIMESTAMP="timestamp";
 	
 	private static final String TAG="ALARM MANAGER";
+	
+	private static final String DEFAULT_INCENTIVE="-1";
 
 	/**
 	 * 
@@ -52,7 +54,7 @@ public class PreloadNotificationSchedular
 		int id = mprefs.getData(CURRENT_ALARM_ID, 0);
 
 		long time = getTime(mprefs.getData(NOTIFICATION_TIMELINE, null), id, context);
-		Logger.i(TAG, time + "");
+		Logger.d(TAG, time + "");
 
 		if (time == 0)
 		{
@@ -155,7 +157,7 @@ public class PreloadNotificationSchedular
 
 			// notification is shown .So this is the correct incentive.
 
-			mprefs.saveData(INCENTIVE_ID, mprefs.getData(TEMP_INCENTIVE_ID, "-1"));
+			mprefs.saveData(INCENTIVE_ID, mprefs.getData(TEMP_INCENTIVE_ID, DEFAULT_INCENTIVE));
 
 		}
 
