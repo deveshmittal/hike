@@ -149,7 +149,7 @@ public class FestivePopup
 
 	private static String getStickerId(int popupType)
 	{
-		return (popupType == NEW_YEAR_POPUP) ? "008_hikinnewyear" : "002_merryxmas.png";
+		return (popupType == NEW_YEAR_POPUP) ? "008_hikinnewyear.png" : "002_merryxmas.png";
 	}
 
 	private static String getCatId(int popupType)

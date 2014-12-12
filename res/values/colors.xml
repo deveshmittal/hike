@@ -381,5 +381,6 @@
     <color name="sticker_shop_icon_pressed">#9A33B5E5</color>
     <color name="happy_new_year_popup">#31BCEE</color>
     <color name="festive_mode_bg">#D9000D1F</color>
+    <color name="festive_popup_divider">#33000000</color>
 </resources>
 	

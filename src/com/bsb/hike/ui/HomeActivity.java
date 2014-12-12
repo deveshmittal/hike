@@ -239,6 +239,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		setupMainFragment(savedInstanceState);
 		initialiseTabs();
 
+		setupFestivePopup();
+
 		if (savedInstanceState == null && dialogShowing == null)
 		{
 			
@@ -268,6 +270,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		GetFTUEContactsTask getFTUEContactsTask = new GetFTUEContactsTask();
 		Utils.executeContactInfoListResultTask(getFTUEContactsTask);
+
+	}
+
+	private void setupFestivePopup()
+	{
 		final int festivePopupType = accountPrefs.getInt(HikeConstants.SHOW_FESTIVE_POPUP, -1);
 		if (festivePopupType != -1)
 		{
@@ -275,7 +282,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				HikeSharedPreferenceUtil.getInstance(this).removeData(HikeConstants.SHOW_FESTIVE_POPUP);
 			}
-			else
+			else if(dialogShowing == null)
 			{
 				ViewStub festiveView = (ViewStub) findViewById(R.id.festive_view_stub);
 				if(festivePopupType == FestivePopup.NEW_YEAR_POPUP)
@@ -1226,7 +1233,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_MENU)
 			{
-				if (ftueAddFriendWindow != null && ftueAddFriendWindow.getVisibility() == View.VISIBLE)
+				if ((ftueAddFriendWindow != null && ftueAddFriendWindow.getVisibility() == View.VISIBLE) || dialogShowing!=null)
 				{
 					return true;
 				}
