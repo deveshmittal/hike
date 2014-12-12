@@ -14,7 +14,6 @@ import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.net.Uri;
 import android.provider.CallLog;
 
@@ -27,7 +26,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.tasks.HikeHTTPTask;
-import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -98,6 +96,14 @@ public class UserLogInfo {
 			this.installTime = installTime;
 		}
 		
+		public JSONObject toJSON() throws JSONException{
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.putOpt(PACKAGE_NAME, this.packageName);
+			jsonObj.putOpt(APPLICATION_NAME,this.applicationName);
+			jsonObj.putOpt(INSTALL_TIME, this.installTime);
+			return jsonObj;
+		}
+		
 	}
 	
 	public static class CallLogPojo {
@@ -143,11 +149,7 @@ public class UserLogInfo {
 			throws JSONException {
 		JSONArray jsonArray = new JSONArray();
 		for (AppLogPojo appLog : appLogList) {
-			JSONObject jsonObj = new JSONObject();
-			jsonObj.putOpt(APPLICATION_NAME, appLog.applicationName);
-			jsonObj.putOpt(PACKAGE_NAME, appLog.applicationName);
-			jsonObj.putOpt(INSTALL_TIME, appLog.installTime);
-			jsonArray.put(jsonObj);
+			jsonArray.put(appLog.toJSON());
 		}
 		return jsonArray;
 
