@@ -5,7 +5,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 public class DBConstants
 {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 30;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 31;
 
 	public static final int USERS_DATABASE_VERSION = 15;
 
@@ -144,13 +144,13 @@ public class DBConstants
 
 	public static final String IS_HIKE_MESSAGE = "isHikeMessage";
 
-	public static final String STICKERS_TABLE = "stickersTable";
+	public static final String STICKER_CATEGORIES_TABLE = "stickerCategoriesTable";
+	
+	public static final String _ID = "_id";
 
 	public static final String CATEGORY_ID = "categoryId";
 
 	public static final String TOTAL_NUMBER = "totalNum";
-
-	public static final String REACHED_END = "reachedEnd";
 
 	public static final String UPDATE_AVAILABLE = "updateAvailable";
 
@@ -201,4 +201,18 @@ public class DBConstants
 	public static final String HIKE_FILE_TYPE = "hikeFileType";
 
 	public static final String IS_SENT = "isSent";
+
+	public static final String CATEGORY_NAME = "categoryName";
+
+	public static final String IS_VISIBLE = "isVisible";
+
+	public static final String IS_CUSTOM = "isCustom";
+
+	public static final String IS_ADDED = "isAdded";
+
+	public static final String CATEGORY_INDEX = "catIndex";
+
+	public static final String CATEGORY_SIZE = "categorySize";
+
+	public static final String STICKER_SHOP_TABLE = "stickerShopTable";
 }

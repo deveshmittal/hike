@@ -11,9 +11,11 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
@@ -49,6 +51,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	protected Boolean doInBackground(Void... unused)
 	{
 		FileTransferManager.getInstance(ctx).shutDownAll();
+		StickerDownloadManager.getInstance(ctx).shutDownAll();
 		HikeConversationsDatabase convDb = HikeConversationsDatabase.getInstance();
 		Editor editor = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
 		Editor appPrefEditor = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
@@ -66,6 +69,10 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			app.disconnectFromService();
 			ctx.stopService(new Intent(ctx, HikeService.class));
 
+			if (delete)
+			{
+				//DBBackupRestore.getInstance(ctx).deleteAllFiles();
+			}
 			ContactManager.getInstance().deleteAll();
 			convDb.deleteAll();
 			HikeMessengerApp.getLruCache().clearIconCache();
@@ -83,6 +90,11 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			}
 			StickerManager.getInstance().deleteStickers();
 
+			/*
+			 * We need to do this where on reset/delete account. We need to we need to run initial setup for stickers. for normal cases it runs from onCreate method of
+			 * HikeMessangerApp but in this case onCreate won't be called and user can complete signup.
+			 */
+			app.startUpdgradeIntent();
 			return true;
 		}
 		catch (Exception e)
