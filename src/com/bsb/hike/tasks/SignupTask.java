@@ -611,76 +611,61 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		if (!restored)
 		{
 			this.data = null;
-			if (DBBackupRestore.getInstance(context).isBackupAvailable())
+			try
 			{
-				publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
-				// After publishing 'backup available' the task waits for the user to make an input(Restore or Skip)
-				synchronized (this)
+				if (DBBackupRestore.getInstance(context).isBackupAvailable())
 				{
-					try
+					publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
+					// After publishing 'backup available' the task waits for the user to make an input(Restore or Skip)
+					synchronized (this)
 					{
 						this.wait();
 					}
-					catch (InterruptedException e)
-					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						Logger.d("backup","Interrupted while waiting for user's choice on restore.");
-					}
 				}
-			}
-	
-			/*
-			 * The following while loop executes restore operation(if user has selected so)
-			 * As soon as the loop starts it resets itself, so it wont execute again unless its again
-			 * set by the user.
-			 */
-			while (!TextUtils.isEmpty(this.data))
-			{
-				this.data = null;
-				publishProgress(new StateValue(State.RESTORING_BACKUP,null));
-				boolean status = DBBackupRestore.getInstance(context).restoreDB();
-				// A delay so that user is able to understand the UI animations.
-				synchronized (this)
+		
+				/*
+				 * The following while loop executes restore operation(if user has selected so)
+				 * As soon as the loop starts it resets itself, so it wont execute again unless its again
+				 * set by the user.
+				 */
+				while (!TextUtils.isEmpty(this.data))
 				{
-					try
+					this.data = null;
+					publishProgress(new StateValue(State.RESTORING_BACKUP,null));
+					boolean status = DBBackupRestore.getInstance(context).restoreDB();
+					// A delay so that user is able to understand the UI animations.
+					synchronized (this)
 					{
 						this.wait(HikeConstants.BACKUP_RESTORE_UI_DELAY);
 					}
-					catch (InterruptedException e)
+					if (status)
 					{
-						e.printStackTrace();
+						ContactManager.getInstance().init(context);
+						publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString()));
 					}
-				}
-				if (status)
-				{
-					ContactManager.getInstance().init(context);
-					publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString()));
-				}
-				else
-				{
-					publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.FALSE.toString()));
-					// After publishing 'restore failed' the task waits for the user to again make an input(Restore or Skip)
-					synchronized (this)
+					else
 					{
-						try
+						publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.FALSE.toString()));
+						// After publishing 'restore failed' the task waits for the user to again make an input(Restore or Skip)
+						synchronized (this)
 						{
 							this.wait();
 						}
-						catch (InterruptedException e)
-						{
-							e.printStackTrace();
-							Logger.d("backup","Interrupted while waiting for user's post restore animation to complete.");
-						}
 					}
 				}
+				this.data = null;
+				if (!isCancelled())
+				{
+					Editor editor = settings.edit();
+					editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+					editor.commit();
+				}
 			}
-			this.data = null;
-			if (!isCancelled())
+			catch (InterruptedException e)
 			{
-				Editor editor = settings.edit();
-				editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
-				editor.commit();
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				Logger.d("backup","Interrupted while waiting for user's choice on restore.");
 			}
 		}
 		Logger.d("SignupTask", "Publishing Token_Created");
