@@ -39,6 +39,7 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.IconLoader;
+import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 import com.bsb.hike.smartImageLoader.SharedFileImageLoader;
 import com.bsb.hike.smartImageLoader.TimelineImageLoader;
@@ -49,12 +50,7 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
 public class ProfileAdapter extends ArrayAdapter<ProfileItem>
-{
-
-	public static final String PROFILE_PIC_SUFFIX = "profilePic";
-	
-	public static final String PROFILE_ROUND_SUFFIX = "round";
-	
+{		
 	public static final String OPEN_GALLERY = "OpenGallery";
 	
 	public static final String IMAGE_TAG = "image";
@@ -375,7 +371,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem>
 			String contmsisdn = mContactInfo.getMsisdn();
 			String contname = TextUtils.isEmpty(mContactInfo.getName()) ? mContactInfo.getMsisdn() : mContactInfo.getName();
 			viewHolder.text.setText(contname);
-			String mapedId = contmsisdn + PROFILE_PIC_SUFFIX;
+			String mapedId = contmsisdn + ProfileActivity.PROFILE_PIC_SUFFIX;
 			ImageViewerInfo imageViewerInf = new ImageViewerInfo(mapedId, null, false, !ContactManager.getInstance().hasIcon(contmsisdn));
 			viewHolder.image.setTag(imageViewerInf);
 			if (profilePreview == null)

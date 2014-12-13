@@ -1,7 +1,6 @@
 package com.bsb.hike.service;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +23,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.CallLog;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -47,6 +47,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
@@ -59,6 +60,7 @@ import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.userlogs.UserLogInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
@@ -963,6 +965,11 @@ public class MqttMessagesManager
 					}
 				}
 			}
+			if (account.has(HikeMessengerApp.BACKUP_TOKEN_SETTING))
+			{
+				String backupToken = account.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING);
+				editor.putString(HikeMessengerApp.BACKUP_TOKEN_SETTING, backupToken);
+			}
 			if (account.has(HikeConstants.MUTED))
 			{
 				JSONObject mutedGroups = account.getJSONObject(HikeConstants.MUTED);
@@ -1055,6 +1062,20 @@ public class MqttMessagesManager
 				settingEditor.commit();
 			}
 		}
+		// this logic requires the backup token which is being setup in the previous if case
+		if(data.optBoolean(HikeConstants.CALL_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.CALL_ANALYTICS_FLAG);
+		}
+		if(data.optBoolean(HikeConstants.LOCATION_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.LOCATION_ANALYTICS_FLAG);
+		}
+		if(data.optBoolean(HikeConstants.APP_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.APP_ANALYTICS_FLAG);
+		}
+		
 		editor.commit();
 		if (inviteTokenAdded)
 		{
@@ -1262,6 +1283,18 @@ public class MqttMessagesManager
 			String rewards_url = data.getString(HikeConstants.REWARDS_URL);
 			editor.putString(HikeConstants.REWARDS_URL, rewards_url);
 		}
+		if(data.optBoolean(HikeConstants.CALL_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.CALL_ANALYTICS_FLAG);
+		}
+		if(data.optBoolean(HikeConstants.LOCATION_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.LOCATION_ANALYTICS_FLAG);
+		}
+		if(data.optBoolean(HikeConstants.APP_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.APP_ANALYTICS_FLAG);
+		}
 
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
@@ -1468,6 +1501,41 @@ public class MqttMessagesManager
 			{
 				HikeSharedPreferenceUtil.getInstance(context).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, true);
 			}
+		}
+		
+		else if (HikeConstants.ADD_CATEGORY.equals(subType))
+		{
+			if((!data.has(StickerManager.CATEGORY_ID)) || (!data.has(HikeConstants.CAT_NAME)))
+			{
+				/**
+				 * We are returning if we don't find category Id or Category name in the MQTT packet.
+				 */
+				
+				Logger.d("SaveSticker", "Did not receive category Id and category Name. Returning");
+				return;
+			}
+			
+			String categoryId = data.getString(StickerManager.CATEGORY_ID);
+			String categoryName = data.getString(HikeConstants.CAT_NAME);
+			int stickerCount = data.optInt(HikeConstants.COUNT, -1);
+			int categorySize = data.optInt(HikeConstants.UPDATED_SIZE, -1);
+			int position = data.optInt(HikeConstants.PALLETE_POSITION, -1);
+			
+			/**
+			 * Creating the sticker object here
+			 */
+			StickerCategory stickerCategory = new StickerCategory(categoryId);
+			stickerCategory.setCategoryName(categoryName);
+			stickerCategory.setTotalStickers(stickerCount == -1 ? 0 : stickerCount);
+			stickerCategory.setCategorySize(categorySize == -1 ? 0 : categorySize);
+			int pos = (position < 1 ? (HikeConversationsDatabase.getInstance().getMaxStickerCategoryIndex() + 1) : position);
+			pos = (pos < 1 ? StickerManager.DEFAULT_POSITION : pos);
+			stickerCategory.setCategoryIndex(pos);  //Choosing it's index based on the above logic
+			stickerCategory.setUpdateAvailable(true);  //To show the green badge on category
+			stickerCategory.setVisible(true);	//To make it visible in pallete
+			stickerCategory.setState(StickerCategory.NONE);
+			
+			StickerManager.getInstance().addNewCategoryInPallete(stickerCategory);
 		}
 	}
 

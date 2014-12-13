@@ -41,6 +41,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -186,7 +187,7 @@ public class FileTransferManager extends BroadcastReceiver
 			int threadCount = threadNumber.getAndIncrement();
 			Thread t = new Thread(r);
 			// This approach reduces resource competition between the Runnable object's thread and the UI thread.
-			t.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+			t.setPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE + android.os.Process.THREAD_PRIORITY_BACKGROUND);
 			t.setName("FT Thread-" + threadCount);
 			Logger.d(getClass().getSimpleName(), "Running FT thread : " + t.getName());
 			return t;
@@ -233,6 +234,14 @@ public class FileTransferManager extends BroadcastReceiver
 				e.printStackTrace();
 			}
 
+			if(task._state == FTState.COMPLETED)
+			{
+				HikeFile hikefile = ((ConvMessage) task.userContext).getMetadata().getHikeFiles().get(0);
+				FTAnalyticEvents analyticEvent = FTAnalyticEvents.getAnalyticEvents(getAnalyticFile(hikefile.getFile(), task.msgId));
+				String network = analyticEvent.mNetwork + "/" + getNetworkTypeString();
+				analyticEvent.sendFTSuccessFailureEvent(network, hikefile.getFileSize(), FTAnalyticEvents.FT_SUCCESS);
+				deleteLogFile(task.msgId, hikefile.getFile());
+			}
 			if (task instanceof DownloadFileTask)
 				((DownloadFileTask) task).postExecute(result);
 			else if (task instanceof UploadFileTask)
@@ -318,7 +327,7 @@ public class FileTransferManager extends BroadcastReceiver
 	}
 
 	public void uploadFile(String msisdn, File sourceFile, String fileKey, String fileType, HikeFileType hikeFileType, boolean isRec, boolean isForwardMsg, boolean isRecipientOnHike,
-			long recordingDuration)
+			long recordingDuration, int attachement)
 	{
 		if(taskOverflowLimitAchieved())
 			return;
@@ -327,7 +336,7 @@ public class FileTransferManager extends BroadcastReceiver
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
 		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, msisdn, sourceFile, fileKey, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike,
-				recordingDuration);
+				recordingDuration, attachement);
 		// UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, convMessage, isRecipientOnHike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
@@ -335,7 +344,7 @@ public class FileTransferManager extends BroadcastReceiver
 	}
 	
 	public void uploadFile(ArrayList<ContactInfo> contactList, File sourceFile, String fileKey, String fileType, HikeFileType hikeFileType, boolean isRec, boolean isForwardMsg, boolean isRecipientOnHike,
-			long recordingDuration)
+			long recordingDuration, int attachement)
 	{
 		if(taskOverflowLimitAchieved())
 			return;
@@ -344,7 +353,7 @@ public class FileTransferManager extends BroadcastReceiver
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
 		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, contactList, sourceFile, fileKey, fileType, hikeFileType, isRec, isForwardMsg, isRecipientOnHike,
-				recordingDuration);
+				recordingDuration, attachement);
 		// UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, convMessage, isRecipientOnHike);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
@@ -389,7 +398,7 @@ public class FileTransferManager extends BroadcastReceiver
 		settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		String uId = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, picasaUri, hikeFileType, msisdn, isRecipientOnHike);
+		UploadFileTask task = new UploadFileTask(handler, fileTaskMap, context, token, uId, picasaUri, hikeFileType, msisdn, isRecipientOnHike, FTAnalyticEvents.OTHER_ATTACHEMENT);
 		MyFutureTask ft = new MyFutureTask(task);
 		task.setFutureTask(ft);
 		pool.execute(ft);
@@ -457,7 +466,7 @@ public class FileTransferManager extends BroadcastReceiver
 		_instance = null;
 	}
 
-	public void cancelTask(long msgId, File mFile, boolean sent)
+	public void cancelTask(long msgId, File mFile, boolean sent, int fileSize)
 	{
 		FileSavedState fss;
 		if (sent)
@@ -482,6 +491,10 @@ public class FileTransferManager extends BroadcastReceiver
 					tempDownloadedFile.delete();
 
 			}
+			FTAnalyticEvents analyticEvent = FTAnalyticEvents.getAnalyticEvents(getAnalyticFile(mFile, msgId));
+			String network = analyticEvent.mNetwork + "/" + getNetworkTypeString();
+			analyticEvent.sendFTSuccessFailureEvent(network, fileSize, FTAnalyticEvents.FT_FAILED);
+			deleteLogFile(msgId, mFile);
 		}
 	}
 
@@ -493,6 +506,7 @@ public class FileTransferManager extends BroadcastReceiver
 			FileTransferBase task = ((MyFutureTask) obj).getTask();
 			task.setPausedProgress(task._bytesTransferred);
 			task.setState(FTState.PAUSED);
+			task.analyticEvents.mPauseCount += 1;
 			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 			Logger.d(getClass().getSimpleName(), "pausing the task....");
 		}
@@ -502,6 +516,15 @@ public class FileTransferManager extends BroadcastReceiver
 	public void deleteStateFile(long msgId, File mFile)
 	{
 		String fName = mFile.getName() + ".bin." + msgId;
+		File f = new File(HIKE_TEMP_DIR, fName);
+		if (f != null)
+			f.delete();
+	}
+
+	// this will be used when user deletes corresponding chat bubble
+	public void deleteLogFile(long msgId, File mFile)
+	{
+		String fName = mFile.getName() + ".log." + msgId;
 		File f = new File(HIKE_TEMP_DIR, fName);
 		if (f != null)
 			f.delete();
@@ -821,5 +844,36 @@ public class FileTransferManager extends BroadcastReceiver
 				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 			}
 		}
+	}
+
+	public File getAnalyticFile(File file, long  msgId)
+	{
+		return new File(FileTransferManager.getInstance(context).getHikeTempDir(), file.getName() + ".log." + msgId);
+	}
+
+	public String getNetworkTypeString()
+	{
+		String netTypeString = "n";
+		switch (getNetworkType())
+		{
+			case NO_NETWORK:
+				netTypeString = "n";
+				break;
+			case TWO_G:
+				netTypeString = "2g";
+				break;
+			case THREE_G:
+				netTypeString = "3g";
+				break;
+			case FOUR_G:
+				netTypeString = "4g";
+				break;
+			case WIFI:
+				netTypeString = "wifi";
+				break;
+			default:
+				break;
+		}
+		return netTypeString;
 	}
 }

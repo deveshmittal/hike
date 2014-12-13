@@ -30,6 +30,7 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.tasks.ProfileImageLoader;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -96,7 +97,7 @@ public class ImageViewerFragment extends SherlockFragment implements LoaderCallb
 		key = mappedId;
 		if (!isStatusImage)
 		{
-			int idx = key.lastIndexOf(ProfileAdapter.PROFILE_PIC_SUFFIX);
+			int idx = key.lastIndexOf(ProfileActivity.PROFILE_PIC_SUFFIX);
 			if (idx > 0)
 				key = new String(key.substring(0, idx));
 			hasCustomImage = ContactManager.getInstance().hasIcon(key);

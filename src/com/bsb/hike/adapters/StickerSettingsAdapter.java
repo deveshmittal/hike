@@ -392,7 +392,7 @@ public class StickerSettingsAdapter extends BaseAdapter implements DragSortListe
 		return lastVisibleIndex;
 	}
 	
-	public StickerCategory getDrggedCategory()
+	public StickerCategory getDraggedCategory()
 	{
 		return draggedCategory;
 	}

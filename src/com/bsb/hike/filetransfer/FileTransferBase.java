@@ -104,6 +104,8 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	
 	protected int pausedProgress ;
 
+	protected FTAnalyticEvents analyticEvents;
+
 	protected FileTransferBase(Handler handler, ConcurrentHashMap<Long, FutureTask<FTResult>> fileTaskMap, Context ctx, File destinationFile, long msgId, HikeFileType hikeFileType)
 	{
 		this.handler = handler;
@@ -334,5 +336,4 @@ public abstract class FileTransferBase implements Callable<FTResult>
 	{
 		this.pausedProgress = pausedProgress;
 	}
-
 }
