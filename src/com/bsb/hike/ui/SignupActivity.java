@@ -150,7 +150,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	private boolean addressBookError = false;
 
 	private boolean msisdnErrorDuringSignup = false;
-	
+
+	public static final int POST_SIGNUP = 8;
+
 	public static final int RESTORING_BACKUP = 7;
 
 	public static final int BACKUP_FOUND = 6;
@@ -335,6 +337,9 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 			case RESTORING_BACKUP:
 				prepareLayoutForRestoringAnimation(savedInstanceState,null);
 				break;
+			case POST_SIGNUP:
+				prepareLayoutForPostSignup(savedInstanceState);
+				break;
 			}
 			if (savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
 			{
@@ -376,15 +381,13 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		int displayedChild = viewFlipper.getDisplayedChild();
 		switch (displayedChild)
 		{
-		case GENDER:
-		case SCANNING_CONTACTS:
-		case BACKUP_FOUND:
-		case RESTORING_BACKUP:
-		case 0:
-			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+		case NUMBER:
+		case PIN:
+		case NAME:
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 			break;
 		default:
-			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 			break;
 		}
 	}
@@ -434,7 +437,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		{
 			mActionBarTitle.setText(R.string.tell_us_more);
 		}
-		else if (displayedChild == SCANNING_CONTACTS)
+		else if (displayedChild == SCANNING_CONTACTS || displayedChild == POST_SIGNUP)
 		{
 			mActionBarTitle.setText("");
 		}
@@ -656,8 +659,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	{
 		if (viewFlipper.getDisplayedChild() == BACKUP_FOUND || viewFlipper.getDisplayedChild() == RESTORING_BACKUP)
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.BACKUP_RESTORE_SKIP);
+			Utils.logEvent(SignupActivity.this, HikeConstants.LogEvent.BACKUP_RESTORE_SKIP);
 			mTask.addUserInput(null);
+			viewFlipper.setDisplayedChild(POST_SIGNUP);
+			prepareLayoutForPostSignup(null);
 			return;
 		}
 		if (invalidNum != null)
@@ -1147,7 +1152,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				@Override
 				public void onClick(View v)
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.BACKUP_RESTORE_RETRY);
+					Utils.logEvent(SignupActivity.this, HikeConstants.LogEvent.BACKUP_RESTORE_RETRY);
 					nextBtnContainer.setVisibility(View.GONE);
 					restoreProgress.setVisibility(View.VISIBLE);
 					restoreFail.setVisibility(View.INVISIBLE);
@@ -1164,6 +1169,12 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				onRestoreFailAnimation();
 			}
 		}
+	}
+
+	private void prepareLayoutForPostSignup(Bundle savedInstanceState)
+	{
+		nextBtnContainer.setVisibility(View.GONE);
+		setupActionBarTitle();
 	}
 	
 	private void preRestoreAnimation()
@@ -1670,7 +1681,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		@Override
 		public void onClick(View v)
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.BACKUP_RESTORE);
+			Utils.logEvent(SignupActivity.this, HikeConstants.LogEvent.BACKUP_RESTORE);
 			mTask.addUserInput("true");
 		}
 	};
