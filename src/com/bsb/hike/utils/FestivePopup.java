@@ -13,6 +13,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout.LayoutParams;
@@ -80,7 +81,6 @@ public class FestivePopup
 				{
 					if(popupType == XMAS_POPUP)
 					{
-						Logger.d("deepanshu","xmas popup");
 						activity.findViewById(R.id.snowman_footer).setVisibility(View.VISIBLE);
 						addMoveUpAnimation(activity.findViewById(R.id.snowman_footer));
 					}
@@ -123,7 +123,7 @@ public class FestivePopup
 	{
 		activity.findViewById(R.id.festive_popup_parent).setVisibility(View.VISIBLE);
 
-		addFallAnimation(activity.findViewById(R.id.festive_popup_parent));
+		addFallAnimation(activity, activity.findViewById(R.id.festive_popup_parent), activity.findViewById(R.id.sticker_popup_image));
 
 		activity.findViewById(R.id.btn_ok).setOnClickListener(new View.OnClickListener() {
 			
@@ -165,8 +165,10 @@ public class FestivePopup
 		view.startAnimation(anim);
 	}
 
-	private static void addFallAnimation(View view)
+	private static void addFallAnimation(final Activity activity, View view, final View stickerView)
 	{
+		Handler animHandler = new Handler();
+
 		AnimationSet boxFallAnimSet = new AnimationSet(true);
 		boxFallAnimSet.setInterpolator(new DecelerateInterpolator(1.5f));
 
@@ -179,6 +181,18 @@ public class FestivePopup
 		boxFallAnimSet.addAnimation(boxFallAnim);
 
 		view.startAnimation(boxFallAnimSet);
+		animHandler.postDelayed(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				stickerView.setVisibility(View.VISIBLE);
+
+				AnimationSet animSet = (AnimationSet) AnimationUtils.loadAnimation(activity, R.anim.scale_out_rotate);
+				stickerView.startAnimation(animSet);
+			}
+		}, 700);
 	}
 	
 	public static void stopFestiveAnimAndPopup(final Activity activity)
