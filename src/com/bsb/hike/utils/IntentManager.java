@@ -10,17 +10,21 @@ import com.bsb.hike.R;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.ConnectedAppsActivity;
 import com.bsb.hike.ui.CreditsActivity;
+import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.ui.SettingsActivity;
+import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
+import com.bsb.hike.ui.WelcomeActivity;
 import com.google.android.gms.internal.co;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Message;
 import android.text.TextUtils;
 import android.widget.Toast;
 
@@ -197,5 +201,30 @@ public class IntentManager
 	public static void openConnectedApps(Context appContext)
 	{
 		appContext.startActivity(new Intent(appContext, ConnectedAppsActivity.class));
+	}
+	
+	public static void openHikeSDKAuth(Context appContext, Message msg)
+	{
+		Intent hikeAuthIntent = new Intent("com.bsb.hike.ui.HikeAuthActivity");
+		hikeAuthIntent.putExtra(HikeAuthActivity.MESSAGE_INDEX, Message.obtain(msg));
+		hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		appContext.startActivity(hikeAuthIntent);
+	}
+
+	public static void openWelcomeActivity(Context appContext)
+	{
+		Intent i = new Intent(appContext, WelcomeActivity.class);
+		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		appContext.startActivity(i);
+	}
+
+	public static void openSignupActivity(Context appContext)
+	{
+		Intent i = new Intent(appContext, SignupActivity.class);
+		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		appContext.startActivity(i);
 	}
 }

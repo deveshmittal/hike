@@ -31,6 +31,7 @@ import com.bsb.hike.sdk.HikeSDKResponseCode;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.utils.HikeSDKConstants;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -42,14 +43,22 @@ import com.bsb.hike.utils.Utils;
  */
 public class HikeSDKRequestHandler extends Handler implements Listener
 {
+	
 	private Context mContext;
 
+	/** The cached message. */
 	private static Message cachedMessage;
 
 	private String cachedToken;
 
 	private Handler authUIHandler;
 
+	/**
+	 * Instantiates a new hike sdk request handler.
+	 *
+	 * @param argContext the arg context
+	 * @param looper the looper
+	 */
 	public HikeSDKRequestHandler(final Context argContext, Looper looper)
 	{
 		super(looper);
@@ -57,13 +66,11 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 		{
 			public void handleMessage(android.os.Message msg)
 			{
-				Logger.d("THREAD", Thread.currentThread().getName());
-				Intent hikeAuthIntent = new Intent("com.bsb.hike.ui.HikeAuthActivity");
-				hikeAuthIntent.putExtra(HikeAuthActivity.MESSAGE_INDEX, Message.obtain(msg));
-				hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				hikeAuthIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-				argContext.startActivity(hikeAuthIntent);
-
+				if (!Utils.requireAuth(mContext, true))
+				{
+					return;
+				}
+				IntentManager.openHikeSDKAuth(mContext, Message.obtain(msg));
 			};
 		};
 
@@ -72,9 +79,9 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 	}
 
 	/**
-	 * Return error/failed operation message back to caller messenger
-	 * 
-	 * @param argMessage
+	 * Return error/failed operation message back to caller messenger.
+	 *
+	 * @param argMessage the arg message
 	 */
 	private void returnExceptionMessageToCaller(Message argMessage)
 	{
@@ -91,78 +98,77 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 		return;
 	}
 
+	/* (non-Javadoc)
+	 * @see android.os.Handler#handleMessage(android.os.Message)
+	 */
 	@Override
 	public void handleMessage(Message msg)
 	{
 		super.handleMessage(msg);
 
-		Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "Handle message: Verifying!");
-
-		if (msg.arg2 == HikeSDKResponseCode.STATUS_FAILED)
+		try
 		{
-			returnExceptionMessageToCaller(msg);
-			return;
-		}
+			Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "Handle message: Verifying!");
 
-		if (!HikeAuthActivity.verifyRequest(mContext, Message.obtain(msg)))
-		{
-			cachedMessage = Message.obtain(msg);
-			authUIHandler.sendMessage(Message.obtain(msg));
-			return;
-		}
-
-		Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "Handle message: Verified!");
-
-		Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "message.what== " + msg.what);
-
-		if (msg.what == HikeService.SDK_REQ_GET_LOGGED_USER_INFO)
-		{
-
-			Bundle reqUserInfoBundle = msg.getData();
-
-			if (reqUserInfoBundle == null || reqUserInfoBundle.isEmpty())
+			if (msg.arg2 == HikeSDKResponseCode.STATUS_FAILED)
 			{
 				returnExceptionMessageToCaller(msg);
 				return;
 			}
 
-			postAnalyticsEvents(reqUserInfoBundle);
-
-			// User info is saved in shared preferences
-			SharedPreferences preferences = mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);
-
-			ContactInfo userInfo = Utils.getUserContactInfo(preferences);
-
-			JSONObject reqUserInfoResponseJSON = new JSONObject();
-
-			JSONArray reqUserInfoJSONArray = new JSONArray();
-
-			if (userInfo != null)
+			if (!HikeAuthActivity.verifyRequest(mContext, Message.obtain(msg)))
 			{
-				JSONObject friendJSON = new JSONObject();
-
-				String contactId = userInfo.getId();
-
-				String contactName = userInfo.getNameOrMsisdn();
-
-				if (!TextUtils.isEmpty(contactId) && !TextUtils.isEmpty(contactName))
-				{
-					try
-					{
-						friendJSON.put(HikeUser.HIKE_USER_ID_KEY, "-1");
-
-						friendJSON.put(HikeUser.HIKE_USER_NAME_KEY, contactName);
-					}
-					catch (JSONException e)
-					{
-						e.printStackTrace();
-					}
-
-					reqUserInfoJSONArray.put(friendJSON);
-				}
+				cachedMessage = Message.obtain(msg);
+				authUIHandler.sendMessage(Message.obtain(msg));
+				return;
 			}
-			try
+
+			Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "Handle message: Verified!");
+
+			Logger.d(HikeSDKRequestHandler.class.getCanonicalName(), "message.what== " + msg.what);
+
+			if (msg.what == HikeService.SDK_REQ_GET_LOGGED_USER_INFO)
 			{
+
+				if (!isMessageValid(msg))
+				{
+					return;
+				}
+				Bundle reqUserInfoBundle = msg.getData();
+
+				// User info is saved in shared preferences
+				SharedPreferences preferences = mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE);
+
+				ContactInfo userInfo = Utils.getUserContactInfo(preferences);
+
+				JSONObject reqUserInfoResponseJSON = new JSONObject();
+
+				JSONArray reqUserInfoJSONArray = new JSONArray();
+
+				if (userInfo != null)
+				{
+					JSONObject friendJSON = new JSONObject();
+
+					String contactId = userInfo.getId();
+
+					String contactName = userInfo.getNameOrMsisdn();
+
+					if (!TextUtils.isEmpty(contactId) && !TextUtils.isEmpty(contactName))
+					{
+						try
+						{
+							friendJSON.put(HikeUser.HIKE_USER_ID_KEY, "-1");
+
+							friendJSON.put(HikeUser.HIKE_USER_NAME_KEY, contactName);
+						}
+						catch (JSONException e)
+						{
+							e.printStackTrace();
+						}
+
+						reqUserInfoJSONArray.put(friendJSON);
+					}
+				}
 				reqUserInfoResponseJSON.put(HikeUser.HIKE_USERS_LIST_ID, reqUserInfoJSONArray);
 
 				if (cachedToken != null)
@@ -170,143 +176,122 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 					reqUserInfoResponseJSON.put(HikeSDKConstants.HIKE_REQ_SDK_CLIENT_ACC_TOKEN, cachedToken);
 					cachedToken = null;
 				}
-			}
-			catch (JSONException e)
-			{
-				returnExceptionMessageToCaller(msg);
-				e.printStackTrace();
-				return;
-			}
 
-			reqUserInfoBundle.putString(HikeSDKConstants.HIKE_REQ_DATA_ID, reqUserInfoResponseJSON.toString());
+				reqUserInfoBundle.putString(HikeSDKConstants.HIKE_REQ_DATA_ID, reqUserInfoResponseJSON.toString());
 
-			msg.setData(reqUserInfoBundle);
+				msg.setData(reqUserInfoBundle);
 
-			// Set STATUS_OK
-			msg.arg2 = HikeSDKResponseCode.STATUS_OK;
+				// Set STATUS_OK
+				msg.arg2 = HikeSDKResponseCode.STATUS_OK;
 
-			try
-			{
 				msg.replyTo.send(msg);
-			}
-			catch (RemoteException e)
-			{
-				returnExceptionMessageToCaller(msg);
-				e.printStackTrace();
-				return;
-			}
 
-		}
-		else if (msg.what == HikeService.SDK_REQ_GET_USERS)
-		{
-
-			Bundle reqGetFriendsBundle = msg.getData();
-
-			if (reqGetFriendsBundle == null || reqGetFriendsBundle.isEmpty())
-			{
-				returnExceptionMessageToCaller(msg);
-				return;
 			}
+			else if (msg.what == HikeService.SDK_REQ_GET_USERS)
+			{
 
-			postAnalyticsEvents(reqGetFriendsBundle);
+				Bundle reqGetFriendsBundle = msg.getData();
 
-			JSONObject reqGetFriendsData = null;
-
-			try
-			{
-				reqGetFriendsData = new JSONObject(reqGetFriendsBundle.getString(HikeSDKConstants.HIKE_REQ_DATA_ID));
-			}
-			catch (JSONException e)
-			{
-				e.printStackTrace();
-				returnExceptionMessageToCaller(msg);
-				return;
-			}
-			String requestFilter = "-1";
-			try
-			{
-				requestFilter = reqGetFriendsData.getString(HikeSDKConstants.HIKE_REQ_FILTER_ID);
-			}
-			catch (JSONException e)
-			{
-				e.printStackTrace();
-			}
-
-			List<ContactInfo> contacts = null;
-
-			int reqFilterKey = 0;
-			try
-			{
-				reqFilterKey = Integer.parseInt(requestFilter);
-			}
-			catch (NumberFormatException nfe)
-			{
-				nfe.printStackTrace();
-				returnExceptionMessageToCaller(msg);
-				return;
-			}
-
-			switch (reqFilterKey)
-			{
-			case -1:
-				// Favourites
-				contacts = ContactManager.getInstance().getContactsOfFavoriteType(FavoriteType.FRIEND, 1, "");
-				break;
-			case -2:
-				// On hike
-				contacts = new ArrayList<ContactInfo>();
-				List<ContactInfo> allContacts = ContactManager.getInstance().getAllContacts();
-				for (ContactInfo contact : allContacts)
+				if (!isMessageValid(msg))
 				{
-					if (contact.isOnhike())
+					return;
+				}
+
+				JSONObject reqGetFriendsData = null;
+
+				try
+				{
+					reqGetFriendsData = new JSONObject(reqGetFriendsBundle.getString(HikeSDKConstants.HIKE_REQ_DATA_ID));
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+					returnExceptionMessageToCaller(msg);
+					return;
+				}
+				String requestFilter = "-1";
+				try
+				{
+					requestFilter = reqGetFriendsData.getString(HikeSDKConstants.HIKE_REQ_FILTER_ID);
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+
+				List<ContactInfo> contacts = null;
+
+				int reqFilterKey = 0;
+				try
+				{
+					reqFilterKey = Integer.parseInt(requestFilter);
+				}
+				catch (NumberFormatException nfe)
+				{
+					nfe.printStackTrace();
+					returnExceptionMessageToCaller(msg);
+					return;
+				}
+
+				switch (reqFilterKey)
+				{
+				case -1:
+					// Favourites
+					contacts = ContactManager.getInstance().getContactsOfFavoriteType(FavoriteType.FRIEND, 1, "");
+					break;
+				case -2:
+					// On hike
+					contacts = new ArrayList<ContactInfo>();
+					List<ContactInfo> allContacts = ContactManager.getInstance().getAllContacts();
+					for (ContactInfo contact : allContacts)
 					{
-						contacts.add(contact);
+						if (contact.isOnhike())
+						{
+							contacts.add(contact);
+						}
+					}
+					break;
+				case -3:
+					// Not on hike
+					contacts = new ArrayList<ContactInfo>();
+					List<Pair<AtomicBoolean, ContactInfo>> nonHikePair = ContactManager.getInstance().getNonHikeContacts();
+					for (Pair<AtomicBoolean, ContactInfo> pair : nonHikePair)
+					{
+						contacts.add(pair.second);
+					}
+					break;
+				default:
+					// All contacts
+					contacts = ContactManager.getInstance().getAllContacts();
+				}
+
+				JSONObject responseJSON = new JSONObject();
+
+				JSONArray friendsListJSON = new JSONArray();
+
+				for (ContactInfo contact : contacts)
+				{
+					JSONObject friendJSON = new JSONObject();
+
+					String contactId = contact.getId();
+
+					String contactName = contact.getNameOrMsisdn();
+
+					if (!TextUtils.isEmpty(contactId) && !TextUtils.isEmpty(contactName))
+					{
+						try
+						{
+							friendJSON.put(HikeUser.HIKE_USER_ID_KEY, contactId);
+							friendJSON.put(HikeUser.HIKE_USER_NAME_KEY, contactName);
+						}
+						catch (JSONException jsonException)
+						{
+							jsonException.printStackTrace();
+						}
+						friendsListJSON.put(friendJSON);
 					}
 				}
-				break;
-			case -3:
-				// Not on hike
-				contacts = new ArrayList<ContactInfo>();
-				List<Pair<AtomicBoolean, ContactInfo>> nonHikePair = ContactManager.getInstance().getNonHikeContacts();
-				for (Pair<AtomicBoolean, ContactInfo> pair : nonHikePair)
-				{
-					contacts.add(pair.second);
-				}
-				break;
-			default:
-				// All contacts
-				contacts = ContactManager.getInstance().getAllContacts();
-			}
 
-			JSONObject responseJSON = new JSONObject();
-
-			JSONArray friendsListJSON = new JSONArray();
-
-			for (ContactInfo contact : contacts)
-			{
-				JSONObject friendJSON = new JSONObject();
-
-				String contactId = contact.getId();
-
-				String contactName = contact.getNameOrMsisdn();
-
-				if (!TextUtils.isEmpty(contactId) && !TextUtils.isEmpty(contactName))
-				{
-					try
-					{
-						friendJSON.put(HikeUser.HIKE_USER_ID_KEY, contactId);
-						friendJSON.put(HikeUser.HIKE_USER_NAME_KEY, contactName);
-					}
-					catch (JSONException jsonException)
-					{
-						jsonException.printStackTrace();
-					}
-					friendsListJSON.put(friendJSON);
-				}
-			}
-
-			try
-			{
 				responseJSON.put(HikeUser.HIKE_USERS_LIST_ID, friendsListJSON);
 
 				if (cachedToken != null)
@@ -314,51 +299,30 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 					responseJSON.put(HikeSDKConstants.HIKE_REQ_SDK_CLIENT_ACC_TOKEN, cachedToken);
 					cachedToken = null;
 				}
-			}
-			catch (JSONException e)
-			{
-				returnExceptionMessageToCaller(msg);
-				e.printStackTrace();
-				return;
-			}
 
-			reqGetFriendsBundle.putString(HikeSDKConstants.HIKE_REQ_DATA_ID, responseJSON.toString());
+				reqGetFriendsBundle.putString(HikeSDKConstants.HIKE_REQ_DATA_ID, responseJSON.toString());
 
-			msg.setData(reqGetFriendsBundle);
+				msg.setData(reqGetFriendsBundle);
 
-			// Set STATUS_OK
-			msg.arg2 = HikeSDKResponseCode.STATUS_OK;
+				// Set STATUS_OK
+				msg.arg2 = HikeSDKResponseCode.STATUS_OK;
 
-			try
-			{
 				msg.replyTo.send(msg);
+
 			}
-			catch (RemoteException e)
+			else if (msg.what == HikeService.SDK_REQ_SEND_MESSAGE)
 			{
-				returnExceptionMessageToCaller(msg);
-				e.printStackTrace();
-				return;
-			}
 
-		}
-		else if (msg.what == HikeService.SDK_REQ_SEND_MESSAGE)
-		{
+				Bundle reqSendMessageBundle = msg.getData();
 
-			Bundle reqSendMessageBundle = msg.getData();
+				if (!isMessageValid(msg))
+				{
+					return;
+				}
 
-			if (reqSendMessageBundle == null)
-			{
-				returnExceptionMessageToCaller(msg);
-				return;
-			}
+				HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_SDK_MESSAGE, reqSendMessageBundle.get(HikeSDKConstants.HIKE_REQ_DATA_ID));
 
-			postAnalyticsEvents(reqSendMessageBundle);
-
-			HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_SDK_MESSAGE, reqSendMessageBundle.get(HikeSDKConstants.HIKE_REQ_DATA_ID));
-
-			if (cachedToken != null)
-			{
-				try
+				if (cachedToken != null)
 				{
 					JSONObject sendMessageResponseJSON = new JSONObject();
 					sendMessageResponseJSON.put(HikeSDKConstants.HIKE_REQ_SDK_CLIENT_ACC_TOKEN, cachedToken);
@@ -366,61 +330,83 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 					sendMessageBundle.putString(HikeSDKConstants.HIKE_REQ_DATA_ID, sendMessageResponseJSON.toString());
 					msg.setData(sendMessageBundle);
 				}
-				catch (JSONException e)
+
+				// Set STATUS_OK
+				msg.arg2 = HikeSDKResponseCode.STATUS_OK;
+
+				msg.replyTo.send(msg);
+
+			}
+			else if (msg.what == HikeService.SDK_REQ_AUTH_CLIENT)
+			{
+				if (!isMessageValid(msg))
 				{
-					e.printStackTrace();
+					return;
 				}
-			}
 
-			// Set STATUS_OK
-			msg.arg2 = HikeSDKResponseCode.STATUS_OK;
+				// Set STATUS_OK
+				msg.arg2 = HikeSDKResponseCode.STATUS_OK;
 
-			try
-			{
 				msg.replyTo.send(msg);
 			}
-			catch (RemoteException e)
+			else
 			{
 				returnExceptionMessageToCaller(msg);
-				e.printStackTrace();
 				return;
 			}
-
 		}
-		else if (msg.what == HikeService.SDK_REQ_AUTH_CLIENT)
+		catch (JSONException e)
 		{
-			Bundle reqAuthClientBundle = msg.getData();
-
-			if (reqAuthClientBundle == null)
-			{
-				returnExceptionMessageToCaller(msg);
-				return;
-			}
-			
-			postAnalyticsEvents(reqAuthClientBundle);
-			
-			// Set STATUS_OK
-			msg.arg2 = HikeSDKResponseCode.STATUS_OK;
-
-			try
-			{
-				msg.replyTo.send(msg);
-			}
-			catch (RemoteException e)
-			{
-				returnExceptionMessageToCaller(msg);
-				e.printStackTrace();
-				return;
-			}
+			handleException(msg, e);
 		}
-		else
+		catch (RemoteException e)
 		{
-			returnExceptionMessageToCaller(msg);
-			return;
+			handleException(msg, e);
 		}
-
+		catch (NullPointerException e)
+		{
+			handleException(msg, e);
+		}
 	}
 
+	/**
+	 * Checks if is message valid.
+	 *
+	 * @param msg the msg
+	 * @return true, if is message valid
+	 */
+	private boolean isMessageValid(Message msg)
+	{
+		Bundle messageBundle = msg.getData();
+
+		if (messageBundle == null || messageBundle.isEmpty())
+		{
+			returnExceptionMessageToCaller(msg);
+			return false;
+		}
+
+		postAnalyticsEvents(messageBundle);
+		return true;
+	}
+
+	/**
+	 * Handle exception.
+	 *
+	 * @param msg the msg
+	 * @param e the e
+	 */
+	private void handleException(Message msg, Exception e)
+	{
+		returnExceptionMessageToCaller(msg);
+		e.printStackTrace();
+		return;
+	}
+
+	/**
+	 * Post analytics events.
+	 *
+	 * @param argBundle the arg bundle
+	 */
 	private void postAnalyticsEvents(Bundle argBundle)
 	{
 		String requestData = argBundle.getString(HikeSDKConstants.HIKE_REQ_DATA_ID);
@@ -456,6 +442,9 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see com.bsb.hike.HikePubSub.Listener#onEventReceived(java.lang.String, java.lang.Object)
+	 */
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
@@ -486,6 +475,7 @@ public class HikeSDKRequestHandler extends Handler implements Listener
 						e.printStackTrace();
 					}
 
+					// TODO move this to util thread
 					handleMessage(cachedMessage);
 
 					cachedMessage = null;

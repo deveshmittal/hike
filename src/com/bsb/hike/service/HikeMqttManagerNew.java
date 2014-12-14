@@ -309,20 +309,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 			super(looper);
 		}
 
-		void returnExceptionMessageToCaller(Message argMessage)
-		{
-			argMessage.arg2 = HikeSDKResponseCode.STATUS_EXCEPTION;
-			try
-			{
-				argMessage.replyTo.send(argMessage);
-			}
-			catch (RemoteException e)
-			{
-				e.printStackTrace();
-			}
-			return;
-		}
-
 		@Override
 		public void handleMessage(Message msg)
 		{
@@ -683,7 +669,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 				String protocol = connectUsingSSL ? "ssl://" : "tcp://";
 
 				// Here I am using my modified MQTT PAHO library
-				mqtt = new MqttAsyncClient(protocol + brokerHostName + ":" + brokerPortNumber, clientId + ":" + pushConnect + ":" + fastReconnect, null,
+				mqtt = new MqttAsyncClient(protocol + brokerHostName + ":" + brokerPortNumber, clientId + ":" + pushConnect + ":" + fastReconnect + ":" + Utils.getNetworkType(context), null,
 						MAX_INFLIGHT_MESSAGES_ALLOWED);
 				mqtt.setCallback(getMqttCallback());
 				Logger.d(TAG, "Number of max inflight msgs allowed : " + mqtt.getMaxflightMessages());

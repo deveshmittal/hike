@@ -109,6 +109,8 @@ public class AccountUtils
 	public static final String FILE_TRANSFER_DOWNLOAD_BASE = "/user/ft/";
 
 	public static String fileTransferBaseDownloadUrl = base + FILE_TRANSFER_DOWNLOAD_BASE;
+	
+	public static String fastFileUploadUrl = base + FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 
 	public static String partialfileTransferBaseUrl = base + "/user/pft";
 
@@ -153,6 +155,24 @@ public class AccountUtils
 	public static String mUid = null;
 
 	private static String appVersion = null;
+	
+	public static final String SDK_AUTH_BASE_URL_STAGING = "http://stagingoauth.im.hike.in/o/oauth2/";
+
+	public static final String SDK_AUTH_BASE_URL_PROD = "http://oauth.hike.in/o/oauth2/";
+	
+	public static String SDK_AUTH_BASE = SDK_AUTH_BASE_URL_PROD;
+	
+	public static final String SDK_AUTH_PATH_AUTHORIZE = "authorize";
+	
+	public static final String SDK_AUTH_PARAM_RESPONSE_TYPE = "response_type";
+	
+	public static final String SDK_AUTH_PARAM_CLIENT_ID = "client_id";
+	
+	public static final String SDK_AUTH_PARAM_SCOPE = "scope";
+	
+	public static final String SDK_AUTH_PARAM_PACKAGE_NAME = "package_name";
+	
+	public static final String SDK_AUTH_PARAM_SHA1 = "sha1";
 
 	public static void setToken(String token)
 	{

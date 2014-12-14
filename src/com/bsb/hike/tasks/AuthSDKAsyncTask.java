@@ -13,12 +13,12 @@ import android.widget.ProgressBar;
 
 import com.bsb.hike.utils.AccountUtils;
 
-public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String>
+public class AuthSDKAsyncTask extends AsyncTask<HttpRequestBase, Void, String>
 {
 
 	private View mProgressBarIndicator;
 
-	private UtilAsyncTaskListener mListener;
+	private AuthAsyncTaskListener mListener;
 
 	private Activity mActivity;
 
@@ -26,7 +26,7 @@ public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String
 
 	private boolean mShowProgressDialog;
 
-	public UtilAtomicAsyncTask(Activity argActivity, View argProgressBar, boolean showProgressDialog, UtilAsyncTaskListener listener)
+	public AuthSDKAsyncTask(Activity argActivity, View argProgressBar, boolean showProgressDialog, AuthAsyncTaskListener listener)
 	{
 		mProgressBarIndicator = argProgressBar;
 		mListener = listener;
@@ -54,8 +54,8 @@ public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String
 				@Override
 				public void onCancel(DialogInterface dialog)
 				{
-					UtilAtomicAsyncTask.this.onPostExecute(null);
-					UtilAtomicAsyncTask.this.cancel(true);
+					AuthSDKAsyncTask.this.onPostExecute(null);
+					AuthSDKAsyncTask.this.cancel(true);
 				}
 			});
 			progressDialog.show();
@@ -65,16 +65,6 @@ public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String
 	@Override
 	protected String doInBackground(HttpRequestBase... params)
 	{
-		
-		try
-		{
-			Thread.sleep(4000);
-		}
-		catch (InterruptedException e1)
-		{
-			e1.printStackTrace();
-		}
-		
 		// for now, assuming only one request is present in the request array
 		HttpRequestBase httpRequest;
 
@@ -106,7 +96,7 @@ public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String
 	{
 		super.onPostExecute(result);
 
-		if (UtilAtomicAsyncTask.this.isCancelled())
+		if (AuthSDKAsyncTask.this.isCancelled())
 		{
 			return;
 		}
@@ -136,7 +126,7 @@ public class UtilAtomicAsyncTask extends AsyncTask<HttpRequestBase, Void, String
 		mActivity = null;
 	}
 
-	public interface UtilAsyncTaskListener
+	public interface AuthAsyncTaskListener
 	{
 		void onComplete(String argResponse);
 

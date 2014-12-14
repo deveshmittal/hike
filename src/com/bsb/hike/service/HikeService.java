@@ -46,9 +46,11 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.HikeHandlerUtil;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.platform.HikeSDKRequestHandler;
 import com.bsb.hike.service.HikeMqttManagerNew.IncomingHandler;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
@@ -109,8 +111,6 @@ public class HikeService extends Service
 
 	public static final int MSG_APP_CONN_STATUS = 6;
 
-	public static final int MSG_APP_INVALID_TOKEN = 7;
-
 	protected Messenger mApp;
 
 	/************************************************************************/
@@ -139,17 +139,17 @@ public class HikeService extends Service
 	public static final int MQTT_NOTIFICATION_UPDATE = 2;
 
 	public static final String POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION = "com.bsb.hike.POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION";
-	
+
 	/************************************************************************/
 	/* SDK Request Ids */
 	/************************************************************************/
-	
+
 	public static final int SDK_REQ_GET_USERS = -11;
-	
+
 	public static final int SDK_REQ_GET_LOGGED_USER_INFO = -14;
-	
+
 	public static final int SDK_REQ_AUTH_CLIENT = -15;
-	
+
 	public static final int SDK_REQ_SEND_MESSAGE = -13;
 
 	/************************************************************************/
@@ -179,14 +179,12 @@ public class HikeService extends Service
 
 	private ContactsChanged mContactsChanged;
 
-	private Looper mHikeUtilLooper;
-
 	private StickerManager sm;
 
 	public static HikeSDKRequestHandler mHikeSDKRequestHandler;
 
 	private Messenger mSDKRequestMessenger;
-	
+
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -198,10 +196,9 @@ public class HikeService extends Service
 	{
 		super.onCreate();
 
-		
 		if (!isUserSignedUp())
 		{
-			initializeAndAssignUtilityThread();
+			assignUtilityThread();
 			return;
 		}
 
@@ -230,6 +227,9 @@ public class HikeService extends Service
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
 		mMqttManager = new HikeMqttManagerNew(getApplicationContext());
 		mMqttManager.init();
+		
+		initStickerDownloadManager();
+		
 
 		/*
 		 * notify android that our service represents a user visible action, so it should not be killable. In order to do so, we need to show a notification so the user understands
@@ -243,8 +243,7 @@ public class HikeService extends Service
 		 * Intent notificationIntent = new Intent(this, MessagesList.class); PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 		 * notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent); startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 		 */
-
-		initializeAndAssignUtilityThread();
+		assignUtilityThread();
 
 		/*
 		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of
@@ -303,6 +302,7 @@ public class HikeService extends Service
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
+		
 	}
 
 	public boolean isUserSignedUp()
@@ -327,24 +327,17 @@ public class HikeService extends Service
 		return true;
 	}
 
-	private void initializeAndAssignUtilityThread()
+	private void assignUtilityThread()
 	{
-		/**
-		 * Make hike utility thread
-		 */
-		HandlerThread hikeUtilHandlerThread = new HandlerThread("HIKE_UTIL");
-
-		hikeUtilHandlerThread.start();
-
 		/**
 		 * Extract utility looper
 		 */
-		mHikeUtilLooper = hikeUtilHandlerThread.getLooper();
+		Looper mHikeUtilLooper = HikeHandlerUtil.getInstance().getLooper();
 
 		/**
 		 * Make SDK request handler with utility looper
 		 */
-		mHikeSDKRequestHandler = new HikeSDKRequestHandler(HikeService.this.getApplicationContext(), hikeUtilHandlerThread.getLooper());
+		mHikeSDKRequestHandler = new HikeSDKRequestHandler(HikeService.this.getApplicationContext(), mHikeUtilLooper);
 
 		mSDKRequestMessenger = new Messenger(mHikeSDKRequestHandler);
 
@@ -356,7 +349,7 @@ public class HikeService extends Service
 		mContactsChanged = new ContactsChanged(HikeService.this);
 
 	}
-	
+
 	@Override
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{
@@ -390,7 +383,7 @@ public class HikeService extends Service
 		super.onDestroy();
 		Logger.i("HikeService", "onDestroy.  Shutting down service");
 
-		if(mMqttManager != null)
+		if (mMqttManager != null)
 		{
 			mMqttManager.destroyMqtt();
 			this.mMqttManager = null;
@@ -1004,6 +997,11 @@ public class HikeService extends Service
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
 			Utils.executeHttpTask(hikeHTTPTask, profilePicRequest);
 		}
+	}
+	
+	private void initStickerDownloadManager()
+	{
+		StickerDownloadManager.init(getApplicationContext());
 	}
 
 }

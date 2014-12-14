@@ -52,7 +52,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	protected Boolean doInBackground(Void... unused)
 	{
 		FileTransferManager.getInstance(ctx).shutDownAll();
-		StickerDownloadManager.getInstance(ctx).shutDownAll();
+		StickerDownloadManager.getInstance().shutDownAll();
 		HikeConversationsDatabase convDb = HikeConversationsDatabase.getInstance();
 		Editor editor = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
 		Editor appPrefEditor = PreferenceManager.getDefaultSharedPreferences(ctx).edit();

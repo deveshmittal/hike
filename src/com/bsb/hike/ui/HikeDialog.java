@@ -43,8 +43,6 @@ public class HikeDialog
 
 	public static final int HIKE_UPGRADE_DIALOG = 8;
 
-	public static final int HIKE_GENERIC_CONFIRM_DIALOG = 9;
-
 	public static Dialog showDialog(Context context, int whichDialog, Object... data)
 	{
 		return showDialog(context, whichDialog, null, data);
@@ -69,47 +67,10 @@ public class HikeDialog
 			return showSMSClientDialog(context, listener, data);
 		case HIKE_UPGRADE_DIALOG:
 			return showHikeUpgradeDialog(context, data);
-		case HIKE_GENERIC_CONFIRM_DIALOG:
-			return getGenericConfirmationDialog(context, listener);
 		}
 
 		return null;
 
-	}
-
-	/**
-	 * Returns dialog instance with no title, description set as "Are you sure?" and positive/negative button as Yes/No respectively. <br>
-	 * <br>
-	 * TODO:Make this further generic by passing strings in data array.
-	 * 
-	 * @param context
-	 * @param listener
-	 * @return
-	 */
-	private static Dialog getGenericConfirmationDialog(Context context, final HikeDialogListener listener)
-	{
-		final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-
-		// set dialog message
-		alertDialogBuilder.setMessage(context.getString(R.string.are_you_sure)).setCancelable(false)
-				.setPositiveButton(context.getString(R.string.yes), new DialogInterface.OnClickListener()
-				{
-					public void onClick(DialogInterface dialog, int id)
-					{
-						listener.positiveClicked(null);
-					}
-				}).setNegativeButton(context.getString(R.string.no), new DialogInterface.OnClickListener()
-				{
-					public void onClick(DialogInterface dialog, int id)
-					{
-						listener.negativeClicked(null);
-					}
-				});
-
-		// create alert dialog
-		AlertDialog alertDialog = alertDialogBuilder.create();
-
-		return alertDialog;
 	}
 
 	private static Dialog showAddedAsFavoriteDialog(Context context, final HikeDialogListener listener, Object... data)

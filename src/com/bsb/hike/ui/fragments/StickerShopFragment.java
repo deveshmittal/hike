@@ -242,7 +242,7 @@ public class StickerShopFragment extends SherlockFragment implements OnScrollLis
 			listview.addFooterView(loadingFooterView);
 		}
 		
-		StickerDownloadManager.getInstance(getSherlockActivity()).DownloadStickerShopTask(currentCategoriesCount, new IStickerResultListener()
+		StickerDownloadManager.getInstance().DownloadStickerShopTask(currentCategoriesCount, new IStickerResultListener()
 		{
 
 			@Override

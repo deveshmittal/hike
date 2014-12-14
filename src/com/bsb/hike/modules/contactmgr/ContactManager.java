@@ -35,6 +35,7 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.DBConstants;
@@ -2089,7 +2090,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 		// Incase of hike id == -1, add self msisdn
 		for (int i = 0; i < selectionArgs.length; i++)
 		{
-			if (selectionArgs[i].equals("-1"))
+			if (selectionArgs[i].equals(HikeConstants.SELF_HIKE_ID))
 			{
 				ContactInfo userContact = Utils.getUserContactInfo(context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE));
 				msisdnList.add(userContact.getMsisdn());

@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="912"
-    android:versionName="3.5.2" >
+    android:versionCode="914"
+    android:versionName="3.5.1.4" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -346,12 +346,19 @@
                 <action android:name="com.android.vending.INSTALL_REFERRER" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".service.AlarmBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="com.bsb.hike.START_ALARM" />
+            </intent-filter>
+        </receiver>
 
         <provider
             android:name="com.bsb.hike.providers.HikeProvider"
             android:authorities="com.bsb.hike.providers.HikeProvider"
             android:exported="true">
         </provider>
+        <service android:name=".service.SimpleWakefulService" >
+        </service>
     </application>
 
 </manifest>
