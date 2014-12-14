@@ -178,7 +178,7 @@ public class CardRenderer implements View.OnLongClickListener {
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
                 view.setTag(viewHolder);
-                cardCallToActions(cardType, actionComponents, textComponents, viewHolder, true, "");
+                cardCallToActions(cardType, actionComponents, viewHolder, true, "");
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
@@ -198,7 +198,7 @@ public class CardRenderer implements View.OnLongClickListener {
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
-                cardCallToActions(cardType, actionComponents, textComponents, viewHolder, true, "");
+                cardCallToActions(cardType, actionComponents, viewHolder, true, "");
                 view.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) view.getTag();
@@ -224,7 +224,7 @@ public class CardRenderer implements View.OnLongClickListener {
                     gameInstalledTextFiller(viewHolder);
                 }
                 String channelSource = convMessage.platformMessageMetadata.channelSource;
-                cardCallToActions(cardType, actionComponents, textComponents, viewHolder, isGamesAppInstalled, channelSource);
+                cardCallToActions(cardType, actionComponents, viewHolder, isGamesAppInstalled, channelSource);
                 view.setTag(viewHolder);
 
             } else {
@@ -246,7 +246,7 @@ public class CardRenderer implements View.OnLongClickListener {
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
-                cardCallToActions(cardType, actionComponents,textComponents, viewHolder, true, "");
+                cardCallToActions(cardType, actionComponents, viewHolder, true, "");
                 view.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) view.getTag();
@@ -266,7 +266,7 @@ public class CardRenderer implements View.OnLongClickListener {
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
-                cardCallToActions(cardType, actionComponents,textComponents, viewHolder, true, "");
+                cardCallToActions(cardType, actionComponents, viewHolder, true, "");
                 view.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) view.getTag();
@@ -294,7 +294,7 @@ public class CardRenderer implements View.OnLongClickListener {
 
 
 
-    private void cardCallToActions(final int cardType, ArrayList<CardComponent.ActionComponent> actionComponents, final List<CardComponent.TextComponent> textComponents, final ViewHolder viewHolder, final boolean isAppInstalled, final String channelSource) {
+    private void cardCallToActions(final int cardType, ArrayList<CardComponent.ActionComponent> actionComponents, final ViewHolder viewHolder, final boolean isAppInstalled, final String channelSource) {
         for (final CardComponent.ActionComponent actionComponent : actionComponents) {
             final String tag = actionComponent.getTag();
             if (!TextUtils.isEmpty(tag)) {
@@ -303,26 +303,16 @@ public class CardRenderer implements View.OnLongClickListener {
                     @Override
                     public void onClick(View v) {
                         try {
-                            String cardName = "";
-                            String actionText = "";
-                            for (CardComponent.TextComponent textComponent : textComponents) {
-                                String tag = textComponent.getTag();
-                                if (!TextUtils.isEmpty(tag)) {
-
-                                    if (tag.equals("T1")){
-                                        cardName = textComponent.getText();
-                                    }
-                                    if (tag.equals("T3")){
-                                        actionText = textComponent.getText();
-                                    }
-                                }
-
-                            }
-                            sendLogEvent(cardName, actionText);
 
                             if (cardType == CardConstants.GAMES_CARD_LAYOUT) {
 
                                 if (tag.equalsIgnoreCase(mContext.getString(R.string.content_card_tag)) && !isAppInstalled) {
+
+                                    TextView cardTitleView  = (TextView) v.findViewWithTag(mContext.getString(R.string.content_card_title_tag));
+                                    TextView actionTextView = (TextView) v.findViewWithTag(mContext.getString(R.string.content_card_action_tag));
+                                    String cardName = (String) cardTitleView.getText();
+                                    String actionText = (String) actionTextView.getText();
+                                    sendLogEvent(cardName, actionText);
                                     JSONObject jsonObject = new JSONObject();
                                     jsonObject.put(HikePlatformConstants.INTENT_URI, CardConstants.PLAY_STORE_TEXT + channelSource);
                                     CardController.callToAction(jsonObject, mContext);
