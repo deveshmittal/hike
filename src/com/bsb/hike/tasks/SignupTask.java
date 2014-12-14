@@ -663,9 +663,9 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			}
 			catch (InterruptedException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
-				Logger.d("backup","Interrupted while waiting for user's choice on restore.");
+				Logger.e("SignupTask","Interrupted while waiting for user's choice on restore.");
+				return Boolean.FALSE;
 			}
 		}
 		Logger.d("SignupTask", "Publishing Token_Created");
