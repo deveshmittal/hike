@@ -14,6 +14,8 @@ import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.bsb.hike.ui.ChatThread;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Environment;
@@ -30,6 +32,8 @@ public class HikeTestUtil
 	public static final String LOGS_RECEIVER_EMAIL = "fieldtest@hike.in";
 	
 	public static final int HIKE_MESSAGE_COUNTER_DEFAULT = 25;
+	
+	public static final int HIKE_FILE_COUNTER_DEFAULT = 0;
 	
 	public static final int HIKE_MESSAGE_DELAY_DEFAULT = 1000; 
 
@@ -201,6 +205,9 @@ public class HikeTestUtil
 	 */
 	public void writeDataToFile(String log)
 	{
+		if(!ChatThread.getSimulationState())
+			return;
+		
 		Log.d("HikeTestUtil", "data to write :" + log);
 		
 		try
