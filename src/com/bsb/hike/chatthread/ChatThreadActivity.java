@@ -6,26 +6,37 @@ import android.os.Bundle;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
-public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity {
+public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
+{
 
 	private ChatThread chatThread;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState)
+	{
 		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 		super.onCreate(savedInstanceState);
 		init();
 		chatThread.setContentView();
 	}
 
-	private void init() {
-		boolean isOneToOne = false;
-		if (isOneToOne) {
-			chatThread = new OneToOneChatThread(this);
-		} else {
-			chatThread = new GroupChatThread(this);
+	private void init()
+	{
+		String whichChatThread = getIntent().getStringExtra(HikeConstants.Extras.WHICH_CHAT_THREAD);
+		if (HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD.equals(whichChatThread))
+		{
+			chatThread = new OneToOneChatThread(this, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
+		}
+		else if (HikeConstants.Extras.GROUP_CHAT_THREAD.equals(whichChatThread))
+		{
+			chatThread = new GroupChatThread(this, getIntent().getStringExtra(HikeConstants.Extras.MSISDN));
+		}
+		else
+		{
+			throw new IllegalArgumentException("Which chat thread I am !!! Did you pass proper arguments?");
 		}
 	}
 
