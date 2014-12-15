@@ -54,6 +54,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorDescription;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -150,6 +153,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.chatthread.ChatThreadActivity;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -160,6 +164,7 @@ import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.AccountData;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
@@ -3225,12 +3230,14 @@ public class Utils
 
 	public static Intent createIntentForConversation(Context context, Conversation conversation)
 	{
-		Intent intent = new Intent(context, ChatThread.class);
+		Intent intent = new Intent(context, ChatThreadActivity.class);
 		if (conversation.getContactName() != null)
 		{
 			intent.putExtra(HikeConstants.Extras.NAME, conversation.getContactName());
 		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
+		String whichChatThread = (conversation instanceof GroupConversation) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD;
+		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, whichChatThread);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;
 	}
@@ -3702,7 +3709,7 @@ public class Utils
 
 	public static void startChatThread(Context context, ContactInfo contactInfo)
 	{
-		Intent intent = new Intent(context, ChatThread.class);
+		Intent intent = new Intent(context, ChatThreadActivity.class);
 		if (contactInfo.getName() != null)
 		{
 			intent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
@@ -3710,6 +3717,8 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, true);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		String whichChatThread = isGroupConversation(contactInfo.getMsisdn()) ? HikeConstants.Extras.GROUP_CHAT_THREAD : HikeConstants.Extras.ONE_TO_ONE_CHAT_THREAD;
+		intent.putExtra(HikeConstants.Extras.WHICH_CHAT_THREAD, whichChatThread);
 		context.startActivity(intent);
 	}
 
