@@ -4952,4 +4952,14 @@ public class Utils
 		sendLocaleToServer(context);
 	}
 
+	public static int getTestFilesCount()
+	{
+		int count = 0;		
+		File dir = new File("/sdcard/Hike/TestFiles");
+		
+		File[] files = dir.listFiles();
+		count = files.length;
+
+		return count;
+	}
 }
