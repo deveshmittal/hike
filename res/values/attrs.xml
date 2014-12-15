@@ -16,6 +16,7 @@
     </declare-styleable>
 
     <attr name="font" format="string" />
+    <attr name="maxLines" format="integer"/>
 
     <declare-styleable name="DragSortListView">
         <attr name="collapsed_height" format="dimension" />

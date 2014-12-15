@@ -80,10 +80,9 @@
                             android:textStyle="bold|italic"
                             android:tag="@string/content_card_title_tag"
                             android:textSize="14sp"
+                            app:maxLines="2"
                             android:textColor="#ffffff"
                             android:visibility="gone"
-                            android:maxLines="2"
-                            android:ellipsize="end"
                             />
 
 
@@ -94,12 +93,11 @@
                             android:textSize="14sp"
                             android:visibility="gone"
                             android:tag="@string/content_card_subtitle_tag"
+                            app:maxLines="3"
                             android:textStyle="italic"
                             android:layout_below="@id/title"
                             android:textColor="#ffffff"
                             android:layout_gravity="center_vertical"
-                            android:maxLines="3"
-                            android:ellipsize="end"
                             />
 
                     <com.bsb.hike.view.CustomFontTextView

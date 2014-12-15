@@ -228,7 +228,6 @@ public class CardRenderer implements View.OnLongClickListener {
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
-
             cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
             if (!isGamesAppInstalled) {
                 gameInstalledTextFiller(viewHolder);
@@ -352,8 +351,9 @@ public class CardRenderer implements View.OnLongClickListener {
             String tag = textComponent.getTag();
             if (!TextUtils.isEmpty(tag)) {
 
-                TextView tv = (TextView) viewHolder.viewHashMap.get(tag);
-                if (null != tv) {
+                CustomFontTextView tv = (CustomFontTextView) viewHolder.viewHashMap.get(tag);
+                if (null != tv)
+                {
                     tv.setVisibility(View.VISIBLE);
                     tv.setText(textComponent.getText());
                 }
