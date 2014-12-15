@@ -41,35 +41,38 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		return chatThread.onCreateOptionsMenu(menu) ? true : super
-				.onCreateOptionsMenu(menu);
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		return chatThread.onCreateOptionsMenu(menu) ? true : super.onCreateOptionsMenu(menu);
 
 	}
 
 	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
+	public boolean onPrepareOptionsMenu(Menu menu)
+	{
 
-		return chatThread.onPrepareOptionsMenu(menu) ? true : super
-				.onPrepareOptionsMenu(menu);
+		return chatThread.onPrepareOptionsMenu(menu) ? true : super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
 
-		return chatThread.onOptionsItemSelected(item) ? true : super
-				.onOptionsItemSelected(item);
+		return chatThread.onOptionsItemSelected(item) ? true : super.onOptionsItemSelected(item);
 	}
 
 	@Override
-	protected void onNewIntent(Intent intent) {
+	protected void onNewIntent(Intent intent)
+	{
 		super.onNewIntent(intent);
 		init();
 	}
 
 	@Override
-	public void onBackPressed() {
-		if(chatThread.onBackPressed()){
+	public void onBackPressed()
+	{
+		if (chatThread.onBackPressed())
+		{
 			return;
 		}
 		super.onBackPressed();
