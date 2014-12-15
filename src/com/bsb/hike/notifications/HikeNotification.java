@@ -947,7 +947,7 @@ public class HikeNotification
 		}
 	}
 
-	private void showBigTextStyleNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text,
+	public void showBigTextStyleNotification(final Intent notificationIntent, final int icon, final long timestamp, final int notificationId, final CharSequence text,
 			final String key, final String message, final String msisdn, String subMessage, Drawable argAvatarDrawable, boolean shouldNotPlaySound, int retryCount)
 	{
 
@@ -1199,7 +1199,6 @@ public class HikeNotification
 
 		return mBuilder;
 	}
-
 	public long getNextRetryNotificationTime()
 	{
 		long nextRetryTime = System.currentTimeMillis() + HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.RETRY_NOTIFICATION_COOL_OFF_TIME, HikeConstants.DEFAULT_RETRY_NOTIF_TIME);

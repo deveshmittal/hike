@@ -4112,14 +4112,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				int totalStickers = c.getInt(c.getColumnIndex(DBConstants.TOTAL_NUMBER));
 
 				StickerCategory s;
-				if(!isCustom)
+				/**
+				 * Making sure that Recents category is added as CustomStickerCategory only. 
+				 * This is being done to avoid ClassCast exception on the PlayStore. 
+				 */
+				if(isCustom || categoryId.equals(StickerManager.RECENT))
 				{
-					s = new StickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, totalStickers,
+					s = new CustomStickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, totalStickers,
 						categorySize);
 				}
 				else
 				{
-					s = new CustomStickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, totalStickers,
+					s = new StickerCategory(categoryId, categoryName, updateAvailable, isVisible, isCustom, true, catIndex, totalStickers,
 							categorySize);
 				}
 				stickerDataMap.put(categoryId, s);
@@ -5839,6 +5843,27 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			if (c != null)
 				c.close();
 		}
+	}
+	
+	/**
+	 * Returns true if category is inserted.
+	 * @param category
+	 * @return 
+	 */
+	public boolean insertNewCategoryInPallete(StickerCategory category)
+	{
+		int rowId = -1;
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants._ID, category.getCategoryId());
+		contentValues.put(DBConstants.CATEGORY_NAME, category.getCategoryName());
+		contentValues.put(DBConstants.TOTAL_NUMBER, category.getTotalStickers());
+		contentValues.put(DBConstants.CATEGORY_SIZE, category.getCategorySize());
+		contentValues.put(DBConstants.IS_VISIBLE, category.isVisible());
+		contentValues.put(DBConstants.CATEGORY_INDEX, category.getCategoryIndex());
+
+		rowId = (int) mDb.insert(DBConstants.STICKER_CATEGORIES_TABLE, null, contentValues);
+
+		return rowId < 0 ? false : true;
 	}
 
 }

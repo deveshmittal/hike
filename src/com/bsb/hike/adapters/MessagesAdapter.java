@@ -797,7 +797,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				stickerHolder.image.setVisibility(View.GONE);
 				stickerHolder.image.setImageDrawable(null);
 
-				StickerDownloadManager.getInstance(context).DownloadSingleSticker(categoryId, stickerId, new IStickerResultListener()
+				StickerDownloadManager.getInstance().DownloadSingleSticker(categoryId, stickerId, new IStickerResultListener()
 				{
 
 					@Override
@@ -2545,26 +2545,54 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		}
 		else if(fss.getFTState() == FTState.IN_PROGRESS && fss.getTransferredSize() == 0)
 		{
-			float fakeProgress = 5 * 0.01f;
-			
-			if (fss.getTotalSize() > 0)
+			float animatedProgress = 5 * 0.01f;
+			if (fss.getTotalSize() > 0 && chunkSize > 0)
 			{
-				fakeProgress = (float) chunkSize;
-				fakeProgress /= fss.getTotalSize();
-				if (fakeProgress > 5 * 0.01f)
+				animatedProgress = (float) chunkSize;
+				animatedProgress = animatedProgress / fss.getTotalSize() ;
+			}
+			if(holder.circularProgress.getRelatedMsgId() == -1 || holder.circularProgress.getCurrentProgress() > animatedProgress
+					|| holder.circularProgress.getCurrentProgress() == 1.0f)
+			{
+				holder.circularProgress.resetProgress();
+			}
+			if (Utils.isHoneycombOrHigher()){
+				holder.circularProgress.stopAnimation();
+				holder.circularProgress.setAnimatedProgress(0, (int) (animatedProgress * 100), 6 * 1000);
+			}else{
+				holder.circularProgress.setProgress(animatedProgress);
+			}
+			holder.circularProgress.setRelatedMsgId(msgId);
+			holder.circularProgress.setVisibility(View.VISIBLE);
+			holder.circularProgressBg.setVisibility(View.VISIBLE);
+		}
+		else if(fss.getFTState() == FTState.IN_PROGRESS || fss.getFTState() == FTState.PAUSED || fss.getFTState() == FTState.ERROR)
+		{
+			if(progress < 100)
+				holder.circularProgress.setProgress(progress * 0.01f);
+			if (Utils.isHoneycombOrHigher())
+				holder.circularProgress.stopAnimation();
+			if(fss.getFTState() == FTState.IN_PROGRESS) {
+				float animatedProgress = 5 * 0.01f;
+				if (fss.getTotalSize() > 0)
 				{
-					fakeProgress = 5 * 0.01f;
+					animatedProgress = (float) chunkSize;
+					animatedProgress = animatedProgress / fss.getTotalSize() ;
+				}
+				if (Utils.isHoneycombOrHigher())
+				{
+					if(holder.circularProgress.getCurrentProgress() < (0.95f) && progress == 100){
+						holder.circularProgress.setAnimatedProgress((int) (holder.circularProgress.getCurrentProgress() * 100), progress, 300);
+					}else
+						holder.circularProgress.setAnimatedProgress(progress, progress + (int) (animatedProgress * 100), 6 * 1000);
 				}
 			}
-			holder.circularProgress.setProgress(fakeProgress);
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgressBg.setVisibility(View.VISIBLE);
 		}
 		else
 		{
-			holder.circularProgress.setProgress(progress * 0.01f);
-			holder.circularProgress.setVisibility(View.VISIBLE);
-			holder.circularProgressBg.setVisibility(View.VISIBLE);
+			showTransferInitialization(holder, hikeFile);
 		}
 	}
 

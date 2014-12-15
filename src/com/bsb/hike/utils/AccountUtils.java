@@ -107,6 +107,8 @@ public class AccountUtils
 	public static final String FILE_TRANSFER_DOWNLOAD_BASE = "/user/ft/";
 
 	public static String fileTransferBaseDownloadUrl = base + FILE_TRANSFER_DOWNLOAD_BASE;
+	
+	public static String fastFileUploadUrl = base + FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 
 	public static String partialfileTransferBaseUrl = base + "/user/pft";
 
@@ -783,12 +785,13 @@ public class AccountUtils
 				entity = new FileEntity(new File(hikeHttpRequest.getFilePath()), "");
 				break;
 
-			case STATUS_UPDATE:
+			case STATUS_UPDATE:			
 			case SOCIAL_POST:
 			case OTHER:
 				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
 				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
 				break;
+				
 
 			case DELETE_STATUS:
 				requestBase = new HttpDelete(base + hikeHttpRequest.getPath());
@@ -796,6 +799,12 @@ public class AccountUtils
 
 			case HIKE_JOIN_TIME:
 				requestBase = new HttpGet(base + hikeHttpRequest.getPath());
+				break;
+
+			case PREACTIVATION:
+				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
+				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
+				break;
 			}
 			if (addToken)
 			{
@@ -813,6 +822,12 @@ public class AccountUtils
 			{
 				throw new NetworkErrorException("Unable to perform request");
 			}
+			if (requestType == RequestType.PREACTIVATION)
+			{
+				hikeHttpRequest.setResponse(obj);
+
+			}
+			else
 			/*
 			 * We need the response to save the id of the status.
 			 */

@@ -10,6 +10,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
+import com.bsb.hike.service.PreloadNotificationSchedular;
+import com.bsb.hike.utils.Utils;
+
 /**
  * A AlarmManager Utility class to set alarms at specific times to perform functions.
  * 
@@ -83,15 +86,16 @@ public class HikeAlarmManager
 
 		PendingIntent mPendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		if (WillWakeCPU)
+		if (Utils.isKitkatOrHigher())
 		{
-			mAlarmManager.set(AlarmManager.RTC_WAKEUP, time, mPendingIntent);
+			mAlarmManager.setExact(WillWakeCPU ? AlarmManager.RTC_WAKEUP : AlarmManager.RTC, time, mPendingIntent);
 		}
-
 		else
 		{
-			mAlarmManager.set(AlarmManager.RTC, time, mPendingIntent);
+
+			mAlarmManager.set(WillWakeCPU ? AlarmManager.RTC_WAKEUP : AlarmManager.RTC, time, mPendingIntent);
 		}
+
 	}
 
 	/**
@@ -169,7 +173,7 @@ public class HikeAlarmManager
 		switch (requestCode)
 		{
 		case HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD:
-			// PreloadNotificationSchedular.performActionWhenAlarmReceived(context);
+			PreloadNotificationSchedular.run(context);
 			break;
 		case HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION:
 			int retryCount  = intent.getExtras().getInt(HikeConstants.RETRY_COUNT, 0);

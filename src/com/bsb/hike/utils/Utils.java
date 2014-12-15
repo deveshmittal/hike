@@ -62,6 +62,7 @@ import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -153,7 +154,6 @@ import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -171,13 +171,13 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.service.ConnectionChangeReceiver;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.FtueActivity;
-import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -187,6 +187,8 @@ import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
@@ -1247,35 +1249,38 @@ public class Utils
 		return bao.toByteArray();
 	}
 
-	public static String getRealPathFromUri(Uri contentUri, Activity activity)
+	// If source is local file path then previous getRealPathFromUri implementation (which uses deprecated manage query) provides null, So adding this implementation to solve the issue.
+	public static String getRealPathFromUri(Uri uri, Context mContext)
 	{
-		String filePath = null;
-		String[] proj = { MediaStore.Images.Media.DATA };
+		String result = null;
 		Cursor cursor = null;
-		// The query can throw exception if is doesn't know the specified projections. This needs to be put in a try-catch block.
 		try
 		{
-			cursor = activity.managedQuery(contentUri, proj, null, null, null);
+		    cursor = mContext.getContentResolver().query(uri, null, null, null, null);
+		    if (cursor == null) {
+		        result = uri.getPath();
+		    } else {
+		        if(cursor.moveToFirst())
+		        {
+		        	int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+			        result = cursor.getString(idx);
+		        }
+		        else
+		        {
+		        	result = null;
+		        }
+		    }
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		if (cursor == null || cursor.getCount() == 0)
+		finally
 		{
-			// return null;
+			if(cursor != null)
+				cursor.close();
 		}
-		else
-		{
-			int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-			cursor.moveToFirst();
-			filePath = cursor.getString(column_index);
-		}
-		if (filePath == null)
-		{
-			filePath = FilePath.getPath(activity.getBaseContext(), contentUri);
-		}
-		return filePath;
+	    return result;
 	}
 
 	public static enum ExternalStorageState
@@ -1564,6 +1569,7 @@ public class Utils
 		CheckForUpdateTask.UPDATE_CHECK_URL = httpString + (isProductionServer ? CheckForUpdateTask.PRODUCTION_URL : CheckForUpdateTask.STAGING_URL);
 
 		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
+		AccountUtils.fastFileUploadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
 
@@ -4978,6 +4984,50 @@ public class Utils
 		calendar.set(Calendar.MINUTE, minutes);
 		calendar.set(Calendar.SECOND, seconds);
 		return calendar.getTimeInMillis();
+	}
+	public static void disableNetworkListner(Context context)
+	{
+		ComponentName mmComponentName = new ComponentName(context, ConnectionChangeReceiver.class);
+
+		context.getPackageManager().setComponentEnabledSetting(mmComponentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+
+	}
+
+	public static JSONObject getPostDeviceDetails(Context context)
+	{
+		String osVersion = Build.VERSION.RELEASE;
+		String devType = HikeConstants.ANDROID;
+		String os = HikeConstants.ANDROID;
+		String deviceVersion = Build.MANUFACTURER + " " + Build.MODEL;
+		String appVersion = "";
+		try
+		{
+			appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+		}
+		catch (NameNotFoundException e)
+		{
+			Logger.e("AccountUtils", "Unable to get app version");
+		}
+
+		TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		String deviceKey = manager.getDeviceId();
+
+		JSONObject data = new JSONObject();
+		try
+		{
+			data.put(HikeConstants.DEV_TYPE, devType);
+			data.put(HikeConstants.APP_VERSION, appVersion);
+			data.put(HikeConstants.LogEvent.OS, os);
+			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
+			data.put(HikeConstants.DEVICE_VERSION, deviceVersion);
+			data.put(HikeConstants.DEVICE_KEY, deviceKey);
+			Utils.addCommonDeviceDetails(data, context);
+		}
+		catch (JSONException e)
+		{
+			Logger.e("Exception", "Invalid JSON", e);
+		}
+		return data;
 	}
 
 }

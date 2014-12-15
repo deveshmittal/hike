@@ -28,6 +28,7 @@ import twitter4j.conf.ConfigurationContext;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -36,19 +37,20 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Pair;
 
 import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
-import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.ToastListener;
 import com.bsb.hike.service.HikeMqttManagerNew.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
+import com.bsb.hike.service.RegisterToGCMTrigger;
+import com.bsb.hike.service.SendGCMIdToServerTrigger;
 import com.bsb.hike.service.UpgradeIntentService;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.smartcache.HikeLruCache.ImageCacheParams;
@@ -152,6 +154,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String TEMP_COUNTRY_CODE = "tempCountryCode";
 
+	public static final String GCM_ID_SENT_PRELOAD = "gcm_id_sent_preload";
+	
 	public static final String GCM_ID_SENT = "gcmIdSent";
 
 	public static final String BLOCK_NOTIFICATIONS = "blockNotification";
@@ -457,6 +461,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public Handler appStateHandler;
 	
 	private StickerManager sm;
+	
+	RegisterToGCMTrigger mmRegisterToGCMTrigger = null;
+
+	SendGCMIdToServerTrigger mmGcmIdToServerTrigger = null;
 
 	class IncomingHandler extends Handler
 	{
@@ -605,7 +613,12 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 		return dataBfr.toString();
 	}
-
+@Override
+public void onTrimMemory(int level)
+{
+	// TODO Auto-generated method stub
+	super.onTrimMemory(level);
+}
 	public void onCreate()
 	{
 
@@ -696,6 +709,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 		sm = StickerManager.getInstance();
 		sm.init(getApplicationContext());
+		
 		// if the setting value is 1 , this means the DB onUpgrade was called
 		// successfully.
 		if ((settings.getInt(HikeConstants.UPGRADE_AVATAR_CONV_DB, -1) == 1 && settings.getInt(HikeConstants.UPGRADE_AVATAR_PROGRESS_USER, -1) == 1) || 
@@ -823,8 +837,26 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		appStateHandler = new Handler();
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTED_TO_MQTT, this);
+		
+		registerReceivers();
 	}
 	
+	
+
+	private void registerReceivers()
+	{
+		// TODO Auto-generated method stub
+
+		LocalBroadcastManager mmBroadcastManager = LocalBroadcastManager.getInstance(this);
+		mmRegisterToGCMTrigger = new RegisterToGCMTrigger();
+		mmGcmIdToServerTrigger = new SendGCMIdToServerTrigger();
+
+		mmBroadcastManager.registerReceiver(mmRegisterToGCMTrigger, new IntentFilter(HikeService.REGISTER_TO_GCM_ACTION));
+
+		mmBroadcastManager.registerReceiver(mmGcmIdToServerTrigger, new IntentFilter(HikeService.SEND_TO_SERVER_ACTION));
+
+	}
+
 	public void startUpdgradeIntent()
 	{
 		// turn off future push notifications as soon as the app has
@@ -871,7 +903,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		conMgr = ContactManager.getInstance();
 		conMgr.init(getApplicationContext());
 	}
-
+	
 	public static ContactManager getContactManager()
 	{
 		return conMgr;
@@ -1007,7 +1039,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		}
 		if (toastListener == null)
 		{
-			toastListener = new ToastListener(getApplicationContext());
+			toastListener = toastListener = ToastListener.getInstance(getApplicationContext());
 		}
 		if (activityTimeLogger == null)
 		{

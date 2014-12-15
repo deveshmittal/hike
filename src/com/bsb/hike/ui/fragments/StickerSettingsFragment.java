@@ -247,7 +247,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				{	
 					if(!prefs.getData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, false))
 					{
-						StickerCategory category = mAdapter.getDrggedCategory();
+						StickerCategory category = mAdapter.getDraggedCategory();
 						
 						if ((from == to) || (category == null) ||(!category.isVisible())) // Dropping at the same position. No need to perform Drop.
 						{

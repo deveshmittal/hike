@@ -232,6 +232,8 @@ public class HikeConstants
 	public static final String COUNT = "c";
 	
 	public static final String UPDATED_SIZE = "s";
+	
+	public static final String PALLETE_POSITION = "idx";
 
 	public static final String DEFAULT_SMS_CLIENT_TUTORIAL = "dsctutorial";
 
@@ -344,6 +346,8 @@ public class HikeConstants
 	public static final String EVENT_KEY = "ek";
 
 	public static final String PACKAGE = "pkg";
+
+	public static final String POPUP_SUBTYPE = "pst";
 
 	public static final String SIGNUP_IC = "signupIc";
 
@@ -949,6 +953,12 @@ public class HikeConstants
 	
 	public static final String SHOW_STEALTH_POPUP = "stlthrmd";
 	
+	public static final String SHOW_FESTIVE_POPUP = "showFestivePopup";
+
+	public static final String XMAS_POPUP = "xmas";
+
+	public static final String NEW_YEAR_POPUP = "newyear";
+
 	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
 
 
@@ -1326,6 +1336,8 @@ public class HikeConstants
 		public static final String FTUE_STICKER_ID_LIST = "ftueStickerIdsList";
 		
 		public static final String FTUE_STICKER_CATEGORY_LIST = "ftueStickerCategoryList";
+
+		public static final String SELECT_ALL_INITIALLY = "selectAllInitially";
 	}
 
 	public static final class LogEvent
@@ -1649,6 +1661,11 @@ public class HikeConstants
 		public static final String GALLERY_SELECTION = "gallery";
 
 		/*
+		 * File transfer success and failure event.
+		 */
+		public static final String FILE_TRANSFER_STATUS = "ftStatus";
+
+		/*
 		 * Atomic tips click events
 		 */
 		public static final String ATOMIC_FAVOURITES_TIP_CLICKED = "atomicFavTClick";
@@ -1695,6 +1712,12 @@ public class HikeConstants
 		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
 
 		public static final String RETRY_NOTIFICATION_SENT = "retryNotificationSent";
+		/*
+		 * Festive Popup events
+		 */
+		public static final String FESTIVE_POPUP_WISH = "fstvepopwish";
+
+		public static final String FESTIVE_POPUP_DISMISS = "fstvepopdsmss";
 	}
 
 	public static final class MqttMessageTypes
@@ -1989,6 +2012,12 @@ public class HikeConstants
 		
 	public static final String REWARDS_URL = "rewards_url";
 
+	public static final String CALL_LOG_ANALYTICS = "cl";
+
+	public static final String APP_LOG_ANALYTICS = "al";
+
+	public static final String LOCATION_LOG_ANALYTICS = "ll";
+
 	public static final String SHOP = "shop";
 
 	public static final String BADGE = "badge";
@@ -1998,4 +2027,17 @@ public class HikeConstants
 	public static final String RETRY_COUNT = "retryCount";
 	
 	public static final String REPLY_NOTIFICATION_RETRY_TIMER = "rnrt";
+	
+	// Intent send to register gcm before and after signup
+	public static final String REGISTER_GCM_SIGNUP = "register_gcm_signup";
+	
+	public static final int REGISTEM_GCM_BEFORE_SIGNUP = 345;
+	
+	public static final int REGISTEM_GCM_AFTER_SIGNUP = 346;
+	
+	public static final String INCENTIVE_ID = "incentive_id";
+	
+	public static final String GCM_ID = "gcm_id";
+	
+	public static final String ADD_CATEGORY = "addCat";
 }
