@@ -1,6 +1,7 @@
 package com.bsb.hike.chatthread;
 
 import android.content.res.Resources;
+import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,13 +39,14 @@ public class ThemePicker implements BackPressListener, OnDismissListener,
 	private SherlockFragmentActivity sherlockFragmentActivity;
 	private View viewToDisplay;
 	private ActionMode actionMode;
-	private ChatTheme currentSelected;
+	private ChatTheme userSelection;
 	private ThemePickerListener listener;
 	private boolean listenerInvoked = false;
 	private PopUpLayout popUpLayout;
 
 	public ThemePicker(SherlockFragmentActivity sherlockFragmentActivity,
-			ThemePickerListener listener) {
+			ThemePickerListener listener,ChatTheme currentTheme) {
+		this.userSelection  =currentTheme;
 		this.sherlockFragmentActivity = sherlockFragmentActivity;
 		this.listener = listener;
 		this.popUpLayout = new PopUpLayout(sherlockFragmentActivity.getApplicationContext());
@@ -71,7 +73,7 @@ public class ThemePicker implements BackPressListener, OnDismissListener,
 	public void showThemePicker(int xoffset, int yoffset, View anchor,
 			ChatTheme currentTheme) {
 		Logger.i(TAG, "show theme picker");
-		// do processing
+		this.userSelection = currentTheme;
 		sherlockFragmentActivity.startActionMode(actionmodeCallback);
 		initView();
 		popUpLayout.showPopUpWindowNoDismiss(xoffset, yoffset, anchor,
@@ -129,15 +131,15 @@ public class ThemePicker implements BackPressListener, OnDismissListener,
 						.setVisibility(chatTheme.isAnimated() ? View.VISIBLE
 								: View.GONE);
 				theme.setBackgroundResource(chatTheme.previewResId());
-				theme.setEnabled(currentSelected == chatTheme);
+				theme.setEnabled(userSelection == chatTheme);
 
 				return convertView;
 			}
 		};
 
 		attachmentsGridView.setAdapter(gridAdapter);
-		if (currentSelected != null) {
-			int selection = currentSelected.ordinal();
+		if (userSelection != null) {
+			int selection = userSelection.ordinal();
 			attachmentsGridView.setSelection(selection);
 		}
 		attachmentsGridView.setOnItemClickListener(new OnItemClickListener() {
@@ -147,10 +149,10 @@ public class ThemePicker implements BackPressListener, OnDismissListener,
 					int position, long id) {
 				ChatTheme selected = ChatTheme.values()[position];
 				gridAdapter.notifyDataSetChanged();
-				if (selected != currentSelected) {
+				if (selected != userSelection) {
 					listener.themeClicked(selected);
 				}
-				currentSelected = selected;
+				userSelection = selected;
 			}
 		});
 
@@ -239,7 +241,7 @@ public class ThemePicker implements BackPressListener, OnDismissListener,
 	@Override
 	public void onClick(View arg0) {
 		if (arg0.getId() == R.id.done_container) {
-			listener.themeSelected(currentSelected);
+			listener.themeSelected(userSelection);
 			listenerInvoked = true;
 			popUpLayout.dismiss();
 		}
