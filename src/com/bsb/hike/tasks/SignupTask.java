@@ -608,7 +608,24 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
-		boolean newUser = true;
+		// Setting up preferences for new user.
+		Editor edit = settings.edit();
+		/*
+		 * We show these tips only to upgrading users
+		 */
+		edit.putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
+		
+		/*
+		 * We show this tip only to new signup users
+		 */
+		edit.putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true);
+		
+		/*
+		 * We don't want to show red dot on overflow menu for new users
+		 */
+		edit.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, true);
+		edit.commit();
+		
 		if (!restored)
 		{
 			this.data = null;
@@ -643,7 +660,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					{
 						ContactManager.getInstance().init(context);
 						publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString()));
-						newUser = false;
 					}
 					else
 					{
@@ -676,26 +692,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
 		isAlreadyFetchingNumber = false;
 
-		Editor edit = settings.edit();
-		/*
-		 * We show these tips only to upgrading users
-		 */
-		edit.putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
-		
-		if(newUser)
-		{
-			/*
-			 * We show this tip only to new signup users
-			 */
-			edit.putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true);
-		}
-		
-		/*
-		 * We don't want to show red dot on overflow menu for new users
-		 */
-		edit.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, true);
-		
-		edit.commit();
 		return Boolean.TRUE;
 	}
 
