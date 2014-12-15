@@ -651,6 +651,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					this.data = null;
 					publishProgress(new StateValue(State.RESTORING_BACKUP,null));
 					boolean status = DBBackupRestore.getInstance(context).restoreDB();
+					
+					if (status)
+					{
+						ContactManager.getInstance().init(context);
+						Editor editor = settings.edit();
+						editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+						editor.commit();
+					}
 					// A delay so that user is able to understand the UI animations.
 					synchronized (this)
 					{
@@ -658,7 +666,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 					if (status)
 					{
-						ContactManager.getInstance().init(context);
 						publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString()));
 					}
 					else
