@@ -45,16 +45,19 @@ public class HikeDialog
 	public static final int RESET_STEALTH_DIALOG = 4;
 
 	public static final int STEALTH_FTUE_EMPTY_STATE_DIALOG = 5;
-	
+
 	public static final int SHARE_IMAGE_QUALITY_DIALOG = 6;
 
 	public static final int SMS_CLIENT_DIALOG = 7;
 
+	public static final int CONTACT_SEND_DIALOG = 8;
 
-	public static Dialog showDialog(Context context, int whichDialog, Object... data)
-	{
-		return showDialog(context, whichDialog, null, data);
-	}
+	public static final int CONTACT_SAVE_DIALOG = 9;
+
+	// public static Dialog showDialog(Context context, int whichDialog, Object... data)
+	// {
+	// return showDialog(context, whichDialog, null, data);
+	// }
 
 	public static Dialog showDialog(Context context, int whichDialog, HikeDialogListener listener, Object... data)
 	{
@@ -74,9 +77,19 @@ public class HikeDialog
 		case SMS_CLIENT_DIALOG:
 			return showSMSClientDialog(context, listener, data);
 		}
-
 		return null;
+	}
 
+	public static Dialog showDialog(Context context, int whichDialog, HHikeDialogListener listener, Object... data)
+	{
+
+		switch (whichDialog)
+		{
+		case CONTACT_SEND_DIALOG:
+		case CONTACT_SAVE_DIALOG:
+			return showPhonebookContactDialog(context, listener, whichDialog, data);
+		}
+		return null;
 	}
 
 	private static Dialog showAddedAsFavoriteDialog(Context context, final HikeDialogListener listener, Object... data)
@@ -435,6 +448,141 @@ public class HikeDialog
 		return dialog;
 	}
 
+	private static Dialog showPhonebookContactDialog(Context context, final HHikeDialogListener listener, int id, Object... data)
+	{
+		try
+		{
+			PhonebookContact contact = (PhonebookContact) data[0];
+			String okText = (String) data[1];
+			Boolean showAccountInfo = (Boolean) data[2];
+			final ContactDialog contactDialog = new ContactDialog(context, R.style.Theme_CustomDialog, id);
+			contactDialog.setContentView(R.layout.contact_share_info);
+			contactDialog.data = contact;
+			ViewGroup parent = (ViewGroup) contactDialog.findViewById(R.id.parent);
+			TextView contactName = (TextView) contactDialog.findViewById(R.id.contact_name);
+			ListView contactDetails = (ListView) contactDialog.findViewById(R.id.contact_details);
+			Button yesBtn = (Button) contactDialog.findViewById(R.id.btn_ok);
+			Button noBtn = (Button) contactDialog.findViewById(R.id.btn_cancel);
+			View accountContainer = contactDialog.findViewById(R.id.account_container);
+			final Spinner accounts = (Spinner) contactDialog.findViewById(R.id.account_spinner);
+			final TextView accountInfo = (TextView) contactDialog.findViewById(R.id.account_info);
+
+			int screenHeight = context.getResources().getDisplayMetrics().heightPixels;
+			int dialogWidth = (int) context.getResources().getDimension(R.dimen.contact_info_width);
+			int dialogHeight = (int) (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? ((3 * screenHeight) / 4)
+					: FrameLayout.LayoutParams.MATCH_PARENT);
+			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(dialogWidth, dialogHeight);
+			lp.topMargin = (int) (5 * Utils.densityMultiplier);
+			lp.bottomMargin = (int) (5 * Utils.densityMultiplier);
+
+			parent.setLayoutParams(lp);
+
+			contactDialog.setViewReferences(parent, accounts);
+
+			yesBtn.setText(okText);
+
+			if (showAccountInfo)
+			{
+				accountContainer.setVisibility(View.VISIBLE);
+				accounts.setAdapter(new AccountAdapter(context, Utils.getAccountList(context)));
+				if (accounts.getSelectedItem() != null)
+				{
+					accountInfo.setText(((AccountData) accounts.getSelectedItem()).getName());
+				}
+				else
+				{
+					accountInfo.setText(R.string.device);
+				}
+			}
+			else
+			{
+				accountContainer.setVisibility(View.GONE);
+			}
+
+			accountContainer.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					accounts.performClick();
+				}
+			});
+
+			accounts.setOnItemSelectedListener(new OnItemSelectedListener()
+			{
+
+				@Override
+				public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id)
+				{
+					accountInfo.setText(((AccountData) accounts.getSelectedItem()).getName());
+				}
+
+				@Override
+				public void onNothingSelected(AdapterView<?> arg0)
+				{
+				}
+
+			});
+
+			contactName.setText(contact.name);
+			contactDetails.setAdapter(new ArrayAdapter<ContactInfoData>(context, R.layout.contact_share_item, R.id.info_value, contact.items)
+			{
+
+				@Override
+				public View getView(int position, View convertView, ViewGroup parent)
+				{
+					View v = super.getView(position, convertView, parent);
+					ContactInfoData contactInfoData = getItem(position);
+
+					TextView header = (TextView) v.findViewById(R.id.info_head);
+					header.setText(contactInfoData.getDataSubType());
+
+					TextView details = (TextView) v.findViewById(R.id.info_value);
+					details.setText(contactInfoData.getData());
+					return v;
+				}
+
+			});
+			yesBtn.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					if (listener != null)
+					{
+						listener.positiveClicked(contactDialog.id, contactDialog);
+					}
+					else
+					{
+						contactDialog.dismiss();
+					}
+				}
+			});
+			noBtn.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					if (listener != null)
+					{
+						listener.negativeClicked(contactDialog.id, contactDialog);
+					}
+					else
+					{
+						contactDialog.dismiss();
+					}
+				}
+			});
+			contactDialog.show();
+			return contactDialog;
+		}
+		catch (ClassCastException c)
+		{
+			throw new IllegalArgumentException(
+					"Make sure you are sending  PhonebookContact object in data[0] and String for okText in data[1] and boolean to show account info in data[2] and dialog id in data[3]");
+		}
+	}
 
 	public static interface HikeDialogListener
 	{
