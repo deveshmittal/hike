@@ -87,31 +87,6 @@ public class ChatThreadActionBar {
 	 * @ordered
 	 */
 
-	public void enableCopyText() {
-		// TODO implement me
-	}
-
-	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
-	 */
-
-	public void disableCopyText() {
-		// TODO implement me
-	}
-
-	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
-	 */
-
-	public void enableShare() {
-		// TODO implement me
-	}
 
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -161,16 +136,6 @@ public class ChatThreadActionBar {
 		// TODO implement me
 	}
 
-	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
-	 */
-
-	public void disableShare() {
-		// TODO implement me
-	}
 
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
