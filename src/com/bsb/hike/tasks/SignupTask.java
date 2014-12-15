@@ -637,19 +637,17 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				{
 					this.data = "true";
 				}
-				else
+				else if (DBBackupRestore.getInstance(context).isBackupAvailable())
 				{
-					if (DBBackupRestore.getInstance(context).isBackupAvailable())
+					publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
+					// After publishing 'backup available' the task waits for the user to make an input(Restore or Skip)
+					synchronized (this)
 					{
-						publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
-						// After publishing 'backup available' the task waits for the user to make an input(Restore or Skip)
-						synchronized (this)
-						{
-							this.wait();
-						}
+						this.wait();
 					}
-					
 				}
+					
+				
 				/*
 				 * The following while loop executes restore operation(if user has selected so)
 				 * As soon as the loop starts it resets itself, so it wont execute again unless its again
@@ -659,22 +657,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				{
 					this.data = null;
 					
-					Editor editor = settings.edit();
-					editor.putBoolean(HikeMessengerApp.RESTORING_BACKUP, true);
-					editor.commit();
+					boolean status = restore(settings);
 					
-					publishProgress(new StateValue(State.RESTORING_BACKUP,null));
-					boolean status = DBBackupRestore.getInstance(context).restoreDB();
-					
-					if (status)
-					{
-						ContactManager.getInstance().init(context);
-						editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
-						editor.commit();
-					}
-
-					editor.putBoolean(HikeMessengerApp.RESTORING_BACKUP, false);
-					editor.commit();
 					// A delay so that user is able to understand the UI animations.
 					synchronized (this)
 					{
@@ -716,6 +700,28 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		isAlreadyFetchingNumber = false;
 
 		return Boolean.TRUE;
+	}
+	
+	private boolean restore(SharedPreferences settings)
+	{
+		Editor editor = settings.edit();
+		editor.putBoolean(HikeMessengerApp.RESTORING_BACKUP, true);
+		editor.commit();
+		
+		publishProgress(new StateValue(State.RESTORING_BACKUP,null));
+		boolean status = DBBackupRestore.getInstance(context).restoreDB();
+		
+		if (status)
+		{
+			ContactManager.getInstance().init(context);
+			editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+			editor.commit();
+		}
+
+		editor.putBoolean(HikeMessengerApp.RESTORING_BACKUP, false);
+		editor.commit();
+		
+		return status;
 	}
 
 	/**
