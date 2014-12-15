@@ -77,4 +77,10 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 		}
 		super.onBackPressed();
 	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		chatThread.onActivityResult(requestCode, resultCode, data);
+	}
 }
