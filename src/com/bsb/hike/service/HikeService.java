@@ -167,7 +167,7 @@ public class HikeService extends Service
 		if (!(mprefs.getData(HikeConstants.REGISTER_GCM_SIGNUP, -1) == (HikeConstants.REGISTEM_GCM_AFTER_SIGNUP)))
 		{
 			mprefs.saveData(HikeConstants.REGISTER_GCM_SIGNUP, HikeConstants.REGISTEM_GCM_AFTER_SIGNUP);
-			HikeAlarmManager.cancelAlaram(getApplicationContext(), HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD);
+			HikeAlarmManager.cancelAlarm(getApplicationContext(), HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD);
 
 		}
 

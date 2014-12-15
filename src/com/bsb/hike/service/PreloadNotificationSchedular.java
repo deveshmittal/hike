@@ -58,7 +58,7 @@ public class PreloadNotificationSchedular
 
 		if (time == 0)
 		{
-			HikeAlarmManager.cancelAlaram(context, HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD);
+			HikeAlarmManager.cancelAlarm(context, HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD);
 
 		}
 		else if (time > System.currentTimeMillis())

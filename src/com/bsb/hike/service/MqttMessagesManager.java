@@ -1284,6 +1284,11 @@ public class MqttMessagesManager
 			String rewards_url = data.getString(HikeConstants.REWARDS_URL);
 			editor.putString(HikeConstants.REWARDS_URL, rewards_url);
 		}
+		if (data.has(HikeConstants.REPLY_NOTIFICATION_RETRY_TIMER))
+		{
+			int retryTimeInMinutes = data.getInt(HikeConstants.REPLY_NOTIFICATION_RETRY_TIMER);
+			editor.putLong(HikeMessengerApp.RETRY_NOTIFICATION_COOL_OFF_TIME, retryTimeInMinutes * 60 * 1000);
+		}
 		if(data.optBoolean(HikeConstants.CALL_LOG_ANALYTICS))
 		{
 			UserLogInfo.sendLogs(context, UserLogInfo.CALL_ANALYTICS_FLAG);

@@ -54,7 +54,7 @@ public class GCMIntentService extends GCMBaseIntentService
 
 			if (notification != null && prefs != null)
 			{
-				HikeAlarmManager.cancelAlaram(context, HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD);
+				HikeAlarmManager.cancelAlarm(context, HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD);
 				prefs.saveData(PreloadNotificationSchedular.CURRENT_ALARM_ID, 0);
 				prefs.saveData(PreloadNotificationSchedular.NOTIFICATION_TIMELINE, notification);
 				PreloadNotificationSchedular.scheduleNextAlarm(context);

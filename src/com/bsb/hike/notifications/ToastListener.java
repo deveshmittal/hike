@@ -88,7 +88,7 @@ public class ToastListener implements Listener
 	private ToastListener(Context context)
 	{
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
-		this.toaster = new HikeNotification(context);
+		this.toaster = HikeNotification.getInstance(context);
 		this.context = context;
 		mCurrentUnnotifiedStatus = MQTTConnectionStatus.NOT_CONNECTED;
 		mDefaultPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -615,6 +615,6 @@ public class ToastListener implements Listener
 		Drawable drawable = context.getResources().getDrawable(R.drawable.hike_avtar_protip);	
 		Intent intent = new Intent(context, HomeActivity.class);
 		toaster.showBigTextStyleNotification(intent, 0, System.currentTimeMillis(), HikeNotification.HIKE_SUMMARY_NOTIFICATION_ID, title, text, title, "",
-				null, drawable, false);
+				null, drawable, false, 0);
 	}
 }

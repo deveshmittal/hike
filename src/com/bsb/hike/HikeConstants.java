@@ -1711,6 +1711,7 @@ public class HikeConstants
 
 		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
 
+		public static final String RETRY_NOTIFICATION_SENT = "retryNotificationSent";
 		/*
 		 * Festive Popup events
 		 */
@@ -2020,6 +2021,12 @@ public class HikeConstants
 	public static final String SHOP = "shop";
 
 	public static final String BADGE = "badge";
+
+	public static final long DEFAULT_RETRY_NOTIF_TIME = 20 * 60 * 1000; // 20 minutes
+
+	public static final String RETRY_COUNT = "retryCount";
+	
+	public static final String REPLY_NOTIFICATION_RETRY_TIMER = "rnrt";
 	
 	// Intent send to register gcm before and after signup
 	public static final String REGISTER_GCM_SIGNUP = "register_gcm_signup";
