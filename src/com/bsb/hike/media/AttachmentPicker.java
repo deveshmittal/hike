@@ -30,7 +30,7 @@ public class AttachmentPicker extends OverFlowMenuLayout {
 	private static final String tag = "attachmentPicker";
 
 	public static final int CAMERA = 313;
-	public static final int GALLARY = 314;
+	public static final int GALLERY = 314;
 	public static final int AUDIO = 315;
 	public static final int VIDEO = 316;
 	public static final int FILE = 317;
@@ -81,7 +81,7 @@ public class AttachmentPicker extends OverFlowMenuLayout {
 		items.add(new OverFlowMenuItem(getString(R.string.camera_upper_case),
 				0, R.drawable.ic_attach_camera, CAMERA));
 		items.add(new OverFlowMenuItem(getString(R.string.photo), 0,
-				R.drawable.ic_attach_pic, GALLARY));
+				R.drawable.ic_attach_pic, GALLERY));
 		items.add(new OverFlowMenuItem(getString(R.string.audio), 0,
 				R.drawable.ic_attach_music, AUDIO));
 		items.add(new OverFlowMenuItem(getString(R.string.video), 0,
@@ -154,34 +154,30 @@ public class AttachmentPicker extends OverFlowMenuLayout {
 				Intent pickIntent = null;
 				switch (item.uniqueness) {
 				case CAMERA:
-					requestCode = HikeConstants.IMAGE_CAPTURE_CODE;
+					requestCode = CAMERA;
 					pickIntent = IntentManager.getImageCaptureIntent(context);
 					break;
-
 				case VIDEO:
-					requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
+					requestCode = VIDEO;
 					pickIntent = IntentManager.getVideoRecordingIntent();
 					break;
-
 				case AUDIO:
-					requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
-					// showAudioDialog();
+					requestCode = AUDIO;
+					pickIntent = IntentManager.getAudioShareIntent(context);
 					break;
-
 				case LOCATOIN:
-					requestCode = HikeConstants.SHARE_LOCATION_CODE;
+					requestCode = LOCATOIN;
 					pickIntent = IntentManager.getLocationPickerIntent(context);
 					break;
-
 				case CONTACT:
-					requestCode = HikeConstants.SHARE_CONTACT_CODE;
+					requestCode = CONTACT;
 					pickIntent = IntentManager.getContactPickerIntent();
 					break;
-
 				case FILE:
-					listener.itemClicked(item);
+					requestCode = FILE;
+					pickIntent = IntentManager.getFileSelectActivityIntent(context);
 					break;
-				case GALLARY:
+				case GALLERY:
 					listener.itemClicked(item);
 					break;
 				}
