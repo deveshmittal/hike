@@ -97,7 +97,7 @@
                             android:textSize="14sp"
                             android:textColor="#ffffff"
                             android:visibility="gone"
-                            android:maxLines="3"
+                            android:maxLines="2"
                             android:ellipsize="end"
                             />
 

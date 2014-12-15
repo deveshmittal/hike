@@ -208,6 +208,7 @@ public class CardRenderer implements View.OnLongClickListener {
 
         } else if (cardType == CardConstants.GAMES_CARD_LAYOUT) {
             ViewHolder viewHolder;
+            boolean isGamesAppInstalled = convMessage.platformMessageMetadata.isInstalled;
             if (view == null) {
                 viewHolder = new ViewHolder();
 
@@ -219,10 +220,7 @@ public class CardRenderer implements View.OnLongClickListener {
                     viewHolder.initializeHolderForReceiver(view);
                 }
                 viewHolder.initializeHolder(view, textComponents, mediaComponents, actionComponents);
-                boolean isGamesAppInstalled = convMessage.platformMessageMetadata.isInstalled;
-                if (!isGamesAppInstalled) {
-                    gameInstalledTextFiller(viewHolder);
-                }
+
                 String channelSource = convMessage.platformMessageMetadata.channelSource;
                 cardCallToActions(cardType, actionComponents, viewHolder, isGamesAppInstalled, channelSource);
                 view.setTag(viewHolder);
@@ -232,6 +230,9 @@ public class CardRenderer implements View.OnLongClickListener {
             }
 
             cardDataFiller(cardType, textComponents, mediaComponents, viewHolder);
+            if (!isGamesAppInstalled) {
+                gameInstalledTextFiller(viewHolder);
+            }
 
 
         } else if (cardType == CardConstants.ARTICLE_CARD_LAYOUT) {
