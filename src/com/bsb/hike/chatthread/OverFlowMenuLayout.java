@@ -1,5 +1,6 @@
 package com.bsb.hike.chatthread;
 
+import java.util.Iterator;
 import java.util.List;
 
 import android.content.Context;
@@ -91,14 +92,39 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 		popUpLayout.dismiss();
 	}
 
-	public void showOverflowMenu(int width, int height, View anchor) {
-		showOverflowMenu(width, height, 0, 0, anchor);
+	public void show(int width, int height, View anchor) {
+		show(width, height, 0, 0, anchor);
 	}
 
-	public void showOverflowMenu(int width, int height, int xOffset,
+	public void show(int width, int height, int xOffset,
 			int yOffset, View anchor) {
 		initView();
 		popUpLayout.showPopUpWindow(width, height, xOffset, yOffset, anchor,
 				getView());
 	}
+
+	public void appendItem(OverFlowMenuItem item) {
+		this.overflowItems.add(item);
+	}
+
+	public void appendItem(OverFlowMenuItem item, int position) {
+		this.overflowItems.add(position, item);
+	}
+
+	public void appendItems(OverFlowMenuItem... items) {
+		for (OverFlowMenuItem item : items) {
+			this.overflowItems.add(item);
+		}
+	}
+
+	public void removeItem(int id) {
+		Iterator<OverFlowMenuItem> iterator = overflowItems.iterator();
+		while (iterator.hasNext()) {
+			if (iterator.next().uniqueness == id) {
+				iterator.remove();
+				break;
+			}
+		}
+	}
+
 }
