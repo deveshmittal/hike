@@ -608,13 +608,36 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
-		boolean newUser = true;
+		// Setting up preferences for new user.
+		Editor edit = settings.edit();
+		/*
+		 * We show these tips only to upgrading users
+		 */
+		edit.putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
+		
+		/*
+		 * We show this tip only to new signup users
+		 */
+		edit.putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true);
+		
+		/*
+		 * We don't want to show red dot on overflow menu for new users
+		 */
+		edit.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, true);
+		edit.commit();
+		
 		if (!restored)
 		{
 			this.data = null;
 			try
 			{
-				if (DBBackupRestore.getInstance(context).isBackupAvailable())
+		
+				// If was already restoring backup, no need to check anything, make another attempt at it.
+				if (settings.getBoolean(HikeMessengerApp.RESTORING_BACKUP, false))
+				{
+					this.data = "true";
+				}
+				else if (DBBackupRestore.getInstance(context).isBackupAvailable())
 				{
 					publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
 					// After publishing 'backup available' the task waits for the user to make an input(Restore or Skip)
@@ -623,7 +646,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 						this.wait();
 					}
 				}
-		
+					
+				
 				/*
 				 * The following while loop executes restore operation(if user has selected so)
 				 * As soon as the loop starts it resets itself, so it wont execute again unless its again
@@ -632,8 +656,9 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				while (!TextUtils.isEmpty(this.data))
 				{
 					this.data = null;
-					publishProgress(new StateValue(State.RESTORING_BACKUP,null));
-					boolean status = DBBackupRestore.getInstance(context).restoreDB();
+					
+					boolean status = restore(settings);
+					
 					// A delay so that user is able to understand the UI animations.
 					synchronized (this)
 					{
@@ -641,9 +666,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 					if (status)
 					{
-						ContactManager.getInstance().init(context);
 						publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString()));
-						newUser = false;
 					}
 					else
 					{
@@ -676,27 +699,29 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
 		isAlreadyFetchingNumber = false;
 
-		Editor edit = settings.edit();
-		/*
-		 * We show these tips only to upgrading users
-		 */
-		edit.putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
-		
-		if(newUser)
-		{
-			/*
-			 * We show this tip only to new signup users
-			 */
-			edit.putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true);
-		}
-		
-		/*
-		 * We don't want to show red dot on overflow menu for new users
-		 */
-		edit.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, true);
-		
-		edit.commit();
 		return Boolean.TRUE;
+	}
+	
+	private boolean restore(SharedPreferences settings)
+	{
+		Editor editor = settings.edit();
+		editor.putBoolean(HikeMessengerApp.RESTORING_BACKUP, true);
+		editor.commit();
+		
+		publishProgress(new StateValue(State.RESTORING_BACKUP,null));
+		boolean status = DBBackupRestore.getInstance(context).restoreDB();
+		
+		if (status)
+		{
+			ContactManager.getInstance().init(context);
+			editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+			editor.commit();
+		}
+
+		editor.putBoolean(HikeMessengerApp.RESTORING_BACKUP, false);
+		editor.commit();
+		
+		return status;
 	}
 
 	/**

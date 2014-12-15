@@ -89,6 +89,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String BACKUP_TOKEN_SETTING = "backup_token";
 
 	public static final String RESTORE_ACCOUNT_SETTING = "restore";
+	
+	public static final String SIGNUP_COMPLETE = "signup_complete";
+
+	public static final String RESTORING_BACKUP = "restoring_backup";
 
 	public static final String UPDATE_SETTING = "update";
 

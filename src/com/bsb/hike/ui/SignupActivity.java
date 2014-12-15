@@ -509,7 +509,10 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 					mHandler.removeCallbacks(startWelcomeScreen);
 					mHandler.postDelayed(startWelcomeScreen, 2500);
 				}
-
+				SharedPreferences settings = getApplication().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+				Editor ed = settings.edit();
+				ed.putBoolean(HikeMessengerApp.SIGNUP_COMPLETE, true);
+				ed.commit();
 			}
 			else if (mCurrentState != null && mCurrentState.value != null && mCurrentState.value.equals(HikeConstants.CHANGE_NUMBER))
 			{
