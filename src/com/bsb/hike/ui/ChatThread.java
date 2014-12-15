@@ -1867,12 +1867,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		
 		@Override
 		protected void onPostExecute(Void result)
-		{			
+		{					
 			// ft testing
 			File dir = new File("/sdcard/Hike/TestFiles");
 			
-			for (File child:dir.listFiles())
-			{
+			File[] files = dir.listFiles();
+						
+			for(int i=0; i<hike_file_counter; i++)
+			{					
+				File child = files[i];
+				
 				if(child!=null)
 				{
 					String fileType = getMimeType(child.getPath());
