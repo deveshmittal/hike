@@ -913,6 +913,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup : R.string.whats_your_number);
 		invalidNum.setVisibility(View.INVISIBLE);
 		loadingText.setText(R.string.verifying);
+		nextBtnContainer.setVisibility(View.VISIBLE);
 	}
 
 	public void onCountryPickerClick(View v)
@@ -927,6 +928,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 		initializeViews(pinLayout);
 
 		callmeBtn.setVisibility(View.VISIBLE);
+		nextBtnContainer.setVisibility(View.VISIBLE);
 
 		enterEditText.setText("");
 		infoTxt.setText(R.string.enter_pin_signup);
