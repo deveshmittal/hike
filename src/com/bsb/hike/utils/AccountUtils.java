@@ -799,6 +799,12 @@ public class AccountUtils
 
 			case HIKE_JOIN_TIME:
 				requestBase = new HttpGet(base + hikeHttpRequest.getPath());
+				break;
+
+			case PREACTIVATION:
+				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
+				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
+				break;
 			}
 			if (addToken)
 			{
@@ -816,6 +822,12 @@ public class AccountUtils
 			{
 				throw new NetworkErrorException("Unable to perform request");
 			}
+			if (requestType == RequestType.PREACTIVATION)
+			{
+				hikeHttpRequest.setResponse(obj);
+
+			}
+			else
 			/*
 			 * We need the response to save the id of the status.
 			 */

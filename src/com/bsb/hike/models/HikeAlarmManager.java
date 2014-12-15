@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
+import com.bsb.hike.service.PreloadNotificationSchedular;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -163,7 +164,7 @@ public class HikeAlarmManager
 		switch (requestCode)
 		{
 		case HikeAlarmManager.REQUESTCODE_NOTIFICATION_PRELOAD:
-			// PreloadNotificationSchedular.performActionWhenAlarmReceived(context);
+			PreloadNotificationSchedular.run(context);
 			break;
 		default:
 
