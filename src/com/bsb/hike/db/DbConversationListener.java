@@ -134,11 +134,7 @@ public class DbConversationListener implements Listener
 		{
 			MultipleConvMessage multiConvMessages = (MultipleConvMessage) object;
 
-			mConversationDb.addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),multiConvMessages.getCreateChatThread());
-			// after DB insertion, we need to update conversation UI , so sending event which contains all contacts and last message for each contact
-			multiConvMessages.sendPubSubForConvScreenMultiMessage();
-			// publishing mqtt packet
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
+            sendMultiConvMessage(multiConvMessages);
 		}
 		else if (HikePubSub.MULTI_FILE_UPLOADED.equals(type))
 		{
@@ -394,8 +390,16 @@ public class DbConversationListener implements Listener
 			handleHikeSdkMessage(object);
 		}
 	}
-	
-	private void handleHikeSdkMessage(Object object){
+
+    private void sendMultiConvMessage(MultipleConvMessage multiConvMessages) {
+        mConversationDb.addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),multiConvMessages.getCreateChatThread());
+        // after DB insertion, we need to update conversation UI , so sending event which contains all contacts and last message for each contact
+        multiConvMessages.sendPubSubForConvScreenMultiMessage();
+        // publishing mqtt packet
+        mPubSub.publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
+    }
+
+    private void handleHikeSdkMessage(Object object){
 	//	if(object instanceof JSONObject){
         JSONObject jsonObject = null;
         try {
@@ -414,15 +418,10 @@ public class DbConversationListener implements Listener
             }
             convMessage.platformMessageMetadata.thumbnailMap.clear();
             convMessage.platformMessageMetadata.addThumbnailsToMetadata();
-            if(listOfMessages!=null && null != listOfContacts) {
-                HikeConversationsDatabase.getInstance().addConversations(listOfMessages, listOfContacts, true);
-                for (String msisdn:msisdns){
-                    convMessage.setMsisdn(msisdn);
-                    mPubSub.publish(HikePubSub.HIKE_SDK_MESSAGE_SENT, convMessage);
-                    mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
+            long timeStamp = System.currentTimeMillis()/1000;
+            MultipleConvMessage multipleConvMessage = new MultipleConvMessage(listOfMessages, listOfContacts, timeStamp, true, null);
+            sendMultiConvMessage(multipleConvMessage);
 
-                }
-            }
         } catch (JSONException e) {
 
             e.printStackTrace();

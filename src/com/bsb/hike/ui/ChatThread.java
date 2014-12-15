@@ -356,7 +356,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED, HikePubSub.PARTICIPANT_JOINED_GROUP, HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.APP_FOREGROUNDED, HikePubSub.BULK_MESSAGE_RECEIVED, 
 			HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.UPDATE_PIN_METADATA,HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT,HikePubSub.CONV_META_DATA_UPDATED, 
-			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED, HikePubSub.STICKER_FTUE_TIP,HikePubSub.HIKE_SDK_MESSAGE_SENT  };
+			HikePubSub.LATEST_PIN_DELETED, HikePubSub.CONTACT_DELETED, HikePubSub.STICKER_CATEGORY_MAP_UPDATED, HikePubSub.STICKER_FTUE_TIP,HikePubSub.MULTI_MESSAGE_DB_INSERTED  };
 
 	private EmoticonType emoticonType;
 
@@ -4315,43 +4315,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			});
 		}
 
-        else if (HikePubSub.HIKE_SDK_MESSAGE_SENT.equals(type)){
-
-            final ConvMessage message = (ConvMessage) object;
-            String msisdn = message.getMsisdn();
-            if (msisdn == null)
-            {
-                Logger.wtf("ChatThread", "Message with missing msisdn:" + message.toString());
-                return;
-            }
-
-            if (!msisdn.equals(mContactNumber))
-                return;
-
-            if (hasWindowFocus())
-            {
-                message.setState(State.SENT_CONFIRMED);
-                mConversationDb.updateMsgStatus(message.getMsgID(), State.SENT_CONFIRMED.ordinal(), mConversation.getMsisdn());
-
-            }
-
-            if (activityVisible && Utils.isPlayTickSound(getApplicationContext()))
-            {
-                Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
-            }
-
-            runOnUiThread(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    addMessage(message);
-                    //Logger.d(getClass().getSimpleName(), "calling chatThread.addMessage() Line no. : 2219");
-                }
-            });
-
-        }
-
 		else if (HikePubSub.STICKER_CATEGORY_MAP_UPDATED.equals(type))
 		{
 			if(stickerAdapter == null)
@@ -4381,6 +4344,28 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 			});
 		}
+        else if (HikePubSub.MULTI_MESSAGE_DB_INSERTED.equals(type)) {
+            List<Pair<ContactInfo, ConvMessage>> pairList = (List<Pair<ContactInfo, ConvMessage>>) object;
+            for (final Pair<ContactInfo, ConvMessage> pair : pairList) {
+                ContactInfo conInfo = pair.first;
+                String msisdn = conInfo.getMsisdn();
+
+                if (msisdn.equals(mContactNumber)) {
+
+                    if (activityVisible && Utils.isPlayTickSound(getApplicationContext())) {
+                        Utils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
+                    }
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            addMessage(pair.second);
+                        }
+                    });
+                    break;
+                }
+            }
+        }
 	}
 
 	private void setStateAndUpdateView(long msgId, boolean updateView)

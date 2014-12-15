@@ -78,12 +78,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textStyle="bold|italic"
-                            android:tag="T1"
+                            android:tag="@string/content_card_title_tag"
                             android:textSize="14sp"
+                            app:maxLines="2"
                             android:textColor="#ffffff"
                             android:visibility="gone"
-                            android:maxLines="2"
-                            android:ellipsize="end"
                             />
 
 
@@ -93,17 +92,17 @@
                             android:layout_height="wrap_content"
                             android:textSize="14sp"
                             android:visibility="gone"
-                            android:tag="T2"
+                            android:tag="@string/content_card_subtitle_tag"
+                            app:maxLines="3"
                             android:textStyle="italic"
                             android:layout_below="@id/title"
                             android:textColor="#ffffff"
                             android:layout_gravity="center_vertical"
-                            android:maxLines="3"
-                            android:ellipsize="end"
                             />
 
                     <com.bsb.hike.view.CustomFontTextView
                             android:layout_width="wrap_content"
+                            android:id="@+id/action_text"
                             android:visibility="gone"
                             android:gravity="center"
                             android:paddingLeft="12dp"
@@ -114,7 +113,7 @@
                             android:textColor="#ffffff"
                             android:textAllCaps="true"
                             android:background="@drawable/green_button_selector"
-                            android:tag="T3"
+                            android:tag="@string/content_card_action_tag"
                             android:textStyle="bold|italic"
                             android:layout_marginTop="6dp"
                             android:layout_below="@id/description"
