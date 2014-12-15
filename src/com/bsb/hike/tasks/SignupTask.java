@@ -608,6 +608,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		publishProgress(new StateValue(State.PROFILE_IMAGE, FINISHED_UPLOAD_PROFILE));
 
+		boolean newUser = true;
 		if (!restored)
 		{
 			this.data = null;
@@ -642,6 +643,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					{
 						ContactManager.getInstance().init(context);
 						publishProgress(new StateValue(State.RESTORING_BACKUP,Boolean.TRUE.toString()));
+						newUser = false;
 					}
 					else
 					{
@@ -663,9 +665,9 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			}
 			catch (InterruptedException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
-				Logger.d("backup","Interrupted while waiting for user's choice on restore.");
+				Logger.e("SignupTask","Interrupted while waiting for user's choice on restore.");
+				return Boolean.FALSE;
 			}
 		}
 		Logger.d("SignupTask", "Publishing Token_Created");
@@ -679,10 +681,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		 * We show these tips only to upgrading users
 		 */
 		edit.putBoolean(HikeMessengerApp.SHOWN_WELCOME_HIKE_TIP, true);
-		/*
-		 * We show this tip only to new signup users
-		 */
-		edit.putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true);
+		
+		if(newUser)
+		{
+			/*
+			 * We show this tip only to new signup users
+			 */
+			edit.putBoolean(HikeMessengerApp.SHOW_STEALTH_INFO_TIP, true);
+		}
 		
 		/*
 		 * We don't want to show red dot on overflow menu for new users
