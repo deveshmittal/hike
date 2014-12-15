@@ -631,16 +631,25 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			this.data = null;
 			try
 			{
-				if (DBBackupRestore.getInstance(context).isBackupAvailable())
-				{
-					publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
-					// After publishing 'backup available' the task waits for the user to make an input(Restore or Skip)
-					synchronized (this)
-					{
-						this.wait();
-					}
-				}
 		
+				// If was already restoring backup, no need to check anything, make another attempt at it.
+				if (settings.getBoolean(HikeMessengerApp.RESTORING_BACKUP, false))
+				{
+					this.data = "true";
+				}
+				else
+				{
+					if (DBBackupRestore.getInstance(context).isBackupAvailable())
+					{
+						publishProgress(new StateValue(State.BACKUP_AVAILABLE,null));
+						// After publishing 'backup available' the task waits for the user to make an input(Restore or Skip)
+						synchronized (this)
+						{
+							this.wait();
+						}
+					}
+					
+				}
 				/*
 				 * The following while loop executes restore operation(if user has selected so)
 				 * As soon as the loop starts it resets itself, so it wont execute again unless its again
@@ -649,16 +658,23 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				while (!TextUtils.isEmpty(this.data))
 				{
 					this.data = null;
+					
+					Editor editor = settings.edit();
+					editor.putBoolean(HikeMessengerApp.RESTORING_BACKUP, true);
+					editor.commit();
+					
 					publishProgress(new StateValue(State.RESTORING_BACKUP,null));
 					boolean status = DBBackupRestore.getInstance(context).restoreDB();
 					
 					if (status)
 					{
 						ContactManager.getInstance().init(context);
-						Editor editor = settings.edit();
 						editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
 						editor.commit();
 					}
+
+					editor.putBoolean(HikeMessengerApp.RESTORING_BACKUP, false);
+					editor.commit();
 					// A delay so that user is able to understand the UI animations.
 					synchronized (this)
 					{
