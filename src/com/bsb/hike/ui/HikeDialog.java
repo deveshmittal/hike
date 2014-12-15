@@ -2,30 +2,38 @@ package com.bsb.hike.ui;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.preference.PreferenceManager;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.AccountAdapter;
+import com.bsb.hike.models.AccountData;
+import com.bsb.hike.models.ContactInfoData;
+import com.bsb.hike.models.PhonebookContact;
+import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.CustomFontButton;
 import com.bsb.hike.view.CustomFontTextView;
 
 public class HikeDialog
@@ -435,7 +443,35 @@ public class HikeDialog
 		public void positiveClicked(Dialog dialog);
 
 		public void neutralClicked(Dialog dialog);
-		
+
 		public void onSucess(Dialog dialog);
+	}
+
+	public static class HDialog extends Dialog
+	{
+		public final int id;
+		public Object data;
+		public HDialog(Context context, int theme, int id)
+		{
+			super(context, theme);
+			this.id = id;
+		}
+
+		public HDialog(Context context, int id)
+		{
+			super(context);
+			this.id = id;
+		}
+
+	}
+
+	public static interface HHikeDialogListener
+	{
+		public void negativeClicked(int id, HDialog dialog);
+
+		public void positiveClicked(int id, HDialog dialog);
+
+		public void neutralClicked(int id, HDialog dialog);
+
 	}
 }
