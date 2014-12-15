@@ -4867,5 +4867,59 @@ public class Utils
 	{
 		return ctx.getResources().getConfiguration().orientation;
 	}
+	
+	public static List<AccountData> getAccountList(Context context)
+	{
+		Account[] a = AccountManager.get(context).getAccounts();
+		// Clear out any old data to prevent duplicates
+		List<AccountData> accounts = new ArrayList<AccountData>();
+
+		// Get account data from system
+		AuthenticatorDescription[] accountTypes = AccountManager.get(context).getAuthenticatorTypes();
+
+		// Populate tables
+		for (int i = 0; i < a.length; i++)
+		{
+			// The user may have multiple accounts with the same name, so we
+			// need to construct a
+			// meaningful display name for each.
+			String type = a[i].type;
+			/*
+			 * Only showing the user's google accounts
+			 */
+			if (!"com.google".equals(type))
+			{
+				continue;
+			}
+			String systemAccountType = type;
+			AuthenticatorDescription ad = getAuthenticatorDescription(systemAccountType, accountTypes);
+			AccountData data = new AccountData(a[i].name, ad, context);
+			accounts.add(data);
+		}
+
+		return accounts;
+	}
+	
+	/**
+	 * Obtain the AuthenticatorDescription for a given account type.
+	 * 
+	 * @param type
+	 *            The account type to locate.
+	 * @param dictionary
+	 *            An array of AuthenticatorDescriptions, as returned by AccountManager.
+	 * @return The description for the specified account type.
+	 */
+	private static AuthenticatorDescription getAuthenticatorDescription(String type, AuthenticatorDescription[] dictionary)
+	{
+		for (int i = 0; i < dictionary.length; i++)
+		{
+			if (dictionary[i].type.equals(type))
+			{
+				return dictionary[i];
+			}
+		}
+		// No match found
+		throw new RuntimeException("Unable to find matching authenticator");
+	}
 
 }
