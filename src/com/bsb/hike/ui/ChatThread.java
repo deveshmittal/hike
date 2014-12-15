@@ -205,6 +205,7 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.utils.customClasses.AsyncTask.MyAsyncTask;
+import com.bsb.hike.utils.customClasses.AsyncTask.MyAsyncTask.Status;
 import com.bsb.hike.view.CustomFontEditText;
 import com.bsb.hike.view.CustomFontEditText.BackKeyListener;
 import com.bsb.hike.view.CustomLinearLayout;
@@ -334,6 +335,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private int HIKE_TO_OFFLINE_TIP_STATE_3 = 3;
 
 	private int currentCreditsForToast = 0;
+	
+	private static boolean isSimulationRunning = false;
 
 	/*
 	 * We should run client timer before showing hikeOffline tip only if user is entering chat thread and reciever's online state changes while user is on chatthread
@@ -446,6 +449,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 	private static int hike_message_counter = HikeTestUtil.HIKE_MESSAGE_COUNTER_DEFAULT;
 	
 	private static int hike_message_delay = HikeTestUtil.HIKE_MESSAGE_DELAY_DEFAULT;
+	
+	private static int hike_file_counter = HikeTestUtil.HIKE_FILE_COUNTER_DEFAULT;
+		
+	private StartHikeTestingAsyncTask startTestTask = null;
 
 	@Override
 	protected void onPause()
@@ -1475,13 +1482,18 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if(!Utils.isGroupConversation(mContactNumber))
 		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.start_test), 9));
+			if(!isSimulationRunning)
+				optionsList.add(new OverFlowMenuItem(getString(R.string.start_simulation), 9));
+			else
+				optionsList.add(new OverFlowMenuItem(getString(R.string.stop_simulation), 9));				
 			
 			optionsList.add(new OverFlowMenuItem(getString(R.string.send_logs), 10));
 			
-			optionsList.add(new OverFlowMenuItem(getString(R.string.simulation_settings), 11));
-			
-			optionsList.add(new OverFlowMenuItem(getString(R.string.delay_settings), 12));
+			optionsList.add(new OverFlowMenuItem(getString(R.string.configure_message_count), 11));
+
+			optionsList.add(new OverFlowMenuItem(getString(R.string.configure_ft_counter), 12));
+
+			optionsList.add(new OverFlowMenuItem(getString(R.string.delay_settings), 13));
 		}
 		dismissPopupWindow();
 
@@ -1577,25 +1589,53 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 				// start test simulation here
 				case 9:
-					ExternalStorageState val = Utils.getExternalStorageState();
-					Log.d("HikeTestUtil", "external storage state :" + val);
-					
-					if(val==ExternalStorageState.NONE)
-					{	
-						Log.d("HikeTestUtil", "sd card is not present");
-						Toast toast = Toast.makeText(getApplicationContext(), "Simulation can't start. Please insert sd card.", Toast.LENGTH_LONG);
-						toast.show();
+					if(!isSimulationRunning)
+					{
+						ExternalStorageState val = Utils.getExternalStorageState();
+						Log.d("HikeTestUtil", "external storage state :" + val);
+						
+						if(val==ExternalStorageState.NONE)
+						{	
+							Log.d("HikeTestUtil", "sd card is not present");
+							Toast toast = Toast.makeText(getApplicationContext(), "Simulation can't start. Please insert sd card.", Toast.LENGTH_LONG);
+							toast.show();
+						}
+						else
+						{
+							// delete old test report and create new one
+							mTestUtil.deleteFile();
+							
+							// start the simulation now
+							startTestTask = new StartHikeTestingAsyncTask();					
+							startTestTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
+							isSimulationRunning = true;		
+						}
 					}
 					else
 					{
-						// delete old test report and create new one
-						mTestUtil.deleteFile();
-						
-						// start the simulation now
-						StartHikeTestingAsyncTask startTestTask = new StartHikeTestingAsyncTask();					
-						startTestTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
+						if(startTestTask != null) 
+						{
+							boolean wasCancelled = false;
+							
+							if((startTestTask.getStatus() == Status.RUNNING) || (startTestTask.getStatus() == Status.PENDING))
+							{
+								wasCancelled = startTestTask.cancel(true);
+							}
+							else if(startTestTask.getStatus() == Status.FINISHED)
+							{
+								wasCancelled = true;
+							}
+								
+							
+							if(wasCancelled)
+							{
+								isSimulationRunning = false;
+								Logger.d("HikeTestUtil", "Simulation was stopped!");
+							}
+						}
 					}
 					break;
+						
 				// send test logs via email client from here					
 				case 10:
 					ExternalStorageState sdcardSate = Utils.getExternalStorageState();
@@ -1687,8 +1727,55 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					});
 					alertDialog.show();
 				break;
-				// configure delay among hms
+				// configure ft counter
 				case 12:
+					final int filesCount = Utils.getTestFilesCount();
+					AlertDialog ftDialog = new AlertDialog.Builder(ChatThread.this).create();
+					ftDialog.setTitle("FT counter");
+					ftDialog.setMessage("Enter number of files to be sent(" + filesCount + " present).");
+					ftDialog.setIcon(R.drawable.ic_launcher);
+
+					final EditText inputCount = new EditText(ChatThread.this);
+					LinearLayout.LayoutParams lpFt = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+					inputCount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+					inputCount.setLayoutParams(lpFt);
+					ftDialog.setView(inputCount);
+
+					// Setting OK Button
+					ftDialog.setButton("OK", new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog, int which)
+						{
+							if(inputCount.getText().length() > 0)
+							{								
+								if(filesCount == 0)
+								{
+									Toast.makeText(getApplicationContext(), "There are no test files.", Toast.LENGTH_SHORT).show();
+								}
+								else
+								{
+									String value = inputCount.getText().toString();
+									hike_file_counter = Integer.valueOf(value);
+									
+									if(hike_file_counter > filesCount || hike_file_counter < 0)
+									{
+										Toast toast = Toast.makeText(getApplicationContext(), "Value should be between 1-" + filesCount + ".", Toast.LENGTH_SHORT);
+										toast.show();	
+										hike_file_counter = HikeTestUtil.HIKE_FILE_COUNTER_DEFAULT;
+									}
+								}
+							}
+							else
+							{
+								Toast toast = Toast.makeText(getApplicationContext(), "Field can't be blank!", Toast.LENGTH_SHORT);
+								toast.show();
+							}
+						}
+					});
+					ftDialog.show();
+				break;
+				// configure delay among hms
+				case 13:
 				AlertDialog delayDialog = new AlertDialog.Builder(ChatThread.this).create();
 				delayDialog.setTitle("Message delay");
 				delayDialog.setMessage("Enter delay between messages(100ms-2000ms)");
@@ -1805,11 +1892,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 				}
 			}	
-			CharSequence text = "Simulation has ended. Wait to receive all the messages after which you can send test report.";
-			int duration = Toast.LENGTH_LONG;
 
-			Toast toast = Toast.makeText(getApplicationContext(), text, duration);
-			toast.show();
+//			CharSequence text = "Simulation has ended. Wait to receive all the messages after which you can send test report.";
+//			int duration = Toast.LENGTH_LONG;
+//
+//			Toast toast = Toast.makeText(getApplicationContext(), text, duration);
+//			toast.show();
+			
+//			if(hike_file_counter == 0)
+//				isSimulationRunning = false;
 		}
 	}
 
@@ -8852,5 +8943,15 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		{
 			Utils.hideSoftKeyboard(ChatThread.this, mComposeView);
 		}
+	}
+	
+	public static boolean getSimulationState()
+	{
+		return isSimulationRunning;
+	}
+	
+	public static void setSimulationState(boolean state)
+	{
+		isSimulationRunning = state;
 	}
 }
