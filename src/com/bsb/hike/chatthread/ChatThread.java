@@ -55,10 +55,12 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 
 	protected ChatTheme currentTheme;
 
-	public ChatThread(ChatThreadActivity activity)
+	protected String msisdn;
+
+	public ChatThread(ChatThreadActivity activity, String msisdn)
 	{
 		this.activity = activity;
-
+		this.msisdn = msisdn;
 		init();
 	}
 
