@@ -6708,22 +6708,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			emoticonViewPager = emoticonViewPager == null ? (ViewPager) emoticonLayout.findViewById(R.id.emoticon_pager) : emoticonViewPager;
 
 			View eraseKey = emoticonLayout.findViewById(R.id.erase_key);
-			ImageView shopIcon = (ImageView) emoticonLayout.findViewById(R.id.erase_key_image);
-			if(v.getId() == R.id.sticker_btn && HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))  //The shop icon would be blue unless the user clicks on it once
-			{
-				emoticonLayout.findViewById(R.id.sticker_shop_badge).setVisibility(View.VISIBLE);
-			}
-			else
-			{
-				emoticonLayout.findViewById(R.id.sticker_shop_badge).setVisibility(View.GONE);
-			}
+			View shopButton = emoticonLayout.findViewById(R.id.shop_button);
+
 			if (v != null)
 			{
 				int[] tabDrawables = null;
 
 				if (v.getId() == R.id.sticker_btn)
 				{
-					View shopIconViewGroup = eraseKey;
 					if (emoticonType == EmoticonType.STICKERS)
 					{
 						v.setSelected(false);
@@ -6731,6 +6723,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						dismissPopupWindow();
 						return;
 					}
+
+					eraseKey.setVisibility(View.GONE);
+					shopButton.setVisibility(View.VISIBLE);
+
 					v.setSelected(true);
 					((View)findViewById(R.id.tb_layout)).findViewById(R.id.emo_btn).setSelected(false);
 					resetAtomicPopUpKey(HikeMessengerApp.ATOMIC_POP_UP_STICKER);
@@ -6749,16 +6745,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						emoticonType = EmoticonType.STICKERS;
 					}
-					shopIconViewGroup.setVisibility(View.VISIBLE);
+					final ImageView shopIcon = (ImageView) emoticonLayout.findViewById(R.id.shop_icon_image);
 					shopIcon.setImageResource(R.drawable.ic_sticker_shop);
-					eraseKey.setBackgroundResource(R.drawable.sticker_shop_selector);
-					
+
+					if(HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))
+					{
+						emoticonLayout.findViewById(R.id.sticker_shop_badge).setVisibility(View.VISIBLE);
+					}
+
+					final View animatedBackground = emoticonLayout.findViewById(R.id.animated_backgroud);
 					if(!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 					{
-						shopIconViewGroup.setBackgroundResource(R.color.shop_icon_color);
+						animatedBackground.setVisibility(View.VISIBLE);
+						Animation anim = AnimationUtils.loadAnimation(this, R.anim.scale_out_from_mid);
+						animatedBackground.startAnimation(anim);
+
+						shopIcon.setAnimation(HikeAnimationFactory.getStickerShopIconAnimation(this));
 					}
 					
-					shopIconViewGroup.setOnClickListener(new View.OnClickListener()
+					shopButton.setOnClickListener(new View.OnClickListener()
 					{
 						
 						@Override
@@ -6767,6 +6772,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							if(!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 							{
 								HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
+								animatedBackground.setVisibility(View.GONE);
+								animatedBackground.clearAnimation();
+								shopIcon.clearAnimation();
 							}
 							if(HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))  //The shop icon would be blue unless the user clicks on it once
 							{
@@ -6786,6 +6794,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						dismissPopupWindow();
 						return;
 					}
+
+					eraseKey.setVisibility(View.VISIBLE);
+					shopButton.setVisibility(View.GONE);
+
 					v.setSelected(true);
 					findViewById(R.id.sticker_btn).setSelected(false);
 					int offset = 0;
@@ -6814,9 +6826,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							whichSubcategory++;
 						}
 					}
-					eraseKey.setVisibility(View.VISIBLE);
-					shopIcon.setImageResource(R.drawable.ic_erase);
-					eraseKey.setBackgroundResource(R.drawable.erase_key_selector);
 					eraseKey.setOnClickListener(new OnClickListener()
 					{
 
