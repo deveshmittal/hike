@@ -174,6 +174,8 @@ public class HikeService extends Service
 
 	private Messenger mSDKRequestMessenger;
 
+	private boolean isInitialized;
+
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -185,12 +187,22 @@ public class HikeService extends Service
 	{
 		super.onCreate();
 
+		// If user is not signed up. Do not initialize MQTT or serve any SDK requests. Instead, re-route to Welcome/Signup page.
+		// TODO : This is a fix to handle edge case when a request comes from SDK and user has not signed up yet. In future we must make a separate bound service for handling SDK
+		// related requests.
 		if (!isUserSignedUp())
 		{
-			assignUtilityThread();
 			return;
 		}
 
+		initHikeService();
+	}
+
+	/**
+	 * Initialize HikeService variables, references and other components.
+	 */
+	private void initHikeService()
+	{
 		HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED, null);
 
 		HikeService.this.sendBroadcast(new Intent(HikeService.SEND_RAI_TO_SERVER_ACTION));
@@ -288,7 +300,8 @@ public class HikeService extends Service
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
 			Utils.executeAsyncTask(syncContactExtraInfo);
 		}
-		
+
+		setInitialized(true);
 	}
 
 	public boolean isUserSignedUp()
@@ -340,6 +353,13 @@ public class HikeService extends Service
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{
 		Logger.d("HikeService", "Start MQTT Thread.");
+
+		// In-case if service is already started, the onStart command calls this method. Proceed only if service is initialized.
+		if (!isInitialized())
+		{
+			initHikeService();
+		}
+
 		mMqttManager.connectOnMqttThread();
 		Logger.d("HikeService", "Intent is " + intent);
 		if (intent != null && intent.hasExtra(HikeConstants.Extras.SMS_MESSAGE))
@@ -437,23 +457,30 @@ public class HikeService extends Service
 	@Override
 	public IBinder onBind(Intent intent)
 	{
-		try
+		if (mSDKRequestMessenger != null)
 		{
-			mSDKRequestMessenger.getBinder().linkToDeath(new IBinder.DeathRecipient()
+			try
 			{
-
-				@Override
-				public void binderDied()
+				mSDKRequestMessenger.getBinder().linkToDeath(new IBinder.DeathRecipient()
 				{
-					Logger.e(HikeService.class.getCanonicalName(), "BINDER DEATH!!!!");
-				}
-			}, 0);
+
+					@Override
+					public void binderDied()
+					{
+						Logger.e(HikeService.class.getCanonicalName(), "BINDER DEATH!!!!");
+					}
+				}, 0);
+			}
+			catch (RemoteException e)
+			{
+				e.printStackTrace();
+			}
+			return mSDKRequestMessenger.getBinder();
 		}
-		catch (RemoteException e)
+		else
 		{
-			e.printStackTrace();
+			return null;
 		}
-		return mSDKRequestMessenger.getBinder();
 	}
 
 	@Override
@@ -839,10 +866,20 @@ public class HikeService extends Service
 			Utils.executeHttpTask(hikeHTTPTask, profilePicRequest);
 		}
 	}
-	
+
 	private void initStickerDownloadManager()
 	{
 		StickerDownloadManager.init(getApplicationContext());
+	}
+
+	public boolean isInitialized()
+	{
+		return isInitialized;
+	}
+
+	public void setInitialized(boolean isInitialized)
+	{
+		this.isInitialized = isInitialized;
 	}
 
 }
