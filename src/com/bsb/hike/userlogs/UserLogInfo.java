@@ -12,6 +12,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.provider.CallLog;
 
@@ -24,7 +26,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.tasks.HikeHTTPTask;
-import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -55,6 +56,34 @@ public class UserLogInfo {
 	private static final String PACKAGE_NAME = "pn";
 	private static final String APPLICATION_NAME = "an";
 	private static final String INSTALL_TIME = "it";
+	
+	private static final String LATITUDE = "lat";
+	private static final String LONGITUDE = "long";
+	private static final String RADIUS = "rd";
+	private static final String TIMESTAMP = "ts";
+	
+	public static class LocLogPojo{
+		final double latitude;
+		final double longitude;
+		final float radius;
+		final long timeStamp;
+		
+		public LocLogPojo(double latitude, double longitude, float radius, long timeStamp){
+			this.latitude = latitude;
+			this.longitude = longitude;
+			this.radius = radius;
+			this.timeStamp = timeStamp;
+		}
+		
+		public JSONObject toJSON() throws JSONException{
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.putOpt(LATITUDE, this.latitude);
+			jsonObj.putOpt(LONGITUDE,this.longitude);
+			jsonObj.putOpt(RADIUS, this.radius);
+			jsonObj.putOpt(TIMESTAMP, this.timeStamp);
+			return jsonObj;
+		}
+	}
 
 	public static class AppLogPojo {
 		final String packageName;
@@ -66,6 +95,15 @@ public class UserLogInfo {
 			this.applicationName = applicationName;
 			this.installTime = installTime;
 		}
+		
+		public JSONObject toJSON() throws JSONException{
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.putOpt(PACKAGE_NAME, this.packageName);
+			jsonObj.putOpt(APPLICATION_NAME,this.applicationName);
+			jsonObj.putOpt(INSTALL_TIME, this.installTime);
+			return jsonObj;
+		}
+		
 	}
 	
 	public static class CallLogPojo {
@@ -111,11 +149,7 @@ public class UserLogInfo {
 			throws JSONException {
 		JSONArray jsonArray = new JSONArray();
 		for (AppLogPojo appLog : appLogList) {
-			JSONObject jsonObj = new JSONObject();
-			jsonObj.putOpt(APPLICATION_NAME, appLog.applicationName);
-			jsonObj.putOpt(PACKAGE_NAME, appLog.applicationName);
-			jsonObj.putOpt(INSTALL_TIME, appLog.installTime);
-			jsonArray.put(jsonObj);
+			jsonArray.put(appLog.toJSON());
 		}
 		return jsonArray;
 
@@ -133,13 +167,12 @@ public class UserLogInfo {
 
 	private static JSONObject getEncryptedJSON(Context ctx, JSONArray jsonLogArray, int flag) throws JSONException {
 		
-		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		
-		String key = settings.getString(HikeMessengerApp.MSISDN_SETTING, "");
+		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);	
+		String key = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		//for the case when AI packet will not send us the backup Token
-		String salt = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, "");
+		String salt = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, null);
 		// if salt or key is empty, we do not send anything
-		if(salt.equals("") || key.equals(""))
+		if(salt == null|| key == null)
 			return null;
 		
 		AESEncryption aesObj = new AESEncryption(key + salt, HASH_SCHEME);
@@ -151,19 +184,54 @@ public class UserLogInfo {
 
 	}
 	
-	private static JSONArray getJSONLogArray(Context ctx, int flag) throws JSONException{	
-		JSONArray jsonLogArray = null;
+	private static JSONArray collectLogs(Context ctx, int flag) throws JSONException{	
 		switch(flag){
-			case APP_ANALYTICS_FLAG : jsonLogArray = getJSONAppArray(getAppLogs(ctx)); break;
+			case APP_ANALYTICS_FLAG : return getJSONAppArray(getAppLogs(ctx)); 
 			//case CALL_ANALYTICS_FLAG : jsonLogArray = getJSONCallArray(getCallLogs(ctx)); break;
-			//case LOCATION_ANALYTICS_FLAG : jsonArray = getJSONLocationArray(getAllLocationLogs(ctx)); break;	
+			case LOCATION_ANALYTICS_FLAG : return getJSONLocArray(getLocLogs(ctx));
+			default : return null;
 		}
-		return jsonLogArray;
+	}
+	
+	private static JSONArray getJSONLocArray(List<LocLogPojo> locLogList) throws JSONException{
+		//not sending anything if there is no Log available
+		if(locLogList == null)
+			return null;
+		JSONArray locJsonArray = new JSONArray();
+		for(LocLogPojo locLog : locLogList){
+			locJsonArray.put(locLog.toJSON());
+		}
+		Logger.d(TAG, locJsonArray.toString());
+		return locJsonArray;
+	}
+	
+	private static List<LocLogPojo> getLocLogs(Context ctx){
+		Location bestLocation = null;
+		LocationManager locManager = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
+		List<String> locProviders = locManager.getProviders(true);
+		if (locProviders == null || locProviders.isEmpty())
+			return null;
+		for(String provider : locManager.getProviders(true)){
+			Location location = locManager.getLastKnownLocation(provider);
+			if(location == null)
+				continue;
+			if (bestLocation == null || 
+					(location.hasAccuracy() && location.getAccuracy() < bestLocation.getAccuracy())){
+				bestLocation = location;
+			}
+		}
+		if(bestLocation == null)
+			return null;
+		LocLogPojo locLog = new LocLogPojo(bestLocation.getLatitude(), bestLocation.getLongitude(), 
+				bestLocation.getAccuracy(), bestLocation.getTime());
+		List<LocLogPojo> locLogList = new ArrayList<LocLogPojo>(1);
+		locLogList.add(locLog);
+		return locLogList;
 	}
 
 	public static void sendLogs(Context ctx, int flags) throws JSONException {
 		
-		JSONArray jsonLogArray = getJSONLogArray(ctx, flags);	
+		JSONArray jsonLogArray = collectLogs(ctx, flags);	
 		// if nothing is logged we do not send anything
 		if(jsonLogArray != null){		
 			JSONObject jsonLogObj = getEncryptedJSON(ctx, jsonLogArray, flags);
