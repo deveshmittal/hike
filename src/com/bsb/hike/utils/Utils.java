@@ -578,22 +578,44 @@ public class Utils
 			return true;
 		}
 
-		if (!settings.getBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false))
+		if (!settings.getBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false) || !settings.getBoolean(HikeMessengerApp.SIGNUP_COMPLETE, false))
 		{
-			disconnectAndStopService(activity);
-			activity.startActivity(new Intent(activity, SignupActivity.class));
-			activity.finish();
+			if (isUserUpgrading(activity))
+			{
+				Editor editor = settings.edit();
+				editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+				editor.putBoolean(HikeMessengerApp.SIGNUP_COMPLETE, true);
+				editor.commit();
+				return false;
+			}
+			else
+			{
+				disconnectAndStopService(activity);
+				activity.startActivity(new Intent(activity, SignupActivity.class));
+				activity.finish();
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private static boolean isUserUpgrading(Context context)
+	{
+		SharedPreferences settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String currentAppVersion = settings.getString(HikeMessengerApp.CURRENT_APP_VERSION, "");
+		String actualAppVersion = "";
+		try
+		{
+			actualAppVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+		}
+		catch (NameNotFoundException e)
+		{
+			Logger.e("Utils", "Unable to get the app version");
+		}
+		if (!currentAppVersion.equals("") && !currentAppVersion.equals(actualAppVersion))
+		{
 			return true;
 		}
-		
-		if (!settings.getBoolean(HikeMessengerApp.SIGNUP_COMPLETE, false))
-		{
-			disconnectAndStopService(activity);
-			activity.startActivity(new Intent(activity, SignupActivity.class));
-			activity.finish();
-			return true;
-		}
-
 		return false;
 	}
 
