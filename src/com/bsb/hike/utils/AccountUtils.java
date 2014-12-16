@@ -42,8 +42,10 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -153,6 +155,24 @@ public class AccountUtils
 	public static String mUid = null;
 
 	private static String appVersion = null;
+	
+	public static final String SDK_AUTH_BASE_URL_STAGING = "http://stagingoauth.im.hike.in/o/oauth2/";
+
+	public static final String SDK_AUTH_BASE_URL_PROD = "http://oauth.hike.in/o/oauth2/";
+	
+	public static String SDK_AUTH_BASE = SDK_AUTH_BASE_URL_PROD;
+	
+	public static final String SDK_AUTH_PATH_AUTHORIZE = "authorize";
+	
+	public static final String SDK_AUTH_PARAM_RESPONSE_TYPE = "response_type";
+	
+	public static final String SDK_AUTH_PARAM_CLIENT_ID = "client_id";
+	
+	public static final String SDK_AUTH_PARAM_SCOPE = "scope";
+	
+	public static final String SDK_AUTH_PARAM_PACKAGE_NAME = "package_name";
+	
+	public static final String SDK_AUTH_PARAM_SHA1 = "sha1";
 
 	public static void setToken(String token)
 	{
@@ -527,6 +547,16 @@ public class AccountUtils
 			throw new IllegalStateException("Token is null");
 		}
 		req.addHeader("Cookie", "user=" + mToken + "; UID=" + mUid);
+	}
+	
+	public static void addTokenForAuthReq(HttpRequestBase req) throws IllegalStateException
+	{
+		assertIfTokenNull();
+		if (TextUtils.isEmpty(mToken))
+		{
+			throw new IllegalStateException("Token is null");
+		}
+		req.addHeader(new BasicHeader("cookie", "uid="+mUid+";token="+mToken));
 	}
 
 	private static void assertIfTokenNull()

@@ -1,33 +1,8 @@
 package com.bsb.hike.adapters;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
@@ -37,68 +12,37 @@ import android.graphics.drawable.shapes.OvalShape;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Handler;
+import android.os.*;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
-import android.util.Pair;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
+import android.view.*;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
-import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
+import android.widget.*;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.ListAdapter;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
-import com.bsb.hike.models.ContactInfoData;
+import com.bsb.hike.models.*;
 import com.bsb.hike.models.ContactInfoData.DataType;
-import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.models.GroupTypingNotification;
-import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.HikeSharedFile;
-import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
-import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.platform.CardRenderer;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
@@ -108,9 +52,9 @@ import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
-import com.bsb.hike.ui.fragments.PhotoViewerFragment;
-import com.bsb.hike.ui.utils.HashSpanWatcher;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.fragments.PhotoViewerFragment;
+import com.bsb.hike.utils.*;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.HikeTip;
@@ -120,6 +64,11 @@ import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.HoloCircularProgress;
+import org.json.JSONArray;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener, OnCheckedChangeListener
 {
@@ -128,39 +77,41 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION, UNKNOWN_BLOCK_ADD, PIN_TEXT_SENT, PIN_TEXT_RECEIVE
 	};
 
-	private static class DayHolder
-	{
-		ViewStub dayStub;
+    private int viewTypeCount = ViewType.values().length;
 
-		View dayStubInflated;
+	public static class DayHolder
+	{
+		public ViewStub dayStub;
+
+		public View dayStubInflated;
 	}
 
-	private static class DetailViewHolder extends DayHolder
+	public static class DetailViewHolder extends DayHolder
 	{
 
-		ImageView status;
+		public ImageView status;
 
-		TextView time;
+		public TextView time;
 
-		View timeStatus;
+		public View timeStatus;
 
-		View senderDetails;
+		public View senderDetails;
 
-		TextView senderName;
+		public TextView senderName;
 
-		TextView senderNameUnsaved;
+		public TextView senderNameUnsaved;
 
-		ImageView avatarImage;
+		public ImageView avatarImage;
 
-		ViewGroup avatarContainer;
+		public ViewGroup avatarContainer;
 
-		View selectedStateOverlay;
+		public View selectedStateOverlay;
 
-		ViewGroup messageContainer;
+		public ViewGroup messageContainer;
 
-		ViewStub messageInfoStub;
+		public ViewStub messageInfoStub;
 
-		View messageInfoInflated;
+		public View messageInfoInflated;
 	}
 
 	private static class FTViewHolder extends DetailViewHolder
@@ -310,6 +261,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	
 	private HighQualityThumbLoader hqThumbLoader;
 
+    private CardRenderer mChatThreadCardRenderer;
+
 	/*
 	 * this is set of all the currently visible messages which are stuck in tick and are not sms
 	 */
@@ -342,6 +295,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		hqThumbLoader = new HighQualityThumbLoader();
 		hqThumbLoader.setImageFadeIn(false);
 		hqThumbLoader.setDefaultDrawableNull(false);
+        this.mChatThreadCardRenderer = new CardRenderer(context);
+
 	}
 
 	public void setChatTheme(ChatTheme theme)
@@ -566,6 +521,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 			}
 		}
+        else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT)
+        {
+            return viewTypeCount + mChatThreadCardRenderer.getItemViewType(convMessage);
+        }
 		else if (convMessage.getUnreadCount() > 0)
 		{
 			type = ViewType.UNREAD_COUNT;
@@ -621,7 +580,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	@Override
 	public int getViewTypeCount()
 	{
-		return ViewType.values().length;
+		return viewTypeCount + mChatThreadCardRenderer.getCardCount();
 	}
 
 	@Override
@@ -629,13 +588,26 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		long startTime = System.currentTimeMillis();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		ViewType viewType = ViewType.values()[getItemViewType(position)];
+        int type = getItemViewType(position);
+		ViewType viewType = null;
 
 		final ConvMessage convMessage = getItem(position);
 
 		DayHolder dayHolder = null;
 		View v = convertView;
 		// Applicable to all kinds of messages
+        if (type >= viewTypeCount){
+            v = mChatThreadCardRenderer.getView(v, convMessage, parent);
+            DetailViewHolder holder = (DetailViewHolder) v.getTag();
+            dayHolder = holder;
+            setSenderDetails(convMessage, position, holder, false);
+            //setBubbleColor(convMessage, holder.messageContainer);
+            setTimeNStatus(position, holder, true, holder.messageContainer);
+            setSelection(convMessage, holder.selectedStateOverlay);
+        }  else
+            viewType = ViewType.values()[type];
+
+
 		if (viewType == ViewType.TYPING_NOTIFICATION)
 		{
 
@@ -2796,8 +2768,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		/*
 		 * We show the time stamp in the status message separately so no need to show this time stamp.
 		 */
-		ViewType viewtype = ViewType.values()[getItemViewType(position)];
-		if (viewtype == ViewType.STATUS_MESSAGE || viewtype == ViewType.PIN_TEXT_RECEIVE || viewtype == ViewType.PIN_TEXT_SENT)
+        int type = getItemViewType(position);
+        ViewType viewtype = null;
+        if (type < viewTypeCount) {
+            viewtype = ViewType.values()[type];
+        }
+
+		if (null != viewtype && (viewtype == ViewType.STATUS_MESSAGE || viewtype == ViewType.PIN_TEXT_RECEIVE || viewtype == ViewType.PIN_TEXT_SENT))
 		{
 			return false;
 		}

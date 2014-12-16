@@ -48,6 +48,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -176,8 +177,11 @@ import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
+import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.FtueActivity;
+import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -358,7 +362,7 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
 	}
-	
+
 	public static Intent createIntentFromMsisdn(String msisdnOrGroupId, boolean openKeyBoard)
 	{
 		Intent intent = new Intent();
@@ -568,7 +572,6 @@ public class Utils
 
 		if (!settings.getBoolean(HikeMessengerApp.ACCEPT_TERMS, false))
 		{
-			disconnectAndStopService(activity);
 			activity.startActivity(new Intent(activity, WelcomeActivity.class));
 			activity.finish();
 			return true;
@@ -576,7 +579,6 @@ public class Utils
 
 		if (settings.getString(HikeMessengerApp.NAME_SETTING, null) == null)
 		{
-			disconnectAndStopService(activity);
 			activity.startActivity(new Intent(activity, SignupActivity.class));
 			activity.finish();
 			return true;
@@ -595,14 +597,6 @@ public class Utils
 			return true;
 		}
 		return false;
-	}
-	
-	public static void disconnectAndStopService(Activity activity)
-	{
-		// Added these lines to prevent the bad username/password bug.
-		HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
-		app.disconnectFromService();
-		activity.stopService(new Intent(activity, HikeService.class));
 	}
 
 	public static String formatNo(String msisdn)
@@ -1556,11 +1550,13 @@ public class Utils
 		{
 			AccountUtils.base = httpString + AccountUtils.host + "/v1";
 			AccountUtils.baseV2 = httpString + AccountUtils.host + "/v2";
+			AccountUtils.SDK_AUTH_BASE = AccountUtils.SDK_AUTH_BASE_URL_PROD;
 		}
 		else
 		{
 			AccountUtils.base = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v1";
 			AccountUtils.baseV2 = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v2";
+			AccountUtils.SDK_AUTH_BASE = AccountUtils.SDK_AUTH_BASE_URL_STAGING;
 		}
 
 		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
@@ -3118,6 +3114,18 @@ public class Utils
 		else
 		{
 			asyncTask.execute(hikeHttpRequests);
+		}
+	}
+	
+	public static void executeAuthSDKTask(AuthSDKAsyncTask argTask, HttpRequestBase... requests)
+	{
+		if (isHoneycombOrHigher())
+		{
+			argTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requests);
+		}
+		else
+		{
+			argTask.execute(requests);
 		}
 	}
 
@@ -5028,6 +5036,37 @@ public class Utils
 			Logger.e("Exception", "Invalid JSON", e);
 		}
 		return data;
+	}
+
+	/**
+	 * Checks if is user signed up. Works with application context.
+	 * 
+	 * @return true, if is user signed up
+	 */
+	public static boolean requireAuth(Context appContext, boolean allowOpeningActivity)
+	{
+		appContext = appContext.getApplicationContext();
+
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(appContext);
+
+		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
+		{
+			if (allowOpeningActivity)
+			{
+				IntentManager.openWelcomeActivity(appContext);
+			}
+			return false;
+		}
+
+		if (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null)
+		{
+			if (allowOpeningActivity)
+			{
+				IntentManager.openSignupActivity(appContext);
+			}
+			return false;
+		}
+		return true;
 	}
 
 }

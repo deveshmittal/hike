@@ -2,10 +2,10 @@ package com.bsb.hike.db;
 
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 
-public class DBConstants
+public interface DBConstants
 {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 31;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 32;
 
 	public static final int USERS_DATABASE_VERSION = 15;
 
@@ -146,8 +146,6 @@ public class DBConstants
 
 	public static final String STICKER_CATEGORIES_TABLE = "stickerCategoriesTable";
 	
-	public static final String _ID = "_id";
-
 	public static final String CATEGORY_ID = "categoryId";
 
 	public static final String TOTAL_NUMBER = "totalNum";
@@ -200,7 +198,52 @@ public class DBConstants
 
 	public static final String HIKE_FILE_TYPE = "hikeFileType";
 
+	public static final String _ID = "_id";
+	
+	public static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS ";
+	public static final String CREATE_INDEX = "CREATE INDEX IF NOT EXISTS ";
+	
 	public static final String IS_SENT = "isSent";
+	
+	public static interface HIKE_CONV_DB{
+		// CHANNEL TABLE -> _id,channel_id,name,visibility,index 
+		public static final String CHANNEL_TABLE = "channel";
+		public static final String CHANNEL_ID = "channel_id";
+		public static final String CHANNEL_NAME = "name";
+		public static final String VISIILITY = "visibility";
+		public static final String INDEX_ORDER = "index";
+		// CHANNEL TABLE ENDS HERE
+		// LOVE TABLE -> _id,love_id,count,user_status,ref_count,timestamp
+		public static final String LOVE_TABLE = "love";
+		public static final String LOVE_ID = "love_id";
+		public static final String COUNT = "count";
+		public static final String USER_STATUS = "user_status";
+		public static final String REF_COUNT = "ref_count";
+		public static final String TIMESTAMP = "timestamp";
+		// LOVE TABLE ENDS HERE
+		// MESSAGE TABLE
+		public static final String LOVE_ID_REL = "love_id";
+		// MESSAGE TABLE ENDS HERE
+	}
+	/**
+	 * 
+	 * @author gauravKhanna
+	 *
+	 */
+	public static interface HIKE_CONTENT{
+		public static final int DB_VERSION = 1;
+		public static final String DB_NAME = "hike_content_db";
+		// CONTENT TABLE -> _id,content_id,love_id,channel_id,timestamp,metadata
+		public static final String CONTENT_TABLE = "content";
+		public static final String CONTENT_ID = "content_id";
+		public static final String LOVE_ID = "love_id";
+		public static final String CHANNEL_ID = "channel_id";
+		public static final String TIMESTAMP = "timestamp";
+		public static final String METADATA = "metadata";
+		// CONTENT TABLE ENDS HERE
+		
+		public static final String CONTENT_ID_INDEX = "contentTableContentIdIndex";
+	}
 
 	public static final String CATEGORY_NAME = "categoryName";
 

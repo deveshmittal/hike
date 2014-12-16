@@ -822,6 +822,8 @@ public class HikeConstants
 	public static final String NAMESPACE = "http://schemas.android.com/apk/res/com.bsb.hike";
 
 	public static final String FONT = "font";
+	
+	public static final String MAX_LINES = "maxLines";
 
 	public static final int MAX_MESSAGE_PREVIEW_LENGTH = 300;
 
@@ -986,6 +988,8 @@ public class HikeConstants
 	public static final String NUX_HOME_INVITE_FOOTER = "nuxHomeInviteFooter";
 
 	public static final String NUX_INVITE_FORWARD = "nuxInviteForward";
+	
+	public static final String SELF_HIKE_ID = "-1";
 
 	public static final class ResultCodes
 	{
@@ -1336,6 +1340,10 @@ public class HikeConstants
 		public static final String FTUE_STICKER_ID_LIST = "ftueStickerIdsList";
 		
 		public static final String FTUE_STICKER_CATEGORY_LIST = "ftueStickerCategoryList";
+		
+		public static final String SDK_THIRD_PARTY_PKG = "third_party_app_pkg";
+		
+		public static final String SDK_CONNECTION_TYPE = "connection_type";
 
 		public static final String SELECT_ALL_INITIALLY = "selectAllInitially";
 	}
@@ -1710,6 +1718,34 @@ public class HikeConstants
 		public static final String NUX_INVITE_SENT = "nuxInvteSent";
 
 		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
+		
+		/*
+		 * Platform Events
+		 */
+		public static final String SDK_AUTH_DIALOG_VIEWED = "sdkAuthDialogViewed";
+		
+		public static final String SDK_AUTH_DIALOG_DECLINED = "sdkAuthDialogDeclined";
+		
+		public static final String SDK_AUTH_DIALOG_CONNECT = "sdkAuthDialogConnect";
+		
+		public static final String SDK_AUTH_FAILURE = "sdkAuthFailure";
+		
+		public static final String SDK_AUTH_SUCCESS = "sdkAuthSuccess";
+		
+		public static final String SDK_SEND_MESSAGE = "sdkSendMessage";
+		
+		public static final String SDK_INSTALL_HIKE_MESSENGER = "sdkDialogInstallHikeMessenger";
+		
+		public static final String SDK_INSTALL_HIKE_ACCEPT = "sdkInstallHikeAccept";
+		
+		public static final String SDK_INSTALL_HIKE_DECLINE = "sdkInstallHikeDeclined";
+		
+		public static final String SDK_DISCONNECT_APP = "sdkDisconnectApp";
+		
+        /*
+		 * Content Card events
+		 */
+        public static final String CONTENT_CARD_TAPPED = "contentCardTapped";
 
 		public static final String RETRY_NOTIFICATION_SENT = "retryNotificationSent";
 		/*
@@ -1940,9 +1976,19 @@ public class HikeConstants
 
 	public static class MESSAGE_TYPE
 	{
+		public static final String MESSAGE_TYPE = "messageType";
+				
 		public static final int PLAIN_TEXT = 0;
 
 		public static final int TEXT_PIN = 1;
+		
+		public static final int CONTENT = 2;
+	}
+	
+	public static interface ConvMessagePacketKeys{
+		public static final String CONTENT_TYPE = "c";
+		public static final String PIN_TYPE = "pin";
+		public static final String LOVE_ID = "loveID";
 	}
 	
 	public static class HASH_MESSAGE_TYPE

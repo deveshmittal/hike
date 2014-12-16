@@ -19,6 +19,7 @@ import android.os.Build.VERSION_CODES;
 import android.provider.MediaStore;
 import android.support.v4.util.LruCache;
 
+import android.util.Base64;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.BitmapModule.RecyclingBitmapDrawable;
@@ -200,6 +201,27 @@ public class HikeLruCache extends LruCache<String, BitmapDrawable>
 
 		return bitmap;
 	}
+
+    public BitmapDrawable getBitmapDrawable(String key){
+
+        BitmapDrawable value;
+
+            value = get(key);
+
+            // if bitmap is found in cache and is recyclyed, remove this from cache and make thread get new Bitmap
+            if (null != value && value.getBitmap().isRecycled())
+            {
+                remove(key);
+                value = null;
+            }
+            if (value == null){
+                value = (BitmapDrawable) HikeConversationsDatabase.getInstance().getFileThumbnail(key);
+                putInCache(key, value);
+            }
+
+        return value;
+
+    }
 
 	/**
 	 * @param candidate

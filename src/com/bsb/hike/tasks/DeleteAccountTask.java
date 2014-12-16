@@ -21,6 +21,7 @@ import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
 import com.facebook.Session;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -55,7 +56,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			AccountUtils.deleteOrUnlinkAccount(this.delete);
 			
 			HikeMessengerApp app = (HikeMessengerApp) ctx.getApplicationContext();
-			app.disconnectFromService();
+			app.setServiceAsDisconnected();
 			ctx.stopService(new Intent(ctx, HikeService.class));
 
 			clearAppData();
