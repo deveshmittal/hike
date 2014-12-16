@@ -199,8 +199,19 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 		};
 
 		text_view_connected_apps_numbers = ((TextView) findViewById(R.id.text_view_connected_apps_numbers));
-		text_view_connected_apps_numbers.setText(connectedAppsAdapter.getCount() == 1 ? String.format(getString(R.string.connected_apps_to_hike), connectedAppsAdapter.getCount())
-				: getString(R.string.connected_app_to_hike));
+		
+		if (connectedAppList != null)
+		{
+			if (connectedAppList.isEmpty())
+			{
+				text_view_connected_apps_numbers.setText(String.format(getString(R.string.connected_apps_to_hike), getString(R.string.no)));
+			}
+			else
+			{
+				text_view_connected_apps_numbers.setText(connectedAppList.size() == 1 ? getString(R.string.connected_app_to_hike) : String.format(
+						getString(R.string.connected_apps_to_hike), connectedAppList.size()));
+			}
+		}
 
 		listView = ((ListView) findViewById(R.id.list_view_connected_apps));
 		listView.setAdapter(connectedAppsAdapter);
@@ -223,23 +234,30 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 		}
 		else
 		{
-			StringBuilder sb = null;
-
-			for (ConnectedApp app : connectedAppList)
+			if (connectedAppList.isEmpty())
 			{
-				if (sb == null)
+				authPrefs.removeData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY);
+			}
+			else
+			{
+				StringBuilder sb = null;
+
+				for (ConnectedApp app : connectedAppList)
 				{
-					sb = new StringBuilder(app.getPackageName());
+					if (sb == null)
+					{
+						sb = new StringBuilder(app.getPackageName());
+					}
+					else
+					{
+						sb.append("," + app.getPackageName());
+					}
 				}
-				else
-				{
-					sb.append("," + app.getPackageName());
-				}
+
+				authPrefs.saveData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, String.valueOf(sb));
 			}
 
-			authPrefs.saveData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, sb.toString());
-
-			authPrefs.removeData(disconnAppObj.getTitle());
+			authPrefs.removeData(disconnAppObj.getPackageName().split(":")[0]);
 
 			try
 			{
@@ -305,7 +323,18 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 	private void invalidateUI()
 	{
 		connectedAppsAdapter.notifyDataSetChanged();
-		text_view_connected_apps_numbers.setText(connectedAppsAdapter.getCount() == 1 ? String.format(getString(R.string.connected_apps_to_hike), connectedAppsAdapter.getCount())
-				: getString(R.string.connected_app_to_hike));
+
+		if (connectedAppList != null)
+		{
+			if (connectedAppList.isEmpty())
+			{
+				text_view_connected_apps_numbers.setText(String.format(getString(R.string.connected_apps_to_hike), getString(R.string.no)));
+			}
+			else
+			{
+				text_view_connected_apps_numbers.setText(connectedAppList.size() == 1 ? getString(R.string.connected_app_to_hike) : String.format(
+						getString(R.string.connected_apps_to_hike), connectedAppList.size()));
+			}
+		}
 	}
 }
