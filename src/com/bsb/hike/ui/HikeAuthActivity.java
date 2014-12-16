@@ -435,7 +435,7 @@ public class HikeAuthActivity extends Activity
 			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_RESPONSE_TYPE, "token"));
 			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_CLIENT_ID, "VIVTB9Y18EOCw7d-:VIVTqNY18EOCw7d_.apps.hike.in"));
 			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_SCOPE, "publish_actions"));
-			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_PACKAGE_NAME, "com.bsb.jellies"));
+			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_PACKAGE_NAME, mAppPackage));
 			params.add(new BasicNameValuePair(AccountUtils.SDK_AUTH_PARAM_SHA1, "test_sha1"));
 		}
 		else
