@@ -28,18 +28,18 @@ public class HAManager
 	
 	public static String ANALYTICS_SERVICE_STATUS = "analyticsServiceStatus";
 	
-	public Thread writerThread;
+	private Thread writerThread;
 	
 	/**
 	 * Constructor
 	 */
-	public HAManager(Context context) 
+	private HAManager(Context context) 
 	{
 		this.context = context.getApplicationContext();
 		
 		eventsList = new ArrayList<Event>();
 		
-		store = new AnalyticsStore(context);					
+		store = new AnalyticsStore(this.context);					
 	}
 	
 	/**
