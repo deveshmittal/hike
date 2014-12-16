@@ -9,6 +9,7 @@ import java.util.ConcurrentModificationException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.os.Environment;
 import android.os.FileObserver;
 
 import com.bsb.hike.analytics.Event.EventPriority;
@@ -81,6 +82,8 @@ class AnalyticsStore implements Runnable
 	{
 		try 
 		{
+			File dir = new File(AnalyticsConstants.EVENT_FILE_PATH);
+			dir.mkdirs();
 			eventFile = new File(AnalyticsConstants.EVENT_FILE_PATH + currentFileName);
 			fileWriter = new FileWriter(eventFile, true);
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "event file created");
