@@ -132,11 +132,12 @@ class AnalyticsStore implements Runnable
 			for(Event e : eventList)
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Writing event...");
-				JSONObject json = Event.toJson(e);	
-				fileWriter.write(json + AnalyticsConstants.NEW_LINE);
+				JSONObject json = Event.toJson(e);
+				
+				if(fileWriter != null)					
+					fileWriter.write(json + AnalyticsConstants.NEW_LINE);
 			}
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to the file!");
-			eventList.clear();
 		}
 		catch (IOException e)
 		{
@@ -147,7 +148,9 @@ class AnalyticsStore implements Runnable
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "ConcurrentModificationException exception while writing events to file");			
 		}
 		finally
-		{
+		{			
+			eventList.clear();
+
 			try 
 			{
 				if(fileWriter != null)	
