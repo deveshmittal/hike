@@ -6,6 +6,7 @@ import java.util.List;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.R;
+import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.utils.Logger;
 
 /**
@@ -75,7 +76,7 @@ public class OneToOneChatThread extends ChatThread
 	public void setContentView()
 	{
 		activity.setContentView(R.layout.chatthread);
-		setConversationTheme();
+		super.setContentView();
 	}
 
 	private boolean isUserBlocked()

@@ -409,10 +409,6 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	
 	private void initStickers(StickerPageObjects spo, final StickerCategory category)
 	{
-		if (!isCurrentEmoticonTypeStickers())
-		{
-			return;
-		}
 
 		spo.getStickerGridView().setVisibility(View.VISIBLE);
 		final List<Sticker> stickersList = category.getStickerList(activity);

@@ -16,16 +16,22 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.chatthread.ThemePicker.ThemePickerListener;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.media.AttachmentPicker;
 import com.bsb.hike.media.CaptureImageParser;
 import com.bsb.hike.media.CaptureImageParser.CaptureImageListener;
+import com.bsb.hike.media.OverFlowMenuItem;
+import com.bsb.hike.media.OverflowItemClickListener;
 import com.bsb.hike.media.PickContactParser;
 import com.bsb.hike.media.PickFileParser;
 import com.bsb.hike.media.PickFileParser.PickFileListener;
+import com.bsb.hike.media.StickerPicker;
+import com.bsb.hike.media.StickerPicker.StickerPickerListener;
+import com.bsb.hike.media.ThemePicker;
+import com.bsb.hike.media.ThemePicker.ThemePickerListener;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.PhonebookContact;
+import com.bsb.hike.models.Sticker;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HDialog;
 import com.bsb.hike.ui.HikeDialog.HHikeDialogListener;
@@ -41,7 +47,7 @@ import com.bsb.hike.utils.Utils;
  */
 
 public class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
-		HHikeDialogListener
+		HHikeDialogListener, StickerPickerListener
 {
 	private static final String TAG = "chatthread";
 
@@ -56,6 +62,8 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 	protected ChatTheme currentTheme;
 
 	protected String msisdn;
+
+	protected StickerPicker stickerPicker;
 
 	public ChatThread(ChatThreadActivity activity, String msisdn)
 	{
@@ -87,9 +95,20 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 		init();
 	}
 
-	private void init()
+	protected void init()
 	{
 		chatThreadActionBar = new ChatThreadActionBar(activity);
+	}
+
+	/**
+	 * This function must be called after setting content view
+	 */
+	protected void initView()
+	{
+		setConversationTheme();
+		activity.findViewById(R.id.sticker_btn).setOnClickListener(this);
+		stickerPicker = new StickerPicker(activity, this, activity.findViewById(R.id.chatThreadParentLayout),
+				(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)));
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -162,6 +181,7 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 
 	public void setContentView()
 	{
+		initView();
 	}
 
 	protected OverFlowMenuItem[] getOverFlowMenuItems()
@@ -185,8 +205,16 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 		case R.id.overflowmenu:
 			showOverflowMenu();
 			break;
+		case R.id.sticker_btn:
+			stickerClicked();
+			break;
 		}
 
+	}
+
+	protected void stickerClicked()
+	{
+		stickerPicker.showStickerPicker();
 	}
 
 	protected void showThemePicker()
@@ -425,6 +453,13 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 	protected void setConversationTheme()
 	{
 		updateUIAsPerTheme(ChatTheme.DEFAULT);
+	}
+
+	@Override
+	public void stickerSelected(Sticker sticker)
+	{
+		Logger.i(TAG, "sticker clicked " + sticker);
+		stickerPicker.dismiss();
 	}
 
 }
