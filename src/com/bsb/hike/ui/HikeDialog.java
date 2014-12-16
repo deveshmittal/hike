@@ -22,7 +22,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.ImageQuality;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.test.MainActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomFontTextView;

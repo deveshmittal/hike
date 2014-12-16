@@ -2,7 +2,6 @@ package com.bsb.hike.platform;
 
 import android.content.Context;
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.model.card.HikeCardConstants;
 import com.bsb.hike.models.ConvMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
