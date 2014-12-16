@@ -3459,6 +3459,8 @@ public class Utils
 		Editor prefEditor = prefs.edit();
 		prefEditor.remove(HikeMessengerApp.DEVICE_DETAILS_SENT);
 		prefEditor.remove(HikeMessengerApp.UPGRADE_RAI_SENT);
+		prefEditor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+		prefEditor.putBoolean(HikeMessengerApp.SIGNUP_COMPLETE, true);
 		prefEditor.commit();
 	}
 
