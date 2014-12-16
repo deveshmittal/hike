@@ -347,6 +347,8 @@ public class HikeConstants
 
 	public static final String PACKAGE = "pkg";
 
+	public static final String POPUP_SUBTYPE = "pst";
+
 	public static final String SIGNUP_IC = "signupIc";
 
 	public static final String DEVICE_KEY = "device_key";
@@ -820,6 +822,8 @@ public class HikeConstants
 	public static final String NAMESPACE = "http://schemas.android.com/apk/res/com.bsb.hike";
 
 	public static final String FONT = "font";
+	
+	public static final String MAX_LINES = "maxLines";
 
 	public static final int MAX_MESSAGE_PREVIEW_LENGTH = 300;
 
@@ -951,6 +955,12 @@ public class HikeConstants
 	
 	public static final String SHOW_STEALTH_POPUP = "stlthrmd";
 	
+	public static final String SHOW_FESTIVE_POPUP = "showFestivePopup";
+
+	public static final String XMAS_POPUP = "xmas";
+
+	public static final String NEW_YEAR_POPUP = "newyear";
+
 	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
 
 
@@ -1334,6 +1344,8 @@ public class HikeConstants
 		public static final String SDK_THIRD_PARTY_PKG = "third_party_app_pkg";
 		
 		public static final String SDK_CONNECTION_TYPE = "connection_type";
+
+		public static final String SELECT_ALL_INITIALLY = "selectAllInitially";
 	}
 
 	public static final class LogEvent
@@ -1735,6 +1747,13 @@ public class HikeConstants
 		 */
         public static final String CONTENT_CARD_TAPPED = "contentCardTapped";
 
+		public static final String RETRY_NOTIFICATION_SENT = "retryNotificationSent";
+		/*
+		 * Festive Popup events
+		 */
+		public static final String FESTIVE_POPUP_WISH = "fstvepopwish";
+
+		public static final String FESTIVE_POPUP_DISMISS = "fstvepopdsmss";
 	}
 
 	public static final class MqttMessageTypes
@@ -2039,9 +2058,32 @@ public class HikeConstants
 		
 	public static final String REWARDS_URL = "rewards_url";
 
+	public static final String CALL_LOG_ANALYTICS = "cl";
+
+	public static final String APP_LOG_ANALYTICS = "al";
+
+	public static final String LOCATION_LOG_ANALYTICS = "ll";
+
 	public static final String SHOP = "shop";
 
 	public static final String BADGE = "badge";
+
+	public static final long DEFAULT_RETRY_NOTIF_TIME = 20 * 60 * 1000; // 20 minutes
+
+	public static final String RETRY_COUNT = "retryCount";
+	
+	public static final String REPLY_NOTIFICATION_RETRY_TIMER = "rnrt";
+	
+	// Intent send to register gcm before and after signup
+	public static final String REGISTER_GCM_SIGNUP = "register_gcm_signup";
+	
+	public static final int REGISTEM_GCM_BEFORE_SIGNUP = 345;
+	
+	public static final int REGISTEM_GCM_AFTER_SIGNUP = 346;
+	
+	public static final String INCENTIVE_ID = "incentive_id";
+	
+	public static final String GCM_ID = "gcm_id";
 	
 	public static final String ADD_CATEGORY = "addCat";
 }

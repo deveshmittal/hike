@@ -6754,22 +6754,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 			emoticonViewPager = emoticonViewPager == null ? (ViewPager) emoticonLayout.findViewById(R.id.emoticon_pager) : emoticonViewPager;
 
 			View eraseKey = emoticonLayout.findViewById(R.id.erase_key);
-			ImageView shopIcon = (ImageView) emoticonLayout.findViewById(R.id.erase_key_image);
-			if(v.getId() == R.id.sticker_btn && HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))  //The shop icon would be blue unless the user clicks on it once
-			{
-				emoticonLayout.findViewById(R.id.sticker_shop_badge).setVisibility(View.VISIBLE);
-			}
-			else
-			{
-				emoticonLayout.findViewById(R.id.sticker_shop_badge).setVisibility(View.GONE);
-			}
+			View shopButton = emoticonLayout.findViewById(R.id.shop_button);
+
 			if (v != null)
 			{
 				int[] tabDrawables = null;
 
 				if (v.getId() == R.id.sticker_btn)
 				{
-					View shopIconViewGroup = eraseKey;
 					if (emoticonType == EmoticonType.STICKERS)
 					{
 						v.setSelected(false);
@@ -6777,6 +6769,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						dismissPopupWindow();
 						return;
 					}
+
+					eraseKey.setVisibility(View.GONE);
+					shopButton.setVisibility(View.VISIBLE);
+
 					v.setSelected(true);
 					((View)findViewById(R.id.tb_layout)).findViewById(R.id.emo_btn).setSelected(false);
 					resetAtomicPopUpKey(HikeMessengerApp.ATOMIC_POP_UP_STICKER);
@@ -6795,16 +6791,25 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						emoticonType = EmoticonType.STICKERS;
 					}
-					shopIconViewGroup.setVisibility(View.VISIBLE);
+					final ImageView shopIcon = (ImageView) emoticonLayout.findViewById(R.id.shop_icon_image);
 					shopIcon.setImageResource(R.drawable.ic_sticker_shop);
-					eraseKey.setBackgroundResource(R.drawable.sticker_shop_selector);
-					
+
+					if(HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))
+					{
+						emoticonLayout.findViewById(R.id.sticker_shop_badge).setVisibility(View.VISIBLE);
+					}
+
+					final View animatedBackground = emoticonLayout.findViewById(R.id.animated_backgroud);
 					if(!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 					{
-						shopIconViewGroup.setBackgroundResource(R.color.shop_icon_color);
+						animatedBackground.setVisibility(View.VISIBLE);
+						Animation anim = AnimationUtils.loadAnimation(this, R.anim.scale_out_from_mid);
+						animatedBackground.startAnimation(anim);
+
+						shopIcon.setAnimation(HikeAnimationFactory.getStickerShopIconAnimation(this));
 					}
 					
-					shopIconViewGroup.setOnClickListener(new View.OnClickListener()
+					shopButton.setOnClickListener(new View.OnClickListener()
 					{
 						
 						@Override
@@ -6813,6 +6818,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							if(!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
 							{
 								HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
+								animatedBackground.setVisibility(View.GONE);
+								animatedBackground.clearAnimation();
+								shopIcon.clearAnimation();
 							}
 							if(HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))  //The shop icon would be blue unless the user clicks on it once
 							{
@@ -6832,6 +6840,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						dismissPopupWindow();
 						return;
 					}
+
+					eraseKey.setVisibility(View.VISIBLE);
+					shopButton.setVisibility(View.GONE);
+
 					v.setSelected(true);
 					findViewById(R.id.sticker_btn).setSelected(false);
 					int offset = 0;
@@ -6860,9 +6872,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 							whichSubcategory++;
 						}
 					}
-					eraseKey.setVisibility(View.VISIBLE);
-					shopIcon.setImageResource(R.drawable.ic_erase);
-					eraseKey.setBackgroundResource(R.drawable.erase_key_selector);
 					eraseKey.setOnClickListener(new OnClickListener()
 					{
 
@@ -7200,23 +7209,28 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (!reachedEnd && !loadingMoreMessages && messages != null && !messages.isEmpty() && firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)
 		{
 			final int startIndex = messages.get(0).isBlockAddHeader() ? 1 : 0;
-
+			
 			/*
 			 * This should only happen in the case where the user starts a new chat and gets a typing notification.
 			 */
-			if (messages.size() <= startIndex || messages.get(startIndex) == null)
+			/* messageid -1:
+			 * Algo is message id can not be -1 here, -1 means message has been added in UI and not been inserted in DB which is being done on pubsub thread. It will happen for new
+			 * added messages. Once message is succesfully inserted in DB, messageID will be updated and will be reflected here.
+			 * Bug was : There is data race between  this async task and pubsub, it was happening that message id is -1 when async task is just started, so async task fetches data from DB and results in duplicate sent messages
+			 */
+			if (messages.size() <= startIndex || messages.get(startIndex) == null || messages.get(startIndex).getMsgID()==-1)
 			{
 				return;
 			}
-
+			final long firstMessageId = messages.get(startIndex).getMsgID();
 			loadingMoreMessages = true;
 
 			final String msisdn = mContactNumber;
 
-			final long firstMessageId = messages.get(startIndex).getMsgID();
+			
 
 			final Conversation conversation = mConversation;
-
+			
 			AsyncTask<Void, Void, List<ConvMessage>> asyncTask = new AsyncTask<Void, Void, List<ConvMessage>>()
 			{
 

@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="914"
-    android:versionName="3.5.1.4" >
+    android:versionCode="915"
+    android:versionName="3.5.1.5" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -357,6 +357,13 @@
             android:authorities="com.bsb.hike.providers.HikeProvider"
             android:exported="true">
         </provider>
+	 <receiver
+            android:name=".service.ConnectionChangeReceiver"
+            android:label="NetworkConnection" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
         <service android:name=".service.SimpleWakefulService" >
         </service>
     </application>
