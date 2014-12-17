@@ -85,7 +85,10 @@ class AnalyticsStore implements Runnable
 			File dir = new File(dirName);
 			dir.mkdirs();
 			eventFile = new File(dir, currentFileName);
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "event file created :" + Boolean.toString(eventFile.createNewFile()) + " " + eventFile.getAbsolutePath().toString());			
+			
+			if(!eventFile.exists())
+				eventFile.createNewFile();
+			
 			fileWriter = new FileWriter(eventFile, true);
 		}
 		catch (IOException e) 
@@ -104,34 +107,17 @@ class AnalyticsStore implements Runnable
 			createNewEventFile(currentFileName);
 
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, currentFileName);
+			
+			long size = eventFile.length();
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "file was written!");
 
-			fileObserver = new FileObserver(this.context.getFilesDir() + AnalyticsConstants.EVENT_FILE_DIR +
-					File.separator + currentFileName) 
-			{			
-				@Override
-				public void onEvent(int event, String path) 
-				{
-					switch(event)
-					{
-						case FileObserver.MODIFY:						
-							long size = eventFile.length();
-							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "file was written!");
-
-							if(size >= AnalyticsConstants.MAX_FILE_SIZE)
-							{
-								Logger.d(AnalyticsConstants.ANALYTICS_TAG, "current file size reached its limit!");
-								setMaxFileSizeReached(true);
-								closeCurrentFile();
-								getNewFileName();
-							}
-						break;					
-						
-						case FileObserver.ACCESS:
-						break;
-					}
-				}
-			};
-			fileObserver.startWatching();
+			if(size >= AnalyticsConstants.MAX_FILE_SIZE)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "current file size reached its limit!");
+				setMaxFileSizeReached(true);
+				closeCurrentFile();				
+				createNewEventFile(getNewFileName());
+			}
 
 			for(Event e : eventList)
 			{
