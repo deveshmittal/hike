@@ -12,6 +12,7 @@ import java.nio.channels.FileChannel;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -20,6 +21,11 @@ import com.bsb.hike.utils.Logger;
 
 public class DBBackupRestore
 {
+	/**
+	 * @author gauravmittal
+	 * 	DBBackupRestore is a singleton class that performs are the backup/restore related
+	 * 	operations
+	 */
 	private static DBBackupRestore _instance = null;
 
 	private static final String HIKE_PACKAGE_NAME = "com.bsb.hike";
@@ -32,17 +38,19 @@ public class DBBackupRestore
 
 	private static final String[] resetTableNames = { DBConstants.STICKER_SHOP_TABLE, DBConstants.STICKER_CATEGORIES_TABLE };
 
-	private String backupToken;
-
 	private Context mContext;
 
 	private DBBackupRestore(Context context)
 	{
 		this.mContext = context;
-		SharedPreferences settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		backupToken = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, null);
 	}
 
+	/**
+	 * Gets the BDBackupRestore instance. Creates one it not already created.
+	 * @param context
+	 * @return
+	 * 		The BDBackupRestore instance
+	 */
 	public static DBBackupRestore getInstance(Context context)
 	{
 		if (_instance == null)
@@ -56,6 +64,11 @@ public class DBBackupRestore
 		return _instance;
 	}
 
+	/**
+	 * Creates a complete backup of chats and the specified preferences.
+	 * @return
+	 * 	true for success, and false for for failure. 
+	 */
 	public boolean backupDB()
 	{
 		Long time = System.currentTimeMillis();
@@ -68,6 +81,12 @@ public class DBBackupRestore
 					return false;
 
 				File backup = getDBBackupFile(dbCopy.getName());
+				String backupToken = getBackupToken();
+				Logger.d(getClass().getSimpleName(), "encrypting with key: " + backupToken);
+				if (TextUtils.isEmpty(backupToken))
+				{
+					throw new Exception("Backup Token is empty");
+				}
 				CBCEncryption.encryptFile(dbCopy, backup, backupToken);
 				dbCopy.delete();
 			}
@@ -78,7 +97,7 @@ public class DBBackupRestore
 			e.printStackTrace();
 			return false;
 		}
-		if (!updateBackupState())
+		if (!updateBackupState(null))
 		{
 			return false;
 		}
@@ -87,6 +106,13 @@ public class DBBackupRestore
 		return true;
 	}
 
+	/**
+	 * Creates a copy of the specified database of the application.
+	 * @param databaseName
+	 * 		The name of the database.
+	 * @return
+	 * 		The copy the database.
+	 */
 	public File exportDatabse(String databaseName)
 	{
 		Long time = System.currentTimeMillis();
@@ -122,6 +148,11 @@ public class DBBackupRestore
 		return dbCopy;
 	}
 
+	/**
+	 * Restores the complete backup of chats and the specified preferences.
+	 * @return
+	 * 	true for success, and false for for failure. 
+	 */
 	public boolean restoreDB()
 	{
 		Long time = System.currentTimeMillis();
@@ -141,6 +172,12 @@ public class DBBackupRestore
 				File currentDB = getCurrentDBFile(fileName);
 				File dbCopy = getDBCopyFile(currentDB.getName());
 				File backup = getDBBackupFile(dbCopy.getName());
+				String backupToken = getBackupToken();
+				Logger.d(getClass().getSimpleName(), "decrypting with key: " + backupToken);
+				if (TextUtils.isEmpty(backupToken))
+				{
+					throw new Exception("Backup Token is empty");
+				}
 				CBCEncryption.decryptFile(backup, dbCopy, backupToken);
 				importDatabase(dbCopy);
 				dbCopy.delete();
@@ -152,12 +189,18 @@ public class DBBackupRestore
 			e.printStackTrace();
 			return false;
 		}
+		state.restorePrefs(mContext);
 		postRestoreSetup(state);
 		time = System.currentTimeMillis() - time;
 		Logger.d(getClass().getSimpleName(), "Restore complete!! in " + time / 1000 + "." + time % 1000 + "s");
 		return true;
 	}
 
+	/**
+	 * Replaces the current Application database file with the provided database file
+	 * @param dbCopy
+	 * 		The file to placed as the new database.
+	 */
 	private void importDatabase(File dbCopy)
 	{
 		Long time = System.currentTimeMillis();
@@ -189,6 +232,13 @@ public class DBBackupRestore
 		time = System.currentTimeMillis() - time;
 		Logger.d(getClass().getSimpleName(), "DB import complete!! in " + time / 1000 + "." + time % 1000 + "s");
 	}
+	
+	private String getBackupToken()
+	{
+		SharedPreferences settings = mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String backupToken = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, null);
+		return backupToken;
+	}
 
 	private void postRestoreSetup(BackupState state)
 	{
@@ -200,8 +250,14 @@ public class DBBackupRestore
 		{
 			HikeConversationsDatabase.getInstance().clearTable(table);
 		}
+		HikeConversationsDatabase.getInstance().upgradeForStickerShopVersion1();
 	}
 
+	/**
+	 * Closes the closeables.
+	 * @param closeables
+	 * 		Set of the closeables to be closed.
+	 */
 	private void closeChannelsAndStreams(Closeable... closeables)
 	{
 		for (Closeable closeable : closeables)
@@ -218,6 +274,11 @@ public class DBBackupRestore
 		}
 	}
 
+	/**
+	 * Checks if a backup is there or not.
+	 * @return
+	 * 		true is the backup is available, false otherwise.
+	 */
 	public boolean isBackupAvailable()
 	{
 		for (String fileName : dbNames)
@@ -228,11 +289,15 @@ public class DBBackupRestore
 			if (!backup.exists())
 				return false;
 		}
-		if(!getBackupStateFile().exists())
+		BackupState state = getBackupState();
+		if (state != null)
 		{
-			return false;
+			if (state.getBackupTime() > 0)
+			{
+				return true;
+			}
 		}
-		return true;
+		return false;
 	}
 
 	public long getLastBackupTime()
@@ -245,6 +310,9 @@ public class DBBackupRestore
 		return -1;
 	}
 
+	/**
+	 * Deletes the temporary files.
+	 */
 	private void deleteTempFiles()
 	{
 		for (String fileName : dbNames)
@@ -255,6 +323,9 @@ public class DBBackupRestore
 		}
 	}
 
+	/**
+	 * Deletes all the backup files.
+	 */
 	public void deleteAllFiles()
 	{
 		for (String fileName : dbNames)
@@ -265,6 +336,8 @@ public class DBBackupRestore
 			dbCopy.delete();
 			backup.delete();
 		}
+		getBackupStateFile().delete();
+		deleteTempFiles();
 	}
 
 	private File getCurrentDBFile(String dbName)
@@ -292,10 +365,21 @@ public class DBBackupRestore
 		new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT).mkdirs();
 		return new File(HikeConstants.HIKE_BACKUP_DIRECTORY_ROOT, BACKUP);
 	}
-	
-	private boolean updateBackupState()
+
+	/**
+	 * Update the backup state file
+	 * @param state
+	 * 
+	 * @return
+	 * 		Success or failure
+	 */
+	private boolean updateBackupState(BackupState state)
 	{
-		BackupState state = new BackupState(dbNames[0], DBConstants.CONVERSATIONS_DATABASE_VERSION);
+		if (state == null)
+		{
+			state = new BackupState(dbNames[0], DBConstants.CONVERSATIONS_DATABASE_VERSION);
+			state.backupPrefs(mContext);
+		}
 		File backupStateFile = getBackupStateFile();
 		FileOutputStream fileOut = null;
 		ObjectOutputStream out = null;
@@ -350,6 +434,22 @@ public class DBBackupRestore
 			closeChannelsAndStreams(fileIn,in);
 		}
 		return state;
+	}
+
+	/**
+	 * Takes fresh backup of the preferences.
+	 * @return
+	 * 		The success or failure.
+	 */
+	public boolean updatePrefs()
+	{
+		BackupState state = getBackupState();
+		if (state == null)
+		{
+			state = new BackupState(dbNames[0], DBConstants.CONVERSATIONS_DATABASE_VERSION);
+		}
+		state.backupPrefs(mContext);
+		return updateBackupState(state);
 	}
 
 }

@@ -230,6 +230,7 @@ public class HikeService extends Service
 		 * notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent); startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 		 */
 		assignUtilityThread();
+		scheduleNextAccountBackup();
 
 		/*
 		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of
@@ -659,25 +660,11 @@ public class HikeService extends Service
 
 	private void scheduleNextAccountBackup()
 	{
-		long MaxBackupDelay = 24 * 60 * 60 * 1000; // 24 Hours
-		long lastBackup = DBBackupRestore.getInstance(HikeService.this).getLastBackupTime();
-
 		long scheduleTime = 0;
-		if ((System.currentTimeMillis() - lastBackup) > MaxBackupDelay)
-		{
-			scheduleTime = 0;
-		}
-		else
-		{
-			Calendar c = Calendar.getInstance();
-			c.add(Calendar.DAY_OF_MONTH, 1);
-			c.set(Calendar.HOUR_OF_DAY, 3);
-			c.set(Calendar.MINUTE, 0);
-			c.set(Calendar.SECOND, 0);
-			c.set(Calendar.MILLISECOND, 0);
-			scheduleTime = (c.getTimeInMillis() - System.currentTimeMillis());
-
-		}
+		Calendar c = Calendar.getInstance();
+		c.add(Calendar.DAY_OF_MONTH, 1);
+		c.set(Calendar.HOUR_OF_DAY, 3);
+		scheduleTime = (c.getTimeInMillis() - System.currentTimeMillis());
 		postRunnableWithDelay(BackupAccountRunnable, scheduleTime);
 	}
 

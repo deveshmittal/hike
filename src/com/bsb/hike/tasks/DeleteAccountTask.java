@@ -54,7 +54,12 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		try
 		{
 			AccountUtils.deleteOrUnlinkAccount(this.delete);
-			
+
+			if (delete)
+			{
+				DBBackupRestore.getInstance(ctx).deleteAllFiles();
+			}
+
 			HikeMessengerApp app = (HikeMessengerApp) ctx.getApplicationContext();
 			app.setServiceAsDisconnected();
 			ctx.stopService(new Intent(ctx, HikeService.class));

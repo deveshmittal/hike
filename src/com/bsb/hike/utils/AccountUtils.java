@@ -500,7 +500,7 @@ public class AccountUtils
 		int all_invitee_joined = obj.optInt(HikeConstants.ALL_INVITEE_JOINED_2);
 		String country_code = obj.optString("country_code");
 
-		Logger.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
+		Logger.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid + "backup_token: " + backupToken);
 		return new AccountUtils.AccountInfo(token, msisdn, uid, backupToken, smsCredits, all_invitee, all_invitee_joined, country_code);
 	}
 

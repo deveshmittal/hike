@@ -606,7 +606,7 @@ public class HikeConstants
 
 	public static final int NETWORK_ERROR_POP_UP_TIME = 120 * 1000;
 
-	public static final int BACKUP_RESTORE_UI_DELAY = 2 * 1000; 
+	public static final int BACKUP_RESTORE_UI_DELAY = 3 * 1000; 
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 
@@ -1072,6 +1072,8 @@ public class HikeConstants
 		public static final String EMAIL = "email";
 
 		public static final String GENDER = "gender";
+
+		public static final String RESTORE_STATUS = "restoreStatus";
 
 		public static final String OVERLAY_SHOWING = "overlayShowing";
 
@@ -1719,6 +1721,17 @@ public class HikeConstants
 
 		public static final String NUX_BOT_FORWARD = "nuxBotFwd";
 		
+		/*
+		 * Account Backup Events
+		 */
+		public static final String BACKUP = "backupClk";
+
+		public static final String BACKUP_RESTORE = "backupRestoreClk";
+
+		public static final String BACKUP_RESTORE_RETRY = "backupRestoreRetryClk";
+
+		public static final String BACKUP_RESTORE_SKIP = "backupRestoreSkipClk";
+
 		/*
 		 * Platform Events
 		 */
