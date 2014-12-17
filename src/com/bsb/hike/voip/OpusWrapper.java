@@ -25,7 +25,7 @@ public class OpusWrapper {
 	private static Object decoderLock = new Object();
 	
 	static {
-		System.loadLibrary("opus");
+		System.loadLibrary("opuscodec");
 	}
 	
 	public int getEncoder(int samplingRate, int channels, int bitrate) {
@@ -36,10 +36,16 @@ public class OpusWrapper {
 	}
 	
 	public void setEncoderBitrate(int bitrate) {
+		if (encoder == 0)
+			return;
 		opus_set_bitrate(encoder, bitrate);
+		Log.d(VoIPActivity.logTag, "Changed bitrate to: " + bitrate);
 	}
 	
 	public void setDecoderGain(int gain) {
+		if (decoder == 0)
+			return;
+		
 		opus_set_gain(decoder, gain);
 		Log.d(VoIPActivity.logTag, "Setting gain to: " + gain);
 	}

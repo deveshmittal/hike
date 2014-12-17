@@ -1,7 +1,6 @@
 package com.bsb.hike.service;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,12 +53,10 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
-import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
@@ -70,7 +67,6 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.voip.VoIPCaller;
 
 /**
  * 
@@ -2022,16 +2018,20 @@ public class MqttMessagesManager
 				HikeConstants.MqttMessageTypes.MESSAGE_VOIP_1.equals(type)) {
 
 			Log.d(VoIPActivity.logTag, "Received VoIP Message");
+
 			// VoIP checks
 			if (jsonObj.has(HikeConstants.SUB_TYPE)) {
 
 				if (jsonObj.getString(HikeConstants.SUB_TYPE).equals(HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO)) {
-					// VoIPCaller voipCaller = VoIPCaller.getInstance(context);
-					// voipCaller.setPartnerInfo(jsonObj);
-					// voipCaller.establishConnection();
-					
+
 					Log.d(VoIPActivity.logTag, "Receiving socket info..");
 					JSONObject metadataJSON = jsonObj.getJSONObject(HikeConstants.DATA).getJSONObject(HikeConstants.METADATA);
+					
+					if (metadataJSON.getBoolean("initiator") == false && VoIPActivity.isRunning == false) {
+						Log.w(VoIPActivity.logTag, "Receiving a reply for a terminated call.");
+						return;		// The initiator has already hung up
+					}
+					
 					Intent i = new Intent(context, VoIPActivity.class);
 					i.putExtra("action", "setpartnerinfo");
 					i.putExtra("msisdn", jsonObj.getString(HikeConstants.FROM));
@@ -2042,7 +2042,6 @@ public class MqttMessagesManager
 					i.putExtra("initiator", metadataJSON.getBoolean("initiator"));
 					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 					context.startActivity(i);
-
 				}
 			}
 		}

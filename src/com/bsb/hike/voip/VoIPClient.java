@@ -73,7 +73,7 @@ public class VoIPClient implements Serializable {		// TODO Remove serializable. 
 			ConnectionMethods preferredConnectionMethod) {
 		this.preferredConnectionMethod = preferredConnectionMethod;
 		cachedInetAddress = null;
-		Log.d(VoIPCaller.logTag, "Setting preferred connection method to: " + preferredConnectionMethod.toString());
+		Log.d(VoIPActivity.logTag, "Setting preferred connection method to: " + preferredConnectionMethod.toString());
 	}
 	public String getPreferredIPAddress() {
 		String ip;

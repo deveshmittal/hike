@@ -1,6 +1,8 @@
 ROOT := $(call my-dir)
+LOCAL_PATH := $(call my-dir)
 
 ###########################################################  Build opus
+# https://code.google.com/p/csipsimple/source/browse/trunk/CSipSimple/jni/opus/android_toolchain/Android.mk
 include $(CLEAR_VARS)
 LOCAL_LDLIBS := -llog
 
@@ -12,7 +14,7 @@ endif
 
 LOCAL_PATH			:= $(ROOT)/opus-1.1
 OPUS_PATH := $(LOCAL_PATH)
-LOCAL_MODULE		:= libopus
+LOCAL_MODULE		:= opuscodec
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include $(OPUS_PATH)/celt $(OPUS_PATH)/silk
 
 # we need to rebuild silk cause we don't know what are diff required for opus and may change in the future
@@ -35,7 +37,6 @@ LOCAL_SRC_FILES += $(CELT_SOURCES)
 include $(OPUS_PATH)/opus_sources.mk
 LOCAL_SRC_FILES += $(OPUS_SOURCES)
 
-#self
 LOCAL_SRC_FILES += src/javaopus.c
  
 
@@ -47,7 +48,5 @@ ifeq ($(TARGET_ARCH_ABI),$(filter $(TARGET_ARCH_ABI),armeabi armeabi-v7a))
 LOCAL_CFLAGS += -DFIXED_POINT=1 -DDISABLE_FLOAT_API
 endif
 
+
 include $(BUILD_SHARED_LIBRARY)
-
-
-
