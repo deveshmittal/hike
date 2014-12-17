@@ -19,9 +19,7 @@ class AnalyticsConstants
 	public static final String EVENT_FILE_DIR = "/Analytics";
 	
 	public static final String NEW_LINE = "\n";
-	
-	public static final String FWD_SLASH = "/";
-	
+		
 	public static final String EVENT_FILE_NAME = "eventdata";
 	
 	public static final String FILE_EXTENSION = ".txt";

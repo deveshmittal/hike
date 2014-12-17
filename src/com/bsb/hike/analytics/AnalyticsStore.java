@@ -106,7 +106,7 @@ class AnalyticsStore implements Runnable
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, currentFileName);
 
 			fileObserver = new FileObserver(this.context.getFilesDir() + AnalyticsConstants.EVENT_FILE_DIR +
-					AnalyticsConstants.FWD_SLASH + currentFileName) 
+					File.separator + currentFileName) 
 			{			
 				@Override
 				public void onEvent(int event, String path) 
@@ -154,16 +154,9 @@ class AnalyticsStore implements Runnable
 		{			
 			eventList.clear();
 
-			try 
+			if(fileWriter != null)	
 			{
-				if(fileWriter != null)	
-				{
-					fileWriter.flush();
-					fileWriter.close();
-				}
-			}
-			catch (IOException e) 
-			{
+				closeCurrentFile();
 			}
 		}
 	}
@@ -172,7 +165,7 @@ class AnalyticsStore implements Runnable
 	 * checks if the event file has reached its max size
 	 * @return true if event file has reached its max size, false otherwise 
 	 */
-	public boolean isMaxFileSizeReached()
+	private boolean isMaxFileSizeReached()
 	{
 		return hasMaxFileSizeReached;
 	}
@@ -181,7 +174,7 @@ class AnalyticsStore implements Runnable
 	 * sets the event file size
 	 * @param value true if file size has reached its max size, false otherwise
 	 */
-	public void setMaxFileSizeReached(boolean value)
+	private void setMaxFileSizeReached(boolean value)
 	{
 		hasMaxFileSizeReached = true;
 	}
@@ -211,6 +204,7 @@ class AnalyticsStore implements Runnable
 	{		
 		try 
 		{
+			fileWriter.flush();
 			fileWriter.close();
 		}
 		catch (IOException e) 
