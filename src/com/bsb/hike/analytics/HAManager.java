@@ -88,8 +88,8 @@ public class HAManager
 	 * @param whenToSend time(long) of the day when event file should be sent to the server
 	 * @param isServiceEnabled true if analytics service should be stopped, false otherwise
 	 */
-	public static void configureAnalyticsService(Context context, int maxFileSize, long whenToSend, boolean isServiceEnabled)	
+	public static void configureAnalyticsService(Context context, long maxFileSize, int whenToSend, boolean isAnalyticsEnabled)	
 	{
-		AnalyticsSettings.configureAnalyticsService(context, maxFileSize, whenToSend, isServiceEnabled);
+		AnalyticsSettings.configureAnalyticsService(context, maxFileSize, whenToSend, isAnalyticsEnabled);
 	}
 }
