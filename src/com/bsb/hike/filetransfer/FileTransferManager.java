@@ -44,6 +44,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 /* 
  * This manager will manage the upload and download (File Transfers).
@@ -840,5 +841,20 @@ public class FileTransferManager extends BroadcastReceiver
 				LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED));
 			}
 		}
+	}
+	
+	public boolean canTransferFile()
+	{
+		if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
+		{
+			Toast.makeText(context, R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+			return false;
+		}
+		if (remainingTransfers() == 0)
+		{
+			Toast.makeText(context, context.getResources().getString(R.string.max_num_files_reached, getTaskLimit()), Toast.LENGTH_SHORT).show();
+			return false;
+		}
+		return true;
 	}
 }
