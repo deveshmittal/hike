@@ -877,7 +877,7 @@ public class HikeService extends Service
 		return isInitialized;
 	}
 
-	public void setInitialized(boolean isInitialized)
+	private void setInitialized(boolean isInitialized)
 	{
 		this.isInitialized = isInitialized;
 	}
