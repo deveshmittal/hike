@@ -1,4 +1,4 @@
-package com.bsb.hike.chatthread;
+package com.bsb.hike.media;
 
 public class OverFlowMenuItem {
 	public String text;

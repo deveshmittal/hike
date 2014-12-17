@@ -1,4 +1,4 @@
-package com.bsb.hike.chatthread;
+package com.bsb.hike.media;
 
 import java.util.Iterator;
 import java.util.List;

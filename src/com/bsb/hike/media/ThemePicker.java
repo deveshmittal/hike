@@ -1,4 +1,4 @@
-package com.bsb.hike.chatthread;
+package com.bsb.hike.media;
 
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
@@ -20,6 +20,7 @@ import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.R;
+import com.bsb.hike.chatthread.BackPressListener;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 
