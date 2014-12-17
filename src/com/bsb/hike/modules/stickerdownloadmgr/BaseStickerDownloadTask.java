@@ -207,7 +207,7 @@ abstract class BaseStickerDownloadTask implements Callable<STResult>
 
 	protected void postExecute(STResult result)
 	{
-		StickerDownloadManager.getInstance(context).removeTask(taskId);
+		StickerDownloadManager.getInstance().removeTask(taskId);
 		if (result != STResult.SUCCESS)
 		{
 			if (callback != null)

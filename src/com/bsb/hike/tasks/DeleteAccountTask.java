@@ -21,6 +21,7 @@ import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
+import com.bsb.hike.utils.Utils;
 import com.facebook.Session;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -50,45 +51,21 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	@Override
 	protected Boolean doInBackground(Void... unused)
 	{
-		FileTransferManager.getInstance(ctx).shutDownAll();
-		StickerDownloadManager.getInstance(ctx).shutDownAll();
-		HikeConversationsDatabase convDb = HikeConversationsDatabase.getInstance();
-		Editor editor = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
-		Editor appPrefEditor = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
-
-		HikeMessengerApp.clearStealthMsisdn();
-
 		try
 		{
 			AccountUtils.deleteOrUnlinkAccount(this.delete);
+
 			if (delete)
 			{
 				DBBackupRestore.getInstance(ctx).deleteAllFiles();
 			}
 
-			// Unregister from GCM service
-			GCMRegistrar.unregister(ctx.getApplicationContext());
-
 			HikeMessengerApp app = (HikeMessengerApp) ctx.getApplicationContext();
-			app.disconnectFromService();
+			app.setServiceAsDisconnected();
 			ctx.stopService(new Intent(ctx, HikeService.class));
 
-			ContactManager.getInstance().deleteAll();
-			convDb.deleteAll();
-			HikeMessengerApp.getLruCache().clearIconCache();
-			HikeMessengerApp.getContactManager().clearCache();
-			// IconCacheManager.getInstance().clearIconCache();
-			editor.clear();
-			appPrefEditor.clear();
+			clearAppData();
 			Logger.d("DeleteAccountTask", "account deleted");
-
-			Session session = Session.getActiveSession();
-			if (session != null)
-			{
-				session.closeAndClearTokenInformation();
-				Session.setActiveSession(null);
-			}
-			StickerManager.getInstance().deleteStickers();
 
 			/*
 			 * We need to do this where on reset/delete account. We need to we need to run initial setup for stickers. for normal cases it runs from onCreate method of
@@ -102,11 +79,79 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			Logger.e("DeleteAccountTask", "error deleting account", e);
 			return false;
 		}
-		finally
+	}
+
+	/**
+	 * This method cleans up the residual app data during signing out process
+	 */
+	private void clearAppData()
+	{
+		/**
+		 * Adding a try catch here, because StickerDownloadManager.getInstance() can throw a RuntimeException
+		 */
+		try
 		{
-			editor.commit();
-			appPrefEditor.commit();
+			StickerDownloadManager.getInstance().shutDownAll();
 		}
+		catch (RuntimeException e)
+		{
+			Logger.e("DeleteAccountTask", "Error in StickerDownloadManager.getInstance()", e);
+		}
+
+		/**
+		 * Clearing the shared preferences
+		 */
+		Editor editor = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
+		Editor appPrefEditor = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
+
+		editor.clear();
+		appPrefEditor.clear();
+		editor.commit();
+		appPrefEditor.commit();
+
+		/**
+		 * Unregister from GCM service
+		 */
+		GCMRegistrar.unregister(ctx.getApplicationContext());
+
+		HikeMessengerApp.clearStealthMsisdn();
+
+		FileTransferManager.getInstance(ctx).shutDownAll();
+
+		/**
+		 * Clearing db
+		 */
+		HikeConversationsDatabase convDb = HikeConversationsDatabase.getInstance();
+		convDb.deleteAll();
+
+		if (delete)
+		{
+			// DBBackupRestore.getInstance(ctx).deleteAllFiles();
+		}
+
+		ContactManager.getInstance().deleteAll();
+
+		/**
+		 * Clearing cache
+		 */
+		HikeMessengerApp.getLruCache().clearIconCache();
+		HikeMessengerApp.getContactManager().clearCache();
+		// IconCacheManager.getInstance().clearIconCache();
+
+		/**
+		 * Clearing facebook session tokens
+		 */
+		Session session = Session.getActiveSession();
+		if (session != null)
+		{
+			session.closeAndClearTokenInformation();
+			Session.setActiveSession(null);
+		}
+
+		/**
+		 * Deleting residual sticker data
+		 */
+		StickerManager.getInstance().deleteStickers();
 	}
 
 	@Override
