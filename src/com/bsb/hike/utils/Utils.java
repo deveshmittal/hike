@@ -584,6 +584,43 @@ public class Utils
 			return true;
 		}
 
+		if (!settings.getBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false) || !settings.getBoolean(HikeMessengerApp.SIGNUP_COMPLETE, false))
+		{
+			if (isUserUpgrading(activity))
+			{
+				Editor editor = settings.edit();
+				editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+				editor.putBoolean(HikeMessengerApp.SIGNUP_COMPLETE, true);
+				editor.commit();
+				return false;
+			}
+			else
+			{
+				activity.startActivity(new Intent(activity, SignupActivity.class));
+				activity.finish();
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private static boolean isUserUpgrading(Context context)
+	{
+		SharedPreferences settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String currentAppVersion = settings.getString(HikeMessengerApp.CURRENT_APP_VERSION, "");
+		String actualAppVersion = "";
+		try
+		{
+			actualAppVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+		}
+		catch (NameNotFoundException e)
+		{
+			Logger.e("Utils", "Unable to get the app version");
+		}
+		if (!currentAppVersion.equals("") && !currentAppVersion.equals(actualAppVersion))
+		{
+			return true;
+		}
 		return false;
 	}
 
@@ -3364,6 +3401,15 @@ public class Utils
 		calendar.setTimeInMillis(milliSeconds * 1000);
 		return formatter.format(calendar.getTime());
 	}
+	
+	public static String getFormattedDateTimeWOSecondsFromTimestamp(long milliSeconds, Locale current)
+	{
+		String dateFormat = "dd/MM/yyyy hh:mm a";
+		DateFormat formatter = new SimpleDateFormat(dateFormat, current);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(milliSeconds * 1000);
+		return formatter.format(calendar.getTime());
+	}
 
 	public static void sendUILogEvent(String key)
 	{
@@ -3428,6 +3474,8 @@ public class Utils
 		Editor prefEditor = prefs.edit();
 		prefEditor.remove(HikeMessengerApp.DEVICE_DETAILS_SENT);
 		prefEditor.remove(HikeMessengerApp.UPGRADE_RAI_SENT);
+		prefEditor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+		prefEditor.putBoolean(HikeMessengerApp.SIGNUP_COMPLETE, true);
 		prefEditor.commit();
 	}
 

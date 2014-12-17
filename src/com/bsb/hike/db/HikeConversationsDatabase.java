@@ -4718,14 +4718,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN + "=?", new String[] { msisdn });
 	}
 	
-	public void resetConversationsStealthStatus()
-	{
-		ContentValues values = new ContentValues();
-		values.put(DBConstants.IS_STEALTH, 0);
-		
-		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, null, null);
-	}
-
 	public void addStealthMsisdnToMap()
 	{
 		Cursor c = null;

@@ -1095,7 +1095,6 @@
     <string name="pinHistoryTutorialText">Noch keine PINs</string>
     <string name="incorrect_msisdn_warning">Falsche Nummer</string>
     <string name="incorrect_msisdn_msg">Bitte gib die Nummer ein, die du bei der Registrierung von hike auf diesem Handy angegeben hast.</string>
-    <string name="delete_account_description">All deine Nachrichten, Frei-SMS und hike-Belohnungen gelöscht</string>
     <string name="delete_account_heading_2">Zum Löschen deines Kontos gib bitte deine Nummer ein</string>
     <string name="delete_my_account">MEIN KONTO LÖSCHEN</string>
     <string name="hike_extras">hike Extras</string>
@@ -1194,12 +1193,10 @@
     <string name="n_more">%1$d MEHR</string>
     <string name="n_stickers">%1$d Sticker</string>
     <string name="last_backup">Letzte Datensicherung</string>
-    <string name="creating_backup_message">Es wird eine Sicherungskopie deiner Chats erstellt. Die täglichen Datensicherungen werden um 3 Uhr durchgeführt.</string>
     <string name="restore_account">Konto wiederherstellen</string>
     <string name="account_backup">Konto-Datensicherung</string>
     <string name="backup_found">Datensicherung gefunden</string>
     <string name="backup_found_hint">Möchtest du dein Konto wiederherstellen?</string>
-    <string name="restore">WIEDERHERSTELLEN</string>
     <string name="restoring...">Wird wiederhergestellt...</string>
     <string name="restoring..._hint">Bitte warten. Dieser Vorgang könnte einen Augenblick dauern.</string>
     <string name="restored">Wiederhergestellt</string>
