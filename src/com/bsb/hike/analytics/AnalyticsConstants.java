@@ -1,7 +1,5 @@
 package com.bsb.hike.analytics;
 
-import android.os.Environment;
-
 /**
  * @author rajesh
  *
@@ -14,13 +12,17 @@ class AnalyticsConstants
 	
 	public static boolean IS_ANALYTICS_ENABLED = true;
 	
-	public static int MAX_EVENTS_IN_MEMORY = 10;
+	public static final int MAX_EVENTS_IN_MEMORY = 10;
 	
-	public static final String EVENT_FILE_PATH = Environment.getExternalStorageDirectory() + "/";
+	public static final String HTTP_UPLOAD_URL = "http://staging.im.hike.in/v1/logs/analytics"; 
+	
+	public static final String EVENT_FILE_DIR = "/Analytics";
 	
 	public static final String NEW_LINE = "\n";
 	
-	public static final String EVENT_FILE_NAME = "EventData";
+	public static final String FWD_SLASH = "/";
+	
+	public static final String EVENT_FILE_NAME = "eventdata";
 	
 	public static final String FILE_EXTENSION = ".txt";
 	

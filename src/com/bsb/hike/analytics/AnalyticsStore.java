@@ -9,7 +9,6 @@ import java.util.ConcurrentModificationException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.os.Environment;
 import android.os.FileObserver;
 
 import com.bsb.hike.analytics.Event.EventPriority;
@@ -81,12 +80,13 @@ class AnalyticsStore implements Runnable
 	private void createNewEventFile(String fileName)
 	{
 		try 
-		{
-			File dir = new File(AnalyticsConstants.EVENT_FILE_PATH);
+		{			
+			String dirName = this.context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR;
+			File dir = new File(dirName);
 			dir.mkdirs();
-			eventFile = new File(AnalyticsConstants.EVENT_FILE_PATH + currentFileName);
+			eventFile = new File(dir, currentFileName);
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "event file created :" + Boolean.toString(eventFile.createNewFile()) + " " + eventFile.getAbsolutePath().toString());			
 			fileWriter = new FileWriter(eventFile, true);
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "event file created");
 		}
 		catch (IOException e) 
 		{
@@ -105,7 +105,8 @@ class AnalyticsStore implements Runnable
 
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, currentFileName);
 
-			fileObserver = new FileObserver(AnalyticsConstants.EVENT_FILE_PATH + currentFileName) 
+			fileObserver = new FileObserver(this.context.getFilesDir() + AnalyticsConstants.EVENT_FILE_DIR +
+					AnalyticsConstants.FWD_SLASH + currentFileName) 
 			{			
 				@Override
 				public void onEvent(int event, String path) 
@@ -134,7 +135,6 @@ class AnalyticsStore implements Runnable
 
 			for(Event e : eventList)
 			{
-				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Writing event...");
 				JSONObject json = Event.toJson(e);
 				
 				if(fileWriter != null)					
