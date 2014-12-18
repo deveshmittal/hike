@@ -105,13 +105,24 @@ class AnalyticsStore implements Runnable
 
 		if(!dir.exists())
 		{
-			dir.mkdirs();
+			boolean ret = dir.mkdirs();
+			
+			if(!ret)
+			{				
+				throw new IOException("Failed to create Analytics directory");
+			}
 		}
 		eventFile = new File(dir, fileName);
 
-		eventFile.createNewFile();
+		boolean val = eventFile.createNewFile();
+		
+		if(!val)
+		{
+			throw new IOException("Failed to create event file");
+		}
 
 		currentFileName = fileName;
+		
 		return eventFile;
 	}
 	
