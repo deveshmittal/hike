@@ -1,12 +1,11 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -23,15 +22,14 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ConnectedApp;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.R.string;
-import com.bsb.hike.models.ConnectedApp;
 
 /**
- * This class is reponsible for displaying "Connected apps" screen in Settings. Also takes care of underlying functionality.
+ * This class is responsible for displaying "Connected apps" screen in Settings. Also takes care of underlying functionality.
  * 
  * @author AtulM
  * 
@@ -50,6 +48,8 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 	private BaseAdapter connectedAppsAdapter;
 
 	private TextView text_view_connected_apps_numbers;
+
+	private boolean isDataChanged;
 
 	/*
 	 * (non-Javadoc)
@@ -103,6 +103,8 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 			catch (PackageManager.NameNotFoundException e)
 			{
 				e.printStackTrace();
+				isDataChanged = true;
+				continue;
 			}
 
 			connectedAppList.add(connApp);
@@ -199,18 +201,15 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 		};
 
 		text_view_connected_apps_numbers = ((TextView) findViewById(R.id.text_view_connected_apps_numbers));
-		
-		if (connectedAppList != null)
+
+		if (connectedAppList.isEmpty())
 		{
-			if (connectedAppList.isEmpty())
-			{
-				text_view_connected_apps_numbers.setText(String.format(getString(R.string.connected_apps_to_hike), getString(R.string.no)));
-			}
-			else
-			{
-				text_view_connected_apps_numbers.setText(connectedAppList.size() == 1 ? getString(R.string.connected_app_to_hike) : String.format(
-						getString(R.string.connected_apps_to_hike), connectedAppList.size()));
-			}
+			text_view_connected_apps_numbers.setText(String.format(getString(R.string.connected_apps_to_hike), getString(R.string.no)));
+		}
+		else
+		{
+			text_view_connected_apps_numbers.setText(connectedAppList.size() == 1 ? getString(R.string.connected_app_to_hike) : String.format(
+					getString(R.string.connected_apps_to_hike), connectedAppList.size()));
 		}
 
 		listView = ((ListView) findViewById(R.id.list_view_connected_apps));
@@ -226,56 +225,13 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 	{
 		ConnectedApp disconnAppObj = connectedAppList.remove(index);
 
-		String connectedPkgCSV = authPrefs.getData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, "");
+		isDataChanged = true;
 
-		if (TextUtils.isEmpty(connectedPkgCSV))
-		{
-			// Not possible
-		}
-		else
-		{
-			if (connectedAppList.isEmpty())
-			{
-				authPrefs.removeData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY);
-			}
-			else
-			{
-				StringBuilder sb = null;
+		sendDisconnectedAppAnalytics(disconnAppObj.getTitle());
 
-				for (ConnectedApp app : connectedAppList)
-				{
-					if (sb == null)
-					{
-						sb = new StringBuilder(app.getPackageName());
-					}
-					else
-					{
-						sb.append("," + app.getPackageName());
-					}
-				}
+		invalidateUI();
 
-				authPrefs.saveData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, String.valueOf(sb));
-			}
-
-			authPrefs.removeData(disconnAppObj.getPackageName().split(":")[0]);
-
-			try
-			{
-				JSONObject analyticsJSON = new JSONObject();
-
-				analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_DISCONNECT_APP);
-
-				analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, disconnAppObj.getTitle());
-
-				Utils.sendLogEvent(analyticsJSON);
-			}
-			catch (JSONException e)
-			{
-				e.printStackTrace();
-			}
-
-			invalidateUI();
-		}
+		authPrefs.removeData(disconnAppObj.getPackageName().split(":")[0]);
 	}
 
 	/*
@@ -322,19 +278,152 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 	 */
 	private void invalidateUI()
 	{
-		connectedAppsAdapter.notifyDataSetChanged();
-
-		if (connectedAppList != null)
+		runOnUiThread(new Runnable()
 		{
-			if (connectedAppList.isEmpty())
+
+			@Override
+			public void run()
 			{
-				text_view_connected_apps_numbers.setText(String.format(getString(R.string.connected_apps_to_hike), getString(R.string.no)));
+				connectedAppsAdapter.notifyDataSetChanged();
+
+				if (connectedAppList != null)
+				{
+					if (connectedAppList.isEmpty())
+					{
+						text_view_connected_apps_numbers.setText(String.format(getString(R.string.connected_apps_to_hike), getString(R.string.no)));
+					}
+					else
+					{
+						text_view_connected_apps_numbers.setText(connectedAppList.size() == 1 ? getString(R.string.connected_app_to_hike) : String.format(
+								getString(R.string.connected_apps_to_hike), connectedAppList.size()));
+					}
+				}
+			}
+		});
+
+	}
+
+	/**
+	 * Disconnects all connected apps. The apps are stored as comma separated values in shared preferences each having expiry time (:) separated
+	 * 
+	 * @param argContext
+	 */
+	public static void disconnectAllApps(Context argContext)
+	{
+		HikeSharedPreferenceUtil prefs = HikeSharedPreferenceUtil.getInstance(argContext, HikeAuthActivity.AUTH_SHARED_PREF_NAME);
+
+		prefs.deleteAllData();
+	}
+
+	/**
+	 * Disconnects given application package name. The apps are stored as comma separated values in shared preferences, each having expiry time (:) separated
+	 * 
+	 * @param argContext
+	 */
+	public static void disconnectApp(Context argContext, String appPkg)
+	{
+		HikeSharedPreferenceUtil prefs = HikeSharedPreferenceUtil.getInstance(argContext, HikeAuthActivity.AUTH_SHARED_PREF_NAME);
+
+		prefs.removeData(appPkg);
+
+		String connectedPkgCSV = prefs.getData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, "");
+
+		if (TextUtils.isEmpty(connectedPkgCSV))
+		{
+			return;
+		}
+
+		String[] connectedPkgs = connectedPkgCSV.split(",");
+
+		if (connectedPkgs.length > 0)
+		{
+			StringBuilder sb = null;
+
+			for (String app : connectedPkgs)
+			{
+				if (app.split(":")[0].equals(appPkg))
+				{
+					// Do nothing
+				}
+				else
+				{
+					// Add to new CSV
+					if (sb == null)
+					{
+						sb = new StringBuilder(app);
+					}
+					else
+					{
+						sb.append("," + app);
+					}
+				}
+			}
+
+			if (sb != null && sb.length() > 0)
+			{
+				prefs.saveData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, String.valueOf(sb));
 			}
 			else
 			{
-				text_view_connected_apps_numbers.setText(connectedAppList.size() == 1 ? getString(R.string.connected_app_to_hike) : String.format(
-						getString(R.string.connected_apps_to_hike), connectedAppList.size()));
+				prefs.removeData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY);
 			}
+		}
+
+	}
+
+	@Override
+	protected void onPause()
+	{
+		super.onPause();
+		if (isDataChanged)
+		{
+			isDataChanged = false;
+
+			saveCurrentData();
+		}
+	}
+
+	private void saveCurrentData()
+	{
+		if (connectedAppList.isEmpty())
+		{
+			disconnectAllApps(getApplicationContext());
+		}
+		else
+		{
+			StringBuilder sb = null;
+
+			for (ConnectedApp app : connectedAppList)
+			{
+				if (sb == null)
+				{
+					sb = new StringBuilder(app.getPackageName());
+				}
+				else
+				{
+					sb.append("," + app.getPackageName());
+				}
+			}
+
+			authPrefs.saveData(HikeAuthActivity.AUTH_SHARED_PREF_PKG_KEY, String.valueOf(sb));
+		}
+	}
+
+	private void sendDisconnectedAppAnalytics(String disconnectedAppTitle)
+	{
+		try
+		{
+			JSONObject analyticsJSON = new JSONObject();
+
+			analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_DISCONNECT_APP);
+
+			analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, disconnectedAppTitle);
+
+			Utils.sendLogEvent(analyticsJSON);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
 		}
 	}
 }
