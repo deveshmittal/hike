@@ -16,14 +16,12 @@ import com.bsb.hike.utils.Logger;
  * @author rajesh
  *
  */
-class AnalyticsStore implements Runnable
+class AnalyticsStore
 {
 	private Context context;
 	
 	private static AnalyticsStore _instance; 
-	
-	private ArrayList<Event> eventList;
-	
+		
 	private File eventFile;
 	
 	private String currentFileName;
@@ -35,9 +33,7 @@ class AnalyticsStore implements Runnable
 	private AnalyticsStore(Context context)
 	{
 		this.context = context.getApplicationContext();
-		
-		eventList = new ArrayList<Event>();
-		
+				
 		try 
 		{
 			eventFile = createNewEventFile();
@@ -129,58 +125,59 @@ class AnalyticsStore implements Runnable
 	/**
 	 * writes the event json to the file
 	 */
-	private synchronized void dumpEvents()
+	protected synchronized void dumpEvents(final ArrayList<Event> events)
 	{		
-		FileWriter fileWriter = null;
-		try
-		{
-			ArrayList<Event> events = (ArrayList<Event>)eventList.clone();
-			eventList.clear();
-			if(!eventFileExists())
+		new Thread(new Runnable() 
+		{			
+			@Override
+			public void run() 
 			{
-				createNewEventFile();
-			}
-
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, currentFileName);
-			
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "file was written!");
-
-			if(getFileSize() >= AnalyticsConstants.MAX_FILE_SIZE)
-			{
-				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "current file size reached its limit!");
-				createNewEventFile();
-			}
-
-			fileWriter = new FileWriter(eventFile, true);
-			
-			for(Event e : events)
-			{
-				JSONObject json = Event.toJson(e);
+				FileWriter fileWriter = null;
 				
-				fileWriter.write(json + AnalyticsConstants.NEW_LINE);
-			}
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to the file!");
-		}
-		catch (IOException e)
-		{
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "io exception while writing events to file");
-		}
-		catch(ConcurrentModificationException ex)
-		{
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "ConcurrentModificationException exception while writing events to file");			
-		}
-		finally
-		{	
-			if(eventList != null)
-			{
-				eventList.clear();
-			}
+				try
+				{					
+					if(!eventFileExists())
+					{
+						createNewEventFile();
+					}
 
-			if(fileWriter != null)	
-			{
-				closeCurrentFile(fileWriter);
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, currentFileName);
+					
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "file was written!");
+
+					if(getFileSize() >= AnalyticsConstants.MAX_FILE_SIZE)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "current file size reached its limit!");
+						createNewEventFile();
+					}
+
+					fileWriter = new FileWriter(eventFile, true);
+					
+					for(Event e : events)
+					{
+						JSONObject json = Event.toJson(e);
+						
+						fileWriter.write(json + AnalyticsConstants.NEW_LINE);
+					}
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to the file!");
+				}
+				catch (IOException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "io exception while writing events to file");
+				}
+				catch(ConcurrentModificationException ex)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "ConcurrentModificationException exception while writing events to file");			
+				}
+				finally
+				{	
+					if(fileWriter != null)	
+					{
+						closeCurrentFile(fileWriter);
+					}
+				}
 			}
-		}
+		}).start();						
 	}
 	
 	/**
@@ -188,26 +185,8 @@ class AnalyticsStore implements Runnable
 	 * @return true if the file exists, false otherwise
 	 */
 	private boolean eventFileExists()
-	{
+	{		
 		return eventFile != null && eventFile.exists();
-	}
-
-	/**
-	 * Sets the events to be written to the file
-	 * @param events ArrayList of events
-	 */
-	protected void setEventsToDump(ArrayList<Event> events)
-	{
-		this.eventList.addAll(events);
-	}
-	
-	/**
-	 * Returns the events to be written to the file
-	 * @return ArrayList of events 
-	 */
-	protected ArrayList<Event> getEventsToDump()
-	{
-		return this.eventList;
 	}
 	
 	/**
@@ -224,14 +203,5 @@ class AnalyticsStore implements Runnable
 		{
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "io exception while file connection closing!");
 		}
-	}
-	
-	/**
-	 * writer thread's run implementation
-	 */
-	@Override
-	public void run() 
-	{
-		dumpEvents();		
-	}
+	}	
 }

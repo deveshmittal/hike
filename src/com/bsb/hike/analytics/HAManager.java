@@ -1,6 +1,7 @@
 package com.bsb.hike.analytics;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -29,9 +30,7 @@ public class HAManager
 	public static String HOUR_TO_SEND = "hourToSend";
 	
 	public static String ANALYTICS_SERVICE_STATUS = "analyticsServiceStatus";
-	
-	private Thread writerThread;
-	
+		
 	private boolean isAnalyticsEnabled = true;
 	
 	/**
@@ -42,6 +41,9 @@ public class HAManager
 		this.context = context.getApplicationContext();
 		
 		eventsList = new ArrayList<Event>();
+		
+		/** synchronize all access to the events list */
+		Collections.synchronizedCollection(eventsList);
 		
 		store = AnalyticsStore.getInstance(this.context);	
 		
@@ -77,16 +79,15 @@ public class HAManager
 		eventsList.add(event);
 		
 		if(eventsList.size() >= AnalyticsConstants.MAX_EVENTS_IN_MEMORY)
-		{			
-			store.setEventsToDump(eventsList);
+		{	
+			// clone a local copy and send for writing
+			ArrayList<Event> events = (ArrayList<Event>)eventsList.clone();
+
+			AnalyticsStore.getInstance(this.context).dumpEvents(events);
 			
 			eventsList.clear();
 			
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "writer thread started!");
-			
-			writerThread = new Thread(store);
-			
-			writerThread.start();
 		}					
 	}
 
