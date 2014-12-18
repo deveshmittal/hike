@@ -18,6 +18,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.media.AttachmentPicker;
+import com.bsb.hike.media.AudioRecordView;
+import com.bsb.hike.media.AudioRecordView.AudioRecordListener;
 import com.bsb.hike.media.CaptureImageParser;
 import com.bsb.hike.media.CaptureImageParser.CaptureImageListener;
 import com.bsb.hike.media.OverFlowMenuItem;
@@ -47,7 +49,7 @@ import com.bsb.hike.utils.Utils;
  */
 
 public class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
-		HHikeDialogListener, StickerPickerListener
+		HHikeDialogListener, StickerPickerListener, AudioRecordListener
 {
 	private static final String TAG = "chatthread";
 
@@ -65,6 +67,8 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 
 	protected StickerPicker stickerPicker;
 
+	protected AudioRecordView audioRecordView;
+	
 	public ChatThread(ChatThreadActivity activity, String msisdn)
 	{
 		this.activity = activity;
@@ -107,8 +111,10 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 	{
 		setConversationTheme();
 		activity.findViewById(R.id.sticker_btn).setOnClickListener(this);
+		activity.findViewById(R.id.send_message).setOnClickListener(this);
 		stickerPicker = new StickerPicker(activity, this, activity.findViewById(R.id.chatThreadParentLayout),
 				(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)));
+		audioRecordView = new AudioRecordView(activity, this);
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -208,10 +214,21 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 		case R.id.sticker_btn:
 			stickerClicked();
 			break;
+		case R.id.send_message:
+			sendButtonClicked();
+			break;
 		}
 
 	}
 
+	protected void sendButtonClicked(){
+		audioRecordClicked();
+	}
+	
+	protected void audioRecordClicked(){
+		audioRecordView.show();
+	}
+	
 	protected void stickerClicked()
 	{
 		stickerPicker.showStickerPicker();
@@ -460,6 +477,20 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 	{
 		Logger.i(TAG, "sticker clicked " + sticker);
 		stickerPicker.dismiss();
+	}
+
+	@Override
+	public void audioRecordSuccess(String filePath, long duration)
+	{
+		Logger.i(TAG, "Audio Recorded " + filePath + "--" + duration);
+		// initialiseFileTransfer(filePath, null, HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true, duration, false);
+
+	}
+
+	@Override
+	public void audioRecordCancelled()
+	{
+		Logger.i(TAG, "Audio Recorded failed");
 	}
 
 }
