@@ -14,13 +14,13 @@ import com.bsb.hike.utils.Logger;
  */
 public class HAManager 
 {
-	private static HAManager instance = null;
+	private static HAManager instance;
 	
-	private Context context = null;
+	private Context context;
 	
 	private ArrayList<Event> eventsList;
 	
-	private AnalyticsStore store = null;
+	private AnalyticsStore store;
 	
 	public static String ANALYTICS_SETTINGS = "analyticssettings";
 

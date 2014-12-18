@@ -18,13 +18,13 @@ import com.bsb.hike.utils.Logger;
  */
 class AnalyticsStore implements Runnable
 {
-	private Context context = null;
+	private Context context;
 	
 	private static AnalyticsStore _instance; 
 	
-	private ArrayList<Event> eventList = null;
+	private ArrayList<Event> eventList;
 	
-	private File eventFile = null;
+	private File eventFile;
 	
 	private String currentFileName;
 				
