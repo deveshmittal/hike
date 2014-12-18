@@ -9,9 +9,7 @@ import java.util.ConcurrentModificationException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.os.FileObserver;
 
-import com.bsb.hike.analytics.Event.EventPriority;
 import com.bsb.hike.utils.Logger;
 
 /**
@@ -22,15 +20,11 @@ class AnalyticsStore implements Runnable
 {
 	private Context context = null;
 	
+	private static AnalyticsStore _instance; 
+	
 	private ArrayList<Event> eventList = null;
 	
-	private boolean hasMaxFileSizeReached = false;
-	
-	private FileObserver fileObserver = null;
-		
 	private File eventFile = null;
-	
-	private FileWriter fileWriter = null;
 	
 	private String currentFileName;
 				
@@ -38,93 +32,118 @@ class AnalyticsStore implements Runnable
 	 * Constructor
 	 * @param context application context
 	 */
-	public AnalyticsStore(Context context)
+	private AnalyticsStore(Context context)
 	{
 		this.context = context.getApplicationContext();
-								
-		currentFileName = getNewFileName();
+		
+		eventList = new ArrayList<Event>();
+		
+		try 
+		{
+			eventFile = createNewEventFile();
+		}
+		catch (IOException e) 
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "IO exception while creating new event file");
+		}
+	}
+	
+	/**
+	 * static constructor of AnalyticsStore
+	 * @param context application context
+	 * @return singleton instance of AnalyticsStore 
+	 */
+	public static AnalyticsStore getInstance(Context context)
+	{
+		if(_instance == null)
+		{
+			synchronized (AnalyticsStore.class) 
+			{
+				_instance = new AnalyticsStore(context.getApplicationContext());
+			}
+		}
+		return _instance;
 	}
 	
 	/**
 	 * Returns the file name which is a concatenation of filename and current system time
 	 * @return name of the file
 	 */
-	private String getNewFileName()
+	private String generateNewEventFileName()
 	{
-		 return currentFileName = AnalyticsConstants.EVENT_FILE_NAME + Long.toString(System.currentTimeMillis()) + 
+		 return AnalyticsConstants.EVENT_FILE_NAME + Long.toString(System.currentTimeMillis()) + 
 				 AnalyticsConstants.FILE_EXTENSION;
 	}
 	
 	/**
-	 * deletes the event file whose priority is given
-	 * @param priority priority of the events to be deleted
-	 */
-	public void deleteEvents(EventPriority priority)
-	{
-		//TODO:: Implementation of events deletion goes here. 
-	}
-	
-	/**
 	 * gets the size of the event file whose priority is given
-	 * @param priority priority of the events 
 	 * @return the size of file in bytes
 	 */
-	public long getFileSize(EventPriority priority)
+	protected long getFileSize()
 	{
-		return eventFile.length();
+		long fileLength = 0;
+		
+		if(eventFile != null)
+		{
+			fileLength = eventFile.length();
+		}
+		return fileLength;
 	}
 	
 	/**
 	 * creates a new plain events(text) file 
 	 */
-	private void createNewEventFile(String fileName)
+	private File createNewEventFile() throws IOException
 	{
-		try 
-		{			
-			String dirName = this.context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR;
-			File dir = new File(dirName);
-			dir.mkdirs();
-			eventFile = new File(dir, currentFileName);
-			
-			if(!eventFile.exists())
-				eventFile.createNewFile();
-			
-			fileWriter = new FileWriter(eventFile, true);
-		}
-		catch (IOException e) 
+		String fileName = generateNewEventFileName();
+
+		String dirName = this.context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR;
+		File dir = new File(dirName);
+
+		if(!dir.exists())
 		{
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "io exception while creating file writer");
+			dir.mkdirs();
 		}
+		eventFile = new File(dir, fileName);
+
+		eventFile.createNewFile();
+
+		currentFileName = fileName;
+		return eventFile;
 	}
 	
 	/**
 	 * writes the event json to the file
 	 */
-	public synchronized void dumpEvents()
+	private synchronized void dumpEvents()
 	{		
+		FileWriter fileWriter = null;
 		try
 		{
-			createNewEventFile(currentFileName);
+			ArrayList<Event> events = (ArrayList<Event>)eventList.clone();
+			eventList.clear();
+			if(!eventFileExists())
+			{
+				createNewEventFile();
+			}
 
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, currentFileName);
 			
-			long size = eventFile.length();
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "file was written!");
 
-			if(size >= AnalyticsConstants.MAX_FILE_SIZE)
+			if(getFileSize() >= AnalyticsConstants.MAX_FILE_SIZE)
 			{
 				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "current file size reached its limit!");
-				setMaxFileSizeReached(true);
-				closeCurrentFile();				
-				createNewEventFile(getNewFileName());
+				createNewEventFile();
 			}
 
-			for(Event e : eventList)
+			fileWriter = new FileWriter(eventFile, true);
+			
+			for(Event e : events)
 			{
 				JSONObject json = Event.toJson(e);
 				
-				if(fileWriter != null)					
-					fileWriter.write(json + AnalyticsConstants.NEW_LINE);
+				fileWriter.write(json + AnalyticsConstants.NEW_LINE);
 			}
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to the file!");
 		}
@@ -137,48 +156,42 @@ class AnalyticsStore implements Runnable
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "ConcurrentModificationException exception while writing events to file");			
 		}
 		finally
-		{			
-			eventList.clear();
+		{	
+			if(eventList != null)
+			{
+				eventList.clear();
+			}
 
 			if(fileWriter != null)	
 			{
-				closeCurrentFile();
+				closeCurrentFile(fileWriter);
 			}
 		}
 	}
+	
+	/**
+	 * Checks if the event file exists or not
+	 * @return true if the file exists, false otherwise
+	 */
+	private boolean eventFileExists()
+	{
+		return eventFile != null && eventFile.exists();
+	}
 
-	/**
-	 * checks if the event file has reached its max size
-	 * @return true if event file has reached its max size, false otherwise 
-	 */
-	private boolean isMaxFileSizeReached()
-	{
-		return hasMaxFileSizeReached;
-	}
-	
-	/**
-	 * sets the event file size
-	 * @param value true if file size has reached its max size, false otherwise
-	 */
-	private void setMaxFileSizeReached(boolean value)
-	{
-		hasMaxFileSizeReached = true;
-	}
-	
 	/**
 	 * Sets the events to be written to the file
 	 * @param events ArrayList of events
 	 */
-	public void setEventsToDump(ArrayList<Event> events)
+	protected void setEventsToDump(ArrayList<Event> events)
 	{
-		this.eventList = (ArrayList<Event>)events.clone();
+		this.eventList.addAll(events);
 	}
 	
 	/**
 	 * Returns the events to be written to the file
 	 * @return ArrayList of events 
 	 */
-	public ArrayList<Event> getEventsToDump()
+	protected ArrayList<Event> getEventsToDump()
 	{
 		return this.eventList;
 	}
@@ -186,7 +199,7 @@ class AnalyticsStore implements Runnable
 	/**
 	 * closes the currently opened event file
 	 */
-	private void closeCurrentFile()
+	private void closeCurrentFile(FileWriter fileWriter)
 	{		
 		try 
 		{
