@@ -306,13 +306,14 @@ public class CardRenderer implements View.OnLongClickListener {
 
                             if (cardType == CardConstants.GAMES_CARD_LAYOUT) {
 
+                                TextView cardTitleView  = (TextView) v.findViewWithTag(mContext.getString(R.string.content_card_title_tag));
+                                TextView actionTextView = (TextView) v.findViewWithTag(mContext.getString(R.string.content_card_action_tag));
+                                String cardName = (String) cardTitleView.getText();
+                                String actionText = (String) actionTextView.getText();
+                                sendLogEvent(cardName, actionText);
+
                                 if (tag.equalsIgnoreCase(mContext.getString(R.string.content_card_tag)) && !isAppInstalled) {
 
-                                    TextView cardTitleView  = (TextView) v.findViewWithTag(mContext.getString(R.string.content_card_title_tag));
-                                    TextView actionTextView = (TextView) v.findViewWithTag(mContext.getString(R.string.content_card_action_tag));
-                                    String cardName = (String) cardTitleView.getText();
-                                    String actionText = (String) actionTextView.getText();
-                                    sendLogEvent(cardName, actionText);
                                     JSONObject jsonObject = new JSONObject();
                                     jsonObject.put(HikePlatformConstants.INTENT_URI, CardConstants.PLAY_STORE_TEXT + channelSource);
                                     CardController.callToAction(jsonObject, mContext);
