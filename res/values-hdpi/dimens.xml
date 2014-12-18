@@ -37,6 +37,7 @@
 	<dimen name="welcome_bottom_margin">25dp</dimen>
 	<dimen name="welcome_artwork_padding">10dp</dimen>
 	<dimen name="welcome_with_love_top">30dp</dimen>
+	<dimen name="auth_margin_top">60dp</dimen>
 	<dimen name="invite_footer_top_margin">114dp</dimen>
 	<dimen name="nux_button_text_margin">26dp</dimen>
 	<dimen name="nux_text_text_margin">6dp</dimen>

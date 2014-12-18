@@ -1,8 +1,14 @@
 package com.bsb.hike.modules.animationModule;
 
+import com.bsb.hike.R;
+import com.bsb.hike.utils.Utils;
+
+import android.content.Context;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 
@@ -27,6 +33,29 @@ public class HikeAnimationFactory
 		fade.setDuration(1000);
 		fade.setRepeatCount(Animation.INFINITE);
 		animSet.addAnimation(fade);
+		return animSet;
+	}
+
+	public static AnimationSet getStickerShopIconAnimation(Context context)
+	{
+		final AnimationSet animSet = (AnimationSet) AnimationUtils.loadAnimation(context, R.anim.sticker_shop_icon_anim);
+
+		animSet.setAnimationListener(new AnimationListener() {
+
+			@Override
+			public void onAnimationStart(Animation animation) {
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				animation.reset();
+				animation.start();
+			}
+		});
 		return animSet;
 	}
 }

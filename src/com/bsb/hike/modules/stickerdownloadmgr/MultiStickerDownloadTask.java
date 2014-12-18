@@ -293,7 +293,7 @@ public class MultiStickerDownloadTask extends BaseStickerDownloadTask
 		}
 		else
 		{
-			NetworkType networkType = StickerDownloadManager.getInstance(context).getNetworkType();
+			NetworkType networkType = StickerDownloadManager.getInstance().getNetworkType();
 			return networkType.getStickerDownloadSize();
 			
 		}

@@ -1,19 +1,5 @@
 package com.bsb.hike.ui.fragments;
 
-import java.util.ArrayList;
-
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.FutureTask;
-import java.util.Set;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,9 +11,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Bitmap;
-import android.graphics.Shader.TileMode;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -37,57 +20,31 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.*;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.BitmapModule.HikeBitmapFactory;
-import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.adapters.EmptyConversationsAdapter;
+import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.*;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.ConversationTip;
-import com.bsb.hike.models.EmptyConversationContactItem;
-import com.bsb.hike.models.EmptyConversationFtueCardItem;
-import com.bsb.hike.models.EmptyConversationItem;
-import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.MultipleConvMessage;
-import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
-import com.bsb.hike.ui.HikeDialog;
-import com.bsb.hike.ui.HikeFragmentable;
-import com.bsb.hike.ui.HikeListActivity;
-import com.bsb.hike.ui.HomeActivity;
-import com.bsb.hike.ui.PeopleActivity;
-import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.utils.CustomAlertDialog;
-import com.bsb.hike.utils.HikeAnalyticsEvent;
-import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.PairModified;
-import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.HikeTip.TipType;
+import com.bsb.hike.ui.*;
+import com.bsb.hike.utils.*;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class ConversationFragment extends SherlockListFragment implements OnItemLongClickListener, Listener, OnScrollListener, HikeFragmentable
 {
@@ -189,7 +146,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			HikePubSub.DISMISS_STEALTH_FTUE_CONV_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.STEALTH_MODE_TOGGLED, HikePubSub.CLEAR_FTUE_STEALTH_CONV,
 			HikePubSub.RESET_STEALTH_INITIATED, HikePubSub.RESET_STEALTH_CANCELLED, HikePubSub.REMOVE_WELCOME_HIKE_TIP, HikePubSub.REMOVE_STEALTH_INFO_TIP,
 			HikePubSub.REMOVE_STEALTH_UNREAD_TIP, HikePubSub.BULK_MESSAGE_RECEIVED, HikePubSub.GROUP_MESSAGE_DELIVERED_READ, HikePubSub.BULK_MESSAGE_DELIVERED_READ, HikePubSub.GROUP_END,
-			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.SWITCH_OFF_NUX_MODE };
+			HikePubSub.CONTACT_DELETED,HikePubSub.MULTI_MESSAGE_DB_INSERTED, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.SWITCH_OFF_NUX_MODE};
 
 	private ConversationsAdapter mAdapter;
 
@@ -501,6 +458,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		prefUtil.removeData(HikeMessengerApp.SHOWING_STEALTH_FTUE_CONV_TIP);
 		prefUtil.removeData(HikeMessengerApp.RESET_COMPLETE_STEALTH_START_TIME);
 		prefUtil.removeData(HikeMessengerApp.SHOWN_FIRST_UNMARK_STEALTH_TOAST);
+		DBBackupRestore.getInstance(getActivity()).updatePrefs();
 	}
 
 	@Override
@@ -1074,7 +1032,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			return;
 		}
 		Logger.d(getClass().getSimpleName(), "Event received: " + type);
-		if ((HikePubSub.MESSAGE_RECEIVED.equals(type)) || (HikePubSub.MESSAGE_SENT.equals(type)))
+		if ((HikePubSub.MESSAGE_RECEIVED.equals(type)) || (HikePubSub.MESSAGE_SENT.equals(type)) )
 		{
 			Logger.d(getClass().getSimpleName(), "New msg event sent or received.");
 			ConvMessage message = (ConvMessage) object;

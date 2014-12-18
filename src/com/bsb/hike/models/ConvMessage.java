@@ -1,23 +1,20 @@
 package com.bsb.hike.models;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.ocpsoft.prettytime.PrettyTime;
-
 import android.content.Context;
 import android.text.TextUtils;
-
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.ConvMessagePacketKeys;
+import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.platform.ContentLove;
+import com.bsb.hike.platform.PlatformMessageMetadata;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ConvMessage
 {
@@ -38,7 +35,7 @@ public class ConvMessage
 
 	private boolean mIsSMS;
 
-	private State mState;
+	private State mState = State.SENT_UNCONFIRMED;
 
 	private boolean mInvite;
 
@@ -75,7 +72,11 @@ public class ConvMessage
 	private int unreadCount = -1;
 	private int messageType = HikeConstants.MESSAGE_TYPE.PLAIN_TEXT;
 	// private boolean showResumeButton = true;
-	
+	public ContentLove contentLove;
+	public PlatformMessageMetadata platformMessageMetadata;
+	public boolean isLovePresent(){
+		return contentLove!=null;
+	}
 	public int getMessageType()
 	{
 		return messageType;
@@ -105,6 +106,8 @@ public class ConvMessage
 	{
 		this.isFileTransferMessage = isFileTransferMessage;
 	}
+
+    public void setIsSent(boolean isSent){this.mIsSent = isSent;}
 
 	public boolean isStickerMessage()
 	{
@@ -203,6 +206,10 @@ public class ConvMessage
 		}
 	}
 
+	public ConvMessage(){
+        this.mTimestamp = System.currentTimeMillis()/1000;
+		
+	}
 	public ConvMessage(int unreadCount, long timestamp, long msgId)
 	{
 		this.unreadCount = unreadCount;
@@ -279,6 +286,8 @@ public class ConvMessage
 		this.shouldShowPush = other.shouldShowPush;
 		this.unreadCount = other.unreadCount;
 		this.metadata = other.metadata;
+		this.platformMessageMetadata = other.platformMessageMetadata;
+		this.contentLove = other.contentLove;
 		try {
 			this.readByArray = other.readByArray !=null? new JSONArray(other.readByArray.toString()) : null;
 		} catch (JSONException e) {
@@ -287,7 +296,7 @@ public class ConvMessage
 				
 	}
 
-	public ConvMessage(JSONObject obj) throws JSONException
+	public ConvMessage(JSONObject obj, Context context) throws JSONException
 	{
 		this.mMsisdn = obj.getString(obj.has(HikeConstants.TO) ? HikeConstants.TO : HikeConstants.FROM); /*
 																										 * represents msg is coming from another client
@@ -337,7 +346,15 @@ public class ConvMessage
 			{
 				this.messageType = mdata.getInt(HikeConstants.PIN_MESSAGE);
 			}
+			// TODO : We should parse metadata based on message type, so doing now for content, we should clean the else part sometime
+			if(HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE.equals(obj.optString(HikeConstants.SUB_TYPE))){
+				this.messageType  = MESSAGE_TYPE.CONTENT;
+				platformMessageMetadata  = new PlatformMessageMetadata(data.optJSONObject(HikeConstants.METADATA), context);
+                platformMessageMetadata.addToThumbnailTable();
+                platformMessageMetadata.thumbnailMap.clear();
+			}else{
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
+		    }
 		}
 		this.isStickerMessage = HikeConstants.STICKER.equals(obj.optString(HikeConstants.SUB_TYPE));
 		/**
@@ -619,7 +636,7 @@ public class ConvMessage
 		JSONObject md = null;
 		try
 		{
-			if (participantInfoState == ParticipantInfoState.CHAT_BACKGROUND)
+			if (participantInfoState == ParticipantInfoState.CHAT_BACKGROUND && metadata!=null)
 			{
 				object = metadata.getJSON();
 			}
@@ -670,7 +687,14 @@ public class ConvMessage
 				{
 					object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
 				}
-
+				// TODO : we should add all sub types here and set metadata accordingly
+				switch(messageType){
+				case MESSAGE_TYPE.CONTENT:
+					object.put(HikeConstants.SUB_TYPE, ConvMessagePacketKeys.CONTENT_TYPE);
+					data.put(HikeConstants.METADATA, platformMessageMetadata.getJSON());
+					break;
+				}
+				
 				object.put(HikeConstants.TYPE, mInvite ? HikeConstants.MqttMessageTypes.INVITE : HikeConstants.MqttMessageTypes.MESSAGE);
 			}
 		}
@@ -893,4 +917,6 @@ public class ConvMessage
 	public void setMsisdn(String msisdn){
 		this.mMsisdn = msisdn;
 	}
+	
+	
 }
