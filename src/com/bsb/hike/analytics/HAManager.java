@@ -58,7 +58,10 @@ public class HAManager
 		{
 			synchronized (HAManager.class)
 			{
-				instance = new HAManager(context.getApplicationContext());				
+				if(instance == null)
+				{
+					instance = new HAManager(context.getApplicationContext());
+				}
 			}
 		}
 		return instance;

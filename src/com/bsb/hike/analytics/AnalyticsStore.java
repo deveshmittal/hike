@@ -59,7 +59,10 @@ class AnalyticsStore implements Runnable
 		{
 			synchronized (AnalyticsStore.class) 
 			{
-				_instance = new AnalyticsStore(context.getApplicationContext());
+				if(_instance == null)
+				{
+					_instance = new AnalyticsStore(context.getApplicationContext());
+				}
 			}
 		}
 		return _instance;
