@@ -6798,6 +6798,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					{
 						emoticonLayout.findViewById(R.id.sticker_shop_badge).setVisibility(View.VISIBLE);
 					}
+					else
+					{
+						emoticonLayout.findViewById(R.id.sticker_shop_badge).setVisibility(View.GONE);
+					}
 
 					final View animatedBackground = emoticonLayout.findViewById(R.id.animated_backgroud);
 					if(!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false))  //The shop icon would be blue unless the user clicks on it once
