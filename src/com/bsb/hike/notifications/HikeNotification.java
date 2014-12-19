@@ -566,7 +566,7 @@ public class HikeNotification
 					avatarDrawable, shouldNotPlaySound, retryCount);
 
 		}
-		else
+		else if (!hikeNotifMsgStack.isEmpty())
 		{
 			showInboxStyleNotification(hikeNotifMsgStack.getNotificationIntent(), hikeNotifMsgStack.getNotificationIcon(), hikeNotifMsgStack.getLatestAddedTimestamp(),
 					hikeNotifMsgStack.getNotificationId(), hikeNotifMsgStack.getNotificationTickerText(), hikeNotifMsgStack.getNotificationTitle(),
