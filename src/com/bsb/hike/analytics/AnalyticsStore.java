@@ -125,7 +125,7 @@ class AnalyticsStore
 	/**
 	 * writes the event json to the file
 	 */
-	protected synchronized void dumpEvents(final ArrayList<Event> events)
+	protected void dumpEvents(final ArrayList<Event> events)
 	{		
 		new Thread(new Runnable() 
 		{			

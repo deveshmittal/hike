@@ -2,6 +2,7 @@ package com.bsb.hike.analytics;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -39,10 +40,7 @@ public class HAManager
 		this.context = context.getApplicationContext();
 		
 		eventsList = new ArrayList<Event>();
-		
-		/** synchronize all access to the events list */
-		Collections.synchronizedCollection(eventsList);
-				
+						
 		isAnalyticsEnabled = getPrefs().getBoolean(HAManager.ANALYTICS_SERVICE_STATUS, AnalyticsConstants.IS_ANALYTICS_ENABLED);
 	}
 	
@@ -64,27 +62,28 @@ public class HAManager
 		}
 		return instance;
 	}
-
+	
 	/**
 	 * Records one event
 	 * @param event event to be logged
 	 * @param context application context
 	 */
-	public void recordEvent(Event event)
+	// TODO need to look for a better way to do this operation and avoid synchronization
+	public synchronized void recordEvent(Event event) 
 	{
 		eventsList.add(event);
-		
-		if(eventsList.size() >= AnalyticsConstants.MAX_EVENTS_IN_MEMORY)
-		{	
-			// clone a local copy and send for writing
-			ArrayList<Event> events = (ArrayList<Event>)eventsList.clone();
 
-			AnalyticsStore.getInstance(this.context).dumpEvents(events);
+		if (AnalyticsConstants.MAX_EVENTS_IN_MEMORY == eventsList.size()) 
+		{			
+			// clone a local copy and send for writing
+			ArrayList<Event> events = (ArrayList<Event>) eventsList.clone();
 			
 			eventsList.clear();
 			
+			AnalyticsStore.getInstance(this.context).dumpEvents(events);
+
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "writer thread started!");
-		}					
+		}
 	}
 
 	/**
