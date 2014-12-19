@@ -679,7 +679,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	{
 		super.onResume();
 		checkNShowNetworkError();
-		HikeAlarmManager.cancelAlarm(HomeActivity.this, HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
 	}
 
