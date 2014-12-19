@@ -4,11 +4,18 @@ package com.bsb.hike.analytics;
  * @author rajesh
  *
  */
-class AnalyticsConstants 
+public class AnalyticsConstants 
 {	
 	public static long MAX_FILE_SIZE = 10 * 1024;
 	
-	public static int HOUR_OF_DAY_TO_SEND = 2;
+	/** time of first attempt to send analytics data */ 
+	public static int HOUR_OF_DAY_TO_SEND = 8;
+	
+	/** number of times upload should be tried in one day */
+	public static int ANALYTICS_UPLOAD_FREQUENCY = 3;
+	
+	/** try sending analytics data every 4 hours */
+	public static int UPLOAD_TIME_MULTIPLE = 4;
 	
 	public static boolean IS_ANALYTICS_ENABLED = true;
 	

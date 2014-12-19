@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.util.Calendar;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -24,6 +25,7 @@ import android.net.ConnectivityManager;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
+import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -31,7 +33,7 @@ import com.bsb.hike.utils.Utils;
  * @author rajesh
  *
  */
-class AnalyticsSender implements Runnable  
+public class AnalyticsSender implements Runnable  
 {
 	private Context context;
 	
@@ -76,6 +78,19 @@ class AnalyticsSender implements Runnable
 			}
 		}
 		return _instance;
+	}
+	
+	public boolean isAnalyticsUploadReady()
+	{
+		boolean isPossible = true;
+		
+		// get files absolute paths
+		String[] fileNames = getFileNames(context);
+		
+		if(fileNames == null || !(Utils.isUserOnline(context)))
+			isPossible = false;	
+		
+		return isPossible;
 	}
 	
 	/**
@@ -158,6 +173,36 @@ class AnalyticsSender implements Runnable
 	public void run() 
 	{
 		sendData();
+	}
+	
+	/**
+	 * starts the analytics data upload to server as per the set alarm and schedules the next alarm
+	 */
+	public void startUploadAndScheduleNextAlarm()
+	{
+		if(isAnalyticsUploadReady())
+		{
+			new Thread(AnalyticsSender.getInstance(context)).start();
+		}				
+		
+		HAManager instance = HAManager.getInstance(context);
+		
+		long nextSchedule = 0;
+		
+		if(HAManager.getAnalyticsUploadRetryCount() < AnalyticsConstants.ANALYTICS_UPLOAD_FREQUENCY)
+		{
+			nextSchedule = Utils.getTimeInMillis(Calendar.getInstance(), instance.getWhenToSend() + AnalyticsConstants.UPLOAD_TIME_MULTIPLE, 0, 0);
+			
+			HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, true);
+		}
+		else
+		{
+			HAManager.resetAnalyticsUploadRetryCount();
+			
+			nextSchedule = Utils.getTimeInMillis(Calendar.getInstance(), instance.getWhenToSend(), 0, 0);
+
+			HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, true);
+		}
 	}
 	
 	/**
@@ -264,9 +309,9 @@ class NetworkListener extends BroadcastReceiver
 				{
 					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Wifi connectivity changed!");
 
-					if(AnalyticsSender.getFileNames(this.context) != null)
+					if(AnalyticsSender.getFileNames(context) != null && Utils.isUserOnline(context))
 					{
-						new Thread(AnalyticsSender.getInstance(this.context)).start();
+						new Thread(AnalyticsSender.getInstance(context)).start();
 					}
 				}
 			}

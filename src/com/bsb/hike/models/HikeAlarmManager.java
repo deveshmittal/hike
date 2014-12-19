@@ -1,6 +1,9 @@
 package com.bsb.hike.models;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.AnalyticsSender;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -39,6 +42,8 @@ public class HikeAlarmManager
 	public static final int REQUESTCODE_NOTIFICATION_PRELOAD = 4567;
 	
 	public static final int REQUESTCODE_RETRY_LOCAL_NOTIFICATION = 4568;
+	
+	public static final int REQUESTCODE_HIKE_ANALYTICS = 3456;
 
 	public static final int REQUESTCODE_DEFAULT = 0;
 
@@ -181,6 +186,11 @@ public class HikeAlarmManager
 			
 			Utils.sendUILogEvent(HikeConstants.LogEvent.RETRY_NOTIFICATION_SENT);
 			HikeNotification.getInstance(context).showNotificationForCurrentMsgStack(true, retryCount);
+			break;
+			case HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS:
+			{				
+				AnalyticsSender.getInstance(context).startUploadAndScheduleNextAlarm();
+			}
 			break;
 		default:
 
