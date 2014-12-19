@@ -33,7 +33,9 @@ public class HAManager
 		
 	private boolean isAnalyticsEnabled = true;
 	
-	private static int analyticsRetryCount;
+	private long fileMaxSize = AnalyticsConstants.MAX_FILE_SIZE;
+	
+	private int analyticsUploadFrequency = 0;
 	
 	private NetworkListener listner;
 	
@@ -48,10 +50,12 @@ public class HAManager
 						
 		isAnalyticsEnabled = getPrefs().getBoolean(HAManager.ANALYTICS_SERVICE_STATUS, AnalyticsConstants.IS_ANALYTICS_ENABLED);
 		
+		fileMaxSize = getPrefs().getLong(HAManager.FILE_SIZE_LIMIT, AnalyticsConstants.MAX_FILE_SIZE);
+		
 		long whenToSendAnalytics = Utils.getTimeInMillis(Calendar.getInstance(), getWhenToSend(), 0, 0);  
 	
 		// set first alarm to upload analytics data to server
-		HikeAlarmManager.setAlarm(this.context, whenToSendAnalytics, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, true);
+		HikeAlarmManager.setAlarm(this.context, whenToSendAnalytics, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
 		
 		// set wifi listener
 		listner = new NetworkListener(this.context);
@@ -163,6 +167,15 @@ public class HAManager
 	}
 	
 	/**
+	 * Used to set the maximum event file size
+	 * @param size size in Kb
+	 */
+	public void setFileMaxSize(long size)
+	{
+		fileMaxSize = size;
+	}
+	
+	/**
 	 * Used to get the application's SharedPreferences
 	 * @return SharedPreference of the application
 	 */
@@ -171,13 +184,28 @@ public class HAManager
 		return context.getSharedPreferences(HAManager.ANALYTICS_SETTINGS, Context.MODE_PRIVATE);		
 	}
 	
-	protected static int getAnalyticsUploadRetryCount()
+	/**
+	 * Returns how many times in the day analytics data has been tried to upload
+	 * @return frequency in int
+	 */
+	protected int getAnalyticsUploadFrequency()
 	{
-		return analyticsRetryCount;
+		return analyticsUploadFrequency;
 	}
 	
-	protected static void resetAnalyticsUploadRetryCount()
+	/**
+	 * Resets the upload frequency to 0
+	 */
+	protected void resetAnalyticsUploadFrequency()
 	{
-		analyticsRetryCount = 0;
+		analyticsUploadFrequency = 0;
+	}
+	
+	/**
+	 * Increments the analytics upload frequency
+	 */
+	protected void incrementAnalyticsUploadFrequency()
+	{
+		analyticsUploadFrequency++;
 	}
 }
