@@ -172,7 +172,7 @@ public class UserLogInfo {
 		//for the case when AI packet will not send us the backup Token
 		String salt = settings.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING, "");
 		// if salt or key is empty, we do not send anything
-		if(salt.equals("") || key.equals(""))
+		if("".equals(salt) || "".equals(key))
 			return null;
 		
 		AESEncryption aesObj = new AESEncryption(key + salt, HASH_SCHEME);
