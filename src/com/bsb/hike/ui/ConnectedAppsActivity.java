@@ -279,29 +279,17 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 	 */
 	private void invalidateUI()
 	{
-		runOnUiThread(new Runnable()
+		connectedAppsAdapter.notifyDataSetChanged();
+
+		if (connectedAppList.isEmpty())
 		{
-
-			@Override
-			public void run()
-			{
-				connectedAppsAdapter.notifyDataSetChanged();
-
-				if (connectedAppList != null)
-				{
-					if (connectedAppList.isEmpty())
-					{
-						text_view_connected_apps_numbers.setText(String.format(getString(R.string.connected_apps_to_hike), getString(R.string.no)));
-					}
-					else
-					{
-						text_view_connected_apps_numbers.setText(connectedAppList.size() == 1 ? getString(R.string.connected_app_to_hike) : String.format(
-								getString(R.string.connected_apps_to_hike), connectedAppList.size()));
-					}
-				}
-			}
-		});
-
+			text_view_connected_apps_numbers.setText(String.format(getString(R.string.connected_apps_to_hike), getString(R.string.no)));
+		}
+		else
+		{
+			text_view_connected_apps_numbers.setText(connectedAppList.size() == 1 ? getString(R.string.connected_app_to_hike) : String.format(
+					getString(R.string.connected_apps_to_hike), connectedAppList.size()));
+		}
 	}
 
 	/**
