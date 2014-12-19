@@ -28,4 +28,6 @@ public interface HikePlatformConstants {
     String ANDROID_INTENT = "android";
     String CHANNEL_SOURCE = "channelSource";
     String CLICK_TRACK_URL = "clickTrackURL";
+    public static final String GAME_SDK_ID = "gamesdk";
+    
 }
