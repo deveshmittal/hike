@@ -180,29 +180,26 @@ public class AnalyticsSender implements Runnable
 	 */
 	public void startUploadAndScheduleNextAlarm()
 	{
-		if(isAnalyticsUploadReady())
-		{
-			new Thread(AnalyticsSender.getInstance(context)).start();
-		}				
+		if(!isAnalyticsUploadReady())
+			return;
+		
+		new Thread(AnalyticsSender.getInstance(context)).start();
 		
 		HAManager instance = HAManager.getInstance(context);
 		
 		long nextSchedule = 0;
 		
-		if(HAManager.getAnalyticsUploadRetryCount() < AnalyticsConstants.ANALYTICS_UPLOAD_FREQUENCY)
-		{
+		if(instance.getAnalyticsUploadFrequency() < AnalyticsConstants.ANALYTICS_UPLOAD_FREQUENCY)
+		{			
 			nextSchedule = Utils.getTimeInMillis(Calendar.getInstance(), instance.getWhenToSend() + AnalyticsConstants.UPLOAD_TIME_MULTIPLE, 0, 0);
-			
-			HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, true);
+			instance.incrementAnalyticsUploadFrequency();
 		}
 		else
 		{
-			HAManager.resetAnalyticsUploadRetryCount();
-			
 			nextSchedule = Utils.getTimeInMillis(Calendar.getInstance(), instance.getWhenToSend(), 0, 0);
-
-			HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, true);
+			instance.resetAnalyticsUploadFrequency();			
 		}
+		HikeAlarmManager.setAlarm(context, nextSchedule, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);		
 	}
 	
 	/**
