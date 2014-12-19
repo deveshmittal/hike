@@ -20,9 +20,7 @@ public class HAManager
 	private Context context;
 	
 	private ArrayList<Event> eventsList;
-	
-	private AnalyticsStore store;
-	
+		
 	public static String ANALYTICS_SETTINGS = "analyticssettings";
 
 	public static String FILE_SIZE_LIMIT = "fileSizeLimit";
@@ -44,9 +42,7 @@ public class HAManager
 		
 		/** synchronize all access to the events list */
 		Collections.synchronizedCollection(eventsList);
-		
-		store = AnalyticsStore.getInstance(this.context);	
-		
+				
 		isAnalyticsEnabled = getPrefs().getBoolean(HAManager.ANALYTICS_SERVICE_STATUS, AnalyticsConstants.IS_ANALYTICS_ENABLED);
 	}
 	
