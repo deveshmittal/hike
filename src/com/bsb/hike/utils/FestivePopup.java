@@ -35,7 +35,7 @@ public class FestivePopup
 
 	public static final int NEW_YEAR_POPUP = 1;
 
-	public static SnowFallView startAndSetSnowFallView(final Activity activity, final int popupType)
+	public static SnowFallView startAndSetSnowFallView(final HomeActivity activity, final int popupType)
 	{
 		if (activity == null)
 		{
@@ -119,7 +119,7 @@ public class FestivePopup
 
 	}
 
-	public static void setupFestivePopup(final Activity activity, final int popupType)
+	public static void setupFestivePopup(final HomeActivity activity, final int popupType)
 	{
 		activity.findViewById(R.id.festive_popup_parent).setVisibility(View.VISIBLE);
 
@@ -129,7 +129,14 @@ public class FestivePopup
 			
 			@Override
 			public void onClick(View v) {
-				stopFestiveAnimAndPopup(activity);
+				new Handler().postDelayed(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						stopFestiveAnimAndPopup(activity);
+					}
+				}, 500);
 				Utils.sendUILogEvent(HikeConstants.LogEvent.FESTIVE_POPUP_WISH);
 				Intent intent = IntentManager.getForwardStickerIntent(activity, getStickerId(popupType), getCatId(popupType), false);
 				intent.putExtra(HikeConstants.Extras.SELECT_ALL_INITIALLY, true);
@@ -195,23 +202,26 @@ public class FestivePopup
 		}, 700);
 	}
 	
-	public static void stopFestiveAnimAndPopup(final Activity activity)
+	public static void stopFestiveAnimAndPopup(final HomeActivity activity)
 	{
-		// Removing overlay
-		activity.findViewById(R.id.chat_bg_ftue_fade).clearAnimation();	
-		activity.findViewById(R.id.chat_bg_ftue_fade).setVisibility(View.GONE);
-
-		// Removing popup
-		activity.findViewById(R.id.festive_view).setVisibility(View.GONE);
-
-		// Removing snowfall anim
-		if(snowFallView!=null)
+		if(activity != null)
 		{
-			snowFallView.clearAnimation();
-			snowFallView.setVisibility(View.GONE);
-		}
+			// Removing overlay
+			activity.findViewById(R.id.chat_bg_ftue_fade).clearAnimation();
+			activity.findViewById(R.id.chat_bg_ftue_fade).setVisibility(View.GONE);
 
-		((HomeActivity)activity).showActionBarAfterFestivePopup();
+			// Removing popup
+			activity.findViewById(R.id.festive_view).setVisibility(View.GONE);
+
+			// Removing snowfall anim
+			if(snowFallView!=null)
+			{
+				snowFallView.clearAnimation();
+				snowFallView.setVisibility(View.GONE);
+			}
+
+			activity.showActionBarAfterFestivePopup();
+		}
 
 		HikeSharedPreferenceUtil.getInstance(activity).removeData(HikeConstants.SHOW_FESTIVE_POPUP);
 	}
