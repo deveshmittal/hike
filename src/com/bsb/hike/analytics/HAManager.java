@@ -1,14 +1,15 @@
 package com.bsb.hike.analytics;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Calendar;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
+import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 /**
  * @author rajesh
@@ -32,6 +33,10 @@ public class HAManager
 		
 	private boolean isAnalyticsEnabled = true;
 	
+	private static int analyticsRetryCount;
+	
+	private NetworkListener listner;
+	
 	/**
 	 * Constructor
 	 */
@@ -42,6 +47,14 @@ public class HAManager
 		eventsList = new ArrayList<Event>();
 						
 		isAnalyticsEnabled = getPrefs().getBoolean(HAManager.ANALYTICS_SERVICE_STATUS, AnalyticsConstants.IS_ANALYTICS_ENABLED);
+		
+		long whenToSendAnalytics = Utils.getTimeInMillis(Calendar.getInstance(), getWhenToSend(), 0, 0);  
+	
+		// set first alarm to upload analytics data to server
+		HikeAlarmManager.setAlarm(this.context, whenToSendAnalytics, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, true);
+		
+		// set wifi listener
+		listner = new NetworkListener(this.context);
 	}
 	
 	/**
@@ -64,12 +77,23 @@ public class HAManager
 	}
 	
 	/**
+	 * passes analytics events for recording by first checking if analytics service is enabled or disabled 
+	 * @param e event to be recorded
+	 */
+	public void record(Event e)
+	{
+		if(!isAnalyticsEnabled)
+			return;
+		recordEvent(e);
+	}
+	
+	/**
 	 * Records one event
 	 * @param event event to be logged
 	 * @param context application context
 	 */
 	// TODO need to look for a better way to do this operation and avoid synchronization
-	public synchronized void recordEvent(Event event) 
+	private synchronized void recordEvent(Event event) 
 	{
 		eventsList.add(event);
 
@@ -119,7 +143,7 @@ public class HAManager
 	{
 		return getPrefs().getInt(HAManager.HOUR_TO_SEND, AnalyticsConstants.HOUR_OF_DAY_TO_SEND);
 	}
-	
+
 	/**
 	 * Returns whether analytics logging service is currently enabled or disabled 
 	 * @return true if logging service is enabled, false otherwise
@@ -145,5 +169,15 @@ public class HAManager
 	private SharedPreferences getPrefs()
 	{
 		return context.getSharedPreferences(HAManager.ANALYTICS_SETTINGS, Context.MODE_PRIVATE);		
+	}
+	
+	protected static int getAnalyticsUploadRetryCount()
+	{
+		return analyticsRetryCount;
+	}
+	
+	protected static void resetAnalyticsUploadRetryCount()
+	{
+		analyticsRetryCount = 0;
 	}
 }
