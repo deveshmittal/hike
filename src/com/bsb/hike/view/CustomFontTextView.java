@@ -45,10 +45,17 @@ public class CustomFontTextView extends TextView
 	{
 		if (!isInEditMode())
 		{
+			super.setTypeface(tf, style);
+			return;
+		}
+
+		/*
+		if (!isInEditMode())
+		{
 			this.style = style;
-			/*
+			
 			 * If we are dealing with LDPI phones, we use the default font, They have a rendering issue with the font that we're using
-			 */
+			 
 			if (Utils.densityMultiplier <= 0.75f)
 			{
 				if (style == Typeface.ITALIC || style == Typeface.BOLD_ITALIC)
@@ -87,5 +94,5 @@ public class CustomFontTextView extends TextView
 				super.setTypeface(customTypeFace.normal);
 			}
 		}
-	}
+	*/}
 }
