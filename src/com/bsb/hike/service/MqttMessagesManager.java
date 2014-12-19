@@ -32,6 +32,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
@@ -41,11 +42,6 @@ import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.*;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.GroupTypingNotification;
-import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
@@ -1295,6 +1291,18 @@ public class MqttMessagesManager
 			UserLogInfo.sendLogs(context, UserLogInfo.APP_ANALYTICS_FLAG);
 		}
 
+		// check for analytics configuration packet
+		if(data.has(AnalyticsConstants.ANALYTICS_FILESIZE))
+		{
+			long fileSize = data.getLong(AnalyticsConstants.ANALYTICS_FILESIZE);
+			editor.putLong(AnalyticsConstants.ANALYTICS_FILESIZE, fileSize);
+		}
+		if(data.has(AnalyticsConstants.ANALYTICS))
+		{
+			boolean isAnalyticsEnabled = data.getBoolean(AnalyticsConstants.ANALYTICS);
+			editor.putBoolean(AnalyticsConstants.ANALYTICS, isAnalyticsEnabled);
+		}
+		
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
 	}

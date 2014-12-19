@@ -54,4 +54,8 @@ public class AnalyticsConstants
 	public static String EVENT_KEY = "ek";
 	
 	public static String TO = "to";	
+	
+	public static final String ANALYTICS = "analytics";
+	
+	public static final String ANALYTICS_FILESIZE = "analyticsfs";
 }
