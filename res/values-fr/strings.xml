@@ -1095,7 +1095,6 @@
     <string name="pinHistoryTutorialText">Pas encore d\'épingle</string>
     <string name="incorrect_msisdn_warning">Numéro incorrect</string>
     <string name="incorrect_msisdn_msg">Entre le numéro enregistré avec hike sur ce téléphone.</string>
-    <string name="delete_account_description">Supprime tous tes messages, SMS gratuits et récompenses hike</string>
     <string name="delete_account_heading_2">Pour supprimer ton compte, entre ton numéro</string>
     <string name="delete_my_account">SUPPRIMER MON COMPTE</string>
     <string name="hike_extras">Bonus hike</string>
@@ -1194,12 +1193,10 @@
     <string name="n_more">%1$d DE PLUS</string>
     <string name="n_stickers">%1$d stickers</string>
     <string name="last_backup">Dernière sauvegarde</string>
-    <string name="creating_backup_message">Création d\'une sauvegarde de tes chats. Les sauvegardes quotidiennes ont lieu à 3 h 00.</string>
     <string name="restore_account">Restaurer le compte</string>
     <string name="account_backup">Sauvegarde du compte</string>
     <string name="backup_found">Sauvegarde trouvée</string>
     <string name="backup_found_hint">Veux-tu restaurer ton compte ?</string>
-    <string name="restore">RESTAURER</string>
     <string name="restoring...">Restauration...</string>
     <string name="restoring..._hint">patience, l\'opération est parfois longue</string>
     <string name="restored">Restauré</string>

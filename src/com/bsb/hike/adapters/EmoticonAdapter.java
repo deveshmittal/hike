@@ -15,6 +15,7 @@ import android.widget.GridView;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
@@ -117,9 +118,8 @@ public class EmoticonAdapter extends PagerAdapter implements StickerEmoticonIcon
 	}
 
 	@Override
-	public String getCategoryIdForIndex(int index)
+	public StickerCategory getCategoryForIndex(int index)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 

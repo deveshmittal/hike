@@ -1,15 +1,5 @@
 package com.bsb.hike.db;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
@@ -19,28 +9,29 @@ import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Pair;
-
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
-import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.*;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.FtueContactInfo;
-import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.models.MultipleConvMessage;
-import com.bsb.hike.models.Protip;
-import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.platform.HikePlatformConstants;
+import com.bsb.hike.platform.HikeSDKMessageFilter;
 import com.bsb.hike.service.SmsMessageStatusReceiver;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 public class DbConversationListener implements Listener
 {
@@ -86,6 +77,7 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.UPDATE_PIN_METADATA, this);
 		mPubSub.addListener(HikePubSub.MULTI_MESSAGE_SENT, this);
 		mPubSub.addListener(HikePubSub.MULTI_FILE_UPLOADED, this);
+		mPubSub.addListener(HikePubSub.HIKE_SDK_MESSAGE, this);
 	}
 
 	@Override
@@ -142,11 +134,7 @@ public class DbConversationListener implements Listener
 		{
 			MultipleConvMessage multiConvMessages = (MultipleConvMessage) object;
 
-			mConversationDb.addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),multiConvMessages.getCreateChatThread());
-			// after DB insertion, we need to update conversation UI , so sending event which contains all contacts and last message for each contact
-			multiConvMessages.sendPubSubForConvScreenMultiMessage();
-			// publishing mqtt packet
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
+            sendMultiConvMessage(multiConvMessages);
 		}
 		else if (HikePubSub.MULTI_FILE_UPLOADED.equals(type))
 		{
@@ -398,8 +386,51 @@ public class DbConversationListener implements Listener
 				Conversation conv = (Conversation)object;
 				HikeConversationsDatabase.getInstance().updateConversationMetadata(conv.getMsisdn(), conv.getMetaData());
 			
+		}else if(HikePubSub.HIKE_SDK_MESSAGE.equals(type)){
+			handleHikeSdkMessage(object);
 		}
 	}
+
+    private void sendMultiConvMessage(MultipleConvMessage multiConvMessages) {
+        mConversationDb.addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),multiConvMessages.getCreateChatThread());
+        // after DB insertion, we need to update conversation UI , so sending event which contains all contacts and last message for each contact
+        multiConvMessages.sendPubSubForConvScreenMultiMessage();
+        // publishing mqtt packet
+        mPubSub.publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
+    }
+
+    private void handleHikeSdkMessage(Object object){
+	//	if(object instanceof JSONObject){
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject((String) object);
+            JSONObject parseJSON = new JSONObject(jsonObject.optString("message"));
+            ArrayList<ConvMessage> listOfMessages= new ArrayList<ConvMessage>(1);
+            ConvMessage convMessage= HikeSDKMessageFilter.filterMessage((JSONObject) parseJSON, context);
+            listOfMessages.add(convMessage);
+
+            String[] toArray = parseJSON.has(HikePlatformConstants.RECEPIENT) ? parseJSON.getString(HikePlatformConstants.RECEPIENT).split(",") : new String[]{};
+            ArrayList<String> msisdns = ContactManager.getInstance().getMsisdnFromId(toArray);
+            ArrayList<ContactInfo> listOfContacts = new ArrayList<ContactInfo>();
+            for (String msisdn:msisdns){
+                convMessage.platformMessageMetadata.addToThumbnailTable();
+                listOfContacts.add(new ContactInfo(msisdn, msisdn, null, null,!convMessage.isSMS()));
+            }
+            convMessage.platformMessageMetadata.thumbnailMap.clear();
+            convMessage.platformMessageMetadata.addThumbnailsToMetadata();
+            long timeStamp = System.currentTimeMillis()/1000;
+            MultipleConvMessage multipleConvMessage = new MultipleConvMessage(listOfMessages, listOfContacts, timeStamp, true, null);
+            sendMultiConvMessage(multipleConvMessage);
+
+        } catch (JSONException e) {
+
+            e.printStackTrace();
+        }
+
+		// publish MQTT and update UI here
+		//	}
+		}
+
 
 	private void sendNativeSMSFallbackLogEvent(boolean onHike, boolean userOnline, int numMessages)
 	{

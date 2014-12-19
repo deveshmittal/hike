@@ -375,13 +375,17 @@ public class HikePubSub implements Runnable
 	public static String HIKE_TO_OFFLINE_PUSH = "hikeToOfflinePush";
 
 	public static String PROFILE_UPDATE_FINISH = "profileUpdateFinish";
+
+	public static String HIKE_SDK_MESSAGE = "hikeSDKMessage";
 	
 	public static final String CONV_META_DATA_UPDATED = "convMetaDataUpdated";
 	
 	public static final String LATEST_PIN_DELETED = "lastPinDeleted";
 	
 	public static final String UNREAD_PIN_COUNT_RESET = "pinCountReset";
-
+	
+	public static final String AUTH_TOKEN_RECEIVED = "authTokenReceived";
+	
 	public static final String STICKER_CATEGORY_MAP_UPDATED = "stickerCategoryMapUpdated";
 	
 	public static final String STICKER_FTUE_TIP = "stickerFtueTip";

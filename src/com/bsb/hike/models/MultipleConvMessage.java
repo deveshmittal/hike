@@ -1,20 +1,16 @@
 package com.bsb.hike.models;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.util.Pair;
-
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.PairModified;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MultipleConvMessage
 {
@@ -113,10 +109,15 @@ public class MultipleConvMessage
 			for (int i=0; i<messageList.size();i++)
 			{
 				JSONObject msg = new JSONObject();
-				msg.put(HikeConstants.HIKE_MESSAGE, ((ConvMessage)messageList.get(i)).getMessage());
-				if(((ConvMessage)messageList.get(i)).getMetadata()!=null){
-					msg.put(HikeConstants.METADATA,((ConvMessage)messageList.get(i)).getMetadata().getJSON());
-				}
+                ConvMessage convMessage = messageList.get(i);
+				msg.put(HikeConstants.HIKE_MESSAGE, (convMessage.getMessage()));
+
+				if((convMessage.getMetadata()!=null)){
+					msg.put(HikeConstants.METADATA,convMessage.getMetadata().getJSON());
+				} else if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.CONTENT){
+                    msg.put(HikeConstants.METADATA, convMessage.platformMessageMetadata.getJSON());
+                    msg.put(HikeConstants.SUB_TYPE, HikeConstants.ConvMessagePacketKeys.CONTENT_TYPE);
+                }
 				
 				msgArray.put(msg);
 			}
