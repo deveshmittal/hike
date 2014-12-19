@@ -170,17 +170,14 @@ public class HikeNotificationMsgStack implements Listener
 
 		// If message stack consists of any stealth messages, do not add new message, change
 		// stealth message string to notify multiple messages (add s to message"S")
-		if (argMsisdn.equals(HikeNotification.HIKE_STEALTH_MESSAGE_KEY))
+		if (argMsisdn.equals(HikeNotification.HIKE_STEALTH_MESSAGE_KEY) && mMessagesMap.containsKey(HikeNotification.HIKE_STEALTH_MESSAGE_KEY))
 		{
 
-			if (mMessagesMap.containsKey(argMsisdn))
-			{
-				LinkedList<String> stealthMessageList = mMessagesMap.get(argMsisdn);
+			LinkedList<String> stealthMessageList = mMessagesMap.get(argMsisdn);
 
-				// There should only be 1 item dedicated to stealth message
-				// hike - You have new notification(s)
-				stealthMessageList.set(0, mContext.getString(R.string.stealth_notification_messages));
-			}
+			// There should only be 1 item dedicated to stealth message
+			// hike - You have new notification(s)
+			stealthMessageList.set(0, mContext.getString(R.string.stealth_notification_messages));
 		}
 		else
 		{
