@@ -33,6 +33,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
@@ -1296,11 +1297,13 @@ public class MqttMessagesManager
 		{
 			long fileSize = data.getLong(AnalyticsConstants.ANALYTICS_FILESIZE);
 			editor.putLong(AnalyticsConstants.ANALYTICS_FILESIZE, fileSize);
+			HAManager.getInstance(context).setFileMaxSize(fileSize);
 		}
 		if(data.has(AnalyticsConstants.ANALYTICS))
 		{
 			boolean isAnalyticsEnabled = data.getBoolean(AnalyticsConstants.ANALYTICS);
 			editor.putBoolean(AnalyticsConstants.ANALYTICS, isAnalyticsEnabled);
+			HAManager.getInstance(context).setAnalyticsEnabled(isAnalyticsEnabled);
 		}
 		
 		editor.commit();
