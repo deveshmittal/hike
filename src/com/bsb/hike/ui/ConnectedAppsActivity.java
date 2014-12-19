@@ -23,6 +23,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConnectedApp;
+import com.bsb.hike.platform.HikePlatformConstants;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -418,6 +419,8 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 			analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_DISCONNECT_APP);
 
 			analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, disconnectedAppTitle);
+			
+			analyticsJSON.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
 
 			Utils.sendLogEvent(analyticsJSON);
 		}
