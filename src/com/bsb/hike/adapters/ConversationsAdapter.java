@@ -642,7 +642,7 @@ public class ConversationsAdapter extends BaseAdapter
 		if(viewHolder == null)
 		{
 			// TODO: Find the root cause for viewholder being null
-			Logger.w(tag,"Viewholder is null");
+			Logger.w("nux","Viewholder is null");
 			return;
 		}
 		/*
