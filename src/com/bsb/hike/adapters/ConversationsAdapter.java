@@ -639,6 +639,12 @@ public class ConversationsAdapter extends BaseAdapter
 	{
 		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
 
+		if(viewHolder == null)
+		{
+			// TODO: Find the root cause for viewholder being null
+			Logger.w(tag,"Viewholder is null");
+			return;
+		}
 		/*
 		 * If the viewholder's msisdn is different from the converstion's msisdn, it means that the viewholder is currently being used for a different conversation.
 		 * We don't need to do anything here then.
