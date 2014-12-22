@@ -6,6 +6,7 @@ import java.util.List;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.bsb.hike.R;
@@ -115,6 +116,10 @@ public class ShareablePopupLayout
 		 * New view. Add it to the layout
 		 */
 		Logger.i(TAG, "Adding popupView in frameLayout");
+		if(popupView.getParent() != null)
+		{
+			((ViewGroup) popupView.getParent()).removeAllViews();
+		}
 		frameLayout.addView(popupView);
 	}
 

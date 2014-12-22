@@ -70,11 +70,11 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 
 	protected String msisdn;
 
-	protected StickerPicker mStickerPicker;
+	protected static StickerPicker mStickerPicker;
 
-	protected EmoticonPicker mEmoticonPicker;
+	protected static EmoticonPicker mEmoticonPicker;
 
-	protected ShareablePopupLayout mShareablePopupLayout;
+	protected static ShareablePopupLayout mShareablePopupLayout;
 
 	public ChatThread(ChatThreadActivity activity, String msisdn)
 	{
@@ -117,9 +117,9 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 	protected void initView()
 	{
 		setConversationTheme();
-		initStickerPicker();
-		initEmoticonPicker();
+		
 		initShareablePopup();
+		
 		addOnClickListeners();
 	}
 	
@@ -128,13 +128,27 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 	 */
 	private void initShareablePopup()
 	{
-		int[] mEatOuterTouchIds = new int[] { R.id.sticker_btn, R.id.emoticon_btn, R.id.send_message };
+		if(mShareablePopupLayout == null)
+		{
+			int[] mEatOuterTouchIds = new int[] { R.id.sticker_btn, R.id.emoticon_btn, R.id.send_message };
 
-		List<ShareablePopup> sharedPopups = new ArrayList<ShareablePopup>();
-		sharedPopups.add(mEmoticonPicker);
-		sharedPopups.add(mStickerPicker);
-		mShareablePopupLayout = new ShareablePopupLayout(activity.getApplicationContext(), activity.findViewById(R.id.chatThreadParentLayout),
-				(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)), mEatOuterTouchIds, sharedPopups);
+			List<ShareablePopup> sharedPopups = new ArrayList<ShareablePopup>();
+			
+			initStickerPicker();
+			initEmoticonPicker();
+			
+			sharedPopups.add(mEmoticonPicker);
+			sharedPopups.add(mStickerPicker);
+			mShareablePopupLayout = new ShareablePopupLayout(activity.getApplicationContext(), activity.findViewById(R.id.chatThreadParentLayout),
+					(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)), mEatOuterTouchIds, sharedPopups);
+		}
+		
+		else
+		{
+			mStickerPicker.replaceListener(this);
+			mEmoticonPicker.replaceListener(this);
+		}
+		
 
 	}
 	
@@ -146,18 +160,12 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 
 	private void initStickerPicker()
 	{
-		if (this.mStickerPicker == null)
-		{
-			this.mStickerPicker = new StickerPicker(activity, this);
-		}
+		mStickerPicker = new StickerPicker(activity, this);
 	}
 	
 	private void initEmoticonPicker()
 	{
-		if(this.mEmoticonPicker == null)
-		{
-			this.mEmoticonPicker = new EmoticonPicker(activity, this);
-		}
+		mEmoticonPicker = new EmoticonPicker(activity, this);
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu)

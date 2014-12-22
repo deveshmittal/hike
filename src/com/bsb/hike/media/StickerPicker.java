@@ -296,4 +296,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 		stickerAdapter = null;
 
 	}
+
+	public void replaceListener(StickerPickerListener mListener)
+	{
+		this.listener = mListener;
+	}
 }
