@@ -33,18 +33,17 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.EmoticonAdapter;
-import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
 import com.bsb.hike.adapters.MoodAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
+import com.bsb.hike.media.EmoticonPicker.EmoticonPickerListener;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -52,6 +51,7 @@ import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.HikeTip;
+import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
@@ -61,7 +61,7 @@ import com.facebook.Session;
 import com.facebook.Session.StatusCallback;
 import com.facebook.SessionState;
 
-public class StatusUpdate extends AuthSocialAccountBaseActivity implements Listener, OnSoftKeyboardListener, EmoticonClickListener
+public class StatusUpdate extends AuthSocialAccountBaseActivity implements Listener, OnSoftKeyboardListener, EmoticonPickerListener
 {
 
 	private class ActivityTask
@@ -694,7 +694,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		emoticonViewPager.setAdapter(statusEmojiAdapter);
 		emoticonViewPager.invalidate();
 
-		StickerEmoticonIconPageIndicator pageIndicator = (StickerEmoticonIconPageIndicator) findViewById(R.id.icon_indicator);
+		StickerEmoticonIconPageIndicator pageIndicator = (StickerEmoticonIconPageIndicator) findViewById(R.id.emoticon_icon_indicator);
 		pageIndicator.setViewPager(emoticonViewPager);
 		pageIndicator.setCurrentItem(whichSubcategory);
 	}
@@ -874,9 +874,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 	}
 
 	@Override
-	public void onEmoticonClicked(int emoticonIndex)
+	public void emoticonSelected(int emoticonIndex)
 	{
 		Utils.emoticonClicked(getApplicationContext(), emoticonIndex, statusTxt);
-		
 	}
 }

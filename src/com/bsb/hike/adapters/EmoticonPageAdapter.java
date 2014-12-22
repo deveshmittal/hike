@@ -1,27 +1,21 @@
 package com.bsb.hike.adapters;
 
 import android.app.Activity;
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.media.EmoticonPicker.EmoticonPickerListener;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.SmileyParser;
 
 public class EmoticonPageAdapter extends BaseAdapter implements OnClickListener
 {
 	
-	public static interface EmoticonClickListener{
-		public void onEmoticonClicked(int emoticonIndex);
-	}
-
 	LayoutInflater inflater;
 
 	int currentPage;
@@ -37,10 +31,10 @@ public class EmoticonPageAdapter extends BaseAdapter implements OnClickListener
 	private int idOffset;
 
 	Activity activity;
-	EmoticonClickListener listener;
+	EmoticonPickerListener listener;
 	
 
-	public EmoticonPageAdapter(Activity context, int[] emoticonSubCategories, int[] emoticonResIds, int currentPage, int idOffset, EmoticonClickListener listener)
+	public EmoticonPageAdapter(Activity context, int[] emoticonSubCategories, int[] emoticonResIds, int currentPage, int idOffset, EmoticonPickerListener listener)
 	{
 		this.listener = listener;
 		this.activity = context;
@@ -121,7 +115,7 @@ public class EmoticonPageAdapter extends BaseAdapter implements OnClickListener
 	{
 		Logger.i("emoticon", "item clicked");
 		int emoticonIndex = (Integer) v.getTag();
-		listener.onEmoticonClicked(emoticonIndex);
+		listener.emoticonSelected(emoticonIndex);
 
 	}
 }
