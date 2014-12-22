@@ -419,7 +419,8 @@ public class DbConversationListener implements Listener
             convMessage.platformMessageMetadata.thumbnailMap.clear();
             convMessage.platformMessageMetadata.addThumbnailsToMetadata();
             long timeStamp = System.currentTimeMillis()/1000;
-            MultipleConvMessage multipleConvMessage = new MultipleConvMessage(listOfMessages, listOfContacts, timeStamp, true, null);
+			String source = jsonObject.optString(HikePlatformConstants.SOURCE);
+            MultipleConvMessage multipleConvMessage = new MultipleConvMessage(listOfMessages, listOfContacts, timeStamp, true, source);
             sendMultiConvMessage(multipleConvMessage);
 
         } catch (JSONException e) {
