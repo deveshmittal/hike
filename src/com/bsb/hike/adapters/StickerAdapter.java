@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants.EmoticonType;
 import com.bsb.hike.R;
+import com.bsb.hike.media.StickerPicker.StickerPickerListener;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
@@ -52,6 +53,8 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 	private StickerLoader worker;
 	
 	private StickerOtherIconLoader stickerOtherIconLoader;
+	
+	private StickerPickerListener mStickerPickerListener;
 
 	private class StickerPageObjects
 	{
@@ -80,10 +83,11 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 	}
 
-	public StickerAdapter(Activity activity)
+	public StickerAdapter(Activity activity, StickerPickerListener listener)
 	{
 		this.inflater = LayoutInflater.from(activity);
 		this.activity = activity;
+		this.mStickerPickerListener = listener;
 		instantiateStickerList();
 		stickerObjMap = Collections.synchronizedMap(new HashMap<String, StickerAdapter.StickerPageObjects>());
 		worker = new StickerLoader(activity.getApplicationContext());
@@ -449,7 +453,7 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		}
 		else
 		{
-			final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickerPageList, category, worker, spo.getStickerGridView());
+			final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(activity, stickerPageList, category, worker, spo.getStickerGridView(), mStickerPickerListener);
 			spo.setStickerPageAdapter(stickerPageAdapter);
 			spo.getStickerGridView().setAdapter(stickerPageAdapter);
 		}

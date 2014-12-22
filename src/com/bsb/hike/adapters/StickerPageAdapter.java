@@ -18,12 +18,12 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.media.StickerPicker.StickerPickerListener;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.StickerPageAdapterItem;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
 import com.bsb.hike.smartImageLoader.StickerLoader;
-import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.utils.RecyclingImageView;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
@@ -53,13 +53,16 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 
 	private boolean isListFlinging;
 	
+	private StickerPickerListener mStickerPickerListener;
+	
 	AbsListView absListView;
 	
-	public StickerPageAdapter(Activity activity, List<StickerPageAdapterItem> itemList, StickerCategory category, StickerLoader worker, AbsListView absListView )
+	public StickerPageAdapter(Activity activity, List<StickerPageAdapterItem> itemList, StickerCategory category, StickerLoader worker, AbsListView absListView, StickerPickerListener listener )
 	{
 		this.activity = activity;
 		this.itemList = itemList;
 		this.category = category;
+		this.mStickerPickerListener = listener;
 		this.inflater = LayoutInflater.from(activity);
 		this.stickerLoader = worker;
 		this.absListView = absListView;
@@ -292,7 +295,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener
 		case StickerPageAdapterItem.STICKER:
 			Sticker sticker = item.getSticker();
 			String source = category.isCustom() ? StickerManager.FROM_RECENT : StickerManager.FROM_OTHER;
-			((ChatThread) activity).sendSticker(sticker, source);
+			mStickerPickerListener.stickerSelected(sticker, source);
 
 			/* In case sticker is clicked on the recents screen, don't update the UI or recents list. Also if this sticker is disabled don't update the recents UI */
 			if (!category.isCustom())
