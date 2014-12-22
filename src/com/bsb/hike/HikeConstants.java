@@ -1817,22 +1817,20 @@ public class HikeConstants
 
 		public static final String MESSAGE_VOIP_1 = "v1";
 
+		/**
+		 * The person we are calling is on a compatible platform, but is
+		 * using an old version of the client which does not support VoIP. 
+		 */
+		public static final String VOIP_ERROR_CALLEE_INCOMPATIBLE_UPGRADABLE = "e0";
+
+		/**
+		 * The person we are calling is on a client that cannot be upgraded
+		 * to support VoIP. For example, might be on iOS and we have no iOS client.
+		 */
+		public static final String VOIP_ERROR_CALLEE_INCOMPATIBLE_NOT_UPGRADABLE = "e1";
+
 	}
 	
-	public static final class VoIPConstants
-	{
-		public static final String COMM_UDP_SYN_ALL = "synall";
-		public static final String COMM_UDP_SYN_PUBLIC = "synpublic";
-		public static final String COMM_UDP_SYN_PRIVATE = "synprivate";
-		public static final String COMM_UDP_SYN_RELAY = "synrelay";
-		public static final String COMM_UDP_SYNACK_PUBLIC = "synackpublic";
-		public static final String COMM_UDP_SYNACK_PRIVATE = "synackprivate";
-		public static final String COMM_UDP_SYNACK_RELAY = "synackrelay";
-		public static final String COMM_UDP_ACK_PRIVATE = "ackprivate";
-		public static final String COMM_UDP_ACK_PUBLIC = "ackpublic";
-		public static final String COMM_UDP_ACK_RELAY = "ar";
-	}
-
 	public static final class SMSNative
 	{
 		/*

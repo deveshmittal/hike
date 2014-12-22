@@ -1,5 +1,7 @@
 package com.bsb.hike;
 
+import java.util.Random;
+
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -19,6 +21,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -58,12 +62,12 @@ import android.widget.Toast;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.voip.VoIPClient;
+import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPService.LocalBinder;
 
 public class VoIPActivity extends Activity {
 
-	public static final String logTag = "VoIPCaller";
 	static final int PROXIMITY_SCREEN_OFF_WAKELOCK = 32;
 	static final int NOTIFICATION_IDENTIFIER = 1;
 	public static boolean isRunning = false;
@@ -80,6 +84,8 @@ public class VoIPActivity extends Activity {
 	private SensorManager sensorManager;
 	private float proximitySensorMaximumRange;
 	private NotificationManager notificationManager;
+	private MediaPlayer mediaplayer = null;
+	private AudioManager audioManager;
 
 	public static final int MSG_SHUTDOWN_ACTIVITY = 1;
 	public static final int MSG_CONNECTION_ESTABLISHED = 2;
@@ -90,6 +96,8 @@ public class VoIPActivity extends Activity {
 	public static final int MSG_CURRENT_BITRATE = 7;
 	public static final int MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE = 8;
 	public static final int MSG_ANSWER_BEFORE_CONNECTION_ESTB = 9;
+	public static final int MSG_PARTNER_SOCKET_INFO_TIMEOUT = 10;
+	public static final int MSG_PARTNER_ANSWER_TIMEOUT = 11;
 
 	@SuppressLint("HandlerLeak") class IncomingHandler extends Handler {
 
@@ -97,17 +105,19 @@ public class VoIPActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case MSG_SHUTDOWN_ACTIVITY:
-				Log.d(VoIPActivity.logTag, "Shutting down..");
+				Log.d(VoIPConstants.TAG, "Shutting down..");
 				shutdown();
 				break;
 			case MSG_CONNECTION_ESTABLISHED:
 				showMessage("Connection established.");
 				if (clientSelf.isInitiator()) {
-					// TODO: Play ringing tone
+					playOnSpeaker(R.raw.ring_tone, true);
 					inCallTimer.setText("RINGING...");
 				} 
 				break;
 			case MSG_AUDIO_START:
+				stopMediaPlayer();
+				initAudioManager();
 				startCallDuration();
 				if (!clientSelf.isInitiator()) {
 					drawCallAccepted();
@@ -134,6 +144,14 @@ public class VoIPActivity extends Activity {
 			case MSG_ANSWER_BEFORE_CONNECTION_ESTB:
 				showMessage("Still connecting..");
 				break;
+			case MSG_PARTNER_SOCKET_INFO_TIMEOUT:
+				showMessage("Partner is not responding.");
+				voipService.stop();
+				break;
+			case MSG_PARTNER_ANSWER_TIMEOUT:
+				showMessage("No response.");
+				voipService.stop();
+				break;
 			default:
 				super.handleMessage(msg);
 			}
@@ -145,12 +163,12 @@ public class VoIPActivity extends Activity {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			isBound = false;
-			Log.d(VoIPActivity.logTag, "VoIPService disconnected.");
+			Log.d(VoIPConstants.TAG, "VoIPService disconnected.");
 		}
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			Log.d(VoIPActivity.logTag, "VoIPService connected.");
+			Log.d(VoIPConstants.TAG, "VoIPService connected.");
 			LocalBinder binder = (LocalBinder) service;
 			voipService = binder.getService();
 			isBound = true;
@@ -172,7 +190,7 @@ public class VoIPActivity extends Activity {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 		
-		Log.d(VoIPActivity.logTag, "Binding to service..");
+		Log.d(VoIPConstants.TAG, "Binding to service..");
 		Intent intent = new Intent(this, VoIPService.class);
 		bindService(intent, myConnection, Context.BIND_AUTO_CREATE);
 
@@ -187,10 +205,92 @@ public class VoIPActivity extends Activity {
 		saveCurrentAudioSettings();
 		setButtonHandlers();
 		acquireWakeLock();
-		showNotification();
 		isRunning = true;
 	}
 	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		showNotification();
+		initProximitySensor();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		sensorManager.unregisterListener(proximitySensorEventListener);
+		Log.w(VoIPConstants.TAG, "VoIPActivity onPause()");
+	}
+
+	@Override
+	protected void onDestroy() {
+		isRunning = false;
+		Log.w(VoIPConstants.TAG, "VoIPActivity onDestroy()");
+		super.onDestroy();
+	}
+
+	@Override
+	public void onBackPressed() {
+		moveTaskToBack(true);
+		return;
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		Log.d(VoIPConstants.TAG, "VoIPActivity onNewIntent().");
+		handleIntent(intent);
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+		boolean retval = true; 
+
+		if (voipService != null && voipService.isAudioRunning() && 
+				(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP)) {
+			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
+				voipService.adjustGain(-1000);
+			else
+				voipService.adjustGain(1000);
+		} else
+			retval = super.onKeyDown(keyCode, event);
+
+		return retval;
+	}
+
+	@SuppressLint("InlinedApi") private void initAudioManager() {
+		audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+		if (android.os.Build.VERSION.SDK_INT >= 11)
+			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);	
+		audioManager.setParameters("noise_suppression=on");
+	}
+	
+	private void releaseAudioManager() {
+		if (audioManager != null) {
+			audioManager.setMode(AudioManager.MODE_NORMAL);
+		}
+	}
+	
+	private void stopMediaPlayer() {
+		try {
+			if (mediaplayer != null && mediaplayer.isPlaying()) {
+				mediaplayer.stop();
+				mediaplayer.reset();
+				mediaplayer.release();
+			}
+		} catch (IllegalStateException e) {
+			Log.d(VoIPConstants.TAG, "Mediaplayer exception: " + e.toString());
+		}
+	}
+	
+	private void playOnSpeaker(int resid, boolean looping) {
+		stopMediaPlayer();
+		mediaplayer = MediaPlayer.create(this, resid);
+		mediaplayer.setLooping(looping);
+		mediaplayer.start();
+	}
+
 	private void showNotification() {
 		Intent myIntent = new Intent(this, VoIPActivity.class);
 		myIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -209,48 +309,26 @@ public class VoIPActivity extends Activity {
 		notificationManager.notify(null, NOTIFICATION_IDENTIFIER, myNotification);
 	}
 
-	@Override
-	protected void onDestroy() {
-		isRunning = false;
-		super.onDestroy();
-	}
-
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		Log.d(logTag, "VoIPActivity onNewIntent().");
-		handleIntent(intent);
-	}
-
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-
-		boolean retval = true; 
-
-		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
-				voipService.adjustGain(-1000);
-			else
-				voipService.adjustGain(1000);
-		} else
-			retval = super.onKeyDown(keyCode, event);
-
-		return retval;
-	}
-
 	private void handleIntent(Intent intent) {
 		String action = intent.getStringExtra("action");
 
-		if (action != null && action.equals("outgoingcall")) {
+		if (action == null || action.isEmpty())
+			return;
+		else
+			Log.d(VoIPConstants.TAG, "Intent action: " + action);
+		
+		if (action.equals("outgoingcall")) {
 			// we are making an outgoing call
 			clientPartner.setPhoneNumber(intent.getStringExtra("msisdn"));
 			clientSelf.setInitiator(true);
 			clientPartner.setInitiator(false);
-			Log.d(logTag, "Making outgoing call to: " + clientPartner.getPhoneNumber());
+			// voipService.setCallid(new Random().nextInt(999999));
+			Log.d(VoIPConstants.TAG, "Making outgoing call to: " + clientPartner.getPhoneNumber());
+			initAudioManager();
 			drawAsCaller();		
 		}
 
-		if (action != null && action.equals("setpartnerinfo")) {
+		if (action.equals("setpartnerinfo")) {
 			clientPartner.setInternalIPAddress(intent.getStringExtra("internalIP"));
 			clientPartner.setInternalPort(intent.getIntExtra("internalPort", 0));
 			clientPartner.setExternalIPAddress(intent.getStringExtra("externalIP"));
@@ -260,9 +338,8 @@ public class VoIPActivity extends Activity {
 			clientSelf.setInitiator(!clientPartner.isInitiator());
 
 			if (clientPartner.isInitiator()) {
-				Log.d(logTag, "Detected incoming VoIP call.");
+				Log.d(VoIPConstants.TAG, "Detected incoming VoIP call.");
 				drawAsCallee();
-				// voipService.retrieveExternalSocket();
 			} else {
 				// We have already sent our socket info to partner
 				// And now they have sent us their's, so let's establish connection
@@ -270,36 +347,30 @@ public class VoIPActivity extends Activity {
 			}
 		}
 		
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-		initProximitySensor();
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-		sensorManager.unregisterListener(proximitySensorEventListener);
-	}
-
-	@Override
-	public void onBackPressed() {
-		moveTaskToBack(true);
-		return;
+		if (action.equals(VoIPConstants.PARTNER_REQUIRES_UPGRADE)) {
+			showMessage("Callee needs to upgrade their client.");
+			voipService.stop();
+		}
+		
+		if (action.equals(VoIPConstants.PARTNER_INCOMPATIBLE)) {
+			showMessage("Callee is on an incompatible client.");
+			voipService.stop();
+		}
+		
+		// Clear the intent so the activity doesn't process intent again on resume
+		getIntent().removeExtra("action");
 	}
 
 	private void startService() {
 		try {
-			Log.d(VoIPActivity.logTag, "Retrieving socket through service..");
+			Log.d(VoIPConstants.TAG, "Retrieving socket through service..");
 			voipService.setClientSelf(clientSelf);
 			voipService.setClientPartner(clientPartner);
 			voipService.setMessenger(mMessenger);
 
 			voipService.retrieveExternalSocket();
 		} catch (Exception e) {
-			Log.d(VoIPActivity.logTag, "Exception: " + e.toString());
+			Log.d(VoIPConstants.TAG, "Exception: " + e.toString());
 		}
 	}
 	
@@ -333,7 +404,7 @@ public class VoIPActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				Log.d(logTag, "Trying to hang up.");
+				Log.d(VoIPConstants.TAG, "Trying to hang up.");
 				voipService.hangUp();
 			}
 		});
@@ -398,7 +469,8 @@ public class VoIPActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				voipService.adjustBitrate(2000);
+				if (voipService != null)
+					voipService.adjustBitrate(2000);
 			}
 		});
 
@@ -407,7 +479,8 @@ public class VoIPActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				voipService.adjustBitrate(-2000);
+				if (voipService != null)
+					voipService.adjustBitrate(-2000);
 			}
 		});
 
@@ -419,7 +492,9 @@ public class VoIPActivity extends Activity {
 		}
 		restoreAudioSettings();
 		releaseWakeLock();
-		stopRinging();		
+		stopMediaPlayer();
+		releaseAudioManager();
+
 		isRunning = false;
 		
 		// Dismiss notification
@@ -451,14 +526,14 @@ public class VoIPActivity extends Activity {
 		}
 		if (!wakeLock.isHeld()) {
 			wakeLock.acquire();
-			Log.d(VoIPActivity.logTag, "Wakelock acquired.");
+			Log.d(VoIPConstants.TAG, "Wakelock acquired.");
 		}
 	}
 
 	private void releaseWakeLock() {
 		if (wakeLock != null && wakeLock.isHeld()) {
 			wakeLock.release();
-			Log.d(VoIPActivity.logTag, "Wakelock released.");
+			Log.d(VoIPConstants.TAG, "Wakelock released.");
 		}
 		if (proximityWakeLock != null && proximityWakeLock.isHeld())
 			proximityWakeLock.release();
@@ -483,7 +558,7 @@ public class VoIPActivity extends Activity {
 		Sensor proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
 
 		if (proximitySensor == null) {
-			Log.d(logTag, "No proximity sensor found.");
+			Log.d(VoIPConstants.TAG, "No proximity sensor found.");
 			return;
 		}
 		// Set proximity sensor
@@ -535,7 +610,7 @@ public class VoIPActivity extends Activity {
 	private boolean isVibrating;
 
 	public void drawAsCallee(){
-		startRinging();
+		playOnSpeaker(R.raw.ringtone_incoming, true);
 		getCallerInfo();
 //		Drawing incoming call layout, fetching resources, animations
 		
@@ -555,38 +630,6 @@ public class VoIPActivity extends Activity {
 		startArrowAnimations();
 		startSliderAnimation(callSlider);
 		
-		
-	}
-
-	private void startRinging() {
-		Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-		r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-		r.setStreamType(AudioManager.STREAM_ALARM);
-		AudioManager am = (AudioManager)getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-		if (am.getRingerMode() == AudioManager.RINGER_MODE_NORMAL ){
-			r.play();			//commented because it's irritating while testing. :/
-			isPlaying = true;
-		} else if (am.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
-			vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-			long[] vibTimings = {0,300,700};
-			if(vibrator.hasVibrator()){
-				isVibrating = true;
-				vibrator.vibrate(vibTimings, 0);				
-			}
-		}
-		
-	}
-	
-	public void stopRinging() {
-		AudioManager am = (AudioManager)getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-		if ((am.getRingerMode() == AudioManager.RINGER_MODE_NORMAL)&&isPlaying){
-			r.stop();
-		} else if ((am.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE)&&isVibrating) {
-			vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-			if(vibrator.hasVibrator()){
-				vibrator.cancel();				
-			}
-		}
 		
 	}
 
@@ -614,7 +657,7 @@ public class VoIPActivity extends Activity {
 		//TODO: Play dialertone
 		
 		getCallerInfo();
-		Log.d(logTag, "Setting view for caller.");
+		Log.d(VoIPConstants.TAG, "Setting view for caller.");
 		displayPic = (ImageView)this.findViewById(R.id.fullvoipContactPicture);
 		avatarContainer = (FrameLayout)this.findViewById(R.id.voip_avatar_container);
 		callSlider = (ImageView)this.findViewById(R.id.fullcallSlider);
@@ -645,7 +688,7 @@ public class VoIPActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				Log.d(logTag, "Trying to hang up.");
+				Log.d(VoIPConstants.TAG, "Trying to hang up.");
 				voipService.hangUp();
 			}
 		});
@@ -742,17 +785,17 @@ public class VoIPActivity extends Activity {
 				{
 					if (clientSelf.isInitiator() == false)
 					{
+						playOnSpeaker(R.raw.call_end, false);
 						voipService.rejectIncomingCall();
 					}
-					stopRinging();
 				}
 				else if (xcoord>5.0f*acceptCall.getX()/6.0f)		//accept call
 				{
 					if (clientSelf.isInitiator() == false)
 					{
+						playOnSpeaker(R.raw.call_answer, false);
 						voipService.startAudio();
 					}
-					stopRinging();
 				} 
 				else {								//if no ACTION_UP, then start animation again
 					startArrowAnimations();

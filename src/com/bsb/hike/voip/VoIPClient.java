@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import com.bsb.hike.VoIPActivity;
 
 import android.util.Log;
 
@@ -73,7 +72,7 @@ public class VoIPClient implements Serializable {		// TODO Remove serializable. 
 			ConnectionMethods preferredConnectionMethod) {
 		this.preferredConnectionMethod = preferredConnectionMethod;
 		cachedInetAddress = null;
-		Log.d(VoIPActivity.logTag, "Setting preferred connection method to: " + preferredConnectionMethod.toString());
+		Log.d(VoIPConstants.TAG, "Setting preferred connection method to: " + preferredConnectionMethod.toString());
 	}
 	public String getPreferredIPAddress() {
 		String ip;
@@ -82,7 +81,7 @@ public class VoIPClient implements Serializable {		// TODO Remove serializable. 
 		else if (preferredConnectionMethod == ConnectionMethods.PUBLIC)
 			ip = getExternalIPAddress();
 		else
-			ip = VoIPService.ICEServerName;
+			ip = VoIPConstants.ICEServerName;
 		return ip;
 	}
 	public int getPreferredPort() {
@@ -92,7 +91,7 @@ public class VoIPClient implements Serializable {		// TODO Remove serializable. 
 		else if (preferredConnectionMethod == ConnectionMethods.PUBLIC)
 			port = getExternalPort();
 		else
-			port = VoIPService.ICEServerPort;
+			port = VoIPConstants.ICEServerPort;
 		return port;
 	}
 	
@@ -102,7 +101,7 @@ public class VoIPClient implements Serializable {		// TODO Remove serializable. 
 //				Log.d(VoIPActivity.logTag, "preferred address: " + getPreferredIPAddress());
 				cachedInetAddress = InetAddress.getByName(getPreferredIPAddress());
 			} catch (UnknownHostException e) {
-				Log.e(VoIPActivity.logTag, "VoIPClient UnknownHostException: " + e.toString());
+				Log.e(VoIPConstants.TAG, "VoIPClient UnknownHostException: " + e.toString());
 			}
 		}
 		// Log.d(VoIPActivity.logTag, "cached address: " + cachedInetAddress.toString());

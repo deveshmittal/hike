@@ -67,6 +67,7 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.voip.VoIPConstants;
 
 /**
  * 
@@ -1965,7 +1966,7 @@ public class MqttMessagesManager
 	public void saveMqttMessage(JSONObject jsonObj) throws JSONException
 	{
 		String type = jsonObj.optString(HikeConstants.TYPE);
-		Log.d(VoIPActivity.logTag, "Received message of type: " + type);  // TODO: Remove me!
+		Log.d(VoIPConstants.TAG, "Received message of type: " + type);  // TODO: Remove me!
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{
 			saveIcon(jsonObj);
@@ -2017,18 +2018,20 @@ public class MqttMessagesManager
 		else if (HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0.equals(type) ||
 				HikeConstants.MqttMessageTypes.MESSAGE_VOIP_1.equals(type)) {
 
-			Log.d(VoIPActivity.logTag, "Received VoIP Message");
+			Log.d(VoIPConstants.TAG, "Received VoIP Message");
 
 			// VoIP checks
 			if (jsonObj.has(HikeConstants.SUB_TYPE)) {
+				
+				String subType = jsonObj.getString(HikeConstants.SUB_TYPE); 
 
-				if (jsonObj.getString(HikeConstants.SUB_TYPE).equals(HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO)) {
+				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO)) {
 
-					Log.d(VoIPActivity.logTag, "Receiving socket info..");
+					Log.d(VoIPConstants.TAG, "Receiving socket info..");
 					JSONObject metadataJSON = jsonObj.getJSONObject(HikeConstants.DATA).getJSONObject(HikeConstants.METADATA);
 					
 					if (metadataJSON.getBoolean("initiator") == false && VoIPActivity.isRunning == false) {
-						Log.w(VoIPActivity.logTag, "Receiving a reply for a terminated call.");
+						Log.w(VoIPConstants.TAG, "Receiving a reply for a terminated call.");
 						return;		// The initiator has already hung up
 					}
 					
@@ -2043,6 +2046,21 @@ public class MqttMessagesManager
 					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 					context.startActivity(i);
 				}
+				
+				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_UPGRADABLE)) {
+					Intent i = new Intent(context, VoIPActivity.class);
+					i.putExtra("action", VoIPConstants.PARTNER_REQUIRES_UPGRADE);
+					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+					context.startActivity(i);
+				}
+				
+				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_NOT_UPGRADABLE)) {
+					Intent i = new Intent(context, VoIPActivity.class);
+					i.putExtra("action", VoIPConstants.PARTNER_INCOMPATIBLE);
+					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+					context.startActivity(i);
+				}
+				
 			}
 		}
 		else if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type)) // Message

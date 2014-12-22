@@ -2,7 +2,6 @@ package com.bsb.hike.voip;
 
 import android.util.Log;
 
-import com.bsb.hike.VoIPActivity;
 
 public class OpusWrapper {
 	
@@ -39,7 +38,7 @@ public class OpusWrapper {
 		if (encoder == 0)
 			return;
 		opus_set_bitrate(encoder, bitrate);
-		Log.d(VoIPActivity.logTag, "Changed bitrate to: " + bitrate);
+		Log.d(VoIPConstants.TAG, "Changed bitrate to: " + bitrate);
 	}
 	
 	public void setDecoderGain(int gain) {
@@ -47,7 +46,7 @@ public class OpusWrapper {
 			return;
 		
 		opus_set_gain(decoder, gain);
-		Log.d(VoIPActivity.logTag, "Setting gain to: " + gain);
+		Log.d(VoIPConstants.TAG, "Setting gain to: " + gain);
 	}
 	
 	public int getDecoder(int samplingRate, int channels) {
