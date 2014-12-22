@@ -165,7 +165,7 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 	
 	private void initEmoticonPicker()
 	{
-		mEmoticonPicker = new EmoticonPicker(activity, this);
+		mEmoticonPicker = new EmoticonPicker(activity.getApplicationContext(), this);
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu)

@@ -687,7 +687,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 	private void setupEmoticonLayout(int whichSubcategory, int[] tabDrawable)
 	{
 
-		EmoticonAdapter statusEmojiAdapter = new EmoticonAdapter(this, this, getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT, tabDrawable,
+		EmoticonAdapter statusEmojiAdapter = new EmoticonAdapter(this.getApplicationContext(), this, getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT, tabDrawable,
 				true);
 
 		ViewPager emoticonViewPager = (ViewPager) findViewById(R.id.emoticon_pager);

@@ -1,6 +1,7 @@
 package com.bsb.hike.media;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -29,7 +30,7 @@ public class EmoticonPicker implements ShareablePopup
 
 	private EmoticonPickerListener mEmoPickerListener;
 
-	private Activity mActivity;
+	private Context mContext;
 
 	private KeyboardPopupLayout mPopUpLayout;
 
@@ -46,9 +47,9 @@ public class EmoticonPicker implements ShareablePopup
 	 * @param emoPickerListener
 	 */
 
-	public EmoticonPicker(Activity activity, EmoticonPickerListener emoPickerListener)
+	public EmoticonPicker(Context context, EmoticonPickerListener emoPickerListener)
 	{
-		this.mActivity = activity;
+		this.mContext = context;
 		this.mEmoPickerListener = emoPickerListener;
 	}
 
@@ -60,9 +61,9 @@ public class EmoticonPicker implements ShareablePopup
 	 * @param popUpLayout
 	 */
 
-	public EmoticonPicker(int layoutResId, Activity activity, EmoticonPickerListener emoPickerListener, KeyboardPopupLayout popUpLayout)
+	public EmoticonPicker(int layoutResId, Context context, EmoticonPickerListener emoPickerListener, KeyboardPopupLayout popUpLayout)
 	{
-		this(activity, emoPickerListener);
+		this(context, emoPickerListener);
 		this.mLayoutResId = layoutResId;
 		this.mPopUpLayout = popUpLayout;
 	}
@@ -76,9 +77,9 @@ public class EmoticonPicker implements ShareablePopup
 	 * @param popUpLayout
 	 */
 
-	public EmoticonPicker(View view, Activity activity, EmoticonPickerListener emoPickerListener, KeyboardPopupLayout popUpLayout)
+	public EmoticonPicker(View view, Context context, EmoticonPickerListener emoPickerListener, KeyboardPopupLayout popUpLayout)
 	{
-		this(activity, emoPickerListener);
+		this(context, emoPickerListener);
 		this.mPopUpLayout = popUpLayout;
 		this.mViewToDisplay = view;
 		initViewComponents(mViewToDisplay);
@@ -94,10 +95,10 @@ public class EmoticonPicker implements ShareablePopup
 	 * @param firstTimeHeight
 	 * @param eatOuterTouchIds
 	 */
-	public EmoticonPicker(Activity activiy, EmoticonPickerListener emoPickerListener, View mainView, int firstTimeHeight, int[] eatOuterTouchIds)
+	public EmoticonPicker(Context context, EmoticonPickerListener emoPickerListener, View mainView, int firstTimeHeight, int[] eatOuterTouchIds)
 	{
-		this(activiy, emoPickerListener);
-		mPopUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, mActivity.getApplicationContext(), eatOuterTouchIds);
+		this(context, emoPickerListener);
+		mPopUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, mContext, eatOuterTouchIds);
 	}
 
 	/**
@@ -148,7 +149,7 @@ public class EmoticonPicker implements ShareablePopup
 			 * Use default view.
 			 */
 
-			mViewToDisplay = (ViewGroup) LayoutInflater.from(mActivity.getApplicationContext()).inflate(R.layout.emoticon_layout, null);
+			mViewToDisplay = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.emoticon_layout, null);
 		}
 
 		else
@@ -156,7 +157,7 @@ public class EmoticonPicker implements ShareablePopup
 			/**
 			 * Use the resId passed in the constructor
 			 */
-			mViewToDisplay = (ViewGroup) LayoutInflater.from(mActivity.getApplicationContext()).inflate(mLayoutResId, null);
+			mViewToDisplay = (ViewGroup) LayoutInflater.from(mContext).inflate(mLayoutResId, null);
 		}
 
 		initViewComponents(mViewToDisplay);
@@ -182,7 +183,7 @@ public class EmoticonPicker implements ShareablePopup
 				R.drawable.emo_tab_4_selector, R.drawable.emo_tab_5_selector, R.drawable.emo_tab_6_selector, R.drawable.emo_tab_7_selector, R.drawable.emo_tab_8_selector,
 				R.drawable.emo_tab_9_selector };
 
-		boolean isPortrait = mActivity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+		boolean isPortrait = mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
 		int emoticonsListSize = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
 
@@ -195,7 +196,7 @@ public class EmoticonPicker implements ShareablePopup
 		 */
 		int firstCategoryToShow = (mRecentEmoticons.length < recentEmoticonsSizeReq) ? 1 : 0;
 
-		EmoticonAdapter mEmoticonAdapter = new EmoticonAdapter(mActivity, mEmoPickerListener, isPortrait, tabDrawables);
+		EmoticonAdapter mEmoticonAdapter = new EmoticonAdapter(mContext, mEmoPickerListener, isPortrait, tabDrawables);
 
 		mPager.setVisibility(View.VISIBLE);
 
