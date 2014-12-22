@@ -27,11 +27,13 @@ import android.provider.CallLog;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.VoIPActivity;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
@@ -48,6 +50,7 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -64,6 +67,7 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.voip.VoIPConstants;
 
 /**
  * 
@@ -2043,6 +2047,7 @@ public class MqttMessagesManager
 	public void saveMqttMessage(JSONObject jsonObj) throws JSONException
 	{
 		String type = jsonObj.optString(HikeConstants.TYPE);
+		Log.d(VoIPConstants.TAG, "Received message of type: " + type);  // TODO: Remove me!
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{
 			saveIcon(jsonObj);
@@ -2090,6 +2095,54 @@ public class MqttMessagesManager
 		// end
 		{
 			saveGCEnd(jsonObj);
+		} 
+		else if (HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0.equals(type) ||
+				HikeConstants.MqttMessageTypes.MESSAGE_VOIP_1.equals(type)) {
+
+			Log.d(VoIPConstants.TAG, "Received VoIP Message");
+
+			// VoIP checks
+			if (jsonObj.has(HikeConstants.SUB_TYPE)) {
+				
+				String subType = jsonObj.getString(HikeConstants.SUB_TYPE); 
+
+				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO)) {
+
+					Log.d(VoIPConstants.TAG, "Receiving socket info..");
+					JSONObject metadataJSON = jsonObj.getJSONObject(HikeConstants.DATA).getJSONObject(HikeConstants.METADATA);
+					
+					if (metadataJSON.getBoolean("initiator") == false && VoIPActivity.isRunning == false) {
+						Log.w(VoIPConstants.TAG, "Receiving a reply for a terminated call.");
+						return;		// The initiator has already hung up
+					}
+					
+					Intent i = new Intent(context, VoIPActivity.class);
+					i.putExtra("action", "setpartnerinfo");
+					i.putExtra("msisdn", jsonObj.getString(HikeConstants.FROM));
+					i.putExtra("internalIP", metadataJSON.getString("internalIP"));
+					i.putExtra("internalPort", metadataJSON.getInt("internalPort"));
+					i.putExtra("externalIP", metadataJSON.getString("externalIP"));
+					i.putExtra("externalPort", metadataJSON.getInt("externalPort"));
+					i.putExtra("initiator", metadataJSON.getBoolean("initiator"));
+					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+					context.startActivity(i);
+				}
+				
+				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_UPGRADABLE)) {
+					Intent i = new Intent(context, VoIPActivity.class);
+					i.putExtra("action", VoIPConstants.PARTNER_REQUIRES_UPGRADE);
+					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+					context.startActivity(i);
+				}
+				
+				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_NOT_UPGRADABLE)) {
+					Intent i = new Intent(context, VoIPActivity.class);
+					i.putExtra("action", VoIPConstants.PARTNER_INCOMPATIBLE);
+					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+					context.startActivity(i);
+				}
+				
+			}
 		}
 		else if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type)) // Message
 		// received

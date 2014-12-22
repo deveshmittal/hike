@@ -75,6 +75,10 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
 
+	public static final String VOIP_SETTINGS = "voipsettings";
+
+	public static final String VOIP_AUDIO_GAIN = "voipaudiogain";
+
 	public static final String MSISDN_SETTING = "msisdn";
 
 	public static final String CARRIER_SETTING = "carrier";

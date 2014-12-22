@@ -1887,8 +1887,26 @@ public class HikeConstants
 		
 		public static final String TIP = "tip";
 
-	}
+		public static final String VOIP_SOCKET_INFO = "ve";
 
+		public static final String MESSAGE_VOIP_0 = "v0";
+
+		public static final String MESSAGE_VOIP_1 = "v1";
+
+		/**
+		 * The person we are calling is on a compatible platform, but is
+		 * using an old version of the client which does not support VoIP. 
+		 */
+		public static final String VOIP_ERROR_CALLEE_INCOMPATIBLE_UPGRADABLE = "e0";
+
+		/**
+		 * The person we are calling is on a client that cannot be upgraded
+		 * to support VoIP. For example, might be on iOS and we have no iOS client.
+		 */
+		public static final String VOIP_ERROR_CALLEE_INCOMPATIBLE_NOT_UPGRADABLE = "e1";
+
+	}
+	
 	public static final class SMSNative
 	{
 		/*
