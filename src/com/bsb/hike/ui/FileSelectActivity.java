@@ -42,6 +42,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.FileListAdapter;
+import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
@@ -289,6 +290,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 						intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.MSISDN));
 						intent.putExtra(HikeConstants.Extras.FILE_PATH, file.getAbsolutePath());
 						intent.putExtra(HikeConstants.Extras.FILE_TYPE, item.getMimeType());
+						intent.putExtra(FTAnalyticEvents.FT_ATTACHEMENT_TYPE, FTAnalyticEvents.FILE_ATTACHEMENT);
 						intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						startActivity(intent);
 					}
@@ -421,7 +423,7 @@ public class FileSelectActivity extends HikeAppStateBaseFragmentActivity impleme
 				String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
 				boolean onHike = getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, true);
 
-				fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike);
+				fileTransferTask = new InitiateMultiFileTransferTask(getApplicationContext(), fileDetails, msisdn, onHike, FTAnalyticEvents.FILE_ATTACHEMENT);
 				Utils.executeAsyncTask(fileTransferTask);
 
 				progressDialog = ProgressDialog.show(FileSelectActivity.this, null, getResources().getString(R.string.multi_file_creation));

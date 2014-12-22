@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="911"
-    android:versionName="3.5.1" >
+    android:versionCode="922"
+    android:versionName="3.5.1.66" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -68,6 +68,9 @@
         <service
             android:name="com.bsb.hike.service.HikeService"
             android:enabled="true" >
+            <intent-filter>
+                <action android:name="com.bsb.hike.service.ACTION_BIND"/>
+            </intent-filter>
         </service>
         <service android:name="com.bsb.hike.service.UpgradeIntentService" />
         <service android:name="com.bsb.hike.GCMIntentService" />
@@ -184,6 +187,21 @@
             android:launchMode="singleTop" >
         </activity>
         <activity android:name="com.bsb.hike.ui.SettingsActivity" >
+        </activity>
+        <activity android:name="com.bsb.hike.ui.ConnectedAppsActivity"
+            android:configChanges="orientation" >
+        </activity>
+        <activity android:name="com.bsb.hike.ui.HikeAuthActivity" 
+            android:configChanges="orientation"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:noHistory="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"  >
+            <intent-filter>
+			    <action android:name="com.bsb.hike.ui.HikeAuthActivity" />
+			    <category android:name="android.intent.category.DEFAULT" />
+			  </intent-filter>
         </activity>
         <activity
             android:name="com.bsb.hike.ui.TwitterAuthActivity"
@@ -328,7 +346,26 @@
                 <action android:name="com.android.vending.INSTALL_REFERRER" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".service.AlarmBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="com.bsb.hike.START_ALARM" />
+            </intent-filter>
+        </receiver>
 
+        <provider
+            android:name="com.bsb.hike.providers.HikeProvider"
+            android:authorities="com.bsb.hike.providers.HikeProvider"
+            android:exported="true">
+        </provider>
+	 <receiver
+            android:name=".service.ConnectionChangeReceiver"
+            android:label="NetworkConnection" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+        <service android:name=".service.SimpleWakefulService" >
+        </service>
     </application>
 
 </manifest>

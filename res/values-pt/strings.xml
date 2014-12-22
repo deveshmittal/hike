@@ -1095,7 +1095,6 @@
     <string name="pinHistoryTutorialText">Nenhum marcador ainda</string>
     <string name="incorrect_msisdn_warning">Número incorreto</string>
     <string name="incorrect_msisdn_msg">Insira o número registrado do hike neste celular.</string>
-    <string name="delete_account_description">Exclui todas as mensagens, SMS gratuitos e recompensas do hike</string>
     <string name="delete_account_heading_2">Para excluir a conta, insira o número</string>
     <string name="delete_my_account">EXCLUIR MINHA CONTA</string>
     <string name="hike_extras">Extras do hike</string>
@@ -1194,12 +1193,10 @@
     <string name="n_more">MAIS %1$d</string>
     <string name="n_stickers">%1$d adesivos</string>
     <string name="last_backup">Último backup</string>
-    <string name="creating_backup_message">Criando um backup das conversas. Os backups diários são realizados às 03h00.</string>
     <string name="restore_account">Restaurar conta</string>
     <string name="account_backup">Backup da conta</string>
     <string name="backup_found">Backup encontrado</string>
     <string name="backup_found_hint">deseja restaurar a conta?</string>
-    <string name="restore">RESTAURAR</string>
     <string name="restoring...">Restaurando...</string>
     <string name="restoring..._hint">aguarde, pode demorar um pouco</string>
     <string name="restored">Restaurado</string>

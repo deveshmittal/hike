@@ -22,6 +22,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ProfileAdapter;
+import com.bsb.hike.smartImageLoader.ImageWorker;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeSSLUtil;
 import com.bsb.hike.utils.Logger;
@@ -210,7 +212,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean>
 
 			if (!statusImage)
 			{
-				idpp = id + ProfileAdapter.PROFILE_PIC_SUFFIX;
+				idpp = id + ProfileActivity.PROFILE_PIC_SUFFIX;
 			}
 
 			HikeMessengerApp.getLruCache().remove(idpp);
