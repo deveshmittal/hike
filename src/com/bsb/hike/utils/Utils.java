@@ -5116,5 +5116,21 @@ public class Utils
 		}
 		return true;
 	}
+	
+	public static int dp(float value)
+	{
+		return (int) Math.ceil(Utils.densityMultiplier * value);
+	}
+
+	public static int getOldLedPref(Context context)
+	{
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
+
+		if ((preferenceManager.getInt(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, -1) == -1))
+		{
+			return HikeConstants.LED_DEFAULT_BLUE_COLOR;
+		}
+		return preferenceManager.getInt(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, -1);
+	}
 
 }

@@ -425,6 +425,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public static final String RETRY_NOTIFICATION_COOL_OFF_TIME = "retryNotificationCoolOffTime";
 
+	public static final String LED_NOTIFICATION_COLOR_CODE = "ledNotificationColorCode";
+
 	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Twitter twitter;
@@ -1061,6 +1063,7 @@ public void onTrimMemory(int level)
 			edit.putString(HikeConstants.NOTIF_SOUND_PREF, Utils.getOldSoundPref(this));
 			edit.putString(HikeConstants.VIBRATE_PREF_LIST, Utils.getOldVibratePref(this));
 			edit.putBoolean(HikeConstants.PREFERENCE_TRANSITION_SOUND_VIB_TO_LIST, true);
+			edit.putInt(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, Utils.getOldLedPref(this));
 			edit.commit();
 		}
 	}
