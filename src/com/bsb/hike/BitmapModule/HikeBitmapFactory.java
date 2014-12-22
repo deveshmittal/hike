@@ -1,19 +1,11 @@
 package com.bsb.hike.BitmapModule;
 
-import java.io.InputStream;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
+import android.graphics.*;
 import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -21,11 +13,12 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.view.View;
 import android.view.View.MeasureSpec;
-
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.smartcache.HikeLruCache;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
+
+import java.io.InputStream;
 
 public class HikeBitmapFactory
 {
@@ -58,6 +51,37 @@ public class HikeBitmapFactory
 		canvas.drawBitmap(bitmap, rect, rect, paint);
 		return output;
 	}
+
+    public static Bitmap getRoundedRectangleBitmap(BitmapDrawable value, float cornerRadius){
+        if (value == null)
+            return null;
+
+        Bitmap output = value.getBitmap() ;
+        return getRoundedCornerBitmap(output, cornerRadius);
+
+    }
+
+    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, float cornerRadius) {
+
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+
+        return output ;
+    }
 
 	public static Bitmap getBitMapFromTV(View textView)
 	{

@@ -17,6 +17,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.DBConstants;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
+import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadType;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.smartImageLoader.StickerOtherIconLoader;
 import com.bsb.hike.utils.StickerManager;
@@ -141,6 +142,7 @@ public class StickerShopAdapter extends CursorAdapter
 			switch (category.getState())
 			{
 			case StickerCategory.NONE:
+			case StickerCategory.DONE_SHOP_SETTINGS:
 			case StickerCategory.DONE:
 				if (category.getDownloadedStickersCount() == 0)
 				{
@@ -214,7 +216,9 @@ public class StickerShopAdapter extends CursorAdapter
 			switch (downloadButton.getDrawable().getLevel())
 			{
 			case NOT_DOWNLOADED:
-				StickerDownloadManager.getInstance(mContext).DownloadEnableDisableImage(category.getCategoryId(), null);
+				StickerDownloadManager.getInstance().DownloadEnableDisableImage(category.getCategoryId(), null);
+				StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.SHOP, DownloadType.NEW_CATEGORY, mContext);
+				break;
 			case UPDATE_AVAILABLE:
 			case RETRY:
 				StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.SHOP, mContext);

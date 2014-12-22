@@ -12,6 +12,7 @@ import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.ui.fragments.ImageViewerFragment;
 
 public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity implements Listener
@@ -31,6 +32,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity i
 	protected void onResume()
 	{
 		HikeAppStateUtils.onResume(this);
+		HikeAlarmManager.cancelAlarm(HikeAppStateBaseFragmentActivity.this, HikeAlarmManager.REQUESTCODE_RETRY_LOCAL_NOTIFICATION);
 		super.onResume();
 	}
 
