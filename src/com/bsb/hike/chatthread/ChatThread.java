@@ -1,5 +1,8 @@
 package com.bsb.hike.chatthread;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONObject;
 
 import android.content.Intent;
@@ -20,11 +23,15 @@ import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.media.AttachmentPicker;
 import com.bsb.hike.media.CaptureImageParser;
 import com.bsb.hike.media.CaptureImageParser.CaptureImageListener;
+import com.bsb.hike.media.EmoticonPicker.EmoticonPickerListener;
+import com.bsb.hike.media.EmoticonPicker;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.media.OverflowItemClickListener;
 import com.bsb.hike.media.PickContactParser;
 import com.bsb.hike.media.PickFileParser;
 import com.bsb.hike.media.PickFileParser.PickFileListener;
+import com.bsb.hike.media.ShareablePopup;
+import com.bsb.hike.media.ShareablePopupLayout;
 import com.bsb.hike.media.StickerPicker;
 import com.bsb.hike.media.StickerPicker.StickerPickerListener;
 import com.bsb.hike.media.ThemePicker;
@@ -47,7 +54,7 @@ import com.bsb.hike.utils.Utils;
  */
 
 public class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
-		HHikeDialogListener, StickerPickerListener
+		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener
 {
 	private static final String TAG = "chatthread";
 
@@ -63,7 +70,11 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 
 	protected String msisdn;
 
-	protected StickerPicker stickerPicker;
+	protected StickerPicker mStickerPicker;
+
+	protected EmoticonPicker mEmoticonPicker;
+
+	protected ShareablePopupLayout mShareablePopupLayout;
 
 	public ChatThread(ChatThreadActivity activity, String msisdn)
 	{
@@ -106,9 +117,47 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 	protected void initView()
 	{
 		setConversationTheme();
+		initStickerPicker();
+		initEmoticonPicker();
+		initShareablePopup();
+		addOnClickListeners();
+	}
+	
+	/**
+	 * Instantiate the mShareable popupLayout
+	 */
+	private void initShareablePopup()
+	{
+		int[] mEatOuterTouchIds = new int[] { R.id.sticker_btn, R.id.emoticon_btn, R.id.send_message };
+
+		List<ShareablePopup> sharedPopups = new ArrayList<ShareablePopup>();
+		sharedPopups.add(mEmoticonPicker);
+		sharedPopups.add(mStickerPicker);
+		mShareablePopupLayout = new ShareablePopupLayout(activity.getApplicationContext(), activity.findViewById(R.id.chatThreadParentLayout),
+				(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)), mEatOuterTouchIds, sharedPopups);
+
+	}
+	
+	private void addOnClickListeners()
+	{
 		activity.findViewById(R.id.sticker_btn).setOnClickListener(this);
-		stickerPicker = new StickerPicker(activity, this, activity.findViewById(R.id.chatThreadParentLayout),
-				(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)));
+		activity.findViewById(R.id.emoticon_btn).setOnClickListener(this);
+	}
+
+	private void initStickerPicker()
+	{
+		if (this.mStickerPicker == null)
+		{
+			this.mStickerPicker = new StickerPicker(activity, this);
+		}
+	}
+	
+	private void initEmoticonPicker()
+	{
+		if(this.mEmoticonPicker == null)
+		{
+			this.mEmoticonPicker = new EmoticonPicker(activity, this);
+		}
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -208,13 +257,21 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 		case R.id.sticker_btn:
 			stickerClicked();
 			break;
+		case R.id.emoticon_btn:
+			emoticonClicked();
+			break;
 		}
 
 	}
 
 	protected void stickerClicked()
 	{
-		stickerPicker.showStickerPicker();
+		mShareablePopupLayout.showPopup(mStickerPicker);
+	}
+	
+	protected void emoticonClicked()
+	{
+		mShareablePopupLayout.showPopup(mEmoticonPicker);
 	}
 
 	protected void showThemePicker()
@@ -305,6 +362,11 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 	@Override
 	public boolean onBackPressed()
 	{
+		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
+		}
+		
 		if (themePicker != null && themePicker.isShowing())
 		{
 			return themePicker.onBackPressed();
@@ -456,10 +518,19 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 	}
 
 	@Override
-	public void stickerSelected(Sticker sticker)
+	public void stickerSelected(Sticker sticker, String sourceOfSticker)
 	{
-		Logger.i(TAG, "sticker clicked " + sticker);
-		stickerPicker.dismiss();
+		Logger.i(TAG, "sticker clicked " + sticker.getStickerId() + sticker.getCategoryId() + sourceOfSticker);
+		mShareablePopupLayout.dismiss();
+	}
+
+	@Override
+	public void emoticonSelected(int emoticonIndex)
+	{
+		// TODO : Implement this
+		// Utils.emoticonClicked(getApplicationContext(), emoticonIndex, mComposeView);
+		Logger.i(TAG, " This emoticon was selected : " + emoticonIndex);
+		mShareablePopupLayout.dismiss();
 	}
 
 }
