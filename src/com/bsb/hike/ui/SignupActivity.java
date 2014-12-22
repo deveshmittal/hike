@@ -1875,6 +1875,11 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 	@Override
 	public void onBackPressed()
 	{
+		SharedPreferences settings = getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (settings.getBoolean(HikeMessengerApp.RESTORING_BACKUP, false))
+		{
+			return;
+		}
 		if (viewFlipper.getDisplayedChild() == PIN)
 		{
 			if (countDownTimer != null)
