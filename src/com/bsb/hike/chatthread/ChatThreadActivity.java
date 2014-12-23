@@ -20,7 +20,11 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 		super.onCreate(savedInstanceState);
 		init();
-		chatThread.setContentView();
+		if (chatThread.filter())
+		{
+			chatThread.init();
+			chatThread.setContentView();
+		}
 	}
 
 	private void init()
