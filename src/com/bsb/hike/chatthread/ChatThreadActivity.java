@@ -7,7 +7,10 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
+import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 
 public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 {
@@ -19,12 +22,29 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	{
 		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 		super.onCreate(savedInstanceState);
-		init();
-		if (chatThread.filter())
+
+		if (filter())
 		{
-			chatThread.init();
-			chatThread.setContentView();
+			init();
+			chatThread.onCreate(savedInstanceState);
 		}
+	}
+
+	private boolean filter()
+	{
+		String msisdn = getIntent().getStringExtra(HikeConstants.Extras.MSISDN);
+		if (HikeMessengerApp.isStealthMsisdn(msisdn))
+		{
+			if (HikeSharedPreferenceUtil.getInstance(this).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF) != HikeConstants.STEALTH_ON)
+			{
+				Intent intent = new Intent(this, HomeActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				this.startActivity(intent);
+				this.finish();
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private void init()

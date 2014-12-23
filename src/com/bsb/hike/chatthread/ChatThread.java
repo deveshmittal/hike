@@ -101,7 +101,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 
 	protected MessagesAdapter mAdapter;
 
-	protected ArrayList<ConvMessage> messages;
+	protected List<ConvMessage> messages;
 
 	public ChatThread(ChatThreadActivity activity, String msisdn)
 	{
@@ -130,29 +130,16 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	public void onCreate(Bundle arg0)
 	{
 		init();
+		setContentView();
+		fetchConversation(true);
 	}
 
-	protected boolean filter()
-	{
-		if (HikeMessengerApp.isStealthMsisdn(msisdn))
-		{
-			if (HikeSharedPreferenceUtil.getInstance(activity).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF) != HikeConstants.STEALTH_ON)
-			{
-				Intent intent = new Intent(activity, HomeActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				activity.startActivity(intent);
-				activity.finish();
-				return false;
-			}
-		}
-		return true;
-	}
 
 	protected void init()
 	{
 		chatThreadActionBar = new ChatThreadActionBar(activity);
 		mConversationDb = HikeConversationsDatabase.getInstance();
-
+		
 	}
 
 	/**
@@ -294,6 +281,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 
 	public void setContentView()
 	{
+		activity.setContentView(getContentView());
 		initView();
 	}
 
@@ -655,6 +643,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	 * @return
 	 */
 	protected abstract List<ConvMessage> loadMessages();
+	
+	protected abstract int getContentView();
 
 	/**
 	 * This function is called in UI thread when conversation is fetched from DB
