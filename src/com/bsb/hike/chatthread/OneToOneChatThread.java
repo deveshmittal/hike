@@ -75,13 +75,6 @@ public class OneToOneChatThread extends ChatThread
 		return list;
 	}
 
-	@Override
-	public void setContentView()
-	{
-		activity.setContentView(R.layout.chatthread);
-		super.setContentView();
-	}
-
 	private boolean isUserBlocked()
 	{
 		return false;
@@ -116,5 +109,11 @@ public class OneToOneChatThread extends ChatThread
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	protected int getContentView()
+	{
+		return R.layout.chatthread;
 	}
 }

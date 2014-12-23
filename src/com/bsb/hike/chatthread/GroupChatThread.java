@@ -87,12 +87,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		return list;
 	}
 
-	@Override
-	public void setContentView()
-	{
-		activity.setContentView(R.layout.chatthread);
-	}
-
 	private boolean isMuted()
 	{
 		return false;
@@ -120,5 +114,11 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	protected int getContentView()
+	{
+		return R.layout.chatthread;
 	}
 }

@@ -217,6 +217,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 
 	public void setContentView()
 	{
+		activity.setContentView(getContentView());
 		initView();
 	}
 
@@ -556,6 +557,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	 * @return
 	 */
 	protected abstract List<ConvMessage> loadMessages();
+	
+	protected abstract int getContentView();
 
 	/**
 	 * This function is called in UI thread when conversation is fetched from DB
