@@ -263,7 +263,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	private Conversation conversation;
 
-	private ArrayList<ConvMessage> convMessages;
+	private List<ConvMessage> convMessages;
 
 	private Context context;
 
@@ -320,7 +320,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	 */
 	private ConvMessage firstPendingConvMessage = null;
 
-	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
+	public MessagesAdapter(Context context, List<ConvMessage> objects, Conversation conversation, ChatThread chatThread)
 	{
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		// this.largeStickerLoader = new StickerLoader(context);
