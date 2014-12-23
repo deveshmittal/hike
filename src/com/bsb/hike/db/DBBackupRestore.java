@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.channels.FileChannel;
+import java.util.Calendar;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -16,8 +17,10 @@ import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.utils.CBCEncryption;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 public class DBBackupRestore
 {
@@ -62,6 +65,27 @@ public class DBBackupRestore
 			}
 		}
 		return _instance;
+	}
+
+	/**
+	 * Schedules next auto backup.
+	 */
+	public void scheduleNextAutoBackup()
+	{
+		long scheduleTime = 0;
+		Calendar c = Calendar.getInstance();
+		c.add(Calendar.DAY_OF_MONTH, 0);
+		c.set(Calendar.HOUR_OF_DAY, 3);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		scheduleTime = c.getTimeInMillis();
+		if (scheduleTime < System.currentTimeMillis() || !mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false))
+		{
+			scheduleTime += 24 * 60 * 60 * 1000;
+		}
+		HikeAlarmManager.setAlarm(mContext, scheduleTime, HikeAlarmManager.REQUESTCODE_PERIODIC_BACKUP, true);
+		Logger.d(getClass().getSimpleName(), "Scheduled next Auto-Backup for: " + Utils.getFormattedDateTimeFromTimestamp(scheduleTime/1000, mContext.getResources().getConfiguration().locale));
 	}
 
 	/**

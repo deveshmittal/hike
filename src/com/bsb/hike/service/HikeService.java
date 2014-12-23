@@ -242,7 +242,7 @@ public class HikeService extends Service
 		 * notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent); startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 		 */
 		assignUtilityThread();
-		scheduleNextAccountBackup();
+		DBBackupRestore.getInstance(getApplicationContext()).scheduleNextAutoBackup();
 
 		/*
 		 * register with the Contact list to get an update whenever the phone book changes. Use the application thread for the intent receiver, the IntentReceiver will take care of
@@ -674,26 +674,6 @@ public class HikeService extends Service
 			sendBroadcast(new Intent(HikeService.POST_SIGNUP_PRO_PIC_TO_SERVER_ACTION));
 		}
 	};
-
-	private Runnable BackupAccountRunnable = new Runnable()
-	{
-		@Override
-		public void run()
-		{
-			DBBackupRestore.getInstance(HikeService.this).backupDB();
-			scheduleNextAccountBackup();
-		}
-	};
-
-	private void scheduleNextAccountBackup()
-	{
-		long scheduleTime = 0;
-		Calendar c = Calendar.getInstance();
-		c.add(Calendar.DAY_OF_MONTH, 1);
-		c.set(Calendar.HOUR_OF_DAY, 3);
-		scheduleTime = (c.getTimeInMillis() - System.currentTimeMillis());
-		postRunnableWithDelay(BackupAccountRunnable, scheduleTime);
-	}
 
 	private void scheduleNextManualContactSync()
 	{
