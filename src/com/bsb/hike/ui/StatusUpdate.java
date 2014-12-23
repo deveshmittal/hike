@@ -18,6 +18,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -678,6 +679,19 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements Liste
 		}
 		setupEmoticonLayout(whichSubcategory, tabDrawables);
 		emoticonLayout.setVisibility(View.VISIBLE);
+		
+		View eraseKey = (View) findViewById(R.id.erase_key);
+		eraseKey.setVisibility(View.VISIBLE);
+		eraseKey.setOnClickListener(new OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				statusTxt.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
+			}
+		});
+		
 	}
 
 	public void hideEmoticonSelector()

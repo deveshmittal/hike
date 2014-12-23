@@ -129,8 +129,6 @@ public class HikeSharedPreferenceUtil
 
 	public synchronized void deleteAllData()
 	{
-
-		hikePrefsMap.clear();
 		editor.clear();
 		editor.commit();
 	}
