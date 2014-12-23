@@ -160,7 +160,7 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 
 	private void initStickerPicker()
 	{
-		mStickerPicker = new StickerPicker(activity, this);
+		mStickerPicker = new StickerPicker(activity.getApplicationContext(), this);
 	}
 	
 	private void initEmoticonPicker()

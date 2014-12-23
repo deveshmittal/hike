@@ -1,6 +1,6 @@
 package com.bsb.hike.media;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -30,7 +30,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 
 	private StickerPickerListener listener;
 
-	private Activity activity;
+	private Context mContext;
 
 	private KeyboardPopupLayout popUpLayout;
 
@@ -48,9 +48,9 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 	 * @param activity
 	 * @param listener
 	 */
-	public StickerPicker(Activity activity, StickerPickerListener listener)
+	public StickerPicker(Context context, StickerPickerListener listener)
 	{
-		this.activity = activity;
+		this.mContext = context;
 		this.listener = listener;
 	}
 
@@ -61,7 +61,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 	 * @param listener
 	 * @param popUpLayout
 	 */
-	public StickerPicker(int layoutResId, Activity context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
+	public StickerPicker(int layoutResId, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
 	{
 		this(context, listener);
 		this.mLayoutResId = layoutResId;
@@ -76,7 +76,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 	 * @param listener
 	 * @param popUpLayout
 	 */
-	public StickerPicker(View view, Activity context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
+	public StickerPicker(View view, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
 	{
 		this(context, listener);
 		this.viewToDisplay = view;
@@ -95,7 +95,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 	 * @param eatTouchEventViewIds
 	 */
 
-	public StickerPicker(Activity context, StickerPickerListener listener, View mainView, int firstTimeHeight, int[] eatTouchEventViewIds)
+	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight, int[] eatTouchEventViewIds)
 	{
 		this(context, listener);
 		popUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, context.getApplicationContext(), eatTouchEventViewIds);
@@ -109,7 +109,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 	 *            this is your activity Or fragment root view which gets resized when keyboard toggles
 	 * @param firstTimeHeight
 	 */
-	public StickerPicker(Activity context, StickerPickerListener listener, View mainView, int firstTimeHeight)
+	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight)
 	{
 		this(context, listener, mainView, firstTimeHeight, null);
 	}
@@ -141,7 +141,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 			/**
 			 * Use the default layout
 			 */
-			viewToDisplay = (ViewGroup) LayoutInflater.from(activity.getApplicationContext()).inflate(R.layout.sticker_layout, null);
+			viewToDisplay = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.sticker_layout, null);
 		}
 
 		else
@@ -149,7 +149,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 			/**
 			 * Use the resId passed in the constructor
 			 */
-			viewToDisplay = (ViewGroup) LayoutInflater.from(activity.getApplicationContext()).inflate(mLayoutResId, null);
+			viewToDisplay = (ViewGroup) LayoutInflater.from(mContext).inflate(mLayoutResId, null);
 		}
 
 		initViewComponents(viewToDisplay);
@@ -169,7 +169,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 			throw new IllegalArgumentException("View Pager was not found in the view passed.");
 		}
 
-		stickerAdapter = new StickerAdapter(activity, listener);
+		stickerAdapter = new StickerAdapter(mContext, listener);
 
 		StickerEmoticonIconPageIndicator mIconPageIndicator = (StickerEmoticonIconPageIndicator) view.findViewById(R.id.sticker_icon_indicator);
 
@@ -177,7 +177,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 
 		shopIcon.setOnClickListener(this);
 
-		if (HikeSharedPreferenceUtil.getInstance(activity).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))
+		if (HikeSharedPreferenceUtil.getInstance(mContext).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))
 		{
 			// The shop icon would be blue unless the user clicks on it once
 			view.findViewById(R.id.shop_icon_badge).setVisibility(View.VISIBLE);
@@ -227,18 +227,24 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 
 	private void shopIconClicked()
 	{
-		if (!HikeSharedPreferenceUtil.getInstance(activity).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false)) // The shop icon would be blue unless the user clicks
+		if (!HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false)) // The shop icon would be blue unless the user clicks
 		// on it once
 		{
-			HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
+			HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
 		}
-		if (HikeSharedPreferenceUtil.getInstance(activity).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false)) // The shop icon would be blue unless the user clicks
+		if (HikeSharedPreferenceUtil.getInstance(mContext).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false)) // The shop icon would be blue unless the user clicks
 		// on it once
 		{
-			HikeSharedPreferenceUtil.getInstance(activity).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
+			HikeSharedPreferenceUtil.getInstance(mContext).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
 		}
-		Intent i = new Intent(activity, StickerShopActivity.class);
-		activity.startActivity(i);
+		Intent i = new Intent(mContext, StickerShopActivity.class);
+		/**
+		 * Was getting a runtime exception over here : 
+		 * Calling startActivity() from outside of an Activity  context requires the FLAG_ACTIVITY_NEW_TASK flag. Is this really what you want?
+		 *
+		 */
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		mContext.startActivity(i);
 	}
 
 	public void updateDimension(int width, int height)
