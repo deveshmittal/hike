@@ -62,10 +62,12 @@ import com.bsb.hike.utils.Utils;
  * @generated
  */
 
-public class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
-		HHikeDialogListener, StickerPickerListener, AudioRecordListener
+public abstract class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
+		HHikeDialogListener, StickerPickerListener, AudioRecordListener, LoaderCallbacks<Object>
 {
 	private static final String TAG = "chatthread";
+
+	private static final int FETCH_CONV = 1;
 
 	protected ChatThreadActivity activity;
 
@@ -82,6 +84,14 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 	protected StickerPicker stickerPicker;
 
 	protected AudioRecordView audioRecordView;
+
+	protected Conversation mConversation;
+
+	protected HikeConversationsDatabase mConversationDb;
+
+	protected MessagesAdapter mAdapter;
+
+	protected ArrayList<ConvMessage> messages;
 
 	public ChatThread(ChatThreadActivity activity, String msisdn)
 	{
@@ -526,5 +536,83 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 		Logger.i(TAG, "Audio Recorded failed");
 	}
 
-	
+	/**
+	 * This method calls {@link #fetchConversation(String)} in UI or non UI thread, depending upon async variable For non UI, it starts asyncloader, see {@link ConversationLoader}
+	 * 
+	 * @param async
+	 * @param convId
+	 */
+	protected final void fetchConversation(boolean async)
+	{
+		if (async)
+		{
+			Bundle bundle = new Bundle();
+			activity.getSupportLoaderManager().initLoader(FETCH_CONV, bundle, this);
+		}
+		else
+		{
+			fetchConversation();
+		}
+	}
+
+	/**
+	 * This method is either called in either UI thread or non UI, check {@link #fetchConversation(boolean, String)}
+	 * 
+	 */
+	protected abstract Conversation fetchConversation();
+
+	/**
+	 * This method is called in NON UI thread when list view scrolls
+	 * 
+	 * @return
+	 */
+	protected abstract List<ConvMessage> loadMessages();
+
+	@Override
+	public Loader<Object> onCreateLoader(int arg0, Bundle arg1)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void onLoadFinished(Loader<Object> arg0, Object arg1)
+	{
+		
+	}
+
+	@Override
+	public void onLoaderReset(Loader<Object> arg0)
+	{
+
+	}
+
+	private class ConversationLoader extends AsyncTaskLoader<Object>
+	{
+
+		public ConversationLoader(Context context)
+		{
+			super(context);
+		}
+
+		@Override
+		public Object loadInBackground()
+		{
+
+			return fetchConversation();
+		}
+
+		/**
+		 * This has to be done due to some bug in compat library -- http://stackoverflow.com/questions/10524667/android-asynctaskloader-doesnt-start-loadinbackground
+		 */
+		protected void onStartLoading()
+		{
+			if (takeContentChanged())
+			{
+				forceLoad();
+			}
+		}
+
+	}
+
 }
