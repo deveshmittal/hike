@@ -303,7 +303,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 
 	}
 
-	public void replaceListener(StickerPickerListener mListener)
+	public void updateListener(StickerPickerListener mListener)
 	{
 		this.listener = mListener;
 	}

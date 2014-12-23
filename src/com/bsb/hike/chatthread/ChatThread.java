@@ -145,13 +145,22 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 		
 		else
 		{
-			mStickerPicker.replaceListener(this);
-			mEmoticonPicker.replaceListener(this);
+			updateSharedPopups();
 		}
 		
 
 	}
 	
+	/**
+	 * Updates the mainView for KeyBoard popup as well as updates the Picker Listeners for Emoticon and Stickers
+	 */
+	private void updateSharedPopups()
+	{
+		mShareablePopupLayout.updateMainView(activity.findViewById(R.id.chatThreadParentLayout));
+		mStickerPicker.updateListener(this);
+		mEmoticonPicker.updateListener(this);
+	}
+
 	private void addOnClickListeners()
 	{
 		activity.findViewById(R.id.sticker_btn).setOnClickListener(this);

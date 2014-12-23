@@ -257,7 +257,7 @@ public class EmoticonPicker implements ShareablePopup
 
 	}
 
-	public void replaceListener(EmoticonPickerListener listener)
+	public void updateListener(EmoticonPickerListener listener)
 	{
 		this.mEmoPickerListener = listener;
 	}

@@ -195,4 +195,10 @@ public class KeyboardPopupLayout extends PopUpLayout implements OnDismissListene
 		return ((eventX >= xy[0] && eventX <= (xy[0] + st.getWidth())));
 	}
 
+	public void updateMainView(View view)
+	{
+		this.mainView = view;
+		registerOnGlobalLayoutListener();
+	}
+
 }
