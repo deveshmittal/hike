@@ -5,22 +5,32 @@ import java.util.List;
 
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ImageView.ScaleType;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.MessagesAdapter;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.media.AttachmentPicker;
+import com.bsb.hike.media.AudioRecordView;
+import com.bsb.hike.media.AudioRecordView.AudioRecordListener;
 import com.bsb.hike.media.CaptureImageParser;
 import com.bsb.hike.media.CaptureImageParser.CaptureImageListener;
 import com.bsb.hike.media.EmoticonPicker.EmoticonPickerListener;
@@ -36,12 +46,15 @@ import com.bsb.hike.media.StickerPicker;
 import com.bsb.hike.media.StickerPicker.StickerPickerListener;
 import com.bsb.hike.media.ThemePicker;
 import com.bsb.hike.media.ThemePicker.ThemePickerListener;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HDialog;
 import com.bsb.hike.ui.HikeDialog.HHikeDialogListener;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
@@ -53,10 +66,14 @@ import com.bsb.hike.utils.Utils;
  * @generated
  */
 
-public class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
-		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener
+public abstract class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
+		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>
 {
 	private static final String TAG = "chatthread";
+
+	private static final int FETCH_CONV = 1;
+
+	private static final int LOAD_MORE_MESSAGES = 2;
 
 	protected ChatThreadActivity activity;
 
@@ -76,11 +93,20 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 
 	protected static ShareablePopupLayout mShareablePopupLayout;
 
+	protected AudioRecordView audioRecordView;
+
+	protected Conversation mConversation;
+
+	protected HikeConversationsDatabase mConversationDb;
+
+	protected MessagesAdapter mAdapter;
+
+	protected ArrayList<ConvMessage> messages;
+
 	public ChatThread(ChatThreadActivity activity, String msisdn)
 	{
 		this.activity = activity;
 		this.msisdn = msisdn;
-		init();
 	}
 
 	/**
@@ -106,9 +132,27 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 		init();
 	}
 
+	protected boolean filter()
+	{
+		if (HikeMessengerApp.isStealthMsisdn(msisdn))
+		{
+			if (HikeSharedPreferenceUtil.getInstance(activity).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF) != HikeConstants.STEALTH_ON)
+			{
+				Intent intent = new Intent(activity, HomeActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				activity.startActivity(intent);
+				activity.finish();
+				return false;
+			}
+		}
+		return true;
+	}
+
 	protected void init()
 	{
 		chatThreadActionBar = new ChatThreadActionBar(activity);
+		mConversationDb = HikeConversationsDatabase.getInstance();
+
 	}
 
 	/**
@@ -121,6 +165,8 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 		initShareablePopup();
 		
 		addOnClickListeners();
+		
+		audioRecordView = new AudioRecordView(activity, this);
 	}
 	
 	/**
@@ -165,6 +211,7 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 	{
 		activity.findViewById(R.id.sticker_btn).setOnClickListener(this);
 		activity.findViewById(R.id.emoticon_btn).setOnClickListener(this);
+		activity.findViewById(R.id.send_message).setOnClickListener(this);
 	}
 
 	private void initStickerPicker()
@@ -277,8 +324,21 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 		case R.id.emoticon_btn:
 			emoticonClicked();
 			break;
+		case R.id.send_message:
+			sendButtonClicked();
+			break;
 		}
 
+	}
+
+	protected void sendButtonClicked()
+	{
+		audioRecordClicked();
+	}
+
+	protected void audioRecordClicked()
+	{
+		audioRecordView.show();
 	}
 
 	protected void stickerClicked()
@@ -548,6 +608,145 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 		// Utils.emoticonClicked(getApplicationContext(), emoticonIndex, mComposeView);
 		Logger.i(TAG, " This emoticon was selected : " + emoticonIndex);
 		mShareablePopupLayout.dismiss();
+	}
+
+	@Override
+	public void audioRecordSuccess(String filePath, long duration)
+	{
+		Logger.i(TAG, "Audio Recorded " + filePath + "--" + duration);
+		// initialiseFileTransfer(filePath, null, HikeFileType.AUDIO_RECORDING, HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true, duration, false);
+
+	}
+
+	@Override
+	public void audioRecordCancelled()
+	{
+		Logger.i(TAG, "Audio Recorded failed");
+	}
+
+	/**
+	 * This method calls {@link #fetchConversation(String)} in UI or non UI thread, depending upon async variable For non UI, it starts asyncloader, see {@link ConversationLoader}
+	 * 
+	 * @param async
+	 * @param convId
+	 */
+	protected final void fetchConversation(boolean async)
+	{
+		if (async)
+		{
+			Bundle bundle = new Bundle();
+			activity.getSupportLoaderManager().initLoader(FETCH_CONV, bundle, this);
+		}
+		else
+		{
+			fetchConversation();
+		}
+	}
+
+	/**
+	 * This method is either called in either UI thread or non UI, check {@link #fetchConversation(boolean, String)}
+	 * 
+	 */
+	protected abstract Conversation fetchConversation();
+
+	/**
+	 * This method is called in NON UI thread when list view scrolls
+	 * 
+	 * @return
+	 */
+	protected abstract List<ConvMessage> loadMessages();
+
+	/**
+	 * This function is called in UI thread when conversation is fetched from DB
+	 */
+	protected void fetchConversationFinished(Conversation conversation)
+	{
+		// this function should be called only once per conversation
+		mConversation = conversation;
+		messages.addAll(mConversation.getMessages());
+		mAdapter = new MessagesAdapter(activity.getApplicationContext(), mConversation.getMessages(), mConversation, null);
+		ListView mConversationsView = (ListView) activity.findViewById(R.id.conversations_list);
+		mConversationsView.setAdapter(mAdapter);
+	}
+
+	/**
+	 * This function is called in UI thread when message loading is finished
+	 */
+	protected void loadMessagesFinished(List<ConvMessage> list)
+	{
+		mAdapter.addMessages(list, mAdapter.getCount());
+		mAdapter.notifyDataSetChanged();
+	}
+
+	@Override
+	public Loader<Object> onCreateLoader(int arg0, Bundle arg1)
+	{
+		if (arg0 == FETCH_CONV)
+		{
+			new ConversationLoader(activity.getApplicationContext(), FETCH_CONV);
+		}
+		else if (arg0 == LOAD_MORE_MESSAGES)
+		{
+			new ConversationLoader(activity.getApplicationContext(), LOAD_MORE_MESSAGES);
+		}
+		else
+		{
+			throw new IllegalArgumentException("On create loader is called with wrong loader id");
+		}
+		return null;
+	}
+
+	@Override
+	public void onLoadFinished(Loader<Object> arg0, Object arg1)
+	{
+		ConversationLoader loader = (ConversationLoader) arg0;
+		if (loader.loaderId == FETCH_CONV)
+		{
+			fetchConversationFinished((Conversation) arg1);
+		}
+		else if (loader.loaderId == LOAD_MORE_MESSAGES)
+		{
+			loadMessagesFinished((List<ConvMessage>) arg1);
+		}
+		else
+		{
+			throw new IllegalStateException("Expected data is either Conversation OR List<ConvMessages> , please check " + arg0.getClass().getCanonicalName());
+		}
+	}
+
+	@Override
+	public void onLoaderReset(Loader<Object> arg0)
+	{
+
+	}
+
+	private class ConversationLoader extends AsyncTaskLoader<Object>
+	{
+		int loaderId;
+
+		public ConversationLoader(Context context, int loaderId)
+		{
+			super(context);
+		}
+
+		@Override
+		public Object loadInBackground()
+		{
+
+			return loaderId == FETCH_CONV ? fetchConversation() : loaderId == LOAD_MORE_MESSAGES ? loadMessages() : null;
+		}
+
+		/**
+		 * This has to be done due to some bug in compat library -- http://stackoverflow.com/questions/10524667/android-asynctaskloader-doesnt-start-loadinbackground
+		 */
+		protected void onStartLoading()
+		{
+			if (takeContentChanged())
+			{
+				forceLoad();
+			}
+		}
+
 	}
 
 }
