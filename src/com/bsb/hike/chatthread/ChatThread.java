@@ -1,7 +1,6 @@
 package com.bsb.hike.chatthread;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -17,6 +16,7 @@ import android.support.v4.content.Loader;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ImageView.ScaleType;
 import android.widget.Toast;
 
@@ -42,9 +42,9 @@ import com.bsb.hike.media.StickerPicker;
 import com.bsb.hike.media.StickerPicker.StickerPickerListener;
 import com.bsb.hike.media.ThemePicker;
 import com.bsb.hike.media.ThemePicker.ThemePickerListener;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.ui.HikeDialog;
@@ -68,6 +68,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	private static final String TAG = "chatthread";
 
 	private static final int FETCH_CONV = 1;
+
+	private static final int LOAD_MORE_MESSAGES = 2;
 
 	protected ChatThreadActivity activity;
 
@@ -568,17 +570,62 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	 */
 	protected abstract List<ConvMessage> loadMessages();
 
+	/**
+	 * This function is called in UI thread when conversation is fetched from DB
+	 */
+	protected void fetchConversationFinished(Conversation conversation)
+	{
+		// this function should be called only once per conversation
+		mConversation = conversation;
+		messages.addAll(mConversation.getMessages());
+		mAdapter = new MessagesAdapter(activity.getApplicationContext(), mConversation.getMessages(), mConversation, null);
+		ListView mConversationsView = (ListView) activity.findViewById(R.id.conversations_list);
+		mConversationsView.setAdapter(mAdapter);
+	}
+
+	/**
+	 * This function is called in UI thread when message loading is finished
+	 */
+	protected void loadMessagesFinished(List<ConvMessage> list)
+	{
+		mAdapter.addMessages(list, mAdapter.getCount());
+		mAdapter.notifyDataSetChanged();
+	}
+
 	@Override
 	public Loader<Object> onCreateLoader(int arg0, Bundle arg1)
 	{
-		// TODO Auto-generated method stub
+		if (arg0 == FETCH_CONV)
+		{
+			new ConversationLoader(activity.getApplicationContext(), FETCH_CONV);
+		}
+		else if (arg0 == LOAD_MORE_MESSAGES)
+		{
+			new ConversationLoader(activity.getApplicationContext(), LOAD_MORE_MESSAGES);
+		}
+		else
+		{
+			throw new IllegalArgumentException("On create loader is called with wrong loader id");
+		}
 		return null;
 	}
 
 	@Override
 	public void onLoadFinished(Loader<Object> arg0, Object arg1)
 	{
-		
+		ConversationLoader loader = (ConversationLoader) arg0;
+		if (loader.loaderId == FETCH_CONV)
+		{
+			fetchConversationFinished((Conversation) arg1);
+		}
+		else if (loader.loaderId == LOAD_MORE_MESSAGES)
+		{
+			loadMessagesFinished((List<ConvMessage>) arg1);
+		}
+		else
+		{
+			throw new IllegalStateException("Expected data is either Conversation OR List<ConvMessages> , please check " + arg0.getClass().getCanonicalName());
+		}
 	}
 
 	@Override
@@ -589,8 +636,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 
 	private class ConversationLoader extends AsyncTaskLoader<Object>
 	{
+		int loaderId;
 
-		public ConversationLoader(Context context)
+		public ConversationLoader(Context context, int loaderId)
 		{
 			super(context);
 		}
@@ -599,7 +647,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		public Object loadInBackground()
 		{
 
-			return fetchConversation();
+			return loaderId == FETCH_CONV ? fetchConversation() : loaderId == LOAD_MORE_MESSAGES ? loadMessages() : null;
 		}
 
 		/**
