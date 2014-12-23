@@ -35,7 +35,7 @@ public class AnalyticsConstants
 	
 	public static String TYPE = "t";
 
-	public static String ANALYTICS_EVENT = "le";
+	public static String ANALYTICS_EVENT = "le_android";
 	
 	public static String EVENT_PRIORITY = "ep";
 
@@ -44,7 +44,9 @@ public class AnalyticsConstants
 	public static String METADATA = "md";
 
 	public static String UI_EVENT = "uiEvent";
-	
+
+	public static String NON_UI_EVENT = "nonUiEvent";
+
 	public static String CLICK_EVENT = "click";
 				
 	public static String SUB_TYPE = "st";
@@ -58,4 +60,12 @@ public class AnalyticsConstants
 	public static final String ANALYTICS = "analytics";
 	
 	public static final String ANALYTICS_FILESIZE = "analyticsfs";
+	
+	public static final String EVENT_SUB_TYPE = "st";
+	
+	public static final String EVENT_TAG = "tag";
+	
+	public static final String CURRENT_TIME_STAMP = "cts"; 
+	
+	public static final String EVENT_TAG_VALUE = "mob";
 }

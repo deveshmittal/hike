@@ -21,17 +21,15 @@ public class Event
 
 	private String type;
 		
-	private String eventContext;
-	
-	private String key;
-	
-	private String msisdn;
+	private String subType;
 	
 	private EventPriority priority;
+	
+	private JSONObject metadata;
 					
-	public Event()
+	public Event(JSONObject metadata)
 	{
-		
+		this.metadata = metadata;
 	}
 
 	public void setType(String type)
@@ -39,24 +37,14 @@ public class Event
 		this.type = type;
 	}
 	
-	public void setContext(String eventContext)
+	public void setContext(String subType)
 	{
-		this.eventContext = eventContext;
+		this.subType = subType;
 	}
 	
 	public void setPriority(EventPriority priority)
 	{
 		this.priority = priority;
-	}
-	
-	public void setEventKey(String key)
-	{
-		this.key = key;		
-	}
-	
-	public void setMsisdn(String msisdn)
-	{
-		this.msisdn = msisdn;
 	}
 	
 	public static JSONObject toJson(Event event)
@@ -67,17 +55,12 @@ public class Event
 		try 
 		{
 			data.put(AnalyticsConstants.EVENT_TYPE, event.type);
+			data.put(AnalyticsConstants.EVENT_SUB_TYPE, event.subType);
+			data.put(AnalyticsConstants.EVENT_PRIORITY, event.priority);
+			data.put(AnalyticsConstants.EVENT_TAG, AnalyticsConstants.EVENT_TAG_VALUE);
+			data.put(AnalyticsConstants.CURRENT_TIME_STAMP, System.currentTimeMillis());			
+			data.put(AnalyticsConstants.METADATA, event.metadata);
 			
-			JSONObject metadata = new JSONObject();
-			metadata.put(AnalyticsConstants.SUB_TYPE, event.eventContext);
-			metadata.put(AnalyticsConstants.EVENT_PRIORITY, event.priority);
-			metadata.put(AnalyticsConstants.EVENT_KEY, event.key);
-						
-			if(TextUtils.isEmpty(event.msisdn))
-			{
-				metadata.put(AnalyticsConstants.TO, event.msisdn);				
-			}
-			data.put(AnalyticsConstants.METADATA, metadata);
 			json.put(AnalyticsConstants.TYPE, AnalyticsConstants.ANALYTICS_EVENT);
 			json.put(AnalyticsConstants.DATA, data);
 		}
