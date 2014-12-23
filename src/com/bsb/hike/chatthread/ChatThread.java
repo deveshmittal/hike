@@ -1,11 +1,19 @@
 package com.bsb.hike.chatthread;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
@@ -15,7 +23,10 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.MessagesAdapter;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.media.AttachmentPicker;
 import com.bsb.hike.media.AudioRecordView;
@@ -31,12 +42,15 @@ import com.bsb.hike.media.StickerPicker;
 import com.bsb.hike.media.StickerPicker.StickerPickerListener;
 import com.bsb.hike.media.ThemePicker;
 import com.bsb.hike.media.ThemePicker.ThemePickerListener;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HDialog;
 import com.bsb.hike.ui.HikeDialog.HHikeDialogListener;
+import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
@@ -68,12 +82,11 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 	protected StickerPicker stickerPicker;
 
 	protected AudioRecordView audioRecordView;
-	
+
 	public ChatThread(ChatThreadActivity activity, String msisdn)
 	{
 		this.activity = activity;
 		this.msisdn = msisdn;
-		init();
 	}
 
 	/**
@@ -99,9 +112,27 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 		init();
 	}
 
+	protected boolean filter()
+	{
+		if (HikeMessengerApp.isStealthMsisdn(msisdn))
+		{
+			if (HikeSharedPreferenceUtil.getInstance(activity).getData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF) != HikeConstants.STEALTH_ON)
+			{
+				Intent intent = new Intent(activity, HomeActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				activity.startActivity(intent);
+				activity.finish();
+				return false;
+			}
+		}
+		return true;
+	}
+
 	protected void init()
 	{
 		chatThreadActionBar = new ChatThreadActionBar(activity);
+		mConversationDb = HikeConversationsDatabase.getInstance();
+
 	}
 
 	/**
@@ -221,14 +252,16 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 
 	}
 
-	protected void sendButtonClicked(){
+	protected void sendButtonClicked()
+	{
 		audioRecordClicked();
 	}
-	
-	protected void audioRecordClicked(){
+
+	protected void audioRecordClicked()
+	{
 		audioRecordView.show();
 	}
-	
+
 	protected void stickerClicked()
 	{
 		stickerPicker.showStickerPicker();
@@ -493,4 +526,5 @@ public class ChatThread implements OverflowItemClickListener, View.OnClickListen
 		Logger.i(TAG, "Audio Recorded failed");
 	}
 
+	
 }
