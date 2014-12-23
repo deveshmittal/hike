@@ -7,7 +7,10 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.R;
 import com.bsb.hike.media.OverFlowMenuItem;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 /**
  * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -18,7 +21,6 @@ import com.bsb.hike.utils.Logger;
 public class OneToOneChatThread extends ChatThread
 {
 	private static final String TAG = "oneonechatthread";
-
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
@@ -27,6 +29,7 @@ public class OneToOneChatThread extends ChatThread
 	public OneToOneChatThread(ChatThreadActivity activity, String msisdn)
 	{
 		super(activity, msisdn);
+		
 	}
 
 	@Override
@@ -99,5 +102,19 @@ public class OneToOneChatThread extends ChatThread
 	protected void startHikeGallary(boolean onHike)
 	{
 		super.startHikeGallary(isUserOnHike());
+	}
+	
+	@Override
+	protected Conversation fetchConversation()
+	{
+//		mConversation = mConversationDb.getConversation(msisdn, mes,Utils.isGroupConversation(mContactNumber));
+		return null;
+	}
+	
+	@Override
+	protected List<ConvMessage> loadMessages()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

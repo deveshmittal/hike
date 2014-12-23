@@ -6,6 +6,9 @@ import java.util.List;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.R;
+import com.bsb.hike.media.OverFlowMenuItem;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 
 /**
  * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -103,5 +106,19 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			showThemePicker();
 		}
 		super.itemClicked(item);
+	}
+
+	@Override
+	protected Conversation fetchConversation()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	protected List<ConvMessage> loadMessages()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
