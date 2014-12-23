@@ -1,5 +1,6 @@
 package com.bsb.hike.chatthread;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -102,6 +104,16 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected MessagesAdapter mAdapter;
 
 	protected List<ConvMessage> messages;
+
+	protected Handler uiHandler = new Handler()
+	{
+		public void handleMessage(android.os.Message msg)
+		{
+			switch (msg.what)
+			{
+			}
+		};
+	};
 
 	public ChatThread(ChatThreadActivity activity, String msisdn)
 	{
@@ -620,10 +632,10 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	 */
 	protected final void fetchConversation(boolean async)
 	{
+		Logger.i(TAG, "fetch conversation called , isAsync " + async);
 		if (async)
 		{
-			Bundle bundle = new Bundle();
-			activity.getSupportLoaderManager().initLoader(FETCH_CONV, bundle, this);
+			activity.getSupportLoaderManager().initLoader(FETCH_CONV, null, this);
 		}
 		else
 		{
@@ -671,19 +683,19 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	@Override
 	public Loader<Object> onCreateLoader(int arg0, Bundle arg1)
 	{
+		Logger.d(TAG, "on create loader is called " + arg0);
 		if (arg0 == FETCH_CONV)
 		{
-			new ConversationLoader(activity.getApplicationContext(), FETCH_CONV);
+			return new ConversationLoader(activity.getApplicationContext(), FETCH_CONV,this);
 		}
 		else if (arg0 == LOAD_MORE_MESSAGES)
 		{
-			new ConversationLoader(activity.getApplicationContext(), LOAD_MORE_MESSAGES);
+			return new ConversationLoader(activity.getApplicationContext(), LOAD_MORE_MESSAGES,this);
 		}
 		else
 		{
 			throw new IllegalArgumentException("On create loader is called with wrong loader id");
 		}
-		return null;
 	}
 
 	@Override
@@ -710,20 +722,30 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 
 	}
 
-	private class ConversationLoader extends AsyncTaskLoader<Object>
+	private static class ConversationLoader extends AsyncTaskLoader<Object>
 	{
 		int loaderId;
+		private Conversation conversation;
+		private List<ConvMessage> list;
+		WeakReference<ChatThread> chatThread;
 
-		public ConversationLoader(Context context, int loaderId)
+		public ConversationLoader(Context context, int loaderId,ChatThread chatThread)
 		{
 			super(context);
+			Logger.i(TAG, "conversation loader object " + loaderId);
+			this.loaderId = loaderId;
+			this.chatThread = new WeakReference<ChatThread>(chatThread);
 		}
 
 		@Override
 		public Object loadInBackground()
 		{
-
-			return loaderId == FETCH_CONV ? fetchConversation() : loaderId == LOAD_MORE_MESSAGES ? loadMessages() : null;
+			Logger.i(TAG, "load in background of conversation loader");
+			if (chatThread.get() != null)
+			{
+				return loaderId == FETCH_CONV ? chatThread.get().fetchConversation() : loaderId == LOAD_MORE_MESSAGES ? chatThread.get().loadMessages() : null;
+			}
+			return null;
 		}
 
 		/**
@@ -731,8 +753,12 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		 */
 		protected void onStartLoading()
 		{
-			if (takeContentChanged())
-			{
+			Logger.i(TAG, "conversation loader onStartLoading");
+			if(loaderId == FETCH_CONV && conversation!=null){
+				deliverResult(conversation);
+			}else if(loaderId == LOAD_MORE_MESSAGES && list!=null){
+				deliverResult(list);
+			}else{
 				forceLoad();
 			}
 		}
