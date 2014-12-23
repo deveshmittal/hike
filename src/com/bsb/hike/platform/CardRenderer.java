@@ -339,10 +339,12 @@ public class CardRenderer implements View.OnLongClickListener {
 
     private void sendLogEvent(String cardName, String actionText) throws JSONException {
         JSONObject analytics = new JSONObject();
-        analytics.put(CardConstants.CARD_NAME, cardName);
-        analytics.put(CardConstants.ACTION_TEXT, actionText);
-        analytics.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.CONTENT_CARD_TAPPED);
-        analytics.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
+        JSONObject metaDataJSON = new JSONObject();
+        metaDataJSON.put(CardConstants.CARD_NAME, cardName);
+        metaDataJSON.put(CardConstants.ACTION_TEXT, actionText);
+        metaDataJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.CONTENT_CARD_TAPPED);
+        metaDataJSON.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
+        analytics.put(HikeConstants.METADATA, metaDataJSON);
         Utils.sendLogEvent(analytics);
     }
 
