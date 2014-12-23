@@ -72,14 +72,9 @@ public class DBBackupRestore
 	 */
 	public void scheduleNextAutoBackup()
 	{
-		long scheduleTime = 0;
-		Calendar c = Calendar.getInstance();
-		c.add(Calendar.DAY_OF_MONTH, 0);
-		c.set(Calendar.HOUR_OF_DAY, 3);
-		c.set(Calendar.MINUTE, 0);
-		c.set(Calendar.SECOND, 0);
-		c.set(Calendar.MILLISECOND, 0);
-		scheduleTime = c.getTimeInMillis();
+		long scheduleTime = Utils.getTimeInMillis(Calendar.getInstance(), 3, 0, 0, 0);
+		// If the scheduled time is in the past OR the account restore process(at the time of signup) is not yet complete.
+		// Scheduled time is increased by 24 hours i.e. same time next day.
 		if (scheduleTime < System.currentTimeMillis() || !mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false))
 		{
 			scheduleTime += 24 * 60 * 60 * 1000;

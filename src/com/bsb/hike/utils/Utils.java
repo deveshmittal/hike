@@ -5034,11 +5034,12 @@ public class Utils
 	 * @param minutes
 	 * @param seconds
 	 */
-	public static long getTimeInMillis(Calendar calendar, int hour, int minutes, int seconds)
+	public static long getTimeInMillis(Calendar calendar, int hour, int minutes, int seconds, int milliseconds)
 	{
 		calendar.set(Calendar.HOUR_OF_DAY, hour);
 		calendar.set(Calendar.MINUTE, minutes);
 		calendar.set(Calendar.SECOND, seconds);
+		calendar.set(Calendar.MILLISECOND, milliseconds);
 		return calendar.getTimeInMillis();
 	}
 	public static void disableNetworkListner(Context context)
