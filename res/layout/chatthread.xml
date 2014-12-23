@@ -309,7 +309,7 @@
                             android:textSize="17sp" />
 
                         <ImageButton
-                            android:id="@+id/chat_emo_btn"
+                            android:id="@+id/emo_btn"
                             android:layout_width="33dp"
                             android:layout_height="wrap_content"
                             android:background="@null"

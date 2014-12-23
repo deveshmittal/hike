@@ -178,7 +178,6 @@
     <color name="description_lightgrey">#bfbcb6</color>
     <color name="protip_dismiss">#a59b94</color>
     <color name="action_bar_item_pressed">#9A33b5e5</color>
-    <color name="sticker_shop_icon_pressed">#9A33b5e5</color>
     <color name="sms_popup">#0f8fe1</color>
     <color name="humanoid_bg">#a4e2f6</color>
     <color name="humanoid_btn_normal">#c1f0ff</color>
