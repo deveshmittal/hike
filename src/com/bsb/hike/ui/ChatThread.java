@@ -2405,8 +2405,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mLabel = mConversation.getLabel();
 		if (!(mConversation instanceof GroupConversation))
 		{
-			// To Show Full Name on ActionBar in One-to-One Conv
-			mLabel = Utils.getFirstNameAndSurname(mLabel);
+			mLabel = Utils.getFirstName(mLabel);
 		}
 
 		if (showKeyboard && !wasOrientationChanged)
