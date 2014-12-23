@@ -342,6 +342,7 @@ public class CardRenderer implements View.OnLongClickListener {
         analytics.put(CardConstants.CARD_NAME, cardName);
         analytics.put(CardConstants.ACTION_TEXT, actionText);
         analytics.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.CONTENT_CARD_TAPPED);
+        analytics.put(HikeConstants.LogEvent.SOURCE_APP, HikePlatformConstants.GAME_SDK_ID);
         Utils.sendLogEvent(analytics);
     }
 

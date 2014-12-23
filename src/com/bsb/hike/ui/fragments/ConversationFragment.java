@@ -2500,6 +2500,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			 * Need to set adapter again after removing footer view because getListView.getChildCount doesn't update. (Hack)
 			 */
 			setListAdapter(mAdapter);
+			Logger.d("nux", "Removed NUX invite footer");
 		}
 	}
 

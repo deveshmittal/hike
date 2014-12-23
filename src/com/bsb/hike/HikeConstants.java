@@ -1354,6 +1354,8 @@ public class HikeConstants
 	{
 		// Common tags for Countly. Don't change.
 
+		public static final String SOURCE_APP = "source_app";
+		
 		public static final String TAG = "tag";
 
 		public static final String DEVICE_ID = "device_id";
