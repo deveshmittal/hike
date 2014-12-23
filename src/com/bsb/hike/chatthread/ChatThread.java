@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -95,6 +96,16 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected MessagesAdapter mAdapter;
 
 	protected List<ConvMessage> messages;
+
+	protected Handler uiHandler = new Handler()
+	{
+		public void handleMessage(android.os.Message msg)
+		{
+			switch (msg.what)
+			{
+			}
+		};
+	};
 
 	public ChatThread(ChatThreadActivity activity, String msisdn)
 	{
