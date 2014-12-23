@@ -1,14 +1,16 @@
 package com.bsb.hike.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import org.json.JSONObject;
 
-import com.bsb.hike.HikeConstants;
+import android.content.Context;
+import android.text.TextUtils;
+
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-
-import android.content.Context;
 
 public class NUXManager
 {
@@ -24,11 +26,18 @@ public class NUXManager
 
 	private static final String STRING_SPLIT_SEPERATOR = ", ";
 
-	private ArrayList<String> list_nux_contacts;
+	private HashSet<String> list_nux_contacts;
 
-	private NUXManager()
+	private NUXManager(Context context)
 	{
-		list_nux_contacts = new ArrayList<String>();
+		list_nux_contacts = new HashSet<String>();
+		HikeSharedPreferenceUtil mmprefs = HikeSharedPreferenceUtil.getInstance(context);
+		String msisdn = mmprefs.getData(CURRENT_NUX_CONTACTS, null);
+		if (!TextUtils.isEmpty(msisdn))
+		{
+			String[] arrmsisdn = msisdn.split(STRING_SPLIT_SEPERATOR);
+			list_nux_contacts.addAll(Arrays.asList(arrmsisdn));
+		}
 	}
 
 	public static NUXManager getInstance(Context context)
@@ -37,7 +46,7 @@ public class NUXManager
 		{
 			synchronized (NUXManager.class)
 			{
-				mmManager = new NUXManager();
+				mmManager = new NUXManager(context);
 			}
 		}
 		return mmManager;
@@ -51,38 +60,22 @@ public class NUXManager
 		// context.startActivity(in);
 	}
 
-	public void storeNUXContact(ArrayList<String> msisdn, Context context)
+	public void saveNUXContact(HashSet<String> msisdn, Context context)
 	{
 		HikeSharedPreferenceUtil mmpref = HikeSharedPreferenceUtil.getInstance(context);
 
-		String presentlist = mmpref.getData(CURRENT_NUX_CONTACTS, null);
-		String contacts = msisdn.toString();
-		contacts = contacts.replace("[", "").replace("]", "");
-		if (presentlist != null)
-		{
-			presentlist = presentlist.concat(contacts);
-		}
-		else
-		{
-			presentlist = contacts;
-		}
-		mmpref.saveData(CURRENT_NUX_CONTACTS, presentlist);
 		list_nux_contacts.addAll(msisdn);
+
+		mmpref.saveData(CURRENT_NUX_CONTACTS, list_nux_contacts.toString().replace("[", "").replace("]", ""));
 	}
 
-	public void removeNUXCONTACT(ArrayList<String> msisdn, Context context)
+	public void removeNUXContact(HashSet<String> msisdn, Context context)
 	{
 		HikeSharedPreferenceUtil mmpref = HikeSharedPreferenceUtil.getInstance(context);
-		String presentlist = mmpref.getData(CURRENT_NUX_CONTACTS, null);
-
-		if (presentlist == null)
-			return;
 
 		list_nux_contacts.removeAll(msisdn);
-		String contacts = list_nux_contacts.toString();
-		contacts = contacts.replace("[", "").replace("]", "");
 
-		mmpref.saveData(CURRENT_NUX_CONTACTS, contacts);
+		mmpref.saveData(CURRENT_NUX_CONTACTS, list_nux_contacts.toString().replace("[", "").replace("]", ""));
 
 	}
 
@@ -126,7 +119,7 @@ public class NUXManager
 		return HikeSharedPreferenceUtil.getInstance(context).getData(IS_NUX_ACTIVE, false);
 	}
 
-	public ArrayList<String> getAllNUXContacts()
+	public HashSet<String> getAllNUXContacts()
 	{
 		return list_nux_contacts;
 	}
@@ -134,7 +127,7 @@ public class NUXManager
 	public void sendMessage(ArrayList<String> msisdn)
 	{
 		JSONObject mmObject = null;
-		for (String s : msisdn)
+		for (String r : msisdn)
 		{
 			mmObject = new JSONObject();
 
@@ -142,9 +135,14 @@ public class NUXManager
 		}
 
 	}
-	
+
 	public void parseJson(String json)
 	{
-		
+
+	}
+
+	public void removeData(Context context)
+	{
+		HikeSharedPreferenceUtil.getInstance(context).removeData(CURRENT_NUX_CONTACTS);
 	}
 }
