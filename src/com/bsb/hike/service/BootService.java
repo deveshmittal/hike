@@ -25,10 +25,17 @@ public class BootService extends BroadcastReceiver
 		{
 			PreloadNotificationSchedular.scheduleNextAlarm(ctx);
 		}
+		//TODO  remove this check
 		if (TextUtils.isEmpty(mprefs.getData(HikeMessengerApp.TOKEN_SETTING, null)))
 		{
 			return;
 		}
+		
+		if(!Utils.isUserSignedUp(ctx.getApplicationContext(), false))
+		{
+			return;
+		}
+		
 		Intent startServiceIntent = new Intent(ctx, HikeService.class);
 		ctx.startService(startServiceIntent);
 	}

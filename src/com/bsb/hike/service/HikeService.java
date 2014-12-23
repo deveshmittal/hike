@@ -190,7 +190,7 @@ public class HikeService extends Service
 		// If user is not signed up. Do not initialize MQTT or serve any SDK requests. Instead, re-route to Welcome/Signup page.
 		// TODO : This is a fix to handle edge case when a request comes from SDK and user has not signed up yet. In future we must make a separate bound service for handling SDK
 		// related requests.
-		if (!isUserSignedUp())
+		if (!Utils.isUserSignedUp(getApplicationContext(), true))
 		{
 			return;
 		}
@@ -203,10 +203,6 @@ public class HikeService extends Service
 	 */
 	private void initHikeService()
 	{
-		HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED, null);
-
-		HikeService.this.sendBroadcast(new Intent(HikeService.SEND_RAI_TO_SERVER_ACTION));
-
 		Logger.d("TestUpdate", "Service started");
 
 		HikeSharedPreferenceUtil mprefs = HikeSharedPreferenceUtil.getInstance(getApplicationContext());
@@ -305,28 +301,6 @@ public class HikeService extends Service
 		setInitialized(true);
 	}
 
-	public boolean isUserSignedUp()
-	{
-		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(getApplicationContext());
-		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
-		{
-			Intent i = new Intent(getApplicationContext(), WelcomeActivity.class);
-			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			getApplicationContext().startActivity(i);
-			return false;
-		}
-
-		if (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null)
-		{
-			Intent i = new Intent(getApplicationContext(), SignupActivity.class);
-			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			getApplicationContext().startActivity(i);
-			return false;
-		}
-
-		return true;
-	}
-
 	private void assignUtilityThread()
 	{
 		/**
@@ -356,11 +330,17 @@ public class HikeService extends Service
 		Logger.d("HikeService", "Start MQTT Thread.");
 
 		// In-case if service is already started, the onStart command calls this method. Proceed only if service is initialized.
+		//TODO remove this check ??
+		
 		if (!isInitialized())
 		{
 			initHikeService();
 		}
 
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SERVICE_STARTED, null);
+
+		HikeService.this.sendBroadcast(new Intent(HikeService.SEND_RAI_TO_SERVER_ACTION));
+		
 		mMqttManager.connectOnMqttThread();
 		Logger.d("HikeService", "Intent is " + intent);
 		if (intent != null && intent.hasExtra(HikeConstants.Extras.SMS_MESSAGE))

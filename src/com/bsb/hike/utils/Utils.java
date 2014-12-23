@@ -604,6 +604,61 @@ public class Utils
 		return false;
 	}
 	
+	/**
+	 * Returns true if the user has successfully signedup. This means user is has passed signuptask.
+	 * Returns false otherwise. In this case it will open either SignupActivity or WelcomeActivity.
+	 * 
+	 * @param context
+	 * @param launchSignup  -- true if you want to launch respective activity, false otherwise
+	 * @return
+	 */
+	public static boolean isUserSignedUp(Context context, boolean launchSignup)
+	{
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(context);
+		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
+		{
+			if(launchSignup)
+			{
+				Intent i = new Intent(context, WelcomeActivity.class);
+				i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(i);
+			}
+			return false;
+		}
+
+		if (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null)
+		{
+			if(launchSignup)
+			{
+				Intent i = new Intent(context, SignupActivity.class);
+				i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(i);
+			}
+			return false;
+		}
+
+		if (!settingPref.getData(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false) || !settingPref.getData(HikeMessengerApp.SIGNUP_COMPLETE, false))
+		{
+			if (isUserUpgrading(context))
+			{
+				settingPref.saveData(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+				settingPref.saveData(HikeMessengerApp.SIGNUP_COMPLETE, true);
+				return true;
+			}
+			else
+			{
+				if(launchSignup)
+				{
+					Intent i = new Intent(context, SignupActivity.class);
+					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					context.startActivity(i);
+				}
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	private static boolean isUserUpgrading(Context context)
 	{
 		SharedPreferences settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
