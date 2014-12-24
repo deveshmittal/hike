@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 
 public class Conversation implements Comparable<Conversation>
@@ -69,7 +70,19 @@ public class Conversation implements Comparable<Conversation>
 	private String lastPin;
 
 	private MetaData metaData;
+	
+	private ChatTheme theme;
 
+	public void setTheme(ChatTheme theme)
+	{
+		this.theme = theme;
+	}
+	
+	public ChatTheme getTheme()
+	{
+		return theme;
+	}
+	
 	public String getLastPin()
 	{
 		return lastPin;

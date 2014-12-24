@@ -15,8 +15,14 @@ import android.os.Handler;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ImageView.ScaleType;
@@ -69,13 +75,15 @@ import com.bsb.hike.utils.Utils;
  */
 
 public abstract class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
-		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>
+		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener
 {
 	private static final String TAG = "chatthread";
 
-	private static final int FETCH_CONV = 1;
+	protected static final int FETCH_CONV = 1;
 
-	private static final int LOAD_MORE_MESSAGES = 2;
+	protected static final int LOAD_MORE_MESSAGES = 2;
+
+	protected static final int SHOW_TOAST = 3;
 
 	protected ChatThreadActivity activity;
 
@@ -111,6 +119,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		{
 			switch (msg.what)
 			{
+			case SHOW_TOAST:
+				showToast(msg.arg1);
+				break;
 			}
 		};
 	};
@@ -146,12 +157,11 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		fetchConversation(true);
 	}
 
-
 	protected void init()
 	{
 		chatThreadActionBar = new ChatThreadActionBar(activity);
 		mConversationDb = HikeConversationsDatabase.getInstance();
-		
+
 	}
 
 	/**
@@ -401,21 +411,22 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 
 	protected boolean updateUIAsPerTheme(ChatTheme theme)
 	{
-		if (currentTheme != theme)
+		if (theme != null && currentTheme != theme)
 		{
 			Logger.i(TAG, "update ui for theme " + theme);
 			currentTheme = theme;
 			// messages theme changed, call adapter
+			mAdapter.setChatTheme(theme);
 			// action bar
 			activity.updateActionBarColor(theme.headerBgResId());
 			// background image
-			setBackgroundImage(theme);
+			setBackground(theme);
 			return true;
 		}
 		return false;
 	}
 
-	protected void setBackgroundImage(ChatTheme theme)
+	protected void setBackground(ChatTheme theme)
 	{
 		ImageView backgroundImage = (ImageView) activity.findViewById(R.id.background);
 		if (theme == ChatTheme.DEFAULT)
@@ -591,7 +602,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 
 	protected void setConversationTheme()
 	{
-		updateUIAsPerTheme(ChatTheme.DEFAULT);
+
 	}
 
 	@Override
@@ -655,7 +666,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	 * @return
 	 */
 	protected abstract List<ConvMessage> loadMessages();
-	
+
 	protected abstract int getContentView();
 
 	/**
@@ -664,11 +675,29 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected void fetchConversationFinished(Conversation conversation)
 	{
 		// this function should be called only once per conversation
+		Logger.i(TAG, "conversation fetch success");
 		mConversation = conversation;
-		messages.addAll(mConversation.getMessages());
+		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 		mAdapter = new MessagesAdapter(activity.getApplicationContext(), mConversation.getMessages(), mConversation, null);
 		ListView mConversationsView = (ListView) activity.findViewById(R.id.conversations_list);
+
 		mConversationsView.setAdapter(mAdapter);
+		mConversationsView.setSelection(mAdapter.getCount());
+		mConversationsView.setOnItemLongClickListener(this);
+		mConversationsView.setOnTouchListener(this);
+		mConversationsView.setOnScrollListener(this);
+
+		updateUIAsPerTheme(mConversation.getTheme());// it has to be done after setting adapter
+
+	}
+
+	/*
+	 * This function is called in UI thread when conversation fetch is failed from DB, By default we finish activity, override in case you want to do something else
+	 */
+	protected void fetchConversationFailed()
+	{
+		Logger.e(TAG, "conversation fetch failed");
+		activity.finish();
 	}
 
 	/**
@@ -676,8 +705,15 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	 */
 	protected void loadMessagesFinished(List<ConvMessage> list)
 	{
-		mAdapter.addMessages(list, mAdapter.getCount());
-		mAdapter.notifyDataSetChanged();
+		if (list == null)
+		{
+			Logger.e(TAG, "load message failed");
+		}
+		else
+		{
+			mAdapter.addMessages(list, mAdapter.getCount());
+			mAdapter.notifyDataSetChanged();
+		}
 	}
 
 	@Override
@@ -686,11 +722,11 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		Logger.d(TAG, "on create loader is called " + arg0);
 		if (arg0 == FETCH_CONV)
 		{
-			return new ConversationLoader(activity.getApplicationContext(), FETCH_CONV,this);
+			return new ConversationLoader(activity.getApplicationContext(), FETCH_CONV, this);
 		}
 		else if (arg0 == LOAD_MORE_MESSAGES)
 		{
-			return new ConversationLoader(activity.getApplicationContext(), LOAD_MORE_MESSAGES,this);
+			return new ConversationLoader(activity.getApplicationContext(), LOAD_MORE_MESSAGES, this);
 		}
 		else
 		{
@@ -704,11 +740,26 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		ConversationLoader loader = (ConversationLoader) arg0;
 		if (loader.loaderId == FETCH_CONV)
 		{
-			fetchConversationFinished((Conversation) arg1);
+			if (arg1 == null)
+			{
+				fetchConversationFailed();
+			}
+			else
+			{
+				fetchConversationFinished((Conversation) arg1);
+			}
 		}
 		else if (loader.loaderId == LOAD_MORE_MESSAGES)
 		{
-			loadMessagesFinished((List<ConvMessage>) arg1);
+			if (arg1 == null)
+			{
+				loadMessagesFinished(null);
+			}
+			else
+			{
+				loadMessagesFinished((List<ConvMessage>) arg1);
+			}
+
 		}
 		else
 		{
@@ -725,11 +776,14 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	private static class ConversationLoader extends AsyncTaskLoader<Object>
 	{
 		int loaderId;
+
 		private Conversation conversation;
+
 		private List<ConvMessage> list;
+
 		WeakReference<ChatThread> chatThread;
 
-		public ConversationLoader(Context context, int loaderId,ChatThread chatThread)
+		public ConversationLoader(Context context, int loaderId, ChatThread chatThread)
 		{
 			super(context);
 			Logger.i(TAG, "conversation loader object " + loaderId);
@@ -754,15 +808,47 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		protected void onStartLoading()
 		{
 			Logger.i(TAG, "conversation loader onStartLoading");
-			if(loaderId == FETCH_CONV && conversation!=null){
+			if (loaderId == FETCH_CONV && conversation != null)
+			{
 				deliverResult(conversation);
-			}else if(loaderId == LOAD_MORE_MESSAGES && list!=null){
+			}
+			else if (loaderId == LOAD_MORE_MESSAGES && list != null)
+			{
 				deliverResult(list);
-			}else{
+			}
+			else
+			{
 				forceLoad();
 			}
 		}
 
 	}
 
+	@Override
+	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3)
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event)
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState)
+	{
+		// TODO Auto-generated method stub
+
+	}
 }
