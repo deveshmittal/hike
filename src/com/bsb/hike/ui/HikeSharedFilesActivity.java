@@ -43,6 +43,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeSharedFileAdapter;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.Conversation;
@@ -412,7 +414,12 @@ public class HikeSharedFilesActivity extends HikeAppStateBaseFragmentActivity im
 		}
 		else
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.OPEN_THUMBNAIL_VIA_GALLERY);
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.OPEN_THUMBNAIL_VIA_GALLERY);
+			Event e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(getApplicationContext()).record(e);
+
 			ArrayList<HikeSharedFile> sharedMediaItems = new ArrayList<HikeSharedFile>(sharedFilesList.size());
 			sharedMediaItems.addAll(sharedFilesList);
 			Collections.reverse(sharedMediaItems);
