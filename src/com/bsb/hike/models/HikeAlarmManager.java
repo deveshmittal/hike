@@ -1,8 +1,12 @@
 package com.bsb.hike.models;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.AnalyticsSender;
+import com.bsb.hike.analytics.Event;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.utils.Logger;
@@ -184,7 +188,12 @@ public class HikeAlarmManager
 			int retryCount  = intent.getExtras().getInt(HikeConstants.RETRY_COUNT, 0);
 			Logger.i(LOG_TAG, "processTasks called with request Code "+requestCode+ "time = "+System.currentTimeMillis() +" retryCount = "+retryCount);
 			
-			Utils.sendUILogEvent(HikeConstants.LogEvent.RETRY_NOTIFICATION_SENT);
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.RETRY_NOTIFICATION_SENT);
+			Event e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(context).record(e);
+
 			HikeNotification.getInstance(context).showNotificationForCurrentMsgStack(true, retryCount);
 			break;
 			case HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS:
