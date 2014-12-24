@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -22,6 +24,8 @@ import android.widget.RelativeLayout;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.ui.HomeActivity;
 
@@ -130,7 +134,12 @@ public class FestivePopup
 			@Override
 			public void onClick(View v) {
 				stopFestiveAnimAndPopup(activity);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FESTIVE_POPUP_WISH);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FESTIVE_POPUP_WISH);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(activity.getApplicationContext()).record(e);
+
 				Intent intent = IntentManager.getForwardStickerIntent(activity, getStickerId(popupType), getCatId(popupType), false);
 				intent.putExtra(HikeConstants.Extras.SELECT_ALL_INITIALLY, true);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -141,7 +150,11 @@ public class FestivePopup
 			
 			@Override
 			public void onClick(View v) {
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FESTIVE_POPUP_DISMISS);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FESTIVE_POPUP_DISMISS);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(activity.getApplicationContext()).record(e);
 				stopFestiveAnimAndPopup(activity);
 			}
 		});
