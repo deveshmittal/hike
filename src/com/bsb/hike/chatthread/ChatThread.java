@@ -190,15 +190,11 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		{
 			int[] mEatOuterTouchIds = new int[] { R.id.sticker_btn, R.id.emoticon_btn, R.id.send_message };
 
-			List<ShareablePopup> sharedPopups = new ArrayList<ShareablePopup>();
-			
 			initStickerPicker();
 			initEmoticonPicker();
 			
-			sharedPopups.add(mEmoticonPicker);
-			sharedPopups.add(mStickerPicker);
 			mShareablePopupLayout = new ShareablePopupLayout(activity.getApplicationContext(), activity.findViewById(R.id.chatThreadParentLayout),
-					(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)), mEatOuterTouchIds, sharedPopups);
+					(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)), mEatOuterTouchIds);
 		}
 		
 		else

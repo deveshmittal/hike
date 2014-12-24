@@ -136,21 +136,13 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 			return;
 		}
 
-		if (mLayoutResId == -1)
-		{
-			/**
-			 * Use the default layout
-			 */
-			viewToDisplay = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.sticker_layout, null);
-		}
+		/**
+		 * Use default view. or the view passed in the constructor
+		 */
 
-		else
-		{
-			/**
-			 * Use the resId passed in the constructor
-			 */
-			viewToDisplay = (ViewGroup) LayoutInflater.from(mContext).inflate(mLayoutResId, null);
-		}
+		mLayoutResId = (mLayoutResId == -1) ? R.layout.emoticon_layout : mLayoutResId;
+
+		viewToDisplay = (ViewGroup) LayoutInflater.from(mContext).inflate(mLayoutResId, null);
 
 		initViewComponents(viewToDisplay);
 	}

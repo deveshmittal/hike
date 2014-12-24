@@ -143,22 +143,13 @@ public class EmoticonPicker implements ShareablePopup
 			return;
 		}
 
-		if (mLayoutResId == -1)
-		{
-			/**
-			 * Use default view.
-			 */
+		/**
+		 * Use default view. or the view passed in the constructor
+		 */
 
-			mViewToDisplay = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.emoticon_layout, null);
-		}
+		mLayoutResId = (mLayoutResId == -1) ? R.layout.emoticon_layout : mLayoutResId;
 
-		else
-		{
-			/**
-			 * Use the resId passed in the constructor
-			 */
-			mViewToDisplay = (ViewGroup) LayoutInflater.from(mContext).inflate(mLayoutResId, null);
-		}
+		mViewToDisplay = (ViewGroup) LayoutInflater.from(mContext).inflate(mLayoutResId, null);
 
 		initViewComponents(mViewToDisplay);
 	}

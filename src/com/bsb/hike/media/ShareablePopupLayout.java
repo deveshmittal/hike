@@ -21,8 +21,6 @@ public class ShareablePopupLayout
 {
 	private KeyboardPopupLayout mKeyboardPopupLayout;
 
-	private List<ShareablePopup> mList;
-
 	private View mViewToDisplay;
 
 	private View prevVisibleView;
@@ -38,11 +36,10 @@ public class ShareablePopupLayout
 	 * @param eatOuterTouchIds
 	 */
 
-	public ShareablePopupLayout(Context context, View mainView, int firstTimeHeight, int[] eatOuterTouchIds, List<ShareablePopup> shareablePopupsList)
+	public ShareablePopupLayout(Context context, View mainView, int firstTimeHeight, int[] eatOuterTouchIds)
 	{
 		initViewToDisplay(context);
 		initPopupLayout(context, mainView, firstTimeHeight, eatOuterTouchIds);
-		mList = new ArrayList<ShareablePopup>(shareablePopupsList);
 	}
 
 	private void initViewToDisplay(Context context)
@@ -68,14 +65,6 @@ public class ShareablePopupLayout
 		}
 	}
 
-	public void addToShareableList(ShareablePopup shareablePopup)
-	{
-		if (!mList.contains(shareablePopup))
-		{
-			this.mList.add(shareablePopup);
-
-		}
-	}
 
 	/**
 	 * Utility method used for displaying the Popups using the Keyboard Popup layout. Appropriate comments have been added in the code flow for easily readability
@@ -136,6 +125,7 @@ public class ShareablePopupLayout
 		if (prevVisibleView == null)
 		{
 			prevVisibleView = popupView;
+			popupView.setVisibility(View.VISIBLE);
 		}
 
 		else if (prevVisibleView != popupView)

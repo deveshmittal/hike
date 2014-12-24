@@ -189,7 +189,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		else
 		{
-			fetchHikeUser(msisdn);
+			FetchHikeUser.fetchHikeUser(activity.getApplicationContext(), msisdn);
 		}
 		
 		if(shouldShowLastSeen(favoriteType))
@@ -257,41 +257,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			return PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 		}
 		return false;
-	}
-
-	private void fetchHikeUser(final String msisdn)
-	{
-		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/profile/" + msisdn, RequestType.HIKE_JOIN_TIME, new HikeHttpCallback()
-		{
-			@Override
-			public void onSuccess(JSONObject response)
-			{
-				Logger.d(TAG,  "Response for account/profile request: " + response.toString());
-				try
-				{
-					
-					JSONObject profile = response.getJSONObject(HikeConstants.PROFILE);
-					long hikeJoinTime = profile.optLong(HikeConstants.JOIN_TIME, 0);
-					if (hikeJoinTime > 0)
-					{
-						addUnkownContactBlockHeader();
-						hikeJoinTime = Utils.applyServerTimeOffset(activity, hikeJoinTime);
-						HikeMessengerApp.getPubSub().publish(HikePubSub.HIKE_JOIN_TIME_OBTAINED, new Pair<String, Long>(msisdn, hikeJoinTime));
-						ContactManager.getInstance().updateHikeStatus(activity.getApplicationContext(), msisdn, true);
-						mConversationDb.updateOnHikeStatus(msisdn, true);
-						HikeMessengerApp.getPubSub().publish(HikePubSub.USER_JOINED, msisdn);
-					}
-				}
-				
-				catch (JSONException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		});
-		
-		HikeHTTPTask getHikeJoinTimeTask = new HikeHTTPTask(null, -1);
-		Utils.executeHttpTask(getHikeJoinTimeTask, hikeHttpRequest);
 	}
 
 	protected void addUnkownContactBlockHeader()
