@@ -155,7 +155,7 @@ class AnalyticsStore
 					
 					for(Event e : events)
 					{
-						JSONObject json = Event.toJson(e);
+						JSONObject json = e.toJson(e);
 						
 						fileWriter.write(json + AnalyticsConstants.NEW_LINE);
 					}
