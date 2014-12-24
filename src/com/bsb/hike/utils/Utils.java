@@ -153,6 +153,8 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.Event;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -5117,4 +5119,32 @@ public class Utils
 		return true;
 	}
 
+	/**
+	 * Used to create the analytics event in json format
+	 * @param event Event for which json is generated
+	 * @return JSONObject 
+	 */
+	public static JSONObject toJson(Event event)
+	{		
+		JSONObject json = new JSONObject();
+		JSONObject data = new JSONObject();
+		
+		try 
+		{
+			data.put(AnalyticsConstants.EVENT_TYPE, event.getType());
+			data.put(AnalyticsConstants.EVENT_SUB_TYPE, event.getContext());
+			data.put(AnalyticsConstants.EVENT_PRIORITY, event.getPriority());
+			data.put(AnalyticsConstants.EVENT_TAG, AnalyticsConstants.EVENT_TAG_VALUE);
+			data.put(AnalyticsConstants.CURRENT_TIME_STAMP, System.currentTimeMillis());			
+			data.put(AnalyticsConstants.METADATA, event.getMetadata());
+			
+			json.put(AnalyticsConstants.TYPE, AnalyticsConstants.ANALYTICS_EVENT);
+			json.put(AnalyticsConstants.DATA, data);
+		}
+		catch (JSONException e) 
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}		
+		return json;
+	}	
 }

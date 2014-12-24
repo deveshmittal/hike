@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import android.content.Context;
 
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 
 /**
  * @author rajesh
@@ -155,7 +156,7 @@ class AnalyticsStore
 					
 					for(Event e : events)
 					{
-						JSONObject json = e.toJson(e);
+						JSONObject json = Utils.toJson(e);
 						
 						fileWriter.write(json + AnalyticsConstants.NEW_LINE);
 					}

@@ -78,34 +78,32 @@ public class Event
 			throw new NullPointerException("Event type cannot be null");
 		}
 	}
-
+	
 	/**
-	 * Used to create the analytics event in json format
-	 * @param event Event for which json is generated
-	 * @return JSONObject 
+	 * Used to get the event type
+	 * @return event return type
 	 */
-	public JSONObject toJson(Event event)
-	{		
-		JSONObject json = new JSONObject();
-		JSONObject data = new JSONObject();
-		
-		try 
-		{
-			data.put(AnalyticsConstants.EVENT_TYPE, event.type);
-			data.put(AnalyticsConstants.EVENT_SUB_TYPE, event.context);
-			data.put(AnalyticsConstants.EVENT_PRIORITY, event.priority);
-			data.put(AnalyticsConstants.EVENT_TAG, AnalyticsConstants.EVENT_TAG_VALUE);
-			data.put(AnalyticsConstants.CURRENT_TIME_STAMP, System.currentTimeMillis());			
-			data.put(AnalyticsConstants.METADATA, getMetadata(event.metadata));
-			
-			json.put(AnalyticsConstants.TYPE, AnalyticsConstants.ANALYTICS_EVENT);
-			json.put(AnalyticsConstants.DATA, data);
-		}
-		catch (JSONException e) 
-		{
-			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
-		}		
-		return json;
+	public String getType()
+	{
+		return this.type;
+	}
+
+	/** 
+	 * Used to return the event context
+	 * @return context of the event
+	 */
+	public String getContext()
+	{
+		return this.context;
+	}
+	
+	/**
+	 * Used to return the priority of the event
+	 * @return priority of the event
+	 */
+	public EventPriority getPriority()
+	{
+		return this.priority;
 	}
 	
 	/**
@@ -113,13 +111,13 @@ public class Event
 	 * @param mdMap Map of key-value pairs
 	 * @return JSONObject 
 	 */
-	private JSONObject getMetadata(Map<String, String> mdMap)
+	public JSONObject getMetadata()
 	{
 		JSONObject metadata = null;
 		  	
 		try
 		{
-			metadata = new JSONObject(mdMap);
+			metadata = new JSONObject(this.metadata);
 		}
 		catch(NullPointerException e)
 		{
