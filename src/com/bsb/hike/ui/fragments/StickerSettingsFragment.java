@@ -1,8 +1,10 @@
 package com.bsb.hike.ui.fragments;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import android.content.BroadcastReceiver;
@@ -34,6 +36,8 @@ import com.bsb.hike.DragSortListView.DragSortListView;
 import com.bsb.hike.DragSortListView.DragSortListView.DragScrollProfile;
 import com.bsb.hike.DragSortListView.DragSortListView.DropListener;
 import com.bsb.hike.adapters.StickerSettingsAdapter;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerConstants.DownloadSource;
@@ -152,7 +156,11 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			{
 				isUpdateAllTapped = false;
 				confirmView.setVisibility(View.GONE);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.UPDATE_ALL_CANCEL_CLICKED);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.UPDATE_ALL_CANCEL_CLICKED);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(getActivity().getApplicationContext()).record(e);
 			}
 		});
 		
@@ -167,7 +175,11 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				{
 					StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.SETTINGS, getSherlockActivity());
 				}
-				Utils.sendUILogEvent(HikeConstants.LogEvent.UPDATE_ALL_CONFIRM_CLICKED);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.UPDATE_ALL_CONFIRM_CLICKED);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(getActivity().getApplicationContext()).record(e);
 				mAdapter.notifyDataSetChanged();
 				confirmView.setVisibility(View.GONE);
 			}
@@ -259,7 +271,12 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 							return;
 						}
 						prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
-						Utils.sendUILogEvent(HikeConstants.LogEvent.SEEN_REORDERING_TIP);
+						Map<String, String> metadata = new HashMap<String, String>();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SEEN_REORDERING_TIP);
+						Event e = new Event(metadata);
+						e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+						HAManager.getInstance(getActivity().getApplicationContext()).record(e);
+
 						
 						ImageView tickImage = (ImageView) parent.findViewById(R.id.reorder_indicator);
 						tickImage.setImageResource(R.drawable.art_tick);
