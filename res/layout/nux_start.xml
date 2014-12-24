@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffffff"
+    android:orientation="vertical" >
+
+    <Button
+        android:id="@+id/but_skip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:background="#00000000"
+        android:text="SKIP"
+        android:textSize="13sp"
+        android:textColor="#c6c6c7" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/tv_reward_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:gravity="center_horizontal"
+        android:paddingLeft="60dp"
+        android:paddingRight="60dp"
+        android:lines="2"
+        android:singleLine="false"
+        android:text="Earn a free talktime worth Rs 100!"
+        android:textColor="#26292d"
+        android:textSize="24sp"
+        android:textStyle="italic" />
+
+    <com.bsb.hike.ui.utils.RecyclingImageView
+        android:id="@+id/imgv_invitefrd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:background="#00000000"
+        android:src="@drawable/ic_nuxinvite"
+        android:textStyle="italic" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/tv_reward_subText"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:lines="3"
+        android:singleLine="false"
+        android:text="Start a chat with your friends.Unlock your talktime reward when any 3 of them message you back"
+        android:textColor="#87888a"
+        android:textSize="16sp"
+        android:textStyle="italic" />
+
+    <com.bsb.hike.view.CustomFontButton
+        android:id="@+id/but_inviteFrnds"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="50dp"
+        android:background="#0f8fe1"
+        android:textSize="13sp"
+        android:gravity="center"
+        android:text="SELECT FRIENDS TO CHAT"
+        android:textColor="#ffffffff" />
+
+</LinearLayout>
