@@ -2,6 +2,7 @@ package com.bsb.hike.chatthread;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -15,23 +16,23 @@ import android.os.Handler;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.ImageView.ScaleType;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -41,24 +42,28 @@ import com.bsb.hike.media.AudioRecordView;
 import com.bsb.hike.media.AudioRecordView.AudioRecordListener;
 import com.bsb.hike.media.CaptureImageParser;
 import com.bsb.hike.media.CaptureImageParser.CaptureImageListener;
+import com.bsb.hike.media.EmoticonPicker;
+import com.bsb.hike.media.EmoticonPicker.EmoticonPickerListener;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.media.OverflowItemClickListener;
 import com.bsb.hike.media.PickContactParser;
 import com.bsb.hike.media.PickFileParser;
 import com.bsb.hike.media.PickFileParser.PickFileListener;
+import com.bsb.hike.media.ShareablePopup;
+import com.bsb.hike.media.ShareablePopupLayout;
 import com.bsb.hike.media.StickerPicker;
 import com.bsb.hike.media.StickerPicker.StickerPickerListener;
 import com.bsb.hike.media.ThemePicker;
 import com.bsb.hike.media.ThemePicker.ThemePickerListener;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HDialog;
 import com.bsb.hike.ui.HikeDialog.HHikeDialogListener;
-import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
@@ -71,7 +76,7 @@ import com.bsb.hike.utils.Utils;
  */
 
 public abstract class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
-		HHikeDialogListener, StickerPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener
+		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener
 {
 	private static final String TAG = "chatthread";
 
@@ -93,7 +98,11 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 
 	protected String msisdn;
 
-	protected StickerPicker stickerPicker;
+	protected static StickerPicker mStickerPicker;
+
+	protected static EmoticonPicker mEmoticonPicker;
+
+	protected static ShareablePopupLayout mShareablePopupLayout;
 
 	protected AudioRecordView audioRecordView;
 
@@ -104,6 +113,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected MessagesAdapter mAdapter;
 
 	protected List<ConvMessage> messages;
+	
+	protected static HashMap<Long, ConvMessage> mMessageMap;
 
 	protected Handler uiHandler = new Handler()
 	{
@@ -161,11 +172,68 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	 */
 	protected void initView()
 	{
-		activity.findViewById(R.id.sticker_btn).setOnClickListener(this);
-		activity.findViewById(R.id.send_message).setOnClickListener(this);
-		stickerPicker = new StickerPicker(activity, this, activity.findViewById(R.id.chatThreadParentLayout),
-				(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)));
+		setConversationTheme();
+		
+		initShareablePopup();
+		
+		addOnClickListeners();
+		
 		audioRecordView = new AudioRecordView(activity, this);
+	}
+	
+	/**
+	 * Instantiate the mShareable popupLayout
+	 */
+	private void initShareablePopup()
+	{
+		if(mShareablePopupLayout == null)
+		{
+			int[] mEatOuterTouchIds = new int[] { R.id.sticker_btn, R.id.emoticon_btn, R.id.send_message };
+
+			List<ShareablePopup> sharedPopups = new ArrayList<ShareablePopup>();
+			
+			initStickerPicker();
+			initEmoticonPicker();
+			
+			sharedPopups.add(mEmoticonPicker);
+			sharedPopups.add(mStickerPicker);
+			mShareablePopupLayout = new ShareablePopupLayout(activity.getApplicationContext(), activity.findViewById(R.id.chatThreadParentLayout),
+					(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)), mEatOuterTouchIds, sharedPopups);
+		}
+		
+		else
+		{
+			updateSharedPopups();
+		}
+		
+
+	}
+	
+	/**
+	 * Updates the mainView for KeyBoard popup as well as updates the Picker Listeners for Emoticon and Stickers
+	 */
+	private void updateSharedPopups()
+	{
+		mShareablePopupLayout.updateMainView(activity.findViewById(R.id.chatThreadParentLayout));
+		mStickerPicker.updateListener(this);
+		mEmoticonPicker.updateListener(this);
+	}
+
+	private void addOnClickListeners()
+	{
+		activity.findViewById(R.id.sticker_btn).setOnClickListener(this);
+		activity.findViewById(R.id.emoticon_btn).setOnClickListener(this);
+		activity.findViewById(R.id.send_message).setOnClickListener(this);
+	}
+
+	private void initStickerPicker()
+	{
+		mStickerPicker = new StickerPicker(activity.getApplicationContext(), this);
+	}
+	
+	private void initEmoticonPicker()
+	{
+		mEmoticonPicker = new EmoticonPicker(activity.getApplicationContext(), this);
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -266,6 +334,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case R.id.sticker_btn:
 			stickerClicked();
 			break;
+		case R.id.emoticon_btn:
+			emoticonClicked();
+			break;
 		case R.id.send_message:
 			sendButtonClicked();
 			break;
@@ -285,7 +356,12 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 
 	protected void stickerClicked()
 	{
-		stickerPicker.showStickerPicker();
+		mShareablePopupLayout.showPopup(mStickerPicker);
+	}
+	
+	protected void emoticonClicked()
+	{
+		mShareablePopupLayout.showPopup(mEmoticonPicker);
 	}
 
 	protected void showThemePicker()
@@ -377,6 +453,11 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	@Override
 	public boolean onBackPressed()
 	{
+		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
+		{
+			mShareablePopupLayout.dismiss();
+		}
+		
 		if (themePicker != null && themePicker.isShowing())
 		{
 			return themePicker.onBackPressed();
@@ -528,10 +609,19 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	}
 
 	@Override
-	public void stickerSelected(Sticker sticker)
+	public void stickerSelected(Sticker sticker, String sourceOfSticker)
 	{
-		Logger.i(TAG, "sticker clicked " + sticker);
-		stickerPicker.dismiss();
+		Logger.i(TAG, "sticker clicked " + sticker.getStickerId() + sticker.getCategoryId() + sourceOfSticker);
+		mShareablePopupLayout.dismiss();
+	}
+
+	@Override
+	public void emoticonSelected(int emoticonIndex)
+	{
+		// TODO : Implement this
+		// Utils.emoticonClicked(getApplicationContext(), emoticonIndex, mComposeView);
+		Logger.i(TAG, " This emoticon was selected : " + emoticonIndex);
+		mShareablePopupLayout.dismiss();
 	}
 
 	@Override
@@ -590,7 +680,15 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		// this function should be called only once per conversation
 		Logger.i(TAG, "conversation fetch success");
 		mConversation = conversation;
+		/*
+		 * make a copy of the message list since it's used internally by the adapter
+		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
+		messages.addAll(mConversation.getMessages());
+		
+		mMessageMap = new HashMap<Long, ConvMessage>();
+		addtoMessageMap(0, messages.size());
+		
 		mAdapter = new MessagesAdapter(activity.getApplicationContext(), mConversation.getMessages(), mConversation, null);
 		ListView mConversationsView = (ListView) activity.findViewById(R.id.conversations_list);
 
@@ -650,6 +748,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	@Override
 	public void onLoadFinished(Loader<Object> arg0, Object arg1)
 	{
+		Logger.d(TAG, "onLoadFinished");
 		ConversationLoader loader = (ConversationLoader) arg0;
 		if (loader.loaderId == FETCH_CONV)
 		{
@@ -764,4 +863,97 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		// TODO Auto-generated method stub
 
 	}
+	
+	/**
+	 * This method is called when a one to one or group chat thread is instantiated
+	 */
+	public void loadData()
+	{
+		fetchConversation(true);
+	}
+	
+	private void addtoMessageMap(int from, int to)
+	{
+		for (int i = to - 1; i >= from; i--)
+		{
+			ConvMessage message = messages.get(i);
+			ConvMessage msg = checkNUpdateFTMsg(message);
+			if (msg != null)
+			{
+				message = msg;
+				messages.set(i, message);
+			}
+			addtoMessageMap(message);
+		}
+	}
+	
+	private ConvMessage checkNUpdateFTMsg(ConvMessage message)
+	{
+		if (message.isSent() && message.isFileTransferMessage())
+		{
+			ConvMessage msg = FileTransferManager.getInstance(activity.getApplicationContext()).getMessage(message.getMsgID());
+			return msg;
+		}
+		return null;
+	}
+	
+	public static void addtoMessageMap(ConvMessage msg)
+	{
+		State msgState = msg.getState();
+
+		if (msg.getMsgID() <= 0)
+		{
+			return;
+		}
+		if (msg.isSent())
+		{
+			if (mMessageMap == null)
+			{
+				mMessageMap = new HashMap<Long, ConvMessage>();
+			}
+
+			if (msg.isFileTransferMessage())
+			{
+				if (TextUtils.isEmpty(msg.getMetadata().getHikeFiles().get(0).getFileKey()))
+				{
+					mMessageMap.put(msg.getMsgID(), msg);
+					return;
+				}
+			}
+			if (msg.isSMS())
+			{
+				if (msgState == State.SENT_UNCONFIRMED || msgState == State.SENT_FAILED)
+				{
+					mMessageMap.put(msg.getMsgID(), msg);
+				}
+			}
+			else
+			{
+				if (msgState != State.SENT_DELIVERED_READ)
+				{
+					mMessageMap.put(msg.getMsgID(), msg);
+				}
+			}
+		}
+	}
+	
+	private void removeFromMessageMap(ConvMessage msg)
+	{
+		if (mMessageMap == null)
+			return;
+
+		if (msg.isFileTransferMessage())
+		{
+			if (!TextUtils.isEmpty(msg.getMetadata().getHikeFiles().get(0).getFileKey()))
+			{
+				mMessageMap.remove(msg.getMsgID());
+			}
+		}
+		else
+		{
+			mMessageMap.remove(msg.getMsgID());
+		}
+	}
+
+	
 }

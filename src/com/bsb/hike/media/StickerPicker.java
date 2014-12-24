@@ -1,6 +1,6 @@
 package com.bsb.hike.media;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -8,32 +8,29 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.HikeConstants.EmoticonType;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
-import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.StickerShopActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
-public class StickerPicker implements OnClickListener
+public class StickerPicker implements OnClickListener, ShareablePopup
 {
 
 	public interface StickerPickerListener
 	{
-		public void stickerSelected(Sticker sticker);
+		public void stickerSelected(Sticker sticker, String source);
 	}
 
 	private StickerPickerListener listener;
 
-	private Activity activity;
+	private Context mContext;
 
 	private KeyboardPopupLayout popUpLayout;
 
@@ -41,7 +38,68 @@ public class StickerPicker implements OnClickListener
 
 	private View viewToDisplay;
 
-	private View[] viewsToEatTouch;
+	private int mLayoutResId = -1;
+
+	private static final String TAG = "StickerPicker";
+
+	/**
+	 * Constructor
+	 * 
+	 * @param activity
+	 * @param listener
+	 */
+	public StickerPicker(Context context, StickerPickerListener listener)
+	{
+		this.mContext = context;
+		this.listener = listener;
+	}
+
+	/**
+	 * Another constructor. The popup layout is passed to this, rather than the picker instantiating one of its own.
+	 * 
+	 * @param context
+	 * @param listener
+	 * @param popUpLayout
+	 */
+	public StickerPicker(int layoutResId, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
+	{
+		this(context, listener);
+		this.mLayoutResId = layoutResId;
+		this.popUpLayout = popUpLayout;
+	}
+
+	/**
+	 * The view to display is also passed to this constructor
+	 * 
+	 * @param view
+	 * @param context
+	 * @param listener
+	 * @param popUpLayout
+	 */
+	public StickerPicker(View view, Context context, StickerPickerListener listener, KeyboardPopupLayout popUpLayout)
+	{
+		this(context, listener);
+		this.viewToDisplay = view;
+		this.popUpLayout = popUpLayout;
+		initViewComponents(viewToDisplay);
+		Logger.d(TAG, "Sticker Picker instantiated with views");
+	}
+
+	/**
+	 * Basic constructor. Constructs the popuplayout on its own.
+	 * 
+	 * @param context
+	 * @param listener
+	 * @param mainView
+	 * @param firstTimeHeight
+	 * @param eatTouchEventViewIds
+	 */
+
+	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight, int[] eatTouchEventViewIds)
+	{
+		this(context, listener);
+		popUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight, context.getApplicationContext(), eatTouchEventViewIds);
+	}
 
 	/**
 	 * 
@@ -49,12 +107,11 @@ public class StickerPicker implements OnClickListener
 	 * @param listener
 	 * @param mainview
 	 *            this is your activity Or fragment root view which gets resized when keyboard toggles
+	 * @param firstTimeHeight
 	 */
-	public StickerPicker(Activity context, StickerPickerListener listener, View mainView,int firstTimeHeight)
+	public StickerPicker(Context context, StickerPickerListener listener, View mainView, int firstTimeHeight)
 	{
-		this.activity = context;
-		this.listener = listener;
-		popUpLayout = new KeyboardPopupLayout(mainView, firstTimeHeight,context);
+		this(context, listener, mainView, firstTimeHeight, null);
 	}
 
 	public void showStickerPicker()
@@ -69,39 +126,84 @@ public class StickerPicker implements OnClickListener
 		popUpLayout.showKeyboardPopup(viewToDisplay);
 	}
 
+	/**
+	 * Used for instantiating the views
+	 */
 	private void initView()
 	{
 		if (viewToDisplay != null)
 		{
 			return;
 		}
-		viewToDisplay = (ViewGroup) LayoutInflater.from(activity.getApplicationContext()).inflate(R.layout.emoticon_layout, null);
-		View shopIcon = (viewToDisplay.findViewById(R.id.erase_key));
-		shopIcon.setBackgroundResource(R.color.sticker_pallete_bg_color);
+
+		if (mLayoutResId == -1)
+		{
+			/**
+			 * Use the default layout
+			 */
+			viewToDisplay = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.sticker_layout, null);
+		}
+
+		else
+		{
+			/**
+			 * Use the resId passed in the constructor
+			 */
+			viewToDisplay = (ViewGroup) LayoutInflater.from(mContext).inflate(mLayoutResId, null);
+		}
+
+		initViewComponents(viewToDisplay);
+	}
+
+	/**
+	 * Initialises the view components from a given view
+	 * 
+	 * @param view
+	 */
+	private void initViewComponents(View view)
+	{
+		ViewPager mViewPager = ((ViewPager) view.findViewById(R.id.sticker_pager));
+
+		if (null == mViewPager)
+		{
+			throw new IllegalArgumentException("View Pager was not found in the view passed.");
+		}
+
+		stickerAdapter = new StickerAdapter(mContext, listener);
+
+		StickerEmoticonIconPageIndicator mIconPageIndicator = (StickerEmoticonIconPageIndicator) view.findViewById(R.id.sticker_icon_indicator);
+
+		View shopIcon = (view.findViewById(R.id.shop_icon));
+
 		shopIcon.setOnClickListener(this);
-		((ImageView) viewToDisplay.findViewById(R.id.erase_key_image)).setImageResource(R.drawable.ic_sticker_shop);
-		if (HikeSharedPreferenceUtil.getInstance(activity).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))
+
+		if (HikeSharedPreferenceUtil.getInstance(mContext).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false))
 		{
 			// The shop icon would be blue unless the user clicks on it once
-			viewToDisplay.findViewById(R.id.sticker_shop_badge).setVisibility(View.VISIBLE);
+			view.findViewById(R.id.shop_icon_badge).setVisibility(View.VISIBLE);
 		}
 		else
 		{
-			viewToDisplay.findViewById(R.id.sticker_shop_badge).setVisibility(View.GONE);
+			view.findViewById(R.id.shop_icon_badge).setVisibility(View.GONE);
 		}
 
-		stickerAdapter = new StickerAdapter(activity);
-		ViewPager pager = ((ViewPager) viewToDisplay.findViewById(R.id.emoticon_pager));
-		pager.setAdapter(stickerAdapter);
+		mViewPager.setVisibility(View.VISIBLE);
 
-		StickerEmoticonIconPageIndicator iconPageIndicator = (StickerEmoticonIconPageIndicator) viewToDisplay.findViewById(R.id.icon_indicator);
-		iconPageIndicator.setViewPager(pager);
-		iconPageIndicator.setOnPageChangeListener(onPageChangeListener);
+		mViewPager.setAdapter(stickerAdapter);
+
+		mIconPageIndicator.setViewPager(mViewPager);
+
+		mIconPageIndicator.setOnPageChangeListener(onPageChangeListener);
 	}
 
+	/**
+	 * Interface mehtod. Check {@link ShareablePopup}
+	 */
+
+	@Override
 	public View getView()
 	{
-		if (viewToDisplay != null)
+		if (viewToDisplay == null)
 		{
 			initView();
 		}
@@ -116,7 +218,7 @@ public class StickerPicker implements OnClickListener
 	@Override
 	public void onClick(View arg0)
 	{
-		if (arg0.getId() == R.id.erase_key)
+		if (arg0.getId() == R.id.shop_icon)
 		{
 			// shop icon clicked
 			shopIconClicked();
@@ -125,18 +227,24 @@ public class StickerPicker implements OnClickListener
 
 	private void shopIconClicked()
 	{
-		if (!HikeSharedPreferenceUtil.getInstance(activity).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false)) // The shop icon would be blue unless the user clicks
+		if (!HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, false)) // The shop icon would be blue unless the user clicks
 		// on it once
 		{
-			HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
+			HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.SHOWN_SHOP_ICON_BLUE, true);
 		}
-		if (HikeSharedPreferenceUtil.getInstance(activity).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false)) // The shop icon would be blue unless the user clicks
+		if (HikeSharedPreferenceUtil.getInstance(mContext).getData(StickerManager.SHOW_STICKER_SHOP_BADGE, false)) // The shop icon would be blue unless the user clicks
 		// on it once
 		{
-			HikeSharedPreferenceUtil.getInstance(activity).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
+			HikeSharedPreferenceUtil.getInstance(mContext).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, false);
 		}
-		Intent i = new Intent(activity, StickerShopActivity.class);
-		activity.startActivity(i);
+		Intent i = new Intent(mContext, StickerShopActivity.class);
+		/**
+		 * Was getting a runtime exception over here : 
+		 * Calling startActivity() from outside of an Activity  context requires the FLAG_ACTIVITY_NEW_TASK flag. Is this really what you want?
+		 *
+		 */
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		mContext.startActivity(i);
 	}
 
 	public void updateDimension(int width, int height)
@@ -155,7 +263,6 @@ public class StickerPicker implements OnClickListener
 		@Override
 		public void onPageSelected(int pageNum)
 		{
-			Logger.d("ViewPager", "Page number: " + pageNum);
 			StickerCategory category = stickerAdapter.getStickerCategory(pageNum);
 			if (category.getState() == StickerCategory.DONE)
 			{
@@ -173,4 +280,31 @@ public class StickerPicker implements OnClickListener
 		{
 		}
 	};
+
+	/**
+	 * Interface method. Check {@link ShareablePopup}
+	 */
+
+	@Override
+	public int getViewId()
+	{
+		return viewToDisplay.getId();
+	}
+
+	/**
+	 * Interface method. Check {@link ShareablePopup}
+	 */
+	@Override
+	public void releaseViewResources()
+	{
+		// TODO Implement this.
+		viewToDisplay = null;
+		stickerAdapter = null;
+
+	}
+
+	public void updateListener(StickerPickerListener mListener)
+	{
+		this.listener = mListener;
+	}
 }

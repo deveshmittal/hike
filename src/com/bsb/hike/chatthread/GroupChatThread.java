@@ -8,6 +8,10 @@ import android.os.Message;
 import android.util.Pair;
 import android.widget.Toast;
 
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.AdapterView;
+
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
@@ -203,4 +207,19 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			}
 		}
 	}
+	
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event)
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
 }

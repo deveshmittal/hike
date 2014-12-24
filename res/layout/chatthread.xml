@@ -259,7 +259,6 @@
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentLeft="true"
                     android:background="@null"
-                    android:onClick="onStickerBtnClicked"
                     android:scaleType="centerInside"
                     android:src="@drawable/sticker_btn_selector" />
 
@@ -301,11 +300,10 @@
                             android:textSize="17sp" />
 
                         <ImageButton
-                            android:id="@+id/emo_btn"
+                            android:id="@+id/emoticon_btn"
                             android:layout_width="33dp"
                             android:layout_height="wrap_content"
                             android:background="@null"
-                            android:onClick="onEmoticonBtnClicked"
                             android:paddingBottom="3dp"
                             android:paddingTop="11dp"
                             android:src="@drawable/smiley_selector" />
