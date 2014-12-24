@@ -41,6 +41,8 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.CustomStickerCategory;
 import com.bsb.hike.models.Sticker;
@@ -1410,7 +1412,11 @@ public class StickerManager
 			if (!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STICKER_SETTING_CHECK_BOX_CLICKED, false))
 			{
 				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.STICKER_SETTING_CHECK_BOX_CLICKED, true);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_CHECK_BOX_CLICKED);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_CHECK_BOX_CLICKED);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(context).record(e);
 			}
 		}
 		else
@@ -1418,7 +1424,11 @@ public class StickerManager
 			if (!HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.STICKER_SETTING_UNCHECK_BOX_CLICKED, false))
 			{
 				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.STICKER_SETTING_UNCHECK_BOX_CLICKED, true);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_UNCHECK_BOX_CLICKED);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_UNCHECK_BOX_CLICKED);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(context).record(e);
 			}
 		}
 	}
