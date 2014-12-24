@@ -1,18 +1,18 @@
 package com.bsb.hike.adapters;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,12 +21,13 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ImageViewerInfo;
@@ -569,7 +570,11 @@ public class CentralTimelineAdapter extends BaseAdapter
 				Intent intent = new Intent(context, StatusUpdate.class);
 				context.startActivity(intent);
 
-				Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_CARD);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.POST_UPDATE_FROM_CARD);				
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(context).record(e);
 			}
 			else if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP)
 			{
@@ -664,7 +669,18 @@ public class CentralTimelineAdapter extends BaseAdapter
 
 			ContactInfo contactInfo2 = new ContactInfo(contactInfo);
 
-			Utils.sendUILogEvent(HikeConstants.LogEvent.ADD_UPDATES_CLICK, contactInfo2.getMsisdn());
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ADD_UPDATES_CLICK);
+			
+			String msisdn = contactInfo2.getMsisdn();
+			
+			if(TextUtils.isEmpty(msisdn))
+			{
+				metadata.put(HikeConstants.TO, msisdn);
+			}
+			Event e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(context).record(e);
 
 			if (!contactInfo.isOnhike())
 				Utils.sendInviteUtil(contactInfo2, context, HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED, context.getString(R.string.ftue_add_prompt_invite_title),
@@ -680,7 +696,11 @@ public class CentralTimelineAdapter extends BaseAdapter
 		{
 			Intent intent = new Intent(context, PeopleActivity.class);
 			context.startActivity(intent);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_FAV_CARD_SEEL_ALL_CLICKED);
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_FAV_CARD_SEEL_ALL_CLICKED);
+			Event e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(context).record(e);
 		}
 	};
 	
@@ -693,8 +713,19 @@ public class CentralTimelineAdapter extends BaseAdapter
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 
 			Utils.startChatThread(context, contactInfo);
+						
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_FAV_CARD_START_CHAT_CLICKED);
 			
-			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_FAV_CARD_START_CHAT_CLICKED, contactInfo.getMsisdn());
+			String msisdn = contactInfo.getMsisdn();
+			
+			if(TextUtils.isEmpty(msisdn))
+			{
+				metadata.put(HikeConstants.TO, msisdn);
+			}
+			Event e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(context).record(e);
 
 			context.finish();
 		}
