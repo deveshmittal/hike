@@ -2,13 +2,28 @@ package com.bsb.hike.chatthread;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
+
+import android.os.Message;
+import android.util.Pair;
+import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.media.OverFlowMenuItem;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.Utils;
 
 /**
  * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -18,6 +33,11 @@ import com.bsb.hike.models.Conversation;
 
 public class GroupChatThread extends ChatThread implements HashTagModeListener
 {
+
+	private static final String TAG = "groupchatthread";
+
+	protected GroupConversation groupConversation;
+
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
@@ -102,23 +122,85 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		super.itemClicked(item);
 	}
 
+	/**
+	 * NON UI
+	 */
 	@Override
 	protected Conversation fetchConversation()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		Logger.i(TAG, "fetch group conversation " + Thread.currentThread().getName());
+		mConversation = groupConversation = (GroupConversation) mConversationDb.getConversation(msisdn, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, true);
+		if (mConversation == null)
+		{
+			/* the user must have deleted the chat. */
+			Message message = Message.obtain();
+			message.what = SHOW_TOAST;
+			message.arg1 = R.string.invalid_group_chat;
+			uiHandler.sendMessage(message);
+			return null;
+		}
+
+		// Setting a flag which tells us whether the group contains sms users or not.
+		boolean hasSmsUser = false;
+		for (Entry<String, PairModified<GroupParticipant, String>> entry : groupConversation.getGroupParticipantList().entrySet())
+		{
+			GroupParticipant groupParticipant = entry.getValue().getFirst();
+			if (!groupParticipant.getContactInfo().isOnhike())
+			{
+				hasSmsUser = true;
+				break;
+			}
+		}
+		groupConversation.setHasSmsUser(hasSmsUser);
+
+		// Set participant read by list
+		Pair<String, Long> pair = HikeConversationsDatabase.getInstance().getReadByValueForGroup(mConversation.getMsisdn());
+		if (pair != null)
+		{
+			String readBy = pair.first;
+			long msgId = pair.second;
+			(groupConversation).setupReadByList(readBy, msgId);
+		}
+		// fetch theme
+		ChatTheme currentTheme = mConversationDb.getChatThemeForMsisdn(msisdn);
+		Logger.d("ChatThread", "Calling setchattheme from createConversation");
+		groupConversation.setTheme(currentTheme);
+		return groupConversation;
 	}
-	
+
 	@Override
 	protected List<ConvMessage> loadMessages()
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	protected int getContentView()
 	{
 		return R.layout.chatthread;
+	}
+
+	@Override
+	protected void fetchConversationFinished(Conversation conversation)
+	{
+		super.fetchConversationFinished(conversation);
+		if (groupConversation.getUnreadCount() > 0 && groupConversation.getMessages().size() > 0)
+		{
+			ConvMessage message = messages.get(messages.size() - 1);
+			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getTypingNotification() == null))
+			{
+				long timeStamp = messages.get(messages.size() - mConversation.getUnreadCount()).getTimestamp();
+				long msgId = messages.get(messages.size() - mConversation.getUnreadCount()).getMsgID();
+				if ((messages.size() - mConversation.getUnreadCount()) > 0)
+				{
+					messages.add((messages.size() - mConversation.getUnreadCount()), new ConvMessage(mConversation.getUnreadCount(), timeStamp, msgId));
+				}
+				else
+				{
+					messages.add(0, new ConvMessage(mConversation.getUnreadCount(), timeStamp, msgId));
+				}
+			}
+		}
 	}
 }
