@@ -125,6 +125,7 @@ public class ShareablePopupLayout
 		if (prevVisibleView == null)
 		{
 			prevVisibleView = popupView;
+			popupView.setVisibility(View.VISIBLE);
 		}
 
 		else if (prevVisibleView != popupView)
