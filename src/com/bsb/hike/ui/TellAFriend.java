@@ -1,6 +1,8 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +32,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
@@ -434,15 +438,27 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
 		int tag = (Integer) view.getTag();
+		
+		Map<String, String> metadata = new HashMap<String, String>();
+		Event e;
+		
 		switch (tag)
 		{
 		case SMS:
 			Utils.logEvent(this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.INVITE_SMS_SCREEN_FROM_INVITE);
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.INVITE_SMS_SCREEN_FROM_INVITE);
+			e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(getApplicationContext()).record(e);
+
 			IntentManager.openInviteSMS(this);
 			break;
 		case WATSAPP:
-			Utils.sendUILogEvent(HikeConstants.LogEvent.WATS_APP_INVITE);
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.WATS_APP_INVITE);
+			e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(getApplicationContext()).record(e);
+
 			sendInviteViaWatsApp();
 			break;
 		case FACEBOOK:
