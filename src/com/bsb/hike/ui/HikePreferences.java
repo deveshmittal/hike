@@ -1,6 +1,8 @@
 package com.bsb.hike.ui;
 
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +36,9 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
@@ -380,7 +385,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (preference.getKey().equals(HikeConstants.BACKUP_PREF))
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.BACKUP);
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.BACKUP);
+			Event e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(getApplicationContext()).record(e);
+
 			BackupAccountTask task = new BackupAccountTask(getApplicationContext(), HikePreferences.this);
 			blockingTaskType = BlockingTaskType.BACKUP_ACCOUNT;
 			setBlockingTask(task);
@@ -598,7 +608,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.RESET_STEALTH_CANCELLED, null);
 
-				Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(getApplicationContext()).record(e);
 			}
 			else
 			{
@@ -626,7 +640,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 						startActivity(intent);
 
 						dialog.dismiss();
-						Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_INIT);
+						Map<String, String> metadata = new HashMap<String, String>();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.RESET_STEALTH_INIT);
+						Event e = new Event(metadata);
+						e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+						HAManager.getInstance(getApplicationContext()).record(e);
 					}
 
 					@Override
@@ -680,7 +698,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 
 		if (HikeConstants.RECEIVE_SMS_PREF.equals(preference.getKey()))
 		{
-			Utils.sendDefaultSMSClientLogEvent(isChecked);
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.UNIFIED_INBOX, String.valueOf(isChecked));
+			Event e = new Event(metadata);
+			e.setEventAttributes(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS);			
+			HAManager.getInstance(getApplicationContext()).record(e);
 
 			if (!isChecked)
 			{
@@ -742,7 +764,12 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			Logger.d(getClass().getSimpleName(), "Free SMS toggled");
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FREE_SMS_TOGGLED, isChecked);
 
-			Utils.sendFreeSmsLogEvent(isChecked);
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.FREE_SMS_ON, String.valueOf(isChecked));
+			Event e = new Event(metadata);
+			e.setEventAttributes(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS);			
+			HAManager.getInstance(getApplicationContext()).record(e);
+
 		}
 		else if (HikeConstants.SSL_PREF.equals(preference.getKey()))
 		{
@@ -755,23 +782,40 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.NUJ_NOTIF_BOOLEAN_PREF.equals(preference.getKey()))
 		{
+			Map<String, String> metadata = new HashMap<String, String>();
+			Event e = null;
+			
 			if(isChecked)
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_ON);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_ON);
+				e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+
 			}
 			else{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_OFF);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_OFF);
+				e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
 			}
+			HAManager.getInstance(getApplicationContext()).record(e);			
 		}
 		else if (HikeConstants.H2O_NOTIF_BOOLEAN_PREF.equals(preference.getKey()))
 		{
+			Map<String, String> metadata = new HashMap<String, String>();
+			Event e = null;
+			
 			if(isChecked)
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_ON);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_ON);
+				e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
 			}
 			else{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_OFF);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SETTINGS_NOTIFICATION_H2O_OFF);
+				e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
 			}
+			HAManager.getInstance(getApplicationContext()).record(e);			
 		}
 		return false;
 	}
