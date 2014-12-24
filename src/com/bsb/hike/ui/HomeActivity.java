@@ -2,7 +2,9 @@ package com.bsb.hike.ui;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,6 +69,8 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -456,7 +460,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			@Override
 			public void onClick(View v)
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(getApplicationContext()).record(e);
+
 				Intent intent = new Intent(HomeActivity.this, ComposeChatActivity.class);
 				intent.putExtra(HikeConstants.Extras.EDIT, true);
 				newConversationIndicator.setVisibility(View.GONE);
@@ -618,7 +627,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				Intent intent = new Intent(HomeActivity.this, HikeListActivity.class);
 				startActivity(intent);
 
-				Utils.sendUILogEvent(showingRewardsPopup ? HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_REWARDS : HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_FREE_SMS);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, showingRewardsPopup ? HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_REWARDS : HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_FREE_SMS);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(getApplicationContext()).record(e);
 			}
 		});
 
@@ -1027,18 +1040,32 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					sendDeviceDetails();
 					if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP, false))
 					{
-						Utils.sendUILogEvent(HikeConstants.LogEvent.FB_CLICK);
+						Map<String, String> metadata = new HashMap<String, String>();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FB_CLICK);
+						Event e = new Event(metadata);
+						e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+						HAManager.getInstance(getApplicationContext()).record(e);
+
 					}
 					if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) > -1)
 					{
+						Map<String, String> metadata = new HashMap<String, String>();
+						Event e = null;
+						
 						if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
 						{
-							Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+							metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+							e = new Event(metadata);
+							e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
 						}
 						else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
 						{
-							Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+							metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+							e = new Event(metadata);
+							e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
 						}
+						HAManager.getInstance(getApplicationContext()).record(e);
+
 						editor = accountPrefs.edit();
 						editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
 						editor.commit();
@@ -1486,13 +1513,23 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					intent = new Intent(HomeActivity.this, CreateNewGroupActivity.class);
 					break;
 				case 7:
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SHOW_TIMELINE_TOP_BAR);
+					Map<String, String> md = new HashMap<String, String>();
+					md.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SHOW_TIMELINE_TOP_BAR);
+					Event e = new Event(md);
+					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(getApplicationContext()).record(e);
+
 					editor.putBoolean(HikeConstants.SHOW_TIMELINE_RED_DOT, false);
 					editor.commit();
 					intent = new Intent(HomeActivity.this, TimelineActivity.class);
 					break;
 				case 8:
-					Utils.sendUILogEvent(HikeConstants.LogEvent.STATUS_UPDATE_FROM_OVERFLOW);
+					Map<String, String> metadata = new HashMap<String, String>();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STATUS_UPDATE_FROM_OVERFLOW);
+					Event event = new Event(metadata);
+					event.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(getApplicationContext()).record(event);
+
 					intent = new Intent(HomeActivity.this, StatusUpdate.class);
 					break;
 				case 9:
@@ -1669,7 +1706,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 				case STEALTH_FTUE_POPUP:
 					HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, null);
-					Utils.sendUILogEvent(HikeConstants.LogEvent.QUICK_SETUP_CLICK);
+					Map<String, String> metadata = new HashMap<String, String>();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.QUICK_SETUP_CLICK);
+					Event e = new Event(metadata);
+					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(getApplicationContext()).record(e);
+
 					break;
 
 				default:
@@ -1783,7 +1825,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				HikeSharedPreferenceUtil.getInstance(HomeActivity.this).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, true);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.EXIT_STEALTH_MODE);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.EXIT_STEALTH_MODE);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(getApplicationContext()).record(e);
 			}
 		}
 	}
