@@ -1242,4 +1242,6 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="recently_joined_hike">RECENTLY JOINED HIKE</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_vo_ip">VoIPActivity</string>
+    <string name="voip_ringing">...RINGING</string>
+    <string name="voip_incoming_call">...INCOMING CALL</string>
 </resources>

@@ -209,7 +209,7 @@ public abstract class ImageWorker
 		// }
 	}
 
-	private void setDefaultAvatar(ImageView imageView, String data)
+	protected void setDefaultAvatar(ImageView imageView, String data)
 	{
 		int idx = data.indexOf(ROUND_SUFFIX);
 		boolean rounded = false;

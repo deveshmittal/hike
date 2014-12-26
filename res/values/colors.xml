@@ -378,5 +378,8 @@
     <color name="sticker_pallete_bg_color">#555555</color>
     <color name="sticker_drag_tip_bg_color">#34d5b1</color>
     <color name="black_10">#1A000000</color>
+    <color name="black_90">#E6000000</color>
+    <color name="voip_signal">#F5AD00</color>
+    <color name="voip_hang_up">#F64444</color>
 </resources>
 	
