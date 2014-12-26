@@ -1,8 +1,9 @@
 package com.bsb.hike.adapters;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -26,7 +27,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -570,11 +571,16 @@ public class CentralTimelineAdapter extends BaseAdapter
 				Intent intent = new Intent(context, StatusUpdate.class);
 				context.startActivity(intent);
 
-				Map<String, String> metadata = new HashMap<String, String>();
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.POST_UPDATE_FROM_CARD);				
-				Event e = new Event(metadata);
-				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-				HAManager.getInstance(context).record(e);
+				try 
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.POST_UPDATE_FROM_CARD);
+					HAManager.getInstance(context).record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, metadata);
+				}
+				catch (JSONException e) 
+				{
+					Logger.e(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}				
 			}
 			else if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP)
 			{
@@ -669,18 +675,24 @@ public class CentralTimelineAdapter extends BaseAdapter
 
 			ContactInfo contactInfo2 = new ContactInfo(contactInfo);
 
-			Map<String, String> metadata = new HashMap<String, String>();
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ADD_UPDATES_CLICK);
-			
-			String msisdn = contactInfo2.getMsisdn();
-			
-			if(TextUtils.isEmpty(msisdn))
+			try 
 			{
-				metadata.put(HikeConstants.TO, msisdn);
+				JSONObject metadata = new JSONObject();
+				
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ADD_UPDATES_CLICK);
+			
+				String msisdn = contactInfo2.getMsisdn();
+			
+				if(TextUtils.isEmpty(msisdn))
+				{
+					metadata.put(HikeConstants.TO, msisdn);
+				}
+				HAManager.getInstance(context).record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, metadata);
 			}
-			Event e = new Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(context).record(e);
+			catch (JSONException e) 
+			{
+				Logger.e(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 
 			if (!contactInfo.isOnhike())
 				Utils.sendInviteUtil(contactInfo2, context, HikeConstants.FTUE_ADD_SMS_ALERT_CHECKED, context.getString(R.string.ftue_add_prompt_invite_title),
@@ -696,11 +708,17 @@ public class CentralTimelineAdapter extends BaseAdapter
 		{
 			Intent intent = new Intent(context, PeopleActivity.class);
 			context.startActivity(intent);
-			Map<String, String> metadata = new HashMap<String, String>();
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_FAV_CARD_SEEL_ALL_CLICKED);
-			Event e = new Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(context).record(e);
+			
+			try 
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_FAV_CARD_SEEL_ALL_CLICKED);
+				HAManager.getInstance(context).record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, metadata);
+			}
+			catch (JSONException e) 
+			{
+				Logger.e(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 		}
 	};
 	
@@ -714,18 +732,24 @@ public class CentralTimelineAdapter extends BaseAdapter
 
 			Utils.startChatThread(context, contactInfo);
 						
-			Map<String, String> metadata = new HashMap<String, String>();
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_FAV_CARD_START_CHAT_CLICKED);
-			
-			String msisdn = contactInfo.getMsisdn();
-			
-			if(TextUtils.isEmpty(msisdn))
+			try 
 			{
-				metadata.put(HikeConstants.TO, msisdn);
+				JSONObject metadata = new JSONObject();
+
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_FAV_CARD_START_CHAT_CLICKED);
+			
+				String msisdn = contactInfo.getMsisdn();
+			
+				if(TextUtils.isEmpty(msisdn))
+				{
+					metadata.put(HikeConstants.TO, msisdn);
+				}
+				HAManager.getInstance(context).record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, metadata);
 			}
-			Event e = new Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(context).record(e);
+			catch (JSONException e) 
+			{
+				Logger.e(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 
 			context.finish();
 		}
