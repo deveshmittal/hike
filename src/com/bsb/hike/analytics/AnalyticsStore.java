@@ -11,7 +11,6 @@ import org.json.JSONObject;
 import android.content.Context;
 
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.Utils;
 
 /**
  * @author rajesh
@@ -126,7 +125,7 @@ class AnalyticsStore
 	/**
 	 * writes the event json to the file
 	 */
-	protected void dumpEvents(final ArrayList<Event> events)
+	protected void dumpEvents(final ArrayList<JSONObject> eventJsons)
 	{		
 		new Thread(new Runnable() 
 		{			
@@ -154,11 +153,9 @@ class AnalyticsStore
 
 					fileWriter = new FileWriter(eventFile, true);
 					
-					for(Event e : events)
-					{
-						JSONObject json = Utils.toJson(e);
-						
-						fileWriter.write(json + AnalyticsConstants.NEW_LINE);
+					for(JSONObject object : eventJsons)
+					{						
+						fileWriter.write(object.toString() + AnalyticsConstants.NEW_LINE);
 					}
 					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to the file!");
 				}

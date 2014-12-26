@@ -3,6 +3,9 @@ package com.bsb.hike.analytics;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -17,11 +20,18 @@ import com.bsb.hike.utils.Utils;
  */
 public class HAManager 
 {
+	/** enum specifying the priority type of the analytics event */
+	public enum EventPriority
+	{
+		NORMAL,
+		REALTIME
+	}
+
 	private static HAManager instance;
 	
 	private Context context;
 	
-	private ArrayList<Event> eventsList;
+	private ArrayList<JSONObject> eventsList;
 		
 	public static String ANALYTICS_SETTINGS = "analyticssettings";
 
@@ -46,7 +56,7 @@ public class HAManager
 	{
 		this.context = context.getApplicationContext();
 		
-		eventsList = new ArrayList<Event>();
+		eventsList = new ArrayList<JSONObject>();
 						
 		isAnalyticsEnabled = getPrefs().getBoolean(HAManager.ANALYTICS_SERVICE_STATUS, AnalyticsConstants.IS_ANALYTICS_ENABLED);
 		
@@ -81,34 +91,79 @@ public class HAManager
 	}
 	
 	/**
-	 * passes analytics events for recording by first checking if analytics service is enabled or disabled 
+	 * records the analytics event to the file 
 	 * @param e event to be recorded
 	 */
-	public void record(Event e)
+	public void record(String type)
 	{
 		if(!isAnalyticsEnabled)
 			return;
-		recordEvent(e);
+		recordEvent(type, null, EventPriority.NORMAL, null, null);
 	}
-	
+
 	/**
-	 * Records one event
+	 * records the analytics event to the file
+	 * @param type event type
+	 * @param context context of the event
+	 */
+	public void record(String type, String context)
+	{
+		if(!isAnalyticsEnabled)
+			return;
+		recordEvent(type, context, EventPriority.NORMAL, null, null);
+	}
+
+	/**
+	 * records the analytics event to the file
+	 * @param type event type
+	 * @param context context of the event
+	 * @param priority priority of the event
+	 * @param metadata metadata of the event
+	 */
+	public void record(String type, String context, JSONObject metadata)
+	{
+		if(!isAnalyticsEnabled)
+			return;
+		recordEvent(type, context, EventPriority.NORMAL, metadata, null);
+	}
+
+	/**
+	 * records the analytics event to the file
+	 * @param type type of the event
+	 * @param context context of the event
+	 * @param priority priority of the event
+	 * @param metadata metadata of the event
+	 * @param customdata custom data of the event
+	 */
+	public void record(String type, String context, EventPriority priority, JSONObject metadata, JSONObject customdata)
+	{
+		if(!isAnalyticsEnabled)
+			return;
+		recordEvent(type, context, priority, metadata, customdata);
+	}
+
+	/**
+	 * records the analytics event to the file
 	 * @param event event to be logged
 	 * @param context application context
 	 */
 	// TODO need to look for a better way to do this operation and avoid synchronization
-	private synchronized void recordEvent(Event event) 
+	private synchronized void recordEvent(String type, String context, EventPriority priority, JSONObject metadata, JSONObject customdata) throws NullPointerException 
 	{
-		eventsList.add(event);
+		if(type == null || context == null)
+		{
+			throw new NullPointerException("Type and Context of event cannot be null.");
+		}
+		eventsList.add(generateAnalticsJson(type, context, priority, metadata, customdata));
 
 		if (AnalyticsConstants.MAX_EVENTS_IN_MEMORY == eventsList.size()) 
 		{			
 			// clone a local copy and send for writing
-			ArrayList<Event> events = (ArrayList<Event>) eventsList.clone();
+			ArrayList<JSONObject> jsons = (ArrayList<JSONObject>) eventsList.clone();
 			
 			eventsList.clear();
 			
-			AnalyticsStore.getInstance(this.context).dumpEvents(events);
+			AnalyticsStore.getInstance(this.context).dumpEvents(jsons);
 
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "writer thread started!");
 		}
@@ -208,4 +263,47 @@ public class HAManager
 	{
 		analyticsUploadFrequency++;
 	}
+
+	/**
+	 * generates the analytics json object to be written to the file
+	 * @param type type of the event
+	 * @param context context of the event
+	 * @param priority priority of the event
+	 * @param metadata metadata of the event
+	 * @param customdata custom data for the event
+	 * @return
+	 */
+	private JSONObject generateAnalticsJson(String type, String context, EventPriority priority, JSONObject metadata, JSONObject customdata)
+	{		
+		JSONObject json = new JSONObject();
+		JSONObject data = new JSONObject();
+		
+		try 
+		{
+			if(customdata == null)
+			{
+				data.put(AnalyticsConstants.EVENT_TYPE, type);				
+				data.put(AnalyticsConstants.EVENT_SUB_TYPE, context);
+				data.put(AnalyticsConstants.EVENT_PRIORITY, priority);
+				data.put(AnalyticsConstants.CURRENT_TIME_STAMP, System.currentTimeMillis());
+				data.put(AnalyticsConstants.EVENT_TAG, AnalyticsConstants.EVENT_TAG_VALUE);
+			}
+			else
+			{
+				data.put(AnalyticsConstants.DATA, customdata);
+			}
+
+			if(metadata != null)
+			{
+				data.put(AnalyticsConstants.METADATA, metadata);
+			}
+			json.put(AnalyticsConstants.TYPE, AnalyticsConstants.ANALYTICS_EVENT);
+			json.put(AnalyticsConstants.DATA, data);
+		}
+		catch (JSONException e) 
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}		
+		return json;
+	}	
 }
