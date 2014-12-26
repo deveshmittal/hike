@@ -49,6 +49,7 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.SocialNetFriendInfo;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -517,7 +518,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 										data.put(HikeConstants.DATA, d);
 										data.put(HikeConstants.TIMESTAMP, System.currentTimeMillis() / 1000);
 										data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
-										HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, data);
+										HikeMqttManagerNew.getInstance().sendMessage(data, HikeMqttManagerNew.MQTT_PUBLISH);
 										Logger.d("SocialNetInviteActivity", "fb packet" + data.toString());
 
 										// sendFacebookInviteIds(data);

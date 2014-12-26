@@ -29,7 +29,7 @@ public class TimeChangedReceiver extends BroadcastReceiver
 		
 		{
 			jsonObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.REQUEST_SERVER_TIMESTAMP);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH_LOW, jsonObject);
+			HikeMqttManagerNew.getInstance().sendMessage(jsonObject, HikeMqttManagerNew.MQTT_PUBLISH_LOW);
 		}
 		catch (JSONException e)
 		{

@@ -90,6 +90,7 @@ import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.smartImageLoader.ImageWorker;
 import com.bsb.hike.tasks.DownloadImageTask;
@@ -1942,7 +1943,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				public void onClick(DialogInterface dialog, int which)
 				{
 					HikePubSub hikePubSub = HikeMessengerApp.getPubSub();
-					hikePubSub.publish(HikePubSub.MQTT_PUBLISH, groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+					HikeMqttManagerNew.getInstance().sendMessage(groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE), HikeMqttManagerNew.MQTT_PUBLISH);
 					hikePubSub.publish(HikePubSub.GROUP_LEFT, groupConversation.getMsisdn());
 					Intent intent = new Intent(ProfileActivity.this, HomeActivity.class);
 					intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mLocalMSISDN);
@@ -2777,7 +2778,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 				{
 					Logger.e(getClass().getSimpleName(), "Invalid JSON", e);
 				}
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+				HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH);
 				confirmDialog.dismiss();
 			}
 		};
