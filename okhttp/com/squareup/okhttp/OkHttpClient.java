@@ -160,7 +160,7 @@ public class OkHttpClient implements Cloneable {
   private Proxy proxy;
   private List<Protocol> protocols;
   private List<ConnectionSpec> connectionSpecs;
-  private final List<Interceptor> interceptors = new ArrayList<>();
+  private final List<Interceptor> interceptors = new ArrayList<Interceptor>();
   private ProxySelector proxySelector;
   private CookieHandler cookieHandler;
 

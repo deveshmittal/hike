@@ -162,7 +162,7 @@ public final class CertificatePinner {
 
   /** Builds a configured certificate pinner. */
   public static final class Builder {
-    private final Map<String, List<ByteString>> hostnameToPins = new LinkedHashMap<>();
+    private final Map<String, List<ByteString>> hostnameToPins = new LinkedHashMap<String, List<ByteString>>();
 
     /**
      * Pins certificates for {@code hostname}. Each pin is a SHA-1 hash of a
@@ -172,7 +172,7 @@ public final class CertificatePinner {
     public Builder add(String hostname, String... pins) {
       if (hostname == null) throw new IllegalArgumentException("hostname == null");
 
-      List<ByteString> hostPins = new ArrayList<>();
+      List<ByteString> hostPins = new ArrayList<ByteString>();
       List<ByteString> previousPins = hostnameToPins.put(hostname, unmodifiableList(hostPins));
       if (previousPins != null) {
         hostPins.addAll(previousPins);

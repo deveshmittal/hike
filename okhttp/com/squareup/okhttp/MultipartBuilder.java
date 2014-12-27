@@ -76,8 +76,8 @@ public final class MultipartBuilder {
   private long length = 0;
 
   // Parallel lists of nullable headings (boundary + headers) and non-null bodies.
-  private final List<Buffer> partHeadings = new ArrayList<>();
-  private final List<RequestBody> partBodies = new ArrayList<>();
+  private final List<Buffer> partHeadings = new ArrayList<Buffer>();
+  private final List<RequestBody> partBodies = new ArrayList<RequestBody>();
 
   /** Creates a new multipart builder that uses a random boundary token. */
   public MultipartBuilder() {

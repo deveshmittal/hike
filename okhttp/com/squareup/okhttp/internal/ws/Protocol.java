@@ -27,19 +27,31 @@ final class Protocol {
   | |1|2|3|       |  |K|             |
   +-+-+-+-+-------+  +-+-------------+
   */
+	/** Byte 0 flag for whether this is the final fragment in a message. */
+	static final int B0_FLAG_FIN = Integer.parseInt("10000000",2);
+	/** Byte 0 reserved flag 1. Must be 0 unless negotiated otherwise. */
+	static final int B0_FLAG_RSV1 = Integer.parseInt("01000000",2);
+	/** Byte 0 reserved flag 2. Must be 0 unless negotiated otherwise. */
+	static final int B0_FLAG_RSV2 = Integer.parseInt("00100000",2);
+	/** Byte 0 reserved flag 3. Must be 0 unless negotiated otherwise. */
+	static final int B0_FLAG_RSV3 = Integer.parseInt("00010000",2);
+	/** Byte 0 mask for the frame opcode. */
+	static final int B0_MASK_OPCODE = Integer.parseInt("00001111",2);
+	/** Flag in the opcode which indicates a control frame. */
+	static final int OPCODE_FLAG_CONTROL = Integer.parseInt("00001000",2);
 
-  /** Byte 0 flag for whether this is the final fragment in a message. */
-  static final int B0_FLAG_FIN = 0b10000000;
-  /** Byte 0 reserved flag 1. Must be 0 unless negotiated otherwise. */
-  static final int B0_FLAG_RSV1 = 0b01000000;
-  /** Byte 0 reserved flag 2. Must be 0 unless negotiated otherwise. */
-  static final int B0_FLAG_RSV2 = 0b00100000;
-  /** Byte 0 reserved flag 3. Must be 0 unless negotiated otherwise. */
-  static final int B0_FLAG_RSV3 = 0b00010000;
-  /** Byte 0 mask for the frame opcode. */
-  static final int B0_MASK_OPCODE = 0b00001111;
-  /** Flag in the opcode which indicates a control frame. */
-  static final int OPCODE_FLAG_CONTROL = 0b00001000;
+//  /** Byte 0 flag for whether this is the final fragment in a message. */
+//  static final int B0_FLAG_FIN = 0b10000000;
+//  /** Byte 0 reserved flag 1. Must be 0 unless negotiated otherwise. */
+//  static final int B0_FLAG_RSV1 = 0b01000000;
+//  /** Byte 0 reserved flag 2. Must be 0 unless negotiated otherwise. */
+//  static final int B0_FLAG_RSV2 = 0b00100000;
+//  /** Byte 0 reserved flag 3. Must be 0 unless negotiated otherwise. */
+//  static final int B0_FLAG_RSV3 = 0b00010000;
+//  /** Byte 0 mask for the frame opcode. */
+//  static final int B0_MASK_OPCODE = 0b00001111;
+//  /** Flag in the opcode which indicates a control frame. */
+//  static final int OPCODE_FLAG_CONTROL = 0b00001000;
 
   /**
    * Byte 1 flag for whether the payload data is masked.
@@ -47,14 +59,16 @@ final class Protocol {
    * If this flag is set, the next four bytes represent the mask key. These bytes appear after
    * any additional bytes specified by {@link #B1_MASK_LENGTH}.
    */
-  static final int B1_FLAG_MASK = 0b10000000;
+  //static final int B1_FLAG_MASK = 0b10000000;
+  static final int B1_FLAG_MASK = Integer.parseInt("10000000",2);
   /**
    * Byte 1 mask for the payload length.
    * <p>
    * If this value is {@link #PAYLOAD_SHORT}, the next two bytes represent the length.
    * If this value is {@link #PAYLOAD_LONG}, the next eight bytes represent the length.
    */
-  static final int B1_MASK_LENGTH = 0b01111111;
+  //static final int B1_MASK_LENGTH = 0b01111111;
+  static final int B1_MASK_LENGTH = Integer.parseInt("01111111",2);
 
   static final int OPCODE_CONTINUATION = 0x0;
   static final int OPCODE_TEXT = 0x1;
