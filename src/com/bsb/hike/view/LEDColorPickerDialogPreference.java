@@ -20,7 +20,7 @@ public class LEDColorPickerDialogPreference extends DialogPreference
 	private Drawable mIcon;
 	private Context mContext;
 	private ColorPickerView colorPickerView;
-	private LedColorView ledColorView;
+	private LedColorView SelectedLedColorView;
 	
 	public LEDColorPickerDialogPreference(Context context, AttributeSet attrs)
 	{
@@ -42,7 +42,6 @@ public class LEDColorPickerDialogPreference extends DialogPreference
 	@Override
 	protected void onBindDialogView(View view)
 	{
-		// TODO Auto-generated method stub
 		super.onBindDialogView(view);
 		colorPickerView = (ColorPickerView)view.findViewById(R.id.color_picker);
 	}
@@ -50,7 +49,6 @@ public class LEDColorPickerDialogPreference extends DialogPreference
 	@Override
 	protected void onBindView(View view)
 	{
-		// TODO Auto-generated method stub
 		super.onBindView(view);
 		final ImageView imageView = (ImageView) view.findViewById(R.id.icon);
 		if ((imageView != null) && (this.mIcon != null))
@@ -59,8 +57,8 @@ public class LEDColorPickerDialogPreference extends DialogPreference
 			imageView.setVisibility(View.VISIBLE);
 		}
 		LinearLayout layout = (LinearLayout)view.findViewById(android.R.id.widget_frame);
-		ledColorView = (LedColorView)layout.findViewById(R.id.led_color_view);
-		ledColorView.setCircleColor(HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_DEFAULT_BLUE_COLOR));
+		SelectedLedColorView = (LedColorView)layout.findViewById(R.id.led_color_view);
+		SelectedLedColorView.setCircleColor(HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_DEFAULT_BLUE_COLOR));
 	}
 	
 	@Override
@@ -68,8 +66,8 @@ public class LEDColorPickerDialogPreference extends DialogPreference
 	{
 		super.onPrepareDialogBuilder(builder);
 		builder.setTitle(mContext.getResources().getString(R.string.led_notification));
-		builder.setPositiveButton("OK", this);
-		builder.setNegativeButton("Cancel", this);
+		builder.setPositiveButton(R.string.ok, this);
+		builder.setNegativeButton(R.string.cancel, this);
 		colorPickerView.setOldCenterColor(HikeSharedPreferenceUtil.getInstance(mContext).getData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_DEFAULT_BLUE_COLOR));
 	}
 
@@ -79,7 +77,7 @@ public class LEDColorPickerDialogPreference extends DialogPreference
 		{
 			case DialogInterface.BUTTON_POSITIVE:
 				HikeSharedPreferenceUtil.getInstance(mContext).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, colorPickerView.getColor());
-				ledColorView.setCircleColor(colorPickerView.getColor());
+				SelectedLedColorView.setCircleColor(colorPickerView.getColor());
 				notifyChanged();
 				dialog.dismiss();
 				break;
