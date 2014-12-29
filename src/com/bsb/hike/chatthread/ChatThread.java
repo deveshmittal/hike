@@ -25,6 +25,8 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
@@ -33,6 +35,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -56,11 +59,12 @@ import com.bsb.hike.media.StickerPicker.StickerPickerListener;
 import com.bsb.hike.media.ThemePicker;
 import com.bsb.hike.media.ThemePicker.ThemePickerListener;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HDialog;
 import com.bsb.hike.ui.HikeDialog.HHikeDialogListener;
@@ -76,7 +80,8 @@ import com.bsb.hike.utils.Utils;
  */
 
 public abstract class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
-		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener
+		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener,
+		OnScrollListener
 {
 	private static final String TAG = "chatthread";
 
@@ -113,8 +118,10 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected MessagesAdapter mAdapter;
 
 	protected List<ConvMessage> messages;
-	
+
 	protected static HashMap<Long, ConvMessage> mMessageMap;
+
+	protected ComposeViewWatcher mComposeViewWatcher;
 
 	protected Handler uiHandler = new Handler()
 	{
@@ -173,38 +180,41 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected void initView()
 	{
 		setConversationTheme();
-		
+
 		initShareablePopup();
-		
+
 		addOnClickListeners();
-		
+
 		audioRecordView = new AudioRecordView(activity, this);
 	}
-	
+
 	/**
 	 * Instantiate the mShareable popupLayout
 	 */
 	private void initShareablePopup()
 	{
-		if(mShareablePopupLayout == null)
+		if (mShareablePopupLayout == null)
 		{
 			int[] mEatOuterTouchIds = new int[] { R.id.sticker_btn, R.id.emoticon_btn, R.id.send_message };
 
+			List<ShareablePopup> sharedPopups = new ArrayList<ShareablePopup>();
+
 			initStickerPicker();
 			initEmoticonPicker();
-			
+
+			sharedPopups.add(mEmoticonPicker);
+			sharedPopups.add(mStickerPicker);
 			mShareablePopupLayout = new ShareablePopupLayout(activity.getApplicationContext(), activity.findViewById(R.id.chatThreadParentLayout),
 					(int) (activity.getResources().getDimension(R.dimen.emoticon_pallete)), mEatOuterTouchIds);
 		}
-		
+
 		else
 		{
 			updateSharedPopups();
 		}
-		
 
 	}
-	
+
 	/**
 	 * Updates the mainView for KeyBoard popup as well as updates the Picker Listeners for Emoticon and Stickers
 	 */
@@ -226,7 +236,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	{
 		mStickerPicker = new StickerPicker(activity.getApplicationContext(), this);
 	}
-	
+
 	private void initEmoticonPicker()
 	{
 		mEmoticonPicker = new EmoticonPicker(activity.getApplicationContext(), this);
@@ -354,7 +364,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	{
 		mShareablePopupLayout.showPopup(mStickerPicker);
 	}
-	
+
 	protected void emoticonClicked()
 	{
 		mShareablePopupLayout.showPopup(mEmoticonPicker);
@@ -453,7 +463,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		{
 			mShareablePopupLayout.dismiss();
 		}
-		
+
 		if (themePicker != null && themePicker.isShowing())
 		{
 			return themePicker.onBackPressed();
@@ -681,21 +691,49 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 		messages.addAll(mConversation.getMessages());
-		
+
 		mMessageMap = new HashMap<Long, ConvMessage>();
 		addtoMessageMap(0, messages.size());
-		
-		mAdapter = new MessagesAdapter(activity.getApplicationContext(), mConversation.getMessages(), mConversation, null);
-		ListView mConversationsView = (ListView) activity.findViewById(R.id.conversations_list);
 
-		mConversationsView.setAdapter(mAdapter);
-		mConversationsView.setSelection(mAdapter.getCount());
-		mConversationsView.setOnItemLongClickListener(this);
-		mConversationsView.setOnTouchListener(this);
-		mConversationsView.setOnScrollListener(this);
+		mAdapter = new MessagesAdapter(activity.getApplicationContext(), mConversation.getMessages(), mConversation, null);
+		initListView(); // set adapter and add clicks etc
 
 		updateUIAsPerTheme(mConversation.getTheme());// it has to be done after setting adapter
 
+		if (mComposeViewWatcher != null)
+		{
+			mComposeViewWatcher.uninit();
+		}
+		/* get the number of credits and also listen for changes */
+		int mCredits = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
+
+		mComposeViewWatcher = new ComposeViewWatcher(mConversation, (EditText) activity.findViewById(R.id.messageedittext), (ImageButton) activity.findViewById(R.id.send_message),
+				mCredits, activity.getApplicationContext());
+	}
+
+	private void initListView()
+	{
+		ListView mConversationsView = (ListView) activity.findViewById(R.id.conversations_list);
+		mConversationsView.setAdapter(mAdapter);
+		if (mConversation.getUnreadCount() > 0)
+		{
+			ConvMessage message = messages.get(messages.size() - 1);
+			if (message.getTypingNotification() != null)
+			{
+				message = messages.get(messages.size() - 2);
+			}
+			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+			{
+				mConversationsView.setSelection(messages.size() - mConversation.getUnreadCount() - 1);
+			}
+		}
+		else
+		{
+			mConversationsView.setSelection(mAdapter.getCount());
+		}
+		mConversationsView.setOnItemLongClickListener(this);
+		mConversationsView.setOnTouchListener(this);
+		mConversationsView.setOnScrollListener(this);
 	}
 
 	/*
@@ -859,7 +897,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	/**
 	 * This method is called when a one to one or group chat thread is instantiated
 	 */
@@ -867,7 +905,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	{
 		fetchConversation(true);
 	}
-	
+
 	private void addtoMessageMap(int from, int to)
 	{
 		for (int i = to - 1; i >= from; i--)
@@ -882,7 +920,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			addtoMessageMap(message);
 		}
 	}
-	
+
 	private ConvMessage checkNUpdateFTMsg(ConvMessage message)
 	{
 		if (message.isSent() && message.isFileTransferMessage())
@@ -892,7 +930,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		}
 		return null;
 	}
-	
+
 	public static void addtoMessageMap(ConvMessage msg)
 	{
 		State msgState = msg.getState();
@@ -932,7 +970,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			}
 		}
 	}
-	
+
 	private void removeFromMessageMap(ConvMessage msg)
 	{
 		if (mMessageMap == null)
@@ -951,5 +989,4 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		}
 	}
 
-	
 }
