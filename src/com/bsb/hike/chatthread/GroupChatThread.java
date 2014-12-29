@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import android.os.Message;
 import android.util.Pair;
+import android.view.View;
 import android.widget.Toast;
 
 import android.view.MotionEvent;
@@ -185,10 +186,21 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		return R.layout.chatthread;
 	}
 
+	/*
+	 * Called in UI Thread
+	 * 
+	 * @see com.bsb.hike.chatthread.ChatThread#fetchConversationFinished(com.bsb.hike.models.Conversation)
+	 */
 	@Override
 	protected void fetchConversationFinished(Conversation conversation)
 	{
 		super.fetchConversationFinished(conversation);
+		toggleGroupLife(groupConversation.getIsGroupAlive());
+		addUnreadCountMessage();
+	}
+
+	private void addUnreadCountMessage()
+	{
 		if (groupConversation.getUnreadCount() > 0 && groupConversation.getMessages().size() > 0)
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
@@ -207,19 +219,14 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			}
 		}
 	}
-	
-	@Override
-	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
 
-	@Override
-	public boolean onTouch(View v, MotionEvent event)
+	private void toggleGroupLife(boolean alive)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		((GroupConversation) mConversation).setGroupAlive(alive);
+		activity.findViewById(R.id.send_message).setEnabled(alive);
+		activity.findViewById(R.id.msg_compose).setVisibility(alive ? View.VISIBLE : View.INVISIBLE);
+		activity.findViewById(R.id.emo_btn).setEnabled(alive);
+		activity.findViewById(R.id.sticker_btn).setEnabled(alive);
+		// TODO : Hide popup OR dialog if visible
 	}
-	
 }
