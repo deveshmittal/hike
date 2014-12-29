@@ -19,7 +19,7 @@ public class LEDColorPickerDialogPreference extends DialogPreference
 {
 	private Drawable mIcon;
 	private Context mContext;
-	private ColorPickerView colorPickerView;
+	private NotificationColorPickerView colorPickerView;
 	private LedColorView SelectedLedColorView;
 	
 	public LEDColorPickerDialogPreference(Context context, AttributeSet attrs)
@@ -43,7 +43,7 @@ public class LEDColorPickerDialogPreference extends DialogPreference
 	protected void onBindDialogView(View view)
 	{
 		super.onBindDialogView(view);
-		colorPickerView = (ColorPickerView)view.findViewById(R.id.color_picker);
+		colorPickerView = (NotificationColorPickerView)view.findViewById(R.id.color_picker);
 	}
 	
 	@Override

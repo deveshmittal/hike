@@ -5173,20 +5173,30 @@ public class Utils
 		return true;
 	}
 	
+
+	/*
+	 * This function converts float value to int as per device(ldp/hdp/mdp)
+	 */
 	public static int dp(float value)
 	{
 		return (int) Math.ceil(Utils.densityMultiplier * value);
 	}
 
+
+	/*
+	 * This function is to reset previous color(stored in pref) for led notification, 
+	 * if no color was stored then it sets to default blue color
+	 */
 	public static int getOldLedPref(Context context)
 	{
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
-
-		if ((preferenceManager.getInt(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, -1) == -1))
+		
+		int colorCode = preferenceManager.getInt(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, -1); 
+		if ((colorCode == -1))
 		{
 			return HikeConstants.LED_DEFAULT_BLUE_COLOR;
 		}
-		return preferenceManager.getInt(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, -1);
+		return colorCode;
 	}
 
 }

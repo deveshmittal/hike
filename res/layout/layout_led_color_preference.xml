@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:layout_gravity="center">
 
-    <com.bsb.hike.view.ColorPickerView
+    <com.bsb.hike.view.NotificationColorPickerView
         android:id="@+id/color_picker"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -9,6 +9,13 @@ import android.graphics.Paint.Style;
 import android.util.AttributeSet;
 import android.view.View;
 
+/**
+ * 
+ * This is a small circle shown
+ * on Notification Screen painted with 
+ * color chosen for Led Notification
+ *
+ */
 public class LedColorView extends View
 {
 	private Paint circlePaint;
