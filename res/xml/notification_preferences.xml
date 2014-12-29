@@ -20,14 +20,14 @@
         android:summary="@string/tickSoundSummary"
         android:title="@string/tickSoundTitle"
         android:widgetLayout="@layout/checkbox_widget" />
-    <com.bsb.hike.view.IconCheckBoxPreference
+    
+    <com.bsb.hike.view.LEDColorPickerDialogPreference
         icon="@drawable/preference_led"
-        android:defaultValue="true"
         android:key="ledPref"
         android:layout="@layout/icon_preference"
         android:summary="@string/led_notification_info"
-        android:title="@string/led_notification"
-        android:widgetLayout="@layout/checkbox_widget" />
+        android:title="@string/led_notification" 
+        android:widgetLayout="@layout/led_color_widget"/>
 
     <com.bsb.hike.view.IconListPreference
         android:defaultValue="@string/notif_sound_Hike"

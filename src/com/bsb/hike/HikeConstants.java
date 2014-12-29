@@ -2101,4 +2101,6 @@ public class HikeConstants
 	public static final String GCM_ID = "gcm_id";
 	
 	public static final String ADD_CATEGORY = "addCat";
+	
+	public static final int LED_DEFAULT_BLUE_COLOR = 0xff00ff00;
 }

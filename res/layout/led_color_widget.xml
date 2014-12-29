@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.bsb.hike.view.LedColorView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/led_color_view"
+    android:layout_gravity="center_vertical|right"
+    android:layout_width="30dp"
+    android:layout_height="wrap_content"/>
