@@ -177,14 +177,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		//TODO : This is a basic working skeleton. This needs to be segragated into separate functions.
 		
 		mContactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
-
+		
 		FavoriteType favoriteType = mContactInfo.getFavoriteType();
-
-		boolean addBlockHeader = false;
 
 		if (mConversation.isOnhike())
 		{
-			addBlockHeader = true;
+			addUnkownContactBlockHeader();
 		}
 
 		else
@@ -215,21 +213,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 		
 		
-		// TODO : ShowStickerFTUE Tip and H20 Tip
+		// TODO : ShowStickerFTUE Tip and H20 Tip. H20 Tip is a part of one to one chatThread. Sticker Tip is a part of super class
 		
 		if(mConversation.isOnhike())
 		{
 			//GETTING AN NPE HERE
 			// TODO : mAdapter.addAllUndeliverdMessages(messages);
-		}
-		
-		/**
-		 * Add Block View
-		 */
-		
-		if (addBlockHeader)
-		{
-			addUnkownContactBlockHeader();
 		}
 		
 	}
@@ -261,8 +250,28 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 	protected void addUnkownContactBlockHeader()
 	{
-		// TODO Auto-generated method stub
-		
+		if (mContactInfo != null && mContactInfo.isUnknownContact() && messages != null && messages.size() >0 )
+		{
+				ConvMessage cm = messages.get(0);
+				/**
+				 * Check if the conv message was previously a block header or not
+				 */
+				if (!cm.isBlockAddHeader())
+				{
+					/**
+					 * Creating a new conv message to be appended at the 0th position.
+					 */
+					cm = new ConvMessage(0, 0l, 0l);
+					cm.setBlockAddHeader(true);
+					messages.add(0, cm);
+					Logger.d(TAG, "Adding unknownContact Header to the chatThread");
+
+					if (mAdapter != null)
+					{
+						mAdapter.notifyDataSetChanged();
+					}
+				}
+		}
 	}
 
 	@Override
