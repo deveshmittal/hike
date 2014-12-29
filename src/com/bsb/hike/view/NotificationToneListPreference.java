@@ -1,8 +1,6 @@
 package com.bsb.hike.view;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import android.app.AlertDialog.Builder;
@@ -34,8 +32,6 @@ public class NotificationToneListPreference extends ListPreference implements Di
 
 	private int mCancelDialogEntryIndex;
 
-	private List<String> ringtonesList;
-
 	private Map<String, Uri> ringtonesNameURIMap;
 
 	private Cursor notifSoundCursor;
@@ -44,13 +40,15 @@ public class NotificationToneListPreference extends ListPreference implements Di
 
 	private boolean isClickedButtonPressed = false;
 
+	private static int HIKE_JINNGLE_INDEX = 2;
+	
 	public NotificationToneListPreference(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
 		this.mContext = context;
-		this.ringtonesList = new ArrayList<String>();
-		this.ringtonesNameURIMap = new HashMap<String, Uri>();
+		this.ringtonesNameURIMap = new LinkedHashMap<String, Uri>();
 		setIcon(context, attrs);
+		this.setValueIndex(HIKE_JINNGLE_INDEX);
 	}
 
 	private void setIcon(Context context, AttributeSet attrs)
@@ -100,18 +98,18 @@ public class NotificationToneListPreference extends ListPreference implements Di
 
 	private void playSoundAsPerToneClicked()
 	{
-		this.setValue(this.getEntryValues()[mClickedDialogEntryIndex].toString());
 		Object newValue = this.getEntryValues()[mClickedDialogEntryIndex];
-		if (mContext.getString(R.string.notif_sound_off).equals(newValue.toString()))
+		String selectedNotificationTone = newValue.toString();
+		if (mContext.getString(R.string.notif_sound_off).equals(selectedNotificationTone))
 		{
 			// Here No Sound is played
 			return;
 		}
-		else if (mContext.getString(R.string.notif_sound_Hike).equals(newValue.toString()))
+		else if (mContext.getString(R.string.notif_sound_Hike).equals(selectedNotificationTone))
 		{
 			Utils.playSoundFromRaw(mContext, R.raw.hike_jingle_15);
 		}
-		else if (mContext.getString(R.string.notif_sound_default).equals(newValue.toString()))
+		else if (mContext.getString(R.string.notif_sound_default).equals(selectedNotificationTone))
 		{
 			Utils.playSound(mContext, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
 		}
@@ -136,6 +134,7 @@ public class NotificationToneListPreference extends ListPreference implements Di
 
 		case DialogInterface.BUTTON_NEGATIVE:
 			this.setValue(this.getEntryValues()[mCancelDialogEntryIndex].toString());
+			ringtonesNameURIMap.clear();
 			dialog.dismiss();
 			break;
 
@@ -153,7 +152,7 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		{
 			protected void onPreExecute()
 			{
-				initRingtoneLists(ringtonesList);
+				initRingtoneLists();
 			};
 
 			@Override
@@ -167,11 +166,7 @@ public class NotificationToneListPreference extends ListPreference implements Di
 					if (notifSoundCursor != null)
 					{
 						int notifSoundCount = notifSoundCursor.getCount();
-						if (notifSoundCount == 0 && !notifSoundCursor.moveToFirst())
-						{
-							//No Notification Tone was present in device
-						}
-						else
+						if (notifSoundCount != 0 && notifSoundCursor.moveToFirst())
 						{
 							String ringtoneName = "";
 							while (!notifSoundCursor.isAfterLast() && notifSoundCursor.moveToNext())
@@ -179,8 +174,11 @@ public class NotificationToneListPreference extends ListPreference implements Di
 								int currentPosition = notifSoundCursor.getPosition();
 								ringtoneName = ringtoneMgr.getRingtone(currentPosition).getTitle(mContext);
 								ringtonesNameURIMap.put(ringtoneName, ringtoneMgr.getRingtoneUri(currentPosition));
-								ringtonesList.add(ringtoneName);
 							}
+						}
+						else
+						{
+							//No Notification Tone was present in device
 						}
 					}
 				}
@@ -194,30 +192,36 @@ public class NotificationToneListPreference extends ListPreference implements Di
 			protected void onPostExecute(Void result)
 			{
 				if (notifSoundCursor != null)
+				{
 					notifSoundCursor.close();
+				}
 				updateEntryAndValues();
 				notifyChanged();
 				
 				// User has clicked on Notification Button on preferences screen
 				if (isClickedButtonPressed)
+				{
 					NotificationToneListPreference.super.onClick();
+				}
 				else // Was a case of screen rotation
+				{
 					NotificationToneListPreference.super.showDialog(null);
+				}
 			};
 
 		}.execute();
 	}
 
-	private void initRingtoneLists(List<String> ringtonesList)
+	private void initRingtoneLists()
 	{
-		ringtonesList.add(mContext.getResources().getString(R.string.notif_sound_off));
-		ringtonesList.add(mContext.getResources().getString(R.string.notif_sound_default));
-		ringtonesList.add(mContext.getResources().getString(R.string.notif_sound_Hike));
+		ringtonesNameURIMap.put(mContext.getResources().getString(R.string.notif_sound_off), null);
+		ringtonesNameURIMap.put(mContext.getResources().getString(R.string.notif_sound_default), null);
+		ringtonesNameURIMap.put(mContext.getResources().getString(R.string.notif_sound_Hike), null);
 	}
 
 	private void updateEntryAndValues()
 	{
-		rintoneCharSeq = ringtonesList.toArray(new CharSequence[ringtonesList.size()]);
+		rintoneCharSeq = ringtonesNameURIMap.keySet().toArray(new CharSequence[ringtonesNameURIMap.size()]);
 		setEntries(rintoneCharSeq);
 		setEntryValues(rintoneCharSeq);
 	}
