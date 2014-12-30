@@ -1109,7 +1109,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	 */
 	protected void onMessageReceived(Object object)
 	{
-		final ConvMessage message = (ConvMessage) object;
+		ConvMessage message = (ConvMessage) object;
 		String senderMsisdn = message.getMsisdn();
 		if (senderMsisdn == null)
 		{
