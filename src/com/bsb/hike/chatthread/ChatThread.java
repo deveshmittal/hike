@@ -29,6 +29,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -135,6 +136,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected ListView mConversationsView;
 	
 	protected ComposeViewWatcher mComposeViewWatcher;
+	
+	private int unreadMessageCount = 0;
 
 	protected Handler uiHandler = new Handler()
 	{
@@ -171,7 +174,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		 * Don't scroll to bottom if the user is at older messages. It's possible that the user might be reading them.
 		 */
 		
-		/*if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
+		if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
 		{
 			if (convMessage.getTypingNotification() == null
 					&& (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
@@ -184,7 +187,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		{
 			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 		}
-		*/
+		
 		/*
 		 * Resetting the transcript mode once the list has scrolled to the bottom.
 		 */
@@ -294,6 +297,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		activity.findViewById(R.id.sticker_btn).setOnClickListener(this);
 		activity.findViewById(R.id.emoticon_btn).setOnClickListener(this);
 		activity.findViewById(R.id.send_message).setOnClickListener(this);
+		activity.findViewById(R.id.new_message_indicator).setOnClickListener(this);
+		activity.findViewById(R.id.scroll_bottom_indicator).setOnClickListener(this);
 	}
 
 	private void initStickerPicker()
@@ -410,6 +415,11 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case R.id.send_message:
 			sendButtonClicked();
 			break;
+		case R.id.new_message_indicator:
+			unreadCounterClicked();
+			break;
+		case R.id.scroll_bottom_indicator:
+			bottomScrollIndicatorClicked();
 		}
 
 	}
@@ -760,6 +770,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		mConversation = conversation;
 		/*
 		 * make a copy of the message list since it's used internally by the adapter
+		 * 
+		 * Adapter has to show UI elements like tips, day/date of messages, unknown contact headers etc.
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 		messages.addAll(mConversation.getMessages());
@@ -1229,6 +1241,65 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	public void onResume()
 	{
 		isActivityVisible = true;
+	}
+	
+	private void unreadCounterClicked()
+	{
+		mConversationsView.setSelection(mAdapter.getCount() - unreadMessageCount - 1);
+		hideUnreadCountIndicator();
+	}
+	
+	private void hideUnreadCountIndicator()
+	{
+		unreadMessageCount = 0;
+		activity.findViewById(R.id.new_message_indicator).setVisibility(View.GONE);
+	}
+
+	private void bottomScrollIndicatorClicked()
+	{
+		mConversationsView.setSelection(messages.size() - 1);
+		activity.findViewById(R.id.scroll_bottom_indicator);
+	}
+	
+	private void incrementUnreadMessageCount(int count)
+	{
+		unreadMessageCount += count;
+	}
+	
+	/**
+	 * Used to show the unreadCount indicator
+	 */
+	private void showUnreadCountIndicator()
+	{
+		incrementUnreadMessageCount(1);
+		handleUnreadUI();
+	}
+	
+	private void showUnreadCountIndicator(int unreadCount)
+	{
+		incrementUnreadMessageCount(unreadCount);
+		handleUnreadUI();
+	}
+	
+	private void handleUnreadUI()
+	{
+		/**
+		 * fast scroll indicator and unread message should not show simultaneously
+		 */
+
+		activity.findViewById(R.id.scroll_bottom_indicator).setVisibility(View.GONE);
+		activity.findViewById(R.id.new_message_indicator).setVisibility(View.VISIBLE);
+
+		TextView indicatorText = (TextView) activity.findViewById(R.id.indicator_text);
+		indicatorText.setVisibility(View.VISIBLE);
+		if (unreadMessageCount == 1)
+		{
+			indicatorText.setText(getResources().getString(R.string.one_new_message));
+		}
+		else
+		{
+			indicatorText.setText(getResources().getString(R.string.num_new_messages, unreadMessageCount));
+		}
 	}
 	
 }
