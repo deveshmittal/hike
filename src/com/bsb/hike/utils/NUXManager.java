@@ -14,9 +14,13 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NUXConstants;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.NuxCustomMessage;
 import com.bsb.hike.models.NuxInviteFriends;
 import com.bsb.hike.models.NuxSelectFriends;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 
 public class NUXManager
 {
@@ -125,15 +129,23 @@ public class NUXManager
 		return list_nux_contacts;
 	}
 
-	public void sendMessage(ArrayList<String> msisdn)
+	public void sendMessage(HashSet<String> msisdn, String message)
 	{
-		JSONObject mmObject = null;
-		for (String r : msisdn)
-		{
-			mmObject = new JSONObject();
+		ConvMessage convMessage = null;
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, mmObject);
+		ArrayList<ContactInfo> contactList = null;
+		for (String number : msisdn)
+		{
+			contactList = new ArrayList<ContactInfo>(msisdn.size());
+
+			contactList.add(ContactManager.getInstance().getContact(number));
+
 		}
+		ArrayList<ConvMessage> messageList = new ArrayList<ConvMessage>();
+		convMessage = Utils.makeConvMessage(null, message, true);
+		messageList.add(convMessage);
+		MultipleConvMessage multiConvMessages = new MultipleConvMessage(messageList, contactList);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
 
 	}
 

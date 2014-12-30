@@ -34,14 +34,14 @@ public class NUXStartActivity extends HikeAppStateBaseFragmentActivity implement
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 
-		if (!NUXManager.getInstance(this).is_NUX_Active() && NUXManager.getInstance(this).getCurrentState() == NUXConstants.INVFRD)
-		{
-			return;
-		}
-		if (Utils.requireAuth(this))
-		{
-			return;
-		}
+//		if (!NUXManager.getInstance(this).is_NUX_Active() && NUXManager.getInstance(this).getCurrentState() == NUXConstants.INVFRD)
+//		{
+//			return;
+//		}
+//		if (Utils.requireAuth(this))
+//		{
+//			return;
+//		}
 
 		getSupportActionBar().hide();
 
