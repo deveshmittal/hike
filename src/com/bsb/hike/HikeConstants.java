@@ -991,6 +991,10 @@ public class HikeConstants
 	
 	public static final String SELF_HIKE_ID = "-1";
 
+	public static final String VOIP_CALL_DURATION = "vcd";
+
+	public static final String VOIP_CALL_INITIATOR = "vci";
+
 	public static final class ResultCodes
 	{
 		public static final int SELECT_COUNTRY = 4001;
@@ -1888,9 +1892,16 @@ public class HikeConstants
 		public static final String TIP = "tip";
 
 		public static final String VOIP_SOCKET_INFO = "ve";
-
+		
+		/**
+		 * VoIP data packet with QoS 0. This packet will either be delivered immediately
+		 * or never. 
+		 */
 		public static final String MESSAGE_VOIP_0 = "v0";
 
+		/**
+		 * VoIP data packet with QoS 1. 
+		 */
 		public static final String MESSAGE_VOIP_1 = "v1";
 
 		/**
@@ -1904,6 +1915,23 @@ public class HikeConstants
 		 * to support VoIP. For example, might be on iOS and we have no iOS client.
 		 */
 		public static final String VOIP_ERROR_CALLEE_INCOMPATIBLE_NOT_UPGRADABLE = "e1";
+
+		/**
+		 * The person you are calling has blocked you. 
+		 */
+		public static final String VOIP_ERROR_CALLEE_HAS_BLOCKED_YOU = "e2";
+		
+		/**
+		 * If you receive a packet of this subtype, it implies that the person
+		 * you are calling is already on a call.
+		 */
+		public static final String VOIP_ERROR_ALREADY_IN_CALL = "mc";
+
+		public static final String VOIP_MSG_TYPE_CALL_SUMMARY = "vcs";
+
+		public static final String VOIP_MSG_TYPE_MISSED_CALL_INCOMING = "vmci";
+
+		public static final String VOIP_MSG_TYPE_MISSED_CALL_OUTGOING = "vmco";
 
 	}
 	

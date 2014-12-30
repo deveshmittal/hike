@@ -1,5 +1,7 @@
 package com.bsb.hike.voip;
 
+import com.bsb.hike.voip.VoIPClient.ConnectionMethods;
+
 public class VoIPDataPacket {
 
 	private boolean encrypted = false; 
@@ -35,7 +37,7 @@ public class VoIPDataPacket {
 		CURRENT_BITRATE (17),
 		REQUEST_BITRATE (18),
 		PACKET_LOSS_BIT_ARRAY (19),	// Used in the iOS app
-		CELLULAR_INCOMING_CALL (20);	
+		CELLULAR_INCOMING_CALL (20);
 		
 		private final int value;
 		

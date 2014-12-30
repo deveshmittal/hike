@@ -19,6 +19,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -28,21 +31,26 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
-import android.media.ToneGenerator;
+import android.media.MediaPlayer;
 import android.media.AudioTrack.OnPlaybackPositionUpdateListener;
 import android.media.MediaRecorder;
+import android.media.ToneGenerator;
+import android.media.audiofx.AcousticEchoCanceler;
 import android.media.audiofx.NoiseSuppressor;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.util.Log;
+import android.support.v4.app.NotificationCompat;
 
+import com.bsb.hike.GCMIntentService;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.VoIPActivity;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.voip.VoIPClient.ConnectionMethods;
 import com.bsb.hike.voip.VoIPDataPacket.PacketType;
 import com.bsb.hike.voip.VoIPEncryptor.EncryptionStage;
@@ -55,12 +63,15 @@ public class VoIPService extends Service {
 	private final int PACKET_TRACKING_SIZE = 128;
 	private final int HEARTBEAT_INTERVAL = 1000;
 	private final int HEARTBEAT_TIMEOUT = HEARTBEAT_INTERVAL * 5;
+	private final int HEARTBEAT_HARD_TIMEOUT = 20000;
 	private final int MAX_SAMPLES_BUFFER = 3;
+	private static final int NOTIFICATION_IDENTIFIER = 10;
 
 	private int localBitrate = 12000;
 	private boolean cryptoEnabled = true;
 	private Messenger mMessenger;
-	private boolean connectionEstablished = false;
+	private static boolean connected = false;
+	private boolean reconnecting = false;
 	private int currentPacketNumber = 0;
 	private int previousHighestRemotePacketNumber = 0;
 	private boolean keepRunning = true;
@@ -76,13 +87,17 @@ public class VoIPService extends Service {
 	private int droppedDecodedPackets = 0;
 	private int minBufSizePlayback;
 	private int gain = 0;
-	private boolean answerOnConnectionEstablished = false;
 	private OpusWrapper opusWrapper;
-	private Thread partnerTimeoutThread = null, waitingBeepThread = null;
+	private Thread partnerTimeoutThread = null;
+	private Thread recordingThread = null, playbackThread = null;
 	private AudioTrack audioTrack;
 	private ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_VOICE_CALL, 100);
-	private int callId = 0;
-	private int totalPacketsSent;
+	private static int callId = 0;
+	private int totalPacketsSent = 0, totalPacketsReceived = 0;
+	private NotificationManager notificationManager;
+	private MediaPlayer mediaplayer = null;
+	private AudioManager audioManager;
+
 
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToDecodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToEncodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
@@ -113,30 +128,159 @@ public class VoIPService extends Service {
 	@SuppressLint("InlinedApi") @Override
 	public void onCreate() {
 		super.onCreate();
+		Logger.d(VoIPConstants.TAG, "VoIPService onCreate()");
 		
+		clientPartner = new VoIPClient();
+		clientSelf = new VoIPClient();
+		setCallid(0);
+		
+		showNotification();
 		AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 		
 		if (android.os.Build.VERSION.SDK_INT >= 17) {
 			String rate = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
 			String size = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
-			Log.d(VoIPConstants.TAG, "Device frames/buffer:" + size + ", sample rate: " + rate);
+			Logger.d(VoIPConstants.TAG, "Device frames/buffer:" + size + ", sample rate: " + rate);
 		}
+		
+		retrieveExternalSocket();
+	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		Logger.d(VoIPConstants.TAG, "VoIPService onStartCommand()");
+
+		if (intent == null)
+			return super.onStartCommand(intent, flags, startId);
+		
+		String action = intent.getStringExtra("action");
+
+		if (action == null || action.isEmpty()) {
+			return super.onStartCommand(intent, flags, startId);
+		}
+		else
+			Logger.d(VoIPConstants.TAG, "VoIPService Intent action: " + action);
+
+		if (action.equals("setpartnerinfo")) {
+			
+			// Check in case the other client is reconnecting to us
+			if (connected && intent.getIntExtra("callId", 0) == getCallId()) {
+				Logger.w(VoIPConstants.TAG, "VoIPService reconnecting..");
+				if (!reconnecting) {
+					reconnect();
+				} 
+			}
+			
+			clientPartner = new VoIPClient();
+			clientPartner.setInternalIPAddress(intent.getStringExtra("internalIP"));
+			clientPartner.setInternalPort(intent.getIntExtra("internalPort", 0));
+			clientPartner.setExternalIPAddress(intent.getStringExtra("externalIP"));
+			clientPartner.setExternalPort(intent.getIntExtra("externalPort", 0));
+			clientPartner.setPhoneNumber(intent.getStringExtra("msisdn"));
+			clientPartner.setPreferredConnectionMethod(ConnectionMethods.UNKNOWN);
+			clientPartner.setInitiator(intent.getBooleanExtra("initiator", true));
+			clientSelf.setInitiator(!clientPartner.isInitiator());
+			setCallid(intent.getIntExtra("callId", 0));
+
+			if (clientPartner.isInitiator() && !reconnecting) {
+				Logger.d(VoIPConstants.TAG, "Detected incoming VoIP call.");
+			} else {
+				// We have already sent our socket info to partner
+				// And now they have sent us their's, so let's establish connection
+				// OR, we are reconnecting
+				establishConnection();
+			}
+		}
+		
+		if (action.equals("outgoingcall")) {
+			// we are making an outgoing call
+			clientPartner.setPhoneNumber(intent.getStringExtra("msisdn"));
+			clientSelf.setInitiator(true);
+			clientPartner.setInitiator(false);
+			setCallid(new Random().nextInt(999999));
+			Logger.d(VoIPConstants.TAG, "Making outgoing call to: " + clientPartner.getPhoneNumber());
+			initAudioManager();
+			
+			// Show activity
+			Intent i = new Intent(getApplicationContext(), VoIPActivity.class);
+			i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(i);
+		}
+
+		return super.onStartCommand(intent, flags, startId);
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		stop();
-		Log.d(VoIPConstants.TAG, "VoIP Service destroyed.");
+
+		// Dismiss notification
+		if (notificationManager != null) {
+			Logger.d(VoIPConstants.TAG, "Removing notification..");
+			notificationManager.cancel(NOTIFICATION_IDENTIFIER);
+		}
+		
+		Logger.d(VoIPConstants.TAG, "VoIP Service destroyed.");
 	}
 
+	private void showNotification() {
+		Logger.d(VoIPConstants.TAG, "Showing notification..");
+		Intent myIntent = new Intent(getApplicationContext(), VoIPActivity.class);
+		myIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, myIntent, 0);
+		
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
+		
+		Notification myNotification = builder
+		.setContentTitle("Hike Ongoing Call")
+		.setSmallIcon(R.drawable.ic_launcher)
+		.setContentIntent(pendingIntent)
+		.build();
+		
+		notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.notify(null, NOTIFICATION_IDENTIFIER, myNotification);
+	}
+
+	@SuppressLint("InlinedApi") private void initAudioManager() {
+		audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+		if (android.os.Build.VERSION.SDK_INT >= 11)
+			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);	
+		audioManager.setParameters("noise_suppression=on");
+	}
+	
+	private void releaseAudioManager() {
+		if (audioManager != null) {
+			audioManager.setMode(AudioManager.MODE_NORMAL);
+		}
+	}
+	
+	private void playOnSpeaker(int resid, boolean looping) {
+		stopMediaPlayer();
+		mediaplayer = MediaPlayer.create(this, resid);
+		mediaplayer.setLooping(looping);
+		mediaplayer.start();
+	}
+
+	private void stopMediaPlayer() {
+		try {
+			if (mediaplayer != null && mediaplayer.isPlaying()) {
+				mediaplayer.stop();
+				mediaplayer.reset();
+				mediaplayer.release();
+			}
+		} catch (IllegalStateException e) {
+			Logger.d(VoIPConstants.TAG, "Mediaplayer exception: " + e.toString());
+		}
+	}
+	
 	public void setClientSelf(VoIPClient clientSelf) {
 		this.clientSelf = clientSelf;
 		if (socket == null)
 			try {
 				socket = new DatagramSocket(clientSelf.getInternalPort());
 			} catch (SocketException e) {
-				Log.d(VoIPConstants.TAG, "VoIPService SocketException: " + e.toString());
+				Logger.d(VoIPConstants.TAG, "VoIPService SocketException: " + e.toString());
 			}
 	}
 	
@@ -144,12 +288,22 @@ public class VoIPService extends Service {
 		this.mMessenger = messenger;
 	}
 	
-	public void setCallid(int callId) {
-		this.callId = callId;
+	@Override
+	public boolean onUnbind(Intent intent) {
+		this.mMessenger = null;
+		return super.onUnbind(intent);
+	}
+
+	private static void setCallid(int callId) {
+		VoIPService.callId = callId;
 	}
 	
-	public int getCallId() {
+	public static int getCallId() {
 		return callId;
+	}
+	
+	public VoIPClient getPartnerClient() {
+		return clientPartner;
 	}
 	
 	public void startStreaming() throws Exception {
@@ -164,27 +318,34 @@ public class VoIPService extends Service {
 		startHeartbeat();
 		exchangeCryptoInfo();
 		
-		Log.d(VoIPConstants.TAG, "Streaming started.");
+		Logger.d(VoIPConstants.TAG, "Streaming started.");
 	}
 	
 	public void stop() {
 		if (keepRunning == false) {
-			Log.w(VoIPConstants.TAG, "Trying to stop a stopped service?");
+			// Logger.w(VoIPConstants.TAG, "Trying to stop a stopped service?");
+			sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY);
 			return;
 		}
 		
 		keepRunning = false;
-		sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY);
-		Log.d(VoIPConstants.TAG, "Bytes sent: " + totalBytesSent + 
-				"\nVoice sent: " + rawVoiceSent + "\nBytes received: " + totalBytesReceived +
-				"\nDropped decoded packets: " + droppedDecodedPackets +
-				"\nPackets sent: " + totalPacketsSent);
+		connected = false;
+		setCallid(0);
 		
-		if (waitingBeepThread != null)
-			waitingBeepThread.interrupt();
+		sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY);
+		Logger.d(VoIPConstants.TAG, "Bytes sent / received: " + totalBytesSent + " / " + totalBytesReceived +
+				"\nPackets sent / received: " + totalPacketsSent + " / " + totalPacketsReceived +
+				"\nPure voice bytes: " + rawVoiceSent +
+				"\nDropped decoded packets: " + droppedDecodedPackets);
+		
+		if (partnerTimeoutThread != null)
+			partnerTimeoutThread.interrupt();
 
 		// Hangup tone
 		tg.startTone(ToneGenerator.TONE_CDMA_PIP);
+		stopMediaPlayer();
+		releaseAudioManager();
+		stopSelf();
 	}
 	
 	public void hangUp() {
@@ -197,9 +358,11 @@ public class VoIPService extends Service {
 				stop();
 			}
 		}).start();
+		sendHandlerMessage(VoIPActivity.MSG_HANGUP);
 	}
 	
 	public void rejectIncomingCall() {
+		playOnSpeaker(R.raw.call_end, false);
 		new Thread(new Runnable() {
 			
 			@Override
@@ -209,6 +372,10 @@ public class VoIPService extends Service {
 				stop();
 			}
 		}).start();
+		
+		// sendHandlerMessage(VoIPActivity.MSG_INCOMING_CALL_DECLINED);
+		VoIPUtils.addMessageToChatThread(this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
+
 	}
 	
 	public void setMute(boolean mute) {
@@ -219,12 +386,25 @@ public class VoIPService extends Service {
 		Message msg = Message.obtain();
 		msg.what = message;
 		try {
-			mMessenger.send(msg);
+			if (mMessenger != null)
+				mMessenger.send(msg);
 		} catch (RemoteException e) {
-			Log.e(VoIPConstants.TAG, "Messenger RemoteException: " + e.toString());
+			Logger.e(VoIPConstants.TAG, "Messenger RemoteException: " + e.toString());
 		}
 	}
 
+	/**
+	 * Reconnect after a communications failure.
+	 */
+	private void reconnect() {
+
+		if (reconnecting)
+			return;
+		Logger.w(VoIPConstants.TAG, "VoIPService reconnect()");
+		reconnecting = true;
+		retrieveExternalSocket();
+	}
+	
 	private void startHeartbeat() {
 	
 		// Sending heart beat
@@ -238,7 +418,7 @@ public class VoIPService extends Service {
 					try {
 						Thread.sleep(HEARTBEAT_INTERVAL);
 					} catch (InterruptedException e) {
-						Log.d(VoIPConstants.TAG, "Heartbeat InterruptedException: " + e.toString());
+						Logger.d(VoIPConstants.TAG, "Heartbeat InterruptedException: " + e.toString());
 					}
 				}
 			}
@@ -253,7 +433,13 @@ public class VoIPService extends Service {
 				while (keepRunning == true) {
 					Date currentDate = new Date();
 					if (currentDate.getTime() - lastHeartbeat.getTime() > HEARTBEAT_TIMEOUT) {
-						Log.d(VoIPConstants.TAG, "Heartbeat failure.");
+						Logger.w(VoIPConstants.TAG, "Heartbeat failure. Reconnecting.. ");
+						reconnect();
+						break;
+					}
+					
+					if (currentDate.getTime() - lastHeartbeat.getTime() > HEARTBEAT_HARD_TIMEOUT) {
+						Logger.d(VoIPConstants.TAG, "Giving up on connection.");
 						hangUp();
 						break;
 					}
@@ -262,30 +448,30 @@ public class VoIPService extends Service {
 					
 					// Drop packets if getting left behind
 					while (samplesToDecodeQueue.size() > MAX_SAMPLES_BUFFER) {
-						Log.d(VoIPConstants.TAG, "Dropping to_decode packet.");
+						Logger.d(VoIPConstants.TAG, "Dropping to_decode packet.");
 						samplesToDecodeQueue.poll();
 					}
 					
 					while (samplesToEncodeQueue.size() > MAX_SAMPLES_BUFFER) {
-						Log.d(VoIPConstants.TAG, "Dropping to_encode packet.");
+						Logger.d(VoIPConstants.TAG, "Dropping to_encode packet.");
 						samplesToEncodeQueue.poll();
 					}
 					
 					while (decodedBuffersQueue.size() > MAX_SAMPLES_BUFFER + 1) {
-						Log.d(VoIPConstants.TAG, "Dropping decoded packet.");
+						Logger.d(VoIPConstants.TAG, "Dropping decoded packet.");
 						droppedDecodedPackets++;
 						decodedBuffersQueue.poll();
 					}
 					
 					while (encodedBuffersQueue.size() > MAX_SAMPLES_BUFFER) {
-						Log.d(VoIPConstants.TAG, "Dropping encoded packet.");
+						Logger.d(VoIPConstants.TAG, "Dropping encoded packet.");
 						encodedBuffersQueue.poll();
 					}
 
 					try {
 						Thread.sleep(HEARTBEAT_INTERVAL);
 					} catch (InterruptedException e) {
-						Log.d(VoIPConstants.TAG, "Heartbeat InterruptedException: " + e.toString());
+						Logger.d(VoIPConstants.TAG, "Heartbeat InterruptedException: " + e.toString());
 					}
 					
 				}
@@ -300,7 +486,7 @@ public class VoIPService extends Service {
 			opusWrapper.getDecoder(AUDIO_SAMPLE_RATE, 1);
 			opusWrapper.getEncoder(AUDIO_SAMPLE_RATE, 1, localBitrate);
 		} catch (Exception e) {
-			Log.e(VoIPConstants.TAG, "Codec exception: " + e.toString());
+			Logger.e(VoIPConstants.TAG, "Codec exception: " + e.toString());
 		}
 		
 		startCodecDecompression();
@@ -332,7 +518,7 @@ public class VoIPService extends Service {
 						
 						// Handle packet loss (unused as on Dec 16, 2014)
 						if (dpdecode.getVoicePacketNumber() > lastPacketReceived + 1) {
-							Log.d(VoIPConstants.TAG, "Packet loss! (" + (dpdecode.getVoicePacketNumber() - lastPacketReceived) + ")");
+							Logger.d(VoIPConstants.TAG, "Packet loss! (" + (dpdecode.getVoicePacketNumber() - lastPacketReceived) + ")");
 							lastPacketReceived = dpdecode.getVoicePacketNumber();
 							try {
 								uncompressedLength = opusWrapper.plc(dpdecode.getData(), uncompressedData);
@@ -347,13 +533,13 @@ public class VoIPService extends Service {
 									}
 								}
 							} catch (Exception e) {
-								Log.d(VoIPConstants.TAG, "PLC exception: " + e.toString());
+								Logger.d(VoIPConstants.TAG, "PLC exception: " + e.toString());
 							}
 						}
 						
 						// Regular decoding
 						try {
-							// Log.d(VoIPActivity.logTag, "Decompressing data of length: " + dpdecode.getLength());
+							// Logger.d(VoIPActivity.logTag, "Decompressing data of length: " + dpdecode.getLength());
 							uncompressedLength = opusWrapper.decode(dpdecode.getData(), uncompressedData);
 							uncompressedLength = uncompressedLength * 2;
 							if (uncompressedLength > 0) {
@@ -387,7 +573,7 @@ public class VoIPService extends Service {
 								*/
 							}
 						} catch (Exception e) {
-							Log.d(VoIPConstants.TAG, "Opus decode exception: " + e.toString());
+							Logger.d(VoIPConstants.TAG, "Opus decode exception: " + e.toString());
 						}
 					} else {
 						// Wait till we have a packet to decompress
@@ -395,7 +581,7 @@ public class VoIPService extends Service {
 							try {
 								samplesToDecodeQueue.wait();
 							} catch (InterruptedException e) {
-								Log.d(VoIPConstants.TAG, "samplesToDecodeQueue interrupted: " + e.toString());
+								Logger.d(VoIPConstants.TAG, "samplesToDecodeQueue interrupted: " + e.toString());
 							}
 						}
 					}
@@ -432,7 +618,7 @@ public class VoIPService extends Service {
 
 							}
 						} catch (Exception e) {
-							Log.e(VoIPConstants.TAG, "Compression error: " + e.toString());
+							Logger.e(VoIPConstants.TAG, "Compression error: " + e.toString());
 						}
 						
 					} else {
@@ -440,7 +626,7 @@ public class VoIPService extends Service {
 							try {
 								samplesToEncodeQueue.wait();
 							} catch (InterruptedException e) {
-								Log.d(VoIPConstants.TAG, "samplesToEncodeQueue interrupted: " + e.toString());
+								Logger.d(VoIPConstants.TAG, "samplesToEncodeQueue interrupted: " + e.toString());
 							}
 						}
 					}
@@ -449,15 +635,9 @@ public class VoIPService extends Service {
 		}).start();
 	}
 	
-	public void startAudio() {
+	public void acceptIncomingCall() {
 		
-		if (connectionEstablished == false) {
-			// We are still trying to establish a connection
-			answerOnConnectionEstablished = true;
-			sendHandlerMessage(VoIPActivity.MSG_ANSWER_BEFORE_CONNECTION_ESTB);
-			return;
-		}
-		
+		playOnSpeaker(R.raw.call_answer, false);
 		startRecordingAndPlayback();
 		new Thread(new Runnable() {
 			
@@ -472,21 +652,23 @@ public class VoIPService extends Service {
 	@SuppressLint("InlinedApi") private void startRecordingAndPlayback() {
 
 		if (audioStarted == true) {
-			Log.d(VoIPConstants.TAG, "Audio already started.");
+			Logger.d(VoIPConstants.TAG, "Audio already started.");
 			return;
 		}
 		
-		Log.d(VoIPConstants.TAG, "Starting audio record / playback.");
+		Logger.d(VoIPConstants.TAG, "Starting audio record / playback.");
 
 		startRecording();
 		startPlayBack();
 		audioStarted = true;
 		partnerTimeoutThread.interrupt();
+		stopMediaPlayer();
+		initAudioManager();
 		sendHandlerMessage(VoIPActivity.MSG_AUDIO_START);
 	}
 	
 	private void startRecording() {
-		new Thread(new Runnable() {
+		recordingThread = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -494,7 +676,7 @@ public class VoIPService extends Service {
 
 				AudioRecord recorder;
 				int minBufSizeRecording = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-				Log.d(VoIPConstants.TAG, "minBufSizeRecording: " + minBufSizeRecording);
+				Logger.d(VoIPConstants.TAG, "minBufSizeRecording: " + minBufSizeRecording);
 
 				// Initialize the audio source
 				recorder = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, minBufSizeRecording);
@@ -503,10 +685,19 @@ public class VoIPService extends Service {
 					// Attach noise suppressor
 					if (NoiseSuppressor.isAvailable()) {
 						NoiseSuppressor ns = NoiseSuppressor.create(recorder.getAudioSessionId());
-						Log.w(VoIPConstants.TAG, "Current NS status: " + ns.getEnabled());
+						Logger.d(VoIPConstants.TAG, "Current NS status: " + ns.getEnabled());
 						if (ns != null) ns.setEnabled(true);
 					} else {
-						Log.w(VoIPConstants.TAG, "Noise suppression not available.");
+						Logger.w(VoIPConstants.TAG, "Noise suppression not available.");
+					}
+					
+					// Attach echo cancellation
+					if (AcousticEchoCanceler.isAvailable()) {
+						AcousticEchoCanceler aec = AcousticEchoCanceler.create(recorder.getAudioSessionId());
+						Logger.d(VoIPConstants.TAG, "Current AEC status: " + aec.getEnabled());
+						if (aec != null) aec.setEnabled(true);
+					} else {
+						Logger.w(VoIPConstants.TAG, "Echo cancellation not available.");
 					}
 				}
 				
@@ -514,7 +705,7 @@ public class VoIPService extends Service {
 				try {
 					recorder.startRecording();
 				} catch (IllegalStateException e) {
-					Log.d(VoIPConstants.TAG, "Recorder exception: " + e.toString());
+					Logger.d(VoIPConstants.TAG, "Recorder exception: " + e.toString());
 				}
 				
 				// Start processing recorded data
@@ -525,7 +716,7 @@ public class VoIPService extends Service {
 				while (keepRunning == true) {
 					retVal = recorder.read(recordedData, 0, recordedData.length);
 					if (retVal != recordedData.length)
-						Log.w(VoIPConstants.TAG, "Unexpected recorded data length. Expected: " + recordedData.length + ", Recorded: " + retVal);
+						Logger.w(VoIPConstants.TAG, "Unexpected recorded data length. Expected: " + recordedData.length + ", Recorded: " + retVal);
 					if (mute == true)
 						continue;
 
@@ -561,12 +752,14 @@ public class VoIPService extends Service {
 				
 				recorder.release();
 			}
-		}).start();
+		});
+		
+		recordingThread.start();
 	}
 	
 	private void startPlayBack() {
 		
-		new Thread(new Runnable() {
+		playbackThread = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -578,7 +771,7 @@ public class VoIPService extends Service {
 				android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 				int index = 0, size = 0;
 				minBufSizePlayback = AudioTrack.getMinBufferSize(AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
-				Log.d(VoIPConstants.TAG, "minBufSizePlayback: " + minBufSizePlayback);
+				Logger.d(VoIPConstants.TAG, "minBufSizePlayback: " + minBufSizePlayback);
 				audioTrack = new AudioTrack(AudioManager.STREAM_VOICE_CALL, AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, minBufSizePlayback, AudioTrack.MODE_STREAM);
 				
 				// Audiotrack monitor
@@ -591,7 +784,7 @@ public class VoIPService extends Service {
 					
 					@Override
 					public void onMarkerReached(AudioTrack track) {
-						Log.w(VoIPConstants.TAG, "Buffer underrun expected.");
+						// Logger.w(VoIPConstants.TAG, "Buffer underrun expected.");
 
 						if (voiceCache != null) {
 		                	synchronized (decodedBuffersQueue) {
@@ -626,7 +819,7 @@ public class VoIPService extends Service {
 							try {
 								decodedBuffersQueue.wait();
 							} catch (InterruptedException e) {
-								Log.d(VoIPConstants.TAG, "decodedBuffersQueue interrupted: " + e.toString());
+								Logger.d(VoIPConstants.TAG, "decodedBuffersQueue interrupted: " + e.toString());
 							}
 						}
 					}
@@ -637,8 +830,9 @@ public class VoIPService extends Service {
 				audioTrack.release();
 				audioTrack = null;
 			}
-		}).start();
+		});
 		
+		playbackThread.start();
 	}
 	
 	private void startSendingAndReceiving() {
@@ -671,7 +865,7 @@ public class VoIPService extends Service {
 							try {
 								encodedBuffersQueue.wait();
 							} catch (InterruptedException e) {
-								Log.d(VoIPConstants.TAG, "encodedBuffersQueue interrupted: " + e.toString());
+								Logger.d(VoIPConstants.TAG, "encodedBuffersQueue interrupted: " + e.toString());
 							}
 						}
 					}
@@ -692,8 +886,9 @@ public class VoIPService extends Service {
 						socket.setSoTimeout(0);
 						socket.receive(packet);
 						totalBytesReceived += packet.getLength();
+						totalPacketsReceived++;
 					} catch (IOException e) {
-						Log.e(VoIPConstants.TAG, "startReceiving() IOException: " + e.toString());
+						Logger.e(VoIPConstants.TAG, "startReceiving() IOException: " + e.toString());
 					}
 					
 					byte[] realData = new byte[packet.getLength()];
@@ -720,7 +915,7 @@ public class VoIPService extends Service {
 					}
 					
 					if (dataPacket.getType() == null) {
-						Log.w(VoIPConstants.TAG, "Unknown packet type.");
+						Logger.w(VoIPConstants.TAG, "Unknown packet type.");
 						continue;
 					}
 					
@@ -739,7 +934,7 @@ public class VoIPService extends Service {
 						break;
 						
 					case HEARTBEAT:
-						// Log.d(VoIPActivity.logTag, "Received heartbeat.");
+						// Logger.d(VoIPActivity.logTag, "Received heartbeat.");
 						lastHeartbeat = new Date();
 						break;
 						
@@ -749,10 +944,10 @@ public class VoIPService extends Service {
 						
 					case ENCRYPTION_PUBLIC_KEY:
 						if (clientSelf.isInitiator() == true) {
-							Log.e(VoIPConstants.TAG, "Was not expecting a public key.");
+							Logger.e(VoIPConstants.TAG, "Was not expecting a public key.");
 							continue;
 						}
-						Log.d(VoIPConstants.TAG, "Received public key.");
+						Logger.d(VoIPConstants.TAG, "Received public key.");
 						encryptor.setPublicKey(dataPacket.getData());
 						encryptionStage = EncryptionStage.STAGE_GOT_PUBLIC_KEY;
 						exchangeCryptoInfo();
@@ -760,22 +955,22 @@ public class VoIPService extends Service {
 						
 					case ENCRYPTION_SESSION_KEY:
 						if (clientSelf.isInitiator() != true) {
-							Log.e(VoIPConstants.TAG, "Was not expecting a session key.");
+							Logger.e(VoIPConstants.TAG, "Was not expecting a session key.");
 							continue;
 						}
 						encryptor.setSessionKey(encryptor.rsaDecrypt(dataPacket.getData()));
-						Log.d(VoIPConstants.TAG, "Received session key.");
+						Logger.d(VoIPConstants.TAG, "Received session key.");
 						encryptionStage = EncryptionStage.STAGE_GOT_SESSION_KEY;
 						exchangeCryptoInfo();
 						break;
 						
 					case ENCRYPTION_RECEIVED_SESSION_KEY:
-						Log.d(VoIPConstants.TAG, "Encryption ready.");
+						Logger.d(VoIPConstants.TAG, "Encryption ready.");
 						encryptionStage = EncryptionStage.STAGE_READY;
 						break;
 						
 					case END_CALL:
-						Log.d(VoIPConstants.TAG, "Other party hung up.");
+						Logger.d(VoIPConstants.TAG, "Other party hung up.");
 						hangUp();
 						break;
 						
@@ -784,12 +979,12 @@ public class VoIPService extends Service {
 						break;
 						
 					case CALL_DECLINED:
-						sendHandlerMessage(VoIPActivity.MSG_CALL_DECLINED);
+						sendHandlerMessage(VoIPActivity.MSG_OUTGOING_CALL_DECLINED);
 						stop();
 						break;
 						
 					default:
-						Log.w(VoIPConstants.TAG, "Received unexpected packet: " + dataPacket.getType());
+						Logger.w(VoIPConstants.TAG, "Received unexpected packet: " + dataPacket.getType());
 						break;
 					}
 				}
@@ -828,7 +1023,7 @@ public class VoIPService extends Service {
 			totalBytesSent += packet.getLength();
 			totalPacketsSent++;
 		} catch (IOException e) {
-			Log.e(VoIPConstants.TAG, "IOException: " + e.toString());
+			Logger.e(VoIPConstants.TAG, "IOException: " + e.toString());
 		}
 		
 	}
@@ -922,7 +1117,7 @@ public class VoIPService extends Service {
 			while (iterator.hasNext()) {
 				Integer i = iterator.next();
 				if (ackWaitQueue.get(i).getTimestamp() < currentTime - 1000) {	// Give each packet 1 second to get ack
-					Log.d(VoIPConstants.TAG, "Re-Requesting ack for: " + ackWaitQueue.get(i).getType());
+					Logger.d(VoIPConstants.TAG, "Re-Requesting ack for: " + ackWaitQueue.get(i).getType());
 					sendPacket(ackWaitQueue.get(i), true);
 				}
 			}
@@ -950,7 +1145,7 @@ public class VoIPService extends Service {
 					VoIPDataPacket dp = new VoIPDataPacket(PacketType.ENCRYPTION_PUBLIC_KEY);
 					dp.write(encryptor.getPublicKey());
 					sendPacket(dp, true);
-					Log.d(VoIPConstants.TAG, "Sending public key.");
+					Logger.d(VoIPConstants.TAG, "Sending public key.");
 				}
 
 				if (encryptionStage == EncryptionStage.STAGE_GOT_PUBLIC_KEY && clientSelf.isInitiator() == false) {
@@ -960,14 +1155,14 @@ public class VoIPService extends Service {
 					VoIPDataPacket dp = new VoIPDataPacket(PacketType.ENCRYPTION_SESSION_KEY);
 					dp.write(encryptedSessionKey);
 					sendPacket(dp, true);
-					Log.d(VoIPConstants.TAG, "Sending AES key.");
+					Logger.d(VoIPConstants.TAG, "Sending AES key.");
 				}
 				
 				if (encryptionStage == EncryptionStage.STAGE_GOT_SESSION_KEY) {
 					VoIPDataPacket dp = new VoIPDataPacket(PacketType.ENCRYPTION_RECEIVED_SESSION_KEY);
 					sendPacket(dp, true);
 					encryptionStage = EncryptionStage.STAGE_READY;
-					Log.d(VoIPConstants.TAG, "Encryption ready.");
+					Logger.d(VoIPConstants.TAG, "Encryption ready.");
 				}
 			}
 		}).start();
@@ -984,6 +1179,10 @@ public class VoIPService extends Service {
 		
 		opusWrapper.setEncoderBitrate(localBitrate);
 		sendHandlerMessage(VoIPActivity.MSG_CURRENT_BITRATE);
+		
+		// TODO Remove me!
+		lastHeartbeat = new Date(new Date().getTime() - 10000);
+		
 		return localBitrate;
 	}
 	
@@ -1006,31 +1205,30 @@ public class VoIPService extends Service {
 		edit.commit();
 	}
 	
-	public boolean isConnected() {
-		return connectionEstablished;
+	public static boolean isConnected() {
+		return connected;
 	}
 	
 	public boolean isAudioRunning() {
 		return audioStarted;
 	}
 	
-	public void retrieveExternalSocket() {
+	public void setHold(boolean hold) {
+		// TODO Auto-generated method stub
+		Logger.w(VoIPConstants.TAG, "Changing hold to: " + hold);
+		
+		if (hold == true) {
+			recordingThread.interrupt();
+			playbackThread.interrupt();
+		} else {
+			// Coming off hold
+			recordingThread.start();
+			playbackThread.start();
+		}
+		
+	}	
 
-		// Beeping thread
-		waitingBeepThread = new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				while (true) {
-					tg.startTone(ToneGenerator.TONE_CDMA_CONFIRM, 75);
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						break;
-					}
-				}
-			}
-		});
+	public void retrieveExternalSocket() {
 
 		Thread iceThread = new Thread(new Runnable() {
 
@@ -1056,44 +1254,44 @@ public class VoIPService extends Service {
 					boolean continueSending = true;
 					int counter = 0;
 
-					while (continueSending && counter < 10) {
+					while (continueSending && counter < 10 && keepRunning) {
 						counter++;
 						try {
-							// Log.d(VoIPActivity.logTag, "ICE Sending: " + outgoingPacket.getData().toString() + " to " + host.getHostAddress() + ":" + ICEServerPort);
+							// Logger.d(VoIPActivity.logTag, "ICE Sending: " + outgoingPacket.getData().toString() + " to " + host.getHostAddress() + ":" + ICEServerPort);
 							socket.send(outgoingPacket);
 							socket.receive(incomingPacket);
 							
 							String serverResponse = new String(incomingPacket.getData(), 0, incomingPacket.getLength());
-							Log.d(VoIPConstants.TAG, "ICE Received: " + serverResponse);
+							Logger.d(VoIPConstants.TAG, "ICE Received: " + serverResponse);
 							setExternalSocketInfo(serverResponse);
 							continueSending = false;
 							
 						} catch (SocketTimeoutException e) {
-							Log.d(VoIPConstants.TAG, "UDP timeout on ICE. #" + counter);
+							Logger.d(VoIPConstants.TAG, "UDP timeout on ICE. #" + counter);
 						} catch (IOException e) {
-							Log.d(VoIPConstants.TAG, "IOException: " + e.toString());
+							Logger.d(VoIPConstants.TAG, "IOException: " + e.toString());
 						} catch (JSONException e) {
-							Log.d(VoIPConstants.TAG, "JSONException: " + e.toString());
+							Logger.d(VoIPConstants.TAG, "JSONException: " + e.toString());
 							continueSending = true;
 						}
 					}
 
 				} catch (SocketException e) {
-					Log.d(VoIPConstants.TAG, "SocketException: " + e.toString());
+					Logger.d(VoIPConstants.TAG, "SocketException: " + e.toString());
 				} catch (UnknownHostException e) {
-					Log.d(VoIPConstants.TAG, "UnknownHostException: " + e.toString());
+					Logger.d(VoIPConstants.TAG, "UnknownHostException: " + e.toString());
 				}
 				
 				if (haveExternalSocketInfo())
 					try {
 						sendSocketInfoToPartner();
-						if (clientPartner.isInitiator())
+						if (clientPartner.isInitiator() && !reconnecting)
 							establishConnection();
 					} catch (JSONException e) {
-						Log.d(VoIPConstants.TAG, "JSONException: " + e.toString());
+						Logger.d(VoIPConstants.TAG, "JSONException: " + e.toString());
 					}
 				else {
-					Log.d(VoIPConstants.TAG, "Failed to retrieve external socket.");
+					Logger.d(VoIPConstants.TAG, "Failed to retrieve external socket.");
 					sendHandlerMessage(VoIPActivity.MSG_EXTERNAL_SOCKET_RETRIEVAL_FAILURE);
 				}
 			}
@@ -1101,17 +1299,14 @@ public class VoIPService extends Service {
 		
 		iceThread.start();
 		
-		// Beeps while connecting to recipient
-		if (clientSelf.isInitiator())
-			waitingBeepThread.start();
 	}
 
 	private void setExternalSocketInfo(String ICEResponse) throws JSONException {
 		JSONObject jsonObject = new JSONObject(ICEResponse);
 		clientSelf.setExternalIPAddress(jsonObject.getString("IP"));
 		clientSelf.setExternalPort(Integer.parseInt(jsonObject.getString("Port")));
-		Log.d(VoIPConstants.TAG, "External socket - " + clientSelf.getExternalIPAddress() + ":" + clientSelf.getExternalPort());
-		Log.d(VoIPConstants.TAG, "Internal socket - " + clientSelf.getInternalIPAddress() + ":" + clientSelf.getInternalPort());
+		Logger.d(VoIPConstants.TAG, "External socket - " + clientSelf.getExternalIPAddress() + ":" + clientSelf.getExternalPort());
+		Logger.d(VoIPConstants.TAG, "Internal socket - " + clientSelf.getInternalIPAddress() + ":" + clientSelf.getInternalPort());
 	}
 	
 	private boolean haveExternalSocketInfo() {
@@ -1125,7 +1320,7 @@ public class VoIPService extends Service {
 	
 	private void sendSocketInfoToPartner() throws JSONException {
 		if (clientPartner.getPhoneNumber() == null || clientPartner.getPhoneNumber().isEmpty()) {
-			Log.e(VoIPConstants.TAG, "Have no partner info. Quitting.");
+			Logger.e(VoIPConstants.TAG, "Have no partner info. Quitting.");
 			return;
 		}
 
@@ -1134,7 +1329,9 @@ public class VoIPService extends Service {
 		socketData.put("internalPort", clientSelf.getInternalPort());
 		socketData.put("externalIP", clientSelf.getExternalIPAddress());
 		socketData.put("externalPort", clientSelf.getExternalPort());
+		socketData.put("callId", getCallId());
 		socketData.put("initiator", clientSelf.isInitiator());
+		socketData.put("reconnecting", reconnecting);
 		
 		JSONObject data = new JSONObject();
 		data.put(HikeConstants.MESSAGE_ID, new Random().nextInt(10000));	// TODO: possibly needs to changed
@@ -1148,7 +1345,7 @@ public class VoIPService extends Service {
 		message.put(HikeConstants.DATA, data);
 		
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
-		Log.d(VoIPConstants.TAG, "Sent socket information to partner.");
+		Logger.d(VoIPConstants.TAG, "Sent socket information to partner.");
 		
 		// Wait for partner to send us their socket information
 		// Set timeout so we don't wait indefinitely
@@ -1159,8 +1356,15 @@ public class VoIPService extends Service {
 				try {
 					Thread.sleep(VoIPConstants.TIMEOUT_PARTNER_SOCKET_INFO);
 					sendHandlerMessage(VoIPActivity.MSG_PARTNER_SOCKET_INFO_TIMEOUT);
+					if (clientSelf.isInitiator())
+						VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0);
+					else
+						VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
+
+					stop();
+					
 				} catch (InterruptedException e) {
-					Log.d(VoIPConstants.TAG, "Received partner socket info.");
+					Logger.d(VoIPConstants.TAG, "Received partner socket info.");
 				}
 			}
 		});
@@ -1173,10 +1377,10 @@ public class VoIPService extends Service {
 	 * function should be called to establish and verify a UDP connection.
 	 */
 	public void establishConnection() {
-		connectionEstablished = false;
+		connected = false;
 		partnerTimeoutThread.interrupt();
-		Log.d(VoIPConstants.TAG, "Trying to establish P2P connection..");
-		Log.d(VoIPConstants.TAG, "Listening to local socket (for p2p) on port: " + socket.getLocalPort());
+		Logger.d(VoIPConstants.TAG, "Trying to establish P2P connection..");
+		Logger.d(VoIPConstants.TAG, "Listening to local socket (for p2p) on port: " + socket.getLocalPort());
 		
 		// Sender thread
 		final Thread senderThread = new Thread(new Runnable() {
@@ -1190,13 +1394,14 @@ public class VoIPService extends Service {
 
 					try {
 						count++;
-						sendUDPData(VoIPConstants.COMM_UDP_SYN_PRIVATE.getBytes(), clientPartner.getInternalIPAddress(), clientPartner.getInternalPort());
-						sendUDPData(VoIPConstants.COMM_UDP_SYN_PUBLIC.getBytes(), clientPartner.getExternalIPAddress(), clientPartner.getExternalPort());
-						if (count > 10)
+						if (count <= 15) {
+							sendUDPData(VoIPConstants.COMM_UDP_SYN_PRIVATE.getBytes(), clientPartner.getInternalIPAddress(), clientPartner.getInternalPort());
+							sendUDPData(VoIPConstants.COMM_UDP_SYN_PUBLIC.getBytes(), clientPartner.getExternalIPAddress(), clientPartner.getExternalPort());
+						} else
 							sendUDPData(VoIPConstants.COMM_UDP_SYN_RELAY.getBytes(), clientPartner.getExternalIPAddress(), clientPartner.getExternalPort());
 						Thread.sleep(200);
 					} catch (InterruptedException e) {
-						Log.d(VoIPConstants.TAG, "Stopping sending thread.");
+						Logger.d(VoIPConstants.TAG, "Stopping sending thread.");
 						break;
 					}
 				}
@@ -1219,7 +1424,7 @@ public class VoIPService extends Service {
 						socket.receive(packet);
 
 						String data = new String(packet.getData(), 0, packet.getLength());
-						Log.d(VoIPConstants.TAG, "CS Received: " + data);
+						Logger.d(VoIPConstants.TAG, "CS Received: " + data);
 						
 						if (data.equals(lastPacketReceived))
 							continue;
@@ -1246,7 +1451,7 @@ public class VoIPService extends Service {
 							senderThread.interrupt();
 							clientPartner.setPreferredConnectionMethod(ConnectionMethods.PRIVATE);
 							sendUDPData(VoIPConstants.COMM_UDP_ACK_PRIVATE.getBytes(), clientPartner.getInternalIPAddress(), clientPartner.getInternalPort());
-							connectionEstablished = true;
+							connected = true;
 						}
 						
 						if (lastPacketReceived.equals(VoIPConstants.COMM_UDP_SYNACK_PUBLIC) ||
@@ -1255,7 +1460,7 @@ public class VoIPService extends Service {
 								senderThread.interrupt();
 								clientPartner.setPreferredConnectionMethod(ConnectionMethods.PUBLIC);
 								sendUDPData(VoIPConstants.COMM_UDP_ACK_PUBLIC.getBytes(), clientPartner.getExternalIPAddress(), clientPartner.getExternalPort());
-								connectionEstablished = true;
+								connected = true;
 							}
 						}
 
@@ -1266,12 +1471,12 @@ public class VoIPService extends Service {
 								senderThread.interrupt();
 								clientPartner.setPreferredConnectionMethod(ConnectionMethods.RELAY);
 								sendUDPData(VoIPConstants.COMM_UDP_ACK_RELAY.getBytes(), clientPartner.getExternalIPAddress(), clientPartner.getExternalPort());
-								connectionEstablished = true;
+								connected = true;
 							}
 						}
 						
 					} catch (IOException e) {
-						Log.d(VoIPConstants.TAG, "CS receiving exception: " + e.toString());
+						Logger.d(VoIPConstants.TAG, "CS receiving exception: " + e.toString());
 					}
 				}
 			}
@@ -1287,7 +1492,7 @@ public class VoIPService extends Service {
 			public void run() {
 				try {
 					for (int i = 0; i < 20; i++) {
-						if (connectionEstablished == true) {
+						if (connected == true) {
 							Thread.sleep(500);		// To let the last message(s) go through
 							break;
 						}
@@ -1304,25 +1509,42 @@ public class VoIPService extends Service {
 
 				senderThread.interrupt();
 				receivingThread.interrupt();
-				waitingBeepThread.interrupt();
+				reconnecting = false;
 				
-				if (connectionEstablished == true) {
-					Log.d(VoIPConstants.TAG, "UDP connection established :) " + clientPartner.getPreferredConnectionMethod());
+				if (connected == true) {
+					Logger.d(VoIPConstants.TAG, "UDP connection established :) " + clientPartner.getPreferredConnectionMethod());
 					sendHandlerMessage(VoIPActivity.MSG_CONNECTION_ESTABLISHED);
+					if (clientSelf.isInitiator()) {
+						playOnSpeaker(R.raw.ring_tone, true);
+						// inCallTimer.setText("RINGING...");
+					} 
+
 					try {
 						startStreaming();
 						startResponseTimeout();
 					} catch (Exception e) {
-						Log.e(VoIPConstants.TAG, "Exception: " + e.toString());
+						Logger.e(VoIPConstants.TAG, "Exception: " + e.toString());
 					}
-					// We have already answered the incoming calls
-					if (answerOnConnectionEstablished == true) {
-						startAudio();
+					
+					if (!clientSelf.isInitiator()) {
+						// We are receiving a call. 
+						// VoIPService was started, and it established a connection. 
+						// Now show the activity so the user can answer / decline the call. 
+						Intent i = new Intent(getApplicationContext(), VoIPActivity.class);
+						i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+						startActivity(i);
+						
+						playOnSpeaker(R.raw.ringtone_incoming, true);
 					}
 				}
 				else {
-					Log.d(VoIPConstants.TAG, "UDP connection failure! :(");
+					Logger.d(VoIPConstants.TAG, "UDP connection failure! :(");
 					sendHandlerMessage(VoIPActivity.MSG_CONNECTION_FAILURE);
+					if (clientSelf.isInitiator())
+						VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0);
+					else
+						VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
+					stop();
 				}
 				
 			}
@@ -1340,6 +1562,12 @@ public class VoIPService extends Service {
 					if (!isAudioRunning()) {
 						// Call not answered yet?
 						sendHandlerMessage(VoIPActivity.MSG_PARTNER_ANSWER_TIMEOUT);
+						if (!clientSelf.isInitiator())
+							VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
+						else
+							VoIPUtils.addMessageToChatThread(VoIPService.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0);
+						stop();
+						
 					}
 				} catch (InterruptedException e) {
 					// Do nothing, all is good
@@ -1350,7 +1578,7 @@ public class VoIPService extends Service {
 		partnerTimeoutThread.start();
 	}
 
-	private void sendUDPData(byte[] data, String IpAddress, int port) {
+	private void sendUDPData(byte[] data, String host, int port) {
 		
 		// For relay packets, we must send them as PB since the server needs to parse them
 		if (Arrays.equals(data, VoIPConstants.COMM_UDP_SYN_RELAY.getBytes()) ||
@@ -1359,24 +1587,25 @@ public class VoIPService extends Service {
 		
 			VoIPDataPacket dp = new VoIPDataPacket(PacketType.RELAY);
 			dp.setData(data);
-			dp.setDestinationIP(IpAddress);
+			dp.setDestinationIP(host);
 			dp.setDestinationPort(port);
 			byte[] serializedData = VoIPSerializer.serialize(dp);
 			
-			IpAddress = VoIPConstants.ICEServerName;
+			host = VoIPConstants.ICEServerName;
 			port = VoIPConstants.ICEServerPort;
 			data = serializedData;
 		}
 		
 		try {
-			InetAddress address = InetAddress.getByName(IpAddress);
+			InetAddress address = InetAddress.getByName(host);
 			DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
 			socket.send(packet);
-			Log.d(VoIPConstants.TAG, "CS sending: " + data);
+			Logger.d(VoIPConstants.TAG, "CS sending: " + new String(data, "UTF-8") + " to: " + address.toString() + ":" + port);
 		} catch (IOException e) {
-			Log.d(VoIPConstants.TAG, "IOException: " + e.toString());
+			Logger.d(VoIPConstants.TAG, "IOException: " + e.toString());
 		}
-	}	
+	}
+
 	
 	
 }

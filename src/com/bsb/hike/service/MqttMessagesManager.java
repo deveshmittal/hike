@@ -68,6 +68,8 @@ import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPConstants;
+import com.bsb.hike.voip.VoIPService;
+import com.bsb.hike.voip.VoIPUtils;
 
 /**
  * 
@@ -2105,18 +2107,39 @@ public class MqttMessagesManager
 			if (jsonObj.has(HikeConstants.SUB_TYPE)) {
 				
 				String subType = jsonObj.getString(HikeConstants.SUB_TYPE); 
+				Log.d(VoIPConstants.TAG, "VoIP Message subtype: " + subType);
 
 				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO)) {
 
-					Log.d(VoIPConstants.TAG, "Receiving socket info..");
+					/**
+					 * Socket information is the same as a request for call initiation. 
+					 * The calling party sends its socket information to the callee, and
+					 * the callee at that point should start its voip service (and not the 
+					 * activity) so it can reply with its own socket information. 
+					 * 
+					 * The callee should not start its activity since in case we are unable
+					 * to establish a connection, the user will see a call screen popup and then
+					 * disappear. 
+					 */
+//					Log.d(VoIPConstants.TAG, "Receiving socket info..");
 					JSONObject metadataJSON = jsonObj.getJSONObject(HikeConstants.DATA).getJSONObject(HikeConstants.METADATA);
 					
+					if (VoIPService.isConnected() && 
+							metadataJSON.getInt("callId") != VoIPService.getCallId() &&
+							metadataJSON.getBoolean("reconnecting") != true) {
+						Log.w(VoIPConstants.TAG, "We are already in a call.");
+						VoIPUtils.sendMessage(jsonObj.getString(HikeConstants.FROM), 
+								HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0, 
+								HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL);
+					}
+						
+					// Check if the initiator (us) has already hung up
 					if (metadataJSON.getBoolean("initiator") == false && VoIPActivity.isRunning == false) {
 						Log.w(VoIPConstants.TAG, "Receiving a reply for a terminated call.");
-						return;		// The initiator has already hung up
+						return;		
 					}
 					
-					Intent i = new Intent(context, VoIPActivity.class);
+					Intent i = new Intent(context.getApplicationContext(), VoIPService.class);
 					i.putExtra("action", "setpartnerinfo");
 					i.putExtra("msisdn", jsonObj.getString(HikeConstants.FROM));
 					i.putExtra("internalIP", metadataJSON.getString("internalIP"));
@@ -2124,20 +2147,41 @@ public class MqttMessagesManager
 					i.putExtra("externalIP", metadataJSON.getString("externalIP"));
 					i.putExtra("externalPort", metadataJSON.getInt("externalPort"));
 					i.putExtra("initiator", metadataJSON.getBoolean("initiator"));
-					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-					context.startActivity(i);
+					i.putExtra("callId", metadataJSON.getInt("callId"));
+					context.startService(i);
+					return;
 				}
 				
 				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_UPGRADABLE)) {
+					String message = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.HIKE_MESSAGE);
 					Intent i = new Intent(context, VoIPActivity.class);
 					i.putExtra("action", VoIPConstants.PARTNER_REQUIRES_UPGRADE);
+					i.putExtra("message", message);
 					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 					context.startActivity(i);
 				}
 				
 				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_NOT_UPGRADABLE)) {
+					String message = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.HIKE_MESSAGE);
 					Intent i = new Intent(context, VoIPActivity.class);
 					i.putExtra("action", VoIPConstants.PARTNER_INCOMPATIBLE);
+					i.putExtra("message", message);
+					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+					context.startActivity(i);
+				}
+				
+				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_HAS_BLOCKED_YOU)) {
+					String message = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.HIKE_MESSAGE);
+					Intent i = new Intent(context, VoIPActivity.class);
+					i.putExtra("action", VoIPConstants.PARTNER_HAS_BLOCKED_YOU);
+					i.putExtra("message", message);
+					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+					context.startActivity(i);
+				}
+				
+				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_ALREADY_IN_CALL)) {
+					Intent i = new Intent(context, VoIPActivity.class);
+					i.putExtra("action", VoIPConstants.PARTNER_IN_CALL);
 					i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 					context.startActivity(i);
 				}

@@ -360,6 +360,12 @@
             android:label="@string/title_activity_vo_ip" >
         </activity>
         
+        <receiver android:name=".voip.IncomingCallListener">
+            <intent-filter>
+                <action android:name="android.intent.action.PHONE_STATE"/>
+            </intent-filter>
+        </receiver>
+        
         <service android:name=".voip.VoIPService" />
         
         <provider
