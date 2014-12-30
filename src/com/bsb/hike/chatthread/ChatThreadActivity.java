@@ -107,4 +107,25 @@ public class ChatThreadActivity extends HikeAppStateBaseFragmentActivity
 	{
 		chatThread.onActivityResult(requestCode, resultCode, data);
 	}
+	
+	@Override
+	protected void onDestroy()
+	{
+		chatThread.onDestroy();
+		super.onDestroy();
+	}
+	
+	@Override
+	protected void onPause()
+	{
+		chatThread.onPause();
+		super.onPause();
+	}
+	
+	@Override
+	protected void onResume()
+	{
+		chatThread.onResume();
+		super.onResume();
+	}
 }
