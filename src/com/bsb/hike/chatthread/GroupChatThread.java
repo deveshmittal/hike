@@ -7,20 +7,13 @@ import java.util.Map.Entry;
 import android.os.Message;
 import android.util.Pair;
 import android.view.View;
-import android.widget.Toast;
-
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.AdapterView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.media.OverFlowMenuItem;
-import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
@@ -31,7 +24,6 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
-import com.bsb.hike.utils.Utils;
 
 /**
  * <!-- begin-user-doc --> <!-- end-user-doc -->
