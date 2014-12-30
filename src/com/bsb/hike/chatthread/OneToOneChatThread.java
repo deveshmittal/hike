@@ -25,8 +25,11 @@ import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.ChatTheme;
@@ -177,14 +180,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		//TODO : This is a basic working skeleton. This needs to be segragated into separate functions.
 		
 		mContactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
-
+		
 		FavoriteType favoriteType = mContactInfo.getFavoriteType();
-
-		boolean addBlockHeader = false;
 
 		if (mConversation.isOnhike())
 		{
-			addBlockHeader = true;
+			addUnkownContactBlockHeader();
 		}
 
 		else
@@ -215,21 +216,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 		
 		
-		// TODO : ShowStickerFTUE Tip and H20 Tip
+		// TODO : ShowStickerFTUE Tip and H20 Tip. H20 Tip is a part of one to one chatThread. Sticker Tip is a part of super class
 		
 		if(mConversation.isOnhike())
 		{
 			//GETTING AN NPE HERE
 			// TODO : mAdapter.addAllUndeliverdMessages(messages);
-		}
-		
-		/**
-		 * Add Block View
-		 */
-		
-		if (addBlockHeader)
-		{
-			addUnkownContactBlockHeader();
 		}
 		
 	}
@@ -261,13 +253,70 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 	protected void addUnkownContactBlockHeader()
 	{
-		// TODO Auto-generated method stub
-		
+		if (mContactInfo != null && mContactInfo.isUnknownContact() && messages != null && messages.size() >0 )
+		{
+				ConvMessage cm = messages.get(0);
+				/**
+				 * Check if the conv message was previously a block header or not
+				 */
+				if (!cm.isBlockAddHeader())
+				{
+					/**
+					 * Creating a new conv message to be appended at the 0th position.
+					 */
+					cm = new ConvMessage(0, 0l, 0l);
+					cm.setBlockAddHeader(true);
+					messages.add(0, cm);
+					Logger.d(TAG, "Adding unknownContact Header to the chatThread");
+
+					if (mAdapter != null)
+					{
+						mAdapter.notifyDataSetChanged();
+					}
+				}
+		}
 	}
 
 	@Override
 	public void lastSeenFetched(String msisdn, int offline, long lastSeenTime)
 	{
 		//TODO : updateLastSeen(msisdn, offline, lastSeenTime);
+	}
+
+	@Override
+	protected void onMessageReceived(Object object)
+	{
+		super.onMessageReceived(object);
+	}
+
+	@Override
+	protected String[] getPubSubListeners()
+	{
+		// TODO Add PubSubListeners
+		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED};
+		return oneToOneListeners;
+	}
+	
+	@Override
+	protected void addMessage(ConvMessage convMessage)
+	{
+		TypingNotification typingNotification = null;
+		
+		/*
+		 * If we were showing the typing bubble, we remove it from the add the new message and add the typing bubble back again
+		 */
+
+		if (!messages.isEmpty() && messages.get(messages.size() - 1).getTypingNotification() != null)
+		{
+			typingNotification = messages.get(messages.size() - 1).getTypingNotification();
+			messages.remove(messages.size() - 1);
+		}
+
+		if (convMessage.getTypingNotification() == null && typingNotification != null && convMessage.isSent())
+		{
+				mAdapter.addMessage(new ConvMessage(typingNotification));
+		}
+		
+		super.addMessage(convMessage);
 	}
 }

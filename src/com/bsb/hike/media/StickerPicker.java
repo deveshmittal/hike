@@ -140,7 +140,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 		 * Use default view. or the view passed in the constructor
 		 */
 
-		mLayoutResId = (mLayoutResId == -1) ? R.layout.emoticon_layout : mLayoutResId;
+		mLayoutResId = (mLayoutResId == -1) ? R.layout.sticker_layout : mLayoutResId;
 
 		viewToDisplay = (ViewGroup) LayoutInflater.from(mContext).inflate(mLayoutResId, null);
 

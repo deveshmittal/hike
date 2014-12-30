@@ -25,6 +25,9 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.GroupTypingNotification;
+import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
@@ -228,5 +231,60 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		activity.findViewById(R.id.emo_btn).setEnabled(alive);
 		activity.findViewById(R.id.sticker_btn).setEnabled(alive);
 		// TODO : Hide popup OR dialog if visible
+	}
+
+	@Override
+	protected String[] getPubSubListeners()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	/**
+	 * Called from {@link ChatThread}'s {@link #onMessageReceived(Object)}, to handle abnormal messages like User joined group, user left group etc.}
+	 * 
+	 */
+	
+	@Override
+	protected void handleAbnormalMessages()
+	{
+		ContactManager conMgr = ContactManager.getInstance();
+		((GroupConversation) mConversation).setGroupParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), false, false));
+	}
+	
+	@Override
+	protected void addMessage(ConvMessage convMessage)
+	{
+		TypingNotification typingNotification = null;
+
+		/*
+		 * If we were showing the typing bubble, we remove it from the add the new message and add the typing bubble back again
+		 */
+
+		if (!messages.isEmpty() && messages.get(messages.size() - 1).getTypingNotification() != null)
+		{
+			typingNotification = messages.get(messages.size() - 1).getTypingNotification();
+			messages.remove(messages.size() - 1);
+		}
+
+		// Something related to Pins
+		// if(convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+		// showImpMessage(convMessage, playPinAnim ? R.anim.up_down_fade_in : -1);
+
+		if (convMessage.isSent())
+		{
+			((GroupConversation) mConversation).setupReadByList(null, convMessage.getMsgID());
+		}
+
+		if (convMessage.getTypingNotification() == null && typingNotification != null)
+		{
+			if (!((GroupTypingNotification) typingNotification).getGroupParticipantList().isEmpty())
+			{
+				Logger.d(TAG, "Typing notification in group chat thread: " + ((GroupTypingNotification) typingNotification).getGroupParticipantList().size());
+				mAdapter.addMessage(new ConvMessage(typingNotification));
+			}
+		}
+		
+		super.addMessage(convMessage);
 	}
 }

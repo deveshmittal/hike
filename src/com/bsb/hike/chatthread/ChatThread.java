@@ -13,6 +13,7 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -36,6 +37,8 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -59,6 +62,7 @@ import com.bsb.hike.media.StickerPicker.StickerPickerListener;
 import com.bsb.hike.media.ThemePicker;
 import com.bsb.hike.media.ThemePicker.ThemePickerListener;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -80,8 +84,7 @@ import com.bsb.hike.utils.Utils;
  */
 
 public abstract class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
-		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener,
-		OnScrollListener
+		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener, Listener
 {
 	private static final String TAG = "chatthread";
 
@@ -90,6 +93,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected static final int LOAD_MORE_MESSAGES = 2;
 
 	protected static final int SHOW_TOAST = 3;
+	
+	protected static final int MESSAGE_RECEIVED = 4;
 
 	protected ChatThreadActivity activity;
 
@@ -120,7 +125,15 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected List<ConvMessage> messages;
 
 	protected static HashMap<Long, ConvMessage> mMessageMap;
-
+	
+	protected boolean isActivityVisible = true;
+	
+	protected boolean reachedEnd = false;
+	
+	private String[] mPubSubListeners;
+	
+	protected ListView mConversationsView;
+	
 	protected ComposeViewWatcher mComposeViewWatcher;
 
 	protected Handler uiHandler = new Handler()
@@ -132,9 +145,59 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			case SHOW_TOAST:
 				showToast(msg.arg1);
 				break;
+			case MESSAGE_RECEIVED:
+				addMessage((ConvMessage)msg.obj);
+				break;
 			}
-		};
+		}
+
 	};
+	
+	protected void addMessage(ConvMessage convMessage)
+	{
+		mAdapter.addMessage(convMessage);
+
+		addtoMessageMap(messages.size() - 1 ,messages.size());
+
+		mAdapter.notifyDataSetChanged();
+		
+		// Reset this boolean to load more messages when the user scrolls to
+		// the top
+		reachedEnd = false;
+
+
+		// TODO : THIS IS TO BE BASED ON PRODUCT CALL
+		/*
+		 * Don't scroll to bottom if the user is at older messages. It's possible that the user might be reading them.
+		 */
+		
+		/*if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
+		{
+			if (convMessage.getTypingNotification() == null
+					&& (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
+			{
+				showUnreadCountIndicator();
+			}
+			return;
+		}
+		else
+		{
+			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+		}
+		*/
+		/*
+		 * Resetting the transcript mode once the list has scrolled to the bottom.
+		 */
+		/*mHandler.post(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_DISABLED);
+			}
+		});*/
+	
+	}
 
 	public ChatThread(ChatThreadActivity activity, String msisdn)
 	{
@@ -186,6 +249,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		addOnClickListeners();
 
 		audioRecordView = new AudioRecordView(activity, this);
+		
 	}
 
 	/**
@@ -462,13 +526,21 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		if (mShareablePopupLayout != null && mShareablePopupLayout.isShowing())
 		{
 			mShareablePopupLayout.dismiss();
+			return true;
 		}
 
 		if (themePicker != null && themePicker.isShowing())
 		{
 			return themePicker.onBackPressed();
 		}
+		
 		return false;
+	}
+
+	private void removePubSubListeners()
+	{
+		Logger.d(TAG, "removing pubSub listeners");
+		HikeMessengerApp.getPubSub().removeListeners(this, mPubSubListeners);
 	}
 
 	protected void startHikeGallary(boolean onHike)
@@ -734,6 +806,14 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		mConversationsView.setOnItemLongClickListener(this);
 		mConversationsView.setOnTouchListener(this);
 		mConversationsView.setOnScrollListener(this);
+
+		updateUIAsPerTheme(mConversation.getTheme());// it has to be done after setting adapter
+		
+		/**
+		 * Adding PubSub, here since all the heavy work related to fetching of messages and setting up UI has been done already.
+		 */
+		addToPubSub();
+
 	}
 
 	/*
@@ -989,4 +1069,166 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		}
 	}
 
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		Logger.d(TAG, "Inside onEventReceived of pubSub : " + type);
+		
+		/**
+		 * Using switch on String, as it is present in JDK 7 onwards. 
+		 * Switch makes for a cleaner and easier to read code as well.
+		 * http://stackoverflow.com/questions/338206/why-cant-i-switch-on-a-string
+		 */
+		switch (type)
+		{
+		case HikePubSub.MESSAGE_RECEIVED:
+			onMessageReceived(object);
+			break;
+       
+		default:
+			break;
+		}
+	}
+	
+	/**
+	 * Handles message received events in chatThread
+	 * 
+	 * @param object
+	 */
+	protected void onMessageReceived(Object object)
+	{
+		final ConvMessage message = (ConvMessage) object;
+		String senderMsisdn = message.getMsisdn();
+		if (senderMsisdn == null)
+		{
+			Logger.wtf("ChatThread", "Message with missing msisdn:" + message.toString());
+		}
+		if (msisdn.equals(senderMsisdn))
+		{
+			if (activity.hasWindowFocus())
+			{
+				message.setState(ConvMessage.State.RECEIVED_READ);
+				mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal(), mConversation.getMsisdn());
+				if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle MR
+				}
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
+			}
+
+			if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO) 
+			{
+				/**
+				 * ParticipantInfoState == NO_INFO indicates a normal message.
+				 */
+				handleAbnormalMessages();
+			}
+
+			if (isActivityVisible && Utils.isPlayTickSound(activity.getApplicationContext()))
+			{
+				Utils.playSoundFromRaw(activity.getApplicationContext(), R.raw.received_message);
+			}
+			
+			sendUIMessage(MESSAGE_RECEIVED, message);
+
+		}
+	}
+	
+	protected void handleAbnormalMessages()
+	{
+		// TODO DO NOTHING. Only classes which need to handle such type of messages need to override this method
+		return;
+	}
+
+	protected void sendUIMessage(int what,Object data){
+		Message message = Message.obtain();
+		message.what = what;
+		message.obj = data;
+		uiHandler.sendMessage(message);
+	}
+	
+
+	/**
+	 * Utility method for adding listeners for pubSub
+	 * 
+	 * @param listeners
+	 */
+	protected void addToPubSub()
+	{
+		mPubSubListeners = getPubSubEvents();
+		
+		Logger.d(TAG, Integer.toString(mPubSubListeners.length));
+		HikeMessengerApp.getPubSub().addListeners(this, mPubSubListeners);
+	}
+	
+	/**
+	 * Returns pubSubListeners for ChatThread
+	 * 
+	 */
+	
+	private String[] getPubSubEvents()
+	{
+		String[] retVal;
+		/**
+		 * Array of pubSub listeners common to both {@link OneToOneChatThread} and {@link GroupChatThread}
+		 */
+		String[] commonEvents = new String[]{ HikePubSub.MESSAGE_RECEIVED};
+		
+		/**
+		 * Array of pubSub listeners we get from  {@link OneToOneChatThread} or {@link GroupChatThread}
+		 * 
+		 */
+		String [] moreEvents = getPubSubListeners();
+		
+		if(moreEvents == null)
+		{
+			retVal = new String[commonEvents.length];
+			
+			System.arraycopy(commonEvents, 0, retVal, 0, commonEvents.length);
+		}
+		
+		else
+		{
+			retVal = new String[commonEvents.length + moreEvents.length];
+			
+			System.arraycopy(commonEvents, 0, retVal, 0, commonEvents.length);
+			
+			System.arraycopy(moreEvents, 0, retVal, retVal.length - commonEvents.length, moreEvents.length);
+			
+		}
+		
+		return retVal;
+	}
+
+	protected abstract String[] getPubSubListeners();
+
+	/**
+	 * Mimics the onDestroy method of an Activity. 
+	 * It is used to release resources help by the ChatThread instance.
+	 */
+	
+	public void onDestroy()
+	{
+		removePubSubListeners();
+	}
+
+	/**
+	 * Mimics the onPause method of an Activity. 
+	 */
+	
+	public void onPause()
+	{
+		isActivityVisible = false;
+	}
+	
+	/**
+	 * Mimics the onResume method of an Activity. 
+	 */
+
+	public void onResume()
+	{
+		isActivityVisible = true;
+	}
+	
 }
