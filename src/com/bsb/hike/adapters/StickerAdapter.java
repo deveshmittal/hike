@@ -332,6 +332,14 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 				@Override
 				public void onClick(View v)
 				{
+					/**
+					 * This is done to remove the green dot for update available state. For a new category added on the fly from the server, the update available is set to true to
+					 * show a green indicator. To remove that, we are doing this.
+					 */
+					if(category.isUpdateAvailable())
+					{
+						category.setUpdateAvailable(false);
+					}
 					StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.FIRST_TIME, DownloadType.NEW_CATEGORY, activity);
 					setupStickerPage(parent, category);
 				}
@@ -488,19 +496,15 @@ public class StickerAdapter extends PagerAdapter implements StickerEmoticonIconP
 		return stickerOtherIconLoader;
 	}
 
-	@Override
-	public String getCategoryIdForIndex(int index)
-	{
-		return stickerCategoryList.get(index).getCategoryId();
-	}
-	
 	/**
-	 * Returns Sticker Category object based on position
+	 * Returns Sticker Category object based on index
 	 * @param position
-	 * @return
+	 * @return {@link StickerCategory} Object
 	 */
-	public StickerCategory getStickerCategory(int position)
+	@Override
+	public StickerCategory getCategoryForIndex(int index)
 	{
-		return stickerCategoryList.get(position);
+		return stickerCategoryList.get(index);
 	}
+
 }
