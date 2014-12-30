@@ -29,6 +29,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -51,6 +52,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private ContactInfo mContactInfo;
 	
 	private LastSeenScheduler lastSeenScheduler;
+	
+	private FavoriteType mFavoriteType;
 	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -181,7 +184,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		
 		mContactInfo = HikeMessengerApp.getContactManager().getContact(msisdn, true, true);
 		
-		FavoriteType favoriteType = mContactInfo.getFavoriteType();
+		mFavoriteType = mContactInfo.getFavoriteType();
 
 		if (mConversation.isOnhike())
 		{
@@ -193,7 +196,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			FetchHikeUser.fetchHikeUser(activity.getApplicationContext(), msisdn);
 		}
 		
-		if(shouldShowLastSeen(favoriteType))
+		if(shouldShowLastSeen())
 		{
 			
 			/*
@@ -241,9 +244,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 
-	private boolean shouldShowLastSeen(FavoriteType favoriteType)
+	private boolean shouldShowLastSeen()
 	{
-		if ((favoriteType == FavoriteType.FRIEND || favoriteType == FavoriteType.REQUEST_RECEIVED || favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED)
+		if ((mFavoriteType == FavoriteType.FRIEND || mFavoriteType == FavoriteType.REQUEST_RECEIVED || mFavoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED)
 				&& mConversation.isOnhike())
 		{
 			return PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
@@ -319,4 +322,57 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		
 		super.addMessage(convMessage);
 	}
+	
+	/**
+	 * This overrides {@link ChatThread}'s {@link #onTypingConversationNotificationReceived(Object)}
+	 */
+	@Override
+	protected void onTypingConversationNotificationReceived(Object object)
+	{
+		TypingNotification typingNotification = (TypingNotification) object;
+		
+		if(typingNotification == null)
+		{
+			return;
+		}
+		
+		if (msisdn.equals(typingNotification.getId()))
+		{
+			sendUIMessage(TYPING_CONVERSATION, typingNotification);
+		}
+		
+		if (shouldShowLastSeen() && mContactInfo.getOffline() != -1)
+		{
+			/*
+			 * Publishing an online event for this number.
+			 */
+			mContactInfo.setOffline(0);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.LAST_SEEN_TIME_UPDATED, mContactInfo);
+		}
+	}
+	
+	/**
+	 * This overrides : {@link ChatThread}'s {@link #setTypingText(boolean, TypingNotification)}
+	 */
+	@Override
+	protected void setTypingText(boolean direction, TypingNotification typingNotification)
+	{
+		if (direction)
+		{
+			super.setTypingText(direction, typingNotification);
+		}
+
+		else
+		{
+			if (!messages.isEmpty() && messages.get(messages.size() - 1).getTypingNotification() != null)
+			{
+				/*
+				 * We only remove the typing notification if the conversation in a one to one conversation or it no one is typing in the group.
+				 */
+				messages.remove(messages.size() - 1);
+				mAdapter.notifyDataSetChanged();
+			}
+		}
+	}
+	
 }

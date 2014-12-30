@@ -29,9 +29,9 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
@@ -69,6 +69,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HDialog;
@@ -96,6 +97,10 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected static final int SHOW_TOAST = 3;
 	
 	protected static final int MESSAGE_RECEIVED = 4;
+	
+	protected static final int END_TYPING_CONVERSATION = 5;
+	
+	protected static final int TYPING_CONVERSATION = 6;
 
 	protected ChatThreadActivity activity;
 
@@ -150,6 +155,14 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 				break;
 			case MESSAGE_RECEIVED:
 				addMessage((ConvMessage)msg.obj);
+				break;
+			case END_TYPING_CONVERSATION:
+				setTypingText(false, (TypingNotification) msg.obj);
+				break;
+			case TYPING_CONVERSATION:
+				setTypingText(true, (TypingNotification) msg.obj);
+				break;
+			default:
 				break;
 			}
 		}
@@ -1096,7 +1109,12 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case HikePubSub.MESSAGE_RECEIVED:
 			onMessageReceived(object);
 			break;
-       
+		case HikePubSub.END_TYPING_CONVERSATION:
+			onEndTypingNotificationReceived(object);
+			break;
+		case HikePubSub.TYPING_CONVERSATION:
+			onTypingConversationNotificationReceived(object);
+			break;
 		default:
 			break;
 		}
@@ -1185,7 +1203,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		/**
 		 * Array of pubSub listeners common to both {@link OneToOneChatThread} and {@link GroupChatThread}
 		 */
-		String[] commonEvents = new String[]{ HikePubSub.MESSAGE_RECEIVED};
+		String[] commonEvents = new String[]{ HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION };
 		
 		/**
 		 * Array of pubSub listeners we get from  {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -1302,4 +1320,56 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		}
 	}
 	
+	private void onEndTypingNotificationReceived(Object object)
+	{
+		TypingNotification typingNotification = (TypingNotification) object;
+		if (typingNotification == null)
+		{
+			return;
+		}
+		
+		if (msisdn.equals(typingNotification.getId()))
+		{
+			sendUIMessage(END_TYPING_CONVERSATION, typingNotification);
+		}
+	}
+	
+	/**
+	 * This is used to add Typing Conversation on the UI
+	 * @param object
+	 */
+	protected void onTypingConversationNotificationReceived(Object object)
+	{
+		TypingNotification typingNotification = (TypingNotification) object;
+		if (typingNotification == null)
+		{
+			return;
+		}
+		
+		if (msisdn.equals(typingNotification.getId()))
+		{
+			sendUIMessage(TYPING_CONVERSATION, typingNotification);
+		}
+	}
+	
+	/**
+	 * Adds typing notification on the UI
+	 * 
+	 * @param direction
+	 * @param typingNotification
+	 */
+	protected void setTypingText(boolean direction, TypingNotification typingNotification)
+	{
+		if (messages.isEmpty() || messages.get(messages.size() - 1).getTypingNotification() == null)
+		{
+			addMessage(new ConvMessage(typingNotification));
+		}
+		else if (messages.get(messages.size() - 1).getTypingNotification() != null)
+		{
+			ConvMessage convMessage = messages.get(messages.size() - 1);
+			convMessage.setTypingNotification(typingNotification);
+
+			mAdapter.notifyDataSetChanged();
+		}
+	}
 }

@@ -287,4 +287,31 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		
 		super.addMessage(convMessage);
 	}
+	
+	/**
+	 * This overrides : {@link ChatThread}'s {@link #setTypingText(boolean, TypingNotification)}
+	 */
+	
+	@Override
+	protected void setTypingText(boolean direction, TypingNotification typingNotification)
+	{
+		if (direction)
+		{
+			super.setTypingText(direction, typingNotification);
+		}
+
+		else
+		{
+			if (!messages.isEmpty() && messages.get(messages.size() - 1).getTypingNotification() != null)
+			{
+				GroupTypingNotification groupTypingNotification = (GroupTypingNotification) messages.get(messages.size() - 1).getTypingNotification();
+				if (groupTypingNotification.getGroupParticipantList().isEmpty())
+				{
+					messages.remove(messages.size() - 1);
+				}
+
+				mAdapter.notifyDataSetChanged();
+			}
+		}
+	}
 }
