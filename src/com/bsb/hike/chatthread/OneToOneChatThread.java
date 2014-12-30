@@ -25,8 +25,11 @@ import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.ChatTheme;
@@ -278,5 +281,42 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	public void lastSeenFetched(String msisdn, int offline, long lastSeenTime)
 	{
 		//TODO : updateLastSeen(msisdn, offline, lastSeenTime);
+	}
+
+	@Override
+	protected void onMessageReceived(Object object)
+	{
+		super.onMessageReceived(object);
+	}
+
+	@Override
+	protected String[] getPubSubListeners()
+	{
+		// TODO Add PubSubListeners
+		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED};
+		return oneToOneListeners;
+	}
+	
+	@Override
+	protected void addMessage(ConvMessage convMessage)
+	{
+		TypingNotification typingNotification = null;
+		
+		/*
+		 * If we were showing the typing bubble, we remove it from the add the new message and add the typing bubble back again
+		 */
+
+		if (!messages.isEmpty() && messages.get(messages.size() - 1).getTypingNotification() != null)
+		{
+			typingNotification = messages.get(messages.size() - 1).getTypingNotification();
+			messages.remove(messages.size() - 1);
+		}
+
+		if (convMessage.getTypingNotification() == null && typingNotification != null && convMessage.isSent())
+		{
+				mAdapter.addMessage(new ConvMessage(typingNotification));
+		}
+		
+		super.addMessage(convMessage);
 	}
 }
