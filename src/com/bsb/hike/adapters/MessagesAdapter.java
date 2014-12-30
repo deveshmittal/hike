@@ -1,8 +1,28 @@
 package com.bsb.hike.adapters;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
+import org.json.JSONArray;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.*;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
@@ -12,22 +32,39 @@ import android.graphics.drawable.shapes.OvalShape;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
-import android.os.*;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.text.util.Linkify;
-import android.view.*;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.*;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ListAdapter;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -35,18 +72,26 @@ import com.bsb.hike.R;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
-import com.bsb.hike.models.*;
+import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.GroupTypingNotification;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.HikeSharedFile;
+import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.MessageMetadata.NudgeAnimationType;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.platform.CardRenderer;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
+import com.bsb.hike.platform.CardRenderer;
 import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ChatThread;
@@ -54,21 +99,15 @@ import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.fragments.PhotoViewerFragment;
-import com.bsb.hike.utils.*;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.EmoticonConstants;
-import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.HoloCircularProgress;
-import org.json.JSONArray;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import com.bsb.hike.voip.VoIPConstants;
 
 public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener, OnCheckedChangeListener
 {
@@ -422,6 +461,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 	{
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
+		
 		MessageMetadata metadata = convMessage.getMetadata();
 		if (convMessage.isStickerMessage())
 		{
@@ -606,7 +646,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
             setSelection(convMessage, holder.selectedStateOverlay);
         }  else
             viewType = ViewType.values()[type];
-
 
 		if (viewType == ViewType.TYPING_NOTIFICATION)
 		{
@@ -1859,7 +1898,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			int bottom = positiveMargin;
 
 			int layoutRes = chatTheme.systemMessageLayoutId();
-
+			
 			if (infoState == ParticipantInfoState.PARTICIPANT_JOINED)
 			{
 				JSONArray participantInfoArray = metadata.getGcjParticipantInfo();
@@ -2111,6 +2150,38 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, name), isDefaultTheme ? R.drawable.ic_change_theme
 						: R.drawable.ic_change_theme_custom);
 
+				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
+			}
+			else if (infoState == ParticipantInfoState.VOIP_CALL_SUMMARY)
+			{
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
+
+				int duration = metadata.getDuration();
+				boolean initiator = metadata.isVoipInitiator();
+
+				String message = context.getString(initiator ? R.string.voip_call_summary_outgoing : R.string.voip_call_summary_incoming);
+				message += String.format(" (%02d:%02d)", (duration / 60), (duration % 60));
+
+				setTextAndIconForSystemMessages(mainMessage, message, R.drawable.ic_call);
+				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
+			}
+			else if (infoState == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING)
+			{
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
+
+				String message = context.getString(R.string.voip_missed_call_incoming);
+
+				setTextAndIconForSystemMessages(mainMessage, message, R.drawable.ic_call);
+				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
+			}
+			else if (infoState == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING)
+			{
+				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
+				String name = Utils.getFirstName(conversation.getLabel());
+
+				String message = context.getString(R.string.voip_missed_call_outgoing, name);
+
+				setTextAndIconForSystemMessages(mainMessage, message, R.drawable.ic_call);
 				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
 			}
 			dayHolder = participantInfoHolder;

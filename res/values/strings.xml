@@ -1273,4 +1273,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="merry_christmas">Merry Christmas</string>
     <string name="send_sticker_joy">Wish your friends with this sticker</string>
     <string name="happy_new_year">Happy New Year</string>
+    <string name="voip_call_summary_incoming">Incoming Call</string>
+    <string name="voip_call_summary_outgoing">Outgoing Call</string>
+    <string name="voip_missed_call_outgoing">%1$s missed your call.</string>
+    <string name="voip_missed_call_incoming">You missed a call.</string>
 </resources>

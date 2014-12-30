@@ -33,4 +33,7 @@ public class VoIPConstants {
 	// Intent actions
 	public static final String PARTNER_REQUIRES_UPGRADE = "pru";
 	public static final String PARTNER_INCOMPATIBLE = "pi";
+	public static final String PARTNER_IN_CALL = "missedcall";
+	public static final String PARTNER_HAS_BLOCKED_YOU = "blocked";
+	public static final String PUT_CALL_ON_HOLD = "hold";
 }

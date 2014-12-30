@@ -192,6 +192,7 @@ import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
+import com.bsb.hike.voip.VoIPService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.maps.GeoPoint;
@@ -3326,11 +3327,19 @@ public class Utils
 	public static void onCallClicked(Activity activity, final String mContactNumber)
 	{
 		// VoIP stub
+		/*
 		Intent i = new Intent(activity.getApplicationContext(), VoIPActivity.class);
 		i.putExtra("action", "outgoingcall");
 		i.putExtra("msisdn", mContactNumber);
 		i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		activity.startActivity(i);
+		*/
+		
+		Intent i = new Intent(activity.getApplicationContext(), VoIPService.class);
+		i.putExtra("action", "outgoingcall");
+		i.putExtra("msisdn", mContactNumber);
+		activity.startService(i);
+
 
 		/*
 		VoIPCaller voipCaller = VoIPCaller.getInstance(activity.getApplicationContext());
