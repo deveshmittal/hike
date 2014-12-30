@@ -247,32 +247,47 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		if (mContactInfo != null && mContactInfo.isUnknownContact() && messages != null && messages.size() >0 )
 		{
-				ConvMessage cm = messages.get(0);
+			ConvMessage cm = messages.get(0);
+			/**
+			 * Check if the conv message was previously a block header or not
+			 */
+			if (!cm.isBlockAddHeader())
+			{
 				/**
-				 * Check if the conv message was previously a block header or not
+				 * Creating a new conv message to be appended at the 0th position.
 				 */
-				if (!cm.isBlockAddHeader())
-				{
-					/**
-					 * Creating a new conv message to be appended at the 0th position.
-					 */
-					cm = new ConvMessage(0, 0l, 0l);
-					cm.setBlockAddHeader(true);
-					messages.add(0, cm);
-					Logger.d(TAG, "Adding unknownContact Header to the chatThread");
+				cm = new ConvMessage(0, 0l, 0l);
+				cm.setBlockAddHeader(true);
+				messages.add(0, cm);
+				Logger.d(TAG, "Adding unknownContact Header to the chatThread");
 
-					if (mAdapter != null)
-					{
-						mAdapter.notifyDataSetChanged();
-					}
+				if (mAdapter != null)
+				{
+					mAdapter.notifyDataSetChanged();
 				}
+			}
 		}
 	}
 
 	@Override
 	public void lastSeenFetched(String msisdn, int offline, long lastSeenTime)
 	{
-		//TODO : updateLastSeen(msisdn, offline, lastSeenTime);
+		// TODO : updateLastSeen(msisdn, offline, lastSeenTime);
+	}
+
+	@Override
+	protected void sendMessage()
+	{
+		// TODO : SMS related code -gaurav
+		// if (!mConversation.isOnhike() && mCredits <= 0)
+		// {
+		// boolean nativeSmsPref = Utils.getSendSmsPref(this);
+		// if (!nativeSmsPref)
+		// {
+		// return;
+		// }
+		// }
+		super.sendMessage();
 	}
 
 	@Override
@@ -285,15 +300,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	protected String[] getPubSubListeners()
 	{
 		// TODO Add PubSubListeners
-		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED};
+		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED };
 		return oneToOneListeners;
 	}
-	
+
 	@Override
 	protected void addMessage(ConvMessage convMessage)
 	{
 		TypingNotification typingNotification = null;
-		
+
 		/*
 		 * If we were showing the typing bubble, we remove it from the add the new message and add the typing bubble back again
 		 */
@@ -306,9 +321,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		if (convMessage.getTypingNotification() == null && typingNotification != null && convMessage.isSent())
 		{
-				mAdapter.addMessage(new ConvMessage(typingNotification));
+			mAdapter.addMessage(new ConvMessage(typingNotification));
 		}
-		
+
 		super.addMessage(convMessage);
 	}
 	
@@ -364,4 +379,39 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 	
+
+	@Override
+	protected void onMessageRead(Object object)
+	{
+		super.onMessageRead(object);
+		/*
+		 * Right now our logic is to force MR for all the unread messages that is why we need to remove all message from undelivered set
+		 * 
+		 * if in future we move to MR less than msgId we should modify this logic also
+		 */
+		if (isUserOnHike())
+		{
+			mAdapter.removeAllFromUndeliverdMessage();
+		}
+	}
+
+	@Override
+	protected boolean onMessageDelivered(Object object)
+	{
+		// TODO Auto-generated method stub
+		if (super.onMessageDelivered(object))
+		{
+			if (isUserOnHike())
+			{
+				Pair<String, Long> pair = (Pair<String, Long>) object;
+				long msgID = pair.second;
+				// TODO we could keep a map of msgId -> conversation objects
+				// somewhere to make this faster
+				ConvMessage msg = findMessageById(msgID);
+				mAdapter.removeFromUndeliverdMessage(msg, true);
+			}
+			return true;
+		}
+		return false;
+	}
 }
