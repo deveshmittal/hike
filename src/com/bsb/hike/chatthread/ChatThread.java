@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
@@ -18,6 +19,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -66,6 +68,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.ui.ComposeViewWatcher;
@@ -84,7 +87,8 @@ import com.bsb.hike.utils.Utils;
  */
 
 public abstract class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
-		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener, OnScrollListener, Listener
+		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener,
+		OnScrollListener, Listener
 {
 	private static final String TAG = "chatthread";
 
@@ -93,8 +97,10 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected static final int LOAD_MORE_MESSAGES = 2;
 
 	protected static final int SHOW_TOAST = 3;
-	
+
 	protected static final int MESSAGE_RECEIVED = 4;
+
+	protected static final int NOTIFY_DATASET_CHANGED = 5;
 
 	protected ChatThreadActivity activity;
 
@@ -125,16 +131,18 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected List<ConvMessage> messages;
 
 	protected static HashMap<Long, ConvMessage> mMessageMap;
-	
+
 	protected boolean isActivityVisible = true;
-	
+
 	protected boolean reachedEnd = false;
-	
+
 	private String[] mPubSubListeners;
-	
+
 	protected ListView mConversationsView;
-	
+
 	protected ComposeViewWatcher mComposeViewWatcher;
+
+	private EditText mComposeView;
 
 	protected Handler uiHandler = new Handler()
 	{
@@ -146,57 +154,57 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 				showToast(msg.arg1);
 				break;
 			case MESSAGE_RECEIVED:
-				addMessage((ConvMessage)msg.obj);
+				addMessage((ConvMessage) msg.obj);
+				break;
+			case NOTIFY_DATASET_CHANGED:
+				mAdapter.notifyDataSetChanged();
 				break;
 			}
 		}
 
 	};
-	
-	protected void addMessage(ConvMessage convMessage)
+
+	protected void addMessage(ConvMessage convMessage, boolean scrollToLast)
 	{
+
 		mAdapter.addMessage(convMessage);
 
-		addtoMessageMap(messages.size() - 1 ,messages.size());
+		addtoMessageMap(messages.size() - 1, messages.size());
 
 		mAdapter.notifyDataSetChanged();
-		
+
 		// Reset this boolean to load more messages when the user scrolls to
 		// the top
 		reachedEnd = false;
-
+		if (scrollToLast)
+		{
+			mConversationsView.setSelection(mAdapter.getCount());
+		}
 
 		// TODO : THIS IS TO BE BASED ON PRODUCT CALL
 		/*
 		 * Don't scroll to bottom if the user is at older messages. It's possible that the user might be reading them.
 		 */
-		
-		/*if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
-		{
-			if (convMessage.getTypingNotification() == null
-					&& (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
-			{
-				showUnreadCountIndicator();
-			}
-			return;
-		}
-		else
-		{
-			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-		}
-		*/
+
+		/*
+		 * if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4) { if
+		 * (convMessage.getTypingNotification() == null && (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() ==
+		 * ParticipantInfoState.STATUS_MESSAGE)) { showUnreadCountIndicator(); } return; } else { mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL); }
+		 */
 		/*
 		 * Resetting the transcript mode once the list has scrolled to the bottom.
 		 */
-		/*mHandler.post(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_DISABLED);
-			}
-		});*/
-	
+		/*
+		 * mHandler.post(new Runnable() {
+		 * 
+		 * @Override public void run() { mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_DISABLED); } });
+		 */
+
+	}
+
+	protected void addMessage(ConvMessage convMessage)
+	{
+		addMessage(convMessage, false);
 	}
 
 	public ChatThread(ChatThreadActivity activity, String msisdn)
@@ -249,7 +257,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		addOnClickListeners();
 
 		audioRecordView = new AudioRecordView(activity, this);
-		
+		mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
 	}
 
 	/**
@@ -416,7 +424,44 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 
 	protected void sendButtonClicked()
 	{
-		audioRecordClicked();
+		if (TextUtils.isEmpty(mComposeView.getText()))
+		{
+			audioRecordClicked();
+		}
+		else
+		{
+			sendMessage();
+		}
+	}
+
+	/**
+	 * This function gets text from compose edit text and makes a message and uses {@link ChatThread#sendMessage(ConvMessage)} to send message
+	 * 
+	 * In addition, it calls {@link ComposeViewWatcher#onMessageSent()}
+	 */
+	protected void sendMessage()
+	{
+		String message = mComposeView.getText().toString();
+		ConvMessage convMessage = Utils.makeConvMessage(msisdn, message, isOnHike());
+		// TODO : PinShowing related code -gaurav
+		mComposeView.setText("");
+		if (mComposeViewWatcher != null)
+		{
+			mComposeViewWatcher.onMessageSent();
+		}
+		sendMessage(convMessage);
+	}
+
+	/**
+	 * This function adds convmessage to list using
+	 * 
+	 * It publishes a pubsub with {@link HikePubSub#MESSAGE_SENT}
+	 */
+	protected void sendMessage(ConvMessage convMessage)
+	{
+		addMessage(convMessage, true);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
+
 	}
 
 	protected void audioRecordClicked()
@@ -533,7 +578,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		{
 			return themePicker.onBackPressed();
 		}
-		
+
 		return false;
 	}
 
@@ -768,10 +813,22 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		addtoMessageMap(0, messages.size());
 
 		mAdapter = new MessagesAdapter(activity.getApplicationContext(), mConversation.getMessages(), mConversation, null);
+
 		initListView(); // set adapter and add clicks etc
-
 		updateUIAsPerTheme(mConversation.getTheme());// it has to be done after setting adapter
+		initMessageSenderLayout();
+	}
 
+	/*
+	 * This Function initializes all components which are required to send message, in case you do not want to send message OR want to provide your own functionality, override this
+	 */
+	protected void initMessageSenderLayout()
+	{
+		initComposeViewWatcher();
+	}
+
+	protected void initComposeViewWatcher()
+	{
 		if (mComposeViewWatcher != null)
 		{
 			mComposeViewWatcher.uninit();
@@ -779,13 +836,20 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		/* get the number of credits and also listen for changes */
 		int mCredits = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
 
-		mComposeViewWatcher = new ComposeViewWatcher(mConversation, (EditText) activity.findViewById(R.id.messageedittext), (ImageButton) activity.findViewById(R.id.send_message),
-				mCredits, activity.getApplicationContext());
+		mComposeViewWatcher = new ComposeViewWatcher(mConversation, mComposeView, (ImageButton) activity.findViewById(R.id.send_message), mCredits,
+				activity.getApplicationContext());
+
+		mComposeViewWatcher.init();
+
+		/* check if the send button should be enabled */
+		mComposeViewWatcher.setBtnEnabled();
+		mComposeView.requestFocus();
+
 	}
 
 	private void initListView()
 	{
-		ListView mConversationsView = (ListView) activity.findViewById(R.id.conversations_list);
+		mConversationsView = (ListView) activity.findViewById(R.id.conversations_list);
 		mConversationsView.setAdapter(mAdapter);
 		if (mConversation.getUnreadCount() > 0)
 		{
@@ -798,6 +862,10 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			{
 				mConversationsView.setSelection(messages.size() - mConversation.getUnreadCount() - 1);
 			}
+			else
+			{
+				mConversationsView.setSelection(mAdapter.getCount());
+			}
 		}
 		else
 		{
@@ -808,7 +876,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		mConversationsView.setOnScrollListener(this);
 
 		updateUIAsPerTheme(mConversation.getTheme());// it has to be done after setting adapter
-		
+
 		/**
 		 * Adding PubSub, here since all the heavy work related to fetching of messages and setting up UI has been done already.
 		 */
@@ -1073,10 +1141,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	public void onEventReceived(String type, Object object)
 	{
 		Logger.d(TAG, "Inside onEventReceived of pubSub : " + type);
-		
+
 		/**
-		 * Using switch on String, as it is present in JDK 7 onwards. 
-		 * Switch makes for a cleaner and easier to read code as well.
+		 * Using switch on String, as it is present in JDK 7 onwards. Switch makes for a cleaner and easier to read code as well.
 		 * http://stackoverflow.com/questions/338206/why-cant-i-switch-on-a-string
 		 */
 		switch (type)
@@ -1084,12 +1151,18 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case HikePubSub.MESSAGE_RECEIVED:
 			onMessageReceived(object);
 			break;
-       
+		case HikePubSub.MESSAGE_DELIVERED:
+			onMessageDelivered(object);
+			break;
+		case HikePubSub.MESSAGE_DELIVERED_READ:
+			onMessageRead(object);
+			break;
 		default:
+			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
 		}
 	}
-	
+
 	/**
 	 * Handles message received events in chatThread
 	 * 
@@ -1117,7 +1190,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 			}
 
-			if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO) 
+			if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 			{
 				/**
 				 * ParticipantInfoState == NO_INFO indicates a normal message.
@@ -1129,25 +1202,80 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			{
 				Utils.playSoundFromRaw(activity.getApplicationContext(), R.raw.received_message);
 			}
-			
+
 			sendUIMessage(MESSAGE_RECEIVED, message);
 
 		}
 	}
-	
+
+	protected boolean onMessageDelivered(Object object)
+	{
+
+		Pair<String, Long> pair = (Pair<String, Long>) object;
+		// If the msisdn don't match we simply return
+		if (!mConversation.getMsisdn().equals(pair.first))
+		{
+			return false;
+		}
+		long msgID = pair.second;
+		// TODO we could keep a map of msgId -> conversation objects
+		// somewhere to make this faster
+		ConvMessage msg = findMessageById(msgID);
+		if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
+		{
+			msg.setState(ConvMessage.State.SENT_DELIVERED);
+			
+			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			return true;
+		}
+		return false;
+	}
+
+	protected void onMessageRead(Object object)
+	{
+		Pair<String, long[]> pair = (Pair<String, long[]>) object;
+		// If the msisdn don't match we simply return
+		if (!mConversation.getMsisdn().equals(pair.first))
+		{
+			return;
+		}
+		long[] ids = pair.second;
+		// TODO we could keep a map of msgId -> conversation objects
+		// somewhere to make this faster
+		for (int i = 0; i < ids.length; i++)
+		{
+			ConvMessage msg = findMessageById(ids[i]);
+			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+			{
+				msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+				removeFromMessageMap(msg);
+			}
+		}
+		
+		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+	}
+
+	protected ConvMessage findMessageById(long msgID)
+	{
+		if (mMessageMap == null)
+			return null;
+
+		return mMessageMap.get(msgID);
+	}
+
 	protected void handleAbnormalMessages()
 	{
 		// TODO DO NOTHING. Only classes which need to handle such type of messages need to override this method
 		return;
 	}
 
-	protected void sendUIMessage(int what,Object data){
+	protected void sendUIMessage(int what, Object data)
+	{
 		Message message = Message.obtain();
 		message.what = what;
 		message.obj = data;
 		uiHandler.sendMessage(message);
 	}
-	
 
 	/**
 	 * Utility method for adding listeners for pubSub
@@ -1157,78 +1285,76 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected void addToPubSub()
 	{
 		mPubSubListeners = getPubSubEvents();
-		
-		Logger.d(TAG, Integer.toString(mPubSubListeners.length));
+		Logger.d(TAG, "adding pubsub, length = "+ Integer.toString(mPubSubListeners.length));
 		HikeMessengerApp.getPubSub().addListeners(this, mPubSubListeners);
 	}
-	
+
 	/**
 	 * Returns pubSubListeners for ChatThread
 	 * 
 	 */
-	
+
 	private String[] getPubSubEvents()
 	{
 		String[] retVal;
 		/**
 		 * Array of pubSub listeners common to both {@link OneToOneChatThread} and {@link GroupChatThread}
 		 */
-		String[] commonEvents = new String[]{ HikePubSub.MESSAGE_RECEIVED};
-		
+		String[] commonEvents = new String[] { HikePubSub.MESSAGE_RECEIVED, HikePubSub.MESSAGE_DELIVERED, HikePubSub.MESSAGE_DELIVERED_READ };
+
 		/**
-		 * Array of pubSub listeners we get from  {@link OneToOneChatThread} or {@link GroupChatThread}
+		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
 		 * 
 		 */
-		String [] moreEvents = getPubSubListeners();
-		
-		if(moreEvents == null)
+		String[] moreEvents = getPubSubListeners();
+
+		if (moreEvents == null)
 		{
 			retVal = new String[commonEvents.length];
-			
+
 			System.arraycopy(commonEvents, 0, retVal, 0, commonEvents.length);
 		}
-		
+
 		else
 		{
 			retVal = new String[commonEvents.length + moreEvents.length];
-			
+
 			System.arraycopy(commonEvents, 0, retVal, 0, commonEvents.length);
-			
+
 			System.arraycopy(moreEvents, 0, retVal, retVal.length - commonEvents.length, moreEvents.length);
-			
+
 		}
-		
+
 		return retVal;
 	}
 
 	protected abstract String[] getPubSubListeners();
 
 	/**
-	 * Mimics the onDestroy method of an Activity. 
-	 * It is used to release resources help by the ChatThread instance.
+	 * Mimics the onDestroy method of an Activity. It is used to release resources help by the ChatThread instance.
 	 */
-	
+
 	public void onDestroy()
 	{
 		removePubSubListeners();
 	}
 
 	/**
-	 * Mimics the onPause method of an Activity. 
+	 * Mimics the onPause method of an Activity.
 	 */
-	
+
 	public void onPause()
 	{
 		isActivityVisible = false;
 	}
-	
+
 	/**
-	 * Mimics the onResume method of an Activity. 
+	 * Mimics the onResume method of an Activity.
 	 */
 
 	public void onResume()
 	{
 		isActivityVisible = true;
 	}
-	
+
 }
