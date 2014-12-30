@@ -33,6 +33,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
@@ -71,6 +72,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HDialog;
@@ -99,8 +101,12 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected static final int SHOW_TOAST = 3;
 
 	protected static final int MESSAGE_RECEIVED = 4;
+	
+	protected static final int END_TYPING_CONVERSATION = 5;
+	
+	protected static final int TYPING_CONVERSATION = 6;
 
-	protected static final int NOTIFY_DATASET_CHANGED = 5;
+	protected static final int NOTIFY_DATASET_CHANGED = 7;
 
 	protected ChatThreadActivity activity;
 
@@ -141,6 +147,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected ListView mConversationsView;
 
 	protected ComposeViewWatcher mComposeViewWatcher;
+	
+	private int unreadMessageCount = 0;
 
 	private EditText mComposeView;
 
@@ -158,6 +166,14 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 				break;
 			case NOTIFY_DATASET_CHANGED:
 				mAdapter.notifyDataSetChanged();
+				break;
+			case END_TYPING_CONVERSATION:
+				setTypingText(false, (TypingNotification) msg.obj);
+				break;
+			case TYPING_CONVERSATION:
+				setTypingText(true, (TypingNotification) msg.obj);
+				break;
+			default:
 				break;
 			}
 		}
@@ -185,12 +201,21 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		/*
 		 * Don't scroll to bottom if the user is at older messages. It's possible that the user might be reading them.
 		 */
-
-		/*
-		 * if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4) { if
-		 * (convMessage.getTypingNotification() == null && (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() ==
-		 * ParticipantInfoState.STATUS_MESSAGE)) { showUnreadCountIndicator(); } return; } else { mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL); }
-		 */
+		
+		if (((convMessage != null && !convMessage.isSent()) || convMessage == null) && mConversationsView.getLastVisiblePosition() < messages.size() - 4)
+		{
+			if (convMessage.getTypingNotification() == null
+					&& (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO || convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE))
+			{
+				showUnreadCountIndicator();
+			}
+			return;
+		}
+		else
+		{
+			mConversationsView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+		}
+		
 		/*
 		 * Resetting the transcript mode once the list has scrolled to the bottom.
 		 */
@@ -302,6 +327,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		activity.findViewById(R.id.sticker_btn).setOnClickListener(this);
 		activity.findViewById(R.id.emoticon_btn).setOnClickListener(this);
 		activity.findViewById(R.id.send_message).setOnClickListener(this);
+		activity.findViewById(R.id.new_message_indicator).setOnClickListener(this);
+		activity.findViewById(R.id.scroll_bottom_indicator).setOnClickListener(this);
 	}
 
 	private void initStickerPicker()
@@ -418,6 +445,11 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case R.id.send_message:
 			sendButtonClicked();
 			break;
+		case R.id.new_message_indicator:
+			unreadCounterClicked();
+			break;
+		case R.id.scroll_bottom_indicator:
+			bottomScrollIndicatorClicked();
 		}
 
 	}
@@ -805,6 +837,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		mConversation = conversation;
 		/*
 		 * make a copy of the message list since it's used internally by the adapter
+		 * 
+		 * Adapter has to show UI elements like tips, day/date of messages, unknown contact headers etc.
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 		messages.addAll(mConversation.getMessages());
@@ -1151,6 +1185,12 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case HikePubSub.MESSAGE_RECEIVED:
 			onMessageReceived(object);
 			break;
+		case HikePubSub.END_TYPING_CONVERSATION:
+			onEndTypingNotificationReceived(object);
+			break;
+		case HikePubSub.TYPING_CONVERSATION:
+			onTypingConversationNotificationReceived(object);
+			break;
 		case HikePubSub.MESSAGE_DELIVERED:
 			onMessageDelivered(object);
 			break;
@@ -1170,7 +1210,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	 */
 	protected void onMessageReceived(Object object)
 	{
-		final ConvMessage message = (ConvMessage) object;
+		ConvMessage message = (ConvMessage) object;
 		String senderMsisdn = message.getMsisdn();
 		if (senderMsisdn == null)
 		{
@@ -1300,8 +1340,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		/**
 		 * Array of pubSub listeners common to both {@link OneToOneChatThread} and {@link GroupChatThread}
 		 */
-		String[] commonEvents = new String[] { HikePubSub.MESSAGE_RECEIVED, HikePubSub.MESSAGE_DELIVERED, HikePubSub.MESSAGE_DELIVERED_READ };
-
+		String[] commonEvents = new String[]{ HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION, HikePubSub.MESSAGE_DELIVERED, HikePubSub.MESSAGE_DELIVERED_READ };
+		
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
 		 * 
@@ -1356,5 +1396,116 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	{
 		isActivityVisible = true;
 	}
+	
+	private void unreadCounterClicked()
+	{
+		mConversationsView.setSelection(mAdapter.getCount() - unreadMessageCount - 1);
+		hideUnreadCountIndicator();
+	}
+	
+	private void hideUnreadCountIndicator()
+	{
+		unreadMessageCount = 0;
+		activity.findViewById(R.id.new_message_indicator).setVisibility(View.GONE);
+	}
 
+	private void bottomScrollIndicatorClicked()
+	{
+		mConversationsView.setSelection(messages.size() - 1);
+		activity.findViewById(R.id.scroll_bottom_indicator);
+	}
+	
+	private void incrementUnreadMessageCount(int count)
+	{
+		unreadMessageCount += count;
+	}
+	
+	/**
+	 * Used to show the unreadCount indicator
+	 */
+	private void showUnreadCountIndicator()
+	{
+		incrementUnreadMessageCount(1);
+		handleUnreadUI();
+	}
+	
+	private void showUnreadCountIndicator(int unreadCount)
+	{
+		incrementUnreadMessageCount(unreadCount);
+		handleUnreadUI();
+	}
+	
+	private void handleUnreadUI()
+	{
+		/**
+		 * fast scroll indicator and unread message should not show simultaneously
+		 */
+
+		activity.findViewById(R.id.scroll_bottom_indicator).setVisibility(View.GONE);
+		activity.findViewById(R.id.new_message_indicator).setVisibility(View.VISIBLE);
+
+		TextView indicatorText = (TextView) activity.findViewById(R.id.indicator_text);
+		indicatorText.setVisibility(View.VISIBLE);
+		if (unreadMessageCount == 1)
+		{
+			indicatorText.setText(getResources().getString(R.string.one_new_message));
+		}
+		else
+		{
+			indicatorText.setText(getResources().getString(R.string.num_new_messages, unreadMessageCount));
+		}
+	}
+	
+	private void onEndTypingNotificationReceived(Object object)
+	{
+		TypingNotification typingNotification = (TypingNotification) object;
+		if (typingNotification == null)
+		{
+			return;
+		}
+		
+		if (msisdn.equals(typingNotification.getId()))
+		{
+			sendUIMessage(END_TYPING_CONVERSATION, typingNotification);
+		}
+	}
+	
+	/**
+	 * This is used to add Typing Conversation on the UI
+	 * @param object
+	 */
+	protected void onTypingConversationNotificationReceived(Object object)
+	{
+		TypingNotification typingNotification = (TypingNotification) object;
+		if (typingNotification == null)
+		{
+			return;
+		}
+		
+		if (msisdn.equals(typingNotification.getId()))
+		{
+			sendUIMessage(TYPING_CONVERSATION, typingNotification);
+		}
+	}
+	
+	/**
+	 * Adds typing notification on the UI
+	 * 
+	 * @param direction
+	 * @param typingNotification
+	 */
+	protected void setTypingText(boolean direction, TypingNotification typingNotification)
+	{
+		if (messages.isEmpty() || messages.get(messages.size() - 1).getTypingNotification() == null)
+		{
+			addMessage(new ConvMessage(typingNotification));
+		}
+		else if (messages.get(messages.size() - 1).getTypingNotification() != null)
+		{
+			ConvMessage convMessage = messages.get(messages.size() - 1);
+			convMessage.setTypingNotification(typingNotification);
+
+			mAdapter.notifyDataSetChanged();
+		}
+	}
 }
