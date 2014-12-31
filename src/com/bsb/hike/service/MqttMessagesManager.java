@@ -2117,8 +2117,8 @@ public class MqttMessagesManager
 					 * the callee at that point should start its voip service (and not the 
 					 * activity) so it can reply with its own socket information. 
 					 * 
-					 * The callee should not start its activity since in case we are unable
-					 * to establish a connection, the user will see a call screen popup and then
+					 * The callee does not start its activity since in case we are unable
+					 * to establish a connection, the user will see a call screen popup and
 					 * disappear. 
 					 */
 //					Log.d(VoIPConstants.TAG, "Receiving socket info..");
