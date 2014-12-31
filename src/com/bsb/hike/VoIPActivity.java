@@ -87,6 +87,8 @@ public class VoIPActivity extends Activity {
 	public static final int MSG_PARTNER_ANSWER_TIMEOUT = 11;
 	public static final int MSG_HANGUP = 12;
 	public static final int MSG_INCOMING_CALL_DECLINED = 14;
+	public static final int MSG_RECONNECTING = 15;
+	public static final int MSG_RECONNECTED = 16;
 
 	@SuppressLint("HandlerLeak") class IncomingHandler extends Handler {
 
@@ -155,7 +157,12 @@ public class VoIPActivity extends Activity {
 					seconds = (int) ((SystemClock.elapsedRealtime() - callDuration.getBase()) / 1000);
 				// VoIPUtils.addMessageToChatThread(VoIPActivity.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, seconds);
 				break;
-				
+			case MSG_RECONNECTING:
+				showMessage("Reconnecting..");
+				break;
+			case MSG_RECONNECTED:
+				showMessage("Reconnected!");
+				break;
 			default:
 				super.handleMessage(msg);
 			}
