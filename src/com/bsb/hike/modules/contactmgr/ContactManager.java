@@ -517,6 +517,40 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	}
 
 	/**
+	 * Returns true if group is mute otherwise false
+	 * 
+	 * @param groupId
+	 * @return
+	 */
+	public boolean isGroupMute(String groupId)
+	{
+		return persistenceCache.isGroupMute(groupId);
+	}
+
+	/**
+	 * Sets the group mute status in {@link #persistenceCache}
+	 * 
+	 * @param groupId
+	 * @param mute
+	 */
+	public void setGroupMute(String groupId, boolean mute)
+	{
+		persistenceCache.setGroupMute(groupId, mute);
+	}
+	
+	/**
+	 * Gets the Name, alive and Mute status of Group
+	 * 
+	 * @param msisdn
+	 * @return GroupDetails
+	 */
+	public GroupDetails getGroupDetails(String msisdn)
+	{
+		GroupDetails groupDetails = persistenceCache.getGroupPersistence().get(msisdn);
+		return groupDetails;
+	}
+	
+	/**
 	 * This method returns a list {@link ContactInfo} objects of a particular favorite type and if parameter <code>onHike</code> is one then these are hike contacts otherwise non
 	 * hike contacts. This list should not contain contact whose msisdn is same as parameter <code>myMsisdn</code>. Unsaved contacts are also included in these.
 	 * 
@@ -1898,7 +1932,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 
 	public List<ContactInfo> getConversationGroupsAsContacts(boolean shouldSort)
 	{
-		List<GroupDetails> groupDetails = persistenceCache.getGroupDetails();
+		List<GroupDetails> groupDetails = persistenceCache.getGroupDetailsList();
 		List<ContactInfo> groupContacts = new ArrayList<ContactInfo>();
 		Map<String, Integer> groupCountMap = HikeConversationsDatabase.getInstance().getAllGroupsActiveParticipantCount();
 		for(GroupDetails group : groupDetails)

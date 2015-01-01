@@ -74,6 +74,8 @@ public class ConversationsAdapter extends BaseAdapter
 	private Context context;
 
 	private ListView listView;
+	
+	private LayoutInflater inflater;
 
 	private enum ViewType
 	{
@@ -99,6 +101,8 @@ public class ConversationsAdapter extends BaseAdapter
 		ImageView avatar;
 		
 		View parent;
+		
+		ImageView muteIcon;
 	}
 
 	public ConversationsAdapter(Context context, List<Conversation> objects, ListView listView)
@@ -106,6 +110,7 @@ public class ConversationsAdapter extends BaseAdapter
 		this.context = context;
 		this.conversationList = objects;
 		this.listView = listView;
+		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mIconImageSize = context.getResources().getDimensionPixelSize(R.dimen.icon_picture_size);
 		iconLoader = new IconLoader(context, mIconImageSize);
 		iconLoader.setImageFadeIn(false);
@@ -186,7 +191,6 @@ public class ConversationsAdapter extends BaseAdapter
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		final Conversation conversation = getItem(position);
 
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
@@ -207,6 +211,7 @@ public class ConversationsAdapter extends BaseAdapter
 				viewHolder.subText = (TextView) v.findViewById(R.id.last_message);
 				viewHolder.timeStamp = (TextView) v.findViewById(R.id.last_message_timestamp);
 				viewHolder.avatar = (ImageView) v.findViewById(R.id.avatar);
+				viewHolder.muteIcon = (ImageView) v.findViewById(R.id.mute_indicator);
 				break;
 			case STEALTH_FTUE_TIP_VIEW:
 			case RESET_STEALTH_TIP:
@@ -469,6 +474,8 @@ public class ConversationsAdapter extends BaseAdapter
 
 		updateViewsRelatedToAvatar(v, conversation);
 
+		updateViewsRelatedToMute(v, conversation);
+		
 		return v;
 	}
 
@@ -608,6 +615,24 @@ public class ConversationsAdapter extends BaseAdapter
 
 		ImageView avatarView = viewHolder.avatar;
 		iconLoader.loadImage(conversation.getMsisdn(), true, avatarView, false, isListFlinging, true);
+	}
+
+	public void updateViewsRelatedToMute(View parentView, Conversation conversation)
+	{
+		ViewHolder viewHolder = (ViewHolder) parentView.getTag();
+
+		ImageView muteIcon = viewHolder.muteIcon;
+		if (conversation instanceof GroupConversation && muteIcon != null)
+		{
+			if (((GroupConversation) conversation).isMuted())
+			{
+				muteIcon.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				muteIcon.setVisibility(View.GONE);
+			}
+		}
 	}
 
 	public void updateViewsRelatedToLastMessage(View parentView, ConvMessage message, Conversation conversation)
