@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
@@ -845,26 +846,30 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 			}
 		});
 		lp.setTitle(lp.getTitle() + " - " + lp.getValue());
-		ListPreference soundPref = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.NOTIF_SOUND_PREF);
-		soundPref.setOnPreferenceChangeListener(new OnPreferenceChangeListener()
+		
+		ListPreference ledPref = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.LED_PREF);
+		ledPref.setOnPreferenceChangeListener(new OnPreferenceChangeListener()
 		{
 
 			@Override
 			public boolean onPreferenceChange(Preference preference, Object newValue)
 			{
-				preference.setTitle(getString(R.string.notificationSoundTitle) + " - " + (newValue.toString()));
-				if (getString(R.string.notif_sound_Hike).equals(newValue.toString()))
+				// Color.parseColor throws an IllegalArgumentException exception 
+				// If the string cannot be parsed
+				try
 				{
-					Utils.playSoundFromRaw(getApplicationContext(), R.raw.hike_jingle_15);
+					preference.setTitle(getString(R.string.notificationSoundTitle) + " - " + (newValue.toString()));
+					int finalColor = Color.parseColor(newValue.toString().toLowerCase());
+					HikeSharedPreferenceUtil.getInstance(HikePreferences.this).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, finalColor);
+					return true;
 				}
-				else if (getString(R.string.notif_sound_default).equals(newValue.toString()))
+				catch (Exception e)
 				{
-					Utils.playSound(getApplicationContext(), RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+					e.printStackTrace();
+					return false;
 				}
-				return true;
 			}
 		});
-		soundPref.setTitle(getString(R.string.notificationSoundTitle) + " - " + (soundPref.getValue()));
 	}
 
 	@Override
