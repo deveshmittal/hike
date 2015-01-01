@@ -847,6 +847,27 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		});
 		lp.setTitle(lp.getTitle() + " - " + lp.getValue());
 		
+		ListPreference soundPref = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.NOTIF_SOUND_PREF);
+		soundPref.setOnPreferenceChangeListener(new OnPreferenceChangeListener()
+		{
+
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue)
+			{
+				preference.setTitle(getString(R.string.notificationSoundTitle) + " - " + (newValue.toString()));
+				if (getString(R.string.notif_sound_Hike).equals(newValue.toString()))
+				{
+					Utils.playSoundFromRaw(getApplicationContext(), R.raw.hike_jingle_15);
+				}
+				else if (getString(R.string.notif_sound_default).equals(newValue.toString()))
+				{
+					Utils.playSound(getApplicationContext(), RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+				}
+				return true;
+			}
+		});
+		soundPref.setTitle(getString(R.string.notificationSoundTitle) + " - " + (soundPref.getValue()));
+		
 		ListPreference ledPref = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.LED_PREF);
 		ledPref.setOnPreferenceChangeListener(new OnPreferenceChangeListener()
 		{
