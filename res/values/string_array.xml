@@ -24,6 +24,7 @@
         <item>@string/notif_sound_Hike</item>
     </string-array>
     <string-array name="ledPrefKeys">
+        <item>@string/led_color_none_key</item>
         <item>@string/led_color_blue_key</item>
         <item>@string/led_color_cyan_key</item>
         <item>@string/led_color_green_key</item>
@@ -33,6 +34,7 @@
         <item>@string/led_color_purple_key</item>
     </string-array>
     <string-array name="ledPrefValues">
+        <item>@string/led_color_none</item>
         <item>@string/led_color_blue</item>
         <item>@string/led_color_cyan</item>
         <item>@string/led_color_green</item>

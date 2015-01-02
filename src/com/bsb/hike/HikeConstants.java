@@ -2103,5 +2103,7 @@ public class HikeConstants
 	public static final String ADD_CATEGORY = "addCat";
 
 	public static final int LED_DEFAULT_BLUE_COLOR = 0xff0000ff;
+	
+	public static final int LED_NONE_COLOR = -1;
 
 }

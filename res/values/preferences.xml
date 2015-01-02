@@ -41,6 +41,7 @@
     <string name="notif_sound_Hike">HikeJingle</string>
     <string name="notificationSoundTitle">Notification tones</string>
     
+    <string name="led_color_none">None</string>
     <string name="led_color_blue">Blue</string>
     <string name="led_color_cyan">Cyan</string>
     <string name="led_color_green">Green</string>

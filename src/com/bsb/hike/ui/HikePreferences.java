@@ -1,7 +1,5 @@
 package com.bsb.hike.ui;
 
-import java.text.SimpleDateFormat;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,20 +34,17 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.DBBackupRestore;
-import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.BackupAccountTask;
 import com.bsb.hike.tasks.BackupAccountTask.BackupAccountListener;
 import com.bsb.hike.tasks.DeleteAccountTask;
-import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
-import com.bsb.hike.tasks.UnlinkTwitterTask;
 import com.bsb.hike.tasks.DeleteAccountTask.DeleteAccountListener;
+import com.bsb.hike.tasks.UnlinkTwitterTask;
 import com.bsb.hike.ui.utils.LockPattern;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
 import com.facebook.Session;
@@ -880,8 +875,15 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				try
 				{
 					preference.setTitle(getString(R.string.notificationSoundTitle) + " - " + (newValue.toString()));
-					int finalColor = Color.parseColor(newValue.toString().toLowerCase());
-					HikeSharedPreferenceUtil.getInstance(HikePreferences.this).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, finalColor);
+					if("None".equals(newValue.toString()))
+					{
+						HikeSharedPreferenceUtil.getInstance(HikePreferences.this).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_NONE_COLOR);
+					}
+					else
+					{
+						int finalColor = Color.parseColor(newValue.toString().toLowerCase());
+						HikeSharedPreferenceUtil.getInstance(HikePreferences.this).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, finalColor);
+					}
 					return true;
 				}
 				catch (IllegalArgumentException e)
