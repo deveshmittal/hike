@@ -52,6 +52,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,6 +67,7 @@ import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -96,6 +98,7 @@ import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -173,11 +176,16 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
+import com.bsb.hike.service.ConnectionChangeReceiver;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SyncOldSMSTask;
+import com.bsb.hike.tasks.AuthSDKAsyncTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.FtueActivity;
+import com.bsb.hike.ui.ComposeChatActivity;
+import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
@@ -187,6 +195,8 @@ import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.maps.GeoPoint;
 
 public class Utils
@@ -356,7 +366,7 @@ public class Utils
 		intent.putExtra(HikeConstants.Extras.SHOW_KEYBOARD, openKeyBoard);
 		return intent;
 	}
-	
+
 	public static Intent createIntentFromMsisdn(String msisdnOrGroupId, boolean openKeyBoard)
 	{
 		Intent intent = new Intent();
@@ -566,7 +576,6 @@ public class Utils
 
 		if (!settings.getBoolean(HikeMessengerApp.ACCEPT_TERMS, false))
 		{
-			disconnectAndStopService(activity);
 			activity.startActivity(new Intent(activity, WelcomeActivity.class));
 			activity.finish();
 			return true;
@@ -574,21 +583,116 @@ public class Utils
 
 		if (settings.getString(HikeMessengerApp.NAME_SETTING, null) == null)
 		{
-			disconnectAndStopService(activity);
 			activity.startActivity(new Intent(activity, SignupActivity.class));
 			activity.finish();
 			return true;
 		}
 
+		if (!settings.getBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false) || !settings.getBoolean(HikeMessengerApp.SIGNUP_COMPLETE, false))
+		{
+			if (isUserUpgrading(activity))
+			{
+				Editor editor = settings.edit();
+				editor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+				editor.putBoolean(HikeMessengerApp.SIGNUP_COMPLETE, true);
+				editor.commit();
+				return false;
+			}
+			else
+			{
+				activity.startActivity(new Intent(activity, SignupActivity.class));
+				activity.finish();
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if the user has successfully signedup. This means user is has passed signuptask.
+	 * Returns false otherwise. In this case it will open either SignupActivity or WelcomeActivity.
+	 * 
+	 * @param context
+	 * @param launchSignup  -- true if you want to launch respective activity, false otherwise
+	 * @return
+	 */
+	public static boolean isUserSignedUp(Context context, boolean launchSignup)
+	{
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(context);
+		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
+		{
+			if(launchSignup)
+			{
+				Intent i = new Intent(context, WelcomeActivity.class);
+				i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(i);
+			}
+			return false;
+		}
+
+		if (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null)
+		{
+			if(launchSignup)
+			{
+				Intent i = new Intent(context, SignupActivity.class);
+				i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(i);
+			}
+			return false;
+		}
+
+		if (!settingPref.getData(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, false) || !settingPref.getData(HikeMessengerApp.SIGNUP_COMPLETE, false))
+		{
+			if (isUserUpgrading(context))
+			{
+				settingPref.saveData(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+				settingPref.saveData(HikeMessengerApp.SIGNUP_COMPLETE, true);
+				return true;
+			}
+			else
+			{
+				if(launchSignup)
+				{
+					Intent i = new Intent(context, SignupActivity.class);
+					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					context.startActivity(i);
+				}
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private static boolean isUserUpgrading(Context context)
+	{
+		SharedPreferences settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String currentAppVersion = settings.getString(HikeMessengerApp.CURRENT_APP_VERSION, "");
+		String actualAppVersion = "";
+		try
+		{
+			actualAppVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+		}
+		catch (NameNotFoundException e)
+		{
+			Logger.e("Utils", "Unable to get the app version");
+		}
+		if (!currentAppVersion.equals("") && !currentAppVersion.equals(actualAppVersion))
+		{
+			return true;
+		}
 		return false;
 	}
 
-	public static void disconnectAndStopService(Activity activity)
+	public static boolean showNuxScreen(Activity activity)
 	{
-		// Added these lines to prevent the bad username/password bug.
-		HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
-		app.disconnectFromService();
-		activity.stopService(new Intent(activity, HikeService.class));
+		SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (settings.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false))
+		{
+			activity.startActivity(new Intent(activity, FtueActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+			activity.finish();
+			return true;
+		}
+		return false;
 	}
 
 	public static String formatNo(String msisdn)
@@ -1235,35 +1339,38 @@ public class Utils
 		return bao.toByteArray();
 	}
 
-	public static String getRealPathFromUri(Uri contentUri, Activity activity)
+	// If source is local file path then previous getRealPathFromUri implementation (which uses deprecated manage query) provides null, So adding this implementation to solve the issue.
+	public static String getRealPathFromUri(Uri uri, Context mContext)
 	{
-		String filePath = null;
-		String[] proj = { MediaStore.Images.Media.DATA };
+		String result = null;
 		Cursor cursor = null;
-		// The query can throw exception if is doesn't know the specified projections. This needs to be put in a try-catch block.
 		try
 		{
-			cursor = activity.managedQuery(contentUri, proj, null, null, null);
+		    cursor = mContext.getContentResolver().query(uri, null, null, null, null);
+		    if (cursor == null) {
+		        result = uri.getPath();
+		    } else {
+		        if(cursor.moveToFirst())
+		        {
+		        	int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+			        result = cursor.getString(idx);
+		        }
+		        else
+		        {
+		        	result = null;
+		        }
+		    }
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		if (cursor == null || cursor.getCount() == 0)
+		finally
 		{
-			// return null;
+			if(cursor != null)
+				cursor.close();
 		}
-		else
-		{
-			int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-			cursor.moveToFirst();
-			filePath = cursor.getString(column_index);
-		}
-		if (filePath == null)
-		{
-			filePath = FilePath.getPath(activity.getBaseContext(), contentUri);
-		}
-		return filePath;
+	    return result;
 	}
 
 	public static enum ExternalStorageState
@@ -1539,11 +1646,13 @@ public class Utils
 		{
 			AccountUtils.base = httpString + AccountUtils.host + "/v1";
 			AccountUtils.baseV2 = httpString + AccountUtils.host + "/v2";
+			AccountUtils.SDK_AUTH_BASE = AccountUtils.SDK_AUTH_BASE_URL_PROD;
 		}
 		else
 		{
 			AccountUtils.base = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v1";
 			AccountUtils.baseV2 = httpString + AccountUtils.host + ":" + Integer.toString(AccountUtils.port) + "/v2";
+			AccountUtils.SDK_AUTH_BASE = AccountUtils.SDK_AUTH_BASE_URL_STAGING;
 		}
 
 		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
@@ -1552,6 +1661,7 @@ public class Utils
 		CheckForUpdateTask.UPDATE_CHECK_URL = httpString + (isProductionServer ? CheckForUpdateTask.PRODUCTION_URL : CheckForUpdateTask.STAGING_URL);
 
 		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
+		AccountUtils.fastFileUploadUrl = AccountUtils.base + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE + "ffu/";
 		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
 
@@ -3102,6 +3212,18 @@ public class Utils
 			asyncTask.execute(hikeHttpRequests);
 		}
 	}
+	
+	public static void executeAuthSDKTask(AuthSDKAsyncTask argTask, HttpRequestBase... requests)
+	{
+		if (isHoneycombOrHigher())
+		{
+			argTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requests);
+		}
+		else
+		{
+			argTask.execute(requests);
+		}
+	}
 
 	public static void executeSignupTask(AsyncTask<Void, SignupTask.StateValue, Boolean> asyncTask)
 	{
@@ -3210,7 +3332,6 @@ public class Utils
 	{
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
 		HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
 	}
 
 	public static void resetUnseenFriendRequestCount(Context context)
@@ -3334,6 +3455,15 @@ public class Utils
 	public static String getFormattedDateTimeFromTimestamp(long milliSeconds, Locale current)
 	{
 		String dateFormat = "dd/MM/yyyy hh:mm:ss a";
+		DateFormat formatter = new SimpleDateFormat(dateFormat, current);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(milliSeconds * 1000);
+		return formatter.format(calendar.getTime());
+	}
+	
+	public static String getFormattedDateTimeWOSecondsFromTimestamp(long milliSeconds, Locale current)
+	{
+		String dateFormat = "dd/MM/yyyy hh:mm a";
 		DateFormat formatter = new SimpleDateFormat(dateFormat, current);
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(milliSeconds * 1000);
@@ -3513,6 +3643,8 @@ public class Utils
 		Editor prefEditor = prefs.edit();
 		prefEditor.remove(HikeMessengerApp.DEVICE_DETAILS_SENT);
 		prefEditor.remove(HikeMessengerApp.UPGRADE_RAI_SENT);
+		prefEditor.putBoolean(HikeMessengerApp.RESTORE_ACCOUNT_SETTING, true);
+		prefEditor.putBoolean(HikeMessengerApp.SIGNUP_COMPLETE, true);
 		prefEditor.commit();
 	}
 
@@ -4242,16 +4374,16 @@ public class Utils
 	 * Adding this method to compute the overall count for showing in overflow menu on home screen
 	 * 
 	 * @param accountPref
-	 * @param count
+	 * @param defaultValue
 	 * @return
 	 */
-	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref)
+	public static int updateHomeOverflowToggleCount(SharedPreferences accountPref, boolean defaultValue)
 	{
 		int overallCount = 0;
 		/*
 		 * Not considering games option for micromax
 		 */
-		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, true)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
+		if (!(accountPref.getBoolean(HikeConstants.IS_REWARDS_ITEM_CLICKED, defaultValue)) && accountPref.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
 		{
 			overallCount++;
 		}
@@ -4267,6 +4399,7 @@ public class Utils
 		{
 			Editor editor = accountPref.edit();
 			editor.putInt(HikeMessengerApp.FRIEND_REQ_COUNT, currentCount);
+			editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
 			editor.commit();
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_COUNT_CHANGED, null);
@@ -4962,6 +5095,187 @@ public class Utils
 	public static int getDeviceOrientation(Context ctx)
 	{
 		return ctx.getResources().getConfiguration().orientation;
+	}
+	
+	/**
+	 * Fetches the network connection using connectivity manager
+	 * @param context
+	 * @return
+	 * <li>-1 in case of no network</li>
+	 * <li> 0 in case of unknown network</li>
+	 * <li> 1 in case of wifi</li>
+	 * <li> 2 in case of 2g</li>
+	 * <li> 3 in case of 3g</li>
+	 * <li> 4 in case of 4g</li>
+	 *     
+	 */
+	public static short getNetworkType(Context context)
+	{
+		int networkType = -1;
+		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		// Contains all the information about current connection
+		NetworkInfo info = cm.getActiveNetworkInfo();
+		if (info != null)
+		{
+			if (!info.isConnected())
+				return -1;
+			// If device is connected via WiFi
+			if (info.getType() == ConnectivityManager.TYPE_WIFI)
+				return 1; // return 1024 * 1024;
+			else
+				networkType = info.getSubtype();
+		}
+
+		// There are following types of mobile networks
+		switch (networkType)
+		{
+		case TelephonyManager.NETWORK_TYPE_HSUPA: // ~ 1-23 Mbps
+		case TelephonyManager.NETWORK_TYPE_LTE: // ~ 10+ Mbps // API level 11
+		case TelephonyManager.NETWORK_TYPE_HSPAP: // ~ 10-20 Mbps // API level 13
+		case TelephonyManager.NETWORK_TYPE_EVDO_B: // ~ 5 Mbps // API level 9
+			return 4;
+		case TelephonyManager.NETWORK_TYPE_EVDO_0: // ~ 400-1000 kbps
+		case TelephonyManager.NETWORK_TYPE_EVDO_A: // ~ 600-1400 kbps
+		case TelephonyManager.NETWORK_TYPE_HSDPA: // ~ 2-14 Mbps
+		case TelephonyManager.NETWORK_TYPE_HSPA: // ~ 700-1700 kbps
+		case TelephonyManager.NETWORK_TYPE_UMTS: // ~ 400-7000 kbps
+		case TelephonyManager.NETWORK_TYPE_EHRPD: // ~ 1-2 Mbps // API level 11
+			return 3;
+		case TelephonyManager.NETWORK_TYPE_1xRTT: // ~ 50-100 kbps
+		case TelephonyManager.NETWORK_TYPE_CDMA: // ~ 14-64 kbps
+		case TelephonyManager.NETWORK_TYPE_EDGE: // ~ 50-100 kbps
+		case TelephonyManager.NETWORK_TYPE_GPRS: // ~ 100 kbps
+		case TelephonyManager.NETWORK_TYPE_IDEN: // ~25 kbps // API level 8
+			return 2;
+		case TelephonyManager.NETWORK_TYPE_UNKNOWN:
+		default:
+			return 0;
+		}
+	}
+
+	public static void sendDetailsAfterSignup(Context context, boolean upgrade, boolean sendBot)
+	{
+		sendDeviceDetails(context, upgrade, sendBot);
+		SharedPreferences accountPrefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP, false))
+		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.FB_CLICK);
+		}
+		if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) > -1)
+		{
+			if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+			}
+			else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+			{
+				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+			}
+			Editor editor = accountPrefs.edit();
+			editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
+			editor.commit();
+		}
+	}
+
+	private static void sendDeviceDetails(Context context, boolean upgrade, boolean sendBot)
+	{
+		JSONObject obj = getDeviceDetails(context);
+		if (obj != null)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+		}
+		requestAccountInfo(upgrade, sendBot);
+		sendLocaleToServer(context);
+	}
+	
+	/**
+	 * @param calendar
+	 * @param hour   hour value in 24 hour format eg. 2PM = 14
+	 * @param minutes
+	 * @param seconds
+	 */
+	public static long getTimeInMillis(Calendar calendar, int hour, int minutes, int seconds, int milliseconds)
+	{
+		calendar.set(Calendar.HOUR_OF_DAY, hour);
+		calendar.set(Calendar.MINUTE, minutes);
+		calendar.set(Calendar.SECOND, seconds);
+		calendar.set(Calendar.MILLISECOND, milliseconds);
+		return calendar.getTimeInMillis();
+	}
+	public static void disableNetworkListner(Context context)
+	{
+		ComponentName mmComponentName = new ComponentName(context, ConnectionChangeReceiver.class);
+
+		context.getPackageManager().setComponentEnabledSetting(mmComponentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+
+	}
+
+	public static JSONObject getPostDeviceDetails(Context context)
+	{
+		String osVersion = Build.VERSION.RELEASE;
+		String devType = HikeConstants.ANDROID;
+		String os = HikeConstants.ANDROID;
+		String deviceVersion = Build.MANUFACTURER + " " + Build.MODEL;
+		String appVersion = "";
+		try
+		{
+			appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+		}
+		catch (NameNotFoundException e)
+		{
+			Logger.e("AccountUtils", "Unable to get app version");
+		}
+
+		TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		String deviceKey = manager.getDeviceId();
+
+		JSONObject data = new JSONObject();
+		try
+		{
+			data.put(HikeConstants.DEV_TYPE, devType);
+			data.put(HikeConstants.APP_VERSION, appVersion);
+			data.put(HikeConstants.LogEvent.OS, os);
+			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
+			data.put(HikeConstants.DEVICE_VERSION, deviceVersion);
+			data.put(HikeConstants.DEVICE_KEY, deviceKey);
+			Utils.addCommonDeviceDetails(data, context);
+		}
+		catch (JSONException e)
+		{
+			Logger.e("Exception", "Invalid JSON", e);
+		}
+		return data;
+	}
+
+	/**
+	 * Checks if is user signed up. Works with application context.
+	 * 
+	 * @return true, if is user signed up
+	 */
+	public static boolean requireAuth(Context appContext, boolean allowOpeningActivity)
+	{
+		appContext = appContext.getApplicationContext();
+
+		HikeSharedPreferenceUtil settingPref = HikeSharedPreferenceUtil.getInstance(appContext);
+
+		if (!settingPref.getData(HikeMessengerApp.ACCEPT_TERMS, false))
+		{
+			if (allowOpeningActivity)
+			{
+				IntentManager.openWelcomeActivity(appContext);
+			}
+			return false;
+		}
+
+		if (settingPref.getData(HikeMessengerApp.NAME_SETTING, null) == null)
+		{
+			if (allowOpeningActivity)
+			{
+				IntentManager.openSignupActivity(appContext);
+			}
+			return false;
+		}
+		return true;
 	}
 
 }

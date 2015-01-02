@@ -190,8 +190,12 @@ public class StickerManager
 	public static final long MINIMUM_FREE_SPACE = 10 * 1024 * 1024;
 
 	public static final String SHOW_STICKER_SHOP_BADGE = "showStickerShopBadge";
+
+	public static final String STICKER_RES_ID = "stickerResId";
 	
 	private Map<String, StickerCategory> stickerCategoriesMap;
+	
+	public static final int DEFAULT_POSITION = 3;
 	
 	public FilenameFilter stickerFileFilter = new FilenameFilter()
 	{
@@ -510,17 +514,29 @@ public class StickerManager
 
 	public void saveCustomCategories()
 	{
-		saveSortedListForCategory(RECENT);
+		saveSortedListForCategory(StickerManager.RECENT);
 	}
 	
 	public void saveSortedListForCategory(String catId)
 	{
-		CustomStickerCategory customCategory = ((CustomStickerCategory) stickerCategoriesMap.get(catId));
-		if(customCategory == null)
+		StickerCategory customCategory = stickerCategoriesMap.get(catId);
+
+		if (customCategory == null)
 		{
 			return;
 		}
-		Set<Sticker> list = customCategory.getStickerSet();
+
+		/**
+		 * Putting an instance of check here to avoid ClassCastException.
+		 */
+
+		if (!(customCategory instanceof CustomStickerCategory))
+		{
+			Logger.d("StickerManager", "Inside saveSortedListforCategory : " + customCategory.getCategoryName() + " is not CustomStickerCategory");
+			return;
+		}
+
+		Set<Sticker> list = ((CustomStickerCategory) customCategory).getStickerSet();
 		try
 		{
 			if (list.size() == 0)
@@ -1067,7 +1083,7 @@ public class StickerManager
 		category.updateDownloadedStickersCount();
 		if(downloadSource == DownloadSource.SHOP || downloadSource == DownloadSource.SETTINGS)
 		{
-			category.setState(StickerCategory.NONE);
+			category.setState(StickerCategory.DONE_SHOP_SETTINGS);
 		}
 		else
 		{
@@ -1160,10 +1176,10 @@ public class StickerManager
 				{
 				case PALLATE_ICON_TYPE:
 				case PALLATE_ICON_SELECTED_TYPE:
-					StickerDownloadManager.getInstance(ctx).DownloadEnableDisableImage(categoryId, null);
+					StickerDownloadManager.getInstance().DownloadEnableDisableImage(categoryId, null);
 					break;
 				case PREVIEW_IMAGE_TYPE:
-					StickerDownloadManager.getInstance(ctx).DownloadStickerPreviewImage(categoryId, null);
+					StickerDownloadManager.getInstance().DownloadStickerPreviewImage(categoryId, null);
 					break;
 				default:
 					break;
@@ -1226,7 +1242,7 @@ public class StickerManager
 			return;
 		}
 
-		StickerDownloadManager.getInstance(context).DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
+		StickerDownloadManager.getInstance().DownloadStickerSignupUpgradeTask(getAllInitialyInsertedStickerCategories(), new IStickerResultListener()
 		{
 
 			@Override
@@ -1319,7 +1335,8 @@ public class StickerManager
 	
 	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, Context context)
 	{
-		initialiseDownloadStickerTask(category, source, null, context);
+		DownloadType downloadType = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
+		initialiseDownloadStickerTask(category, source, downloadType, context);
 	}
 	public void initialiseDownloadStickerTask(StickerCategory category, DownloadSource source, DownloadType downloadType, Context context)
 	{
@@ -1330,11 +1347,7 @@ public class StickerManager
 		if(category.getTotalStickers() == 0 || category.getDownloadedStickersCount() < category.getTotalStickers())
 		{
 			category.setState(StickerCategory.DOWNLOADING);
-			if(downloadType== null)
-			{
-				downloadType = category.isUpdateAvailable() ? DownloadType.UPDATE : DownloadType.MORE_STICKERS;
-			}
-			StickerDownloadManager.getInstance(context).DownloadMultipleStickers(category, downloadType, source, null);
+			StickerDownloadManager.getInstance().DownloadMultipleStickers(category, downloadType, source, null);
 		}
 		saveCategoryAsVisible(category);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
@@ -1408,5 +1421,61 @@ public class StickerManager
 				Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_UNCHECK_BOX_CLICKED);
 			}
 		}
+	}
+	
+	/**
+	 * This method is used for adding a new sticker category in pallete on the fly. The category is placed at a position in the pallete if specified, else at the end
+	 * 
+	 * @param categoryId
+	 * @param categoryName
+	 * @param stickerCount
+	 * @param categorySize
+	 * @param position
+	 */
+	public void addNewCategoryInPallete(StickerCategory stickerCategory)
+	{
+		if (stickerCategoriesMap.containsKey(stickerCategory.getCategoryId()))
+		{
+			/**
+			 * Discard the add packet.
+			 */
+			return;
+		}
+
+		boolean isCategoryInserted = HikeConversationsDatabase.getInstance().insertNewCategoryInPallete(stickerCategory);
+		/**
+		 * If isCategoryInserted is false, we simply return, since it's a duplicate category
+		 */
+		if (!isCategoryInserted)
+		{
+			return;
+		}
+
+		ArrayList<StickerCategory> updateCategories = new ArrayList<StickerCategory>();
+		/**
+		 * Incrementing the index of other categories by 1 to accommodate the new category in between
+		 */
+
+		for (StickerCategory category : stickerCategoriesMap.values())
+		{
+			if (category.getCategoryIndex() < stickerCategory.getCategoryIndex())
+			{
+				continue;
+			}
+
+			category.setCategoryIndex(category.getCategoryIndex() + 1);
+			updateCategories.add(category);
+		}
+
+		stickerCategoriesMap.put(stickerCategory.getCategoryId(), stickerCategory);
+		HikeConversationsDatabase.getInstance().updateStickerCategoriesInDb(updateCategories);
+		/**
+		 * Now download the Enable disable images as well as preview image
+		 */
+		StickerDownloadManager.getInstance().DownloadEnableDisableImage(stickerCategory.getCategoryId(), null);
+		StickerDownloadManager.getInstance().DownloadStickerPreviewImage(stickerCategory.getCategoryId(), null);
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_CATEGORY_MAP_UPDATED, null);
+
 	}
 }

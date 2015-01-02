@@ -1,7 +1,6 @@
 package com.bsb.hike.service;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,11 +23,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.CallLog;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
-
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -39,30 +38,27 @@ import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
-import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.*;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.MessageMetadata;
-import com.bsb.hike.models.Protip;
-import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.models.Sticker;
-import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.HikeHTTPTask;
-import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.utils.*;
+import com.bsb.hike.userlogs.UserLogInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
+import com.bsb.hike.utils.FestivePopup;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
@@ -259,16 +255,28 @@ public class MqttMessagesManager
 
 		if (joined)
 		{
-
 			if (joinTime > 0)
 			{
 				joinTime = Utils.applyServerTimeOffset(context, joinTime);
 				ContactManager.getInstance().setHikeJoinTime(msisdn, joinTime);
+				
+				ContactInfo contact = ContactManager.getInstance().getContact(msisdn, true, false);
+				if (contact.getHikeJoinTime() > 0 && !contact.isUnknownContact())
+				{
+					Editor e = this.settings.edit();
+					e.putBoolean(HikeConstants.SHOW_RECENTLY_JOINED_DOT, true);
+					e.commit();
+				}
 			}
-
-			if(appPrefs.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true))
+			
+			if (appPrefs.getBoolean(HikeConstants.NUJ_NOTIF_BOOLEAN_PREF, true))
 			{
-				saveStatusMsg(jsonObj, msisdn);
+				ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
+				
+				if (convMessage != null && !isBulkMessage)
+				{
+					this.pubSub.publish(HikePubSub.USER_JOINED_NOTIFICATION, convMessage);
+				}
 			}
 		}
 		else
@@ -517,7 +525,7 @@ public class MqttMessagesManager
 	 */
 	private ConvMessage messagePreProcess(JSONObject jsonObj) throws JSONException
 	{
-		ConvMessage convMessage = new ConvMessage(jsonObj);
+		ConvMessage convMessage = new ConvMessage(jsonObj, context);
 		if (convMessage.isStickerMessage())
 		{
 			convMessage.setMessage(context.getString(R.string.sent_sticker));
@@ -951,6 +959,11 @@ public class MqttMessagesManager
 					}
 				}
 			}
+			if (account.has(HikeMessengerApp.BACKUP_TOKEN_SETTING))
+			{
+				String backupToken = account.getString(HikeMessengerApp.BACKUP_TOKEN_SETTING);
+				editor.putString(HikeMessengerApp.BACKUP_TOKEN_SETTING, backupToken);
+			}
 			if (account.has(HikeConstants.MUTED))
 			{
 				JSONObject mutedGroups = account.getJSONObject(HikeConstants.MUTED);
@@ -1043,6 +1056,20 @@ public class MqttMessagesManager
 				settingEditor.commit();
 			}
 		}
+		// this logic requires the backup token which is being setup in the previous if case
+		if(data.optBoolean(HikeConstants.CALL_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.CALL_ANALYTICS_FLAG);
+		}
+		if(data.optBoolean(HikeConstants.LOCATION_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.LOCATION_ANALYTICS_FLAG);
+		}
+		if(data.optBoolean(HikeConstants.APP_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.APP_ANALYTICS_FLAG);
+		}
+		
 		editor.commit();
 		if (inviteTokenAdded)
 		{
@@ -1250,6 +1277,23 @@ public class MqttMessagesManager
 			String rewards_url = data.getString(HikeConstants.REWARDS_URL);
 			editor.putString(HikeConstants.REWARDS_URL, rewards_url);
 		}
+		if (data.has(HikeConstants.REPLY_NOTIFICATION_RETRY_TIMER))
+		{
+			int retryTimeInMinutes = data.getInt(HikeConstants.REPLY_NOTIFICATION_RETRY_TIMER);
+			editor.putLong(HikeMessengerApp.RETRY_NOTIFICATION_COOL_OFF_TIME, retryTimeInMinutes * 60 * 1000);
+		}
+		if(data.optBoolean(HikeConstants.CALL_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.CALL_ANALYTICS_FLAG);
+		}
+		if(data.optBoolean(HikeConstants.LOCATION_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.LOCATION_ANALYTICS_FLAG);
+		}
+		if(data.optBoolean(HikeConstants.APP_LOG_ANALYTICS))
+		{
+			UserLogInfo.sendLogs(context, UserLogInfo.APP_ANALYTICS_FLAG);
+		}
 
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
@@ -1294,7 +1338,8 @@ public class MqttMessagesManager
 			Editor editor = settings.edit();
 			editor.putBoolean(HikeMessengerApp.GCM_ID_SENT, false);
 			editor.commit();
-			context.sendBroadcast(new Intent(HikeService.SEND_TO_SERVER_ACTION));
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.REGISTER_GCM_SIGNUP, HikeConstants.REGISTEM_GCM_AFTER_SIGNUP);
+			LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(HikeService.SEND_TO_SERVER_ACTION));
 		}
 		if (data.optBoolean(HikeConstants.DEFAULT_SMS_CLIENT_TUTORIAL))
 		{
@@ -1455,6 +1500,41 @@ public class MqttMessagesManager
 			{
 				HikeSharedPreferenceUtil.getInstance(context).saveData(StickerManager.SHOW_STICKER_SHOP_BADGE, true);
 			}
+		}
+		
+		else if (HikeConstants.ADD_CATEGORY.equals(subType))
+		{
+			if((!data.has(StickerManager.CATEGORY_ID)) || (!data.has(HikeConstants.CAT_NAME)))
+			{
+				/**
+				 * We are returning if we don't find category Id or Category name in the MQTT packet.
+				 */
+				
+				Logger.d("SaveSticker", "Did not receive category Id and category Name. Returning");
+				return;
+			}
+			
+			String categoryId = data.getString(StickerManager.CATEGORY_ID);
+			String categoryName = data.getString(HikeConstants.CAT_NAME);
+			int stickerCount = data.optInt(HikeConstants.COUNT, -1);
+			int categorySize = data.optInt(HikeConstants.UPDATED_SIZE, -1);
+			int position = data.optInt(HikeConstants.PALLETE_POSITION, -1);
+			
+			/**
+			 * Creating the sticker object here
+			 */
+			StickerCategory stickerCategory = new StickerCategory(categoryId);
+			stickerCategory.setCategoryName(categoryName);
+			stickerCategory.setTotalStickers(stickerCount == -1 ? 0 : stickerCount);
+			stickerCategory.setCategorySize(categorySize == -1 ? 0 : categorySize);
+			int pos = (position < 1 ? (HikeConversationsDatabase.getInstance().getMaxStickerCategoryIndex() + 1) : position);
+			pos = (pos < 1 ? StickerManager.DEFAULT_POSITION : pos);
+			stickerCategory.setCategoryIndex(pos);  //Choosing it's index based on the above logic
+			stickerCategory.setUpdateAvailable(true);  //To show the green badge on category
+			stickerCategory.setVisible(true);	//To make it visible in pallete
+			stickerCategory.setState(StickerCategory.NONE);
+			
+			StickerManager.getInstance().addNewCategoryInPallete(stickerCategory);
 		}
 	}
 
@@ -1701,7 +1781,8 @@ public class MqttMessagesManager
 
 	private void savePopup(JSONObject jsonObj) throws JSONException
 	{
-		if (jsonObj.getString(HikeConstants.SUB_TYPE).equals(HikeConstants.SHOW_STEALTH_POPUP))
+		String subType = jsonObj.getString(HikeConstants.SUB_TYPE);
+		if (subType.equals(HikeConstants.SHOW_STEALTH_POPUP))
 		{
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
 			String id = data.optString(HikeConstants.MESSAGE_ID);
@@ -1742,6 +1823,14 @@ public class MqttMessagesManager
 				}
 			}
 		}
+		else if(subType.equals(HikeConstants.XMAS_POPUP))
+		{
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.XMAS_POPUP);
+		}
+		else if(subType.equals(HikeConstants.NEW_YEAR_POPUP))
+		{
+			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeConstants.SHOW_FESTIVE_POPUP, FestivePopup.NEW_YEAR_POPUP);
+		}
 		else
 		{
 			// updatePopUpData
@@ -1749,6 +1838,19 @@ public class MqttMessagesManager
 		}
 	}
 
+	private void saveTip(JSONObject jsonObj)
+	{
+		String subType = jsonObj.optString(HikeConstants.SUB_TYPE);
+		if (subType.equals(HikeConstants.STICKER))
+		{
+			Editor editor = settings.edit();
+			if (!settings.contains(HikeMessengerApp.SHOWN_EMOTICON_TIP))
+				editor.putBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false);
+			editor.commit();
+			HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_FTUE_TIP, null);
+		}
+	}
+	
 	/**
 	 * <br>
 	 * This function handles bulk packet</br>
@@ -2139,6 +2241,10 @@ public class MqttMessagesManager
 		{
 			saveBulkMessage(jsonObj);
 		}
+		else if (HikeConstants.MqttMessageTypes.TIP.equals(type))
+		{
+			saveTip(jsonObj);
+		}
 	}
 
 	private void uploadGroupProfileImage(final String groupId, final boolean retryOnce)
@@ -2290,6 +2396,7 @@ public class MqttMessagesManager
 		count++;
 		Editor editor = settings.edit();
 		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, count);
+		editor.putBoolean(HikeConstants.IS_HOME_OVERFLOW_CLICKED, false);
 		editor.commit();
 
 		pubSub.publish(HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT, null);
@@ -2308,7 +2415,7 @@ public class MqttMessagesManager
 		 */
 		return convDb.updateMsgStatus(msgID, status.ordinal(), msisdn);
 	}
-
+	
 	private ConvMessage saveStatusMsg(JSONObject jsonObj, String msisdn) throws JSONException
 	{
 		if (isBulkMessage)
@@ -2316,24 +2423,22 @@ public class MqttMessagesManager
 			ConvMessage convMessage = saveStatusMsgBulk(jsonObj, msisdn);
 			return convMessage;
 		}
-
 		ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
-
+		
 		if (convMessage == null)
 		{
 			return null;
 		}
-
+		
 		convDb.addConversationMessages(convMessage);
-
+		
 		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
-
+		
 		statusMessagePostProcess(convMessage, jsonObj);
-
+		
 		return convMessage;
-
 	}
-
+	
 	private ConvMessage saveStatusMsgBulk(JSONObject jsonObj, String msisdn) throws JSONException
 	{
 		ConvMessage convMessage = statusMessagePreProcess(jsonObj, msisdn);
