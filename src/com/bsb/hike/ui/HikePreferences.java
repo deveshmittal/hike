@@ -755,12 +755,21 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.NUJ_NOTIF_BOOLEAN_PREF.equals(preference.getKey()))
 		{
-			if(isChecked)
+			JSONObject object = new JSONObject();
+			try
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_ON);
+				object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+
+				JSONObject data = new JSONObject();
+				data.put(HikeConstants.UJ_NOTIF_SETTING, isChecked? 1:0 );
+				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
+				object.put(HikeConstants.DATA, data);
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
 			}
-			else{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SETTINGS_NOTIFICATION_NUJ_OFF);
+			catch (JSONException e)
+			{
+				Logger.w(getClass().getSimpleName(), "Invalid json", e);
 			}
 		}
 		else if (HikeConstants.H2O_NOTIF_BOOLEAN_PREF.equals(preference.getKey()))
