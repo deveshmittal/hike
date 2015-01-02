@@ -381,5 +381,8 @@
     <color name="sticker_shop_icon_pressed">#9A33B5E5</color>
     <color name="festive_mode_bg">#D9000D1F</color>
     <color name="festive_popup_divider">#33000000</color>
+    <color name="black_90">#E6000000</color>
+    <color name="voip_signal">#F5AD00</color>
+    <color name="voip_hang_up">#F64444</color>
 </resources>
 	
