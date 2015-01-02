@@ -65,7 +65,7 @@ public class VoIPService extends Service {
 	private final int PACKET_TRACKING_SIZE = 128;
 	private final int HEARTBEAT_INTERVAL = 1000;
 	private final int HEARTBEAT_TIMEOUT = HEARTBEAT_INTERVAL * 5;
-	private final int HEARTBEAT_HARD_TIMEOUT = 20000;
+	private final int HEARTBEAT_HARD_TIMEOUT = 15000;
 	private final int MAX_SAMPLES_BUFFER = 3;
 	private static final int NOTIFICATION_IDENTIFIER = 10;
 
@@ -174,6 +174,15 @@ public class VoIPService extends Service {
 				hangUp();
 				return returnInt;
 			}
+			
+			// Error case: partner is trying to reconnect to us, but we aren't
+			// expecting a reconnect
+			boolean partnerReconnecting = intent.getBooleanExtra("reconnecting", false);
+			if (partnerReconnecting == true && partnerCallId != getCallId()) {
+				Logger.w(VoIPConstants.TAG, "Partner trying to reconnect? Remote: " + partnerCallId + ", Self: " + getCallId());
+				hangUp();
+				return returnInt;
+			}
 
 			clientPartner = new VoIPClient();
 			clientPartner.setInternalIPAddress(intent.getStringExtra("internalIP"));
@@ -183,6 +192,10 @@ public class VoIPService extends Service {
 			clientPartner.setPhoneNumber(intent.getStringExtra("msisdn"));
 			clientPartner.setInitiator(intent.getBooleanExtra("initiator", true));
 			clientSelf.setInitiator(!clientPartner.isInitiator());
+
+			Logger.d(VoIPConstants.TAG, "Setting our relay to: " + intent.getStringExtra("relay"));
+			clientSelf.setRelayAddress(intent.getStringExtra("relay"));
+			clientPartner.setRelayAddress(intent.getStringExtra("relay"));
 
 			// Error case: we are receiving a delayed v0 message for a call we 
 			// initiated earlier. 
@@ -203,7 +216,6 @@ public class VoIPService extends Service {
 				setCallid(partnerCallId);
 				if (clientPartner.isInitiator() && !reconnecting) {
 					Logger.d(VoIPConstants.TAG, "Detected incoming VoIP call.");
-					clientSelf.setRelayAddress(intent.getStringExtra("relay"));
 					retrieveExternalSocket();
 				} else {
 					// We have already sent our socket info to partner
@@ -1325,8 +1337,9 @@ public class VoIPService extends Service {
 					 * If we are initiating the connection, then we set the relay server
 					 * to be used by both clients. 
 					 */
-					if (clientSelf.isInitiator())
+					if (clientSelf.isInitiator()) {
 						clientSelf.setRelayAddress(host.getHostAddress());
+					}
 
 					VoIPDataPacket dp = new VoIPDataPacket(PacketType.RELAY_INIT);
 					byte[] dpData = VoIPSerializer.serialize(dp);
@@ -1484,9 +1497,11 @@ public class VoIPService extends Service {
 						if (count <= 15) {
 							sendUDPDataForConnectionSetup(VoIPConstants.COMM_UDP_SYN_PRIVATE.getBytes(), clientPartner.getInternalIPAddress(), clientPartner.getInternalPort());
 							sendUDPDataForConnectionSetup(VoIPConstants.COMM_UDP_SYN_PUBLIC.getBytes(), clientPartner.getExternalIPAddress(), clientPartner.getExternalPort());
-						} else
+							Thread.sleep(200);
+						} else {
 							sendUDPDataForConnectionSetup(VoIPConstants.COMM_UDP_SYN_RELAY.getBytes(), clientPartner.getExternalIPAddress(), clientPartner.getExternalPort());
-						Thread.sleep(200);
+							Thread.sleep(500);
+						}
 					} catch (InterruptedException e) {
 						Logger.d(VoIPConstants.TAG, "Stopping sending thread.");
 						break;

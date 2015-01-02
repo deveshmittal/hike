@@ -2147,6 +2147,8 @@ public class MqttMessagesManager
 					i.putExtra("internalPort", metadataJSON.getInt("internalPort"));
 					i.putExtra("externalIP", metadataJSON.getString("externalIP"));
 					i.putExtra("externalPort", metadataJSON.getInt("externalPort"));
+					i.putExtra("relay", metadataJSON.getString("relay"));
+					i.putExtra("reconnecting", metadataJSON.getBoolean("reconnecting"));
 					i.putExtra("initiator", metadataJSON.getBoolean("initiator"));
 					i.putExtra("callId", metadataJSON.getInt("callId"));
 					context.startService(i);
