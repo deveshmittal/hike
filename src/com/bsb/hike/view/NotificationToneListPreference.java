@@ -36,11 +36,9 @@ public class NotificationToneListPreference extends ListPreference implements Di
 
 	private Cursor notifSoundCursor;
 
-	private CharSequence[] rintoneCharSeq;
-
-	private boolean isClickedButtonPressed = false;
-
 	private static int HIKE_JINNGLE_INDEX = 2;
+	
+	private RingtoneFetcherTask fetcherTask;
 	
 	public NotificationToneListPreference(Context context, AttributeSet attrs)
 	{
@@ -80,7 +78,7 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	@Override
 	protected void onPrepareDialogBuilder(Builder builder)
 	{
-		updateEntryAndValues();
+		setEntryAndValues();
 		mClickedDialogEntryIndex = getValueIndex();
 		mCancelDialogEntryIndex = getValueIndex();
 		builder.setSingleChoiceItems(this.getEntries(), mClickedDialogEntryIndex, new DialogInterface.OnClickListener()
@@ -146,17 +144,68 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	/**
 	 * Sets entries and Values for SoundListPref via AsyncTask
 	 */
-	public void updateSoundPrefData()
+	public void fetchSoundPrefData()
 	{
-		new AsyncTask<Void, Void, Void>()
-		{
-			protected void onPreExecute()
-			{
-				initRingtoneLists();
-			};
+		fetcherTask = new RingtoneFetcherTask();
+		fetcherTask.execute();
+	}
 
-			@Override
-			protected Void doInBackground(Void... params)
+	private void initRingtoneLists()
+	{
+		ringtonesNameURIMap.put(mContext.getResources().getString(R.string.notif_sound_off), null);
+		ringtonesNameURIMap.put(mContext.getResources().getString(R.string.notif_sound_default), null);
+		ringtonesNameURIMap.put(mContext.getResources().getString(R.string.notif_sound_Hike), null);
+	}
+
+	private void setEntryAndValues()
+	{
+		CharSequence[] rintoneCharSeq = ringtonesNameURIMap.keySet().toArray(new CharSequence[ringtonesNameURIMap.size()]);
+		setEntries(rintoneCharSeq);
+		setEntryValues(rintoneCharSeq);
+	}
+
+	/**
+	 * Handles Click of Notification Option in Preferences Screen
+	 */
+	@Override
+	protected void onClick()
+	{
+		fetchSoundPrefData();
+		
+		//To avoid opening of multiple Dialogs 
+		this.setEnabled(false);
+	}
+
+	@Override
+	protected void showDialog(Bundle state)
+	{
+		// It is the case of screen rotation
+		if (fetcherTask == null)
+		{
+			fetchSoundPrefData();
+		}
+		else // User has clicked Notification Button
+		{
+			super.showDialog(state);
+		}
+	}
+	
+	/**
+	 * 
+	 * Fetches Available Ringtones from Device
+	 *
+	 */
+	private class RingtoneFetcherTask extends AsyncTask<Void, Void, Void>{
+
+		protected void onPreExecute()
+		{
+			initRingtoneLists();
+		};
+
+		@Override
+		protected Void doInBackground(Void... params)
+		{
+			if (!fetcherTask.isCancelled())
 			{
 				try
 				{
@@ -180,73 +229,38 @@ public class NotificationToneListPreference extends ListPreference implements Di
 						{
 							//No Notification Tone was present in device
 						}
+						
+						//The returned cursor will be the same cursor returned each time this method is called, 
+						//so do not Cursor.close() the cursor. The cursor can be Cursor.deactivate() safely.
+						notifSoundCursor.deactivate();
 					}
 				}
 				catch (Exception e)
 				{
 					e.printStackTrace();
 				}
-				return null;
 			}
+			return null;
+		}
 
-			protected void onPostExecute(Void result)
-			{
-				if (notifSoundCursor != null)
-				{
-					notifSoundCursor.close();
-				}
-				updateEntryAndValues();
-				notifyChanged();
-				
-				// User has clicked on Notification Button on preferences screen
-				if (isClickedButtonPressed)
-				{
-					NotificationToneListPreference.super.onClick();
-				}
-				else // Was a case of screen rotation
-				{
-					NotificationToneListPreference.super.showDialog(null);
-				}
-			};
-
-		}.execute();
-	}
-
-	private void initRingtoneLists()
-	{
-		ringtonesNameURIMap.put(mContext.getResources().getString(R.string.notif_sound_off), null);
-		ringtonesNameURIMap.put(mContext.getResources().getString(R.string.notif_sound_default), null);
-		ringtonesNameURIMap.put(mContext.getResources().getString(R.string.notif_sound_Hike), null);
-	}
-
-	private void updateEntryAndValues()
-	{
-		rintoneCharSeq = ringtonesNameURIMap.keySet().toArray(new CharSequence[ringtonesNameURIMap.size()]);
-		setEntries(rintoneCharSeq);
-		setEntryValues(rintoneCharSeq);
-	}
-
-	/**
-	 * Handles Click of Notification Option in Preferences Screen
-	 */
-	@Override
-	protected void onClick()
-	{
-		isClickedButtonPressed = true;
-		updateSoundPrefData();
+		protected void onPostExecute(Void result)
+		{
+			setEntryAndValues();
+			notifyChanged();
+			
+			showDialog(null);
+		};
+		
 	}
 
 	@Override
-	protected void showDialog(Bundle state)
+	public void onDismiss(DialogInterface dialog)
 	{
-		// It is the case of screen rotation
-		if (!isClickedButtonPressed)
+		super.onDismiss(dialog);
+		if(!fetcherTask.isCancelled())
 		{
-			updateSoundPrefData();
+			fetcherTask.cancel(true);
 		}
-		else // User has clicked Notification Button
-		{
-			super.showDialog(state);
-		}
+		this.setEnabled(true);
 	}
 }
