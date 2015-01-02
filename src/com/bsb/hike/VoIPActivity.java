@@ -453,39 +453,6 @@ public class VoIPActivity extends Activity
 	private Vibrator vibrator;
 	private boolean isVibrating;
 
-	private void startRinging() {
-		Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-		r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-		r.setStreamType(AudioManager.STREAM_ALARM);
-		AudioManager am = (AudioManager)getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-		if (am.getRingerMode() == AudioManager.RINGER_MODE_NORMAL ){
-			r.play();			//commented because it's irritating while testing. :/
-			isPlaying = true;
-		} else if (am.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
-			vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-			long[] vibTimings = {0,300,700};
-			if(vibrator.hasVibrator()){
-				isVibrating = true;
-				vibrator.vibrate(vibTimings, 0);				
-			}
-		}
-		
-	}
-	
-	public void stopRinging() 
-	{
-		AudioManager am = (AudioManager)getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-		if ((am.getRingerMode() == AudioManager.RINGER_MODE_NORMAL)&&isPlaying){
-			r.stop();
-		} else if ((am.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE)&&isVibrating) {
-			vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-			if(vibrator.hasVibrator()){
-				vibrator.cancel();				
-			}
-		}
-		
-	}
-
 	private void setupCallerLayout()
 	{
 		setAvatar();
@@ -496,7 +463,6 @@ public class VoIPActivity extends Activity
 
 	private void setupCalleeLayout()
 	{
-		startRinging();
 		setAvatar();
 		setContactDetails();
 		showCallGlowPad();
@@ -551,17 +517,15 @@ public class VoIPActivity extends Activity
 	{
 		Logger.d(VoIPConstants.TAG, "Accepted call, starting audio...");
 		voipService.acceptIncomingCall();
-		stopRinging();
-    	showActiveCallLayout();
+		showActiveCallLayout();
 	}
 
 	private void declineCall()
 	{
 		Logger.d(VoIPConstants.TAG, "Declined call, rejecting...");
 		voipService.rejectIncomingCall();
-		stopRinging();
 	}
-	
+
 	private void showActiveCallLayout()
 	{
 		findViewById(R.id.glow_pad_view).setVisibility(View.GONE);
