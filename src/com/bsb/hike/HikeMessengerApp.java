@@ -463,6 +463,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	
 	private StickerManager sm;
 	
+	private static HikeMessengerApp _instance;
+	
 	RegisterToGCMTrigger mmRegisterToGCMTrigger = null;
 
 	SendGCMIdToServerTrigger mmGcmIdToServerTrigger = null;
@@ -629,6 +631,8 @@ public void onTrimMemory(int level)
 		ErrorReporter.getInstance().setReportSender(customReportSender);
 
 		super.onCreate();
+		
+		_instance = this;
 
 		Utils.setDensityMultiplier(getResources().getDisplayMetrics());
 
@@ -829,7 +833,10 @@ public void onTrimMemory(int level)
 		registerReceivers();
 	}
 	
-	
+	public static HikeMessengerApp getInstance()
+	{
+		return _instance;
+	}
 
 	private void registerReceivers()
 	{
