@@ -47,6 +47,6 @@
     <string name="led_color_red">Red</string>
     <string name="led_color_white">White</string>
     <string name="led_color_yellow">Yellow</string>
-    <string name="led_purple_yellow">Purple</string>
+    <string name="led_color_purple">Purple</string>
 
 </resources>

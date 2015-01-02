@@ -884,7 +884,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 					HikeSharedPreferenceUtil.getInstance(HikePreferences.this).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, finalColor);
 					return true;
 				}
-				catch (Exception e)
+				catch (IllegalArgumentException e)
 				{
 					e.printStackTrace();
 					return false;
