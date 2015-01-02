@@ -1,4 +1,4 @@
-package com.bsb.hike.ui.fragments;
+  package com.bsb.hike.ui.fragments;
 
 import org.json.JSONException;
 import org.json.JSONObject;

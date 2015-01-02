@@ -26,6 +26,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.tasks.FetchFriendsTask;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.WhichScreen;
 import com.bsb.hike.view.PinnedSectionListView.PinnedSectionListAdapter;
@@ -108,7 +109,7 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 		setLoadingView();
 		FetchFriendsTask fetchFriendsTask = new FetchFriendsTask(this, context, friendsList, hikeContactsList, smsContactsList, recentContactsList,recentlyJoinedHikeContactsList, friendsStealthList, hikeStealthContactsList,
 				smsStealthContactsList, recentStealthContactsList, filteredFriendsList, filteredHikeContactsList, filteredSmsContactsList, groupsList, groupsStealthList, filteredGroupsList, filteredRecentsList,filteredRecentlyJoinedHikeContactsList,
-				existingParticipants, sendingMsisdn, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true, false, fetchRecents , fetchRecentlyJoined, showDefaultEmptyList);
+				existingParticipants, sendingMsisdn, fetchGroups, existingGroupId, isCreatingOrEditingGroup, true, false, fetchRecents , fetchRecentlyJoined, showDefaultEmptyList, true);
 		Utils.executeAsyncTask(fetchFriendsTask);
 	}
 
@@ -276,10 +277,13 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 				holder.checkbox.setVisibility(View.VISIBLE);
 				if (selectedPeople.containsKey(contactInfo.getMsisdn()))
 				{
+
+					Logger.d("UmangX","checked true");
 					holder.checkbox.setChecked(true);
 				}
 				else
 				{
+					Logger.d("UmangX","checked false");
 					holder.checkbox.setChecked(false);
 				}
 			}
@@ -470,6 +474,10 @@ public class ComposeChatAdapter extends FriendsAdapter implements PinnedSectionL
 
 		notifyDataSetChanged();
 		setEmptyView();
+		
+		
+		
+		
 	}
 
 	public void addContact(ContactInfo contactInfo)

@@ -3,6 +3,8 @@ package com.bsb.hike.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,6 +16,7 @@ import android.text.TextUtils;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NUXConstants;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.NuxCustomMessage;
 import com.bsb.hike.models.NuxInviteFriends;
 import com.bsb.hike.models.NuxSelectFriends;
@@ -22,7 +25,7 @@ public class NUXManager
 {
 	private static NUXManager mmManager;
 
-	private HashSet<String> list_nux_contacts;
+	private HashSet<String> listNuxContacts;
 
 	private NuxInviteFriends inviteFriends;
 
@@ -34,16 +37,23 @@ public class NUXManager
 
 	private NUXManager(Context context)
 	{
-		list_nux_contacts = new HashSet<String>();
+		listNuxContacts = new HashSet<String>();
 		mprefs = HikeSharedPreferenceUtil.getInstance(context);
 		String msisdn = mprefs.getData(NUXConstants.CURRENT_NUX_CONTACTS, null);
 		if (!TextUtils.isEmpty(msisdn))
 		{
 			String[] arrmsisdn = msisdn.split(NUXConstants.STRING_SPLIT_SEPERATOR);
-			list_nux_contacts.addAll(Arrays.asList(arrmsisdn));
+			listNuxContacts.addAll(Arrays.asList(arrmsisdn));
 		}
 	}
 
+	public List<ContactInfo> getRecommendedContacts(){
+		return null;
+	}
+	
+	public Set<ContactInfo> getHiddenContacts(){
+		return null;
+	}
 	public static NUXManager getInstance(Context context)
 	{
 		if (mmManager == null)
@@ -69,23 +79,23 @@ public class NUXManager
 	public void saveNUXContact(HashSet<String> msisdn, Context context)
 	{
 
-		list_nux_contacts.addAll(msisdn);
+		listNuxContacts.addAll(msisdn);
 
-		mprefs.saveData(NUXConstants.CURRENT_NUX_CONTACTS, list_nux_contacts.toString().replace("[", "").replace("]", ""));
+		mprefs.saveData(NUXConstants.CURRENT_NUX_CONTACTS, listNuxContacts.toString().replace("[", "").replace("]", ""));
 	}
 
 	public void removeNUXContact(HashSet<String> msisdn, Context context)
 	{
 
-		list_nux_contacts.removeAll(msisdn);
+		listNuxContacts.removeAll(msisdn);
 
-		mprefs.saveData(NUXConstants.CURRENT_NUX_CONTACTS, list_nux_contacts.toString().replace("[", "").replace("]", ""));
+		mprefs.saveData(NUXConstants.CURRENT_NUX_CONTACTS, listNuxContacts.toString().replace("[", "").replace("]", ""));
 
 	}
 
 	public int getCountCurrentNUXContacts()
 	{
-		return list_nux_contacts.size();
+		return listNuxContacts.size();
 	}
 
 	public int getMaxContacts(Context context)
@@ -122,7 +132,7 @@ public class NUXManager
 
 	public HashSet<String> getAllNUXContacts()
 	{
-		return list_nux_contacts;
+		return listNuxContacts;
 	}
 
 	public void sendMessage(ArrayList<String> msisdn)
