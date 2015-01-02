@@ -229,6 +229,14 @@ public class VoIPService extends Service {
 		}
 		
 		if (action.equals("outgoingcall")) {
+
+			// Edge case. 
+			String myMsisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.MSISDN_SETTING, null);
+			if (myMsisdn != null && myMsisdn.equals(intent.getStringExtra("msisdn"))) {
+				Logger.wtf(VoIPConstants.TAG, "Don't be ridiculous!");
+				return returnInt;
+			}
+			
 			// we are making an outgoing call
 			clientPartner.setPhoneNumber(intent.getStringExtra("msisdn"));
 			clientSelf.setInitiator(true);
@@ -274,6 +282,7 @@ public class VoIPService extends Service {
 		.setContentTitle("Hike Ongoing Call")
 		.setSmallIcon(R.drawable.ic_launcher)
 		.setContentIntent(pendingIntent)
+		.setOngoing(true)
 		.build();
 		
 		notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -561,10 +570,12 @@ public class VoIPService extends Service {
 		startCodecDecompression();
 		startCodecCompression();
 		
+		/*
 		// Set audio gain
 		SharedPreferences preferences = getSharedPreferences(HikeMessengerApp.VOIP_SETTINGS, Context.MODE_PRIVATE);
 		gain = preferences.getInt(HikeMessengerApp.VOIP_AUDIO_GAIN, 0);
 		opusWrapper.setDecoderGain(gain);
+		*/
 		
 		// Set encoder complexity which directly affects CPU usage
 		opusWrapper.setEncoderComplexity(0);

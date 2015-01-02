@@ -262,6 +262,7 @@ public class VoIPActivity extends Activity
 		handleIntent(intent);
 	}
 
+	/*
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 
@@ -278,6 +279,7 @@ public class VoIPActivity extends Activity
 
 		return retval;
 	}
+	*/
 
 	private void handleIntent(Intent intent) {
 		String action = intent.getStringExtra("action");
