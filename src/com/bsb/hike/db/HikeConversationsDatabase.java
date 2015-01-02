@@ -1479,7 +1479,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					}
 					
 					conv.setMsgID(msgId);
-					ChatThread.addtoMessageMap(conv);
+					com.bsb.hike.chatthread.ChatThread.addtoMessageMap(conv);
 
 					/*
 					 * msdId > 0 means that the conversation exists.
@@ -1598,7 +1598,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					assert (msgId >= 0);
 				}
 				conv.setMsgID(msgId);
-				ChatThread.addtoMessageMap(conv);
+				com.bsb.hike.chatthread.ChatThread.addtoMessageMap(conv);
 
 				/*
 				 * msdId > 0 means that the conversation exists.
