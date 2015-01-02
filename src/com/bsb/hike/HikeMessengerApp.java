@@ -424,6 +424,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String STICKER_SETTING_UNCHECK_BOX_CLICKED = "stickerSettingUnCheckBoxClicked";
 
 	public static final String RETRY_NOTIFICATION_COOL_OFF_TIME = "retryNotificationCoolOffTime";
+	
+	public static final String LED_NOTIFICATION_COLOR_CODE = "led_notification_color_code";
 
 	public static CurrentState currentState = CurrentState.CLOSED;
 

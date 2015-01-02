@@ -434,7 +434,7 @@ public class HikeConstants
 	public static final String MESSAGES = "msgs";
 	
 	public static final String FILE_IMAGE_QUALITY = "img_quality";
-
+	
 	// @GM
 	// public static final String AUTO_DOWNLOAD_IMAGE_PREF = "autoDownloadImagePref"
 	public static final String AUTO_DOWNLOAD_MEDIA_PREF = "AutoDownloadMediaPref";
@@ -2101,4 +2101,9 @@ public class HikeConstants
 	public static final String GCM_ID = "gcm_id";
 	
 	public static final String ADD_CATEGORY = "addCat";
+
+	public static final int LED_DEFAULT_BLUE_COLOR = 0xff0000ff;
+	
+	public static final int LED_NONE_COLOR = -1;
+
 }
