@@ -157,6 +157,7 @@ JNIEXPORT jlong JNICALL Java_com_bsb_hike_voip_OpusWrapper_opus_1encoder_1create
 	  opus_encoder_ctl((OpusEncoder *)(intptr_t)enc, OPUS_SET_FORCE_CHANNELS(1));
 	  // opus_encoder_ctl((OpusEncoder *)enc, OPUS_SET_BITRATE(32000));
 	  opus_encoder_ctl((OpusEncoder *)(intptr_t)enc, OPUS_SET_SIGNAL(OPUS_SIGNAL_VOICE));
+	  // opus_encoder_ctl((OpusEncoder *)(intptr_t)enc, OPUS_SET_COMPLEXITY(1));
 	  // opus_encoder_ctl((OpusEncoder *)enc, OPUS_SET_PACKET_LOSS_PERC(5));
 	  // opus_encoder_ctl((OpusEncoder *)enc, OPUS_SET_INBAND_FEC(1));
 	  allocateInputBuffer();
@@ -168,6 +169,12 @@ JNIEXPORT void JNICALL Java_com_bsb_hike_voip_OpusWrapper_opus_1set_1bitrate
   (JNIEnv *je, jobject jo, jlong enc, jint bitrate) {
 	  opus_encoder_ctl((OpusEncoder *)(intptr_t)enc, OPUS_SET_BITRATE(bitrate));
 	  // LOGD("Encoder bitrate set to: %d ", bitrate);
+
+}
+
+JNIEXPORT void JNICALL Java_com_bsb_hike_voip_OpusWrapper_opus_1set_1complexity
+  (JNIEnv *je, jobject jo, jlong enc, jint complexity) {
+	  opus_encoder_ctl((OpusEncoder *)(intptr_t)enc, OPUS_SET_COMPLEXITY(complexity));
 
 }
 

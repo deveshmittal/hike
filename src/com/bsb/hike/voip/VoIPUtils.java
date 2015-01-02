@@ -122,6 +122,13 @@ public class VoIPUtils {
 
 		JSONObject jsonObject = new JSONObject();
 		JSONObject data = new JSONObject();
+		
+		if (duration == 0 && messageType == HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY) {
+			if (clientPartner.isInitiator())
+				messageType = HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING;
+			else
+				messageType = HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING;
+		}
 
 		try
 		{
@@ -144,5 +151,32 @@ public class VoIPUtils {
 			Logger.w(VoIPConstants.TAG, "addMessageToChatThread() JSONException: " + e.toString());
 		}    	
     }
+
+	public static void sendMissedCallNotificationToPartner(VoIPClient clientPartner) {
+
+		try {
+			JSONObject socketData = new JSONObject();
+			socketData.put("time", System.currentTimeMillis());
+			
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.MESSAGE_ID, new Random().nextInt(10000));
+			data.put(HikeConstants.TIMESTAMP, System.currentTimeMillis() / 1000); 
+			data.put(HikeConstants.METADATA, socketData);
+
+			JSONObject message = new JSONObject();
+			message.put(HikeConstants.TO, clientPartner.getPhoneNumber());
+			message.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_VOIP_1);
+			message.put(HikeConstants.SUB_TYPE, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING);
+			message.put(HikeConstants.DATA, data);
+			
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
+			Logger.d(VoIPConstants.TAG, "Sent missed call notifer to partner.");
+			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
+	}
     
 }

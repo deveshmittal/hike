@@ -1,24 +1,19 @@
 package com.bsb.hike.voip;
 
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-
 import android.util.Log;
 
-public class VoIPClient implements Serializable {		// TODO Remove serializable. Used in voipcaller currently to start activity
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1328034162596085555L;
+public class VoIPClient  {		
+	
 	private String phoneNumber;
 	private String internalIPAddress, externalIPAddress;
 	private int internalPort, externalPort;
 	private boolean initiator;
 	private ConnectionMethods preferredConnectionMethod = ConnectionMethods.UNKNOWN;
 	private InetAddress cachedInetAddress = null;
+	private String relayAddress;
 	
 	public enum ConnectionMethods {
 		UNKNOWN,
@@ -81,7 +76,7 @@ public class VoIPClient implements Serializable {		// TODO Remove serializable. 
 		else if (preferredConnectionMethod == ConnectionMethods.PUBLIC)
 			ip = getExternalIPAddress();
 		else
-			ip = VoIPConstants.ICEServerName;
+			ip = relayAddress;
 		return ip;
 	}
 	public int getPreferredPort() {
@@ -107,5 +102,13 @@ public class VoIPClient implements Serializable {		// TODO Remove serializable. 
 		// Log.d(VoIPActivity.logTag, "cached address: " + cachedInetAddress.toString());
 		return cachedInetAddress;
 	}
+
+	public String getRelayAddress() {
+		return relayAddress;
+	}
+	public void setRelayAddress(String relayAddress) {
+		this.relayAddress = relayAddress;
+	}
+
 }
 

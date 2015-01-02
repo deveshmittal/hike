@@ -20,6 +20,8 @@ import javax.crypto.spec.SecretKeySpec;
 import android.annotation.SuppressLint;
 import android.util.Log;
 
+import com.bsb.hike.utils.Logger;
+
 
 public class VoIPEncryptor {
 	private static final int RSA_KEY_SIZE = 2048;
@@ -115,6 +117,11 @@ public class VoIPEncryptor {
 
 	public byte[] rsaEncrypt(byte[] data, byte[] pubKey) {
 		
+		if (pubKey == null) {
+			Logger.e(VoIPConstants.TAG, "rsaEncrypt() called, but I have no public key.");
+			return null;
+		}
+
 		byte[] encryptedData = null;
 		
 		try {
@@ -191,6 +198,11 @@ public class VoIPEncryptor {
 
 	public byte[] aesDecrypt(byte[] data) {
 		byte[] decryptedData = null;
+		
+		if (sessionKey == null) {
+			Logger.e(VoIPConstants.TAG, "aesDecrypt() called, but I have no session key.");
+			return null;
+		}
 		
 		try {
 			if (aesKeySpec == null)

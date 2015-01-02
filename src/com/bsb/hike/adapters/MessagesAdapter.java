@@ -113,7 +113,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 {
 	private enum ViewType
 	{
-		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION, UNKNOWN_BLOCK_ADD, PIN_TEXT_SENT, PIN_TEXT_RECEIVE
+		STICKER_SENT, STICKER_RECEIVE, NUDGE_SENT, NUDGE_RECEIVE, WALKIE_TALKIE_SENT, WALKIE_TALKIE_RECEIVE, VIDEO_SENT, VIDEO_RECEIVE, IMAGE_SENT, IMAGE_RECEIVE, FILE_SENT, FILE_RECEIVE, LOCATION_SENT, LOCATION_RECEIVE, CONTACT_SENT, CONTACT_RECEIVE, RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, STATUS_MESSAGE, UNREAD_COUNT, TYPING_NOTIFICATION, UNKNOWN_BLOCK_ADD, PIN_TEXT_SENT, PIN_TEXT_RECEIVE,
+		VOIP_CALL_SUMMARY, VOIP_MISSED_CALL_OUTGOING, VOIP_MISSED_CALL_INCOMING;
+		
 	};
 
     private int viewTypeCount = ViewType.values().length;
@@ -237,6 +239,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		TextView messageInfo;
 
+	}
+	
+	private static class VoipInfoHolder extends DayHolder {
+		
+		ImageView image;
+		
+		TextView text;
+
+		TextView messageInfo;
 	}
 
 	private static class ParticipantInfoHolder extends DayHolder
@@ -581,6 +592,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		else if (convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE)
 		{
 			type = ViewType.STATUS_MESSAGE;
+		}
+		else if (convMessage.getParticipantInfoState() == ParticipantInfoState.VOIP_CALL_SUMMARY)
+		{
+			type = ViewType.VOIP_CALL_SUMMARY;
+		}
+		else if (convMessage.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING)
+		{
+			type = ViewType.VOIP_MISSED_CALL_INCOMING;
+		}
+		else if (convMessage.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING)
+		{
+			type = ViewType.VOIP_MISSED_CALL_OUTGOING;
 		}
 		else if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
@@ -1820,7 +1843,49 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				}
 			}
 		}
+		else if (viewType == ViewType.VOIP_CALL_SUMMARY || 
+				viewType == ViewType.VOIP_MISSED_CALL_OUTGOING ||
+				viewType == ViewType.VOIP_MISSED_CALL_INCOMING)
+		{
+			VoipInfoHolder infoHolder = null;
+			if (v == null) {
+				infoHolder = new VoipInfoHolder();
+				v = inflateView(R.layout.voip_info, null);
+				infoHolder.image = (ImageView) v.findViewById(R.id.voip_image);
+				infoHolder.text = (TextView) v.findViewById(R.id.voip_text);
+				infoHolder.messageInfo = (TextView) v.findViewById(R.id.timestamp);
+				v.setTag(infoHolder);
+			} else {
+				infoHolder = (VoipInfoHolder) v.getTag();
+			}
+			dayHolder = infoHolder;
+			
+			if (isDefaultTheme) {
+				infoHolder.text.setTextColor(context.getResources().getColor(R.color.list_item_subtext));
+				infoHolder.messageInfo.setTextColor(context.getResources().getColor(R.color.timestampcolor));
+			} else {
+				infoHolder.text.setTextColor(context.getResources().getColor(R.color.white));
+				infoHolder.messageInfo.setTextColor(context.getResources().getColor(R.color.white));
+			}
+			
+			int duration = metadata.getDuration();
+			boolean initiator = metadata.isVoipInitiator();
 
+			String message = null;
+			if (viewType == ViewType.VOIP_CALL_SUMMARY) {
+				message = context.getString(initiator ? R.string.voip_call_summary_outgoing : R.string.voip_call_summary_incoming);
+				message += String.format(" (%02d:%02d)", (duration / 60), (duration % 60));
+			} else if (viewType == ViewType.VOIP_MISSED_CALL_OUTGOING) {
+				String name = Utils.getFirstName(conversation.getLabel());
+				message = context.getString(R.string.voip_missed_call_outgoing, name);
+			} else if(viewType == ViewType.VOIP_MISSED_CALL_INCOMING) {
+				message = context.getString(R.string.voip_missed_call_incoming);
+			}
+			
+			infoHolder.text.setText(message);
+			infoHolder.messageInfo.setText(convMessage.getTimestampFormatted(true, context));
+			
+		}
 		else if (viewType == ViewType.STATUS_MESSAGE || viewType == ViewType.PIN_TEXT_SENT || viewType == ViewType.PIN_TEXT_RECEIVE)
 		{
 			StatusViewHolder statusHolder = null;
@@ -2150,38 +2215,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, name), isDefaultTheme ? R.drawable.ic_change_theme
 						: R.drawable.ic_change_theme_custom);
 
-				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
-			}
-			else if (infoState == ParticipantInfoState.VOIP_CALL_SUMMARY)
-			{
-				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
-
-				int duration = metadata.getDuration();
-				boolean initiator = metadata.isVoipInitiator();
-
-				String message = context.getString(initiator ? R.string.voip_call_summary_outgoing : R.string.voip_call_summary_incoming);
-				message += String.format(" (%02d:%02d)", (duration / 60), (duration % 60));
-
-				setTextAndIconForSystemMessages(mainMessage, message, R.drawable.ic_call);
-				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
-			}
-			else if (infoState == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING)
-			{
-				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
-
-				String message = context.getString(R.string.voip_missed_call_incoming);
-
-				setTextAndIconForSystemMessages(mainMessage, message, R.drawable.ic_call);
-				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
-			}
-			else if (infoState == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING)
-			{
-				TextView mainMessage = (TextView) inflater.inflate(layoutRes, null);
-				String name = Utils.getFirstName(conversation.getLabel());
-
-				String message = context.getString(R.string.voip_missed_call_outgoing, name);
-
-				setTextAndIconForSystemMessages(mainMessage, message, R.drawable.ic_call);
 				((ViewGroup) participantInfoHolder.container).addView(mainMessage);
 			}
 			dayHolder = participantInfoHolder;
