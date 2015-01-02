@@ -67,6 +67,7 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.voip.VoIPClient;
 import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPUtils;
@@ -2146,10 +2147,20 @@ public class MqttMessagesManager
 					i.putExtra("internalPort", metadataJSON.getInt("internalPort"));
 					i.putExtra("externalIP", metadataJSON.getString("externalIP"));
 					i.putExtra("externalPort", metadataJSON.getInt("externalPort"));
+					i.putExtra("relay", metadataJSON.getString("relay"));
+					i.putExtra("reconnecting", metadataJSON.getBoolean("reconnecting"));
 					i.putExtra("initiator", metadataJSON.getBoolean("initiator"));
 					i.putExtra("callId", metadataJSON.getInt("callId"));
 					context.startService(i);
 					return;
+				}
+				
+				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING)) {
+					Logger.d(VoIPConstants.TAG, "Adding a missed call to our chat history.");
+					VoIPClient clientPartner = new VoIPClient();
+					clientPartner.setPhoneNumber(jsonObj.getString(HikeConstants.FROM));
+					clientPartner.setInitiator(true);
+					VoIPUtils.addMessageToChatThread(context, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
 				}
 				
 				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_ERROR_CALLEE_INCOMPATIBLE_UPGRADABLE)) {

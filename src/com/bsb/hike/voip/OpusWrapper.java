@@ -14,7 +14,8 @@ public class OpusWrapper {
 	private native int opus_queue(byte[] stream);	
 	private native int opus_get_encoded_data(long encoder, int frameSize, byte[] output, int maxDataBytes);
 	private native void opus_set_bitrate(long encoder, int bitrate);
-	private native void opus_set_gain(long decoder, int bitrate);
+	private native void opus_set_gain(long decoder, int gain);
+	private native void opus_set_complexity(long encoder, int complexity);
 
 	private native long opus_decoder_create(int samplingRate, int channels, int errors);
 	private native void opus_decoder_destroy(long decoder);
@@ -47,6 +48,14 @@ public class OpusWrapper {
 		
 		opus_set_gain(decoder, gain);
 		Log.d(VoIPConstants.TAG, "Setting gain to: " + gain);
+	}
+	
+	public void setEncoderComplexity(int complexity) {
+		if (encoder == 0)
+			return;
+		
+		opus_set_complexity(encoder, complexity);
+		Log.d(VoIPConstants.TAG, "Setting complexity to: " + complexity);
 	}
 	
 	public int getDecoder(int samplingRate, int channels) {

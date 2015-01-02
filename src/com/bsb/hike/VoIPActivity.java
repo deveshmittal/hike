@@ -120,6 +120,8 @@ public class VoIPActivity extends Activity
 				showMessage("Connection established.");
 				break;
 			case MSG_AUDIO_START:
+				startCallDuration();
+				voipService.startChrono();
 				setConnectionStatus(ConnectionStatus.CALL_ESTABLISHED);
 				break;
 			case MSG_ENCRYPTION_INITIALIZED:
@@ -166,10 +168,6 @@ public class VoIPActivity extends Activity
 //				voipService.stop();
 				break;
 			case MSG_HANGUP:	// TODO in service
-				int seconds = 0;
-				if (callDuration != null)
-					seconds = (int) ((SystemClock.elapsedRealtime() - callDuration.getBase()) / 1000);
-				// VoIPUtils.addMessageToChatThread(VoIPActivity.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_CALL_SUMMARY, seconds);
 				break;
 			case MSG_RECONNECTING:
 				showMessage("Reconnecting..");
