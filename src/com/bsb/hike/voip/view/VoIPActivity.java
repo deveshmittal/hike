@@ -237,6 +237,13 @@ public class VoIPActivity extends Activity implements CallActions
 		}
 		
 		isRunning = false;
+
+		if(mGlowPadView!=null)
+		{
+			mGlowPadView.stopPing();
+			mGlowPadView = null;
+		}
+
 		Logger.w(VoIPConstants.TAG, "VoIPActivity onDestroy()");
 		super.onDestroy();
 	}
@@ -611,5 +618,7 @@ public class VoIPActivity extends Activity implements CallActions
 		mGlowPadView.startAnimation(anim);
 		
 		mGlowPadView.setCallActionsListener(this);
+		mGlowPadView.setAutoRepeat(true);
+		mGlowPadView.startPing();
 	}
 }

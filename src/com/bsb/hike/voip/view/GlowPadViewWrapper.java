@@ -17,6 +17,12 @@ public class GlowPadViewWrapper extends GlowPadView implements GlowPadView.OnTri
 
 	private String TAG = "VoIPGlowPad";
 
+	private final long PING_REPEAT_DELAY = 1500;
+
+	private boolean pingAutoRepeat;
+
+	private Handler pingHandler = new Handler();
+
 	public GlowPadViewWrapper(Context context) 
 	{
 		super(context);
@@ -39,16 +45,22 @@ public class GlowPadViewWrapper extends GlowPadView implements GlowPadView.OnTri
 		this.mCallActions = mCallActions;
 	}
 
+	public void setAutoRepeat(boolean val)
+	{
+		pingAutoRepeat = val;
+	}
+
 	@Override
 	public void onGrabbed(View v, int handle) {
 		Logger.d(TAG,"Call glow pad view - Grabbed");
+		stopPing();
 	}
 
 	@Override
 	public void onReleased(View v, int handle) 
 	{
 		Logger.d(TAG,"Call glow pad view - onRelease");
-		ping();
+		startPing();
 	}
 
 	@Override
@@ -74,4 +86,31 @@ public class GlowPadViewWrapper extends GlowPadView implements GlowPadView.OnTri
 	public void onFinishFinalAnimation() {
 		Logger.d(TAG,"Call glow pad view - Finish final anim");
 	}
+
+	public void stopPing()
+	{
+		Logger.d(TAG, "stopping Ping");
+		pingAutoRepeat = false;
+		pingHandler.removeCallbacks(pingRunnable);
+	}
+
+	public void startPing()
+	{
+		Logger.d(TAG, "starting ping, auto repeat:" + pingAutoRepeat);
+		ping();
+		if (pingAutoRepeat)
+		{
+			pingHandler.postDelayed(pingRunnable, PING_REPEAT_DELAY);
+		}
+	}
+
+	Runnable pingRunnable = new Runnable()
+	{
+		@Override
+		public void run()
+		{
+			startPing();
+		}
+	};
+
 }
