@@ -5,8 +5,8 @@ import android.util.Log;
 
 public class OpusWrapper {
 	
-	public static long encoder = 0;
-	public static long decoder = 0;
+	private static long encoder = 0;
+	private static long decoder = 0;
 	public static final int OPUS_FRAME_SIZE = 2880; // permitted values are 120, 240, 480, 960, 1920, and 2880
 
 	private native long opus_encoder_create(int samplingRate, int channels, int errors);
