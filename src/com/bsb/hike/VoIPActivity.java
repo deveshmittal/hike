@@ -334,9 +334,22 @@ public class VoIPActivity extends Activity
 		releaseWakeLock();
 
 		isRunning = false;
-		finish();
 
 		showCallEnded();
+
+		if(callDuration!=null)
+		{
+			callDuration.stop();
+		}
+
+		new Handler().postDelayed(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				finish();
+			}
+		}, 600);
 	}
 
 	private void saveCurrentAudioSettings() {
