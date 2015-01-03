@@ -1,26 +1,18 @@
-package com.bsb.hike;
+package com.bsb.hike.voip.view;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
-import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -30,31 +22,29 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.os.Vibrator;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
-import android.view.DragEvent;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.RotateAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Chronometer;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bsb.hike.R;
+import com.bsb.hike.R.dimen;
+import com.bsb.hike.R.drawable;
+import com.bsb.hike.R.id;
+import com.bsb.hike.R.layout;
+import com.bsb.hike.R.string;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 import com.bsb.hike.smartImageLoader.VoipProfilePicImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.Logger;
@@ -62,10 +52,9 @@ import com.bsb.hike.voip.VoIPClient;
 import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPService.LocalBinder;
-import com.bsb.hike.voip.VoIPUtils;
 import com.fima.glowpadview.GlowPadView;
 
-public class VoIPActivity extends Activity
+public class VoIPActivity extends Activity implements CallActions
 {
 
 	static final int PROXIMITY_SCREEN_OFF_WAKELOCK = 32;
@@ -74,7 +63,7 @@ public class VoIPActivity extends Activity
 	private VoIPService voipService;
 	// private VoIPClient clientSelf = new VoIPClient(), clientPartner = new VoIPClient();
 	private boolean isBound = false;
-	private boolean mute = false, speaker = false;
+	private boolean hold, mute, speaker;
 	private final Messenger mMessenger = new Messenger(new IncomingHandler());
 	private int initialAudioMode, initialRingerMode;
 	private boolean initialSpeakerMode;
@@ -82,11 +71,6 @@ public class VoIPActivity extends Activity
 	private WakeLock proximityWakeLock;
 	private SensorManager sensorManager;
 	private float proximitySensorMaximumRange;
-
-	private enum ConnectionStatus
-	{
-		INCOMING_RINGING, OUTGOING_RINGING, CALL_ESTABLISHED
-	}
 
 	public static final int MSG_SHUTDOWN_ACTIVITY = 1;
 	public static final int MSG_CONNECTION_ESTABLISHED = 2;
@@ -103,7 +87,7 @@ public class VoIPActivity extends Activity
 	public static final int MSG_RECONNECTING = 15;
 	public static final int MSG_RECONNECTED = 16;
 
-	private GlowPadView mGlowPadView;
+	private GlowPadViewWrapper mGlowPadView;
 	private Chronometer callDuration;
 
 	@SuppressLint("HandlerLeak") class IncomingHandler extends Handler {
@@ -121,8 +105,6 @@ public class VoIPActivity extends Activity
 				break;
 			case MSG_AUDIO_START:
 				startCallDuration();
-				voipService.startChrono();
-				setConnectionStatus(ConnectionStatus.CALL_ESTABLISHED);
 				break;
 			case MSG_ENCRYPTION_INITIALIZED:
 				showMessage("Encryption initialized.");
@@ -251,6 +233,13 @@ public class VoIPActivity extends Activity
 		}
 		
 		isRunning = false;
+
+		if(mGlowPadView!=null)
+		{
+			mGlowPadView.stopPing();
+			mGlowPadView = null;
+		}
+
 		Logger.w(VoIPConstants.TAG, "VoIPActivity onDestroy()");
 		super.onDestroy();
 	}
@@ -356,8 +345,22 @@ public class VoIPActivity extends Activity
 		releaseWakeLock();
 
 		isRunning = false;
-		
-		finish();
+
+		showCallEnded();
+
+		if(callDuration!=null)
+		{
+			callDuration.stop();
+		}
+
+		new Handler().postDelayed(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				finish();
+			}
+		}, 600);
 	}
 
 	private void saveCurrentAudioSettings() {
@@ -458,7 +461,6 @@ public class VoIPActivity extends Activity
 		setAvatar();
 		setContactDetails();
 		showActiveCallLayout();
-		setConnectionStatus(ConnectionStatus.OUTGOING_RINGING);
 	}
 
 	private void setupCalleeLayout()
@@ -466,61 +468,19 @@ public class VoIPActivity extends Activity
 		setAvatar();
 		setContactDetails();
 		showCallGlowPad();
-		setConnectionStatus(ConnectionStatus.INCOMING_RINGING);	
-
-		mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
-		mGlowPadView.setOnTriggerListener(new CallGlowPadViewListener());
 	}
 
-	class CallGlowPadViewListener implements GlowPadView.OnTriggerListener
+	@Override
+	public void acceptCall()
 	{
-
-		@Override
-		public void onGrabbed(View v, int handle) {
-			Logger.d(VoIPConstants.TAG,"Call glow pad view - Grabbed");
-		}
-
-		@Override
-		public void onReleased(View v, int handle) 
-		{
-			Logger.d(VoIPConstants.TAG,"Call glow pad view - onRelease");
-			mGlowPadView.ping();	
-		}
-
-		@Override
-		public void onTrigger(View v, int target) 
-		{
-			int resId = mGlowPadView.getResourceIdForTarget(target);
-			if(resId == R.drawable.ic_item_call_hang)
-			{
-				declineCall();
-			}
-			else if(resId == R.drawable.ic_item_call_pick)
-			{
-				acceptCall();
-			}
-		}
-
-		@Override
-		public void onGrabbedStateChange(View v, int handle) {
-			Logger.d(VoIPConstants.TAG,"Call glow pad view - Grabbed state changed");
-		}
-
-		@Override
-		public void onFinishFinalAnimation() {
-			Logger.d(VoIPConstants.TAG,"Call glow pad view - Finish final anim");
-		}
-		
-	}
-
-	private void acceptCall()
-	{
+		Logger.d("deepanshu","in voip");
 		Logger.d(VoIPConstants.TAG, "Accepted call, starting audio...");
 		voipService.acceptIncomingCall();
 		showActiveCallLayout();
 	}
 
-	private void declineCall()
+	@Override
+	public void declineCall()
 	{
 		Logger.d(VoIPConstants.TAG, "Declined call, rejecting...");
 		voipService.rejectIncomingCall();
@@ -538,7 +498,6 @@ public class VoIPActivity extends Activity
 
 		findViewById(R.id.hang_up_btn).startAnimation(anim);
 		findViewById(R.id.mute_btn).startAnimation(anim);
-		findViewById(R.id.hide_btn).startAnimation(anim);
 		findViewById(R.id.hold_btn).startAnimation(anim);
 		findViewById(R.id.speaker_btn).startAnimation(anim);
 		
@@ -556,24 +515,40 @@ public class VoIPActivity extends Activity
 			}
 		});
 
-		findViewById(R.id.mute_btn).setOnClickListener(new OnClickListener() 
+		final ImageButton muteButton = (ImageButton) findViewById(R.id.mute_btn);
+		muteButton.setOnClickListener(new OnClickListener() 
 		{
 			@Override
 			public void onClick(View v) 
 			{
 				mute = !mute;
+				muteButton.setSelected(mute);
 				voipService.setMute(mute);
 			}
 		});
 
-		findViewById(R.id.speaker_btn).setOnClickListener(new OnClickListener() 
+		final ImageButton speakerButton = (ImageButton) findViewById(R.id.speaker_btn);
+		speakerButton.setOnClickListener(new OnClickListener() 
 		{
 			@Override
 			public void onClick(View v) 
 			{				
 				speaker = !speaker;
+				speakerButton.setSelected(speaker);
 				AudioManager audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 				audiomanager.setSpeakerphoneOn(speaker);
+			}
+		});
+
+		final ImageButton holdButton = (ImageButton) findViewById(R.id.hold_btn);
+		holdButton.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				hold = !hold;
+				holdButton.setSelected(hold);
+				voipService.setHold(hold);
 			}
 		});
 	}
@@ -590,25 +565,10 @@ public class VoIPActivity extends Activity
 		callDuration.start();
 	}
 
-	private void setConnectionStatus(ConnectionStatus id)
+	private void showCallEnded()
 	{
 		final TextView connStatus = (TextView) findViewById(R.id.connection_status);
-		String text = "";
-		if(id == ConnectionStatus.INCOMING_RINGING)
-		{
-			text = getString(R.string.voip_incoming_call);
-			connStatus.setText(text);
-		}
-		else if(id == ConnectionStatus.OUTGOING_RINGING)
-		{
-			text = getString(R.string.voip_ringing);
-			connStatus.setText(text);
-		}
-		else
-		{
-			connStatus.setVisibility(View.GONE);
-			startCallDuration();
-		}		
+		connStatus.setText(getString(R.string.voip_call_ended));
 	}
 
 	public void setAvatar()
@@ -630,12 +590,12 @@ public class VoIPActivity extends Activity
 
 		VoIPClient clientPartner = voipService.getPartnerClient();
 		ContactInfo contactInfo = ContactManager.getInstance().getContact(clientPartner.getPhoneNumber());
-		String name = contactInfo.getNameOrMsisdn();
-		if(name.length() > 16)
+		String nameOrMsisdn = contactInfo.getNameOrMsisdn();
+		if(nameOrMsisdn.length() > 16)
 		{
 			contactNameView.setTextSize(24);
 		}
-		contactNameView.setText(name);
+		contactNameView.setText(nameOrMsisdn);
 
 		if(contactInfo.getName() != null)
 		{
@@ -646,13 +606,17 @@ public class VoIPActivity extends Activity
 	
 	public void showCallGlowPad()
 	{
-		View callGlowPadView = findViewById(R.id.glow_pad_view);
+		mGlowPadView = (GlowPadViewWrapper)findViewById(R.id.glow_pad_view);
 
 		TranslateAnimation anim = new TranslateAnimation(0, 0.0f, 0, 0.0f, Animation.RELATIVE_TO_PARENT, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
 		anim.setDuration(1500);
 		anim.setInterpolator(new DecelerateInterpolator(4f));
 
-		callGlowPadView.setVisibility(View.VISIBLE);
-		callGlowPadView.startAnimation(anim);
+		mGlowPadView.setVisibility(View.VISIBLE);
+		mGlowPadView.startAnimation(anim);
+		
+		mGlowPadView.setCallActionsListener(this);
+		mGlowPadView.setAutoRepeat(true);
+		mGlowPadView.startPing();
 	}
 }
