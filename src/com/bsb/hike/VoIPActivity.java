@@ -2,25 +2,17 @@ package com.bsb.hike;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
-import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -30,31 +22,23 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.os.Vibrator;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
-import android.view.DragEvent;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.RotateAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Chronometer;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
 import com.bsb.hike.smartImageLoader.VoipProfilePicImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.Logger;
@@ -62,7 +46,6 @@ import com.bsb.hike.voip.VoIPClient;
 import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPService.LocalBinder;
-import com.bsb.hike.voip.VoIPUtils;
 import com.fima.glowpadview.GlowPadView;
 
 public class VoIPActivity extends Activity
@@ -74,7 +57,7 @@ public class VoIPActivity extends Activity
 	private VoIPService voipService;
 	// private VoIPClient clientSelf = new VoIPClient(), clientPartner = new VoIPClient();
 	private boolean isBound = false;
-	private boolean mute = false, speaker = false;
+	private boolean hold, mute, speaker;
 	private final Messenger mMessenger = new Messenger(new IncomingHandler());
 	private int initialAudioMode, initialRingerMode;
 	private boolean initialSpeakerMode;
@@ -538,7 +521,6 @@ public class VoIPActivity extends Activity
 
 		findViewById(R.id.hang_up_btn).startAnimation(anim);
 		findViewById(R.id.mute_btn).startAnimation(anim);
-		findViewById(R.id.hide_btn).startAnimation(anim);
 		findViewById(R.id.hold_btn).startAnimation(anim);
 		findViewById(R.id.speaker_btn).startAnimation(anim);
 		
@@ -556,24 +538,40 @@ public class VoIPActivity extends Activity
 			}
 		});
 
-		findViewById(R.id.mute_btn).setOnClickListener(new OnClickListener() 
+		final ImageButton muteButton = (ImageButton) findViewById(R.id.mute_btn);
+		muteButton.setOnClickListener(new OnClickListener() 
 		{
 			@Override
 			public void onClick(View v) 
 			{
 				mute = !mute;
+				muteButton.setSelected(mute);
 				voipService.setMute(mute);
 			}
 		});
 
-		findViewById(R.id.speaker_btn).setOnClickListener(new OnClickListener() 
+		final ImageButton speakerButton = (ImageButton) findViewById(R.id.speaker_btn);
+		speakerButton.setOnClickListener(new OnClickListener() 
 		{
 			@Override
 			public void onClick(View v) 
 			{				
 				speaker = !speaker;
+				speakerButton.setSelected(speaker);
 				AudioManager audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 				audiomanager.setSpeakerphoneOn(speaker);
+			}
+		});
+
+		final ImageButton holdButton = (ImageButton) findViewById(R.id.hold_btn);
+		holdButton.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				hold = !hold;
+				holdButton.setSelected(hold);
+				voipService.setHold(hold);
 			}
 		});
 	}

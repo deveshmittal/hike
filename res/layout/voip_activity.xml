@@ -92,83 +92,52 @@
 	        android:layout_below="@id/voip_header"
 	        android:scaleType="centerCrop" />
 
-		<LinearLayout
+
+		<RelativeLayout
 		    android:id="@+id/active_call_group"
 		    android:orientation="horizontal"
 		    android:layout_width="match_parent"
 		    android:layout_height="72dp"
-		    android:gravity="center_vertical"
-		    android:weightSum="548"
+		    android:gravity="center"
 		    android:background="@color/black_90"
 		    android:layout_alignParentBottom="true"
 		    android:visibility="gone">
-
-		    <View
-				android:layout_width="0dp"
-				android:layout_height="1dp"
-				android:layout_weight="96" >
-    		</View>
     		
     		<ImageButton
 		        android:id="@+id/mute_btn"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
+		        android:scaleType="centerInside"
+		        android:padding="7dp"
 		        android:background="@null"
-		        android:layout_gravity="center_vertical"
-		        android:src="@drawable/ic_mute">
+		        android:layout_alignParentLeft="true"
+		        android:layout_marginLeft="48dp"
+		        android:src="@drawable/voip_mute_btn_selector">
 		    </ImageButton>
-		    
-		    <View
-        		android:layout_width="0dp"
-        		android:layout_height="1dp"
-        		android:layout_weight="110" >
-    		</View>
-
-		    <ImageButton
-		        android:id="@+id/hide_btn"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:background="@null"
-		        android:layout_gravity="center_vertical"
-		        android:src="@drawable/ic_hide">
-		    </ImageButton>
-		    
-		    <View
-		        android:layout_width="0dp"
-		        android:layout_height="1dp"
-		        android:layout_weight="122" >
-		    </View>
 		    
 		     <ImageButton
 		        android:id="@+id/hold_btn"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
+		        android:scaleType="centerInside"
+		        android:padding="7dp"
 		        android:background="@null"
-		        android:layout_gravity="center_vertical"
-		        android:src="@drawable/ic_hold">
+		        android:layout_centerHorizontal="true"
+		        android:src="@drawable/voip_hold_btn_selector">
 		    </ImageButton>
-		    
-		    <View
-		        android:layout_width="0dp"
-		        android:layout_height="1dp"
-		        android:layout_weight="124" >
-		    </View>
 		    
 		    <ImageButton
 		        android:id="@+id/speaker_btn"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:background="@null"
-		        android:layout_gravity="center_vertical"
-		        android:src="@drawable/ic_speaker">
+		        android:padding="7dp"
+		        android:scaleType="centerInside"
+		        android:layout_alignParentRight="true"
+		        android:layout_marginRight="48dp"
+		        android:src="@drawable/voip_speaker_selector">
 		    </ImageButton>
-		    
-		    <View
-				android:layout_width="0dp"
-				android:layout_height="1dp"
-				android:layout_weight="96" >
-    		</View>
-		</LinearLayout>
+		</RelativeLayout>
 
 		<ImageButton
 			android:id="@+id/hang_up_btn"
