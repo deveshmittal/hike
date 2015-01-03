@@ -5,15 +5,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.smartImageLoader.ProfilePicImageLoader;
+import com.bsb.hike.utils.Utils;
+import com.google.android.gms.plus.model.people.Person.Image;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -82,6 +90,10 @@ public class HorizontalFriendsFragment extends Fragment {
     		LayoutInflater inf = getLayoutInflater(null);
         	View py = inf.inflate(R.layout.friends_horizontal_item,null);
         	TextView tv = (TextView)py.findViewById(R.id.msisdn);
+        	ImageView iv = (ImageView ) py.findViewById(R.id.profile_image);
+        	// (new ProfilePicImageLoader(getActivity(), 94)).loadImage(contactInfo.getMsisdn(), iv, false, true, false);
+        	Bitmap tempBitmap = HikeBitmapFactory.scaleDownBitmap(Utils.getProfileImageFileName(contactInfo.getMsisdn()), HikeConstants.PROFILE_IMAGE_DIMENSIONS, HikeConstants.PROFILE_IMAGE_DIMENSIONS, true, true);
+        	iv.setImageDrawable(ContactManager.getInstance().getIcon(contactInfo.getMsisdn(),true));
         	tv.setText(contactInfo.getFirstName());
     		linearViews.put(contactInfo,py);
     		ll.addView(py);

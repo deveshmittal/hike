@@ -3,8 +3,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical" 
-    android:padding="10dp"
-    android:background="#aaaaaa">
+    android:padding="5dp">
     
      <FrameLayout
             android:id="@+id/avatar_container"
@@ -15,7 +14,7 @@
             
             <ImageView 
                 android:layout_width="94dp"
-                android:layout_height="94dp"
+                android:layout_height="94dp" 
                 android:src="@drawable/avatar_stroke"/>
             
         <com.bsb.hike.ui.utils.RecyclingImageView
@@ -23,15 +22,18 @@
             android:layout_width="92dp"
             android:layout_height="92dp"
             android:contentDescription="Profile Image"
-            android:layout_gravity="center"
-            
-            android:src="@drawable/ic_default_avatar_group" />
+            android:layout_gravity="center"     
+            android:src="@drawable/question_mark" />
+        
         </FrameLayout>
  
     <TextView 
         android:id="@+id/msisdn"
-        android:layout_width="wrap_content"
+        android:layout_marginTop="5dp"
+        android:singleLine="true"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="asjkd]l"/>
+        android:gravity="center"
+        android:text="as "/> 
 
 </LinearLayout>

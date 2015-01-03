@@ -213,7 +213,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 
 		if(nuxIncentiveMode){
-			getSupportActionBar().hide();
+			getSupportActionBar().show();
 		}
 		else{
 			setActionBar();
