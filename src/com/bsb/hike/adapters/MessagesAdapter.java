@@ -1854,6 +1854,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				infoHolder.image = (ImageView) v.findViewById(R.id.voip_image);
 				infoHolder.text = (TextView) v.findViewById(R.id.voip_text);
 				infoHolder.messageInfo = (TextView) v.findViewById(R.id.timestamp);
+				infoHolder.dayStub = (ViewStub) v.findViewById(R.id.day_stub);
 				v.setTag(infoHolder);
 			} else {
 				infoHolder = (VoipInfoHolder) v.getTag();

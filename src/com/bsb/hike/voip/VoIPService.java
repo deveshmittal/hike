@@ -47,6 +47,7 @@ import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Chronometer;
 
+import com.bsb.hike.GCMIntentService;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -80,7 +81,7 @@ public class VoIPService extends Service {
 	private DatagramSocket socket = null;
 	private VoIPClient clientPartner = null, clientSelf = null;
 	private BitSet packetTrackingBits = new BitSet(PACKET_TRACKING_SIZE);
-	private Date lastHeartbeat;
+	private long lastHeartbeat;
 	private int totalBytesSent = 0, totalBytesReceived = 0, rawVoiceSent = 0;
 	private VoIPEncryptor encryptor = new VoIPEncryptor();
 	private VoIPEncryptor.EncryptionStage encryptionStage = EncryptionStage.STAGE_INITIAL;
@@ -90,6 +91,7 @@ public class VoIPService extends Service {
 	private int minBufSizePlayback;
 	private int gain = 0;
 	private OpusWrapper opusWrapper;
+	private SpeexDSPWrapper speexDspWrapper;
 	private Thread partnerTimeoutThread = null;
 	private Thread recordingThread = null, playbackThread = null, sendingThread = null, receivingThread = null;
 	private AudioTrack audioTrack;
@@ -102,6 +104,7 @@ public class VoIPService extends Service {
 	private boolean socketInfoSent = false, socketInfoReceived = false;
 	private int reconnectAttempts = 0;
 	private Chronometer chronometer;
+	private int outputSampleRate = 0;
 
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToDecodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToEncodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
@@ -141,6 +144,9 @@ public class VoIPService extends Service {
 		showNotification();
 		AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 		
+		outputSampleRate = AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_VOICE_CALL);
+		Logger.d(VoIPConstants.TAG, "Native playback sample rate: " + outputSampleRate);
+
 		if (android.os.Build.VERSION.SDK_INT >= 17) {
 			String rate = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
 			String size = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
@@ -396,18 +402,20 @@ public class VoIPService extends Service {
 		}
 		
 		Logger.d(VoIPConstants.TAG, "VoIPService stop()");
-		keepRunning = false;
-		connected = false;
-		setCallid(0);
-		chronometer = null;
 		
 		sendHandlerMessage(VoIPActivity.MSG_SHUTDOWN_ACTIVITY);
 		Logger.d(VoIPConstants.TAG, "Bytes sent / received: " + totalBytesSent + " / " + totalBytesReceived +
 				"\nPackets sent / received: " + totalPacketsSent + " / " + totalPacketsReceived +
 				"\nPure voice bytes: " + rawVoiceSent +
 				"\nDropped decoded packets: " + droppedDecodedPackets +
-				"\nReconnect attempts: " + reconnectAttempts);
+				"\nReconnect attempts: " + reconnectAttempts +
+				"\nCall duration: " + getCallDuration());
 		
+		keepRunning = false;
+		connected = false;
+		setCallid(0);
+		chronometer = null;
+
 		if (partnerTimeoutThread != null)
 			partnerTimeoutThread.interrupt();
 
@@ -415,6 +423,12 @@ public class VoIPService extends Service {
 		tg.startTone(ToneGenerator.TONE_CDMA_PIP);
 		stopMediaPlayer();
 		releaseAudioManager();
+		
+		if (opusWrapper != null)
+			opusWrapper.destroy();
+		if (speexDspWrapper != null)
+			speexDspWrapper.destroyResampler();
+		
 		stopSelf();
 	}
 	
@@ -505,10 +519,9 @@ public class VoIPService extends Service {
 			
 			@Override
 			public void run() {
-				lastHeartbeat = new Date();
+				lastHeartbeat = System.currentTimeMillis();
 				while (keepRunning == true) {
-					Date currentDate = new Date();
-					if (currentDate.getTime() - lastHeartbeat.getTime() > HEARTBEAT_TIMEOUT && !reconnecting) {
+					if (System.currentTimeMillis() - lastHeartbeat > HEARTBEAT_TIMEOUT && !reconnecting) {
 						// Logger.w(VoIPConstants.TAG, "Heartbeat failure. Reconnecting.. ");
 						if (clientSelf.isInitiator() && isConnected() && isAudioRunning())
 							reconnect();
@@ -516,7 +529,7 @@ public class VoIPService extends Service {
 							hangUp();
 					}
 					
-					if (currentDate.getTime() - lastHeartbeat.getTime() > HEARTBEAT_HARD_TIMEOUT) {
+					if (System.currentTimeMillis() - lastHeartbeat > HEARTBEAT_HARD_TIMEOUT) {
 						Logger.d(VoIPConstants.TAG, "Giving up on connection.");
 						hangUp();
 						break;
@@ -567,6 +580,9 @@ public class VoIPService extends Service {
 			Logger.e(VoIPConstants.TAG, "Codec exception: " + e.toString());
 		}
 		
+//		speexDspWrapper = new SpeexDSPWrapper();
+//		speexDspWrapper.createResampler(48000, 44100, 1);
+		
 		startCodecDecompression();
 		startCodecCompression();
 		
@@ -610,6 +626,7 @@ public class VoIPService extends Service {
 									VoIPDataPacket dp = new VoIPDataPacket(PacketType.VOICE_PACKET);
 									dp.write(uncompressedData);
 									dp.setLength(uncompressedLength);
+									
 									synchronized (decodedBuffersQueue) {
 										decodedBuffersQueue.add(dp);
 										decodedBuffersQueue.notify();
@@ -629,10 +646,19 @@ public class VoIPService extends Service {
 								// We have a decoded packet
 								lastPacketReceived = dpdecode.getVoicePacketNumber();
 
-								byte[] packetData = new byte[uncompressedLength];
-								System.arraycopy(uncompressedData, 0, packetData, 0, uncompressedLength);
 								VoIPDataPacket dp = new VoIPDataPacket(PacketType.VOICE_PACKET);
-								dp.write(packetData);
+
+								if (outputSampleRate != AUDIO_SAMPLE_RATE && speexDspWrapper != null) {
+									// We need to resample the output signal
+									byte[] output = new byte[uncompressedLength * outputSampleRate / AUDIO_SAMPLE_RATE];
+									speexDspWrapper.resample(uncompressedData, uncompressedLength / 2, output, output.length / 2);
+									dp.write(output);
+								} else {
+									byte[] packetData = new byte[uncompressedLength];
+									System.arraycopy(uncompressedData, 0, packetData, 0, uncompressedLength);
+									dp.write(packetData);
+								}
+								
 								synchronized (decodedBuffersQueue) {
 									decodedBuffersQueue.add(dp);
 									decodedBuffersQueue.notify();
@@ -862,9 +888,9 @@ public class VoIPService extends Service {
 
 				android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 				int index = 0, size = 0;
-				minBufSizePlayback = AudioTrack.getMinBufferSize(AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
+				minBufSizePlayback = AudioTrack.getMinBufferSize(outputSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
 				Logger.d(VoIPConstants.TAG, "minBufSizePlayback: " + minBufSizePlayback);
-				audioTrack = new AudioTrack(AudioManager.STREAM_VOICE_CALL, AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, minBufSizePlayback, AudioTrack.MODE_STREAM);
+				audioTrack = new AudioTrack(AudioManager.STREAM_VOICE_CALL, outputSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, minBufSizePlayback, AudioTrack.MODE_STREAM);
 				
 				// Audiotrack monitor
 				audioTrack.setPlaybackPositionUpdateListener(new OnPlaybackPositionUpdateListener() {
@@ -1021,6 +1047,8 @@ public class VoIPService extends Service {
 						continue;
 					}
 					
+					lastHeartbeat = System.currentTimeMillis();
+
 					switch (dataPacket.getType()) {
 					case VOICE_PACKET:
 						if (dataPacket.isEncrypted()) {
@@ -1037,7 +1065,7 @@ public class VoIPService extends Service {
 						
 					case HEARTBEAT:
 						// Logger.d(VoIPConstants.TAG, "Received heartbeat.");
-						lastHeartbeat = new Date();
+						lastHeartbeat = System.currentTimeMillis();
 						break;
 						
 					case ACK:
@@ -1667,7 +1695,7 @@ public class VoIPService extends Service {
 				}
 				if (reconnecting) {
 					// Give the heartbeat a chance to recover
-					lastHeartbeat = new Date(new Date().getTime() + 5000);
+					lastHeartbeat = System.currentTimeMillis() + 5000;
 					startSendingAndReceiving();
 					reconnecting = false;
 				}
@@ -1730,7 +1758,5 @@ public class VoIPService extends Service {
 		}
 	}
 
-	
-	
 }
 
