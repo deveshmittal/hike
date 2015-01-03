@@ -354,7 +354,7 @@
         </receiver>
 
         <activity
-            android:name=".VoIPActivity"
+            android:name=".voip.view.VoIPActivity"
             android:theme="@style/TranslucentBlack"
             android:launchMode="singleTask"
             android:label="@string/title_activity_vo_ip" >

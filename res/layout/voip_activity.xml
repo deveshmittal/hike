@@ -149,7 +149,7 @@
 			android:visibility="gone">
 		</ImageButton>
 
-		<com.fima.glowpadview.GlowPadView
+		<com.bsb.hike.voip.view.GlowPadViewWrapper
 			android:id="@+id/glow_pad_view"
 			android:visibility="gone"
 			android:layout_width="wrap_content"

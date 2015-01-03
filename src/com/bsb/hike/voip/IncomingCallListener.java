@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.bsb.hike.VoIPActivity;
+import com.bsb.hike.voip.view.VoIPActivity;
 
 public class IncomingCallListener extends BroadcastReceiver {
 

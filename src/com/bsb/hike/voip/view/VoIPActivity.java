@@ -1,4 +1,4 @@
-package com.bsb.hike;
+package com.bsb.hike.voip.view;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -37,6 +37,12 @@ import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bsb.hike.R;
+import com.bsb.hike.R.dimen;
+import com.bsb.hike.R.drawable;
+import com.bsb.hike.R.id;
+import com.bsb.hike.R.layout;
+import com.bsb.hike.R.string;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.VoipProfilePicImageLoader;
@@ -48,7 +54,7 @@ import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPService.LocalBinder;
 import com.fima.glowpadview.GlowPadView;
 
-public class VoIPActivity extends Activity
+public class VoIPActivity extends Activity implements CallActions
 {
 
 	static final int PROXIMITY_SCREEN_OFF_WAKELOCK = 32;
@@ -81,7 +87,7 @@ public class VoIPActivity extends Activity
 	public static final int MSG_RECONNECTING = 15;
 	public static final int MSG_RECONNECTED = 16;
 
-	private GlowPadView mGlowPadView;
+	private GlowPadViewWrapper mGlowPadView;
 	private Chronometer callDuration;
 
 	@SuppressLint("HandlerLeak") class IncomingHandler extends Handler {
@@ -457,60 +463,19 @@ public class VoIPActivity extends Activity
 		setAvatar();
 		setContactDetails();
 		showCallGlowPad();
-
-		mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
-		mGlowPadView.setOnTriggerListener(new CallGlowPadViewListener());
 	}
 
-	class CallGlowPadViewListener implements GlowPadView.OnTriggerListener
+	@Override
+	public void acceptCall()
 	{
-
-		@Override
-		public void onGrabbed(View v, int handle) {
-			Logger.d(VoIPConstants.TAG,"Call glow pad view - Grabbed");
-		}
-
-		@Override
-		public void onReleased(View v, int handle) 
-		{
-			Logger.d(VoIPConstants.TAG,"Call glow pad view - onRelease");
-			mGlowPadView.ping();	
-		}
-
-		@Override
-		public void onTrigger(View v, int target) 
-		{
-			int resId = mGlowPadView.getResourceIdForTarget(target);
-			if(resId == R.drawable.ic_item_call_hang)
-			{
-				declineCall();
-			}
-			else if(resId == R.drawable.ic_item_call_pick)
-			{
-				acceptCall();
-			}
-		}
-
-		@Override
-		public void onGrabbedStateChange(View v, int handle) {
-			Logger.d(VoIPConstants.TAG,"Call glow pad view - Grabbed state changed");
-		}
-
-		@Override
-		public void onFinishFinalAnimation() {
-			Logger.d(VoIPConstants.TAG,"Call glow pad view - Finish final anim");
-		}
-		
-	}
-
-	private void acceptCall()
-	{
+		Logger.d("deepanshu","in voip");
 		Logger.d(VoIPConstants.TAG, "Accepted call, starting audio...");
 		voipService.acceptIncomingCall();
 		showActiveCallLayout();
 	}
 
-	private void declineCall()
+	@Override
+	public void declineCall()
 	{
 		Logger.d(VoIPConstants.TAG, "Declined call, rejecting...");
 		voipService.rejectIncomingCall();
@@ -636,13 +601,15 @@ public class VoIPActivity extends Activity
 	
 	public void showCallGlowPad()
 	{
-		View callGlowPadView = findViewById(R.id.glow_pad_view);
+		mGlowPadView = (GlowPadViewWrapper)findViewById(R.id.glow_pad_view);
 
 		TranslateAnimation anim = new TranslateAnimation(0, 0.0f, 0, 0.0f, Animation.RELATIVE_TO_PARENT, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
 		anim.setDuration(1500);
 		anim.setInterpolator(new DecelerateInterpolator(4f));
 
-		callGlowPadView.setVisibility(View.VISIBLE);
-		callGlowPadView.startAnimation(anim);
+		mGlowPadView.setVisibility(View.VISIBLE);
+		mGlowPadView.startAnimation(anim);
+		
+		mGlowPadView.setCallActionsListener(this);
 	}
 }
