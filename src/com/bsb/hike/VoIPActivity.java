@@ -66,11 +66,6 @@ public class VoIPActivity extends Activity
 	private SensorManager sensorManager;
 	private float proximitySensorMaximumRange;
 
-	private enum ConnectionStatus
-	{
-		INCOMING_RINGING, OUTGOING_RINGING, CALL_ESTABLISHED
-	}
-
 	public static final int MSG_SHUTDOWN_ACTIVITY = 1;
 	public static final int MSG_CONNECTION_ESTABLISHED = 2;
 	public static final int MSG_AUDIO_START = 3;
@@ -103,7 +98,7 @@ public class VoIPActivity extends Activity
 				showMessage("Connection established.");
 				break;
 			case MSG_AUDIO_START:
-				setConnectionStatus(ConnectionStatus.CALL_ESTABLISHED);
+				startCallDuration();
 				break;
 			case MSG_ENCRYPTION_INITIALIZED:
 				showMessage("Encryption initialized.");
@@ -339,8 +334,9 @@ public class VoIPActivity extends Activity
 		releaseWakeLock();
 
 		isRunning = false;
-		
 		finish();
+
+		showCallEnded();
 	}
 
 	private void saveCurrentAudioSettings() {
@@ -441,7 +437,6 @@ public class VoIPActivity extends Activity
 		setAvatar();
 		setContactDetails();
 		showActiveCallLayout();
-		setConnectionStatus(ConnectionStatus.OUTGOING_RINGING);
 	}
 
 	private void setupCalleeLayout()
@@ -449,7 +444,6 @@ public class VoIPActivity extends Activity
 		setAvatar();
 		setContactDetails();
 		showCallGlowPad();
-		setConnectionStatus(ConnectionStatus.INCOMING_RINGING);	
 
 		mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
 		mGlowPadView.setOnTriggerListener(new CallGlowPadViewListener());
@@ -588,25 +582,10 @@ public class VoIPActivity extends Activity
 		callDuration.start();
 	}
 
-	private void setConnectionStatus(ConnectionStatus id)
+	private void showCallEnded()
 	{
 		final TextView connStatus = (TextView) findViewById(R.id.connection_status);
-		String text = "";
-		if(id == ConnectionStatus.INCOMING_RINGING)
-		{
-			text = getString(R.string.voip_incoming_call);
-			connStatus.setText(text);
-		}
-		else if(id == ConnectionStatus.OUTGOING_RINGING)
-		{
-			text = getString(R.string.voip_ringing);
-			connStatus.setText(text);
-		}
-		else
-		{
-			connStatus.setVisibility(View.GONE);
-			startCallDuration();
-		}		
+		connStatus.setText(getString(R.string.voip_call_ended));
 	}
 
 	public void setAvatar()
@@ -628,12 +607,12 @@ public class VoIPActivity extends Activity
 
 		VoIPClient clientPartner = voipService.getPartnerClient();
 		ContactInfo contactInfo = ContactManager.getInstance().getContact(clientPartner.getPhoneNumber());
-		String name = contactInfo.getNameOrMsisdn();
-		if(name.length() > 16)
+		String nameOrMsisdn = contactInfo.getNameOrMsisdn();
+		if(nameOrMsisdn.length() > 16)
 		{
 			contactNameView.setTextSize(24);
 		}
-		contactNameView.setText(name);
+		contactNameView.setText(nameOrMsisdn);
 
 		if(contactInfo.getName() != null)
 		{
