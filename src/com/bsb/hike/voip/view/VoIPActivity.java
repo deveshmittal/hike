@@ -87,7 +87,7 @@ public class VoIPActivity extends Activity implements CallActions
 	public static final int MSG_RECONNECTING = 15;
 	public static final int MSG_RECONNECTED = 16;
 
-	private GlowPadViewWrapper mGlowPadView;
+	private CallActionsView callActionsView;
 	private Chronometer callDuration;
 
 	@SuppressLint("HandlerLeak") class IncomingHandler extends Handler {
@@ -234,10 +234,10 @@ public class VoIPActivity extends Activity implements CallActions
 		
 		isRunning = false;
 
-		if(mGlowPadView!=null)
+		if(callActionsView!=null)
 		{
-			mGlowPadView.stopPing();
-			mGlowPadView = null;
+			callActionsView.stopPing();
+			callActionsView = null;
 		}
 
 		Logger.w(VoIPConstants.TAG, "VoIPActivity onDestroy()");
@@ -467,15 +467,15 @@ public class VoIPActivity extends Activity implements CallActions
 	{
 		setAvatar();
 		setContactDetails();
-		showCallGlowPad();
+		showCallActionsView();
 	}
 
 	@Override
 	public void acceptCall()
 	{
-		Logger.d("deepanshu","in voip");
 		Logger.d(VoIPConstants.TAG, "Accepted call, starting audio...");
 		voipService.acceptIncomingCall();
+		callActionsView.setVisibility(View.GONE);
 		showActiveCallLayout();
 	}
 
@@ -488,8 +488,6 @@ public class VoIPActivity extends Activity implements CallActions
 
 	private void showActiveCallLayout()
 	{
-		findViewById(R.id.glow_pad_view).setVisibility(View.GONE);
-
 		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
 		anim.setDuration(1000);
 
@@ -604,19 +602,18 @@ public class VoIPActivity extends Activity implements CallActions
 		}
 	}
 	
-	public void showCallGlowPad()
+	public void showCallActionsView()
 	{
-		mGlowPadView = (GlowPadViewWrapper)findViewById(R.id.glow_pad_view);
+		callActionsView = (CallActionsView)findViewById(R.id.call_actions_view);
 
 		TranslateAnimation anim = new TranslateAnimation(0, 0.0f, 0, 0.0f, Animation.RELATIVE_TO_PARENT, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
 		anim.setDuration(1500);
 		anim.setInterpolator(new DecelerateInterpolator(4f));
 
-		mGlowPadView.setVisibility(View.VISIBLE);
-		mGlowPadView.startAnimation(anim);
+		callActionsView.setVisibility(View.VISIBLE);
+		callActionsView.startAnimation(anim);
 		
-		mGlowPadView.setCallActionsListener(this);
-		mGlowPadView.setAutoRepeat(true);
-		mGlowPadView.startPing();
+		callActionsView.setCallActionsListener(this);
+		callActionsView.startPing();
 	}
 }
