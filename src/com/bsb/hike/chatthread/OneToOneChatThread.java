@@ -3,6 +3,7 @@ package com.bsb.hike.chatthread;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Dialog;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Pair;
@@ -46,7 +47,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private FavoriteType mFavoriteType;
 	
+	private Dialog smsDialog;
+	
 	private static final int CONTACT_ADDED_OR_DELETED = 101;
+	
+	private static final int SHOW_SMS_SYNC_DIALOG = 102;
 	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -304,7 +309,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	protected String[] getPubSubListeners()
 	{
 		// TODO Add PubSubListeners
-		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.CONTACT_ADDED, HikePubSub.CONTACT_DELETED };
+		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.CONTACT_ADDED, HikePubSub.CONTACT_DELETED, HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG };
 		return oneToOneListeners;
 	}
 
@@ -444,6 +449,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case HikePubSub.CONTACT_DELETED:
 			onContactAddedOrDeleted(object, false);
 			break;
+		case HikePubSub.CHANGED_MESSAGE_TYPE:
+			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			break;
+		case HikePubSub.SHOW_SMS_SYNC_DIALOG:
+			uiHandler.sendEmptyMessage(SHOW_SMS_SYNC_DIALOG);
+			break;
 		default:
 			super.onEventReceived(type, object);
 		}
@@ -526,11 +537,25 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			case CONTACT_ADDED_OR_DELETED:
 				contactAddedOrDeleted((Pair<Boolean, String>) msg.obj);
 				break;
+			case SHOW_SMS_SYNC_DIALOG:
+				onShowSMSSyncDialog();
+				break;
 			default:
 				Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
 				super.handleUIMessage(msg);
 				break;
 		}
 		
+	}
+	
+	/**
+	 * Method is called from the UI Thread to show the SMS Sync Dialog
+	 */
+	private void onShowSMSSyncDialog()
+	{
+		smsDialog = Utils.showSMSSyncDialog(activity.getApplicationContext(), true);
+		// TODO :
+		// dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG;
+
 	}
 }
