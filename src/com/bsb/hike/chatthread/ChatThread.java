@@ -109,6 +109,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected static final int NOTIFY_DATASET_CHANGED = 7;
 	
 	protected static final int UPDATE_AVATAR = 8;
+	
+	protected static final int FILE_MESSAGE_CREATED = 9;
 
 	protected ChatThreadActivity activity;
 
@@ -192,6 +194,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			break;
 		case UPDATE_AVATAR:
 			setAvatar();
+			break;
+		case FILE_MESSAGE_CREATED:
+			addMessage((ConvMessage) msg.obj);
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
@@ -1229,6 +1234,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED:
 			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
 			break;
+		case HikePubSub.FILE_MESSAGE_CREATED:
+			onFileMessageCreated(object);
+			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1349,7 +1357,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		 * Array of pubSub listeners common to both {@link OneToOneChatThread} and {@link GroupChatThread}
 		 */
 		String[] commonEvents = new String[] { HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION, HikePubSub.MESSAGE_DELIVERED,
-				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED, HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED };
+				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED,
+				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED };
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -1604,4 +1613,25 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		 */
 	}
 	
+	
+	/**
+	 * Called from PubSub thread, when a file upload is initiated, to add the convMessage to ChatThread
+	 * 
+	 * @param object
+	 */
+	private void onFileMessageCreated(Object object)
+	{
+		ConvMessage convMessage = (ConvMessage) object;
+
+		/**
+		 * Ensuring that the convMessage object belongs to the conversation
+		 */
+
+		if (!(convMessage.getMsisdn().equals(msisdn)))
+		{
+			return;
+		}
+
+		sendUIMessage(FILE_MESSAGE_CREATED, convMessage);
+	}
 }
