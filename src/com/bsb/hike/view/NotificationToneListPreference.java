@@ -1,9 +1,12 @@
 package com.bsb.hike.view;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import android.app.AlertDialog.Builder;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -12,6 +15,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.ListPreference;
 import android.util.AttributeSet;
 import android.view.View;
@@ -20,6 +24,7 @@ import android.widget.ImageView;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.Utils;
 
 public class NotificationToneListPreference extends ListPreference implements DialogInterface.OnClickListener
@@ -37,14 +42,27 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	private Cursor notifSoundCursor;
 
 	private static int HIKE_JINNGLE_INDEX = 2;
-	
+
 	private RingtoneFetcherTask fetcherTask;
+
+	private static final String STATE_PARENT = "state_parent";
+
+	private static final String SOUND_PREF_KEY = "sound_pref_key";
+
+	private static final String SOUND_PREF_VALUES = "sound_pref_values";
+	
+	private CharSequence[] rintoneCharSeq;
+	
+	private ArrayList<String> rintoneValSeq;
+	
+	private ProgressDialog progressDialog;
 	
 	public NotificationToneListPreference(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
 		this.mContext = context;
 		this.ringtonesNameURIMap = new LinkedHashMap<String, Uri>();
+		this.rintoneValSeq = new ArrayList<String>();
 		setIcon(context, attrs);
 		this.setValueIndex(HIKE_JINNGLE_INDEX);
 	}
@@ -159,7 +177,7 @@ public class NotificationToneListPreference extends ListPreference implements Di
 
 	private void setEntryAndValues()
 	{
-		CharSequence[] rintoneCharSeq = ringtonesNameURIMap.keySet().toArray(new CharSequence[ringtonesNameURIMap.size()]);
+		rintoneCharSeq = ringtonesNameURIMap.keySet().toArray(new CharSequence[ringtonesNameURIMap.size()]);
 		setEntries(rintoneCharSeq);
 		setEntryValues(rintoneCharSeq);
 	}
@@ -170,36 +188,26 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	@Override
 	protected void onClick()
 	{
-		//To avoid opening of multiple Dialogs 
+		// To avoid opening of multiple Dialogs
 		this.setEnabled(false);
 				
 		fetchSoundPrefData();
-		
+
 	}
 
-	@Override
-	protected void showDialog(Bundle state)
-	{
-		// It is the case of screen rotation
-		if (fetcherTask == null)
-		{
-			fetchSoundPrefData();
-		}
-		else // User has clicked Notification Button
-		{
-			super.showDialog(state);
-		}
-	}
-	
 	/**
 	 * 
 	 * Fetches Available Ringtones from Device
-	 *
+	 * 
 	 */
-	private class RingtoneFetcherTask extends AsyncTask<Void, Void, Void>{
+	private class RingtoneFetcherTask extends AsyncTask<Void, Void, Void>
+	{
 
 		protected void onPreExecute()
 		{
+			progressDialog = new ProgressDialog(mContext);
+			progressDialog.setMessage(mContext.getResources().getString(R.string.ringtone_loader));
+			progressDialog.show();
 			initRingtoneLists();
 		};
 
@@ -228,11 +236,11 @@ public class NotificationToneListPreference extends ListPreference implements Di
 						}
 						else
 						{
-							//No Notification Tone was present in device
+							// No Notification Tone was present in device
 						}
-						
-						//The returned cursor will be the same cursor returned each time this method is called, 
-						//so do not Cursor.close() the cursor. The cursor can be Cursor.deactivate() safely.
+
+						// The returned cursor will be the same cursor returned each time this method is called,
+						// so do not Cursor.close() the cursor. The cursor can be Cursor.deactivate() safely.
 						notifSoundCursor.deactivate();
 					}
 				}
@@ -248,20 +256,83 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		{
 			setEntryAndValues();
 			notifyChanged();
-			
+			updateValueListFromMap();
+			if (progressDialog != null)
+			{
+				progressDialog.dismiss();
+			}
 			showDialog(null);
-		};
-		
+		}
+
 	}
 
 	@Override
 	public void onDismiss(DialogInterface dialog)
 	{
 		super.onDismiss(dialog);
-		if(!fetcherTask.isCancelled())
+		if (fetcherTask != null && !fetcherTask.isCancelled())
 		{
 			fetcherTask.cancel(true);
 		}
 		this.setEnabled(true);
 	}
+
+	@Override
+	protected Parcelable onSaveInstanceState()
+	{
+		Parcelable superState = super.onSaveInstanceState();
+
+		Bundle state = new Bundle();
+		state.putParcelable(STATE_PARENT, superState);
+		state.putCharSequenceArray(SOUND_PREF_KEY, rintoneCharSeq);
+		state.putStringArrayList(SOUND_PREF_VALUES, rintoneValSeq);
+		return state;
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Parcelable state)
+	{
+		Bundle savedState = (Bundle) state;
+
+		Parcelable superState = savedState.getParcelable(STATE_PARENT);
+		rintoneCharSeq = savedState.getCharSequenceArray(SOUND_PREF_KEY);
+		rintoneValSeq = savedState.getStringArrayList(SOUND_PREF_VALUES);
+		updateRingtoneMapAfterRotation();
+		super.onRestoreInstanceState(superState);
+	}
+
+	/**
+	 * Updates Map after rotation
+	 */
+	private void updateRingtoneMapAfterRotation()
+	{
+		for(int i = 0; i < rintoneCharSeq.length; i++)
+		{
+			Uri soundUri = rintoneValSeq.get(i) != null ? Uri.parse(rintoneValSeq.get(i)) : null;
+			ringtonesNameURIMap.put(rintoneCharSeq[i].toString(), soundUri);
+		}
+	}
+	
+	/**
+	 * Updates ValueSeq from Map, 
+	 * so that can be store and restore after rotation 
+	 */
+	private void updateValueListFromMap()
+	{
+		Iterator<Uri> iterator = ringtonesNameURIMap.values().iterator();
+		while(iterator.hasNext())
+		{
+			Uri uri = (Uri)iterator.next();
+			if(uri != null)
+			{
+				rintoneValSeq.add(uri.toString());
+			}
+			else
+			{
+				rintoneValSeq.add(null);
+			}
+		}
+		
+	};
+
 }
