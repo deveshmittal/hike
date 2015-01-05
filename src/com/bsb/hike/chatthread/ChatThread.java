@@ -1199,6 +1199,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			long msgId = ((Long) object).longValue();
 			setStateAndUpdateView(msgId, true);
 			break;
+		case HikePubSub.SERVER_RECEIVED_MULTI_MSG:
+			onServerReceivedMultiMessage(object);
+			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1319,7 +1322,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		 * Array of pubSub listeners common to both {@link OneToOneChatThread} and {@link GroupChatThread}
 		 */
 		String[] commonEvents = new String[] { HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION, HikePubSub.MESSAGE_DELIVERED,
-				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG };
+				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG };
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -1524,5 +1527,23 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * This indicates the clock to tick for a multi forward message
+	 * @param object
+	 */
+	private void onServerReceivedMultiMessage(Object object)
+	{
+		Pair<Long, Integer> p = (Pair<Long, Integer>) object;
+		long baseId = p.first;
+		int count = p.second;
+
+		for (long msgId = baseId; msgId < (baseId + count); msgId++)
+		{
+			setStateAndUpdateView(msgId, false);
+		}
+
+		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
 	}
 }
