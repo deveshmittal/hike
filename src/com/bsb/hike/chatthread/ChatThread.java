@@ -113,6 +113,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected static final int FILE_MESSAGE_CREATED = 9;
 	
 	protected static final int DELETE_MESSAGE = 10;
+	
+	protected static final int CHAT_THEME = 11;
 
 	protected ChatThreadActivity activity;
 
@@ -202,6 +204,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			break;
 		case DELETE_MESSAGE:
 			deleteMessages((Pair<Boolean, ArrayList<Long>>) msg.obj);
+			break;
+		case CHAT_THEME:
+			setBackground((ChatTheme) msg.obj);
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
@@ -1250,6 +1255,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case HikePubSub.MESSAGE_FAILED:
 			onMessageFailed(object);
 			break;
+		case HikePubSub.CHAT_BACKGROUND_CHANGED:
+			onChatBackgroundChanged(object);
+			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1371,7 +1379,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		 */
 		String[] commonEvents = new String[] { HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION, HikePubSub.MESSAGE_DELIVERED,
 				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED,
-				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.DELETE_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.MESSAGE_FAILED };
+				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.DELETE_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.MESSAGE_FAILED,
+				HikePubSub.CHAT_BACKGROUND_CHANGED };
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -1737,6 +1746,24 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		{
 			convMessage.setState(ConvMessage.State.SENT_FAILED);
 			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+		}
+	}
+	
+	/**
+	 * Used to change the chat theme
+	 * @param object
+	 */
+	private void onChatBackgroundChanged(Object object)
+	{
+		Pair<String, ChatTheme> pair = (Pair<String, ChatTheme>) object;
+		
+		/**
+		 * Proceeding only if the chat theme is changed for the current msisdn
+		 */
+		if(mConversation.getMsisdn().equals(pair.first))
+		{
+			currentTheme = pair.second;
+			sendUIMessage(CHAT_THEME, currentTheme);
 		}
 	}
 }
