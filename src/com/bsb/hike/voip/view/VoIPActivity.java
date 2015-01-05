@@ -105,10 +105,11 @@ public class VoIPActivity extends Activity implements CallActions
 				shutdown();
 				break;
 			case MSG_CONNECTION_ESTABLISHED:
-				showMessage("Connection established.");
+				showMessage("Connection established (" + voipService.getConnectionMethod() + ")");
 				break;
 			case MSG_AUDIO_START:
 				isCallActive = true;
+				voipService.startChrono();
 				startCallDuration();
 				activateActiveCallButtons();
 				break;

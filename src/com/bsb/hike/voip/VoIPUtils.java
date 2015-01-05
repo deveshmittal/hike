@@ -18,6 +18,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.telephony.TelephonyManager;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -30,6 +31,14 @@ import com.bsb.hike.utils.Utils;
 
 public class VoIPUtils {
 
+	public static enum ConnectionClass {
+		TwoG,
+		ThreeG,
+		FourG,
+		WiFi,
+		Unknown
+	}
+	
     public static boolean isWifiConnected(Context context) {
     	ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     	NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -116,6 +125,7 @@ public class VoIPUtils {
      */
     public static void addMessageToChatThread(Context context, VoIPClient clientPartner, String messageType, int duration) {
 		
+    	Logger.d(VoIPConstants.TAG, "Adding message to chat thread. Message: " + messageType + ", Duration: " + duration);
     	HikeConversationsDatabase mConversationDb = HikeConversationsDatabase.getInstance();
     	Conversation mConversation = mConversationDb.getConversation(clientPartner.getPhoneNumber(), HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, Utils.isGroupConversation(clientPartner.getPhoneNumber()));	// TODO: possible crash here
     	long timestamp = System.currentTimeMillis() / 1000;
@@ -178,5 +188,53 @@ public class VoIPUtils {
 		} 
 		
 	}
-    
+
+	/**
+	 * Tells you how you are connected to the Internet. 
+	 * 2G / 3G / WiFi etc.
+	 * @param context
+	 * @return ConnectionClass 2G / 3G / 4G / WiFi
+	 */
+	public static ConnectionClass getConnectionClass(Context context) {
+		ConnectionClass connection = null;
+		
+		ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+		if (mWifi != null && mWifi.isConnected()) {
+		    connection = ConnectionClass.WiFi;
+		} else {
+		    TelephonyManager mTelephonyManager = (TelephonyManager)
+		            context.getSystemService(Context.TELEPHONY_SERVICE);
+		    int networkType = mTelephonyManager.getNetworkType();
+		    switch (networkType) {
+		        case TelephonyManager.NETWORK_TYPE_GPRS:
+		        case TelephonyManager.NETWORK_TYPE_EDGE:
+		        case TelephonyManager.NETWORK_TYPE_CDMA:
+		        case TelephonyManager.NETWORK_TYPE_1xRTT:
+		        case TelephonyManager.NETWORK_TYPE_IDEN:
+		            connection = ConnectionClass.TwoG;
+		            break;
+		        case TelephonyManager.NETWORK_TYPE_UMTS:
+		        case TelephonyManager.NETWORK_TYPE_EVDO_0:
+		        case TelephonyManager.NETWORK_TYPE_EVDO_A:
+		        case TelephonyManager.NETWORK_TYPE_HSDPA:
+		        case TelephonyManager.NETWORK_TYPE_HSUPA:
+		        case TelephonyManager.NETWORK_TYPE_HSPA:
+		        case TelephonyManager.NETWORK_TYPE_EVDO_B:
+		        case TelephonyManager.NETWORK_TYPE_EHRPD:
+		        case TelephonyManager.NETWORK_TYPE_HSPAP:
+		            connection = ConnectionClass.ThreeG;
+		            break;
+		        case TelephonyManager.NETWORK_TYPE_LTE:
+		            connection = ConnectionClass.FourG;
+		            break;
+		        default:
+		            connection = ConnectionClass.Unknown;
+		            break;
+		    }
+		}
+//		Logger.w(VoIPConstants.TAG, "Our connection class: " + connection.name());
+		return connection;
+	}
 }
