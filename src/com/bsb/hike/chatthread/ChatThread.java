@@ -118,6 +118,11 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected static final int CHAT_THEME = 11;
 	
 	protected static final int CLOSE_CURRENT_STEALTH_CHAT = 12;
+	/**
+	 * Skipping the number '13' intentionally. 
+	 * #triskaidekaphobia
+	 */
+	protected static final int CLOSE_PHOTO_VIEWER_FRAGMENT = 14;
 
 	protected ChatThreadActivity activity;
 
@@ -214,6 +219,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case CLOSE_CURRENT_STEALTH_CHAT:
 			closeStealthChat();
 			break;
+		case CLOSE_PHOTO_VIEWER_FRAGMENT:
+			removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true);
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
 			break;
@@ -1267,6 +1274,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case HikePubSub.CLOSE_CURRENT_STEALTH_CHAT:
 			uiHandler.sendEmptyMessage(CLOSE_CURRENT_STEALTH_CHAT);
 			break;
+		case HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT:
+			uiHandler.sendEmptyMessage(CLOSE_PHOTO_VIEWER_FRAGMENT);
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1389,7 +1398,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		String[] commonEvents = new String[] { HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION, HikePubSub.MESSAGE_DELIVERED,
 				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED,
 				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.DELETE_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.MESSAGE_FAILED,
-				HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT };
+				HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT };
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -1803,5 +1812,16 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			}
 			editor.commit();
 		}
+	}
+	
+	private boolean removeFragment(String tag, boolean updateActionBar)
+	{
+		boolean isRemoved = activity.removeFragment(tag);
+		if (isRemoved && updateActionBar)
+		{
+			// TODO :
+			// setupActionBar(false);
+		}
+		return isRemoved;
 	}
 }
