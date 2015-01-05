@@ -155,7 +155,7 @@ public class SoundUtils
 	public static void setCurrentVolume(Context context, int streamType, int vol)
 	{
 		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-		am.setStreamVolume(streamType, vol, AudioManager.FLAG_SHOW_UI + AudioManager.FLAG_PLAY_SOUND);
+		am.setStreamVolume(streamType, vol, AudioManager.ADJUST_SAME);
 	}
 	
 	public static boolean isAnyMusicPlaying(Context context)
