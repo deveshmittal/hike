@@ -1223,6 +1223,12 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case HikePubSub.ICON_CHANGED:
 			onIconChanged(object);
 			break;
+		case HikePubSub.UPLOAD_FINISHED:
+			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			break;
+		case HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED:
+			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1343,7 +1349,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		 * Array of pubSub listeners common to both {@link OneToOneChatThread} and {@link GroupChatThread}
 		 */
 		String[] commonEvents = new String[] { HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION, HikePubSub.MESSAGE_DELIVERED,
-				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED };
+				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED, HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED };
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -1597,4 +1603,5 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		 * avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true)); }
 		 */
 	}
+	
 }
