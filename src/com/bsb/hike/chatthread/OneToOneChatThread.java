@@ -6,10 +6,19 @@ import java.util.List;
 import android.app.Dialog;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -51,6 +60,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private boolean isOnline;
 	
+	private int mCredits;
+	
+	private boolean mBlockOverlay;
+	
+	private boolean mIsOverlayShowing;
+	
 	private static final int CONTACT_ADDED_OR_DELETED = 101;
 	
 	private static final int SHOW_SMS_SYNC_DIALOG = 102;
@@ -60,6 +75,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private static final int UPDATE_LAST_SEEN = 104;
 	
 	private static final int SEND_SMS_PREF_TOGGLED = 105;
+	
+	private static final int SMS_CREDIT_CHANGED = 106;
 	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -480,6 +497,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case HikePubSub.SEND_SMS_PREF_TOGGLED:
 			uiHandler.sendEmptyMessage(SEND_SMS_PREF_TOGGLED);
 			break;
+		case HikePubSub.SMS_CREDIT_CHANGED:
+			uiHandler.sendEmptyMessage(SMS_CREDIT_CHANGED);
+			break;
 		default:
 			super.onEventReceived(type, object);
 		}
@@ -572,7 +592,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				setLastSeen((String) msg.obj);
 				break;
 			case SEND_SMS_PREF_TOGGLED:
-				updateUIForHikeStatus()
+				updateUIForHikeStatus();
+				break;
+			case SMS_CREDIT_CHANGED:
+				setSMSCredits();
 				break;
 			default:
 				Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
@@ -688,4 +711,194 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			//setLastSeenText(lastSeenString);
 		}
 	}
+	
+	private void setSMSCredits()
+	{
+		updateUIForHikeStatus();
+		boolean animatedOnce = sharedPreference.getData(HikeConstants.Extras.ANIMATED_ONCE, false);
+
+		if (!animatedOnce)
+		{
+			sharedPreference.saveData(HikeConstants.Extras.ANIMATED_ONCE, true);
+		}
+
+		if ((mCredits % HikeConstants.SHOW_CREDITS_AFTER_NUM == 0 || !animatedOnce) && !mConversation.isOnhike())
+		{
+			showSMSCounter();
+		}
+	}
+	
+	private void updateUIForHikeStatus()
+	{
+		if (mConversation.isOnhike())
+		{
+			removeSMSToggle();
+			nonZeroCredits();
+		}
+
+		else
+		{
+			updateChatMetadata();
+		}
+
+	}
+	
+	/**
+	 * Used for making SMS Toggle view invisible
+	 */
+	private void removeSMSToggle()
+	{
+		activity.findViewById(R.id.sms_toggle_button).setVisibility(View.GONE);
+	}
+	
+	private void nonZeroCredits()
+	{
+		Logger.d(TAG, "Non Zero credits");
+		if (!mComposeView.isEnabled())
+		{
+			if (!TextUtils.isEmpty(mComposeView.getText()))
+			{
+				mComposeView.setText("");
+			}
+			mComposeView.setEnabled(true);
+		}
+
+		activity.findViewById(R.id.info_layout).setVisibility(View.GONE);
+		activity.findViewById(R.id.emoticon_btn).setVisibility(View.VISIBLE);
+
+		activity.findViewById(R.id.emoticon_btn).setEnabled(true);
+		activity.findViewById(R.id.sticker_btn).setEnabled(true);
+
+		if (!mBlockOverlay)
+		{
+			hideOverlay();
+		}
+	}
+	
+	private void zeroCredits()
+	{
+		Logger.d(TAG, "Zero Credits");
+
+		ImageButton mSendButton = (ImageButton) activity.findViewById(R.id.send_message);
+		mSendButton.setEnabled(false);
+
+		if (!TextUtils.isEmpty(mComposeView.getText()))
+		{
+			mComposeView.setText("");
+		}
+
+		mComposeView.setHint(activity.getString(R.string.zero_sms_hint));
+		mComposeView.setEnabled(false);
+		activity.findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
+		activity.findViewById(R.id.emoticon_btn).setVisibility(View.GONE);
+
+		activity.findViewById(R.id.emoticon_btn).setEnabled(false);
+		activity.findViewById(R.id.sticker_btn).setEnabled(false);
+
+		if (!mConversationDb.wasOverlayDismissed(mConversation.getMsisdn()))
+		{
+			showOverlay(false);
+		}
+
+		// TODO : Make tipView a member of superclass ?
+		/**
+		 * if (tipView != null && tipView.getVisibility() == View.VISIBLE) { Object tag = tipView.getTag();
+		 * 
+		 * if (tag instanceof TipType && ((TipType)tag == TipType.EMOTICON)) { HikeTip.closeTip(TipType.EMOTICON, tipView, prefs); tipView = null; } }
+		 */
+
+	}
+	
+	private void updateChatMetadata()
+	{
+		TextView mMetadataNumChars = (TextView) activity.findViewById(R.id.sms_chat_metadata_num_chars);
+
+		boolean mNativeSMSPref = Utils.getSendSmsPref(activity.getApplicationContext());
+
+		if (mCredits <= 0 && !mNativeSMSPref)
+		{
+			zeroCredits();
+		}
+
+		else
+		{
+			nonZeroCredits();
+
+			if (mComposeView.getLineCount() > 2)
+			{
+				mMetadataNumChars.setVisibility(View.VISIBLE);
+				int length = mComposeView.getText().length();
+				/**
+				 * Set the max sms length to a length appropriate to the number of characters we have
+				 */
+
+				int charNum = length % 140;
+				int numSMS = ((int) (length / 140)) + 1;
+
+				String charNumString = Integer.toString(charNum);
+				SpannableString ss = new SpannableString(charNumString + "/#" + Integer.toString(numSMS));
+				ss.setSpan(new ForegroundColorSpan(activity.getResources().getColor(R.color.send_green)), 0, charNumString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				mMetadataNumChars.setText(ss);
+			}
+
+			else
+			{
+				mMetadataNumChars.setVisibility(View.INVISIBLE);
+			}
+		}
+	}
+
+	private void showSMSCounter()
+	{
+		Animation slideUp = AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.slide_up_noalpha);
+		slideUp.setDuration(2000);
+
+		final Animation slideDown = AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.slide_down_noalpha);
+		slideDown.setDuration(2000);
+		slideDown.setStartOffset(2000);
+
+		final TextView smsCounterView = (TextView) activity.findViewById(R.id.sms_counter);
+		smsCounterView.setBackgroundColor(activity.getResources().getColor(mAdapter.isDefaultTheme() ? R.color.updates_text : R.color.chat_thread_indicator_bg_custom_theme));
+		smsCounterView.setAnimation(slideUp);
+		smsCounterView.setVisibility(View.VISIBLE);
+		smsCounterView.setText(mCredits + " " + activity.getResources().getString(R.string.sms_left));
+
+		slideUp.setAnimationListener(new AnimationListener()
+		{
+
+			@Override
+			public void onAnimationStart(Animation animation)
+			{
+
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{
+
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				smsCounterView.setAnimation(slideDown);
+				smsCounterView.setVisibility(View.INVISIBLE);
+			}
+		});
+	}
+
+	private void hideOverlay()
+	{
+		View mOverlayLayout = activity.findViewById(R.id.overlay_layout);
+
+		if (mOverlayLayout.getVisibility() == View.VISIBLE && activity.hasWindowFocus())
+		{
+			Animation fadeOut = AnimationUtils.loadAnimation(activity.getApplicationContext(), android.R.anim.fade_out);
+			mOverlayLayout.setAnimation(fadeOut);
+		}
+
+		mOverlayLayout.setVisibility(View.INVISIBLE);
+		mIsOverlayShowing = false;
+	}
+
 }
