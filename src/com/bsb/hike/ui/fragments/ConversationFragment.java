@@ -1958,7 +1958,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 			final Conversation conversation = mConversationsByMSISDN.get(groupId);
 			
-			if (conversation != null)
+			if (conversation == null)
 			{
 				return ;
 			}
