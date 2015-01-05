@@ -21,7 +21,6 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.ChatTheme;
@@ -302,7 +301,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	protected String[] getPubSubListeners()
 	{
 		// TODO Add PubSubListeners
-		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ };
+		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.CONTACT_ADDED, HikePubSub.CONTACT_DELETED };
 		return oneToOneListeners;
 	}
 
@@ -436,6 +435,12 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case HikePubSub.MESSAGE_DELIVERED_READ:
 			onMessageRead(object);
 			break;
+		case HikePubSub.CONTACT_ADDED:
+			onContactAddedOrDeleted(object, true);
+			break;
+		case HikePubSub.CONTACT_DELETED:
+			onContactAddedOrDeleted(object, false);
+			break;
 		default:
 			super.onEventReceived(type, object);
 		}
@@ -458,5 +463,27 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * This method is used to update UI, when an unsaved contact is saved to phonebook while the chatThread is active
+	 */
+	protected void onContactAddedOrDeleted(Object object, boolean isAdded)
+	{
+		ContactInfo contactInfo = (ContactInfo) object;
+		
+		/**
+		 * Returning here if contactInfo is null or we received this event in a different chatThread
+		 */
+		
+		if(contactInfo == null || (!msisdn.equals(contactInfo.getMsisdn())))
+		{
+			return;
+		}
+		
+		String mContactName = isAdded ? contactInfo.getName() : contactInfo.getMsisdn();
+		mConversation.setContactName(mContactName);
+		mContactName = Utils.getFirstName(mContactName);
+		sendUIMessage(CONTACT_ADDED_OR_DELETED, new Pair<Boolean, String>(isAdded, mContactName));
 	}
 }
