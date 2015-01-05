@@ -1,11 +1,11 @@
 package com.bsb.hike.chatthread;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
@@ -68,8 +68,8 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
@@ -111,6 +111,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected static final int UPDATE_AVATAR = 8;
 	
 	protected static final int FILE_MESSAGE_CREATED = 9;
+	
+	protected static final int DELETE_MESSAGE = 10;
 
 	protected ChatThreadActivity activity;
 
@@ -197,6 +199,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			break;
 		case FILE_MESSAGE_CREATED:
 			addMessage((ConvMessage) msg.obj);
+			break;
+		case DELETE_MESSAGE:
+			deleteMessages((Pair<Boolean, ArrayList<Long>>) msg.obj);
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
@@ -1237,6 +1242,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case HikePubSub.FILE_MESSAGE_CREATED:
 			onFileMessageCreated(object);
 			break;
+		case HikePubSub.DELETE_MESSAGE:
+			onDeleteMessage(object);
+			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1358,7 +1366,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		 */
 		String[] commonEvents = new String[] { HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION, HikePubSub.MESSAGE_DELIVERED,
 				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED,
-				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED };
+				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.DELETE_MESSAGE };
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -1633,5 +1641,86 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		}
 
 		sendUIMessage(FILE_MESSAGE_CREATED, convMessage);
+	}
+	
+	/**
+	 * Called form PubSub thread, when a message is deleted.
+	 * 
+	 * @param object
+	 */
+	private void onDeleteMessage(Object object)
+	{
+		Pair<ArrayList<Long>, Bundle> deleteMessage = (Pair<ArrayList<Long>, Bundle>) object;
+		ArrayList<Long> msgIds = deleteMessage.first;
+		Bundle bundle = deleteMessage.second;
+		String msgMsisdn = bundle.getString(HikeConstants.Extras.MSISDN);
+
+		/**
+		 * Received a delete message pubsub for a different thread, we received a false event with no msgIds
+		 */
+		if (!(msgMsisdn.equals(msisdn)) || msgIds.isEmpty())
+		{
+			return;
+		}
+
+		boolean deleteMediaFromPhone = bundle.getBoolean(HikeConstants.Extras.DELETE_MEDIA_FROM_PHONE);
+
+		sendUIMessage(DELETE_MESSAGE, new Pair<Boolean, ArrayList<Long>>(deleteMediaFromPhone, msgIds));
+	}
+
+	/**
+	 * Deletes the messages based on the message Ids present in the {@link ArrayList<Long>} in {@link Pair.second}
+	 * 
+	 * @param pair
+	 */
+	private void deleteMessages(Pair<Boolean, ArrayList<Long>> pair)
+	{
+		for (long msgId : pair.second)
+		{
+			for (ConvMessage convMessage : messages)
+			{
+				if (convMessage.getMsgID() == msgId)
+				{
+					deleteMessage(convMessage, pair.first);
+					break;
+				}
+			}
+		}
+
+		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+	}
+	
+	/**
+	 * This function accomplishes the following : 1. Removes message from ChatThread and Db. 2. Removes message from {@code MessagesAdapter.undeliveredMessages} set of
+	 * {@link MessagesAdapter} 3. If there is an ongoing FileTransfer, we cancel it.
+	 * 
+	 * @param convMessage
+	 * @param deleteMediaFromPhone
+	 */
+	private void deleteMessage(ConvMessage convMessage, boolean deleteMediaFromPhone)
+	{
+		mAdapter.removeMessage(convMessage);
+		if (!convMessage.isSMS() && convMessage.getState() == State.SENT_CONFIRMED)
+		{
+			// TODO : This will give an error here
+			// mAdapter.removeFromUndeliverdMessage(convMessage);
+			if (mAdapter.isSelected(convMessage))
+			{
+				mAdapter.toggleSelection(convMessage);
+			}
+		}
+
+		if (convMessage.isFileTransferMessage())
+		{
+			// @GM cancelTask has been changed
+			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			File file = hikeFile.getFile();
+			if (deleteMediaFromPhone && hikeFile != null)
+			{
+				hikeFile.delete(activity.getApplicationContext());
+			}
+			FileTransferManager.getInstance(activity.getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent());
+			mAdapter.notifyDataSetChanged();
+		}
 	}
 }
