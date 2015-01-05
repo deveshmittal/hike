@@ -1271,7 +1271,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void onCreateThemeMenu(Menu menu)
 	{
-		if(!mConversation.isOnhike() || HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
+		if((mConversation!=null && !mConversation.isOnhike()) || HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
 		{
 			menu.getItem(0).setVisible(false);
 		}
