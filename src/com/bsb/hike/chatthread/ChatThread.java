@@ -1585,7 +1585,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	/**
 	 * This method is used to setAvatar for a contact
 	 */
-	private void setAvatar()
+	protected void setAvatar()
 	{
 		// TODO :
 		/*

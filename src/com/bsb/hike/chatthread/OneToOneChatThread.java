@@ -46,6 +46,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private FavoriteType mFavoriteType;
 	
+	private static final int CONTACT_ADDED_OR_DELETED = 101;
+	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
@@ -469,7 +471,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	/**
 	 * This method is used to update UI, when an unsaved contact is saved to phonebook while the chatThread is active
 	 */
-	protected void onContactAddedOrDeleted(Object object, boolean isAdded)
+	private void onContactAddedOrDeleted(Object object, boolean isAdded)
 	{
 		ContactInfo contactInfo = (ContactInfo) object;
 		
@@ -489,6 +491,31 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	}
 	
 	/**
+	 * Called on the UI Thread from the UI Handler, which is called from {@link OneToOneChatThread #onContactAddedOrDeleted(Object, boolean)}
+	 */
+	
+	private void contactAddedOrDeleted(Pair<Boolean, String> pair)
+	{
+		if (!pair.first)
+		{
+			setAvatar();
+		}
+		// TODO : Add name to actionBar
+		// setLabel(pair.second);
+
+		if (messages != null && messages.size() > 0)
+		{
+			ConvMessage convMessage = messages.get(0);
+
+			if (convMessage.isBlockAddHeader())
+			{
+				messages.remove(0);
+				uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			}
+		}
+	}
+	
+	/**
 	 * Performs tasks on the UI thread.
 	 */
 	@Override
@@ -496,6 +523,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		switch(msg.what)
 		{
+			case CONTACT_ADDED_OR_DELETED:
+				contactAddedOrDeleted((Pair<Boolean, String>) msg.obj);
+				break;
 			default:
 				Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
 				super.handleUIMessage(msg);
