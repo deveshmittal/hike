@@ -1087,6 +1087,11 @@ public class MqttMessagesManager
 		{
 			this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
 		}
+		if (data.has(HikeConstants.NUX))
+		{
+			JSONObject mmobObject = data.optJSONObject(HikeConstants.NUX);
+			NUXManager.getInstance(context).parseJson(mmobObject.toString(), context);
+		}
 	}
 
 	private void saveUserOptIn(JSONObject jsonObj) throws JSONException

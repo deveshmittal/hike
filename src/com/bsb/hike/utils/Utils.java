@@ -154,6 +154,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.cropimage.CropImage;
+import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
@@ -168,6 +169,7 @@ import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.MultipleConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
@@ -5117,4 +5119,12 @@ public class Utils
 		return true;
 	}
 
+	public static void sendMultiConvMessage(MultipleConvMessage multiConvMessages) {
+      
+		HikeConversationsDatabase.getInstance().addConversations(multiConvMessages.getMessageList(), multiConvMessages.getContactList(),multiConvMessages.getCreateChatThread());
+        // after DB insertion, we need to update conversation UI , so sending event which contains all contacts and last message for each contact
+        multiConvMessages.sendPubSubForConvScreenMultiMessage();
+        // publishing mqtt packet
+        HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, multiConvMessages.serialize());
+    }
 }

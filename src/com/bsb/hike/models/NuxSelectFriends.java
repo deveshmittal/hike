@@ -1,102 +1,172 @@
 package com.bsb.hike.models;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
 public class NuxSelectFriends
 {
 
-	private String sectiontitle;
+	private String sectionTitle;
 
-	private String recosectiontitle;
+	private String title2;
 
-	private boolean togglerecosection;
-
-	private HashSet<String> recolist;
-
-	private boolean togglecontactsection;
-
-	private String buttext;
-
-	private String progresstext;
-
-	private boolean searchtoggle;
-
-	public NuxSelectFriends(String sectiontitle, String recosectiontitle, boolean togglerecosection, HashSet<String> recolist, boolean togglecontactsection, String buttext,
-			String progresstext, boolean searchtoggle)
+	/**
+	 * @param sectionTitle
+	 * @param title2
+	 * @param title3
+	 * @param recoSectionTitle
+	 * @param toggleRecoSection
+	 * @param recoList
+	 * @param hideList
+	 * @param toggleContactSection
+	 * @param butText
+	 * @param searchToggle
+	 * @param contactSectionType
+	 */
+	public NuxSelectFriends(String sectionTitle, String title2, String title3, String recoSectionTitle, ArrayList<String> recoList, ArrayList<String> hideList,
+			boolean toggleContactSection, String butText, boolean searchToggle, int contactSectionType)
 	{
 		super();
-		this.sectiontitle = sectiontitle;
-		this.recosectiontitle = recosectiontitle;
-		this.togglerecosection = togglerecosection;
-		this.recolist = recolist;
-		this.togglecontactsection = togglecontactsection;
-		this.buttext = buttext;
-		this.progresstext = progresstext;
-		this.searchtoggle = searchtoggle;
+		this.sectionTitle = sectionTitle;
+		this.title2 = title2;
+		this.title3 = title3;
+		this.recoSectionTitle = recoSectionTitle;
+		this.recoList = recoList;
+		this.hideList = hideList;
+		this.toggleContactSection = toggleContactSection;
+		this.butText = butText;
+		this.searchToggle = searchToggle;
+		this.contactSectionType = contactSectionType;
 	}
 
 	/**
-	 * @return the sectiontitle
+	 * @return the sectionTitle
 	 */
-	public String getSectiontitle()
+	public String getSectionTitle()
 	{
-		return sectiontitle;
+		return sectionTitle;
 	}
 
 	/**
-	 * @return the recosectiontitle
+	 * @return the title2
 	 */
-	public String getRecosectiontitle()
+	public String getTitle2()
 	{
-		return recosectiontitle;
+		return title2;
 	}
 
 	/**
-	 * @return the togglerecosection
+	 * @return the title3
 	 */
-	public boolean isTogglerecosection()
+	public String getTitle3()
 	{
-		return togglerecosection;
+		return title3;
 	}
 
 	/**
-	 * @return the recolist
+	 * @return the recoSectionTitle
 	 */
-	public HashSet<String> getRecoList()
+	public String getRecoSectionTitle()
 	{
-		return recolist;
+		return recoSectionTitle;
 	}
 
 	/**
-	 * @return the togglecontactsection
+	 * @return the toggleRecoSection
+	 */
+	public boolean isToggleRecoSection()
+	{
+		return toggleRecoSection;
+	}
+
+	/**
+	 * @return the recoList
+	 */
+	public ArrayList<String> getRecoList()
+	{
+		return recoList;
+	}
+
+	/**
+	 * @return the hideList
+	 */
+	public ArrayList<String> getHideList()
+	{
+		return hideList;
+	}
+
+	/**
+	 * @return the toggleContactSection
 	 */
 	public boolean isToggleContactSection()
 	{
-		return togglecontactsection;
+		return toggleContactSection;
 	}
 
 	/**
-	 * @return the buttext
+	 * @return the butText
 	 */
 	public String getButText()
 	{
-		return buttext;
+		return butText;
 	}
 
 	/**
-	 * @return the progresstext
-	 */
-	public String getProgressText()
-	{
-		return progresstext;
-	}
-
-	/**
-	 * @return the searchtoggle
+	 * @return the searchToggle
 	 */
 	public boolean isSearchToggle()
 	{
-		return searchtoggle;
+		return searchToggle;
+	}
+
+	/**
+	 * @return the contactSectionType
+	 */
+	public int getContactSectionType()
+	{
+		return contactSectionType;
+	}
+
+	private String title3;
+
+	private String recoSectionTitle;
+
+	private boolean toggleRecoSection;
+
+	private ArrayList<String> recoList;
+
+	private ArrayList<String> hideList;
+
+	private boolean toggleContactSection;
+
+	private String butText;
+
+	private boolean searchToggle;
+
+	private int contactSectionType;
+
+	public enum s2ContactSectionTypeEnum
+	{
+		all(0), hike(1), nonhike(2), both(3), none(4), unknown(-1);
+
+		private int value;
+
+		public int getValue()
+		{
+			return value;
+		}
+
+		private s2ContactSectionTypeEnum(int value)
+		{
+			this.value = value;
+		}
+
+		public static s2ContactSectionTypeEnum getEnum(int value)
+		{
+			for (s2ContactSectionTypeEnum enum1 : s2ContactSectionTypeEnum.values())
+				if (enum1.value == value)
+					return enum1;
+			return unknown;
+		}
 	}
 
 }
