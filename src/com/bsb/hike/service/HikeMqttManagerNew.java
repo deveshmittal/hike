@@ -72,7 +72,7 @@ import com.bsb.hike.utils.Utils;
  * interval of time. All pings are handled by mqtt paho internally. As soon as you get connected simply reschdule next conn check. In case of no netowrk and SERVER unavailable , we
  * should try and connect on exponential basis.
  * */
-public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
+public class HikeMqttManagerNew extends BroadcastReceiver
 {
 	// this variable when true, does not allow mqtt operation such as publish or connect
 	// this will become true when you force close or force disconnect mqtt (ex : ssl toggle)
@@ -182,6 +182,12 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 	private volatile int retryCount = 0;
 	
 	private static final String UNRESOLVED_EXCEPTION = "unresolved";
+
+	/* publishes a message via mqtt to the server */
+	public static int MQTT_PUBLISH = 1;
+
+	/* publishes a message via mqtt to the server with QoS 0 */
+	public static int MQTT_PUBLISH_LOW = 0;
 
 	// constants used to define MQTT connection status, this is used by external classes and hardly of any use internally
 	public enum MQTTConnectionStatus
@@ -334,7 +340,29 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 		}
 	}
 
-	public HikeMqttManagerNew(Context ctx)
+	private HikeMqttManagerNew()
+	{
+	}
+
+	/*
+	 * This inner class is not loaded until getInstance is called.
+	 * Also, the class initialization of InstanceHolder is thread safe implicitly.
+	 */
+	private static class InstanceHolder
+	{
+		private static final HikeMqttManagerNew INSTANCE = new HikeMqttManagerNew();
+	}
+
+	public static HikeMqttManagerNew getInstance()
+	{
+		return InstanceHolder.INSTANCE;
+	}
+
+	/*
+	 * This method should be used after creating this object. Note : Functions involving 'this' reference and Threads should not be used or started in constructor as it might
+	 * happen that incomplete 'this' object creation took place till that time.
+	 */
+	public void init(Context ctx)
 	{
 		context = ctx;
 		cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -346,27 +374,36 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 
 		persistence = HikeMqttPersistence.getInstance();
 		mqttMessageManager = MqttMessagesManager.getInstance(context);
+
+		createConnectionRunnables();
+
+		initMqttHandlerThread();
+
+		registerBroadcastReceivers();
+
+		setServerUris();
+		// mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
+	}
+
+	private void createConnectionRunnables()
+	{
 		isConnRunnable = new IsMqttConnectedCheckRunnable();
 		connChkRunnable = new ConnectionCheckRunnable();
 		disConnectRunnable = new DisconnectRunnable();
 		activityChkRunnable = new ActivityCheckRunnable();
-		
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH_LOW, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.TOKEN_CREATED, this);
 	}
 
-	/*
-	 * This method should be used after creating this object. Note : Functions involving 'this' reference and Threads should not be used or started in constructor as it might
-	 * happen that incomplete 'this' object creation took place till that time.
-	 */
-	public void init()
+	private void initMqttHandlerThread()
 	{
 		HandlerThread mqttHandlerThread = new HandlerThread("MQTT_Thread");
 		mqttHandlerThread.start();
 		mMqttHandlerLooper = mqttHandlerThread.getLooper();
 		mqttThreadHandler = new Handler(mMqttHandlerLooper);
 		mMessenger = new Messenger(new IncomingHandler(mMqttHandlerLooper));
+	}
+
+	private void registerBroadcastReceivers()
+	{
 		// register for Screen ON, Network Connection Change
 		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -375,8 +412,6 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 		filter.addAction(HikePubSub.IPS_CHANGED);
 		context.registerReceiver(this, filter);
 		LocalBroadcastManager.getInstance(context).registerReceiver(this, filter);
-		setServerUris();
-		// mqttThreadHandler.postDelayed(new TestOutmsgs(), 10 * 1000); // this is just for testing
 	}
 
 	private boolean isNetworkAvailable()
@@ -1519,56 +1554,52 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 		}
 	}
 
-	@Override
-	public void onEventReceived(String type, Object object)
+	/*
+	 * Call this method to send a message.
+	 * On receiving a message, it sends the message to the {@link IncomingHandler} which in turn sends it via mqtt. 
+	 *
+	 * @param object - Message
+	 * @param qos level (MQTT_PUBLISH or MQTT_PUBLISH_LOW)
+	 */
+	public void sendMessage(Object object, int qos)
 	{
-
 		if (mMessenger == null)
 		{
-			init();
+			Logger.d(TAG,"sendMessage returning, mMessenger not initialized");
+			return;
 		}
 
-		Message msg;
-		if (HikePubSub.TOKEN_CREATED.equals(type))
+		JSONObject o = (JSONObject) object;
+		String data = o.toString();
+		Message msg = Message.obtain();
+		msg.what = HikeService.MSG_APP_PUBLISH;
+		Bundle bundle = new Bundle();
+		bundle.putString(HikeConstants.MESSAGE, data);
+
+		/* set the QoS */
+		msg.arg1 = qos;
+
+		/*
+		 * if this is a message, then grab the messageId out of the json object so we can get confirmation of success/failure
+		 */
+		if (HikeConstants.MqttMessageTypes.MESSAGE.equals(o.optString(HikeConstants.TYPE)) || (HikeConstants.MqttMessageTypes.INVITE.equals(o.optString(HikeConstants.TYPE))))
 		{
-			msg = Message.obtain();
-			msg.what = HikeService.MSG_APP_TOKEN_CREATED;
-			msg.replyTo = this.mMessenger;
+			JSONObject json = o.optJSONObject(HikeConstants.DATA);
+			long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
+			bundle.putLong(HikeConstants.MESSAGE_ID, msgId);
+		}
+
+		if (HikeConstants.MqttMessageTypes.MULTIPLE_FORWARD.equals(o.optString(HikeConstants.SUB_TYPE)))
+		{
+			msg.arg2 = HikeConstants.MULTI_FORWARD_MESSAGE_TYPE;
 		}
 		else
 		{
-			JSONObject o = (JSONObject) object;
-			String data = o.toString();
-			msg = Message.obtain();
-			msg.what = HikeService.MSG_APP_PUBLISH;
-			Bundle bundle = new Bundle();
-			bundle.putString(HikeConstants.MESSAGE, data);
-
-			/* set the QoS */
-			msg.arg1 = HikePubSub.MQTT_PUBLISH_LOW.equals(type) ? 0 : 1;
-
-			/*
-			 * if this is a message, then grab the messageId out of the json object so we can get confirmation of success/failure
-			 */
-			if (HikeConstants.MqttMessageTypes.MESSAGE.equals(o.optString(HikeConstants.TYPE)) || (HikeConstants.MqttMessageTypes.INVITE.equals(o.optString(HikeConstants.TYPE))))
-			{
-				JSONObject json = o.optJSONObject(HikeConstants.DATA);
-				long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
-				bundle.putLong(HikeConstants.MESSAGE_ID, msgId);
-			}
-			
-			if (HikeConstants.MqttMessageTypes.MULTIPLE_FORWARD.equals(o.optString(HikeConstants.SUB_TYPE)))
-			{
-				msg.arg2 = HikeConstants.MULTI_FORWARD_MESSAGE_TYPE;
-			}
-			else
-			{
-				msg.arg2 = HikeConstants.NORMAL_MESSAGE_TYPE;
-			}
-
-			msg.setData(bundle);
-			msg.replyTo = this.mMessenger;
+			msg.arg2 = HikeConstants.NORMAL_MESSAGE_TYPE;
 		}
+
+		msg.setData(bundle);
+		msg.replyTo = this.mMessenger;
 
 		try
 		{

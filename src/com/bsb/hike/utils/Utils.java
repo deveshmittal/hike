@@ -173,6 +173,7 @@ import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.service.ConnectionChangeReceiver;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SignupTask;
@@ -1139,7 +1140,7 @@ public class Utils
 			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
 
 			requestAccountInfo.put(HikeConstants.DATA, data);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, requestAccountInfo);
+			HikeMqttManagerNew.getInstance().sendMessage(requestAccountInfo, HikeMqttManagerNew.MQTT_PUBLISH);
 		}
 		catch (JSONException e)
 		{
@@ -1736,7 +1737,7 @@ public class Utils
 		ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(msisdn, context);
 		if (!sentMqttPacket)
 		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize(sendNativeInvite));
+			HikeMqttManagerNew.getInstance().sendMessage(convMessage.serialize(sendNativeInvite), HikeMqttManagerNew.MQTT_PUBLISH);
 		}
 
 		if (sendNativeInvite)
@@ -2479,7 +2480,7 @@ public class Utils
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
 			object.put(HikeConstants.DATA, data);
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH);
 		}
 		catch (JSONException e)
 		{
@@ -2730,7 +2731,7 @@ public class Utils
 			{
 				return;
 			}
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH_LOW, object);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH_LOW);
 		}
 		catch (JSONException e)
 		{
@@ -2993,7 +2994,7 @@ public class Utils
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			object.put(HikeConstants.DATA, data);
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+			HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH);
 		}
 		catch (JSONException e)
 		{
@@ -5077,7 +5078,7 @@ public class Utils
 		JSONObject obj = getDeviceDetails(context);
 		if (obj != null)
 		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+			HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_PUBLISH);
 		}
 		requestAccountInfo(upgrade, sendBot);
 		sendLocaleToServer(context);

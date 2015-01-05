@@ -46,6 +46,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Logger;
@@ -550,7 +551,7 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 
 				mqttPacket.put(HikeConstants.DATA, data);
 
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, mqttPacket);
+				HikeMqttManagerNew.getInstance().sendMessage(mqttPacket, HikeMqttManagerNew.MQTT_PUBLISH);
 
 				CheckBox selectAllCB = (CheckBox) findViewById(R.id.select_all_cb);
 				if (selectAllCB.isChecked())

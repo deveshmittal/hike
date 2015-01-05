@@ -219,8 +219,8 @@ public class HikeService extends Service
 
 		// reset status variable to initial state
 		// mMqttManager = HikeMqttManager.getInstance(getApplicationContext());
-		mMqttManager = new HikeMqttManagerNew(getApplicationContext());
-		mMqttManager.init();
+		mMqttManager = HikeMqttManagerNew.getInstance();
+		mMqttManager.init(getApplicationContext());
 		
 		initStickerDownloadManager();
 		
@@ -595,7 +595,7 @@ public class HikeService extends Service
 			JSONObject obj = Utils.getDeviceDetails(context);
 			if (obj != null)
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+				HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_PUBLISH);
 			}
 
 			Utils.requestAccountInfo(true, false);
@@ -693,7 +693,7 @@ public class HikeService extends Service
 			JSONObject obj = Utils.getDeviceStats(getApplicationContext());
 			if (obj != null)
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+				HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_PUBLISH);
 			}
 			scheduleNextUserStatsSending();
 		}

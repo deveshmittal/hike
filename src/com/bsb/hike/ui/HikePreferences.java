@@ -36,6 +36,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.BackupAccountTask;
 import com.bsb.hike.tasks.BackupAccountTask.BackupAccountListener;
@@ -557,8 +558,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
 				jsonObject.put(HikeConstants.DATA, data);
 				jsonObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, jsonObject);
-
+				HikeMqttManagerNew.getInstance().sendMessage(jsonObject, HikeMqttManagerNew.MQTT_PUBLISH);
 			}
 			catch (JSONException e)
 			{
@@ -579,8 +579,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
 				jsonObject.put(HikeConstants.DATA, data);
 				jsonObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, jsonObject);
-
+				HikeMqttManagerNew.getInstance().sendMessage(jsonObject, HikeMqttManagerNew.MQTT_PUBLISH);
 			}
 			catch (JSONException e)
 			{
@@ -708,7 +707,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis()));
 				object.put(HikeConstants.DATA, data);
 
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+				HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH);
 			}
 			catch (JSONException e)
 			{
@@ -730,7 +729,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				data.put(HikeConstants.AVATAR, avatarSetting);
 				object.put(HikeConstants.DATA, data);
 
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+				HikeMqttManagerNew.getInstance().sendMessage(object, HikeMqttManagerNew.MQTT_PUBLISH);
 	     	}
 			catch (JSONException e)
 			{

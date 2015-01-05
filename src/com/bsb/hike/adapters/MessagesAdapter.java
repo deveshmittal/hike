@@ -47,6 +47,7 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerDownloadManager;
 import com.bsb.hike.modules.stickerdownloadmgr.StickerException;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.smartImageLoader.HighQualityThumbLoader;
 import com.bsb.hike.smartImageLoader.IconLoader;
 import com.bsb.hike.ui.ChatThread;
@@ -3621,7 +3622,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			{
 				for (ConvMessage convMessage : unsentMessages)
 				{
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
+					HikeMqttManagerNew.getInstance().sendMessage(convMessage.serialize(), HikeMqttManagerNew.MQTT_PUBLISH);
 					convMessage.setTimestamp(System.currentTimeMillis() / 1000);
 				}
 				notifyDataSetChanged();

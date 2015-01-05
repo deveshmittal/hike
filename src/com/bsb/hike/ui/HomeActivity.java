@@ -77,6 +77,7 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.service.HikeMqttManagerNew;
 import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
@@ -721,7 +722,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		JSONObject obj = Utils.getDeviceDetails(HomeActivity.this);
 		if (obj != null)
 		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+			HikeMqttManagerNew.getInstance().sendMessage(obj, HikeMqttManagerNew.MQTT_PUBLISH);
 		}
 		Utils.requestAccountInfo(false, HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false));
 		Utils.sendLocaleToServer(HomeActivity.this);
