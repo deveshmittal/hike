@@ -107,6 +107,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected static final int TYPING_CONVERSATION = 6;
 
 	protected static final int NOTIFY_DATASET_CHANGED = 7;
+	
+	protected static final int UPDATE_AVATAR = 8;
 
 	protected ChatThreadActivity activity;
 
@@ -173,6 +175,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 				break;
 			case TYPING_CONVERSATION:
 				setTypingText(true, (TypingNotification) msg.obj);
+				break;
+			case UPDATE_AVATAR:
+				setAvatar();
 				break;
 			default:
 				break;
@@ -1202,6 +1207,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case HikePubSub.SERVER_RECEIVED_MULTI_MSG:
 			onServerReceivedMultiMessage(object);
 			break;
+		case HikePubSub.ICON_CHANGED:
+			onIconChanged(object);
+			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1322,7 +1330,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		 * Array of pubSub listeners common to both {@link OneToOneChatThread} and {@link GroupChatThread}
 		 */
 		String[] commonEvents = new String[] { HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION, HikePubSub.MESSAGE_DELIVERED,
-				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG };
+				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED };
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -1545,5 +1553,35 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		}
 
 		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+	}
+	
+	/**
+	 * This is called when a group icon changes or a contact's dp is changed
+	 * 
+	 * @param object
+	 */
+	private void onIconChanged(Object object)
+	{
+		String mContactNumber = (String) object;
+		if (mContactNumber.equals(msisdn))
+		{
+			uiHandler.sendEmptyMessage(UPDATE_AVATAR);
+		}
+	}
+
+	/**
+	 * This method is used to setAvatar for a contact
+	 */
+	private void setAvatar()
+	{
+		// TODO :
+		/*
+		 * if (avatar == null) { return; }
+		 * 
+		 * Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true); if (drawable != null) { avatar.setScaleType(ScaleType.FIT_CENTER);
+		 * avatar.setImageDrawable(drawable); avatar.setBackgroundDrawable(null); } else { avatar.setScaleType(ScaleType.CENTER_INSIDE); avatar.setImageResource((mConversation
+		 * instanceof GroupConversation) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+		 * avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true)); }
+		 */
 	}
 }
