@@ -1055,6 +1055,14 @@ class PersistenceCache extends ContactsCache
 
 	public GroupDetails getGroupDetails(String msisdn)
 	{
-		return groupPersistence.get(msisdn);
+		readLock.lock();
+		try
+		{
+			return groupPersistence.get(msisdn);
+		}
+		finally
+		{
+			readLock.unlock();
+		}
 	}
 }
