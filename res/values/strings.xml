@@ -1280,4 +1280,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="voip_call_chat">Hike Call</string>
     <string name="voip_call">HIKE CALL</string>
     <string name="voip_call_ended">CALL ENDED</string>
+    <string name="voip_on_hold">ON HOLD</string>
 </resources>

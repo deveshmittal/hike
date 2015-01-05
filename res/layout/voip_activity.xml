@@ -72,6 +72,18 @@
 			android:textColor="@color/white"
 			android:visibility="gone" />
 
+		  <com.bsb.hike.view.CustomFontTextView
+			android:id="@+id/on_hold"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="14dp"
+			android:text="@string/voip_on_hold"
+			android:layout_marginLeft="10dp"
+			android:layout_alignParentRight="true"
+			android:layout_alignBottom="@id/contact_container"
+			android:textColor="@color/white"
+			android:visibility="gone" />
+
 		</RelativeLayout>
 
 	    <com.bsb.hike.ui.utils.RecyclingImageView

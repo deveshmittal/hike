@@ -556,6 +556,8 @@ public class VoIPActivity extends Activity implements CallActions
 			}
 		});
 
+		final View onHoldView = findViewById(R.id.on_hold);
+
 		final ImageButton holdButton = (ImageButton) findViewById(R.id.hold_btn);
 		holdButton.setOnClickListener(new OnClickListener() 
 		{
@@ -567,6 +569,16 @@ public class VoIPActivity extends Activity implements CallActions
 					hold = !hold;
 					holdButton.setSelected(hold);
 					voipService.setHold(hold);
+					if(hold)
+					{
+						onHoldView.setVisibility(View.VISIBLE);
+						callDuration.setVisibility(View.GONE);
+					}
+					else
+					{
+						onHoldView.setVisibility(View.GONE);
+						callDuration.setVisibility(View.VISIBLE);
+					}
 				}
 			}
 		});
