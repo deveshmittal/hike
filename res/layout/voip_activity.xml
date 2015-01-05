@@ -32,7 +32,7 @@
 				     android:layout_toRightOf="@id/hike_logo"
 				     android:textColor="@color/white"
 				     android:text="@string/voip_call"
-				     android:textSize="14sp"/>
+				     android:textSize="14dp"/>
 
 			  	<com.bsb.hike.view.CustomFontTextView
 					android:id="@+id/contact_name"
@@ -46,7 +46,7 @@
 					android:textColor="@color/white"
 					android:textStyle="italic"
 					android:includeFontPadding="false"
-					android:textSize="32sp" />
+					android:textSize="32dp" />
 
 				<com.bsb.hike.view.CustomFontTextView
 				     android:id="@+id/contact_msisdn"
@@ -57,14 +57,14 @@
 				     android:includeFontPadding="false"
 				     android:textColor="@color/white"
 				     android:visibility="gone"
-				     android:textSize="14sp" />
+				     android:textSize="14dp" />
 	      </RelativeLayout>
 
 		  <Chronometer
 			android:id="@+id/call_duration"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:textSize="14sp"
+			android:textSize="14dp"
 			android:layout_marginLeft="10dp"
 			android:paddingBottom="2dp"
 			android:layout_alignParentRight="true"

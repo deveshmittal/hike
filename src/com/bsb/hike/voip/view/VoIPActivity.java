@@ -25,6 +25,7 @@ import android.os.Vibrator;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -48,6 +49,7 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.VoipProfilePicImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient;
 import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
@@ -577,7 +579,8 @@ public class VoIPActivity extends Activity implements CallActions
 
 		VoipProfilePicImageLoader profileImageLoader = new VoipProfilePicImageLoader(this, mBigImageSize);
 	    profileImageLoader.setDefaultAvatarIfNoCustomIcon(true);
-	    profileImageLoader.setDefaultAvatarScaleType(ScaleType.FIT_START);
+	    profileImageLoader.setDefaultAvatarScaleType(ScaleType.CENTER);
+	    profileImageLoader.setDefaultAvatarBounds(LayoutParams.MATCH_PARENT, (int)(250*Utils.densityMultiplier));
 		profileImageLoader.loadImage(mappedId, (ImageView)findViewById(R.id.profile_image));
 	}
 

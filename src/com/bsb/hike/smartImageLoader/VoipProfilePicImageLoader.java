@@ -17,7 +17,11 @@ public class VoipProfilePicImageLoader extends ProfilePicImageLoader
 {
 
 	private ScaleType defaultAvatarScaleType;
-	
+
+	private int defaultAvatarWidth;
+
+	private int defaultAvatarHeight;
+
 	public VoipProfilePicImageLoader(Context ctx, int imageSize) 
 	{
 		super(ctx, imageSize);
@@ -29,9 +33,19 @@ public class VoipProfilePicImageLoader extends ProfilePicImageLoader
 		defaultAvatarScaleType = scaleType;
 	}
 
+	public void setDefaultAvatarBounds(int width, int height)
+	{
+		defaultAvatarWidth = width;
+		defaultAvatarHeight = height;
+	}
+
 	@Override
 	protected void setDefaultAvatar(ImageView imageView, String data)
 	{
+		RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)imageView.getLayoutParams();
+		layoutParams.width = defaultAvatarWidth;
+		layoutParams.height = defaultAvatarHeight;
+		imageView.setLayoutParams(layoutParams);
 		if(defaultAvatarScaleType!=null)
 		{
 			imageView.setScaleType(defaultAvatarScaleType);
