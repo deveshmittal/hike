@@ -16,7 +16,7 @@ public class VoIPConstants {
 	public static final String COMM_UDP_ACK_RELAY = "ar";
 
 	// Relay and ICE server 
-	public static final String ICEServerName = "54.255.209.97";
+	public static final String ICEServerName = "relay.hike.in";
 	public static final int ICEServerPort = 9999;
 
 	/**
@@ -36,4 +36,10 @@ public class VoIPConstants {
 	public static final String PARTNER_IN_CALL = "missedcall";
 	public static final String PARTNER_HAS_BLOCKED_YOU = "blocked";
 	public static final String PUT_CALL_ON_HOLD = "hold";
+	
+	// Default bitrates
+	public static final int BITRATE_2G = 8000;
+	public static final int BITRATE_3G = 24000;
+	public static final int BITRATE_WIFI = 24000;
+			
 }

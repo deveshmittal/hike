@@ -1176,6 +1176,21 @@ public class MqttMessagesManager
 
 		Editor editor = settings.edit();
 
+		if (data.has(HikeConstants.VOIP_BITRATE_2G))
+		{
+			int bitrate = data.getInt(HikeConstants.VOIP_BITRATE_2G);
+			editor.putInt(HikeMessengerApp.VOIP_BITRATE_2G, bitrate);
+		}
+		if (data.has(HikeConstants.VOIP_BITRATE_3G))
+		{
+			int bitrate = data.getInt(HikeConstants.VOIP_BITRATE_3G);
+			editor.putInt(HikeMessengerApp.VOIP_BITRATE_3G, bitrate);
+		}
+		if (data.has(HikeConstants.VOIP_BITRATE_WIFI))
+		{
+			int bitrate = data.getInt(HikeConstants.VOIP_BITRATE_WIFI);
+			editor.putInt(HikeMessengerApp.VOIP_BITRATE_WIFI, bitrate);
+		}
 		if (data.has(HikeConstants.REWARDS_TOKEN))
 		{
 			String rewardToken = data.getString(HikeConstants.REWARDS_TOKEN);

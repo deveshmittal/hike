@@ -994,6 +994,12 @@ public class HikeConstants
 	public static final String VOIP_CALL_DURATION = "vcd";
 
 	public static final String VOIP_CALL_INITIATOR = "vci";
+	
+	public static final String VOIP_BITRATE_2G = "vb2g";
+	
+	public static final String VOIP_BITRATE_3G = "vb3g";
+	
+	public static final String VOIP_BITRATE_WIFI = "vbw";
 
 	public static final class ResultCodes
 	{
