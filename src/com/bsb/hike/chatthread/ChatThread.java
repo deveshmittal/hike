@@ -165,6 +165,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 				addMessage((ConvMessage) msg.obj);
 				break;
 			case NOTIFY_DATASET_CHANGED:
+				Logger.i(TAG, "notifying data set changed on UI Handler");
 				mAdapter.notifyDataSetChanged();
 				break;
 			case END_TYPING_CONVERSATION:
@@ -184,7 +185,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	{
 
 		mAdapter.addMessage(convMessage);
-
+		messages.add(convMessage);
 		addtoMessageMap(messages.size() - 1, messages.size());
 
 		mAdapter.notifyDataSetChanged();
@@ -1153,7 +1154,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		}
 	}
 
-	private void removeFromMessageMap(ConvMessage msg)
+	protected void removeFromMessageMap(ConvMessage msg)
 	{
 		if (mMessageMap == null)
 			return;
@@ -1194,8 +1195,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case HikePubSub.MESSAGE_DELIVERED:
 			onMessageDelivered(object);
 			break;
-		case HikePubSub.MESSAGE_DELIVERED_READ:
-			onMessageRead(object);
+		case HikePubSub.SERVER_RECEIVED_MSG:
+			long msgId = ((Long) object).longValue();
+			setStateAndUpdateView(msgId, true);
 			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
@@ -1264,35 +1266,11 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
 		{
 			msg.setState(ConvMessage.State.SENT_DELIVERED);
-			
+
 			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
 			return true;
 		}
 		return false;
-	}
-
-	protected void onMessageRead(Object object)
-	{
-		Pair<String, long[]> pair = (Pair<String, long[]>) object;
-		// If the msisdn don't match we simply return
-		if (!mConversation.getMsisdn().equals(pair.first))
-		{
-			return;
-		}
-		long[] ids = pair.second;
-		// TODO we could keep a map of msgId -> conversation objects
-		// somewhere to make this faster
-		for (int i = 0; i < ids.length; i++)
-		{
-			ConvMessage msg = findMessageById(ids[i]);
-			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
-			{
-				msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
-				removeFromMessageMap(msg);
-			}
-		}
-		
-		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
 	}
 
 	protected ConvMessage findMessageById(long msgID)
@@ -1325,7 +1303,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected void addToPubSub()
 	{
 		mPubSubListeners = getPubSubEvents();
-		Logger.d(TAG, "adding pubsub, length = "+ Integer.toString(mPubSubListeners.length));
+		Logger.d(TAG, "adding pubsub, length = " + Integer.toString(mPubSubListeners.length));
 		HikeMessengerApp.getPubSub().addListeners(this, mPubSubListeners);
 	}
 
@@ -1340,8 +1318,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		/**
 		 * Array of pubSub listeners common to both {@link OneToOneChatThread} and {@link GroupChatThread}
 		 */
-		String[] commonEvents = new String[]{ HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION, HikePubSub.MESSAGE_DELIVERED, HikePubSub.MESSAGE_DELIVERED_READ };
-		
+		String[] commonEvents = new String[] { HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION, HikePubSub.MESSAGE_DELIVERED,
+				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG };
+
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
 		 * 
@@ -1361,7 +1340,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 
 			System.arraycopy(commonEvents, 0, retVal, 0, commonEvents.length);
 
-			System.arraycopy(moreEvents, 0, retVal, retVal.length - commonEvents.length, moreEvents.length);
+			System.arraycopy(moreEvents, 0, retVal, commonEvents.length, moreEvents.length);
 
 		}
 
@@ -1507,5 +1486,43 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 
 			mAdapter.notifyDataSetChanged();
 		}
+	}
+
+	protected boolean setStateAndUpdateView(long msgId, boolean updateView)
+	{
+		/*
+		 * This would happen in the case if the events calling this method are called before the conversation is setup.
+		 */
+		if (mConversation == null || mAdapter == null)
+		{
+			return false;
+		}
+		ConvMessage msg = findMessageById(msgId);
+
+		/*
+		 * This is a hackish check. For some cases we were getting convMsg in another user's messageMap. which should not happen ideally. that was leading to showing hikeOfflineTip
+		 * in wrong ChatThread.
+		 */
+		if (msg == null || TextUtils.isEmpty(msg.getMsisdn()) || !msg.getMsisdn().equals(msgId))
+		{
+			Logger.i("ChatThread", "We are getting a wrong msisdn convMessage object in " + msisdn + " ChatThread");
+			return false;
+		}
+
+		if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
+		{
+			if (isActivityVisible && (!msg.isTickSoundPlayed()) && Utils.isPlayTickSound(activity.getApplicationContext()))
+			{
+				Utils.playSoundFromRaw(activity.getApplicationContext(), R.raw.message_sent);
+			}
+			msg.setTickSoundPlayed(true);
+			msg.setState(ConvMessage.State.SENT_CONFIRMED);
+
+			if (updateView)
+			{
+				uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			}
+		}
+		return true;
 	}
 }

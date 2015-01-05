@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.preference.PreferenceManager;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,6 +21,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.ChatTheme;
@@ -300,7 +302,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	protected String[] getPubSubListeners()
 	{
 		// TODO Add PubSubListeners
-		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED };
+		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ };
 		return oneToOneListeners;
 	}
 
@@ -378,21 +380,32 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			}
 		}
 	}
-	
 
-	@Override
 	protected void onMessageRead(Object object)
 	{
-		super.onMessageRead(object);
-		/*
-		 * Right now our logic is to force MR for all the unread messages that is why we need to remove all message from undelivered set
-		 * 
-		 * if in future we move to MR less than msgId we should modify this logic also
-		 */
+		Pair<String, long[]> pair = (Pair<String, long[]>) object;
+		// If the msisdn don't match we simply return
+		if (!mConversation.getMsisdn().equals(pair.first))
+		{
+			return;
+		}
+		long[] ids = pair.second;
+		// TODO we could keep a map of msgId -> conversation objects
+		// somewhere to make this faster
+		for (int i = 0; i < ids.length; i++)
+		{
+			ConvMessage msg = findMessageById(ids[i]);
+			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+			{
+				msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+				removeFromMessageMap(msg);
+			}
+		}
 		if (isUserOnHike())
 		{
 			mAdapter.removeAllFromUndeliverdMessage();
 		}
+		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
 	}
 
 	@Override
@@ -409,6 +422,38 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				// somewhere to make this faster
 				ConvMessage msg = findMessageById(msgID);
 				mAdapter.removeFromUndeliverdMessage(msg, true);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		switch (type)
+		{
+		case HikePubSub.MESSAGE_DELIVERED_READ:
+			onMessageRead(object);
+			break;
+		default:
+			super.onEventReceived(type, object);
+		}
+	}
+
+	@Override
+	protected boolean setStateAndUpdateView(long msgId, boolean updateView)
+	{
+		// TODO Auto-generated method stub
+		if (super.setStateAndUpdateView(msgId, updateView))
+		{
+			if (isOnHike())
+			{
+				ConvMessage msg = findMessageById(msgId);
+				if (!msg.isSMS())
+				{
+					mAdapter.addToUndeliverdMessage(msg);
+				}
 			}
 			return true;
 		}

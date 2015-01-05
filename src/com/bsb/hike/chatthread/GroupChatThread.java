@@ -11,6 +11,7 @@ import android.view.View;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.media.OverFlowMenuItem;
@@ -24,6 +25,7 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.Utils;
 
 /**
  * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -228,8 +230,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	@Override
 	protected String[] getPubSubListeners()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return new String[]{HikePubSub.GROUP_MESSAGE_DELIVERED_READ};
 	}
 	
 	/**
@@ -305,5 +306,53 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 				mAdapter.notifyDataSetChanged();
 			}
 		}
+	}
+	
+	protected void onMessageRead(Object object)
+	{
+		Pair<String, Pair<Long,String>> pair = (Pair<String, Pair<Long, String>>) object;
+		// If the msisdn don't match we simply return
+		if (!mConversation.getMsisdn().equals(pair.first) || messages == null || messages.isEmpty())
+		{
+			return;
+		}
+		Long mrMsgId = pair.second.first;
+		for (int i = messages.size() - 1 ; i>=0; i--)
+		{
+			ConvMessage msg = messages.get(i);
+			if (msg != null && msg.isSent())
+			{
+				long id = msg.getMsgID();
+				if (id > mrMsgId)
+				{
+					continue;
+				}
+				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
+				{
+					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+					removeFromMessageMap(msg);
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		String participant = pair.second.second;
+		// TODO we could keep a map of msgId -> conversation objects
+		// somewhere to make this faster
+		groupConversation.updateReadByList(participant,mrMsgId);
+		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+	}
+	
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		switch(type){
+		case HikePubSub.GROUP_MESSAGE_DELIVERED_READ:
+			onMessageRead(object);
+			break;
+		}
+		super.onEventReceived(type, object);
 	}
 }
