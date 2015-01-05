@@ -156,7 +156,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	
 	private int unreadMessageCount = 0;
 
-	private EditText mComposeView;
+	protected EditText mComposeView;
 
 	protected Handler uiHandler = new Handler()
 	{
