@@ -3,6 +3,7 @@ package com.bsb.hike.chatthread;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Pair;
 import android.view.MotionEvent;
@@ -485,5 +486,21 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		mConversation.setContactName(mContactName);
 		mContactName = Utils.getFirstName(mContactName);
 		sendUIMessage(CONTACT_ADDED_OR_DELETED, new Pair<Boolean, String>(isAdded, mContactName));
+	}
+	
+	/**
+	 * Performs tasks on the UI thread.
+	 */
+	@Override
+	protected void handleUIMessage(Message msg)
+	{
+		switch(msg.what)
+		{
+			default:
+				Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
+				super.handleUIMessage(msg);
+				break;
+		}
+		
 	}
 }

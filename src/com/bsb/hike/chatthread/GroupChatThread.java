@@ -355,4 +355,19 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		}
 		super.onEventReceived(type, object);
 	}
+	
+	/**
+	 * Performs tasks on the UI thread.
+	 */
+	@Override
+	protected void handleUIMessage(Message msg)
+	{
+		switch (msg.what)
+		{
+		default:
+			Logger.d(TAG, "Did not find any matching event in Group ChatThread. Calling super class' handleUIMessage");
+			super.handleUIMessage(msg);
+			break;
+		}
+	}
 }

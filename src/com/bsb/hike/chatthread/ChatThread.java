@@ -158,33 +158,46 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	{
 		public void handleMessage(android.os.Message msg)
 		{
-			switch (msg.what)
-			{
-			case SHOW_TOAST:
-				showToast(msg.arg1);
-				break;
-			case MESSAGE_RECEIVED:
-				addMessage((ConvMessage) msg.obj);
-				break;
-			case NOTIFY_DATASET_CHANGED:
-				Logger.i(TAG, "notifying data set changed on UI Handler");
-				mAdapter.notifyDataSetChanged();
-				break;
-			case END_TYPING_CONVERSATION:
-				setTypingText(false, (TypingNotification) msg.obj);
-				break;
-			case TYPING_CONVERSATION:
-				setTypingText(true, (TypingNotification) msg.obj);
-				break;
-			case UPDATE_AVATAR:
-				setAvatar();
-				break;
-			default:
-				break;
-			}
+			handleUIMessage(msg);
 		}
 
 	};
+	
+	
+	/**
+	 * This method is called from the UI Handler's handleMessage. All the tasks performed by this are supposed to run on the UI Thread only.
+	 * 
+	 * This is also overriden by {@link OneToOneChatThread} and {@link GroupChatThread}
+	 * @param msg
+	 */
+	protected void handleUIMessage(android.os.Message msg)
+	{
+		switch (msg.what)
+		{
+		case SHOW_TOAST:
+			showToast(msg.arg1);
+			break;
+		case MESSAGE_RECEIVED:
+			addMessage((ConvMessage) msg.obj);
+			break;
+		case NOTIFY_DATASET_CHANGED:
+			Logger.i(TAG, "notifying data set changed on UI Handler");
+			mAdapter.notifyDataSetChanged();
+			break;
+		case END_TYPING_CONVERSATION:
+			setTypingText(false, (TypingNotification) msg.obj);
+			break;
+		case TYPING_CONVERSATION:
+			setTypingText(true, (TypingNotification) msg.obj);
+			break;
+		case UPDATE_AVATAR:
+			setAvatar();
+			break;
+		default:
+			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
+			break;
+		}
+	}
 
 	protected void addMessage(ConvMessage convMessage, boolean scrollToLast)
 	{
