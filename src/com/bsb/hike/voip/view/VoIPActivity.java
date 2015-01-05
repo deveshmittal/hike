@@ -25,6 +25,7 @@ import android.os.Vibrator;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -48,6 +49,7 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.VoipProfilePicImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient;
 import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
@@ -87,8 +89,10 @@ public class VoIPActivity extends Activity implements CallActions
 	public static final int MSG_RECONNECTING = 15;
 	public static final int MSG_RECONNECTED = 16;
 
-	private GlowPadViewWrapper mGlowPadView;
+	private CallActionsView callActionsView;
 	private Chronometer callDuration;
+
+	private boolean isCallActive;
 
 	@SuppressLint("HandlerLeak") class IncomingHandler extends Handler {
 
@@ -104,8 +108,10 @@ public class VoIPActivity extends Activity implements CallActions
 				showMessage("Connection established (" + voipService.getConnectionMethod() + ")");
 				break;
 			case MSG_AUDIO_START:
-				startCallDuration();
+				isCallActive = true;
 				voipService.startChrono();
+				startCallDuration();
+				activateActiveCallButtons();
 				break;
 			case MSG_ENCRYPTION_INITIALIZED:
 				showMessage("Encryption initialized.");
@@ -235,10 +241,10 @@ public class VoIPActivity extends Activity implements CallActions
 		
 		isRunning = false;
 
-		if(mGlowPadView!=null)
+		if(callActionsView!=null)
 		{
-			mGlowPadView.stopPing();
-			mGlowPadView = null;
+			callActionsView.stopPing();
+			callActionsView = null;
 		}
 
 		Logger.w(VoIPConstants.TAG, "VoIPActivity onDestroy()");
@@ -468,15 +474,15 @@ public class VoIPActivity extends Activity implements CallActions
 	{
 		setAvatar();
 		setContactDetails();
-		showCallGlowPad();
+		showCallActionsView();
 	}
 
 	@Override
 	public void acceptCall()
 	{
-		Logger.d("deepanshu","in voip");
 		Logger.d(VoIPConstants.TAG, "Accepted call, starting audio...");
 		voipService.acceptIncomingCall();
+		callActionsView.setVisibility(View.GONE);
 		showActiveCallLayout();
 	}
 
@@ -489,8 +495,6 @@ public class VoIPActivity extends Activity implements CallActions
 
 	private void showActiveCallLayout()
 	{
-		findViewById(R.id.glow_pad_view).setVisibility(View.GONE);
-
 		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
 		anim.setDuration(1000);
 
@@ -504,7 +508,16 @@ public class VoIPActivity extends Activity implements CallActions
 		
 		setupActiveCallButtonActions();		
 	}
-	
+
+	private void activateActiveCallButtons()
+	{
+		ImageView muteButton = (ImageView)findViewById(R.id.mute_btn);
+		muteButton.setImageResource(R.drawable.voip_mute_btn_selector);
+
+		ImageView holdButton = (ImageView)findViewById(R.id.hold_btn);
+		holdButton.setImageResource(R.drawable.voip_hold_btn_selector);
+	}
+
 	private void setupActiveCallButtonActions()
 	{
 		findViewById(R.id.hang_up_btn).setOnClickListener(new OnClickListener() 
@@ -522,9 +535,12 @@ public class VoIPActivity extends Activity implements CallActions
 			@Override
 			public void onClick(View v) 
 			{
-				mute = !mute;
-				muteButton.setSelected(mute);
-				voipService.setMute(mute);
+				if(isCallActive)
+				{
+					mute = !mute;
+					muteButton.setSelected(mute);
+					voipService.setMute(mute);
+				}
 			}
 		});
 
@@ -541,15 +557,30 @@ public class VoIPActivity extends Activity implements CallActions
 			}
 		});
 
+		final View onHoldView = findViewById(R.id.on_hold);
+
 		final ImageButton holdButton = (ImageButton) findViewById(R.id.hold_btn);
 		holdButton.setOnClickListener(new OnClickListener() 
 		{
 			@Override
 			public void onClick(View v) 
 			{
-				hold = !hold;
-				holdButton.setSelected(hold);
-				voipService.setHold(hold);
+				if(isCallActive)
+				{
+					hold = !hold;
+					holdButton.setSelected(hold);
+					voipService.setHold(hold);
+					if(hold)
+					{
+						onHoldView.setVisibility(View.VISIBLE);
+						callDuration.setVisibility(View.GONE);
+					}
+					else
+					{
+						onHoldView.setVisibility(View.GONE);
+						callDuration.setVisibility(View.VISIBLE);
+					}
+				}
 			}
 		});
 	}
@@ -580,7 +611,8 @@ public class VoIPActivity extends Activity implements CallActions
 
 		VoipProfilePicImageLoader profileImageLoader = new VoipProfilePicImageLoader(this, mBigImageSize);
 	    profileImageLoader.setDefaultAvatarIfNoCustomIcon(true);
-	    profileImageLoader.setDefaultAvatarScaleType(ScaleType.FIT_START);
+	    profileImageLoader.setDefaultAvatarScaleType(ScaleType.CENTER);
+	    profileImageLoader.setDefaultAvatarBounds(LayoutParams.MATCH_PARENT, (int)(250*Utils.densityMultiplier));
 		profileImageLoader.loadImage(mappedId, (ImageView)findViewById(R.id.profile_image));
 	}
 
@@ -605,19 +637,18 @@ public class VoIPActivity extends Activity implements CallActions
 		}
 	}
 	
-	public void showCallGlowPad()
+	public void showCallActionsView()
 	{
-		mGlowPadView = (GlowPadViewWrapper)findViewById(R.id.glow_pad_view);
+		callActionsView = (CallActionsView)findViewById(R.id.call_actions_view);
 
 		TranslateAnimation anim = new TranslateAnimation(0, 0.0f, 0, 0.0f, Animation.RELATIVE_TO_PARENT, 1.0f, Animation.RELATIVE_TO_SELF, 0f);
 		anim.setDuration(1500);
 		anim.setInterpolator(new DecelerateInterpolator(4f));
 
-		mGlowPadView.setVisibility(View.VISIBLE);
-		mGlowPadView.startAnimation(anim);
+		callActionsView.setVisibility(View.VISIBLE);
+		callActionsView.startAnimation(anim);
 		
-		mGlowPadView.setCallActionsListener(this);
-		mGlowPadView.setAutoRepeat(true);
-		mGlowPadView.startPing();
+		callActionsView.setCallActionsListener(this);
+		callActionsView.startPing();
 	}
 }

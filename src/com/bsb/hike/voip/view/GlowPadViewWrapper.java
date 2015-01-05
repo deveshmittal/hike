@@ -17,9 +17,11 @@ public class GlowPadViewWrapper extends GlowPadView implements GlowPadView.OnTri
 
 	private String TAG = "VoIPGlowPad";
 
-	private final long PING_REPEAT_DELAY = 1500;
+	private final long PING_REPEAT_DELAY = 1100;
 
-	private boolean pingAutoRepeat;
+	private boolean pingAutoRepeat = true;
+
+	private boolean targetTriggered;
 
 	private Handler pingHandler = new Handler();
 
@@ -60,7 +62,10 @@ public class GlowPadViewWrapper extends GlowPadView implements GlowPadView.OnTri
 	public void onReleased(View v, int handle) 
 	{
 		Logger.d(TAG,"Call glow pad view - onRelease");
-		startPing();
+		if(!targetTriggered)
+		{
+			startPing();
+		}
 	}
 
 	@Override
@@ -70,10 +75,12 @@ public class GlowPadViewWrapper extends GlowPadView implements GlowPadView.OnTri
 		if(resId == R.drawable.ic_item_call_hang)
 		{
 			mCallActions.declineCall();
+			targetTriggered = true;
 		}
 		else if(resId == R.drawable.ic_item_call_pick)
 		{
 			mCallActions.acceptCall();
+			targetTriggered = true;
 		}
 	}
 
