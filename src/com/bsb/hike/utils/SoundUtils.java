@@ -41,7 +41,7 @@ public class SoundUtils
 		final int notifVol = getCurrentVolume(context, AudioManager.STREAM_NOTIFICATION);
 		if(isAnyMusicPlaying(context))
 		{
-			setCurrentVolume(context, AudioManager.STREAM_NOTIFICATION, notifVol/2);
+			setCurrentVolume(context, AudioManager.STREAM_NOTIFICATION, notifVol);
 		}
 		Resources res = context.getResources();
 		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
@@ -109,7 +109,7 @@ public class SoundUtils
 		final int notifVol = getCurrentVolume(context, AudioManager.STREAM_NOTIFICATION);
 		if(isAnyMusicPlaying(context))
 		{
-			setCurrentVolume(context, AudioManager.STREAM_NOTIFICATION, notifVol/2);
+			setCurrentVolume(context, AudioManager.STREAM_NOTIFICATION, notifVol);
 		}
 		try
 		{
