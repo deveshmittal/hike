@@ -170,10 +170,11 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	@Override
 	protected void onClick()
 	{
-		fetchSoundPrefData();
-		
 		//To avoid opening of multiple Dialogs 
 		this.setEnabled(false);
+				
+		fetchSoundPrefData();
+		
 	}
 
 	@Override
