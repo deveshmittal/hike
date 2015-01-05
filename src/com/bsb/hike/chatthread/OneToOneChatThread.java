@@ -53,6 +53,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private static final int SHOW_SMS_SYNC_DIALOG = 102;
 	
+	private static final int SMS_SYNC_COMPLETE_OR_FAIL = 103;
+	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
@@ -309,7 +311,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	protected String[] getPubSubListeners()
 	{
 		// TODO Add PubSubListeners
-		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.CONTACT_ADDED, HikePubSub.CONTACT_DELETED, HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG };
+		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.CONTACT_ADDED, HikePubSub.CONTACT_DELETED,
+				HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START };
 		return oneToOneListeners;
 	}
 
@@ -455,6 +458,14 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case HikePubSub.SHOW_SMS_SYNC_DIALOG:
 			uiHandler.sendEmptyMessage(SHOW_SMS_SYNC_DIALOG);
 			break;
+		case HikePubSub.SMS_SYNC_COMPLETE:
+			uiHandler.sendEmptyMessage(SMS_SYNC_COMPLETE_OR_FAIL);
+			break;
+		case HikePubSub.SMS_SYNC_FAIL:
+			uiHandler.sendEmptyMessage(SMS_SYNC_COMPLETE_OR_FAIL);
+			break;
+		case HikePubSub.SMS_SYNC_START:
+			onSMSSyncStart();
 		default:
 			super.onEventReceived(type, object);
 		}
@@ -540,6 +551,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			case SHOW_SMS_SYNC_DIALOG:
 				onShowSMSSyncDialog();
 				break;
+			case SMS_SYNC_COMPLETE_OR_FAIL:
+				dismissSMSSyncDialog();
+				break;
 			default:
 				Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
 				super.handleUIMessage(msg);
@@ -557,5 +571,24 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		// TODO :
 		// dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG;
 
+	}
+	
+	/**
+	 * Called on the UI Thread to dismiss SMS Sync Dialog
+	 */
+	private void dismissSMSSyncDialog()
+	{
+		if (smsDialog != null)
+		{
+			smsDialog.dismiss();
+		}
+		// TODO :
+		// dialogShowing = null;
+	}
+	
+	private void onSMSSyncStart()
+	{
+		// TODO :
+		// dialogShowing = DialogShowing.SMS_SYNCING_DIALOG;
 	}
 }
