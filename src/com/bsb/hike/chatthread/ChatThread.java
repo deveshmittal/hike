@@ -123,6 +123,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	 * #triskaidekaphobia
 	 */
 	protected static final int CLOSE_PHOTO_VIEWER_FRAGMENT = 14;
+	
+	protected static final int STICKER_CATEGORY_MAP_UPDATED = 15;
 
 	protected ChatThreadActivity activity;
 
@@ -221,6 +223,10 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			break;
 		case CLOSE_PHOTO_VIEWER_FRAGMENT:
 			removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true);
+			break;
+		case STICKER_CATEGORY_MAP_UPDATED:
+			updateStickerAdapter();
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
 			break;
@@ -1276,6 +1282,10 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			break;
 		case HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT:
 			uiHandler.sendEmptyMessage(CLOSE_PHOTO_VIEWER_FRAGMENT);
+			break;
+		case HikePubSub.STICKER_CATEGORY_MAP_UPDATED:
+			uiHandler.sendEmptyMessage(STICKER_CATEGORY_MAP_UPDATED);
+			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1398,7 +1408,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		String[] commonEvents = new String[] { HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION, HikePubSub.MESSAGE_DELIVERED,
 				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED,
 				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.DELETE_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.MESSAGE_FAILED,
-				HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT };
+				HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.STICKER_CATEGORY_MAP_UPDATED };
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -1823,5 +1833,13 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			// setupActionBar(false);
 		}
 		return isRemoved;
+	}
+	
+	private void updateStickerAdapter()
+	{
+		if (mStickerPicker != null)
+		{
+			mStickerPicker.updateStickerAdapter();
+		}
 	}
 }
