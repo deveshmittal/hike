@@ -92,6 +92,8 @@ public class VoIPActivity extends Activity implements CallActions
 	private CallActionsView callActionsView;
 	private Chronometer callDuration;
 
+	private boolean isCallActive;
+
 	@SuppressLint("HandlerLeak") class IncomingHandler extends Handler {
 
 		@Override
@@ -106,7 +108,9 @@ public class VoIPActivity extends Activity implements CallActions
 				showMessage("Connection established.");
 				break;
 			case MSG_AUDIO_START:
+				isCallActive = true;
 				startCallDuration();
+				activateActiveCallButtons();
 				break;
 			case MSG_ENCRYPTION_INITIALIZED:
 				showMessage("Encryption initialized.");
@@ -503,7 +507,16 @@ public class VoIPActivity extends Activity implements CallActions
 		
 		setupActiveCallButtonActions();		
 	}
-	
+
+	private void activateActiveCallButtons()
+	{
+		ImageView muteButton = (ImageView)findViewById(R.id.mute_btn);
+		muteButton.setImageResource(R.drawable.voip_mute_btn_selector);
+
+		ImageView holdButton = (ImageView)findViewById(R.id.hold_btn);
+		holdButton.setImageResource(R.drawable.voip_hold_btn_selector);
+	}
+
 	private void setupActiveCallButtonActions()
 	{
 		findViewById(R.id.hang_up_btn).setOnClickListener(new OnClickListener() 
@@ -521,9 +534,12 @@ public class VoIPActivity extends Activity implements CallActions
 			@Override
 			public void onClick(View v) 
 			{
-				mute = !mute;
-				muteButton.setSelected(mute);
-				voipService.setMute(mute);
+				if(isCallActive)
+				{
+					mute = !mute;
+					muteButton.setSelected(mute);
+					voipService.setMute(mute);
+				}
 			}
 		});
 
@@ -546,9 +562,12 @@ public class VoIPActivity extends Activity implements CallActions
 			@Override
 			public void onClick(View v) 
 			{
-				hold = !hold;
-				holdButton.setSelected(hold);
-				voipService.setHold(hold);
+				if(isCallActive)
+				{
+					hold = !hold;
+					holdButton.setSelected(hold);
+					voipService.setHold(hold);
+				}
 			}
 		});
 	}

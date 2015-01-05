@@ -110,7 +110,7 @@
 		        android:background="@null"
 		        android:layout_alignParentLeft="true"
 		        android:layout_marginLeft="48dp"
-		        android:src="@drawable/voip_mute_btn_selector">
+		        android:src="@drawable/ic_mute_disabled">
 		    </ImageButton>
 		    
 		     <ImageButton
@@ -121,7 +121,7 @@
 		        android:padding="7dp"
 		        android:background="@null"
 		        android:layout_centerHorizontal="true"
-		        android:src="@drawable/voip_hold_btn_selector">
+		        android:src="@drawable/ic_hold_disabled">
 		    </ImageButton>
 		    
 		    <ImageButton
