@@ -546,8 +546,7 @@ public class ContactManager implements ITransientCache, HikePubSub.Listener
 	 */
 	public GroupDetails getGroupDetails(String msisdn)
 	{
-		GroupDetails groupDetails = persistenceCache.getGroupPersistence().get(msisdn);
-		return groupDetails;
+		return persistenceCache.getGroupDetails(msisdn);
 	}
 	
 	/**

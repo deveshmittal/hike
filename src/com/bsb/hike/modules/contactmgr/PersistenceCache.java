@@ -54,11 +54,6 @@ class PersistenceCache extends ContactsCache
 		loadMemory();
 	}
 
-	public Map<String, GroupDetails> getGroupPersistence()
-	{
-		return groupPersistence;
-	}
-
 	/**
 	 * get contact info from memory. Returns null if not found in memory. The implementation is thread safe.
 	 * 
@@ -1056,5 +1051,10 @@ class PersistenceCache extends ContactsCache
 		{
 			readLock.unlock();
 		}
+	}
+
+	public GroupDetails getGroupDetails(String msisdn)
+	{
+		return groupPersistence.get(msisdn);
 	}
 }
