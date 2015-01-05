@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
@@ -115,6 +116,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected static final int DELETE_MESSAGE = 10;
 	
 	protected static final int CHAT_THEME = 11;
+	
+	protected static final int CLOSE_CURRENT_STEALTH_CHAT = 12;
 
 	protected ChatThreadActivity activity;
 
@@ -207,6 +210,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			break;
 		case CHAT_THEME:
 			setBackground((ChatTheme) msg.obj);
+			break;
+		case CLOSE_CURRENT_STEALTH_CHAT:
+			closeStealthChat();
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
@@ -1258,6 +1264,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		case HikePubSub.CHAT_BACKGROUND_CHANGED:
 			onChatBackgroundChanged(object);
 			break;
+		case HikePubSub.CLOSE_CURRENT_STEALTH_CHAT:
+			uiHandler.sendEmptyMessage(CLOSE_CURRENT_STEALTH_CHAT);
+			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1380,7 +1389,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		String[] commonEvents = new String[] { HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION, HikePubSub.MESSAGE_DELIVERED,
 				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED,
 				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.DELETE_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.MESSAGE_FAILED,
-				HikePubSub.CHAT_BACKGROUND_CHANGED };
+				HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT };
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -1764,6 +1773,35 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		{
 			currentTheme = pair.second;
 			sendUIMessage(CHAT_THEME, currentTheme);
+		}
+	}
+	
+	/**
+	 * Used to close the stealth chat
+	 */
+	private void closeStealthChat()
+	{
+		saveDraft();
+		activity.finish();
+	}
+	
+	/**
+	 * If the user had typed something, we save it as a draft and will show it in the edit text box when he/she comes back to this conversation.
+	 */
+	private void saveDraft()
+	{
+		if (mComposeView != null && mComposeView.getVisibility() == View.VISIBLE)
+		{
+			Editor editor = activity.getSharedPreferences(HikeConstants.DRAFT_SETTING, android.content.Context.MODE_PRIVATE).edit();
+			if (mComposeView.length() != 0)
+			{
+				editor.putString(msisdn, mComposeView.getText().toString());
+			}
+			else
+			{
+				editor.remove(msisdn);
+			}
+			editor.commit();
 		}
 	}
 }
