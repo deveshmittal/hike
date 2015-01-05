@@ -49,11 +49,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private Dialog smsDialog;
 	
+	private boolean isOnline;
+	
 	private static final int CONTACT_ADDED_OR_DELETED = 101;
 	
 	private static final int SHOW_SMS_SYNC_DIALOG = 102;
 	
 	private static final int SMS_SYNC_COMPLETE_OR_FAIL = 103;
+	
+	private static final int UPDATE_LAST_SEEN = 104;
 	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -312,7 +316,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		// TODO Add PubSubListeners
 		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.CONTACT_ADDED, HikePubSub.CONTACT_DELETED,
-				HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START };
+				HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START,
+				HikePubSub.LAST_SEEN_TIME_UPDATED };
 		return oneToOneListeners;
 	}
 
@@ -466,6 +471,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			break;
 		case HikePubSub.SMS_SYNC_START:
 			onSMSSyncStart();
+			break;
+		case HikePubSub.LAST_SEEN_TIME_UPDATED:
+			updateLastSeen((ContactInfo) object);
+			break;
 		default:
 			super.onEventReceived(type, object);
 		}
@@ -554,6 +563,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			case SMS_SYNC_COMPLETE_OR_FAIL:
 				dismissSMSSyncDialog();
 				break;
+			case UPDATE_LAST_SEEN:
+				setLastSeen((String) msg.obj);
+				break;
 			default:
 				Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
 				super.handleUIMessage(msg);
@@ -590,5 +602,82 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		// TODO :
 		// dialogShowing = DialogShowing.SMS_SYNCING_DIALOG;
+	}
+	
+	/**
+	 * Used to update last seen. This is called from the PubSub thread
+	 * @param object
+	 */
+	private void updateLastSeen(ContactInfo contactInfo)
+	{
+		/**
+		 * Proceeding only if the current chat thread is open and we should show the last seen
+		 */
+		if (msisdn.equals(contactInfo.getMsisdn()) && shouldShowLastSeen())
+		{
+			/**
+			 * Fix for case where server and client values are out of sync
+			 */
+			
+			int offLine = contactInfo.getOffline();
+			long lastSeenTime = contactInfo.getLastSeenTime();
+			
+			if(offLine == 1 && lastSeenTime <= 0)
+			{
+				return;
+			}
+			
+			/**
+			 * Updating mContactInfo object
+			 */
+			mContactInfo.setOffline(offLine);
+			mContactInfo.setLastSeenTime(lastSeenTime);
+			
+			String lastSeenString = Utils.getLastSeenTimeAsString(activity.getApplicationContext(), lastSeenTime, offLine, false, true);
+			
+			isOnline = mContactInfo.getOffline() == 0;
+			
+			if(isHikOfflineTipShowing() && isOnline)
+			{
+				/**
+				 * If hike to offline tip is showing and server sends that the user is online, we do not update the last seen field until all pending messages are delivered
+				 */
+				return;
+			}
+			
+			sendUIMessage(UPDATE_LAST_SEEN, lastSeenString);
+		}
+	}
+	
+	private boolean isHikOfflineTipShowing()
+	{
+		// TODO :
+		/**
+		 * if (hikeToOfflineTipview != null) { /* if hike offline tip is in last state this means it is going to hide;
+		 * 
+		 * if (((Integer) hikeToOfflineTipview.getTag()) == HIKE_TO_OFFLINE_TIP_STATE_3) { return false; } return hikeToOfflineTipview.getVisibility() == View.VISIBLE; }
+		 */
+		return false;
+	}
+	
+	/**
+	 * Called from the UI Thread
+	 * @param lastSeenString
+	 */
+	private void setLastSeen(String lastSeenString)
+	{
+		if(isOnline)
+		{
+			//shouldRunTimerForHikeOfflineTip = true;
+		}
+		
+		if(lastSeenString == null)
+		{
+			//setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
+		}
+		else
+		{
+			//setLastSeenText(lastSeenString);
+		}
 	}
 }
