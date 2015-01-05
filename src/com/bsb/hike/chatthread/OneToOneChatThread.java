@@ -59,6 +59,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private static final int UPDATE_LAST_SEEN = 104;
 	
+	private static final int SEND_SMS_PREF_TOGGLED = 105;
+	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
@@ -317,7 +319,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		// TODO Add PubSubListeners
 		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.CONTACT_ADDED, HikePubSub.CONTACT_DELETED,
 				HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START,
-				HikePubSub.LAST_SEEN_TIME_UPDATED };
+				HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED };
 		return oneToOneListeners;
 	}
 
@@ -475,6 +477,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case HikePubSub.LAST_SEEN_TIME_UPDATED:
 			updateLastSeen((ContactInfo) object);
 			break;
+		case HikePubSub.SEND_SMS_PREF_TOGGLED:
+			uiHandler.sendEmptyMessage(SEND_SMS_PREF_TOGGLED);
+			break;
 		default:
 			super.onEventReceived(type, object);
 		}
@@ -565,6 +570,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				break;
 			case UPDATE_LAST_SEEN:
 				setLastSeen((String) msg.obj);
+				break;
+			case SEND_SMS_PREF_TOGGLED:
+				updateUIForHikeStatus()
 				break;
 			default:
 				Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
