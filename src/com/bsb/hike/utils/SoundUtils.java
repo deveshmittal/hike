@@ -10,6 +10,7 @@ import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 
@@ -17,6 +18,10 @@ import com.bsb.hike.HikeConstants;
 
 public class SoundUtils
 {
+
+	private static Handler soundHandler = new Handler();
+
+	private static final int STOP_PLAY_TIMME = 5000; // In milliseconds
 
 	public static boolean isPlayTickSound(Context context)
 	{
@@ -39,7 +44,7 @@ public class SoundUtils
 		MediaPlayer mp = new MediaPlayer();
 		mp.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
 		final int notifVol = getCurrentVolume(context, AudioManager.STREAM_NOTIFICATION);
-		if(isAnyMusicPlaying(context))
+		if (isAnyMusicPlaying(context))
 		{
 			setCurrentVolume(context, AudioManager.STREAM_NOTIFICATION, notifVol);
 		}
@@ -95,7 +100,7 @@ public class SoundUtils
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Plays non-ducking sound from given Uri. Plays on {@link android.Media.AudioManager#STREAM_SYSTEM AudioManager.STREAM_SYSTEM} to enable non-ducking playback.
 	 * 
@@ -104,10 +109,21 @@ public class SoundUtils
 	 */
 	public static void playSound(final Context context, Uri soundUri)
 	{
-		MediaPlayer mp = new MediaPlayer();
+		// TODO Should consider SoundPool as everytime new object is created
+		final MediaPlayer mp = new MediaPlayer();
 		mp.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
+		final Runnable stopSoundRunnable = new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				mp.release();
+			}
+		};
+
 		final int notifVol = getCurrentVolume(context, AudioManager.STREAM_NOTIFICATION);
-		if(isAnyMusicPlaying(context))
+		if (isAnyMusicPlaying(context))
 		{
 			setCurrentVolume(context, AudioManager.STREAM_NOTIFICATION, notifVol);
 		}
@@ -123,10 +139,12 @@ public class SoundUtils
 				{
 					mp.release();
 					setCurrentVolume(context, AudioManager.STREAM_NOTIFICATION, notifVol);
+					soundHandler.removeCallbacks(stopSoundRunnable);
 				}
 			});
 			mp.prepare();
 			mp.start();
+			soundHandler.postDelayed(stopSoundRunnable, STOP_PLAY_TIMME);
 
 		}
 		catch (IllegalArgumentException e)
@@ -145,19 +163,19 @@ public class SoundUtils
 			mp.release();
 		}
 	}
-	
+
 	public static int getCurrentVolume(Context context, int streamType)
 	{
 		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		return am.getStreamVolume(streamType);
 	}
-	
+
 	public static void setCurrentVolume(Context context, int streamType, int vol)
 	{
 		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		am.setStreamVolume(streamType, vol, AudioManager.ADJUST_SAME);
 	}
-	
+
 	public static boolean isAnyMusicPlaying(Context context)
 	{
 		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
