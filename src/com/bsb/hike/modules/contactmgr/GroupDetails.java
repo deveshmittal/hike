@@ -15,6 +15,8 @@ public class GroupDetails
 	private ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns;
 
 	private long timestamp;
+	
+	private boolean isGroupMute;
 
 	GroupDetails(String groupId, String grpName, boolean alive, ConcurrentLinkedQueue<PairModified<String, String>> lastMsisdns)
 	{
@@ -30,6 +32,12 @@ public class GroupDetails
 		this.timestamp = timestamp;
 	}
 
+	public GroupDetails(String groupId, String grpName, boolean alive, boolean mute)
+	{
+		this(groupId, grpName, alive, null, 0);
+		this.isGroupMute = mute;
+	}
+	
 	public String getGroupId()
 	{
 		return groupId;
@@ -108,6 +116,16 @@ public class GroupDetails
 		}
 
 		return null;
+	}
+	
+	public boolean isGroupMute()
+	{
+		return isGroupMute;
+	}
+	
+	void setGroupMute(boolean mute)
+	{
+		isGroupMute = mute;
 	}
 
 }
