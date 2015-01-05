@@ -24,7 +24,6 @@ import android.widget.ImageView;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.Utils;
 
 public class NotificationToneListPreference extends ListPreference implements DialogInterface.OnClickListener
