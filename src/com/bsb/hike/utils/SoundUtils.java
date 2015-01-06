@@ -20,6 +20,19 @@ public class SoundUtils
 {
 
 	private static Handler soundHandler = new Handler();
+	
+	private static MediaPlayer mediaPlayer = new MediaPlayer();
+	
+	private static Runnable stopSoundRunnable = new Runnable()
+	{
+
+		@Override
+		public void run()
+		{
+			mediaPlayer.release();
+		}
+	};
+
 
 	private static final int STOP_PLAY_TIMME = 5000; // In milliseconds
 
@@ -109,19 +122,8 @@ public class SoundUtils
 	 */
 	public static void playSound(final Context context, Uri soundUri)
 	{
-		// TODO Should consider SoundPool as everytime new object is created
-		final MediaPlayer mp = new MediaPlayer();
-		mp.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
-		final Runnable stopSoundRunnable = new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				mp.release();
-			}
-		};
-
+		//final MediaPlayer mp = new MediaPlayer();
+		mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
 		final int notifVol = getCurrentVolume(context, AudioManager.STREAM_NOTIFICATION);
 		if (isAnyMusicPlaying(context))
 		{
@@ -129,9 +131,9 @@ public class SoundUtils
 		}
 		try
 		{
-			mp.setDataSource(context, soundUri);
+			mediaPlayer.setDataSource(context, soundUri);
 
-			mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
+			mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
 			{
 
 				@Override
@@ -142,25 +144,25 @@ public class SoundUtils
 					soundHandler.removeCallbacks(stopSoundRunnable);
 				}
 			});
-			mp.prepare();
-			mp.start();
+			mediaPlayer.prepare();
+			mediaPlayer.start();
 			soundHandler.postDelayed(stopSoundRunnable, STOP_PLAY_TIMME);
 
 		}
 		catch (IllegalArgumentException e)
 		{
 			e.printStackTrace();
-			mp.release();
+			mediaPlayer.release();
 		}
 		catch (IllegalStateException e)
 		{
 			e.printStackTrace();
-			mp.release();
+			mediaPlayer.release();
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			mp.release();
+			mediaPlayer.release();
 		}
 	}
 
