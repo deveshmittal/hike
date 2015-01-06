@@ -1307,6 +1307,12 @@ public class MqttMessagesManager
 			editor.putBoolean(AnalyticsConstants.ANALYTICS, isAnalyticsEnabled);
 			HAManager.getInstance(context).setAnalyticsEnabled(isAnalyticsEnabled);
 		}
+		if(data.has(AnalyticsConstants.ANALYTICS_TOTAL_SIZE))
+		{
+			long size = data.getLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE);
+			editor.putLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, size);
+			HAManager.getInstance(context).setAnalyticsMaxSizeOnClient(size);
+		}
 		
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
@@ -1369,7 +1375,8 @@ public class MqttMessagesManager
 		if(data.optBoolean(AnalyticsConstants.ANALYTICS))
 		{		
 			// if total logged data is less than threshold value, try sending all the data
-			if((AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= AnalyticsConstants.MAX_ANALYTICS_SIZE) || (Utils.getNetworkType(context) == 1))
+			if((AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance(context).getMaxAnalyticsSizeOnClient()) || 
+					(Utils.getNetworkType(context) == 1))
 			{
 				new Thread(AnalyticsSender.getInstance(context)).start();
 			}

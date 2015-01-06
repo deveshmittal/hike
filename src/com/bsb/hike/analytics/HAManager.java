@@ -36,7 +36,9 @@ public class HAManager
 	public static String ANALYTICS_SETTINGS = "analyticssettings";
 
 	public static String FILE_SIZE_LIMIT = "fileSizeLimit";
-	
+
+	public static String ANALYTICS_SIZE_LIMIT = "analyticsSizeLimit";
+
 	public static String HOUR_TO_SEND = "hourToSend";
 	
 	public static String ANALYTICS_SERVICE_STATUS = "analyticsServiceStatus";
@@ -44,6 +46,8 @@ public class HAManager
 	private boolean isAnalyticsEnabled = true;
 	
 	private long fileMaxSize = AnalyticsConstants.MAX_FILE_SIZE;
+	
+	private long analyticsMaxSize = AnalyticsConstants.MAX_ANALYTICS_SIZE;
 	
 	private int analyticsUploadFrequency = 0;
 	
@@ -61,6 +65,8 @@ public class HAManager
 		isAnalyticsEnabled = getPrefs().getBoolean(HAManager.ANALYTICS_SERVICE_STATUS, AnalyticsConstants.IS_ANALYTICS_ENABLED);
 		
 		fileMaxSize = getPrefs().getLong(HAManager.FILE_SIZE_LIMIT, AnalyticsConstants.MAX_FILE_SIZE);
+		
+		analyticsMaxSize = getPrefs().getLong(ANALYTICS_SIZE_LIMIT, AnalyticsConstants.MAX_ANALYTICS_SIZE);
 		
 		long whenToSendAnalytics = Utils.getTimeInMillis(Calendar.getInstance(), getWhenToSend(), 0, 0);  
 	
@@ -231,6 +237,24 @@ public class HAManager
 	public void setFileMaxSize(long size)
 	{
 		fileMaxSize = size;
+	}
+	
+	/**
+	 * Used to set the maximum analytics size on the client
+	 * @param size
+	 */
+	public void setAnalyticsMaxSizeOnClient(long size)
+	{
+		analyticsMaxSize = size;
+	}
+	
+	/**
+	 * Used to get the maximum analytics size on the client
+	 * @return size of analytics in Kbs
+	 */
+	public long getMaxAnalyticsSizeOnClient()	
+	{
+		return getPrefs().getLong(HAManager.ANALYTICS_SIZE_LIMIT, AnalyticsConstants.MAX_ANALYTICS_SIZE );
 	}
 	
 	/**

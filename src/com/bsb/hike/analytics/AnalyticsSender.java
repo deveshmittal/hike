@@ -177,7 +177,9 @@ public class AnalyticsSender implements Runnable
 		if(!isAnalyticsUploadReady())
 			return;
 		
-		if(AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= AnalyticsConstants.MAX_ANALYTICS_SIZE || Utils.getNetworkType(context) == 1)
+		HAManager instance = HAManager.getInstance(context);
+
+		if(AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= instance.getMaxAnalyticsSizeOnClient() || Utils.getNetworkType(context) == 1)
 		{
 			new Thread(AnalyticsSender.getInstance(context)).start();
 		}
@@ -187,9 +189,7 @@ public class AnalyticsSender implements Runnable
 			
 			new Thread(AnalyticsSender.getInstance(context)).start();
 		}
-		
-		HAManager instance = HAManager.getInstance(context);
-		
+				
 		long nextSchedule = 0;
 		
 		if(instance.getAnalyticsUploadFrequency() < AnalyticsConstants.ANALYTICS_UPLOAD_FREQUENCY)
