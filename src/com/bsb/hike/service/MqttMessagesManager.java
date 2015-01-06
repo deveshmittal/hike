@@ -2117,13 +2117,13 @@ public class MqttMessagesManager
 		else if (HikeConstants.MqttMessageTypes.MESSAGE_VOIP_0.equals(type) ||
 				HikeConstants.MqttMessageTypes.MESSAGE_VOIP_1.equals(type)) {
 
-			Log.d(VoIPConstants.TAG, "Received VoIP Message");
+//			Log.d(VoIPConstants.TAG, "Received VoIP Message");
 
 			// VoIP checks
 			if (jsonObj.has(HikeConstants.SUB_TYPE)) {
 				
 				String subType = jsonObj.getString(HikeConstants.SUB_TYPE); 
-				Log.d(VoIPConstants.TAG, "VoIP Message subtype: " + subType);
+//				Log.d(VoIPConstants.TAG, "VoIP Message subtype: " + subType);
 
 				if (subType.equals(HikeConstants.MqttMessageTypes.VOIP_SOCKET_INFO)) {
 
@@ -2137,7 +2137,7 @@ public class MqttMessagesManager
 					 * to establish a connection, the user will see a call screen popup and
 					 * disappear. 
 					 */
-//					Log.d(VoIPConstants.TAG, "Receiving socket info..");
+					Log.d(VoIPConstants.TAG, "Receiving socket info..");
 					JSONObject metadataJSON = jsonObj.getJSONObject(HikeConstants.DATA).getJSONObject(HikeConstants.METADATA);
 					
 					if (VoIPService.isConnected() && 
@@ -2169,6 +2169,7 @@ public class MqttMessagesManager
 					i.putExtra("initiator", metadataJSON.getBoolean("initiator"));
 					i.putExtra("callId", metadataJSON.getInt("callId"));
 					context.startService(i);
+					Log.w(VoIPConstants.TAG, "Intent passed to service.");
 					return;
 				}
 				

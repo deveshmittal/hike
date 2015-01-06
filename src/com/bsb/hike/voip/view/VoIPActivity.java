@@ -650,6 +650,7 @@ public class VoIPActivity extends Activity implements CallActions
 		TextView contactMsisdnView = (TextView) findViewById(R.id.contact_msisdn);
 
 		VoIPClient clientPartner = voipService.getPartnerClient();
+//		Logger.w(VoIPConstants.TAG, "Partner Msisdn: " + clientPartner.getPhoneNumber());
 		ContactInfo contactInfo = ContactManager.getInstance().getContact(clientPartner.getPhoneNumber());
 		String nameOrMsisdn = contactInfo.getNameOrMsisdn();
 		if(nameOrMsisdn.length() > 16)

@@ -55,7 +55,7 @@ public class OpusWrapper {
 			return;
 		
 		opus_set_complexity(encoder, complexity);
-		Log.d(VoIPConstants.TAG, "Setting complexity to: " + complexity);
+//		Log.d(VoIPConstants.TAG, "Setting complexity to: " + complexity);
 	}
 	
 	public int getDecoder(int samplingRate, int channels) {
