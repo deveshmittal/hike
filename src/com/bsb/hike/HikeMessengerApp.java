@@ -780,8 +780,7 @@ public void onTrimMemory(int level)
 			editor.commit();
 		}
 
-		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), Utils.switchSSLOn(getApplicationContext()));
-
+		Utils.setupUri();
 		typingNotificationMap = new HashMap<String, TypingNotification>();
 
 		stealthMsisdn = new HashSet<String>();

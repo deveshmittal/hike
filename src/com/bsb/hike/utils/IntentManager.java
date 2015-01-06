@@ -116,7 +116,7 @@ public class IntentManager
 		               
 		if(!TextUtils.isEmpty(hikeExtrasUrl))                   
 		{
-			if(Utils.switchSSLOn(context))
+			if(Utils.switchSSLOn())
 			{
 				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.HTTPS_STRING + hikeExtrasUrl + HikeConstants.ANDROID + "/" +  prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));				
 			}
@@ -149,7 +149,7 @@ public class IntentManager
 		
 		if(!TextUtils.isEmpty(rewards_url))
 		{
-			if(Utils.switchSSLOn(context))  
+			if(Utils.switchSSLOn())  
 			{
 				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.HTTPS_STRING + rewards_url + HikeConstants.ANDROID + "/" + prefs.getString(HikeMessengerApp.REWARDS_TOKEN, ""));
 			}

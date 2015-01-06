@@ -746,7 +746,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		}
 		else if (HikeConstants.SSL_PREF.equals(preference.getKey()))
 		{
-			Utils.setupUri(this.getApplicationContext());
+			Utils.setupUri();
 			LocalBroadcastManager.getInstance(this.getApplicationContext()).sendBroadcast(new Intent(HikePubSub.SSL_PREFERENCE_CHANGED));
 		}
 		else if (HikeConstants.STATUS_BOOLEAN_PREF.equals(preference.getKey()))

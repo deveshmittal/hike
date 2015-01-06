@@ -490,7 +490,7 @@ public class SignupActivity extends ChangeProfileImageBaseActivity implements Si
 				/*
 				 * Update the urls to use ssl or not.
 				 */
-				Utils.setupUri(this.getApplicationContext());
+				Utils.setupUri();
 
 				boolean showNuxScreen = accountPrefs.getBoolean(HikeConstants.SHOW_NUX_SCREEN, false);
 				/*

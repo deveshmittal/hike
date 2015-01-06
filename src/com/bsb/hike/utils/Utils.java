@@ -1618,14 +1618,14 @@ public class Utils
 		return b;
 	}
 
-	public static void setupUri(Context ctx)
+	public static void setupUri()
 	{
-		SharedPreferences settings = ctx.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		boolean connectUsingSSL = Utils.switchSSLOn(ctx);
+		SharedPreferences settings = HikeMessengerApp.getInstance().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		boolean connectUsingSSL = Utils.switchSSLOn();
 		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true), connectUsingSSL);
 	}
 
-	public static void setupServerURL(boolean isProductionServer, boolean ssl)
+	private static void setupServerURL(boolean isProductionServer, boolean ssl)
 	{
 		Logger.d("SSL", "Switching SSL on? " + ssl);
 
@@ -2211,19 +2211,18 @@ public class Utils
 	/**
 	 * This will return true when SSL toggle is on and connection type is WIFI
 	 * 
-	 * @param context
 	 * @return
 	 */
-	public static boolean switchSSLOn(Context context)
+	public static boolean switchSSLOn()
 	{
 		/*
 		 * If the preference itself is switched to off, we don't need to check if the wifi is on or off.
 		 */
-		if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.SSL_PREF, true))
+		if (!PreferenceManager.getDefaultSharedPreferences(HikeMessengerApp.getInstance()).getBoolean(HikeConstants.SSL_PREF, true))
 		{
 			return false;
 		}
-		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		ConnectivityManager cm = (ConnectivityManager) HikeMessengerApp.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE);
 		try
 		{
 			return (cm != null && cm.getActiveNetworkInfo() != null && (cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI));

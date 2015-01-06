@@ -647,7 +647,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 			if (forceDisconnect)
 				return;
 
-			boolean connectUsingSSL = Utils.switchSSLOn(context);
+			boolean connectUsingSSL = Utils.switchSSLOn();
 
 			// setBrokerHostPort(connectUsingSSL);
 
@@ -1316,7 +1316,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 			Logger.d(TAG, "Network change event happened. Network connected : " + isNetwork);
 			if (isNetwork)
 			{
-				boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
+				boolean shouldConnectUsingSSL = Utils.switchSSLOn();
 				boolean isSSLConnected = isSSLAlreadyOn();
 				// reconnect using SSL as currently not connected using SSL
 				if (shouldConnectUsingSSL && !isSSLConnected)
@@ -1332,7 +1332,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 					connectOnMqttThread();
 				}
 			}
-			Utils.setupUri(context); // TODO : this should be moved out from here to some other place
+			Utils.setupUri(); // TODO : this should be moved out from here to some other place
 		}
 		else if (intent.getAction().equals(MQTT_CONNECTION_CHECK_ACTION))
 		{
@@ -1352,7 +1352,7 @@ public class HikeMqttManagerNew extends BroadcastReceiver implements Listener
 			/*
 			 * ssl settings toggled so disconnect and reconnect mqtt
 			 */
-			boolean shouldConnectUsingSSL = Utils.switchSSLOn(context);
+			boolean shouldConnectUsingSSL = Utils.switchSSLOn();
 			boolean isSSLConnected = isSSLAlreadyOn();
 			Logger.d(TAG, "SSL Preference has changed. OnSSL : " + shouldConnectUsingSSL + " ,isSSLAlreadyOn : " + isSSLConnected);
 			// reconnect using SSL as currently not connected using SSL

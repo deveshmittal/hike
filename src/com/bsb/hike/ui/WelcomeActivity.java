@@ -49,9 +49,6 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
 
-		Utils.setupServerURL(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.PRODUCTION, true),
-				Utils.switchSSLOn(getApplicationContext()));
-
 		mAcceptButton = (Button) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
 		tcText = findViewById(R.id.terms_and_conditions);
@@ -117,11 +114,11 @@ public class WelcomeActivity extends HikeAppStateBaseFragmentActivity implements
 		SharedPreferences sharedPreferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 		boolean production = sharedPreferences.getBoolean(HikeMessengerApp.PRODUCTION, true);
 
-		Utils.setupServerURL(!production, Utils.switchSSLOn(this));
-
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 		editor.putBoolean(HikeMessengerApp.PRODUCTION, !production);
 		editor.commit();
+		
+		Utils.setupUri();
 
 		Toast.makeText(WelcomeActivity.this, AccountUtils.base, Toast.LENGTH_SHORT).show();
 	}
