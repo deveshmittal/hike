@@ -1122,7 +1122,8 @@ public class HikeNotification
 					}
 					else
 					{
-						mBuilder.setSound(Uri.parse(notifSound));
+						mBuilder.setSound(Uri.parse(HikeSharedPreferenceUtil.getInstance(context).
+								getData(HikeMessengerApp.NOTIFICATION_TONE_URI, Uri.EMPTY.toString())));
 					}
 				}
 
