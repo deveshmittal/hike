@@ -452,7 +452,7 @@ public class NUXManager
 			object.put(NUXConstants.INVITE_ARRAY, mmArray);
 			root.put(HikeConstants.DATA, object);
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, root.toString());
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, root);
 
 		}
 		catch (JSONException e)

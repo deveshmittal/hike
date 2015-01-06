@@ -28,6 +28,7 @@ import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -49,6 +50,7 @@ import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gms.internal.co;
@@ -629,8 +631,13 @@ public class ConversationsAdapter extends BaseAdapter
 
 		CharSequence markedUp = getConversationText(conversation, message);
 
-		messageView.setVisibility(View.VISIBLE);
-		messageView.setText("behcn");
+		messageView.setVisibility(View.VISIBLE); 
+		if(NUXManager.getInstance(context).getCurrentState() == NUXConstants.NUX_IS_ACTIVE &&NUXManager.getInstance(context).getAllNUXContacts().contains(message.getMsisdn())){
+			messageView.setText("Waiting for response");
+		}
+		else{
+			messageView.setText(markedUp);
+		}
 		TextView tsView = viewHolder.timeStamp;
 		tsView.setText(message.getTimestampFormatted(true, context));
 	}

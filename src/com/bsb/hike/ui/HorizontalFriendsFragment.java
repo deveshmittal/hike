@@ -117,7 +117,7 @@ public class HorizontalFriendsFragment extends Fragment {
     	super.onActivityCreated(savedInstanceState);
     	LayoutInflater inf = getLayoutInflater(savedInstanceState);
     	View py; 
-    	for(int i=0;i<savedInstanceState.getInt("count");i++){
+    	for(int i=0;i<5;i++){
     		py = inf.inflate(R.layout.friends_horizontal_item,null);
     		py.setTag("tag" + i);
     		ll.addView(py);

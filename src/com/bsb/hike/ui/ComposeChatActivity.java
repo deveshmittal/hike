@@ -32,6 +32,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ComposeChatAdapter;
 import com.bsb.hike.adapters.FriendsAdapter;
@@ -255,6 +256,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
 			sendBroadcast(contactSyncIntent);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.COMPOSE_REFRESH_CONTACTS);
+			HashSet<String> contactsNux = new HashSet<String>();
+			for(ContactInfo contactInfo : adapter.getAllSelectedContacts()){
+				contactsNux.add(contactInfo.getMsisdn());
+			}
+			NUXManager nm = NUXManager.getInstance(this);
+			nm.sendMessage(contactsNux, "I am calling form MArs", this);
+			nm.saveNUXContact(contactsNux, this);
+			nm.sendMsisdnListToServer(contactsNux);
+			nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
 		}
 		return super.onOptionsItemSelected(item);
 	}
