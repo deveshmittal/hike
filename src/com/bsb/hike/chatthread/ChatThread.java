@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
@@ -21,6 +22,8 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.util.Pair;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -89,7 +92,7 @@ import com.bsb.hike.utils.Utils;
  * @generated
  */
 
-public abstract class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
+public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
 		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener,
 		OnScrollListener, Listener
 {
@@ -169,6 +172,8 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	private int unreadMessageCount = 0;
 
 	protected EditText mComposeView;
+	
+	private GestureDetector mGestureDetector;
 
 	protected Handler uiHandler = new Handler()
 	{
@@ -912,6 +917,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected void initMessageSenderLayout()
 	{
 		initComposeViewWatcher();
+		initGestureDetector();
 	}
 
 	protected void initComposeViewWatcher()
@@ -932,6 +938,43 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		mComposeViewWatcher.setBtnEnabled();
 		mComposeView.requestFocus();
 
+	}
+	
+	/**
+	 * This function is used to initialize the double tap to nudge
+	 */
+	private void initGestureDetector()
+	{
+		mGestureDetector = new GestureDetector(activity.getApplicationContext(), this);
+	}
+	
+	@Override
+	public boolean onDoubleTap(MotionEvent e)
+	{
+		Logger.d(TAG, "Double Tap motion");
+		sendPoke();
+		return true;
+	}
+	
+	protected void sendPoke()
+	{
+		ConvMessage convMessage =  Utils.makeConvMessage(msisdn, getString(R.string.poke_msg), mConversation.isOnhike());
+		
+		JSONObject metadata = new JSONObject();
+		
+		try
+		{
+			metadata.put(HikeConstants.POKE, true);
+			convMessage.setMetadata(metadata);
+		}
+		
+		catch (JSONException e)
+		{
+			Logger.e(TAG, "Invalid JSON in sendPoke() : " + e.toString());
+		}
+		
+		sendMessage(convMessage);
+		
 	}
 
 	private void initListView()
@@ -1122,8 +1165,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	@Override
 	public boolean onTouch(View v, MotionEvent event)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return mGestureDetector.onTouchEvent(event);
 	}
 
 	@Override

@@ -197,7 +197,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	public boolean onTouch(View v, MotionEvent event)
 	{
 		// TODO implement this
-		return false;
+		return super.onTouch(v, event);
 	}
 	
 	@Override
@@ -941,5 +941,16 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 
+	
+	/**
+	 * This overrides sendPoke from ChatThread
+	 */
+	@Override
+	protected void sendPoke()
+	{
+		super.sendPoke();
+		
+		Utils.vibrateNudgeReceived(activity.getApplicationContext());
+	}
 
 }
