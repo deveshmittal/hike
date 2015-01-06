@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.net.ConnectivityManager;
 
 import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.utils.Logger;
@@ -99,71 +100,75 @@ public class HAManager
 	/**
 	 * records the analytics event to the file
 	 * @param type event type
-	 * @param context context of the event
+	 * @param eventContext context of the event
 	 */
-	public void record(String type, String context)
+	public void record(String type, String eventContext)
 	{
 		if(!isAnalyticsEnabled)
 			return;
-		recordEvent(type, context, EventPriority.NORMAL, null, AnalyticsConstants.EVENT_TAG_VALUE);
+		recordEvent(type, eventContext, EventPriority.NORMAL, null, AnalyticsConstants.EVENT_TAG_VALUE);
 	}
 
 	/**
 	 * records the analytics event to the file
 	 * @param type event type
-	 * @param context context of the event
+	 * @param eventContext context of the event
 	 * @param priority priority of the event
 	 * @param metadata metadata of the event
 	 */
-	public void record(String type, String context, JSONObject metadata)
+	public void record(String type, String eventContext, JSONObject metadata)
 	{
 		if(!isAnalyticsEnabled)
 			return;
-		recordEvent(type, context, EventPriority.NORMAL, metadata, AnalyticsConstants.EVENT_TAG_VALUE);
+		recordEvent(type, eventContext, EventPriority.NORMAL, metadata, AnalyticsConstants.EVENT_TAG_VALUE);
 	}
 
 	/**
 	 * records the analytics event to the file
 	 * @param type type of the event
-	 * @param context context of the event
+	 * @param eventContext context of the event
 	 * @param priority event priority
 	 * @param tag tag for the event
 	 */
-	public void record(String type, String context, EventPriority priority, String tag)
+	public void record(String type, String eventContext, EventPriority priority, String tag)
 	{
 		if(!isAnalyticsEnabled)
 			return;
-		recordEvent(type, context, priority, null, tag);
+		recordEvent(type, eventContext, priority, null, tag);
 	}
 
 	/**
 	 * records the analytics event to the file
 	 * @param type type of the event
-	 * @param context context of the event
+	 * @param eventContext context of the event
 	 * @param priority priority of the event
 	 * @param metadata metadata of the event
 	 * @param tag tag of the event
 	 */
-	public void record(String type, String context, EventPriority priority, JSONObject metadata, String tag)
+	public void record(String type, String eventContext, EventPriority priority, JSONObject metadata, String tag)
 	{
 		if(!isAnalyticsEnabled)
 			return;
-		recordEvent(type, context, priority, metadata, tag);
+		recordEvent(type, eventContext, priority, metadata, tag);
 	}
-	
+
 	/**
-	 * records the analytics event to the file
-	 * @param event event to be logged
-	 * @param context application context
+	 * Used to write the event onto the text file
+	 * @param type type of the event
+	 * @param eventContext context for the event
+	 * @param priority priority of the event
+	 * @param metadata event metadata
+	 * @param tag tag for the event
+	 * @throws NullPointerException
 	 */
 	// TODO need to look for a better way to do this operation and avoid synchronization
-	private synchronized void recordEvent(String type, String context, EventPriority priority, JSONObject metadata, String tag) throws NullPointerException 
+	private synchronized void recordEvent(String type, String eventContext, EventPriority priority, JSONObject metadata, String tag) throws NullPointerException 
 	{
-		if(type == null || context == null)
+		if(type == null || eventContext == null)
 		{
 			throw new NullPointerException("Type and Context of event cannot be null.");
 		}
-		eventsList.add(generateAnalticsJson(type, context, priority, metadata, tag));
+		eventsList.add(generateAnalticsJson(type, eventContext, priority, metadata, tag));
 
 		if (AnalyticsConstants.MAX_EVENTS_IN_MEMORY == eventsList.size()) 
 		{			
@@ -178,17 +183,31 @@ public class HAManager
 		}
 	}
 
+	public synchronized void dumpMostRecentEvents()
+	{
+		if(eventsList.size() > 0)
+		{
+			ArrayList<JSONObject> jsons = (ArrayList<JSONObject>) eventsList.clone();
+			
+			eventsList.clear();
+			
+			AnalyticsStore.getInstance(this.context).dumpEvents(jsons);
+		}
+	}
+	
 	/**
 	 * sets the analytics service settings for the client
 	 * @param context application context
 	 * @param maxFileSize maximum event file size in bytes
+	 * @param maxAnalyticsSize maximum size of the total analytics data on client
 	 * @param whenToSend time(long) of the day when event file should be sent to the server
 	 * @param isServiceEnabled true if analytics service should be stopped, false otherwise
 	 */
-	public void configureAnalyticsService(long maxFileSize, int whenToSend, boolean isServiceEnabled)	
+	public void configureAnalyticsService(long maxFileSize, long maxAnalyticsSize, int whenToSend, boolean isServiceEnabled)	
 	{
 		Editor editor = getPrefs().edit();
 		editor.putLong(HAManager.FILE_SIZE_LIMIT, AnalyticsConstants.MAX_FILE_SIZE);
+		editor.putLong(HAManager.ANALYTICS_SIZE_LIMIT, AnalyticsConstants.MAX_ANALYTICS_SIZE);
 		editor.putBoolean(HAManager.ANALYTICS_SERVICE_STATUS, AnalyticsConstants.IS_ANALYTICS_ENABLED);
 		editor.putInt(HAManager.HOUR_TO_SEND, AnalyticsConstants.HOUR_OF_DAY_TO_SEND);
 		editor.commit();
@@ -294,13 +313,13 @@ public class HAManager
 	/**
 	 * generates the analytics json object to be written to the file
 	 * @param type type of the event
-	 * @param context context of the event
+	 * @param eventContext context of the event
 	 * @param priority priority of the event
 	 * @param metadata metadata of the event
 	 * @param tag tag for the event
 	 * @return
 	 */
-	private JSONObject generateAnalticsJson(String type, String context, EventPriority priority, JSONObject metadata, String tagValue)
+	private JSONObject generateAnalticsJson(String type, String eventContext, EventPriority priority, JSONObject metadata, String tagValue)
 	{		
 		JSONObject json = new JSONObject();
 		JSONObject data = new JSONObject();
@@ -308,7 +327,7 @@ public class HAManager
 		try 
 		{
 			data.put(AnalyticsConstants.EVENT_TYPE, type);				
-			data.put(AnalyticsConstants.EVENT_SUB_TYPE, context);
+			data.put(AnalyticsConstants.EVENT_SUB_TYPE, eventContext);
 			data.put(AnalyticsConstants.EVENT_PRIORITY, priority);
 			data.put(AnalyticsConstants.CURRENT_TIME_STAMP, System.currentTimeMillis());
 			data.put(AnalyticsConstants.EVENT_TAG, tagValue);
@@ -325,5 +344,19 @@ public class HAManager
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}		
 		return json;
+	}		
+	
+	/**
+	 * Used to send the analytics data to the server
+	 */
+	public void sendAnalyticsData()
+	{
+		// if total logged data is less than threshold value or wifi is available, try sending all the data else delete normal priority data
+		if(!((AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance(context).getMaxAnalyticsSizeOnClient()) || 
+				(Utils.getNetworkType(context) == ConnectivityManager.TYPE_WIFI)))
+		{
+			AnalyticsStore.getInstance(context).deleteNormalPriorityData();
+		}
+		new Thread(AnalyticsSender.getInstance(context)).start();
 	}	
 }

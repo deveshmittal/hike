@@ -25,9 +25,9 @@ public class AnalyticsStore
 	
 	private static AnalyticsStore _instance; 
 		
-	private File normalEventFile;
+	private File normalPriorityEventFile;
 	
-	private File impEventFile;
+	private File highPriorityEventFile;
 	
 	/**
 	 * Constructor
@@ -39,9 +39,9 @@ public class AnalyticsStore
 				
 		try 
 		{
-			normalEventFile = createNewEventFile(EventPriority.NORMAL);
+			normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
 			
-			impEventFile = createNewEventFile(EventPriority.HIGH);
+			highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
 		}
 		catch (IOException e) 
 		{
@@ -100,16 +100,16 @@ public class AnalyticsStore
 		
 		if(priority == EventPriority.NORMAL)
 		{
-			if(normalEventFile != null)
+			if(normalPriorityEventFile != null)
 			{
-				fileLength = normalEventFile.length();
+				fileLength = normalPriorityEventFile.length();
 			}
 		}
 		else if(priority == EventPriority.HIGH)
 		{
-			if(impEventFile != null)
+			if(highPriorityEventFile != null)
 			{
-				fileLength = impEventFile.length();
+				fileLength = highPriorityEventFile.length();
 			}
 		}		
 		return fileLength;
@@ -188,16 +188,16 @@ public class AnalyticsStore
 					{
 						if(!eventFileExists(EventPriority.NORMAL))
 						{
-							normalEventFile = createNewEventFile(EventPriority.NORMAL);
+							normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
 						}
 
 						if(getFileSize(EventPriority.NORMAL) >= AnalyticsConstants.MAX_FILE_SIZE)
 						{
-							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "normal priority file size reached its limit! " + normalEventFile.getName());
-							normalEventFile = createNewEventFile(EventPriority.NORMAL);
+							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "normal priority file size reached its limit! " + normalPriorityEventFile.getName());
+							normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
 						}
 
-						fileWriter = new FileWriter(normalEventFile, true);
+						fileWriter = new FileWriter(normalPriorityEventFile, true);
 						fileWriter.write(normal.toString());
 
 						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to the file!");
@@ -206,15 +206,15 @@ public class AnalyticsStore
 					{
 						if(!eventFileExists(EventPriority.HIGH))
 						{
-							impEventFile = createNewEventFile(EventPriority.HIGH);
+							highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
 						}
 
 						if(getFileSize(EventPriority.HIGH) >= AnalyticsConstants.MAX_FILE_SIZE)
 						{
-							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "high priority file size reached its limit! " + impEventFile.getName());
-							impEventFile = createNewEventFile(EventPriority.HIGH);
+							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "high priority file size reached its limit! " + highPriorityEventFile.getName());
+							highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
 						}
-						fileWriter = new FileWriter(normalEventFile, true);
+						fileWriter = new FileWriter(normalPriorityEventFile, true);
 						fileWriter.write(normal.toString());
 					}	
 				}
@@ -251,11 +251,11 @@ public class AnalyticsStore
 		
 		if(priority == EventPriority.NORMAL)
 		{
-			isExist = normalEventFile != null && normalEventFile.exists();
+			isExist = normalPriorityEventFile != null && normalPriorityEventFile.exists();
 		}
 		else if(priority == EventPriority.HIGH)
 		{
-			isExist = impEventFile != null && impEventFile.exists();			
+			isExist = highPriorityEventFile != null && highPriorityEventFile.exists();			
 		}
 		return isExist;
 	}
@@ -282,14 +282,14 @@ public class AnalyticsStore
 	 */
 	public long getTotalAnalyticsSize()
 	{
-		long dirSize = -1;
+		long dirSize = 0;
 		
 		File dir = new File(context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR + File.separator);
 
 		File[] file = dir.listFiles();
 
 		if(file == null)
-			return dirSize;
+			return 0;
 		
 		int size = file.length;
 		

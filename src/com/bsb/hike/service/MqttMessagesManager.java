@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -1371,22 +1372,12 @@ public class MqttMessagesManager
 			editor.commit();
 			context.sendBroadcast(new Intent(HikeService.SEND_GB_DETAILS_TO_SERVER_ACTION));
 		}
-		// server on demand analytics data to sent from client
+		// server on demand analytics data to be sent from client
 		if(data.optBoolean(AnalyticsConstants.ANALYTICS))
 		{		
-			// if total logged data is less than threshold value, try sending all the data
-			if((AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance(context).getMaxAnalyticsSizeOnClient()) || 
-					(Utils.getNetworkType(context) == 1))
-			{
-				new Thread(AnalyticsSender.getInstance(context)).start();
-			}
-			// else try sending data of high priority only, delete normal priority analytics data
-			else
-			{
-				AnalyticsStore.getInstance(context).deleteNormalPriorityData();
-				
-				new Thread(AnalyticsSender.getInstance(context)).start();
-			}
+			HAManager.getInstance(context).dumpMostRecentEvents();
+			
+			HAManager.getInstance(context).sendAnalyticsData();
 		}
 	}
 

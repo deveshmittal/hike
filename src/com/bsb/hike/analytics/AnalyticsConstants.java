@@ -21,7 +21,7 @@ public class AnalyticsConstants
 	
 	public static boolean IS_ANALYTICS_ENABLED = true;
 	
-	public static final int MAX_EVENTS_IN_MEMORY = 2;
+	public static final int MAX_EVENTS_IN_MEMORY = 50;
 	
 	public static final String HTTP_UPLOAD_URL = "http://staging.im.hike.in/v1/logs/analytics"; 
 	
