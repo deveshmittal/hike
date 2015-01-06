@@ -3,15 +3,19 @@ package com.bsb.hike.chatthread;
 import java.util.List;
 import java.util.Set;
 
+import android.view.LayoutInflater;
 import android.view.View;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.bsb.hike.R;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.media.OverFlowMenuLayout;
 import com.bsb.hike.media.OverflowItemClickListener;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
 /**
  * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -22,7 +26,7 @@ import com.bsb.hike.media.OverflowItemClickListener;
 public class HikeActionBar
 {
 
-	private SherlockFragmentActivity mActivity;
+	private HikeAppStateBaseFragmentActivity mActivity;
 
 	public OverFlowMenuLayout overFlowMenuLayout;
 
@@ -31,7 +35,7 @@ public class HikeActionBar
 	 * @ordered
 	 */
 
-	public HikeActionBar(SherlockFragmentActivity activity)
+	public HikeActionBar(HikeAppStateBaseFragmentActivity activity)
 	{
 		this.mActivity = activity;
 
@@ -77,15 +81,38 @@ public class HikeActionBar
 	}
 
 	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
+	 * This function is used to inflate a custom layout for action bar. 
+	 * It returns the view inflated. The calling classes have to set the View in the ActionBar themselves.
+	 * @param layoutResId
 	 */
-
-	public void setActionbarXML(int parameter)
+	public View inflateCustomActionBarView(int layoutResId, int color)
 	{
-		// TODO implement me
+		ActionBar sherlockActionBar = mActivity.getSupportActionBar();
+		sherlockActionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+		
+		View actionBarView = LayoutInflater.from(mActivity.getApplicationContext()).inflate(layoutResId, null);
+		
+		sherlockActionBar.setCustomView(actionBarView);
+		
+		/**
+		 * Setting the custom color here
+		 */
+		if(color != -1)
+		{
+			mActivity.updateActionBarColor(color);
+		}
+		
+		return actionBarView;
+	}
+	
+	/**
+	 * Called when we use the default color for action bar's background
+	 * @param layoutResId
+	 * @return
+	 */
+	public View inflateCustomActionBarView(int layoutResId)
+	{
+		return inflateCustomActionBarView(layoutResId, -1);
 	}
 
 	/**
