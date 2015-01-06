@@ -1271,7 +1271,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 	private void onCreateThemeMenu(Menu menu)
 	{
-		menu.getItem(0).setVisible(true);
+		if((mConversation!=null && !mConversation.isOnhike()) || HikeMessengerApp.hikeBotNamesMap.containsKey(mContactNumber))
+		{
+			menu.getItem(0).setVisible(false);
+		}
 		menu.getItem(1).setVisible(false);
 		if(tipView!=null && tipView.getVisibility()== View.VISIBLE && tipView.getTag() instanceof TipType && (TipType)tipView.getTag()==TipType.PIN)
 		{
@@ -1350,8 +1353,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		
 		switch (item.getItemId())
 		{
-		case R.id.chat_bg:
-			setupThemePicker(null);
+		case R.id.voip_call:
+			Utils.onCallClicked(ChatThread.this, mContactNumber);
 			break;
 		case R.id.attachment:
 			// hide pop up if any
@@ -1430,7 +1433,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
 		if (!(mConversation instanceof GroupConversation))
 		{
-			optionsList.add(new OverFlowMenuItem(getString(R.string.call), 1));
+			optionsList.add(new OverFlowMenuItem(getString(R.string.chat_theme), 1));
 			if(mUserIsBlocked)
 			{
 				optionsList.add(new OverFlowMenuItem(getString(R.string.unblock_title), 6));
@@ -1522,7 +1525,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					openProfileScreen();
 					break;
 				case 1:
-					Utils.onCallClicked(ChatThread.this, mContactNumber);
+					setupThemePicker(null);
 					break;
 				case 2:
 					GroupConversation groupConversation = (GroupConversation) mConversation;
