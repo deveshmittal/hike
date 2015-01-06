@@ -65,7 +65,6 @@ public class VoIPActivity extends Activity implements CallActions
 	private VoIPService voipService;
 	// private VoIPClient clientSelf = new VoIPClient(), clientPartner = new VoIPClient();
 	private boolean isBound = false;
-	private boolean hold, mute, speaker;
 	private final Messenger mMessenger = new Messenger(new IncomingHandler());
 	private int initialAudioMode, initialRingerMode;
 	private boolean initialSpeakerMode;
@@ -91,6 +90,8 @@ public class VoIPActivity extends Activity implements CallActions
 
 	private CallActionsView callActionsView;
 	private Chronometer callDuration;
+
+	private ImageButton holdButton, muteButton, speakerButton;
 
 	private boolean isCallActive;
 
@@ -199,7 +200,11 @@ public class VoIPActivity extends Activity implements CallActions
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-		
+
+		muteButton = (ImageButton)findViewById(R.id.mute_btn);
+		holdButton = (ImageButton)findViewById(R.id.hold_btn);
+		speakerButton = (ImageButton)findViewById(R.id.speaker_btn);
+
 		Logger.d(VoIPConstants.TAG, "Binding to service..");
 		// Calling start service as well so an activity unbind doesn't cause the service to stop
 		startService(new Intent(getApplicationContext(), VoIPService.class));
@@ -328,12 +333,20 @@ public class VoIPActivity extends Activity implements CallActions
 		voipService.setMessenger(mMessenger);
 		
 		VoIPClient clientPartner = voipService.getPartnerClient();
-		if (clientPartner.isInitiator())
+		if(voipService.isAudioRunning())
 		{
+			// Active Call
+			isCallActive = true;
+			setupActiveCallLayout();
+		}
+		else if (clientPartner.isInitiator())
+		{
+			// Incoming call
 			setupCalleeLayout();
 		}
 		else
 		{
+			// Outgoing call
 			setupCallerLayout();
 		}
 	}
@@ -458,16 +471,12 @@ public class VoIPActivity extends Activity implements CallActions
 	};
 	
 	protected boolean startAnimPlayed = false;
-	private Ringtone r;
-	private boolean isPlaying;
-	private Vibrator vibrator;
-	private boolean isVibrating;
 
 	private void setupCallerLayout()
 	{
 		setAvatar();
 		setContactDetails();
-		showActiveCallLayout();
+		showActiveCallButtons();
 	}
 
 	private void setupCalleeLayout()
@@ -477,13 +486,23 @@ public class VoIPActivity extends Activity implements CallActions
 		showCallActionsView();
 	}
 
+	private void setupActiveCallLayout()
+	{
+		setAvatar();
+		setContactDetails();
+		showActiveCallButtons();
+		startCallDuration();
+		showHoldTextOrChrono();
+		activateActiveCallButtons();
+	}
+
 	@Override
 	public void acceptCall()
 	{
 		Logger.d(VoIPConstants.TAG, "Accepted call, starting audio...");
 		voipService.acceptIncomingCall();
 		callActionsView.setVisibility(View.GONE);
-		showActiveCallLayout();
+		showActiveCallButtons();
 	}
 
 	@Override
@@ -493,28 +512,36 @@ public class VoIPActivity extends Activity implements CallActions
 		voipService.rejectIncomingCall();
 	}
 
-	private void showActiveCallLayout()
+	private void showActiveCallButtons()
+	{
+		animateActiveCallButtons();
+
+		// Get initial setting from service
+		muteButton.setSelected(voipService.getMute());
+		holdButton.setSelected(voipService.getHold());
+		speakerButton.setSelected(voipService.getSpeaker());
+
+		setupActiveCallButtonActions();
+	}
+
+	private void animateActiveCallButtons()
 	{
 		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
 		anim.setDuration(1000);
 
+		View hangupButton = findViewById(R.id.hang_up_btn);
 		findViewById(R.id.active_call_group).setVisibility(View.VISIBLE);
-		findViewById(R.id.hang_up_btn).setVisibility(View.VISIBLE);
+		hangupButton.setVisibility(View.VISIBLE);
 
-		findViewById(R.id.hang_up_btn).startAnimation(anim);
-		findViewById(R.id.mute_btn).startAnimation(anim);
-		findViewById(R.id.hold_btn).startAnimation(anim);
-		findViewById(R.id.speaker_btn).startAnimation(anim);
-		
-		setupActiveCallButtonActions();		
+		muteButton.startAnimation(anim);
+		holdButton.startAnimation(anim);
+		speakerButton.startAnimation(anim);
+		hangupButton.startAnimation(anim);
 	}
 
 	private void activateActiveCallButtons()
 	{
-		ImageView muteButton = (ImageView)findViewById(R.id.mute_btn);
 		muteButton.setImageResource(R.drawable.voip_mute_btn_selector);
-
-		ImageView holdButton = (ImageView)findViewById(R.id.hold_btn);
 		holdButton.setImageResource(R.drawable.voip_hold_btn_selector);
 	}
 
@@ -529,7 +556,6 @@ public class VoIPActivity extends Activity implements CallActions
 			}
 		});
 
-		final ImageButton muteButton = (ImageButton) findViewById(R.id.mute_btn);
 		muteButton.setOnClickListener(new OnClickListener() 
 		{
 			@Override
@@ -537,29 +563,24 @@ public class VoIPActivity extends Activity implements CallActions
 			{
 				if(isCallActive)
 				{
-					mute = !mute;
-					muteButton.setSelected(mute);
-					voipService.setMute(mute);
+					boolean newMute = !voipService.getMute();
+					muteButton.setSelected(newMute);
+					voipService.setMute(newMute);
 				}
 			}
 		});
 
-		final ImageButton speakerButton = (ImageButton) findViewById(R.id.speaker_btn);
 		speakerButton.setOnClickListener(new OnClickListener() 
 		{
 			@Override
 			public void onClick(View v) 
 			{				
-				speaker = !speaker;
-				speakerButton.setSelected(speaker);
-				AudioManager audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-				audiomanager.setSpeakerphoneOn(speaker);
+				boolean newSpeaker = !voipService.getSpeaker();
+				speakerButton.setSelected(newSpeaker);
+				voipService.setSpeaker(newSpeaker);
 			}
 		});
 
-		final View onHoldView = findViewById(R.id.on_hold);
-
-		final ImageButton holdButton = (ImageButton) findViewById(R.id.hold_btn);
 		holdButton.setOnClickListener(new OnClickListener() 
 		{
 			@Override
@@ -567,22 +588,29 @@ public class VoIPActivity extends Activity implements CallActions
 			{
 				if(isCallActive)
 				{
-					hold = !hold;
-					holdButton.setSelected(hold);
-					voipService.setHold(hold);
-					if(hold)
-					{
-						onHoldView.setVisibility(View.VISIBLE);
-						callDuration.setVisibility(View.GONE);
-					}
-					else
-					{
-						onHoldView.setVisibility(View.GONE);
-						callDuration.setVisibility(View.VISIBLE);
-					}
+					boolean newHold = !voipService.getHold();
+					holdButton.setSelected(newHold);
+					voipService.setHold(newHold);
+					showHoldTextOrChrono();
 				}
 			}
 		});
+	}
+
+	private void showHoldTextOrChrono()
+	{
+		View onHoldView = findViewById(R.id.on_hold);
+
+		if(voipService.getHold())
+		{
+			onHoldView.setVisibility(View.VISIBLE);
+			callDuration.setVisibility(View.GONE);
+		}
+		else
+		{
+			callDuration.setVisibility(View.VISIBLE);
+			onHoldView.setVisibility(View.GONE);
+		}
 	}
 	
 	private void startCallDuration()
@@ -593,7 +621,7 @@ public class VoIPActivity extends Activity implements CallActions
 		callDuration = (Chronometer)VoIPActivity.this.findViewById(R.id.call_duration);
 		callDuration.startAnimation(anim);
 		callDuration.setVisibility(View.VISIBLE);
-		callDuration.setBase(SystemClock.elapsedRealtime());
+		callDuration.setBase((SystemClock.elapsedRealtime() - 1000*voipService.getCallDuration()));
 		callDuration.start();
 	}
 
