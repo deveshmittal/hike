@@ -25,6 +25,8 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -81,7 +83,7 @@ public class HorizontalFriendsFragment extends Fragment {
         ll = (LinearLayout) v.findViewById(R.id.horizontalView);
         hsc = (HorizontalScrollView) v.findViewById(R.id.scrollView);
         //ll.addView();
-        ListView lv = (ListView) v.findViewById(R.id.abs__action_bar_title);
+     //   ListView lv = (ListView) v.findViewById(R.id.abs__action_bar_title);
         //lv.setAdapter(adapter);
         return v;
     }
@@ -107,8 +109,14 @@ public class HorizontalFriendsFragment extends Fragment {
         	iv.setImageDrawable(ContactManager.getInstance().getIcon(contactInfo.getMsisdn(),true));
         	tv.setText(contactInfo.getFirstNameAndSurname());
     		linearViews.put(contactInfo,py);
-    		ll.addView(py);
+    		//ll.addView(py);
+    		ViewSwitcher vs = (ViewSwitcher) ll.findViewWithTag("umang_2");
+    		vs.addView(py);
+    		vs.setOutAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.slide_out_down)); 
+    		vs.setInAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.slide_in_up)); 
+    		vs.showNext();
     	}
+ 
     	//ll.invalidate();
     }
     
@@ -116,10 +124,15 @@ public class HorizontalFriendsFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
     	super.onActivityCreated(savedInstanceState);
     	LayoutInflater inf = getLayoutInflater(savedInstanceState);
+    	ViewSwitcher vs = new ViewSwitcher(getActivity());
+    	View p = inf.inflate(R.layout.friends_horizontal_item,null);
+    	vs.setTag("umang_2");
+    	vs.addView(p);
+    	ll.addView(vs);
     	View py; 
     	for(int i=0;i<5;i++){
     		py = inf.inflate(R.layout.friends_horizontal_item,null);
-    		py.setTag("tag" + i);
+    		py.setTag("tag_" + i);
     		ll.addView(py);
     	}
        
