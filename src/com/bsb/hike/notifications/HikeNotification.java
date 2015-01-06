@@ -1113,17 +1113,14 @@ public class HikeNotification
 				{
 					if (NOTIF_SOUND_HIKE.equals(notifSound))
 					{
-						//mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
 						SoundUtils.playSoundFromRaw(context, R.raw.hike_jingle_15);
 					}
 					else if (NOTIF_SOUND_DEFAULT.equals(notifSound))
 					{
-						//mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
 						SoundUtils.playDefaultNotificationSound(context);
 					}
 					else
 					{
-						//mBuilder.setSound(Uri.parse(notifSound));
 						SoundUtils.playSound(context, Uri.parse(notifSound));
 					}
 				}

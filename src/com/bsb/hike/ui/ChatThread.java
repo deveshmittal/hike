@@ -3460,7 +3460,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				}
 
 				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
-				if (activityVisible && SoundUtils.isPlayTickSound(getApplicationContext()))
+				if (activityVisible && SoundUtils.isTickSoundEnabled(getApplicationContext()))
 				{
 					SoundUtils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
 				}
@@ -4192,7 +4192,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 
 					label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
-					if (activityVisible && SoundUtils.isPlayTickSound(getApplicationContext()))
+					if (activityVisible && SoundUtils.isTickSoundEnabled(getApplicationContext()))
 					{
 						SoundUtils.playSoundFromRaw(getApplicationContext(), R.raw.received_message);
 					}
@@ -4354,7 +4354,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 
                 if (msisdn.equals(mContactNumber)) {
 
-                    if (activityVisible && SoundUtils.isPlayTickSound(getApplicationContext())) 
+                    if (activityVisible && SoundUtils.isTickSoundEnabled(getApplicationContext())) 
                     {
                     	SoundUtils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
                     }
@@ -4395,7 +4395,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		
 		if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 		{
-			if (activityVisible && (!msg.isTickSoundPlayed()) && SoundUtils.isPlayTickSound(getApplicationContext()))
+			if (activityVisible && (!msg.isTickSoundPlayed()) && SoundUtils.isTickSoundEnabled(getApplicationContext()))
 			{
 				SoundUtils.playSoundFromRaw(getApplicationContext(), R.raw.message_sent);
 			}

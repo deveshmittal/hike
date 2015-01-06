@@ -11,6 +11,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 
@@ -19,7 +20,7 @@ import com.bsb.hike.HikeConstants;
 public class SoundUtils
 {
 
-	private static Handler soundHandler = new Handler();
+	private static Handler soundHandler = new Handler(Looper.getMainLooper());
 	
 	private static MediaPlayer mediaPlayer = new MediaPlayer();
 	
@@ -29,19 +30,40 @@ public class SoundUtils
 		@Override
 		public void run()
 		{
-			mediaPlayer.release();
+			mediaPlayer.reset();
 		}
 	};
 
-
-	private static final int STOP_PLAY_TIMME = 5000; // In milliseconds
-
-	public static boolean isPlayTickSound(Context context)
+	private static MediaPlayer.OnCompletionListener completeListener = new MediaPlayer.OnCompletionListener()
 	{
-		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+		
+		@Override
+		public void onCompletion(MediaPlayer mp)
+		{
+			mediaPlayer.reset();
+			soundHandler.removeCallbacks(stopSoundRunnable);
+		}
+	};
+	
+	private static MediaPlayer.OnErrorListener errorListener = new MediaPlayer.OnErrorListener()
+	{
+		
+		@Override
+		public boolean onError(MediaPlayer mp, int what, int extra)
+		{
+			soundHandler.removeCallbacks(stopSoundRunnable);
+			mediaPlayer.stop();
+		    mediaPlayer.release();
+		    mediaPlayer = null;
+		    return true;
+		}
+	};
+	
+	public static boolean isTickSoundEnabled(Context context)
+	{
 		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-		return tm.getCallState() == TelephonyManager.CALL_STATE_IDLE && !am.isMusicActive()
-				&& (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true));
+		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.TICK_SOUND_PREF, true) && 
+				tm.getCallState() == TelephonyManager.CALL_STATE_IDLE && !isAnyMusicPlaying(context));
 	}
 
 	/**
@@ -54,49 +76,55 @@ public class SoundUtils
 	{
 
 		Logger.i("sound", "playing sound " + soundId);
-		MediaPlayer mp = new MediaPlayer();
-		mp.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
-		final int notifVol = getCurrentVolume(context, AudioManager.STREAM_NOTIFICATION);
-		if (isAnyMusicPlaying(context))
+		
+		// Initializing Player if it has been killed by onErrorListener
+		if(mediaPlayer == null)
 		{
-			setCurrentVolume(context, AudioManager.STREAM_NOTIFICATION, notifVol);
+			mediaPlayer = new MediaPlayer();
 		}
+		else
+		{
+			// resetting media player
+			mediaPlayer.reset();
+		}
+		
+		mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
 		Resources res = context.getResources();
 		AssetFileDescriptor afd = res.openRawResourceFd(soundId);
 
 		try
 		{
-			mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+			mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
 			afd.close();
 
-			mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
+			mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
 			{
 
 				@Override
 				public void onCompletion(MediaPlayer mp)
 				{
-					mp.release();
-					setCurrentVolume(context, AudioManager.STREAM_NOTIFICATION, notifVol);
+					mp.reset();
 				}
 			});
-			mp.prepare();
-			mp.start();
+			mediaPlayer.setOnErrorListener(errorListener);
+			mediaPlayer.prepare();
+			mediaPlayer.start();
 
 		}
 		catch (IllegalArgumentException e)
 		{
 			e.printStackTrace();
-			mp.release();
+			mediaPlayer.release();
 		}
 		catch (IllegalStateException e)
 		{
 			e.printStackTrace();
-			mp.release();
+			mediaPlayer.release();
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			mp.release();
+			mediaPlayer.release();
 		}
 	}
 
@@ -122,31 +150,31 @@ public class SoundUtils
 	 */
 	public static void playSound(final Context context, Uri soundUri)
 	{
-		//final MediaPlayer mp = new MediaPlayer();
-		mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
-		final int notifVol = getCurrentVolume(context, AudioManager.STREAM_NOTIFICATION);
-		if (isAnyMusicPlaying(context))
+		// remove any previous handler
+		soundHandler.removeCallbacks(stopSoundRunnable);
+		
+		// Initializing Player if it has been killed by onErrorListener
+		if(mediaPlayer == null)
 		{
-			setCurrentVolume(context, AudioManager.STREAM_NOTIFICATION, notifVol);
+			mediaPlayer = new MediaPlayer();
 		}
+		else
+		{
+			// resetting media player
+			mediaPlayer.reset();
+		}
+		
+		mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
+		
 		try
 		{
 			mediaPlayer.setDataSource(context, soundUri);
 
-			mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
-			{
-
-				@Override
-				public void onCompletion(MediaPlayer mp)
-				{
-					mp.release();
-					setCurrentVolume(context, AudioManager.STREAM_NOTIFICATION, notifVol);
-					soundHandler.removeCallbacks(stopSoundRunnable);
-				}
-			});
+			mediaPlayer.setOnCompletionListener(completeListener);
+			mediaPlayer.setOnErrorListener(errorListener);
 			mediaPlayer.prepare();
 			mediaPlayer.start();
-			soundHandler.postDelayed(stopSoundRunnable, STOP_PLAY_TIMME);
+			soundHandler.postDelayed(stopSoundRunnable, HikeConstants.STOP_NOTIF_SOUND_TIME);
 
 		}
 		catch (IllegalArgumentException e)
