@@ -1,5 +1,6 @@
 package com.bsb.hike.chatthread;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +22,8 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.util.Pair;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -68,8 +72,8 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
@@ -88,7 +92,7 @@ import com.bsb.hike.utils.Utils;
  * @generated
  */
 
-public abstract class ChatThread implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
+public abstract class ChatThread extends SimpleOnGestureListener implements OverflowItemClickListener, View.OnClickListener, ThemePickerListener, BackPressListener, CaptureImageListener, PickFileListener,
 		HHikeDialogListener, StickerPickerListener, EmoticonPickerListener, AudioRecordListener, LoaderCallbacks<Object>, OnItemLongClickListener, OnTouchListener,
 		OnScrollListener, Listener
 {
@@ -107,7 +111,22 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected static final int TYPING_CONVERSATION = 6;
 
 	protected static final int NOTIFY_DATASET_CHANGED = 7;
-
+	
+	protected static final int UPDATE_AVATAR = 8;
+	
+	protected static final int FILE_MESSAGE_CREATED = 9;
+	
+	protected static final int DELETE_MESSAGE = 10;
+	
+	protected static final int CHAT_THEME = 11;
+	
+	protected static final int CLOSE_CURRENT_STEALTH_CHAT = 12;
+	/**
+	 * Skipping the number '13' intentionally. 
+	 * #triskaidekaphobia
+	 */
+	protected static final int CLOSE_PHOTO_VIEWER_FRAGMENT = 14;
+	
 	protected ChatThreadActivity activity;
 
 	protected ThemePicker themePicker;
@@ -150,36 +169,69 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	
 	private int unreadMessageCount = 0;
 
-	private EditText mComposeView;
+	protected EditText mComposeView;
+	
+	private GestureDetector mGestureDetector;
 
 	protected Handler uiHandler = new Handler()
 	{
 		public void handleMessage(android.os.Message msg)
 		{
-			switch (msg.what)
-			{
-			case SHOW_TOAST:
-				showToast(msg.arg1);
-				break;
-			case MESSAGE_RECEIVED:
-				addMessage((ConvMessage) msg.obj);
-				break;
-			case NOTIFY_DATASET_CHANGED:
-				Logger.i(TAG, "notifying data set changed on UI Handler");
-				mAdapter.notifyDataSetChanged();
-				break;
-			case END_TYPING_CONVERSATION:
-				setTypingText(false, (TypingNotification) msg.obj);
-				break;
-			case TYPING_CONVERSATION:
-				setTypingText(true, (TypingNotification) msg.obj);
-				break;
-			default:
-				break;
-			}
+			handleUIMessage(msg);
 		}
 
 	};
+	
+	
+	/**
+	 * This method is called from the UI Handler's handleMessage. All the tasks performed by this are supposed to run on the UI Thread only.
+	 * 
+	 * This is also overriden by {@link OneToOneChatThread} and {@link GroupChatThread}
+	 * @param msg
+	 */
+	protected void handleUIMessage(android.os.Message msg)
+	{
+		switch (msg.what)
+		{
+		case SHOW_TOAST:
+			showToast(msg.arg1);
+			break;
+		case MESSAGE_RECEIVED:
+			addMessage((ConvMessage) msg.obj);
+			break;
+		case NOTIFY_DATASET_CHANGED:
+			Logger.i(TAG, "notifying data set changed on UI Handler");
+			mAdapter.notifyDataSetChanged();
+			break;
+		case END_TYPING_CONVERSATION:
+			setTypingText(false, (TypingNotification) msg.obj);
+			break;
+		case TYPING_CONVERSATION:
+			setTypingText(true, (TypingNotification) msg.obj);
+			break;
+		case UPDATE_AVATAR:
+			setAvatar();
+			break;
+		case FILE_MESSAGE_CREATED:
+			addMessage((ConvMessage) msg.obj);
+			break;
+		case DELETE_MESSAGE:
+			deleteMessages((Pair<Boolean, ArrayList<Long>>) msg.obj);
+			break;
+		case CHAT_THEME:
+			updateUIAsPerTheme((ChatTheme) msg.obj);
+			break;
+		case CLOSE_CURRENT_STEALTH_CHAT:
+			closeStealthChat();
+			break;
+		case CLOSE_PHOTO_VIEWER_FRAGMENT:
+			removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true);
+			break;
+		default:
+			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
+			break;
+		}
+	}
 
 	protected void addMessage(ConvMessage convMessage, boolean scrollToLast)
 	{
@@ -860,6 +912,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	protected void initMessageSenderLayout()
 	{
 		initComposeViewWatcher();
+		initGestureDetector();
 	}
 
 	protected void initComposeViewWatcher()
@@ -880,6 +933,43 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		mComposeViewWatcher.setBtnEnabled();
 		mComposeView.requestFocus();
 
+	}
+	
+	/**
+	 * This function is used to initialize the double tap to nudge
+	 */
+	private void initGestureDetector()
+	{
+		mGestureDetector = new GestureDetector(activity.getApplicationContext(), this);
+	}
+	
+	@Override
+	public boolean onDoubleTap(MotionEvent e)
+	{
+		Logger.d(TAG, "Double Tap motion");
+		sendPoke();
+		return true;
+	}
+	
+	protected void sendPoke()
+	{
+		ConvMessage convMessage =  Utils.makeConvMessage(msisdn, getString(R.string.poke_msg), mConversation.isOnhike());
+		
+		JSONObject metadata = new JSONObject();
+		
+		try
+		{
+			metadata.put(HikeConstants.POKE, true);
+			convMessage.setMetadata(metadata);
+		}
+		
+		catch (JSONException e)
+		{
+			Logger.e(TAG, "Invalid JSON in sendPoke() : " + e.toString());
+		}
+		
+		sendMessage(convMessage);
+		
 	}
 
 	private void initListView()
@@ -1070,8 +1160,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 	@Override
 	public boolean onTouch(View v, MotionEvent event)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return mGestureDetector.onTouchEvent(event);
 	}
 
 	@Override
@@ -1199,6 +1288,38 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 			long msgId = ((Long) object).longValue();
 			setStateAndUpdateView(msgId, true);
 			break;
+		case HikePubSub.SERVER_RECEIVED_MULTI_MSG:
+			onServerReceivedMultiMessage(object);
+			break;
+		case HikePubSub.ICON_CHANGED:
+			onIconChanged(object);
+			break;
+		case HikePubSub.UPLOAD_FINISHED:
+			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			break;
+		case HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED:
+			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			break;
+		case HikePubSub.FILE_MESSAGE_CREATED:
+			onFileMessageCreated(object);
+			break;
+		case HikePubSub.DELETE_MESSAGE:
+			onDeleteMessage(object);
+			break;
+		case HikePubSub.STICKER_DOWNLOADED:
+			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+		case HikePubSub.MESSAGE_FAILED:
+			onMessageFailed(object);
+			break;
+		case HikePubSub.CHAT_BACKGROUND_CHANGED:
+			onChatBackgroundChanged(object);
+			break;
+		case HikePubSub.CLOSE_CURRENT_STEALTH_CHAT:
+			uiHandler.sendEmptyMessage(CLOSE_CURRENT_STEALTH_CHAT);
+			break;
+		case HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT:
+			uiHandler.sendEmptyMessage(CLOSE_PHOTO_VIEWER_FRAGMENT);
+			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1319,7 +1440,9 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		 * Array of pubSub listeners common to both {@link OneToOneChatThread} and {@link GroupChatThread}
 		 */
 		String[] commonEvents = new String[] { HikePubSub.MESSAGE_RECEIVED, HikePubSub.END_TYPING_CONVERSATION, HikePubSub.TYPING_CONVERSATION, HikePubSub.MESSAGE_DELIVERED,
-				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG };
+				HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.SERVER_RECEIVED_MULTI_MSG, HikePubSub.ICON_CHANGED, HikePubSub.UPLOAD_FINISHED,
+				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, HikePubSub.FILE_MESSAGE_CREATED, HikePubSub.DELETE_MESSAGE, HikePubSub.STICKER_DOWNLOADED, HikePubSub.MESSAGE_FAILED,
+				HikePubSub.CHAT_BACKGROUND_CHANGED, HikePubSub.CLOSE_CURRENT_STEALTH_CHAT, HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT, HikePubSub.STICKER_CATEGORY_MAP_UPDATED };
 
 		/**
 		 * Array of pubSub listeners we get from {@link OneToOneChatThread} or {@link GroupChatThread}
@@ -1525,4 +1648,224 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		}
 		return true;
 	}
+	
+	/**
+	 * This indicates the clock to tick for a multi forward message
+	 * @param object
+	 */
+	private void onServerReceivedMultiMessage(Object object)
+	{
+		Pair<Long, Integer> p = (Pair<Long, Integer>) object;
+		long baseId = p.first;
+		int count = p.second;
+
+		for (long msgId = baseId; msgId < (baseId + count); msgId++)
+		{
+			setStateAndUpdateView(msgId, false);
+		}
+
+		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+	}
+	
+	/**
+	 * This is called when a group icon changes or a contact's dp is changed
+	 * 
+	 * @param object
+	 */
+	private void onIconChanged(Object object)
+	{
+		String mContactNumber = (String) object;
+		if (mContactNumber.equals(msisdn))
+		{
+			uiHandler.sendEmptyMessage(UPDATE_AVATAR);
+		}
+	}
+
+	/**
+	 * This method is used to setAvatar for a contact
+	 */
+	protected void setAvatar()
+	{
+		// TODO :
+		/*
+		 * if (avatar == null) { return; }
+		 * 
+		 * Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true); if (drawable != null) { avatar.setScaleType(ScaleType.FIT_CENTER);
+		 * avatar.setImageDrawable(drawable); avatar.setBackgroundDrawable(null); } else { avatar.setScaleType(ScaleType.CENTER_INSIDE); avatar.setImageResource((mConversation
+		 * instanceof GroupConversation) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
+		 * avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true)); }
+		 */
+	}
+	
+	
+	/**
+	 * Called from PubSub thread, when a file upload is initiated, to add the convMessage to ChatThread
+	 * 
+	 * @param object
+	 */
+	private void onFileMessageCreated(Object object)
+	{
+		ConvMessage convMessage = (ConvMessage) object;
+
+		/**
+		 * Ensuring that the convMessage object belongs to the conversation
+		 */
+
+		if (!(convMessage.getMsisdn().equals(msisdn)))
+		{
+			return;
+		}
+
+		sendUIMessage(FILE_MESSAGE_CREATED, convMessage);
+	}
+	
+	/**
+	 * Called form PubSub thread, when a message is deleted.
+	 * 
+	 * @param object
+	 */
+	private void onDeleteMessage(Object object)
+	{
+		Pair<ArrayList<Long>, Bundle> deleteMessage = (Pair<ArrayList<Long>, Bundle>) object;
+		ArrayList<Long> msgIds = deleteMessage.first;
+		Bundle bundle = deleteMessage.second;
+		String msgMsisdn = bundle.getString(HikeConstants.Extras.MSISDN);
+
+		/**
+		 * Received a delete message pubsub for a different thread, we received a false event with no msgIds
+		 */
+		if (!(msgMsisdn.equals(msisdn)) || msgIds.isEmpty())
+		{
+			return;
+		}
+
+		boolean deleteMediaFromPhone = bundle.getBoolean(HikeConstants.Extras.DELETE_MEDIA_FROM_PHONE);
+
+		sendUIMessage(DELETE_MESSAGE, new Pair<Boolean, ArrayList<Long>>(deleteMediaFromPhone, msgIds));
+	}
+
+	/**
+	 * Deletes the messages based on the message Ids present in the {@link ArrayList<Long>} in {@link Pair.second}
+	 * 
+	 * @param pair
+	 */
+	private void deleteMessages(Pair<Boolean, ArrayList<Long>> pair)
+	{
+		for (long msgId : pair.second)
+		{
+			for (ConvMessage convMessage : messages)
+			{
+				if (convMessage.getMsgID() == msgId)
+				{
+					deleteMessage(convMessage, pair.first);
+					break;
+				}
+			}
+		}
+
+		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+	}
+	
+	/**
+	 * This function accomplishes the following : 1. Removes message from ChatThread and Db. 2. Removes message from {@code MessagesAdapter.undeliveredMessages} set of
+	 * {@link MessagesAdapter} 3. If there is an ongoing FileTransfer, we cancel it.
+	 * 
+	 * @param convMessage
+	 * @param deleteMediaFromPhone
+	 */
+	private void deleteMessage(ConvMessage convMessage, boolean deleteMediaFromPhone)
+	{
+		mAdapter.removeMessage(convMessage);
+		if (!convMessage.isSMS() && convMessage.getState() == State.SENT_CONFIRMED)
+		{
+			mAdapter.removeFromUndeliverdMessage(convMessage);
+			if (mAdapter.isSelected(convMessage))
+			{
+				mAdapter.toggleSelection(convMessage);
+			}
+		}
+
+		if (convMessage.isFileTransferMessage())
+		{
+			// @GM cancelTask has been changed
+			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			File file = hikeFile.getFile();
+			if (deleteMediaFromPhone && hikeFile != null)
+			{
+				hikeFile.delete(activity.getApplicationContext());
+			}
+			FileTransferManager.getInstance(activity.getApplicationContext()).cancelTask(convMessage.getMsgID(), file, convMessage.isSent());
+			mAdapter.notifyDataSetChanged();
+		}
+	}
+	
+	private void onMessageFailed(Object object)
+	{
+		long msgId = ((Long) object).longValue();
+		ConvMessage convMessage = findMessageById(msgId);
+		if (convMessage != null)
+		{
+			convMessage.setState(ConvMessage.State.SENT_FAILED);
+			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+		}
+	}
+	
+	/**
+	 * Used to change the chat theme
+	 * @param object
+	 */
+	private void onChatBackgroundChanged(Object object)
+	{
+		Pair<String, ChatTheme> pair = (Pair<String, ChatTheme>) object;
+		
+		/**
+		 * Proceeding only if the chat theme is changed for the current msisdn
+		 */
+		if(mConversation.getMsisdn().equals(pair.first))
+		{
+			currentTheme = pair.second;
+			sendUIMessage(CHAT_THEME, currentTheme);
+		}
+	}
+	
+	/**
+	 * Used to close the stealth chat
+	 */
+	private void closeStealthChat()
+	{
+		saveDraft();
+		activity.finish();
+	}
+	
+	/**
+	 * If the user had typed something, we save it as a draft and will show it in the edit text box when he/she comes back to this conversation.
+	 */
+	private void saveDraft()
+	{
+		if (mComposeView != null && mComposeView.getVisibility() == View.VISIBLE)
+		{
+			Editor editor = activity.getSharedPreferences(HikeConstants.DRAFT_SETTING, android.content.Context.MODE_PRIVATE).edit();
+			if (mComposeView.length() != 0)
+			{
+				editor.putString(msisdn, mComposeView.getText().toString());
+			}
+			else
+			{
+				editor.remove(msisdn);
+			}
+			editor.commit();
+		}
+	}
+	
+	private boolean removeFragment(String tag, boolean updateActionBar)
+	{
+		boolean isRemoved = activity.removeFragment(tag);
+		if (isRemoved && updateActionBar)
+		{
+			// TODO :
+			// setupActionBar(false);
+		}
+		return isRemoved;
+	}
+	
 }

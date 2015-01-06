@@ -4067,41 +4067,24 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		removeFromUndeliverdMessage(convMessage, false);
 	}
 
-	/**
+	/** Note : This is to be called from the UI Thread only
 	 * @param msgDelivered
 	 *            signifies that removeFromUndeliverdMessage is called coz convMessage has been reached to delivered state.
 	 */
 	public void removeFromUndeliverdMessage(final ConvMessage convMessage, final boolean msgDelivered)
 	{
-		chatThread.runOnUiThread(new Runnable()
+		ConvMessage msg = undeliveredMessages.remove(convMessage.getMsgID());
+
+		// if on remove if it returns null don't do anything
+		if (msg == null)
 		{
+			return;
+		}
 
-			@Override
-			public void run()
-			{
-				ConvMessage msg = undeliveredMessages.remove(convMessage.getMsgID());
-
-				// if on remove if it returns null don't do anything
-				if (msg == null)
-				{
-					return;
-				}
-
-				if (undeliveredMessages.isEmpty())
-				{
-					/*
-					 * if all messages are delivered OR we don't have any undelivered messages than only we should reset this timer not on delivery of some message
-					 */
-					chatThread.shouldRunTimerForHikeOfflineTip = true;
-
-					chatThread.hideHikeToOfflineTip(false, false, false, msgDelivered);
-				}
-				if (firstPendingConvMessage.equals(convMessage))
-				{
-					updateFirstPendingConvMessage();
-				}
-			}
-		});
+		if (firstPendingConvMessage.equals(convMessage))
+		{
+			updateFirstPendingConvMessage();
+		}
 	}
 
 	private void removeFromUndeliverdMessage(List<ConvMessage> convMessages)
@@ -4114,18 +4097,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 	public void removeAllFromUndeliverdMessage()
 	{
-		chatThread.runOnUiThread(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				undeliveredMessages.clear();
-				chatThread.shouldRunTimerForHikeOfflineTip = true;
-				chatThread.hideHikeToOfflineTip();
-				updateFirstPendingConvMessage();
-			}
-		});
+		undeliveredMessages.clear();
+		updateFirstPendingConvMessage();
 	}
 
 	public void addAllUndeliverdMessages(List<ConvMessage> messages)
@@ -4276,5 +4249,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Returns the count of undeliveredMessages
+	 * @return
+	 */
+	public int getUndeliveredMessagesCount()
+	{
+		return undeliveredMessages.size();
 	}
 }

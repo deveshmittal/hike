@@ -3,11 +3,22 @@ package com.bsb.hike.chatthread;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Dialog;
+import android.os.Message;
 import android.preference.PreferenceManager;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -21,7 +32,6 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.ChatTheme;
@@ -45,6 +55,30 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	private LastSeenScheduler lastSeenScheduler;
 	
 	private FavoriteType mFavoriteType;
+	
+	private Dialog smsDialog;
+	
+	private boolean isOnline;
+	
+	private int mCredits;
+	
+	private boolean mBlockOverlay;
+	
+	private boolean mIsOverlayShowing;
+	
+	private static final int CONTACT_ADDED_OR_DELETED = 101;
+	
+	private static final int SHOW_SMS_SYNC_DIALOG = 102;
+	
+	private static final int SMS_SYNC_COMPLETE_OR_FAIL = 103;
+	
+	private static final int UPDATE_LAST_SEEN = 104;
+	
+	private static final int SEND_SMS_PREF_TOGGLED = 105;
+	
+	private static final int SMS_CREDIT_CHANGED = 106;
+	
+	private static final int REMOVE_UNDELIVERED_MESSAGES = 107;
 	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -163,7 +197,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	public boolean onTouch(View v, MotionEvent event)
 	{
 		// TODO implement this
-		return false;
+		return super.onTouch(v, event);
 	}
 	
 	@Override
@@ -302,7 +336,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	protected String[] getPubSubListeners()
 	{
 		// TODO Add PubSubListeners
-		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ };
+		String[] oneToOneListeners = new String[] { HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.MESSAGE_DELIVERED_READ, HikePubSub.CONTACT_ADDED, HikePubSub.CONTACT_DELETED,
+				HikePubSub.CHANGED_MESSAGE_TYPE, HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START,
+				HikePubSub.LAST_SEEN_TIME_UPDATED, HikePubSub.SEND_SMS_PREF_TOGGLED };
 		return oneToOneListeners;
 	}
 
@@ -403,8 +439,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 		if (isUserOnHike())
 		{
-			mAdapter.removeAllFromUndeliverdMessage();
+			uiHandler.sendEmptyMessage(REMOVE_UNDELIVERED_MESSAGES);
 		}
+		
 		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
 	}
 
@@ -421,7 +458,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				// TODO we could keep a map of msgId -> conversation objects
 				// somewhere to make this faster
 				ConvMessage msg = findMessageById(msgID);
-				mAdapter.removeFromUndeliverdMessage(msg, true);
+				
+				sendUIMessage(REMOVE_UNDELIVERED_MESSAGES, msg);
 			}
 			return true;
 		}
@@ -435,6 +473,36 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 		case HikePubSub.MESSAGE_DELIVERED_READ:
 			onMessageRead(object);
+			break;
+		case HikePubSub.CONTACT_ADDED:
+			onContactAddedOrDeleted(object, true);
+			break;
+		case HikePubSub.CONTACT_DELETED:
+			onContactAddedOrDeleted(object, false);
+			break;
+		case HikePubSub.CHANGED_MESSAGE_TYPE:
+			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			break;
+		case HikePubSub.SHOW_SMS_SYNC_DIALOG:
+			uiHandler.sendEmptyMessage(SHOW_SMS_SYNC_DIALOG);
+			break;
+		case HikePubSub.SMS_SYNC_COMPLETE:
+			uiHandler.sendEmptyMessage(SMS_SYNC_COMPLETE_OR_FAIL);
+			break;
+		case HikePubSub.SMS_SYNC_FAIL:
+			uiHandler.sendEmptyMessage(SMS_SYNC_COMPLETE_OR_FAIL);
+			break;
+		case HikePubSub.SMS_SYNC_START:
+			onSMSSyncStart();
+			break;
+		case HikePubSub.LAST_SEEN_TIME_UPDATED:
+			updateLastSeen((ContactInfo) object);
+			break;
+		case HikePubSub.SEND_SMS_PREF_TOGGLED:
+			uiHandler.sendEmptyMessage(SEND_SMS_PREF_TOGGLED);
+			break;
+		case HikePubSub.SMS_CREDIT_CHANGED:
+			uiHandler.sendEmptyMessage(SMS_CREDIT_CHANGED);
 			break;
 		default:
 			super.onEventReceived(type, object);
@@ -459,4 +527,430 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 		return false;
 	}
+	
+	/**
+	 * This method is used to update UI, when an unsaved contact is saved to phonebook while the chatThread is active
+	 */
+	private void onContactAddedOrDeleted(Object object, boolean isAdded)
+	{
+		ContactInfo contactInfo = (ContactInfo) object;
+		
+		/**
+		 * Returning here if contactInfo is null or we received this event in a different chatThread
+		 */
+		
+		if(contactInfo == null || (!msisdn.equals(contactInfo.getMsisdn())))
+		{
+			return;
+		}
+		
+		String mContactName = isAdded ? contactInfo.getName() : contactInfo.getMsisdn();
+		mConversation.setContactName(mContactName);
+		mContactName = Utils.getFirstName(mContactName);
+		sendUIMessage(CONTACT_ADDED_OR_DELETED, new Pair<Boolean, String>(isAdded, mContactName));
+	}
+	
+	/**
+	 * Called on the UI Thread from the UI Handler, which is called from {@link OneToOneChatThread #onContactAddedOrDeleted(Object, boolean)}
+	 */
+	
+	private void contactAddedOrDeleted(Pair<Boolean, String> pair)
+	{
+		if (!pair.first)
+		{
+			setAvatar();
+		}
+		// TODO : Add name to actionBar
+		// setLabel(pair.second);
+
+		if (messages != null && messages.size() > 0)
+		{
+			ConvMessage convMessage = messages.get(0);
+
+			if (convMessage.isBlockAddHeader())
+			{
+				messages.remove(0);
+				uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			}
+		}
+	}
+	
+	/**
+	 * Performs tasks on the UI thread.
+	 */
+	@Override
+	protected void handleUIMessage(Message msg)
+	{
+		switch(msg.what)
+		{
+			case CONTACT_ADDED_OR_DELETED:
+				contactAddedOrDeleted((Pair<Boolean, String>) msg.obj);
+				break;
+			case SHOW_SMS_SYNC_DIALOG:
+				onShowSMSSyncDialog();
+				break;
+			case SMS_SYNC_COMPLETE_OR_FAIL:
+				dismissSMSSyncDialog();
+				break;
+			case UPDATE_LAST_SEEN:
+				setLastSeen((String) msg.obj);
+				break;
+			case SEND_SMS_PREF_TOGGLED:
+				updateUIForHikeStatus();
+				break;
+			case SMS_CREDIT_CHANGED:
+				setSMSCredits();
+				break;
+			case REMOVE_UNDELIVERED_MESSAGES:
+				removeUndeliveredMessages(msg.obj);
+				break;
+			default:
+				Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
+				super.handleUIMessage(msg);
+				break;
+		}
+		
+	}
+	
+	/**
+	 * Method is called from the UI Thread to show the SMS Sync Dialog
+	 */
+	private void onShowSMSSyncDialog()
+	{
+		smsDialog = Utils.showSMSSyncDialog(activity.getApplicationContext(), true);
+		// TODO :
+		// dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG;
+
+	}
+	
+	/**
+	 * Called on the UI Thread to dismiss SMS Sync Dialog
+	 */
+	private void dismissSMSSyncDialog()
+	{
+		if (smsDialog != null)
+		{
+			smsDialog.dismiss();
+		}
+		// TODO :
+		// dialogShowing = null;
+	}
+	
+	private void onSMSSyncStart()
+	{
+		// TODO :
+		// dialogShowing = DialogShowing.SMS_SYNCING_DIALOG;
+	}
+	
+	/**
+	 * Used to update last seen. This is called from the PubSub thread
+	 * @param object
+	 */
+	private void updateLastSeen(ContactInfo contactInfo)
+	{
+		/**
+		 * Proceeding only if the current chat thread is open and we should show the last seen
+		 */
+		if (msisdn.equals(contactInfo.getMsisdn()) && shouldShowLastSeen())
+		{
+			/**
+			 * Fix for case where server and client values are out of sync
+			 */
+			
+			int offLine = contactInfo.getOffline();
+			long lastSeenTime = contactInfo.getLastSeenTime();
+			
+			if(offLine == 1 && lastSeenTime <= 0)
+			{
+				return;
+			}
+			
+			/**
+			 * Updating mContactInfo object
+			 */
+			mContactInfo.setOffline(offLine);
+			mContactInfo.setLastSeenTime(lastSeenTime);
+			
+			String lastSeenString = Utils.getLastSeenTimeAsString(activity.getApplicationContext(), lastSeenTime, offLine, false, true);
+			
+			isOnline = mContactInfo.getOffline() == 0;
+			
+			if(isHikOfflineTipShowing() && isOnline)
+			{
+				/**
+				 * If hike to offline tip is showing and server sends that the user is online, we do not update the last seen field until all pending messages are delivered
+				 */
+				return;
+			}
+			
+			sendUIMessage(UPDATE_LAST_SEEN, lastSeenString);
+		}
+	}
+	
+	private boolean isHikOfflineTipShowing()
+	{
+		// TODO :
+		/**
+		 * if (hikeToOfflineTipview != null) { /* if hike offline tip is in last state this means it is going to hide;
+		 * 
+		 * if (((Integer) hikeToOfflineTipview.getTag()) == HIKE_TO_OFFLINE_TIP_STATE_3) { return false; } return hikeToOfflineTipview.getVisibility() == View.VISIBLE; }
+		 */
+		return false;
+	}
+	
+	/**
+	 * Called from the UI Thread
+	 * @param lastSeenString
+	 */
+	private void setLastSeen(String lastSeenString)
+	{
+		if(isOnline)
+		{
+			//shouldRunTimerForHikeOfflineTip = true;
+		}
+		
+		if(lastSeenString == null)
+		{
+			//setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
+		}
+		else
+		{
+			//setLastSeenText(lastSeenString);
+		}
+	}
+	
+	private void setSMSCredits()
+	{
+		updateUIForHikeStatus();
+		boolean animatedOnce = sharedPreference.getData(HikeConstants.Extras.ANIMATED_ONCE, false);
+
+		if (!animatedOnce)
+		{
+			sharedPreference.saveData(HikeConstants.Extras.ANIMATED_ONCE, true);
+		}
+
+		if ((mCredits % HikeConstants.SHOW_CREDITS_AFTER_NUM == 0 || !animatedOnce) && !mConversation.isOnhike())
+		{
+			showSMSCounter();
+		}
+	}
+	
+	private void updateUIForHikeStatus()
+	{
+		if (mConversation.isOnhike())
+		{
+			removeSMSToggle();
+			nonZeroCredits();
+		}
+
+		else
+		{
+			updateChatMetadata();
+		}
+
+	}
+	
+	/**
+	 * Used for making SMS Toggle view invisible
+	 */
+	private void removeSMSToggle()
+	{
+		activity.findViewById(R.id.sms_toggle_button).setVisibility(View.GONE);
+	}
+	
+	private void nonZeroCredits()
+	{
+		Logger.d(TAG, "Non Zero credits");
+		if (!mComposeView.isEnabled())
+		{
+			if (!TextUtils.isEmpty(mComposeView.getText()))
+			{
+				mComposeView.setText("");
+			}
+			mComposeView.setEnabled(true);
+		}
+
+		activity.findViewById(R.id.info_layout).setVisibility(View.GONE);
+		activity.findViewById(R.id.emoticon_btn).setVisibility(View.VISIBLE);
+
+		activity.findViewById(R.id.emoticon_btn).setEnabled(true);
+		activity.findViewById(R.id.sticker_btn).setEnabled(true);
+
+		if (!mBlockOverlay)
+		{
+			hideOverlay();
+		}
+	}
+	
+	private void zeroCredits()
+	{
+		Logger.d(TAG, "Zero Credits");
+
+		ImageButton mSendButton = (ImageButton) activity.findViewById(R.id.send_message);
+		mSendButton.setEnabled(false);
+
+		if (!TextUtils.isEmpty(mComposeView.getText()))
+		{
+			mComposeView.setText("");
+		}
+
+		mComposeView.setHint(activity.getString(R.string.zero_sms_hint));
+		mComposeView.setEnabled(false);
+		activity.findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
+		activity.findViewById(R.id.emoticon_btn).setVisibility(View.GONE);
+
+		activity.findViewById(R.id.emoticon_btn).setEnabled(false);
+		activity.findViewById(R.id.sticker_btn).setEnabled(false);
+
+		if (!mConversationDb.wasOverlayDismissed(mConversation.getMsisdn()))
+		{
+			showOverlay(false);
+		}
+
+		// TODO : Make tipView a member of superclass ?
+		/**
+		 * if (tipView != null && tipView.getVisibility() == View.VISIBLE) { Object tag = tipView.getTag();
+		 * 
+		 * if (tag instanceof TipType && ((TipType)tag == TipType.EMOTICON)) { HikeTip.closeTip(TipType.EMOTICON, tipView, prefs); tipView = null; } }
+		 */
+
+	}
+	
+	private void updateChatMetadata()
+	{
+		TextView mMetadataNumChars = (TextView) activity.findViewById(R.id.sms_chat_metadata_num_chars);
+
+		boolean mNativeSMSPref = Utils.getSendSmsPref(activity.getApplicationContext());
+
+		if (mCredits <= 0 && !mNativeSMSPref)
+		{
+			zeroCredits();
+		}
+
+		else
+		{
+			nonZeroCredits();
+
+			if (mComposeView.getLineCount() > 2)
+			{
+				mMetadataNumChars.setVisibility(View.VISIBLE);
+				int length = mComposeView.getText().length();
+				/**
+				 * Set the max sms length to a length appropriate to the number of characters we have
+				 */
+
+				int charNum = length % 140;
+				int numSMS = ((int) (length / 140)) + 1;
+
+				String charNumString = Integer.toString(charNum);
+				SpannableString ss = new SpannableString(charNumString + "/#" + Integer.toString(numSMS));
+				ss.setSpan(new ForegroundColorSpan(activity.getResources().getColor(R.color.send_green)), 0, charNumString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				mMetadataNumChars.setText(ss);
+			}
+
+			else
+			{
+				mMetadataNumChars.setVisibility(View.INVISIBLE);
+			}
+		}
+	}
+
+	private void showSMSCounter()
+	{
+		Animation slideUp = AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.slide_up_noalpha);
+		slideUp.setDuration(2000);
+
+		final Animation slideDown = AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.slide_down_noalpha);
+		slideDown.setDuration(2000);
+		slideDown.setStartOffset(2000);
+
+		final TextView smsCounterView = (TextView) activity.findViewById(R.id.sms_counter);
+		smsCounterView.setBackgroundColor(activity.getResources().getColor(mAdapter.isDefaultTheme() ? R.color.updates_text : R.color.chat_thread_indicator_bg_custom_theme));
+		smsCounterView.setAnimation(slideUp);
+		smsCounterView.setVisibility(View.VISIBLE);
+		smsCounterView.setText(mCredits + " " + activity.getResources().getString(R.string.sms_left));
+
+		slideUp.setAnimationListener(new AnimationListener()
+		{
+
+			@Override
+			public void onAnimationStart(Animation animation)
+			{
+
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{
+
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				smsCounterView.setAnimation(slideDown);
+				smsCounterView.setVisibility(View.INVISIBLE);
+			}
+		});
+	}
+
+	private void hideOverlay()
+	{
+		View mOverlayLayout = activity.findViewById(R.id.overlay_layout);
+
+		if (mOverlayLayout.getVisibility() == View.VISIBLE && activity.hasWindowFocus())
+		{
+			Animation fadeOut = AnimationUtils.loadAnimation(activity.getApplicationContext(), android.R.anim.fade_out);
+			mOverlayLayout.setAnimation(fadeOut);
+		}
+
+		mOverlayLayout.setVisibility(View.INVISIBLE);
+		mIsOverlayShowing = false;
+	}
+	
+	/**
+	 * This method is called to remove undelivered messages from the message adapter
+	 * @param convMessage
+	 */
+	private void removeUndeliveredMessages(Object obj)
+	{
+		if(obj != null)
+		{
+			mAdapter.removeFromUndeliverdMessage((ConvMessage) obj, true);
+			if(mAdapter.getUndeliveredMessagesCount() == 0)
+			{
+				/*
+				 * if all messages are delivered OR we don't have any undelivered messages than only we should reset this timer not on delivery of some message
+				 */
+				// TODO :
+				// chatThread.shouldRunTimerForHikeOfflineTip = true;
+
+				// chatThread.hideHikeToOfflineTip(false, false, false, msgDelivered);
+			}
+		}
+		
+		else
+		{
+			mAdapter.removeAllFromUndeliverdMessage();
+			
+			// TODO :
+			// chatThread.shouldRunTimerForHikeOfflineTip = true;
+
+			// chatThread.hideHikeToOfflineTip();
+			
+		}
+	}
+
+	
+	/**
+	 * This overrides sendPoke from ChatThread
+	 */
+	@Override
+	protected void sendPoke()
+	{
+		super.sendPoke();
+		
+		Utils.vibrateNudgeReceived(activity.getApplicationContext());
+	}
+
 }

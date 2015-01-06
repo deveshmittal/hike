@@ -10,6 +10,8 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.models.Sticker;
@@ -20,7 +22,7 @@ import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
-public class StickerPicker implements OnClickListener, ShareablePopup
+public class StickerPicker implements OnClickListener, ShareablePopup, Listener
 {
 
 	public interface StickerPickerListener
@@ -52,6 +54,7 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 	{
 		this.mContext = context;
 		this.listener = listener;
+		registerPubSub();
 	}
 
 	/**
@@ -298,5 +301,52 @@ public class StickerPicker implements OnClickListener, ShareablePopup
 	public void updateListener(StickerPickerListener mListener)
 	{
 		this.listener = mListener;
+	}
+	
+	private void registerPubSub()
+	{
+		HikeMessengerApp.getPubSub().addListeners(this, new String[] {HikePubSub.STICKER_CATEGORY_MAP_UPDATED});
+	}
+	
+	private void updateStickerAdapter()
+	{
+		if (stickerAdapter != null && viewToDisplay != null)
+		{
+			/**
+			 * Calling this on UI Thread. Still not 100% sure about this though.
+			 */
+			stickerAdapter.instantiateStickerList();
+			viewToDisplay.post(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					stickerAdapter.notifyDataSetChanged();
+
+				}
+			});
+		}
+	}
+
+	/**
+	 * (non-Javadoc)
+	 * @see com.bsb.hike.HikePubSub.Listener#onEventReceived(java.lang.String, java.lang.Object)
+	 */
+	
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		Logger.d(TAG, "Inside onEvent Received of PubSub thread. " + type);
+		
+		switch (type)
+		{
+		case HikePubSub.STICKER_CATEGORY_MAP_UPDATED:
+			updateStickerAdapter();
+			break;
+		default:
+			Logger.e(TAG, "PubSub Registered But Not used : " + type);
+			break;
+		}
 	}
 }
