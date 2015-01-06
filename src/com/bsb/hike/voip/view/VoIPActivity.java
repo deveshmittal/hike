@@ -60,7 +60,7 @@ public class VoIPActivity extends Activity implements CallActions
 {
 
 	static final int PROXIMITY_SCREEN_OFF_WAKELOCK = 32;
-	public static boolean isRunning = false;
+//	public static boolean isRunning = false;
 
 	private VoIPService voipService;
 	// private VoIPClient clientSelf = new VoIPClient(), clientPartner = new VoIPClient();
@@ -213,7 +213,7 @@ public class VoIPActivity extends Activity implements CallActions
 
 		saveCurrentAudioSettings();
 		acquireWakeLock();
-		isRunning = true;
+//		isRunning = true;
 	}
 	
 	@Override
@@ -239,7 +239,7 @@ public class VoIPActivity extends Activity implements CallActions
 			Logger.d(VoIPConstants.TAG, "unbindService IllegalArgumentException: " + e.toString());
 		}
 		
-		isRunning = false;
+//		isRunning = false;
 
 		if(callActionsView!=null)
 		{
@@ -351,7 +351,7 @@ public class VoIPActivity extends Activity implements CallActions
 		restoreAudioSettings();
 		releaseWakeLock();
 
-		isRunning = false;
+//		isRunning = false;
 
 		showCallEnded();
 
