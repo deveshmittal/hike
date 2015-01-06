@@ -307,7 +307,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 * @ordered
 	 */
 
-	public ChatThreadActionBar chatThreadActionBar;
+	public HikeActionBar chatThreadActionBar;
 
 	public void onCreate(Bundle arg0)
 	{
@@ -318,7 +318,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void init()
 	{
-		chatThreadActionBar = new ChatThreadActionBar(activity);
+		chatThreadActionBar = new HikeActionBar(activity);
 		mConversationDb = HikeConversationsDatabase.getInstance();
 
 	}
