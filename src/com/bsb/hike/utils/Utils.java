@@ -2629,6 +2629,8 @@ public class Utils
 
 	public static void setupFormattedTime(TextView tv, long timeElapsed)
 	{
+		if(timeElapsed < 0)
+			return;
 		int totalSeconds = (int) (timeElapsed);
 		int minutesToShow = (int) (totalSeconds / 60);
 		int secondsToShow = totalSeconds % 60;
