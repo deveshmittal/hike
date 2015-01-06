@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,6 +41,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
@@ -170,6 +172,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	private int unreadMessageCount = 0;
 
 	protected EditText mComposeView;
+	
+	protected String mConvLabel;
 	
 	private GestureDetector mGestureDetector;
 
@@ -307,7 +311,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 * @ordered
 	 */
 
-	public HikeActionBar chatThreadActionBar;
+	public HikeActionBar mActionBar;
 
 	public void onCreate(Bundle arg0)
 	{
@@ -318,7 +322,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected void init()
 	{
-		chatThreadActionBar = new HikeActionBar(activity);
+		mActionBar = new HikeActionBar(activity);
 		mConversationDb = HikeConversationsDatabase.getInstance();
 
 	}
@@ -478,7 +482,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		int width = getResources().getDimensionPixelSize(R.dimen.overflow_menu_width);
 		int rightMargin = width + getResources().getDimensionPixelSize(R.dimen.overflow_menu_right_margin);
-		chatThreadActionBar.showOverflowMenu(width, LayoutParams.WRAP_CONTENT, -rightMargin, -(int) (0.5 * Utils.densityMultiplier), activity.findViewById(R.id.attachment_anchor));
+		mActionBar.showOverflowMenu(width, LayoutParams.WRAP_CONTENT, -rightMargin, -(int) (0.5 * Utils.densityMultiplier), activity.findViewById(R.id.attachment_anchor));
 	}
 
 	@Override
@@ -503,6 +507,16 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case R.id.scroll_bottom_indicator:
 			bottomScrollIndicatorClicked();
+			break;
+		case R.id.back:
+			//onActionBarBackPressed();
+			break;
+		case R.id.contact_info:
+			//openProfileScreen();
+			break;
+		default:
+			Logger.e(TAG, "onClick Registered but not added in onClick : " + v.toString());
+			break;
 		}
 
 	}
@@ -902,6 +916,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mAdapter = new MessagesAdapter(activity.getApplicationContext(), mConversation.getMessages(), mConversation, null);
 
 		initListView(); // set adapter and add clicks etc
+		setupActionBar(); //Setup the action bar
 		updateUIAsPerTheme(mConversation.getTheme());// it has to be done after setting adapter
 		initMessageSenderLayout();
 	}
@@ -1684,17 +1699,20 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	/**
 	 * This method is used to setAvatar for a contact
 	 */
-	protected void setAvatar()
+	protected boolean setAvatar()
 	{
-		// TODO :
-		/*
-		 * if (avatar == null) { return; }
-		 * 
-		 * Drawable drawable = HikeMessengerApp.getLruCache().getIconFromCache(mContactNumber, true); if (drawable != null) { avatar.setScaleType(ScaleType.FIT_CENTER);
-		 * avatar.setImageDrawable(drawable); avatar.setBackgroundDrawable(null); } else { avatar.setScaleType(ScaleType.CENTER_INSIDE); avatar.setImageResource((mConversation
-		 * instanceof GroupConversation) ? R.drawable.ic_default_avatar_group : R.drawable.ic_default_avatar);
-		 * avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(mContactNumber, true)); }
-		 */
+		ImageView avatar = (ImageView) activity.getSupportActionBar().getCustomView().findViewById(R.id.avatar);
+		Drawable avatarDrawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true);
+
+		if (avatarDrawable != null)
+		{
+			avatar.setScaleType(ScaleType.FIT_CENTER);
+			avatar.setImageDrawable(avatarDrawable);
+			avatar.setBackgroundDrawable(null);
+			return true;
+		}
+		
+		return false;
 	}
 	
 	
@@ -1868,4 +1886,45 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		return isRemoved;
 	}
 	
+	/**
+	 * Utility method used for setting up the ActionBar in the ChatThread.
+	 *  
+	 */
+	protected void setupActionBar()
+	{
+		View actionBarView = mActionBar.inflateCustomActionBarView(R.layout.chat_thread_action_bar);
+		
+		View backContainer = actionBarView.findViewById(R.id.back);
+		
+		/**
+		 * Defensive check. Can remove if needed.
+		 */
+		
+		if(backContainer == null)
+		{
+			throw new IllegalAccessError("Was correct view passed to inflate chat thread action bar");
+		}
+		
+		View contactInfoContainer = actionBarView.findViewById(R.id.contact_info);
+		
+		setAvatar();
+		setLabel(mConvLabel);
+		
+		/**
+		 * Adding click listeners
+		 */
+		
+		contactInfoContainer.setOnClickListener(this);
+		backContainer.setOnClickListener(this);
+	}
+	
+	/**
+	 * Sets the label for the action bar
+	 */
+	private void setLabel(String label)
+	{
+		TextView mLabelTextView = (TextView) activity.getSupportActionBar().getCustomView().findViewById(R.id.contact_name);
+		
+		mLabelTextView.setText(label);
+	}
 }

@@ -18,6 +18,8 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
@@ -26,6 +28,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ContactInfo;
@@ -95,7 +98,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		Logger.i(TAG, "on create options menu " + menu.hashCode());
-		chatThreadActionBar.onCreateOptionsMenu(menu, R.menu.one_one_chat_thread_menu, getOverFlowItems(), this);
+		mActionBar.onCreateOptionsMenu(menu, R.menu.one_one_chat_thread_menu, getOverFlowItems(), this);
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -117,7 +120,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			showThemePicker();
 			return true;
 		}
-		return chatThreadActionBar.onOptionsItemSelected(item) ? true : super.onOptionsItemSelected(item);
+		return mActionBar.onOptionsItemSelected(item) ? true : super.onOptionsItemSelected(item);
 	}
 
 	private List<OverFlowMenuItem> getOverFlowItems()
@@ -166,6 +169,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			mConversation = new Conversation(msisdn, (contactInfo != null) ? contactInfo.getName() : null, contactInfo.isOnhike());
 			mConversation.setMessages(HikeConversationsDatabase.getInstance().getConversationThread(msisdn, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, mConversation, -1));
 		}
+		
+		String tempLabel = mConversation.getLabel();
+		mConvLabel = Utils.getFirstName(tempLabel);
 		
 		ChatTheme currentTheme = mConversationDb.getChatThemeForMsisdn(msisdn);
 		Logger.d(TAG, "Calling setchattheme from createConversation");
@@ -953,4 +959,117 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		Utils.vibrateNudgeReceived(activity.getApplicationContext());
 	}
 
+	/**
+	 * Overrides {@link ChatThread}'s {@link #setupActionBar()}, to set the last seen time
+	 */
+	@Override
+	protected void setupActionBar()
+	{
+		super.setupActionBar();
+
+		setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
+
+	}
+
+	/**
+	 * If the conv is on Hike, then we hide the last seen text, else we show it as "On SMS"
+	 * 
+	 * @param isConvOnHike
+	 */
+	private void setLastSeenTextBasedOnHikeValue(boolean isConvOnHike)
+	{
+		if (isConvOnHike)
+		{
+			hideLastSeenText();
+		}
+
+		else
+		{
+			setLastSeenText(activity.getResources().getString(R.string.on_sms));
+		}
+	}
+
+	/**
+	 * Utility method to set the last seen text
+	 */
+	private void setLastSeenText(String text)
+	{
+		final TextView mLastSeenView = (TextView) activity.getSupportActionBar().getCustomView().findViewById(R.id.contact_status);
+
+		TextView mLabelView = (TextView) activity.getSupportActionBar().getCustomView().findViewById(R.id.contact_name);
+
+		/**
+		 * If the last seen string is empty or null
+		 */
+		if (TextUtils.isEmpty(text))
+		{
+			mLastSeenView.setVisibility(View.GONE);
+			return;
+		}
+
+		/**
+		 * Setting text on lastSeenView
+		 */
+		mLastSeenView.setText(text);
+
+		if (mLastSeenView.getVisibility() == View.GONE)
+		{
+			/**
+			 * If the view was initially gone and conversation is on hike, we animate the label view in order to make lastSeenView visible
+			 */
+			if (mConversation.isOnhike())
+			{
+				mLastSeenView.setVisibility(View.INVISIBLE);
+
+				Animation animation = AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.slide_up_last_seen);
+				mLabelView.startAnimation(animation);
+
+				animation.setAnimationListener(new AnimationListener()
+				{
+					@Override
+					public void onAnimationStart(Animation animation)
+					{
+					}
+
+					@Override
+					public void onAnimationRepeat(Animation animation)
+					{
+					}
+
+					@Override
+					public void onAnimationEnd(Animation animation)
+					{
+						mLastSeenView.setVisibility(View.VISIBLE);
+					}
+				});
+			}
+
+			else
+			{
+				mLabelView.setVisibility(View.VISIBLE);
+			}
+		}
+	}
+
+	/**
+	 * Utility method used for hiding the lastSeenView from the Action Bar
+	 */
+	private void hideLastSeenText()
+	{
+		activity.getSupportActionBar().getCustomView().findViewById(R.id.contact_status).setVisibility(View.GONE);
+	}
+	
+	@Override
+	protected boolean setAvatar()
+	{
+		if(!super.setAvatar())
+		{
+			ImageView avatar = (ImageView) activity.getSupportActionBar().getCustomView().findViewById(R.id.avatar);
+			avatar.setScaleType(ScaleType.CENTER_INSIDE);
+			avatar.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_default_avatar));
+			avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
+		}
+		
+		return true;
+	}
 }

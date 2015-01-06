@@ -7,12 +7,16 @@ import java.util.Map.Entry;
 import android.os.Message;
 import android.util.Pair;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.ImageView.ScaleType;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ConvMessage;
@@ -77,7 +81,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		chatThreadActionBar.onCreateOptionsMenu(menu, R.menu.group_chat_thread_menu, getOverFlowItems(), this);
+		mActionBar.onCreateOptionsMenu(menu, R.menu.group_chat_thread_menu, getOverFlowItems(), this);
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -163,6 +167,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			long msgId = pair.second;
 			(groupConversation).setupReadByList(readBy, msgId);
 		}
+		
+		mConvLabel = mConversation.getLabel();
 		// fetch theme
 		ChatTheme currentTheme = mConversationDb.getChatThemeForMsisdn(msisdn);
 		Logger.d("ChatThread", "Calling setchattheme from createConversation");
@@ -382,5 +388,48 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		{
 			Utils.vibrateNudgeReceived(activity.getApplicationContext());
 		}
+	}
+	
+	@Override
+	protected void setupActionBar()
+	{
+		super.setupActionBar();
+		
+		incrementGroupParticipants(0);
+	}
+	
+	/**
+	 * Setting the group participant count
+	 * 
+	 * @param morePeopleCount
+	 */
+	private void incrementGroupParticipants(int morePeopleCount)
+	{
+		int numActivePeople = groupConversation.getGroupMemberAliveCount() + morePeopleCount;
+		groupConversation.setGroupMemberAliveCount(numActivePeople);
+
+		TextView groupCountTextView = (TextView) activity.getSupportActionBar().getCustomView().findViewById(R.id.contact_status);
+
+		if (numActivePeople > 0)
+		{
+			/**
+			 * Incrementing numActivePeople by + 1 to add self
+			 */
+			groupCountTextView.setText(activity.getResources().getString(R.string.num_people, (numActivePeople + 1)));
+		}
+	}
+	
+	@Override
+	protected boolean setAvatar()
+	{
+		if (!super.setAvatar())
+		{
+			ImageView avatar = (ImageView) activity.getSupportActionBar().getCustomView().findViewById(R.id.avatar);
+			avatar.setScaleType(ScaleType.CENTER_INSIDE);
+			avatar.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_default_avatar_group));
+			avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
+		}
+
+		return true;
 	}
 }
