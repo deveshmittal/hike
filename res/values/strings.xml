@@ -1269,4 +1269,13 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="merry_christmas">Merry Christmas</string>
     <string name="send_sticker_joy">Wish your friends with this sticker</string>
     <string name="happy_new_year">Happy New Year</string>
+    
+    <string name="led_color_none_key">None</string>
+    <string name="led_color_blue_key">Blue</string>
+    <string name="led_color_cyan_key">Cyan</string>
+    <string name="led_color_green_key">Green</string>
+    <string name="led_color_red_key">Red</string>
+    <string name="led_color_white_key">White</string>
+    <string name="led_color_yellow_key">Yellow</string>
+    <string name="led_color_purple_key">Purple</string>
 </resources>
