@@ -872,7 +872,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 		});
 		soundPref.setTitle(getString(R.string.notificationSoundTitle) + " - " + (soundPref.getValue()));
 		
-		ListPreference ledPref = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.LED_PREF);
+		ListPreference ledPref = (ListPreference) getPreferenceScreen().findPreference(HikeConstants.COLOR_LED_PREF);
 		ledPref.setOnPreferenceChangeListener(new OnPreferenceChangeListener()
 		{
 
