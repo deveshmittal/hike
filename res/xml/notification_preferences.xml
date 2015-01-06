@@ -26,7 +26,7 @@
         android:entries="@array/ledPrefKeys"
         android:entryValues="@array/ledPrefValues"
         icon="@drawable/preference_led"
-        android:key="ledPref"
+        android:key="colorLedPref"
         android:layout="@layout/list_preference"
         android:summary="@string/led_notification_info"
         android:title="@string/led_notification" />
