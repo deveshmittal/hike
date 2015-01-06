@@ -221,7 +221,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			deleteMessages((Pair<Boolean, ArrayList<Long>>) msg.obj);
 			break;
 		case CHAT_THEME:
-			setBackground((ChatTheme) msg.obj);
+			updateUIAsPerTheme((ChatTheme) msg.obj);
 			break;
 		case CLOSE_CURRENT_STEALTH_CHAT:
 			closeStealthChat();
