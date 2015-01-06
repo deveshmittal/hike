@@ -183,7 +183,16 @@ public class AnalyticsSender implements Runnable
 		if(!isAnalyticsUploadReady())
 			return;
 		
-		new Thread(AnalyticsSender.getInstance(context)).start();
+		if(AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= AnalyticsConstants.MAX_ANALYTICS_SIZE || Utils.getNetworkType(context) == 1)
+		{
+			new Thread(AnalyticsSender.getInstance(context)).start();
+		}
+		else
+		{
+			AnalyticsStore.getInstance(context).deleteNormalPriorityData();
+			
+			new Thread(AnalyticsSender.getInstance(context)).start();
+		}
 		
 		HAManager instance = HAManager.getInstance(context);
 		

@@ -33,6 +33,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.AnalyticsSender;
+import com.bsb.hike.analytics.AnalyticsStore;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -1362,6 +1364,22 @@ public class MqttMessagesManager
 			editor.putBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, false);
 			editor.commit();
 			context.sendBroadcast(new Intent(HikeService.SEND_GB_DETAILS_TO_SERVER_ACTION));
+		}
+		// server on demand analytics data to sent from client
+		if(data.optBoolean(AnalyticsConstants.ANALYTICS))
+		{		
+			// if total logged data is less than threshold value, try sending all the data
+			if((AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= AnalyticsConstants.MAX_ANALYTICS_SIZE) || (Utils.getNetworkType(context) == 1))
+			{
+				new Thread(AnalyticsSender.getInstance(context)).start();
+			}
+			// else try sending data of high priority only, delete normal priority analytics data
+			else
+			{
+				AnalyticsStore.getInstance(context).deleteNormalPriorityData();
+				
+				new Thread(AnalyticsSender.getInstance(context)).start();
+			}
 		}
 	}
 
