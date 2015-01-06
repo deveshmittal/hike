@@ -633,6 +633,10 @@ public class ConversationsAdapter extends BaseAdapter
 				muteIcon.setVisibility(View.GONE);
 			}
 		}
+		else if(muteIcon != null)
+		{
+			muteIcon.setVisibility(View.GONE);
+		}
 	}
 
 	public void updateViewsRelatedToLastMessage(View parentView, ConvMessage message, Conversation conversation)
