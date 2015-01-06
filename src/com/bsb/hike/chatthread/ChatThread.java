@@ -127,8 +127,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected static final int CLOSE_PHOTO_VIEWER_FRAGMENT = 14;
 	
-	protected static final int STICKER_CATEGORY_MAP_UPDATED = 15;
-
 	protected ChatThreadActivity activity;
 
 	protected ThemePicker themePicker;
@@ -228,9 +226,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case CLOSE_PHOTO_VIEWER_FRAGMENT:
 			removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true);
-			break;
-		case STICKER_CATEGORY_MAP_UPDATED:
-			updateStickerAdapter();
 			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
@@ -1325,9 +1320,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case HikePubSub.ClOSE_PHOTO_VIEWER_FRAGMENT:
 			uiHandler.sendEmptyMessage(CLOSE_PHOTO_VIEWER_FRAGMENT);
 			break;
-		case HikePubSub.STICKER_CATEGORY_MAP_UPDATED:
-			uiHandler.sendEmptyMessage(STICKER_CATEGORY_MAP_UPDATED);
-			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
 			break;
@@ -1876,11 +1868,4 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		return isRemoved;
 	}
 	
-	private void updateStickerAdapter()
-	{
-		if (mStickerPicker != null)
-		{
-			mStickerPicker.updateStickerAdapter();
-		}
-	}
 }
