@@ -253,14 +253,16 @@ public class NotificationToneListPreference extends ListPreference implements Di
 
 		protected void onPostExecute(Void result)
 		{
-			setEntryAndValues();
-			notifyChanged();
-			//updateValueListFromMap();
-			if (progressDialog != null)
+			if(!fetcherTask.isCancelled())
 			{
-				progressDialog.dismiss();
+				setEntryAndValues();
+				notifyChanged();
+				if (progressDialog != null)
+				{
+					progressDialog.dismiss();
+				}
+				showDialog(null);
 			}
-			showDialog(null);
 		}
 
 	}
