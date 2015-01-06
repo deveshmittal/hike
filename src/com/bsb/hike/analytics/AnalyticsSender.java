@@ -20,6 +20,7 @@ import android.content.SharedPreferences;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.HikeAlarmManager;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -214,7 +215,7 @@ public class AnalyticsSender implements Runnable
 	
 			httpClient = new DefaultHttpClient();
 			
-			HttpPost postCall = new HttpPost(AnalyticsConstants.HTTP_UPLOAD_URL);
+			HttpPost postCall = new HttpPost(AccountUtils.analyticsUploadUrl);
 	
 			HttpResponse response = null;
 			

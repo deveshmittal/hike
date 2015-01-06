@@ -183,7 +183,7 @@ public class HAManager
 		}
 	}
 
-	public synchronized void dumpMostRecentEvents()
+	private synchronized void dumpMostRecentEvents()
 	{
 		if(eventsList.size() > 0)
 		{
@@ -351,6 +351,8 @@ public class HAManager
 	 */
 	public void sendAnalyticsData()
 	{
+		dumpMostRecentEvents();
+		
 		// if total logged data is less than threshold value or wifi is available, try sending all the data else delete normal priority data
 		if(!((AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance(context).getMaxAnalyticsSizeOnClient()) || 
 				(Utils.getNetworkType(context) == ConnectivityManager.TYPE_WIFI)))
