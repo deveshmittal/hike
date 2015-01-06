@@ -8,6 +8,8 @@ public class AnalyticsConstants
 {	
 	public static long MAX_FILE_SIZE = 10 * 1024;
 	
+	public static long MAX_ANALYTICS_SIZE = 500 * 1024;
+	
 	/** time of first attempt to send analytics data */ 
 	public static int HOUR_OF_DAY_TO_SEND = 8;
 	
@@ -19,7 +21,7 @@ public class AnalyticsConstants
 	
 	public static boolean IS_ANALYTICS_ENABLED = true;
 	
-	public static final int MAX_EVENTS_IN_MEMORY = 10;
+	public static final int MAX_EVENTS_IN_MEMORY = 2;
 	
 	public static final String HTTP_UPLOAD_URL = "http://staging.im.hike.in/v1/logs/analytics"; 
 	
@@ -27,7 +29,9 @@ public class AnalyticsConstants
 	
 	public static final String NEW_LINE = "\n";
 		
-	public static final String EVENT_FILE_NAME = "eventdata";
+	public static final String NORMAL_EVENT_FILE_NAME = "normaldata";
+	
+	public static final String IMP_EVENT_FILE_NAME = "impdata";
 	
 	public static final String FILE_EXTENSION = ".txt";
 	
@@ -67,5 +71,5 @@ public class AnalyticsConstants
 	
 	public static final String CURRENT_TIME_STAMP = "cts"; 
 	
-	public static final String EVENT_TAG_VALUE = "mob";
+	public static final String EVENT_TAG_VALUE = "mob";	
 }
