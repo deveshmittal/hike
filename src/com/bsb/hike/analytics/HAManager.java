@@ -91,17 +91,6 @@ public class HAManager
 	}
 	
 	/**
-	 * records the analytics event to the file 
-	 * @param e event to be recorded
-	 */
-	public void record(String type)
-	{
-		if(!isAnalyticsEnabled)
-			return;
-		recordEvent(type, null, EventPriority.NORMAL, null, null);
-	}
-
-	/**
 	 * records the analytics event to the file
 	 * @param type event type
 	 * @param context context of the event
@@ -110,7 +99,7 @@ public class HAManager
 	{
 		if(!isAnalyticsEnabled)
 			return;
-		recordEvent(type, context, EventPriority.NORMAL, null, null);
+		recordEvent(type, context, EventPriority.NORMAL, null, AnalyticsConstants.EVENT_TAG_VALUE);
 	}
 
 	/**
@@ -124,7 +113,21 @@ public class HAManager
 	{
 		if(!isAnalyticsEnabled)
 			return;
-		recordEvent(type, context, EventPriority.NORMAL, metadata, null);
+		recordEvent(type, context, EventPriority.NORMAL, metadata, AnalyticsConstants.EVENT_TAG_VALUE);
+	}
+
+	/**
+	 * records the analytics event to the file
+	 * @param type type of the event
+	 * @param context context of the event
+	 * @param priority event priority
+	 * @param tag tag for the event
+	 */
+	public void record(String type, String context, EventPriority priority, String tag)
+	{
+		if(!isAnalyticsEnabled)
+			return;
+		recordEvent(type, context, priority, null, tag);
 	}
 
 	/**
@@ -133,28 +136,28 @@ public class HAManager
 	 * @param context context of the event
 	 * @param priority priority of the event
 	 * @param metadata metadata of the event
-	 * @param customdata custom data of the event
+	 * @param tag tag of the event
 	 */
-	public void record(String type, String context, EventPriority priority, JSONObject metadata, JSONObject customdata)
+	public void record(String type, String context, EventPriority priority, JSONObject metadata, String tag)
 	{
 		if(!isAnalyticsEnabled)
 			return;
-		recordEvent(type, context, priority, metadata, customdata);
+		recordEvent(type, context, priority, metadata, tag);
 	}
-
+	
 	/**
 	 * records the analytics event to the file
 	 * @param event event to be logged
 	 * @param context application context
 	 */
 	// TODO need to look for a better way to do this operation and avoid synchronization
-	private synchronized void recordEvent(String type, String context, EventPriority priority, JSONObject metadata, JSONObject customdata) throws NullPointerException 
+	private synchronized void recordEvent(String type, String context, EventPriority priority, JSONObject metadata, String tag) throws NullPointerException 
 	{
 		if(type == null || context == null)
 		{
 			throw new NullPointerException("Type and Context of event cannot be null.");
 		}
-		eventsList.add(generateAnalticsJson(type, context, priority, metadata, customdata));
+		eventsList.add(generateAnalticsJson(type, context, priority, metadata, tag));
 
 		if (AnalyticsConstants.MAX_EVENTS_IN_MEMORY == eventsList.size()) 
 		{			
@@ -270,28 +273,21 @@ public class HAManager
 	 * @param context context of the event
 	 * @param priority priority of the event
 	 * @param metadata metadata of the event
-	 * @param customdata custom data for the event
+	 * @param tag tag for the event
 	 * @return
 	 */
-	private JSONObject generateAnalticsJson(String type, String context, EventPriority priority, JSONObject metadata, JSONObject customdata)
+	private JSONObject generateAnalticsJson(String type, String context, EventPriority priority, JSONObject metadata, String tagValue)
 	{		
 		JSONObject json = new JSONObject();
 		JSONObject data = new JSONObject();
 		
 		try 
 		{
-			if(customdata == null)
-			{
-				data.put(AnalyticsConstants.EVENT_TYPE, type);				
-				data.put(AnalyticsConstants.EVENT_SUB_TYPE, context);
-				data.put(AnalyticsConstants.EVENT_PRIORITY, priority);
-				data.put(AnalyticsConstants.CURRENT_TIME_STAMP, System.currentTimeMillis());
-				data.put(AnalyticsConstants.EVENT_TAG, AnalyticsConstants.EVENT_TAG_VALUE);
-			}
-			else
-			{
-				data.put(AnalyticsConstants.DATA, customdata);
-			}
+			data.put(AnalyticsConstants.EVENT_TYPE, type);				
+			data.put(AnalyticsConstants.EVENT_SUB_TYPE, context);
+			data.put(AnalyticsConstants.EVENT_PRIORITY, priority);
+			data.put(AnalyticsConstants.CURRENT_TIME_STAMP, System.currentTimeMillis());
+			data.put(AnalyticsConstants.EVENT_TAG, tagValue);
 
 			if(metadata != null)
 			{
