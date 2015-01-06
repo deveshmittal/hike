@@ -1144,17 +1144,23 @@ public class HikeNotification
 					}
 				}
 			}
-		
-			boolean led = preferenceManager.getBoolean(HikeConstants.LED_PREF, true);
+			
 			int ledColor = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_DEFAULT_BLUE_COLOR);
-			ledColor = led == true ? ledColor : HikeConstants.LED_NONE_COLOR;
+		
+			//Check if Previously any boolean Key was present for this Led
+			if(preferenceManager.contains(HikeConstants.LED_PREF))
+			{
+				boolean led = preferenceManager.getBoolean(HikeConstants.LED_PREF, true);
+				ledColor = led == true ? ledColor : HikeConstants.LED_NONE_COLOR;
+				
+				//removing previous Key
+				preferenceManager.edit().remove(HikeConstants.LED_PREF).commit();
+				
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, ledColor);
+			}
 			if(ledColor != HikeConstants.LED_NONE_COLOR)
 			{
 				mBuilder.setLights(ledColor, HikeConstants.LED_LIGHTS_ON_MS, HikeConstants.LED_LIGHTS_OFF_MS);
-			}
-			else
-			{
-				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, ledColor);
 			}
 		}
 		return mBuilder;
