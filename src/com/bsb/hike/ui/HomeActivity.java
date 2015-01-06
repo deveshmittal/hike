@@ -1,16 +1,12 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,18 +26,14 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.WindowManager.BadTokenException;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.view.animation.ScaleAnimation;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -58,41 +50,34 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
-import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.bsb.hike.AppConfig;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.FtueContactsData;
-import com.bsb.hike.models.HikeAlarmManager;
-import com.bsb.hike.models.HikeFile;
-import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.FtueContactsData;
 import com.bsb.hike.models.OverFlowMenuItem;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.snowfall.SnowFallView;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
-import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.tasks.SendLogsTask;
+import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.utils.LockPattern;
-import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.FestivePopup;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
-import com.bsb.hike.utils.HikeTip;
-import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.HikeTip;
+import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.Utils;
 
 public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Listener
@@ -135,7 +120,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 	private PopupWindow overFlowWindow;
 
 	private TextView newConversationIndicator;
-	
+
 	private TextView topBarIndicator;
 
 	private Drawable myProfileImage;
@@ -164,7 +149,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT, HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.UPDATE_OF_MENU_NOTIFICATION,
 			HikePubSub.SERVICE_STARTED, HikePubSub.UPDATE_PUSH, HikePubSub.REFRESH_FAVORITES, HikePubSub.UPDATE_NETWORK_STATE, HikePubSub.CONTACT_SYNCED,
 			HikePubSub.SHOW_STEALTH_FTUE_SET_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, HikePubSub.SHOW_STEALTH_FTUE_CONV_TIP, HikePubSub.FAVORITE_COUNT_CHANGED,
-			HikePubSub.STEALTH_UNREAD_TIP_CLICKED,HikePubSub. FTUE_LIST_FETCHED_OR_UPDATED };
+			HikePubSub.STEALTH_UNREAD_TIP_CLICKED, HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED };
 
 	private String[] progressPubSubListeners = { HikePubSub.FINISHED_UPGRADE_INTENT_SERVICE };
 
@@ -176,7 +161,17 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			return;
 		}
-				
+
+		if (NUXManager.getInstance(this).getCurrentState() == NUXConstants.NUX_NEW)
+		{
+			if (!NUXManager.getInstance(this).getNuxInviteFriendsPojo().isToggleSkipButton())
+			{
+				NUXManager.getInstance(this).setCurrentState(NUXConstants.NUX_SKIPPED);
+			}
+
+			NUXManager.getInstance(this).startNUX(this);
+			finish();
+		}
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
 		HikeMessengerApp app = (HikeMessengerApp) getApplication();
@@ -200,7 +195,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			initialiseHomeScreen(savedInstanceState);
 		}
-		
+
 	}
 
 	private void setupActionBar()
@@ -245,11 +240,11 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		if (savedInstanceState == null && dialogShowing == null)
 		{
-			
-				/*
-				 * Only show app rater if the tutorial is not being shown an the app was just launched i.e not an orientation change
-				 */
-				AppRater.appLaunched(this);
+
+			/*
+			 * Only show app rater if the tutorial is not being shown an the app was just launched i.e not an orientation change
+			 */
+			AppRater.appLaunched(this);
 		}
 		else if (dialogShowing != null)
 		{
@@ -280,14 +275,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		final int festivePopupType = accountPrefs.getInt(HikeConstants.SHOW_FESTIVE_POPUP, -1);
 		if (festivePopupType != -1)
 		{
-			if(FestivePopup.isPastFestiveDate(festivePopupType))
+			if (FestivePopup.isPastFestiveDate(festivePopupType))
 			{
 				HikeSharedPreferenceUtil.getInstance(this).removeData(HikeConstants.SHOW_FESTIVE_POPUP);
 			}
-			else if(dialogShowing == null)
+			else if (dialogShowing == null)
 			{
 				ViewStub festiveView = (ViewStub) findViewById(R.id.festive_view_stub);
-				if(festivePopupType == FestivePopup.NEW_YEAR_POPUP)
+				if (festivePopupType == FestivePopup.NEW_YEAR_POPUP)
 				{
 					festiveView.setLayoutResource(R.layout.new_year_popup);
 				}
@@ -304,7 +299,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 
 	}
-	
+
 	private void startFestiveView(final int type)
 	{
 		Utils.blockOrientationChange(HomeActivity.this);
@@ -312,7 +307,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		findViewById(R.id.action_bar_img).setVisibility(View.VISIBLE);
 		getSupportActionBar().hide();
 
-		if(snowFallView == null)
+		if (snowFallView == null)
 		{
 			mHandler.postDelayed(new Runnable()
 			{
@@ -328,14 +323,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void setupMainFragment(Bundle savedInstanceState)
 	{
-		if (savedInstanceState != null) {
-            return;
-        }
-        mainFragment = new ConversationFragment();
-        
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.home_screen, mainFragment).commit();
-		
+		if (savedInstanceState != null)
+		{
+			return;
+		}
+		mainFragment = new ConversationFragment();
+
+		getSupportFragmentManager().beginTransaction().add(R.id.home_screen, mainFragment).commit();
+
 	}
 
 	public void onFestiveModeBgClick(View v)
@@ -465,7 +460,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				startActivity(intent);
 			}
 		});
-		
+
 		return true;
 	}
 
@@ -491,9 +486,6 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			return super.onOptionsItemSelected(item);
 		}
 	}
-
-
-	
 
 	private void showSMSClientDialog()
 	{
@@ -884,14 +876,14 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		return timelineCount + Utils.updateHomeOverflowToggleCount(accountPrefs, defaultValue);
 	}
-	
+
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
 		super.onEventReceived(type, object);
 		if (HikePubSub.INCREMENTED_UNSEEN_STATUS_COUNT.equals(type))
 		{
-			runOnUiThread( new Runnable()
+			runOnUiThread(new Runnable()
 			{
 
 				@Override
@@ -975,9 +967,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			{
 				return;
 			}
-			
+
 			String msisdn = (String) object;
-			
+
 			runOnUiThread(new Runnable()
 			{
 				@Override
@@ -986,7 +978,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					showRecentlyJoinedDot(1000);
 				}
 			});
-			
+
 			for (ContactInfo contactInfo : ftueContactsData.getCompleteList())
 			{
 				if (contactInfo.getMsisdn().equals(msisdn))
@@ -1093,7 +1085,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				@Override
 				public void run()
 				{
-					if(manualSync)
+					if (manualSync)
 						Toast.makeText(getApplicationContext(), R.string.contacts_synced, Toast.LENGTH_SHORT).show();
 				}
 			});
@@ -1133,7 +1125,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 		else if (HikePubSub.STEALTH_UNREAD_TIP_CLICKED.equals(type))
 		{
-			runOnUiThread(new Runnable() {
+			runOnUiThread(new Runnable()
+			{
 				@Override
 				public void run()
 				{
@@ -1141,9 +1134,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				}
 			});
 		}
-		else if(HikePubSub.FAVORITE_COUNT_CHANGED.equals(type))
+		else if (HikePubSub.FAVORITE_COUNT_CHANGED.equals(type))
 		{
-			runOnUiThread( new Runnable()
+			runOnUiThread(new Runnable()
 			{
 				@Override
 				public void run()
@@ -1175,7 +1168,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					if (topBarIndicator != null)
 					{
 						/*
-						 * Fetching the count again since it could have changed after the delay. 
+						 * Fetching the count again since it could have changed after the delay.
 						 */
 						int newCount = getHomeOverflowCount(accountPrefs, false, false);
 						if (newCount < 1)
@@ -1224,7 +1217,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		protected void onPostExecute(FtueContactsData result)
 		{
 			ftueContactsData = result;
-			Logger.d("GetFTUEContactsTask","ftueContactsData = "+ ftueContactsData.toString());
+			Logger.d("GetFTUEContactsTask", "ftueContactsData = " + ftueContactsData.toString());
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FTUE_LIST_FETCHED_OR_UPDATED, null);
 		}
 	}
@@ -1237,7 +1230,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		{
 			if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_MENU)
 			{
-				if ((ftueAddFriendWindow != null && ftueAddFriendWindow.getVisibility() == View.VISIBLE) || dialogShowing!=null)
+				if ((ftueAddFriendWindow != null && ftueAddFriendWindow.getVisibility() == View.VISIBLE) || dialogShowing != null)
 				{
 					return true;
 				}
@@ -1412,18 +1405,18 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_GAMES, false))
 		{
 			String hikeExtrasName = accountPrefs.getString(HikeConstants.HIKE_EXTRAS_NAME, getApplicationContext().getString(R.string.hike_extras));
-					                       
-			if(!TextUtils.isEmpty(hikeExtrasName))
+
+			if (!TextUtils.isEmpty(hikeExtrasName))
 			{
 				optionsList.add(new OverFlowMenuItem(hikeExtrasName, 3));
 			}
 		}
-		
+
 		if (accountPrefs.getBoolean(HikeMessengerApp.SHOW_REWARDS, false))
 		{
 			String rewards_name = accountPrefs.getString(HikeConstants.REWARDS_NAME, getApplicationContext().getString(R.string.rewards));
-												
-			if(!TextUtils.isEmpty(rewards_name))
+
+			if (!TextUtils.isEmpty(rewards_name))
 			{
 				optionsList.add(new OverFlowMenuItem(rewards_name, 4));
 			}
@@ -1594,12 +1587,12 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		// TODO Auto-generated method stub
 		super.onConfigurationChanged(newConfig);
 		// handle dialogs here
-		if(progDialog != null && progDialog.isShowing())
+		if (progDialog != null && progDialog.isShowing())
 		{
 			progDialog.dismiss();
 			progDialog = HikeDialog.showDialog(HomeActivity.this, HikeDialog.HIKE_UPGRADE_DIALOG, null);
 			showingProgress = true;
-			
+
 		}
 		if (dialogShowing != null)
 		{
@@ -1691,7 +1684,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			public void onSucess(Dialog dialog)
 			{
 				// TODO Auto-generated method stub
-				
+
 			}
 		};
 	}
@@ -1701,7 +1694,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		LockPattern.onLockActivityResult(this, requestCode, resultCode, data);
 		super.onActivityResult(requestCode, resultCode, data);
 	}
-	
+
 	public void showRecentlyJoinedDot(int delayTime)
 	{
 		mHandler.postDelayed(new Runnable()
@@ -1789,5 +1782,4 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 		}
 	}
 
-	
 }

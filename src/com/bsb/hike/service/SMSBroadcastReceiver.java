@@ -1,5 +1,7 @@
 package com.bsb.hike.service;
 
+import java.util.HashSet;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,6 +18,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.ui.NUXStartActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -28,15 +31,25 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 		/*
 		 * no name setting, so don't bother pulling in SMS's yet or The user doesn't want us pulling in his SMS.
 		 */
-
-		Logger.d("HikeMessageReceiver" , System.currentTimeMillis()+"");
+		HashSet<String> mmlist = new HashSet<String>();
+		mmlist.add("+91111222333");
+		mmlist.add("+632456");
+		// NUXManager.getInstance(context).startNUX(context);
+		// NUXManager.getInstance(context).removeNUXContact(mmlist, context);
+		Intent intt = new Intent(context.getApplicationContext(), NUXStartActivity.class);
+		intt.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		context.startActivity(intt);
+		System.out.println(Utils.getResolutionId());
+		// NUXManager.getInstance(context).putJsonData();
+		// NUXManager.getInstance(context).sendMessage(mmlist, "Hello");
+		Logger.d("HikeMessageReceiver", System.currentTimeMillis() + "");
 		Logger.d("HikeMessageReceiver", "message received");
-
+		// NUXManager.getInstance(context).removeData(context);
 		// If the User is not authenticated and the GCMID is not sent to the server and the user is connected.
 
 		HikeSharedPreferenceUtil mprefs = HikeSharedPreferenceUtil.getInstance(context);
-		
-		if (Utils.isUserOnline(context) && (!Utils.isUserAuthenticated(context)) && !mprefs.getData(HikeMessengerApp.GCM_ID_SENT_PRELOAD, false) )
+
+		if (Utils.isUserOnline(context) && (!Utils.isUserAuthenticated(context)) && !mprefs.getData(HikeMessengerApp.GCM_ID_SENT_PRELOAD, false))
 		{
 
 			Intent in = new Intent(HikeService.REGISTER_TO_GCM_ACTION);

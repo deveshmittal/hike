@@ -1269,4 +1269,8 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="merry_christmas">Merry Christmas</string>
     <string name="send_sticker_joy">Wish your friends with this sticker</string>
     <string name="happy_new_year">Happy New Year</string>
+    <string name="nux_invitefrnds_skip">SKIP</string>
+    <string name="nux_invitefrnds_reward">Earn a free talktime worth Rs 100!</string>
+    <string name="nux_invitefrnds_objective">Start a chat with your friends.Unlock your talktime reward when any 3 of them message you back</string>
+    <string name="nux_invitefrnds_buttext">SELECT FRIENDS TO CHAT</string>
 </resources>

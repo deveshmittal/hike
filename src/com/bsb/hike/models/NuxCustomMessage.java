@@ -1,22 +1,27 @@
 package com.bsb.hike.models;
 
+import java.util.ArrayList;
+
 public class NuxCustomMessage
 {
-	private String screentitle;
+	private String screenTitle;
 
-	private String smsmessage;
+	private String hint;
 
 	private String buttext;
 
-	private boolean togglecustommsg;
+	private boolean togglescreen;
 
-	public NuxCustomMessage(String screentitle, String smsmessage, String buttext, boolean togglecustommsg)
+	private ArrayList<String> stickerList;
+
+	public NuxCustomMessage(String screentitle, String smsmessage, String buttext, boolean togglecustommsg, ArrayList<String> stickerList)
 	{
 		super();
-		this.screentitle = screentitle;
-		this.smsmessage = smsmessage;
+		this.screenTitle = screentitle;
+		this.hint = smsmessage;
 		this.buttext = buttext;
-		this.togglecustommsg = togglecustommsg;
+		this.togglescreen = togglecustommsg;
+		this.stickerList = stickerList;
 	}
 
 	/**
@@ -24,7 +29,7 @@ public class NuxCustomMessage
 	 */
 	public String getScreenTitle()
 	{
-		return screentitle;
+		return screenTitle;
 	}
 
 	/**
@@ -32,7 +37,7 @@ public class NuxCustomMessage
 	 */
 	public String getSmsMessage()
 	{
-		return smsmessage;
+		return hint;
 	}
 
 	/**
@@ -48,7 +53,12 @@ public class NuxCustomMessage
 	 */
 	public boolean isToggleCustomMsg()
 	{
-		return togglecustommsg;
+		return togglescreen;
+	}
+
+	public ArrayList<String> getStickerList()
+	{
+		return stickerList;
 	}
 
 }

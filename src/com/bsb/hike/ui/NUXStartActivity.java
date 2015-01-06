@@ -34,10 +34,6 @@ public class NUXStartActivity extends HikeAppStateBaseFragmentActivity implement
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 
-		if (!NUXManager.getInstance(this).is_NUX_Active() && NUXManager.getInstance(this).getCurrentState() == NUXConstants.INVFRD)
-		{
-			return;
-		}
 		if (Utils.requireAuth(this))
 		{
 			return;
@@ -55,7 +51,7 @@ public class NUXStartActivity extends HikeAppStateBaseFragmentActivity implement
 
 		bindListeners();
 
-		// processViewElemets();
+		processViewElemets();
 
 	}
 
@@ -112,7 +108,9 @@ public class NUXStartActivity extends HikeAppStateBaseFragmentActivity implement
 		{
 		case R.id.but_skip:
 			IntentManager.openHomeActivity(this);
+			NUXManager.getInstance(this).setCurrentState(NUXConstants.NUX_SKIPPED);
 			Toast.makeText(this, "Button Skip", Toast.LENGTH_LONG).show();
+			finish();
 			break;
 
 		case R.id.but_inviteFrnds:

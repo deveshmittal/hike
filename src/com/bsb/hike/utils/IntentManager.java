@@ -241,12 +241,11 @@ public class IntentManager
 		context.startActivity(in);
 	}
 
-	public static void openInviteFriends(Context context)
+	public static Intent openInviteFriends(Context context)
 	{
 		// TODO Auto-generated method stub
 		Intent in = new Intent(context, NUXStartActivity.class);
-		context.startActivity(in);
-
+		return in;
 	}
 
 	public static void openSelectFriends(Context context)
