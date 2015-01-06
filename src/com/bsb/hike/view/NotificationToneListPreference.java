@@ -255,7 +255,7 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		{
 			setEntryAndValues();
 			notifyChanged();
-			updateValueListFromMap();
+			//updateValueListFromMap();
 			if (progressDialog != null)
 			{
 				progressDialog.dismiss();
@@ -280,7 +280,9 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	protected Parcelable onSaveInstanceState()
 	{
 		Parcelable superState = super.onSaveInstanceState();
-
+		
+		updateValueListFromMap();
+		
 		Bundle state = new Bundle();
 		state.putParcelable(STATE_PARENT, superState);
 		state.putCharSequenceArray(SOUND_PREF_KEY, rintoneCharSeq);
@@ -305,6 +307,8 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	 */
 	private void updateRingtoneMapAfterRotation()
 	{
+		ringtonesNameURIMap.clear();
+		
 		for(int i = 0; i < rintoneCharSeq.length; i++)
 		{
 			Uri soundUri = rintoneValSeq.get(i) != null ? Uri.parse(rintoneValSeq.get(i)) : null;
