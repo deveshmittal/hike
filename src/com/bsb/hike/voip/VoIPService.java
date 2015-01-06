@@ -87,7 +87,7 @@ public class VoIPService extends Service {
 	private int totalBytesSent = 0, totalBytesReceived = 0, rawVoiceSent = 0;
 	private VoIPEncryptor encryptor = new VoIPEncryptor();
 	private VoIPEncryptor.EncryptionStage encryptionStage = EncryptionStage.STAGE_INITIAL;
-	private boolean mute = false;
+	private boolean mute, hold, speaker;
 	private boolean audioStarted = false;
 	private int droppedDecodedPackets = 0;
 	private int minBufSizePlayback;
@@ -469,8 +469,14 @@ public class VoIPService extends Service {
 
 	}
 	
-	public void setMute(boolean mute) {
+	public void setMute(boolean mute)
+	{
 		this.mute = mute;
+	}
+
+	public boolean getMute()
+	{
+		return mute;
 	}
 	
 	private void sendHandlerMessage(int message) {
@@ -1480,6 +1486,7 @@ public class VoIPService extends Service {
 	}
 	
 	public void setHold(boolean hold) {
+		this.hold = hold;
 		Logger.w(VoIPConstants.TAG, "Changing hold to: " + hold);
 		
 		if (hold == true) {
@@ -1492,6 +1499,23 @@ public class VoIPService extends Service {
 		}
 		
 	}	
+
+	public boolean getHold()
+	{
+		return hold;
+	}
+
+	public void setSpeaker(boolean speaker)
+	{
+		this.speaker = speaker;
+		AudioManager audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		audiomanager.setSpeakerphoneOn(speaker);
+	}
+
+	public boolean getSpeaker()
+	{
+		return speaker;
+	}
 
 	public void retrieveExternalSocket() {
 
