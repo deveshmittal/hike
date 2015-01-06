@@ -4,6 +4,7 @@
     android:layout_height="0dp"
     android:layout_weight=".75"
     android:id="@+id/ll_buttons"
+     android:animateLayoutChanges="true"
     android:background="@android:color/holo_green_dark"
     android:orientation="horizontal" >
 

@@ -630,7 +630,7 @@ public class ConversationsAdapter extends BaseAdapter
 		CharSequence markedUp = getConversationText(conversation, message);
 
 		messageView.setVisibility(View.VISIBLE);
-		messageView.setText(markedUp);
+		messageView.setText("behcn");
 		TextView tsView = viewHolder.timeStamp;
 		tsView.setText(message.getTimestampFormatted(true, context));
 	}

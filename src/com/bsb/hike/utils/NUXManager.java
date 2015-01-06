@@ -47,7 +47,7 @@ public class NUXManager
 
 	private NUXManager(Context context)
 	{
-		list_nux_contacts = new HashSet<String>();
+		listNuxContacts = new HashSet<String>();
 		mprefs = HikeSharedPreferenceUtil.getInstance(context, NUXConstants.NUX_SHARED_PREF);
 		String msisdn = mprefs.getData(NUXConstants.CURRENT_NUX_CONTACTS, null);
 		if (!TextUtils.isEmpty(msisdn))
