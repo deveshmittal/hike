@@ -4,13 +4,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.json.JSONException;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Message;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ForegroundColorSpan;
+import android.text.util.Linkify;
 import android.util.Pair;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.animation.AnimationUtils;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -21,10 +38,13 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.ui.PinHistoryActivity;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
+import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -154,7 +174,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			}
 		}
 		groupConversation.setHasSmsUser(hasSmsUser);
-
+		// imp message from DB like pin
+		fetchImpMessage();
 		// Set participant read by list
 		Pair<String, Long> pair = HikeConversationsDatabase.getInstance().getReadByValueForGroup(mConversation.getMsisdn());
 		if (pair != null)
@@ -170,6 +191,12 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		return groupConversation;
 	}
 
+	private void fetchImpMessage()
+	{
+		if (mConversation.getMetaData() != null && mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN)){
+			groupConversation.setImpMessage(mConversationDb.getLastPinForConversation(mConversation));
+		}
+	}
 	@Override
 	protected List<ConvMessage> loadMessages()
 	{
@@ -194,8 +221,206 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		super.fetchConversationFinished(conversation);
 		toggleGroupLife(groupConversation.getIsGroupAlive());
 		addUnreadCountMessage();
+		if(groupConversation.getImpMessage()!=null){
+			showImpMessage(groupConversation.getImpMessage(), -1);
+		}
 	}
 
+	
+	/**
+	 * 
+	 * @param impMessage
+	 *            -- ConvMessage to stick to top
+	 * @param animationId
+	 *            -- play animation on message , id must be anim resource id, -1 of no
+	 */
+	private void showImpMessage(ConvMessage impMessage, int animationId){
+		// TODO  : Use HikeActionbarUtil
+		SharedPreferences prefs = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, activity.MODE_PRIVATE);
+		if (!prefs.getBoolean(HikeMessengerApp.SHOWN_PIN_TIP, false))
+		{
+		
+		Editor editor = prefs.edit();
+		editor.putBoolean(HikeMessengerApp.SHOWN_PIN_TIP, true);
+		editor.commit();
+		}
+		
+		if (tipView != null)
+		{
+			tipView.setVisibility(View.GONE);
+		}
+		if (impMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+		{
+			tipView = LayoutInflater.from(activity).inflate(R.layout.imp_message_text_pin, null);
+		}
+
+		if (tipView == null)
+		{
+			Logger.e("chatthread", "got imp message but type is unnknown , type " + impMessage.getMessageType());
+			return;
+		}
+		TextView text = (TextView) tipView.findViewById(R.id.text);
+		if (impMessage.getMetadata() != null && impMessage.getMetadata().isGhostMessage())
+		{
+			tipView.findViewById(R.id.main_content).setBackgroundResource(R.drawable.pin_bg_black);
+			text.setTextColor(getResources().getColor(R.color.gray));
+		}
+		String name="";
+			if(impMessage.isSent()){
+				name="You: ";
+			}else{
+				if(mConversation instanceof GroupConversation){
+				name = ((GroupConversation) mConversation).getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()) + ": ";
+				}
+			}
+		
+		ForegroundColorSpan fSpan = new ForegroundColorSpan(getResources().getColor(R.color.pin_name_color));
+		String str = name+impMessage.getMessage();
+		SpannableString spanStr = new SpannableString(str);
+		spanStr.setSpan(fSpan, 0, name.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		spanStr.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.pin_text_color)), name.length(), str.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		CharSequence markedUp = spanStr;
+		SmileyParser smileyParser = SmileyParser.getInstance();
+		markedUp = smileyParser.addSmileySpans(markedUp, false);
+		text.setText(markedUp);
+		Linkify.addLinks(text, Linkify.ALL);
+		Linkify.addLinks(text, Utils.shortCodeRegex, "tel:");
+		text.setMovementMethod(new LinkMovementMethod()
+		{
+			@Override
+			public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event)
+			{
+				// TODO pin history
+				boolean result = super.onTouchEvent(widget, buffer, event);
+				if (!result)
+				{
+					showPinHistory(false);
+				}
+				return result;
+			}
+		});
+		// text.setText(spanStr);
+
+		View cross = tipView.findViewById(R.id.cross);
+		cross.setTag(impMessage);
+		cross.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				hidePin();
+				
+			}
+		});
+
+		tipView.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				showPinHistory(false);
+			}
+		});
+		LinearLayout ll = ((LinearLayout) activity.findViewById(R.id.impMessageContainer));
+		if (ll.getChildCount() > 0)
+		{
+			ll.removeAllViews();
+		}
+		ll.addView(tipView, 0);
+		// to hide pin , if pin create view is visible
+		if (activity.findViewById(R.id.impMessageCreateView).getVisibility() == View.VISIBLE)
+		{
+			tipView.setVisibility(View.GONE);
+		}
+		if (animationId != -1 && !isShowingPin())
+		{
+			tipView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), animationId));
+		}
+		tipView.setTag(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+		//decrement the unread count if message pinned
+		   
+		     decrementUnreadPInCount();
+	
+	}
+	
+	public void decrementUnreadPInCount()
+	{
+		MetaData metadata = mConversation.getMetaData();
+		if (!metadata.isPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN) && isActivityVisible)
+		{
+			try
+			{
+				metadata.setPinDisplayed(HikeConstants.MESSAGE_TYPE.TEXT_PIN, true);
+				metadata.decrementUnreadCount(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+			}
+			catch (JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
+		}
+	}
+	
+	private void hidePin()
+	{
+		hidePinFromUI(true);
+		MetaData metadata = mConversation.getMetaData();
+		try
+		{
+			metadata.setShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN, false);
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
+	}
+	
+	private boolean isShowingPin(){
+		return tipView!=null && tipView.getTag() instanceof Integer && ((Integer)tipView.getTag() == HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+	}
+	
+	private void hidePinFromUI(boolean playAnim)
+	{
+		if (!isShowingPin())
+		{
+			return;
+		}
+		if (playAnim)
+		{
+			playUpDownAnimation(tipView);
+		}
+		else
+		{
+			tipView.setVisibility(View.GONE);
+			tipView = null;
+		}
+	}
+	
+	
+	private void showPinHistory(boolean viaMenu)
+	{
+		Intent intent = new Intent();
+		intent.setClass(activity.getApplicationContext(), PinHistoryActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(HikeConstants.TEXT_PINS, msisdn);
+		activity.startActivity(intent);
+		Utils.resetPinUnreadCount(mConversation);
+
+		if (viaMenu)
+		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_MENU);
+		}
+		else
+		{
+			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK);
+		}
+	}
+	
 	private void addUnreadCountMessage()
 	{
 		if (groupConversation.getUnreadCount() > 0 && groupConversation.getMessages().size() > 0)

@@ -175,6 +175,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected EditText mComposeView;
 	
 	private GestureDetector mGestureDetector;
+	
+	protected View tipView;
 
 	protected Handler uiHandler = new Handler()
 	{
