@@ -47,7 +47,7 @@ public class HAManager
 	
 	private int analyticsUploadFrequency = 0;
 	
-	private NetworkListener listner;
+//	private NetworkListener listner;
 	
 	/**
 	 * Constructor
@@ -68,7 +68,7 @@ public class HAManager
 		HikeAlarmManager.setAlarm(this.context, whenToSendAnalytics, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
 		
 		// set wifi listener
-		listner = new NetworkListener(this.context);
+//		listner = new NetworkListener(this.context);
 	}
 	
 	/**
