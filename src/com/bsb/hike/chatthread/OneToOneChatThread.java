@@ -78,6 +78,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private static final int SMS_CREDIT_CHANGED = 106;
 	
+	private static final int REMOVE_UNDELIVERED_MESSAGES = 107;
+	
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
@@ -437,8 +439,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 		if (isUserOnHike())
 		{
-			mAdapter.removeAllFromUndeliverdMessage();
+			uiHandler.sendEmptyMessage(REMOVE_UNDELIVERED_MESSAGES);
 		}
+		
 		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
 	}
 
@@ -455,7 +458,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				// TODO we could keep a map of msgId -> conversation objects
 				// somewhere to make this faster
 				ConvMessage msg = findMessageById(msgID);
-				mAdapter.removeFromUndeliverdMessage(msg, true);
+				
+				sendUIMessage(REMOVE_UNDELIVERED_MESSAGES, msg);
 			}
 			return true;
 		}
@@ -596,6 +600,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 				break;
 			case SMS_CREDIT_CHANGED:
 				setSMSCredits();
+				break;
+			case REMOVE_UNDELIVERED_MESSAGES:
+				removeUndeliveredMessages(msg.obj);
 				break;
 			default:
 				Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
@@ -900,5 +907,39 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		mOverlayLayout.setVisibility(View.INVISIBLE);
 		mIsOverlayShowing = false;
 	}
+	
+	/**
+	 * This method is called to remove undelivered messages from the message adapter
+	 * @param convMessage
+	 */
+	private void removeUndeliveredMessages(Object obj)
+	{
+		if(obj != null)
+		{
+			mAdapter.removeFromUndeliverdMessage((ConvMessage) obj, true);
+			if(mAdapter.getUndeliveredMessagesCount() == 0)
+			{
+				/*
+				 * if all messages are delivered OR we don't have any undelivered messages than only we should reset this timer not on delivery of some message
+				 */
+				// TODO :
+				// chatThread.shouldRunTimerForHikeOfflineTip = true;
+
+				// chatThread.hideHikeToOfflineTip(false, false, false, msgDelivered);
+			}
+		}
+		
+		else
+		{
+			mAdapter.removeAllFromUndeliverdMessage();
+			
+			// TODO :
+			// chatThread.shouldRunTimerForHikeOfflineTip = true;
+
+			// chatThread.hideHikeToOfflineTip();
+			
+		}
+	}
+
 
 }

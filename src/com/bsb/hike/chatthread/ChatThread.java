@@ -1744,8 +1744,7 @@ public abstract class ChatThread implements OverflowItemClickListener, View.OnCl
 		mAdapter.removeMessage(convMessage);
 		if (!convMessage.isSMS() && convMessage.getState() == State.SENT_CONFIRMED)
 		{
-			// TODO : This will give an error here
-			// mAdapter.removeFromUndeliverdMessage(convMessage);
+			mAdapter.removeFromUndeliverdMessage(convMessage);
 			if (mAdapter.isSelected(convMessage))
 			{
 				mAdapter.toggleSelection(convMessage);
