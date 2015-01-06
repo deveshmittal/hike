@@ -2104,6 +2104,9 @@ public class HikeConstants
 
 	public static final int LED_DEFAULT_BLUE_COLOR = 0xff0000ff;
 	
-	public static final int LED_NONE_COLOR = -1;
+	public static final int LED_NONE_COLOR = -2; /**
+													Any Change In this Value Should be double checked 
+													as this may coincide with any other color value
+												   */
 
 }
