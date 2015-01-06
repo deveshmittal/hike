@@ -33,6 +33,8 @@ import com.bsb.hike.adapters.ComposeChatAdapter;
 import com.bsb.hike.adapters.FriendsAdapter;
 import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FTAnalyticEvents;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -223,7 +225,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			Intent contactSyncIntent = new Intent(HikeService.MQTT_CONTACT_SYNC_ACTION);
 			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
 			sendBroadcast(contactSyncIntent);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.COMPOSE_REFRESH_CONTACTS);
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.COMPOSE_REFRESH_CONTACTS);
+			Event e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(getApplicationContext()).record(e);
+
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -658,7 +665,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					tagEditText.clear(false);
 					int selected = adapter.getSelectedContactCount();
 					tagEditText.toggleTag( getString(selected <=1 ? R.string.selected_contacts_count_singular : R.string.selected_contacts_count_plural,selected), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SELECT_ALL_HIKE_CONTACTS);
+					Map<String, String> metadata = new HashMap<String, String>();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SELECT_ALL_HIKE_CONTACTS);
+					Event e = new Event(metadata);
+					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(getApplicationContext()).record(e);
 				}else{
 					// call adapter unselect all
 					selectAllMode = false;
@@ -896,9 +907,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
+				Map<String, String> metadata = new HashMap<String, String>();
+				
 				if(isFtueFwd)
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_STICKER_FORWARD);
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_STICKER_FORWARD);
+					Event e = new Event(metadata);
+					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(getApplicationContext()).record(e);
+
 					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 					Editor editor = settings.edit();
 					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, false);
@@ -909,7 +926,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 				else if(nuxInviteMode)
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_BOT_FORWARD);
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_BOT_FORWARD);
+					Event e = new Event(metadata);
+					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(getApplicationContext()).record(e);
+
 					forwardMultipleMessages(adapter.getAllSelectedContacts());
 				}
 				else if (isForwardingMessage)
@@ -1085,7 +1106,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.CONFIRM_FORWARD);
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.CONFIRM_FORWARD);
+			Event e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(getApplicationContext()).record(e);
+
 			// forwarding it is
 			Intent intent = null;
 			if(!nuxInviteMode && !isFtueFwd && arrayList.size()==1)

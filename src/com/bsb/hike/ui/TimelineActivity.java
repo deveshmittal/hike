@@ -1,5 +1,8 @@
 package com.bsb.hike.ui;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -19,6 +22,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
@@ -154,7 +159,11 @@ public class TimelineActivity extends HikeAppStateBaseFragmentActivity implement
 		{
 			intent = new Intent(this, StatusUpdate.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.POST_UPDATE_FROM_TOP_BAR);
+			Event e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(getApplicationContext()).record(e);
 		}
 
 		if (intent != null)

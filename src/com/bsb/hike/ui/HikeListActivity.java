@@ -44,6 +44,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.utils.CustomAlertDialog;
@@ -555,11 +557,19 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				CheckBox selectAllCB = (CheckBox) findViewById(R.id.select_all_cb);
 				if (selectAllCB.isChecked())
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SELECT_ALL_INVITE);
+					Map<String, String> metadata = new HashMap<String, String>();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SELECT_ALL_INVITE);
+					Event e = new Event(metadata);
+					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(getApplicationContext()).record(e);
 				}
 				if(nuxInviteMode)
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_INVITE_SENT);
+					Map<String, String> metadata = new HashMap<String, String>();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_INVITE_SENT);
+					Event e = new Event(metadata);
+					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(getApplicationContext()).record(e);
 				}
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCH_OFF_NUX_MODE, null);
 
@@ -694,7 +704,11 @@ public class HikeListActivity extends HikeAppStateBaseFragmentActivity implement
 				Utils.sendInvite(msisdn, this);
 				if(nuxInviteMode)
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_INVITE_SENT);
+					Map<String, String> metadata = new HashMap<String, String>();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_INVITE_SENT);
+					Event e = new Event(metadata);
+					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(getApplicationContext()).record(e);
 				}
 				HikeMessengerApp.getPubSub().publish(HikePubSub.SWITCH_OFF_NUX_MODE, null);
 				Toast.makeText(this, R.string.invite_sent, Toast.LENGTH_SHORT).show();

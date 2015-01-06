@@ -1,6 +1,8 @@
 package com.bsb.hike.ui.utils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,6 +14,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
@@ -55,7 +59,11 @@ public class LockPattern
 				if (!isReset)
 				{
 					HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, null);
-					Utils.sendUILogEvent(HikeConstants.LogEvent.STEALTH_FTUE_DONE);
+					Map<String, String> metadata = new HashMap<String, String>();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STEALTH_FTUE_DONE);
+					Event e = new Event(metadata);
+					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(activity.getApplicationContext()).record(e);
 				}
 			}
 			else
@@ -79,7 +87,11 @@ public class LockPattern
 			case Activity.RESULT_CANCELED:
 				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, false);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.ENTER_WRONG_STEALTH_MODE);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ENTER_WRONG_STEALTH_MODE);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(activity.getApplicationContext()).record(e);
 				break;
 			case LockPatternActivity.RESULT_FAILED:
 				break;

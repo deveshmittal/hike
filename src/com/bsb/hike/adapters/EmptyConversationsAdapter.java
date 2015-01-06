@@ -1,10 +1,13 @@
 package com.bsb.hike.adapters;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -16,6 +19,8 @@ import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.EmptyConversationContactItem;
 import com.bsb.hike.models.EmptyConversationFtueCardItem;
@@ -313,9 +318,19 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			ContactInfo contactInfo = (ContactInfo) v.getTag();
 
 			Utils.startChatThread(context, contactInfo);
-
-			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_START_CHAT_CLICKED, contactInfo.getMsisdn());
-
+			
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_CARD_START_CHAT_CLICKED);
+			
+			String msisdn = contactInfo.getMsisdn();
+			
+			if(!TextUtils.isEmpty(msisdn))
+			{
+				metadata.put(HikeConstants.TO, msisdn);				
+			}
+			Event e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(context).record(e);
 		}
 	};
 	
@@ -343,7 +358,11 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, AccountUtils.h2oTutorialUrl);
 				intent.putExtra(HikeConstants.Extras.TITLE, context.getResources().getString(R.string.hike_offline_caps));
 				context.startActivity(intent);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_HIKE_OFFLINE_CLICKED);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_CARD_HIKE_OFFLINE_CLICKED);				
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(context).record(e);
 			}
 		}
 	};
@@ -352,7 +371,11 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 	{
 		Intent intent = new Intent(context, activity);
 		context.startActivity(intent);
-		Utils.sendUILogEvent(logEventKey);
+		Map<String, String> metadata = new HashMap<String, String>();
+		metadata.put(HikeConstants.EVENT_KEY, logEventKey);				
+		Event e = new Event(metadata);
+		e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+		HAManager.getInstance(context).record(e);
 	}
 
 	private OnClickListener seeAllBtnClickListener = new OnClickListener()
@@ -370,7 +393,11 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				 intent = new Intent(context, ComposeChatActivity.class);
 			}
 			context.startActivity(intent);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_CARD_SEEL_ALL_CLICKED);
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_CARD_SEEL_ALL_CLICKED);				
+			Event e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(context).record(e);
 		}
 	};
 

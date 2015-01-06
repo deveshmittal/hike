@@ -6,26 +6,29 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
 
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.analytics.HAManager.EventPriority;
 import com.bsb.hike.utils.Logger;
 
 /**
  * @author rajesh
  *
  */
-class AnalyticsStore
+public class AnalyticsStore
 {
 	private Context context;
 	
 	private static AnalyticsStore _instance; 
 		
-	private File eventFile;
+	private File normalPriorityEventFile;
 	
-	private String currentFileName;
-				
+	private File highPriorityEventFile;
+	
 	/**
 	 * Constructor
 	 * @param context application context
@@ -36,7 +39,9 @@ class AnalyticsStore
 				
 		try 
 		{
-			eventFile = createNewEventFile();
+			normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
+			
+			highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
 		}
 		catch (IOException e) 
 		{
@@ -68,33 +73,56 @@ class AnalyticsStore
 	 * Returns the file name which is a concatenation of filename and current system time
 	 * @return name of the file
 	 */
-	private String generateNewEventFileName()
+	private String generateNewEventFileName(EventPriority priority)	
 	{
-		 return AnalyticsConstants.EVENT_FILE_NAME + Long.toString(System.currentTimeMillis()) + 
+		String fileName = null;
+		
+		if(priority == EventPriority.NORMAL)
+		{
+			fileName = AnalyticsConstants.NORMAL_EVENT_FILE_NAME + Long.toString(System.currentTimeMillis()) + 
 				 AnalyticsConstants.FILE_EXTENSION;
+		}
+		else if(priority == EventPriority.HIGH)
+		{
+			fileName = AnalyticsConstants.IMP_EVENT_FILE_NAME + Long.toString(System.currentTimeMillis()) + 
+					 AnalyticsConstants.FILE_EXTENSION;			
+		}
+		return fileName;
 	}
 	
 	/**
 	 * gets the size of the event file whose priority is given
 	 * @return the size of file in bytes
 	 */
-	protected long getFileSize()
+	protected long getFileSize(EventPriority priority)
 	{
 		long fileLength = 0;
 		
-		if(eventFile != null)
+		if(priority == EventPriority.NORMAL)
 		{
-			fileLength = eventFile.length();
+			if(normalPriorityEventFile != null)
+			{
+				fileLength = normalPriorityEventFile.length();
+			}
 		}
+		else if(priority == EventPriority.HIGH)
+		{
+			if(highPriorityEventFile != null)
+			{
+				fileLength = highPriorityEventFile.length();
+			}
+		}		
 		return fileLength;
 	}
 	
 	/**
 	 * creates a new plain events(text) file 
 	 */
-	private File createNewEventFile() throws IOException
+	private File createNewEventFile(EventPriority priority) throws IOException
 	{
-		String fileName = generateNewEventFileName();
+		File eventFile = null;
+		
+		String fileName = generateNewEventFileName(priority);
 
 		String dirName = this.context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR;
 		File dir = new File(dirName);
@@ -117,49 +145,78 @@ class AnalyticsStore
 			throw new IOException("Failed to create event file");
 		}
 
-		currentFileName = fileName;
-		
 		return eventFile;
 	}
 	
 	/**
 	 * writes the event json to the file
 	 */
-	protected void dumpEvents(final ArrayList<Event> events)
+	protected void dumpEvents(final ArrayList<JSONObject> eventJsons)
 	{		
 		new Thread(new Runnable() 
 		{			
 			@Override
 			public void run() 
-			{
+			{					
 				FileWriter fileWriter = null;
-				
+				StringBuilder normal = new StringBuilder();
+				StringBuilder high = new StringBuilder();
+
 				try
-				{					
-					if(!eventFileExists())
+				{
+					for(JSONObject object : eventJsons)
 					{
-						createNewEventFile();
-					}
+						JSONObject json = object.getJSONObject(HikeConstants.DATA);
 
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, currentFileName);
-					
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "file was written!");
+						if(json.has(AnalyticsConstants.EVENT_PRIORITY))
+						{
+							EventPriority priority = (EventPriority) json.get(AnalyticsConstants.EVENT_PRIORITY);
 
-					if(getFileSize() >= AnalyticsConstants.MAX_FILE_SIZE)
+							if(priority == EventPriority.NORMAL)
+							{
+								normal.append(json);
+								normal.append(AnalyticsConstants.NEW_LINE);
+							}
+							else if(priority == EventPriority.HIGH)
+							{
+								high.append(json);
+								high.append(AnalyticsConstants.NEW_LINE);								
+							}
+						}
+					}					
+					if(normal.length() > 0)
 					{
-						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "current file size reached its limit!");
-						createNewEventFile();
-					}
+						if(!eventFileExists(EventPriority.NORMAL))
+						{
+							normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
+						}
 
-					fileWriter = new FileWriter(eventFile, true);
-					
-					for(Event e : events)
-					{
-						JSONObject json = Event.toJson(e);
-						
-						fileWriter.write(json + AnalyticsConstants.NEW_LINE);
+						if(getFileSize(EventPriority.NORMAL) >= AnalyticsConstants.MAX_FILE_SIZE)
+						{
+							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "normal priority file size reached its limit! " + normalPriorityEventFile.getName());
+							normalPriorityEventFile = createNewEventFile(EventPriority.NORMAL);
+						}
+
+						fileWriter = new FileWriter(normalPriorityEventFile, true);
+						fileWriter.write(normal.toString());
+
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to the file!");
 					}
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "events written to the file!");
+					if(high.length() > 0)
+					{
+						if(!eventFileExists(EventPriority.HIGH))
+						{
+							highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
+						}
+
+						if(getFileSize(EventPriority.HIGH) >= AnalyticsConstants.MAX_FILE_SIZE)
+						{
+							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "high priority file size reached its limit! " + highPriorityEventFile.getName());
+							highPriorityEventFile = createNewEventFile(EventPriority.HIGH);
+						}
+						fileWriter = new FileWriter(normalPriorityEventFile, true);
+						fileWriter.write(normal.toString());
+					}	
 				}
 				catch (IOException e)
 				{
@@ -168,6 +225,10 @@ class AnalyticsStore
 				catch(ConcurrentModificationException ex)
 				{
 					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "ConcurrentModificationException exception while writing events to file");			
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "json error");
 				}
 				finally
 				{	
@@ -184,9 +245,19 @@ class AnalyticsStore
 	 * Checks if the event file exists or not
 	 * @return true if the file exists, false otherwise
 	 */
-	private boolean eventFileExists()
-	{		
-		return eventFile != null && eventFile.exists();
+	private boolean eventFileExists(EventPriority priority)
+	{	
+		boolean isExist = false;
+		
+		if(priority == EventPriority.NORMAL)
+		{
+			isExist = normalPriorityEventFile != null && normalPriorityEventFile.exists();
+		}
+		else if(priority == EventPriority.HIGH)
+		{
+			isExist = highPriorityEventFile != null && highPriorityEventFile.exists();			
+		}
+		return isExist;
 	}
 	
 	/**
@@ -204,4 +275,51 @@ class AnalyticsStore
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "io exception while file connection closing!");
 		}
 	}	
+	
+	/**
+	 * Used to get the total size of the logged analytics data
+	 * @return size of the logged data in bytes
+	 */
+	public long getTotalAnalyticsSize()
+	{
+		long dirSize = 0;
+		
+		File dir = new File(context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR + File.separator);
+
+		File[] file = dir.listFiles();
+
+		if(file == null)
+			return 0;
+		
+		int size = file.length;
+		
+		for(int i=0; i<size; i++)
+		{
+			dirSize += file[i].length();
+		}
+		return dirSize;
+	}
+	
+	/**
+	 * Used to delete the analytics log files having NORMAL priority
+	 */
+	public void deleteNormalPriorityData()
+	{
+		File dir = new File(context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR + File.separator);
+
+		File[] file = dir.listFiles();
+
+		if(file == null)
+			return;
+		
+		int size = file.length;
+		
+		for(int i=0; i<size; i++)
+		{
+			if(file[i].exists() && file[i].getName().startsWith(AnalyticsConstants.NORMAL_EVENT_FILE_NAME, 0))
+			{
+				file[i].delete();
+			}
+		}
+	}
 }

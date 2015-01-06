@@ -153,6 +153,9 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -1606,6 +1609,8 @@ public class Utils
 		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
 
+		AccountUtils.analyticsUploadUrl = AccountUtils.base + AccountUtils.ANALYTICS_UPLOAD_BASE;
+		
 		AccountUtils.rewardsUrl = isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE : AccountUtils.REWARDS_STAGING_BASE;
 		AccountUtils.gamesUrl = isProductionServer ? AccountUtils.GAMES_PRODUCTION_BASE : AccountUtils.GAMES_STAGING_BASE;
 		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING + (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE : AccountUtils.STICKERS_STAGING_BASE);
@@ -1811,16 +1816,47 @@ public class Utils
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.INVITE_SENT, null);
 
+		Map<String, String> md = null;
+		Event e = null;
+		String msisdn = contactInfo.getMsisdn();
+		
 		switch (whichScreen)
 		{
 		case FRIENDS_TAB:
-			Utils.sendUILogEvent(!isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK : HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK, contactInfo.getMsisdn());
+			md = new HashMap<String, String>();
+			md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK : HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK);
+			
+			if(!TextUtils.isEmpty(msisdn))
+			{
+				md.put(HikeConstants.TO, msisdn);
+			}
+			e = new Event(md);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(context).record(e);
 			break;
 		case UPDATES_TAB:
-			Utils.sendUILogEvent(!isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK : HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK, contactInfo.getMsisdn());
+			md = new HashMap<String, String>();
+			md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK : HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK);
+			
+			if(!TextUtils.isEmpty(msisdn))
+			{
+				md.put(HikeConstants.TO, msisdn);
+			}
+			e = new Event(md);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(context).record(e);
 			break;
 		case SMS_SECTION:
-			Utils.sendUILogEvent(!isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK : HikeConstants.LogEvent.REMIND_SMS_CLICK, contactInfo.getMsisdn());
+			md = new HashMap<String, String>();
+			md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK : HikeConstants.LogEvent.REMIND_SMS_CLICK);
+			
+			if(!TextUtils.isEmpty(msisdn))
+			{
+				md.put(HikeConstants.TO, msisdn);
+			}
+			e = new Event(md);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(context).record(e);
 			break;
 		}
 	}
@@ -4999,17 +5035,29 @@ public class Utils
 		SharedPreferences accountPrefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP, false))
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.FB_CLICK);
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FB_CLICK);
+			Event e = new Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(context).record(e);
 		}
 		if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) > -1)
 		{
 			if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(context).record(e);
 			}
 			else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(context).record(e);
 			}
 			Editor editor = accountPrefs.edit();
 			editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
@@ -5116,5 +5164,4 @@ public class Utils
 		}
 		return true;
 	}
-
 }

@@ -31,6 +31,8 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.adapters.EmptyConversationsAdapter;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.*;
@@ -409,7 +411,11 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 					dialog.dismiss();
 					
-					Utils.sendUILogEvent(HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+					Map<String, String> metadata = new HashMap<String, String>();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+					Event e = new Event(metadata);
+					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(getActivity().getApplicationContext()).record(e);
 				}
 
 				@Override
@@ -2505,7 +2511,12 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void inviteButtonClicked()
 	{
-		Utils.sendUILogEvent(HikeConstants.LogEvent.NUX_INVITE_BUTTON_CLICKED);
+		Map<String, String> metadata = new HashMap<String, String>();
+		metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_INVITE_BUTTON_CLICKED);
+		Event e = new Event(metadata);
+		e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+		HAManager.getInstance(getActivity().getApplicationContext()).record(e);
+		
 		Intent intent = new Intent(getActivity(), HikeListActivity.class);
 		intent.putExtra(HikeConstants.NUX_INVITE_FORWARD, true);
 		startActivity(intent);

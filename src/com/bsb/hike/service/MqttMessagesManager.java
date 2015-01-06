@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -33,6 +34,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.AnalyticsSender;
+import com.bsb.hike.analytics.AnalyticsStore;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -1305,6 +1308,12 @@ public class MqttMessagesManager
 			editor.putBoolean(AnalyticsConstants.ANALYTICS, isAnalyticsEnabled);
 			HAManager.getInstance(context).setAnalyticsEnabled(isAnalyticsEnabled);
 		}
+		if(data.has(AnalyticsConstants.ANALYTICS_TOTAL_SIZE))
+		{
+			long size = data.getLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE);
+			editor.putLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, size);
+			HAManager.getInstance(context).setAnalyticsMaxSizeOnClient(size);
+		}
 		
 		editor.commit();
 		this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
@@ -1362,6 +1371,11 @@ public class MqttMessagesManager
 			editor.putBoolean(HikeMessengerApp.GREENBLUE_DETAILS_SENT, false);
 			editor.commit();
 			context.sendBroadcast(new Intent(HikeService.SEND_GB_DETAILS_TO_SERVER_ACTION));
+		}
+		// server on demand analytics data to be sent from client
+		if(data.optBoolean(AnalyticsConstants.ANALYTICS))
+		{		
+			HAManager.getInstance(context).sendAnalyticsData();
 		}
 	}
 

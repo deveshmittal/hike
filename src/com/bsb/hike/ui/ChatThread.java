@@ -155,6 +155,7 @@ import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.filetransfer.FTAnalyticEvents;
@@ -1784,15 +1785,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
+			Map<String, String> metadata = new HashMap<String, String>();
+			com.bsb.hike.analytics.Event e;
+
 			if (convMessage.getHashMessage()==HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE)
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_POSTED_VIA_ICON);
-
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_POSTED_VIA_ICON);
+				e = new com.bsb.hike.analytics.Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
 			}
 			else
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_POSTED_VIA_HASH_PIN);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_POSTED_VIA_HASH_PIN);
+				e = new com.bsb.hike.analytics.Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
 			}
+			HAManager.getInstance(getApplicationContext()).record(e);
 		}
 	}
 
@@ -6729,7 +6737,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, false))
 		{
 			HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, true);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_BTN_CLICKED);
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_BTN_CLICKED);
+			com.bsb.hike.analytics.Event e = new com.bsb.hike.analytics.Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(getApplicationContext()).record(e);
 		}
 	}
 
@@ -6783,7 +6795,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						if (tag instanceof TipType && ((TipType)tag == TipType.EMOTICON))
 						{
 							HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
-							Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
+							Map<String, String> metadata = new HashMap<String, String>();
+							metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
+							com.bsb.hike.analytics.Event e = new com.bsb.hike.analytics.Event(metadata);
+							e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+							HAManager.getInstance(getApplicationContext()).record(e);
+
 							tipView = null;
 						}
 					}
@@ -7771,7 +7788,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		case R.id.forward_msgs:
 			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			Collections.sort(selectedMsgIds);
-			Utils.sendUILogEvent(HikeConstants.LogEvent.FORWARD_MSG);
+			Map<String, String> metadata = new HashMap<String, String>();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FORWARD_MSG);
+			com.bsb.hike.analytics.Event event = new com.bsb.hike.analytics.Event(metadata);
+			event.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			HAManager.getInstance(getApplicationContext()).record(event);
+
 			Intent intent = new Intent(ChatThread.this, ComposeChatActivity.class);
 			String msg;
 			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
@@ -8396,7 +8418,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				public void onClick(View v)
 				{
 					mAdapter.hikeOfflineSendClick();
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SECOND_OFFLINE_TIP_CLICKED);
+					Map<String, String> metadata = new HashMap<String, String>();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SECOND_OFFLINE_TIP_CLICKED);
+					com.bsb.hike.analytics.Event e = new com.bsb.hike.analytics.Event(metadata);
+					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(getApplicationContext()).record(e);
+
 				}
 			});
 
@@ -8432,7 +8459,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					initialiseHikeToOfflineMode();
 					setupHikeToOfflineTipViews();
-					Utils.sendUILogEvent(HikeConstants.LogEvent.FIRST_OFFLINE_TIP_CLICKED);
+					Map<String, String> metadata = new HashMap<String, String>();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FIRST_OFFLINE_TIP_CLICKED);
+					com.bsb.hike.analytics.Event e = new com.bsb.hike.analytics.Event(metadata);
+					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(getApplicationContext()).record(e);
+
 				}
 			};
 
@@ -8665,13 +8697,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		startActivity(intent);
 		Utils.resetPinUnreadCount(mConversation);
 		
+		Map<String, String> metadata = new HashMap<String, String>();
+		com.bsb.hike.analytics.Event e;
+		
 		if(viaMenu)
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_MENU);
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_HISTORY_VIA_MENU);
+			e = new com.bsb.hike.analytics.Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
 		}else
 		{
-			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK);
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK);
+			e = new com.bsb.hike.analytics.Event(metadata);
+			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
 		}
+		HAManager.getInstance(getApplicationContext()).record(e);
 	}
 	
 	private void updateOverflowMenuUnreadCount()

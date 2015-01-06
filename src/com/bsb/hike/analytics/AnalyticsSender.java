@@ -15,17 +15,12 @@ import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import twitter4j.internal.http.HttpResponseCode;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
 
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.filetransfer.FileTransferManager;
-import com.bsb.hike.filetransfer.FileTransferManager.NetworkType;
 import com.bsb.hike.models.HikeAlarmManager;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 
@@ -183,9 +178,9 @@ public class AnalyticsSender implements Runnable
 		if(!isAnalyticsUploadReady())
 			return;
 		
-		new Thread(AnalyticsSender.getInstance(context)).start();
-		
 		HAManager instance = HAManager.getInstance(context);
+
+		instance.sendAnalyticsData();
 		
 		long nextSchedule = 0;
 		
@@ -220,7 +215,7 @@ public class AnalyticsSender implements Runnable
 	
 			httpClient = new DefaultHttpClient();
 			
-			HttpPost postCall = new HttpPost(AnalyticsConstants.HTTP_UPLOAD_URL);
+			HttpPost postCall = new HttpPost(AccountUtils.analyticsUploadUrl);
 	
 			HttpResponse response = null;
 			
@@ -282,36 +277,36 @@ public class AnalyticsSender implements Runnable
 	}		
 }
 
-class NetworkListener extends BroadcastReceiver 
-{
-	Context context;
-		
-	public NetworkListener(Context context) 
-	{
-		this.context = context;
-		
-		this.context.registerReceiver(this, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));		
-	}
-
-	@Override
-	public void onReceive(Context context, Intent intent) 
-	{		
-		if(intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION))
-		{
-			if(Utils.isUserOnline(context))
-			{
-				NetworkType networkType = FileTransferManager.getInstance(this.context).getNetworkType();
-				
-				if(networkType == NetworkType.WIFI)
-				{
-					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Wifi connectivity changed!");
-
-					if(AnalyticsSender.getFileNames(context) != null && Utils.isUserOnline(context))
-					{
-						new Thread(AnalyticsSender.getInstance(context)).start();
-					}
-				}
-			}
-		}				
-	}
-}
+//class NetworkListener extends BroadcastReceiver 
+//{
+//	Context context;
+//		
+//	public NetworkListener(Context context) 
+//	{
+//		this.context = context;
+//		
+//		this.context.registerReceiver(this, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));		
+//	}
+//
+//	@Override
+//	public void onReceive(Context context, Intent intent) 
+//	{		
+//		if(intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION))
+//		{
+//			if(Utils.isUserOnline(context))
+//			{
+//				NetworkType networkType = FileTransferManager.getInstance(this.context).getNetworkType();
+//				
+//				if(networkType == NetworkType.WIFI)
+//				{
+//					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "Wifi connectivity changed!");
+//
+//					if(AnalyticsSender.getFileNames(context) != null && Utils.isUserOnline(context))
+//					{
+//						new Thread(AnalyticsSender.getInstance(context)).start();
+//					}
+//				}
+//			}
+//		}				
+//	}
+//}

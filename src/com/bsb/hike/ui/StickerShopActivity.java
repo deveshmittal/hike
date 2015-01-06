@@ -1,6 +1,9 @@
 package com.bsb.hike.ui;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -10,6 +13,8 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.ui.fragments.StickerShopFragment;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
@@ -87,7 +92,12 @@ public class StickerShopActivity extends HikeAppStateBaseFragmentActivity
 			@Override
 			public void onClick(View v)
 			{
-				Utils.sendUILogEvent(HikeConstants.LogEvent.STICKER_SETTING_BTN_CLICKED);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_SETTING_BTN_CLICKED);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(getApplicationContext()).record(e);
+				
 				Intent i = new Intent(StickerShopActivity.this, StickerSettingsActivity.class);
 				startActivity(i);
 			}

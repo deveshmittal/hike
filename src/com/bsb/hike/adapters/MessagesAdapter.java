@@ -32,6 +32,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.filetransfer.FileSavedState;
 import com.bsb.hike.filetransfer.FileTransferBase.FTState;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -3273,7 +3275,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.SEND_SMS_PREF_TOGGLED, null);
 
-		Utils.sendNativeSmsLogEvent(isChecked);
+		Map<String, String> metadata = new HashMap<String, String>();
+		metadata.put(HikeConstants.NATIVE_SMS, String.valueOf(isChecked));
+		Event e = new Event(metadata);
+		e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.SMS);			
+		HAManager.getInstance(context).record(e);
 
 		if (isChecked)
 		{
@@ -3472,10 +3478,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			public void onClick(View v)
 			{
 				smsDialogSendClick(sendHike.isChecked(), false);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_ALWAYS_CLICKED);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SMS_POPUP_ALWAYS_CLICKED);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(context).record(e);
+
 				if (!sendHike.isChecked())
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
+					Map<String, String> md = new HashMap<String, String>();
+					md.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
+					Event event = new Event(metadata);
+					event.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(context).record(event);
 				}
 				dialog.dismiss();
 			}
@@ -3488,10 +3503,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			public void onClick(View v)
 			{
 				smsDialogSendClick(sendHike.isChecked(), true);
-				Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_JUST_ONCE_CLICKED);
+				Map<String, String> metadata = new HashMap<String, String>();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SMS_POPUP_JUST_ONCE_CLICKED);
+				Event e = new Event(metadata);
+				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				HAManager.getInstance(context).record(e);
+
 				if (!sendHike.isChecked())
 				{
-					Utils.sendUILogEvent(HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
+					Map<String, String> md = new HashMap<String, String>();
+					md.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
+					Event event = new Event(metadata);
+					event.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+					HAManager.getInstance(context).record(event);
 				}
 				dialog.dismiss();
 			}
