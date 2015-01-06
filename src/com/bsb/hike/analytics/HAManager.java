@@ -24,7 +24,7 @@ public class HAManager
 	public enum EventPriority
 	{
 		NORMAL,
-		REALTIME
+		HIGH
 	}
 
 	private static HAManager instance;
