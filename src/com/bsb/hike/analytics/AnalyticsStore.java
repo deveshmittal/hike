@@ -275,4 +275,51 @@ public class AnalyticsStore
 			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "io exception while file connection closing!");
 		}
 	}	
+	
+	/**
+	 * Used to get the total size of the logged analytics data
+	 * @return size of the logged data in bytes
+	 */
+	public long getTotalAnalyticsSize()
+	{
+		long dirSize = -1;
+		
+		File dir = new File(context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR + File.separator);
+
+		File[] file = dir.listFiles();
+
+		if(file == null)
+			return dirSize;
+		
+		int size = file.length;
+		
+		for(int i=0; i<size; i++)
+		{
+			dirSize += file[i].length();
+		}
+		return dirSize;
+	}
+	
+	/**
+	 * Used to delete the analytics log files having NORMAL priority
+	 */
+	public void deleteNormalPriorityData()
+	{
+		File dir = new File(context.getFilesDir().toString() + AnalyticsConstants.EVENT_FILE_DIR + File.separator);
+
+		File[] file = dir.listFiles();
+
+		if(file == null)
+			return;
+		
+		int size = file.length;
+		
+		for(int i=0; i<size; i++)
+		{
+			if(file[i].exists() && file[i].getName().startsWith(AnalyticsConstants.NORMAL_EVENT_FILE_NAME, 0))
+			{
+				file[i].delete();
+			}
+		}
+	}
 }
