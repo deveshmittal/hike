@@ -29,6 +29,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Animation.AnimationListener;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -176,6 +179,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected String mConvLabel;
 	
 	private GestureDetector mGestureDetector;
+	
+	protected View tipView;
 
 	protected Handler uiHandler = new Handler()
 	{
@@ -1927,4 +1932,42 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		
 		mLabelTextView.setText(label);
 	}
+	
+	protected void playUpDownAnimation(final View view)
+	{
+		if (view == null)
+		{
+			return;
+		}
+		Animation an = AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_up_part);
+		an.setAnimationListener(new AnimationListener()
+		{
+
+			@Override
+			public void onAnimationStart(Animation animation)
+			{
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				view.setVisibility(View.GONE);
+				if (view == tipView)
+				{
+					tipView = null;
+				}
+			}
+		});
+		view.startAnimation(an);
+	}
+	
 }
