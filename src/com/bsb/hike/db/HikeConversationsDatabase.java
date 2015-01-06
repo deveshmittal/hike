@@ -1,28 +1,7 @@
 package com.bsb.hike.db;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.R.integer;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -33,7 +12,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
@@ -47,8 +25,6 @@ import com.bsb.hike.db.DBConstants.HIKE_CONV_DB;
 import com.bsb.hike.models.*;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.CustomStickerCategory;
-import com.bsb.hike.models.FileListItem;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.modules.contactmgr.ContactManager;
@@ -60,11 +36,6 @@ import com.bsb.hike.utils.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.bsb.hike.utils.ChatTheme;
-import com.bsb.hike.utils.Logger;
-import com.bsb.hike.utils.PairModified;
-import com.bsb.hike.utils.StickerManager;
-import com.bsb.hike.utils.Utils;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -1332,7 +1303,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
             insertStatement.bindString(messageMetadataColumn, conv.platformMessageMetadata != null ? conv.platformMessageMetadata.JSONtoString() : "");
 
         }  else
+        {
             insertStatement.bindString(messageMetadataColumn, conv.getMetadata() != null ? conv.getMetadata().serialize() : "");
+        }
 
 		insertStatement.bindLong(isHikeMessageColumn, conv.isSMS() ? 0 : 1);
 		insertStatement.bindString(groupParticipant, conv.getGroupParticipantMsisdn() != null ? conv.getGroupParticipantMsisdn() : "");
@@ -1425,7 +1398,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	 */
 	public boolean addConversations(List<ConvMessage> convMessages, ArrayList<ContactInfo> contacts,boolean createConvIfNotExist)
 	{
-        SQLiteStatement insertStatement = getSqLiteStatement(createConvIfNotExist);
+        SQLiteStatement insertStatement = getSqLiteStatementToInsertIntoMessagesTable(createConvIfNotExist);
 		
 		try
 		{
@@ -1563,7 +1536,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 	{
 		Logger.d("bulkPacket", "adding conversation started");
 		LinkedList<ConvMessage> resultList = new LinkedList<ConvMessage>();
-        SQLiteStatement insertStatement = getSqLiteStatement(true);
+        SQLiteStatement insertStatement = getSqLiteStatementToInsertIntoMessagesTable(true);
 		try
 		{
 			long msgId = -1;
@@ -1628,7 +1601,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 		}
 	}
 
-    private SQLiteStatement getSqLiteStatement(boolean createConvIfNotExist) {
+    private SQLiteStatement getSqLiteStatementToInsertIntoMessagesTable(boolean createConvIfNotExist) {
         SQLiteStatement insertStatement = null;
         if(createConvIfNotExist){
             insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE + " ( " + DBConstants.MESSAGE + "," + DBConstants.MSG_STATUS + ","
@@ -4314,9 +4287,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
 
                     addFileThumbnail(hikeFile.getFileKey(), imageBytes);
 
-//					ContentValues fileThumbnailValues = getFileThumbnailContentValues();
-//					mDb.insert(DBConstants.FILE_THUMBNAIL_TABLE, null, fileThumbnailValues);
-
 					fileJson.remove(HikeConstants.THUMBNAIL);
 
 					ContentValues fileJsonUpdateValues = new ContentValues();
@@ -4443,8 +4413,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper implements DBCon
             if (refCount > 1) {
                 fileThumbnailValues.put(REF_COUNT, refCount - 1);
                 mDb.update(DBConstants.FILE_THUMBNAIL_TABLE, fileThumbnailValues, DBConstants.FILE_KEY + "=?", new String[]{fileKey});
-            } else
+            } else {
                 mDb.delete(DBConstants.FILE_THUMBNAIL_TABLE, DBConstants.FILE_KEY + "=?", new String[]{fileKey});
+            }
 
         }
         finally {
