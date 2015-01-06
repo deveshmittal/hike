@@ -1144,28 +1144,20 @@ public class HikeNotification
 					}
 				}
 			}
-			
-			int ledColor = getPreviousVersionSyncedLedColor();
+		
+			boolean led = preferenceManager.getBoolean(HikeConstants.LED_PREF, true);
+			int ledColor = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_DEFAULT_BLUE_COLOR);
+			ledColor = led == true ? ledColor : HikeConstants.LED_NONE_COLOR;
 			if(ledColor != HikeConstants.LED_NONE_COLOR)
 			{
 				mBuilder.setLights(ledColor, HikeConstants.LED_LIGHTS_ON_MS, HikeConstants.LED_LIGHTS_OFF_MS);
 			}
+			else
+			{
+				HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, ledColor);
+			}
 		}
 		return mBuilder;
-	}
-
-	private int getPreviousVersionSyncedLedColor()
-	{
-		int ledColor = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_DEFAULT_BLUE_COLOR);
-		SharedPreferences pref = context.getSharedPreferences(context.getPackageName() + "_preferences", Context.MODE_PRIVATE);
-		if(pref.contains(HikeConstants.LED_PREF))
-		{
-			boolean prevLedStatus = HikeSharedPreferenceUtil.getInstance(context).getData(HikeConstants.LED_PREF, false);
-			ledColor = prevLedStatus == false ?  HikeConstants.LED_NONE_COLOR : ledColor;
-			HikeSharedPreferenceUtil.getInstance(context).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, ledColor);
-			pref.edit().remove(HikeConstants.LED_PREF).commit();
-		}
-		return ledColor;
 	}
 
 	public void setNotificationIntentForBuilder(NotificationCompat.Builder mBuilder, Intent notificationIntent)
