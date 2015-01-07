@@ -3585,7 +3585,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 		};
 
-		Dialog dialog = HikeDialog.showDialog(chatThread, HikeDialog.SMS_CLIENT_DIALOG, smsClientDialogListener, triggeredFromToggle, checkBox, showingNativeInfoDialog);
+		Dialog dialog = HikeDialog.showDialog(context, HikeDialog.SMS_CLIENT_DIALOG, smsClientDialogListener, triggeredFromToggle, checkBox, showingNativeInfoDialog);
 		dialog.show();
 	}
 

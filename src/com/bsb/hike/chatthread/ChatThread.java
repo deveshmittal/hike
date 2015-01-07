@@ -918,7 +918,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mMessageMap = new HashMap<Long, ConvMessage>();
 		addtoMessageMap(0, messages.size());
 
-		mAdapter = new MessagesAdapter(activity.getApplicationContext(), mConversation.getMessages(), mConversation, null);
+		mAdapter = new MessagesAdapter(activity, mConversation.getMessages(), mConversation, null);
 
 		initListView(); // set adapter and add clicks etc
 		setupActionBar(); //Setup the action bar

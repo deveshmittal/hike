@@ -4,12 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Dialog;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.graphics.Typeface;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,9 +23,10 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
@@ -28,7 +35,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ContactInfo;
@@ -37,6 +43,8 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.ui.HikeDialog;
+import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
@@ -623,7 +631,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 */
 	private void onShowSMSSyncDialog()
 	{
-		smsDialog = Utils.showSMSSyncDialog(activity.getApplicationContext(), true);
+		smsDialog = Utils.showSMSSyncDialog(activity, true);
 		// TODO :
 		// dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG;
 
@@ -1074,4 +1082,62 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		super.setAvatar(defaultResId);
 	}
+	
+	@Override
+	protected boolean updateUIAsPerTheme(ChatTheme theme)
+	{
+		if(super.updateUIAsPerTheme(theme))
+		{
+			/**
+			 * If the conv is not on hike, neither is the number an international one and the device OS is < v 4.4 Kitkat
+			 */
+			if (!mConversation.isOnhike() && !Utils.isContactInternational(msisdn) && !Utils.isKitkatOrHigher())
+			{
+				setupSMSToggleLayout();
+			}
+		}
+		return false;
+	};
+	
+	/**
+	 * Used to setup FreeSMS - Hike SMS Toggle button for Versions below KitKat
+	 */
+	private void setupSMSToggleLayout()
+	{
+		activity.findViewById(R.id.sms_toggle_button).setVisibility(View.VISIBLE);
+		TextView smsToggleSubtext = (TextView) activity.findViewById(R.id.sms_toggle_subtext);
+		CheckBox smsToggle = (CheckBox) activity.findViewById(R.id.checkbox);
+		TextView hikeSmsText = (TextView) activity.findViewById(R.id.hike_text);
+		TextView regularSmsText = (TextView) activity.findViewById(R.id.sms_text);
+
+		if (currentTheme == ChatTheme.DEFAULT)
+		{
+			hikeSmsText.setTextColor(this.getResources().getColor(R.color.sms_choice_unselected));
+			regularSmsText.setTextColor(this.getResources().getColor(R.color.sms_choice_unselected));
+			smsToggleSubtext.setTextColor(this.getResources().getColor(R.color.sms_choice_unselected));
+			smsToggle.setButtonDrawable(R.drawable.sms_checkbox);
+			activity.findViewById(R.id.sms_toggle_button).setBackgroundResource(R.drawable.bg_sms_toggle);
+		}
+		else
+		{
+			hikeSmsText.setTextColor(this.getResources().getColor(R.color.white));
+			regularSmsText.setTextColor(this.getResources().getColor(R.color.white));
+			smsToggleSubtext.setTextColor(this.getResources().getColor(R.color.white));
+			smsToggle.setButtonDrawable(R.drawable.sms_checkbox_custom_theme);
+			activity.findViewById(R.id.sms_toggle_button).setBackgroundResource(currentTheme.smsToggleBgRes());
+		}
+
+		boolean smsToggleOn = Utils.getSendSmsPref(activity.getApplicationContext());
+		smsToggle.setChecked(smsToggleOn);
+		mAdapter.initializeSmsToggleTexts(hikeSmsText, regularSmsText, smsToggleSubtext);
+		mAdapter.setSmsToggleSubtext(smsToggleOn);
+
+		smsToggleSubtext.setVisibility(View.VISIBLE);
+		smsToggle.setVisibility(View.VISIBLE);
+		hikeSmsText.setVisibility(View.VISIBLE);
+		regularSmsText.setVisibility(View.VISIBLE);
+
+		smsToggle.setOnCheckedChangeListener(mAdapter);
+	}
+	
 }
