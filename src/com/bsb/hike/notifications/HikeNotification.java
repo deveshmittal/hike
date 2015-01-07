@@ -42,6 +42,7 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.Utils;
 
 public class HikeNotification
@@ -1100,9 +1101,7 @@ public class HikeNotification
 		//Reset ticker text since we dont want to tick older messages
 		hikeNotifMsgStack.setTickerText(null);
 		
-		AudioManager manager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
-		
-		if (!forceNotPlaySound && !manager.isMusicActive())
+		if (!forceNotPlaySound)
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 			String notifSound = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
@@ -1114,16 +1113,15 @@ public class HikeNotification
 				{
 					if (NOTIF_SOUND_HIKE.equals(notifSound))
 					{
-						mBuilder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.hike_jingle_15));
+						SoundUtils.playSoundFromRaw(context, R.raw.hike_jingle_15);
 					}
 					else if (NOTIF_SOUND_DEFAULT.equals(notifSound))
 					{
-						mBuilder.setDefaults(mBuilder.getNotification().defaults | Notification.DEFAULT_SOUND);
+						SoundUtils.playDefaultNotificationSound(context);
 					}
 					else
 					{
-						mBuilder.setSound(Uri.parse(HikeSharedPreferenceUtil.getInstance(context).
-								getData(HikeMessengerApp.NOTIFICATION_TONE_URI, Uri.EMPTY.toString())));
+						SoundUtils.playSound(context, Uri.parse(notifSound));
 					}
 				}
 

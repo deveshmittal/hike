@@ -2109,4 +2109,6 @@ public class HikeConstants
 													as this may coincide with any other color value
 												   */
 
+	public static long STOP_NOTIF_SOUND_TIME = 3000; // In milliseconds
+
 }

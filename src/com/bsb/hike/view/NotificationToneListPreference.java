@@ -24,7 +24,7 @@ import android.widget.ImageView;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
-import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.SoundUtils;
 
 public class NotificationToneListPreference extends ListPreference implements DialogInterface.OnClickListener
 {
@@ -49,13 +49,13 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	private static final String SOUND_PREF_KEY = "sound_pref_key";
 
 	private static final String SOUND_PREF_VALUES = "sound_pref_values";
-	
+
 	private CharSequence[] rintoneCharSeq;
-	
+
 	private ArrayList<String> rintoneValSeq;
-	
+
 	private ProgressDialog progressDialog;
-	
+
 	public NotificationToneListPreference(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
@@ -122,15 +122,15 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		}
 		else if (mContext.getString(R.string.notif_sound_Hike).equals(selectedNotificationTone))
 		{
-			Utils.playSoundFromRaw(mContext, R.raw.hike_jingle_15);
+			SoundUtils.playSoundFromRaw(mContext, R.raw.hike_jingle_15);
 		}
 		else if (mContext.getString(R.string.notif_sound_default).equals(selectedNotificationTone))
 		{
-			Utils.playSound(mContext, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+			SoundUtils.playSound(mContext, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
 		}
 		else
 		{
-			Utils.playSound(mContext, ringtonesNameURIMap.get((String) newValue));
+			SoundUtils.playSound(mContext, ringtonesNameURIMap.get((String) newValue));
 		}
 	}
 
@@ -189,7 +189,7 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	{
 		// To avoid opening of multiple Dialogs
 		this.setEnabled(false);
-				
+
 		fetchSoundPrefData();
 
 	}
@@ -253,7 +253,7 @@ public class NotificationToneListPreference extends ListPreference implements Di
 
 		protected void onPostExecute(Void result)
 		{
-			if(!fetcherTask.isCancelled())
+			if (!fetcherTask.isCancelled())
 			{
 				setEntryAndValues();
 				notifyChanged();
@@ -282,9 +282,9 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	protected Parcelable onSaveInstanceState()
 	{
 		Parcelable superState = super.onSaveInstanceState();
-		
+
 		updateValueListFromMap();
-		
+
 		Bundle state = new Bundle();
 		state.putParcelable(STATE_PARENT, superState);
 		state.putCharSequenceArray(SOUND_PREF_KEY, rintoneCharSeq);
@@ -310,25 +310,24 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	private void updateRingtoneMapAfterRotation()
 	{
 		ringtonesNameURIMap.clear();
-		
-		for(int i = 0; i < rintoneCharSeq.length; i++)
+
+		for (int i = 0; i < rintoneCharSeq.length; i++)
 		{
 			Uri soundUri = rintoneValSeq.get(i) != null ? Uri.parse(rintoneValSeq.get(i)) : null;
 			ringtonesNameURIMap.put(rintoneCharSeq[i].toString(), soundUri);
 		}
 	}
-	
+
 	/**
-	 * Updates ValueSeq from Map, 
-	 * so that can be store and restore after rotation 
+	 * Updates ValueSeq from Map, so that can be store and restore after rotation
 	 */
 	private void updateValueListFromMap()
 	{
 		Iterator<Uri> iterator = ringtonesNameURIMap.values().iterator();
-		while(iterator.hasNext())
+		while (iterator.hasNext())
 		{
-			Uri uri = (Uri)iterator.next();
-			if(uri != null)
+			Uri uri = (Uri) iterator.next();
+			if (uri != null)
 			{
 				rintoneValSeq.add(uri.toString());
 			}
@@ -337,7 +336,7 @@ public class NotificationToneListPreference extends ListPreference implements Di
 				rintoneValSeq.add(null);
 			}
 		}
-		
+
 	};
 
 }
