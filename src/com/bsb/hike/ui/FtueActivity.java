@@ -1,9 +1,7 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,7 +26,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
-import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
@@ -118,11 +116,17 @@ public class FtueActivity extends HikeAppStateBaseFragmentActivity implements On
 		Sticker st = pair.first;
 		int stickerResId = pair.second;
 		String stId = st.getStickerId();
-		Map<String, String> metadata = new HashMap<String, String>();
-		metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_STICKER_CLICKED + "_" + stId);
-		Event e = new Event(metadata);
-		e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-		HAManager.getInstance(getApplicationContext()).record(e);
+		
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_STICKER_CLICKED + "_" + stId);
+			HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
 
 		Intent intent = IntentManager.getForwardStickerIntent(FtueActivity.this, stId, st.getCategoryId(), true);
 		intent.putExtra(StickerManager.STICKER_RES_ID, stickerResId);

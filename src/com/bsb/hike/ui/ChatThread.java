@@ -155,6 +155,7 @@ import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.adapters.EmoticonPageAdapter.EmoticonClickListener;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
@@ -1785,22 +1786,24 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
 		{
-			Map<String, String> metadata = new HashMap<String, String>();
-			com.bsb.hike.analytics.Event e;
+			JSONObject metadata = new JSONObject();
 
-			if (convMessage.getHashMessage()==HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE)
+			try
 			{
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_POSTED_VIA_ICON);
-				e = new com.bsb.hike.analytics.Event(metadata);
-				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				if (convMessage.getHashMessage()==HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE)
+				{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_POSTED_VIA_ICON);
+				}
+				else
+				{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_POSTED_VIA_HASH_PIN);
+				}
+				HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 			}
-			else
+			catch(JSONException e)
 			{
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_POSTED_VIA_HASH_PIN);
-				e = new com.bsb.hike.analytics.Event(metadata);
-				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 			}
-			HAManager.getInstance(getApplicationContext()).record(e);
 		}
 	}
 
@@ -6737,11 +6740,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		if (!HikeSharedPreferenceUtil.getInstance(ChatThread.this).getData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, false))
 		{
 			HikeSharedPreferenceUtil.getInstance(ChatThread.this).saveData(HikeMessengerApp.STICKED_BTN_CLICKED_FIRST_TIME, true);
-			Map<String, String> metadata = new HashMap<String, String>();
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_BTN_CLICKED);
-			com.bsb.hike.analytics.Event e = new com.bsb.hike.analytics.Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(getApplicationContext()).record(e);
+			
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_BTN_CLICKED);
+				HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 		}
 	}
 
@@ -6795,11 +6804,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 						if (tag instanceof TipType && ((TipType)tag == TipType.EMOTICON))
 						{
 							HikeTip.closeTip(TipType.EMOTICON, tipView, prefs);
-							Map<String, String> metadata = new HashMap<String, String>();
-							metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
-							com.bsb.hike.analytics.Event e = new com.bsb.hike.analytics.Event(metadata);
-							e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-							HAManager.getInstance(getApplicationContext()).record(e);
+							
+							try
+							{
+								JSONObject metadata = new JSONObject();
+								metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STICKER_FTUE_BTN_CLICK);
+								HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+							}
+							catch(JSONException e)
+							{
+								Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+							}
 
 							tipView = null;
 						}
@@ -7788,11 +7803,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		case R.id.forward_msgs:
 			selectedMsgIds = new ArrayList<Long>(mAdapter.getSelectedMessageIds());
 			Collections.sort(selectedMsgIds);
-			Map<String, String> metadata = new HashMap<String, String>();
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FORWARD_MSG);
-			com.bsb.hike.analytics.Event event = new com.bsb.hike.analytics.Event(metadata);
-			event.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(getApplicationContext()).record(event);
+			
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FORWARD_MSG);
+				HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 
 			Intent intent = new Intent(ChatThread.this, ComposeChatActivity.class);
 			String msg;
@@ -8418,12 +8439,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 				public void onClick(View v)
 				{
 					mAdapter.hikeOfflineSendClick();
-					Map<String, String> metadata = new HashMap<String, String>();
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SECOND_OFFLINE_TIP_CLICKED);
-					com.bsb.hike.analytics.Event e = new com.bsb.hike.analytics.Event(metadata);
-					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-					HAManager.getInstance(getApplicationContext()).record(e);
-
+					
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SECOND_OFFLINE_TIP_CLICKED);
+						HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 				}
 			});
 
@@ -8459,12 +8485,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 					}
 					initialiseHikeToOfflineMode();
 					setupHikeToOfflineTipViews();
-					Map<String, String> metadata = new HashMap<String, String>();
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FIRST_OFFLINE_TIP_CLICKED);
-					com.bsb.hike.analytics.Event e = new com.bsb.hike.analytics.Event(metadata);
-					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-					HAManager.getInstance(getApplicationContext()).record(e);
-
+					
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FIRST_OFFLINE_TIP_CLICKED);
+						HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						
+					}
 				}
 			};
 
@@ -8697,21 +8728,23 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements Hike
 		startActivity(intent);
 		Utils.resetPinUnreadCount(mConversation);
 		
-		Map<String, String> metadata = new HashMap<String, String>();
-		com.bsb.hike.analytics.Event e;
+		JSONObject metadata = new JSONObject();
 		
-		if(viaMenu)
+		try
 		{
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_HISTORY_VIA_MENU);
-			e = new com.bsb.hike.analytics.Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-		}else
-		{
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK);
-			e = new com.bsb.hike.analytics.Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
+			if(viaMenu)
+			{
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_HISTORY_VIA_MENU);
+			}else
+			{
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK);
+			}
+			HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
-		HAManager.getInstance(getApplicationContext()).record(e);
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}		
 	}
 	
 	private void updateOverflowMenuUnreadCount()

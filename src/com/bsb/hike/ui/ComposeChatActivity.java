@@ -33,7 +33,7 @@ import com.bsb.hike.adapters.ComposeChatAdapter;
 import com.bsb.hike.adapters.FriendsAdapter;
 import com.bsb.hike.adapters.FriendsAdapter.FriendsListFetchedCallback;
 import com.bsb.hike.adapters.FriendsAdapter.ViewType;
-import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FTAnalyticEvents;
@@ -225,12 +225,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			Intent contactSyncIntent = new Intent(HikeService.MQTT_CONTACT_SYNC_ACTION);
 			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
 			sendBroadcast(contactSyncIntent);
-			Map<String, String> metadata = new HashMap<String, String>();
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.COMPOSE_REFRESH_CONTACTS);
-			Event e = new Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(getApplicationContext()).record(e);
-
+			
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.COMPOSE_REFRESH_CONTACTS);
+				HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -665,11 +670,17 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					tagEditText.clear(false);
 					int selected = adapter.getSelectedContactCount();
 					tagEditText.toggleTag( getString(selected <=1 ? R.string.selected_contacts_count_singular : R.string.selected_contacts_count_plural,selected), SELECT_ALL_MSISDN, SELECT_ALL_MSISDN);
-					Map<String, String> metadata = new HashMap<String, String>();
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SELECT_ALL_HIKE_CONTACTS);
-					Event e = new Event(metadata);
-					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-					HAManager.getInstance(getApplicationContext()).record(e);
+					
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SELECT_ALL_HIKE_CONTACTS);
+						HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 				}else{
 					// call adapter unselect all
 					selectAllMode = false;
@@ -907,15 +918,20 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			@Override
 			public void onClick(View v)
 			{
-				Map<String, String> metadata = new HashMap<String, String>();
+				JSONObject metadata = new JSONObject();
 				
 				if(isFtueFwd)
 				{
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_STICKER_FORWARD);
-					Event e = new Event(metadata);
-					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-					HAManager.getInstance(getApplicationContext()).record(e);
-
+					try
+					{
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_STICKER_FORWARD);
+						HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
+						
 					SharedPreferences settings = ComposeChatActivity.this.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 					Editor editor = settings.edit();
 					editor.putBoolean(HikeConstants.SHOW_NUX_INVITE_MODE, false);
@@ -926,10 +942,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				}
 				else if(nuxInviteMode)
 				{
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_BOT_FORWARD);
-					Event e = new Event(metadata);
-					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-					HAManager.getInstance(getApplicationContext()).record(e);
+					try
+					{
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_BOT_FORWARD);
+						HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 
 					forwardMultipleMessages(adapter.getAllSelectedContacts());
 				}
@@ -1106,11 +1127,16 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else
 		{
-			Map<String, String> metadata = new HashMap<String, String>();
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.CONFIRM_FORWARD);
-			Event e = new Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(getApplicationContext()).record(e);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.CONFIRM_FORWARD);
+				HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 
 			// forwarding it is
 			Intent intent = null;

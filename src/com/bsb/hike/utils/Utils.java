@@ -154,7 +154,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.analytics.AnalyticsConstants;
-import com.bsb.hike.analytics.Event;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -1816,48 +1815,33 @@ public class Utils
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.INVITE_SENT, null);
 
-		Map<String, String> md = null;
-		Event e = null;
-		String msisdn = contactInfo.getMsisdn();
-		
-		switch (whichScreen)
+		try
 		{
-		case FRIENDS_TAB:
-			md = new HashMap<String, String>();
-			md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK : HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK);
+			JSONObject md = new JSONObject();
+			String msisdn = contactInfo.getMsisdn();
+			
+			switch (whichScreen)
+			{
+			case FRIENDS_TAB:
+				md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_FTUE_FRIENDS_CLICK : HikeConstants.LogEvent.REMIND_FTUE_FRIENDS_CLICK);				
+				break;
+			case UPDATES_TAB:
+				md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK : HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK);
+				break;
+			case SMS_SECTION:
+				md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK : HikeConstants.LogEvent.REMIND_SMS_CLICK);				
+				break;
+			}
 			
 			if(!TextUtils.isEmpty(msisdn))
 			{
 				md.put(HikeConstants.TO, msisdn);
 			}
-			e = new Event(md);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(context).record(e);
-			break;
-		case UPDATES_TAB:
-			md = new HashMap<String, String>();
-			md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_FTUE_UPDATES_CLICK : HikeConstants.LogEvent.REMIND_FTUE_UPDATES_CLICK);
-			
-			if(!TextUtils.isEmpty(msisdn))
-			{
-				md.put(HikeConstants.TO, msisdn);
-			}
-			e = new Event(md);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(context).record(e);
-			break;
-		case SMS_SECTION:
-			md = new HashMap<String, String>();
-			md.put(HikeConstants.EVENT_KEY, !isReminding ? HikeConstants.LogEvent.INVITE_SMS_CLICK : HikeConstants.LogEvent.REMIND_SMS_CLICK);
-			
-			if(!TextUtils.isEmpty(msisdn))
-			{
-				md.put(HikeConstants.TO, msisdn);
-			}
-			e = new Event(md);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(context).record(e);
-			break;
+			HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 	}
 
@@ -5035,33 +5019,41 @@ public class Utils
 		SharedPreferences accountPrefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		if (accountPrefs.getBoolean(HikeMessengerApp.FB_SIGNUP, false))
 		{
-			Map<String, String> metadata = new HashMap<String, String>();
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FB_CLICK);
-			Event e = new Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(context).record(e);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FB_CLICK);
+				HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 		}
 		if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) > -1)
 		{
-			if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+			try
 			{
-				Map<String, String> metadata = new HashMap<String, String>();
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
-				Event e = new Event(metadata);
-				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-				HAManager.getInstance(context).record(e);
+				JSONObject metadata = new JSONObject();
+				
+				if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.STICKER_VIEWED.ordinal())
+				{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_STICKER_VIEWED);
+				}
+				else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+				{
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
+				}
+				HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+	
+				Editor editor = accountPrefs.edit();
+				editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
+				editor.commit();
 			}
-			else if (accountPrefs.getInt(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED, -1) == HikeConstants.WelcomeTutorial.CHAT_BG_VIEWED.ordinal())
+			catch(JSONException e)
 			{
-				Map<String, String> metadata = new HashMap<String, String>();
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
-				Event e = new Event(metadata);
-				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-				HAManager.getInstance(context).record(e);
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 			}
-			Editor editor = accountPrefs.edit();
-			editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
-			editor.commit();
 		}
 	}
 

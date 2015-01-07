@@ -70,7 +70,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.BitmapModule.HikeBitmapFactory;
 import com.bsb.hike.adapters.ProfileAdapter;
-import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -372,11 +372,17 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			if(Intent.ACTION_ATTACH_DATA.equals(getIntent().getAction()))
 			{
 				setProfileImage(HikeConstants.GALLERY_RESULT, RESULT_OK, getIntent());
-				Map<String, String> metadata = new HashMap<String, String>();
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SET_PROFILE_PIC_GALLERY);
-				Event e = new Event(metadata);
-				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-				HAManager.getInstance(getApplicationContext()).record(e);
+				
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SET_PROFILE_PIC_GALLERY);
+					HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 			}
 			if (getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false))
 			{
@@ -1897,11 +1903,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		
 		if (contactInfo.isOnhike())
 		{
-			Map<String, String> metadata = new HashMap<String, String>();
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ADD_TO_FAVOURITE);
-			Event e = new Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(getApplicationContext()).record(e);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ADD_TO_FAVOURITE);
+				HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 
 			Utils.addFavorite(this, contactInfo, false);
 		}
@@ -2921,11 +2932,17 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			arguments.putInt(HikeConstants.MEDIA_POSITION, hsf.size()-1);
 			arguments.putBoolean(HikeConstants.FROM_CHAT_THREAD, true);
 			arguments.putString(HikeConstants.Extras.MSISDN, mLocalMSISDN);
-			Map<String, String> metadata = new HashMap<String, String>();
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.MEDIA_THUMBNAIL_VIA_PROFILE);
-			Event e = new Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(getApplicationContext()).record(e);
+			
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.MEDIA_THUMBNAIL_VIA_PROFILE);
+				HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 
 			if(this.profileType == ProfileType.GROUP_INFO)
 				PhotoViewerFragment.openPhoto(R.id.parent_layout, ProfileActivity.this, hsf, true, groupConversation);
@@ -2936,11 +2953,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		else if(v.getTag() instanceof String)  //Open entire gallery intent
 		{
-			Map<String, String> metadata = new HashMap<String, String>();
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.OPEN_GALLERY_VIA_PROFILE);
-			Event e = new Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(getApplicationContext()).record(e);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.OPEN_GALLERY_VIA_PROFILE);
+				HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 
 			if(this.profileType == ProfileType.GROUP_INFO)
 				startActivity(HikeSharedFilesActivity.getHikeSharedFilesActivityIntent(ProfileActivity.this, groupConversation));
@@ -3056,11 +3078,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		}
 		else
 		{
-			Map<String, String> metadata = new HashMap<String, String>();
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SHARED_FILES_VIA_PROFILE);
-			Event e = new Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(getApplicationContext()).record(e);
+			try
+			{
+				JSONObject metadata = new JSONObject();
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SHARED_FILES_VIA_PROFILE);
+				HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			}
+			catch(JSONException e)
+			{
+				Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+			}
 
 			Intent intent = new Intent(this, SharedOtherFilesActivity.class);
 			intent.putExtra(HikeConstants.Extras.MSISDN, mLocalMSISDN);

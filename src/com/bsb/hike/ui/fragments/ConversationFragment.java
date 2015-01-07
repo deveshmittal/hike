@@ -31,7 +31,7 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.adapters.EmptyConversationsAdapter;
-import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -42,8 +42,6 @@ import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.*;
 import com.bsb.hike.utils.*;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -410,12 +408,17 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					Utils.cancelScheduledStealthReset(getActivity());
 
 					dialog.dismiss();
-					
-					Map<String, String> metadata = new HashMap<String, String>();
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
-					Event e = new Event(metadata);
-					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-					HAManager.getInstance(getActivity().getApplicationContext()).record(e);
+
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
+						HAManager.getInstance(getActivity().getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 				}
 
 				@Override
@@ -2511,11 +2514,16 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 
 	private void inviteButtonClicked()
 	{
-		Map<String, String> metadata = new HashMap<String, String>();
-		metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_INVITE_BUTTON_CLICKED);
-		Event e = new Event(metadata);
-		e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-		HAManager.getInstance(getActivity().getApplicationContext()).record(e);
+		try
+		{
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_INVITE_BUTTON_CLICKED);
+			HAManager.getInstance(getActivity().getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+		}
 		
 		Intent intent = new Intent(getActivity(), HikeListActivity.class);
 		intent.putExtra(HikeConstants.NUX_INVITE_FORWARD, true);
