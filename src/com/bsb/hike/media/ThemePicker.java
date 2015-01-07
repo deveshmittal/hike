@@ -194,7 +194,7 @@ public class ThemePicker implements BackPressListener, OnDismissListener,
 			Logger.i(TAG, "on create action mode");
 			actionMode = mode;
 			mode.setCustomView(LayoutInflater.from(sherlockFragmentActivity)
-					.inflate(R.layout.chat_theme_action_bar, null));
+					.inflate(R.layout.hike_action_mode, null));
 			return true;
 		}
 
