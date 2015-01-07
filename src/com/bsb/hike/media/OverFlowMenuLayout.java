@@ -120,7 +120,7 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 	public void removeItem(int id) {
 		Iterator<OverFlowMenuItem> iterator = overflowItems.iterator();
 		while (iterator.hasNext()) {
-			if (iterator.next().uniqueness == id) {
+			if (iterator.next().id == id) {
 				iterator.remove();
 				break;
 			}

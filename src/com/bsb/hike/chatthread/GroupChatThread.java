@@ -140,7 +140,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	@Override
 	public void itemClicked(OverFlowMenuItem item)
 	{
-		if (item.uniqueness == R.string.chat_theme)
+		if (item.id == R.string.chat_theme)
 		{
 			showThemePicker();
 		}

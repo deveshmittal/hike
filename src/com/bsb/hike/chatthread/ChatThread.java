@@ -457,7 +457,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void itemClicked(OverFlowMenuItem item)
 	{
-		switch (item.uniqueness)
+		switch (item.id)
 		{
 		case R.string.clear_chat:
 			break;

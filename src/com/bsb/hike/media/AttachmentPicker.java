@@ -17,11 +17,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.chatthread.OverFlowMenuItem;
-import com.bsb.hike.chatthread.OverFlowMenuLayout;
-import com.bsb.hike.chatthread.OverflowItemClickListener;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 
@@ -152,7 +148,7 @@ public class AttachmentPicker extends OverFlowMenuLayout {
 				// Start respective activities
 				int requestCode = -1;
 				Intent pickIntent = null;
-				switch (item.uniqueness) {
+				switch (item.id) {
 				case CAMERA:
 					requestCode = CAMERA;
 					pickIntent = IntentManager.getImageCaptureIntent(context);
