@@ -1,8 +1,6 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +30,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
-import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
@@ -439,57 +437,57 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 	{
 		int tag = (Integer) view.getTag();
 		
-		Map<String, String> metadata = new HashMap<String, String>();
-		Event e;
-		
-		switch (tag)
+		try
 		{
-		case SMS:
-			Utils.logEvent(this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.INVITE_SMS_SCREEN_FROM_INVITE);
-			e = new Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(getApplicationContext()).record(e);
-
-			IntentManager.openInviteSMS(this);
-			break;
-		case WATSAPP:
-			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.WATS_APP_INVITE);
-			e = new Event(metadata);
-			e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-			HAManager.getInstance(getApplicationContext()).record(e);
-
-			sendInviteViaWatsApp();
-			break;
-		case FACEBOOK:
-			onClickPickFriends();
-			break;
-
-		case TWITTER:
-			if (!settings.getBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE, false))
+			JSONObject metadata = new JSONObject();
+			
+			switch (tag)
 			{
-				startActivity(new Intent(this, TwitterAuthActivity.class));
+			case SMS:
+				Utils.logEvent(this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.INVITE_SMS_SCREEN_FROM_INVITE);
+				HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				IntentManager.openInviteSMS(this);
+				break;
+			case WATSAPP:
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.WATS_APP_INVITE);
+				HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);	
+				sendInviteViaWatsApp();
+				break;
+			case FACEBOOK:
+				onClickPickFriends();
+				break;
+	
+			case TWITTER:
+				if (!settings.getBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE, false))
+				{
+					startActivity(new Intent(this, TwitterAuthActivity.class));
+				}
+				else
+				{
+					postToSocialNetwork(false);
+				}
+				break;
+	
+			case EMAIL:
+				Intent mailIntent = new Intent(Intent.ACTION_SENDTO);
+	
+				mailIntent.setData(Uri.parse("mailto:"));
+				mailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject));
+				mailIntent.putExtra(Intent.EXTRA_TEXT, Utils.getInviteMessage(this, R.string.email_body));
+	
+				startActivity(mailIntent);
+				break;
+	
+			case OTHER:
+				Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_INVITE);
+				Utils.startShareIntent(this, Utils.getInviteMessage(this, R.string.invite_share_message));
+				break;
 			}
-			else
-			{
-				postToSocialNetwork(false);
-			}
-			break;
-
-		case EMAIL:
-			Intent mailIntent = new Intent(Intent.ACTION_SENDTO);
-
-			mailIntent.setData(Uri.parse("mailto:"));
-			mailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject));
-			mailIntent.putExtra(Intent.EXTRA_TEXT, Utils.getInviteMessage(this, R.string.email_body));
-
-			startActivity(mailIntent);
-			break;
-
-		case OTHER:
-			Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_INVITE);
-			Utils.startShareIntent(this, Utils.getInviteMessage(this, R.string.invite_share_message));
-			break;
+		}
+		catch(JSONException e)
+		{
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 	}
 
