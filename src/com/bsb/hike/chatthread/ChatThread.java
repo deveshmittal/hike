@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONException;
@@ -2062,4 +2063,27 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		//TODO : Implement this
 	}
+	
+	/**
+	 * Can be used to update the title of an overflow menu item on the fly
+	 * 
+	 * @param itemId
+	 * @param newTitle
+	 */
+	protected void updateOverflowMenuItemString(int itemId, String newTitle)
+	{
+		List<OverFlowMenuItem> mItems = mActionBar.getOverFlowMenuItems();
+		
+		Iterator<OverFlowMenuItem> iterator = mItems.iterator();
+		
+		while(iterator.hasNext())
+		{
+			if(iterator.next().id == itemId)
+			{
+				iterator.next().text = newTitle;
+				break;
+			}
+		}
+	}
+
 }
