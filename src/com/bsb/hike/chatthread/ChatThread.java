@@ -21,12 +21,16 @@ import android.os.Message;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.StyleSpan;
 import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
@@ -36,6 +40,7 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -80,6 +85,7 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
@@ -182,6 +188,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected View tipView;
 	
 	protected View mActionBarView;
+	
+	protected boolean blockOverlay;
+	
+	protected boolean mUserIsBlocked;
 
 	protected Handler uiHandler = new Handler()
 	{
@@ -517,6 +527,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case R.id.contact_info:
 			//openProfileScreen();
 			break;
+		case R.id.overlay_layout:
+			onOverlayLayoutClicked();
 		default:
 			Logger.e(TAG, "onClick Registered but not added in onClick : " + v.toString());
 			break;
@@ -1963,4 +1975,91 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		view.startAnimation(an);
 	}
 	
+	/**
+	 * blockOverLay flag indicates whether this is used to block a user or not. 
+	 * This function can also be called from in zero SMS Credits case.
+	 * 
+	 * @param blockOverlay
+	 * @param label
+	 * @param formatString
+	 * @param overlayBtnText
+	 */
+	
+	private void showOverlay(boolean blockOverlay, String label, String formatString, String overlayBtnText)
+	{
+		this.blockOverlay = blockOverlay;
+
+		Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
+
+		View mOverlayLayout = activity.findViewById(R.id.overlay_layout);
+
+		if (mOverlayLayout.getVisibility() != View.VISIBLE && activity.hasWindowFocus())
+		{
+			Animation fadeIn = AnimationUtils.loadAnimation(activity, android.R.anim.fade_in);
+			mOverlayLayout.setAnimation(fadeIn);
+		}
+
+		mComposeView.setEnabled(false);
+
+		mOverlayLayout.setVisibility(View.VISIBLE);
+		mOverlayLayout.setOnClickListener(this);
+
+		TextView message = (TextView) mOverlayLayout.findViewById(R.id.overlay_message);
+		Button overlayBtn = (Button) mOverlayLayout.findViewById(R.id.overlay_button);
+		ImageView overlayImg = (ImageView) mOverlayLayout.findViewById(R.id.overlay_image);
+
+		mComposeView.setEnabled(false);
+
+		if (blockOverlay)
+		{
+			overlayImg.setImageResource(R.drawable.ic_no);
+			overlayBtn.setText(overlayBtnText);
+		}
+		else
+		{
+			mConversationDb.setOverlay(false, mConversation.getMsisdn());
+			overlayImg.setImageResource(R.drawable.ic_no_credits);
+			overlayBtn.setText(overlayBtnText);
+
+		}
+
+		/**
+		 * Making the blocked user's name as bold
+		 */
+		String formatted = String.format(formatString, label);
+		SpannableString str = new SpannableString(formatted);
+		if (blockOverlay)
+		{
+			int start = formatString.indexOf("%1$s");
+			str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start, start + label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
+		message.setText(str);
+	}
+
+	/**
+	 * Used to call {@link #showOverlay(boolean, String, String, String)} from {@link OneToOneChatThread} or {@link GroupChatThread}
+	 * 
+	 * @param label
+	 */
+	protected void showBlockOverlay(String label)
+	{
+		showOverlay(true, label, activity.getApplicationContext().getString(R.string.block_overlay_message), activity.getApplicationContext().getString(R.string.unblock_title));
+	}
+	
+	/**
+	 * Used to call {@link #showOverlay(boolean, String, String, String)} from {@link OneToOneChatThread} or {@link GroupChatThread}
+	 * 
+	 * @param label
+	 * @param formatString
+	 * @param overlayBtnText
+	 */
+	protected void showZeroCreditsOverlay(String label, String formatString, String overlayBtnText)
+	{
+		showOverlay(false, label, formatString, overlayBtnText);
+	}
+	
+	private void onOverlayLayoutClicked()
+	{
+		//TODO : Implement this
+	}
 }

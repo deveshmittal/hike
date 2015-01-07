@@ -223,6 +223,22 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	protected void fetchConversationFinished(Conversation conversation)
 	{
 		super.fetchConversationFinished(conversation);
+		
+		/**
+		 * Is the group owner blocked ?  
+		 * If true then show the block overlay with appropriate strings
+		 */
+		
+		if(ContactManager.getInstance().isBlocked(groupConversation.getGroupOwner()))
+		{
+			mUserIsBlocked = true;
+			
+			String label = groupConversation.getGroupParticipantFirstName(groupConversation.getGroupOwner());
+					
+			showBlockOverlay(label);
+			
+		}
+		
 		toggleGroupLife(groupConversation.getIsGroupAlive());
 		addUnreadCountMessage();
 		if(groupConversation.getImpMessage()!=null){
@@ -648,4 +664,5 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			groupCountTextView.setText(activity.getResources().getString(R.string.num_people, (numActivePeople + 1)));
 		}
 	}
+	
 }

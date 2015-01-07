@@ -251,7 +251,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		
 		if (ContactManager.getInstance().isBlocked(msisdn))
 		{
-			showOverlay(true);
+			mUserIsBlocked = true;
+			showBlockOverlay(getConvLabel());
 		}
 		
 		
@@ -265,12 +266,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		
 	}
 	
-
-	private void showOverlay(boolean blockOverLay)
-	{
-		// TODO Add ShowOverlay
-	}
-
 	private void resetLastSeenScheduler()
 	{
 		if (lastSeenScheduler != null)
@@ -818,7 +813,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 		if (!mConversationDb.wasOverlayDismissed(mConversation.getMsisdn()))
 		{
-			showOverlay(false);
+			showZeroCreditsOverlay(getConvLabel(), activity.getApplicationContext().getString(R.string.no_credits), activity.getApplicationContext().getString(R.string.invite_now));
 		}
 
 		// TODO : Make tipView a member of superclass ?
@@ -975,12 +970,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		super.setupActionBar();
 
-		String tempLabel = mConversation.getLabel();
-		tempLabel = Utils.getFirstName(tempLabel);
-		
 		setAvatar(R.drawable.ic_default_avatar);
 		
-		setLabel(tempLabel);
+		setLabel(getConvLabel());
 		
 		setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
 
@@ -1138,6 +1130,19 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		regularSmsText.setVisibility(View.VISIBLE);
 
 		smsToggle.setOnCheckedChangeListener(mAdapter);
+	}
+	
+	/**
+	 * Returns the label for the cuurent conversation
+	 * 
+	 * @return
+	 */
+	private String getConvLabel()
+	{
+		String tempLabel = mConversation.getLabel();
+		tempLabel = Utils.getFirstName(tempLabel);
+		
+		return tempLabel;
 	}
 	
 }
