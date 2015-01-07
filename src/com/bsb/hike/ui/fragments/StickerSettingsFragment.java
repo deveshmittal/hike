@@ -1,11 +1,12 @@
 package com.bsb.hike.ui.fragments;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -36,7 +37,7 @@ import com.bsb.hike.DragSortListView.DragSortListView;
 import com.bsb.hike.DragSortListView.DragSortListView.DragScrollProfile;
 import com.bsb.hike.DragSortListView.DragSortListView.DropListener;
 import com.bsb.hike.adapters.StickerSettingsAdapter;
-import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.modules.stickerdownloadmgr.IStickerResultListener;
@@ -156,11 +157,17 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 			{
 				isUpdateAllTapped = false;
 				confirmView.setVisibility(View.GONE);
-				Map<String, String> metadata = new HashMap<String, String>();
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.UPDATE_ALL_CANCEL_CLICKED);
-				Event e = new Event(metadata);
-				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-				HAManager.getInstance(getActivity().getApplicationContext()).record(e);
+				
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.UPDATE_ALL_CANCEL_CLICKED);
+					HAManager.getInstance(getActivity().getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 			}
 		});
 		
@@ -175,11 +182,17 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				{
 					StickerManager.getInstance().initialiseDownloadStickerTask(category, DownloadSource.SETTINGS, getSherlockActivity());
 				}
-				Map<String, String> metadata = new HashMap<String, String>();
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.UPDATE_ALL_CONFIRM_CLICKED);
-				Event e = new Event(metadata);
-				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-				HAManager.getInstance(getActivity().getApplicationContext()).record(e);
+				
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.UPDATE_ALL_CONFIRM_CLICKED);
+					HAManager.getInstance(getActivity().getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 				mAdapter.notifyDataSetChanged();
 				confirmView.setVisibility(View.GONE);
 			}
@@ -271,12 +284,17 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 							return;
 						}
 						prefs.saveData(HikeMessengerApp.IS_STICKER_CATEGORY_REORDERING_TIP_SHOWN, true); // Setting the tip flag
-						Map<String, String> metadata = new HashMap<String, String>();
-						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SEEN_REORDERING_TIP);
-						Event e = new Event(metadata);
-						e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-						HAManager.getInstance(getActivity().getApplicationContext()).record(e);
-
+						
+						try
+						{
+							JSONObject metadata = new JSONObject();
+							metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SEEN_REORDERING_TIP);
+							HAManager.getInstance(getActivity().getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+						}
+						catch(JSONException e)
+						{
+							Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+						}
 						
 						ImageView tickImage = (ImageView) parent.findViewById(R.id.reorder_indicator);
 						tickImage.setImageResource(R.drawable.art_tick);
