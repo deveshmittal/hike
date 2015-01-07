@@ -550,7 +550,7 @@ public class VoIPActivity extends Activity implements CallActions
 	private void animateActiveCallButtons()
 	{
 		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
-		anim.setDuration(1000);
+		anim.setDuration(500);
 
 		View hangupButton = findViewById(R.id.hang_up_btn);
 		findViewById(R.id.active_call_group).setVisibility(View.VISIBLE);
@@ -664,7 +664,7 @@ public class VoIPActivity extends Activity implements CallActions
 	private void startCallDuration()
 	{	
 		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
-		anim.setDuration(1000);
+		anim.setDuration(500);
 
 		callDuration = (Chronometer)VoIPActivity.this.findViewById(R.id.call_duration);
 		callDuration.startAnimation(anim);
