@@ -110,7 +110,7 @@ public class HikeActionBar
 	 * @param layoutResId
 	 * @return
 	 */
-	public View inflateCustomActionBarView(int layoutResId)
+	public View setCustomActionBarView(int layoutResId)
 	{
 		return inflateCustomActionBarView(layoutResId, -1);
 	}

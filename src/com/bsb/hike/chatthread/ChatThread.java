@@ -176,8 +176,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	protected EditText mComposeView;
 	
-	protected String mConvLabel;
-	
 	private GestureDetector mGestureDetector;
 	
 	protected View tipView;
@@ -1897,23 +1895,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void setupActionBar()
 	{
-		View actionBarView = mActionBar.inflateCustomActionBarView(R.layout.chat_thread_action_bar);
+		View actionBarView = mActionBar.setCustomActionBarView(R.layout.chat_thread_action_bar);
 		
 		View backContainer = actionBarView.findViewById(R.id.back);
-		
-		/**
-		 * Defensive check. Can remove if needed.
-		 */
-		
-		if(backContainer == null)
-		{
-			throw new IllegalAccessError("Was correct view passed to inflate chat thread action bar");
-		}
 		
 		View contactInfoContainer = actionBarView.findViewById(R.id.contact_info);
 		
 		setAvatar();
-		setLabel(mConvLabel);
 		
 		/**
 		 * Adding click listeners
@@ -1926,7 +1914,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	/**
 	 * Sets the label for the action bar
 	 */
-	private void setLabel(String label)
+	protected void setLabel(String label)
 	{
 		TextView mLabelTextView = (TextView) activity.getSupportActionBar().getCustomView().findViewById(R.id.contact_name);
 		

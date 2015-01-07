@@ -170,9 +170,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			mConversation.setMessages(HikeConversationsDatabase.getInstance().getConversationThread(msisdn, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, mConversation, -1));
 		}
 		
-		String tempLabel = mConversation.getLabel();
-		mConvLabel = Utils.getFirstName(tempLabel);
-		
 		ChatTheme currentTheme = mConversationDb.getChatThemeForMsisdn(msisdn);
 		Logger.d(TAG, "Calling setchattheme from createConversation");
 		mConversation.setTheme(currentTheme);
@@ -967,6 +964,11 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		super.setupActionBar();
 
+		String tempLabel = mConversation.getLabel();
+		tempLabel = Utils.getFirstName(tempLabel);
+		
+		setLabel(tempLabel);
+		
 		setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
 
 	}

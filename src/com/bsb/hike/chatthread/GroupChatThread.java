@@ -188,7 +188,6 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			(groupConversation).setupReadByList(readBy, msgId);
 		}
 		
-		mConvLabel = mConversation.getLabel();
 		// fetch theme
 		ChatTheme currentTheme = mConversationDb.getChatThemeForMsisdn(msisdn);
 		Logger.d("ChatThread", "Calling setchattheme from createConversation");
@@ -618,6 +617,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	protected void setupActionBar()
 	{
 		super.setupActionBar();
+		
+		setLabel(mConversation.getLabel());
 		
 		incrementGroupParticipants(0);
 	}
