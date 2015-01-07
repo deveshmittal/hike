@@ -48,6 +48,7 @@ import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.SoundUtils;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
@@ -855,11 +856,11 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				preference.setTitle(getString(R.string.notificationSoundTitle) + " - " + (newValue.toString()));
 				if (getString(R.string.notif_sound_Hike).equals(newValue.toString()))
 				{
-					Utils.playSoundFromRaw(getApplicationContext(), R.raw.hike_jingle_15);
+					SoundUtils.playSoundFromRaw(getApplicationContext(), R.raw.hike_jingle_15);
 				}
 				else if (getString(R.string.notif_sound_default).equals(newValue.toString()))
 				{
-					Utils.playSound(getApplicationContext(), RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+					SoundUtils.playSound(getApplicationContext(), RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
 				}
 				return true;
 			}
