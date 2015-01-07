@@ -1,6 +1,7 @@
 package com.bsb.hike.chatthread;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import android.app.Dialog;
@@ -147,7 +148,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 
 	private boolean isUserBlocked()
 	{
-		return false;
+		return mUserIsBlocked;
 	}
 
 	private boolean isUserOnHike()
@@ -252,6 +253,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		if (ContactManager.getInstance().isBlocked(msisdn))
 		{
 			mUserIsBlocked = true;
+			updateOverflowMenuItemString(R.string.block_title, activity.getApplicationContext().getString(R.string.block_title));
 			showBlockOverlay(getConvLabel());
 		}
 		
@@ -1143,6 +1145,37 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		tempLabel = Utils.getFirstName(tempLabel);
 		
 		return tempLabel;
+	}
+	
+	
+	@Override
+	public void itemClicked(OverFlowMenuItem item)
+	{
+		switch(item.id)
+		{
+		case R.string.block_title:
+			onBlockUserclicked();
+			break;
+		default :
+			Logger.d(TAG, "Calling super Class' itemClicked");
+			super.itemClicked(item);
+		}
+	}
+	
+	/**
+	 * Used for giving block and unblock user pubSubs
+	 */
+	private void onBlockUserclicked()
+	{
+		if(mUserIsBlocked)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, msisdn);
+		}
+		
+		else
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, msisdn);
+		}
 	}
 	
 }
