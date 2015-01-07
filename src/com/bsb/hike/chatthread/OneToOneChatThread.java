@@ -584,35 +584,38 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	protected void handleUIMessage(Message msg)
 	{
-		switch(msg.what)
+		switch (msg.what)
 		{
-			case CONTACT_ADDED_OR_DELETED:
-				contactAddedOrDeleted((Pair<Boolean, String>) msg.obj);
-				break;
-			case SHOW_SMS_SYNC_DIALOG:
-				onShowSMSSyncDialog();
-				break;
-			case SMS_SYNC_COMPLETE_OR_FAIL:
-				dismissSMSSyncDialog();
-				break;
-			case UPDATE_LAST_SEEN:
-				setLastSeen((String) msg.obj);
-				break;
-			case SEND_SMS_PREF_TOGGLED:
-				updateUIForHikeStatus();
-				break;
-			case SMS_CREDIT_CHANGED:
-				setSMSCredits();
-				break;
-			case REMOVE_UNDELIVERED_MESSAGES:
-				removeUndeliveredMessages(msg.obj);
-				break;
-			default:
-				Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
-				super.handleUIMessage(msg);
-				break;
+		case CONTACT_ADDED_OR_DELETED:
+			contactAddedOrDeleted((Pair<Boolean, String>) msg.obj);
+			break;
+		case SHOW_SMS_SYNC_DIALOG:
+			onShowSMSSyncDialog();
+			break;
+		case SMS_SYNC_COMPLETE_OR_FAIL:
+			dismissSMSSyncDialog();
+			break;
+		case UPDATE_LAST_SEEN:
+			setLastSeen((String) msg.obj);
+			break;
+		case SEND_SMS_PREF_TOGGLED:
+			updateUIForHikeStatus();
+			break;
+		case SMS_CREDIT_CHANGED:
+			setSMSCredits();
+			break;
+		case REMOVE_UNDELIVERED_MESSAGES:
+			removeUndeliveredMessages(msg.obj);
+			break;
+		case UPDATE_AVATAR:
+			setAvatar(R.drawable.ic_default_avatar);
+			break;
+		default:
+			Logger.d(TAG, "Did not find any matching event in OneToOne ChatThread. Calling super class' handleUIMessage");
+			super.handleUIMessage(msg);
+			break;
 		}
-		
+
 	}
 	
 	/**
