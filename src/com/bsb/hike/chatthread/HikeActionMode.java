@@ -1,0 +1,145 @@
+package com.bsb.hike.chatthread;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.TextView;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.bsb.hike.R;
+
+public class HikeActionMode implements ActionMode.Callback, OnClickListener
+{
+	public static interface ActionModeListener
+	{
+		public void actionModeDestroyed(int id);
+
+		public void doneClicked(int id);
+	}
+
+	private static final int DEFAULT_LAYOUT = R.layout.hike_action_mode;
+
+	protected ActionMode actionMode;
+
+	protected SherlockFragmentActivity sherlockFragmentActivity;
+
+	private int title, save, layoutId = DEFAULT_LAYOUT, id;
+
+	private ActionModeListener listener;
+
+	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, int layoutId)
+	{
+		this(sherlockFragmentActivity, layoutId, -1, -1);
+	}
+
+	public HikeActionMode(SherlockFragmentActivity sherlockFragmentActivity, int title, int save, int layoutId)
+	{
+		this.sherlockFragmentActivity = sherlockFragmentActivity;
+		this.layoutId = layoutId;
+		this.title = title;
+		this.save = save;
+	}
+
+	public void setListener(ActionModeListener listener)
+	{
+		this.listener = listener;
+	}
+
+	protected void startActionMode()
+	{
+		sherlockFragmentActivity.startActionMode(this);
+	}
+
+	@Override
+	public boolean onCreateActionMode(ActionMode mode, Menu menu)
+	{
+		this.actionMode = mode;
+		mode.setCustomView(LayoutInflater.from(sherlockFragmentActivity).inflate(layoutId, null));
+		return true;
+	}
+
+	@Override
+	public boolean onPrepareActionMode(ActionMode mode, Menu menu)
+	{
+		initView();
+		return true;
+	}
+
+	@Override
+	public boolean onActionItemClicked(ActionMode mode, MenuItem item)
+	{
+		return false;
+	}
+
+	@Override
+	public void onDestroyActionMode(ActionMode mode)
+	{
+		this.actionMode = null;
+		if (listener != null)
+		{
+			listener.actionModeDestroyed(id);
+		}
+		actionBarDestroyed();
+	}
+
+	public void showActionMode(int id)
+	{
+		showActionMode(id, layoutId);
+	}
+
+	public void showActionMode(int id, int layoutId)
+	{
+		this.id = id;
+	}
+
+	private void setActionBarText()
+	{
+		if (layoutId == DEFAULT_LAYOUT)
+		{
+			setText(R.id.title, title);
+			setText(R.id.save, save);
+
+		}
+	}
+
+	/**
+	 * Override this function in case you have different custom xml
+	 */
+	protected void initView()
+	{
+		setActionBarText();
+	}
+
+	private void setText(int viewId, int textId)
+	{
+		if (textId != -1)
+		{
+			TextView tv = (TextView) actionMode.getCustomView().findViewById(viewId);
+			tv.setText(textId);
+		}
+	}
+
+	@Override
+	public void onClick(View v)
+	{
+		if (v.getId() == R.id.save)
+		{
+			doneClicked();
+		}
+	}
+
+	protected void actionBarDestroyed()
+	{
+	}
+
+	protected void doneClicked()
+	{
+		if (listener != null)
+		{
+			listener.doneClicked(id);
+		}
+	}
+}
