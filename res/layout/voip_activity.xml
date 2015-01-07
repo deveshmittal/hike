@@ -3,43 +3,29 @@
 	android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black">
-    
-	    <RelativeLayout
-	        android:id="@+id/voip_header"
-	        android:background="@color/blue_hike"
-	        android:layout_width="match_parent"
-	        android:layout_height="120dp"
-	        android:paddingLeft="24dp"
-	        android:paddingRight="24dp">
 
 			<RelativeLayout
-				android:id="@+id/contact_container"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_centerVertical="true" >
-
-				<com.bsb.hike.ui.utils.RecyclingImageView
-		           android:id="@+id/hike_logo"
-		           android:layout_width="wrap_content"
-		           android:layout_height="wrap_content"
-		           android:layout_marginRight="10dp"
-		           android:src="@drawable/ic_logo_voip" />
+				android:id="@+id/voip_header"
+				android:layout_width="match_parent"
+				android:layout_height="120dp"
+				android:background="@color/blue_hike"
+				android:gravity="center"
+				android:paddingLeft="24dp"
+	        	android:paddingRight="24dp" >
 
 				<com.bsb.hike.view.CustomFontTextView
-				     android:id="@+id/connection_status"
+				     android:id="@+id/hike_call"
 				     android:layout_width="wrap_content"
 				     android:layout_height="wrap_content"
-				     android:layout_toRightOf="@id/hike_logo"
 				     android:textColor="@color/white"
-				     android:text="@string/voip_call"
 				     android:textSize="14dp"/>
 
 			  	<com.bsb.hike.view.CustomFontTextView
 					android:id="@+id/contact_name"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:layout_marginTop="10dp"
-					android:layout_below="@id/hike_logo"
+					android:layout_marginTop="6dp"
+					android:layout_below="@id/hike_call"
 					android:maxLines="1"
 					android:singleLine="true"
 					android:ellipsize="end"
@@ -53,38 +39,35 @@
 				     android:layout_width="wrap_content"
 				     android:layout_height="wrap_content"
 				     android:layout_below="@id/contact_name"
-				     android:layout_marginTop="7dp"
+				     android:layout_marginTop="3dp"
 				     android:includeFontPadding="false"
 				     android:textColor="@color/white"
-				     android:visibility="gone"
+				     android:visibility="invisible"
 				     android:textSize="14dp" />
+				
+				<Chronometer
+					android:id="@+id/call_duration"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:textSize="14dp"
+					android:layout_marginLeft="10dp"
+					android:paddingBottom="2dp"
+					android:layout_alignParentRight="true"
+					android:layout_alignBottom="@id/contact_msisdn"
+					android:textColor="@color/white"
+					android:visibility="gone" />
+
+				  <com.bsb.hike.view.CustomFontTextView
+					android:id="@+id/call_status"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:textSize="14dp"
+					android:text="@string/voip_on_hold"
+					android:layout_marginLeft="10dp"
+					android:layout_alignParentRight="true"
+					android:layout_alignBottom="@id/contact_msisdn"
+					android:textColor="@color/white" />
 	      </RelativeLayout>
-
-		  <Chronometer
-			android:id="@+id/call_duration"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textSize="14dp"
-			android:layout_marginLeft="10dp"
-			android:paddingBottom="2dp"
-			android:layout_alignParentRight="true"
-			android:layout_alignBottom="@id/contact_container"
-			android:textColor="@color/white"
-			android:visibility="gone" />
-
-		  <com.bsb.hike.view.CustomFontTextView
-			android:id="@+id/on_hold"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textSize="14dp"
-			android:text="@string/voip_on_hold"
-			android:layout_marginLeft="10dp"
-			android:layout_alignParentRight="true"
-			android:layout_alignBottom="@id/contact_container"
-			android:textColor="@color/white"
-			android:visibility="gone" />
-
-		</RelativeLayout>
 
 	    <com.bsb.hike.ui.utils.RecyclingImageView
 	        android:id="@+id/profile_image"

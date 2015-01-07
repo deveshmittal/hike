@@ -62,6 +62,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.SubMenu;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -550,11 +551,6 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			{
 				getSupportMenuInflater().inflate(R.menu.contact_profile_menu, menu);
 				mMenu = menu;
-				MenuItem callItem = menu.findItem(R.id.call);
-				if (callItem != null)
-				{
-					callItem.setVisible(getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY));
-				}
 				return true;
 			}
 		case GROUP_INFO:
@@ -582,6 +578,8 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 			/*Falling onto contact info intentionally*/
 		case CONTACT_INFO:
 			MenuItem friendItem = menu.findItem(R.id.unfriend);
+			MenuItem overflow = menu.findItem(R.id.overflow_menu);
+			MenuItem callItem = menu.findItem(R.id.call);
 
 			if (friendItem != null)
 			{
@@ -594,6 +592,16 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 					{
 						friendItem.setVisible(false);
 					}
+			}
+
+			if (callItem!=null && !contactInfo.isOnhike())
+			{
+				callItem.setVisible(false);
+			}
+
+			if(overflow!=null && !overflow.getSubMenu().hasVisibleItems())
+			{
+				overflow.setVisible(false);
 			}
 			return true;
 		case GROUP_INFO:
