@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import android.content.Context;
-import android.text.method.HideReturnsTransformationMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -125,6 +124,11 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 				break;
 			}
 		}
+	}
+	
+	public List<OverFlowMenuItem> getOverFlowMenuItems()
+	{
+		return overflowItems;
 	}
 
 }

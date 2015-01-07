@@ -149,16 +149,12 @@ public class HikeActionBar
 	}
 
 	/**
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
-	 * @generated
-	 * @ordered
+	 * Returns the list of overflow menu items held by this ActionBar
+	 * @return
 	 */
-
-	public Set<OverFlowMenuItem> getOverFlowMenuItems()
+	public List<OverFlowMenuItem> getOverFlowMenuItems()
 	{
-		// TODO implement me
-		return null;
+		return overFlowMenuLayout.getOverFlowMenuItems(); 
 	}
 
 	/**
