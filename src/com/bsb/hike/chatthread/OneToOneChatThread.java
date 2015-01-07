@@ -76,8 +76,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	
 	private boolean mBlockOverlay;
 	
-	private boolean mIsOverlayShowing;
-	
 	private static final int CONTACT_ADDED_OR_DELETED = 101;
 	
 	private static final int SHOW_SMS_SYNC_DIALOG = 102;
@@ -100,7 +98,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	public OneToOneChatThread(ChatThreadActivity activity, String msisdn)
 	{
 		super(activity, msisdn);
-		
 	}
 
 	@Override
@@ -253,7 +250,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		if (ContactManager.getInstance().isBlocked(msisdn))
 		{
 			mUserIsBlocked = true;
-			updateOverflowMenuItemString(R.string.block_title, activity.getApplicationContext().getString(R.string.block_title));
 			showBlockOverlay(getConvLabel());
 		}
 		
@@ -905,20 +901,6 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		});
 	}
 
-	private void hideOverlay()
-	{
-		View mOverlayLayout = activity.findViewById(R.id.overlay_layout);
-
-		if (mOverlayLayout.getVisibility() == View.VISIBLE && activity.hasWindowFocus())
-		{
-			Animation fadeOut = AnimationUtils.loadAnimation(activity.getApplicationContext(), android.R.anim.fade_out);
-			mOverlayLayout.setAnimation(fadeOut);
-		}
-
-		mOverlayLayout.setVisibility(View.INVISIBLE);
-		mIsOverlayShowing = false;
-	}
-	
 	/**
 	 * This method is called to remove undelivered messages from the message adapter
 	 * @param convMessage
@@ -1162,20 +1144,16 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 	}
 	
-	/**
-	 * Used for giving block and unblock user pubSubs
-	 */
-	private void onBlockUserclicked()
+	@Override
+	protected String getMsisdnMainUser()
 	{
-		if(mUserIsBlocked)
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, msisdn);
-		}
-		
-		else
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, msisdn);
-		}
+		return msisdn;
+	}
+	
+	@Override
+	protected String getBlockedUserLabel()
+	{
+		return getConvLabel();
 	}
 	
 }

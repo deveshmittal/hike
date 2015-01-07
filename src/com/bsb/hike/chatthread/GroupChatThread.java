@@ -140,11 +140,18 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	@Override
 	public void itemClicked(OverFlowMenuItem item)
 	{
-		if (item.id == R.string.chat_theme)
+		switch (item.id)
 		{
+		case R.string.chat_theme:
 			showThemePicker();
+			break;
+		case R.string.block_title:
+			onBlockUserclicked();
+			break;
+		default:
+			Logger.d(TAG, "Calling super Class' itemClicked");
+			super.itemClicked(item);
 		}
-		super.itemClicked(item);
 	}
 
 	/**
@@ -663,6 +670,18 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			 */
 			groupCountTextView.setText(activity.getResources().getString(R.string.num_people, (numActivePeople + 1)));
 		}
+	}
+
+	@Override
+	protected String getMsisdnMainUser()
+	{
+		return groupConversation.getGroupOwner();
+	}
+	
+	@Override
+	protected String getBlockedUserLabel()
+	{
+		return groupConversation.getGroupParticipantFirstName(groupConversation.getGroupOwner());
 	}
 	
 }

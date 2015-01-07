@@ -90,6 +90,7 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HDialog;
@@ -139,6 +140,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 * #triskaidekaphobia
 	 */
 	protected static final int CLOSE_PHOTO_VIEWER_FRAGMENT = 14;
+	
+	protected static final int BLOCK_UNBLOCK_USER = 15;
 	
 	protected ChatThreadActivity activity;
 
@@ -245,6 +248,9 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		case CLOSE_PHOTO_VIEWER_FRAGMENT:
 			removeFragment(HikeConstants.IMAGE_FRAGMENT_TAG, true);
 			break;
+		case BLOCK_UNBLOCK_USER:
+			blockUnBlockUser((boolean) msg.obj);
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event for msg.what : " + msg.what);
 			break;
@@ -338,7 +344,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 		mActionBar = new HikeActionBar(activity);
 		mConversationDb = HikeConversationsDatabase.getInstance();
-
+		mUserIsBlocked = ContactManager.getInstance().isBlocked(msisdn);
 	}
 
 	/**
@@ -529,7 +535,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			//openProfileScreen();
 			break;
 		case R.id.overlay_layout:
+			/**
+			 * Do nothing. We simply eat this event to avoid chat thread window from catching this
+			 */
+			break;
+		case R.id.overlay_button:
 			onOverlayLayoutClicked();
+			break;
 		default:
 			Logger.e(TAG, "onClick Registered but not added in onClick : " + v.toString());
 			break;
@@ -911,6 +923,13 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected abstract List<ConvMessage> loadMessages();
 
 	protected abstract int getContentView();
+	
+	/**
+	 * This method returns the main msisdn in the present chatThread.
+	 * It can have different implementations in OneToOne, Group and a Bot Chat
+	 * @return
+	 */
+	protected abstract String getMsisdnMainUser();
 
 	/**
 	 * This function is called in UI thread when conversation is fetched from DB
@@ -1354,10 +1373,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			uiHandler.sendEmptyMessage(CLOSE_PHOTO_VIEWER_FRAGMENT);
 			break;
 		case HikePubSub.BLOCK_USER:
-			//blockUser(object);
+			blockUser(object, true);
 			break;
 		case HikePubSub.UNBLOCK_USER:
-			//unBlockUser(object);
+			blockUser(object, false);
 			break;
 		default:
 			Logger.e(TAG, "PubSub Registered But Not used : " + type);
@@ -1996,7 +2015,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	private void showOverlay(boolean blockOverlay, String label, String formatString, String overlayBtnText)
 	{
 		this.blockOverlay = blockOverlay;
-
+		
 		Utils.hideSoftKeyboard(activity.getApplicationContext(), mComposeView);
 
 		View mOverlayLayout = activity.findViewById(R.id.overlay_layout);
@@ -2015,6 +2034,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		TextView message = (TextView) mOverlayLayout.findViewById(R.id.overlay_message);
 		Button overlayBtn = (Button) mOverlayLayout.findViewById(R.id.overlay_button);
 		ImageView overlayImg = (ImageView) mOverlayLayout.findViewById(R.id.overlay_image);
+		
+		overlayBtn.setOnClickListener(this);
 
 		mComposeView.setEnabled(false);
 
@@ -2051,7 +2072,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void showBlockOverlay(String label)
 	{
-		showOverlay(true, label, activity.getApplicationContext().getString(R.string.block_overlay_message), activity.getApplicationContext().getString(R.string.unblock_title));
+		showOverlay(true, label, activity.getString(R.string.block_overlay_message), activity.getString(R.string.unblock_title));
 	}
 	
 	/**
@@ -2068,7 +2089,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	
 	private void onOverlayLayoutClicked()
 	{
-		//TODO : Implement this
+		if(activity.findViewById(R.id.overlay_layout).getVisibility() == View.VISIBLE && mUserIsBlocked)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, getMsisdnMainUser());
+		}
+		
+		//TODO : Add SMS credits 0 case 
 	}
 	
 	/**
@@ -2092,5 +2118,73 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			}
 		}
 	}
+	
+	private void blockUser(Object object, boolean isBlocked)
+	{
+		String mMsisdn = (String) object;
+		
+		/**
+		 * Proceeding only if the blocked user's msisdn is that of the current chat thread
+		 */
+		if(mMsisdn.equals(getMsisdnMainUser()))
+		{
+			sendUIMessage(BLOCK_UNBLOCK_USER, isBlocked);
+		}
+	}
+	
+	protected void hideOverlay()
+	{
+		View mOverlayLayout = activity.findViewById(R.id.overlay_layout);
 
+		if (mOverlayLayout.getVisibility() == View.VISIBLE && activity.hasWindowFocus())
+		{
+			Animation fadeOut = AnimationUtils.loadAnimation(activity.getApplicationContext(), android.R.anim.fade_out);
+			mOverlayLayout.setAnimation(fadeOut);
+		}
+
+		mOverlayLayout.setVisibility(View.INVISIBLE);
+	}
+	
+	/**
+	 * This method is overriden by {@link OneToOneChatThread} and {@link GroupChatThread}
+	 * 
+	 * @return
+	 */
+	protected String getBlockedUserLabel()
+	{
+		return null;
+	}
+	
+	protected void blockUnBlockUser(boolean isBlocked)
+	{
+		mUserIsBlocked = isBlocked;
+
+		if (isBlocked)
+		{
+			Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.MENU_BLOCK);
+			showBlockOverlay(getBlockedUserLabel());
+		}
+
+		else
+		{
+			mComposeView.setEnabled(true);
+			hideOverlay();
+		}
+	}
+	
+	/**
+	 * Used for giving block and unblock user pubSubs
+	 */
+	protected void onBlockUserclicked()
+	{
+		if(mUserIsBlocked)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER, msisdn);
+		}
+		
+		else
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, msisdn);
+		}
+	}
 }
