@@ -593,6 +593,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	{
 		switch (msg.what)
 		{
+		case UPDATE_AVATAR:
+			setAvatar(R.drawable.ic_default_avatar_group);
+			break;
 		default:
 			Logger.d(TAG, "Did not find any matching event in Group ChatThread. Calling super class' handleUIMessage");
 			super.handleUIMessage(msg);
@@ -618,6 +621,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	{
 		super.setupActionBar();
 		
+		setAvatar(R.drawable.ic_default_avatar_group);
+		
 		setLabel(mConversation.getLabel());
 		
 		incrementGroupParticipants(0);
@@ -633,7 +638,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		int numActivePeople = groupConversation.getGroupMemberAliveCount() + morePeopleCount;
 		groupConversation.setGroupMemberAliveCount(numActivePeople);
 
-		TextView groupCountTextView = (TextView) activity.getSupportActionBar().getCustomView().findViewById(R.id.contact_status);
+		TextView groupCountTextView = (TextView) mActionBarView.findViewById(R.id.contact_status);
 
 		if (numActivePeople > 0)
 		{
@@ -642,19 +647,5 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			 */
 			groupCountTextView.setText(activity.getResources().getString(R.string.num_people, (numActivePeople + 1)));
 		}
-	}
-	
-	@Override
-	protected boolean setAvatar()
-	{
-		if (!super.setAvatar())
-		{
-			ImageView avatar = (ImageView) activity.getSupportActionBar().getCustomView().findViewById(R.id.avatar);
-			avatar.setScaleType(ScaleType.CENTER_INSIDE);
-			avatar.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_default_avatar_group));
-			avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
-		}
-
-		return true;
 	}
 }

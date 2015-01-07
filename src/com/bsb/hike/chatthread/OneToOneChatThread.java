@@ -561,7 +561,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	{
 		if (!pair.first)
 		{
-			setAvatar();
+			setAvatar(R.drawable.ic_default_avatar);
 		}
 		// TODO : Add name to actionBar
 		// setLabel(pair.second);
@@ -967,6 +967,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		String tempLabel = mConversation.getLabel();
 		tempLabel = Utils.getFirstName(tempLabel);
 		
+		setAvatar(R.drawable.ic_default_avatar);
+		
 		setLabel(tempLabel);
 		
 		setLastSeenTextBasedOnHikeValue(mConversation.isOnhike());
@@ -996,9 +998,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 */
 	private void setLastSeenText(String text)
 	{
-		final TextView mLastSeenView = (TextView) activity.getSupportActionBar().getCustomView().findViewById(R.id.contact_status);
+		final TextView mLastSeenView = (TextView) mActionBarView.findViewById(R.id.contact_status);
 
-		TextView mLabelView = (TextView) activity.getSupportActionBar().getCustomView().findViewById(R.id.contact_name);
+		TextView mLabelView = (TextView) mActionBarView.findViewById(R.id.contact_name);
 
 		/**
 		 * If the last seen string is empty or null
@@ -1058,20 +1060,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 */
 	private void hideLastSeenText()
 	{
-		activity.getSupportActionBar().getCustomView().findViewById(R.id.contact_status).setVisibility(View.GONE);
+		mActionBarView.findViewById(R.id.contact_status).setVisibility(View.GONE);
 	}
 	
+	/**
+	 * This calls the super class method with it's own defaultResId
+	 */
 	@Override
-	protected boolean setAvatar()
+	protected void setAvatar(int defaultResId)
 	{
-		if(!super.setAvatar())
-		{
-			ImageView avatar = (ImageView) activity.getSupportActionBar().getCustomView().findViewById(R.id.avatar);
-			avatar.setScaleType(ScaleType.CENTER_INSIDE);
-			avatar.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_default_avatar));
-			avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
-		}
-		
-		return true;
+		super.setAvatar(defaultResId);
 	}
 }

@@ -50,6 +50,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
@@ -179,6 +180,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	private GestureDetector mGestureDetector;
 	
 	protected View tipView;
+	
+	protected View mActionBarView;
 
 	protected Handler uiHandler = new Handler()
 	{
@@ -215,9 +218,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case TYPING_CONVERSATION:
 			setTypingText(true, (TypingNotification) msg.obj);
-			break;
-		case UPDATE_AVATAR:
-			setAvatar();
 			break;
 		case FILE_MESSAGE_CREATED:
 			addMessage((ConvMessage) msg.obj);
@@ -634,6 +634,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		if (theme != null && currentTheme != theme)
 		{
 			Logger.i(TAG, "update ui for theme " + theme);
+			
+			System.gc();
 			currentTheme = theme;
 			// messages theme changed, call adapter
 			mAdapter.setChatTheme(theme);
@@ -1700,11 +1702,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	}
 
 	/**
-	 * This method is used to setAvatar for a contact
+	 * This method is used to setAvatar for a contact.
 	 */
-	protected boolean setAvatar()
+	protected void setAvatar(int defaultResId)
 	{
-		ImageView avatar = (ImageView) activity.getSupportActionBar().getCustomView().findViewById(R.id.avatar);
+		ImageView avatar = (ImageView) mActionBarView.findViewById(R.id.avatar);
 		Drawable avatarDrawable = HikeMessengerApp.getLruCache().getIconFromCache(msisdn, true);
 
 		if (avatarDrawable != null)
@@ -1712,10 +1714,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			avatar.setScaleType(ScaleType.FIT_CENTER);
 			avatar.setImageDrawable(avatarDrawable);
 			avatar.setBackgroundDrawable(null);
-			return true;
 		}
-		
-		return false;
+
+		else
+		{
+			avatar.setScaleType(ScaleType.CENTER_INSIDE);
+			avatar.setImageDrawable(activity.getResources().getDrawable(defaultResId));
+			avatar.setBackgroundResource(BitmapUtils.getDefaultAvatarResourceId(msisdn, true));
+		}
+
 	}
 	
 	
@@ -1895,13 +1902,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void setupActionBar()
 	{
-		View actionBarView = mActionBar.setCustomActionBarView(R.layout.chat_thread_action_bar);
+		mActionBarView = mActionBar.setCustomActionBarView(R.layout.chat_thread_action_bar);
 		
-		View backContainer = actionBarView.findViewById(R.id.back);
+		View backContainer = mActionBarView.findViewById(R.id.back);
 		
-		View contactInfoContainer = actionBarView.findViewById(R.id.contact_info);
-		
-		setAvatar();
+		View contactInfoContainer = mActionBarView.findViewById(R.id.contact_info);
 		
 		/**
 		 * Adding click listeners
@@ -1916,7 +1921,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void setLabel(String label)
 	{
-		TextView mLabelTextView = (TextView) activity.getSupportActionBar().getCustomView().findViewById(R.id.contact_name);
+		TextView mLabelTextView = (TextView) mActionBarView.findViewById(R.id.contact_name);
 		
 		mLabelTextView.setText(label);
 	}
