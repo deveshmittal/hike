@@ -1,8 +1,9 @@
 package com.bsb.hike.ui.utils;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
@@ -14,12 +15,13 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.analytics.Event;
+import com.bsb.hike.analytics.AnalyticsConstants;
 import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.ui.HomeActivity;
 import com.bsb.hike.utils.HikeAnalyticsEvent;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
+import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
 import com.haibison.android.lockpattern.LockPatternActivity;
 import com.haibison.android.lockpattern.util.Settings;
@@ -59,11 +61,17 @@ public class LockPattern
 				if (!isReset)
 				{
 					HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STEALTH_FTUE_ENTER_PASS_TIP, null);
-					Map<String, String> metadata = new HashMap<String, String>();
-					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STEALTH_FTUE_DONE);
-					Event e = new Event(metadata);
-					e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-					HAManager.getInstance(activity.getApplicationContext()).record(e);
+					
+					try
+					{
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STEALTH_FTUE_DONE);
+						HAManager.getInstance(activity.getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					}
+					catch(JSONException e)
+					{
+						Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+					}
 				}
 			}
 			else
@@ -87,11 +95,17 @@ public class LockPattern
 			case Activity.RESULT_CANCELED:
 				HikeSharedPreferenceUtil.getInstance(activity).saveData(HikeMessengerApp.STEALTH_MODE, HikeConstants.STEALTH_OFF);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.STEALTH_MODE_TOGGLED, false);
-				Map<String, String> metadata = new HashMap<String, String>();
-				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ENTER_WRONG_STEALTH_MODE);
-				Event e = new Event(metadata);
-				e.setEventAttributes(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK);			
-				HAManager.getInstance(activity.getApplicationContext()).record(e);
+				
+				try
+				{
+					JSONObject metadata = new JSONObject();
+					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.ENTER_WRONG_STEALTH_MODE);
+					HAManager.getInstance(activity.getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				}
+				catch(JSONException e)
+				{
+					Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
+				}
 				break;
 			case LockPatternActivity.RESULT_FAILED:
 				break;
