@@ -106,7 +106,7 @@ public class HAManager
 	{
 		if(!isAnalyticsEnabled)
 			return;
-		recordEvent(type, eventContext, EventPriority.NORMAL, null, AnalyticsConstants.EVENT_TAG_VALUE);
+		recordEvent(type, eventContext, EventPriority.NORMAL, null, AnalyticsConstants.EVENT_TAG_MOB);
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class HAManager
 	{
 		if(!isAnalyticsEnabled)
 			return;
-		recordEvent(type, eventContext, EventPriority.NORMAL, metadata, AnalyticsConstants.EVENT_TAG_VALUE);
+		recordEvent(type, eventContext, EventPriority.NORMAL, metadata, AnalyticsConstants.EVENT_TAG_MOB);
 	}
 
 	/**
@@ -152,6 +152,20 @@ public class HAManager
 		recordEvent(type, eventContext, priority, metadata, tag);
 	}
 
+	/**
+	 * Used to write analytics event to the file
+	 * @param type type of the event
+	 * @param eventContext context of the event
+	 * @param metadata metadata of the event as JSONObject
+	 * @param tag tag value for the event
+	 */
+	public void record(String type, String eventContext, JSONObject metadata, String tag)
+	{
+		if(!isAnalyticsEnabled)
+			return;
+		recordEvent(type, eventContext, EventPriority.NORMAL, metadata, tag);
+	}
+	
 	/**
 	 * Used to write the event onto the text file
 	 * @param type type of the event

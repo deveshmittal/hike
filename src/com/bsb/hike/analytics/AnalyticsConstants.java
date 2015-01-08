@@ -73,5 +73,9 @@ public class AnalyticsConstants
 	
 	public static final String CURRENT_TIME_STAMP = "cts"; 
 	
-	public static final String EVENT_TAG_VALUE = "mob";	
+	public static final String EVENT_TAG_MOB = "mob";
+	
+	public static final String EVENT_TAG_CBS = "cbs";	
+	
+	public static final String DEVICE_DETAILS = "devicedetails";
 }
