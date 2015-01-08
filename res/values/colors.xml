@@ -381,5 +381,10 @@
     <color name="sticker_shop_icon_pressed">#9A33B5E5</color>
     <color name="festive_mode_bg">#D9000D1F</color>
     <color name="festive_popup_divider">#33000000</color>
+    <color name="skip_button_button">#c6c6c7</color>
+    <color name="nux_reward_objective">#26292d</color>
+    <color name="nux_reward_subtext">#87888a</color>
+    <color name="nux_invite_button">#0f8fe1</color>
+    <color name="nux_chat_reward_status">#ffab0a</color>
 </resources>
 	
