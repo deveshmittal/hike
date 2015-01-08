@@ -130,5 +130,18 @@ public class OverFlowMenuLayout implements OnItemClickListener {
 	{
 		return overflowItems;
 	}
+	
+
+	public void notifyDateSetChanged()
+	{
+		if(viewToShow != null)
+		{
+			ListView overFlowListView = (ListView) viewToShow
+				.findViewById(R.id.overflow_menu_list);
+			
+			((ArrayAdapter)overFlowListView.getAdapter()).notifyDataSetChanged();
+		}
+		
+	}
 
 }
