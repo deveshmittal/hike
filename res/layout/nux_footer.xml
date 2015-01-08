@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_footer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:orientation="vertical" >
+
+    <com.bsb.hike.ui.utils.RecyclingImageView
+        android:id="@+id/imgv_nux"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_accept" >
+    </com.bsb.hike.ui.utils.RecyclingImageView>
+
+    <LinearLayout
+        android:id="@+id/ll2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical" >
+
+        <!--
+        <ViewStub
+            android:id="@+id/viewStub_up"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:orientation="horizontal" >
+        </ViewStub>
+        -->
+
+        <include layout="@layout/nux_footer_reward_status" />
+        <!--
+        <ViewStub
+            android:id="@+id/viewStub_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+           >
+        </ViewStub>
+        -->
+
+        <include layout="@layout/nux_footer_buttons" />
+    </LinearLayout>
+
+</LinearLayout>
