@@ -2106,17 +2106,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void updateOverflowMenuItemString(int itemId, String newTitle)
 	{
 		List<OverFlowMenuItem> mItems = mActionBar.getOverFlowMenuItems();
-		
-		Iterator<OverFlowMenuItem> iterator = mItems.iterator();
-		
-		while(iterator.hasNext())
+
+		for (OverFlowMenuItem overFlowMenuItem : mItems)
 		{
-			if(iterator.next().id == itemId)
-			{
-				iterator.next().text = newTitle;
+			if (overFlowMenuItem.id == itemId)
+			{	
+				overFlowMenuItem.text = newTitle;
+				mActionBar.overFlowMenuLayout.notifyDateSetChanged();
 				break;
 			}
 		}
+
 	}
 	
 	private void blockUser(Object object, boolean isBlocked)
@@ -2155,6 +2155,10 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		return null;
 	}
 	
+	/**
+	 * This runs only on the UI Thread
+	 * @param isBlocked
+	 */
 	protected void blockUnBlockUser(boolean isBlocked)
 	{
 		mUserIsBlocked = isBlocked;
@@ -2163,12 +2167,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.MENU_BLOCK);
 			showBlockOverlay(getBlockedUserLabel());
+			updateOverflowMenuItemString(R.string.block_title, activity.getString(R.string.unblock_title));
 		}
 
 		else
 		{
 			mComposeView.setEnabled(true);
 			hideOverlay();
+			updateOverflowMenuItemString(R.string.block_title, activity.getString(R.string.block_title));
 		}
 	}
 	
