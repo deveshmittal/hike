@@ -1361,6 +1361,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			break;
 		case HikePubSub.STICKER_DOWNLOADED:
 			uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+			break;
 		case HikePubSub.MESSAGE_FAILED:
 			onMessageFailed(object);
 			break;
