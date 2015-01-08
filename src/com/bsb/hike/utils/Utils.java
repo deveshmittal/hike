@@ -758,18 +758,14 @@ public class Utils
 		return highlight;
 	}
 
-	public static JSONObject getDeviceDetails(Context context)
+	public static void getDeviceDetails(Context context)
 	{
 		try
 		{
-			// {"t": "le", "d"{"tag":"cbs", "device_id":
-			// "54330bc905bcf18a","_os": "DDD","_os_version": "EEE","_device":
-			// "FFF","_resolution": "GGG","_carrier": "HHH", "_app_version" :
-			// "x.x.x"}}
+			JSONObject metadata = new JSONObject();
+			
 			int height;
 			int width;
-			JSONObject object = new JSONObject();
-			JSONObject data = new JSONObject();
 
 			/*
 			 * Doing this to avoid the ClassCastException when the context is sent from the BroadcastReceiver. As it is, we don't need to send the resolution from the
@@ -780,7 +776,7 @@ public class Utils
 				height = ((Activity) context).getWindowManager().getDefaultDisplay().getHeight();
 				width = ((Activity) context).getWindowManager().getDefaultDisplay().getWidth();
 				String resolution = height + "x" + width;
-				data.put(HikeConstants.LogEvent.RESOLUTION, resolution);
+				metadata.put(HikeConstants.LogEvent.RESOLUTION, resolution);
 			}
 			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
@@ -792,12 +788,10 @@ public class Utils
 			}
 			catch (NoSuchAlgorithmException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			catch (UnsupportedEncodingException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			String os = "Android";
@@ -805,38 +799,30 @@ public class Utils
 			String device = Build.MANUFACTURER + " " + Build.MODEL;
 			String appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
 
-			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			Map<String, String> referralValues = retrieveReferralParams(context);
 			if (!referralValues.isEmpty())
 			{
 				for (Entry<String, String> entry : referralValues.entrySet())
 				{
-					data.put(entry.getKey(), entry.getValue());
+					metadata.put(entry.getKey(), entry.getValue());
 				}
 			}
-			data.put(HikeConstants.LogEvent.TAG, "cbs");
-			data.put(HikeConstants.LogEvent.DEVICE_ID, deviceId);
-			data.put(HikeConstants.LogEvent.OS, os);
-			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
-			data.put(HikeConstants.LogEvent.DEVICE, device);
-			data.put(HikeConstants.LogEvent.CARRIER, carrier);
-			data.put(HikeConstants.LogEvent.APP_VERSION, appVersion);
-			data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-			object.put(HikeConstants.DATA, data);
-
-			return object;
+			metadata.put(HikeConstants.LogEvent.DEVICE_ID, deviceId);
+			metadata.put(HikeConstants.LogEvent.OS, os);
+			metadata.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
+			metadata.put(HikeConstants.LogEvent.DEVICE, device);
+			metadata.put(HikeConstants.LogEvent.CARRIER, carrier);
+			metadata.put(HikeConstants.LogEvent.APP_VERSION, appVersion);
+			HAManager.getInstance(context).record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.DEVICE_DETAILS, metadata, AnalyticsConstants.EVENT_TAG_CBS);
 		}
-		catch (JSONException e)
+		catch(JSONException e)
 		{
-			Logger.e("Utils", "Invalid JSON", e);
-			return null;
+			Logger.d(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 		catch (NameNotFoundException e)
 		{
 			Logger.e("Utils", "Package not found", e);
-			return null;
 		}
-
 	}
 
 	public static JSONObject getDeviceStats(Context context)
@@ -5059,11 +5045,7 @@ public class Utils
 
 	private static void sendDeviceDetails(Context context, boolean upgrade, boolean sendBot)
 	{
-		JSONObject obj = getDeviceDetails(context);
-		if (obj != null)
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-		}
+		getDeviceDetails(context);
 		requestAccountInfo(upgrade, sendBot);
 		sendLocaleToServer(context);
 	}

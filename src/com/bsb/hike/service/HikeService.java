@@ -612,11 +612,7 @@ public class HikeService extends Service
 
 			// Send the device details again which includes the new app
 			// version
-			JSONObject obj = Utils.getDeviceDetails(context);
-			if (obj != null)
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-			}
+			Utils.getDeviceDetails(context);
 
 			Utils.requestAccountInfo(true, false);
 

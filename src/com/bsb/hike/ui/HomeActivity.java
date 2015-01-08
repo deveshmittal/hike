@@ -740,11 +740,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void sendDeviceDetails()
 	{
-		JSONObject obj = Utils.getDeviceDetails(HomeActivity.this);
-		if (obj != null)
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-		}
+		Utils.getDeviceDetails(HomeActivity.this);
 		Utils.requestAccountInfo(false, HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false));
 		Utils.sendLocaleToServer(HomeActivity.this);
 		deviceDetailsSent = true;
