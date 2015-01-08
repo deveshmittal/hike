@@ -80,4 +80,6 @@ public class AnalyticsConstants
 	public static final String DEVICE_DETAILS = "devicedetails";
 	
 	public static final String DEVICE_STATS = "devicestats";
+	
+	public static final String FILE_TRANSFER = "filetransfer";	
 }

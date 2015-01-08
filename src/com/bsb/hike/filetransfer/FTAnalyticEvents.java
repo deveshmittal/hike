@@ -9,9 +9,13 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.utils.Logger;
 
 public class FTAnalyticEvents
@@ -157,7 +161,7 @@ public class FTAnalyticEvents
 	/*
 	 * We send an event every time user transfer file whether it is succeeded or canceled.
 	 */
-	public void sendFTSuccessFailureEvent(String network,  int fileSize, int status)
+	public void sendFTSuccessFailureEvent(String network,  int fileSize, int status, Context context)
 	{
 		try
 		{
@@ -168,18 +172,7 @@ public class FTAnalyticEvents
 			metadata.put(FT_PAUSE_COUNT, this.mPauseCount);
 			metadata.put(HikeConstants.FILE_SIZE, fileSize);
 			metadata.put(FT_STATUS, status);
-
-			JSONObject data = new JSONObject();
-			data.put(HikeConstants.C_TIME_STAMP, System.currentTimeMillis());
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LogEvent.FILE_TRANSFER_STATUS);
-
-			JSONObject object = new JSONObject();
-			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
-			object.put(HikeConstants.DATA, data);
-
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+			HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.FILE_TRANSFER, metadata, HikeConstants.LogEvent.FILE_TRANSFER_STATUS);			
 		}
 		catch (JSONException e)
 		{
