@@ -1278,7 +1278,9 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="voip_missed_call_outgoing">%1$s missed your call.</string>
     <string name="voip_missed_call_incoming">You missed a call.</string>
     <string name="voip_call_chat">Hike Call</string>
-    <string name="voip_call">HIKE CALL</string>
+    <string name="voip_call">call</string>
     <string name="voip_call_ended">CALL ENDED</string>
     <string name="voip_on_hold">ON HOLD</string>
+    <string name="voip_incoming">...INCOMING</string>
+    <string name="voip_outgoing">...RINGING</string>
 </resources>

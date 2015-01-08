@@ -37,7 +37,17 @@ public class VoIPDataPacket {
 		CURRENT_BITRATE (17),
 		REQUEST_BITRATE (18),
 		PACKET_LOSS_BIT_ARRAY (19),	// Used in the iOS app
-		CELLULAR_INCOMING_CALL (20);
+		CELLULAR_INCOMING_CALL (20),
+		COMM_UDP_SYN_PRIVATE (21),
+		COMM_UDP_SYN_PUBLIC (22),
+		COMM_UDP_SYN_RELAY (23),
+		COMM_UDP_SYNACK_PRIVATE (24),
+		COMM_UDP_SYNACK_PUBLIC (25),
+		COMM_UDP_SYNACK_RELAY (26),
+		COMM_UDP_ACK_PRIVATE (27),
+		COMM_UDP_ACK_PUBLIC (28),
+		COMM_UDP_ACK_RELAY (29)
+		;
 		
 		private final int value;
 		
@@ -93,6 +103,24 @@ public class VoIPDataPacket {
 				return PACKET_LOSS_BIT_ARRAY;
 			case 20:
 				return CELLULAR_INCOMING_CALL;
+			case 21:
+				return COMM_UDP_SYN_PRIVATE;
+			case 22:
+				return COMM_UDP_SYN_PUBLIC;
+			case 23:
+				return COMM_UDP_SYN_RELAY;
+			case 24:
+				return COMM_UDP_SYNACK_PRIVATE;
+			case 25:
+				return COMM_UDP_SYNACK_PUBLIC;
+			case 26:
+				return COMM_UDP_SYNACK_RELAY;
+			case 27:
+				return COMM_UDP_ACK_PRIVATE;
+			case 28:
+				return COMM_UDP_ACK_PUBLIC;
+			case 29:
+				return COMM_UDP_ACK_RELAY;
 			default:
 				return UPDATE;
 			}

@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
     android:installLocation="auto"
-    android:versionCode="925"
-    android:versionName="3.6.0" >
+    android:versionCode="927"
+    android:versionName="3.6.0.voip.0106" >
 
     <uses-sdk
         android:minSdkVersion="9"

@@ -17,7 +17,7 @@ public class GlowPadViewWrapper extends GlowPadView implements GlowPadView.OnTri
 
 	private String TAG = "VoIPGlowPad";
 
-	private final long PING_REPEAT_DELAY = 1100;
+	private final long PING_REPEAT_DELAY = 1500;
 
 	private boolean pingAutoRepeat = true;
 

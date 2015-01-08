@@ -128,6 +128,18 @@ public class VoIPUtils {
     	Logger.d(VoIPConstants.TAG, "Adding message to chat thread. Message: " + messageType + ", Duration: " + duration);
     	HikeConversationsDatabase mConversationDb = HikeConversationsDatabase.getInstance();
     	Conversation mConversation = mConversationDb.getConversation(clientPartner.getPhoneNumber(), HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, Utils.isGroupConversation(clientPartner.getPhoneNumber()));	// TODO: possible crash here
+    	/*
+    	 * Caused by: java.lang.IllegalArgumentException: the bind value at index 1 is null
+	at android.database.sqlite.SQLiteProgram.bindString(SQLiteProgram.java:164)
+	at android.database.sqlite.SQLiteProgram.bindAllArgsAsStrings(SQLiteProgram.java:200)
+	at android.database.sqlite.SQLiteDirectCursorDriver.query(SQLiteDirectCursorDriver.java:47)
+	at android.database.sqlite.SQLiteDatabase.rawQueryWithFactory(SQLiteDatabase.java:1316)
+	at android.database.sqlite.SQLiteDatabase.queryWithFactory(SQLiteDatabase.java:1163)
+	at android.database.sqlite.SQLiteDatabase.query(SQLiteDatabase.java:1034)
+	at android.database.sqlite.SQLiteDatabase.query(SQLiteDatabase.java:1202)
+	at com.bsb.hike.db.HikeConversationsDatabase.getConversation(HikeConversationsDatabase.java:2079)
+	at com.bsb.hike.voip.VoIPUtils.addMessageToChatThread(VoIPUtils.java:130)
+    	 */
     	long timestamp = System.currentTimeMillis() / 1000;
 
 		JSONObject jsonObject = new JSONObject();

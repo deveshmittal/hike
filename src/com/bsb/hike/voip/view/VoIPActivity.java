@@ -7,12 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
-import android.media.Ringtone;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -21,8 +21,9 @@ import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
-import android.os.Vibrator;
-import android.view.KeyEvent;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ImageSpan;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -39,11 +40,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.R;
-import com.bsb.hike.R.dimen;
-import com.bsb.hike.R.drawable;
-import com.bsb.hike.R.id;
-import com.bsb.hike.R.layout;
-import com.bsb.hike.R.string;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.smartImageLoader.VoipProfilePicImageLoader;
@@ -54,18 +50,16 @@ import com.bsb.hike.voip.VoIPClient;
 import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
 import com.bsb.hike.voip.VoIPService.LocalBinder;
-import com.fima.glowpadview.GlowPadView;
 
 public class VoIPActivity extends Activity implements CallActions
 {
 
 	static final int PROXIMITY_SCREEN_OFF_WAKELOCK = 32;
-	public static boolean isRunning = false;
+//	public static boolean isRunning = false;
 
 	private VoIPService voipService;
 	// private VoIPClient clientSelf = new VoIPClient(), clientPartner = new VoIPClient();
 	private boolean isBound = false;
-	private boolean hold, mute, speaker;
 	private final Messenger mMessenger = new Messenger(new IncomingHandler());
 	private int initialAudioMode, initialRingerMode;
 	private boolean initialSpeakerMode;
@@ -92,7 +86,14 @@ public class VoIPActivity extends Activity implements CallActions
 	private CallActionsView callActionsView;
 	private Chronometer callDuration;
 
+	private ImageButton holdButton, muteButton, speakerButton;
+
 	private boolean isCallActive;
+
+	private enum CallStatus
+	{
+		OUTGOING_RINGING, INCOMING_CALL, ON_HOLD, ACTIVE, ENDED
+	}
 
 	@SuppressLint("HandlerLeak") class IncomingHandler extends Handler {
 
@@ -110,7 +111,7 @@ public class VoIPActivity extends Activity implements CallActions
 			case MSG_AUDIO_START:
 				isCallActive = true;
 				voipService.startChrono();
-				startCallDuration();
+				showCallStatus(CallStatus.ACTIVE);
 				activateActiveCallButtons();
 				break;
 			case MSG_ENCRYPTION_INITIALIZED:
@@ -199,7 +200,11 @@ public class VoIPActivity extends Activity implements CallActions
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-		
+
+		muteButton = (ImageButton)findViewById(R.id.mute_btn);
+		holdButton = (ImageButton)findViewById(R.id.hold_btn);
+		speakerButton = (ImageButton)findViewById(R.id.speaker_btn);
+
 		Logger.d(VoIPConstants.TAG, "Binding to service..");
 		// Calling start service as well so an activity unbind doesn't cause the service to stop
 		startService(new Intent(getApplicationContext(), VoIPService.class));
@@ -213,7 +218,7 @@ public class VoIPActivity extends Activity implements CallActions
 
 		saveCurrentAudioSettings();
 		acquireWakeLock();
-		isRunning = true;
+//		isRunning = true;
 	}
 	
 	@Override
@@ -239,7 +244,7 @@ public class VoIPActivity extends Activity implements CallActions
 			Logger.d(VoIPConstants.TAG, "unbindService IllegalArgumentException: " + e.toString());
 		}
 		
-		isRunning = false;
+//		isRunning = false;
 
 		if(callActionsView!=null)
 		{
@@ -328,12 +333,20 @@ public class VoIPActivity extends Activity implements CallActions
 		voipService.setMessenger(mMessenger);
 		
 		VoIPClient clientPartner = voipService.getPartnerClient();
-		if (clientPartner.isInitiator())
+		if(voipService.isAudioRunning())
 		{
+			// Active Call
+			isCallActive = true;
+			setupActiveCallLayout();
+		}
+		else if (clientPartner.isInitiator())
+		{
+			// Incoming call
 			setupCalleeLayout();
 		}
 		else
 		{
+			// Outgoing call
 			setupCallerLayout();
 		}
 	}
@@ -351,9 +364,9 @@ public class VoIPActivity extends Activity implements CallActions
 		restoreAudioSettings();
 		releaseWakeLock();
 
-		isRunning = false;
+//		isRunning = false;
 
-		showCallEnded();
+		showCallStatus(CallStatus.ENDED);
 
 		if(callDuration!=null)
 		{
@@ -457,24 +470,42 @@ public class VoIPActivity extends Activity implements CallActions
 		}
 	};
 	
-	protected boolean startAnimPlayed = false;
-	private Ringtone r;
-	private boolean isPlaying;
-	private Vibrator vibrator;
-	private boolean isVibrating;
-
 	private void setupCallerLayout()
 	{
+		showHikeCallText();
 		setAvatar();
 		setContactDetails();
-		showActiveCallLayout();
+		showActiveCallButtons();
+		showCallStatus(CallStatus.OUTGOING_RINGING);
 	}
 
 	private void setupCalleeLayout()
 	{
+		showHikeCallText();
 		setAvatar();
 		setContactDetails();
 		showCallActionsView();
+		showCallStatus(CallStatus.INCOMING_CALL);
+	}
+
+	private void setupActiveCallLayout()
+	{
+		showHikeCallText();
+		setAvatar();
+		setContactDetails();
+		showActiveCallButtons();
+
+		// Get hold status from service if activity was destroyed
+		if(voipService.getHold())
+		{
+			showCallStatus(CallStatus.ON_HOLD);
+		}
+		else
+		{
+			showCallStatus(CallStatus.ACTIVE);
+		}
+
+		activateActiveCallButtons();
 	}
 
 	@Override
@@ -483,7 +514,7 @@ public class VoIPActivity extends Activity implements CallActions
 		Logger.d(VoIPConstants.TAG, "Accepted call, starting audio...");
 		voipService.acceptIncomingCall();
 		callActionsView.setVisibility(View.GONE);
-		showActiveCallLayout();
+		showActiveCallButtons();
 	}
 
 	@Override
@@ -493,28 +524,47 @@ public class VoIPActivity extends Activity implements CallActions
 		voipService.rejectIncomingCall();
 	}
 
-	private void showActiveCallLayout()
+	private void showHikeCallText()
+	{
+		TextView textView  = (TextView) findViewById(R.id.hike_call); 
+		SpannableString ss = new SpannableString("  " + getString(R.string.voip_call)); 
+		Drawable logo = getResources().getDrawable(R.drawable.ic_logo_voip); 
+		logo.setBounds(0, 0, logo.getIntrinsicWidth(), logo.getIntrinsicHeight());
+		ImageSpan span = new ImageSpan(logo, ImageSpan.ALIGN_BASELINE); 
+		ss.setSpan(span, 0, 1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE); 
+		textView.setText(ss);
+	}
+
+	private void showActiveCallButtons()
+	{
+		animateActiveCallButtons();
+
+		// Get initial setting from service
+		muteButton.setSelected(voipService.getMute());
+		holdButton.setSelected(voipService.getHold());
+		speakerButton.setSelected(voipService.getSpeaker());
+
+		setupActiveCallButtonActions();
+	}
+
+	private void animateActiveCallButtons()
 	{
 		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
-		anim.setDuration(1000);
+		anim.setDuration(500);
 
+		View hangupButton = findViewById(R.id.hang_up_btn);
 		findViewById(R.id.active_call_group).setVisibility(View.VISIBLE);
-		findViewById(R.id.hang_up_btn).setVisibility(View.VISIBLE);
+		hangupButton.setVisibility(View.VISIBLE);
 
-		findViewById(R.id.hang_up_btn).startAnimation(anim);
-		findViewById(R.id.mute_btn).startAnimation(anim);
-		findViewById(R.id.hold_btn).startAnimation(anim);
-		findViewById(R.id.speaker_btn).startAnimation(anim);
-		
-		setupActiveCallButtonActions();		
+		muteButton.startAnimation(anim);
+		holdButton.startAnimation(anim);
+		speakerButton.startAnimation(anim);
+		hangupButton.startAnimation(anim);
 	}
 
 	private void activateActiveCallButtons()
 	{
-		ImageView muteButton = (ImageView)findViewById(R.id.mute_btn);
 		muteButton.setImageResource(R.drawable.voip_mute_btn_selector);
-
-		ImageView holdButton = (ImageView)findViewById(R.id.hold_btn);
 		holdButton.setImageResource(R.drawable.voip_hold_btn_selector);
 	}
 
@@ -529,7 +579,6 @@ public class VoIPActivity extends Activity implements CallActions
 			}
 		});
 
-		final ImageButton muteButton = (ImageButton) findViewById(R.id.mute_btn);
 		muteButton.setOnClickListener(new OnClickListener() 
 		{
 			@Override
@@ -537,29 +586,24 @@ public class VoIPActivity extends Activity implements CallActions
 			{
 				if(isCallActive)
 				{
-					mute = !mute;
-					muteButton.setSelected(mute);
-					voipService.setMute(mute);
+					boolean newMute = !voipService.getMute();
+					muteButton.setSelected(newMute);
+					voipService.setMute(newMute);
 				}
 			}
 		});
 
-		final ImageButton speakerButton = (ImageButton) findViewById(R.id.speaker_btn);
 		speakerButton.setOnClickListener(new OnClickListener() 
 		{
 			@Override
 			public void onClick(View v) 
 			{				
-				speaker = !speaker;
-				speakerButton.setSelected(speaker);
-				AudioManager audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-				audiomanager.setSpeakerphoneOn(speaker);
+				boolean newSpeaker = !voipService.getSpeaker();
+				speakerButton.setSelected(newSpeaker);
+				voipService.setSpeaker(newSpeaker);
 			}
 		});
 
-		final View onHoldView = findViewById(R.id.on_hold);
-
-		final ImageButton holdButton = (ImageButton) findViewById(R.id.hold_btn);
 		holdButton.setOnClickListener(new OnClickListener() 
 		{
 			@Override
@@ -567,40 +611,65 @@ public class VoIPActivity extends Activity implements CallActions
 			{
 				if(isCallActive)
 				{
-					hold = !hold;
-					holdButton.setSelected(hold);
-					voipService.setHold(hold);
-					if(hold)
+					boolean newHold = !voipService.getHold();
+					holdButton.setSelected(newHold);
+					voipService.setHold(newHold);
+					if(newHold)
 					{
-						onHoldView.setVisibility(View.VISIBLE);
-						callDuration.setVisibility(View.GONE);
+						showCallStatus(CallStatus.ON_HOLD);
 					}
 					else
 					{
-						onHoldView.setVisibility(View.GONE);
-						callDuration.setVisibility(View.VISIBLE);
+						showCallStatus(CallStatus.ACTIVE);
 					}
 				}
 			}
 		});
 	}
+
+	private void showCallStatus(CallStatus status)
+	{
+		TextView callStatusView = (TextView)findViewById(R.id.call_status);
+		Chronometer callDurationView = (Chronometer) findViewById(R.id.call_duration);
+
+		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
+		anim.setDuration(1000);
+
+		switch(status)
+		{
+			case OUTGOING_RINGING:	callStatusView.startAnimation(anim);
+									callStatusView.setText(getString(R.string.voip_outgoing));
+									break;
+
+			case INCOMING_CALL:		callStatusView.startAnimation(anim);
+									callStatusView.setText(getString(R.string.voip_incoming));
+							    	break;
+
+			case ACTIVE: 			startCallDuration();
+									callStatusView.setVisibility(View.GONE);
+									callDurationView.setVisibility(View.VISIBLE);
+									break;
+
+			case ON_HOLD:			callDurationView.setVisibility(View.GONE);
+									callStatusView.setVisibility(View.VISIBLE);
+									callStatusView.startAnimation(anim);
+									callStatusView.setText(getString(R.string.voip_on_hold));
+									break;
+
+			case ENDED: 			callStatusView.setText(getString(R.string.voip_call_ended));
+									break;
+		}
+	}
 	
 	private void startCallDuration()
 	{	
 		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
-		anim.setDuration(1000);
+		anim.setDuration(500);
 
 		callDuration = (Chronometer)VoIPActivity.this.findViewById(R.id.call_duration);
 		callDuration.startAnimation(anim);
-		callDuration.setVisibility(View.VISIBLE);
-		callDuration.setBase(SystemClock.elapsedRealtime());
+		callDuration.setBase((SystemClock.elapsedRealtime() - 1000*voipService.getCallDuration()));
 		callDuration.start();
-	}
-
-	private void showCallEnded()
-	{
-		final TextView connStatus = (TextView) findViewById(R.id.connection_status);
-		connStatus.setText(getString(R.string.voip_call_ended));
 	}
 
 	public void setAvatar()
@@ -622,6 +691,7 @@ public class VoIPActivity extends Activity implements CallActions
 		TextView contactMsisdnView = (TextView) findViewById(R.id.contact_msisdn);
 
 		VoIPClient clientPartner = voipService.getPartnerClient();
+//		Logger.w(VoIPConstants.TAG, "Partner Msisdn: " + clientPartner.getPhoneNumber());
 		ContactInfo contactInfo = ContactManager.getInstance().getContact(clientPartner.getPhoneNumber());
 		String nameOrMsisdn = contactInfo.getNameOrMsisdn();
 		if(nameOrMsisdn.length() > 16)
