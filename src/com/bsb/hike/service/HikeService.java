@@ -726,11 +726,7 @@ public class HikeService extends Service
 		@Override
 		public void run()
 		{
-			JSONObject obj = Utils.getDeviceStats(getApplicationContext());
-			if (obj != null)
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-			}
+			Utils.getDeviceStats(getApplicationContext());
 			scheduleNextUserStatsSending();
 		}
 	};

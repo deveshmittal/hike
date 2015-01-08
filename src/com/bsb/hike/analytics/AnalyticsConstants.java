@@ -78,4 +78,6 @@ public class AnalyticsConstants
 	public static final String EVENT_TAG_CBS = "cbs";	
 	
 	public static final String DEVICE_DETAILS = "devicedetails";
+	
+	public static final String DEVICE_STATS = "devicestats";
 }

@@ -825,43 +825,32 @@ public class Utils
 		}
 	}
 
-	public static JSONObject getDeviceStats(Context context)
+	public static void getDeviceStats(Context context)
 	{
 		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ANALYTICS, 0);
 		Editor editor = prefs.edit();
 		Map<String, ?> keys = prefs.getAll();
 
-		JSONObject data = new JSONObject();
-		JSONObject obj = new JSONObject();
+		JSONObject metadata = new JSONObject();
 
 		try
 		{
-			if (keys.isEmpty())
-			{
-				obj = null;
-			}
-			else
+			if (!keys.isEmpty())
 			{
 				for (String key : keys.keySet())
 				{
 					Logger.d("Utils", "Getting keys: " + key);
-					data.put(key, prefs.getLong(key, 0));
+					metadata.put(key, prefs.getLong(key, 0));
 					editor.remove(key);
 				}
 				editor.commit();
-				data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
-				data.put(HikeConstants.MESSAGE_ID, Long.toString(System.currentTimeMillis() / 1000));
-
-				obj.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
-				obj.put(HikeConstants.DATA, data);
+				HAManager.getInstance(context).record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.DEVICE_STATS, metadata);
 			}
 		}
 		catch (JSONException e)
 		{
 			Logger.e("Utils", "Invalid JSON", e);
 		}
-
-		return obj;
 	}
 
 	public static CharSequence addContactName(String firstName, CharSequence message)
