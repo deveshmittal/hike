@@ -621,7 +621,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 		switch (item.getItemId())
 		{
 		case R.id.call:
-			Utils.onCallClicked(ProfileActivity.this, mLocalMSISDN);
+			Utils.onCallClicked(this, mLocalMSISDN);
 			break;
 		case R.id.unfriend:
 			FavoriteType fav = Utils.checkAndUnfriendContact(contactInfo);
@@ -3057,7 +3057,7 @@ public class ProfileActivity extends ChangeProfileImageBaseActivity implements F
 	
 	public void callBtnClicked(View v)
 	{
-		Utils.onCallClicked(ProfileActivity.this, mLocalMSISDN);
+		Utils.onCallClicked(this, mLocalMSISDN);
 	}
 	
 	@Override

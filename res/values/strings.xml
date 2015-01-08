@@ -1283,4 +1283,5 @@ Also share all types of files - docs, songs, movies etc, up to 100MB each ;) htt
     <string name="voip_on_hold">ON HOLD</string>
     <string name="voip_incoming">...INCOMING</string>
     <string name="voip_outgoing">...RINGING</string>
+    <string name="voip_offline_error">Network unavailable. Please try again when you have network connectivity.</string>
 </resources>
