@@ -3,27 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="48dp" >
 
-    <LinearLayout
-        android:id="@+id/close_container"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:background="@drawable/bg_overflow_menu_selector"
-        android:gravity="center_vertical"
-        android:orientation="horizontal" >
-
-        <ImageView
-            android:id="@+id/close_action_mode"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_close_chat_bg_palette" />
-
-    </LinearLayout>
     
-    <View
-        style="@style/ActionBarDivider"
-        android:background="@color/transparent_white_ab"
-        android:layout_toRightOf="@id/close_container" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/title"
@@ -32,10 +12,8 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginBottom="1dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginRight="5dp"
-        android:layout_toRightOf="@id/close_container"
-        android:layout_toLeftOf="@+id/done_container"
+        android:layout_alignParentLeft="true"
         android:ellipsize="end"
         android:text="@string/chat_theme" />
 
@@ -51,12 +29,12 @@
         android:paddingRight="12dp"
         android:orientation="horizontal" >
 
-      <ImageView
-          android:id="@+id/arrow"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:src="@drawable/action_bar_arrow"
-          android:layout_marginRight="8dp" />        
+		<ImageView
+		    android:id="@+id/arrow"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:src="@drawable/action_bar_arrow"
+		    android:layout_marginRight="8dp" />        
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/save"
