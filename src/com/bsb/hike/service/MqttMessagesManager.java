@@ -2169,7 +2169,7 @@ public class MqttMessagesManager
 					i.putExtra("initiator", metadataJSON.getBoolean("initiator"));
 					i.putExtra("callId", metadataJSON.getInt("callId"));
 					context.startService(i);
-					Log.w(VoIPConstants.TAG, "Intent passed to service.");
+//					Log.w(VoIPConstants.TAG, "Intent passed to service.");
 					return;
 				}
 				

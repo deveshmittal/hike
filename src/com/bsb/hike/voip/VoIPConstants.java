@@ -18,7 +18,7 @@ public class VoIPConstants {
 	
 	// Relay and ICE server 
 	public static final String ICEServerName = "relay.hike.in";
-	public static final int ICEServerPort = 9999;
+	public static final int ICEServerPort = 9998;
 
 	/**
 	 * Time (ms) to wait before the client being called replies with its
@@ -42,5 +42,21 @@ public class VoIPConstants {
 	public static final int BITRATE_2G = 12000;
 	public static final int BITRATE_3G = 24000;
 	public static final int BITRATE_WIFI = 48000;
-			
+	
+	/**
+	 * Call quality
+	 */
+	
+	public static enum CallQuality {
+		EXCELLENT,
+		GOOD,
+		FAIR,
+		WEAK
+	}
+	
+	/**
+	 * Track packets received for last X seconds
+	 */
+	public static final int QUALITY_WINDOW = 3;
+	
 }
