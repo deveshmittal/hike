@@ -300,7 +300,10 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		Parcelable superState = savedState.getParcelable(STATE_PARENT);
 		rintoneCharSeq = savedState.getCharSequenceArray(SOUND_PREF_KEY);
 		rintoneValSeq = savedState.getStringArrayList(SOUND_PREF_VALUES);
-		updateRingtoneMapAfterRotation();
+		if(rintoneCharSeq != null)
+		{
+			updateRingtoneMapAfterRotation();
+		}
 		super.onRestoreInstanceState(superState);
 	}
 
