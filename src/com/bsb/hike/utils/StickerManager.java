@@ -191,6 +191,8 @@ public class StickerManager
 
 	public static final String SHOW_STICKER_SHOP_BADGE = "showStickerShopBadge";
 	
+	public static final String STICKER_MESSAGE_TAG = "Sticker";
+	
 	private Map<String, StickerCategory> stickerCategoriesMap;
 	
 	public FilenameFilter stickerFileFilter = new FilenameFilter()

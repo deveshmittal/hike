@@ -99,6 +99,7 @@ import com.bsb.hike.utils.ChatTheme;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
+import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -864,7 +865,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void stickerSelected(Sticker sticker, String sourceOfSticker)
 	{
 		Logger.i(TAG, "sticker clicked " + sticker.getStickerId() + sticker.getCategoryId() + sourceOfSticker);
-		mShareablePopupLayout.dismiss();
+		sendSticker(sticker, sourceOfSticker);
 	}
 
 	@Override
@@ -2192,5 +2193,46 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			HikeMessengerApp.getPubSub().publish(HikePubSub.BLOCK_USER, msisdn);
 		}
+	}
+	
+	/**
+	 * This method is used to construct {@link ConvMessage} with a given sticker and send it.
+	 * 
+	 * @param sticker
+	 * @param categoryIdIfUnkown
+	 * @param source
+	 */
+	private void sendSticker(Sticker sticker, String source)
+	{
+		ConvMessage convMessage = Utils.makeConvMessage(msisdn, StickerManager.STICKER_MESSAGE_TAG, mConversation.isOnhike());
+
+		JSONObject metadata = new JSONObject();
+
+		try
+		{
+			String categoryId;
+			categoryId = sticker.getCategoryId();
+
+			metadata.put(StickerManager.CATEGORY_ID, categoryId);
+
+			metadata.put(StickerManager.STICKER_ID, sticker.getStickerId());
+
+			/**
+			 * Implies, sticker is sent from Recent stickers
+			 */
+			if (!(source.equalsIgnoreCase(StickerManager.FROM_OTHER)))
+			{
+				metadata.put(StickerManager.SEND_SOURCE, source);
+			}
+
+			convMessage.setMetadata(metadata);
+		}
+
+		catch (JSONException e)
+		{
+			Logger.e(TAG, "Invalid JSON for Sending sticker : " + e.toString());
+		}
+
+		sendMessage(convMessage);
 	}
 }
