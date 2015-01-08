@@ -861,7 +861,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity implemen
 				// If the string cannot be parsed
 				try
 				{
-					preference.setTitle(getString(R.string.notificationSoundTitle) + " - " + (newValue.toString()));
+					preference.setTitle(getString(R.string.led_notification) + " - " + (newValue.toString()));
 					if("None".equals(newValue.toString()))
 					{
 						HikeSharedPreferenceUtil.getInstance(HikePreferences.this).saveData(HikeMessengerApp.LED_NOTIFICATION_COLOR_CODE, HikeConstants.LED_NONE_COLOR);
