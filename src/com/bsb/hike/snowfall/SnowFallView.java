@@ -65,6 +65,7 @@ public class SnowFallView extends View
 		Random random = new Random();
 		Interpolator interpolator = new LinearInterpolator();
 
+		// snow_flake_count is number of parachutes
 		snow_flake_count = Math.max(width, height) / 48;
 		coords = new int[snow_flake_count][];
 		drawables.clear();
@@ -80,7 +81,7 @@ public class SnowFallView extends View
 			int startYDisp = (int) (45 * Utils.densityMultiplier);
 			coords[i] = new int[] { random.nextInt(width), -startYDisp };
 			drawables.add(new AnimateDrawable(snow_flake, snow_flake_large, snow_flake_trans, animation));
-			animation.setStartOffset((random.nextInt(6 * height) * i)/20);
+			animation.setStartOffset((random.nextInt(6 * height) * i)/10);
 			animation.setFillBefore(false);
 
 			animation.startNow();
