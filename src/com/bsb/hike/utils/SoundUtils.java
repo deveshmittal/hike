@@ -51,10 +51,7 @@ public class SoundUtils
 		@Override
 		public boolean onError(MediaPlayer mp, int what, int extra)
 		{
-			soundHandler.removeCallbacks(stopSoundRunnable);
-			mediaPlayer.stop();
-		    mediaPlayer.release();
-		    mediaPlayer = null;
+			stopMediaPlayerProperly();
 		    return true;
 		}
 	};
@@ -114,7 +111,7 @@ public class SoundUtils
 		catch (IllegalArgumentException e)
 		{
 			e.printStackTrace();
-			mediaPlayer.release();
+			
 		}
 		catch (IllegalStateException e)
 		{
@@ -134,6 +131,7 @@ public class SoundUtils
 		{
 			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 			Ringtone r = RingtoneManager.getRingtone(context, notification);
+			r.setStreamType(AudioManager.STREAM_NOTIFICATION);
 			r.play();
 		}
 		catch (Exception e)
@@ -180,17 +178,17 @@ public class SoundUtils
 		catch (IllegalArgumentException e)
 		{
 			e.printStackTrace();
-			mediaPlayer.release();
+			stopMediaPlayerProperly();
 		}
 		catch (IllegalStateException e)
 		{
 			e.printStackTrace();
-			mediaPlayer.release();
+			stopMediaPlayerProperly();
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			mediaPlayer.release();
+			stopMediaPlayerProperly();
 		}
 	}
 
@@ -210,5 +208,14 @@ public class SoundUtils
 	{
 		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		return am.isMusicActive();
+	}
+	
+	private static void stopMediaPlayerProperly()
+	{
+		soundHandler.removeCallbacks(stopSoundRunnable);
+		
+		mediaPlayer.stop();
+		mediaPlayer.release();
+		mediaPlayer = null;
 	}
 }
