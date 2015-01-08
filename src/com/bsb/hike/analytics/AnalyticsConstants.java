@@ -82,4 +82,6 @@ public class AnalyticsConstants
 	public static final String DEVICE_STATS = "devicestats";
 	
 	public static final String FILE_TRANSFER = "filetransfer";	
+	
+	public static final String EXIT_FROM_GALLERY = "exitFromGallery"; 
 }

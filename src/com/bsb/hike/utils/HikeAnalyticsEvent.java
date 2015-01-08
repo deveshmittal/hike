@@ -6,9 +6,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 
 public class HikeAnalyticsEvent
 {
@@ -88,24 +92,14 @@ public class HikeAnalyticsEvent
 	/*
 	 * We send an event every time user exists the gallery selection activity
 	 */
-	public static void sendGallerySelectionEvent(int total, int successful)
+	public static void sendGallerySelectionEvent(int total, int successful, Context context)
 	{
 		try
 		{
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.TOTAL_SELECTIONS, total);
 			metadata.put(HikeConstants.SUCCESSFUL_SELECTIONS, successful);
-			
-			JSONObject data = new JSONObject();
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LogEvent.GALLERY_SELECTION);
-			
-			JSONObject object = new JSONObject();
-			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
-			object.put(HikeConstants.DATA, data);
-			
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, object);
+			HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.EXIT_FROM_GALLERY, metadata, HikeConstants.LogEvent.GALLERY_SELECTION);			
 		}
 		catch (JSONException e)
 		{
