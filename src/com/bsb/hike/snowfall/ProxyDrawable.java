@@ -23,17 +23,17 @@ public class ProxyDrawable extends Drawable
 		int temp = random.nextInt(100);
 		if (temp < 33)
 		{
-			size = 11;
+			size = 20;
 			mProxy = targetSmall;
 		}
 		else if (temp < 66)
 		{
-			size = 8;
+			size = 30;
 			mProxy = targetTrans;
 		}
 		else
 		{
-			size = 14;
+			size = 40;
 			mProxy = targetLarge;
 		}
 		size = (int) (size * Utils.densityMultiplier) + 1;
