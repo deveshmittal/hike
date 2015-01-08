@@ -3,8 +3,8 @@ package com.bsb.hike.voip;
 public class VoIPConstants {
 	public static final String TAG = "VoIP";
 	
+	/*
 	// Connection setup constants
-	public static final String COMM_UDP_SYN_ALL = "synall";
 	public static final String COMM_UDP_SYN_PUBLIC = "synpublic";
 	public static final String COMM_UDP_SYN_PRIVATE = "synprivate";
 	public static final String COMM_UDP_SYN_RELAY = "synrelay";
@@ -14,10 +14,11 @@ public class VoIPConstants {
 	public static final String COMM_UDP_ACK_PRIVATE = "ackprivate";
 	public static final String COMM_UDP_ACK_PUBLIC = "ackpublic";
 	public static final String COMM_UDP_ACK_RELAY = "ar";
-
+	*/
+	
 	// Relay and ICE server 
 	public static final String ICEServerName = "relay.hike.in";
-	public static final int ICEServerPort = 9999;
+	public static final int ICEServerPort = 9998;
 
 	/**
 	 * Time (ms) to wait before the client being called replies with its
@@ -38,8 +39,24 @@ public class VoIPConstants {
 	public static final String PUT_CALL_ON_HOLD = "hold";
 	
 	// Default bitrates
-	public static final int BITRATE_2G = 8000;
+	public static final int BITRATE_2G = 12000;
 	public static final int BITRATE_3G = 24000;
-	public static final int BITRATE_WIFI = 24000;
-			
+	public static final int BITRATE_WIFI = 48000;
+	
+	/**
+	 * Call quality
+	 */
+	
+	public static enum CallQuality {
+		EXCELLENT,
+		GOOD,
+		FAIR,
+		WEAK
+	}
+	
+	/**
+	 * Track packets received for last X seconds
+	 */
+	public static final int QUALITY_WINDOW = 3;
+	
 }
