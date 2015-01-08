@@ -56,11 +56,13 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.voip.VoIPClient.ConnectionMethods;
+import com.bsb.hike.voip.VoIPConstants.CallQuality;
 import com.bsb.hike.voip.VoIPDataPacket.PacketType;
 import com.bsb.hike.voip.VoIPEncryptor.EncryptionStage;
 import com.bsb.hike.voip.VoIPUtils.ConnectionClass;
 import com.bsb.hike.voip.protobuf.VoIPSerializer;
 import com.bsb.hike.voip.view.VoIPActivity;
+import com.google.android.gcm.GCMBaseIntentService;
 import com.musicg.dsp.Resampler;
 
 public class VoIPService extends Service {
@@ -113,6 +115,11 @@ public class VoIPService extends Service {
 	private boolean resamplerEnabled = false;
 	private Thread senderThread, reconnectingBeepsThread;
 	private Ringtone ringtone;
+
+	// Call quality fields
+	private int qualityCounter = 0;
+	private long lastQualityReset = 0;
+	private CallQuality currentCallQuality = CallQuality.GOOD;
 
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToDecodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
 	private final ConcurrentLinkedQueue<VoIPDataPacket> samplesToEncodeQueue     = new ConcurrentLinkedQueue<VoIPDataPacket>();
@@ -180,7 +187,7 @@ public class VoIPService extends Service {
 		if (action == null || action.isEmpty()) {
 			return returnInt;
 		}
-
+		
 		if (action.equals("setpartnerinfo")) {
 			
 			int partnerCallId = intent.getIntExtra("callId", 0);
@@ -220,6 +227,12 @@ public class VoIPService extends Service {
 				return returnInt;
 			}
 				
+			// Error case: we are receiving a repeat v0 during call setup
+			if (partnerCallId == getCallId() && !partnerReconnecting && clientPartner.isInitiator()) {
+				Logger.w(VoIPConstants.TAG, "Ignoring repeat v0.");
+				return returnInt;
+			}
+			
 			// Check in case the other client is reconnecting to us
 			if (connected && partnerCallId == getCallId() && partnerReconnecting) {
 				Logger.w(VoIPConstants.TAG, "Partner trying to reconnect with us. CallId: " + getCallId());
@@ -439,6 +452,9 @@ public class VoIPService extends Service {
 		if (partnerTimeoutThread != null)
 			partnerTimeoutThread.interrupt();
 
+		if (reconnectingBeepsThread != null)
+			reconnectingBeepsThread.interrupt();
+
 		// Hangup tone
 		tg.startTone(ToneGenerator.TONE_CDMA_PIP);
 		stopMediaPlayer();
@@ -525,7 +541,7 @@ public class VoIPService extends Service {
 			
 			@Override
 			public void run() {
-				while (true) {
+				while (keepRunning) {
 					tg.startTone(ToneGenerator.TONE_PROP_BEEP2);
 					try {
 						Thread.sleep(2000);
@@ -607,6 +623,28 @@ public class VoIPService extends Service {
 					
 					sendPacketsWaitingForAck();
 					showNotification();
+					
+					// Monitor quality of incoming data
+					if (System.currentTimeMillis() - lastQualityReset > VoIPConstants.QUALITY_WINDOW * 1000) {
+						CallQuality newQuality;
+						int idealPacketCount = (AUDIO_SAMPLE_RATE * VoIPConstants.QUALITY_WINDOW) / OpusWrapper.OPUS_FRAME_SIZE; 
+						if (qualityCounter >= idealPacketCount)
+							newQuality = CallQuality.EXCELLENT;
+						else if (qualityCounter >= idealPacketCount - VoIPConstants.QUALITY_WINDOW)
+							newQuality = CallQuality.GOOD;
+						else if (qualityCounter >= idealPacketCount - VoIPConstants.QUALITY_WINDOW)
+							newQuality = CallQuality.FAIR;
+						else 
+							newQuality = CallQuality.WEAK;
+
+						if (newQuality != currentCallQuality) {
+							currentCallQuality = newQuality;
+							sendHandlerMessage(VoIPActivity.MSG_UPDATE_QUALITY);
+						}
+						
+						qualityCounter = 0;
+						lastQualityReset = System.currentTimeMillis();
+					}
 					
 					// Drop packets if getting left behind
 					while (samplesToDecodeQueue.size() > MAX_SAMPLES_BUFFER) {
@@ -1126,6 +1164,7 @@ public class VoIPService extends Service {
 					
 					if (dataPacket == null)
 						continue;
+//					Logger.w(VoIPConstants.TAG, "Received datapacket: " + dataPacket.getType());
 					
 					// ACK tracking
 					if (dataPacket.getType() != PacketType.ACK)
@@ -1218,6 +1257,7 @@ public class VoIPService extends Service {
 						break;
 						
 					case VOICE_PACKET:
+						qualityCounter++;
 						if (dataPacket.isEncrypted()) {
 							byte[] encryptedData = dataPacket.getData();
 							dataPacket.write(encryptor.aesDecrypt(encryptedData));
@@ -1374,6 +1414,7 @@ public class VoIPService extends Service {
 		byte[] packetData = new byte[data.length - 1];
 		System.arraycopy(data, 1, packetData, 0, packetData.length);
 
+//		Logger.w(VoIPConstants.TAG, "Prefix: " + prefix);
 		if (prefix == PP_PROTOCOL_BUFFER) {
 			dp = (VoIPDataPacket) VoIPSerializer.deserialize(packetData);
 		} else {
@@ -1442,42 +1483,36 @@ public class VoIPService extends Service {
 		}
 	}
 	
-	private void exchangeCryptoInfo() {
-		
+	private synchronized void exchangeCryptoInfo() {
+
 		if (cryptoEnabled == false)
 			return;
-		
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				if (encryptionStage == EncryptionStage.STAGE_INITIAL && clientSelf.isInitiator() == true) {
-					// The initiator (caller) generates and sends a public key
-					encryptor.initKeys();
-					VoIPDataPacket dp = new VoIPDataPacket(PacketType.ENCRYPTION_PUBLIC_KEY);
-					dp.write(encryptor.getPublicKey());
-					sendPacket(dp, true);
-					Logger.d(VoIPConstants.TAG, "Sending public key.");
-				}
 
-				if (encryptionStage == EncryptionStage.STAGE_GOT_PUBLIC_KEY && clientSelf.isInitiator() == false) {
-					// Generate and send the AES session key
-					encryptor.initSessionKey();
-					byte[] encryptedSessionKey = encryptor.rsaEncrypt(encryptor.getSessionKey(), encryptor.getPublicKey());
-					VoIPDataPacket dp = new VoIPDataPacket(PacketType.ENCRYPTION_SESSION_KEY);
-					dp.write(encryptedSessionKey);
-					sendPacket(dp, true);
-					Logger.d(VoIPConstants.TAG, "Sending AES key.");
-				}
-				
-				if (encryptionStage == EncryptionStage.STAGE_GOT_SESSION_KEY) {
-					VoIPDataPacket dp = new VoIPDataPacket(PacketType.ENCRYPTION_RECEIVED_SESSION_KEY);
-					sendPacket(dp, true);
-					encryptionStage = EncryptionStage.STAGE_READY;
-					Logger.d(VoIPConstants.TAG, "Encryption ready.");
-				}
-			}
-		}).start();
+		if (encryptionStage == EncryptionStage.STAGE_INITIAL && clientSelf.isInitiator() == true) {
+			// The initiator (caller) generates and sends a public key
+			encryptor.initKeys();
+			VoIPDataPacket dp = new VoIPDataPacket(PacketType.ENCRYPTION_PUBLIC_KEY);
+			dp.write(encryptor.getPublicKey());
+			sendPacket(dp, true);
+			Logger.d(VoIPConstants.TAG, "Sending public key.");
+		}
+
+		if (encryptionStage == EncryptionStage.STAGE_GOT_PUBLIC_KEY && clientSelf.isInitiator() == false) {
+			// Generate and send the AES session key
+			encryptor.initSessionKey();
+			byte[] encryptedSessionKey = encryptor.rsaEncrypt(encryptor.getSessionKey(), encryptor.getPublicKey());
+			VoIPDataPacket dp = new VoIPDataPacket(PacketType.ENCRYPTION_SESSION_KEY);
+			dp.write(encryptedSessionKey);
+			sendPacket(dp, true);
+			Logger.d(VoIPConstants.TAG, "Sending AES key.");
+		}
+
+		if (encryptionStage == EncryptionStage.STAGE_GOT_SESSION_KEY) {
+			VoIPDataPacket dp = new VoIPDataPacket(PacketType.ENCRYPTION_RECEIVED_SESSION_KEY);
+			sendPacket(dp, true);
+			encryptionStage = EncryptionStage.STAGE_READY;
+			Logger.d(VoIPConstants.TAG, "Encryption ready.");
+		}
 	}
 
 	public int adjustBitrate(int delta) {
@@ -1561,6 +1596,10 @@ public class VoIPService extends Service {
 			ringtone = RingtoneManager.getRingtone(getApplicationContext(), notification);
 		ringtone.setStreamType(AudioManager.STREAM_RING);
 		ringtone.play();		
+	}
+	
+	public CallQuality getQuality() {
+		return currentCallQuality;
 	}
 	
 	public void retrieveExternalSocket() {
@@ -1702,7 +1741,7 @@ public class VoIPService extends Service {
 		message.put(HikeConstants.DATA, data);
 		
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, message);
-		Logger.w(VoIPConstants.TAG, "Sent socket information to partner. reconnecting: " + reconnecting);
+		Logger.d(VoIPConstants.TAG, "Sent socket information to partner. Reconnecting: " + reconnecting);
 		socketInfoSent = true;
 		
 	}

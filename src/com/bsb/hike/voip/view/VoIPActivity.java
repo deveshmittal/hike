@@ -49,6 +49,7 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.voip.VoIPClient;
 import com.bsb.hike.voip.VoIPConstants;
 import com.bsb.hike.voip.VoIPService;
+import com.bsb.hike.voip.VoIPConstants.CallQuality;
 import com.bsb.hike.voip.VoIPService.LocalBinder;
 
 public class VoIPActivity extends Activity implements CallActions
@@ -82,6 +83,7 @@ public class VoIPActivity extends Activity implements CallActions
 	public static final int MSG_INCOMING_CALL_DECLINED = 14;
 	public static final int MSG_RECONNECTING = 15;
 	public static final int MSG_RECONNECTED = 16;
+	public static final int MSG_UPDATE_QUALITY = 17;
 
 	private CallActionsView callActionsView;
 	private Chronometer callDuration;
@@ -99,7 +101,7 @@ public class VoIPActivity extends Activity implements CallActions
 
 		@Override
 		public void handleMessage(Message msg) {
-			Logger.d(VoIPConstants.TAG, "VoIPActivity handler received: " + msg.what);
+//			Logger.d(VoIPConstants.TAG, "VoIPActivity handler received: " + msg.what);
 			switch (msg.what) {
 			case MSG_SHUTDOWN_ACTIVITY:
 				Logger.d(VoIPConstants.TAG, "Shutting down..");
@@ -125,11 +127,6 @@ public class VoIPActivity extends Activity implements CallActions
 				break;
 			case MSG_CONNECTION_FAILURE:
 				showMessage("Error: Unable to establish connection.");
-//				if (clientSelf.isInitiator())
-//					VoIPUtils.addMessageToChatThread(VoIPActivity.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0);
-//				else
-//					VoIPUtils.addMessageToChatThread(VoIPActivity.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
-//				voipService.stop();
 				break;
 			case MSG_CURRENT_BITRATE:
 				int bitrate = voipService.getBitrate();
@@ -141,21 +138,9 @@ public class VoIPActivity extends Activity implements CallActions
 				break;
 			case MSG_PARTNER_SOCKET_INFO_TIMEOUT:
 				showMessage("Partner is not responding.");
-
-//				if (clientSelf.isInitiator())
-//					VoIPUtils.addMessageToChatThread(VoIPActivity.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0);
-//				else
-//					VoIPUtils.addMessageToChatThread(VoIPActivity.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
-//
-//				voipService.stop();
 				break;
 			case MSG_PARTNER_ANSWER_TIMEOUT:
 				showMessage("No response.");
-//				if (!clientSelf.isInitiator())
-//					VoIPUtils.addMessageToChatThread(VoIPActivity.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_INCOMING, 0);
-//				else
-//					VoIPUtils.addMessageToChatThread(VoIPActivity.this, clientPartner, HikeConstants.MqttMessageTypes.VOIP_MSG_TYPE_MISSED_CALL_OUTGOING, 0);
-//				voipService.stop();
 				break;
 			case MSG_HANGUP:	// TODO in service
 				break;
@@ -164,6 +149,10 @@ public class VoIPActivity extends Activity implements CallActions
 				break;
 			case MSG_RECONNECTED:
 				showMessage("Reconnected!");
+				break;
+			case MSG_UPDATE_QUALITY:
+				CallQuality quality = voipService.getQuality();
+				showMessage("Current call quality: " + quality);
 				break;
 			default:
 				super.handleMessage(msg);
