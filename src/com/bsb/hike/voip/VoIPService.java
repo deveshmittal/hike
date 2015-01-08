@@ -1430,8 +1430,10 @@ public class VoIPService extends Service {
 	public void setSpeaker(boolean speaker)
 	{
 		this.speaker = speaker;
-		AudioManager audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		audiomanager.setSpeakerphoneOn(speaker);
+		if(audioManager!=null)
+		{
+			audioManager.setSpeakerphoneOn(speaker);
+		}
 	}
 
 	public boolean getSpeaker()
