@@ -48,19 +48,9 @@ public class SnowFallView extends View
 	{
 		if(useConfettiAssets)
 		{
-			snow_flake = context.getResources().getDrawable(R.drawable.rectangle);
-			snow_flake_large = context.getResources().getDrawable(R.drawable.spring);
-			snow_flake_trans = context.getResources().getDrawable(R.drawable.circle);
-			
 			snow_flake = context.getResources().getDrawable(R.drawable.green_parachute);
 			snow_flake_large = context.getResources().getDrawable(R.drawable.safron_parachute);
 			snow_flake_trans = context.getResources().getDrawable(R.drawable.white_parachute);
-		}
-		else
-		{
-			snow_flake = context.getResources().getDrawable(R.drawable.snow_flake);
-			snow_flake_large = context.getResources().getDrawable(R.drawable.snow_flake_large);
-			snow_flake_trans = context.getResources().getDrawable(R.drawable.snow_flake_trans);
 		}
 
 		snow_flake.setBounds(0, 0, snow_flake.getIntrinsicWidth(), snow_flake.getIntrinsicHeight());

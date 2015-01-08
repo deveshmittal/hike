@@ -30,10 +30,6 @@ public class FestivePopup
 
 	public static SnowFallView snowFallView; 
 	
-	//public static final int XMAS_POPUP = 0;
-
-	//public static final int NEW_YEAR_POPUP = 1;
-	
 	public static final int REPUBLIC_DAY_POPUP = 0;
 
 	public static SnowFallView startAndSetSnowFallView(final HomeActivity activity, final int popupType)
@@ -57,14 +53,7 @@ public class FestivePopup
 			{
 				snowFallView = new SnowFallView(activity, true);
 			}
-			/*if(popupType == NEW_YEAR_POPUP)
-			{
-				snowFallView = new SnowFallView(activity, true);
-			}
-			else
-			{
-				snowFallView = new SnowFallView(activity);
-			}*/
+
 			snowFallView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 			snowFallView.setVisibility(View.GONE);
 			layout.addView(snowFallView, 4);
@@ -85,13 +74,6 @@ public class FestivePopup
 				@Override
 				public void run()
 				{
-					// What is diff here??
-					/*if(popupType == XMAS_POPUP)
-					{
-						activity.findViewById(R.id.snowman_footer).setVisibility(View.VISIBLE);
-						addMoveUpAnimation(activity.findViewById(R.id.snowman_footer));
-					}
-*/
 					snowFallView.setVisibility(View.VISIBLE);
 					AlphaAnimation alphaAnim = new AlphaAnimation(0.1f, 1f);
 					AccelerateInterpolator accInterpolator = new AccelerateInterpolator(1f);
@@ -113,11 +95,6 @@ public class FestivePopup
 				@Override
 				public void run()
 				{
-					/*if(popupType == XMAS_POPUP)
-					{
-						activity.findViewById(R.id.snowman_footer).setVisibility(View.VISIBLE);
-						addMoveUpAnimation(activity.findViewById(R.id.snowman_footer));
-					}*/
 					setupFestivePopup(activity, popupType);
 				}
 			}, 2000);
@@ -237,10 +214,8 @@ public class FestivePopup
 
 	public static boolean isPastFestiveDate(int type)
 	{
-		//String xmasDate = "2014-12-25";
-		//String newYearsDate = "2015-01-01";
 		String republicDayDate = "2015-01-26";
-		String festive = republicDayDate;//(type == NEW_YEAR_POPUP) ? newYearsDate : xmasDate;
+		String festive = republicDayDate;
 
 		Date currentDate, festiveDate;
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
