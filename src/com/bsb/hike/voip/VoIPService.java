@@ -625,7 +625,7 @@ public class VoIPService extends Service {
 					showNotification();
 					
 					// Monitor quality of incoming data
-					if (System.currentTimeMillis() - lastQualityReset > VoIPConstants.QUALITY_WINDOW * 1000) {
+					if ((System.currentTimeMillis() - lastQualityReset > VoIPConstants.QUALITY_WINDOW * 1000) && isAudioRunning()) {
 						CallQuality newQuality;
 						int idealPacketCount = (AUDIO_SAMPLE_RATE * VoIPConstants.QUALITY_WINDOW) / OpusWrapper.OPUS_FRAME_SIZE; 
 						if (qualityCounter >= idealPacketCount)

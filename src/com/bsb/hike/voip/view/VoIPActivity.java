@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -36,6 +38,7 @@ import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -152,7 +155,7 @@ public class VoIPActivity extends Activity implements CallActions
 				break;
 			case MSG_UPDATE_QUALITY:
 				CallQuality quality = voipService.getQuality();
-				showMessage("Current call quality: " + quality);
+				showSignalStrength(quality);
 				break;
 			default:
 				super.handleMessage(msg);
@@ -709,5 +712,33 @@ public class VoIPActivity extends Activity implements CallActions
 		
 		callActionsView.setCallActionsListener(this);
 		callActionsView.startPing();
+	}
+
+	private void showSignalStrength(CallQuality quality)
+	{
+		LinearLayout signalContainer = (LinearLayout)findViewById(R.id.signal_container);
+		TextView signalStrengthView = (TextView) findViewById(R.id.signal_strength);
+		GradientDrawable gd = (GradientDrawable)signalContainer.getBackground();
+
+		AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
+		anim.setDuration(600);
+
+		switch(quality)
+		{
+			case WEAK: 			gd.setColor(getResources().getColor(R.color.signal_red));
+					   			signalStrengthView.setText(getString(R.string.voip_signal_weak));
+					   			break;
+			case FAIR:			gd.setColor(getResources().getColor(R.color.signal_yellow));
+						   		signalStrengthView.setText(getString(R.string.voip_signal_fair));
+						   		break;
+			case GOOD:			gd.setColor(getResources().getColor(R.color.signal_good));
+						   		signalStrengthView.setText(getString(R.string.voip_signal_good));
+						   		break;
+			case EXCELLENT: 	gd.setColor(getResources().getColor(R.color.signal_green));
+					   			signalStrengthView.setText(getString(R.string.voip_signal_excellent));
+					   			break;
+		}
+		signalContainer.startAnimation(anim);
+		signalContainer.setVisibility(View.VISIBLE);
 	}
 }
