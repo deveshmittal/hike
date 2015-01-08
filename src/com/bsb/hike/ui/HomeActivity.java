@@ -65,6 +65,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -88,6 +89,7 @@ import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.FestivePopup;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeTip;
+import com.bsb.hike.utils.NUXManager;
 import com.bsb.hike.utils.StickerManager;
 import com.bsb.hike.utils.HikeTip.TipType;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
@@ -177,6 +179,16 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 			return;
 		}
 				
+		if (NUXManager.getInstance(this).getCurrentState() == NUXConstants.NUX_NEW)
+		{
+			if (!NUXManager.getInstance(this).getNuxInviteFriendsPojo().isToggleSkipButton())
+			{
+				NUXManager.getInstance(this).setCurrentState(NUXConstants.NUX_SKIPPED);
+			}
+
+			NUXManager.getInstance(this).startNUX(this);
+			finish();
+		}
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
 		HikeMessengerApp app = (HikeMessengerApp) getApplication();

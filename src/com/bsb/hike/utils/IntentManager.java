@@ -14,6 +14,7 @@ import com.bsb.hike.ui.HikeAuthActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.NUXInviteActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.TimelineActivity;
@@ -226,5 +227,30 @@ public class IntentManager
 		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		appContext.startActivity(i);
+	}
+	
+	public static void openHomeActivity(Context context)
+	{
+		Intent in = new Intent(context, HomeActivity.class);
+		context.startActivity(in);
+	}
+
+	public static Intent openInviteFriends(Context context)
+	{
+		// TODO Auto-generated method stub
+		Intent in = new Intent(context, NUXInviteActivity.class);
+		return in;
+	}
+
+	public static void openSelectFriends(Context context)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	public static void openCustomMessage(Context context)
+	{
+		// TODO Auto-generated method stub
+
 	}
 }

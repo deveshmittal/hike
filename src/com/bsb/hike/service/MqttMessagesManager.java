@@ -31,6 +31,7 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.filetransfer.FileTransferManager;
@@ -1086,6 +1087,12 @@ public class MqttMessagesManager
 		if (showNewGames || showNewRewards)
 		{
 			this.pubSub.publish(HikePubSub.UPDATE_OF_MENU_NOTIFICATION, null);
+		}
+		if (data.optJSONObject(HikeConstants.METADATA) != null)
+		{
+			JSONObject mmobObject = data.optJSONObject(HikeConstants.METADATA);
+			if (mmobObject.optJSONObject(HikeConstants.NUX) != null)
+				NUXManager.getInstance(context).parseNuxPacket(data.getJSONObject(HikeConstants.NUX).toString(), context);
 		}
 	}
 
