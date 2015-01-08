@@ -310,9 +310,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	}
 
 	@Override
-	public void lastSeenFetched(String msisdn, int offline, long lastSeenTime)
+	public void lastSeenFetched(String contMsisdn, int offline, long lastSeenTime)
 	{
-		// TODO : updateLastSeen(msisdn, offline, lastSeenTime);
+		Logger.d(TAG, " Got lastSeen Time for msisdn : " + contMsisdn + " LastSeenTime : " + lastSeenTime );
+		updateLastSeen(contMsisdn, offline, lastSeenTime);
 	}
 
 	@Override
@@ -500,7 +501,8 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			onSMSSyncStart();
 			break;
 		case HikePubSub.LAST_SEEN_TIME_UPDATED:
-			updateLastSeen((ContactInfo) object);
+			ContactInfo contactInfo = (ContactInfo) object;
+			updateLastSeen(contactInfo.getMsisdn(), contactInfo.getOffline(), contactInfo.getLastSeenTime());
 			break;
 		case HikePubSub.SEND_SMS_PREF_TOGGLED:
 			uiHandler.sendEmptyMessage(SEND_SMS_PREF_TOGGLED);
@@ -653,21 +655,18 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	 * Used to update last seen. This is called from the PubSub thread
 	 * @param object
 	 */
-	private void updateLastSeen(ContactInfo contactInfo)
+	private void updateLastSeen(String contMsisdn, int offline, long lastSeenTime)
 	{
 		/**
 		 * Proceeding only if the current chat thread is open and we should show the last seen
 		 */
-		if (msisdn.equals(contactInfo.getMsisdn()) && shouldShowLastSeen())
+		if (msisdn.equals(contMsisdn) && shouldShowLastSeen())
 		{
 			/**
 			 * Fix for case where server and client values are out of sync
 			 */
 			
-			int offLine = contactInfo.getOffline();
-			long lastSeenTime = contactInfo.getLastSeenTime();
-			
-			if(offLine == 1 && lastSeenTime <= 0)
+			if(offline == 1 && lastSeenTime <= 0)
 			{
 				return;
 			}
@@ -675,10 +674,10 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			/**
 			 * Updating mContactInfo object
 			 */
-			mContactInfo.setOffline(offLine);
+			mContactInfo.setOffline(offline);
 			mContactInfo.setLastSeenTime(lastSeenTime);
 			
-			String lastSeenString = Utils.getLastSeenTimeAsString(activity.getApplicationContext(), lastSeenTime, offLine, false, true);
+			String lastSeenString = Utils.getLastSeenTimeAsString(activity.getApplicationContext(), lastSeenTime, offline, false, true);
 			
 			isOnline = mContactInfo.getOffline() == 0;
 			
@@ -722,7 +721,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		}
 		else
 		{
-			//setLastSeenText(lastSeenString);
+			setLastSeenText(lastSeenString);
 		}
 	}
 	
