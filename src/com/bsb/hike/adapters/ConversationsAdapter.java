@@ -667,7 +667,7 @@ public class ConversationsAdapter extends BaseAdapter
 						message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING)
 		{
 			String messageText = null;
-			int imageId = R.drawable.ic_voip_ct_miss;
+			int imageId = R.drawable.ic_voip_conv_miss;
 			if (message.getParticipantInfoState() == ParticipantInfoState.VOIP_CALL_SUMMARY)
 			{
 				boolean initiator = message.getMetadata().isVoipInitiator();
@@ -675,12 +675,12 @@ public class ConversationsAdapter extends BaseAdapter
 				if (initiator)
 				{
 					messageText = context.getString(R.string.voip_call_summary_outgoing);
-					imageId = R.drawable.ic_voip_ct_out; 
+					imageId = R.drawable.ic_voip_conv_out; 
 				}
 				else
 				{
 					messageText = context.getString(R.string.voip_call_summary_incoming);
-					imageId = R.drawable.ic_voip_ct_in;
+					imageId = R.drawable.ic_voip_conv_in;
 				}
 				messageText += String.format(" (%02d:%02d)", (duration / 60), (duration % 60));
 			}
