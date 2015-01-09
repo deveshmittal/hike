@@ -317,8 +317,15 @@ public class VoIPActivity extends Activity implements CallActions
 		}
 		
 		if (action.equals(VoIPConstants.PUT_CALL_ON_HOLD)) {
-			showMessage("Putting call on hold.");
-			voipService.setHold(true);
+			showMessage("Receiving cellular call.");
+			if (VoIPService.isConnected() && voipService.isAudioRunning()) {
+				voipService.setHold(true);
+				showCallStatus(CallStatus.ON_HOLD);
+				holdButton.setSelected(true);
+			} else if (VoIPService.isConnected())
+				voipService.hangUp();
+			else
+				voipService.stop();
 		}
 		
 		// Clear the intent so the activity doesn't process intent again on resume
