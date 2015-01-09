@@ -1128,7 +1128,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	@Override
 	public void itemClicked(OverFlowMenuItem item)
 	{
-		switch(item.id)
+		switch (item.id)
 		{
 		case R.string.block_title:
 			onBlockUserclicked();
@@ -1136,12 +1136,15 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case R.string.view_profile:
 			openProfileScreen();
 			break;
-		default :
+		case R.string.call:
+			onCallClicked();
+			break;
+		default:
 			Logger.d(TAG, "Calling super Class' itemClicked");
 			super.itemClicked(item);
 		}
 	}
-	
+
 	@Override
 	protected String getMsisdnMainUser()
 	{
@@ -1171,6 +1174,14 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		Intent profileIntent = IntentManager.getSingleProfileIntent(activity.getApplicationContext(), mConversation.isOnhike(), msisdn);
 		
 		activity.startActivity(profileIntent);
+	}
+	
+	/**
+	 * On Call button clicked
+	 */
+	private void onCallClicked()
+	{
+		Utils.onCallClicked(activity, msisdn);
 	}
 	
 }

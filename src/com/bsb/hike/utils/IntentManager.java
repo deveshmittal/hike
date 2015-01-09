@@ -324,5 +324,18 @@ public class IntentManager {
 		
 		return intent;
 	}
+	
+	/**
+	 * Used for retrieving the intent to place a call
+	 * 
+	 * @param mMsisdn
+	 * @return
+	 */
+	public static Intent getCallIntent(String mMsisdn)
+	{
+		Intent callIntent = new Intent(Intent.ACTION_CALL);
+		callIntent.setData(Uri.parse("tel:" + mMsisdn));
+		return callIntent;
+	}
 
 }

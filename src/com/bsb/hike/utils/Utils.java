@@ -3263,9 +3263,8 @@ public class Utils
 		Toast.makeText(activity, R.string.shortcut_created, Toast.LENGTH_SHORT).show();
 	}
 
-	public static void onCallClicked(Activity activity, final String mContactNumber)
+	public static void onCallClicked(final Activity activity, final String mContactNumber)
 	{
-		final Activity mActivity = activity;
 		final SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
 		if (!settings.getBoolean(HikeConstants.NO_CALL_ALERT_CHECKED, false))
@@ -3305,10 +3304,9 @@ public class Utils
 				@Override
 				public void onClick(View v)
 				{
-					Utils.logEvent(mActivity, HikeConstants.LogEvent.MENU_CALL);
-					Intent callIntent = new Intent(Intent.ACTION_CALL);
-					callIntent.setData(Uri.parse("tel:" + mContactNumber));
-					mActivity.startActivity(callIntent);
+					Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.MENU_CALL);
+					Intent callIntent = IntentManager.getCallIntent(mContactNumber);
+					activity.startActivity(callIntent);
 					dialog.dismiss();
 				}
 			});
@@ -3327,9 +3325,8 @@ public class Utils
 		}
 		else
 		{
-			Utils.logEvent(activity, HikeConstants.LogEvent.MENU_CALL);
-			Intent callIntent = new Intent(Intent.ACTION_CALL);
-			callIntent.setData(Uri.parse("tel:" + mContactNumber));
+			Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.MENU_CALL);
+			Intent callIntent = IntentManager.getCallIntent(mContactNumber);
 			activity.startActivity(callIntent);
 		}
 	}
