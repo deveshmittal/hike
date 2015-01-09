@@ -28,6 +28,8 @@ import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.R.string;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.models.ConnectedApp;
 
 /**
@@ -261,13 +263,13 @@ public class ConnectedAppsActivity extends HikeAppStateBaseFragmentActivity impl
 
 			try
 			{
-				JSONObject analyticsJSON = new JSONObject();
+				JSONObject metadata = new JSONObject();
 
-				analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_DISCONNECT_APP);
+				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_DISCONNECT_APP);
 
-				analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, disconnAppObj.getTitle());
+				metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, disconnAppObj.getTitle());
 
-				Utils.sendLogEvent(analyticsJSON);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 			}
 			catch (JSONException e)
 			{
