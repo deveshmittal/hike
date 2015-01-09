@@ -61,7 +61,6 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		super(context, attrs);
 		this.mContext = context;
 		this.ringtonesNameURIMap = new LinkedHashMap<String, Uri>();
-		this.rintoneValSeq = new ArrayList<String>();
 		setIcon(context, attrs);
 		this.setValueIndex(HIKE_JINNGLE_INDEX);
 	}
@@ -329,6 +328,12 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	private void updateValueListFromMap()
 	{
 		Iterator<Uri> iterator = ringtonesNameURIMap.values().iterator();
+		
+		if(iterator.hasNext())
+		{
+			this.rintoneValSeq = new ArrayList<String>();
+		}
+		
 		while (iterator.hasNext())
 		{
 			Uri uri = (Uri) iterator.next();
