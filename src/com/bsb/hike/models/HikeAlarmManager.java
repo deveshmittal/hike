@@ -1,6 +1,7 @@
 package com.bsb.hike.models;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.db.DBBackupRestore;
 import com.bsb.hike.notifications.HikeNotification;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -39,6 +40,8 @@ public class HikeAlarmManager
 	public static final int REQUESTCODE_NOTIFICATION_PRELOAD = 4567;
 	
 	public static final int REQUESTCODE_RETRY_LOCAL_NOTIFICATION = 4568;
+
+	public static final int REQUESTCODE_PERIODIC_BACKUP= 4569;
 
 	public static final int REQUESTCODE_DEFAULT = 0;
 
@@ -182,10 +185,12 @@ public class HikeAlarmManager
 			Utils.sendUILogEvent(HikeConstants.LogEvent.RETRY_NOTIFICATION_SENT);
 			HikeNotification.getInstance(context).showNotificationForCurrentMsgStack(true, retryCount);
 			break;
+		case HikeAlarmManager.REQUESTCODE_PERIODIC_BACKUP:
+			DBBackupRestore.getInstance(context).backupDB();
+			DBBackupRestore.getInstance(context).scheduleNextAutoBackup();
+			break;
 		default:
-
 		}
 
 	}
-
 }

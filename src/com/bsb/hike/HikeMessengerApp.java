@@ -524,6 +524,11 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 	public void connectToService()
 	{
+		if(!Utils.isUserSignedUp(getApplicationContext(), false))
+		{
+			return;
+		}
+		
 		Logger.d("HikeMessengerApp", "calling connectToService:" + mInitialized);
 		if (!mInitialized.get())
 		{
