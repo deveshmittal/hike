@@ -2943,84 +2943,64 @@ public class Utils
 
 	private static void sendSMSSyncLogEvent(boolean syncing)
 	{
-		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 
 		try
 		{
 			metadata.put(HikeConstants.PULL_OLD_SMS, syncing);
-
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LogEvent", e);
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 
 	}
 
 	public static void sendDefaultSMSClientLogEvent(boolean defaultClient)
 	{
-		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 
 		try
 		{
 			metadata.put(HikeConstants.UNIFIED_INBOX, defaultClient);
-
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LogEvent", e);
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 
 	}
 
 	public static void sendFreeSmsLogEvent(boolean freeSmsOn)
 	{
-		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 
 		try
 		{
 			metadata.put(HikeConstants.FREE_SMS_ON, freeSmsOn);
-
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LogEvent", e);
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 
 	}
 
 	public static void sendNativeSmsLogEvent(boolean nativeSmsOn)
 	{
-		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 
 		try
 		{
 			metadata.put(HikeConstants.NATIVE_SMS, nativeSmsOn);
-
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.SMS, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LogEvent", e);
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "invalid json");
 		}
 
 	}
@@ -3444,23 +3424,17 @@ public class Utils
 	{
 		try
 		{
-			JSONObject data = new JSONObject();
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.CRC_EVENT);
-
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.FILE_NAME, fileName);
 			metadata.put(HikeConstants.FILE_KEY, fileKey);
 			metadata.put(HikeConstants.MD5_HASH, md5);
 			metadata.put(HikeConstants.FILE_SIZE, recBytes);
 			metadata.put(HikeConstants.DOWNLOAD, downloading);
-
-			data.put(HikeConstants.METADATA, metadata);
-
-			sendLogEvent(data);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, HikeConstants.CRC_EVENT, metadata);
 		}
 		catch (JSONException e)
 		{
-			Logger.w("LE", "Invalid json");
+			Logger.w(AnalyticsConstants.ANALYTICS_TAG, "Invalid json");
 		}
 	}
 
