@@ -1064,7 +1064,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			 */
 			if (!mConversation.isOnhike() && !Utils.isContactInternational(msisdn) && !Utils.isKitkatOrHigher())
 			{
-				setupSMSToggleLayout();
+				setupSMSToggleLayout(theme);
 			}
 		}
 		return false;
@@ -1073,7 +1073,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	/**
 	 * Used to setup FreeSMS - Hike SMS Toggle button for Versions below KitKat
 	 */
-	private void setupSMSToggleLayout()
+	private void setupSMSToggleLayout(ChatTheme theme)
 	{
 		activity.findViewById(R.id.sms_toggle_button).setVisibility(View.VISIBLE);
 		TextView smsToggleSubtext = (TextView) activity.findViewById(R.id.sms_toggle_subtext);
@@ -1081,7 +1081,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		TextView hikeSmsText = (TextView) activity.findViewById(R.id.hike_text);
 		TextView regularSmsText = (TextView) activity.findViewById(R.id.sms_text);
 
-		if (currentTheme == ChatTheme.DEFAULT)
+		if (theme == ChatTheme.DEFAULT)
 		{
 			hikeSmsText.setTextColor(this.getResources().getColor(R.color.sms_choice_unselected));
 			regularSmsText.setTextColor(this.getResources().getColor(R.color.sms_choice_unselected));
@@ -1095,7 +1095,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			regularSmsText.setTextColor(this.getResources().getColor(R.color.white));
 			smsToggleSubtext.setTextColor(this.getResources().getColor(R.color.white));
 			smsToggle.setButtonDrawable(R.drawable.sms_checkbox_custom_theme);
-			activity.findViewById(R.id.sms_toggle_button).setBackgroundResource(currentTheme.smsToggleBgRes());
+			activity.findViewById(R.id.sms_toggle_button).setBackgroundResource(theme.smsToggleBgRes());
 		}
 
 		boolean smsToggleOn = Utils.getSendSmsPref(activity.getApplicationContext());
