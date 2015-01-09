@@ -436,18 +436,13 @@ public class DbConversationListener implements Listener
 
 	private void sendNativeSMSFallbackLogEvent(boolean onHike, boolean userOnline, int numMessages)
 	{
-		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 		try
 		{
 			metadata.put(HikeConstants.IS_H2H, onHike);
 			metadata.put(HikeConstants.OFFLINE, userOnline ? HikeConstants.RECIPIENT : HikeConstants.SENDER);
 			metadata.put(HikeConstants.NUMBER_OF_SMS, numMessages);
-
-			data.put(HikeConstants.METADATA, metadata);
-			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
-
-			Utils.sendLogEvent(data);
+			HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
 		catch (JSONException e)
 		{
