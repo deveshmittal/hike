@@ -99,7 +99,7 @@ public class HikeAnalyticsEvent
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.TOTAL_SELECTIONS, total);
 			metadata.put(HikeConstants.SUCCESSFUL_SELECTIONS, successful);
-			HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.EXIT_FROM_GALLERY, metadata, HikeConstants.LogEvent.GALLERY_SELECTION);			
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.EXIT_FROM_GALLERY, metadata, HikeConstants.LogEvent.GALLERY_SELECTION);			
 		}
 		catch (JSONException e)
 		{

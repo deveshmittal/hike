@@ -239,7 +239,7 @@ public class FileTransferManager extends BroadcastReceiver
 				HikeFile hikefile = ((ConvMessage) task.userContext).getMetadata().getHikeFiles().get(0);
 				FTAnalyticEvents analyticEvent = FTAnalyticEvents.getAnalyticEvents(getAnalyticFile(hikefile.getFile(), task.msgId));
 				String network = analyticEvent.mNetwork + "/" + getNetworkTypeString();
-				analyticEvent.sendFTSuccessFailureEvent(network, hikefile.getFileSize(), FTAnalyticEvents.FT_SUCCESS, context);
+				analyticEvent.sendFTSuccessFailureEvent(network, hikefile.getFileSize(), FTAnalyticEvents.FT_SUCCESS);
 				deleteLogFile(task.msgId, hikefile.getFile());
 			}
 			if (task instanceof DownloadFileTask)
@@ -493,7 +493,7 @@ public class FileTransferManager extends BroadcastReceiver
 			}
 			FTAnalyticEvents analyticEvent = FTAnalyticEvents.getAnalyticEvents(getAnalyticFile(mFile, msgId));
 			String network = analyticEvent.mNetwork + "/" + getNetworkTypeString();
-			analyticEvent.sendFTSuccessFailureEvent(network, fileSize, FTAnalyticEvents.FT_FAILED, context);
+			analyticEvent.sendFTSuccessFailureEvent(network, fileSize, FTAnalyticEvents.FT_FAILED);
 			deleteLogFile(msgId, mFile);
 		}
 	}

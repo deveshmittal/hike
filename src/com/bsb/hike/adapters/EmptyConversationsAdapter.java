@@ -332,7 +332,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				{
 					metadata.put(HikeConstants.TO, msisdn);				
 				}
-				HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 			}
 			catch(JSONException e)
 			{
@@ -370,7 +370,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 				{
 					JSONObject metadata = new JSONObject();
 					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_CARD_HIKE_OFFLINE_CLICKED);				
-					HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				}
 				catch(JSONException e)
 				{
@@ -389,7 +389,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 		{
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.EVENT_KEY, logEventKey);				
-			HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
 		catch(JSONException e)
 		{
@@ -417,7 +417,7 @@ public class EmptyConversationsAdapter extends ArrayAdapter<EmptyConversationIte
 			{
 				JSONObject metadata = new JSONObject();
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_CARD_SEEL_ALL_CLICKED);				
-				HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 			}
 			catch(JSONException e)
 			{

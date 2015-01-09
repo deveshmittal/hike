@@ -178,7 +178,7 @@ public class AnalyticsSender implements Runnable
 		if(!isAnalyticsUploadReady())
 			return;
 		
-		HAManager instance = HAManager.getInstance(context);
+		HAManager instance = HAManager.getInstance();
 
 		instance.sendAnalyticsData();
 		

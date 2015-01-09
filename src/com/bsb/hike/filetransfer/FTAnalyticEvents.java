@@ -161,7 +161,7 @@ public class FTAnalyticEvents
 	/*
 	 * We send an event every time user transfer file whether it is succeeded or canceled.
 	 */
-	public void sendFTSuccessFailureEvent(String network,  int fileSize, int status, Context context)
+	public void sendFTSuccessFailureEvent(String network,  int fileSize, int status)
 	{
 		try
 		{
@@ -172,7 +172,7 @@ public class FTAnalyticEvents
 			metadata.put(FT_PAUSE_COUNT, this.mPauseCount);
 			metadata.put(HikeConstants.FILE_SIZE, fileSize);
 			metadata.put(FT_STATUS, status);
-			HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.FILE_TRANSFER, metadata, HikeConstants.LogEvent.FILE_TRANSFER_STATUS);			
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.FILE_TRANSFER, metadata, HikeConstants.LogEvent.FILE_TRANSFER_STATUS);			
 		}
 		catch (JSONException e)
 		{

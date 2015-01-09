@@ -813,7 +813,7 @@ public class Utils
 			metadata.put(HikeConstants.LogEvent.DEVICE, device);
 			metadata.put(HikeConstants.LogEvent.CARRIER, carrier);
 			metadata.put(HikeConstants.LogEvent.APP_VERSION, appVersion);
-			HAManager.getInstance(context).record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.DEVICE_DETAILS, metadata, AnalyticsConstants.EVENT_TAG_CBS);
+			HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.DEVICE_DETAILS, metadata, AnalyticsConstants.EVENT_TAG_CBS);
 		}
 		catch(JSONException e)
 		{
@@ -844,7 +844,7 @@ public class Utils
 					editor.remove(key);
 				}
 				editor.commit();
-				HAManager.getInstance(context).record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.DEVICE_STATS, metadata);
+				HAManager.getInstance().record(AnalyticsConstants.NON_UI_EVENT, AnalyticsConstants.DEVICE_STATS, metadata);
 			}
 		}
 		catch (JSONException e)
@@ -1812,7 +1812,7 @@ public class Utils
 			{
 				md.put(HikeConstants.TO, msisdn);
 			}
-			HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
 		}
 		catch(JSONException e)
 		{
@@ -4998,7 +4998,7 @@ public class Utils
 			{
 				JSONObject metadata = new JSONObject();
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FB_CLICK);
-				HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 			}
 			catch(JSONException e)
 			{
@@ -5019,7 +5019,7 @@ public class Utils
 				{
 					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
 				}
-				HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 	
 				Editor editor = accountPrefs.edit();
 				editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);

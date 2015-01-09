@@ -1300,19 +1300,19 @@ public class MqttMessagesManager
 		{
 			long fileSize = data.getLong(AnalyticsConstants.ANALYTICS_FILESIZE);
 			editor.putLong(AnalyticsConstants.ANALYTICS_FILESIZE, fileSize);
-			HAManager.getInstance(context).setFileMaxSize(fileSize);
+			HAManager.getInstance().setFileMaxSize(fileSize);
 		}
 		if(data.has(AnalyticsConstants.ANALYTICS))
 		{
 			boolean isAnalyticsEnabled = data.getBoolean(AnalyticsConstants.ANALYTICS);
 			editor.putBoolean(AnalyticsConstants.ANALYTICS, isAnalyticsEnabled);
-			HAManager.getInstance(context).setAnalyticsEnabled(isAnalyticsEnabled);
+			HAManager.getInstance().setAnalyticsEnabled(isAnalyticsEnabled);
 		}
 		if(data.has(AnalyticsConstants.ANALYTICS_TOTAL_SIZE))
 		{
 			long size = data.getLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE);
 			editor.putLong(AnalyticsConstants.ANALYTICS_TOTAL_SIZE, size);
-			HAManager.getInstance(context).setAnalyticsMaxSizeOnClient(size);
+			HAManager.getInstance().setAnalyticsMaxSizeOnClient(size);
 		}
 		
 		editor.commit();
@@ -1375,7 +1375,7 @@ public class MqttMessagesManager
 		// server on demand analytics data to be sent from client
 		if(data.optBoolean(AnalyticsConstants.ANALYTICS))
 		{		
-			HAManager.getInstance(context).sendAnalyticsData();
+			HAManager.getInstance().sendAnalyticsData();
 		}
 	}
 

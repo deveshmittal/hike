@@ -442,7 +442,7 @@ public class DbConversationListener implements Listener
 			metadata.put(HikeConstants.IS_H2H, onHike);
 			metadata.put(HikeConstants.OFFLINE, userOnline ? HikeConstants.RECIPIENT : HikeConstants.SENDER);
 			metadata.put(HikeConstants.NUMBER_OF_SMS, numMessages);
-			HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
 		catch (JSONException e)
 		{
@@ -462,7 +462,7 @@ public class DbConversationListener implements Listener
 			{
 				metadata.put(HikeConstants.TIP_URL, URL);
 			}
-			HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
 		catch (JSONException e)
 		{
