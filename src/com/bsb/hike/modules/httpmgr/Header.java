@@ -1,5 +1,13 @@
-package com.bsb.hike.modules.httpmgr.utils;
+package com.bsb.hike.modules.httpmgr;
 
+import com.bsb.hike.modules.httpmgr.response.Response;
+
+/**
+ * A util class for the header of the {@link Request} or {@link Response} class
+ * 
+ * @author sidharth
+ * 
+ */
 public class Header
 {
 	private String name;
@@ -33,7 +41,7 @@ public class Header
 		{
 			return false;
 		}
-		
+
 		Header header = (Header) other;
 		if (name != null ? !name.equals(header.name) : header.name != null)
 		{

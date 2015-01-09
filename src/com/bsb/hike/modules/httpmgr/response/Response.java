@@ -2,13 +2,20 @@ package com.bsb.hike.modules.httpmgr.response;
 
 import java.util.List;
 
-import com.bsb.hike.modules.httpmgr.utils.Header;
+import android.text.TextUtils;
 
+import com.bsb.hike.modules.httpmgr.Header;
+
+/**
+ * Encapsulates all of the information necessary to make an HTTP response.
+ * 
+ * @author sidharth
+ */
 public class Response
 {
 	private String url;
 
-	private int status;
+	private int statusCode;
 
 	private String reason;
 
@@ -19,67 +26,67 @@ public class Response
 	private Response(Builder builder)
 	{
 		this.url = builder.url;
-		this.status = builder.status;
+		this.statusCode = builder.statusCode;
 		this.reason = builder.reason;
 		this.headers = builder.headers;
 		this.body = builder.body;
 	}
 
+	/**
+	 * Returns the url of the response
+	 * 
+	 * @return
+	 */
 	public String getUrl()
 	{
 		return url;
 	}
 
-	public void setUrl(String url)
+	/**
+	 * Returns the status code of the response
+	 * 
+	 * @return
+	 */
+	public int getStatusCode()
 	{
-		this.url = url;
+		return statusCode;
 	}
 
-	public int getStatus()
-	{
-		return status;
-	}
-
-	public void setStatus(int status)
-	{
-		this.status = status;
-	}
-
+	/**
+	 * Returns the reason of the response
+	 * 
+	 * @return
+	 */
 	public String getReason()
 	{
 		return reason;
 	}
 
-	public void setReason(String reason)
-	{
-		this.reason = reason;
-	}
-
+	/**
+	 * Returns the list of headers of this response
+	 * 
+	 * @return
+	 */
 	public List<Header> getHeaders()
 	{
 		return headers;
 	}
 
-	public void setHeaders(List<Header> headers)
-	{
-		this.headers = headers;
-	}
-
+	/**
+	 * Returns the body of the response
+	 * 
+	 * @return
+	 */
 	public byte[] getBody()
 	{
 		return body;
-	}
-
-	public void setBody(byte[] body)
-	{
-		this.body = body;
 	}
 
 	public static class Builder
 	{
 		private String url;
 
-		private int status;
+		private int statusCode = -1;
 
 		private String reason;
 
@@ -87,64 +94,87 @@ public class Response
 
 		private byte[] body;
 
-		public Builder(String url)
+		/**
+		 * Sets the url of the response
+		 * 
+		 * @param url
+		 * @return
+		 */
+		public Builder setUrl(String url)
 		{
 			this.url = url;
+			return this;
 		}
 
-		public String getUrl()
+		/**
+		 * Sets the status code of the response
+		 * 
+		 * @param statusCode
+		 * @return
+		 */
+		public Builder setStatusCode(int statusCode)
 		{
-			return url;
+			this.statusCode = statusCode;
+			return this;
 		}
 
-		public void setUrl(String url)
-		{
-			this.url = url;
-		}
-
-		public int getStatus()
-		{
-			return status;
-		}
-
-		public void setStatus(int status)
-		{
-			this.status = status;
-		}
-
-		public String getReason()
-		{
-			return reason;
-		}
-
-		public void setReason(String reason)
+		/**
+		 * Sets the reason of the response
+		 * 
+		 * @param reason
+		 * @return
+		 */
+		public Builder setReason(String reason)
 		{
 			this.reason = reason;
+			return this;
 		}
 
-		public List<Header> getHeaders()
-		{
-			return headers;
-		}
-
-		public void setHeaders(List<Header> headers)
+		/**
+		 * Sets the headers list of the response
+		 * 
+		 * @param headers
+		 * @return
+		 */
+		public Builder setHeaders(List<Header> headers)
 		{
 			this.headers = headers;
+			return this;
 		}
 
-		public byte[] getBody()
-		{
-			return body;
-		}
-
-		public void setBody(byte[] body)
+		/**
+		 * Sets the body of the response
+		 * 
+		 * @param body
+		 * @return
+		 */
+		public Builder setBody(byte[] body)
 		{
 			this.body = body;
+			return this;
 		}
 
+		/**
+		 * Returns the {@link Response} object built using this builder
+		 * 
+		 * @return
+		 */
 		public Response build()
 		{
+			ensureSaneDefaults();
 			return new Response(this);
+		}
+
+		private void ensureSaneDefaults()
+		{
+			if (TextUtils.isEmpty(url))
+			{
+				throw new IllegalStateException("Url must not be null and its length must be greater than 0");
+			}
+			if (statusCode < 0)
+			{
+				throw new IllegalStateException("status code < 0 " + statusCode);
+			}
 		}
 	}
 }
