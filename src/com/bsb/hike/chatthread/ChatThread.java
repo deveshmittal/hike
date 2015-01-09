@@ -87,6 +87,7 @@ import com.bsb.hike.models.PhonebookContact;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
+import com.bsb.hike.tasks.EmailConversationsAsyncTask;
 import com.bsb.hike.ui.ComposeViewWatcher;
 import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HDialog;
@@ -468,9 +469,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			showClearConversationDialog();
 			break;
 		case R.string.email_chat:
+			emailChat();
 			break;
 		case AttachmentPicker.GALLERY:
 			startHikeGallary(true);
+			break;
+		default:
 			break;
 		}
 	}
@@ -2338,5 +2342,14 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		
 		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
 		Logger.d(TAG, "Clearing conversation");
+	}
+	
+	/**
+	 * Used to email chat
+	 */
+	private void emailChat()
+	{
+		EmailConversationsAsyncTask emailTask = new EmailConversationsAsyncTask(activity, null);
+		Utils.executeConvAsyncTask(emailTask, mConversation);
 	}
 }
