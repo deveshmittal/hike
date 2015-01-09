@@ -228,6 +228,10 @@ public class VoIPActivity extends Activity implements CallActions
 
 	@Override
 	protected void onDestroy() {
+		
+		if (voipService != null)
+			voipService.dismissNotification();
+		
 		try {
 			if (isBound) {
 				unbindService(myConnection);
@@ -683,8 +687,16 @@ public class VoIPActivity extends Activity implements CallActions
 		TextView contactMsisdnView = (TextView) findViewById(R.id.contact_msisdn);
 
 		VoIPClient clientPartner = voipService.getPartnerClient();
+		if (clientPartner == null) {
+			finish();
+			return;
+		}
 //		Logger.w(VoIPConstants.TAG, "Partner Msisdn: " + clientPartner.getPhoneNumber());
 		ContactInfo contactInfo = ContactManager.getInstance().getContact(clientPartner.getPhoneNumber());
+		if (contactInfo == null) {
+			finish();
+			return;
+		}
 		String nameOrMsisdn = contactInfo.getNameOrMsisdn();
 		if(nameOrMsisdn.length() > 16)
 		{
