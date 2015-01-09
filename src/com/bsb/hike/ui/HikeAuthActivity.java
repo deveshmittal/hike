@@ -34,6 +34,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.analytics.AnalyticsConstants;
+import com.bsb.hike.analytics.HAManager;
 import com.bsb.hike.filetransfer.FileTransferManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.platform.HikeSDKConstants;
@@ -162,10 +164,10 @@ public class HikeAuthActivity extends Activity
 
 		try
 		{
-			JSONObject analyticsJSON = new JSONObject();
-			analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_VIEWED);
-			analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
-			Utils.sendLogEvent(analyticsJSON);
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_VIEWED);
+			metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
 		catch (JSONException e)
 		{
@@ -352,10 +354,10 @@ public class HikeAuthActivity extends Activity
 				{
 					try
 					{
-						JSONObject analyticsJSON = new JSONObject();
-						analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_CONNECT);
-						analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
-						Utils.sendLogEvent(analyticsJSON);
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_CONNECT);
+						metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 					}
 					catch (JSONException e)
 					{
@@ -373,10 +375,10 @@ public class HikeAuthActivity extends Activity
 				{
 					try
 					{
-						JSONObject analyticsJSON = new JSONObject();
-						analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_DECLINED);
-						analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
-						Utils.sendLogEvent(analyticsJSON);
+						JSONObject metadata = new JSONObject();
+						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_DIALOG_DECLINED);
+						metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 					}
 					catch (JSONException e)
 					{
@@ -898,11 +900,11 @@ public class HikeAuthActivity extends Activity
 		progress_bar_conn_state.setVisibility(View.GONE);
 		try
 		{
-			JSONObject analyticsJSON = new JSONObject();
-			analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_SUCCESS);
-			analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
-			analyticsJSON.put(HikeConstants.Extras.SDK_CONNECTION_TYPE, FileTransferManager.getInstance(getApplicationContext()).getNetworkType());
-			Utils.sendLogEvent(analyticsJSON);
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_SUCCESS);
+			metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+			metadata.put(HikeConstants.Extras.SDK_CONNECTION_TYPE, FileTransferManager.getInstance(getApplicationContext()).getNetworkType());
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
 		catch (JSONException e)
 		{
@@ -968,11 +970,11 @@ public class HikeAuthActivity extends Activity
 		progress_bar_conn_state.setVisibility(View.GONE);
 		try
 		{
-			JSONObject analyticsJSON = new JSONObject();
-			analyticsJSON.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_FAILURE);
-			analyticsJSON.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
-			analyticsJSON.put(HikeConstants.Extras.SDK_CONNECTION_TYPE, FileTransferManager.getInstance(getApplicationContext()).getNetworkType());
-			Utils.sendLogEvent(analyticsJSON);
+			JSONObject metadata = new JSONObject();
+			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SDK_AUTH_FAILURE);
+			metadata.put(HikeConstants.Extras.SDK_THIRD_PARTY_PKG, mAppPackage);
+			metadata.put(HikeConstants.Extras.SDK_CONNECTION_TYPE, FileTransferManager.getInstance(getApplicationContext()).getNetworkType());
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
 		catch (JSONException e)
 		{
