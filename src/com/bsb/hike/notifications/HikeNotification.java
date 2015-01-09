@@ -1104,7 +1104,7 @@ public class HikeNotification
 		if (!forceNotPlaySound)
 		{
 			final boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-			String notifSound = preferenceManager.getString(HikeConstants.NOTIF_SOUND_PREF, NOTIF_SOUND_HIKE);
+			String notifSound = HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.NOTIFICATION_TONE_URI, NOTIF_SOUND_HIKE);
 			if (!shouldNotPlayNotification)
 			{
 				Logger.i("notif", "sound " + notifSound);
