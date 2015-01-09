@@ -92,6 +92,7 @@ import com.bsb.hike.ui.HikeDialog;
 import com.bsb.hike.ui.HikeDialog.HDialog;
 import com.bsb.hike.ui.HikeDialog.HHikeDialogListener;
 import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.CustomAlertDialog;
 import com.bsb.hike.utils.HikeSharedPreferenceUtil;
 import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
@@ -260,7 +261,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	{
 
 		mAdapter.addMessage(convMessage);
-		messages.add(convMessage);
+		
 		addtoMessageMap(messages.size() - 1, messages.size());
 
 		mAdapter.notifyDataSetChanged();
@@ -464,6 +465,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		switch (item.id)
 		{
 		case R.string.clear_chat:
+			showClearConversationDialog();
 			break;
 		case R.string.email_chat:
 			break;
@@ -962,7 +964,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		mMessageMap = new HashMap<Long, ConvMessage>();
 		addtoMessageMap(0, messages.size());
 
-		mAdapter = new MessagesAdapter(activity, mConversation.getMessages(), mConversation, null);
+		mAdapter = new MessagesAdapter(activity, messages, mConversation, null);
 
 		initListView(); // set adapter and add clicks etc
 		setupActionBar(); //Setup the action bar
@@ -2294,5 +2296,47 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected void openProfileScreen()
 	{
 		return;
+	}
+	
+	/**
+	 * Used to show clear conversation confirmation dialog
+	 */
+	private void showClearConversationDialog()
+	{
+		final CustomAlertDialog dialog = new CustomAlertDialog(activity);
+		dialog.setHeader(R.string.clear_conversation);
+		dialog.setBody(R.string.confirm_clear_conversation);
+		dialog.setOkButton(R.string.ok, new View.OnClickListener()
+		{
+			
+			@Override
+			public void onClick(View v)
+			{
+				clearConversation();
+				dialog.dismiss();
+			}
+		});
+		dialog.setCancelButton(R.string.cancel);
+		
+		
+
+		dialog.show();
+	}
+	
+	/**
+	 * Used to clear a user's conversation
+	 */
+	protected void clearConversation()
+	{
+		HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_CONVERSATION, msisdn);
+		messages.clear();
+		
+		if(mMessageMap != null)
+		{
+			mMessageMap.clear();
+		}
+		
+		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
+		Logger.d(TAG, "Clearing conversation");
 	}
 }

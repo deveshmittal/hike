@@ -1184,4 +1184,14 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		Utils.onCallClicked(activity, msisdn);
 	}
 	
+	/**
+	 * Performs actions relevant to One to One Chat Thread for clearing a conversation
+	 */
+	@Override
+	protected void clearConversation()
+	{
+		super.clearConversation();
+		// TODO : hideHikeToOfflineTip();
+	}
+	
 }

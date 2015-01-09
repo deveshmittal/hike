@@ -702,4 +702,18 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			activity.startActivity(intent);
 		}
 	}
+
+	/**
+	 * Perform's actions relevant to clear conversation for a GroupChat
+	 */
+	@Override
+	protected void clearConversation()
+	{
+		super.clearConversation();
+		
+		// TODO : hidePinFromUI();
+		// Utils.resetPinUnreadCount(mConversation);
+		// updateOverflowMenuUnreadCount();
+		
+	}
 }
