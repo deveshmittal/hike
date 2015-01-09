@@ -21,8 +21,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -32,7 +30,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.BitmapModule.BitmapUtils;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ConvMessage;
@@ -45,6 +42,7 @@ import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.PinHistoryActivity;
 import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
@@ -147,6 +145,9 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			break;
 		case R.string.block_title:
 			onBlockUserclicked();
+			break;
+		case R.string.group_profile:
+			openProfileScreen();
 			break;
 		default:
 			Logger.d(TAG, "Calling super Class' itemClicked");
@@ -683,5 +684,22 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	{
 		return groupConversation.getGroupParticipantFirstName(groupConversation.getGroupOwner());
 	}
-	
+	/**
+	 * Used to launch Profile Activity from GroupChatThread
+	 */
+	@Override
+	protected void openProfileScreen()
+	{
+		/**
+		 * Proceeding only if the group is alive
+		 */
+		if(groupConversation.getIsGroupAlive())
+		{
+			Utils.logEvent(activity.getApplicationContext(), HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
+			
+			Intent intent = IntentManager.getGroupProfileIntent(activity.getApplicationContext(), msisdn);
+			
+			activity.startActivity(intent);
+		}
+	}
 }

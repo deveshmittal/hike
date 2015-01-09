@@ -6,32 +6,30 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.provider.ContactsContract.Contacts;
+import android.provider.MediaStore;
+import android.text.TextUtils;
+import android.widget.Toast;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeChatActivity;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.FileSelectActivity;
 import com.bsb.hike.ui.GalleryActivity;
 import com.bsb.hike.ui.HikeListActivity;
 import com.bsb.hike.ui.HikePreferences;
-import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.ShareLocation;
 import com.bsb.hike.ui.TimelineActivity;
 import com.bsb.hike.ui.WebViewActivity;
-import com.google.android.gms.internal.co;
-
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
-import android.provider.MediaStore;
-import android.provider.ContactsContract.Contacts;
-import android.text.TextUtils;
-import android.widget.Toast;
 
 public class IntentManager {
 	public static void openSetting(Context context) {
@@ -277,6 +275,54 @@ public class IntentManager {
 
 	public static Intent getFileSelectActivityIntent(Context context) {
 		return new Intent(context, FileSelectActivity.class);
+	}
+	
+	/**
+	 * Returns intent for viewing a user's profile screen
+	 * 
+	 * @param context
+	 * @param isConvOnHike
+	 * @param mMsisdn
+	 * @return
+	 */
+	public static Intent getSingleProfileIntent(Context context, boolean isConvOnHike, String mMsisdn)
+	{
+		Intent intent = new Intent();
+		
+		intent.setClass(context, ProfileActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		
+		/**
+		 * Negation of is self chat true
+		 */
+		if(!(HikeSharedPreferenceUtil.getInstance(context).getData(HikeMessengerApp.MSISDN_SETTING, "").equals(mMsisdn)))
+		{
+			intent.putExtra(HikeConstants.Extras.CONTACT_INFO, mMsisdn);
+			intent.putExtra(HikeConstants.Extras.ON_HIKE, isConvOnHike);
+		}
+		
+		return intent;
+	}
+	
+	/**
+	 * Returns intent for viewing group profile screen
+	 * 
+	 * @param context
+	 * @param mMsisdn
+	 * @return
+	 */
+	
+	public static Intent getGroupProfileIntent(Context context, String mMsisdn)
+	{
+		Intent intent = new Intent();
+		
+		intent.setClass(context, ProfileActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		
+		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mMsisdn);
+		
+		return intent;
 	}
 
 }

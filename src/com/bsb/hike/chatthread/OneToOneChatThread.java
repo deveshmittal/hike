@@ -1,22 +1,16 @@
 package com.bsb.hike.chatthread;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import android.app.Dialog;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.graphics.Typeface;
+import android.content.Intent;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,8 +19,6 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -44,9 +36,8 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.modules.contactmgr.ContactManager;
-import com.bsb.hike.ui.HikeDialog;
-import com.bsb.hike.ui.HikeDialog.HikeDialogListener;
 import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.IntentManager;
 import com.bsb.hike.utils.LastSeenScheduler;
 import com.bsb.hike.utils.LastSeenScheduler.LastSeenFetchedCallback;
 import com.bsb.hike.utils.Logger;
@@ -129,9 +120,13 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		return mActionBar.onOptionsItemSelected(item) ? true : super.onOptionsItemSelected(item);
 	}
 
+	/**
+	 * Returns a list of over flow menu items to be displayed
+	 * 
+	 * @return
+	 */
 	private List<OverFlowMenuItem> getOverFlowItems()
 	{
-
 		List<OverFlowMenuItem> list = new ArrayList<OverFlowMenuItem>();
 		list.add(new OverFlowMenuItem(getString(R.string.view_profile), 0, 0, R.string.view_profile));
 		list.add(new OverFlowMenuItem(getString(R.string.call), 0, 0, R.string.call));
@@ -139,6 +134,7 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		{
 			list.add(item);
 		}
+		
 		list.add(new OverFlowMenuItem(isUserBlocked() ? getString(R.string.unblock_title) : getString(R.string.block_title), 0, 0, R.string.block_title));
 		return list;
 	}
@@ -176,9 +172,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 			mConversation.setMessages(HikeConversationsDatabase.getInstance().getConversationThread(msisdn, HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY, mConversation, -1));
 		}
 		
-		ChatTheme currentTheme = mConversationDb.getChatThemeForMsisdn(msisdn);
+		ChatTheme chatTheme = mConversationDb.getChatThemeForMsisdn(msisdn);
 		Logger.d(TAG, "Calling setchattheme from createConversation");
-		mConversation.setTheme(currentTheme);
+		mConversation.setTheme(chatTheme);
 		return mConversation;
 	}
 	
@@ -1137,6 +1133,9 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 		case R.string.block_title:
 			onBlockUserclicked();
 			break;
+		case R.string.view_profile:
+			openProfileScreen();
+			break;
 		default :
 			Logger.d(TAG, "Calling super Class' itemClicked");
 			super.itemClicked(item);
@@ -1153,6 +1152,25 @@ public class OneToOneChatThread extends ChatThread implements LastSeenFetchedCal
 	protected String getBlockedUserLabel()
 	{
 		return getConvLabel();
+	}
+	
+	/**
+	 * Used to launch Profile Activity from one to one chat thread
+	 */
+	@Override
+	protected void openProfileScreen()
+	{
+		/**
+		 * Do nothing if the user is blocked
+		 */
+		if(mUserIsBlocked)
+		{
+			return;
+		}
+		
+		Intent profileIntent = IntentManager.getSingleProfileIntent(activity.getApplicationContext(), mConversation.isOnhike(), msisdn);
+		
+		activity.startActivity(profileIntent);
 	}
 	
 }
