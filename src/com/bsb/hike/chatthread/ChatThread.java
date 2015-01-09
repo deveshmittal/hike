@@ -243,7 +243,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 			deleteMessages((Pair<Boolean, ArrayList<Long>>) msg.obj);
 			break;
 		case CHAT_THEME:
-			updateUIAsPerTheme((ChatTheme) msg.obj);
+			changeChatTheme((ChatTheme) msg.obj);
 			break;
 		case CLOSE_CURRENT_STEALTH_CHAT:
 			closeStealthChat();
@@ -1908,8 +1908,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		 */
 		if(mConversation.getMsisdn().equals(pair.first))
 		{
-			currentTheme = pair.second;
-			sendUIMessage(CHAT_THEME, currentTheme);
+			sendUIMessage(CHAT_THEME, pair.second);
 		}
 	}
 	
@@ -2279,5 +2278,17 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Called from the UI Handler to change the chat theme
+	 * 
+	 * @param chatTheme
+	 */
+	private void changeChatTheme(ChatTheme chatTheme)
+	{
+		updateUIAsPerTheme(chatTheme);
+		
+		currentTheme = chatTheme;
 	}
 }
