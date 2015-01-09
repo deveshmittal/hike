@@ -61,7 +61,6 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		super(context, attrs);
 		this.mContext = context;
 		this.ringtonesNameURIMap = new LinkedHashMap<String, Uri>();
-		this.rintoneValSeq = new ArrayList<String>();
 		setIcon(context, attrs);
 		this.setValueIndex(HIKE_JINNGLE_INDEX);
 	}
@@ -300,7 +299,9 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		Parcelable superState = savedState.getParcelable(STATE_PARENT);
 		rintoneCharSeq = savedState.getCharSequenceArray(SOUND_PREF_KEY);
 		rintoneValSeq = savedState.getStringArrayList(SOUND_PREF_VALUES);
+		
 		updateRingtoneMapAfterRotation();
+		
 		super.onRestoreInstanceState(superState);
 	}
 
@@ -311,10 +312,13 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	{
 		ringtonesNameURIMap.clear();
 
-		for (int i = 0; i < rintoneCharSeq.length; i++)
+		if (rintoneCharSeq != null)
 		{
-			Uri soundUri = rintoneValSeq.get(i) != null ? Uri.parse(rintoneValSeq.get(i)) : null;
-			ringtonesNameURIMap.put(rintoneCharSeq[i].toString(), soundUri);
+			for (int i = 0; i < rintoneCharSeq.length; i++)
+			{
+				Uri soundUri = rintoneValSeq.get(i) != null ? Uri.parse(rintoneValSeq.get(i)) : null;
+				ringtonesNameURIMap.put(rintoneCharSeq[i].toString(), soundUri);
+			}
 		}
 	}
 
@@ -324,6 +328,12 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	private void updateValueListFromMap()
 	{
 		Iterator<Uri> iterator = ringtonesNameURIMap.values().iterator();
+		
+		if(iterator.hasNext())
+		{
+			this.rintoneValSeq = new ArrayList<String>();
+		}
+		
 		while (iterator.hasNext())
 		{
 			Uri uri = (Uri) iterator.next();
