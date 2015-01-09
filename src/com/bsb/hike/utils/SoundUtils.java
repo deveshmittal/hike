@@ -113,17 +113,17 @@ public class SoundUtils
 		catch (IllegalArgumentException e)
 		{
 			e.printStackTrace();
-
+			stopMediaPlayerProperly();
 		}
 		catch (IllegalStateException e)
 		{
 			e.printStackTrace();
-			mediaPlayer.release();
+			stopMediaPlayerProperly();
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			mediaPlayer.release();
+			stopMediaPlayerProperly();
 		}
 	}
 
