@@ -228,6 +228,10 @@ public class VoIPActivity extends Activity implements CallActions
 
 	@Override
 	protected void onDestroy() {
+		
+		if (voipService != null)
+			voipService.dismissNotification();
+		
 		try {
 			if (isBound) {
 				unbindService(myConnection);
@@ -313,8 +317,15 @@ public class VoIPActivity extends Activity implements CallActions
 		}
 		
 		if (action.equals(VoIPConstants.PUT_CALL_ON_HOLD)) {
-			showMessage("Putting call on hold.");
-			voipService.setHold(true);
+			showMessage("Receiving cellular call.");
+			if (VoIPService.isConnected() && voipService.isAudioRunning()) {
+				voipService.setHold(true);
+				showCallStatus(CallStatus.ON_HOLD);
+				holdButton.setSelected(true);
+			} else if (VoIPService.isConnected())
+				voipService.hangUp();
+			else
+				voipService.stop();
 		}
 		
 		// Clear the intent so the activity doesn't process intent again on resume
@@ -683,8 +694,16 @@ public class VoIPActivity extends Activity implements CallActions
 		TextView contactMsisdnView = (TextView) findViewById(R.id.contact_msisdn);
 
 		VoIPClient clientPartner = voipService.getPartnerClient();
+		if (clientPartner == null) {
+			finish();
+			return;
+		}
 //		Logger.w(VoIPConstants.TAG, "Partner Msisdn: " + clientPartner.getPhoneNumber());
 		ContactInfo contactInfo = ContactManager.getInstance().getContact(clientPartner.getPhoneNumber());
+		if (contactInfo == null) {
+			finish();
+			return;
+		}
 		String nameOrMsisdn = contactInfo.getNameOrMsisdn();
 		if(nameOrMsisdn.length() > 16)
 		{
