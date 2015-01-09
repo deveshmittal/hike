@@ -5,11 +5,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract.Data;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.*;
@@ -21,6 +26,7 @@ import android.webkit.MimeTypeMap;
 import android.widget.*;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
+
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -28,6 +34,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.MESSAGE_TYPE;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.NUXConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ComposeChatAdapter;
 import com.bsb.hike.adapters.FriendsAdapter;
@@ -47,6 +54,7 @@ import com.bsb.hike.tasks.InitiateMultiFileTransferTask;
 import com.bsb.hike.utils.*;
 import com.bsb.hike.view.TagEditText;
 import com.bsb.hike.view.TagEditText.TagEditorListener;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,6 +78,8 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private static final int FTUE_FWD = 4;
 
     private static final int NUX_INVITE_MODE = 5;
+    
+    private static final int NUX_INCENTIVE_MODE = 6;
 
 	private View multiSelectActionBar, groupChatActionBar;
 
@@ -128,7 +138,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 	private boolean deviceDetailsSent;
 
 	private boolean nuxInviteMode;
+	
+	private boolean nuxIncentiveMode;
 
+	 private HorizontalFriendsFragment newFragment =null;
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -150,6 +163,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		isForwardingMessage = getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false);
 		isSharingFile = getIntent().getType() != null;
 		nuxInviteMode = getIntent().getBooleanExtra(HikeConstants.NUX_INVITE_FORWARD, false);
+		nuxIncentiveMode = getIntent().getBooleanExtra(HikeConstants.Extras.NUX_INCENTIVE_MODE, false);
 
 		// Getting the group id. This will be a valid value if the intent
 		// was passed to add group participants.
@@ -168,6 +182,21 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 
 		setContentView(R.layout.compose_chat);
+		NUXManager nuxManager = NUXManager.getInstance(getApplicationContext());
+		
+		if (savedInstanceState == null) {
+           
+			
+			FragmentManager fm = getSupportFragmentManager();
+			newFragment = (HorizontalFriendsFragment) fm.findFragmentByTag("chatFragment");
+			if(newFragment == null){
+				Logger.d("UmangX","Give me red");
+				newFragment = new HorizontalFriendsFragment();
+			}
+			
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.add(R.id.horizontal_friends_placeholder, newFragment, "chatFragment").commit();
+        }
 
 		Object object = getLastCustomNonConfigurationInstance();
 
@@ -186,7 +215,13 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			isForwardingMessage = true;
 		}
 
-		setActionBar();
+		if(nuxIncentiveMode){
+			Utils.blockOrientationChange(this);
+			getSupportActionBar().hide();
+		}
+		else{
+			setActionBar();
+		}
 
 		init();
 		mPubSub = HikeMessengerApp.getPubSub();
@@ -224,6 +259,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			contactSyncIntent.putExtra(HikeConstants.Extras.MANUAL_SYNC, true);
 			sendBroadcast(contactSyncIntent);
 			Utils.sendUILogEvent(HikeConstants.LogEvent.COMPOSE_REFRESH_CONTACTS);
+			HashSet<String> contactsNux = new HashSet<String>();
+			for(ContactInfo contactInfo : adapter.getAllSelectedContacts()){
+				contactsNux.add(contactInfo.getMsisdn());
+			}
+			NUXManager nm = NUXManager.getInstance(this);
+			nm.sendMessage(contactsNux, "I am calling form MArs", this);
+			nm.saveNUXContact(contactsNux, this);
+			nm.sendMsisdnListToServer(contactsNux);
+			nm.setCurrentState(NUXConstants.NUX_IS_ACTIVE);
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -339,7 +383,11 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		}
 		else if (isForwardingMessage && !isSharingFile)
 		{
-			setMode(nuxInviteMode ? NUX_INVITE_MODE : MULTIPLE_FWD);
+			setMode(nuxIncentiveMode ? NUX_INCENTIVE_MODE : (nuxInviteMode ? NUX_INVITE_MODE : MULTIPLE_FWD));
+		}
+		else if(nuxIncentiveMode)
+		{
+			setMode(NUX_INCENTIVE_MODE);
 		}
 		else
 		{
@@ -351,6 +399,7 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 		adapter.executeFetchTask();
 		
 		HikeSharedPreferenceUtil.getInstance(this).saveData(HikeConstants.SHOW_RECENTLY_JOINED_DOT, false);
+		
 	}
 
 	private void initTagEditText()
@@ -468,12 +517,15 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			if (isForwardingMessage || isFtueFwd)
 			{
 				// share
+				Logger.d("UmangX","isForwarding true");
 				if(isSharingFile){
 					ArrayList<ContactInfo> list = new ArrayList<ContactInfo>();list.add(contactInfo);
 					forwardConfirmation(list);
 					return;
 				}
 				// for SMS users, append SMS text with name
+
+				Logger.d("UmangX","isForwarding true and not returned");
 				int viewtype = adapter.getItemViewType(arg2);
 				if (contactInfo.getName() == null)
 				{
@@ -484,8 +536,12 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					tagEditText.clear(false);
 					if(adapter.isContactAdded(contactInfo)){
 						adapter.removeContact(contactInfo);
+
+						Logger.d("UmangX","removing");
 					}else{
 						adapter.addContact(contactInfo);
+
+						Logger.d("UmangX","adding");
 					}
 					int selected = adapter.getSelectedContactCount();
 					if(selected>0){
@@ -495,7 +551,22 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 					}
 				}else{
 				String name = viewtype == ViewType.NOT_FRIEND_SMS.ordinal() ? contactInfo.getName() + " (SMS) " : contactInfo.getName();
-				tagEditText.toggleTag(name, contactInfo.getMsisdn(), contactInfo);
+					if (!nuxIncentiveMode)
+						// change is to prevent the Tags from appearing in the search bar.
+						tagEditText.toggleTag(name, contactInfo.getMsisdn(),contactInfo);
+					else {
+						//newFragment.toggleViews(contactInfo);
+						
+						if (adapter.isContactAdded(contactInfo)) {
+							if(newFragment.removeView(contactInfo)) adapter.removeContact(contactInfo);;
+
+							Logger.d("UmangX", "removing");
+						} else {
+							if(newFragment.addView(contactInfo))adapter.addContact(contactInfo);
+							
+							Logger.d("UmangX", "adding");
+						}
+					}
 				}
 			}
 			else
@@ -621,8 +692,20 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
 			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint(R.string.nux_fwd_search_hint);
 			break;
+		case NUX_INCENTIVE_MODE:
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+			adapter.showCheckBoxAgainstItems(true);
+			tagEditText.clear(false);
+			adapter.removeFilter();
+			adapter.clearAllSelection(true);
+			System.out.print("INSIDE NUX");
+			Logger.d("UmangX","INNUX");
+			adapter.setStatusForEmptyContactInfo(R.string.compose_chat_empty_contact_status_group_mode);
+			((TagEditText)findViewById(R.id.composeChatNewGroupTagET)).setHint(R.string.nux_fwd_search_hint);
+			break;
 		}
-		setTitle();
+		if(!nuxIncentiveMode) 
+			setTitle();
 	}
 	
 	/**
@@ -825,7 +908,10 @@ public class ComposeChatActivity extends HikeAppStateBaseFragmentActivity implem
 				onBackPressed();
 			}
 		});
-		setTitle();
+		
+		if(!nuxIncentiveMode)
+			setTitle();
+		
 		if(HikeMessengerApp.syncingContacts)
 		{
 			// For showing progress bar when activity is closed and opened again

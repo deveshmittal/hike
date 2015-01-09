@@ -3,6 +3,8 @@ package com.bsb.hike.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +32,8 @@ public class NUXManager
 	private static NUXManager mmManager;
 
 	private HashSet<String> listNuxContacts;
+	
+	private HashSet<String> unlockedNUXContacts;
 
 	private NuxInviteFriends inviteFriends;
 
@@ -53,8 +57,23 @@ public class NUXManager
 			String[] arrmsisdn = msisdn.split(NUXConstants.STRING_SPLIT_SEPERATOR);
 			listNuxContacts.addAll(Arrays.asList(arrmsisdn));
 		}
+		
+		unlockedNUXContacts = new HashSet<String>();
+		msisdn = mprefs.getData(NUXConstants.UNLOCKED_NUX_CONTACTS, null);
+		if (!TextUtils.isEmpty(msisdn))
+		{
+			String[] arrmsisdn = msisdn.split(NUXConstants.STRING_SPLIT_SEPERATOR);
+			unlockedNUXContacts.addAll(Arrays.asList(arrmsisdn));
+		}
 	}
 
+	public List<ContactInfo> getRecommendedContacts(){
+		return null;
+	}
+	
+	public Set<ContactInfo> getHiddenContacts(){
+		return null;
+	}
 	public static NUXManager getInstance(Context context)
 	{
 		if (mmManager == null)
@@ -93,6 +112,13 @@ public class NUXManager
 
 		mprefs.saveData(NUXConstants.CURRENT_NUX_CONTACTS, listNuxContacts.toString().replace("[", "").replace("]", ""));
 
+	}
+	public void addUnlockedNUXContact(HashSet<String> msisdns, Context context)
+	{
+		unlockedNUXContacts.addAll(msisdns);
+		
+		mprefs.saveData(NUXConstants.UNLOCKED_NUX_CONTACTS, listNuxContacts.toString().replace("[", "").replace("]", ""));
+		
 	}
 
 	public int getCountCurrentNUXContacts()
@@ -230,8 +256,8 @@ public class NUXManager
 						{
 							mmUnlockedPersons.add(mmArray.optString(i));
 						}
+						 addUnlockedNUXContact(mmUnlockedPersons, context);
 						 removeNUXContact(mmUnlockedPersons, context);
-						 increaseCurrentUnlockedSize(mmUnlockedPersons.size());
 					}
 						
 					
@@ -315,8 +341,8 @@ public class NUXManager
 					}
 					
 					int incrMax = task_details.optInt(NUXConstants.TD_INCR_MAX);
-					int min = task_details.optInt(NUXConstants.TD_MIN_CONTACTS);
-					int max = task_details.optInt(NUXConstants.TD_MAX_CONTACTS);
+					int min = task_details.optInt(NUXConstants.TD_MIN_CONTACTS, 3);
+					int max = task_details.optInt(NUXConstants.TD_MAX_CONTACTS, 3);
 					int incrMin = task_details.optInt(NUXConstants.TD_INCR_MIN);
 					taskDetails = new NUXTaskDetails(incentiveId, activityId, incrMax, incrMin, min, max,incentiveAmount);
 				}
@@ -365,7 +391,7 @@ public class NUXManager
 					String title3 = select_friends.optString(NUXConstants.SF_SECTION_TITLE3);
 					boolean searchToggle = select_friends.optBoolean(NUXConstants.SF_SEARCH_TOGGLE);
 					int contactSectionType = select_friends.optInt(NUXConstants.SF_CONTACT_SECTION_TYPE);
-					selectFriends = new NuxSelectFriends(sectionTitle, title2, title3, recoSectionTitle, recoList, hideList, toggleContactSection, butText, searchToggle,
+					selectFriends = new NuxSelectFriends("Himanshu %d", "title %d", " al set", recoSectionTitle, recoList, hideList, toggleContactSection, butText, searchToggle,
 							contactSectionType);
 				}
 			}
@@ -455,15 +481,9 @@ public class NUXManager
 
 	public int getCurrentUnlockedSize()
 	{
-		return mprefs.getData(NUXConstants.CURRENT_PERSONS_UNLOCKED, 0);
+		return unlockedNUXContacts.size();
 	}
 
-	private void increaseCurrentUnlockedSize(int size)
-	{
-		mprefs.saveData(NUXConstants.CURRENT_PERSONS_UNLOCKED, mprefs.getData(NUXConstants.CURRENT_PERSONS_UNLOCKED, 0) + size);
-	}
-
-	
 	
 	public void sendMsisdnListToServer(HashSet<String> msisdn)
 	{
@@ -477,7 +497,7 @@ public class NUXManager
 			object.put(NUXConstants.INVITE_ARRAY, mmArray);
 			root.put(HikeConstants.DATA, object);
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, root.toString());
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, root);
 
 		}
 		catch (JSONException e)

@@ -1,4 +1,16 @@
-package com.bsb.hike.ui.fragments;
+  package com.bsb.hike.ui.fragments;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -323,6 +335,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		NUXChatReward mmReward = mmNuxManager.getNuxChatRewardPojo();
 
 		
+		if(mmReward!=null){
 		
 		if(!TextUtils.isEmpty(mmReward.getInviteMoreButtonText()))
 		{
@@ -373,7 +386,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 			}
 			
 			
-						
+		}			
 		}
 	}
 

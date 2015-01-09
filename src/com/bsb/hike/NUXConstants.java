@@ -11,6 +11,8 @@ public class NUXConstants
 
 	public static final String CURRENT_NUX_CONTACTS = "current_nux_contacts";
 
+	public static final String UNLOCKED_NUX_CONTACTS = "unlocked_nux_contacts";
+	
 	public static final String STRING_SPLIT_SEPERATOR = ", ";
 
 	public static final String INVITEFRDS_MAIN_TITLE = "ttl";

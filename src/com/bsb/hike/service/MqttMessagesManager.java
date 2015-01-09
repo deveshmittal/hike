@@ -1092,7 +1092,7 @@ public class MqttMessagesManager
 		{
 			JSONObject mmobObject = data.optJSONObject(HikeConstants.METADATA);
 			if (mmobObject.optJSONObject(HikeConstants.NUX) != null)
-				NUXManager.getInstance(context).parseNuxPacket(data.getJSONObject(HikeConstants.NUX).toString(), context);
+				NUXManager.getInstance(context).parseNuxPacket(mmobObject.getJSONObject(HikeConstants.NUX).toString(), context);
 		}
 	}
 

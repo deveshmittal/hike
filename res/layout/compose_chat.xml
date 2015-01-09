@@ -16,6 +16,12 @@
         android:layout_height="wrap_content"
         android:layout="@layout/nux_compose_card_layout"/>
     
+	<FrameLayout
+       android:id="@+id/horizontal_friends_placeholder"
+       android:layout_height="wrap_content"
+       android:layout_width="match_parent">
+  	</FrameLayout>
+    
     <com.bsb.hike.view.TagEditText
         android:id="@+id/composeChatNewGroupTagET"
         android:layout_width="match_parent"
