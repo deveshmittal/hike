@@ -300,10 +300,9 @@ public class NotificationToneListPreference extends ListPreference implements Di
 		Parcelable superState = savedState.getParcelable(STATE_PARENT);
 		rintoneCharSeq = savedState.getCharSequenceArray(SOUND_PREF_KEY);
 		rintoneValSeq = savedState.getStringArrayList(SOUND_PREF_VALUES);
-		if(rintoneCharSeq != null)
-		{
-			updateRingtoneMapAfterRotation();
-		}
+		
+		updateRingtoneMapAfterRotation();
+		
 		super.onRestoreInstanceState(superState);
 	}
 
@@ -314,10 +313,13 @@ public class NotificationToneListPreference extends ListPreference implements Di
 	{
 		ringtonesNameURIMap.clear();
 
-		for (int i = 0; i < rintoneCharSeq.length; i++)
+		if (rintoneCharSeq != null)
 		{
-			Uri soundUri = rintoneValSeq.get(i) != null ? Uri.parse(rintoneValSeq.get(i)) : null;
-			ringtonesNameURIMap.put(rintoneCharSeq[i].toString(), soundUri);
+			for (int i = 0; i < rintoneCharSeq.length; i++)
+			{
+				Uri soundUri = rintoneValSeq.get(i) != null ? Uri.parse(rintoneValSeq.get(i)) : null;
+				ringtonesNameURIMap.put(rintoneCharSeq[i].toString(), soundUri);
+			}
 		}
 	}
 
