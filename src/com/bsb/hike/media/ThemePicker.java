@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -164,13 +166,34 @@ public class ThemePicker implements BackPressListener, OnDismissListener,
 		@Override
 		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
 			Logger.i(TAG, "on prepare actionmode");
-			View saveThemeBtn = mode.getCustomView().findViewById(
+			
+			View actionModeView = mode.getCustomView();
+			if (actionModeView == null)
+			{
+				return false;
+
+			}
+			
+			View saveThemeBtn = actionModeView.findViewById(
 					R.id.done_container);
 
 			saveThemeBtn.startAnimation(AnimationUtils.loadAnimation(
 					sherlockFragmentActivity, R.anim.scale_in));
 
 			saveThemeBtn.setOnClickListener(ThemePicker.this);
+			
+			
+			/*View closeContainer = actionModeView.findViewById(R.id.close_container);
+			
+			closeContainer.setOnClickListener(ThemePicker.this);
+			
+			View closeBtn = actionModeView.findViewById(R.id.close_action_mode);
+			
+			Animation slideIn = AnimationUtils.loadAnimation(sherlockFragmentActivity, R.anim.slide_in_left_noalpha);
+			slideIn.setInterpolator(new AccelerateDecelerateInterpolator());
+			slideIn.setDuration(200);
+			closeBtn.startAnimation(slideIn);
+			*/
 			return true;
 		}
 

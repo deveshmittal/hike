@@ -197,6 +197,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	protected boolean blockOverlay;
 	
 	protected boolean mUserIsBlocked;
+	
+	private boolean wasThemeClicked;
 
 	protected Handler uiHandler = new Handler()
 	{
@@ -353,8 +355,6 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	 */
 	protected void initView()
 	{
-		setConversationTheme();
-
 		initShareablePopup();
 
 		addOnClickListeners();
@@ -644,6 +644,11 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void themeClicked(ChatTheme theme)
 	{
 		Logger.i(TAG, "theme clicked " + theme);
+		if(theme != currentTheme)
+		{
+			wasThemeClicked = true;
+		}
+		
 		updateUIAsPerTheme(theme);
 	}
 
@@ -651,8 +656,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	public void themeSelected(ChatTheme chatTheme)
 	{
 		Logger.i(TAG, "theme selected " + chatTheme);
-		currentTheme = chatTheme;
-		// save and send theme message
+		
+		/**
+		 *  Save current theme and send chat theme message
+		 */
+		if(currentTheme != chatTheme)
+		{
+			currentTheme = chatTheme;
+			sendChatThemeMessage();
+		}
 	}
 
 	protected boolean updateUIAsPerTheme(ChatTheme theme)
@@ -661,14 +673,7 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		{
 			Logger.i(TAG, "update ui for theme " + theme);
 			
-			System.gc();
-			currentTheme = theme;
-			// messages theme changed, call adapter
-			mAdapter.setChatTheme(theme);
-			// action bar
-			activity.updateActionBarColor(theme.headerBgResId());
-			// background image
-			setBackground(theme);
+			setConversationTheme(theme);
 			return true;
 		}
 		return false;
@@ -691,8 +696,12 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 	@Override
 	public void themeCancelled()
 	{
-		Logger.i(TAG, "theme cancelled ");
-		setConversationTheme();
+		Logger.i(TAG, "theme cancelled, resetting the default theme if needed.");
+		if (wasThemeClicked)
+		{
+			wasThemeClicked = false;
+			setConversationTheme(currentTheme);
+		}
 	}
 
 	@Override
@@ -856,9 +865,15 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 	}
 
-	protected void setConversationTheme()
+	protected void setConversationTheme(ChatTheme theme)
 	{
-
+		System.gc();
+		// messages theme changed, call adapter
+		mAdapter.setChatTheme(theme);
+		// action bar
+		activity.updateActionBarColor(theme.headerBgResId());
+		// background image
+		setBackground(theme);
 	}
 
 	@Override
@@ -955,7 +970,8 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 
 		initListView(); // set adapter and add clicks etc
 		setupActionBar(); //Setup the action bar
-		updateUIAsPerTheme(mConversation.getTheme());// it has to be done after setting adapter
+		currentTheme = mConversation.getTheme();
+		updateUIAsPerTheme(currentTheme);// it has to be done after setting adapter
 		initMessageSenderLayout();
 	}
 
@@ -2235,5 +2251,33 @@ public abstract class ChatThread extends SimpleOnGestureListener implements Over
 		}
 
 		sendMessage(convMessage);
+	}
+	
+	private void sendChatThemeMessage()
+	{
+		long timestamp = System.currentTimeMillis() / 1000;
+		mConversationDb.setChatBackground(msisdn, currentTheme.bgId(), timestamp);
+
+		JSONObject jsonObject = new JSONObject();
+		JSONObject data = new JSONObject();
+
+		try
+		{
+			data.put(HikeConstants.MESSAGE_ID, Long.toString(timestamp));
+			data.put(HikeConstants.BG_ID, currentTheme.bgId());
+
+			jsonObject.put(HikeConstants.DATA, data);
+			jsonObject.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.CHAT_BACKGROUD);
+			jsonObject.put(HikeConstants.TO, mConversation.getMsisdn());
+			jsonObject.put(HikeConstants.FROM, HikeSharedPreferenceUtil.getInstance(activity.getApplicationContext()).getData(HikeMessengerApp.MSISDN_SETTING, ""));
+
+			ConvMessage convMessage = new ConvMessage(jsonObject, mConversation, activity.getApplicationContext(), true);
+			
+			sendMessage(convMessage);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
