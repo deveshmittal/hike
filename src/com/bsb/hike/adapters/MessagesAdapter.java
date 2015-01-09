@@ -1891,8 +1891,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			}
 			else if (convMessage.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING)
 			{
-				String name = Utils.getFirstName(conversation.getLabel());
-				message = context.getString(R.string.voip_missed_call_outgoing, name);
+				message = context.getString(R.string.voip_missed_call_outgoing);
 			}
 			else if (convMessage.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING)
 			{

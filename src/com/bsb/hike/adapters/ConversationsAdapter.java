@@ -686,8 +686,7 @@ public class ConversationsAdapter extends BaseAdapter
 			}
 			else if (message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_OUTGOING)
 			{
-				String name = Utils.getFirstName(conversation.getLabel());
-				messageText = context.getString(R.string.voip_missed_call_outgoing, name);
+				messageText = context.getString(R.string.voip_missed_call_outgoing);
 			}
 			else if (message.getParticipantInfoState() == ParticipantInfoState.VOIP_MISSED_CALL_INCOMING)
 			{
