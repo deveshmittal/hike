@@ -957,7 +957,7 @@ public class HikeConstants
 	
 	public static final String SHOW_FESTIVE_POPUP = "showFestivePopup";
 
-	public static final String REPUBLIC_DAY_POPUP = "republicday";
+	public static final String REPUBLIC_DAY_POPUP = "indiarepublic";
 
 	public static final String HIKE_OFFLINE_NOTIFICATION_PREF = "hikeOfflineNotificationPref";
 
