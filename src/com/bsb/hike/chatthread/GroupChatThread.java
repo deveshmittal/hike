@@ -219,10 +219,12 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 
 	private void fetchImpMessage()
 	{
-		if (mConversation.getMetaData() != null && mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN)){
+		if (mConversation.getMetaData() != null && mConversation.getMetaData().isShowLastPin(HikeConstants.MESSAGE_TYPE.TEXT_PIN))
+		{
 			groupConversation.setImpMessage(mConversationDb.getLastPinForConversation(mConversation));
 		}
 	}
+
 	@Override
 	protected List<ConvMessage> loadMessages()
 	{
@@ -247,12 +249,12 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		super.fetchConversationFinished(conversation);
 		toggleGroupLife(groupConversation.getIsGroupAlive());
 		addUnreadCountMessage();
-		if(groupConversation.getImpMessage()!=null){
+		if (groupConversation.getImpMessage() != null)
+		{
 			showImpMessage(groupConversation.getImpMessage(), -1);
 		}
 	}
 
-	
 	/**
 	 * 
 	 * @param impMessage
@@ -260,17 +262,18 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	 * @param animationId
 	 *            -- play animation on message , id must be anim resource id, -1 of no
 	 */
-	private void showImpMessage(ConvMessage impMessage, int animationId){
-		// TODO  : Use HikeActionbarUtil
+	private void showImpMessage(ConvMessage impMessage, int animationId)
+	{
+		// TODO : Use HikeActionbarUtil
 		SharedPreferences prefs = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, activity.MODE_PRIVATE);
 		if (!prefs.getBoolean(HikeMessengerApp.SHOWN_PIN_TIP, false))
 		{
-		
-		Editor editor = prefs.edit();
-		editor.putBoolean(HikeMessengerApp.SHOWN_PIN_TIP, true);
-		editor.commit();
+
+			Editor editor = prefs.edit();
+			editor.putBoolean(HikeMessengerApp.SHOWN_PIN_TIP, true);
+			editor.commit();
 		}
-		
+
 		if (tipView != null)
 		{
 			tipView.setVisibility(View.GONE);
@@ -291,17 +294,21 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			tipView.findViewById(R.id.main_content).setBackgroundResource(R.drawable.pin_bg_black);
 			text.setTextColor(getResources().getColor(R.color.gray));
 		}
-		String name="";
-			if(impMessage.isSent()){
-				name="You: ";
-			}else{
-				if(mConversation instanceof GroupConversation){
+		String name = "";
+		if (impMessage.isSent())
+		{
+			name = "You: ";
+		}
+		else
+		{
+			if (mConversation instanceof GroupConversation)
+			{
 				name = ((GroupConversation) mConversation).getGroupParticipantFirstName(impMessage.getGroupParticipantMsisdn()) + ": ";
-				}
 			}
-		
+		}
+
 		ForegroundColorSpan fSpan = new ForegroundColorSpan(getResources().getColor(R.color.pin_name_color));
-		String str = name+impMessage.getMessage();
+		String str = name + impMessage.getMessage();
 		SpannableString spanStr = new SpannableString(str);
 		spanStr.setSpan(fSpan, 0, name.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		spanStr.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.pin_text_color)), name.length(), str.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -379,7 +386,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
 		}
 	}
-	
+
 	private void hidePin()
 	{
 		hidePinFromUI(true);
@@ -396,11 +403,12 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.UPDATE_PIN_METADATA, mConversation);
 	}
-	
-	private boolean isShowingPin(){
-		return tipView!=null && tipView.getTag() instanceof Integer && ((Integer)tipView.getTag() == HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+
+	private boolean isShowingPin()
+	{
+		return tipView != null && tipView.getTag() instanceof Integer && ((Integer) tipView.getTag() == HikeConstants.MESSAGE_TYPE.TEXT_PIN);
 	}
-	
+
 	private void hidePinFromUI(boolean playAnim)
 	{
 		if (!isShowingPin())
@@ -417,8 +425,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			tipView = null;
 		}
 	}
-	
-	
+
 	private void showPinHistory(boolean viaMenu)
 	{
 		Intent intent = new Intent();
@@ -437,7 +444,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			Utils.sendUILogEvent(HikeConstants.LogEvent.PIN_HISTORY_VIA_PIN_CLICK);
 		}
 	}
-	
+
 	private void addUnreadCountMessage()
 	{
 		if (groupConversation.getUnreadCount() > 0 && groupConversation.getMessages().size() > 0)
@@ -472,21 +479,21 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 	@Override
 	protected String[] getPubSubListeners()
 	{
-		return new String[]{HikePubSub.GROUP_MESSAGE_DELIVERED_READ};
+		return new String[] { HikePubSub.GROUP_MESSAGE_DELIVERED_READ };
 	}
-	
+
 	/**
 	 * Called from {@link ChatThread}'s {@link #onMessageReceived(Object)}, to handle abnormal messages like User joined group, user left group etc.}
 	 * 
 	 */
-	
+
 	@Override
 	protected void handleAbnormalMessages()
 	{
 		ContactManager conMgr = ContactManager.getInstance();
 		((GroupConversation) mConversation).setGroupParticipantList(conMgr.getGroupParticipants(mConversation.getMsisdn(), false, false));
 	}
-	
+
 	@Override
 	protected void addMessage(ConvMessage convMessage)
 	{
@@ -519,14 +526,14 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 				mAdapter.addMessage(new ConvMessage(typingNotification));
 			}
 		}
-		
+
 		super.addMessage(convMessage);
 	}
-	
+
 	/**
 	 * This overrides : {@link ChatThread}'s {@link #setTypingText(boolean, TypingNotification)}
 	 */
-	
+
 	@Override
 	protected void setTypingText(boolean direction, TypingNotification typingNotification)
 	{
@@ -549,17 +556,17 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			}
 		}
 	}
-	
+
 	protected void onMessageRead(Object object)
 	{
-		Pair<String, Pair<Long,String>> pair = (Pair<String, Pair<Long, String>>) object;
+		Pair<String, Pair<Long, String>> pair = (Pair<String, Pair<Long, String>>) object;
 		// If the msisdn don't match we simply return
 		if (!mConversation.getMsisdn().equals(pair.first) || messages == null || messages.isEmpty())
 		{
 			return;
 		}
 		Long mrMsgId = pair.second.first;
-		for (int i = messages.size() - 1 ; i>=0; i--)
+		for (int i = messages.size() - 1; i >= 0; i--)
 		{
 			ConvMessage msg = messages.get(i);
 			if (msg != null && msg.isSent())
@@ -583,21 +590,22 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 		String participant = pair.second.second;
 		// TODO we could keep a map of msgId -> conversation objects
 		// somewhere to make this faster
-		groupConversation.updateReadByList(participant,mrMsgId);
+		groupConversation.updateReadByList(participant, mrMsgId);
 		uiHandler.sendEmptyMessage(NOTIFY_DATASET_CHANGED);
 	}
-	
+
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
-		switch(type){
+		switch (type)
+		{
 		case HikePubSub.GROUP_MESSAGE_DELIVERED_READ:
 			onMessageRead(object);
 			break;
 		}
 		super.onEventReceived(type, object);
 	}
-	
+
 	/**
 	 * Performs tasks on the UI thread.
 	 */
@@ -612,7 +620,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener, 
 			break;
 		}
 	}
-	
+
 	/**
 	 * This overrides sendPoke from ChatThread
 	 */
