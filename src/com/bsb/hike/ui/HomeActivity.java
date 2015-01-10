@@ -462,7 +462,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 					JSONObject metadata = new JSONObject();
 					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NEW_CHAT_FROM_TOP_BAR);
-					HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				}
 				catch(JSONException e)
 				{
@@ -634,7 +634,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 					JSONObject metadata = new JSONObject();
 					metadata.put(HikeConstants.EVENT_KEY, showingRewardsPopup ? HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_REWARDS : HikeConstants.LogEvent.INVITE_FRIENDS_FROM_POPUP_FREE_SMS);
-					HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				}
 				catch(JSONException e)
 				{
@@ -740,11 +740,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private void sendDeviceDetails()
 	{
-		JSONObject obj = Utils.getDeviceDetails(HomeActivity.this);
-		if (obj != null)
-		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-		}
+		Utils.getDeviceDetails(HomeActivity.this);
 		Utils.requestAccountInfo(false, HikeSharedPreferenceUtil.getInstance(this).getData(HikeConstants.SHOW_NUX_INVITE_MODE, false));
 		Utils.sendLocaleToServer(HomeActivity.this);
 		deviceDetailsSent = true;
@@ -1052,7 +1048,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 						{
 							JSONObject metadata = new JSONObject();
 							metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FB_CLICK);
-							HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+							HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 						}
 						catch(JSONException e)
 						{
@@ -1073,7 +1069,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 							{
 								metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_TUTORIAL_CBG_VIEWED);
 							}
-							HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+							HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 	
 							editor = accountPrefs.edit();
 							editor.remove(HikeMessengerApp.WELCOME_TUTORIAL_VIEWED);
@@ -1530,7 +1526,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					{
 						JSONObject md = new JSONObject();
 						md.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SHOW_TIMELINE_TOP_BAR);
-						HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
 					}
 					catch(JSONException e)
 					{
@@ -1546,7 +1542,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					{
 						JSONObject metadata = new JSONObject();
 						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.STATUS_UPDATE_FROM_OVERFLOW);
-						HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 					}
 					catch(JSONException e)
 					{
@@ -1734,7 +1730,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 					{
 						JSONObject metadata = new JSONObject();
 						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.QUICK_SETUP_CLICK);
-						HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 					}
 					catch(JSONException e)
 					{
@@ -1858,7 +1854,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 				{
 					JSONObject metadata = new JSONObject();
 					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.EXIT_STEALTH_MODE);
-					HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				}
 				catch(JSONException e)
 				{

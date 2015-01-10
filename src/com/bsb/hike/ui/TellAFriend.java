@@ -446,12 +446,12 @@ public class TellAFriend extends HikeAppStateBaseFragmentActivity implements Lis
 			case SMS:
 				Utils.logEvent(this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.INVITE_SMS_SCREEN_FROM_INVITE);
-				HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				IntentManager.openInviteSMS(this);
 				break;
 			case WATSAPP:
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.WATS_APP_INVITE);
-				HAManager.getInstance(getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);	
+				HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);	
 				sendInviteViaWatsApp();
 				break;
 			case FACEBOOK:

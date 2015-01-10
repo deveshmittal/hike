@@ -73,5 +73,19 @@ public class AnalyticsConstants
 	
 	public static final String CURRENT_TIME_STAMP = "cts"; 
 	
-	public static final String EVENT_TAG_VALUE = "mob";	
+	public static final String EVENT_TAG_MOB = "mob";
+	
+	public static final String EVENT_TAG_CBS = "cbs";	
+	
+	public static final String DEVICE_DETAILS = "devicedetails";
+	
+	public static final String DEVICE_STATS = "devicestats";
+	
+	public static final String FILE_TRANSFER = "filetransfer";	
+	
+	public static final String EXIT_FROM_GALLERY = "exitFromGallery";
+	
+	public static final String HIKE_SDK_INSTALL_ACCEPT = "hikeSDKInstallAccept";
+	
+	public static final String HIKE_SDK_INSTALL_DECLINE = "hikeSDKInstallDecline";
 }

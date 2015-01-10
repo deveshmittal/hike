@@ -413,7 +413,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 					{
 						JSONObject metadata = new JSONObject();
 						metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.RESET_STEALTH_CANCEL);
-						HAManager.getInstance(getActivity().getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 					}
 					catch(JSONException e)
 					{
@@ -2518,7 +2518,7 @@ public class ConversationFragment extends SherlockListFragment implements OnItem
 		{
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.NUX_INVITE_BUTTON_CLICKED);
-			HAManager.getInstance(getActivity().getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
 		catch(JSONException e)
 		{

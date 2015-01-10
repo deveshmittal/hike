@@ -575,7 +575,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 				{
 					JSONObject metadata = new JSONObject();
 					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.POST_UPDATE_FROM_CARD);
-					HAManager.getInstance(context).record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, metadata);
+					HAManager.getInstance().record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, metadata);
 				}
 				catch (JSONException e) 
 				{
@@ -687,7 +687,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 				{
 					metadata.put(HikeConstants.TO, msisdn);
 				}
-				HAManager.getInstance(context).record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, metadata);
+				HAManager.getInstance().record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, metadata);
 			}
 			catch (JSONException e) 
 			{
@@ -713,7 +713,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 			{
 				JSONObject metadata = new JSONObject();
 				metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.FTUE_FAV_CARD_SEEL_ALL_CLICKED);
-				HAManager.getInstance(context).record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, metadata);
+				HAManager.getInstance().record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, metadata);
 			}
 			catch (JSONException e) 
 			{
@@ -744,7 +744,7 @@ public class CentralTimelineAdapter extends BaseAdapter
 				{
 					metadata.put(HikeConstants.TO, msisdn);
 				}
-				HAManager.getInstance(context).record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, metadata);
+				HAManager.getInstance().record(HikeConstants.UI_EVENT, HikeConstants.LogEvent.CLICK, metadata);
 			}
 			catch (JSONException e) 
 			{

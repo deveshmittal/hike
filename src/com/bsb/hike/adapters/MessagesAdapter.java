@@ -3281,7 +3281,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		{
 			JSONObject metadata = new JSONObject();
 			metadata.put(HikeConstants.NATIVE_SMS, String.valueOf(isChecked));
-			HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+			HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 		}
 		catch(JSONException e)
 		{
@@ -3490,7 +3490,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				{
 					JSONObject metadata = new JSONObject();
 					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SMS_POPUP_ALWAYS_CLICKED);
-					HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				}
 				catch(JSONException e)
 				{
@@ -3503,7 +3503,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 					{
 						JSONObject md = new JSONObject();
 						md.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
-						HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, md);
 					}
 					catch(JSONException e)
 					{
@@ -3526,13 +3526,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 				
 					JSONObject metadata = new JSONObject();
 					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SMS_POPUP_JUST_ONCE_CLICKED);
-					HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 					
 					if (!sendHike.isChecked())
 					{						
 						JSONObject md = new JSONObject();
 						md.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SMS_POPUP_REGULAR_CHECKED);
-						HAManager.getInstance(context).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+						HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 					}
 					dialog.dismiss();
 				}

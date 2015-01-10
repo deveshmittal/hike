@@ -37,7 +37,7 @@ public class BootService extends BroadcastReceiver
 		Intent startServiceIntent = new Intent(ctx, HikeService.class);
 		ctx.startService(startServiceIntent);
 		
-		long whenToSend = Utils.getTimeInMillis(Calendar.getInstance(), HAManager.getInstance(ctx).getWhenToSend(), 0, 0);
+		long whenToSend = Utils.getTimeInMillis(Calendar.getInstance(), HAManager.getInstance().getWhenToSend(), 0, 0);
 		HikeAlarmManager.setAlarm(ctx, whenToSend, HikeAlarmManager.REQUESTCODE_HIKE_ANALYTICS, false);
 	}
 

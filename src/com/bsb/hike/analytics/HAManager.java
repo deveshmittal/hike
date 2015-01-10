@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.HikeAlarmManager;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.Utils;
@@ -57,10 +58,10 @@ public class HAManager
 	/**
 	 * Constructor
 	 */
-	private HAManager(Context context) 
-	{
-		this.context = context.getApplicationContext();
-		
+	private HAManager() 
+	{		
+		this.context = HikeMessengerApp.getInstance().getApplicationContext(); 
+				
 		eventsList = new ArrayList<JSONObject>();
 						
 		isAnalyticsEnabled = getPrefs().getBoolean(HAManager.ANALYTICS_SERVICE_STATUS, AnalyticsConstants.IS_ANALYTICS_ENABLED);
@@ -82,7 +83,7 @@ public class HAManager
 	 * Singleton instance of HAManager
 	 * @return HAManager instance
 	 */
-	public static HAManager getInstance(Context context)
+	public static HAManager getInstance()
 	{
 		if(instance == null)
 		{
@@ -90,7 +91,7 @@ public class HAManager
 			{
 				if(instance == null)
 				{
-					instance = new HAManager(context.getApplicationContext());
+					instance = new HAManager();
 				}
 			}
 		}
@@ -106,7 +107,7 @@ public class HAManager
 	{
 		if(!isAnalyticsEnabled)
 			return;
-		recordEvent(type, eventContext, EventPriority.NORMAL, null, AnalyticsConstants.EVENT_TAG_VALUE);
+		recordEvent(type, eventContext, EventPriority.NORMAL, null, AnalyticsConstants.EVENT_TAG_MOB);
 	}
 
 	/**
@@ -120,7 +121,7 @@ public class HAManager
 	{
 		if(!isAnalyticsEnabled)
 			return;
-		recordEvent(type, eventContext, EventPriority.NORMAL, metadata, AnalyticsConstants.EVENT_TAG_VALUE);
+		recordEvent(type, eventContext, EventPriority.NORMAL, metadata, AnalyticsConstants.EVENT_TAG_MOB);
 	}
 
 	/**
@@ -152,6 +153,20 @@ public class HAManager
 		recordEvent(type, eventContext, priority, metadata, tag);
 	}
 
+	/**
+	 * Used to write analytics event to the file
+	 * @param type type of the event
+	 * @param eventContext context of the event
+	 * @param metadata metadata of the event as JSONObject
+	 * @param tag tag value for the event
+	 */
+	public void record(String type, String eventContext, JSONObject metadata, String tag)
+	{
+		if(!isAnalyticsEnabled)
+			return;
+		recordEvent(type, eventContext, EventPriority.NORMAL, metadata, tag);
+	}
+	
 	/**
 	 * Used to write the event onto the text file
 	 * @param type type of the event
@@ -354,7 +369,7 @@ public class HAManager
 		dumpMostRecentEvents();
 		
 		// if total logged data is less than threshold value or wifi is available, try sending all the data else delete normal priority data
-		if(!((AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance(context).getMaxAnalyticsSizeOnClient()) || 
+		if(!((AnalyticsStore.getInstance(context).getTotalAnalyticsSize() <= HAManager.getInstance().getMaxAnalyticsSizeOnClient()) || 
 				(Utils.getNetworkType(context) == ConnectivityManager.TYPE_WIFI)))
 		{
 			AnalyticsStore.getInstance(context).deleteNormalPriorityData();

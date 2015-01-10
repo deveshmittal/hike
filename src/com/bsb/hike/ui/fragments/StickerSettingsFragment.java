@@ -162,7 +162,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				{
 					JSONObject metadata = new JSONObject();
 					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.UPDATE_ALL_CANCEL_CLICKED);
-					HAManager.getInstance(getActivity().getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				}
 				catch(JSONException e)
 				{
@@ -187,7 +187,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 				{
 					JSONObject metadata = new JSONObject();
 					metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.UPDATE_ALL_CONFIRM_CLICKED);
-					HAManager.getInstance(getActivity().getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+					HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 				}
 				catch(JSONException e)
 				{
@@ -289,7 +289,7 @@ public class StickerSettingsFragment extends SherlockFragment implements Listene
 						{
 							JSONObject metadata = new JSONObject();
 							metadata.put(HikeConstants.EVENT_KEY, HikeConstants.LogEvent.SEEN_REORDERING_TIP);
-							HAManager.getInstance(getActivity().getApplicationContext()).record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
+							HAManager.getInstance().record(AnalyticsConstants.UI_EVENT, AnalyticsConstants.CLICK_EVENT, metadata);
 						}
 						catch(JSONException e)
 						{
