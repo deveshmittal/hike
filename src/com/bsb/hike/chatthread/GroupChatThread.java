@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +13,7 @@ import android.content.SharedPreferences.Editor;
 import android.os.Message;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.util.Linkify;
@@ -20,7 +22,9 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -30,6 +34,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.chatthread.HikeActionMode.ActionModeListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.media.OverFlowMenuItem;
 import com.bsb.hike.models.ConvMessage;
@@ -42,10 +47,14 @@ import com.bsb.hike.models.Conversation.MetaData;
 import com.bsb.hike.modules.contactmgr.ContactManager;
 import com.bsb.hike.ui.PinHistoryActivity;
 import com.bsb.hike.utils.ChatTheme;
+import com.bsb.hike.utils.EmoticonTextWatcher;
+import com.bsb.hike.utils.HikeTip;
 import com.bsb.hike.utils.Logger;
 import com.bsb.hike.utils.PairModified;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.HikeTip.TipType;
+import com.bsb.hike.view.CustomFontEditText;
 
 /**
  * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -53,12 +62,17 @@ import com.bsb.hike.utils.Utils;
  * @generated
  */
 
-public class GroupChatThread extends ChatThread implements HashTagModeListener
+public class GroupChatThread extends ChatThread implements HashTagModeListener, ActionModeListener
 {
+	private static final int PIN_CREATE_ACTION_MODE = 201;
 
 	private static final String TAG = "groupchatthread";
 
 	protected GroupConversation groupConversation;
+
+	private ActionModeListener actionModeListener;
+
+	private HikeActionMode actionMode;
 
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -68,6 +82,13 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	public GroupChatThread(ChatThreadActivity activity, String msisdn)
 	{
 		super(activity, msisdn);
+	}
+
+	@Override
+	protected void init()
+	{
+		super.init();
+		initActionMode();
 	}
 
 	/**
@@ -110,7 +131,12 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		// TODO Auto-generated method stub
+		switch (item.getItemId())
+		{
+		case R.id.pin_imp:
+			showPinCreateView();
+			break;
+		}
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -303,16 +329,7 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 
 		View cross = tipView.findViewById(R.id.cross);
 		cross.setTag(impMessage);
-		cross.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
-			{
-				hidePin();
-				
-			}
-		});
+		cross.setOnClickListener(this);
 
 		tipView.setOnClickListener(new OnClickListener()
 		{
@@ -338,12 +355,12 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 			tipView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), animationId));
 		}
 		tipView.setTag(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
-		//decrement the unread count if message pinned
-		   
-		     decrementUnreadPInCount();
-	
+		// decrement the unread count if message pinned
+
+		decrementUnreadPInCount();
+
 	}
-	
+
 	public void decrementUnreadPInCount()
 	{
 		MetaData metadata = mConversation.getMetaData();
@@ -486,8 +503,8 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 		}
 
 		// Something related to Pins
-		// if(convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
-		// showImpMessage(convMessage, playPinAnim ? R.anim.up_down_fade_in : -1);
+		if (convMessage.getMessageType() == HikeConstants.MESSAGE_TYPE.TEXT_PIN)
+			showImpMessage(convMessage, -1);
 
 		if (convMessage.isSent())
 		{
@@ -603,9 +620,136 @@ public class GroupChatThread extends ChatThread implements HashTagModeListener
 	protected void sendPoke()
 	{
 		super.sendPoke();
-		if(!groupConversation.isMuted())
+		if (!groupConversation.isMuted())
 		{
 			Utils.vibrateNudgeReceived(activity.getApplicationContext());
 		}
+	}
+
+	private void initActionMode()
+	{
+		actionMode = new HikeActionMode(activity);
+		actionMode.setListener(this);
+	}
+
+	private void showPinCreateView()
+	{
+		actionMode.showActionMode(PIN_CREATE_ACTION_MODE, R.string.create_pin, R.string.pin);
+		// TODO : dismissPopupWindow was here : gaurav
+		final View content = activity.findViewById(R.id.impMessageCreateView);
+		content.setVisibility(View.VISIBLE);
+		int id = mComposeView.getId();
+		mComposeView = (CustomFontEditText) content.findViewById(R.id.messageedittext);
+		mComposeView.setTag(id);
+		View mBottomView = activity.findViewById(R.id.bottom_panel);
+		if (mShareablePopupLayout.isKeyboardOpen())
+		{ // ifkeyboard is not open, then keyboard will come which will make so much animation on screen
+			mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.up_down_lower_part));
+		}
+		mBottomView.setVisibility(View.GONE);
+		content.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.up_down_fade_in));
+		Utils.showSoftKeyboard(activity.getApplicationContext(), mComposeView);
+		mComposeView.addTextChangedListener(new EmoticonTextWatcher());
+		mComposeView.requestFocus();
+		content.findViewById(R.id.emo_btn).setOnClickListener(this);
+		if (tipView != null && tipView.getVisibility() == View.VISIBLE && tipView.getTag() instanceof TipType && (TipType) tipView.getTag() == TipType.PIN)
+		{
+			tipView.setVisibility(View.GONE);
+			HikeTip.closeTip(TipType.PIN, tipView, activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, activity.MODE_PRIVATE));
+			tipView = null;
+		}
+
+	}
+
+	private void destroyPinCreateView()
+	{
+		// AFTER PIN MODE, we make sure mComposeView is reinitialized to messaeg composer compose
+		mComposeView = (EditText) activity.findViewById(R.id.msg_compose);
+		View mBottomView = activity.findViewById(R.id.bottom_panel);
+		mBottomView.startAnimation(AnimationUtils.loadAnimation(activity.getApplicationContext(), R.anim.down_up_lower_part));
+		mBottomView.setVisibility(View.VISIBLE);
+		final View v = activity.findViewById(R.id.impMessageCreateView);
+		int animId = -1;
+		if (animId != -1)
+		{
+			Animation an = AnimationUtils.loadAnimation(activity.getApplicationContext(), animId);
+			playUpDownAnimation(v);
+		}
+		else
+		{
+			v.setVisibility(View.GONE);
+		}
+	}
+
+	private void sendPin()
+	{
+		// send pin code
+		ConvMessage message = createConvMessageFromCompose();
+		if (message != null)
+		{
+			JSONObject jsonObject = new JSONObject();
+			try
+			{
+				jsonObject.put(HikeConstants.PIN_MESSAGE, 1);
+				message.setMetadata(jsonObject);
+				message.setMessageType(HikeConstants.MESSAGE_TYPE.TEXT_PIN);
+				message.setHashMessage(HikeConstants.HASH_MESSAGE_TYPE.DEFAULT_MESSAGE);
+				sendMessage(message);
+				// TODO : PinAnaytics code
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+			actionMode.finish();
+		}
+	}
+
+	@Override
+	public void doneClicked(int id)
+	{
+		if (id == PIN_CREATE_ACTION_MODE)
+		{
+			sendPin();
+		}
+	}
+
+	@Override
+	public void initActionbarActionModeView(int id, View view)
+	{
+
+	}
+
+	@Override
+	public void actionModeDestroyed(int id)
+	{
+		if (id == PIN_CREATE_ACTION_MODE)
+		{
+			destroyPinCreateView();
+		}
+	}
+
+	@Override
+	public void onClick(View v)
+	{
+		Logger.i(TAG, "onclick of view " + v.getId());
+		switch (v.getId())
+		{
+		case R.id.emo_btn:
+			emoticonClicked();
+			break;
+		case R.id.cross: // PIN CREATE cross
+			actionMode.finish();
+			break;
+		default:
+			super.onClick(v);
+		}
+	}
+
+	@Override
+	public boolean onBackPressed()
+	{
+		boolean toReturn = false;
+		return super.onBackPressed();
 	}
 }
